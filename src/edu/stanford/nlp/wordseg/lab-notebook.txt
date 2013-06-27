@@ -1,0 +1,783 @@
+These contain ideas for improving Chinese word segmentation, started
+during the bridge period after the GALE Year 2 Go-No-go failure.  It'd
+be great if we can assess and evaluate a bunch and work out what to
+keep.
+
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| Idea: Investigate whether a higher order CRF (with appropriate feature
+| templates added) does or does not improve segmentation performance
+| Evaluation [14 Oct CDM]: The first 5 things of this sort that I tried
+| didn't help whatsoever.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Rejuvenate and extend the Jenny/Teg model of NER consistency via 2
+CRFs in a product model for segmentation consistency.
+Evaluation [14 Oct CDM]: Defer till later.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Partially alternatively to the above, induce a large word lexicon
+unsupervised and use that as a feature.  (In NER speak, this would be broadly
+equivalent to what Vijay Krishnan did instead of what Jenny and Teg
+did.  It could work just as well.)  The obvious thing to do is to go
+through Chinese Gigaword 3rd edition and use collocation finding
+techniques to learn new words.  I remember reading some papers on this
+in the mid 1990s.  Here are a couple:
+   http://citeseer.ist.psu.edu/74113.html
+   http://www.aclweb.org/anthology-new/W/W95/W95-0109.pdf
+   http://citeseer.ist.psu.edu/605106.html
+Here's two more recent things that I haven't really look at:
+   http://www.ee.ust.hk/~pascale/Publications/journal/IJST-2004-2.pdf
+   http://www.basistech.com/knowledge-center/unicode/emerson-iuc29.pdf
+Status: Deferred.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| Idea: In general, support lexicons, so we can add speech one.
+| In particular support person name lists.
+| Gather such lists from the web
+| Status: Mengqiu gathered name lists and Pi-chuan has written features
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| Idea: Provide k-best or lattice output.  Chris Dyer suggested either
+| HTK's SLF format or the AT&T FSM format, but could cope with any text
+| format.
+| Status: Jenny has done this, providing k-best output.
+|
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: learning segmentation from bilingual information (UMd would be
+interested in working on that).
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| Idea: Evaluate a max-match segmenter for MT.  How does it compare?
+| Michel did this: it works a fraction better.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Work to split family and given names.  And also to mark them in an
+NER fashion?
+
+Looking on the web, I seem to find lots of cases where Chinese
+transliterations of foreign names do have center dots between the
+words.  I agree that sometimes they're there and sometimes they're not,
+but it seems to me like they're there quite often enough that you could
+learn to segment foreign names based on the ones that do occur with
+dots!  So, maybe doing that is much more like a 1 week project than the
+PhD thesis that Jurafsky was claiming it was.  If you find long
+character sequence like this in text, they're presumably really high
+accuracy segmentations.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Make our vocabulary as consistent as possible with the speech rec
+vocabulary while not harming MT.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Measure vocabulary size, and histogram it for length. Aim to
+reduce vocabulary size within reason.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Evaluate whether we can find more LDC segmented training data.
+Status [Oct 14]: We now have ctb6.0.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Check/correct segmentation of URLs etc.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| Idea: Use name lists to improve consistency.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Weed out extremely long words, unless they are really appropriate.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| Idea: Evaluate other features that Mengqiu used from Ng and Low 2004 --
+| L_{begin}, L_{end}, L_{mid}, and also HowNet semantic classes.
+| Status: Pichuan is using these features for name lists; we decided that using
+| HowNet is too much work.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Do POS sequence based rescoring?
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| Idea: Start using SGD switching to BFGS for training models
+| Evaluation: Things train so fast on CTB that this just isn't worth bothering
+| with.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+|
+| General further feature exploration, including conjunctions
+| Status: Chris couldn't find much that helped.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Idea: Put in shape features (approximately 6 classes of chars like extended
+Low/Ng divisions over 3gram, 4gram, 5gram) and evaluate.
+
+** Friday, 5 October 2007, Christopher Manning ------------------------------
+
+Resource: Mine http://csd.unog.ch/interp/Language_Sections/Chinese/index.html
+UN glossaries.  Lots of good stuff.
+Status [Oct 14]: Mengqiu has mined a lot of this stuff.
+
+** Thursday, 11 October 2007, Pi-Chuan Chang --------------------------------
+
+Resource: Niyu's dev07 test set is now at
+/u/nlp/data/gale/moses-umd/GALE-DEV07.dev+blind.tar.gz
+
+** Thursday, 11 October 2007, Pi-Chuan Chang --------------------------------
+
+Resource: First Sighan Bakeoff data.
+
+Training:
+  /u/nlp/scr/data/ldc/LDC2003E16-SIGHAN_Bakeoff
+  Training data was CTB files 1-931 [1-325,400-454,500-554,590-931]
+  In GB18030.
+  Or it's available as 1 file in UTF-8 in:
+  /u/nlp/data/gale/segtool/stanford-seg/data/sighan1-train.utf8
+  /u/nlp/data/chinese-segmenter/Sighan2005/sighan2003/ctb.sighan.train.utf8.txt
+
+Test data is:
+  /u/nlp/data/chinese-segmenter/Sighan2005/dev/ctb-testref.txt.utf8
+
+(for training)
+I added a properties file : /u/nlp/data/gale/segtool/stanford-seg/props/sighan1.prop
+See /u/nlp/data/gale/segtool/stanford-seg/props/README for usage
+NB: Note that this one uses ChineseSegmenterFeatureFactory and not
+Gale2007ChineseSegmenterFeatureFactory!
+
+There are also data splits in /u/nlp/data/gale/benchmark/seg
+What's their meaning/status?
+
+** Thursday, 11 October 2007, Pi-Chuan Chang --------------------------------
+
+Sighan 2003 CTB train test performance of our system: 0.896 F1
+
+Huihsin said that before we had 91.0F when we tried on that data set.
+So I guess 89.6 isn't too far off.
+
+** Friday, 12 October 2007, Christopher Manning ------------------------------
+
+Resource: I've been putting versions of the various dictionaries
+that we (i.e., Mengqiu) have been collecting here:
+
+  /u/nlp/data/chinese-dictionaries
+
+** Sunday, 14 October 2007, Christopher Manning ------------------------------
+
+I've put my current best prop file in:
+
+  /u/nlp/data/gale/segtool/stanford-seg/props/chris1.prop
+
+Not very different.
+  sigma=5.0 [5.0-10.0 seems to work well. >1 definitely helps]
+  maxLeft=1 [only use 1st-order CRF currently!]
+  useFeaturesC4gram, useFeaturesCpC4gram [seems to help a bit]
+  useUnicodeType=1 [may help even more marginally]
+  Turns off featuresCnC [not helpful once weaken regularization]
+No other higher order or big data context features that I tried helped.
+
+Performance:
+  === TOTAL NCHANGE:      4982
+  === F MEASURE:  0.900
+  === OOV Rate:   0.998
+  === OOV Recall Rate:    0.900
+
+** Monday, 15 October 2007, Christopher Manning ------------------------------
+
+Priorities:
+a. Script to evaluate vocab size, word length distribution on
+training data, and OOV rate on test data.  Maxmatch with large
+lexicon has OOV rate of 0.2 wds/sentence on MT03 test data.
+Also evaluation scripts for segmenatation accuracy and MT.
+Pichuan.
+b. Put in all lexicons and evaluate them.
+Note: make sure no absolute pathnames so we can distribute it.
+Pichuan.
+c. Type/shape features (letter, number, period, ...]
+Chris?
+d. Start using ctb6.0. Work out part of it that was
+SIGHAN WSB 1 test data and exclude it and train on the rest.
+Pichuan.
+e. Train a PKU segmenter with our CRF and evaluate it.
+f. Error analysis of segmentation on MT data.  Look at blogs, hansard, etc.
+g. Train MT systems.
+h. Try radical features again.
+i. Get more data on whether CTB segmentation standard is good or bad for MT.
+Is it the segmentation standard or the segmenter?  Controlling for CRF vs.
+lexicon-based segmenter and PKU vs. CTB would be a good start.
+j. Back off unknown words to char sequences?  Or is the problem mainly
+inconsistency?
+
+** Monday, 15 October 2007, Christopher Manning ------------------------------
+
+EDA: Vocabulary size:
+u/nlp/data/gale/scr/umd-zh-seg/stanford/CountWords.java (usage see Makefile)
+
+Hi Michel,
+if you need to run MERT on MT03, you probably want to segment the
+Chinese part with your segmenter.
+Here's the raw data that ChrisD gave me.
+
+All  other stuff is in :
+/u/nlp/data/gale/scr/NIST-MT-eval-data/mt03/chinese/
+
+I've run MERT on harbin and stanford training set,
+here's my Makefile:
+/u/nlp/data/gale/moses-umd/harbin/Makefile
+
+Next step will be evaluation, which I'm planning to do on dev07
+(although the training data we're using now isn't really subsampled
+from dev07. We haven't got that, right?)
+dev07 is in /u/nlp/data/gale/moses-umd/GALE-DEV07
+
+If you're evaluating on that,  you'll need to segment it with whatever
+segmenter you're using as well.
+
+** Tuesday, 16 October 2007, Christopher Manning ------------------------------
+
+I've put my new best prop file in:
+
+  /u/nlp/data/gale/segtool/stanford-seg/props/chris2.prop
+
+Differences from chris1.prop
+  No longer use normalizationTable=/u/nlp/data/chinesefactfinder/data/chinese-segmenter/norm.simp.utf8
+  useShapeStrings=true
+  useShapeStrings1=true
+
+Performance:
+=== TOTAL NCHANGE:      4830
+=== F MEASURE:  0.903
+=== OOV Rate:   0.998
+=== OOV Recall Rate:    0.904
+
+** Wednesday, 17 October 2007, Christopher Manning ----------------------------
+
+Idea: Could also add in Adso lexicon.
+
+** Wednesday, 17 October 2007, Christopher Manning ----------------------------
+
+http://www-nlp.stanford.edu/~mgalley/segmenter/
+
+** Sunday, 21 October 2007, Christopher Manning -----------------------------
+
+This is the performance I get on Sighan2003 CTB train/test:
+
+numClasses: 2 [0=1,1=0]
+numDocuments: 10365
+numDatums: 426891
+numFeatures: 686401
+numWeights: 2150296
+060-segment.results
+=== TOTAL NCHANGE:      3729
+=== F MEASURE:  0.929
+=== OOV Rate:   0.998
+=== OOV Recall Rate:    0.932
+
+	/u/nlp/data/gale/segtool/stanford-seg/props/chris3.prop
+
+Notes:
+ - Main new useful feature: some useful dictionary feature conjunctions.  I also added a flag to expand the dictionary by adding items with midDots without the midDots.  And played with getting dictionaries in shape and usable versions.
+ - I didn't try again with/without -useWordn.  The run below is without it.
+ - It contains the right dictionaries in it, so you shouldn't need the -dictionary flag in the script for the basic with-lexicon case, but you will need to specify [override] the dictionaries for the -trainLex case still.
+ - The pk-* properties files in the above directory are missing a
+	sigma=5.0
+line.  I just checked again with dictionaries, and sigma=5.0 is roughly optimal (well, more precisely, it's better than either 3 or 10).  It'd certainly be a much better value to use than the default 1.0.
+
+** Sunday, 21 October 2007, Christopher Manning -----------------------------
+
+Here are the things that I feel we should do, and a few remarks on status.  (Well, at least the ones that I have thought of.  I'll doubtless think of one or two more....)  It's a long list, I know, but there's only 1 item (#2) which takes a lot of time.
+
+1. I've been working on some new properties files and features today.  I will make sure that I'm done by the end of today.  I will send out a further note.  But I'm making some further progress.  With lexicons, I'm up to 92.8 F1 on SIGHAN 2003.
+
+2. I think the most important thing is that we should test and validate our segmenters on data that is close to how they will actually be used.  I've just downloaded Niyu's:
+
+	/usr/home/ibm-rosetta/IBM/MT/MTCERosetta2007/dev07.chinese.multiseg.tar.gz
+
+See the article on Quickplace entitled "Chinese Dev07 Multi-segmentation".  Can we switch over to and evaluate on that for our final runs?  That involves finding the references for dev07.dev.  I leave that as a challenge for someone -- it might already be in /scr/nlp/data/gale, or else look on Quickplace.  (I would guess that Michel might well end up doing this item....)
+
+3. We unfortunately need to expunge lexicons that we can't show predate the test data episode.  Sorry, Mengqiu, but I think we just have to drop the lexicon you got from Wikipedia, even though it does help our system a fraction.  For Adso, I think there is an easy solution.  I've swapped in an older version of the Adso lexicon.  It's from 2005.  (If anyone has one from late Sep-Oct 2006, let me know!!)  Without diminishing David Lancashire's hard work on this, in aggregate it's not that different and seems to work just as well in our segmenter, as evaluated by SIGHAN 2003.  So, I think this job is done: I'm using okay lexicons now.
+
+| 4. ChineseDictionary.  Pichuan, can you change this class so that there is a constant MAX_LEXICON_LENGTH=6 at the top of the file, and all the mysterious 6's and 7's in ChineseDictionary and Sighan2005DocumentReaderAndWriter have disappeared.
+|
+| 5. Sighan2005DocumentReaderAndWriter.  Pichuan, can you change the regular expressions that are constants so that they are compiled once on class construction.
+| 	private static final Pattern pName = Pattern.compile("mysteriousStuff");
+|
+6. Sighan2005DocumentReaderAndWriter.   I rather suspect a bit more could still be done to optimize the performance of the deterministic postprocessing.  Pichuan, can you look at the things that it does and doesn't do and look if there are opportunities for further gains.  Maybe compare with Michel's Perl postprocessing for any diffs.  I think it clearly does help in the MT context if the processing of English, numbers, URLs, etc. is as sensible as possible.
+
+7. Sighan2005DocumentReaderAndWriter.  Pichuan, could you in general look through all the regexes and see if there are any opportunities for adding missing or incorrect characters etc.  (We're certainly not now in the situation where the character lists have to be automatically derived from the training data, as we were when doing Sighan2005 closed competition.)
+
+8. I hadn't realized this until today, but that -useDict2 Non-word bigram dictionary is really useful in the segmenter.  Congratulations to whoever came up with that!!!  Pichuan, can we easily rebuild the data that it is based on around ctb6 minus the SIGHAN 2003 testing data?  Presumably that would help it a bit further.
+
+9. The segmenter DOESN'T require 10 GB to train.  I've been training it successfully (with dict features) inside 3 GB with 32 bit Java.   I didn't optimize that number -- it just worked, and I stuck with it.  It could easily train inside 2 GB.  I would hope that runtime segmentation would fit in 1GB, but, again, I haven't tested it.  Pichuan, could you check this and put sensible numbers in the scripts that get put into the distribution?  (It's fine and probably better to put in amounts that are sufficient to run successfully in 64 bit mode, which are, admittedly, often 50% greater than the amounts needed in 32 bit mode.)
+
+10. I think we may as well aim to distribute 4 segmenters as last time ({ctb,pk}x{trainLex,noTrainLex}) but with a recommendation of what to use in the README.txt file.  Having all 4 might be interesting to people still interested in exploring the segmentation space, since you can vary one parameter at a time.
+
+11. We should have a README.txt file in our distribution.  It should briefly explain the different segmenters.  It should give a simple example command to use.  It should give an example of getting k best output from the segmenter.
+
+| 12. segment.sh could be improved.  In particular, you can use $0 to reference where it is run from so it can be run from any directory.  See /u/nlp/distrib/stanford-parser-2007-08-19/lexparser.csh for an example.
+|
+13. It'd be great to have an up-to-date evals.xls to distribute with the 4 segmenters.
+
+| 14. I've been trying to standardize all distribution naming so that the tar file and the directory are the same except for the .tar.gz and they start with "stanford".  So can be move both to be stanford-chinese-segmenter-DATE?
+|
+| 15. I think I've removed all references to list_err in the code.  So I boldly removed it from the distribution too.  I hope I'm right....
+|
+16. Mengqiu and Pichuan: while it is still in people's heads, could we have a README.txt in /u/nlp/data/chinese-dictionaries, which gives brief information about the provenence of the various lexicons (version, data, URL collected from, ...). And a Makefile that produces any derived versions.  I've already started on this, but it's very incomplete.
+
+17. It'd be GREAT if we had any insight at all to pass on about WHY different segmenters turn out to work better or worse in Moses....  Worth spending a bit of time on.
+
+
+** Monday, 22 October 2007, Pi-Chuan Chang -----------------------------
+
+The "ctb.non" file you built before was much smaller than the one I just built:
+wc -l /u/nlp/data/chinese-segmenter//dict/ctb.non
+     21405 /u/nlp/data/chinese-segmenter//dict/ctb.non
+
+wc -l /u/nlp/data/chinese-segmenter/sighan2003-dict/dict/ctb.non
+    75073 /u/nlp/data/chinese-segmenter/sighan2003-dict/dict/ctb.non
+
+If I remember correctly, "/u/nlp/data/chinese-segmenter//dict/ctb.non"
+is the one you made with all the CTB data we had at that time (this
+file: /juice/scr1/htseng/gale/seg/trainforibm.1 ).
+And "/u/nlp/data/chinese-segmenter/sighan2003-dict/dict/ctb.non" is
+using the training data for Sighan 2003, which is smaller than the one
+you used.
+
+I've shared a document with you called "Stanford Segmenter (beta3 10/22/2007): performance and consistency analysis":
+http://spreadsheets.google.com/ccc?key=p8SFD0rQd8gBk7JnD6bfzTQ&hl=en&pli=1
+
+Trying to work out how to make nonDict anew:
+What I did is to remake the non-word charcter bigram dictionary
+"ctb.non" , and the list of seen characters, in this directory :
+/u/nlp/data/chinese-segmenter/sighan2003-dict/dict/
+All the results with the newly made data is in :
+/u/nlp/data/gale/segtool/stanford-seg/props/correct-sighan2003-chris3.lex.*
+
+the 4 segmenters are trained:
+/u/nlp/data/gale/segtool/stanford-seg/classifiers/ctb6-chris3.lex.gz
+/u/nlp/data/gale/segtool/stanford-seg/classifiers/ctb6-chris3.trainLex.gz
+/u/nlp/data/gale/segtool/stanford-seg/classifiers/pk-chris3.lex.gz
+/u/nlp/data/gale/segtool/stanford-seg/classifiers/pk-chris3.trainLex.gz
+
+also, the document is updated:
+http://spreadsheets.google.com/ccc?key=p8SFD0rQd8gBk7JnD6bfzTQ&hl=en
+
+But these are still using the data extracted from all CTB5.
+
+** Monday, 22 October 2007, Huihsin Tseng -----------------------------
+
+1) (CTB5 - Sighan 2003 test data)  is prepared in
+
+/u/nlp/data/chinese-segmenter/gale2007/ctb5minusSighan2003/ctb5minusSighan2003forTrain
+
+2) all tables generated from CTB5 - Sighan 2003 are in
+/u/nlp/data/chinese-segmenter/gale2007/ctb5minusSighan2003/
+
+a) character_list.ctb5
+b) ctb5.non
+c) in.ctb5
+
+3) all the scripts are also in
+/u/nlp/data/chinese-segmenter/gale2007/ctb5minusSighan2003/
+
+one only needs to run "run" to regenerate the tables.
+
+4) all of the tables generated from ctb6 are in
+
+/juicy/u2/nlp2/data/chinese-segmenter/gale2007/ctb6
+
+a) character_list.ctb6
+b) ctb6.non
+c) in.ctb6
+
+Pichuan also requested dictionaries of Sighan 2006 test sets for evaluation.
+
+The tables are in:
+/u/nlp/data/chinese-segmenter/gale2007/ctb6minusSighan2006
+
+a) ctb6.non
+b) in.ctb6
+c) character_list.ctb6
+
+
+they are all in gbk.
+
+** Monday, 22 October 2007, Christopher Manning -----------------------------
+
+Final FeatureFactory notes:
+
+  private static Pattern patP = Pattern.compile("[\u00b7\\-\\.]");
+
+is broken regex.  \u00b7 is middot.  Make [-\u00b7.].  Useful or useless?
+Add \u00b7 to a sensible shape category and delete feature?!?  Another regex has this in number.  Best as period?
+This is used in -useRule2, which we use, I believe.
+Ditto for isEnglish which does 2 clique on shape, distinguishing lower and upper case.
+
+in.ctb has a lot of numbers/English in it as well as real Chinese affixes!
+
+cliqueCpC feature is being added twice. Useless.
+
+Features with no flag around them based on Character.getType is
+probably best off removed and replaced by new shape stuff!
+
+** Tuesday, 23 October 2007, Chris Dyer -----------------------------
+
+Hi Pichuan-
+Please use the following for your segmentation experiments:
+
+   /usr/home/ibm-rosetta/IBM/MT/MTCERosetta2007/umd- 5gram-char-subsample.tar.gz
+
+With a phrase-based model with a 3gm LM, I'm getting the following results with it.
+
+*Runs*  	MT03	Dev07-text
+Est Bleu	PrecSc	Bleu	TER	OOV
+Stanford	 0.3176	 0.1426	 0.1242	 70.92	 0.69%
+Harbin  	 0.3271	 0.1416	 0.1223	 70.63	 0.44%
+Harbin-HIERO	 0.3395	 0.1460	 0.1258	 69.79	 0.44%
+Max match	 0.3154	 0.1389	 0.1207	 71.06	 0.24%
+Dynamic prog	 0.3196	 0.1397	 0.1202	 70.94	 0.18%
+
+u/nlp/data/gale/scr/umd-5gram-char-subsample.tar.gz
+
+** Tuesday, 23 October 2007, Pi-Chuan Chang -----------------------------
+
+Unfortunately, I found I trained "ctb6-chris3.trainLex.gz" with a
+smaller training lexicon. :(
+
+So Michel, I'll retrain the file, but I won't override this:
+/u/nlp/data/gale/segtool/stanford-seg/classifiers/ctb6-chris3.trainLex.gz
+I'll just put it to:
+/u/nlp/data/gale/segtool/stanford-seg/classifiers/ctb6-chris3.trainLex.new.gz
+
+Here's Pichuan's Makefile
+  /u/nlp/data/gale/segtool/stanford-seg/props/Makefile
+
+But if you see this and if time permitted, maybe you should just wait
+for the new.gz to be trained.
+
+By the way, I'm starting training ctb6-chris3 training with the new
+data Huihsin extracted from CTB6.
+
+I re-run {lex, trainLex} for chris1, chris2 and chris3, with the
+latest lexicon definition.
+If you need to see commands I use, read
+/u/nlp/data/gale/segtool/stanford-seg/props/Makefile.
+Look for correct-sighan2003-chris{1,2,3}.{lex,trainLex}.result in the Makefile
+to see the commands.
+
+correct-sighan2003-chris{1,2,3}.{lex,trainLex}.err is the STDERR
+output of each training, and
+correct-sighan2003-chris{1,2,3}.{lex,trainLex}.result is the score
+output.
+
+
+The results is:
+for "lex" : chris2(0.945) > chris1(0.942) > chris3(0.926)
+for "trainLex": chris2(0.907) > chris1(0.904) > chris3(0.902)
+ERROR!!  These were wrong.  Wrong dictionary character encoding.
+
+On 10/23/07, Pi-Chuan Chang <pcchang@gmail.com> wrote:
+Here's  the LM:
+/u/nlp/data/gale/scr/FOUO-gale-noUN.5gram.lm.gz
+
+Here's the 3gram LM:
+/u/nlp/data/gale/scr/gng07.zhen.3gram.lm.gz
+
+http://spreadsheets.google.com/ccc?key=p8SFD0rQd8gBk7JnD6bfzTQ&hl=en
+
+CTB6 inconsistent segmentations:
+http://spreadsheets.google.com/ccc?key=p8SFD0rQd8gANNhLvw7s_Uw&hl=en
+
+** Wednesday, 24 October 2007, Michel Galley ---------------------------
+
+To enable more analyzes of differences between Chris{1,2,3} and between "lex" and "trainLex", I created token-level (not line-level) diff files in:
+/home/mgalley/mt/mt-experiments/zh-en/analysis
+
+** Wednesday, 24 October 2007, Pichuan Chang ---------------------------
+
+I agree that is very weird.
+Huihsin said the SIghan2003 test data is very low-quality. I'll do
+some consistent data analysis on that test data (is that okay
+though?). I haven't read the paper that Huihsin pointed
+(http://acl.ldc.upenn.edu/acl2003/sighan/pdfs/Sproat.pdf). Maybe I'll
+read that before I look at the test data.
+
+By the way, the results on Sighan2006 seem much more reasonble.
+And the NonDict2 feature helps a little bit, which is what we would expect.
+
+This time I trained on Sighan2006 training set, Not {CTB6-Sighan2006},
+so the results is comparable to Open track results of the Sighan 2006
+competition.
+
+http://sighan.cs.uchicago.edu/bakeoff2006/longstats.html
+
+Our best result is chris{1,2}.lex, which is just 0.1%F lower than the best one.
+
+Here are the results:
+* lex:  chris1 (0.943) == chris2 (0.943) > chris3 (0.942)
+(see /u/nlp/data/gale/segtool/stanford-seg/props/correct-sighan2006-chris[1-3].lex.result
+)
+
+* trainLex: chris1 (0.913) < chris2 (0.914) < chris3 (0.914)
+(see /u/nlp/data/gale/segtool/stanford-seg/props/correct-sighan2006-chris[1-3].trainLex.result
+)
+
+Comparing useDict2=true and useDict2=false:
+* lex: useDict=true (0.942) > useDict=true (0.940)
+(see /u/nlp/data/gale/segtool/stanford-seg/props/correct-sighan2006-chris3.lex*result
+)
+
+* trainLex: useDict=true (0.915) > useDict=true (0.914)
+( see /u/nlp/data/gale/segtool/stanford-seg/props/correct-sighan2006-chris3.trainLex*result
+)
+
+I asked Huihsin about training/testing of Sighan2006.
+She said it's: train: 1-1999, test: 2000-2511.
+She made the data files out of CTB6-Sighan2006test, so it should
+definitely be considered Open track (and we're also using external
+lexicons...)
+
+Huihsin has some theory about why the weird degradation happened. I'm
+running some exps to help her verify. I'll let her explain tomorrow.
+
+But when we were discussing, she brought up an issue: normalization.
+
+So I noticed that, actually when we read in all those data files
+Huihsin made before, those things weren't normalize. However, we
+always use normalized "char" to compare against them.
+
+OK. This clearly isn't optimal. But since this was what we had before,
+and for real "Chinese" characters this shouldn't be a problem. So I
+don't want to introduce more complications here since I want to start
+the chris5 runs and get some sleep.I
+
+But there are some other (also pre-existing) problem that's quite
+annoying to me. =(
+Huihsin: the table you made for NonDict2, each entry contains 4 bytes
+(in GB encoding), but actually they should just be 2 characters, no
+matter they are ASCII or Chinese characters.
+There are entries like "P.92" which will just never be matched, since
+we're always querying NonDict2 with precisely 2 characters...
+
+As I said, I don't think this is the reason. The problem above will
+just be missing some matched data. (The normalization could be
+problematic, if the original training and testing were  mismatched in
+formatting).
+
+Anyway, I thought I should just bring up this issue. I'd like to fix
+it later but not for the chris5 run I'm going to do now.
+
+
+chris5, ctb, noUseDict2, noTrainLex
+chris5, ctb, noUseDict2, trainLex
+
+These 2 (with the unprocessed CTB6 training data) is running on jess.
+
+make /u/nlp/data/gale/segtool/stanford-seg/classifiers/ctb6-chris5.lex.gz
+make /u/nlp/data/gale/segtool/stanford-seg/classifiers/ctb6-chris5.trainLex.gz
+
+
+** Wednesday, 24 October 2007, Michel Galley ---------------------------
+
+Yes, a few chris3.prop runs just finished.
+
+MT03:
+
+CTB + no train lex
+BLEU = 26.19, 76.9/38.9/19.7/10.0 (BP=0.944, ration=0.946)
+
+CTB + train lex
+BLEU = 25.02, 75.5/37.5/18.5/9.3 (BP=0.946, ration=0.947) [search error!]
+
+PKU + no train lex
+BLEU = 25.90, 75.5/38.1/19.1/9.7 (BP=0.960, ration=0.961)  [still searching]
+
+The best BLEU we got before on MT03 was 26.30, with Chris1+CTB+no train lex.
+
+I just spent some time analyzing search errors Moses is making... In the case of CTB+train lex, I get this with previous parameters:
+
+chris3 with chris1 params:
+BLEU = 25.35, 74.4/37.2/18.4/9.2 (BP=0.970, ration=0.971)
+chris3 with chris2 params:
+BLEU = 25.58, 74.5/37.2/18.4/9.3 (BP=0.975, ration=0.975)
+
+Perhaps I should set a model average ( e.g., of chris{1,2,3}) as initial parameters of Moses before starting MERT in the last experiments... Moses initial parameters are clearly bad.
+
+About Chris2+PKU+train lex. It was indeed a bug (used CTB train lex instead of PKU). I wrote a comment about it on the spreadsheet, though I should have mentioned it by email earlier.
+
+** Thursday, 25 October 2007, Michel Galley ---------------------------
+
+I'm combining the words in these yellow lines,
+?? 'this' -- but done as classifier in early CTB
+?? 'foreign'  Should be a word it appears!
+?? 'only' Should be a word.
+?? 'highest/supreme'
+?? 'really not' -- maybe should be phrase?
+?? 'our country/China' -- word
+?? 'entire' - word
+?? '(to) say/speak'
+
+The file before process:
+/u/nlp/data/gale/segtool/stanford-seg/data/ctb6.all
+The file after process:
+/u/nlp/data/gale/segtool/stanford-seg/data/ctb6.all.processed
+
+** Sunday, 28 October 2007, Christopher Manning ---------------------------
+
+We should normalize words in dictionary lookup (ASCII/fullwidth, but also for
+things like midDot chars.  Previously the dictionary code had not even trimmed
+spaces from the beginning and ends of lines.  I added that (may well not do
+\u3000 but).
+
+Are there characters standardly used for foreign name transliteration?
+If so, we should have a list of them as a feature.
+
+Can use characters used for transliteration.   Helen Meng did this?
+Definitely appears in Gao's Computational Linguistics paper on word
+segmentation.
+
+** Friday, 2 November 2007, Christopher Manning ---------------------------
+
+Obvious additional data sets to look at:
+
+2.1 New test sets: MT06 and dev07-speech
+- Yaser: reminder that MT06 was added to the mix, and that team
+  members are expected to provide system outputs for this set.
+- dev07-speech is also added. Yaser's concern is that so far we
+  haven't been using speech test data, and we might only be
+  covering text specific phenomena.
+
+chris5 no train lex output on umd-5gram-char-subsample
+/scr/nlp/data/gale/MichelMTsystem/mt-experiments/zh-en.segmentation_experiments2/stanford-ctb6-chris5.lex
+/scr/nlp/data/gale/MichelMTsystem/seg-experiments/stanford-ctb6-chris5.lex.large/stats
+
+** Saturday, 10 November 2007, Christopher Manning ---------------------------
+
+SParseval:
+
+Mary Harper sez:
+OK, so you can now snarf a tarball with alignment and scoring scripts for Mandarin parses for which there are different word segmentations in the test and gold sets.   This taball contains the latest update of SParseval together with my Chinese parameter file ( CH.prm) and head percolation rules (ptb.head.ch.charniak).  These are based on Charniak's parser and may need to be adapted for other parsers.
+ftp://ftp.ecn.purdue.edu/harper/ctb-score.tar.gz
+I put a lot of information into the readme that will help you to get started, and I also include an example.  There is an assumption that you will be using linux OS.
+
+Sorry this took me longer to get to than I had anticipated.  Please feel free to ask questions and adapt this as needed.  It is really only a rudimentary start.
+
+Location is really currently: ftp://ftp.ecn.purdue.edu/harper/gale/ctb-score.tar.gz
+
+** Saturday, 10 November 2007, Christopher Manning ---------------------------
+
+Current results (training on ctb5minusSighan2003, testing on Michel's completely unsegmented version of the sighan2003 test  data) are:
+
+chris5:
+=== TOTAL NCHANGE:      3901
+=== F MEASURE:  0.927
+=== OOV Recall Rate:    0.928
+
+chris6:
+=== TOTAL NCHANGE:      3863
+=== F MEASURE:  0.927
+=== OOV Recall Rate:    0.929
+
+chris7:
+=== TOTAL NCHANGE:      3825
+=== F MEASURE:  0.928
+=== OOV Recall Rate:    0.930
+
+** Saturday, 10 November 2007, Michel Galley ---------------------------
+
+Just for reference, the new results are on this spreadsheet:
+http://spreadsheets.google.com/ccc?key=peoT6EPvl6ZEJXV3k4zqFNQ&hl=en&pli=1
+and we should get new numbers tomorrow morning.
+
+[????]
+
+** Sunday, 11 November 2007, Christopher Manning ---------------------------
+
+The features that we should obviously add that aren't in here when you think
+about it, are ones that combine a single character with shape or Unicode type.
+
+On Nov 11, 2007 8:38 PM, Christopher Manning <manning@stanford.edu> wrote:
+   4716 [-??-] {+? ?+}
+
+Welll, I didn't find the one on the left in any of our
+dictionaries ... Pichuan?
+The 2 characters "??" together doesn't mean anything to me.
+I checked the corpus.zh, actually, based on the context the word
+should be "??" which means "education". "?" has the same pronunciation
+as "?" but I really have no idea why this happened.
+
+In terms of why it was ?? but now ? ?, I have no clue. Neither the
+word ?? nor the 2 character seqeunce "? ?" occurred in the
+segmentation training data. "?" occurred a few times as part of person
+names.
+
+    546 [-? ?-] {+??+} (*)
+    515 [-??-] {+? ?+}
+    427 [-??-] {+? ?+}
+    409 [-gov .hk-] {+gov.hk+}
+    405 [----] {+- -+}
+    388 [-? ?-] {+??+}
+    385 [-??-] {+? ?+}
+    382 [-? ?-] {+??+}
+    379 [-][-] {+] [+}
+    374 [-??-] {+? ?+} (**)
+There seem to be some inconsistency between (*) and (**).
+
+?? Pichuan ??
+The character "?" never appeared in the segmentation training data.
+And neither "??" nor "? ?" make sense for me.
+I just looked at corpus.zh again, It seems like "??" should be "??",
+which means situation.
+Chris: Where do these come from?  Bad conversions from traditional characters?
+
+** Friday, 16 November 2007, Christopher Manning ---------------------------
+
+  public class CTBDocumentParser implements Function<String,List<CoreLabel>> {
+  strips ISOControl.  That's part of the problem with the ESC char.
+
+** Friday, 30 November 2007, Christopher Manning ---------------------------
+
+Main things to try that remain if doing further work:
+ - Use chars commonly used for transliteration as a feature
+ - Do 4 class classification with {start,continue}x{name,other}
+ - Try McCallum's solution to weight undertraining
+ - Unuspervised learning/self-training
+ - Global inference (on sentence or doc level?) as replacement for
+ training lexicon.  Just stick a language model in there
+ - Do semi-crf?
+ - Should we try RVF so can have logit(boundary|left,right context)
+   style features?
+
+** Friday, 2 May 2008, Christopher Manning ---------------------------
+
+The things that were on my blackboard for the longest time as points for
+a paper:
+
+1. MT performance is better using words than characters as units.
+2. You can demonstrate a CRF vs. a lexicon-based segmenter such that the
+   lexicon-based segmenter gives better MT BLEU/TER but the CRF is much
+   better on Segmentation WER.
+3. For common words, lexicon and CRF performance will be a tie (maybe this
+   wasn't shown to be correct, actually).  For named entities and technical
+   terms, the CRF segmenter does better.
+4. Integrating segmentation and MT will be better than using a pipeline.
+5. You can do better with a 4-class segmenter which differentiates proper
+   and common nouns than with a 2-class segmenter.
+6. You can get better results in the CRF by using Andrew McCallum's idea
+   of 2 models to address weight undertraining with a lexicon.
+7. Assess the vocab size and consistency of different segmenters.

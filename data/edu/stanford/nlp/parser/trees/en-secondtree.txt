@@ -1,0 +1,35 @@
+
+( (S 
+    (NP-SBJ (NNP Bio-Technology) (NNP General) (NNP Corp.) )
+    (VP (VBD received) 
+      (NP 
+        (NP (NNS tenders) )
+        (PP (IN for) 
+          (NP 
+            (NP 
+              (NP (CD 97.9) (NN %) )
+              (PP (IN of) 
+                (NP 
+                  (NP (PRP$ its) 
+                    (ADJP (CD 7.5) (NN %) )
+                    (JJ convertible) (JJ senior) (VBN subordinated) (NNS notes) )
+                  (ADJP (JJ due) 
+                    (NP-TMP 
+                      (NP (NNP April) (CD 15) )
+                      (, ,) 
+                      (NP (CD 1997) ))))))
+            (, ,) 
+            (CC and)
+            (NP 
+              (NP (CD 96) (NN %) )
+              (PP (IN of) 
+                (NP 
+                  (NP (PRP$ its) 
+                    (ADJP (CD 11) (NN %) )
+                    (JJ convertible) (JJ senior) (VBN subordinated) (NNS debentures) )
+                  (ADJP (JJ due) 
+                    (NP-TMP 
+                      (NP (NNP March) (CD 1) )
+                      (, ,) 
+                      (NP (CD 2006) ))))))))))
+    (. .) ))

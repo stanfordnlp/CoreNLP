@@ -1,0 +1,6 @@
+(ROOT (S (ADJD-MO Genausowenig) (ADV-MO aber) (VMFIN-HD kann) (NE-SB Baumgartl) (VP-OC (VVINF-HD sagen) ($, ,) (S-OC (PWS-SB was) (VP-OC (PP-MO (APPR-AC in) (NN-NK Zukunft)) (ADV-MO nun) (ADJD-MO genau) (PP-MO (APPR-AC mit) (ART-NK der) (NE-NK Volksfürsorge)) (VVINF-HD geschehen)) (VMFIN-HD soll))) ($. .)))
+
+(ROOT ( (S (PDS-SB Das) (VMFIN-HD müsse) ($*LRB* ") (VP-OC (VP-OC (ADV-MO erst) (PP-MO (APPR-AC in) (NN-NK Ruhe) ) ($*LRB* ") (VVPP-HD überlegt) ) (VAINF-HD werden) ) ) ($. .) ) )
+
+
+(ROOT ( (S  (CS-SB   (S-CJ    (PWS-SB Wer)    (PP-MO     (APPR-AC an)     (ART-NK der)     (NE-NK Seine)    )    (NN-OA Wasser)    (VVFIN-HD predigt)   )   ($, ,)   (S-CJ    (PP-MO     (APPR-AC an)     (ART-NK der)     (NE-NK Alster)    )    (ADV-MO aber)    (NN-OA Wein)    (VVFIN-HD trinkt)   )  )  ($, ,)  (VVFIN-HD macht)  (PRF-OA sich)  (PTKNEG-NG nicht)  (AP-PD   (ADJD-MO sonderlich)   (ADJD-HD glaubwürdig)  ) ) ($. .)))

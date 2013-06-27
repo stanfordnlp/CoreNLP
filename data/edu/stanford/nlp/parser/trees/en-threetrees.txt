@@ -1,0 +1,74 @@
+(ROOT (S (NP (NP (JJ Influential) (NNS members)) (PP (IN of) (NP (DT the) (NNP House) (NNP Ways) (CC and) (NNP Means) (NNP Committee)))) (VP (VBD introduced) (NP (NP (NN legislation)) (SBAR (WHNP (WDT that)) (S (VP (MD would) (VP (VB restrict) (SBAR (WHADVP (WRB how)) (S (NP (DT the) (JJ new) (NN savings-and-loan) (NN bailout) (NN agency)) (VP (MD can) (VP (VB raise) (NP (NN capital)))))) (, ,) (S (VP (VBG creating) (NP (NP (DT another) (JJ potential) (NN obstacle)) (PP (TO to) (NP (NP (NP (DT the) (NN government) (POS 's)) (NN sale)) (PP (IN of) (NP (JJ sick) (NNS thrifts)))))))))))))) (. .)))
+( (S 
+    (NP-SBJ (NNP Bio-Technology) (NNP General) (NNP Corp.) )
+    (VP (VBD received) 
+      (NP 
+        (NP (NNS tenders) )
+        (PP (IN for) 
+          (NP 
+            (NP 
+              (NP (CD 97.9) (NN %) )
+              (PP (IN of) 
+                (NP 
+                  (NP (PRP$ its) 
+                    (ADJP (CD 7.5) (NN %) )
+                    (JJ convertible) (JJ senior) (VBN subordinated) (NNS notes) )
+                  (ADJP (JJ due) 
+                    (NP-TMP 
+                      (NP (NNP April) (CD 15) )
+                      (, ,) 
+                      (NP (CD 1997) ))))))
+            (, ,) 
+            (CC and)
+            (NP 
+              (NP (CD 96) (NN %) )
+              (PP (IN of) 
+                (NP 
+                  (NP (PRP$ its) 
+                    (ADJP (CD 11) (NN %) )
+                    (JJ convertible) (JJ senior) (VBN subordinated) (NNS debentures) )
+                  (ADJP (JJ due) 
+                    (NP-TMP 
+                      (NP (NNP March) (CD 1) )
+                      (, ,) 
+                      (NP (CD 2006) ))))))))))
+    (. .) ))
+( (S 
+    (PP-LOC (IN In) 
+      (NP 
+        (NP (NN exchange) (NNS offers) )
+        (SBAR 
+          (WHNP-1 (WDT that) )
+          (S 
+            (NP-SBJ (-NONE- *T*-1) )
+            (VP (VBD expired) 
+              (NP-TMP (NNP Friday) ))))))
+    (, ,) 
+    (NP-SBJ 
+      (NP (NNS holders) )
+      (PP (IN of) 
+        (NP 
+          (NP (DT each) ($ $) (CD 1,000) (-NONE- *U*) )
+          (PP (IN of) 
+            (NP (NNS notes) )))))
+    (VP (MD will) 
+      (VP (VB receive) 
+        (NP 
+          (NP 
+            (NP 
+              (ADJP ($ $) (CD 250) (-NONE- *U*) )
+              (NN face) (NN amount) )
+            (PP (IN of) 
+              (NP 
+                (NP (NNP Series) (NNP A) 
+                  (ADJP (CD 7.5) (NN %) )
+                  (JJ senior) (VBN secured) (JJ convertible) (NNS notes) )
+                (ADJP (JJ due) 
+                  (NP-TMP 
+                    (NP (NNP Jan.) (CD 15) )
+                    (, ,) 
+                    (NP (CD 1995) ))))))
+          (, ,) 
+          (CC and)
+          (NP (CD 200) (JJ common) (NNS shares) ))))
+    (. .) ))

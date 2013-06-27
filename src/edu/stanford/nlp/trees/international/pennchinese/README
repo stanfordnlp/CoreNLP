@@ -1,0 +1,78 @@
+Chinese-English Map Utilities v0.1 - 05 Jan 2005
+----------------------------------------------
+
+(c) Leland Stanford Junior University 2005.
+
+Included are utilities for mapping Chinese characters to
+their primary radicals, and mapping Chinese words to English.
+
+The unicode mapping is taken from Unihan database of CJK characters,
+based on Unicode standard:
+
+http://www.unicode.org/charts/unihan.html
+
+The Chinese to English word map is taken from CEDict Chinese-English
+Lexicon.  Future versions of this package will support multiple Lexicons.
+
+http://www.mandarintools.com/cedict.html
+
+The code was written by Galen Andrew.
+
+QUICKSTART
+-----------------------------------------------
+
+These files are intended for programmatic use, but include simple main
+methods.  The following command will lookup translations of Chinese
+words in the given example input file. (Such a file needs to have
+whitespace-separated words.)
+ 
+java -cp chinese_map_utils.jar edu.stanford.nlp.trees.international.pennchinese.ChineseEnglishWordMap test.txt > test.out
+
+This command will look up the radicals of the characters:
+
+java -cp chinese_map_utils.jar edu.stanford.nlp.trees.international.pennchinese.RadicalMap -infile test.txt > test.out
+
+CONTENTS
+-----------------------------------------------
+
+README
+
+  This file.
+
+LICENSE
+
+  These Chinese map utilities are licensed under the Gnu General
+  Public License.
+
+chinese_map_utils.jar
+
+  This is a JAR file containing all the Stanford classes necessary to
+  run the map utilities.
+
+source.jar
+
+  A jarfile containing the Java 1.5 source code for the Chinese map utilities
+  distribution.
+
+javadoc
+
+  Javadocs for the distribution.
+
+THANKS
+-----------------------------------------------
+
+Thanks to the people who created and maintain CEDICT, the free online
+Chinese-English Lexicon.  Also thanks to Unihan, Inc. for providing
+the Unicode database used in the Radical Map.
+
+Thanks to the members of the Stanford Natural Language Processing Lab
+for great collaborative work on Java libraries for natural language
+processing.
+
+  http://nlp.stanford.edu/javanlp/
+
+CONTACT
+-----------------------------------------------
+
+Contact Galen Andrew at galen@cs.stanford.edu for any questions you may have
+about these utilities.

@@ -1,0 +1,1 @@
+(ROOT (SENT (VN (CL Nous) (V prions)) (NP (D les) (N cinéastes) (COORD (C et) (NP (A tous) (D nos) (N lecteurs)))) (VPinf (P de) (ADV bien) (VN (V vouloir)) (VPinf (VN (CL nous) (CL en) (V excuser)))) (PUNC .)))

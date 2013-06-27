@@ -1,0 +1,1 @@
+(ROOT (S (ADJD-MO Genausowenig) (ADV-MO aber) (VMFIN-HD kann) (NE-SB Baumgartl) (VP-OC (VVINF-HD sagen) ($, ,) (S-OC (PWS-SB was) (VP-OC (PP-MO (APPR-AC in) (NN-NK Zukunft)) (ADV-MO nun) (ADJD-MO genau) (PP-MO (APPR-AC mit) (ART-NK der) (NE-NK Volksfürsorge)) (VVINF-HD geschehen)) (VMFIN-HD soll))) ($. .)))

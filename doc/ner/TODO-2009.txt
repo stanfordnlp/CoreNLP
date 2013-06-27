@@ -1,0 +1,5 @@
+ - Add German NER
+ - Add BionNER
+ - Add all uppercase/uncased NER model
+ - Make it possible to have multiple NER matching threads sharing one data resource of features, etc.
+ - 

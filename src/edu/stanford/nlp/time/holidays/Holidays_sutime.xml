@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:Configuration hierarchy="sutime" description="SUTime default holidays"
+                   xmlns:tns="http://www.example.org/Holiday" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.example.org/Holiday /Holiday.xsd">
+    <tns:Holidays>
+
+        <tns:Fixed month="JANUARY" day="1" descriptionPropertiesKey="NEW_YEAR"/>
+        <tns:Fixed month="JANUARY" day="20" descriptionPropertiesKey="INAUGURATION"/>
+        <tns:Fixed month="FEBRUARY" day="2" descriptionPropertiesKey="GROUNDHOG"/>
+        <tns:Fixed month="FEBRUARY" day="14" descriptionPropertiesKey="VALENTINE"/>
+        <tns:Fixed month="MARCH" day="17" descriptionPropertiesKey="ST_PATRICK"/>
+        <tns:Fixed month="APRIL" day="1" descriptionPropertiesKey="APRIL_FOOLS"/>
+        <tns:Fixed month="APRIL" day="23" descriptionPropertiesKey="ST_GEORGE"/>
+        <tns:Fixed month="MAY" day="1" descriptionPropertiesKey="MAYDAY"/>
+        <tns:Fixed month="MAY" day="5" descriptionPropertiesKey="CINCO_DE_MAYO"/>
+        <tns:Fixed month="JUNE" day="24" descriptionPropertiesKey="BAPTISTE"/>
+        <tns:Fixed month="JULY" day="4" validFrom="1776" descriptionPropertiesKey="US_INDEPENDENCE"/>
+        <tns:Fixed month="JULY" day="14" descriptionPropertiesKey="BASTILLE"/>
+        <tns:Fixed month="OCTOBER" day="31" descriptionPropertiesKey="HALLOWEEN"/>
+        <tns:Fixed month="NOVEMBER" day="1" descriptionPropertiesKey="ALL_HALLOW"/>
+        <tns:Fixed month="NOVEMBER" day="2" descriptionPropertiesKey="ALL_SOULS"/>
+        <tns:Fixed month="NOVEMBER" day="5" descriptionPropertiesKey="GUY_FAWKES"/>
+        <tns:Fixed month="NOVEMBER" day="11" validFrom="1938" descriptionPropertiesKey="VETERANS"/>
+        <tns:Fixed month="DECEMBER" day="25" descriptionPropertiesKey="CHRISTMAS"/>
+
+        <tns:Fixed month="MAY" day="30" validFrom="1869" validTo="1967" descriptionPropertiesKey="MEMORIAL"/>
+
+        <tns:FixedWeekday which="THIRD" weekday="MONDAY" month="JANUARY" validFrom="1986" descriptionPropertiesKey="MARTIN_LUTHER_KING"/>
+        <tns:FixedWeekday which="THIRD" weekday="MONDAY" month="FEBRUARY" validFrom="1968" descriptionPropertiesKey="WASHINGTONS_BIRTHDAY"/>
+        <tns:FixedWeekday which="FIRST" weekday="MONDAY" month="MARCH" descriptionPropertiesKey="CANBERRA"/>
+        <tns:FixedWeekday which="LAST" weekday="MONDAY" month="MAY" validFrom="1968" descriptionPropertiesKey="MEMORIAL"/>
+        <tns:FixedWeekday which="SECOND" weekday="SUNDAY" month="MAY" descriptionPropertiesKey="MOTHERS_DAY"/>
+        <tns:FixedWeekday which="THIRD" weekday="SUNDAY" month="JUNE" descriptionPropertiesKey="FATHERS_DAY"/>
+        <tns:FixedWeekday which="FIRST" weekday="MONDAY" month="SEPTEMBER" validFrom="1895" descriptionPropertiesKey="LABOUR_DAY"/>
+        <tns:FixedWeekday which="SECOND" weekday="MONDAY" month="OCTOBER" validFrom="1934" descriptionPropertiesKey="COLUMBUS_DAY"/>
+        <tns:FixedWeekday which="FOURTH" weekday="THURSDAY" month="NOVEMBER" validFrom="1863" descriptionPropertiesKey="THANKSGIVING"/>
+
+        <tns:ChristianHoliday type="EASTER" descriptionPropertiesKey="christian.EASTER"/>
+        <tns:ChristianHoliday type="CLEAN_MONDAY" descriptionPropertiesKey="christian.CLEAN_MONDAY"/>
+        <tns:ChristianHoliday type="GOOD_FRIDAY" descriptionPropertiesKey="christian.GOOD_FRIDAY"/>
+        <tns:ChristianHoliday type="ASH_WEDNESDAY" descriptionPropertiesKey="christian.ASH_WEDNESDAY"/>
+        <tns:ChristianHoliday type="MARDI_GRAS" descriptionPropertiesKey="christian.MARDI_GRAS"/>
+    </tns:Holidays>
+</tns:Configuration>

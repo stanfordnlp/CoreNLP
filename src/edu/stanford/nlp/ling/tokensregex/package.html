@@ -1,0 +1,28 @@
+<body>
+
+<p>This package contains a library for matching regular expressions over
+   tokens.</p>
+
+<p>Use {@link edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher} and {@link edu.stanford.nlp.ling.tokensregex.TokenSequencePattern} to match sequences of tokens.
+   Their usage is very similar to <code>java.util.regex</code> except that matches are done
+   over <code>List&lt;CoreMap&gt;</code> instead of over <code>String</code>.
+</p>
+   Example:
+<pre>
+  <code>
+   List&lt;CoreLabel&lt; tokens = ...;
+   TokenSequencePattern pattern = TokenSequencePattern.compile(...);
+   TokenSequenceMatcher matcher = pattern.getMatcher(tokens);
+  </code>
+</pre>
+
+<p>The classes {@link edu.stanford.nlp.ling.tokensregex.SequenceMatcher} and {@link edu.stanford.nlp.ling.tokensregex.SequencePattern} can be used to build
+classes for recognizing regular expressions over sequences of other
+{@link edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher} provides utility functions for finding expressions with multiple patterns.</p>
+
+<p>To find character offsets of multiple word expressions in a <code>String</code>,
+    can also use <code>MultiWordStringMatcher.findTargetStringOffsets</code>. </p>
+
+<p>{@link edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor} and {@link edu.stanford.nlp.ling.tokensregex.SequenceMatchRules} describes how extraction rules are created</p>
+@author Angel Chang (angelx@stanford.edu)
+</body>

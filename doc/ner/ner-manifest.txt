@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Created-By: Stanford JavaNLP
+Main-Class: edu.stanford.nlp.ie.crf.NERGUI

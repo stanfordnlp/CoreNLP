@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.stanford.nlp</groupId>
+  <artifactId>stanford-parser</artifactId>
+  <version>3.2.0</version>
+  <packaging>jar</packaging>
+  <name>Stanford Parser</name>
+  <description>Stanford Parser processes raw text in English, Chinese, German, Arabic, and French, and extracts constituency parse trees.</description>
+  <url>http://nlp.stanford.edu/software/corenlp.shtml</url>
+  <licenses>
+    <license>
+      <name>GNU General Public License Version 2</name>
+      <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
+    </license>
+  </licenses>
+  <scm>
+    <url>http://nlp.stanford.edu/software/stanford-parser-2013-06-09.tgz</url>
+    <connection>http://nlp.stanford.edu/software/stanford-parser-2013-06-09.tgz</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>christopher.manning</id>
+      <name>Christopher Manning</name>
+      <email>manning@stanford.edu</email>
+    </developer>
+    <developer>
+      <id>john.bauer</id>
+      <name>John Bauer</name>
+      <email>horatio@gmail.com</email>
+    </developer>
+    <developer>
+      <id>spence.green</id>
+      <name>Spence Green</name>
+      <email>spenceg@stanford.edu</email>
+    </developer>
+  </developers>
+  <properties>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+    <encoding>UTF-8</encoding>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
+      <artifactId>ejml</artifactId>
+      <version>0.19</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>attach-models</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.basedir}/stanford-parser-3.2.0-models.jar</file>
+                  <type>jar</type>
+                  <classifier>models</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

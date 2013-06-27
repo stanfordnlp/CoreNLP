@@ -1,0 +1,109 @@
+ColumnDataClassifier invoked at Thu Oct 28 01:47:49 PDT 2010 with arguments:
+  -prop projects/core/data/edu/stanford/nlp/classify/iris2007.prop
+Gold answer column is 0
+numDatums: 130
+numLabels: 3 [Iris-setosa, Iris-versicolor, Iris-virginica]
+numFeatures (Phi(X) types): 5
+QNMinimizer called on double function of 15 variables, using M = 15.
+               An explanation of the output:
+Iter           The number of iterations
+evals          The number of function evaluations
+SCALING        <D> Diagonal scaling was used; <I> Scaled Identity
+LINESEARCH     [## M steplength]  Minpack linesearch
+                   1-Function value was too high
+                   2-Value ok, gradient positive, positive curvature
+                   3-Value ok, gradient negative, positive curvature
+                   4-Value ok, gradient negative, negative curvature
+               [.. B]  Backtracking
+VALUE          The current function value
+TIME           Total elapsed time
+|GNORM|        The current norm of the gradient
+{RELNORM}      The ratio of the current to initial gradient norms
+AVEIMPROVE     The average improvement / current value
+
+Iter ## evals ## <SCALING> [LINESEARCH] VALUE TIME |GNORM| {RELNORM} AVEIMPROVE
+
+Iter 1 evals 1 <D> [113M 7.322E-4] 1.343E2 0.01s |1.294E2| {8.774E-1} 0.000E0 
+Iter 2 evals 5 <D> [M 1.000E0] 1.218E2 0.01s |1.203E2| {8.153E-1} 5.149E-2 
+Iter 3 evals 6 <D> [1M 2.579E-1] 9.447E1 0.01s |3.005E2| {2.038E0} 1.406E-1 
+Iter 4 evals 8 <D> [M 1.000E0] 6.653E1 0.02s |8.207E1| {5.564E-1} 2.548E-1 
+Iter 5 evals 9 <D> [M 1.000E0] 5.801E1 0.02s |6.732E1| {4.564E-1} 2.631E-1 
+Iter 6 evals 10 <D> [M 1.000E0] 5.165E1 0.02s |5.683E1| {3.853E-1} 2.668E-1 
+Iter 7 evals 11 <D> [M 1.000E0] 4.106E1 0.02s |1.640E1| {1.112E-1} 3.245E-1 
+Iter 8 evals 12 <D> [M 1.000E0] 3.117E1 0.02s |1.342E1| {9.098E-2} 4.137E-1 
+Iter 9 evals 13 <D> [M 1.000E0] 2.379E1 0.02s |7.857E0| {5.327E-2} 5.162E-1 
+Iter 10 evals 14 <D> [M 1.000E0] 2.081E1 0.03s |4.359E0| {2.955E-2} 5.454E-1 
+Iter 11 evals 15 <D> [M 1.000E0] 1.948E1 0.03s |2.471E0| {1.675E-2} 4.775E-1 
+Iter 12 evals 16 <D> [M 1.000E0] 1.822E1 0.03s |2.027E0| {1.374E-2} 3.804E-1 
+Iter 13 evals 17 <D> [1M 2.803E-1] 1.765E1 0.03s |3.416E0| {2.316E-2} 2.517E-1 
+Iter 14 evals 19 <D> [1M 3.647E-1] 1.742E1 0.04s |5.151E0| {3.492E-2} 2.118E-1 
+Iter 15 evals 21 <D> [M 1.000E0] 1.733E1 0.04s |5.687E0| {3.856E-2} 1.800E-1 
+Iter 16 evals 22 <D> [M 1.000E0] 1.715E1 0.04s |4.654E0| {3.155E-2} 1.268E-1 
+Iter 17 evals 23 <D> [13M 2.793E-1] 1.654E1 0.04s |2.496E1| {1.692E-1} 8.040E-2 
+Iter 18 evals 26 <D> [M 1.000E0] 1.625E1 0.05s |1.109E1| {7.520E-2} 4.218E-2 
+Iter 19 evals 27 <D> [M 1.000E0] 1.616E1 0.05s |6.277E0| {4.256E-2} 2.615E-2 
+Iter 20 evals 28 <D> [M 1.000E0] 1.611E1 0.05s |1.533E0| {1.039E-2} 1.902E-2 
+Iter 21 evals 29 <D> [1M 3.770E-1] 1.610E1 0.05s |7.873E-1| {5.337E-3} 1.197E-2 
+Iter 22 evals 31 <D> [M 1.000E0] 1.610E1 0.05s |4.135E-1| {2.804E-3} 8.769E-3 
+Iter 23 evals 32 <D> [M 1.000E0] 1.609E1 0.06s |5.164E-1| {3.501E-3} 7.497E-3 
+Iter 24 evals 33 <D> [M 1.000E0] 1.608E1 0.06s |9.113E-1| {6.179E-3} 7.047E-3 
+Iter 25 evals 34 <D> [M 1.000E0] 1.606E1 0.06s |1.449E0| {9.821E-3} 6.179E-3 
+Iter 26 evals 35 <D> [M 1.000E0] 1.603E1 0.06s |1.457E0| {9.876E-3} 2.920E-3 
+Iter 27 evals 36 <D> [M 1.000E0] 1.601E1 0.06s |6.130E-1| {4.156E-3} 1.393E-3 
+Iter 28 evals 37 <D> [M 1.000E0] 1.600E1 0.06s |1.423E-1| {9.646E-4} 9.225E-4 
+Iter 29 evals 38 <D> [M 1.000E0] 1.600E1 0.06s |3.959E-1| {2.684E-3} 6.343E-4 
+Iter 30 evals 39 <D> [M 1.000E0] 1.599E1 0.07s |3.814E-1| {2.586E-3} 6.082E-4 
+Iter 31 evals 40 <D> [M 1.000E0] 1.599E1 0.07s |1.383E-1| {9.376E-4} 6.128E-4 
+Iter 32 evals 41 <D> [1M 2.468E-1] 1.599E1 0.07s |6.242E-1| {4.232E-3} 5.882E-4 
+Iter 33 evals 43 <D> [M 1.000E0] 1.599E1 0.07s |5.413E-2| {3.670E-4} 5.399E-4 
+Iter 34 evals 44 <D> [M 1.000E0] 1.599E1 0.07s |9.543E-2| {6.470E-4} 3.936E-4 
+Iter 35 evals 45 <D> [M 1.000E0] 1.599E1 0.07s |7.560E-2| {5.125E-4} 2.130E-4 
+Iter 36 evals 46 <D> [M 1.000E0] 1.599E1 0.07s |2.585E-1| {1.752E-3} 1.090E-4 
+Iter 37 evals 47 <D> [1M 2.684E-1] 1.599E1 0.07s
+QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL 
+Total time spent in optimization: 0.07s
+Built this classifier: LinearClassifier [printing top 200 features]
+(3-Value,Iris-virginica)   3.9660
+(4-Value,Iris-virginica)   3.9054
+(2-Value,Iris-setosa)      2.7759
+(CLASS,Iris-versicolor)    2.5068
+(1-Value,Iris-setosa)      1.3780
+(1-Value,Iris-versicolor)  0.6052
+(CLASS,Iris-setosa)        0.5928
+(2-Value,Iris-versicolor)  0.0735
+(3-Value,Iris-versicolor) -0.0444
+(1-Value,Iris-virginica)  -1.8754
+(4-Value,Iris-setosa)     -1.9822
+(4-Value,Iris-versicolor) -1.9982
+(2-Value,Iris-virginica)  -2.8192
+(CLASS,Iris-virginica)    -3.1561
+(3-Value,Iris-setosa)     -3.8551
+
+Output format: dataColumn1 goldAnswer classifierAnswer P(classifierAnswer)
+5	Iris-setosa	Iris-setosa	0.995615365125735
+4.6	Iris-setosa	Iris-setosa	0.9994804135630505
+5.1	Iris-setosa	Iris-setosa	0.9937095680980086
+4.9	Iris-setosa	Iris-setosa	0.9905109629700247
+5.4	Iris-setosa	Iris-setosa	0.9982151488134486
+4.4	Iris-setosa	Iris-setosa	0.9944214428148407
+5.3	Iris-setosa	Iris-setosa	0.9984497925740373
+6.1	Iris-versicolor	Iris-versicolor	0.8873152482428373
+6	Iris-versicolor	Iris-versicolor	0.9424246013278404
+5.5	Iris-versicolor	Iris-versicolor	0.9030026595536319
+6.5	Iris-versicolor	Iris-versicolor	0.928816167001929
+6.8	Iris-versicolor	Iris-versicolor	0.9569376555329442
+6.2	Iris-versicolor	Iris-versicolor	0.9857141927233324
+6.7	Iris-virginica	Iris-virginica	0.9698639532763317
+6.4	Iris-virginica	Iris-virginica	0.8982390073296296
+5.7	Iris-virginica	Iris-virginica	0.9920401400173403
+6.7	Iris-virginica	Iris-virginica	0.968576539063806
+6.8	Iris-virginica	Iris-virginica	0.9957320369272686
+7.7	Iris-virginica	Iris-virginica	0.9900526044768513
+7.3	Iris-virginica	Iris-virginica	0.9766204287594443
+
+20 examples in test set
+Cls Iris-setosa: TP=7 FN=0 FP=0 TN=13; Acc 1.000 P 1.000 R 1.000 F1 1.000
+Cls Iris-versicolor: TP=6 FN=0 FP=0 TN=14; Acc 1.000 P 1.000 R 1.000 F1 1.000
+Cls Iris-virginica: TP=7 FN=0 FP=0 TN=13; Acc 1.000 P 1.000 R 1.000 F1 1.000
+Micro-averaged accuracy/F1: 1.00000
+Macro-averaged F1: 1.00000
