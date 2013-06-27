@@ -1,0 +1,1042 @@
+options {
+    UNICODE_INPUT = true;
+    // Option for multiple instances
+    STATIC = false;
+    // Private classes
+    SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+}
+
+PARSER_BEGIN(TokenSequenceParser)
+package edu.stanford.nlp.ling.tokensregex.parser;
+// all generated classes are in this package
+
+//imports
+import edu.stanford.nlp.ling.tokensregex.types.*;
+import edu.stanford.nlp.ling.tokensregex.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.ArrayMap;
+import edu.stanford.nlp.util.Pair;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.*;
+
+public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
+    public TokenSequenceParser() {}
+
+    public CoreMapExpressionExtractor getExpressionExtractor(Env env, Reader r) throws ParseException {
+        TokenSequenceParser p = new TokenSequenceParser(r);
+        List<SequenceMatchRules.Rule> rules = p.RuleList(env);
+        return new CoreMapExpressionExtractor(env, rules);
+    }
+
+    public void updateExpressionExtractor(CoreMapExpressionExtractor extractor, Reader r) throws ParseException {
+        TokenSequenceParser p = new TokenSequenceParser(r);
+        List<SequenceMatchRules.Rule> rules = p.RuleList(extractor.getEnv());
+        extractor.appendRules(rules);
+    }
+
+	public SequencePattern.PatternExpr parseSequence(Env env, String s) throws ParseException {
+        TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
+        return p.SeqRegex(env);
+  	}
+
+	public Pair<SequencePattern.PatternExpr, SequenceMatchAction<CoreMap>> parseSequenceWithAction(Env env, String s) throws ParseException {
+        TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
+        return p.SeqRegexWithAction(env);
+  	}
+
+	public SequencePattern.PatternExpr parseNode(Env env, String s) throws ParseException {
+        TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
+        NodePattern n = p.Node(env);
+        return new SequencePattern.NodePatternExpr(n);
+  	}
+
+    private Integer parseInteger(String str) {
+      if (str.startsWith("+")) {
+        return Integer.valueOf(str.substring(1));
+      } else {
+        return Integer.valueOf(str);
+      }
+    }
+
+    private Long parseLongInteger(String str) {
+      if (str.endsWith("L")) {
+        str = str.substring(0, str.length()-1);
+      }
+      if (str.startsWith("+")) {
+        return Long.valueOf(str.substring(1));
+      } else {
+        return Long.valueOf(str);
+      }
+    }
+}
+
+PARSER_END(TokenSequenceParser)
+
+SKIP:
+{
+	" "
+|	"\r"
+|	"\n"
+|	"\t"
+|   < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|   < "#" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+}
+
+TOKEN:
+{
+	< IDENTIFIER: ( ["A"-"Z","a"-"z", "_"] ) (["A"-"Z","a"-"z","0"-"9", "_"] )* >
+|	< REGEXVAR: "$" ( ["A"-"Z","a"-"z", "_"] ) (["A"-"Z","a"-"z","0"-"9", "_"] )* >
+|	< REGEXGROUP: "$" (["0"-"9"])+ >
+|	< REGEXMRVAR: "$$" ( ["A"-"Z","a"-"z", "_"] ) (["A"-"Z","a"-"z","0"-"9", "_"] )* >
+|	< REGEXMRGROUP: "$$" (["0"-"9"])+ >
+|   < BACKREF: "\\" (["0"-"9"])+ >
+|   < NONNEGINT: (["0"-"9"])+ >
+|   < INT: (["+","-"])? (["0"-"9"])+ >
+|   < LONGINT: (["+","-"])? (["0"-"9"])+ "L" >
+|   < REAL: (["+","-"])? (["0"-"9"])+ "." (["0"-"9"])+ >
+|	< REGEX: "/" ("\\/"|~["\n","\r","/"])* "/" >
+|	< STR: "\"" ("\\\""|~["\n","\r", "\""])* "\"" >
+|   < NUMCMP: "<=" | ">=" | ">" | "<" | "==" | "!=" >
+|   < STRREGEXCMP: "=~" | "!=" >
+|   < STRSIMPLE: (["A"-"Z","a"-"z","0"-"9", "_"] )+ >
+}
+
+
+List<SequenceMatchRules.Rule> RuleList(Env env) : {
+  List<SequenceMatchRules.Rule> rules = new ArrayList<SequenceMatchRules.Rule>();
+  SequenceMatchRules.Rule rule;
+} {
+    ( rule = Rule(env) { rules.add(rule); }
+    )*
+    { return rules; }
+}
+
+SequenceMatchRules.Rule Rule(Env env) : {
+  SequenceMatchRules.Rule rule;
+  Expressions.CompositeValue cv;
+} {
+  ( LOOKAHEAD(3)
+    rule = ExpressionExtractorRule(env)
+    |
+    LOOKAHEAD(3)
+    rule = AssignmentRule(env)
+    |
+    LOOKAHEAD(3)
+    cv = CompositeFieldValue(env) { rule = SequenceMatchRules.createRule(env, cv); } )
+  { return rule; }
+}
+
+SequenceMatchRules.Rule ExpressionExtractorRule(Env env) : {
+  SequencePattern.PatternExpr expr;
+  String stringRegex;
+  Expression result;
+  Token ruleTypeToken;
+} {
+    LOOKAHEAD(2)
+  ( "{" stringRegex = StringRegex(env) "=>" result = Expression(env) "}" )
+  { return SequenceMatchRules.createExtractionRule(env, null, stringRegex, result); }
+  |
+    LOOKAHEAD(2)
+  ( "{" "(" expr = SeqRegex(env) ")" "=>" result = Expression(env) "}" )
+  { return SequenceMatchRules.createExtractionRule(env, null, TokenSequencePattern.compile(expr), result); }
+  |
+    LOOKAHEAD(2)
+  ( "{" "tokens:" "(" expr = SeqRegex(env) ")" "=>" result = Expression(env) "}" )
+  { return SequenceMatchRules.createTokenPatternRule(env, expr, result); }
+  |
+    LOOKAHEAD(2)
+  ( "{" "text:" stringRegex = StringRegex(env) "=>" result = Expression(env) "}" )
+  { return SequenceMatchRules.createTextPatternRule(env, stringRegex, result); }
+}
+
+SequenceMatchRules.Rule AssignmentRule(Env env) : {
+  AssignableExpression var;
+  Expression result;
+} {
+  ( var = AssignableExpression(env)  "=" result = Expression(env) (";")? )
+  { return SequenceMatchRules.createAssignmentRule(env, var, result);
+  }
+}
+
+AssignableExpression AssignableExpression(Env env) : {
+  AssignableExpression expr;
+} {
+  expr = AssignableNestedVarExpression(env)
+  { return expr; }
+}
+
+Expression Expression(Env env) : {
+  Expression expr;
+} {
+  (
+    LOOKAHEAD(4)
+    expr = FunctionCallExpression(env) |
+    LOOKAHEAD(4)
+    expr = NestedVarExpression(env) |
+    LOOKAHEAD(4)
+    expr = ValueExpression(env) |
+    LOOKAHEAD(4)
+    expr = ListExpression(env) |
+    LOOKAHEAD(4)
+    expr = CaseExpression(env)
+  )
+  { return expr; }
+}
+
+int Index() : {
+  Token t;
+} {
+  ( "[" t = IntegerToken() "]" )
+  { return Integer.valueOf(t.image); }
+}
+
+Expression FunctionCallExpression(Env env) : {
+  Token typeToken;
+  Expression param;
+  List<Expression> params = new ArrayList<Expression>();
+} {
+  (  typeToken = <IDENTIFIER>
+   ( "("
+     (
+       param = Expression(env) { params.add(param); }
+       ( "," param = Expression(env) { params.add(param); } )*
+     )?
+     ")"
+   )
+  )
+  { return new Expressions.FunctionCallExpression(typeToken.image, params); }
+}
+
+Value ValueExpression(Env env) : {
+  Value expr;
+} {
+  (
+    expr = BasicValue(env)
+    |
+    expr = CompositeFieldValue(env)
+  )
+  { return expr; }
+}
+
+Expressions.CompositeValue CompositeFieldValue(Env env) : {
+    Map<String, Expression> attributes = new ArrayMap<String,Expression>();
+} {
+	(
+	    "{"
+	        (
+	            FieldValue(env, attributes)
+	        )
+
+			( ("," | ";")  FieldValue(env, attributes)
+		    )*
+		"}"
+    )
+  	{
+  	  return new Expressions.CompositeValue(/*"COMPOSITE", */ attributes, false);
+	}
+}
+
+Map<String,Expression> FieldValue(Env env, Map<String,Expression> attributes) : {
+	String fieldname = null;
+	Expression expr = null;
+}   {
+	    fieldname = RelaxedString()
+	    (    ":" expr = Expression(env) )
+	    { 
+	      if (fieldname != null && expr != null)  {
+	        if (attributes.containsKey(fieldname)) {
+                throw new Error("Field already defined: " + fieldname);
+	        }
+	        attributes.put(fieldname, expr);
+	      }
+     	  return attributes;
+	    }
+	}
+
+Value BasicValue(Env env) : {
+	Token tok = null;
+	SequencePattern.PatternExpr seqRegex = null;
+}   {
+        tok = <REGEX> { return new Expressions.RegexValue(/*"REGEX",*/ tok.image.substring(1,tok.image.length()-1)); }
+        |
+        tok = <STR> { return new Expressions.PrimitiveValue<String>("STRING", tok.image.substring(1,tok.image.length()-1) ); }
+        |
+        tok = IntegerToken() { return new Expressions.PrimitiveValue<Number>("INTEGER", parseInteger(tok.image)); }
+        |
+        tok = <LONGINT> { return new Expressions.PrimitiveValue<Number>("INTEGER", parseLongInteger(tok.image)); }
+        |
+        tok = <REAL> { return new Expressions.PrimitiveValue<Number>("REAL", Double.valueOf(tok.image)); }
+        |
+        "(" seqRegex = SeqRegex(env) ")" {
+          TokenSequencePattern seqPattern = new TokenSequencePattern(null, seqRegex);
+          return new Expressions.PrimitiveValue<TokenSequencePattern>("TOKEN_REGEX", seqPattern);
+        }
+	}
+
+AssignableExpression AssignableVar(Env env) : {
+	Token tok = null;
+}   {
+        tok = <IDENTIFIER> { return new Expressions.VarExpression(tok.image); }
+        |
+        tok = <REGEXVAR> { return new Expressions.RegexMatchVarExpression(tok.image); }
+	}
+
+Expression VarOrRegexVar(Env env) : {
+	Token tok = null;
+}   {
+        tok = <IDENTIFIER> { return new Expressions.VarExpression(tok.image); }
+        |
+        tok = <REGEXVAR> { return new Expressions.RegexMatchVarExpression(tok.image); }
+        |
+        tok = <REGEXGROUP> { return new Expressions.RegexMatchVarExpression(Integer.valueOf(tok.image.substring(1))); }
+        |
+        tok = <REGEXMRVAR> { return new Expressions.RegexMatchResultVarExpression(tok.image.substring(1)); }
+        |
+        tok = <REGEXMRGROUP> { return new Expressions.RegexMatchResultVarExpression(Integer.valueOf(tok.image.substring(2))); }
+	}
+
+Expression MethodCallExpression(Env env, Expression parent) : {
+  Token typeToken;
+  Expression param;
+  List<Expression> params = new ArrayList<Expression>();
+} {
+  (  typeToken = <IDENTIFIER>
+   ( "("
+     (
+       param = Expression(env) { params.add(param); }
+       ( "," param = Expression(env) { params.add(param); } )*
+     )?
+     ")"
+   )
+  )
+  { return new Expressions.MethodCallExpression(typeToken.image, parent, params); }
+}
+
+AssignableExpression AssignableNestedVarExpression(Env env) : {
+  AssignableExpression expr;
+  Expression fieldExpr;
+  String s;
+  Token tok;
+  int i;
+} {
+  ( expr = AssignableVar(env)
+   (
+     LOOKAHEAD(2)
+     i = Index()
+    { expr = new Expressions.IndexedExpression(expr, i);   }
+     |
+     LOOKAHEAD(2)
+     "["
+     fieldExpr = Expression(env)
+     { expr = new Expressions.FieldExpression(expr, fieldExpr); }
+     "]"
+     |
+     LOOKAHEAD(2)
+     "."
+     s = RelaxedString()
+     { expr = new Expressions.FieldExpression(expr, s); }
+    )*
+  )
+  { return expr;   }
+}
+
+Expression NestedVarExpression(Env env) : {
+  Expression expr;
+  Expression fieldExpr;
+  String s;
+  Token tok;
+  int i;
+} {
+  ( expr = VarOrRegexVar(env)
+   (
+     LOOKAHEAD(3)
+     i = Index()
+    { expr = new Expressions.IndexedExpression(expr, i);   }
+     |
+     LOOKAHEAD(3)
+     "["
+     fieldExpr = Expression(env)
+     { expr = new Expressions.FieldExpression(expr, fieldExpr); }
+     "]"
+     |
+     LOOKAHEAD(3)
+     "."
+     expr = MethodCallExpression(env, expr)
+     |
+     LOOKAHEAD(3)
+     "."
+     s = RelaxedString()
+     { expr = new Expressions.FieldExpression(expr, s); }
+    )*
+  )
+  { return expr;   }
+}
+
+Expression ListExpression(Env env) : {
+  List<Expression> exprs = new ArrayList<Expression>();
+  Expression expr;
+} {
+  ( "("
+     expr = Expression(env)
+     { exprs.add(expr); }
+   (
+     ","
+     expr = Expression(env)
+     { exprs.add(expr); }
+   )*
+    ")"
+  )
+  { return new Expressions.ListExpression(Expressions.TYPE_LIST, exprs); }
+}
+
+Expression BasicCondExpression(Env env) : {
+  Expression expr1 = null;
+  Expression expr2 = null;
+  Token op = null;
+} {
+  LOOKAHEAD(3)
+  (
+    expr1 = NestedVarExpression(env)
+    ( op = CmpToken()
+      expr2 = Expression(env) )?
+  )
+  { if (op == null) {
+      return new Expressions.ConditionalExpression(expr1);
+    } else {
+      return new Expressions.ConditionalExpression(op.image, expr1, expr2);
+    }
+  }
+  |
+  LOOKAHEAD(3)
+    expr1 = FunctionCallExpression(env)
+    { return new Expressions.ConditionalExpression(expr1); }
+}
+
+Expression CondGroup(Env env) : {
+  Expression expr;
+} {
+  (
+    ( expr = BasicCondExpression(env) )
+    |
+    (
+      "(" expr = CondExpression(env)  ")"
+    )
+  )
+  { return expr; }
+}
+
+Expression CondExpression(Env env) : {
+  Expression child;
+  List<Expression> disjChildren = new ArrayList<Expression>();
+  List<Expression> conjChildren = new ArrayList<Expression>();
+  Token op;
+} {
+    ( child = CondGroup(env)  { conjChildren.add(child); }  )
+	(  ( op = "&&"| op = "||" )
+	   child = CondGroup(env)
+	  {
+	     if ("&&".equals(op.image)) {
+	      conjChildren.add(child);
+	     } else if ("||".equals(op.image)) {
+	       if (conjChildren.size() > 1) {
+	          disjChildren.add(new Expressions.AndExpression(conjChildren));
+	       } else {
+	          disjChildren.add(conjChildren.get(0));
+	       }
+	       conjChildren = new ArrayList<Expression>();
+	       conjChildren.add(child);
+	     }
+	   }
+	)*
+ 	{
+	  if (conjChildren.size() > 1) {
+	     disjChildren.add(new Expressions.AndExpression(conjChildren));
+	  } else {
+	     disjChildren.add(conjChildren.get(0));
+	  }
+ 	  if (disjChildren.size() == 1)
+		return disjChildren.get(0);
+	  else
+		return new Expressions.OrExpression(disjChildren);
+    }
+}
+Expression CaseExpression(Env env) : {
+  Expression cond = null;
+  Expression expr = null;
+  List<Pair<Expression, Expression>> cases
+    = new ArrayList<Pair<Expression, Expression>>();
+  Expression elseExpr = null;
+} {
+   (
+    ":case" "{"
+        ( cond = CondExpression(env) "=>"  expr = Expression(env)
+          { cases.add(new Pair<Expression, Expression>(cond, expr)); }
+          ("," | ";")
+        )+
+        ( ":else" "=>" elseExpr = Expression(env))?
+    "}"
+   )
+   { return new Expressions.CaseExpression(cases, elseExpr); }
+}
+
+String StringRegex(Env env) : {
+  Token tok;
+} {
+    ( tok = <REGEX> )  { return tok.image.substring(1,tok.image.length()-1); }
+}
+
+
+SequencePattern.PatternExpr SeqRegex(Env env) : {
+  SequencePattern.PatternExpr expr;
+} {
+    ( expr = SeqRegexDisjConj(env) )  { return expr; }
+}
+
+
+Object StringNumberValue(Env env) : {
+	Token tok = null;
+}   {
+        tok = <STR> { return tok.image.substring(1,tok.image.length()-1); }
+        |
+        tok = IntegerToken() { return parseInteger(tok.image); }
+        |
+        tok = <LONGINT> { return parseLongInteger(tok.image); }
+        |
+        tok = <REAL> { return Double.valueOf(tok.image); }
+	}
+
+SequencePattern.PatternExpr SeqRegexBasic(Env env) : {
+  List<SequencePattern.PatternExpr> children = new ArrayList<SequencePattern.PatternExpr>();
+  NodePattern node;
+  MultiNodePattern multiNode;
+  SequencePattern.PatternExpr expr;
+  Object value = null;
+} {
+    (
+     (
+      ( ( node = BracketedNode(env) ) { expr = new SequencePattern.NodePatternExpr(node);  }
+         |
+        ( node = CoreMapWordPattern(env) ) { expr = new SequencePattern.NodePatternExpr(node);  }
+         |
+        ( multiNode = MultiNodePattern(env) ) { expr = new SequencePattern.MultiNodePatternExpr(multiNode);  }
+         |
+        ( expr = SeqRegexGroup(env)  )
+         |
+        ( expr = SeqVar(env) )
+         |
+        ( expr = SeqBackRef(env) )
+      )
+      ( expr = SeqRegexRepeatTimes(env, expr) )?
+       {
+         children.add(expr);
+       }
+     )+
+// 	 ( "=>" value = StringNumberValue() )?
+ 	 ( "=>" value = Expression(env) )?
+ 	)
+ 	{ if (children.size() != 1) {
+ 	    expr = new SequencePattern.SequencePatternExpr(children);
+ 	  }
+ 	  if (value != null) {
+ 	    expr = new SequencePattern.ValuePatternExpr(expr, value);
+ 	  }
+ 	  return expr;
+ 	}
+}
+
+SequencePattern.PatternExpr SeqRegexRepeatTimes(Env env, SequencePattern.PatternExpr expr) : {
+   Token value;
+   Token v2;
+   int min = -1;
+   int max = -1;
+   boolean greedy = true;
+}  {
+  (  (
+       ( value = "*" )  { min = 0; max = -1;  }
+       |
+       ( value = "?" )  { min = 0; max = 1; }
+       |
+       ( value = "+" )  { min = 1; max = -1;  }
+       |
+    LOOKAHEAD(3)
+       ( "{"  value = <NONNEGINT> "}" ) { min = Integer.parseInt(value.image); max = min;  }
+       |
+    LOOKAHEAD(4)
+       ( "{"  value = <NONNEGINT> "," "}" ) { min = Integer.parseInt(value.image); max = -1;  }
+       |
+       ( "{"  value = <NONNEGINT>  "," v2 = <NONNEGINT> "}" ) { min = Integer.parseInt(value.image); max = Integer.parseInt(v2.image);  }
+   )
+   (  "?" {  greedy = false; } )? 
+ )
+   {
+      return new SequencePattern.RepeatPatternExpr(expr, min, max, greedy);
+   }
+}
+
+
+SequencePattern.PatternExpr SeqRegexDisj(Env env) : {
+  List<SequencePattern.PatternExpr> children = new ArrayList<SequencePattern.PatternExpr>();
+  SequencePattern.PatternExpr expr;
+} {
+    ( expr = SeqRegexBasic(env) ) { children.add(expr); }
+    (
+      ("|"|"||")  expr = SeqRegexBasic(env)  {  children.add(expr);  }
+    )*
+ 	{
+ 	    if (children.size() == 1) { return children.get(0); }
+		else { return new SequencePattern.OrPatternExpr(children);  }
+    }
+}
+
+SequencePattern.PatternExpr SeqRegexDisjConj(Env env) : {
+	SequencePattern.PatternExpr child;
+	List<SequencePattern.PatternExpr> disjChildren = new ArrayList<SequencePattern.PatternExpr>();
+	List<SequencePattern.PatternExpr> conjChildren = new ArrayList<SequencePattern.PatternExpr>();
+	Token op;
+} {
+    ( child = SeqRegexBasic(env)  { conjChildren.add(child); }  )
+	(  ( op = "&"| op = "|" | op = "&&"| op = "||" )
+	   child = SeqRegexBasic(env)
+	  {
+	     if ("&".equals(op.image) | "&&".equals(op.image)) {
+	      conjChildren.add(child);
+	     } else if ("|".equals(op.image) | "||".equals(op.image)) {
+	       if (conjChildren.size() > 1) {
+	          disjChildren.add(new SequencePattern.AndPatternExpr(conjChildren));
+	       } else {
+	          disjChildren.add(conjChildren.get(0));
+	       }
+	       conjChildren = new ArrayList<SequencePattern.PatternExpr>();
+	       conjChildren.add(child);
+	     }
+	   }
+	)*
+ 	{
+	  if (conjChildren.size() > 1) {
+	     disjChildren.add(new SequencePattern.AndPatternExpr(conjChildren));
+	  } else {
+	     disjChildren.add(conjChildren.get(0));
+	  }
+ 	  if (disjChildren.size() == 1)
+		return disjChildren.get(0);
+	  else
+		return new SequencePattern.OrPatternExpr(disjChildren);
+    }
+}
+
+SequencePattern.PatternExpr SeqRegexGroup(Env env) : {
+  SequencePattern.PatternExpr expr;
+  boolean capturing = true;
+  String varname = null;
+  Token var;
+} {
+    (  "("
+      ( ( "?:" {capturing = false; } )
+        |
+        ( "?" var = <REGEXVAR> {varname = var.image; } )
+      )?
+       ( (expr = SeqRegex(env) )  )
+       ")"
+     )
+
+ 	{
+		if (varname != null) {
+		   return new SequencePattern.GroupPatternExpr(expr, varname);
+		} else {
+		   return new SequencePattern.GroupPatternExpr(expr, capturing);
+        }
+    }
+}
+
+NodePattern BracketedNode(Env env) : {
+  NodePattern node;
+} {
+  (
+    LOOKAHEAD(2)
+    "[" "]" { node = NodePattern.ANY_NODE; }
+    |
+    "["
+    (  node = NodeDisjConj(env)  )
+    "]"
+  )
+  { return node; }
+
+}
+
+SequencePattern.PatternExpr SeqVar(Env env) : {
+  SequencePattern.PatternExpr expr;
+  Token name;
+} {
+  (
+    name = <REGEXVAR>
+    {
+        expr = env.getSequencePatternExpr(name.image, true);
+        if (expr == null) {
+            throw new Error("Unknown sequence pattern variable " + name.image);
+        } 
+    }
+  )
+  { return expr; }
+
+}
+
+SequencePattern.PatternExpr SeqBackRef(Env env) : {
+  Token name;
+} {
+    name = <BACKREF>
+    {
+        int v = Integer.parseInt(name.image.substring(1));
+        return new SequencePattern.BackRefPatternExpr(CoreMapNodePattern.TEXT_ATTR_EQUAL_CHECKER, v);
+    }
+}
+
+
+NodePattern Node(Env env) : {
+  NodePattern node;
+} {
+  (
+    ( node = BracketedNode(env) )
+    |
+    (  node = NodeGroup(env)  )
+  )
+  { return node; }
+}
+
+NodePattern NodeDisj(Env env) : {
+	List<NodePattern> children = new ArrayList<NodePattern>();
+	NodePattern child;
+} {
+    (  child = NodeGroup(env)  { children.add(child); }  )
+	( ("|"|"||") child = NodeGroup(env)  { children.add(child); } )*
+ 	{ if (children.size() == 1)
+		return child;
+	  else
+		return new NodePattern.DisjNodePattern(children);
+    }
+}
+
+NodePattern NodeConj(Env env) : {
+	NodePattern child;
+	List children = new ArrayList();
+} {
+    ( child = NodeGroup(env)  { children.add(child); }  )
+	( ("&"|"&&") child = NodeGroup(env)  { children.add(child); } )*
+ 	{ if (children.size() == 1)
+		return child;
+	  else
+		return new NodePattern.ConjNodePattern(children);
+    }
+}
+
+NodePattern NodeDisjConj(Env env) : {
+	NodePattern child;
+	List<NodePattern> disjChildren = new ArrayList<NodePattern>();
+	List<NodePattern> conjChildren = new ArrayList<NodePattern>();
+	Token op;
+} {
+    ( child = NodeGroup(env)  { conjChildren.add(child); }  )
+	(  ( op = "&" | op = "|" | op = "&&" | op = "||" )
+	   child = NodeGroup(env)
+	  {
+	     if ("&".equals(op.image) || "&&".equals(op.image)) {
+	      conjChildren.add(child);
+	     } else if ("|".equals(op.image) || ("||".equals(op.image))) {
+	       if (conjChildren.size() > 1) {
+	          disjChildren.add(new NodePattern.ConjNodePattern(conjChildren));
+	       } else {
+	          disjChildren.add(conjChildren.get(0));
+	       }
+	       conjChildren = new ArrayList<NodePattern>();
+	       conjChildren.add(child);
+	     }
+	   }
+	)*
+ 	{
+	  if (conjChildren.size() > 1) {
+	     disjChildren.add(new NodePattern.ConjNodePattern(conjChildren));
+	  } else {
+	     disjChildren.add(conjChildren.get(0));
+	  }
+ 	  if (disjChildren.size() == 1)
+		return disjChildren.get(0);
+	  else
+		return new NodePattern.DisjNodePattern(disjChildren);
+    }
+}
+
+NodePattern NodeGroup(Env env) : {
+  NodePattern node;
+} {
+  (
+    LOOKAHEAD(2)
+    ( node = NodeBasic(env) )
+    |
+    LOOKAHEAD(2)
+    (
+      "(" node = NodeDisjConj(env)  ")"
+    )
+    |
+    LOOKAHEAD(2)
+    (
+      "!" "(" node = NodeDisjConj(env)  ")"
+      { node = new NodePattern.NegateNodePattern(node); }
+    )
+  )
+  { return node; }
+}
+
+NodePattern NodeBasic(Env env) : {
+	NodePattern child;
+} {
+   ( "!" child = CoreMapNode(env)
+ 	{ return new NodePattern.NegateNodePattern(child); } )
+ 	|
+   (  child = CoreMapNode(env)
+ 	{ return child;  }    )
+}
+
+NodePattern CoreMapNode(Env env) : {
+    Map<String, String> attributes = new ArrayMap<String,String>();
+    NodePattern pat;
+	Token value = null;
+} {
+	(
+	    "{"
+	        (
+	            AttrValue(env, attributes)
+	        )
+
+			( ("," | ";")  AttrValue(env, attributes)
+		    )*
+		"}"
+		    | ( value = RelaxedStringToken() | value = <REGEX>  )
+		      { attributes.put("word", value.image); }
+    )
+  	{ pat = CoreMapNodePattern.valueOf(env, attributes);
+	  return pat;
+	}
+	|
+	pat = CoreMapVarNodePattern(env)
+	{
+	    return pat;
+	}
+	|
+	( "{{" pat = CoreMapExprNodePattern(env) "}}" )
+	{
+	    return pat;
+	}
+}
+
+Map<String,String> AttrValue(Env env, Map<String,String> attributes) : {
+	Token attr = null;
+	Token value = null;
+	Token tok = null;
+	String str = null;
+}   {
+	    attr = <IDENTIFIER>
+	    (    ":" (value = <STR> | value = <REGEX> | value = <IDENTIFIER> | str = CoreMapVarValue(env) )
+	        | tok = "::"
+	            value = <IDENTIFIER>
+	        | tok = <NUMCMP>
+	            ( value = NumberToken() | str = CoreMapVarValue(env) )
+	    )
+	    { if (value != null) { str = value.image; }
+	      if (tok != null) { str = tok.image + str; }
+	      if (attr != null && str != null)  {
+	        if (attributes.containsKey(attr.image)) {
+                throw new Error("Attribute match already defined: " + attr.image);
+	        }
+	        attributes.put(attr.image, str);
+	      }
+     	  return attributes;
+	    }
+	}
+
+
+
+NodePattern CoreMapWordPattern(Env env) : {
+    Map<String, String> attributes = new ArrayMap<String,String>();
+    CoreMapNodePattern pat;
+	Token value = null;
+} {
+	(
+        ( value = <STR> | value = <REGEX>  | value = <IDENTIFIER>
+           | value = <NONNEGINT> | value = <INT> | value = <LONGINT>
+           | value = <REAL> | value = <STRSIMPLE> )
+		{ attributes.put("word", value.image); }
+    )
+  	{ pat = CoreMapNodePattern.valueOf(env, attributes);
+	  return pat;
+	}
+}
+
+MultiNodePattern MultiNodePattern(Env env) : {
+    NodePattern pat;
+    MultiNodePattern mp;
+    Token v1, v2;
+    int min = 1, max = -1;
+} {
+    "(?m)"
+    (
+    LOOKAHEAD(3)
+     "{" v1 = <NONNEGINT> "}"
+     { min = Integer.parseInt(v1.image);
+       max = Integer.parseInt(v1.image); }
+      |
+    LOOKAHEAD(4)
+     "{" v1 = <NONNEGINT> "," "}"
+     { min = Integer.parseInt(v1.image); }
+      |
+     "{" v1 = <NONNEGINT> "," v2 = <NONNEGINT> "}"
+     { min = Integer.parseInt(v1.image);
+       max = Integer.parseInt(v2.image); }
+    )?
+     pat = CoreMapWordPattern(env)
+    {
+      mp = new MultiCoreMapNodePattern(pat);
+      mp.setMinNodes(min);
+      mp.setMaxNodes(max);
+      return mp;
+    }
+}
+
+String CoreMapVarValue(Env env) : {
+	Token value = null;
+}  {
+	( value = <REGEXVAR> ) { return (String) env.get(value.image); }
+}
+
+NodePattern CoreMapVarNodePattern(Env env) : {
+	Token value = null;
+}  {
+	( value = <REGEXVAR> ) { return env.getNodePattern(value.image); }
+}
+
+NodePattern CoreMapExprNodePattern(Env env) : {
+	Expression expr = null;
+}  {
+	( expr = CondExpression(env) ) { return new CoreMapExpressionNodePattern(env, expr); }
+}
+
+
+Pair<SequencePattern.PatternExpr, SequenceMatchAction<CoreMap>> SeqRegexWithAction(Env env) : {
+  SequencePattern.PatternExpr expr;
+  SequenceMatchAction<CoreMap> action = null;
+} {
+    ( expr = SeqRegex(env) )
+    ( action = Action(env) )?
+    { return new Pair<SequencePattern.PatternExpr, SequenceMatchAction<CoreMap>>(expr,action); }
+}
+
+SequenceMatchAction<CoreMap> Action(Env env) : {
+   SequenceMatchAction<CoreMap> action;
+} {
+  "==>"
+  (
+    action = AnnotateAction(env)
+  )
+  { return action; }
+}
+
+SequenceMatchAction<CoreMap> AnnotateAction(Env env) : {
+  Map<String, String> attributes;
+//  int group;
+} {
+  "&annotate" "("
+//  group = <NONNEGINT> ","
+  attributes = SetAttrValues(env)
+  ")"
+  { return new CoreMapSequenceMatchAction.AnnotateAction<CoreMap>( /*group,*/ attributes);  }
+}
+
+Map<String,String> SetAttrValues(Env env) : {
+    Map<String, String> attributes = new ArrayMap<String,String>();
+} {
+	(
+	    "{"
+	        (
+	            SetAttrValue(env, attributes)
+	        )
+
+			( ("," | ";")  SetAttrValue(env, attributes)
+		    )*
+		"}"
+    )
+  	{
+	  return attributes;
+	}
+}
+
+Map<String,String> SetAttrValue(Env env, Map<String,String> attributes) : {
+	Token attr = null;
+	Token value = null;
+	String str = null;
+}   {
+	    attr = <IDENTIFIER>
+	    (    "=" (value = RelaxedStringToken() | value = NumberToken() )
+	    )
+	    { if (value != null) { str = value.image; }
+	      if (attr != null && str != null)  {
+	        if (attributes.containsKey(attr.image)) {
+                throw new Error("Attribute already defined: " + attr.image);
+	        }
+	        attributes.put(attr.image, str);
+	      }
+     	  return attributes;
+	    }
+	}
+
+Token NumberToken() : {
+   Token value = null;
+} {
+  ( value = <NONNEGINT> | value = <INT> | value = <REAL> )
+  { return value; }
+}
+
+Token IntegerToken() : {
+   Token value = null;
+} {
+  ( value = <NONNEGINT> | value = <INT> )
+  { return value; }
+}
+
+Token CmpToken() : {
+   Token value = null;
+} {
+  ( value = <STRREGEXCMP> | value = <NUMCMP> )
+  { return value; }
+}
+
+Token RelaxedStringToken() : {
+   Token value = null;
+} {
+  ( value = <STR> | value = <IDENTIFIER> )
+  { return value; }
+}
+
+String RelaxedString() : {
+   Token value = null;
+} {
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
+  | ( value = <IDENTIFIER> )
+    { return value.image; }
+}
+
+/*
+String VarName() : {
+   Token value = null;
+} {
+  ( value = <IDENTIFIER> )
+    { return value.image; }
+  | ( value = <REGEXVAR> )
+    { return value.image; }
+  | ( value = <STR> )
+    { return value.image.substring(1,value.image.length()-1); }
+} */
+
+String RelaxedStringNoIdentifier() : {
+   Token value = null;
+} {
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
+}

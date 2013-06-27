@@ -1,0 +1,195 @@
+# This file has the most recent results of running makeSerialized.
+# The results should be almost exactly the same next time.
+#
+# grep -A 8 "Testing on treebank done" serializedParsers.log  > summary.txt
+
+
+Testing on treebank done [89.0 sec].
+pcfg LP/LR summary evalb: LP: 87.79 LR: 87.74 F1: 87.77 Exact: 31.04 N: 393
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 87.79 LR: 87.74 F1: 87.77 Exact: 31.04 N: 393
+factor DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor Tag summary evalb: LP: 96.1 LR: 96.1 F1: 96.1 Exact: 48.09 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.77		31.04	87.77		96.11	393
+244.058u 3.411s 4:03.07 101.8%	0+0k 0+0io 2pf+0w
+--
+Testing on treebank done [192.7 sec].
+pcfg LP/LR summary evalb: LP: 83.24 LR: 82.8 F1: 83.02 Exact: 25.19 N: 393
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 83.24 LR: 82.8 F1: 83.02 Exact: 25.19 N: 393
+factor DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor Tag summary evalb: LP: 95.86 LR: 95.86 F1: 95.86 Exact: 44.78 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+83.03		25.19	83.03		95.87	393
+1111.527u 4.872s 19:20.28 96.2%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [348.4 sec].
+pcfg LP/LR summary evalb: LP: 82.87 LR: 82.97 F1: 82.92 Exact: 23.66 N: 393
+dep DA summary evalb: LP: 84.05 LR: 84.05 F1: 84.05 Exact: 22.64 N: 393
+factor LP/LR summary evalb: LP: 86.53 LR: 88.11 F1: 87.31 Exact: 32.56 N: 393
+factor DA summary evalb: LP: 91.52 LR: 91.63 F1: 91.57 Exact: 41.47 N: 393
+factor Tag summary evalb: LP: 96.46 LR: 96.46 F1: 96.46 Exact: 50.38 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.31	91.58	32.57	82.93	84.06	96.47	393
+537.825u 4.905s 8:31.85 106.0%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [360.1 sec].
+pcfg LP/LR summary evalb: LP: 82.73 LR: 82.74 F1: 82.74 Exact: 23.66 N: 393
+dep DA summary evalb: LP: 83.79 LR: 83.79 F1: 83.79 Exact: 22.39 N: 393
+factor LP/LR summary evalb: LP: 86.49 LR: 88.2 F1: 87.33 Exact: 32.82 N: 393
+factor DA summary evalb: LP: 91.33 LR: 91.44 F1: 91.38 Exact: 41.47 N: 393
+factor Tag summary evalb: LP: 96.4 LR: 96.4 F1: 96.4 Exact: 50.12 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.34	91.39	32.82	82.74	83.80	96.41	393
+534.083u 4.960s 8:33.03 105.0%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [446.2 sec].
+pcfg LP/LR summary evalb: LP: 82.71 LR: 82.62 F1: 82.67 Exact: 23.66 N: 393
+dep DA summary evalb: LP: 83.46 LR: 83.46 F1: 83.46 Exact: 20.86 N: 393
+factor LP/LR summary evalb: LP: 85.82 LR: 87.49 F1: 86.65 Exact: 31.8 N: 393
+factor DA summary evalb: LP: 91.13 LR: 91.24 F1: 91.18 Exact: 39.69 N: 393
+factor Tag summary evalb: LP: 96.39 LR: 96.39 F1: 96.39 Exact: 51.14 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+86.66	91.19	31.81	82.67	83.46	96.40	393
+631.541u 4.595s 10:08.63 104.5%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [107.2 sec].
+pcfg LP/LR summary evalb: LP: 87.36 LR: 87.36 F1: 87.36 Exact: 31.55 N: 393
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 87.36 LR: 87.36 F1: 87.36 Exact: 31.55 N: 393
+factor DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor Tag summary evalb: LP: 96.13 LR: 96.13 F1: 96.13 Exact: 49.1 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.36		31.55	87.36		96.13	393
+272.800u 3.250s 4:22.56 105.1%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [126.3 sec].
+pcfg LP/LR summary evalb: LP: 87.26 LR: 87.48 F1: 87.37 Exact: 30.78 N: 393
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 87.26 LR: 87.48 F1: 87.37 Exact: 30.78 N: 393
+factor DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor Tag summary evalb: LP: 95.06 LR: 95.06 F1: 95.06 Exact: 44.52 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.38		30.79	87.38		95.06	393
+297.773u 3.124s 4:46.69 104.9%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [28.0 sec].
+pcfg LP/LR summary evalb: LP: 79.78 LR: 75.6 F1: 77.64 Exact: 27.27 N: 253
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 79.78 LR: 75.6 F1: 77.64 Exact: 27.27 N: 253
+factor DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor Tag summary evalb: LP: 95.02 LR: 95.02 F1: 95.02 Exact: 41.5 N: 253
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+77.64		27.27	77.64		95.02	253
+63.092u 1.271s 0:55.91 115.1%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [54.5 sec].
+pcfg LP/LR summary evalb: LP: 79.42 LR: 74.02 F1: 76.63 Exact: 28.85 N: 253
+dep DA summary evalb: LP: 77.21 LR: 77.21 F1: 77.21 Exact: 18.18 N: 253
+factor LP/LR summary evalb: LP: 83.43 LR: 84.13 F1: 83.78 Exact: 30.03 N: 253
+factor DA summary evalb: LP: 86.84 LR: 86.77 F1: 86.81 Exact: 41.89 N: 253
+factor Tag summary evalb: LP: 96.13 LR: 96.13 F1: 96.13 Exact: 53.35 N: 253
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+83.79	86.81	30.04	76.63	77.22	96.14	253
+105.891u 2.154s 1:28.83 121.6%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [142.2 sec].
+pcfg LP/LR summary evalb: LP: 80.18 LR: 75.46 F1: 77.75 Exact: 29.24 N: 253
+dep DA summary evalb: LP: 78.34 LR: 78.34 F1: 78.34 Exact: 16.6 N: 253
+factor LP/LR summary evalb: LP: 82.77 LR: 84.86 F1: 83.8 Exact: 30.43 N: 253
+factor DA summary evalb: LP: 86.69 LR: 86.59 F1: 86.64 Exact: 42.68 N: 253
+factor Tag summary evalb: LP: 96.03 LR: 96.03 F1: 96.03 Exact: 52.17 N: 253
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+83.81	86.64	30.43	77.75	78.34	96.03	253
+272.347u 3.777s 4:03.44 113.4%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [85.2 sec].
+pcfg LP/LR summary evalb: LP: 80.0 LR: 76.21 F1: 78.06 Exact: 26.87 N: 253
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 80.0 LR: 76.21 F1: 78.06 Exact: 26.87 N: 253
+factor DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor Tag summary evalb: LP: 94.66 LR: 94.66 F1: 94.66 Exact: 41.1 N: 253
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+78.06		26.88	78.06		94.66	253
+159.202u 2.103s 2:28.58 108.5%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [54.2 sec].
+pcfg LP/LR summary evalb: LP: 79.42 LR: 74.02 F1: 76.63 Exact: 28.85 N: 253
+dep DA summary evalb: LP: 77.21 LR: 77.21 F1: 77.21 Exact: 18.18 N: 253
+factor LP/LR summary evalb: LP: 83.43 LR: 84.13 F1: 83.78 Exact: 30.03 N: 253
+factor DA summary evalb: LP: 86.84 LR: 86.77 F1: 86.81 Exact: 41.89 N: 253
+factor Tag summary evalb: LP: 96.13 LR: 96.13 F1: 96.13 Exact: 53.35 N: 253
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+83.79	86.81	30.04	76.63	77.22	96.14	253
+72.175u 1.711s 0:58.01 127.3%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [305.6 sec].
+pcfg LP/LR summary evalb: LP: 64.42 LR: 66.07 F1: 65.23 Exact: 21.94 N: 975
+dep DA summary evalb: LP: 73.04 LR: 72.98 F1: 73.01 Exact: 19.6 N: 974
+factor LP/LR summary evalb: LP: 67.77 LR: 69.78 F1: 68.76 Exact: 23.38 N: 975
+factor DA summary evalb: LP: 85.08 LR: 84.96 F1: 85.02 Exact: 35.21 N: 974
+factor Tag summary evalb: LP: 95.52 LR: 95.52 F1: 95.52 Exact: 53.33 N: 975
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+68.76	85.03	23.38	65.24	73.01	95.52	975
+362.336u 3.948s 5:41.89 107.1%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [65.5 sec].
+pcfg LP/LR summary evalb: LP: 64.82 LR: 66.54 F1: 65.67 Exact: 22.15 N: 975
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 64.82 LR: 66.54 F1: 65.67 Exact: 22.15 N: 975
+factor Tag summary evalb: LP: 94.59 LR: 94.59 F1: 94.59 Exact: 49.94 N: 975
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+65.67		22.15	65.67		94.59	975
+104.536u 1.334s 1:33.52 113.1%	0+0k 0+0io 0pf+0w
+
+--
+Testing on treebank done [1286.4 sec].
+pcfg LP/LR summary evalb: LP: 81.59 LR: 78.51 F1: 80.02 Exact: 28.32 N: 1737
+dep DA summary evalb: LP: 94.59 LR: 94.61 F1: 94.6 Exact: 51.18 N: 1737
+factor LP/LR summary evalb: LP: 94.38 LR: 93.45 F1: 93.91 Exact: 53.94 N: 1737
+factor Tag summary evalb: LP: 99.42 LR: 99.42 F1: 99.42 Exact: 89.98 N: 1737
+1713.262u 7.243s 28:06.01 102.0%	0+0k 0+0io 0pf+0w
+
+Training French Factored grammar using baseline feature set
+/user/horatio/codebase/javanlp
+--
+Testing on treebank done [1123.6 sec].
+pcfg LP/LR summary evalb: LP: 83.32 LR: 82.11 F1: 82.71 Exact: 27.18 N: 916
+dep DA summary evalb: LP: 77.22 LR: 77.42 F1: 77.32 Exact: 20.52 N: 916
+factor LP/LR summary evalb: LP: 95.17 LR: 94.72 F1: 94.95 Exact: 64.08 N: 916
+factor Tag summary evalb: LP: 99.5 LR: 99.5 F1: 99.5 Exact: 90.93 N: 916
+1298.476u 7.820s 21:05.03 103.2%	0+0k 0+0io 0pf+0w
+Running wsjPCFG (acl03pcfg replication) on jacko -server
+LexicalizedParser invoked with arguments: -evals factDA,tsv -acl03pcfg -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-2199 -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219
+Training a parser from treebank dir: /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj
+--
+Testing on treebank done [112.9 sec].
+pcfg LP/LR summary evalb: LP: 87.34 LR: 87.25 F1: 87.29 Exact: 30.02 N: 393
+dep DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor LP/LR summary evalb: LP: 87.34 LR: 87.25 F1: 87.29 Exact: 30.02 N: 393
+factor DA summary evalb: LP: 0.0 LR: 0.0 F1: 0.0 Exact: 0.0 N: 0
+factor Tag summary evalb: LP: 96.02 LR: 96.02 F1: 96.02 Exact: 47.32 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.30		30.03	87.30		96.03	393
+251.248u 3.095s 4:01.94 105.1%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [330.7 sec].
+pcfg LP/LR summary evalb: LP: 82.87 LR: 82.97 F1: 82.92 Exact: 23.66 N: 393
+dep DA summary evalb: LP: 84.05 LR: 84.05 F1: 84.05 Exact: 22.64 N: 393
+factor LP/LR summary evalb: LP: 86.53 LR: 88.11 F1: 87.31 Exact: 32.56 N: 393
+factor DA summary evalb: LP: 91.52 LR: 91.63 F1: 91.57 Exact: 41.47 N: 393
+factor Tag summary evalb: LP: 96.46 LR: 96.46 F1: 96.46 Exact: 50.38 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.31	91.58	32.57	82.93	84.06	96.47	393
+358.197u 2.650s 5:40.85 105.8%	0+0k 0+0io 0pf+0w
+--
+Testing on treebank done [317.5 sec].
+pcfg LP/LR summary evalb: LP: 82.87 LR: 82.97 F1: 82.92 Exact: 23.66 N: 393
+dep DA summary evalb: LP: 84.05 LR: 84.05 F1: 84.05 Exact: 22.64 N: 393
+factor LP/LR summary evalb: LP: 86.53 LR: 88.11 F1: 87.31 Exact: 32.56 N: 393
+factor DA summary evalb: LP: 91.52 LR: 91.63 F1: 91.57 Exact: 41.47 N: 393
+factor Tag summary evalb: LP: 96.46 LR: 96.46 F1: 96.46 Exact: 50.38 N: 393
+factF1	factDA	factEx	pcfgF1	depDA	factTA	num
+87.31	91.58	32.57	82.93	84.06	96.47	393
+342.676u 2.432s 5:24.18 106.4%	0+0k 0+0io 0pf+0w

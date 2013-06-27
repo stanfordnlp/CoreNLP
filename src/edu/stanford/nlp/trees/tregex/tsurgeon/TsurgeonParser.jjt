@@ -1,0 +1,209 @@
+// jjtree "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon" projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.jjt
+// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon" projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.jj
+
+options { UNICODE_INPUT = true;
+          SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+          STATIC = false; }
+
+PARSER_BEGIN(TsurgeonParser)
+
+package edu.stanford.nlp.trees.tregex.tsurgeon;
+
+import java.io.StringReader;
+import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Pair;
+import java.util.*;
+
+
+class TsurgeonParser {
+
+  private TreeFactory treeFactory = new LabeledScoredTreeFactory();
+
+  public static void main(String[] args) {
+    System.out.println("Reading from standard input...");
+    TsurgeonParser t = new TsurgeonParser(System.in);
+    try {
+      TsurgeonPattern n = t.Root();
+      System.out.println(n.toString());
+      System.out.println("Thank you.");
+    } catch (Exception e) {
+      System.out.println("Oops.");
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+}
+
+PARSER_END(TsurgeonParser)
+
+
+SKIP:
+{
+  " "
+| "\r"
+| "\t"
+//| "\n"
+}
+
+TOKEN:
+{
+  < DELETE: "delete" >
+| < PRUNE:  "prune" >
+| < RELABEL: "relabel" >
+| < EXCISE: "excise" >
+| < INSERT: "insert" >
+| < MOVE: "move" >
+| < REPLACE: "replace" > 
+| < ADJOIN: "adjoin" >
+| < ADJOIN_TO_HEAD: "adjoinH" >
+| < ADJOIN_TO_FOOT: "adjoinF" >
+| < COINDEX: "coindex" >
+| < SELECTION: "#rightmost" | "#leftmost" >
+| < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|~["\n","\r"])* "/") )+ >
+| < IDENTIFIER: ["-","*","a"-"z","A"-"Z"] ( ["-","*","a"-"z","A"-"Z","_","0"-"9","|","@","="] )* >
+| < LABEL: ["A"-"Z"] (["A"-"Z","0"-"9","-","_"])* >
+| < LOCATION_RELATION: "$-" | "$+" | ">" ("-")? (["0"-"9"])+ >
+| < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
+| < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
+| < HASH_INTEGER: "#" (["0"-"9"])+ >
+| < TREE_NODE_TERMINAL_LABEL: ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )+ >
+| < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
+}
+
+TsurgeonPattern Root() :
+{
+  TsurgeonPattern result;
+}
+{
+  result = Operation() "\n"
+  { return result; }
+}
+
+TsurgeonPattern Operation() :
+{
+  TsurgeonPattern child1;
+  TsurgeonPattern child2 = null;
+  Token newLabel = null;
+  TreeLocation loc = null;
+  Token operator;
+  AuxiliaryTree tree = null;
+  List<TsurgeonPattern> nodeSelections = null;
+  Token regex;
+  Token hash_int;
+}
+{
+  operator = <DELETE> nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
+    { return new DeleteNode(nodeSelections); }
+| operator = <PRUNE> nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
+    { return new PruneNode(nodeSelections); }
+| operator = <EXCISE> child1 = NodeSelection() child2 = NodeSelection()
+    { return new ExciseNode(child1,child2); }
+| LOOKAHEAD(3)
+  operator = <RELABEL> child1 = NodeSelection() newLabel = <IDENTIFIER>
+    { return new RelabelNode(child1,newLabel.image); }
+| LOOKAHEAD(3)
+  operator = <RELABEL> child1 = NodeSelection() newLabel = <QUOTEX>
+    { return new RelabelNode(child1, newLabel.image); }
+| LOOKAHEAD(3)
+  operator = <RELABEL> child1 = NodeSelection() regex = <REGEX>
+    { return new RelabelNode(child1, regex.image); }
+| LOOKAHEAD(3)
+  operator = <RELABEL> child1 = NodeSelection() newLabel = <GENERAL_RELABEL>
+    { return new RelabelNode(child1, newLabel.image); }
+| LOOKAHEAD(3)
+  operator = <REPLACE> child1 = NodeSelection() child2 = NodeSelection()
+    { return new ReplaceNode(child1,child2); }
+| LOOKAHEAD(3)
+  operator = <REPLACE> child1 = NodeSelection() tree = TreeRoot(false)
+    { return new ReplaceNode(child1,tree); } 
+|  operator = <MOVE> child1 = NodeSelection() loc = Location()
+    { return new MoveNode(child1, loc); }
+| LOOKAHEAD(3)
+  operator = <INSERT> child1 = NodeSelection() loc = Location()
+    { return new InsertNode(child1, loc); }
+| LOOKAHEAD(3)
+  operator = <INSERT> tree = TreeRoot(false) loc = Location()
+    { return new InsertNode(tree, loc); }
+| operator = <ADJOIN> tree = TreeRoot(true) child1 = NodeSelection()
+    { return new AdjoinNode(tree, child1); }
+| operator = <ADJOIN_TO_HEAD> tree = TreeRoot(true) child1 = NodeSelection()
+    { return new AdjoinToHeadNode(tree, child1); }
+| operator = <ADJOIN_TO_FOOT> tree = TreeRoot(true) child1 = NodeSelection()
+    { return new AdjoinToFootNode(tree, child1); }
+| operator = <COINDEX> nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
+    { return new CoindexNodes(nodeSelections.toArray(new TsurgeonPattern[] {})); }
+}
+
+TreeLocation Location() :
+{
+  Token rel;
+  TsurgeonPattern child;
+}
+{
+ rel = <LOCATION_RELATION> child = NodeSelection()
+   { return new TreeLocation(rel.image, child); }
+}
+
+
+List<TsurgeonPattern> NodeSelectionList(List<TsurgeonPattern> l) :
+{
+  TsurgeonPattern result;
+}
+{
+ ( ( result = NodeSelection() ) { l.add(result); } 
+ ( ( result = NodeSelection() ) {l.add(result); } )* )
+   { return l; }
+}
+
+// we'll also put in a way to use a SELECTION with a list of nodes.
+TsurgeonPattern NodeSelection() :
+{
+  TsurgeonPattern result;
+}
+{
+  result =  NodeName()
+  { return result; }
+}
+
+TsurgeonPattern NodeName() : 
+{ 
+  Token t;
+}
+{
+  t=<IDENTIFIER>
+  { return new FetchNode(t.image); }
+}
+
+// the argument says whether there must be a foot node on the aux tree.
+AuxiliaryTree TreeRoot(boolean requiresFoot) :
+{
+  Tree t;
+}
+{
+  t = TreeNode()
+    { return new AuxiliaryTree(t,requiresFoot); }
+}
+
+Tree TreeNode() :
+{
+ Token label;
+ List<Tree> dtrs = null;
+}
+{
+ label = <TREE_NODE_NONTERMINAL_LABEL> dtrs = TreeDtrs(new ArrayList<Tree>())
+    { return treeFactory.newTreeNode(label.image.substring(1),dtrs); }
+| ( label = <TREE_NODE_TERMINAL_LABEL> | label = <IDENTIFIER> )
+    { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
+}
+
+List<Tree> TreeDtrs(List<Tree> dtrs) :
+{
+  Tree tree;
+}
+{
+  tree = TreeNode() TreeDtrs(dtrs)
+    {dtrs.add(0,tree); return dtrs; }
+| ")"
+  {return dtrs; }
+}

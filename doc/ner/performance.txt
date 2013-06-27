@@ -1,0 +1,55 @@
+PERFORMANCE NOTES:
+
+Note that these results are underestimates for DATE, TIME, etc. because
+not all the test data (mcdm.test) was marked for them.  But they're not
+bad undercounts, because the classifiers have as much trouble based on
+the "all" data on recall as precision.  For example:
+
+Sept 2006 F1 scores on mcdm.test
+
+ner-eng-ie.crf-3-all2006.ser.gz
+Memory: 100 MB
+PERSON	ORGANIZATION	LOCATION
+89.19	80.15		85.48
+
+ner-eng-ie.crf-3-all2006-distsim.ser.gz
+Memory: 320MB
+PERSON	ORGANIZATION	LOCATION
+91.88	82.91		88.21
+
+ner-eng-ie.crf-7-muc.ser.gz
+Memory: 120MB
+PERSON  ORGANIZATION    LOCATION        DATE    TIME    MONEY   PERCENT
+74.45   59.93		76.27		55.59   73.12   64.96	71.05
+
+ner-eng-ie.crf-7-muc-distsim.ser.gz
+Memory: 350MB
+PERSON  ORGANIZATION    LOCATION        DATE    TIME    MONEY   PERCENT
+84.09   65.20		83.13		56.68   72.19	66.01   70.82
+
+ner-eng-ie.crf-8-all2006.ser.gz
+Memory: 120MB
+PERSON  ORGANIZATION    LOCATION        DATE    TIME    MONEY   PERCENT
+89.15   79.93		85.07		47.43   69.79   59.10	29.87
+
+ner-eng-ie.crf-8-all2006-distsim.ser.gz
+Memory: 350MB
+PERSON  ORGANIZATION    LOCATION        DATE    TIME    MONEY   PERCENT
+92.11   82.55		87.65		47.95   69.59	58.82   31.17
+
+
+
+
+train_all.8.distsim_test_mcdm.test.results
+processed 125957 tokens with 11947 phrases; found: 11465 phrases; correct: 9437.
+accuracy:  95.16%; precision:  82.31%; recall:  78.99%; FB1:  80.62
+             DATE: precision:  85.23%; recall:  33.36%; FB1:  47.95  535
+         LOCATION: precision:  85.06%; recall:  90.41%; FB1:  87.65  3293
+             MISC: precision:   0.00%; recall:   0.00%; FB1:   0.00  518
+            MONEY: precision:  71.09%; recall:  50.17%; FB1:  58.82  211
+     ORGANIZATION: precision:  84.04%; recall:  81.12%; FB1:  82.55  3846
+          PERCENT: precision:  64.86%; recall:  20.51%; FB1:  31.17  37
+           PERSON: precision:  91.39%; recall:  92.83%; FB1:  92.11  2905
+             TIME: precision:  99.17%; recall:  53.60%; FB1:  69.59  120
+
+

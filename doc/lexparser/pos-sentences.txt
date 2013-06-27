@@ -1,0 +1,7 @@
+People can butter their bread with a knife .
+People can butter/VB their bread with a knife .
+People can butter/NN their bread with a knife .
+People/NNS can/MD butter/VB their/PRP$ bread/NN with/IN a/DT knife/NN ./.
+People/NNS can/VB butter/NN their/PRP$ bread/NN with/IN a/DT knife/NN ./.
+People/NNS can/NN butter/NN their/PRP$ bread/NN with/IN a/DT knife/NN ./.
+People/NN can/NN butter/NN their/NN bread/NN with/NN a/NN knife/NN ./NN

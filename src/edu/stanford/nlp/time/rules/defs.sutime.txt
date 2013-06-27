@@ -1,0 +1,201 @@
+  RefTime = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$RefTime" }
+  SimpleTime = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$SimpleTime" }
+  InexactTime = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$InexactTime" }
+  InexactDuration = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$InexactDuration" }
+  DurationWithFields = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$DurationWithFields" }
+  //Duration = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$Duration" }
+  IsoDate = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$IsoDate" }
+  IsoTime = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$IsoTime" }
+  TimeRange = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$Range" }
+  TimeWithRange = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$TimeWithRange" }
+  RelativeTime = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$RelativeTime" }
+  OrdinalTime = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$OrdinalTime" }
+  PeriodicTemporalSet = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$PeriodicTemporalSet" }
+  ExplicitTemporalSet = { type: "CLASS", value: "edu.stanford.nlp.time.SUTime$ExplicitTemporalSet" }
+
+  ANY = -1;
+  NONE = -1;
+  NON_TEMPORAL = "NON_TEMPORAL";
+
+  DURATION_UNKNOWN = DurationWithFields();
+  DURATION_NONE = DurationWithFields();
+
+  TIME_NOW = {
+    type: REFTIME,
+	label: "PRESENT_REF",
+	value: RefTime("NOW")
+  }
+  TIME_PRESENT = {
+    type: REFDATE,
+	label: "PRESENT_REF",
+	value: InexactTime( TimeRange(TIME_NOW, TIME_NOW) )
+  }
+  TIME_PAST = {
+    type: REFDATE,
+	label: "PAST_REF",
+	value: InexactTime( TimeRange(TIME_UNKNOWN, TIME_NOW) )
+  }
+  TIME_FUTURE = {
+    type: REFDATE,
+	label: "FUTURE_REF",
+	value: InexactTime( TimeRange(TIME_NOW, TIME_UNKNOWN) )
+  }
+
+  // Predefined durations: YEAR, MONTH, DAY, WEEK, HOUR, MINUTE, SECOND
+  FORTNIGHT = { type: "TIMEUNIT", value: Duration(WEEK, 2) };
+  HALFHOUR = Duration(MINUTE, 30);
+  QUARTERHOUR = Duration(MINUTE, 15);
+
+  // Basic dates/times
+  MONDAY = DayOfWeek(1);
+  TUESDAY = DayOfWeek(2);
+  WEDNESDAY = DayOfWeek(3);
+  THURSDAY = DayOfWeek(4);
+  FRIDAY = DayOfWeek(5);
+  SATURDAY = DayOfWeek(6);
+  SUNDAY = DayOfWeek(7);
+
+  WEEKEND = {
+    type: DAYS_OF_WEEK,
+    label: "WE",
+    value: TimeWithRange(TimeRange(SATURDAY, SUNDAY, Duration(DAY, 2)))
+  } 
+
+  JANUARY = MonthOfYear(1);
+  FEBRUARY = MonthOfYear(2);
+  MARCH = MonthOfYear(3);
+  APRIL = MonthOfYear(4);
+  MAY = MonthOfYear(5);
+  JUNE = MonthOfYear(6);
+  JULY = MonthOfYear(7);
+  AUGUST = MonthOfYear(8);
+  SEPTEMBER = MonthOfYear(9);
+  OCTOBER = MonthOfYear(10);
+  NOVEMBER = MonthOfYear(11);
+  DECEMBER = MonthOfYear(12);
+
+  // Dates are rough with respect to northern hemisphere (actual
+  // solstice/equinox days depend on the year)
+  SPRING_EQUINOX = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 3, 20), IsoDate(ANY, 3, 21) ) )
+  }
+  SUMMER_SOLSTICE = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 6, 20), IsoDate(ANY, 6, 21) ) )
+  }
+  FALL_EQUINOX = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 9, 22), IsoDate(ANY, 9, 23) ) )
+  }
+  WINTER_SOLSTICE = {
+    type: DAY_OF_YEAR,
+	value: InexactTime( TimeRange( IsoDate(ANY, 12, 21), IsoDate(ANY, 12, 22) ) )
+  }
+
+  // Dates for seasons are rough with respect to northern hemisphere
+  SPRING = {
+      type: SEASON_OF_YEAR,
+      label: "SP",
+      value: InexactTime( SPRING_EQUINOX, QUARTER, TimeRange( MARCH, JUNE, QUARTER ) ) }
+  SUMMER = {
+      type: SEASON_OF_YEAR,
+      label: "SU",
+      value: InexactTime( SUMMER_SOLSTICE, QUARTER, TimeRange( JUNE, SEPTEMBER, QUARTER ) )
+  }
+  FALL = {
+      type: SEASON_OF_YEAR,
+      label: "FA",
+      value: InexactTime( FALL_EQUINOX, QUARTER, TimeRange( SEPTEMBER, DECEMBER, QUARTER ) )
+  }
+  WINTER = {
+      type: SEASON_OF_YEAR,
+      label: "WI",
+      value: InexactTime( WINTER_SOLSTICE, QUARTER, TimeRange( DECEMBER, MARCH, QUARTER ) )
+  }
+
+  // Time of day
+  NOON = IsoTime( 12, 0, NONE )
+  MIDNIGHT = IsoTime( 0, 0, NONE )
+  MORNING = {	      
+      type: TIME_OF_DAY,
+      label: "MO",
+      value: InexactTime( TimeRange ( IsoTime( 6, NONE, NONE), NOON ) )
+  }
+  AM = IsoTime(NIL, NIL, NIL, NIL, HALFDAY_AM)
+  PM = IsoTime(NIL, NIL, NIL, NIL, HALFDAY_PM)
+  AFTERNOON = {	      
+      type: TIME_OF_DAY,
+      label: "AF",
+      value: InexactTime( TimeRange ( NOON, IsoTime( 18, NONE, NONE) ) )
+  }
+  EVENING = {	      
+      type: TIME_OF_DAY,
+      label: "EV",
+      value: InexactTime( TimeRange ( IsoTime( 18, NONE, NONE), IsoTime ( 20, NONE, NONE) ) )
+  }
+  NIGHT = {	      
+      type: TIME_OF_DAY,
+      label: "NI",
+      value: InexactTime( TimeRange ( IsoTime( 19, NONE, NONE), IsoTime ( 5, NONE, NONE) ) )
+  }
+
+  SUNRISE = {
+      type: TIME_OF_DAY,
+      label: "MO",
+      modifier: "EARLY"
+  }
+
+  SUNSET = {
+      type: TIME_OF_DAY,
+      label: "EV",
+      modifier: "EARLY"
+  }
+
+  DAWN = {
+      type: TIME_OF_DAY,
+      label: "MO",
+      modifier: "EARLY"
+  }
+
+  DUSK = {
+      type: TIME_OF_DAY,
+      label: "EV",
+      modifier: "EARLY"
+  }
+
+  LUNCHTIME = InexactTime( TimeRange( IsoTime(12, NONE, NONE), IsoTime(14, NONE, NONE) ))
+  TEATIME = InexactTime( TimeRange( IsoTime(15, NONE, NONE), IsoTime(17, NONE, NONE) ))
+  DINNERTIME = InexactTime( TimeRange( IsoTime(18, NONE, NONE), IsoTime(20, NONE, NONE) ))
+
+  DAYTIME = {
+     type: TIME_OF_DAY,
+     label: "DT",
+     value: InexactTime( TimeRange(DAWN, SUNSET) )
+  }
+  MORNING_TWILIGHT = {
+     type: TIME_OF_DAY,
+     label: "MO",
+     value: InexactTime( TimeRange(DAWN, SUNRISE) )
+  }
+  EVENING_TWILIGHT = {
+     type: TIME_OF_DAY,
+     label: "EV",
+     value: InexactTime( TimeRange(SUNSET, DUSK) )
+  }
+  // For now, just have TWILIGHT be same as EVENING_TWILIGHT (could possibly be MORNING_TWILIGHT || EVENING_TWILIGHT)
+  TWILIGHT = EVENING_TWILIGHT
+
+  // Relative days
+  YESTERDAY = RelativeTime( Duration(DAY, -1) );
+  TOMORROW = RelativeTime( Duration(DAY, +1) );
+  TODAY = RelativeTime( THIS, DAY );
+  TONIGHT = RelativeTime( THIS, NIGHT );  
+  
+  HOURLY = PeriodicTemporalSet(NIL, HOUR, "EVERY", "P1X");
+  NIGHTLY = PeriodicTemporalSet(NIGHT, DAY, "EVERY", "P1X");
+  DAILY = PeriodicTemporalSet(NIL, DAY, "EVERY", "P1X");
+  MONTHLY = PeriodicTemporalSet(NIL, MONTH, "EVERY", "P1X");
+  QUARTERLY = PeriodicTemporalSet(NIL, QUARTER, "EVERY", "P1X");
+  YEARLY = PeriodicTemporalSet(NIL, YEAR, "EVERY", "P1X");
+  WEEKLY = PeriodicTemporalSet(NIL, WEEK, "EVERY", "P1X");    

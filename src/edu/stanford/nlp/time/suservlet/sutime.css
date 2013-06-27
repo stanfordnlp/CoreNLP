@@ -1,0 +1,25 @@
+#Footer {
+  position: relative;
+  bottom: 0px;
+}
+#Main td
+{
+  padding:15px;
+  vertical-align:top;
+}
+#Main table
+{
+  margin:15px;
+}
+td
+{
+  padding:5px;
+}
+table
+{
+  margin:15px;
+}
+#Annotated td
+{
+  font-size: 14px;
+}

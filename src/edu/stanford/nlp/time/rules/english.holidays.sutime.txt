@@ -1,0 +1,29 @@
+  ENV.defaults["stage"] = 1
+  ENV.defaults["ruleType"] = "tokens"
+
+  $POSS = "( /'s/ | /'/ /s/ )"
+  { (/new/ /year/ $POSS? /eve/ ) => IsoDate(NIL, 12, 31) }
+  { (/new/ /year/ $POSS? /day/? ) => IsoDate(NIL, 1, 1) }
+  { (/inauguration/ /day/ ) => IsoDate(NIL, 1, 20) }
+  { (/groundhog/ /day/ ) => IsoDate(NIL, 2, 2) }
+  { (/st.?|saint/? /valentine/ $POSS? /day/ ) => IsoDate(NIL, 2, 14) }
+  { (/st.?|saint/ /patrick/ $POSS? /day/ ) => IsoDate(NIL, 3, 17) }
+  { (/april/ /fools/ /day/? ) => IsoDate(NIL, 4, 1) }
+  { (/cinco/ /de/ /mayo/ ) => IsoDate(NIL, 5, 5) }
+  { (/halloween/ ) => IsoDate(NIL, 10, 31) }
+  { (/x-?mas|christmas/ /eve/ ) => IsoDate(NIL, 12, 24) }
+  { (/x-?mas|christmas/ /day/? ) => IsoDate(NIL, 12, 25) }
+
+
+  { (/martin/ /luther/ /king/ /day/ | /mlk/ /day/) => JH_MARTIN_LURTHER_KING }
+  { (/memorial/ /day/) => JH_MEMORIAL }
+  { (/mother/ $POSS /day/) => JH_MOTHERS_DAY }
+  { (/father/ $POSS /day/) => JH_FATHERS_DAY }
+  { (/labou?r/ /day/) => JH_LABOUR_DAY }
+  { (/columbus/ /day/) => JH_COLUMBUS_DAY }
+  { (/thanksgiving/) => JH_THANKSGIVING }
+
+  { (/easter/ (/day/|/sunday/)?) => JH_EASTER }
+  { (/clean/ /monday/) => JH_CLEAN_MONDAY }
+  { (/good/ /friday/) => JH_GOOD_FRIDAY }
+  { (/ash/ /wednesday/) => JH_ASH_WEDNESDAY }

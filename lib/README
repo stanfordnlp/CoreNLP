@@ -1,0 +1,395 @@
+README for $JAVANLP_HOME/core/lib
+
+Written by Bill MacCartney <wcmac@cs.stanford.edu> 23 January 2006
+Updated by Daniel Ramage 16 October 2006
+
+This directory is intended to contain only *current and necessary*
+.jar files used with JavaNLP.  Each jar file in lib should be without
+its version number but include a corresponding source .zip/.jar file
+with a full version number in the libsrc folder.  For example, if
+there is a file  lib/ra.jar there should be a corresponding and
+up-to-date libsrc/ra-0.1.8-src.zip.
+
+Outdated or redundant .jar files should NOT be kept here, but can
+be stored instead in /u/nlp/java/liball.  Files in that directory 
+can have version numbers in the name.  Example: colt1.0.3.jar.
+
+If you're adding a new .jar to the repository, please:
+ - add the jar itself (without version number)
+ - add its source zip (with version number)
+ - if the .jar file has other libraries embedded which overlap with
+   other javanlp libraries, please remove that
+ - update the Eclipse .classpath file to include the jar and a path
+   to its source, AND
+ - also update this file with information about the jar.
+
+
+Any .jar files which appear in this directory should be listed in
+this file, with the following information: 
+
+ORIGINAL JAR NAME: original name of the .jar file when downloaded
+
+VERSION: version number
+
+RELEASE DATE: when the library was originally released.
+
+SOURCE AVAILABLE: yes or no, if it is available it should be checked in
+to the repository under libsrc
+
+DESCRIPTION: a short description of the library's function and purpose.
+
+URL: where to check for library information, documentation, and updates.
+
+USED BY: what JavaNLP packages use this library. (This need not be exhaustive,
+but should list a couple of key packages that use/need this library.)
+
+LAST UPDATE: when we last updated our copy from the source.
+
+LAST UPDATE BY: who last updated it
+
+
+
+
+=======================================================================
+
+-----------------------------------------------------------------------
+ant-contrib-1.0b3.jar
+
+ORIGINAL JAR NAME: ant-contrib-1.0b3.jar
+
+VERSION: 1.0b3
+
+RELEASE DATE: 2006-11-02
+
+SOURCE AVAILABLE: libsrc/ant-contrib-1.0b3-src.zip
+
+DESCRIPTION: Adds new useful tasks to ant.
+
+URL: http://ant-contrib.sourceforge.net/
+
+USED BY:
+the build.xml task that builds .jsps
+
+LAST UPDATE: 2010/06/28
+
+LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
+lib/tomcat/jasper.jar, el-api.jar, servlet-api.jar, tomcat-juli.jar
+           jasper-el.jar, jsp-api.jar, tomcat-api.jar
+
+ORIGINAL JAR NAME: the same...
+
+VERSION: Tomcat 7.0.12
+
+RELEASE DATE: 2011-04-05 (?)
+
+SOURCE AVAILABLE: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
+
+DESCRIPTION: Various parts of tomcat needed to build .jsp files
+
+URL: http://tomcat.apache.org/download-70.cgi
+
+USED BY:
+used to build .jsps
+
+LAST UPDATE: 2011-11-21
+
+LAST UPDATE BY: John Bauer
+
+
+-----------------------------------------------------------------------
+jasper-compiler-jdt.jar
+
+ORIGINAL JAR NAME: jasper-compiler-jdt.jar
+
+VERSION: Tomcat 5.5.29
+
+RELEASE DATE: 2009-06-19 (?)
+
+SOURCE AVAILABLE: No (not found)
+
+DESCRIPTION: Various parts of tomcat needed to build .jsp files
+
+URL: http://tomcat.apache.org/download-55.cgi
+
+USED BY:
+used to build .jsps
+
+LAST UPDATE: 2010/06/28
+
+LAST UPDATE BY: John Bauer
+
+
+-----------------------------------------------------------------------
+commons-logging.jar
+
+ORIGINAL JAR NAME: commons-logging.jar
+VERSION: 1.0.4
+RELEASE DATE: ?
+SOURCE AVAILABLE: yes
+DESCRIPTION: "The Logging package is an ultri-thin bridge between different
+logging implementations.  A library that uses the commons-logging API can be
+used with any logging implementation at runtime.
+URL: http://jakarta.apache.org/commons/logging
+USED BY: org.mortbay.jetty.jar, jsp compiler
+LAST UPDATE: 2006/02/06
+LAST UPDATE BY: Jeff Michels
+
+
+-----------------------------------------------------------------------
+jdbm.jar
+
+ORIGINAL JAR NAME:
+
+VERSION: 1.0
+
+RELEASE DATE: 2005/08/11
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: "JDBM is a transactional persistence engine for Java. It
+aims to be for Java what GDBM is for other languages (C/C++, Python,
+Perl, etc.): a fast, simple persistence engine. You can use it to
+store a mix of objects and BLOBs, and all updates are done in a
+transactionally safe manner. JDBM also provides scalable data
+structures, such as HTree and B+Tree, to support persistence of large
+object collections."
+
+URL: http://jdbm.sourceforge.net/
+
+USED BY: src.edu.stanford.nlp.database.SLJDB.java
+
+LAST UPDATE:
+
+LAST UPDATE BY:
+
+
+-----------------------------------------------------------------------
+jgraph.jar
+
+ORIGINAL JAR NAME: jgraph.jar
+
+VERSION: 5.12.1.1
+
+RELEASE DATE: 2008/05/20
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Graph drawing / visualization package used by jgrapht.
+  "JGraph is the most powerful, easy-to-use, feature-rich and
+  standards-compliant open source graph component available for Java. "
+
+URL: http://www.jgraph.com/
+
+USED BY: jgrapht.jar
+
+LAST UPDATE: 2008/05/23
+
+LAST UPDATE BY: Daniel Ramage
+
+
+-----------------------------------------------------------------------
+junit.jar
+
+ORIGINAL JAR NAME: junit-4.5.jar
+
+VERSION: 4.5
+
+RELEASE DATE: 2008/08/08
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: JUnit is a simple framework to write repeatable unit tests.
+
+URL: http://www.junit.org/
+
+USED BY:
+
+LAST UPDATE: 2008/08/24
+
+LAST UPDATE BY: Ilya Sherman
+
+
+
+-----------------------------------------------------------------------
+uima-core.jar
+
+ORIGINAL JAR NAME: uima-core.jar
+
+VERSION: 1.0.1
+
+RELEASE DATE: 2004/12/16 (?)
+
+SOURCE AVAILABLE:
+
+DESCRIPTION: Core classes for IBM's Unstructured Information
+Management Architecture. The entire UIMA package is installed in
+/u/nlp/src/uima-1.0.1/.
+
+URL: http://www.alphaworks.ibm.com/tech/uima
+
+USED BY: edu.stanford.nlp.uima
+
+LAST UPDATE: 2005/04/26
+
+LAST UPDATE BY:
+
+NOTE: version 1.3.1 is out, release date 1/23/06 -- get it
+
+
+-----------------------------------------------------------------------
+wn.jar
+
+ORIGINAL JAR NAME: wn.jar
+
+VERSION: ?
+
+RELEASE DATE: ?
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Some stuff by Dan Bikel to interface with WordNet.
+
+URL: http://www.cis.upenn.edu/~dbikel/software.html#wn
+
+USED BY:
+
+LAST UPDATE: 2004/10/22
+
+LAST UPDATE BY:
+
+----------------------------------------------------------------------
+AppleJavaExtensions.jar
+
+ORIGINAL JAR NAME: AppleJavaExtensions.jar
+
+VERSION: 1.3
+
+RELEASE DATE: 2006-10-17
+
+SOURCE AVAILABLE: no
+
+DESCRIPTION: Stub methods to allow programs that can use Mac graphical
+stuff load on non-macs.  Should only be on compile classpath, not actually
+used at run time (Macs actually have the classes in this jar, and should load
+by reflection; see TregexGUI for an example).
+
+URL: http://developer.apple.com/samplecode/AppleJavaExtensions/index.html
+
+USED BY: TregexGUI.java
+
+LAST UPDATE: 9/18/2007
+
+LAST UPDATE BY: Anna Rafferty.
+
+-----------------------------------------------------------------------
+xom-1.2.8.jar
+
+ORIGINAL JAR NAME: xom-1.2.8.jar
+
+VERSION: 1.2.8
+
+RELEASE DATE: 2012-05-12
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: xml parsing
+
+URL: http://www.xom.nu/
+
+USED BY:
+
+LAST UPDATE: 2012-11-08
+
+LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
+JFlex.jar
+
+ORIGINAL JAR NAME: JFlex.jar
+
+VERSION: 1.4.3
+
+RELEASE DATE: 2009-01-31
+
+SOURCE AVAILABLE: yes, jflex-1.4.3-src.zip
+
+DESCRIPTION: compiles .flex files into .java
+
+URL: http://jflex.de/
+
+USED BY: jflex the tokenizer
+
+LAST UPDATE: 2011-03-19
+
+LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
+commons-lang3-3.1.jar
+ORIGINAL JAR NAME: commons-lang3-3.1.jar
+VERSION: 
+RELEASE DATE: 11-14-2011
+SOURCE AVAILABLE: yes
+DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff; changes from 2.5 - no escapeHtml function.
+URL: http://commons.apache.org/lang/
+USED BY: edu.stanford.nlp.kbp and web servelets
+LAST UPDATE: 2013-06-05
+LAST UPDATE BY: Sonal Gupta
+
+-----------------------------------------------------------------------
+log4j-1.2.16.jar
+ORIGINAL JAR NAME: log4j-1.2.16.jar 
+VERSION: 1.2.16
+RELEASE DATE: 2010-04-06
+SOURCE AVAILABLE: yes
+DESCRIPTION: Java logging
+URL: http://logging.apache.org/log4j/1.2/index.html
+USED BY: edu.stanford.nlp.parser.ensemble (library required by the Malt module)
+  Also used by RTE and the Parser webapp.
+LAST UPDATE: 2011/11/20
+LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
+joda-time.jar
+ORIGINAL JAR NAME: joda-time-2.1.jar
+VERSION: 2.1
+RELEASE DATE: 2012-02-22
+SOURCE AVAILABLE: yes
+DESCRIPTION: Extended date/time API that handles partial dates/times
+URL: http://joda-time.sourceforge.net/index.html
+USED BY: edu.stanford.nlp.time
+LAST UPDATE: 2012-11-08
+LAST UPDATE BY: John Bauer
+-----------------------------------------------------------------------
+jollyday-0.4.7.jar
+ORIGINAL JAR NAME: jollyday-0.4.7.jar
+VERSION: 0.4.7
+RELEASE DATE: 2012-11-05
+SOURCE AVAILABLE: yes
+DESCRIPTION: API for holidays (using jodatime)
+URL: http://jollyday.sourceforge.net
+USED BY: edu.stanford.nlp.time
+LAST UPDATE: 2012-11-05
+LAST UPDATE BY: John Bauer
+-----------------------------------------------------------------------
+foo.jar
+
+ORIGINAL JAR NAME:
+
+VERSION:
+
+RELEASE DATE:
+
+SOURCE AVAILABLE:
+
+DESCRIPTION:
+
+URL:
+
+USED BY:
+
+LAST UPDATE:
+
+LAST UPDATE BY:
+

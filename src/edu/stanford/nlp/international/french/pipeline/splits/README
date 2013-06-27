@@ -1,0 +1,14 @@
+ftb-uc-2010.id_mrg -- Contains the M. Candito's pre-processed FTB trees from the June 2010 distribution.
+These trees originate in the corpus-fonctions directory, although she used a version with only 12k trees.
+The June 2010 revision has about 16k trees. We added the additional trees to the end of the training set.
+
+Candito's split of these trees is 10/10/80 (test/dev/train), where both test and dev have 1235 sentences,
+and the training set is whatever remains. For more details, see
+
+Candito and Seddah. 2010. Parsing word clusters. In SPMRL.
+
+To make the training set from the EMNLP 2011, concatenate the *.train and *.train.extended files produced
+by SplitCanditoTrees.java.
+
+Spence
+2 June 2011

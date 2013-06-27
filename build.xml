@@ -1,0 +1,371 @@
+<!-- JavaNLP core build file -->
+
+<project name="core" default="compile" basedir=".">
+
+  <property name="build.path"      value="${basedir}/classes" />
+  <property name="source.path"     value="${basedir}/src" />
+  <property name="doc.path"        value="${basedir}/doc" />
+  <property name="data.path"       value="${basedir}/data" />
+  <property name="tests.path"      value="${basedir}/test/src" />
+  <property name="itests.path"     value="${basedir}/itest/src" />
+
+  <!-- included tasks may use project.core as a property name -->
+  <property name="project.core"    value="${basedir}" />
+
+  <property name="compile.debug"       value="true"/>
+  <property name="compile.deprecation" value="false"/>
+  <property name="compile.optimize"    value="true"/>
+  <property name="compile.source"      value="1.6" />
+  <property name="compile.target"      value="1.6" />
+  <property name="compile.encoding"    value="utf-8" />
+
+  <target name="classpath" description="Sets the classpath">
+    <echo message="${ant.project.name}" />
+    <path id="classpath">
+      <fileset dir="${basedir}/lib">
+        <include name="*.jar"/>
+        <exclude name="javanlp*"/>
+      </fileset>
+    </path>
+  </target>
+
+  <target name="clean" description="Delete old classes">
+    <echo message="${ant.project.name}" />
+    <delete dir="${build.path}"/>
+  </target>
+
+  <target name="flexeverything" depends="classpath"
+          description="JFlex everything that can be JFlexed">
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+      <classpath>
+        <pathelement location="${project.core}/lib/ant-contrib-1.0b3.jar"/>
+      </classpath>
+    </taskdef>
+
+    <taskdef classname="JFlex.anttask.JFlexTask" name="jflex">
+      <classpath>
+        <pathelement location="${project.core}/lib/JFlex.jar"/>
+      </classpath>
+    </taskdef>
+
+    <echo message="${ant.project.name}" />
+    <for param="flex.target">
+      <path>
+        <fileset dir="${source.path}">
+          <include name="**/*.flex"/>
+        </fileset>
+      </path>
+      <sequential>
+        <jflex file="@{flex.target}" />
+      </sequential>
+    </for>
+  </target>
+
+  <target name="compile" depends="classpath"
+          description="Compile core sources">
+    <echo message="${ant.project.name}" />
+    <mkdir    dir="${build.path}" />
+    <javac srcdir="${source.path}:${tests.path}:${itests.path}"
+          destdir="${build.path}"
+            debug="${compile.debug}"
+         encoding="${compile.encoding}" 
+      deprecation="${compile.deprecation}"
+         optimize="${compile.optimize}"
+           source="${compile.source}"
+           target="${compile.target}"
+           fork="true"
+           memorymaximumsize="2g"
+           includeantruntime="false">
+        <classpath refid="classpath" />
+      <!-- <compilerarg value="-Xmaxerrs"/>
+           <compilerarg value="20"/> -->
+        <compilerarg value="-Xlint:cast"/>
+        <compilerarg value="-Xlint:finally"/>
+        <compilerarg value="-Xlint:path"/>
+   <!-- <compilerarg value="-Xlint"/>
+        <compilerarg value="-Xmaxwarns"/>
+        <compilerarg value="10000"/> -->
+    </javac>
+  </target>
+
+  <target name="test" depends="classpath"
+          description="Run core unit tests">
+    <echo message="${ant.project.name}" />
+    <junit fork="true" maxmemory="1g" printsummary="off" outputtoformatters="false" forkmode="perBatch" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${tests.path}">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="itest" depends="classpath"
+          description="Run core integration tests">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/*ITest*.java"/>
+          <exclude name="**/*SlowITest*.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="slowitest" depends="classpath"
+          description="Run really slow integration tests">
+    <echo message="${ant.project.name}" />
+    <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
+      <classpath refid="classpath"/>
+      <classpath path="${build.path}"/>
+      <classpath path="${data.path}"/>
+      <classpath path="${source.path}"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest fork="yes">
+        <fileset dir="${itests.path}">
+          <include name="**/*SlowITest.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="compile-all" depends="compile,jsp"
+          description="Compile everything" />
+
+  <target name="all" depends="clean,compile-all"
+          description="Clean and re-compile." />
+
+  <!-- This file contains the .jsp build target -->
+  <import file="../../commonbuildjsp.xml" />
+
+  <!-- This runs the specified class, using a separate Java VM -->
+  <!-- Specify class to run via "run.class," arg, i.e., -->
+  <!--       ant run -Drun.class=edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI -->
+  <!-- Use "jvmarg" to pass arguments to the VM, use "arg" to pass cmdline args to the class -->
+  <target name="run" depends="classpath">
+    <java classname="${run.class}" fork="true" jvm="java">
+      <jvmarg value="-Xmx2g"/>
+      <jvmarg value="-server"/>
+      <classpath>
+	<path refid="classpath"/>
+	<pathelement path="${build.path}"/>
+      </classpath>
+    </java>
+  </target>
+
+  <!-- Same as "run," except causes the VM to wait until debugger is attached -->
+  <!-- See http://nlp.stanford.edu/javanlp/did_you_know/eclipse_debug.html for example -->
+  <target name="run-debug" depends="classpath">
+    <java classname="${run.class}" fork="true" jvm="java">
+      <jvmarg value="-Xmx2g"/>
+      <!-- Following args should cause this to freeze and wait for debug attach -->
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xnoagent"/>
+      <jvmarg value="-Djava.compiler=None"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9099"/>
+      <classpath>
+	<path refid="classpath"/>
+	<pathelement path="${build.path}"/>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="javanlp-core.jar">
+      <fileset dir="${project.core}/classes" />
+    </jar>
+  </target>
+
+  <!-- I wrote this for a side project, so if you one day see it in a
+       build file of mine, you can't sue me for taking it from
+       Stanford. -jab -->
+  <!-- This macro builds a .war for a jsp, configured by several
+       attributes which say which .jar file to use as a base library,
+       which other libraries are needed, which data files to grab,
+       etc.  In order to verify that the .jsp will work, it
+       precompiles it before building the .war. -->
+  <macrodef name="buildjsp">
+    <attribute name="webapp.path"/>   <!-- where to find the .jsp files -->
+    <attribute name="webapp.war"/>    <!-- name of the .war to produce -->
+    <attribute name="webapp.jar"/>    <!-- probably javanlp-core.jar -->
+    <element name="webapp.lib"/>      <!-- libs to include -->
+    <element name="webapp.data"/>     <!-- data files to include -->
+
+    <sequential>
+      <!-- This tool turns .jsp into .java -->
+      <taskdef classname="org.apache.jasper.JspC" name="jasper2" >
+        <classpath refid="webapp.classpath"/>
+      </taskdef>
+
+      <echo message="Building .jsp @{webapp.path}" />
+      <echo message="Building from ${source.path}/@{webapp.path}"/>
+
+      <!-- First, compile the .jsp into .java -->
+      <jasper2 
+         validateXml="false" 
+         uriroot="${source.path}/@{webapp.path}" 
+         webXmlFragment="${source.path}/@{webapp.path}/WEB-INF/generated.xml" 
+         addWebXmlMappings="true"
+         outputDir="${build.path}/@{webapp.path}/WEB-INF/src" /> 
+      
+      <mkdir dir="${build.path}/@{webapp.path}/WEB-INF/classes"/>
+      
+      <!-- Then compile the .java into .class -->
+      <javac destdir="${build.path}/@{webapp.path}/WEB-INF/classes"
+             optimize="${compile.optimize}"
+             encoding="${compile.encoding}"
+             debug="${compile.debug}" 
+             srcdir="${build.path}/@{webapp.path}/WEB-INF/src" 
+             includeantruntime="false"
+                  excludes="**/*.smap">
+        <classpath refid="webapp.classpath"/>
+        <classpath refid="classpath"/>
+        <classpath path="${build.path}"/>
+        <include name="**" />
+        <exclude name="tags/**" />
+      </javac>
+
+      <!-- Now, build a .war out of the compiled java and all of the
+           specified libraries. -->
+      <war destfile="@{webapp.war}" 
+           webxml="${source.path}/@{webapp.path}/WEB-INF/web.xml">
+        <classes dir="${build.path}/@{webapp.path}/WEB-INF/classes"/>
+        <webapp.lib/>
+        <lib dir=".">
+          <include name="@{webapp.jar}"/>
+        </lib>
+        <webapp.data/>
+      </war>
+    </sequential>
+  </macrodef>
+
+  <target name="sutime.war" depends="compile,jar"
+          description="build the sutime webapp">
+    <war destfile="sutime.war"
+         webxml="${source.path}/edu/stanford/nlp/time/suservlet/WEB-INF/web.xml">
+      <lib dir=".">
+        <include name="javanlp-core.jar"/>
+      </lib>
+      <lib dir="${basedir}/lib">
+        <include name="commons-lang3-3.1.jar"/>
+        <include name="xom-1.2.7.jar"/>
+        <include name="joda-time.jar"/>
+        <include name="jollyday.jar"/>
+      </lib>
+      <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/pos-tagger/english/english-left3words-distsim.tagger"/>
+      <zipfileset prefix="WEB-INF/data/rules"
+                  file="${source.path}/edu/stanford/nlp/time/rules/*"/>
+      <zipfileset prefix="WEB-INF/classes/holidays"
+                    file="${source.path}/edu/stanford/nlp/time/holidays/*"/>
+      <zipfileset file="${data.path}/webapps/favicon.ico"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/header.jsp"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/footer.jsp"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/sutime.css"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/calendarview.css"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/calendarview.js"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/prototype.js"/>
+    </war>
+  </target>
+
+  <target name="parser.war" depends="compile,jar"
+          description="build the parser webapp">
+    <buildjsp webapp.path="edu/stanford/nlp/parser/webapp"
+              webapp.war="parser.war"
+              webapp.jar="javanlp-core.jar">
+      <webapp.lib/> <!-- don't need anything! -->
+      <webapp.data>
+        <zipfileset prefix="WEB-INF/data"
+                    file="/u/nlp/data/lexparser/englishPCFG.ser.gz"/>
+        <zipfileset prefix="WEB-INF/data"
+                    file="/u/nlp/data/lexparser/arabicFactored.ser.gz"/>
+        <zipfileset prefix="WEB-INF/data"
+                    file="/u/nlp/data/lexparser/xinhuaFactored.ser.gz"/>
+        <zipfileset prefix="WEB-INF/data/chinesesegmenter"
+                    file="/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz"/>
+        <zipfileset prefix="WEB-INF/data/chinesesegmenter"
+                    dir="/u/nlp/data/gale/segtool/stanford-seg/releasedata"/>
+        <zipfileset file="${data.path}/webapps/favicon.ico"/>
+      </webapp.data>
+    </buildjsp>
+  </target>
+
+  <target name="ner.war" depends="compile,jar"
+          description="build the ner webapp">
+    <!-- This is built from a java servlet, not a jsp. -->
+    <!-- The class needed for the results page will already be in
+         javanlp-core.jar -->
+    <war destfile="ner.war"
+         webxml="${source.path}/edu/stanford/nlp/ie/ner/webapp/WEB-INF/web.xml">
+      <lib dir=".">
+        <include name="javanlp-core.jar"/>
+      </lib>
+      <lib dir="${basedir}/lib">
+        <include name="commons-lang3-3.1.jar"/>
+      </lib>
+      <zipfileset file="${source.path}/edu/stanford/nlp/ie/ner/webapp/ner.jsp"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/ie/ner/webapp/header.jsp"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/ie/ner/webapp/footer.jsp"/>
+      <zipfileset prefix="WEB-INF/data/models"
+                  file="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data/models"
+                  file="/u/nlp/data/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data/models"
+                  file="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data/models"
+                  file="/u/nlp/data/ner/goodClassifiers/german.hgc_175m_600.crf.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data/models"
+                  file="/u/nlp/data/ner/goodClassifiers/chinese.misc.distsim.crf.ser.gz"/>
+      <zipfileset file="${data.path}/webapps/favicon.ico"/>
+    </war>
+  </target>
+
+  <target name="corenlp.war" depends="compile,jar"
+          description="build the corenlp webapp">
+    <!-- This is built from a java servlet, not a jsp. -->
+    <!-- The class needed for the results page will already be in
+         javanlp-core.jar -->
+    <war destfile="corenlp.war"
+         webxml="${source.path}/edu/stanford/nlp/pipeline/webapp/WEB-INF/web.xml">
+      <lib dir=".">
+        <include name="javanlp-core.jar"/>
+      </lib>
+      <lib dir="${basedir}/lib">
+        <include name="commons-lang3-3.1.jar"/>
+        <include name="xom-1.2.8.jar"/>
+        <include name="xalan.jar"/>
+        <include name="serializer.jar"/>
+        <include name="xercesImpl.jar"/>
+        <include name="xml-apis.jar"/>
+        <include name="joda-time.jar"/>
+        <include name="jollyday-0.4.7.jar"/>
+      </lib>
+      <!-- note for John: c:/Users/John Bauer/nlp/stanford-releases -->
+      <lib dir="/u/nlp/data/StanfordCoreNLPModels">
+        <include name="stanford-corenlp-models-current.jar"/>
+      </lib>
+      <classes dir="${source.path}/edu/stanford/nlp/pipeline">
+        <include name="StanfordCoreNLP.properties"/>
+      </classes>
+      <zipfileset file="${source.path}/edu/stanford/nlp/pipeline/webapp/header.jsp"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/pipeline/webapp/footer.jsp"/>
+      <zipfileset file="${source.path}/edu/stanford/nlp/pipeline/webapp/brat.js"/>
+      <zipfileset file="${data.path}/webapps/favicon.ico"/>
+      <zipfileset prefix="WEB-INF/data"
+                  file="${doc.path}/corenlp/CoreNLP-to-HTML.xsl"/>
+    </war>
+  </target>
+
+</project>
+

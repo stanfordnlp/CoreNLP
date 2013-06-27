@@ -1,0 +1,1 @@
+(S (CC و) (VP (VBD صادف) (NP-TMP (NN اثناء) (NP (NN اطلاق) (NP (DTNN النار)))) (NP-SBJ (NN وجود) (NP (NP (NP (NNP عادل) (DTNNP الحرازين)) (NP (NN شقيق) (NP (DTNN القتيل)))) (SBAR (SBAR (WHNP-2 (WP الذي)) (S (VP (VBD قام) (PP-CLR (IN ب) (NP (NP (NN اطلاق) (NP (DTNN النار))) (PP (IN على) (NP (DTNN الجاني)))))))) (CC ف) (SBAR (S (VP (VBD قتل) (NP-OBJ (PRP ه))))))))) (PUNC .))

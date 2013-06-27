@@ -1,0 +1,29 @@
+AppleJavaExtensions.jar provides some stub methods to allow
+compilation of code which contains Java methods that reference Mac OS
+X specific Java APIs on any platform.  This is needed only for
+compilation of the class edu.stanford.nlp.trees.tregex.gui.OSXAdapter .
+Using this class and the links to Apple-specific technologies is
+required to allow the Mac version of Tregex to behave like a normal
+Mac application in responding to About and Preferences... menu items.
+
+This library is not needed or used at runtime on any platform.
+
+If you'd prefer not to have these complications in the source for your
+use on other platforms, simply delete both AppleJavaExtensions.jar and
+the file src/edu/stanford/nlp/trees/tregex/gui/OSXAdapter.java . The
+OSXAdapter class is loaded using reflection by the main TregexGUI
+class, so its absence will not cause any errors in compilation.
+
+The file README-AppleJavaExtensions.txt contains Apple's README and
+license information for AppleJavaExtensions.jar . More information on
+AppleJavaExtensions can be found at:
+
+  http://developer.apple.com/samplecode/AppleJavaExtensions/
+
+This issue of needing to include AppleJavaExtensions.jar occurs for
+many Java GUI programs which want to function well on Mac OS X,
+including NetBeans, FindBugs, etc.  Do a Google search on:
+
+  AppleJavaExtensions license
+
+to find examples.

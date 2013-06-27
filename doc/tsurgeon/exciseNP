@@ -1,0 +1,6 @@
+NP < (NP=np < NNS) < (NP=np1 < NN)
+
+excise np np
+excise np1 np1
+
+

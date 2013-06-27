@@ -1,0 +1,286 @@
+// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex" projects/core/src/edu/stanford/nlp/trees/tregex/TregexParser.jj
+
+options { UNICODE_INPUT = true;
+          SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+          STATIC = false; }
+
+PARSER_BEGIN(TregexParser)
+package edu.stanford.nlp.trees.tregex;
+// all generated classes are in this package
+
+import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.trees.HeadFinder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+class TregexParser {
+
+  // this is so we can tell, at any point during the parse
+  // whether we are under a negation, which we need to know
+  // because labeling nodes under negation is illegal
+  private boolean underNegation = false;
+
+  private Function<String, String> basicCatFunction =
+    TregexPatternCompiler.DEFAULT_BASIC_CAT_FUNCTION;
+
+  private HeadFinder headFinder =
+    TregexPatternCompiler.DEFAULT_HEAD_FINDER;
+
+  // keep track of which variables we've seen, so that we can reject
+  // some nonsense patterns such as ones that reset variables or link
+  // to variables that haven't been set
+  private Set<String> knownVariables = Generics.newHashSet();
+
+  public TregexParser(java.io.Reader stream,
+                      Function<String, String> basicCatFunction,
+                      HeadFinder headFinder) {
+    this(stream);
+    this.basicCatFunction = basicCatFunction;
+    this.headFinder = headFinder;
+  }
+
+}
+
+PARSER_END(TregexParser)
+
+// stuff for token manager:
+
+SKIP:
+{
+  " "
+| "\r"
+| "\t"
+//| "\n"
+}
+
+TOKEN:
+{
+  < RELATION: "<<" | ">>" | "<" | ">" | "$" | ".." | "." | ",," | "," | "<<," | "<<-" | ">>," | ">>-" | "<," | ">," | "<-" | ">-" | "<`" | ">`" | "<<`" | ">>`" | "<:" | ">:" | "<<:" | ">>:" | "$++" | "$--" | "$+" | "$-" | "<#" | "<<#" | ">#" | ">>#" | "==" | "$." | "$.." | "$," | "$,," | ":" >
+| < REL_W_STR_ARG: "<+" | ">+" | ".+" | ",+" >
+| < NUMBER: ("-")? ( ["0"-"9"] )+ >
+| < IDENTIFIER: ~[" ","0"-"9","\n","\r","(","/","|","@","!","#","%","&",")","=","?","[","]",">","<","~","_",".",",","$",":"] ( ~[" ","\n","\r","(","/","@","!","#","%","&",")","=","?","[","]",">","<","~",".",",","$",":"] )* >
+| < BLANK: "__" >
+| < REGEX: "/" ("\\/"|~["\n","\r","/"])* "/" >
+| < VARNAME: ( ["a"-"z","A"-"Z"] )+ >
+}
+
+// TODO: IDENTIFIER should not allow | after the first character, but
+// it breaks some | queries to allow it.  We should fix that.
+
+// the grammar starts here
+// each of these BNF rules will be converted into a function
+// first expr is return val- passed up the tree after a production
+TregexPattern Root() : {
+  TregexPattern node;
+  // a local variable
+} {
+  ( node = SubNode(Relation.ROOT) "\n" )
+  // RHS can be preceded with local variable "=" which means
+  // this lv gets the return val of the production
+  { return node; }
+  // a code block can be placed after any bracketed expression
+  // it will be executed after that expression is matched
+  // that's where we have to return something if the production isn't void
+}
+
+// passing arguments down the tree - in this case the relation that
+// pertains to this node gets passed all the way down to the Description node
+TregexPattern Node(Relation r) : {
+  TregexPattern node;
+} {
+  ( "(" node = SubNode(r) ")"
+  | node = ModDescription(r) )
+  { return node; }
+}
+
+DescriptionPattern SubNode(Relation r) : {
+  DescriptionPattern result = null;
+  TregexPattern child = null;
+} {
+  ( "(" result = SubNode(r) ")" ( child = ChildrenDisj() )? )
+    { if(child != null) {
+        List<TregexPattern> newChildren = new ArrayList<TregexPattern>();
+        newChildren.addAll(result.getChildren());
+        newChildren.add(child);
+        result.setChild(new CoordinationPattern(newChildren,true));
+      }
+      return result;
+    }
+  | ( result = ModDescription(r) ( child = ChildrenDisj() )? )
+  // we can do other things in the code block besides return
+  // here we can check if the optional child was found and if so
+  // incorporate it before returning
+    { if (child != null) result.setChild(child);
+      return result; }
+}
+
+DescriptionPattern ModDescription(Relation r) : {
+  DescriptionPattern node;
+  boolean neg = false, cat = false;
+} {
+// another example of passing values down the tree:
+// whether the description is negated
+  ( (("!") { neg = true; })? (("@") { cat = true; })? node = Description(r, neg, cat) )
+  { return node; }
+}
+
+DescriptionPattern Description(Relation r, boolean negateDesc, boolean cat) : {
+  Token desc = null;
+  Token name = null;
+  Token linkedName = null;
+  boolean link = false;
+  Token groupNum;
+  Token groupVar;
+  List<Pair<Integer,String>> varGroups = new ArrayList<Pair<Integer,String>>();
+} {
+// this is how we match tokens
+// the return value of tokens is a Token object
+  ( ( ( desc = <IDENTIFIER> | desc = <REGEX> | desc = <BLANK> )
+    ( ( "#" groupNum = <NUMBER> "%" groupVar = <IDENTIFIER> ) {
+        varGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
+      } )*
+      ( ( "=" name = <IDENTIFIER> )
+        { if (knownVariables.contains(name.image)) {
+            throw new ParseException("Variable " + name.image + " has been declared twice, which makes no sense");
+          } else {
+            knownVariables.add(name.image);
+          }
+          if (underNegation)
+            throw new ParseException("No named tregex nodes allowed in the scope of negation.");
+        } )? ) |
+    ( ( "~" linkedName = <IDENTIFIER> ) ( "=" name = <IDENTIFIER> )? {
+        if (!knownVariables.contains(linkedName.image)) {
+          throw new ParseException("Variable " + linkedName.image +
+                                   " was referenced before it was declared");
+        }
+        if (name != null) {
+          if (knownVariables.contains(name.image)) {
+            throw new ParseException("Variable " + name.image + " has been declared twice, which makes no sense");
+          } else {
+            knownVariables.add(name.image);
+          }
+        }
+        link = true;
+      } ) |
+    ( ( "=" ) name = <IDENTIFIER> {
+        if (!knownVariables.contains(name.image)) {
+          throw new ParseException("Variable " + name.image +
+                                   " was referenced before it was declared");
+        }
+      } ) )
+  { DescriptionPattern ret = new DescriptionPattern(r, negateDesc, desc != null ? desc.image : null, name != null ? name.image : null, cat, basicCatFunction, varGroups, link, linkedName != null ? linkedName.image : null);
+    return ret; }
+
+  // our trees are built out of TregexPattern objects, which live in
+  // the tregex package (which this parser will be part of)
+  // DescriptionPattern and CoordinationPattern are the two types
+  // of TregexPattern (which is abstract)
+}
+
+TregexPattern ChildrenDisj() : {
+  TregexPattern child;
+  List<TregexPattern> children = new ArrayList<TregexPattern>();
+  // When we keep track of the known variables to assert that
+  // variables are not redefined, or that links are only set to known
+  // variables, we want to separate those done in different parts of the
+  // disjunction.  Variables set in one part won't be set in the next
+  // part if it gets there, since disjunctions exit once known.
+  Set<String> originalKnownVariables = Generics.newHashSet(knownVariables);
+  // However, we want to keep track of all the known variables, so that after
+  // the disjunction is over, we know them all.
+  Set<String> allKnownVariables = Generics.newHashSet(knownVariables);
+} {
+  ( ( child = ChildrenConj() ) {
+      children.add(child);
+      allKnownVariables.addAll(knownVariables); }
+    ( { knownVariables = Generics.newHashSet(originalKnownVariables); }
+      ( "|" child = ChildrenConj() ) {
+      children.add(child);
+      allKnownVariables.addAll(knownVariables); } )* )
+    // create a new Coordination node for the disjunction if
+    // there are two or more disjuncts, otherwise just pass up the child
+  { knownVariables = allKnownVariables;
+    if (children.size() == 1)
+      return child;
+    else
+      return new CoordinationPattern(children, false);
+  }
+}
+
+TregexPattern ChildrenConj() : {
+  TregexPattern child;
+  List<TregexPattern> children = new ArrayList<TregexPattern>();
+} {
+  ( ( child = ModChild() ) { children.add(child); }
+    ( ( ("&")? child = ModChild() ) { children.add(child); } )* )
+    // create a new Coordination node for the conjunction if
+    // there are two or more conjuncts, otherwise just pass up the child
+  { if (children.size() == 1)
+        return child;
+      else
+        return new CoordinationPattern(children, true);
+  }
+}
+
+TregexPattern ModChild() : {
+  TregexPattern child;
+  boolean startUnderNeg;
+} {
+  ( child = Child()
+    | ( "!"
+        { startUnderNeg = underNegation;
+          underNegation = true; }
+        child = Child()
+          { underNegation = startUnderNeg; }
+      )
+      { child.negate(); }
+    | ( "?" child = Child() ) { child.makeOptional(); } )
+  { return child; }
+}
+
+TregexPattern Child() : {
+  TregexPattern child;
+} {
+  ( "[" child = ChildrenDisj() "]"
+    | child = Relation() )
+  { return child; }
+}
+
+TregexPattern Relation() : {
+  Token t, strArg = null, numArg = null, negation = null, cat = null;
+  // the easiest way to check if an optional production was used
+  // is to set the token to null and then check it later
+  Relation r;
+  TregexPattern child;
+} {
+  ( ( t = <RELATION> ( numArg = <NUMBER> )?
+      | t = <REL_W_STR_ARG> ( "(" ( negation = "!" )? ( cat = "@" )? ( strArg = <REGEX> | strArg = <IDENTIFIER> | strArg = <BLANK> ) ")"
+                              | ( negation = "!" )? strArg = <REGEX> ) )
+    { if (strArg != null) {
+        String negStr = negation == null ? "": "!";
+        String catStr = cat == null ? "": "@";
+        r = Relation.getRelation(t.image, negStr + catStr + strArg.image,
+                                 basicCatFunction, headFinder);
+      } else if (numArg != null) {
+        if (t.image.endsWith("-")) {
+          t.image = t.image.substring(0, t.image.length()-1);
+          numArg.image = "-" + numArg.image;
+        }
+        r = Relation.getRelation(t.image, numArg.image,
+                                 basicCatFunction, headFinder);
+      } else {
+        r = Relation.getRelation(t.image, basicCatFunction, headFinder);
+      } }
+    child = Node(r) )
+  { return child; }
+}
+
+// care needs to be taken to insure that the resulting grammar is LL1
+// for example, in Relation() we could not have used:
+// t = <REL_W_STR_ARG> "(" ( negation = "!" )? ( strArg = <REGEX> | strArg = <IDENTIFIER> ) ")"
+// | t = <REL_W_STR_ARG> ( negation = "!" )? strArg = <REGEX>
+// because the parser does not know which rule to use if it sees a <REL_W_STR_ARG> token

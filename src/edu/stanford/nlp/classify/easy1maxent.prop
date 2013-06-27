@@ -1,0 +1,18 @@
+useClassFeature=true
+1.useString=true
+2.useString=true
+
+printClassifier=HighWeight
+printClassifierParam=20
+justify=true
+displayedColumn=-1
+
+useQN=true
+useNB=false
+sigma=0
+prior=no
+
+# Training input
+
+trainFile=easy1.train
+testFile=easy1.test

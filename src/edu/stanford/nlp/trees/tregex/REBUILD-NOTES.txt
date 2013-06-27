@@ -1,0 +1,44 @@
+The parser TregexParser.jj is built with javacc.  If you change it, you need
+to rebuild it with javacc:
+
+   javacc TregexParser.jj
+
+javacc can be found in /u/nlp/java/libsrc/javacc/bin/javacc
+
+
+Rebuilding the Mac OS X version of the GUI:
+
+Run Jar Bundler on the Mac.
+
+For Main Class, click Choose and select the new jar.
+
+Select "Use Macintosh Menu Bar"
+
+Click "Choose Icon..." and select
+
+      nlp-logo-6x6.icns
+
+(which you of course remembered to download beforehand!)
+
+Click Properties
+
+Enter the version number in each of the three version fields.
+
+Enter the main class name in Identifier
+
+Put 400m in Heap Maximum size.
+
+Click Create Application.
+
+Create it as "Stanford Tregex" (really "Stanford Tregex.app" but the GUI
+usually hides the extension).
+
+Open a tool (which you've downloaded) like FreeDMG.
+
+Drop Stanford Tregex on it.
+
+Rename the .dmg what it produces to be the same as the distro name, but
+ending in .dmg.
+
+You're done!
+

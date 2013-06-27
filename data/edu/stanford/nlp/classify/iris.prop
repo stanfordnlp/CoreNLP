@@ -1,0 +1,35 @@
+#
+# Print features
+#
+useClassFeature=true
+1.realValued=true
+2.realValued=true
+3.realValued=true
+4.realValued=true
+
+
+printClassifier=HighWeight
+printClassifierParam=200
+# printTo=classifier.txt
+
+#
+# Mapping
+#
+goldAnswerColumn=0
+displayedColumn=1
+
+#
+# Optimization
+#
+intern=true
+sigma=3
+useQN=true
+QNsize=15
+tolerance=1e-4
+#
+# Training input
+#
+#trainFile=./examples/iris.train
+#testFile=./examples/iris.test
+trainFile=./projects/core/data/edu/stanford/nlp/classify/iris.train
+testFile=./projects/core/data/edu/stanford/nlp/classify/iris.test

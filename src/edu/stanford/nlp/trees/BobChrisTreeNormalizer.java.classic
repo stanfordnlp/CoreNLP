@@ -1,0 +1,79 @@
+package edu.stanford.nlp.trees;
+
+/** Normalizes trees roughly the way used in Manning and Carpenter 1997.
+ *  NB: This implementation is still incomplete! 
+ *  The normalizations performed are: (i) terminals are interned, (ii)
+ *  nonterminals are stripped of alternants, functional tags and
+ *  cross-reference codes (on |, =, -) and then interned, (iii) empty
+ *  elements (ones with nonterminal label "-NONE-") are deleted from the
+ *  tree, (iv) the null label at the root node is replaced with the label
+ *  "ROOT".
+ */
+public class BobChrisTreeNormalizer extends TreeNormalizer {
+
+    /** Normalizes a leaf contents.
+     *  This implementation interns the leaf.
+     */
+    public String normalizeTerminal(String leaf) {
+	// We could unquote * and / with backslash \ in front of them
+	return leaf.intern();
+    }
+
+
+    /** Normalizes a nonterminal contents.
+     *  This implementation strips functional tags, etc. and interns the
+     *  nonterminal.
+     */
+    public String normalizeNonterminal(String category) {
+	return cleanUpLabel(category).intern();
+    }
+
+
+    /** Normalize a whole tree -- one can assume that this is the root.
+     *  This implementation deletes empty elements (ones with nonterminal
+     *  label '-NONE-') from the tree
+     */
+    public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
+	return tree.prune(new edu.stanford.nlp.util.Filter() {
+	    public boolean accept(Object obj) {
+		Tree t = (Tree) obj;
+		Tree[] kids = t.children();
+		if ((t.label() != null) && 
+		    (t.label().toString() == "-NONE-") &&
+		    ! t.isLeaf() && 
+		    kids.length == 1 && kids[0].isLeaf()) {
+		    // Delete empty/trace nodes (ones marked '-NONE-')
+		    return false;
+		}
+		return true;
+	    }
+	}, tf);
+    }
+
+
+    /** Remove things like hyphened functional tags and equals from the
+     *  end of a node label
+     */
+    private static String cleanUpLabel(String label) {
+	if (label == null) {
+	    label = "ROOT";
+	    // String constants are always interned
+	} else {
+	    // a '-' at the beginning of label is okay (punctuation tag!)
+	    int k = label.indexOf('-');
+	    if (k > 0) {
+		label = label.substring(0, k);
+	    }
+	    k = label.indexOf('=');
+	    if (k > 0) {
+		label = label.substring(0, k);
+	    }
+	    k = label.indexOf('|');
+	    if (k > 0) {
+		label = label.substring(0, k);
+	    }
+	}
+	return label;
+    }
+
+}

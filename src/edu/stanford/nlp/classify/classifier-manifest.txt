@@ -1,0 +1,2 @@
+Main-class: edu.stanford.nlp.classify.ColumnDataClassifier
+
