@@ -526,6 +526,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "(ROOT (S (NP (CD Two) (JJ former) (NNS ministers) ) (VP (VBD were) (ADJP (ADJP (ADVP (RB heavily) ) (VBN implicated) )) (PP (IN in) (NP (DT the) (NNP Koskotas) (NN affair) )))))",
         "( (S (NP-SBJ (CD Two) (JJ former) (NNS ministers) ) (VP (VBD were) (ADJP-PRD (ADJP (ADVP (RB heavily) ) (VBN implicated) )) (PP-LOC (IN in) (NP (DT the) (NNP Koskotas) (NN affair) )))))",
         "(NP-ADV (NP (DT The) (JJR more) (NNS accounts) ) (SBAR (WHNP-1 (-NONE- 0) ) (S (NP-SBJ (NNS customers) ) (VP (VBP have) (NP (-NONE- *T*-1) )))))",
+        "(NP-ADV (NP-ADV (DT a) (NN-ADV lesson)) (VP (ADVP (RB once)) (VBN learned) (PP (IN by) (NP (NNP Henry) (NNP Kissinger)))))",
         // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
         // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -617,6 +618,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, accounts-3)\n" +
                 "nsubj(have-5, customers-4)\n" +
                 "rcmod(accounts-3, have-5)\n",
+        "det(lesson-2, a-1)\nroot(ROOT-0, lesson-2)\nadvmod(learned-4, once-3)\npartmod(lesson-2, learned-4)\nprep(learned-4, by-5)\nnn(Kissinger-7, Henry-6)\npobj(by-5, Kissinger-7)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
