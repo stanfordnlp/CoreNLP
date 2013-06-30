@@ -6,17 +6,90 @@ import edu.stanford.nlp.util.ScoredComparator;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Arrays;
 
 /**
- * A class capable of computing the best sequence given a SequenceModel.
- * Uses beam search.
- *
+ * An class capable of computing the best sequence given a SequenceModel. Uses beam search.
  * @author Dan Klein
  * @author Teg Grenager (grenager@stanford.edu)
  */
 public class BeamBestSequenceFinder implements BestSequenceFinder {
 
-  // todo [CDM 2013]: AFAICS, this class doesn't actually work correctly AND gives nondeterministic answers. See the commented out test in BestSequenceFinderTest
+  /**
+   * A class for testing.
+   */
+  private static class TestSequenceModel implements SequenceModel {
+
+    private int[] correctTags = {0, 0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 0, 0};
+    private int[] allTags = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    private int[] midTags = {0, 1, 2, 3};
+    private int[] nullTags = {0};
+
+    public int length() {
+      return correctTags.length - leftWindow() - rightWindow();
+    }
+
+    public int leftWindow() {
+      return 2;
+    }
+
+    public int rightWindow() {
+      return 2;
+    }
+
+    public int[] getPossibleValues(int pos) {
+      if (pos < leftWindow() || pos >= leftWindow() + length()) {
+        return nullTags;
+      }
+      if (correctTags[pos] < 4) {
+        return midTags;
+      }
+      return allTags;
+    }
+
+    public double scoreOf(int[] sequence) {
+      throw new UnsupportedOperationException();
+    }
+
+    public double scoreOf(int[] tags, int pos) {
+      //System.out.println("Was asked: "+arrayToString(tags,10)+" at "+pos);
+      boolean match = true;
+      boolean ones = true;
+      for (int loc = pos - leftWindow(); loc <= pos + rightWindow(); loc++) {
+        if (tags[loc] != correctTags[loc]) {
+          match = false;
+        }
+        if (tags[loc] != 1 && loc >= leftWindow() && loc < length() + leftWindow()) {
+          ones = false;
+        }
+      }
+      if (match) {
+        return pos;
+      }
+      if (ones) {
+        return 0;//(length()/2-1);
+      }
+      return 0;
+    }
+
+    public double[] scoresOf(int[] tags, int pos) {
+      int[] tagsAtPos = getPossibleValues(pos);
+      double[] scores = new double[tagsAtPos.length];
+      for (int t = 0; t < tagsAtPos.length; t++) {
+        tags[pos] = tagsAtPos[t];
+        scores[t] = scoreOf(tags, pos);
+      }
+      return scores;
+    }
+
+  }
+
+  public static void main(String[] args) {
+    BestSequenceFinder ti = new BeamBestSequenceFinder(4, true);
+    SequenceModel ts = new TestSequenceModel();
+    int[] bestTags = ti.bestSequence(ts);
+    System.out.println("The best sequence is .... " + Arrays.toString(bestTags));
+  }
 
   private static int[] tmp = null;
 
@@ -133,7 +206,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
       }
       // each hypothesis gets extended and beamed
       for (Iterator beamI = oldBeam.iterator(); beamI.hasNext();) {
-        // System.out.print("#"); System.out.flush();
+          System.out.print("#"); System.out.flush();
         TagSeq tagSeq = (TagSeq) beamI.next();
         for (int nextTagNum = 0; nextTagNum < tagNum[pos]; nextTagNum++) {
           TagSeq nextSeq = tagSeq.tclone();
@@ -150,7 +223,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
           //System.out.println("Best is: "+((Scored)newBeam.iterator().next()).score());
         }
       }
-      // System.out.println(" done");
+      System.out.println(" done");
       if (recenter) {
         double max = Double.NEGATIVE_INFINITY;
         for (Iterator beamI = newBeam.iterator(); beamI.hasNext();) {
@@ -214,7 +287,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
 	}
       }
     }
-
+    
 
     // Set up score and backtrace arrays
     double[][] score = new double[padLength][];
@@ -322,7 +395,7 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
 	windowScore[pos][product] = ts.scoreOf(tempTags, pos);
       }
     }
-
+    
 
     // Set up score and backtrace arrays
     double[][] score = new double[padLength][];
@@ -400,5 +473,4 @@ public class BeamBestSequenceFinder implements BestSequenceFinder {
     this.beamSize = beamSize;
     this.recenter = recenter;
   }
-
 }

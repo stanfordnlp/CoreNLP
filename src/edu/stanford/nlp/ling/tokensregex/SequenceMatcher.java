@@ -57,6 +57,7 @@ import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NO
  */
 public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   private static final Logger logger = Logger.getLogger(SequenceMatcher.class.getName());
+  SequencePattern pattern;    // Pattern we are trying to match against
 
   boolean matchingCompleted = false;
   boolean matched = false;
@@ -82,9 +83,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   // For FIND_ALL
   Iterator<Integer> curMatchIter = null;
   MatchedStates<T> curMatchStates = null;
-
-  // Branching limit for searching with back tracking
-  int branchLimit = 2;
 
   protected SequenceMatcher(SequencePattern pattern, List<? extends T> elements)
   {
@@ -371,44 +369,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     return matched;
   }
 
-  public Iterable<SequenceMatchResult<T>> findAllNonOverlapping() {
-    Iterator<SequenceMatchResult<T>> iter = new Iterator<SequenceMatchResult<T>>() {
-      SequenceMatchResult<T> next;
-
-      private SequenceMatchResult<T> getNext() {
-        boolean found = find();
-        if (found) {
-          return toBasicSequenceMatchResult();
-        } else {
-          return null;
-        }
-      }
-
-      @Override
-      public boolean hasNext() {
-        if (next == null) {
-          next = getNext();
-          return (next != null);
-        } else {
-          return true;
-        }
-      }
-
-      @Override
-      public SequenceMatchResult<T> next() {
-        if (!hasNext()) { throw new NoSuchElementException(); }
-        SequenceMatchResult<T> res = next;
-        next = null;
-        return res;
-      }
-
-      public void remove() {
-        throw new UnsupportedOperationException();
-      }
-    };
-    return new IterableIterator<SequenceMatchResult<T>>(iter);
-  }
-
   /**
    * Searches for the next occurrence of the pattern
    * @return true if a match is found (false otherwise)
@@ -468,6 +428,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   protected boolean findMatchStartBacktracking(int start, boolean matchAllTokens)
   {
     boolean matchAll = true;
+    int branchLimit = 2;
     Stack<MatchedStates> todo = new Stack<MatchedStates>();
     MatchedStates cStates = getStartStates();
     cStates.curPosition = start-1;
@@ -502,7 +463,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   }
 
   /**
-   * Checks if the pattern matches the entire sequence
+   * Checkes if the pattern matches the entire sequence
    * @return true if the entire sequence is matched (false otherwise)
    * @see #find()
    */
@@ -1172,10 +1133,10 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       removeMatchStateInfo(bid, node);
     }
 
-    protected void setMatchedInterval(int bid, SequencePattern.State node, HasInterval<Integer> interval)
+    protected void setMatchedInterval(int bid, SequencePattern.State node, Interval<Integer> interval)
     {
       Map<SequencePattern.State,Object> matchStateInfo = getMatchStateInfo(bid, true);
-      HasInterval<Integer> p = (HasInterval<Integer>) matchStateInfo.get(node);
+      Interval<Integer> p = (Interval<Integer>) matchStateInfo.get(node);
       if (p == null) {
         matchStateInfo.put(node, interval);
       } else {
@@ -1183,10 +1144,10 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       }
     }
 
-    protected HasInterval<Integer> getMatchedInterval(int bid, SequencePattern.State node)
+    protected Interval<Integer> getMatchedInterval(int bid, SequencePattern.State node)
     {
       Map<SequencePattern.State,Object> matchStateInfo = getMatchStateInfo(bid, true);
-      HasInterval<Integer> p = (HasInterval<Integer>) matchStateInfo.get(node);
+      Interval<Integer> p = (Interval<Integer>) matchStateInfo.get(node);
       return p;
     }
 
@@ -1383,7 +1344,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
 
     /**
-     * Returns index of state that results in match (-1 if no matches)
+     * Returns index of state that results in match (-1 if no mtaches)
      */
     private int getMatchIndex()
     {
