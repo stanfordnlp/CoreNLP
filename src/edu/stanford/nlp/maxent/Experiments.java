@@ -7,8 +7,6 @@
 
 package edu.stanford.nlp.maxent;
 
-import edu.stanford.nlp.io.InDataStreamFile;
-import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
@@ -20,7 +18,7 @@ import java.util.ArrayList;
 
 /**
  * This class represents the training samples. It can return statistics of them,
- * for example the frequency of each x or y
+ * for example the frequency of each x or y.
  * in the training data.
  *
  * @author Kristina Toutanova
@@ -28,8 +26,9 @@ import java.util.ArrayList;
  */
 public class Experiments {
 
+  // todo [cdm 2013]: It might be better to change this to an IntPair[]
   /**
-   * vArray has dimensions [numTraining][2] and holds the x and y for each training sample.
+   * vArray has dimensions [numTrainingDatums][2] and holds the x and y (word and tag index) for each training sample.
    * Its length is the number of data points.
    */
   protected int[][] vArray;
@@ -53,7 +52,7 @@ public class Experiments {
   // Changing them to non-static member variables did not break the
   // POS tagger, at least.  A few other places that use this code at a
   // fairly low level are:
-  // 
+  //
   // periphery/src/edu/stanford/nlp/redwoods/Utilities.java and
   //  ProblemSolverHSPG.java.
   // periphery/.../classify/internal/ILogisticRegressionFactory.java
@@ -74,10 +73,12 @@ public class Experiments {
 
   /**
    * Maximum ySize.
-   * CDM May 2007: What is this and what does it control?  Why isn't it set
-   * dynamically?  Is it the number of y values that one x value can have?
+   * todo [CDM May 2007]: What is this and what does it control?  Why isn't it set dynamically?
+   * Is it the number of different y values that one x value can have?
    * If so, although it was set to 5, it should be 7 for the WSJ PTB.
    * But that doesn't solve the problem for the data set after that....
+   * See the commented out bits where it should exception if it overflows.
+   * Should just be able to make it dynamic
    */
   int dim = 7;  // was 5 before CDM fiddled
 
@@ -94,8 +95,7 @@ public class Experiments {
 
   /**
    * If this constructor is used, the maximum possible class overall is found and all classes are assumed possible
-   * for all instances
-   *
+   * for all instances.
    */
   public Experiments(int[][] vArray) {
     this.vArray = vArray;
@@ -105,8 +105,7 @@ public class Experiments {
 
   /**
    * The number of possible classes for each instance is contained in the array maxYs
-   * then the possible classes for x are from 0 to maxYs[x]-1
-   *
+   * then the possible classes for x are from 0 to maxYs[x]-1.
    */
   public Experiments(int[][] vArray, int[] maxYs) {
     this.vArray = vArray;
@@ -132,11 +131,11 @@ public class Experiments {
   }
 
   /**
-   * The filename has format: <data><xSize>xSize</xSize><ySize>ySize</ySize>
+   * The filename has format: {@literal <data><xSize>xSize</xSize><ySize>ySize</ySize>}
    * x1 y1
    * x2 y2
    * ..
-   * </data>
+   * {@literal }</data>}
    * ..
    */
   public Experiments(String filename) {
@@ -369,6 +368,7 @@ public class Experiments {
     return vArray[index];
   }
 
+  /** Returns the number of training data items. */
   public int size() {
     return vArray.length;
   }
@@ -409,70 +409,5 @@ public class Experiments {
     }
 
   }
-
-
-  /** Currently unused */
-  @SuppressWarnings({"UnusedDeclaration","unused"})
-  private void save(String filename) {
-    try {
-      OutDataStreamFile rF = new OutDataStreamFile(filename);
-      rF.writeInt(xSize);
-      rF.writeInt(ySize);
-      rF.writeInt(vArray.length);
-      for (int i = 0; i < xSize; i++) {
-        rF.writeInt(px[i]);
-      }
-      for (int j = 0; j < ySize; j++) {
-        rF.writeInt(py[j]);
-      }
-      for (int i = 0; i < xSize; i++) {
-        for (int j = 0; j < dim; j++) {
-          rF.writeInt(pxy[i][j]);
-        }
-      }
-
-      rF.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /** Currently unused */
-  @SuppressWarnings("unused")
-  private void read(String filename) {
-    try {
-      InDataStreamFile rF = new InDataStreamFile(filename);
-      xSize = rF.readInt();
-      ySize = rF.readInt();
-      int number = rF.readInt();
-      px = new int[xSize];
-      py = new int[ySize];
-      pxy = new int[xSize][ySize];
-      for (int i = 0; i < xSize; i++) {
-        px[i] = rF.readInt();
-      }
-      for (int j = 0; j < ySize; j++) {
-        py[j] = rF.readInt();
-      }
-      for (int i = 0; i < xSize; i++) {
-        for (int j = 0; j < dim; j++) {
-          pxy[i][j] = rF.readInt();
-        }
-      }
-      rF.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-
-  /*
-  public static void main(String[] args) {
-    int[] hPos = {0, 1, 2, -1, -2};
-    boolean[] isTag = {false, false, false, true, true};
-    TaggerExperiments gophers = new TaggerExperiments("trainhuge.txt",null);
-    gophers.ptilde();
-  }
-  */
 
 }

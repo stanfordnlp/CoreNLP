@@ -258,7 +258,7 @@
         <include name="javanlp-core.jar"/>
       </lib>
       <lib dir="${basedir}/lib">
-        <include name="commons-lang-2.5.jar"/>
+        <include name="commons-lang3-3.1.jar"/>
         <include name="xom-1.2.7.jar"/>
         <include name="joda-time.jar"/>
         <include name="jollyday.jar"/>
@@ -312,7 +312,7 @@
         <include name="javanlp-core.jar"/>
       </lib>
       <lib dir="${basedir}/lib">
-        <include name="commons-lang-2.5.jar"/>
+        <include name="commons-lang3-3.1.jar"/>
       </lib>
       <zipfileset file="${source.path}/edu/stanford/nlp/ie/ner/webapp/ner.jsp"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/ie/ner/webapp/header.jsp"/>
@@ -342,7 +342,7 @@
         <include name="javanlp-core.jar"/>
       </lib>
       <lib dir="${basedir}/lib">
-        <include name="commons-lang-2.5.jar"/>
+        <include name="commons-lang3-3.1.jar"/>
         <include name="xom-1.2.8.jar"/>
         <include name="xalan.jar"/>
         <include name="serializer.jar"/>
