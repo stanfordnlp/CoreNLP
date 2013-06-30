@@ -1,9 +1,6 @@
 package edu.stanford.nlp.maxent.iis;
 
-import edu.stanford.nlp.io.InDataStreamFile;
-import edu.stanford.nlp.io.OutDataStreamFile;
-import edu.stanford.nlp.io.PrintFile;
-import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.maxent.*;
 import edu.stanford.nlp.util.MutableDouble;
@@ -651,7 +648,7 @@ public class LambdaSolve {
    */
   public void save_lambdas(String filename) {
     try {
-      OutDataStreamFile rf = new OutDataStreamFile(filename);
+      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
       save_lambdas(rf, lambda);
       rf.close();
     } catch (IOException e) {
@@ -685,7 +682,7 @@ public class LambdaSolve {
    */
   public void readL(String filename) {
     try {
-      InDataStreamFile rf = new InDataStreamFile(filename);
+      DataInputStream rf = IOUtils.getDataInputStream(filename);
       lambda = read_lambdas(rf);
       rf.close();
     } catch (Exception e) {
@@ -702,7 +699,7 @@ public class LambdaSolve {
    */
   static double[] read_lambdas(String modelFilename) {
     try {
-      InDataStreamFile rf = new InDataStreamFile(modelFilename);
+      DataInputStream rf = IOUtils.getDataInputStream(modelFilename);
       double[] lamb = read_lambdas(rf);
       rf.close();
       return lamb;
