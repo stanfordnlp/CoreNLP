@@ -61,10 +61,14 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * build up the pipeline by adding Annotators, and then
  * you take the objects you wish to annotate and pass
  * them in and get in return a fully annotated object.
+ * At the command-line level you can, e.g., tokenize text with StanfordCoreNLP with a command like:
+ * <br/><pre>
+ * java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file document.txt
+ * </pre><br/>
  * Please see the package level javadoc for sample usage
  * and a more complete description.
  * <p>
- * The main entry point for the API is StanfordCoreNLP.process()
+ * The main entry point for the API is StanfordCoreNLP.process() .
  * <p>
  * <i>Implementation note:</i> There are other annotation pipelines, but they
  * don't extend this one. Look for classes that implement Annotator and which
@@ -230,7 +234,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
-    
+
     if (props == null) {
       // if undefined, find the properties file in the classpath
       props = loadPropertiesFromClasspath();
