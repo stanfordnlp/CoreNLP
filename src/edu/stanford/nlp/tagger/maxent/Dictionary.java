@@ -6,7 +6,8 @@
  */
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.InDataStreamFile;
+import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
 
@@ -165,7 +166,7 @@ public class Dictionary {
   /*
   public void save(String filename) {
     try {
-      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
+      OutDataStreamFile rf = new OutDataStreamFile(filename);
       save(rf);
       rf.close();
     } catch (Exception e) {
@@ -207,7 +208,8 @@ public class Dictionary {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = TagCount.readTagCount(rf);
+      TagCount count = new TagCount();
+      count.read(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
@@ -233,7 +235,8 @@ public class Dictionary {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = TagCount.readTagCount(rf);
+      TagCount count = new TagCount();
+      count.read(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
@@ -250,7 +253,7 @@ public class Dictionary {
 
   protected void read(String filename) {
     try {
-      DataInputStream rf = IOUtils.getDataInputStream(filename);
+      InDataStreamFile rf = new InDataStreamFile(filename);
       read(rf, filename);
 
       int len1 = rf.readInt();

@@ -2,7 +2,7 @@
 "http://www.w3.org/TR/html4/loose.dtd">
 
 <%@ page import="java.util.List" %>
-<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <%@ page import="edu.stanford.nlp.util.ErasureUtils" %>
 
 <%!
@@ -59,7 +59,7 @@
                           style="width: 400px; height: 8em" rows=31 cols=7><% 
                   String input = request.getParameter("input");
                   if (input != null) {
-                    %><%=StringEscapeUtils.escapeHtml4(input)%><%
+                    %><%=StringEscapeUtils.escapeHtml(input)%><%
                   }
                 %></textarea>
             </td></tr>
