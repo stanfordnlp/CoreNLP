@@ -9,7 +9,7 @@ Gnu lesser general public license
 
 -----------------------------------------
 
-joda-time-2.0.jar
+joda-time-2.1.jar
 
 Url: http://joda-time.sourceforge.net/
 
@@ -18,3 +18,10 @@ License: http://joda-time.sourceforge.net/license.html
 Apache License 2.0
 
 -----------------------------------------
+
+ejml.jar
+
+URL: http://code.google.com/p/efficient-java-matrix-library/
+
+Gnu lesser general public license
+-----------------------------------------------------------------
