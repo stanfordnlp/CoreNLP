@@ -72,7 +72,7 @@ public class TaggerExperiments extends Experiments {
     this.tFeature = new TemplateHash(maxentTagger);
     numFeatsGeneral = maxentTagger.extractors.getSize();
     numFeatsAll = numFeatsGeneral + maxentTagger.extractorsRare.getSize();
-    feats = new TaggerFeatures(maxentTagger.tags, this);
+    feats = new TaggerFeatures(this);
   }
 
   /** This method gets feature statistics from a training file found in the TaggerConfig.
