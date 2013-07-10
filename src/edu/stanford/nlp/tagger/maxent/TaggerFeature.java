@@ -38,28 +38,20 @@ import edu.stanford.nlp.maxent.Feature;
  */
 public class TaggerFeature extends Feature {
 
-  private int start;
-  private int end;
-  private FeatureKey key;
-  private int yTag;
-  private final TTags ttags;
+  private final int start;
+  private final int end;
+  private final FeatureKey key;
+  private final int yTag;
   private final TaggerExperiments domain;
 
   protected TaggerFeature(int start, int end, FeatureKey key,
-                          TTags ttags, TaggerExperiments domain) {
+                          int yTag, TaggerExperiments domain) {
     this.start = start;
     this.end = end;
     this.key = key;
-    this.ttags = ttags;
     this.domain = domain;
-    yTag = ttags.getIndex(key.tag);
+    this.yTag = yTag;
   }
-
-  public TaggerFeature(TTags ttags, TaggerExperiments domain) {
-    this.ttags = ttags;
-    this.domain = domain;
-  }
-
 
   @Override
   public double getVal(int index) {
