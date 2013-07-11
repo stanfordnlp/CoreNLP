@@ -2,7 +2,6 @@ package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -475,7 +474,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     if ( ! m.spanToString().equalsIgnoreCase("it")) return false;
     final String[] patterns = {
         // cdm 2013: I spent a while on these patterns. I fixed a syntax error in five patterns ($.. split with space), so it now shouldn't exception in checkPleonastic. This gave 0.02% on CoNLL11 dev
-        // I tried some more precise paterns but they didn't help. Indeed, they tended to hurt vs. the higher recall patterns.
+        // I tried some more precise patterns but they didn't help. Indeed, they tended to hurt vs. the higher recall patterns.
 
         //"NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (VP < (VBN $.. /S|SBAR/))))", // overmatches
         // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@VP < (VBN < expected|hoped $.. @SBAR))))",  // this one seems more accurate, but ...
@@ -490,7 +489,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@NP $.. @ADVP $.. @SBAR)))", // cleft examples, generalized to not need ADVP; but gave worse CoNLL12 dev numbers....
 
         // these next 5 had buggy space in "$ ..", which I fixed
-        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (VP < (VBN $.. /S|SBAR/))))))", 
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (VP < (VBN $.. /S|SBAR/))))))",
 
         "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP $.. (/S|SBAR/))))))", // extraposed. OK 1/2 correct; need non-adverbial case
         "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP < (/S|SBAR/))))))", // OK: 3/3 good matches on dev; but 3/4 wrong on WSJ
@@ -507,7 +506,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
     for (String p : patterns) {
       if (checkPleonastic(m, tree, p)) {
-        System.err.printf("XXXX %s%n", tree);
+        // System.err.printf("Found pleonastic: %s%n", tree);
         return true;
       }
     }
