@@ -38,10 +38,10 @@ import edu.stanford.nlp.maxent.Feature;
  */
 public class TaggerFeature extends Feature {
 
-  private int start;
-  private int end;
-  private FeatureKey key;
-  private int yTag;
+  private final int start;
+  private final int end;
+  private final FeatureKey key;
+  private final int yTag;
   private final TaggerExperiments domain;
 
   protected TaggerFeature(int start, int end, FeatureKey key,
