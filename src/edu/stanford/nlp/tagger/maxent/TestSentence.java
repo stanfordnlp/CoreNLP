@@ -418,7 +418,7 @@ public class TestSentence implements SequenceModel {
 
   private double[] getExactHistories(History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
     double[] scores = new double[maxentTagger.ySize];
-    int szCommon = maxentTagger.extractors.size();
+    int szCommon = maxentTagger.extractors.getSize();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
@@ -457,7 +457,7 @@ public class TestSentence implements SequenceModel {
   private double[] getApproximateHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
 
     double[] scores = new double[tags.length];
-    int szCommon = maxentTagger.extractors.size();
+    int szCommon = maxentTagger.extractors.getSize();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
@@ -507,7 +507,7 @@ public class TestSentence implements SequenceModel {
    */
   void printUnknown(int numSent, PrintFile pfu) {
     NumberFormat nf = new DecimalFormat("0.0000");
-    int numTags = maxentTagger.numTags();
+    int numTags = maxentTagger.tags.getSize();
     double[][][] probabilities = new double[size][kBestSize][numTags];
     calculateProbs(probabilities);
     for (int current = 0; current < size; current++) {
@@ -557,7 +557,7 @@ public class TestSentence implements SequenceModel {
   // to the file pfu except for
   void printTop(PrintFile pfu) {
     NumberFormat nf = new DecimalFormat("0.0000");
-    int numTags = maxentTagger.numTags();
+    int numTags = maxentTagger.tags.getSize();
     double[][][] probabilities = new double[size][kBestSize][numTags];
     calculateProbs(probabilities);
     for (int current = 0; current < size; current++) {
