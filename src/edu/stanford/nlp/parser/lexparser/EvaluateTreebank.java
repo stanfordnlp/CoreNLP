@@ -183,7 +183,12 @@ public class EvaluateTreebank {
       factDA = new UnlabeledAttachmentEval("factor DA", runningAverages, null);
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factTA"))) {
-      factTA = new TaggingEval("factor Tag", runningAverages, lex);
+      if (op.doPCFG) {
+        factTA = new TaggingEval("factor Tag", runningAverages, lex);
+      } else {
+        // only doing dep parser, and need to get tags out in special way....
+        factTA = new TaggingEval("factor Tag", runningAverages, lex);
+      }
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgRUO"))) {
       pcfgRUO = new AbstractEval.RuleErrorEval("pcfg Rule under/over");
