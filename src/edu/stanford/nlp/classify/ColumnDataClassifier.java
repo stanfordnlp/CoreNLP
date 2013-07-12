@@ -212,7 +212,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>useQN</td><td>boolean</td><td>true</td><td>Use Quasi-Newton optimization if true, otherwise use Conjugate Gradient optimization.  Recommended.</td></tr>
  * <tr><td>QNsize</td><td>int</td><td>15</td><td>Number of previous iterations of Quasi-Newton to store (this increases memory use, but speeds convergence by letting the Quasi-Newton optimization more effectively approximate the second derivative).</td></tr>
  * <tr><td>featureFormat</td><td>boolean</td><td>false</td><td>Assumes the input file isn't text strings but already featurized.  One column is treated as the class column (as defined by <code>goldAnswerColumn</code>, and all other columns are treated as features of the instance.  (If answers are not present, set <code>goldAnswerColumn</code> to a negative number.)</td></tr>
- * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight webpage</a> for more information)</td></tr>
+ * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight web page</a> for more information)</td></tr>
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
  * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization)</td></tr>
  * </table>
@@ -412,9 +412,6 @@ public class ColumnDataClassifier {
    */
   private void writeResultsSummary(int num, Counter<String> contingency, Collection<String> labels) {
     System.err.println();
-    NumberFormat nf = NumberFormat.getNumberInstance();
-    nf.setMinimumFractionDigits(3);
-    nf.setMaximumFractionDigits(3);
     System.err.print(num + " examples");
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null) {
       System.err.print(" and " + numGroups + " ranking groups");
@@ -490,14 +487,34 @@ public class ColumnDataClassifier {
     if (globalFlags.displayedColumn >= 0) {
       printedText = strs[globalFlags.displayedColumn];
     }
+    String results;
+    if (globalFlags.displayAllAnswers) {
+      // sort the labels by probability
+      TreeSet<Pair<Double,String>> sortedLabels = new TreeSet<Pair<Double,String>>();
+      for (String key : cntr.keySet()) {
+        sortedLabels.add(new Pair<Double,String>(cntr.probabilityOf(key), key));
+      }
+      StringBuilder builder = new StringBuilder();
+      for (Pair<Double,String> pair : sortedLabels.descendingSet()) {
+        if (builder.length() > 0) {
+          builder.append("\t");
+        }
+        builder.append(pair.first().toString()).append('\t').append(pair.second());
+      }
+      results = builder.toString();
+    } else {
+      if ( ! goldAnswer.equals(clAnswer)) {
+        results = clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer) + '\t' + nf.format(cntr.probabilityOf(goldAnswer)));
+      } else {
+	results = clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer));
+      }
+    }
+
     String line;
     if ("".equals(printedText)) {
-      line = goldAnswer + '\t' + clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer));
-    } else {
-      line = printedText + '\t' + goldAnswer + '\t' + clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer));
-    }
-    if ( ! goldAnswer.equals(clAnswer)) {
-      line = line + '\t' + nf.format(cntr.probabilityOf(goldAnswer));
+      line = goldAnswer + '\t' + results;
+     } else {
+      line = printedText + '\t' + goldAnswer + '\t' + results;
     }
     System.out.println(line);
     // NB: This next bit judges correctness by surface String equality, not our internal indices, so strs has to be right even for svmlightFormat
@@ -1529,6 +1546,8 @@ public class ColumnDataClassifier {
         Flags.printTo = val;
       } else if (key.equals("trainFile")) {
         Flags.trainFile = val;
+      } else if (key.equals("displayAllAnswers")) {
+        Flags.displayAllAnswers = Boolean.parseBoolean(val);
       } else if (key.equals("testFile")) {
         myFlags[col].testFile = val;
       } else if (key.equals("trainFromSVMLight")) {
@@ -1854,6 +1873,8 @@ public class ColumnDataClassifier {
     static boolean testFromSVMLight = false; //test file is in SVMLight format
     static String encoding = null;
     static String printSVMLightFormatTo;
+
+    static boolean displayAllAnswers = false;
 
     // Distinguishes whether this file has real valued features or if the more efficient non-RVF representation can be used.
     // This is set as a summary flag in globalFeatures based on whether anything uses real values.
