@@ -503,11 +503,7 @@ public class ColumnDataClassifier {
       }
       results = builder.toString();
     } else {
-      if ( ! goldAnswer.equals(clAnswer)) {
-        results = clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer) + '\t' + nf.format(cntr.probabilityOf(goldAnswer)));
-      } else {
-	results = clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer));
-      }
+      results = clAnswer + '\t' + cntr.probabilityOf(clAnswer);
     }
 
     String line;
