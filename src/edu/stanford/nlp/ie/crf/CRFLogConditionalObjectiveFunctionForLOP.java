@@ -130,21 +130,9 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
   private void initialize2DWeights() {
     lopExpertWeights2D = new double[numLopExpert][][];
     for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-      lopExpertWeights2D[lopIter] = to2D(lopExpertWeights[lopIter], labelIndices, map); 
+      lopExpertWeights2D[lopIter] = CRFLogConditionalObjectiveFunction.to2D(lopExpertWeights[lopIter], labelIndices, map); 
     }
   }
-
-  public double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
-    double[][] newWeights = new double[map.length][];
-    int index = 0;
-    for (int i = 0; i < map.length; i++) {
-      newWeights[i] = new double[labelIndices.get(map[i]).size()];
-      System.arraycopy(weights, index, newWeights[i], 0, labelIndices.get(map[i]).size());
-      index += labelIndices.get(map[i]).size();
-    }
-    return newWeights;
-  }
-  
 
   private void computeEHat() {
     Ehat = empty2D();
