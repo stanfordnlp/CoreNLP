@@ -247,7 +247,7 @@ public class TrieMapMatcher<K,V> {
     }
 
     public void add(PartialApproxMatch<K,V> pam) {
-      Match<K,V> m = new Match<K,V>(pam.matched, pam.value, pam.begin, pam.end);
+      Match<K,V> m = new MultiMatch<K,V>(pam.matched, pam.value, pam.begin, pam.end, pam.multimatched, pam.multivalues);
       queue.put(m, pam);
     }
 
@@ -269,7 +269,8 @@ public class TrieMapMatcher<K,V> {
     }
 
     public void add(PartialApproxMatch<K,V> pam) {
-      Match<K,V> m = new Match<K,V>(pam.matched, pam.value, pam.begin, pam.end);
+      Match<K,V> m = new MultiMatch<K,V>(
+              pam.matched, pam.value, pam.begin, pam.end, pam.multimatched, pam.multivalues);
       Integer key = (pam.multimatched != null)? pam.multimatched.size():0;
       if (pam.value == null) key = key + 1;
       BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> mq = multimatchQueues.get(key);
