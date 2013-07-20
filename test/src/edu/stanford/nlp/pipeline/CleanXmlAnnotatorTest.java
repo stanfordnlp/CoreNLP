@@ -14,20 +14,22 @@ import edu.stanford.nlp.util.CoreMap;
  */
 
 public class CleanXmlAnnotatorTest extends TestCase {
-  public static Annotator ptbInvertible = null;
-  public static Annotator ptbNotInvertible = null;
 
-  public static Annotator cleanXmlAllTags = null;
-  public static Annotator cleanXmlSomeTags = null;
-  public static Annotator cleanXmlEndSentences = null;
-  public static Annotator cleanXmlWithFlaws = null;
+  private static Annotator ptbInvertible = null;
+  private static Annotator ptbNotInvertible = null;
 
-  public static Annotator wtsSplitter = null;
+  private static Annotator cleanXmlAllTags = null;
+  private static Annotator cleanXmlSomeTags = null;
+  private static Annotator cleanXmlEndSentences = null;
+  private static Annotator cleanXmlWithFlaws = null;
+
+  private static Annotator wtsSplitter = null;
 
   /**
-   * Initialize the annotators at the start of the unittest.
+   * Initialize the annotators at the start of the unit test.
    * If they've already been initialized, do nothing.
    */
+  @Override
   public void setUp() {
     synchronized(CleanXmlAnnotatorTest.class) {
       if (ptbInvertible == null) {
@@ -57,9 +59,9 @@ public class CleanXmlAnnotatorTest extends TestCase {
     }
   }
 
-  public Annotation annotate(String text,
-                             Annotator tokenizer, Annotator xmlRemover,
-                             Annotator splitter) {
+  public static Annotation annotate(String text,
+                                    Annotator tokenizer, Annotator xmlRemover,
+                                    Annotator splitter) {
     Annotation annotation = new Annotation(text);
     tokenizer.annotate(annotation);
     if (xmlRemover != null)
@@ -69,8 +71,8 @@ public class CleanXmlAnnotatorTest extends TestCase {
     return annotation;
   }
 
-  public void checkResult(Annotation annotation,
-                          String ... gold) {
+  public static void checkResult(Annotation annotation,
+                                 String... gold) {
     List<CoreLabel> goldTokens = new ArrayList<CoreLabel>();
     Annotation[] goldAnnotations = new Annotation[gold.length];
     for (int i = 0; i < gold.length; ++i) {
@@ -80,12 +82,12 @@ public class CleanXmlAnnotatorTest extends TestCase {
     List<CoreLabel> annotationLabels = annotation.get(CoreAnnotations.TokensAnnotation.class);
 
     if (goldTokens.size() != annotationLabels.size()) {
-      for (int i = 0; i < annotationLabels.size(); ++i) {
-        System.err.print(annotationLabels.get(i).word() + " ");
+      for (CoreLabel annotationLabel : annotationLabels) {
+        System.err.print(annotationLabel.word() + " ");
       }
       System.err.println();
-      for (int i = 0; i < goldTokens.size(); ++i) {
-        System.err.print(goldTokens.get(i).word() + " ");
+      for (CoreLabel goldToken : goldTokens) {
+        System.err.print(goldToken.word() + " ");
       }
       System.err.println();
     }
@@ -102,7 +104,7 @@ public class CleanXmlAnnotatorTest extends TestCase {
     }
   }
 
-  public void checkInvert(Annotation annotation, String gold) {
+  public static void checkInvert(Annotation annotation, String gold) {
     List<CoreLabel> annotationLabels =
       annotation.get(CoreAnnotations.TokensAnnotation.class);
     StringBuilder original = new StringBuilder();
@@ -115,7 +117,7 @@ public class CleanXmlAnnotatorTest extends TestCase {
     assertEquals(gold, original.toString());
   }
 
-  public void checkContext(CoreLabel label, String ... expectedContext) {
+  public static void checkContext(CoreLabel label, String... expectedContext) {
     List<String> xmlContext = label.get(CoreAnnotations.XmlContextAnnotation.class);
     assertEquals(expectedContext.length, xmlContext.size());
     for (int i = 0; i < expectedContext.length; ++i) {
