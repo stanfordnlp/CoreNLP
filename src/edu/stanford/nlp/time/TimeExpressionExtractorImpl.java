@@ -108,19 +108,16 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           logger.log(Level.WARNING, "Failed to get attributes from " + text + ", timeIndex " + timeIndex, e);
           continue;
         }
-        Timex timex = null;
+        Timex timex;
         try {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
-          logger.log(Level.WARNING, "Failed to process " + text + " with attributes " + timexAttributes, e);
+          logger.log(Level.WARNING, "Failed to process timex " + text + " with attributes " + timexAttributes, e);
           continue;
         }
+        assert timex != null;  // Timex.fromMap never returns null and if it exceptions, we've already done a continue
         cm.set(TimeAnnotations.TimexAnnotation.class, timex);
-        if (timex != null) {
-          coreMaps.add(cm);
-        } else {
-          logger.warning("No timex expression for: " + text);
-        }
+        coreMaps.add(cm);
       }
     }
     return coreMaps;
