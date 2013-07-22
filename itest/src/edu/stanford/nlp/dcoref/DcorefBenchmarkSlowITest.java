@@ -15,7 +15,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author John Bauer
  */
-public class DcorefRegressionSlowITest extends TestCase {
+public class DcorefBenchmarkSlowITest extends TestCase {
   public void testDcoref() throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefITest", "");
     WORK_DIR_FILE.delete();

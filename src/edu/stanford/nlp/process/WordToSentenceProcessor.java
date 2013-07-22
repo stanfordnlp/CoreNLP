@@ -5,28 +5,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
+// todo [cdm Feb 2012]: Rewrite the Set's as List's since while conceptually
+// sets, we just don't need to be hashing things here!
+// todo [cdm Aug 2012]: This should be unified with the PlainTextIterator in
+// DocumentPreprocessor, perhaps by making this one implement Iterator
+
 /**
- * Transforms a List of words into a List of Lists of words (that is, a List
- * of sentences), by grouping the words.  The word stream is assumed to
- * already be adequately tokenized, and this class just divides the List into
- * sentences, perhaps discarding some separator tokens as it goes.
- * <p>
- * The main behavior is to look for sentence ending tokens like "." or "?!?",
- * and to split after them and any following sentence closers like ")".
- * Overlaid on this is an overall choice of state: The WordToSentenceProcessor
- * can be a non-splitter, which always returns one sentence. Otherwise, the
- * WordToSentenceProcessor will also split based on paragraphs using one of
- * these three states: (1) Ignore line breaks in splitting sentences,
- * (2) Treat each line as a separate paragraph, or (3) Treat two consecutive
- * line breaks as marking the end of a paragraph. The details of sentence
- * breaking within paragraphs is controlled based on the following three
- * variables:
+ * Transforms a Document of Words into a Document of Sentences by grouping the
+ * Words.  The word stream is assumed to already be adequately tokenized,
+ * and this class just divides the list into sentences, perhaps discarding
+ * some separator tokens based on the setting of the following three sets:
  * <ul>
  * <li>sentenceBoundaryTokens are tokens that are left in a sentence, but are
  * to be regarded as ending a sentence.  A canonical example is a period.
@@ -42,13 +36,13 @@ import edu.stanford.nlp.util.Generics;
  * be a '{@code <p>}' tag.  If two of these follow each other, they are
  * coalesced: no empty Sentence is output.  The end-of-file is not
  * represented in this Set, but the code behaves as if it were a member.
- * <li>regionElementRegex A regular expression for element names containing
- * a sentence region. Only tokens in such elements will be included in
- * sentences. The start and end tags themselves are not included in the
- * sentence.
+ * <li>sentenceRegionBeginPattern A regular expression for marking the start
+ * of a sentence region.  Not included in the sentence.
+ * <li>sentenceRegionEndPattern A regular expression for marking the end
+ * of a sentence region.  Not included in the sentence.
  * </ul>
- *
- * Instances of this class are now immutable. ☺
+ * See DocumentPreprocessor for a class with a main method that will call this
+ * and cut a text file up into sentences.
  *
  * @author Joseph Smarr (jsmarr@stanford.edu)
  * @author Christopher Manning
@@ -59,20 +53,10 @@ import edu.stanford.nlp.util.Generics;
  */
 public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> {
 
-  // todo [cdm Aug 2012]: This should be unified with the PlainTextIterator
-  // in DocumentPreprocessor, perhaps by making this one implement Iterator.
-  // (DocumentProcessor once used to use this class, but now doesn't....)
-
-  public enum NewlineIsSentenceBreak { NEVER, ALWAYS, TWO_CONSECUTIVE }
-
-  public static final String DEFAULT_BOUNDARY_REGEX = "\\.|[!?]+";
-  public static final Set<String> DEFAULT_BOUNDARY_FOLLOWERS = Collections.unmodifiableSet(Generics.newHashSet(
-          Arrays.asList(")", "]", "}", "\"", "'", "''", "\u2019", "\u201D", "-RRB-", "-RSB-", "-RCB-", ")", "]", "}")));
-  public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(Generics.newHashSet(
-          Arrays.asList(WhitespaceLexer.NEWLINE, PTBLexer.NEWLINE_TOKEN)));
-
   private static final boolean DEBUG = false;
 
+  public static final Set<String> DEFAULT_BOUNDARY_FOLLOWERS = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(")", "]", "\"", "\'", "''", "-RRB-", "-RSB-", "-RCB-")));
+  public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(WhitespaceLexer.NEWLINE, PTBLexer.NEWLINE_TOKEN)));
 
   /**
    * Regex for tokens (Strings) that qualify as sentence-final tokens.
@@ -89,73 +73,54 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   /**
    * List of regex Pattern that are sentence boundaries to be discarded.
-   * This is normally newline tokens or representations of them.
    */
-  private final Set<String> sentenceBoundaryToDiscard;
-
-  /** Patterns that match the start and end tags of XML elements. These will
-   *  be discarded, but taken to mark a sentence boundary.
-   *  The value will be null if there are no such elements being used
-   *  (for efficiency).
-   */
-  private final List<Pattern> xmlBreakElementsToDiscard;
+  private List<Pattern> sentenceBoundaryToDiscard;
 
   private final Pattern sentenceRegionBeginPattern;
 
   private final Pattern sentenceRegionEndPattern;
 
-  private final NewlineIsSentenceBreak newlineIsSentenceBreak;
+  private boolean isOneSentence;
 
-  private final boolean isOneSentence;
+  private boolean allowEmptySentences = false;
 
-  private final boolean allowEmptySentences;
-
-
-  public static NewlineIsSentenceBreak stringToNewlineIsSentenceBreak(String name) {
-    if ("always".equals(name)) {
-      return NewlineIsSentenceBreak.ALWAYS;
-    } else if ("never".equals(name)) {
-      return NewlineIsSentenceBreak.NEVER;
-    } else if (name != null && name.contains("two")) {
-      return NewlineIsSentenceBreak.TWO_CONSECUTIVE;
-    } else {
-      throw new IllegalArgumentException("Not a valid NewlineIsSentenceBreak name");
+  public void setSentenceBoundaryToDiscard(Set<String> regexSet) {
+    sentenceBoundaryToDiscard = new ArrayList<Pattern>(regexSet.size());
+    for (String s: regexSet) {
+      sentenceBoundaryToDiscard.add(Pattern.compile(Pattern.quote(s)));
     }
   }
 
-  /** This is a sort of hacked in other way to end sentences.
-   *  Tokens with the ForcedSentenceEndAnnotation set to true
-   *  will also end a sentence.
-   */
-  @SuppressWarnings("OverlyStrongTypeCast")
-  private boolean isForcedEndToken(IN o) {
-    if (o instanceof CoreMap) {
-      Boolean forcedEndValue =
-              ((CoreMap)o).get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
-      return forcedEndValue != null && forcedEndValue;
-    } else {
-      return false;
+  public boolean isOneSentence() {
+    return isOneSentence;
+  }
+
+  public void setOneSentence(boolean oneSentence) {
+    isOneSentence = oneSentence;
+  }
+
+  public boolean allowEmptySentences() {
+    return allowEmptySentences;
+  }
+
+  public void setAllowEmptySentences(boolean allowEmptySentences) {
+    this.allowEmptySentences = allowEmptySentences;
+  }
+
+  public void addHtmlSentenceBoundaryToDiscard(Set<String> set) {
+    if (sentenceBoundaryToDiscard == null) {
+      sentenceBoundaryToDiscard = new ArrayList<Pattern>();
+    }
+    for (String s: set) {
+      sentenceBoundaryToDiscard.add(Pattern.compile("<\\s*/?\\s*" + s + "\\s*/?\\s*>", Pattern.CASE_INSENSITIVE));
+      sentenceBoundaryToDiscard.add(Pattern.compile("<\\s*" + s + "\\s+[^>]+>", Pattern.CASE_INSENSITIVE));
     }
   }
 
-  @SuppressWarnings("OverlyStrongTypeCast")
-  private String getString(IN o) {
-    if (o instanceof HasWord) {
-      HasWord h = (HasWord) o;
-      return h.word();
-    } else if (o instanceof String) {
-      return (String) o;
-    } else if (o instanceof CoreMap) {
-      return ((CoreMap) o).get(CoreAnnotations.TextAnnotation.class);
-    } else {
-      throw new RuntimeException("Expected token to be either Word or String.");
-    }
-  }
-
-  private boolean matchesXmlBreakElementToDiscard(String word) {
-    for (Pattern p : xmlBreakElementsToDiscard) {
+  private boolean matchesSentenceBoundaryToDiscard(String word) {
+    for(Pattern p: sentenceBoundaryToDiscard){
       Matcher m = p.matcher(word);
-      if (m.matches()) {
+      if(m.matches()){
         return true;
       }
     }
@@ -165,7 +130,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
   @Override
   public List<List<IN>> process(List<? extends IN> words) {
     if (isOneSentence) {
-      // put all the words in one sentence
       List<List<IN>> sentences = Generics.newArrayList();
       sentences.add(new ArrayList<IN>(words));
       return sentences;
@@ -183,78 +147,66 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    * input document must have been tokenized with a tokenizer that makes
    * sentence boundary tokens their own tokens (e.g., {@link PTBTokenizer}).
    *
-   * @param words A list of already tokenized words (must implement HasWord or be a String).
-   * @return A list of sentences.
-   * @see #WordToSentenceProcessor(String, Set, Set, Set, String, NewlineIsSentenceBreak, boolean, boolean)
+   * @param words A list of already tokenized words (must implement HasWord or be a String)
+   * @return A list of Sentence
+   * @see #WordToSentenceProcessor(String, Set, Set, Pattern, Pattern)
    */
   public List<List<IN>> wordsToSentences(List<? extends IN> words) {
     List<List<IN>> sentences = Generics.newArrayList();
     List<IN> currentSentence = new ArrayList<IN>();
     List<IN> lastSentence = null;
     boolean insideRegion = false;
-    boolean lastTokenWasNewline = false;
-    for (IN o : words) {
-      String word = getString(o);
-      boolean forcedEnd = isForcedEndToken(o);
+    for (IN o: words) {
+      String word;
+      if (o instanceof HasWord) {
+        HasWord h = (HasWord) o;
+        word = h.word();
+      } else if (o instanceof String) {
+        word = (String) o;
+      } else if (o instanceof CoreMap) {
+        word = ((CoreMap)o).get(CoreAnnotations.TextAnnotation.class);
+      } else {
+        throw new RuntimeException("Expected token to be either Word or String.");
+      }
+
+      boolean forcedEnd = false;
+      if (o instanceof CoreMap) {
+        Boolean forcedEndValue =
+          ((CoreMap)o).get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
+        if (forcedEndValue != null)
+          forcedEnd = forcedEndValue;
+      }
 
       if (DEBUG) {
         EncodingPrintWriter.err.println("Word is " + word, "UTF-8");
       }
       if (sentenceRegionBeginPattern != null && ! insideRegion) {
-        if (DEBUG) {
-          System.err.println("  outside region; deleted");
-        }
         if (sentenceRegionBeginPattern.matcher(word).matches()) {
           insideRegion = true;
-          if (DEBUG) {
-            System.err.println("  entering region");
-          }
         }
-        lastTokenWasNewline = false;
+        if (DEBUG) {
+          System.err.println("  outside region");
+        }
         continue;
       }
-
-      if (lastSentence != null && currentSentence.isEmpty() && sentenceBoundaryFollowers.contains(word)) {
+      if (sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
         lastSentence.add(o);
         if (DEBUG) {
-          System.err.println("  added to last sentence");
-        }
-        lastTokenWasNewline = false;
-        continue;
-      }
-
-      boolean newSent = false;
-      if (sentenceBoundaryToDiscard.contains(word)) {
-        if (newlineIsSentenceBreak == NewlineIsSentenceBreak.ALWAYS) {
-          newSent = true;
-        } else if (newlineIsSentenceBreak == NewlineIsSentenceBreak.TWO_CONSECUTIVE) {
-          if (lastTokenWasNewline) {
-            newSent = true;
-          }
-        }
-        lastTokenWasNewline = true;
-        if (DEBUG) {
-          System.err.println("  discarded sentence boundary");
+          System.err.println("  added to last");
         }
       } else {
-        lastTokenWasNewline = false;
-        if (xmlBreakElementsToDiscard != null && matchesXmlBreakElementToDiscard(word)) {
+        boolean newSent = false;
+        if (matchesSentenceBoundaryToDiscard(word)) {
           newSent = true;
-          if (DEBUG) {
-            System.err.println("  is XML break element; discarded");
-          }
         } else if (sentenceRegionEndPattern != null && sentenceRegionEndPattern.matcher(word).matches()) {
           insideRegion = false;
           newSent = true;
-          if (DEBUG) {
-            System.err.println("  discarded; exiting region");
-          }
         } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
           currentSentence.add(o);
-          newSent = true;
           if (DEBUG) {
             System.err.println("  is sentence boundary; added to current");
           }
+          newSent = true;
         } else if (forcedEnd) {
           currentSentence.add(o);
           newSent = true;
@@ -267,16 +219,15 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
             System.err.println("  added to current");
           }
         }
-      }
-
-      if (newSent && (!currentSentence.isEmpty() || allowEmptySentences)) {
-        if (DEBUG) {
-          System.err.println("  beginning new sentence");
+        if (newSent && (!currentSentence.isEmpty() || allowEmptySentences())) {
+          if (DEBUG) {
+            System.err.println("  beginning new sentence");
+          }
+          sentences.add(currentSentence);
+          // adds this sentence now that it's complete
+          lastSentence = currentSentence;
+          currentSentence = new ArrayList<IN>(); // clears the current sentence
         }
-        sentences.add(currentSentence);
-        // adds this sentence now that it's complete
-        lastSentence = currentSentence;
-        currentSentence = new ArrayList<IN>(); // clears the current sentence
       }
     }
 
@@ -288,181 +239,67 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     return sentences;
   }
 
+
   public <L, F> Document<L, F, List<IN>> processDocument(Document<L, F, IN> in) {
     Document<L, F, List<IN>> doc = in.blankDocument();
     doc.addAll(process(in));
     return doc;
   }
 
-
   /**
    * Create a {@code WordToSentenceProcessor} using a sensible default
-   * list of tokens for sentence ending for English/Latin writing systems.
+   * list of tokens to split on for English/Latin writing systems.
    * The default set is: {".","?","!"} and
    * any combination of ! or ?, as in !!!?!?!?!!!?!!?!!!.
-   * A sequence of two or more consecutive line breaks is taken as a paragraph break
-   * which also splits sentences. This is the usual constructor for sentence
-   * breaking reasonable text, which uses hard-line breaking, so two
-   * blank lines indicate a paragraph break.
    */
   public WordToSentenceProcessor() {
-    this(false);
-  }
-
-  /**
-   * Create a {@code WordToSentenceProcessor} using a sensible default
-   * list of tokens for sentence ending for English/Latin writing systems.
-   * The default set is: {".","?","!"} and
-   * any combination of ! or ?, as in !!!?!?!?!!!?!!?!!!.
-   * You can specify the treatment of newlines as sentence breaks as one
-   * of ignored, every newline is a sentence break, or only two or more
-   * consecutive newlines are a sentence break.
-   *
-   * @param newlineIsSentenceBreak Strategy for treating newlines as
-   *                               paragraph breaks.
-   */
-  public WordToSentenceProcessor(NewlineIsSentenceBreak newlineIsSentenceBreak) {
-    this(DEFAULT_BOUNDARY_REGEX, newlineIsSentenceBreak, false);
-  }
-
-  /**
-   * Create a {@code WordToSentenceProcessor} which never breaks the input
-   * into multiple sentences. If the argument is true, the input stream
-   * is always output as one sentence. (If it is false, this is
-   * equivalent to the no argument constructor, so why use this?)
-   *
-   * @param isOneSentence Marker argument: true means to treat input
-   *                      as one sentence
-   */
-  public WordToSentenceProcessor(boolean isOneSentence) {
-    this(DEFAULT_BOUNDARY_REGEX, NewlineIsSentenceBreak.TWO_CONSECUTIVE, isOneSentence);
-  }
-
-
-  /**
-   * This one just massages the above 3 constructors to the maximal constructor.
-   *
-   * @param boundaryTokenRegex The set of boundary tokens
-   * @param newlineIsSentenceBreak Strategy for treating newlines as sentence breaks
-   * @param isOneSentence Whether to treat whole text as one sentence
-   *                      (if true, the other two parameters are ignored).
-   */
-  private WordToSentenceProcessor(String boundaryTokenRegex,
-                                 NewlineIsSentenceBreak newlineIsSentenceBreak,
-                                 boolean isOneSentence) {
-    this(boundaryTokenRegex, DEFAULT_BOUNDARY_FOLLOWERS, DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD,
-            null, null, newlineIsSentenceBreak, isOneSentence, false);
+    this("\\.|[!?]+");
   }
 
   /**
    * Flexibly set the set of acceptable sentence boundary tokens, but with
-   * a default set of allowed boundary following tokens. Also can set sentence boundary
-   * to discard tokens and xmlBreakElementsToDiscard and set the treatment of newlines
-   * (boundaryToDiscard) as sentence ends.
-   *
-   * This one is convenient in allowing any of the first 3 arguments to be null,
-   * and then the usual defaults are substituted for it.
+   * a default set of allowed boundary following tokens and sentence boundary
+   * to discard tokens (based on English and Penn Treebank encoding).
    * The allowed set of boundary followers is:
-   * {")", "]", "}", "\"", "'", "''", "’", "”", "-RRB-", "-RSB-", "-RCB-", ")", "]", "}"}.
+   * {")","]","\"","\'", "''", "-RRB-", "-RSB-", "-RCB-"}.
    * The default set of discarded separator tokens includes the
    * newline tokens used by WhitespaceLexer and PTBLexer.
    *
-   * @param boundaryTokenRegex The set of boundary tokens. If null, use default.
-   * @param boundaryToDiscard The set of regex for sentence boundary tokens that should be discarded.
-   *                          If null, use default.
-   * @param xmlBreakElementsToDiscard xml element names like "p", which will be recognized,
-   *                                  treated as sentence ends, and discarded.
-   *                                  If null, use none.
-   * @param newlineIsSentenceBreak Strategy for counting line ends (boundaryToDiscard) as sentence ends.
+   * @param boundaryTokenRegex The set of boundary tokens
+   */
+  public WordToSentenceProcessor(String boundaryTokenRegex) {
+    this(boundaryTokenRegex, DEFAULT_BOUNDARY_FOLLOWERS, DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD);
+  }
+
+  /**
+   * Flexibly set the set of acceptable sentence boundary tokens,
+   * the set of tokens commonly following sentence boundaries, and also
+   * the set of tokens that are sentences boundaries that should be
+   * discarded.
    */
   public WordToSentenceProcessor(String boundaryTokenRegex,
-                                 Set<String> boundaryToDiscard, Set<String> xmlBreakElementsToDiscard,
-                                 NewlineIsSentenceBreak newlineIsSentenceBreak) {
-    this(boundaryTokenRegex == null ? DEFAULT_BOUNDARY_REGEX : boundaryTokenRegex,
-            DEFAULT_BOUNDARY_FOLLOWERS,
-            boundaryToDiscard == null || boundaryToDiscard.isEmpty() ? DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD : boundaryToDiscard,
-            xmlBreakElementsToDiscard == null ? Collections.<String>emptySet() : xmlBreakElementsToDiscard,
-            null, newlineIsSentenceBreak, false, false);
-  }
-
-
-  /**
-   * Set the set of Strings that will mark the end of a sentence,
-   * and which will be discarded after doing so.
-   * This constructor is used for, and usually only for, doing
-   * one-sentence-per-line sentence splitting.  Since in such cases, you
-   * generally want to strictly preserve the set of lines in the input,
-   * it preserves empty lines as empty sentences in the output.
-   *
-   * @param boundaryToDiscard A Set of String that will be matched
-   *                          with .equals() and will mark an
-   *                          end of sentence and be discarded.
-   */
-  public WordToSentenceProcessor(Set<String> boundaryToDiscard) {
-    this("", Collections.<String>emptySet(), boundaryToDiscard, null, null,
-            NewlineIsSentenceBreak.ALWAYS, false, true);
+                                 Set<String> boundaryFollowers,
+                                 Set<String> boundaryToDiscard) {
+    this(boundaryTokenRegex, boundaryFollowers, boundaryToDiscard, null, null);
   }
 
   /**
-   * Flexibly set parameters for converting a list of tokens into sentences.
-   * The whole enchilada.
-   *
-   * @param boundaryTokenRegex Tokens that match this regex will end a
-   *                           sentence, but are retained at the end of
-   *                           the sentence.
-   * @param boundaryFollowers This is a Set of String that are matched with
-   *                          .equals() which are allowed to be tacked onto
-   *                          the end of a sentence after a sentence boundary
-   *                          token, for example ")".
-   * @param boundariesToDiscard This is normally used for newline tokens if
-   *                            they are included in the tokenization. They
-   *                            may end the sentence (depending on the setting
-   *                            of newlineIsSentenceBreak), but at any rate
-   *                            are deleted from sentences in the output.
-   * @param xmlBreakElementsToDiscard These are elements like "p" or "sent",
-   *                                  which will be wrapped into regex for
-   *                                  approximate XML matching. They will be
-   *                                  deleted in the output, and will always
-   *                                  trigger a sentence boundary.
+   * Flexibly set a pattern that matches acceptable sentence boundaries,
+   * the set of tokens commonly following sentence boundaries, and also
+   * the set of tokens that are sentence boundaries that should be discarded.
+   * This is private because it is a dangerous constructor. It's not clear what the semantics
+   * should be if there are both boundary token sets, and patterns to match.
    */
-  public WordToSentenceProcessor(String boundaryTokenRegex, Set<String> boundaryFollowers,
-                                  Set<String> boundariesToDiscard, Set<String> xmlBreakElementsToDiscard,
-                                  String regionElementRegex, NewlineIsSentenceBreak newlineIsSentenceBreak,
-                                  boolean isOneSentence, boolean allowEmptySentences) {
+  private WordToSentenceProcessor(String boundaryTokenRegex, Set<String> boundaryFollowers, Set<String> boundaryToDiscard, Pattern regionBeginPattern, Pattern regionEndPattern) {
     sentenceBoundaryTokenPattern = Pattern.compile(boundaryTokenRegex);
-    sentenceBoundaryFollowers = Collections.unmodifiableSet(boundaryFollowers);
-    sentenceBoundaryToDiscard = Collections.unmodifiableSet(boundariesToDiscard);
-    if (xmlBreakElementsToDiscard == null || xmlBreakElementsToDiscard.isEmpty()) {
-      this.xmlBreakElementsToDiscard = null;
-    } else {
-      this.xmlBreakElementsToDiscard = new ArrayList<Pattern>(xmlBreakElementsToDiscard.size());
-      for (String s: xmlBreakElementsToDiscard) {
-        String regex = "<\\s*(?:/\\s*)?(?:" + s + ")(?:\\s+[^>]+?|\\s*(?:/\\s*)?)>";
-        // System.err.println("Regex is |" + regex + "|");
-        // todo: Historically case insensitive, but maybe better and more proper to make case sensitive?
-        this.xmlBreakElementsToDiscard.add(Pattern.compile(regex, Pattern.CASE_INSENSITIVE));
-      }
-    }
-    if (regionElementRegex != null) {
-      sentenceRegionBeginPattern = Pattern.compile("<\\s*(?:" + regionElementRegex + ")(?:\\s+[^>]+?)?>");
-      sentenceRegionEndPattern = Pattern.compile("<\\s*/\\s*(?:" + regionElementRegex + ")\\s*>");
-    } else {
-      sentenceRegionBeginPattern = null;
-      sentenceRegionEndPattern = null;
-    }
-    this.newlineIsSentenceBreak = newlineIsSentenceBreak;
-    this.isOneSentence = isOneSentence;
-    this.allowEmptySentences = allowEmptySentences;
+    sentenceBoundaryFollowers = boundaryFollowers;
+    setSentenceBoundaryToDiscard(boundaryToDiscard);
+    sentenceRegionBeginPattern = regionBeginPattern;
+    sentenceRegionEndPattern = regionEndPattern;
     if (DEBUG) {
       EncodingPrintWriter.err.println("WordToSentenceProcessor: boundaryTokens=" + boundaryTokenRegex, "UTF-8");
       EncodingPrintWriter.err.println("  boundaryFollowers=" + boundaryFollowers, "UTF-8");
-      EncodingPrintWriter.err.println("  boundariesToDiscard=" + boundariesToDiscard, "UTF-8");
-      EncodingPrintWriter.err.println("  xmlBreakElementsToDiscard=" + xmlBreakElementsToDiscard, "UTF-8");
-      EncodingPrintWriter.err.println("  regionBeginPattern=" + sentenceRegionBeginPattern, "UTF-8");
-      EncodingPrintWriter.err.println("  regionEndPattern=" + sentenceRegionEndPattern, "UTF-8");
-      EncodingPrintWriter.err.println("  newlineIsSentenceBreak=" + newlineIsSentenceBreak, "UTF-8");
-      EncodingPrintWriter.err.println("  isOneSentence=" + isOneSentence, "UTF-8");
-      EncodingPrintWriter.err.println("  allowEmptySentences=" + allowEmptySentences, "UTF-8");
+      EncodingPrintWriter.err.println("  boundaryToDiscard=" + boundaryToDiscard, "UTF-8");
     }
   }
 
