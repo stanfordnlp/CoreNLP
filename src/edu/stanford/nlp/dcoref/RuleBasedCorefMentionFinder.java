@@ -240,7 +240,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     // found an exact match
     //
     if (exactMatch != null) {
-      return safeHead(exactMatch, endIdx);
+      return safeHead(exactMatch);
     }
 
     // no exact match found
@@ -271,13 +271,10 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, Pattern.compile(".*"));
     List<ParserConstraint> constraints = Collections.singletonList(constraint);
     Tree tree = parse(extentTokens, constraints);
-    convertToCoreLabels(tree);  // now unnecessary, as parser uses CoreLabels?
+    convertToCoreLabels(tree);
     tree.indexSpans(m.startIndex - ADDED_WORDS);  // remember it has ADDED_WORDS extra words at the beginning
     Tree subtree = findPartialSpan(tree, m.startIndex);
-    // There was a possible problem that with a crazy parse, extentHead could be one of the added words, not a real word!
-    // Now we make sure in findPartialSpan that it can't be before the real start, and in safeHead, we disallow something
-    // passed the right end (that is, just that final period).
-    Tree extentHead = safeHead(subtree, endIdx);
+    Tree extentHead = safeHead(subtree);
     assert(extentHead != null);
     // extentHead is a child in the local extent parse tree. we need to find the corresponding node in the main tree
     // Because we deleted dashes, it's index will be >= the index in the extent parse tree
@@ -286,8 +283,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     assert(realHead != null);
     return realHead;
   }
-
-  /** Find the tree that covers the portion of interest. */
   private static Tree findPartialSpan(final Tree root, final int start) {
     CoreLabel label = (CoreLabel) root.label();
     int startIndex = label.get(CoreAnnotations.BeginIndexAnnotation.class);
@@ -306,34 +301,18 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private static Tree funkyFindLeafWithApproximateSpan(Tree root, String token, int index, int approximateness) {
-    // System.err.println("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
-      Integer indexInteger = label.get(CoreAnnotations.IndexAnnotation.class);
-      if (indexInteger == null) continue;
-      int ind = indexInteger - 1;
+      int ind = label.get(CoreAnnotations.IndexAnnotation.class) - 1;
       if (token.equals(leaf.value()) && ind >= index && ind <= index + approximateness) {
         return leaf;
       }
     }
     // this shouldn't happen
     //    throw new RuntimeException("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
-    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Failed to find head token:\n" +
-                       "Tree is: " + root + "\n" + 
-                       "token = |" + token + "|" + index + "|, approx=" + approximateness);
-    for (Tree leaf : leaves) {
-      CoreLabel label = CoreLabel.class.cast(leaf.label());
-      Integer indexInteger = label.get(CoreAnnotations.IndexAnnotation.class);
-      if (indexInteger == null) continue; // not a word from the original tree
-      int ind = indexInteger - 1;
-      if (token.equals(leaf.value())) {
-        // System.err.println("Found it at position " + ind + "; returning " + leaf);
-        return leaf;
-      }
-    }
-    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(leaves.size() - 2));
-    return leaves.get(leaves.size() - 2); // last except for the added period.
+    System.err.println("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
+    return leaves.get(leaves.size() - 1);
   }
 
   private static CoreLabel initCoreLabel(String token) {
@@ -360,7 +339,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     sents = doc.get(CoreAnnotations.SentencesAnnotation.class);
     return sents.get(0).get(TreeCoreAnnotations.TreeAnnotation.class);
   }
-
   private Annotator getParser() {
     if(parserProcessor == null){
       parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");
@@ -368,11 +346,9 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
     return parserProcessor;
   }
-
-  // This probably isn't needed now; everything is always a core label. But no-op.
   private static void convertToCoreLabels(Tree tree) {
     Label l = tree.label();
-    if (! (l instanceof CoreLabel)) {
+    if(! (l instanceof CoreLabel)){
       CoreLabel cl = new CoreLabel();
       cl.setValue(l.value());
       tree.setLabel(cl);
@@ -382,37 +358,15 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       convertToCoreLabels(kid);
     }
   }
-
-  private Tree safeHead(Tree top, int endIndex) {
+  private Tree safeHead(Tree top) {
     Tree head = top.headTerminal(headFinder);
-    // One obscure failure case is that the added period becomes the head. Disallow this.
-    if (head != null) {
-      Integer headIndexInteger = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class);
-      if (headIndexInteger != null) {
-        int headIndex = headIndexInteger - 1;
-        if (headIndex < endIndex) {
-          return head;
-        }
-      }
-    }
+    if (head != null) return head;
     // if no head found return the right-most leaf
     List<Tree> leaves = top.getLeaves();
-    int candidate = leaves.size() - 1;
-    while (candidate >= 0) {
-      head = leaves.get(candidate);
-      Integer headIndexInteger = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class);
-      if (headIndexInteger != null) {
-        int headIndex = headIndexInteger - 1;
-        if (headIndex < endIndex) {
-          return head;
-        }
-      }
-      candidate--;
-    }
+    if(leaves.size() > 0) return leaves.get(leaves.size() - 1);
     // fallback: return top
     return top;
   }
-
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
     CoreLabel l = (CoreLabel) tree.label();
     if (l != null && l.has(CoreAnnotations.BeginIndexAnnotation.class) && l.has(CoreAnnotations.EndIndexAnnotation.class)) {
