@@ -32,17 +32,16 @@ public class QPTreeTransformer implements TreeTransformer {
 
   /**
    * Right now (Jan 2013) we only deal with the following QP structures:
-   * <ul>
-   * <li> QP (RB IN CD|DT ...)   well over, more than
-   * <li> QP (JJR IN CD|DT ...)  fewer than
-   * <li> QP (IN JJS CD|DT ...)  at least
-   * <li> QP (... CC ...)        between 5 and 10
-   * </ul>
+   *
+   * QP (RB IN CD|DT ...)   well over, more than
+   * QP (JJR IN CD|DT ...)  fewer than
+   * QP (IN JJS CD|DT ...)  at least
+   * QP (... CC ...)        between 5 and 10
    *
    * @param t tree to be transformed
-   * @return The tree t with an extra layer if there was a QP structure matching the ones mentioned above
+   * @return  t with an extra layer if there was a QP structure matching the ones mentioned above
    */
-  @Override
+
   public Tree transformTree(Tree t) {
      return QPtransform(t);
   }
