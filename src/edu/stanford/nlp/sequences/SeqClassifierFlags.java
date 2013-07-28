@@ -957,7 +957,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useTrainLexicon = false;
   public boolean useCWSFeatures = true;
   public boolean appendLC = false;
-  public boolean lazyUpdate = true;
   public boolean perceptronDebug = false;
   public boolean pctSegmenterScaleByCRF = false;
   public double pctSegmenterScale = 0.0;
@@ -970,6 +969,8 @@ public class SeqClassifierFlags implements Serializable {
   public String unsupDropoutFile = null;
   public double unsupDropoutScale = 1.0;
   public int startEvaluateIters = 0;
+  public int multiThreadPerceptron = 1;
+  public boolean lazyUpdate = false;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2362,8 +2363,6 @@ public class SeqClassifierFlags implements Serializable {
         useCWSFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("appendLC")){
         appendLC = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("lazyUpdate")){
-        lazyUpdate = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("perceptronDebug")){
         perceptronDebug = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("pctSegmenterScaleByCRF")){
@@ -2388,6 +2387,10 @@ public class SeqClassifierFlags implements Serializable {
         unsupDropoutScale = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("startEvaluateIters")){
         startEvaluateIters = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("multiThreadPerceptron")){
+        multiThreadPerceptron = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("lazyUpdate")){
+        lazyUpdate = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
