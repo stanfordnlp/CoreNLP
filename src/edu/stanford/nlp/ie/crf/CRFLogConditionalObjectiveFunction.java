@@ -7,7 +7,7 @@ import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.concurrent.*;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.Quadruple;
 
 import java.util.*;
@@ -85,6 +85,18 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   private Random rand = new Random(2147483647L);
 
+  private ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> threadProcessor = 
+        new ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>() {
+      @Override
+      public Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> process(Triple<Integer,Boolean, double[][]> docIndexUnsupWeights) {
+        return expectedCountsAndValueForADoc(docIndexUnsupWeights.third(), docIndexUnsupWeights.first(), false, docIndexUnsupWeights.second());
+      }
+      @Override
+      public ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> newInstance() {
+        return this;
+      }
+    };
+
   @Override
   public double[] initial() {
     double[] initial = new double[domainDimension()];
@@ -148,6 +160,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     this.dropoutScale = dropoutScale;
     this.dropoutApprox = dropoutApprox;
     this.multiThreadGrad = multiThreadGrad;
+    // takes docIndex, returns Triple<prob, E, dropoutGrad>
     Ehat = empty2D();
     empiricalCounts(Ehat);
     int myDomainDimension = 0;
@@ -169,7 +182,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     }
     domainDimension = myDomainDimension;
     initEdgeLabels();
-    initializeDataFeatureHash();
+    if (multiThreadGrad > 0)
+      initializeDataFeatureHash();
   }
 
   private void initEdgeLabels() {
@@ -345,7 +359,10 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   }
 
   public double valueForADoc(double[][] weights, int docIndex) {
-    return expectedCountsAndValueForADoc(weights, docIndex, true, false).second();
+    if (multiThreadGrad == 0)
+      return expectedCountsAndValueForADoc(weights, null, docIndex, true, false);
+    else
+      return expectedCountsAndValueForADoc(weights, docIndex, true, false).second();
   }
 
   private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(double[][] weights, int docIndex) {
@@ -380,7 +397,79 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return aMap;
   }
 
-  // TODO(mengqiu) optimize EForADoc and dropoutPriorGrad to be smaller
+  private double expectedCountsAndValueForADoc(double[][] weights, double[][] E, int docIndex) {
+    return expectedCountsAndValueForADoc(weights, E, docIndex, false, false);
+  }
+
+  private double expectedCountsForADoc(double[][] weights, double[][] E, int docIndex) {
+    return expectedCountsAndValueForADoc(weights, E, docIndex, false, true);
+  }
+
+  private double expectedCountsAndValueForADoc(double[][] weights, double[][] E, int docIndex, boolean skipExpectedCountCalc, boolean skipValCalc) {
+    double prob = 0.0;
+    int[][][] docData = data[docIndex];
+    int[] docLabels = labels[docIndex];
+
+    double[][][] featureVal3DArr = null;
+    if (featureVal != null)
+      featureVal3DArr = featureVal[docIndex];
+
+    CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
+    // make a clique tree for this document
+    CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
+
+    if (!skipValCalc) {
+      // compute the log probability of the document given the model with the parameters x
+      int[] given = new int[window - 1];
+      Arrays.fill(given, classIndex.indexOf(backgroundSymbol));
+      if (docLabels.length>docData.length) { // only true for self-training
+        // fill the given array with the extra docLabels
+        System.arraycopy(docLabels, 0, given, 0, given.length);
+        // shift the docLabels array left
+        int[] newDocLabels = new int[docData.length];
+        System.arraycopy(docLabels, docLabels.length-newDocLabels.length, newDocLabels, 0, newDocLabels.length);
+        docLabels = newDocLabels;
+      }
+
+      // iterate over the positions in this document
+      for (int i = 0; i < docData.length; i++) {
+        int label = docLabels[i];
+        double p = cliqueTree.condLogProbGivenPrevious(i, label, given);
+        if (VERBOSE) {
+          System.err.println("P(" + label + "|" + ArrayMath.toString(given) + ")=" + p);
+        }
+        prob += p;
+        System.arraycopy(given, 1, given, 0, given.length - 1);
+        given[given.length - 1] = label;
+      }
+    }
+
+    if (!skipExpectedCountCalc) {
+      // compute the expected counts for this document, which we will need to compute the derivative
+      // iterate over the positions in this document
+      for (int i = 0; i < docData.length; i++) {
+        // for each possible clique at this position
+        for (int j = 0; j < docData[i].length; j++) {
+          Index<CRFLabel> labelIndex = labelIndices.get(j);
+          // for each possible labeling for that clique
+          for (int k = 0; k < labelIndex.size(); k++) {
+            int[] label = labelIndex.get(k).getLabel();
+            double p = cliqueTree.prob(i, label); // probability of these labels occurring in this clique with these features
+            for (int n = 0; n < docData[i][j].length; n++) {
+              double fVal = 1.0;
+              if (j == 0 && featureVal3DArr != null) // j == 0 because only node features gets feature values
+                fVal = featureVal3DArr[i][j][n];
+              E[docData[i][j][n]][k] += p * fVal;
+            }
+          }
+        }
+      }
+    }
+
+    return prob;
+  }
+
+
   private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(double[][] weights, int docIndex, 
       boolean skipExpectedCountCalc, boolean skipValCalc) {
     
@@ -1063,43 +1152,66 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     final double[][] weights = to2D(x);
 
-    if (weightSquare == null) {
-      weightSquare = new double[weights.length][];
-      for (int i = 0; i < weights.length; i++)
-        weightSquare[i] = new double[weights[i].length];
-    }
-    double w = 0;
-    for (int i = 0; i < weights.length; i++) {
-      for (int j=0; j < weights[i].length; j++) {
-        w = weights[i][j];
-        weightSquare[i][j] = w * w;
+    if (prior == DROPOUT_PRIOR) {
+      if (weightSquare == null) {
+        weightSquare = new double[weights.length][];
+        for (int i = 0; i < weights.length; i++)
+          weightSquare[i] = new double[weights[i].length];
+      }
+      double w = 0;
+      for (int i = 0; i < weights.length; i++) {
+        for (int j=0; j < weights[i].length; j++) {
+          w = weights[i][j];
+          weightSquare[i][j] = w * w;
+        }
       }
     }
 
     // the expectations over counts
     // first index is feature index, second index is of possible labeling
     double[][] E = empty2D();
-    double[][] dropoutPriorGrad = empty2D();
+    double[][] dropoutPriorGrad = null;
+    if (prior == DROPOUT_PRIOR)
+      dropoutPriorGrad = empty2D();
 
-    // takes docIndex, returns Triple<prob, E, dropoutGrad>
-    ThreadsafeProcessor<Pair<Integer,Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> threadProcessor = 
-        new ThreadsafeProcessor<Pair<Integer,Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>() {
-      @Override
-      public Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> process(Pair<Integer,Boolean> docIndexUnsup) {
-        return expectedCountsAndValueForADoc(weights, docIndexUnsup.first(), false, docIndexUnsup.second());
+    if (multiThreadGrad == 0) {
+      for (int m = 0; m < data.length; m++) {
+        prob += expectedCountsAndValueForADoc(weights, E, m);
       }
-      @Override
-      public ThreadsafeProcessor<Pair<Integer,Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> newInstance() {
-        return this;
-      }
-    };
-    MulticoreWrapper<Pair<Integer,Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> wrapper = null;
-    wrapper = new MulticoreWrapper<Pair<Integer,Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>(multiThreadGrad, threadProcessor); 
+    } else {
+      MulticoreWrapper<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> wrapper =
+        new MulticoreWrapper<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>(multiThreadGrad, threadProcessor); 
+      // supervised part
+      for (int m = 0; m < totalData.length; m++) {
+        boolean submitIsUnsup = (m >= unsupDropoutStartIndex);
+        wrapper.put(new Triple<Integer, Boolean, double[][]>(m, submitIsUnsup, weights));
+        while (wrapper.peek()) {
+          Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> result = wrapper.poll();
+          int docIndex = result.first();
+          boolean isUnsup = docIndex >= unsupDropoutStartIndex;
+          if (isUnsup) {
+            prob += unsupDropoutScale * result.second();
+          } else {
+            prob += result.second();
+          }
 
-    // supervised part
-    for (int m = 0; m < totalData.length; m++) {
-      boolean submitIsUnsup = (m >= unsupDropoutStartIndex);
-      wrapper.put(new Pair<Integer, Boolean>(m, submitIsUnsup));
+          Map<Integer, double[]> partialDropout = result.fourth();
+          if (partialDropout != null) {
+            if (isUnsup) {
+              combine2DArr(dropoutPriorGrad, partialDropout, unsupDropoutScale);
+            } else {
+              combine2DArr(dropoutPriorGrad, partialDropout);
+            }
+          }
+
+          if (!isUnsup) {
+            Map<Integer, double[]> partialE = result.third();
+            if (partialE != null)
+              combine2DArr(E, partialE);
+          }
+        }
+      }
+      wrapper.join();
       while (wrapper.peek()) {
         Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> result = wrapper.poll();
         int docIndex = result.first();
@@ -1124,32 +1236,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
           if (partialE != null)
             combine2DArr(E, partialE);
         }
-      }
-    }
-    wrapper.join();
-    while (wrapper.peek()) {
-      Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> result = wrapper.poll();
-      int docIndex = result.first();
-      boolean isUnsup = docIndex >= unsupDropoutStartIndex;
-      if (isUnsup) {
-        prob += unsupDropoutScale * result.second();
-      } else {
-        prob += result.second();
-      }
-
-      Map<Integer, double[]> partialDropout = result.fourth();
-      if (partialDropout != null) {
-        if (isUnsup) {
-          combine2DArr(dropoutPriorGrad, partialDropout, unsupDropoutScale);
-        } else {
-          combine2DArr(dropoutPriorGrad, partialDropout);
-        }
-      }
-
-      if (!isUnsup) {
-        Map<Integer, double[]> partialE = result.third();
-        if (partialE != null)
-          combine2DArr(E, partialE);
       }
     }
 

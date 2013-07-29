@@ -963,7 +963,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean separateASCIIandRange = true;
   public double dropoutRate = 0.0;
   public double dropoutScale = 1.0;
-  public int multiThreadGrad = 1;
+  public int multiThreadGrad = 0;
   public int maxQNItr = 0;
   public boolean dropoutApprox = false;
   public String unsupDropoutFile = null;
