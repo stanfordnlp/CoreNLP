@@ -431,6 +431,11 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         docLabels = newDocLabels;
       }
 
+      double startPosLogProb = cliqueTree.logProbStartPos();
+      if (VERBOSE)
+        System.err.printf("P_-1(Background) = % 5.3f\n", startPosLogProb);
+      prob += startPosLogProb;
+
       // iterate over the positions in this document
       for (int i = 0; i < docData.length; i++) {
         int label = docLabels[i];
