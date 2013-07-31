@@ -135,6 +135,71 @@ public class TrieMapMatcher<K,V> {
     return allMatches;
   }
 
+  public List<Match<K,V>> findNonOverlapping(K ... list) {
+    return findNonOverlapping(Arrays.asList(list));
+  }
+
+  public List<Match<K,V>> findNonOverlapping(List<K> list) {
+    return findNonOverlapping(list, 0, list.size());
+  }
+
+  public final static Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.<Match>lengthEndpointsComparator();
+
+  public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end) {
+    return findNonOverlapping(list, start, end, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
+  }
+
+  public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end, Comparator<? super Match<K,V>> compareFunc) {
+    List<Match<K,V>> allMatches = findAllMatches(list, start, end);
+    return getNonOverlapping(allMatches, compareFunc);
+  }
+
+  public List<Match<K,V>> segment(K ... list) {
+    return segment(Arrays.asList(list));
+  }
+
+  public List<Match<K,V>> segment(List<K> list) {
+    return segment(list, 0, list.size());
+  }
+
+  public List<Match<K,V>> segment(List<K> list, int start, int end) {
+    return segment(list, start, end, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
+  }
+
+  public List<Match<K,V>> segment(List<K> list, int start, int end, Comparator<? super Match<K,V>> compareFunc) {
+    List<Match<K,V>> nonOverlapping = findNonOverlapping(list, start, end, compareFunc);
+    List<Match<K,V>> segments = new ArrayList<Match<K,V>>(nonOverlapping.size());
+    int last = 0;
+    for (Match<K,V> match:nonOverlapping) {
+      if (match.begin > last) {
+        // Create empty match and add to segments
+        Match<K,V> empty = new Match<K,V>(list.subList(last, match.begin), null, last, match.begin);
+        segments.add(empty);
+      }
+      segments.add(match);
+      last = match.end;
+    }
+    if (list.size() > last) {
+      Match<K,V> empty = new Match<K,V>(list.subList(last, list.size()), null, last, list.size());
+      segments.add(empty);
+    }
+    return segments;
+  }
+
+  public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches) {
+    return getNonOverlapping(allMatches, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
+  }
+
+  public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches, Comparator<? super Match<K,V>> compareFunc) {
+    if (allMatches.size() > 1) {
+      List<Match<K,V>> nonOverlapping = IntervalTree.getNonOverlapping(allMatches, compareFunc);
+      Collections.sort(nonOverlapping, HasInterval.ENDPOINTS_COMPARATOR);
+      return nonOverlapping;
+    } else {
+      return allMatches;
+    }
+  }
+
   protected void updateAllMatches(TrieMap<K,V> trie, List<Match<K,V>> matches, List<K> matched, List<K> list, int start, int end) {
     for (int i = start; i < end; i++) {
       updateAllMatchesWithStart(trie, matches, matched, list, i, end);
