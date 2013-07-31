@@ -522,7 +522,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   private static final String [] commonNESuffixes = {
     "Corp", "Co", "Inc", "Ltd"
   };
-
   private static boolean knownSuffix(String s) {
     if(s.endsWith(".")) s = s.substring(0, s.length() - 1);
     for(String suff: commonNESuffixes){
@@ -542,13 +541,13 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         throw new RuntimeException("Invalid start index " + start + "=" + headIndex + "-" + startIndex
                 + ": originalSpan=[" + StringUtils.joinWords(originalSpan, " ") + "], head=" + headWord);
       }
-      while (start >= 0) {
+      while(start >= 0){
         String head = originalSpan.get(start).get(CoreAnnotations.TextAnnotation.class).toLowerCase();
-        if (knownSuffix(head)) {
-          start --;
-        } else {
+        if(knownSuffix(head) == false){
           this.headString = head;
           break;
+        } else {
+          start --;
         }
       }
     }
