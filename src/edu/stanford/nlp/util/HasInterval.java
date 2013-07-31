@@ -1,5 +1,7 @@
 package edu.stanford.nlp.util;
 
+import edu.stanford.nlp.ling.tokensregex.matcher.Match;
+
 import java.util.Comparator;
 
 /**
@@ -61,4 +63,8 @@ public interface HasInterval<E extends Comparable<E>> {
               }
             }
           };
+
+  public final static Comparator<HasInterval<Integer>> LENGTH_ENDPOINTS_COMPARATOR =
+          Comparators.chain(HasInterval.LENGTH_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
+
 }
