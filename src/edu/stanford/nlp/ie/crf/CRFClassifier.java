@@ -455,6 +455,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    */
   public Triple<int[][][], int[], double[][][]> documentToDataAndLabels(List<IN> document,
                                                         boolean trainTime) {
+    boolean droppedFeature = false; // todo: remove me
     int docSize = document.size();
     // first index is position in the document also the index of the
     // clique/factor table
@@ -735,18 +736,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *          {@code List<CoreLabel>}.
    */
   protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob) {
-    boolean useFeatureCountThresh = flags.featureCountThresh > 1 ? true: false;
 
     Set<String>[] featureIndices = new HashSet[windowSize];
-    Map<String, Integer>[] featureCountIndices = null;
     for (int i = 0; i < windowSize; i++) {
       featureIndices[i] = Generics.newHashSet();
-    }
-    if (useFeatureCountThresh) {
-      featureCountIndices = new HashMap[windowSize];
-      for (int i = 0; i < windowSize; i++) {
-        featureCountIndices[i] = Generics.newHashMap();
-      }
     }
 
     labelIndices = new ArrayList<Index<CRFLabel>>(windowSize);
@@ -798,52 +791,21 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
             }
             if (background) {
               for (String f : cliqueFeatures) {
-                if (useFeatureCountThresh) {
-                  if (!featureCountIndices[k].containsKey(f)) {
-                    if (seenBackgroundFeatures[k].contains(f)) {
-                      seenBackgroundFeatures[k].remove(f);
-                      featureCountIndices[k].put(f, 1);
-                    } else {
-                      seenBackgroundFeatures[k].add(f);
-                    }
-                  }
-                } else {
-                  if (!featureIndices[k].contains(f)) {
-                    if (seenBackgroundFeatures[k].contains(f)) {
-                      seenBackgroundFeatures[k].remove(f);
-                      featureIndices[k].add(f);
-                    } else {
-                      seenBackgroundFeatures[k].add(f);
-                    }
+                if (!featureIndices[k].contains(f)) {
+                  if (seenBackgroundFeatures[k].contains(f)) {
+                    seenBackgroundFeatures[k].remove(f);
+                    featureIndices[k].add(f);
+                  } else {
+                    seenBackgroundFeatures[k].add(f);
                   }
                 }
               }
             } else {
               seenBackgroundFeatures[k].removeAll(cliqueFeatures);
-              if (useFeatureCountThresh) {
-                Map<String, Integer> fCountIndex = featureCountIndices[k];
-                for (String f: cliqueFeatures) {
-                  if (fCountIndex.containsKey(f))
-                    fCountIndex.put(f, fCountIndex.get(f)+1);
-                  else
-                    fCountIndex.put(f, 1);
-                }
-              } else {
-                featureIndices[k].addAll(cliqueFeatures);
-              }
-            }
-          } else {
-            if (useFeatureCountThresh) {
-              Map<String, Integer> fCountIndex = featureCountIndices[k];
-              for (String f: cliqueFeatures) {
-                if (fCountIndex.containsKey(f))
-                  fCountIndex.put(f, fCountIndex.get(f)+1);
-                else
-                  fCountIndex.put(f, 1);
-              }
-            } else {
               featureIndices[k].addAll(cliqueFeatures);
             }
+          } else {
+            featureIndices[k].addAll(cliqueFeatures);
           }
         }
       }
@@ -853,29 +815,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     }
 
-    if (useFeatureCountThresh) {
-      int numFeatures = 0;
-      for (int i = 0; i < windowSize; i++) {
-        numFeatures += featureCountIndices[i].size();
-      }
-      System.err.println("Before feature count thresholding, numFeatures = " + numFeatures);
-      for (int i = 0; i < windowSize; i++) {
-        for(Iterator<Map.Entry<String, Integer>> it = featureCountIndices[i].entrySet().iterator(); it.hasNext(); ) {
-          Map.Entry<String, Integer> entry = it.next();
-          if(entry.getValue() < flags.featureCountThresh) {
-            it.remove();
-          }
-        }
-        featureIndices[i].addAll(featureCountIndices[i].keySet());
-        featureCountIndices[i] = null;
-      }
-    }
-
     int numFeatures = 0;
     for (int i = 0; i < windowSize; i++) {
       numFeatures += featureIndices[i].size();
     }
-    System.err.println("numFeatures = " + numFeatures);
 
     featureIndex = new HashIndex<String>();
     map = new int[numFeatures];
@@ -1943,6 +1886,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // save feature index to disk and read in later
       File featIndexFile = null;
 
+      // int[] temp = new int[]{114, 157, 273,520,531};
+      // for (int ii = 0; ii < featureIndex.size(); ii++)
+      //   System.err.println("featureIndex["+ii+"] = " + featureIndex.get(ii));
       // CRFLogConditionalObjectiveFunction.featureIndex = featureIndex;
       int numFeatures = featureIndex.size();
       if (flags.saveFeatureIndexToDisk) {
