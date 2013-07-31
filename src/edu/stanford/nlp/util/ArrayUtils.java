@@ -934,20 +934,5 @@ public class ArrayUtils {
     }
     return ar2;
   }
-  
-  public static Object[] subArray(Object[] arr, int startindexInclusive, int endindexExclusive){
-    if(arr == null)
-      return arr;
-    Class type = arr.getClass().getComponentType();
-    if(endindexExclusive < startindexInclusive || startindexInclusive > arr.length -1 )
-      return (Object[]) Array.newInstance(type, 0);
-    if(endindexExclusive > arr.length)
-      endindexExclusive = arr.length;
-    if(startindexInclusive < 0)
-      startindexInclusive = 0;
-    Object[] b = (Object[]) Array.newInstance(type, endindexExclusive - startindexInclusive);
-    System.arraycopy(arr, startindexInclusive, b, 0, endindexExclusive - startindexInclusive);
-    return b;
-  }
 
 }
