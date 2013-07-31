@@ -1,7 +1,6 @@
 package edu.stanford.nlp.util;
 
 import java.io.Serializable;
-import java.util.Comparator;
 
 /**
  * Represents a interval of a generic type E that is comparable.
@@ -887,11 +886,6 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
 
   public static double getRadius(Interval<Integer> interval) {
     return (interval.getEnd() - interval.getBegin())/2;
-  }
-
-  @SuppressWarnings("unchecked")
-  public final static <T extends HasInterval<Integer>> Comparator<T> lengthEndpointsComparator() {
-    return ErasureUtils.uncheckedCast(HasInterval.LENGTH_ENDPOINTS_COMPARATOR);
   }
 
   private static final long serialVersionUID = 1;

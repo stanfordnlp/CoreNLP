@@ -57,7 +57,7 @@ public class PTBTokenizerTest extends TestCase {
       "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
     { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
       "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
-    { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
+    { "No", ".", "I", "like", "No.", "24", "and", "no.47", "." },
   };
 
   public void testPTBTokenizerWord() {

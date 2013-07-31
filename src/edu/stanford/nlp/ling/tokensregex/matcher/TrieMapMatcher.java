@@ -12,23 +12,9 @@ import java.util.*;
  */
 public class TrieMapMatcher<K,V> {
   TrieMap<K,V> root;
-  TrieMap<K,V> rootWithDelimiter;
-  List<K> multimatchDelimiter;
 
   public TrieMapMatcher(TrieMap<K, V> root) {
     this.root = root;
-  }
-
-  public TrieMapMatcher(TrieMap<K, V> root, List<K> multimatchDelimiter) {
-    this.root = root;
-    this.multimatchDelimiter = multimatchDelimiter;
-    if (multimatchDelimiter != null && !multimatchDelimiter.isEmpty()) {
-      // Create a new root that always starts with the delimiter
-      rootWithDelimiter = new TrieMap<K, V>();
-      rootWithDelimiter.putChildTrie(multimatchDelimiter, root);
-    } else {
-      rootWithDelimiter = root;
-    }
   }
 
   public List<ApproxMatch<K,V>> findClosestMatches(K[] target, int n) {
@@ -135,71 +121,6 @@ public class TrieMapMatcher<K,V> {
     return allMatches;
   }
 
-  public List<Match<K,V>> findNonOverlapping(K ... list) {
-    return findNonOverlapping(Arrays.asList(list));
-  }
-
-  public List<Match<K,V>> findNonOverlapping(List<K> list) {
-    return findNonOverlapping(list, 0, list.size());
-  }
-
-  public final static Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.<Match>lengthEndpointsComparator();
-
-  public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end) {
-    return findNonOverlapping(list, start, end, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
-  }
-
-  public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end, Comparator<? super Match<K,V>> compareFunc) {
-    List<Match<K,V>> allMatches = findAllMatches(list, start, end);
-    return getNonOverlapping(allMatches, compareFunc);
-  }
-
-  public List<Match<K,V>> segment(K ... list) {
-    return segment(Arrays.asList(list));
-  }
-
-  public List<Match<K,V>> segment(List<K> list) {
-    return segment(list, 0, list.size());
-  }
-
-  public List<Match<K,V>> segment(List<K> list, int start, int end) {
-    return segment(list, start, end, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
-  }
-
-  public List<Match<K,V>> segment(List<K> list, int start, int end, Comparator<? super Match<K,V>> compareFunc) {
-    List<Match<K,V>> nonOverlapping = findNonOverlapping(list, start, end, compareFunc);
-    List<Match<K,V>> segments = new ArrayList<Match<K,V>>(nonOverlapping.size());
-    int last = 0;
-    for (Match<K,V> match:nonOverlapping) {
-      if (match.begin > last) {
-        // Create empty match and add to segments
-        Match<K,V> empty = new Match<K,V>(list.subList(last, match.begin), null, last, match.begin);
-        segments.add(empty);
-      }
-      segments.add(match);
-      last = match.end;
-    }
-    if (list.size() > last) {
-      Match<K,V> empty = new Match<K,V>(list.subList(last, list.size()), null, last, list.size());
-      segments.add(empty);
-    }
-    return segments;
-  }
-
-  public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches) {
-    return getNonOverlapping(allMatches, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
-  }
-
-  public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches, Comparator<? super Match<K,V>> compareFunc) {
-    if (allMatches.size() > 1) {
-      List<Match<K,V>> nonOverlapping = IntervalTree.getNonOverlapping(allMatches, compareFunc);
-      Collections.sort(nonOverlapping, HasInterval.ENDPOINTS_COMPARATOR);
-      return nonOverlapping;
-    } else {
-      return allMatches;
-    }
-  }
-
   protected void updateAllMatches(TrieMap<K,V> trie, List<Match<K,V>> matches, List<K> matched, List<K> list, int start, int end) {
     for (int i = start; i < end; i++) {
       updateAllMatchesWithStart(trie, matches, matched, list, i, end);
@@ -262,7 +183,6 @@ public class TrieMapMatcher<K,V> {
                                               K t, K k, boolean multimatch, TrieMap<K,V> root) {
       PartialApproxMatch<K,V> res = withMatch(costFunction, deltaCost, t, k);
       if (multimatch && res.matched != null && res.value != null) {
-        // Update tracking of matched keys and values for multiple entry matches
         if (res.multivalues == null) {
           res.multivalues = new ArrayList<V>(1);
         } else {
@@ -277,7 +197,7 @@ public class TrieMapMatcher<K,V> {
           res.multimatched.addAll(multimatched);
         }
         res.multimatched.add(res.matched.subList(lastMultimatchedStartIndex, res.matched.size()));
-        res.cost += costFunction.multiMatchDeltaCost(res.multimatched.get(res.multimatched.size()-1), res.value, res.multimatched.size());
+        res.cost += costFunction.multiMatchDeltaCost(res.multimatched.get(res.multimatched.size()-1),res.value,res.multimatched.size());
         res.lastMultimatchedStartIndex = res.matched.size();
         // Reset current value/key being matched
         res.trie = root;
@@ -390,8 +310,7 @@ public class TrieMapMatcher<K,V> {
   private boolean addToQueue(MatchQueue<K,V> queue,
                              MatchQueue<K,V> best,
                              MatchCostFunction<K,V> costFunction,
-                             PartialApproxMatch<K,V> pam, K a, K b,
-                             boolean multimatch, boolean complete) {
+                             PartialApproxMatch<K,V> pam, K a, K b, boolean multimatch, boolean complete) {
     double deltaCost = costFunction.cost(a,b);
     double newCost = pam.cost + deltaCost;
     if (newCost > queue.maxCost) return false;
@@ -406,7 +325,7 @@ public class TrieMapMatcher<K,V> {
     }
 
     if (multimatch && npam.value != null) {
-      npam = pam.withMatch(costFunction, deltaCost, a, b, multimatch, rootWithDelimiter);
+      npam = pam.withMatch(costFunction, deltaCost, a, b, multimatch, root);
       if (complete && npam.value != null) {
         best.add(npam);
       }
