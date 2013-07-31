@@ -12,9 +12,23 @@ import java.util.*;
  */
 public class TrieMapMatcher<K,V> {
   TrieMap<K,V> root;
+  TrieMap<K,V> rootWithDelimiter;
+  List<K> multimatchDelimiter;
 
   public TrieMapMatcher(TrieMap<K, V> root) {
     this.root = root;
+  }
+
+  public TrieMapMatcher(TrieMap<K, V> root, List<K> multimatchDelimiter) {
+    this.root = root;
+    this.multimatchDelimiter = multimatchDelimiter;
+    if (multimatchDelimiter != null && !multimatchDelimiter.isEmpty()) {
+      // Create a new root that always starts with the delimiter
+      rootWithDelimiter = new TrieMap<K, V>();
+      rootWithDelimiter.putChildTrie(multimatchDelimiter, root);
+    } else {
+      rootWithDelimiter = root;
+    }
   }
 
   public List<ApproxMatch<K,V>> findClosestMatches(K[] target, int n) {
@@ -183,6 +197,7 @@ public class TrieMapMatcher<K,V> {
                                               K t, K k, boolean multimatch, TrieMap<K,V> root) {
       PartialApproxMatch<K,V> res = withMatch(costFunction, deltaCost, t, k);
       if (multimatch && res.matched != null && res.value != null) {
+        // Update tracking of matched keys and values for multiple entry matches
         if (res.multivalues == null) {
           res.multivalues = new ArrayList<V>(1);
         } else {
@@ -197,7 +212,7 @@ public class TrieMapMatcher<K,V> {
           res.multimatched.addAll(multimatched);
         }
         res.multimatched.add(res.matched.subList(lastMultimatchedStartIndex, res.matched.size()));
-        res.cost += costFunction.multiMatchDeltaCost(res.multimatched.get(res.multimatched.size()-1),res.value,res.multimatched.size());
+        res.cost += costFunction.multiMatchDeltaCost(res.multimatched.get(res.multimatched.size()-1), res.value, res.multimatched.size());
         res.lastMultimatchedStartIndex = res.matched.size();
         // Reset current value/key being matched
         res.trie = root;
@@ -310,7 +325,8 @@ public class TrieMapMatcher<K,V> {
   private boolean addToQueue(MatchQueue<K,V> queue,
                              MatchQueue<K,V> best,
                              MatchCostFunction<K,V> costFunction,
-                             PartialApproxMatch<K,V> pam, K a, K b, boolean multimatch, boolean complete) {
+                             PartialApproxMatch<K,V> pam, K a, K b,
+                             boolean multimatch, boolean complete) {
     double deltaCost = costFunction.cost(a,b);
     double newCost = pam.cost + deltaCost;
     if (newCost > queue.maxCost) return false;
@@ -325,7 +341,7 @@ public class TrieMapMatcher<K,V> {
     }
 
     if (multimatch && npam.value != null) {
-      npam = pam.withMatch(costFunction, deltaCost, a, b, multimatch, root);
+      npam = pam.withMatch(costFunction, deltaCost, a, b, multimatch, rootWithDelimiter);
       if (complete && npam.value != null) {
         best.add(npam);
       }

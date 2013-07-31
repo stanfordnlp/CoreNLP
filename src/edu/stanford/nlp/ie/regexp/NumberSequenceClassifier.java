@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ie.regexp;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -287,7 +286,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     return newSentence;
   }
 
-  private static String buildText(List<CoreLabel> tokens, Class<? extends CoreAnnotation<String>> textAnnotation) {
+  @SuppressWarnings("unchecked")
+  private static String buildText(List<CoreLabel> tokens, Class textAnnotation) {
     StringBuilder os = new StringBuilder();
     for (int i = 0, sz = tokens.size(); i < sz; i ++) {
       CoreLabel crt = tokens.get(i);
@@ -304,7 +304,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
           spaces--;
         }
       }
-      String word = crt.get(textAnnotation);
+      String word = (String) crt.get(textAnnotation);
       if (word == null) {
         // this annotation does not exist; bail out
         return null;
@@ -522,10 +522,10 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
    */
   public static List<CoreLabel> copyTokens(List<CoreLabel> srcTokens, CoreMap srcSentence) {
     boolean adjustCharacterOffsets = false;
-    if (srcSentence == null ||
+    if(srcSentence == null ||
         srcSentence.get(CoreAnnotations.TextAnnotation.class) == null ||
-        srcTokens.isEmpty() ||
-        srcTokens.get(0).get(CoreAnnotations.OriginalTextAnnotation.class) == null) {
+        srcTokens.size() == 0 ||
+        srcTokens.get(0).get(CoreAnnotations.OriginalTextAnnotation.class) == null){
       adjustCharacterOffsets = true;
     }
 
@@ -533,9 +533,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   }
 
   /**
-   * Copies only the fields required for numeric entity extraction into  the new CoreLabel.
-   *
-   * @param src Source CoreLabel to copy.
+   * Copies only the fields required for numeric entity extraction in the new CoreLabel
+   * @param src
    */
   private static CoreLabel copyCoreLabel(CoreLabel src, Integer startOffset, Integer endOffset) {
     CoreLabel dst = new CoreLabel();
@@ -560,21 +559,21 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     return dst;
   }
 
-  private static final Pattern MONTH_PATTERN = Pattern.compile("January|Jan\\.?|February|Feb\\.?|March|Mar\\.?|April|Apr\\.?|May|June|Jun\\.?|July|Jul\\.?|August|Aug\\.?|September|Sept?\\.?|October|Oct\\.?|November|Nov\\.?|December|Dec\\.");
+  public static final Pattern MONTH_PATTERN = Pattern.compile("January|Jan\\.?|February|Feb\\.?|March|Mar\\.?|April|Apr\\.?|May|June|Jun\\.?|July|Jul\\.?|August|Aug\\.?|September|Sept?\\.?|October|Oct\\.?|November|Nov\\.?|December|Dec\\.");
 
-  private  static final Pattern YEAR_PATTERN = Pattern.compile("[1-3][0-9]{3}|'?[0-9]{2}");
+  public static final Pattern YEAR_PATTERN = Pattern.compile("[1-3][0-9]{3}|'?[0-9]{2}");
 
-  private static final Pattern DAY_PATTERN = Pattern.compile("(?:[1-9]|[12][0-9]|3[01])(?:st|nd|rd)?");
+  public static final Pattern DAY_PATTERN = Pattern.compile("(?:[1-9]|[12][0-9]|3[01])(?:st|nd|rd)?");
 
-  private static final Pattern DATE_PATTERN = Pattern.compile("(?:[1-9]|[0-3][0-9])\\\\?/(?:[1-9]|[0-3][0-9])\\\\?/[1-3][0-9]{3}");
+  public static final Pattern DATE_PATTERN = Pattern.compile("(?:[1-9]|[0-3][0-9])\\\\?/(?:[1-9]|[0-3][0-9])\\\\?/[1-3][0-9]{3}");
 
-  private static final Pattern DATE_PATTERN2 = Pattern.compile("[12][0-9]{3}[-/](?:0?[1-9]|1[0-2])[-/][0-3][0-9]");
+  public static final Pattern DATE_PATTERN2 = Pattern.compile("[12][0-9]{3}[-/](?:0?[1-9]|1[0-2])[-/][0-3][0-9]");
 
-  private static final Pattern TIME_PATTERN = Pattern.compile("[0-2]?[0-9]:[0-5][0-9]");
+  public static final Pattern TIME_PATTERN = Pattern.compile("[0-2]?[0-9]:[0-5][0-9]");
 
-  private static final Pattern TIME_PATTERN2 = Pattern.compile("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]");
+  public static final Pattern TIME_PATTERN2 = Pattern.compile("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]");
 
-  private static final Pattern AM_PM = Pattern.compile("(a\\.?m\\.?)|(p\\.?m\\.?)", Pattern.CASE_INSENSITIVE);
+  public static final Pattern AM_PM = Pattern.compile("(a\\.?m\\.?)|(p\\.?m\\.?)", Pattern.CASE_INSENSITIVE);
 
   public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(?:dollar|cent|euro|pound)s?|penny|pence|yen|yuan|won", Pattern.CASE_INSENSITIVE);
   public static final Pattern CURRENCY_SYMBOL_PATTERN = Pattern.compile("\\$|&#163|\u00A3|\u00A5|#|\u20AC|US\\$|HK\\$|A\\$", Pattern.CASE_INSENSITIVE);
@@ -791,6 +790,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   // Implement other methods of AbstractSequenceClassifier interface
 
+  @SuppressWarnings("unchecked")
   @Override
   public void train(Collection<List<CoreLabel>> docs,
                     DocumentReaderAndWriter<CoreLabel> readerAndWriter) {
@@ -810,6 +810,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException, ClassNotFoundException {
   }
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
     NumberSequenceClassifier nsc =
@@ -836,8 +837,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
 
     if (textFile != null) {
-      DocumentReaderAndWriter<CoreLabel> readerAndWriter =
-        new PlainTextDocumentReaderAndWriter<CoreLabel>();
+      DocumentReaderAndWriter readerAndWriter =
+        new PlainTextDocumentReaderAndWriter();
       nsc.classifyAndWriteAnswers(textFile, readerAndWriter);
     }
   } // end main
