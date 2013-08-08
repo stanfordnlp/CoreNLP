@@ -335,22 +335,18 @@ public class SieveCoreferenceSystem {
    */
   public static void main(String[] args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
-    initializeAndRunCoref(props);
-  }
-
-  public static String initializeAndRunCoref(Properties props) throws Exception {
     String timeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
 
     //
     // initialize logger
     //
-    String logFileName = props.getProperty(Constants.LOG_PROP, "log.txt");
-    if (logFileName.endsWith(".txt")) {
-      logFileName = logFileName.substring(0, logFileName.length()-4) +"_"+ timeStamp+".txt";
-    } else {
-      logFileName = logFileName + "_"+ timeStamp+".txt";
-    }
     try {
+      String logFileName = props.getProperty(Constants.LOG_PROP, "log.txt");
+      if(logFileName.endsWith(".txt")) {
+        logFileName = logFileName.substring(0, logFileName.length()-4) +"_"+ timeStamp+".txt";
+      } else {
+        logFileName = logFileName + "_"+ timeStamp+".txt";
+      }
       FileHandler fh = new FileHandler(logFileName, false);
       logger.addHandler(fh);
       logger.setLevel(Level.FINE);
@@ -417,8 +413,6 @@ public class SieveCoreferenceSystem {
     logger.info("done");
     String endTimeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-");
     logger.fine(endTimeStamp);
-
-    return logFileName;
   }
 
   public static double runAndScoreCoref(SieveCoreferenceSystem corefSystem,

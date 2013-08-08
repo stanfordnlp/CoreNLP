@@ -10,6 +10,41 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ant-contrib-1.0b3-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/ant-contrib-1.0b3.jar!/"/>
 	</lib>
+	<lib name="el-api.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/el-api.jar!/"/>
+	</lib>
+	<lib name="jasper.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/jasper.jar!/"/>
+	</lib>
+	<lib name="servlet-api.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/servlet-api.jar!/"/>
+	</lib>
+	<lib name="tomcat-juli.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/tomcat-juli.jar!/"/>
+	</lib>
+	<lib name="jasper-el.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/jasper-el.jar!/"/>
+	</lib>
+	<lib name="jsp-api.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/jsp-api.jar!/"/>
+	</lib>
+	<lib name="tomcat-api.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/tomcat-api.jar!/"/>
+	</lib>
 	<lib name="commons-logging.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-logging-1.1.1-sources.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-logging-1.1.1-sources.jar!/"/>
@@ -19,6 +54,9 @@
 		<srcroot url="jar://$MODULE_DIR$/libsrc/junit-4.5-src.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/junit-4.5-src.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/junit.jar!/"/>
+	</lib>
+	<lib name="javax.servlet.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.servlet.jar!/"/>
 	</lib>
 	<lib name="AppleJavaExtensions.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/AppleJavaExtensions.jar!/"/>
@@ -59,8 +97,5 @@
 		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-lang3-3.1-sources.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-lang3-3.1-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-lang3-3.1.jar!/"/>
-	</lib>
-	<lib name="servlet-api.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/servlet-api.jar!/"/>
 	</lib>
 </component>
