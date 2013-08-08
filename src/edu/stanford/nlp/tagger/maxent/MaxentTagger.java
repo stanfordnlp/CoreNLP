@@ -38,7 +38,6 @@ import edu.stanford.nlp.maxent.iis.LambdaSolve;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.objectbank.ReaderIteratorFactory;
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.process.TransformXML;
 import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
@@ -1456,21 +1455,20 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   }
 
   private void tagFromXML() {
-    Reader reader = null;
+    InputStream is = null;
     Writer w = null;
     try {
-      reader = new BufferedReader(new InputStreamReader(new FileInputStream(config.getFile()), config.getEncoding()));
-
+      is = new BufferedInputStream(new FileInputStream(config.getFile()));
       String outFile = config.getOutputFile();
       if (outFile.length() > 0) {
         w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile),
                                                       config.getEncoding()));
       } else {
-        w = new BufferedWriter(new OutputStreamWriter(System.out, config.getEncoding()));
+        w = new PrintWriter(System.out);
       }
       w.write("<?xml version=\"1.0\" encoding=\"" +
               config.getEncoding() + "\"?>\n");
-      tagFromXML(reader, w, config.getXMLInput());
+      tagFromXML(is, w, config.getXMLInput());
     } catch (FileNotFoundException e) {
       System.err.println("Input file not found: " + config.getFile());
       e.printStackTrace();
@@ -1478,7 +1476,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       System.err.println("tagFromXML: mysterious IO Exception");
       ioe.printStackTrace();
     } finally {
-      IOUtils.closeIgnoringExceptions(reader);
+      IOUtils.closeIgnoringExceptions(is);
       IOUtils.closeIgnoringExceptions(w);
     }
   }

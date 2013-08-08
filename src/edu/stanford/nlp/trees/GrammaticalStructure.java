@@ -1098,7 +1098,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         continue;
       int parentId = Integer.parseInt(parentIdStr) - 1;
       String grelString = tokenFields.get(i).get(CoNLLX_RelnField);
-      if (grelString.equals("null") || grelString.equals("erased"))
+      if (grelString.equals("null"))
         continue;
       GrammaticalRelation grel = shortNameToGRel.get(grelString.toLowerCase());
       TypedDependency tdep;
