@@ -339,8 +339,8 @@ public class IOUtils {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static int lineCount(File textFile) throws IOException {
-    BufferedReader r = new BufferedReader(new FileReader(textFile));
+  public static int lineCount(String textFileOrUrl) throws IOException {
+    BufferedReader r = readerFromString(textFileOrUrl);
     int numLines = 0;
     while (r.readLine() != null) {
       numLines++;
@@ -565,7 +565,7 @@ public class IOUtils {
     // TODO: better programming style would be to make this two
     // separate classes, but we don't expect to make more versions of
     // this class anyway
-    GetLinesIterable(final File file, 
+    GetLinesIterable(final File file,
                      final Class<? extends InputStream> fileInputStreamWrapper,
                      final String encoding) {
       this.file = file;
@@ -574,7 +574,7 @@ public class IOUtils {
       this.encoding = encoding;
     }
 
-    GetLinesIterable(final String path, 
+    GetLinesIterable(final String path,
                      final Class<? extends InputStream> fileInputStreamWrapper,
                      final String encoding) {
       this.file = null;
@@ -582,7 +582,7 @@ public class IOUtils {
       this.fileInputStreamWrapper = fileInputStreamWrapper;
       this.encoding = encoding;
     }
-    
+
     private InputStream getStream() throws IOException {
       if (file != null) {
         return new FileInputStream(file);
@@ -595,14 +595,14 @@ public class IOUtils {
 
     public Iterator<String> iterator() {
       return new Iterator<String>() {
-        
+
         protected BufferedReader reader = this.getReader();
         protected String line = this.getLine();
-        
+
         public boolean hasNext() {
           return this.line != null;
         }
-        
+
         public String next() {
           String nextLine = this.line;
           if (nextLine == null) {
@@ -611,7 +611,7 @@ public class IOUtils {
           line = getLine();
           return nextLine;
         }
-        
+
         protected String getLine() {
           try {
             String result = this.reader.readLine();
@@ -623,7 +623,7 @@ public class IOUtils {
             throw new RuntimeIOException(e);
           }
         }
-        
+
         protected BufferedReader getReader() {
           try {
             InputStream stream = getStream();
@@ -639,7 +639,7 @@ public class IOUtils {
             throw new RuntimeIOException(e);
           }
         }
-        
+
         @Override
           public void remove() {
           throw new UnsupportedOperationException();
@@ -765,8 +765,7 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpFile(File file) throws IOException {
-    Reader r = new FileReader(file);
-    return IOUtils.slurpReader(r);
+    return slurpFile(file, null);
   }
 
   /**
@@ -785,8 +784,8 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpGZippedFile(String filename) throws IOException {
-    Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(
-            filename)));
+    Reader r = encodedInputStreamReader(new GZIPInputStream(new FileInputStream(
+            filename)), null);
     return IOUtils.slurpReader(r);
   }
 
@@ -794,8 +793,8 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpGZippedFile(File file) throws IOException {
-    Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(
-            file)));
+    Reader r = encodedInputStreamReader(new GZIPInputStream(new FileInputStream(
+            file)), null);
     return IOUtils.slurpReader(r);
   }
 
@@ -897,14 +896,30 @@ public class IOUtils {
     return buff.toString();
   }
 
+  public static String getUrlEncoding(URLConnection connection) {
+    String contentType = connection.getContentType();
+    String[] values = contentType.split(";");
+    String charset = defaultEncoding;  // might or might not be right....
+
+    for (String value : values) {
+      value = value.trim();
+      if (value.toLowerCase(Locale.ENGLISH).startsWith("charset=")) {
+        charset = value.substring("charset=".length());
+      }
+    }
+    return charset;
+  }
+
+
   /**
    * Returns all the text at the given URL.
    */
   public static String slurpURL(URL u) throws IOException {
     String lineSeparator = System.getProperty("line.separator");
     URLConnection uc = u.openConnection();
+    String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
-    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     String temp;
     StringBuilder buff = new StringBuilder(16000); // make biggish
     while ((temp = br.readLine()) != null) {
@@ -957,7 +972,7 @@ public class IOUtils {
    */
   public static String slurpFileNoExceptions(File file) {
     try {
-      return IOUtils.slurpReader(new FileReader(file));
+      return IOUtils.slurpReader(encodedInputStreamReader(new FileInputStream(file), null));
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -1178,8 +1193,15 @@ public class IOUtils {
   }
 
   public static PrintWriter getPrintWriter(File textFile) throws IOException {
+    return getPrintWriter(textFile, null);
+  }
+
+  public static PrintWriter getPrintWriter(File textFile, String encoding) throws IOException {
     File f = textFile.getAbsoluteFile();
-    return new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f))), true);
+    if (encoding == null) {
+      encoding = defaultEncoding;
+    }
+    return new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), encoding)), true);
   }
 
   public static PrintWriter getPrintWriter(String filename) throws IOException {
