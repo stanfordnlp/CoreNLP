@@ -1,10 +1,11 @@
 package edu.stanford.nlp.dcoref;
 
 import java.io.File;
-import edu.stanford.nlp.io.IOUtils;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -15,24 +16,24 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author John Bauer
  */
-public class DcorefRegressionSlowITest extends TestCase {
+public class DcorefBenchmarkSlowITest extends TestCase {
   public void testDcoref() throws Exception {
-    final File WORK_DIR_FILE = File.createTempFile("DcorefITest", "");
+    final File WORK_DIR_FILE = File.createTempFile("DcorefBenchmarkTest", "");
     WORK_DIR_FILE.delete();
     WORK_DIR_FILE.mkdir();
-    // TODO: delete the files left behind?
+    WORK_DIR_FILE.deleteOnExit();
 
     String baseLogFile = WORK_DIR_FILE + File.separator + "log";
 
     System.err.println("Base log file name: " + WORK_DIR_FILE);
 
-    String[] args = { "-props", "edu/stanford/nlp/dcoref/coref.properties",
-                      "-" + Constants.LOG_PROP, baseLogFile,
-                      "-" + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
-    Properties props = StringUtils.argsToProperties(args);
-
     String expectedResults = IOUtils.slurpFile("edu/stanford/nlp/dcoref/expected.txt");
 
+    String[] corefArgs = { "-props", "edu/stanford/nlp/dcoref/coref.properties",
+                      "-" + Constants.LOG_PROP, baseLogFile,
+                      "-" + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
+
+    Properties props = StringUtils.argsToProperties(corefArgs);
     System.err.println("Running dcoref with properties:");
     System.err.println(props);
 

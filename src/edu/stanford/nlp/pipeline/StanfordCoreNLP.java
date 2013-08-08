@@ -396,9 +396,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     });
 
     //
-    // sentence splitter: splits the above sequence of tokens into
+    // Sentence splitter: splits the above sequence of tokens into
     // sentences.  This is required when processing entire documents or
-    // text consisting of multiple sentences
+    // text consisting of multiple sentences.
     //
     pool.register(STANFORD_SSPLIT, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
@@ -407,54 +407,43 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
-          WordsToSentencesAnnotator wts;
           if (whitespaceTokenization) {
             if (System.getProperty("line.separator").equals("\n")) {
-              wts = WordsToSentencesAnnotator.newlineSplitter(false, "\n");
+              return WordsToSentencesAnnotator.newlineSplitter(false, "\n");
             } else {
               // throw "\n" in just in case files use that instead of
               // the system separator
-              wts = WordsToSentencesAnnotator.newlineSplitter(false, System.getProperty("line.separator"), "\n");
+              return WordsToSentencesAnnotator.newlineSplitter(false, System.getProperty("line.separator"), "\n");
             }
           } else {
-            wts = WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
+            return WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
           }
 
-          wts.setCountLineNumbers(true);
-
-          return wts;
         } else {
-          WordsToSentencesAnnotator wts;
-          String boundaryTokenRegex = properties.getProperty("ssplit.boundaryTokenRegex");
-          if (boundaryTokenRegex != null) {
-            wts = new WordsToSentencesAnnotator(false, boundaryTokenRegex);
-          } else {
-            wts = new WordsToSentencesAnnotator();
-          }
-
-          // regular boundaries
-          String bounds = properties.getProperty("ssplit.boundariesToDiscard");
-          if (bounds != null){
-            String [] toks = bounds.split(",");
-            // for(int i = 0; i < toks.length; i ++)
-            //   System.err.println("BOUNDARY: " + toks[i]);
-            wts.setSentenceBoundaryToDiscard(Generics.newHashSet (Arrays.asList(toks)));
-          }
-
-          // HTML boundaries
-          bounds = properties.getProperty("ssplit.htmlBoundariesToDiscard");
-          if (bounds != null){
-            String [] toks = bounds.split(",");
-            wts.addHtmlSentenceBoundaryToDiscard(Generics.newHashSet (Arrays.asList(toks)));
-          }
-
-          // Treat as one sentence
+          // Treat as one sentence: You get a no-op sentence splitter that always returns all tokens as one sentence.
           String isOneSentence = properties.getProperty("ssplit.isOneSentence");
-          if (isOneSentence != null){
-            wts.setOneSentence(Boolean.parseBoolean(isOneSentence));
+          if (Boolean.parseBoolean(isOneSentence)) { // this method treats null as false
+            return WordsToSentencesAnnotator.nonSplitter(false);
           }
 
-          return wts;
+          String boundaryTokenRegex = properties.getProperty("ssplit.boundaryTokenRegex");
+          Set<String> boundariesToDiscard = null;
+          // newline boundaries which are discarded.
+          String bounds = properties.getProperty("ssplit.boundariesToDiscard");
+          if (bounds != null) {
+            String [] toks = bounds.split(",");
+            boundariesToDiscard = Generics.newHashSet(Arrays.asList(toks));
+          }
+          Set<String> htmlElementsToDiscard = null;
+          // HTML boundaries which are discarded
+          bounds = properties.getProperty("ssplit.htmlBoundariesToDiscard");
+          if (bounds != null) {
+            String [] elements = bounds.split(",");
+            htmlElementsToDiscard = Generics.newHashSet(Arrays.asList(elements));
+          }
+          String nlsb = properties.getProperty("ssplit.newlineIsSentenceBreak", "two");
+
+          return new WordsToSentencesAnnotator(false, boundaryTokenRegex, boundariesToDiscard, htmlElementsToDiscard, nlsb);
         }
       }
 
@@ -464,17 +453,23 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         StringBuilder os = new StringBuilder();
         os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
                 properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-        if(Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
+        if (Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
                 "false"))) {
           os.append("tokenize.whitespace:" +
                   properties.getProperty("tokenize.whitespace", "false"));
         } else {
-          os.append("ssplit.boundariesToDiscard:" +
-                  properties.getProperty("ssplit.boundariesToDiscard", ""));
-          os.append("ssplit.htmlBoundariesToDiscard:" +
-                  properties.getProperty("ssplit.htmlBoundariesToDiscard", ""));
           os.append("ssplit.isOneSentence:" +
-                  properties.getProperty("ssplit.isOneSentence", ""));
+                  properties.getProperty("ssplit.isOneSentence", "false"));
+          if ( ! Boolean.valueOf(properties.getProperty("ssplit.isOneSentence", "false"))) {
+            os.append("ssplit.boundaryTokenRegex:" +
+                    properties.getProperty("ssplit.boundaryTokenRegex", ""));
+            os.append("ssplit.boundariesToDiscard:" +
+                    properties.getProperty("ssplit.boundariesToDiscard", ""));
+            os.append("ssplit.htmlBoundariesToDiscard:" +
+                    properties.getProperty("ssplit.htmlBoundariesToDiscard", ""));
+            os.append("ssplit.newlineIsSentenceBreak:" +
+                    properties.getProperty("ssplit.newlineIsSentenceBreak", "two"));
+          }
         }
         return os.toString();
       }
@@ -970,46 +965,53 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @param os PrintStream to print usage to
    */
   private static void printRequiredProperties(PrintStream os) {
-    // TODO some annotators (ssplit, regexner, gender, some parser
-    // options, dcoref?) are not documented
+    // TODO some annotators (ssplit, regexner, gender, some parser options, dcoref?) are not documented
     os.println("The following properties can be defined:");
     os.println("(if -props or -annotators is not passed in, default properties will be loaded via the classpath)");
     os.println("\t\"props\" - path to file with configuration properties");
     os.println("\t\"annotators\" - comma separated list of annotators");
     os.println("\tThe following annotators are supported: cleanxml, tokenize, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, nfl");
 
-    os.println("\n\tIf annotator \"tokenize\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"tokenize\" is defined:");
     os.println("\t\"tokenize.options\" - PTBTokenizer options (see edu.stanford.nlp.process.PTBTokenizer for details)");
     os.println("\t\"tokenize.whitespace\" - If true, just use whitespace tokenization");
 
-    os.println("\n\tIf annotator \"cleanxml\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"cleanxml\" is defined:");
     os.println("\t\"clean.xmltags\" - regex of tags to extract text from");
     os.println("\t\"clean.sentenceendingtags\" - regex of tags which mark sentence endings");
     os.println("\t\"clean.allowflawedxml\" - if set to false, don't complain about XML errors");
 
-    os.println("\n\tIf annotator \"pos\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"pos\" is defined:");
     os.println("\t\"pos.maxlen\" - maximum length of sentence to POS tag");
     os.println("\t\"pos.model\" - path towards the POS tagger model");
 
-    os.println("\n\tIf annotator \"ner\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"ner\" is defined:");
     os.println("\t\"ner.model.3class\" - path towards the three-class NER model");
     os.println("\t\"ner.model.7class\" - path towards the seven-class NER model");
     os.println("\t\"ner.model.MISCclass\" - path towards the NER model with a MISC class");
 
-    os.println("\n\tIf annotator \"truecase\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"truecase\" is defined:");
     os.println("\t\"truecase.model\" - path towards the true-casing model; default: " + DefaultPaths.DEFAULT_TRUECASE_MODEL);
     os.println("\t\"truecase.bias\" - class bias of the true case model; default: " + TrueCaseAnnotator.DEFAULT_MODEL_BIAS);
     os.println("\t\"truecase.mixedcasefile\" - path towards the mixed case file; default: " + DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
 
-    os.println("\n\tIf annotator \"nfl\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"nfl\" is defined:");
     os.println("\t\"nfl.gazetteer\" - path towards the gazetteer for the NFL domain");
     os.println("\t\"nfl.relation.model\" - path towards the NFL relation extraction model");
 
-    os.println("\n\tIf annotator \"parse\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"parse\" is defined:");
     os.println("\t\"parse.model\" - path towards the PCFG parser model");
 
     /* XXX: unstable, do not use for now
-    os.println("\n\tIf annotator \"srl\" is defined:");
+    os.println();
+    os.println("\tIf annotator \"srl\" is defined:");
     os.println("\t\"srl.verb.args\" - path to the file listing verbs and their core arguments (\"verbs.core_args\")");
     os.println("\t\"srl.model.id\" - path prefix for the role identification model (adds \".model.gz\" and \".fe\" to this prefix)");
     os.println("\t\"srl.model.cls\" - path prefix for the role classification model (adds \".model.gz\" and \".fe\" to this prefix)");
@@ -1017,7 +1019,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("\t                  (if not specified, the joint model will not be used)");
     */
 
-    os.println("\nCommand line properties:");
+    os.println();
+    os.println("Command line properties:");
     os.println("\t\"file\" - run the pipeline on the content of this file, or on the content of the files in this directory");
     os.println("\t         XML output is generated for every input file \"file\" as file.xml");
     os.println("\t\"extension\" - if -file used with a directory, process only the files with this extension");
@@ -1029,10 +1032,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
     os.println("\t\"noClobber\" - don't automatically override (clobber) output files that already exist");
 		os.println("\t\"threads\" - multithread on this number of threads");
-    os.println("\nIf none of the above are present, run the pipeline in an interactive shell (default properties will be loaded from the classpath).");
+    os.println();
+    os.println("If none of the above are present, run the pipeline in an interactive shell (default properties will be loaded from the classpath).");
     os.println("The shell accepts input from stdin and displays the output at stdout.");
 
-    os.println("\nRun with -help [topic] for more help on a specific topic.");
+    os.println();
+    os.println("Run with -help [topic] for more help on a specific topic.");
     os.println("Current topics include: parser");
 
     os.println();
@@ -1267,7 +1272,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Process a list of files
     //
-    else if(props.containsKey("filelist")){
+    else if (props.containsKey("filelist")){
       String fileName = props.getProperty("filelist");
       Collection<File> files = readFileList(fileName);
       pipeline.processFiles(files, numThreads);
