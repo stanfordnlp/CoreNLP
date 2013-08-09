@@ -118,7 +118,7 @@ public class TrieMapTest extends TestCase {
     assertEquals("Expecting " + expected + ", got " + matches, expected, matches);
     //System.out.println(matches);
 
-    matches = matcher.findClosestMatches(new String[]{"the", "black","cat","is","wearing","a","white","hat"}, 5, false);
+    matches = matcher.findClosestMatches(new String[]{"the", "black","cat","is","wearing","a","white","hat"}, 5);
     expected = new ArrayList<ApproxMatch<String,Boolean>>();
     expected.add(new ApproxMatch(Arrays.asList(new String[]{"a", "white", "hat"}), Boolean.TRUE, 0, 8, 5.0));
     expected.add(new ApproxMatch(Arrays.asList(new String[]{"a", "black", "cat"}), Boolean.TRUE, 0, 8, 6.0));
@@ -128,8 +128,7 @@ public class TrieMapTest extends TestCase {
     assertEquals("Expecting " + expected + ", got " + matches, expected, matches);
     //System.out.println(matches);
 
-    //matcher.keepAlignments = true;
-    matches = matcher.findClosestMatches(new String[]{"the", "black","cat","is","wearing","a","white","hat"}, 5, true);
+    matches = matcher.findClosestMatches(new String[]{"the", "black","cat","is","wearing","a","white","hat"}, 5, true, true);
     //   [([[a, black, cat]-[a, white, hat]] -> true-true at (0,8),3.0),
     expected = new ArrayList<ApproxMatch<String,Boolean>>();
     expected.add(new ApproxMatch(Arrays.asList(new String[]{"a", "black", "cat", "a", "white", "hat"}), Boolean.TRUE, 0, 8,

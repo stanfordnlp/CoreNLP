@@ -17,7 +17,6 @@ public class TrieMapMatcher<K,V> {
   TrieMap<K,V> root;
   TrieMap<K,V> rootWithDelimiter;
   List<K> multimatchDelimiter;
-  boolean keepAlignments = false;
 
   public TrieMapMatcher(TrieMap<K, V> root) {
     this.root = root;
@@ -54,10 +53,11 @@ public class TrieMapMatcher<K,V> {
    * @param n Number of matches to return. The actual number of matches may be less.
    * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
    *                   Otherwise, only each match will contain one element from the trie.
+   * @param keepAlignments If true, alignment information is returned
    * @return List of approximate matches
    */
-  public List<ApproxMatch<K,V>> findClosestMatches(K[] target, int n, boolean multimatch) {
-    return findClosestMatches(Arrays.asList(target), n, multimatch);
+  public List<ApproxMatch<K,V>> findClosestMatches(K[] target, int n, boolean multimatch, boolean keepAlignments) {
+    return findClosestMatches(Arrays.asList(target), n, multimatch, keepAlignments);
   }
 
   /**
@@ -69,11 +69,12 @@ public class TrieMapMatcher<K,V> {
    * @param n Number of matches to return. The actual number of matches may be less.
    * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
    *                   Otherwise, only each match will contain one element from the trie.
+   * @param keepAlignments If true, alignment information is returned
    * @return List of approximate matches
    */
   public List<ApproxMatch<K,V>> findClosestMatches(K[] target, MatchCostFunction<K,V> costFunction,
-                                                   Double maxCost, int n, boolean multimatch) {
-    return findClosestMatches(Arrays.asList(target), costFunction, maxCost, n, multimatch);
+                                                   Double maxCost, int n, boolean multimatch, boolean keepAlignments) {
+    return findClosestMatches(Arrays.asList(target), costFunction, maxCost, n, multimatch, keepAlignments);
   }
 
   /**
@@ -84,7 +85,7 @@ public class TrieMapMatcher<K,V> {
    * @return List of approximate matches
    */
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, int n) {
-    return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, false);
+    return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, false, false);
   }
 
   /**
@@ -94,10 +95,11 @@ public class TrieMapMatcher<K,V> {
    * @param n Number of matches to return. The actual number of matches may be less.
    * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
    *                   Otherwise, only each match will contain one element from the trie.
+   * @param keepAlignments If true, alignment information is returned
    * @return List of approximate matches
    */
-  public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, int n, boolean multimatch) {
-    return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, multimatch);
+  public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, int n, boolean multimatch, boolean keepAlignments) {
+    return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, multimatch, keepAlignments);
   }
 
   /**
@@ -109,10 +111,11 @@ public class TrieMapMatcher<K,V> {
    * @param n Number of matches to return. The actual number of matches may be less.
    * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
    *                   Otherwise, only each match will contain one element from the trie.
+   * @param keepAlignments If true, alignment information is returned
    * @return List of approximate matches
    */
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, MatchCostFunction<K,V> costFunction,
-                                                   double maxCost, int n, boolean multimatch) {
+                                                   double maxCost, int n, boolean multimatch, boolean keepAlignments) {
     if (root.isEmpty()) return null;
     int extra = 3;
     // Find the closest n options to the key in the trie based on the given cost function for substitution
