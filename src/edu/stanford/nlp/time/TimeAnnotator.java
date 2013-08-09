@@ -24,7 +24,7 @@ import java.util.Set;
  * will represent one temporal expression.
  *
  * If a reference time is set (via {@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}),
- * then temporal expressions are resolved with respect to the document date.  You set it on an
+ * then temporal expressions are resolved with respect the to document date.  You set it on an
  * Annotation as follows:
  * <blockquote>{@code annotation.set(CoreAnnotations.DocDateAnnotation.class, "2013-07-14");}</blockquote>
  * <p>
@@ -179,9 +179,9 @@ public class TimeAnnotator implements Annotator {
   public void annotate(Annotation annotation) {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
     String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if(docDate == null) {
+    if(docDate == null){
       Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
-      if(cal == null) {
+      if(cal == null){
         Redwood.log(Redwood.WARN, "No document date specified");
       } else {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
@@ -242,5 +242,4 @@ public class TimeAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(SUTIME_REQUIREMENT);
   }
-
 }
