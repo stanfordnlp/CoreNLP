@@ -17,9 +17,11 @@ public class TrieMapMatcher<K,V> {
   TrieMap<K,V> root;
   TrieMap<K,V> rootWithDelimiter;
   List<K> multimatchDelimiter;
+  boolean keepAlignments = false;
 
   public TrieMapMatcher(TrieMap<K, V> root) {
     this.root = root;
+    this.rootWithDelimiter = root;
   }
 
   public TrieMapMatcher(TrieMap<K, V> root, List<K> multimatchDelimiter) {
@@ -116,18 +118,23 @@ public class TrieMapMatcher<K,V> {
     // Find the closest n options to the key in the trie based on the given cost function for substitution
     // matches[i][j] stores the top n partial matches for i elements from the target
     //   and j elements from the partial matches from trie keys
+
+    // At any time, we only keep track of the last two rows
+    // (prevMatches (matches[i-1][j]), curMatches (matches[i][j]) that we are working on
     MatchQueue<K,V> best = new MatchQueue<K, V>(n, maxCost);
-    List<PartialApproxMatch<K,V>>[][] matches = new List[target.size()+1][];
+    List<PartialApproxMatch<K,V>>[] prevMatches = null;
+    List<PartialApproxMatch<K,V>>[] curMatches;
     for (int i = 0; i <= target.size(); i++) {
+      curMatches = new List[target.size()+1+extra];
       for (int j = 0; j <= target.size()+extra; j++) {
         if (j > 0) {
-          boolean complete = (i == target.size()) && (j >= target.size());
+          boolean complete = (i == target.size());
           // Try to pick best match from trie
           K t = (i > 0 && i <= target.size())? target.get(i-1):null;
           // Look at the top n choices we saved away and pick n new options
           MatchQueue<K,V> queue = (multimatch)? new MultiMatchQueue<K, V>(n, maxCost):new MatchQueue<K, V>(n, maxCost);
           if (i > 0) {
-            for (PartialApproxMatch<K,V> pam:matches[i-1][j-1]) {
+            for (PartialApproxMatch<K,V> pam:prevMatches[j-1]) {
               if (pam.trie != null) {
                 if (pam.trie.children != null) {
                   for (K k:pam.trie.children.keySet()) {
@@ -137,7 +144,7 @@ public class TrieMapMatcher<K,V> {
               }
             }
           }
-          for (PartialApproxMatch<K,V> pam:matches[i][j-1]) {
+          for (PartialApproxMatch<K,V> pam:curMatches[j-1]) {
             if (pam.trie != null) {
               if (pam.trie.children != null) {
                 for (K k:pam.trie.children.keySet()) {
@@ -147,33 +154,33 @@ public class TrieMapMatcher<K,V> {
             }
           }
           if (i > 0) {
-            for (PartialApproxMatch<K,V> pam:matches[i-1][j]) {
+            for (PartialApproxMatch<K,V> pam:prevMatches[j]) {
               addToQueue(queue, best, costFunction, pam, t, null, multimatch, complete);
             }
           }
-          matches[i][j] = queue.toSortedList();
+          curMatches[j] = queue.toSortedList();
         } else {
-          matches[i] = new List[target.size()+1+extra];
-          matches[i][0] = new ArrayList<PartialApproxMatch<K,V>>();
+          curMatches[0] = new ArrayList<PartialApproxMatch<K,V>>();
           if (i > 0) {
             K t = (i < target.size())? target.get(i-1):null;
-            for (PartialApproxMatch<K,V> pam:matches[i-1][0]) {
+            for (PartialApproxMatch<K,V> pam:prevMatches[0]) {
               PartialApproxMatch<K,V> npam = pam.withMatch(costFunction, costFunction.cost(t, null), t, null);
               if (npam.cost <= maxCost) {
-                matches[i][0].add(npam);
+                curMatches[0].add(npam);
               }
             }
           } else {
-            matches[i][0].add(new PartialApproxMatch<K,V>(0, root));
+            curMatches[0].add(new PartialApproxMatch<K,V>(0, root, keepAlignments? target.size():0));
           }
         }
 //        System.out.println("i=" + i + ",j=" + j + "," + matches[i][j]);
       }
+      prevMatches = curMatches;
     }
     // Get the best matches
     List<ApproxMatch<K,V>> res = new ArrayList<ApproxMatch<K,V>>();
-    for (ApproxMatch<K,V> m:best.toSortedList()) {
-      res.add(m);
+    for (PartialApproxMatch<K,V> m:best.toSortedList()) {
+      res.add(m.toApproxMatch());
     }
     return res;
   }
@@ -376,18 +383,22 @@ public class TrieMapMatcher<K,V> {
     }
   }
 
-  public static class PartialApproxMatch<K,V> extends ApproxMatch<K,V> {
+  // Helper class for keeping track of partial matches with TrieMatcher
+  private static class PartialApproxMatch<K,V> extends ApproxMatch<K,V> {
     TrieMap<K,V> trie;
-    int lastMultimatchedStartIndex = 0;
+    int lastMultimatchedMatchedStartIndex = 0;
+    int lastMultimatchedOriginalStartIndex = 0;
 
-    public PartialApproxMatch() {}
+    private PartialApproxMatch() {}
 
-    public PartialApproxMatch(double cost, TrieMap<K,V> trie) {
+    private PartialApproxMatch(double cost, TrieMap<K,V> trie, int alignmentLength) {
       this.trie = trie;
       this.cost = cost;
-      this.value = this.trie.value;
+      this.value = (trie != null)? this.trie.value:null;
+      if (alignmentLength > 0) {
+        this.alignments = new Interval[alignmentLength];
+      }
     }
-
 
     private PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost, K t, K k) {
       PartialApproxMatch<K,V> res = new PartialApproxMatch<K,V>();
@@ -405,11 +416,32 @@ public class TrieMapMatcher<K,V> {
       res.end = (t != null)? end + 1: end;
       res.cost = cost + deltaCost;
       res.trie = (k != null)? trie.getChildTrie(k):trie;
-      res.value = res.trie.value;
-      res.multimatched = multimatched;
-      res.multivalues = multivalues;
-      res.lastMultimatchedStartIndex = lastMultimatchedStartIndex;
+      res.value = (res.trie != null)? res.trie.value:null;
+      res.multimatches = multimatches;
+      res.lastMultimatchedMatchedStartIndex = lastMultimatchedMatchedStartIndex;
+      res.lastMultimatchedOriginalStartIndex = lastMultimatchedOriginalStartIndex;
+      if (res.lastMultimatchedOriginalStartIndex == end  && k == null && t != null) {
+        res.lastMultimatchedOriginalStartIndex++;
+      }
+      // Update alignments
+      if (alignments != null) {
+        res.alignments = new Interval[alignments.length];
+        System.arraycopy(alignments, 0, res.alignments, 0, alignments.length);
+        if (k != null && res.end > 0) {
+          int p = res.end-1;
+          if (res.alignments[p] == null) {
+            res.alignments[p] = Interval.toInterval(res.matched.size()-1, res.matched.size());
+          } else {
+            res.alignments[p] = Interval.toInterval(res.alignments[p].getBegin(), res.alignments[p].getEnd() + 1);
+          }
+        }
+      }
       return res;
+    }
+
+    private ApproxMatch<K,V> toApproxMatch() {
+      // Makes a copy of this partial approx match that can be returned to the caller
+      return new ApproxMatch<K,V>(matched, value, begin, end, multimatches, cost, alignments);
     }
 
     private PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost,
@@ -417,22 +449,21 @@ public class TrieMapMatcher<K,V> {
       PartialApproxMatch<K,V> res = withMatch(costFunction, deltaCost, t, k);
       if (multimatch && res.matched != null && res.value != null) {
         // Update tracking of matched keys and values for multiple entry matches
-        if (res.multivalues == null) {
-          res.multivalues = new ArrayList<V>(1);
+        if (res.multimatches == null) {
+          res.multimatches = new ArrayList<Match<K,V>>(1);
         } else {
-          res.multivalues = new ArrayList<V>(multivalues.size()+1);
-          res.multivalues.addAll(multivalues);
+          res.multimatches = new ArrayList<Match<K,V>>(multimatches.size()+1);
+          res.multimatches.addAll(multimatches);
         }
-        res.multivalues.add(res.value);
-        if (res.multimatched == null) {
-          res.multimatched = new ArrayList<List<K>>(1);
-        } else {
-          res.multimatched = new ArrayList<List<K>>(multimatched.size()+1);
-          res.multimatched.addAll(multimatched);
-        }
-        res.multimatched.add(res.matched.subList(lastMultimatchedStartIndex, res.matched.size()));
-        res.cost += costFunction.multiMatchDeltaCost(res.multimatched.get(res.multimatched.size()-1), res.value, res.multimatched.size());
-        res.lastMultimatchedStartIndex = res.matched.size();
+        List<K> newlyMatched = res.matched.subList(lastMultimatchedMatchedStartIndex, res.matched.size());
+        res.multimatches.add( new Match<K, V>(
+                newlyMatched,
+                res.value,
+                lastMultimatchedOriginalStartIndex, res.end
+        ));
+        res.cost += costFunction.multiMatchDeltaCost(newlyMatched, res.value, res.multimatches.size());
+        res.lastMultimatchedMatchedStartIndex = res.matched.size();
+        res.lastMultimatchedOriginalStartIndex = res.end;
         // Reset current value/key being matched
         res.trie = root;
       }
@@ -447,7 +478,8 @@ public class TrieMapMatcher<K,V> {
 
       PartialApproxMatch that = (PartialApproxMatch) o;
 
-      if (lastMultimatchedStartIndex != that.lastMultimatchedStartIndex) return false;
+      if (lastMultimatchedMatchedStartIndex != that.lastMultimatchedMatchedStartIndex) return false;
+      if (lastMultimatchedOriginalStartIndex != that.lastMultimatchedOriginalStartIndex) return false;
       if (trie != null ? !trie.equals(that.trie) : that.trie != null) return false;
 
       return true;
@@ -456,8 +488,8 @@ public class TrieMapMatcher<K,V> {
     @Override
     public int hashCode() {
       int result = super.hashCode();
-      result = 31 * result + (trie != null ? trie.hashCode() : 0);
-      result = 31 * result + lastMultimatchedStartIndex;
+      result = 31 * result + lastMultimatchedMatchedStartIndex;
+      result = 31 * result + lastMultimatchedOriginalStartIndex;
       return result;
     }
   }
@@ -481,13 +513,22 @@ public class TrieMapMatcher<K,V> {
     }
 
     public void add(PartialApproxMatch<K,V> pam) {
-      Match<K,V> m = new MultiMatch<K,V>(pam.matched, pam.value, pam.begin, pam.end, pam.multimatched, pam.multivalues);
+      List<Match<K,V>> multiMatchesWithoutOffsets = null;
+      if (pam.multimatches != null) {
+        multiMatchesWithoutOffsets = new ArrayList<Match<K, V>>(pam.multimatches.size());
+        for (Match<K,V> m:pam.multimatches) {
+          multiMatchesWithoutOffsets.add( new Match<K, V>(m.matched, m.value, 0, 0));
+        }
+      }
+      Match<K,V> m = new MultiMatch<K,V>(pam.matched, pam.value, pam.begin, pam.end, multiMatchesWithoutOffsets);
       queue.put(m, pam);
     }
 
     public double topCost() { return queue.topCost(); }
 
     public int size() { return queue.size(); }
+
+    public boolean isEmpty() { return queue.isEmpty(); }
 
     public List<PartialApproxMatch<K,V>> toSortedList() {
       return queue.valuesList();
@@ -504,8 +545,8 @@ public class TrieMapMatcher<K,V> {
 
     public void add(PartialApproxMatch<K,V> pam) {
       Match<K,V> m = new MultiMatch<K,V>(
-              pam.matched, pam.value, pam.begin, pam.end, pam.multimatched, pam.multivalues);
-      Integer key = (pam.multimatched != null)? pam.multimatched.size():0;
+              pam.matched, pam.value, pam.begin, pam.end, pam.multimatches);
+      Integer key = (pam.multimatches != null)? pam.multimatches.size():0;
       if (pam.value == null) key = key + 1;
       BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> mq = multimatchQueues.get(key);
       if (mq == null) {
@@ -548,11 +589,11 @@ public class TrieMapMatcher<K,V> {
                              boolean multimatch, boolean complete) {
     double deltaCost = costFunction.cost(a,b);
     double newCost = pam.cost + deltaCost;
-    if (newCost > queue.maxCost) return false;
+    if (queue.maxCost != Double.MAX_VALUE && newCost > queue.maxCost) return false;
     if (best.size() >= queue.maxSize && newCost > best.topCost()) return false;
 
     PartialApproxMatch<K,V> npam = pam.withMatch(costFunction, deltaCost, a, b);
-    if (!multimatch || npam.trie.children != null) {
+    if (!multimatch || (npam.trie != null && npam.trie.children != null)) {
       if (!multimatch && complete && npam.value != null) {
         best.add(npam);
       }
