@@ -48,6 +48,10 @@ public class ApproxMatch<K,V> extends MultiMatch<K,V> {
     return cost;
   }
 
+  public Interval<Integer>[] getAlignments() {
+    return alignments;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
