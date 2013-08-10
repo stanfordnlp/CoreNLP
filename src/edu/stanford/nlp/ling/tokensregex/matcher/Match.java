@@ -66,7 +66,6 @@ public class Match<K,V> implements HasInterval<Integer>
   @Override
   public int hashCode() {
     int result = matched != null ? matched.hashCode() : 0;
-    result = 31 * result + (value != null ? value.hashCode() : 0);
     result = 31 * result + begin;
     result = 31 * result + end;
     return result;
