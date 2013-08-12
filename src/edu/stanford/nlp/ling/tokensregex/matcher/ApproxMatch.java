@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
+import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.List;
@@ -11,9 +12,44 @@ import java.util.List;
 */
 public class ApproxMatch<K,V> extends MultiMatch<K,V> {
   double cost;
+  Interval<Integer>[] alignments;  // Tracks alignments from original sequence to matched sequence (null indicates not aligned)
+
+  public ApproxMatch() {
+  }
+
+  public ApproxMatch(List<K> matched, V value, int begin, int end, double cost) {
+    this.matched = matched;
+    this.value = value;
+    this.begin = begin;
+    this.end = end;
+    this.cost = cost;
+  }
+
+  public ApproxMatch(List<K> matched, V value, int begin, int end, List<Match<K,V>> multimatches, double cost) {
+    this.matched = matched;
+    this.value = value;
+    this.begin = begin;
+    this.end = end;
+    this.multimatches = multimatches;
+    this.cost = cost;
+  }
+
+  public ApproxMatch(List<K> matched, V value, int begin, int end, List<Match<K,V>> multimatches, double cost, Interval[] alignments) {
+    this.matched = matched;
+    this.value = value;
+    this.begin = begin;
+    this.end = end;
+    this.multimatches = multimatches;
+    this.cost = cost;
+    this.alignments = alignments;
+  }
 
   public double getCost() {
     return cost;
+  }
+
+  public Interval<Integer>[] getAlignments() {
+    return alignments;
   }
 
   @Override
@@ -42,7 +78,11 @@ public class ApproxMatch<K,V> extends MultiMatch<K,V> {
     StringBuilder sb = new StringBuilder();
     sb.append("(");
     sb.append(super.toString());
-    sb.append(",").append(cost).append(")");
+    sb.append(",").append(cost);
+    if (alignments != null) {
+      sb.append(", [").append(StringUtils.join(alignments, ", ")).append("]");
+    }
+    sb.append(")");
     return sb.toString();
   }
 }
