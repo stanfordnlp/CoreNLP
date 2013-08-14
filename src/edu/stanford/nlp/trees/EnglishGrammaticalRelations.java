@@ -908,8 +908,7 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "amod", "adjectival modifier",
         AdjectivalModifierGRAnnotation.class, MODIFIER, "NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP|ADJP", tregexCompiler,
         new String[] {
-          // QP !< $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
-          "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< (QP !< /^[$]$/) !$- CC)",
+          "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< QP !$- CC)",
                 // IN above is needed for "next" in "next week" etc., which is often tagged IN.
           "ADJP !< CC|CONJP < (JJ|NNP $ JJ|NNP=target)",
           // Cover the case of "John, 34, works at Stanford" - similar to an expression for appos
@@ -932,8 +931,7 @@ public class EnglishGrammaticalRelations {
         NumericModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|ADJP|WHADJP|QP", tregexCompiler,
         new String[] {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
-          // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
-          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: QP)",
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
           // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
           // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.  
