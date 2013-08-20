@@ -16,7 +16,7 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author Dan Klein
  */
-public abstract class AbstractEval implements Eval {
+public abstract class AbstractEval {
 
   private static final boolean DEBUG = false;
 

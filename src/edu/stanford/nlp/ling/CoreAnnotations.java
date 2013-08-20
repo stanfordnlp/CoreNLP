@@ -295,17 +295,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * Line number for a sentence in a document delimited by newlines
-   * instead of punctuation.  May skip numbers if there are blank
-   * lines not represented as sentences.  Indexed from 1 rather than 0.
-   */
-  public static class LineNumberAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
    * Contains the "value" - an ill-defined string used widely in MapLabel.
    */
   public static class ValueAnnotation implements CoreAnnotation<String> {
@@ -1308,6 +1297,10 @@ public class CoreAnnotations {
     }
   }
 
+  /**
+   * Used in CleanXMLAnnotator.  The value is a list of XML element names indicating
+   * the XML tag the token was nested inside.
+   */
   public static class XmlContextAnnotation implements CoreAnnotation<List<String>> {
 
     public Class<List<String>> getType() {
@@ -1423,6 +1416,17 @@ public class CoreAnnotations {
       return ErasureUtils.<Class<List<CoreMap>>> uncheckedCast(List.class);
     }
   }
+
+  /**
+   * used in dcoref.
+   * to indicate that the it should use the discourse information annotated in the document
+   */
+  public static class UseMarkedDiscourseAnnotation implements CoreAnnotation<Boolean> {
+    public Class<Boolean> getType() {
+      return Boolean.class;
+    }
+  }
+
   /**
    * used in dcoref.
    * to store discourse information. (marking <TURN> or quotation)
@@ -1450,6 +1454,16 @@ public class CoreAnnotations {
   public static class ParagraphAnnotation implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {
       return Integer.class;
+    }
+  }
+
+  /**
+   * used in dcoref.
+   * to store premarked entity mentions.
+   */
+  public static class MentionTokenAnnotation implements CoreAnnotation<MultiTokenTag> {
+    public Class<MultiTokenTag> getType() {
+      return MultiTokenTag.class;
     }
   }
 
