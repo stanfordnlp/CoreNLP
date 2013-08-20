@@ -139,6 +139,7 @@ public class Rules {
     if (first.size() > 1 && second.size() > 1) {
       return false;
     }
+    if (first.size() == 0 && second.size() == 0) { return false; }
     List<CoreLabel> longer;
     List<CoreLabel> shorter;
     
