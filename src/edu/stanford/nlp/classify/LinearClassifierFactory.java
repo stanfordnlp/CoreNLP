@@ -29,11 +29,10 @@
 package edu.stanford.nlp.classify;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.math.ArrayMath;
@@ -50,9 +49,10 @@ import edu.stanford.nlp.util.Function;
  * Builds various types of linear classifiers, with functionality for
  * setting objective function, optimization method, and other parameters.
  * Classifiers can be defined with passed constructor arguments or using setter methods.
- * Defaults to Quasi-newton optimization of a <code>LogConditionalObjectiveFunction</code>
+ * Defaults to Quasi-newton optimization of a {@code LogConditionalObjectiveFunction}
  * (Merges old classes: CGLinearClassifierFactory, QNLinearClassifierFactory, and MaxEntClassifierFactory).
- * Note that a bias term is not assumed, and so if you want to learn a bias term you should add an "always-on" feature to your examples.
+ * Note that a bias term is not assumed, and so if you want to learn
+ * a bias term you should add an "always-on" feature to your examples.
  *
  * @author Jenny Finkel
  * @author Chris Cox (merged factories, 8/11/04)
@@ -85,6 +85,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private Factory<Minimizer<DiffFunction>> minimizerCreator = null;
   private int evalIters = -1;
   private Evaluator[] evaluators = null;
+
 
   private Minimizer<DiffFunction> getMinimizer() {
     // Create a new minimizer
@@ -611,7 +612,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     //resetWeight = true;
   }
 
-  protected static double[] sigmasToTry = {0.5,1.0,2.0,4.0,10.0, 20.0, 100.0};
+  protected static final double[] sigmasToTry = {0.5,1.0,2.0,4.0,10.0, 20.0, 100.0};
 
   /**
    * Calls the method {@link #crossValidateSetSigma(GeneralDataset, int)} with 5-fold cross-validation.
@@ -850,22 +851,21 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    *
    * TODO: Leverage Index
    */
-  public Classifier<String, String> loadFromFilename(String file) {
+  public static LinearClassifier<String, String> loadFromFilename(String file) {
     try {
-      File tgtFile = new File(file);
-      BufferedReader in = new BufferedReader(new FileReader(tgtFile));
+      BufferedReader in = IOUtils.readerFromString(file);
 
-      // Format: read indicies first, weights, then thresholds
+      // Format: read indices first, weights, then thresholds
       Index<String> labelIndex = HashIndex.loadFromReader(in);
       Index<String> featureIndex = HashIndex.loadFromReader(in);
       double[][] weights = new double[featureIndex.size()][labelIndex.size()];
-      String line = in.readLine();
       int currLine = 1;
+      String line = in.readLine();
       while (line != null && line.length()>0) {
         String[] tuples = line.split(LinearClassifier.TEXT_SERIALIZATION_DELIMITER);
         if (tuples.length != 3) {
             throw new Exception("Error: incorrect number of tokens in weight specifier, line="
-            +currLine+" in file "+tgtFile.getAbsolutePath());
+                + currLine + " in file " + file);
         }
         currLine++;
         int feature = Integer.valueOf(tuples[0]);
@@ -939,10 +939,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       return new LinearClassifier<L, F>(weights2D, featureIndex, labelIndex);
     }
 
+    @Override
     public Classifier createClassifier(double[] weights) {
       return createLinearClassifier(weights);
     }
 
+    @Override
     public ProbabilisticClassifier createProbabilisticClassifier(double[] weights) {
       return createLinearClassifier(weights);
     }
