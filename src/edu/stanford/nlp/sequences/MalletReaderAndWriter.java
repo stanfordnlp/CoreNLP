@@ -8,7 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.objectbank.DelimitRegExIterator;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.util.Function;
@@ -61,8 +62,8 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
           throw new RuntimeException("Bad line: "+line);
         CoreLabel wi = new CoreLabel();
         wi.setWord(line.substring(0,idx));
-        wi.set(CoreAnnotations.AnswerAnnotation.class, line.substring(idx+1));
-        wi.set(CoreAnnotations.GoldAnswerAnnotation.class, line.substring(idx+1));
+        wi.set(AnswerAnnotation.class, line.substring(idx+1));
+        wi.set(GoldAnswerAnnotation.class, line.substring(idx+1));
         words.add(wi);
       }
       return words;
@@ -71,8 +72,8 @@ public class MalletReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
   
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
     for (CoreLabel wi : doc) {
-      String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
-      String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String answer = wi.get(AnswerAnnotation.class);
+      String goldAnswer = wi.get(GoldAnswerAnnotation.class);
       out.println(wi.word() + "\t" + goldAnswer + "\t" + answer);
     }
     out.println();

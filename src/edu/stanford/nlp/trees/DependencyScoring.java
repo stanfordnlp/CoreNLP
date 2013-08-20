@@ -7,14 +7,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
@@ -34,8 +35,8 @@ public class DependencyScoring {
   
   
   private static List<Set<TypedDependency>> toSets(Collection<TypedDependency> depCollection) {
-    Set<TypedDependency> depSet = Generics.newHashSet();
-    Set<TypedDependency> unlabeledDepSet = Generics.newHashSet();
+    Set<TypedDependency> depSet = new HashSet<TypedDependency>();
+    Set<TypedDependency> unlabeledDepSet = new HashSet<TypedDependency>();
     for (TypedDependency dep : depCollection) {
       unlabeledDepSet.add(new TypedDependencyStringEquality(null, dep.gov(), dep.dep()));
       depSet.add(new TypedDependencyStringEquality(dep.reln(), dep.gov(), dep.dep()));
@@ -108,7 +109,7 @@ public class DependencyScoring {
   public static List<Collection<TypedDependency>> convertStringEquality(List<Collection<TypedDependency>> deps){
     List<Collection<TypedDependency>> convertedDeps = new ArrayList<Collection<TypedDependency>>();
     for(Collection<TypedDependency> depSet : deps){
-      Collection<TypedDependency> converted = Generics.newHashSet();
+      Collection<TypedDependency> converted = new HashSet<TypedDependency>();
       for(TypedDependency dep : depSet){
         converted.add(new TypedDependencyStringEquality(dep.reln(), dep.gov(), dep.dep()));
       }
@@ -243,8 +244,6 @@ public class DependencyScoring {
   public Score score(List<Collection<TypedDependency>> system) {
     int parserCnt = 0;
     int goldCnt = 0;
-    int parserUnlabeledCnt = 0;
-    int goldUnlabeledCnt = 0;
     int correctAttachment = 0;
     int correctUnlabeledAttachment = 0;
     int labelCnt = 0;
@@ -259,14 +258,11 @@ public class DependencyScoring {
         removeHeadsAssignedToPunc(l.get(0));
         removeHeadsAssignedToPunc(l.get(1));
       }
-      
       parserCnt += l.get(0).size();
       goldCnt += goldDeps.get(i).size();
-      
-      parserUnlabeledCnt += l.get(1).size();      
-      goldUnlabeledCnt += goldDepsUnlabeled.get(i).size();
-      
       l.get(0).retainAll(goldDeps.get(i));
+      //System.out.println("UGold: "+goldDepsUnlabeled.get(i)+"\n");
+      //System.out.println("USys: "+l.get(1)+"\n");
       l.get(1).retainAll(goldDepsUnlabeled.get(i));
       correctAttachment += l.get(0).size();
       correctUnlabeledAttachment += l.get(1).size();
@@ -279,8 +275,8 @@ public class DependencyScoring {
       List<Set<TypedDependency>> errl = toSets(system.get(i));
       errl.get(0).removeAll(goldDeps.get(i));
       errl.get(1).removeAll(goldDepsUnlabeled.get(i));
-      Map<String,String> childCorrectWithLabel = Generics.newHashMap();
-      Map<String,String> childCorrectWithOutLabel = Generics.newHashMap();
+      Map<String,String> childCorrectWithLabel = new HashMap<String,String>();
+      Map<String,String> childCorrectWithOutLabel = new HashMap<String,String>();
 
       for (TypedDependency goldDep: goldDeps.get(i)) {
           //System.out.print(goldDep);
@@ -306,14 +302,12 @@ public class DependencyScoring {
           unlabeledErrorCounts.incrementCount("dep("+sGov+", "+sChild+") <= "+childCorrectWithOutLabel.get(sChild));
       }
     }
-    return new Score(parserCnt, goldCnt, parserUnlabeledCnt, goldUnlabeledCnt, correctAttachment, correctUnlabeledAttachment, labelCnt, labelCorrect, labeledErrorCounts, unlabeledErrorCounts);
+    return new Score(parserCnt, goldCnt, correctAttachment, correctUnlabeledAttachment, labelCnt, labelCorrect, labeledErrorCounts, unlabeledErrorCounts);
   }
 
   public class Score {
     final int parserCnt;
     final int goldCnt;
-    final int parserUnlabeledCnt;
-    final int goldUnlabeledCnt;
     final int correctAttachment;
     final int correctUnlabeledAttachment;
     final int labelCnt;
@@ -321,11 +315,9 @@ public class DependencyScoring {
     final ClassicCounter<String> unlabeledErrorCounts;
     final ClassicCounter<String> labeledErrorCounts;
 
-    public Score(int parserCnt, int goldCnt, int parserUnlabeledCnt, int goldUnlabeledCnt, int correctAttachment, int correctUnlabeledAttachment, int labelCnt, int labelCorrect, ClassicCounter<String> labeledErrorCounts, ClassicCounter<String> unlabeledErrorCounts) {
+    public Score(int parserCnt, int goldCnt, int correctAttachment, int correctUnlabeledAttachment, int labelCnt, int labelCorrect, ClassicCounter<String> labeledErrorCounts, ClassicCounter<String> unlabeledErrorCounts) {
       this.parserCnt = parserCnt;
       this.goldCnt = goldCnt;
-      this.parserUnlabeledCnt = parserUnlabeledCnt;
-      this.goldUnlabeledCnt = goldUnlabeledCnt;
       this.correctAttachment = correctAttachment;
       this.correctUnlabeledAttachment = correctUnlabeledAttachment;
       this.labelCnt = labelCnt;
@@ -371,8 +363,8 @@ public class DependencyScoring {
       /*sbuild.append(String.format("Labeled Attachment P: %.3f (%d/%d)\n", correctAttachment/(double)parserCnt, correctAttachment, parserCnt));
       sbuild.append(String.format("Labeled Attachment R: %.3f (%d/%d)\n", correctAttachment/(double)goldCnt, correctAttachment, goldCnt));
       */
-      double ulp = correctUnlabeledAttachment/(double)parserUnlabeledCnt; 
-      double ulr = correctUnlabeledAttachment/(double)goldUnlabeledCnt;
+      double ulp = correctUnlabeledAttachment/(double)parserCnt; 
+      double ulr = correctUnlabeledAttachment/(double)goldCnt;
       double ulf = 2.0*(ulp*ulr)/(ulp+ulr);
       /*
       sbuild.append(String.format("Unlabeled Attachment P: %.3f (%d/%d)\n", correctUnlabeledAttachment/(double)parserCnt, correctUnlabeledAttachment, parserCnt));

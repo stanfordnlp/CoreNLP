@@ -1,0 +1,275 @@
+options {
+   IGNORE_CASE = false;   
+   STATIC = false;
+}
+
+
+PARSER_BEGIN(HtmlLexer)
+package edu.stanford.nlp.annotation;
+import java.util.StringTokenizer;
+
+public class HtmlLexer {
+
+
+  public static void main(String args[]) throws ParseException {
+    HtmlLexer parser = new HtmlLexer(System.in);
+	try {
+	while (true) {
+		Token t = parser.getNextToken();		
+	        if (t.kind == 0) break;
+	        System.out.println(t.kind);
+		System.out.println(t);
+        }
+	}
+	catch (Error e) {
+		System.out.println(e);
+		return;	
+	}	
+  }
+
+
+
+}	
+
+
+PARSER_END(HtmlLexer)
+
+
+
+/** HTML COMMENTS
+ * -------------
+ * Comments must begin with a '<!--' and end with a '-->'.
+ */
+
+<DEFAULT> TOKEN:
+{
+   <COMMENT_START: "<!--" > : COMMENT_BODY
+}
+
+<COMMENT_BODY> TOKEN:
+{
+  <COMMENT_END: "-->" > : DEFAULT
+| <COMMENT_WORD: (  ~["-"])+ 
+		  | "-" >
+}
+
+
+
+/** HTML TAGS
+ * ---------
+ * Legal tags are "<>" and tags that have 100 or fewer characters between
+ * the left and right brackets; this is to prevent run-away tags resulting
+ * from misplaced left brackets.  If a '<' is encountered while parsing a
+ * tag, the tag is abandoned.  Escape characters are of the form '&xxx;'
+ * with no limitation on the length of the 'xxx' suffix.  'xxx' must contain
+ * only alphanumeric characters, with the exception of the first character,
+ * which may be a '#', but if so, then the following characters must all
+ * be numeric.
+ * Certain tags are special cased: script, applet, server, and style.
+ * These will all be known as CODE_TAGs.
+ *
+ * UPDATE 5/12/02: the tag length limit has been removed.  Angled brackets
+ * are now allowed insided of quoted literals inside of html tags.  Runaway tags
+ * are now returned as tags -- the regexp is identical to that of a normal tag,
+ * except that it does not match the '>'; this works because JavaCC will attempt
+ * to match the longest string, which will always be the one with the '>'
+ * if it exists.  RUNAWAY_TAG can potentially return a lot of whitespace at
+ * the end.
+ */
+
+<DEFAULT> TOKEN:
+{
+   <ESCAPE_CHARACTER: "&" ( ("#" (<DIGIT>)+) | (<ALPHANUM>)+ ) ";" >
+}
+
+<DEFAULT> TOKEN:
+{
+   <CODE_TAG: ( "<" (  ["S","s"] ["C","c"] ["R","r"] ["I","i"] ["P","p"] ["T","t"] 
+		     | ["A","a"] ["P","p"] ["P","p"] ["L","l"] ["E","e"] ["T","t"]
+                     | ["S","s"] ["E","e"] ["R","r"] ["V","v"] ["E","e"] ["R","r"]
+                     | ["S","s"] ["T","t"] ["Y","y"] ["L","l"] ["E","e"] )
+			(<WHITESPACE> (~[">"])* )? ">" ) > : CODE
+}
+
+<CODE> TOKEN:
+{
+  <CODE_END: "</" (["S","s"] ["C","c"] ["R","r"] ["I","i"] ["P","p"] ["T","t"] 
+		     | ["A","a"] ["P","p"] ["P","p"] ["L","l"] ["E","e"] ["T","t"]
+                     | ["S","s"] ["E","e"] ["R","r"] ["V","v"] ["E","e"] ["R","r"]
+                     | ["S","s"] ["T","t"] ["Y","y"] ["L","l"] ["E","e"] )
+                   	(<WHITESPACE>)? ">" > : DEFAULT
+| <CODE_WORD:  (~["<"])+ 
+		 | "<" >
+}
+
+
+<DEFAULT> TOKEN:
+{
+   <HTML_TAG: "<" ((<HTML_INSIDE>)* | <HTML_QUOTED> )*  ">" > : DEFAULT
+}
+
+<DEFAULT> TOKEN:
+{
+   <RUNAWAY_TAG: "<" ((<HTML_QUOTED>) | (<HTML_INSIDE>)*)* > : DEFAULT
+}
+
+
+<TAG_NO_RETURN> TOKEN:
+{
+   <HTML_INSIDE: (~["<", "\"", "\'", ">"]) >
+|  <HTML_QUOTED: ("\"" (~["\""])* "\"") | ("\'" (~["\'"])* "\'") >
+}
+
+
+
+
+/** NORMAL WORDS
+ * ------------
+ * Restrictions are placed on words returned as tokens based on some of
+ * the patterns of English language and CS jargon.
+ * 
+ * - A word must begin and end with an alphanumerical character (with the
+ *   exception of periods, described below)
+ * - A word can include any number of '-' or '_' characters, with no
+ *   restrictions placed on where these appear in the word, so long as no
+ *   two such characters appear in sequence, or begin or end the word
+ * - A word can include one apostrophe, so long as it is flanked by
+ *   alphanumeric characters (i.e., it cannot appear at the beginning or
+ *   end of the word)
+ * - A word can include one or more periods.  A period may begin a word, but
+ *   it may not end a word.  Otherwise, a period must be flanked by
+ *   alphanumeric characters (this is to prevent elipses from joining two
+ *   words together).  Thus, domain names and IP addresses are considered
+ *   one word.  As a by-product of allowing periods to begin words, any
+ *   series of periods is returned as a single token (see below)
+ *
+ * UPDATE 5/29/02: Email addresses are tokenized as one token
+ *
+ * UPDATE 5/29/02: Known abbreviations and single-letter initials are
+ * tokenized to include the trailing period.  Also, letters
+ * separated by periods are also tokenized to include the trailing
+ * period.  Examples:
+ *
+ * 	A. Anderson		(two tokens)
+ * 	Dr. A. Anderson		(three tokens)
+ * 	R.E.M.			(one tokens)
+ * 
+ * but:	DARPA.	==>   DARPA .	(two tokens)
+ */
+
+<DEFAULT> TOKEN:
+{
+
+   <WORD:   <ALPHANUM> ( (<ALPHANUM>)* (<HYPHEN>)? (<ALPHANUM>)+ )* >
+|  <APOST_WORD: <WORD> ("\'") <WORD> >
+|  <EMAIL_WORD: <WORD> "@" <WORD> (("." <WORD>)*) >
+|  <DOT_WORD: ( (((<WORD>)* "." (<WORD>)+ )*) 	|
+		((<WORD> ".") (<WORD> ".")+) 	|
+		(["A"-"Z"] ".")			|
+		("Dr." | "Mr." | "Mrs." | "Ms." | "Gov." | "Lt." | "Rep." | "Rev." |
+		 "Sen." | "Jr." | "Sr." | "Co." | "Corp." | "Inc." | "Ltd." |
+		 "Prof." | "Asst." | "Assoc." | "Esq." | "Bros." | "Gen." | "Capt." |
+		 "St." | "Ave." | "Blvd." | "Apt." | "Rd." | "Cir." | "Ln." | "Dr." |
+		 "Rm." | "Mt." | "Ft." |
+		 "Jan." | "Feb." | "Mar." | "Apr." | "Jun." | "Jul." | "Aug." |
+		 "Sept." | "Oct." | "Nov." | "Dec." | "Mon." | "Tues." | "Tue." | "Wed." |
+		 "Thurs." | "Thu." | "Fri." | "Sat." | "Sun." |
+		 "Ala." | "Ariz." | "Ark." | "Calif." | "Colo." | "Conn." | "Del." | "Fla." |
+		 "Ga." | "Ill." | "Ind." | "Kan." | "Ky." | "La." | "Md." | "Mass." |
+		 "Mich." | "Minn." | "Miss." | "Mo." | "Mont." | "Neb." | "Nev." |
+		 "Okla." | "Ore." | "Pa." | "Tenn." | "Vt." | "Va." | "Wash." | "Wis." | "Wyo." 
+
+		)) >
+
+}
+
+
+/** NUMBERS
+ * -------
+ * Numbers present a difficulty when dealing with commas.  Normally we
+ * want to treat '34,567' as a single number.  However, in the case of
+ * '34,4567' we would want '34' ',' and '4567' returned as three separate
+ * tokens.  Javacc does greedy matching, so it would return '34,456' and
+ * '7'.  Thus, there is a token rule that deals with the malformed case.
+ *
+ * A number will default to the word rules in the appropriate cases
+ * (IP addresses, eg).  Standard numeric rules are also defined:
+ *
+ * - A number can include commas, but in this case they cannot begin
+ *   with a zero, nor can there be more than three digits to the right
+ *   of a comma before another comma occurs.
+ * - A number can include a single decimal point.  The decimal point can
+ *   optionally begin a number, but no number may end in a decimal point.
+ * - A number can include one or both of '-' (negation) and '%' and the
+ *   beginning and end of the number, respectively.
+ * - A number can include '$' at the beginning, in isolation of other
+ *   modifiers ('-' or '%')
+ * - A number can be a time in the form of dd:dd:dd or dd:dd, though no
+ *   attempt is made at verifying that these represent real times 
+ */
+
+<DEFAULT> TOKEN:
+{
+   <DEC_COMMA_NUM: (<NONZERO> | <NONZERO><DIGIT> | <NONZERO><DIGIT><DIGIT>)
+               ("," <DIGIT><DIGIT><DIGIT>)* ("." (<DIGIT>)+ )? > 
+
+|  <DEC_NUM: (<DIGIT>)* (".")? (<DIGIT>)+ >
+
+|  <QUALIFIED_NUM: ("-")? (<DEC_COMMA_NUM> | <DEC_NUM>) ("%")? >
+
+|  <MONEY_NUM: ("$") (<DEC_COMMA_NUM> | <DEC_NUM>) >
+
+|  <NUM_LIST: ("-" | "$")? ( (<DIGIT>)+ "," (<DIGIT>)+ ) ("%")? >
+   {
+	String temp = matchedToken.image;
+	StringTokenizer s = new StringTokenizer(temp, ",");
+	try {
+ 	   String str = s.nextToken();
+	   matchedToken.image = str;
+	   matchedToken.kind = WORD;
+	   matchedToken.endColumn = matchedToken.beginColumn + str.length() -1;
+	   
+	   str = s.nextToken();
+	   Token t = new Token();
+	   t.image = str;
+	   t.next = matchedToken.next;
+	   t.kind = WORD;
+	   t.beginLine = matchedToken.beginLine;
+	   t.beginColumn = matchedToken.endColumn+2;  //for the comma
+	   t.endLine = matchedToken.endLine;
+	   t.endColumn = matchedToken.endColumn + 1 + str.length();
+	   matchedToken.next = t;
+
+	   t = new Token();
+	   t.image = ",";
+	   t.next = matchedToken.next;
+	   t.kind = ANY;
+	   t.beginLine = matchedToken.beginLine;
+	   t.beginColumn = matchedToken.endColumn + 1;
+	   t.endLine = matchedToken.endLine;
+	   t.endColumn = matchedToken.endColumn + 1;
+	   matchedToken.next = t;
+	} catch (Exception e) {}
+   }
+
+
+|  <TIME: <DIGIT> (<DIGIT>)? (":" <DIGIT><DIGIT>) (":" <DIGIT><DIGIT>)? >
+
+}
+
+
+<DEFAULT> TOKEN:
+{
+  <ALPHANUM: ["a"-"z", "A"-"Z", "0"-"9"] >
+| <ALPHA: ["a"-"z", "A"-"Z"] >
+| <DIGIT: ["0"-"9"] >
+| <NONZERO: ["1"-"9"] >
+| <HYPHEN: ["-", "_"] >
+| <WHITESPACE: (" " | "\t" | "\n" | "\r")+ >
+| <DOTPLUS: (".")+ >
+| <ANY: ~[] >
+}
+
+
+/*NO NONTERMINALS*/
+

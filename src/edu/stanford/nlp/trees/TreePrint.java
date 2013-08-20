@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.CopyAnnotation;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEnglishWordMap;
 import edu.stanford.nlp.util.*;
@@ -39,7 +39,6 @@ public class TreePrint {
     "typedDependencies",
     "typedDependenciesCollapsed",
     "latexTree",
-    "xmlTree",
     "collocations",
     "semanticGraph",
     "conllStyleDependencies",
@@ -110,7 +109,7 @@ public class TreePrint {
    *
    * @param formatString A comma separated list of ways to print each Tree.
    *                For instance, "penn" or "words,typedDependencies".
-   *                Known formats are: oneline, penn, latexTree, xmlTree, words,
+   *                Known formats are: oneline, penn, latexTree, words,
    *                wordsAndTags, rootSymbolOnly, dependencies,
    *                typedDependencies, typedDependenciesCollapsed,
    *                collocations, semanticGraph, conllStyleDependencies,
@@ -454,11 +453,6 @@ public class TreePrint {
         pw.println(".]");
         pw.println("  </tree>");
       }
-      if (formats.containsKey("xmlTree")) {
-        pw.println("<tree style=\"xml\">");
-        outputTree.indentedXMLPrint(pw,false);
-        pw.println("</tree>");
-      }
       if (formats.containsKey("dependencies")) {
         Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory(),
                                                  CoreLabel.factory());
@@ -524,11 +518,10 @@ public class TreePrint {
         outputTree.indentedListPrint(pw,false);
         pw.println(".]");
       }
-      if (formats.containsKey("xmlTree")) {
-        outputTree.indentedXMLPrint(pw,false);
-      }
       if (formats.containsKey("dependencies")) {
-        Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory());
+        // NB: We need a CyclicCoreLabel here as we use	its "value-index" printing method
+        Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory(),
+                                                 CyclicCoreLabel.factory());
         indexedTree.indexLeaves();
         Set<Dependency<Label, Label, Object>> depsSet = indexedTree.mapDependencies(dependencyWordFilter, hf);
         List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>(depsSet);
@@ -603,7 +596,7 @@ public class TreePrint {
           System.err.println(t);
           System.err.println();
         } else {
-          Map<Integer,Integer> deps = Generics.newHashMap();
+          Map<Integer,Integer> deps = new HashMap<Integer, Integer>();
           for (Dependency<Label, Label, Object> dep : depsSet) {
             CoreLabel child = (CoreLabel)dep.dependent();
             CoreLabel parent = (CoreLabel)dep.governor();
@@ -771,7 +764,7 @@ public class TreePrint {
     String options = "";
     String tlpName = "edu.stanford.nlp.trees.PennTreebankLanguagePack";
     String hfName = null;
-    Map<String,Integer> flagMap = Generics.newHashMap();
+    Map<String,Integer> flagMap = new HashMap<String,Integer>();
     flagMap.put("-format", 1);
     flagMap.put("-options", 1);
     flagMap.put("-tLP", 1);
@@ -955,12 +948,12 @@ public class TreePrint {
       // add an attribute if the node is a copy
       // (this happens in collapsing when different prepositions are conjuncts)
       String govCopy = "";
-      Integer copyGov = td.gov().label.get(CoreAnnotations.CopyAnnotation.class);
+      Integer copyGov = td.gov().label.get(CopyAnnotation.class);
       if (copyGov != null) {
         govCopy = " copy=\"" + copyGov + '\"';
       }
       String depCopy = "";
-      Integer copyDep = td.dep().label.get(CoreAnnotations.CopyAnnotation.class);
+      Integer copyDep = td.dep().label.get(CopyAnnotation.class);
       if (copyDep != null) {
         depCopy = " copy=\"" + copyDep + '\"';
       }

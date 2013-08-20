@@ -37,7 +37,7 @@ public class ArrayMath {
    * 
    * @param start
    * @param end
-   * @return integers from [start...end)
+   * @return
    */
   public static int[] range(int start, int end) {
     assert end > start;

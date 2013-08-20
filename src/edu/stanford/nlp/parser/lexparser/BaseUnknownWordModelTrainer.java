@@ -1,8 +1,8 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.Label;
@@ -10,7 +10,6 @@ import edu.stanford.nlp.ling.Tag;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 public class BaseUnknownWordModelTrainer
@@ -22,11 +21,11 @@ public class BaseUnknownWordModelTrainer
   ClassicCounter<Label> tc;
   
   // tag (Label) --> signature --> count
-  Map<Label,ClassicCounter<String>> c;
+  HashMap<Label,ClassicCounter<String>> c;
   
   ClassicCounter<IntTaggedWord> unSeenCounter;
 
-  Map<Label,ClassicCounter<String>> tagHash;
+  HashMap<Label,ClassicCounter<String>> tagHash;
 
   Set<String> seenEnd;
 
@@ -46,10 +45,10 @@ public class BaseUnknownWordModelTrainer
 
     seenCounter = new ClassicCounter<IntTaggedWord>();;
     unSeenCounter = new ClassicCounter<IntTaggedWord>();
-    tagHash = Generics.newHashMap();
+    tagHash = new HashMap<Label,ClassicCounter<String>>();
     tc = new ClassicCounter<Label>();
-    c = Generics.newHashMap();
-    seenEnd = Generics.newHashSet();
+    c = new HashMap<Label,ClassicCounter<String>>();
+    seenEnd = new HashSet<String>();
 
     useEnd = (op.lexOptions.unknownSuffixSize > 0 && 
               op.lexOptions.useUnknownWordSignatures > 0);
@@ -141,7 +140,7 @@ public class BaseUnknownWordModelTrainer
   }
 
   protected UnknownWordModel buildUWM() {
-    Map<String,Float> unknownGT = null;
+    HashMap<String,Float> unknownGT = null;
     if (useGT) {
       unknownGT = unknownGTTrainer.unknownGT;
     }

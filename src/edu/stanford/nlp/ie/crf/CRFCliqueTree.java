@@ -508,7 +508,7 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
   /**
    * @return a new CRFCliqueTree for the weights on the data
    */
-  public static <E> CRFCliqueTree<E> getCalibratedCliqueTree(int[][][] data, List<Index<CRFLabel>> labelIndices,
+  public static <E> CRFCliqueTree<E> getCalibratedCliqueTree(int[][][] data, Index[] labelIndices,
       int numClasses, Index<E> classIndex, E backgroundSymbol, CliquePotentialFunction cliquePotentialFunc, double[][][] featureVals) {
 
     FactorTable[] factorTables = new FactorTable[data.length];
@@ -539,7 +539,7 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
    * @return a new CRFCliqueTree for the weights on the data
    */
   public static <E> CRFCliqueTree<E> getCalibratedCliqueTree(double[] weights, double wscale, int[][] weightIndices,
-      int[][][] data, List<Index<CRFLabel>> labelIndices, int numClasses, Index<E> classIndex, E backgroundSymbol) {
+      int[][][] data, Index[] labelIndices, int numClasses, Index<E> classIndex, E backgroundSymbol) {
 
     FactorTable[] factorTables = new FactorTable[data.length];
     FactorTable[] messages = new FactorTable[data.length - 1];
@@ -565,12 +565,12 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
   }
 
   private static FactorTable getFactorTable(double[] weights, double wscale, int[][] weightIndices, int[][] data,
-      List<Index<CRFLabel>> labelIndices, int numClasses) {
+      Index[] labelIndices, int numClasses) {
 
     FactorTable factorTable = null;
 
-    for (int j = 0; j < labelIndices.size(); j++) {
-      Index labelIndex = labelIndices.get(j);
+    for (int j = 0; j < labelIndices.length; j++) {
+      Index labelIndex = labelIndices[j];
       FactorTable ft = new FactorTable(numClasses, j + 1);
 
       // ... and each possible labeling for that clique
@@ -602,21 +602,21 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
     return factorTable;
   }
 
-  public static FactorTable getFactorTable(double[][] weights, int[][] data, List<Index<CRFLabel>> labelIndices, int numClasses) {
+  public static FactorTable getFactorTable(double[][] weights, int[][] data, Index[] labelIndices, int numClasses) {
     CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
     return getFactorTable(data, labelIndices, numClasses, cliquePotentialFunc);
   }
 
 
-  public static FactorTable getFactorTable(int[][] data, List<Index<CRFLabel>> labelIndices, int numClasses, CliquePotentialFunction cliquePotentialFunc) {
+  public static FactorTable getFactorTable(int[][] data, Index[] labelIndices, int numClasses, CliquePotentialFunction cliquePotentialFunc) {
     return getFactorTable(data, labelIndices, numClasses, cliquePotentialFunc, null);
   }
 
-  public static FactorTable getFactorTable(int[][] data, List<Index<CRFLabel>> labelIndices, int numClasses, CliquePotentialFunction cliquePotentialFunc, double[][] featureValByCliqueSize) {
+  public static FactorTable getFactorTable(int[][] data, Index[] labelIndices, int numClasses, CliquePotentialFunction cliquePotentialFunc, double[][] featureValByCliqueSize) {
     FactorTable factorTable = null;
 
-    for (int j = 0; j < labelIndices.size(); j++) {
-      Index labelIndex = labelIndices.get(j);
+    for (int j = 0; j < labelIndices.length; j++) {
+      Index labelIndex = labelIndices[j];
       FactorTable ft = new FactorTable(numClasses, j + 1);
       double[] featureVal = null;
       if (featureValByCliqueSize != null)

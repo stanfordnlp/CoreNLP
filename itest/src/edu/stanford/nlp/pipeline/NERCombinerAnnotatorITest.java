@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.sequences.ColumnTabDocumentReaderWriter;
 import junit.framework.TestCase;
 
@@ -60,7 +61,7 @@ public class NERCombinerAnnotatorITest extends TestCase {
       for (int i = 0; i < goldTokens.size(); i++) {
         CoreLabel goldToken = goldTokens.get(i);
         CoreLabel testToken = testTokens.get(i);
-        System.err.println("POS: " + testToken.get(CoreAnnotations.PartOfSpeechAnnotation.class));
+        System.err.println("POS: " + testToken.get(PartOfSpeechAnnotation.class));
         String goldNer = goldToken.get(CoreAnnotations.AnswerAnnotation.class);
         String testNer = testToken.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         //System.err.println("Ner tag for token " + i + " doc " + k +", GOLD: " + goldNer + ", TEST:" + testNer);

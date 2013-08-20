@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.NormalizedNamedEntityTagAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
@@ -107,8 +108,8 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
         for (int i = 0; i < words.size(); i++) {
           String ner = words.get(i).ner();
           tokens.get(i).setNER(ner);
-          tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-              words.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
+          tokens.get(i).set(NormalizedNamedEntityTagAnnotation.class,
+              words.get(i).get(NormalizedNamedEntityTagAnnotation.class));
         }
       }
       if (VERBOSE) {
@@ -133,8 +134,8 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
       for (int i = 0; i < words.size(); i++) {
         String ner = words.get(i).ner();
         tokens.get(i).setNER(ner);
-        tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-            words.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
+        tokens.get(i).set(NormalizedNamedEntityTagAnnotation.class,
+            words.get(i).get(NormalizedNamedEntityTagAnnotation.class));
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
@@ -145,16 +146,4 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
     QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(words, collapse);
   }
 
-
-  @Override
-  public Set<Requirement> requires() {
-    return Collections.singleton(TOKENIZE_REQUIREMENT);
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    // technically it adds some NER, but someone who wants full NER
-    // labels will be very disappointed, so we do not claim to produce NER
-    return Collections.singleton(QUANTIFIABLE_ENTITY_NORMALIZATION_REQUIREMENT);
-  }
 }

@@ -27,17 +27,21 @@
 package edu.stanford.nlp.dcoref;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.dcoref.Dictionaries.Animacy;
 import edu.stanford.nlp.dcoref.Dictionaries.Gender;
+import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
+import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 
 /**
  * One cluster for the SieveCoreferenceSystem.
@@ -47,25 +51,24 @@ import edu.stanford.nlp.util.Generics;
 public class CorefCluster implements Serializable{
 
   private static final long serialVersionUID = 8655265337578515592L;
-
-  protected final Set<Mention> corefMentions;
-  protected final int clusterID;
+  protected Set<Mention> corefMentions;
+  protected int clusterID;
 
   // Attributes for cluster - can include multiple attribute e.g., {singular, plural}
-  protected final Set<Number> numbers;
-  protected final Set<Gender> genders;
-  protected final Set<Animacy> animacies;
-  protected final Set<String> nerStrings;
-  protected final Set<String> heads;
+  protected Set<Number> numbers;
+  protected Set<Gender> genders;
+  protected Set<Animacy> animacies;
+  protected Set<String> nerStrings;
+  public Set<String> heads;
 
   /** All words in this cluster - for word inclusion feature  */
-  public final Set<String> words;
+  public Set<String> words;
 
   /** The first mention in this cluster */
   protected Mention firstMention;
-
-  /** Return the most representative mention in the chain.
-   *  A proper noun mention or a mention with more pre-modifiers is preferred.
+  
+  /** Return the most representative mention in the chain. 
+   *  Proper mention and a mention with more pre-modifiers are preferred.  
    */
   protected Mention representative;
 
@@ -76,21 +79,25 @@ public class CorefCluster implements Serializable{
 
   public CorefCluster(int ID) {
     clusterID = ID;
-    corefMentions = Generics.newHashSet();
+    corefMentions = new HashSet<Mention>();
     numbers = EnumSet.noneOf(Number.class);
     genders = EnumSet.noneOf(Gender.class);
     animacies = EnumSet.noneOf(Animacy.class);
-    nerStrings = Generics.newHashSet();
-    heads = Generics.newHashSet();
-    words = Generics.newHashSet();
+    nerStrings = new HashSet<String>();
+    heads = new HashSet<String>();
+    words = new HashSet<String>();
     firstMention = null;
     representative = null;
+  }
+
+  public CorefCluster(){
+    this(-1);
   }
 
   public CorefCluster(int ID, Set<Mention> mentions){
     this(ID);
     corefMentions.addAll(mentions);
-    for (Mention m : mentions) {
+    for(Mention m : mentions){
       animacies.add(m.animacy);
       genders.add(m.gender);
       numbers.add(m.number);
@@ -98,16 +105,16 @@ public class CorefCluster implements Serializable{
       heads.add(m.headString);
       if(!m.isPronominal()){
         for(CoreLabel w : m.originalSpan){
-          words.add(w.get(CoreAnnotations.TextAnnotation.class).toLowerCase());
+          words.add(w.get(TextAnnotation.class).toLowerCase());
         }
       }
-      if (firstMention == null) firstMention = m;
+      if(firstMention == null) firstMention = m;
       else {
         if(m.appearEarlierThan(firstMention)) firstMention = m;
       }
     }
     representative = firstMention;
-    for (Mention m : mentions) {
+    for(Mention m : mentions) {
       if(m.moreRepresentativeThan(representative)) representative = m;
     }
   }

@@ -5,7 +5,6 @@ package edu.stanford.nlp.trees;
 import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.util.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.io.BufferedReader;
@@ -16,14 +15,9 @@ import java.io.IOException;
 /**
  * Transforms an English structure parse tree in order to get the dependencies right:
  * Adds an extra structure in QP phrases:
- * <br>
  * (QP (RB well) (IN over) (CD 9)) becomes
- * <br>
+ *
  * (QP (XS (RB well) (IN over)) (CD 9))
- * <br>
- * (QP (...) (CC ...) (...)) becomes
- * <br>
- * (QP (NP ...) (CC ...) (NP ...))
  *
  *
  * @author mcdm
@@ -31,12 +25,11 @@ import java.io.IOException;
 public class QPTreeTransformer implements TreeTransformer {
 
   /**
-   * Right now (Jan 2013) we only deal with the following QP structures:
+   * Right now (July 2007) we only deal with the following QP structures:
    *
    * QP (RB IN CD|DT ...)   well over, more than
    * QP (JJR IN CD|DT ...)  fewer than
    * QP (IN JJS CD|DT ...)  at least
-   * QP (... CC ...)        between 5 and 10
    *
    * @param t tree to be transformed
    * @return  t with an extra layer if there was a QP structure matching the ones mentioned above
@@ -52,7 +45,6 @@ public class QPTreeTransformer implements TreeTransformer {
    * QP (RB IN CD|DT ...)   well over, more than
    * QP (JJR IN CD|DT ...)  fewer than
    * QP (IN JJS CD|DT ...)  at least
-   * QP (... CC ...)        between 5 and 10
    *
    * @param t a tree to be transformed
    * @return t transformed
@@ -64,12 +56,12 @@ public class QPTreeTransformer implements TreeTransformer {
 
 
 
-  /**
+  /*
    * Given a tree t, if this tree contains a QP of the form
    * QP (RB IN CD|DT ...)   well over, more than
    * QP (JJR IN CD|DT ...)  fewer than
    * QP (IN JJS CD|DT ...)  at least
-   * QP (... CC ...)        between 5 and 10
+   *
    * it will transform it
    *
    */
@@ -87,27 +79,6 @@ public class QPTreeTransformer implements TreeTransformer {
            (child1.startsWith("RB") || child1.startsWith("JJ") || child1.startsWith("IN")) &&
            (child2.startsWith("IN") || child2.startsWith("JJ"))) {
           transformQP(t);
-          children = t.getChildrenAsList();
-        }
-      }
-      // If the children include a CC, we split that into left and
-      // right subtrees with the CC in the middle so the headfinders
-      // have an easier time interpreting the tree later on
-      if (children.size() >= 3) {
-        boolean flat = true;
-        for (int i = 0; i < children.size(); ++i) {
-          if (!children.get(i).isPreTerminal()) {
-            flat = false;
-            break;
-          }
-        }
-        if (flat) {
-          for (int i = 1; i < children.size() - 1; ++i) {
-            if (children.get(i).value().startsWith("CC")) {
-              transformCC(t, children.subList(0, i), children.get(i), children.subList(i + 1, children.size()));
-              break;
-            }
-          }
         }
       }
     /* --- to be written or deleted
@@ -119,23 +90,10 @@ public class QPTreeTransformer implements TreeTransformer {
       }
     ---- */
     } else if (t.isPhrasal()) {
-      for (Tree child : t.children()) {
+      for (Tree child : t.getChildrenAsList()) {
         doTransform(child);
       }
     }
-  }
-
-
-  private static void transformCC(Tree t, List<Tree> left, Tree conj, List<Tree> right) {
-    TreeFactory tf = t.treeFactory();
-    LabelFactory lf = t.label().labelFactory();
-    Tree leftQP = tf.newTreeNode(lf.newLabel("NP"), left);
-    Tree rightQP = tf.newTreeNode(lf.newLabel("NP"), right);
-    List<Tree> newChildren = new ArrayList<Tree>();
-    newChildren.add(leftQP);
-    newChildren.add(conj);
-    newChildren.add(rightQP);
-    t.setChildren(newChildren);
   }
 
 

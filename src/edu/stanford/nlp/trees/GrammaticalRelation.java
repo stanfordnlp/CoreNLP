@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  * </ul>
  * For example, for the grammatical relation <code>PREDICATE</code>
  * which holds between a clause and its primary verb phrase, we might
- * want to use the pattern <code>"S &lt; VP=target"</code>, in which the
+ * want to use the pattern <code>"S < VP=target"</code>, in which the
  * root will match a clause and the node labeled <code>"target"</code>
  * will match the verb phrase.<p>
  *
@@ -86,8 +86,6 @@ import java.util.regex.Pattern;
 public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Serializable {
 
   private static final long serialVersionUID = 892618003417550128L;
-
-  private static final boolean DEBUG = false;
 
   public abstract static class GrammaticalRelationAnnotation implements CoreAnnotation<Set<TreeGraphNode>> {
     @SuppressWarnings({"unchecked", "RedundantCast"})
@@ -289,7 +287,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
     Map<String, GrammaticalRelation> sToR = stringsToRelations.get(language);
     if (sToR == null) {
-      sToR = Generics.newHashMap();
+      sToR = new HashMap<String, GrammaticalRelation>();
       stringsToRelations.put(language, sToR);
     }
     GrammaticalRelation previous = sToR.put(toString(), this);
@@ -355,14 +353,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       TregexMatcher m = p.matcher(root);
       while (m.findAt(t)) {
         nodeList.add(m.getNode("target"));
-        if (DEBUG) {
-          System.err.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
-          for (String nodeName : m.getNodeNames()) {
-            if (nodeName.equals("target")) 
-              continue;
-            System.err.println("  node " + nodeName + ": " + m.getNode(nodeName));
-          }
-        }
+        //System.out.println("found " + this + "(" + t + ", " + m.getNode("target") + ")");
       }
     }
     return nodeList;

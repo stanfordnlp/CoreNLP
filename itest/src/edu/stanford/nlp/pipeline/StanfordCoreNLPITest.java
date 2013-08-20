@@ -1,10 +1,11 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.semgraph.SemanticGraphCoreAnnotations.BasicDependenciesAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -68,13 +69,13 @@ public class StanfordCoreNLPITest extends TestCase {
       List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       Assert.assertNotNull(sentenceTokens);
       for (CoreLabel token: sentenceTokens) {
-        Assert.assertNotNull(token.get(CoreAnnotations.PartOfSpeechAnnotation.class));
-        Assert.assertNotNull(token.get(CoreAnnotations.LemmaAnnotation.class));
-        Assert.assertNotNull(token.get(CoreAnnotations.NamedEntityTagAnnotation.class));
+        Assert.assertNotNull(token.get(PartOfSpeechAnnotation.class));
+        Assert.assertNotNull(token.get(LemmaAnnotation.class));
+        Assert.assertNotNull(token.get(NamedEntityTagAnnotation.class));
       }
       
       // check for parse tree
-      Assert.assertNotNull(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+      Assert.assertNotNull(sentence.get(TreeAnnotation.class));
     }
     
     // test pretty print
@@ -168,13 +169,13 @@ public class StanfordCoreNLPITest extends TestCase {
     Annotation document = new Annotation("Stanford University is located in California. It is a great university.");
     pipeline.annotate(document);
 
-    CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-    SemanticGraph g = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    CoreMap sentence = document.get(SentencesAnnotation.class).get(0);
+    SemanticGraph g = sentence.get(BasicDependenciesAnnotation.class);
     processSerialization(g);
 
-    processSerialization(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
-    processSerialization(sentence.get(CoreAnnotations.TokensAnnotation.class));
-    processSerialization(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
+    processSerialization(sentence.get(TreeAnnotation.class));
+    processSerialization(sentence.get(TokensAnnotation.class));
+    processSerialization(sentence.get(BasicDependenciesAnnotation.class));
     processSerialization(sentence);
 
     Object newDocument = processSerialization(document);

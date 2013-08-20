@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ie;
 
 
-import edu.stanford.nlp.io.IOUtils;
 import junit.framework.TestCase;
 
 import java.io.*;
@@ -21,7 +20,7 @@ import edu.stanford.nlp.net.Ports;
  * it's a pretty simple query that should work.
  * <br>
  * Then it tests that if the server goes wrong somehow, the client
- * doesn't blow up or hang.
+ * doesn't blow up or hang.  
  * <br>
  * Finally, it tests that two clients accessing the server in multiple
  * threads get the same results, ie testing the server is thread safe.
@@ -31,21 +30,21 @@ import edu.stanford.nlp.net.Ports;
 public class NERServerITest extends TestCase {
   private static CRFClassifier crf = null;
 
-  private static final String englishCRFPath =
+  private static final String englishCRFPath = 
     "/u/nlp/data/ner/goodClassifiers/english.all.3class.nodistsim.crf.ser.gz";
-  private static final String englishTestFile =
+  private static final String englishTestFile = 
     "/u/nlp/data/ner/column_data/conll.testa";
   private static String loadedQueryFile = null;
 
   private static final String CHARSET = "UTF-8";
 
   private static final String QUERY = "John Bauer was born in New Jersey";
-  private static final String EXPECTED_ANSWER =
+  private static final String EXPECTED_ANSWER = 
     "John/PERSON Bauer/PERSON was/O born/O in/O New/LOCATION Jersey/LOCATION";
 
-  public Thread startNERServer(int port,
-                               AbstractSequenceClassifier classifier,
-                               String charset, boolean daemon)
+  public Thread startNERServer(int port, 
+                               AbstractSequenceClassifier classifier, 
+                               String charset, boolean daemon) 
     throws IOException
   {
     final NERServer server = new NERServer(port, classifier, charset);
@@ -59,7 +58,7 @@ public class NERServerITest extends TestCase {
     return thread;
   }
 
-  public void setUp()
+  public void setUp() 
     throws IOException
   {
     if (crf == null) {
@@ -67,7 +66,7 @@ public class NERServerITest extends TestCase {
         if (crf == null) {
           Properties props = new Properties();
           props.setProperty("outputFormat", "slashTags");
-          crf = new CRFClassifier(props);
+          crf = new CRFClassifier(props);    
           crf.loadClassifierNoExceptions(englishCRFPath, props);
         }
       }
@@ -76,11 +75,12 @@ public class NERServerITest extends TestCase {
     if (loadedQueryFile == null) {
       synchronized(NERServerITest.class) {
         if (loadedQueryFile == null) {
-          BufferedReader br = IOUtils.readerFromString(englishTestFile);
+          BufferedReader bin = 
+            new BufferedReader(new FileReader(englishTestFile));
           String line;
           StringBuilder query = new StringBuilder();
           StringBuilder allQueries = new StringBuilder();
-          while ((line = br.readLine()) != null) {
+          while ((line = bin.readLine()) != null) {
             line = line.trim();
             if (line.length() == 0) {
               if (query.length() > 0) {
@@ -103,7 +103,7 @@ public class NERServerITest extends TestCase {
 
   }
 
-  public void testStartServer()
+  public void testStartServer() 
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
@@ -111,7 +111,7 @@ public class NERServerITest extends TestCase {
     startNERServer(port, crf, CHARSET, true);
   }
 
-  public void testQueryServer()
+  public void testQueryServer() 
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
@@ -121,7 +121,7 @@ public class NERServerITest extends TestCase {
     BufferedReader bin = new BufferedReader(sin);
     StringWriter sout = new StringWriter();
     BufferedWriter bout = new BufferedWriter(sout);
-    NERServer.NERClient.communicateWithNERServer("localhost", port, CHARSET,
+    NERServer.NERClient.communicateWithNERServer("localhost", port, CHARSET, 
                                                  bin, bout, false);
     bout.flush();
     assertEquals(EXPECTED_ANSWER, sout.toString().trim());
@@ -131,7 +131,7 @@ public class NERServerITest extends TestCase {
    * This test would hang forever for some various kinds of bugs in
    * the server/client read/write code
    */
-  public void testServerDoesntHang()
+  public void testServerDoesntHang() 
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
@@ -159,7 +159,7 @@ public class NERServerITest extends TestCase {
     BufferedReader bin = new BufferedReader(sin);
     StringWriter sout = new StringWriter();
     BufferedWriter bout = new BufferedWriter(sout);
-    NERServer.NERClient.communicateWithNERServer("localhost", port, CHARSET,
+    NERServer.NERClient.communicateWithNERServer("localhost", port, CHARSET, 
                                                  bin, bout, false);
     bout.flush();
     String results = sout.toString();
@@ -173,7 +173,7 @@ public class NERServerITest extends TestCase {
     bin = new BufferedReader(sin);
     sout = new StringWriter();
     bout = new BufferedWriter(sout);
-    NERServer.NERClient.communicateWithNERServer("localhost", port, CHARSET,
+    NERServer.NERClient.communicateWithNERServer("localhost", port, CHARSET, 
                                                  bin, bout, false);
     bout.flush();
     results = sout.toString();
@@ -212,14 +212,14 @@ public class NERServerITest extends TestCase {
     }
 
     public String results() { return results; }
-
+      
     public void run() {
       try {
         StringReader sin = new StringReader(queryText);
         BufferedReader bin = new BufferedReader(sin);
         StringWriter sout = new StringWriter();
         BufferedWriter bout = new BufferedWriter(sout);
-        NERServer.NERClient.communicateWithNERServer(host, port, charset,
+        NERServer.NERClient.communicateWithNERServer(host, port, charset, 
                                                      bin, bout, false);
         bout.flush();
         results = sout.toString();

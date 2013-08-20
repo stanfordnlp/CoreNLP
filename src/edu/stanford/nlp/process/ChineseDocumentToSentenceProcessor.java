@@ -13,6 +13,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -28,7 +29,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -41,10 +41,10 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
 
   private static final long serialVersionUID = 4054964767812217460L;
 
-  private static Set<Character> fullStopsSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u3002', '\uff01', '\uff1f', '!', '?'}));
+  private static Set<Character> fullStopsSet = new HashSet<Character>(Arrays.asList(new Character[]{'\u3002', '\uff01', '\uff1f', '!', '?'}));
   // not \uff0e . (too often separates English first/last name, etc.)
 
-  private static Set<Character> rightMarkSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u201d', '\u2019', '\u300b', '\u300f', '\u3009', '\u300d', '\uff1e', '\uff07', '\uff09', '\'', '"', ')', ']', '>'}));
+  private static Set<Character> rightMarkSet = new HashSet<Character>(Arrays.asList(new Character[]{'\u201d', '\u2019', '\u300b', '\u300f', '\u3009', '\u300d', '\uff1e', '\uff07', '\uff09', '\'', '"', ')', ']', '>'}));
 
   private static String normalizationTableFile = null;
   private String encoding = "UTF-8";

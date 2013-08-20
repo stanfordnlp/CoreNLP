@@ -363,7 +363,7 @@
       <zipfileset file="${source.path}/edu/stanford/nlp/pipeline/webapp/brat.js"/>
       <zipfileset file="${data.path}/webapps/favicon.ico"/>
       <zipfileset prefix="WEB-INF/data"
-                  file="${doc.path}/corenlp/CoreNLP-to-HTML.xsl"/>
+                  file="${doc.path}/software/CoreNLP-to-HTML.xsl"/>
     </war>
   </target>
 
