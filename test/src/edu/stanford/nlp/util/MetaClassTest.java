@@ -9,9 +9,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import org.junit.*;
 
-import edu.stanford.nlp.util.MetaClass;
-
-public class MetaClassTest{
+public class MetaClassTest {
 	
 	private static final String CLASS =  MetaClassTest.class.getName();
 	
