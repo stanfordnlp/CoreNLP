@@ -436,6 +436,26 @@ public class MetaClassTest {
     assertEquals(list, castedList);
   }
 
+  private static class Pointer<E> {
+    public E value;
+    public Pointer(E value) {
+      this.value = value;
+    }
+    @SuppressWarnings("UnusedDeclaration") // used via reflection
+    public static <E> Pointer<E> fromString(String value) {
+      E v = MetaClass.castWithoutKnowingType(value);
+      return new Pointer<E>(v);
+    }
+  }
+
+  @Test
+  public void testCastRegression() {
+    // Generics ordering (integer should go relatively early)
+    Pointer<Integer> x1 = MetaClass.cast("1", Pointer.class);
+    assertEquals(1, x1.value.intValue());
+
+  }
+
   private static class FromStringable {
     public final String myContents;
     private FromStringable(String contents) { myContents = contents; }
