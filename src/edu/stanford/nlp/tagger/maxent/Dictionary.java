@@ -207,8 +207,7 @@ public class Dictionary {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = new TagCount();
-      count.read(rf);
+      TagCount count = TagCount.readTagCount(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
@@ -234,8 +233,7 @@ public class Dictionary {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = new TagCount();
-      count.read(rf);
+      TagCount count = TagCount.readTagCount(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
