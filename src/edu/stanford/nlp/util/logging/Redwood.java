@@ -564,10 +564,10 @@ public class Redwood {
     b.append(sec).append(".").append(mili);
     if(min > 0) b.append(" minutes");
     else b.append(" seconds");
-  };
+  }
 
 
-  protected static final boolean supportsAnsi;
+  public static final boolean supportsAnsi;
   static {
     String os = System.getProperty("os.name").toLowerCase();
     boolean isUnix = os.contains("unix") || os.contains("linux") || os.contains("solaris");
