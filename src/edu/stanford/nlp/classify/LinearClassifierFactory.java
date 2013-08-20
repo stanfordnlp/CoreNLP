@@ -49,15 +49,16 @@ import edu.stanford.nlp.util.Function;
  * Builds various types of linear classifiers, with functionality for
  * setting objective function, optimization method, and other parameters.
  * Classifiers can be defined with passed constructor arguments or using setter methods.
- * Defaults to Quasi-newton optimization of a {@code LogConditionalObjectiveFunction}
- * (Merges old classes: CGLinearClassifierFactory, QNLinearClassifierFactory, and MaxEntClassifierFactory).
+ * Defaults to Quasi-newton optimization of a {@code LogConditionalObjectiveFunction}.
+ * (Merges old classes: CGLinearClassifierFactory, QNLinearClassifierFactory, and MaxEntClassifierFactory.)
  * Note that a bias term is not assumed, and so if you want to learn
  * a bias term you should add an "always-on" feature to your examples.
  *
  * @author Jenny Finkel
  * @author Chris Cox (merged factories, 8/11/04)
  * @author Dan Klein (CGLinearClassifierFactory, MaxEntClassifierFactory)
- * @author Galen Andrew (tuneSigma), Marie-Catherine de Marneffe (CV in tuneSigma)
+ * @author Galen Andrew (tuneSigma),
+ * @author Marie-Catherine de Marneffe (CV in tuneSigma)
  * @author Sarah Spikes (Templatization, though I don't know what to do with the Minimizer)
  * @author Ramesh Nallapati (nmramesh@cs.stanford.edu) {@link #trainSemiSupGE} methods
  */
@@ -98,8 +99,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
 
   /**
-   * Adapt classifier (adjust the mean of Gaussian prior)
-   * under construction -pichuan
+   * Adapt classifier (adjust the mean of Gaussian prior).
+   * Under construction -pichuan
+   *
    * @param origWeights the original weights trained from the training data
    * @param adaptDataset the Dataset used to adapt the trained weights
    * @return adapted weights
@@ -220,6 +222,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   /**
    * Returns a list of featured thresholded by minPrecision and sorted by their frequency of occurrence.
    * precision in this case, is defined as the frequency of majority label over total frequency for that feature.
+   *
    * @return list of high precision features.
    */
   private List<F> getHighPrecisionFeatures(GeneralDataset<L,F> dataset, double minPrecision, int maxNumFeatures){
@@ -291,17 +294,15 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return new LinearClassifier<L, F>(weights, train.featureIndex(), train.labelIndex());
   }
 
-  /** NOTE: Constructors that takes in a Minimizer creates a LinearClassifierFactory that will reuse the minimizer
-   *  and will not be threadsafe (unless the Minimzer itself is ThreadSafe which is probably not the case)
-   */
-
-
   public LinearClassifierFactory() {
     this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } });
     this.mem = 15;
     this.useQuasiNewton();
   }
 
+  /** NOTE: Constructors that takes in a Minimizer creates a LinearClassifierFactory that will reuse the minimizer
+   *  and will not be threadsafe (unless the Minimizer itself is ThreadSafe which is probably not the case)
+   */
   public LinearClassifierFactory(Minimizer<DiffFunction> min) {
     this(min, false);
   }
@@ -417,8 +418,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Set the prior.
    *
    * @param logPrior One of the priors defined in
-   *              <code>LogConditionalObjectiveFunction</code>.
-   *              <code>LogPrior.QUADRATIC</code> is the default.
+   *              {@code LogConditionalObjectiveFunction}.
+   *              {@code LogPrior.QUADRATIC} is the default.
    */
   public void setPrior(LogPrior logPrior) {
     this.logPrior = logPrior;
@@ -429,7 +430,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Only used with conjugate-gradient minimization.
    * <code>false</code> is the default.
    */
-
   public void setVerbose(boolean verbose) {
     this.verbose = verbose;
   }
@@ -573,7 +573,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * Sets the minimizer to {@link CGMinimizer}, with the passed <code>verbose</code> flag.
+   * Sets the minimizer to {@link CGMinimizer}, with the passed {@code verbose} flag.
    */
   public void useConjugateGradientAscent(boolean verbose) {
     this.verbose = verbose;
@@ -647,9 +647,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * callls the method {@link #crossValidateSetSigma(GeneralDataset, int, Scorer, LineSearcher)} with
+   * Calls the method {@link #crossValidateSetSigma(GeneralDataset, int, Scorer, LineSearcher)} with
    * multi-class log-likelihood scoring (see {@link MultiClassAccuracyStats}) and golden-section line search
    * (see {@link GoldenSectionLineSearch}).
+   *
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold) {
@@ -665,7 +666,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
   /**
    * Sets the sigma parameter to a value that optimizes the cross-validation score given by <code>scorer</code>.  Search for an optimal value
-   * is carried out by <code>minimizer</code>
+   * is carried out by <code>minimizer</code>.
+   *
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold, final Scorer<L> scorer, LineSearcher minimizer) {
@@ -751,6 +753,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * is carried out by <code>minimizer</code>
    * dataset the data set to optimize sigma on.
    * kfold
+   * 
    * @return an interim set of optimal weights: the weights
    */
   public double[] heldOutSetSigma(final GeneralDataset<L, F> trainSet, final GeneralDataset<L, F> devSet, final Scorer<L> scorer, LineSearcher minimizer) {
