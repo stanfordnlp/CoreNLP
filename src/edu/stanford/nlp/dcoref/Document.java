@@ -113,9 +113,8 @@ public class Document implements Serializable {
   public int numParagraph;
   public int numSentences;
 
-  /** Set of incompatible clusters pairs */
-  private Set<Pair<Integer, Integer>> incompatibles;
-  private Set<Pair<Integer, Integer>> incompatibleClusters;
+  /** Set of incompatible mention pairs */
+  public Set<Pair<Integer, Integer>> incompatibles;
 
   /** Map of speaker name/id to speaker info */
   transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
@@ -131,7 +130,6 @@ public class Document implements Serializable {
     speakers = Generics.newHashMap();
     speakerPairs = Generics.newHashSet();
     incompatibles = Generics.newHashSet();
-    incompatibleClusters = Generics.newHashSet();
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
@@ -258,34 +256,13 @@ public class Document implements Serializable {
 
   public boolean isIncompatible(CorefCluster c1, CorefCluster c2) {
     // Was any of the pairs of mentions marked as incompatible
-    int cid1 = Math.min(c1.clusterID, c2.clusterID);
-    int cid2 = Math.max(c1.clusterID, c2.clusterID);
-    return incompatibleClusters.contains(Pair.makePair(cid1,cid2));
-  }
-
-  // Update incompatibles for two clusters that are about to be merged
-  public void mergeIncompatibles(CorefCluster to, CorefCluster from) {
-    List<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>> replacements =
-            new ArrayList<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>>();
-    for (Pair<Integer, Integer> p:incompatibleClusters) {
-      Integer other = null;
-      if (p.first == from.clusterID) {
-        other = p.second;
-      } else if (p.second == from.clusterID) {
-        other = p.first;
-      }
-      if (other != null && other != to.clusterID) {
-        int cid1 = Math.min(other, to.clusterID);
-        int cid2 = Math.max(other, to.clusterID);
-        replacements.add(Pair.makePair(p, Pair.makePair(cid1, cid2)));
+    for (Mention m:c1.corefMentions)  {
+      for (Mention a:c2.corefMentions) {
+        if (isIncompatible(m,a)) return true;
       }
     }
-    for (Pair<Pair<Integer,Integer>, Pair<Integer,Integer>> r:replacements)  {
-      incompatibleClusters.remove(r.first);
-      incompatibleClusters.add(r.second);
-    }
+    return false;
   }
-
 
   public boolean isIncompatible(Mention m1, Mention m2) {
     int mid1 = Math.min(m1.mentionID, m2.mentionID);
@@ -297,9 +274,6 @@ public class Document implements Serializable {
     int mid1 = Math.min(m1.mentionID, m2.mentionID);
     int mid2 = Math.max(m1.mentionID, m2.mentionID);
     incompatibles.add(Pair.makePair(mid1,mid2));
-    int cid1 = Math.min(m1.corefClusterID, m2.corefClusterID);
-    int cid2 = Math.max(m1.corefClusterID, m2.corefClusterID);
-    incompatibleClusters.add(Pair.makePair(cid1,cid2));
   }
 
   /** Mark twin mentions in gold and predicted mentions */
