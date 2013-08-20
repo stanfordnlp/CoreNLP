@@ -24,14 +24,14 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     filename = record.file;
     try {
       reader = new BufferedReader(new InputStreamReader
-                                  (new FileInputStream(filename), 
+                                  (new FileInputStream(filename),
                                    record.encoding));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    wordColumn = ((record.wordColumn == null) ? 
+    wordColumn = ((record.wordColumn == null) ?
                   DEFAULT_WORD_COLUMN : record.wordColumn);
-    tagColumn = ((record.tagColumn == null) ? 
+    tagColumn = ((record.tagColumn == null) ?
                  DEFAULT_TAG_COLUMN : record.tagColumn);
     primeNext();
   }
@@ -73,8 +73,8 @@ public class TSVTaggedFileReader implements TaggedFileReader {
     next = new ArrayList<TaggedWord>();
     while (line != null && !line.trim().equals("")) {
       String[] pieces = line.split("\t");
-      if (pieces.length <= wordColumn || pieces.length <= wordColumn) {
-        throw new IllegalArgumentException("File " + filename + " line #" + 
+      if (pieces.length <= wordColumn || pieces.length <= tagColumn) {
+        throw new IllegalArgumentException("File " + filename + " line #" +
                                            linesRead + " too short");
       }
       String word = pieces[wordColumn];
