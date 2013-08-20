@@ -63,7 +63,9 @@ public class AnnotationLookup {
     DOCTYPE_KEY(CoreAnnotations.DocTypeAnnotation.class,"doctype"),
     DOCDATE_KEY(CoreAnnotations.DocDateAnnotation.class,"docdate"),
     DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype"),
-    AUTHORS_KEY(CoreAnnotations.AuthorsAnnotation.class,"authors"),
+    LINK_KEY(CoreAnnotations.LinkAnnotation.class,"link"),
+    SPEAKER_KEY(CoreAnnotations.SpeakerAnnotation.class,"speaker"),
+    AUTHOR_KEY(CoreAnnotations.AuthorAnnotation.class,"author"),
     SECTION_KEY(CoreAnnotations.SectionAnnotation.class,"section"),
     SECTIONID_KEY(CoreAnnotations.SectionIDAnnotation.class,"sectionID"),
     SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate");
