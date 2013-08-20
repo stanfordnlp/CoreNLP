@@ -31,7 +31,6 @@ public class RegexNERAnnotator implements Annotator {
     boolean verbose = Boolean.parseBoolean(properties.getProperty(name + ".verbose", "false"));
 
     classifier = new RegexNERSequenceClassifier(mapping, ignoreCase, overwriteMyLabels, validPosPattern);
-    timer = new Timing();
     this.verbose = verbose;
   }
 
