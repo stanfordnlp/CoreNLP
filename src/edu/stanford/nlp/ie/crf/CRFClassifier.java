@@ -28,6 +28,7 @@ package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.ie.*;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.math.ArrayMath;
@@ -3310,7 +3311,27 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     ObjectOutputStream oos = null;
     try {
       oos = IOUtils.writeStreamFromString(serializePath);
+      serializeClassifier(oos);
+      System.err.println("done.");
 
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  /**
+   * Serialize the classifier to the given ObjectOutputStream.
+   * <br>
+   * TODO: with a little more effort we could just make the
+   * AbstractSequenceClassifier family implement Serializable
+   */
+  public void serializeClassifier(ObjectOutputStream oos) {
+    try {
       oos.writeObject(labelIndices);
       oos.writeObject(classIndex);
       oos.writeObject(featureIndex);
@@ -3335,16 +3356,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
 
       oos.writeObject(knownLCWords);
-
-      System.err.println("done.");
-
-    } catch (Exception e) {
-      System.err.println("Failed");
-      e.printStackTrace();
-      // don't actually exit in case they're testing too
-      // System.exit(1);
-    } finally {
-      IOUtils.closeIgnoringExceptions(oos);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
