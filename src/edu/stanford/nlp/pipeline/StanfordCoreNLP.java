@@ -1106,6 +1106,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return ObjectBank.getLineIterator(fileName, new ObjectBank.PathToFileFunction());
   }
 
+
+
   public void processFiles(String base, final Collection<File> files, int numThreads) throws IOException {
     List<Runnable> toRun = new LinkedList<Runnable>();
 
@@ -1123,20 +1125,19 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
-    final String serializerClass = properties.getProperty("serializer");
-    final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
-    final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
+    String serializerClass = properties.getProperty("serializer");
+    AnnotationSerializer annotationSerializer = null;
+    if (serializerClass != null) {
+      annotationSerializer = ReflectionLoading.loadByReflection(serializerClass);
+    }
+    final AnnotationSerializer loadingSerializer = annotationSerializer;
+    final AnnotationSerializer outputSerializer = annotationSerializer;
 
     final String extension = properties.getProperty("outputExtension", defaultExtension);
     final boolean replaceExtension = Boolean.parseBoolean(properties.getProperty("replaceExtension", "false"));
-    final boolean continueOnAnnotateError = Boolean.parseBoolean(properties.getProperty("continueOnAnnotateError", "false"));
 
     final boolean noClobber = Boolean.parseBoolean(properties.getProperty("noClobber", "false"));
-    final boolean randomize = Boolean.parseBoolean(properties.getProperty("randomize", "false"));
-
     final MutableInteger totalProcessed = new MutableInteger(0);
-    final MutableInteger totalSkipped = new MutableInteger(0);
-    final MutableInteger totalErrorAnnotating = new MutableInteger(0);
 
     //for each file...
     for (final File file : files) {
@@ -1177,16 +1178,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             //      Java 7 will have a Files.isSymbolicLink(file) method
             if (outputFilename.equals(file.getCanonicalPath())) {
               err("Skipping " + file.getName() + ": output file " + outputFilename + " has the same filename as the input file -- assuming you don't actually want to do this.");
-              synchronized (totalSkipped) {
-                totalSkipped.incValue(1);
-              }
               return;
             }
             if (noClobber && new File(outputFilename).exists()) {
               err("Skipping " + file.getName() + ": output file " + outputFilename + " as it already exists.  Don't use the noClobber option to override this.");
-              synchronized (totalSkipped) {
-                totalSkipped.incValue(1);
-              }
               return;
             }
 
@@ -1197,10 +1192,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             if (file.getAbsolutePath().endsWith(".ser.gz")) {
               // maybe they want to continue processing a partially processed annotation
               try {
-                // Create serializers
-                if (inputSerializerClass != null) {
-                  AnnotationSerializer inputSerializer = ReflectionLoading.loadByReflection(inputSerializerClass);
-                  annotation = inputSerializer.load(new BufferedInputStream(new FileInputStream(file)));
+                if (loadingSerializer != null) {
+                  annotation = loadingSerializer.load(new BufferedInputStream(new FileInputStream(file)));
                 } else {
                   annotation = IOUtils.readObjectFromFile(file);
                 }
@@ -1222,70 +1215,52 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               annotation = new Annotation(text);
             }
 
-            boolean annotationOkay = false;
             forceTrack("Annotating file " + file.getAbsoluteFile());
             try {
               annotate(annotation);
-              annotationOkay = true;
             } catch (Exception ex) {
-              if (continueOnAnnotateError) {
-                // Error annotating but still wanna continue
-                // (maybe in the middle of long job and maybe next one will be okay)
-                err("Error annotating " + file.getAbsoluteFile(), ex);
-                annotationOkay = false;
-                synchronized (totalErrorAnnotating) {
-                  totalErrorAnnotating.incValue(1);
-                }
-              } else {
-                throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
-              }
+              warn("Error annotating " + file.getAbsoluteFile(), ex);
+              throw new RuntimeException(ex);
             } finally {
               endTrack("Annotating file " + file.getAbsoluteFile());
             }
 
-            if (annotationOkay) {
-              //--Output File
-              switch (outputFormat) {
-              case XML: {
-                OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
-                xmlPrint(annotation, fos);
-                fos.close();
-                break;
-              }
-              case TEXT: {
-                OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
-                prettyPrint(annotation, fos);
-                fos.close();
-                break;
-              }
-              case SERIALIZED: {
-                if (outputSerializerClass != null) {
-                  AnnotationSerializer outputSerializer = ReflectionLoading.loadByReflection(inputSerializerClass);
-                  OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
-                  outputSerializer.save(annotation, fos);
-                  fos.close();
-                } else {
-                  IOUtils.writeObjectToFile(annotation, outputFilename);
-                }
-                break;
-              }
-              default:
-                throw new IllegalArgumentException("Unknown output format " + outputFormat);
-              }
-              synchronized (totalProcessed) {
-                totalProcessed.incValue(1);
-                if (totalProcessed.intValue() % 1000 == 0) {
-                  log("Processed " + totalProcessed + " documents");
-                }
-              }
-            } else {
-              warn("Error annotating " + file.getAbsoluteFile() + " not saved to " + outputFilename);
+            //--Output File
+            switch (outputFormat) {
+            case XML: {
+              OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
+              xmlPrint(annotation, fos);
+              fos.close();
+              break;
             }
-
+            case TEXT: {
+              OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
+              prettyPrint(annotation, fos);
+              fos.close();
+              break;
+            }
+            case SERIALIZED: {
+              if (outputSerializer != null) {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
+                outputSerializer.save(annotation, fos);
+                fos.close();
+              } else {
+                IOUtils.writeObjectToFile(annotation, outputFilename);
+              }
+              break;
+            }
+            default:
+              throw new IllegalArgumentException("Unknown output format " + outputFormat);
+            }
 
             endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
 
-
+            synchronized (totalProcessed) {
+              totalProcessed.incValue(1);
+              if (totalProcessed.intValue() % 1000 == 0) {
+                log("Processed " + totalProcessed + " documents");
+              }
+            }
 
           } catch (IOException e) {
             throw new RuntimeIOException(e);
@@ -1294,11 +1269,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       });
     }
 
-    if (randomize) {
-      log("Randomly shuffling input");
-      Collections.shuffle(toRun);
-    }
-    log("Ready to process: " + toRun.size() + " files");
     //--Run Jobs
     if(numThreads == 1){
       for(Runnable r : toRun){ r.run(); }
@@ -1306,7 +1276,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       Redwood.Util.threadAndRun("StanfordCoreNLP <" + numThreads + " threads>", toRun, numThreads);
     }
     log("Processed " + totalProcessed + " documents");
-    log("Skipped " + totalSkipped + " documents, error annotating " + totalErrorAnnotating + " documents");
   }
 
   public void processFiles(final Collection<File> files, int numThreads) throws IOException {
