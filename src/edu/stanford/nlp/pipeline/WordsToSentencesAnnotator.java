@@ -56,7 +56,7 @@ public class WordsToSentencesAnnotator implements Annotator {
             new WordToSentenceProcessor<CoreLabel>(boundaryTokenRegex,
                     boundaryToDiscard, htmlElementsToDiscard,
                     WordToSentenceProcessor.stringToNewlineIsSentenceBreak(newlineIsSentenceBreak),
-                    TokenSequencePattern.compile(boundaryMultiTokenRegex), tokenRegexesToDiscard));
+                    (boundaryMultiTokenRegex != null)? TokenSequencePattern.compile(boundaryMultiTokenRegex):null, tokenRegexesToDiscard));
   }
 
   private WordsToSentencesAnnotator(boolean verbose, boolean countLineNumbers,
