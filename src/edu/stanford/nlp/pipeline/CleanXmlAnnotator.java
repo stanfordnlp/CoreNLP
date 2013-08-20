@@ -101,11 +101,6 @@ public class CleanXmlAnnotator implements Annotator{
   public static final String DEFAULT_SECTION_TAGS = null;
 
   /**
-   * This tells us what tokens will be discarded by ssplit
-   */
-  private Pattern ssplitDiscardTokensMatcher = null;
-
-  /**
    * A map of section level annotation keys (i.e. docid) along with a pattern i
    *  indicating the tag to match, and the attribute to match
    */
@@ -157,10 +152,6 @@ public class CleanXmlAnnotator implements Annotator{
     } else {
       return null;
     }
-  }
-
-  public void setSsplitDiscardTokensMatcher(String tags) {
-    ssplitDiscardTokensMatcher = toCaseInsensitivePattern(tags);
   }
 
   public void setSingleSentenceTagMatcher(String tags) {
@@ -468,18 +459,12 @@ public class CleanXmlAnnotator implements Annotator{
         }
 
         if (sectionStartTag != null) {
-          boolean okay = true;
-          if (ssplitDiscardTokensMatcher != null) {
-            okay = !ssplitDiscardTokensMatcher.matcher(token.word()).matches();
+          if (sectionStartToken == null) {
+            sectionStartToken = token;
           }
-          if (okay) {
-            if (sectionStartToken == null) {
-              sectionStartToken = token;
-            }
-            // Add tokens to saved section tokens
-            for (List<CoreLabel> saved:savedTokensForSection.values()) {
-              saved.add(token);
-            }
+          // Add tokens to saved section tokens
+          for (List<CoreLabel> saved:savedTokensForSection.values()) {
+            saved.add(token);
           }
         }
 
