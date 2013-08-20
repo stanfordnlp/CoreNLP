@@ -706,6 +706,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence);
 
   /**
+   * Classification is finished for the document.
+   * Do any cleanup (if information was stored as part of the document for global classification)
+   * @param document
+   */
+  public void finalizeClassification(final CoreMap document) {
+  }
+
+  /**
    * Train the classifier based on values in flags. It will use the first of
    * these variables that is defined: trainFiles (and baseTrainDir),
    * trainFileList, trainFile.
