@@ -3,7 +3,6 @@ package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,12 +14,13 @@ import edu.stanford.nlp.ie.machinereading.common.DomReader;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.RobustTokenizer.WordToken;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.util.Generics;
 
 public class AceSentenceSegmenter extends DomReader {
   // list of tokens which mark sentence boundaries
   private final static String[] sentenceFinalPunc = new String[] { ".", "!",
       "?" };
-  private static Set<String> sentenceFinalPuncSet = new HashSet<String>();
+  private static Set<String> sentenceFinalPuncSet = Generics.newHashSet();
 
   static {
     // set up sentenceFinalPuncSet

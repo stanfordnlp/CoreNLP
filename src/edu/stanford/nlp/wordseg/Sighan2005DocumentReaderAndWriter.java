@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,20 +18,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LMiddleAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LMiddleAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalCharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PositionAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ShapeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SpaceBeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UBlockAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UTypeAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.LineIterator;
 import edu.stanford.nlp.objectbank.ObjectBank;
@@ -43,6 +29,7 @@ import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.LatticeWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.fsm.DFSA;
@@ -59,7 +46,7 @@ import edu.stanford.nlp.fsm.DFSATransition;
  * @author Pi-Chuan Chang
  * @author Michel Galley (Viterbi seearch graph printing)
  */
-public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel> {
+public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer> {
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
@@ -147,7 +134,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         CoreLabel wi = new CoreLabel();
         String wordString = Character.toString(ch);
         if ( ! Character.isWhitespace(ch) && ! Character.isISOControl(ch)) {
-          wi.set(CharAnnotation.class, intern(wordString));
+          wi.set(CoreAnnotations.CharAnnotation.class, intern(wordString));
           nonspaceLineSB.append(wordString);
 
           // non-breaking space is skipped as well
@@ -156,32 +143,32 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           }
 
           wordString = Character.toString(origLine.charAt(origIndex));
-          wi.set(OriginalCharAnnotation.class, intern(wordString));
+          wi.set(CoreAnnotations.OriginalCharAnnotation.class, intern(wordString));
 
           // put in a word shape
           if (flags.useShapeStrings) {
-            wi.set(ShapeAnnotation.class, shapeOf(wordString));
+            wi.set(CoreAnnotations.ShapeAnnotation.class, shapeOf(wordString));
           }
           if (flags.useUnicodeType || flags.useUnicodeType4gram || flags.useUnicodeType5gram) {
-            wi.set(UTypeAnnotation.class, Character.getType(ch));
+            wi.set(CoreAnnotations.UTypeAnnotation.class, Character.getType(ch));
           }
           if (flags.useUnicodeBlock) {
-            wi.set(UBlockAnnotation.class, Characters.unicodeBlockStringOf(ch));
+            wi.set(CoreAnnotations.UBlockAnnotation.class, Characters.unicodeBlockStringOf(ch));
           }
 
           origIndex++;
 
           if (index == 0) { // first character of a sentence (a line)
-            wi.set(AnswerAnnotation.class, "1");
-            wi.set(SpaceBeforeAnnotation.class, "1");
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
+            wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
           } else if (Character.isWhitespace(line.charAt(index - 1)) || Character.isISOControl(line.charAt(index - 1))) {
-            wi.set(AnswerAnnotation.class, "1");
-            wi.set(SpaceBeforeAnnotation.class, "1");
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
+            wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
           } else {
-            wi.set(AnswerAnnotation.class, "0");
-            wi.set(SpaceBeforeAnnotation.class, "0");
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "0");
+            wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "0");
           }
-          wi.set(PositionAnnotation.class, intern(String.valueOf((position))));
+          wi.set(CoreAnnotations.PositionAnnotation.class, intern(String.valueOf((position))));
           position++;
           if (DEBUG_MORE) EncodingPrintWriter.err.println(wi.toString(), "UTF-8");
           lwi.add(wi);
@@ -189,12 +176,12 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       }
       if (flags.dictionary != null || flags.serializedDictionary != null) {
         String nonspaceLine = nonspaceLineSB.toString();
-        addDictionaryFeatures(cdict, LBeginAnnotation.class, LMiddleAnnotation.class, LEndAnnotation.class, nonspaceLine, lwi);
+        addDictionaryFeatures(cdict, CoreAnnotations.LBeginAnnotation.class, CoreAnnotations.LMiddleAnnotation.class, CoreAnnotations.LEndAnnotation.class, nonspaceLine, lwi);
       }
 
       if (flags.dictionary2 != null) {
         String nonspaceLine = nonspaceLineSB.toString();
-        addDictionaryFeatures(cdict2, D2_LBeginAnnotation.class, D2_LMiddleAnnotation.class, D2_LEndAnnotation.class, nonspaceLine, lwi);
+        addDictionaryFeatures(cdict2, CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class, nonspaceLine, lwi);
       }
       return lwi;
     }
@@ -298,14 +285,14 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     return s.trim().intern();
   }
 
-  public void printLattice(DFSA tagLattice, List<CoreLabel> doc, PrintWriter out) {
+  public void printLattice(DFSA<String, Integer> tagLattice, List<CoreLabel> doc, PrintWriter out) {
     CoreLabel[] docArray = doc.toArray(new CoreLabel[doc.size()]);
     // Create answer lattice:
     MutableInteger nodeId = new MutableInteger(0);
-    DFSA answerLattice = new DFSA(null);
-    DFSAState aInitState = new DFSAState(nodeId.intValue(),answerLattice);
+    DFSA<String, Integer> answerLattice = new DFSA<String, Integer>(null);
+    DFSAState<String, Integer> aInitState = new DFSAState<String, Integer>(nodeId.intValue(),answerLattice);
     answerLattice.setInitialState(aInitState);
-    Map<DFSAState,DFSAState> stateLinks = new HashMap<DFSAState,DFSAState>();
+    Map<DFSAState<String, Integer>,DFSAState<String, Integer>> stateLinks = Generics.newHashMap();
     // Convert binary lattice into word lattice:
     tagLatticeToAnswerLattice
       (tagLattice.initialState(), aInitState, new StringBuilder(""), nodeId, 0, 0.0, stateLinks, answerLattice, docArray);
@@ -320,7 +307,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
    * Recursively builds an answer lattice (Chinese words) from a Viterbi search graph
    * of binary predictions. This function does a limited amount of post-processing:
    * preserve white spaces of the input, and not segment between two latin characters or
-   * between two digits. Consequently, the probabilities of all paths in anserLattice
+   * between two digits. Consequently, the probabilities of all paths in answerLattice
    * may not sum to 1 (they do sum to 1 if no post processing applies).
    *
    * @arg tSource Current node in Viterbi search graph.
@@ -334,32 +321,33 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
    *  recombined as well, if at word boundary).
    */
   private void tagLatticeToAnswerLattice
-         (DFSAState tSource, DFSAState aSource, StringBuilder answer,
+         (DFSAState<String, Integer> tSource, DFSAState<String, Integer> aSource, StringBuilder answer,
           MutableInteger nodeId, int pos, double cost,
-          Map<DFSAState,DFSAState> stateLinks, DFSA answerLattice, CoreLabel[] docArray) {
+          Map<DFSAState<String, Integer>,DFSAState<String, Integer>> stateLinks, 
+          DFSA<String, Integer> answerLattice, CoreLabel[] docArray) {
     // Add "1" prediction after the end of the sentence, if applicable:
     if(tSource.isAccepting() && tSource.continuingInputs().size() == 0) {
       tSource.addTransition
-        (new DFSATransition("", tSource, new DFSAState(-1, null), "1", "", 0));
+        (new DFSATransition<String, Integer>("", tSource, new DFSAState<String, Integer>(-1, null), "1", "", 0));
     }
     // Get current label, character, and prediction:
     CoreLabel curLabel = (pos < docArray.length) ? docArray[pos] : null;
     String curChr = null, origSpace = null;
     if(curLabel != null) {
-      curChr = curLabel.get(OriginalCharAnnotation.class);
+      curChr = curLabel.get(CoreAnnotations.OriginalCharAnnotation.class);
       assert(curChr.length() == 1);
-      origSpace = curLabel.get(SpaceBeforeAnnotation.class);
+      origSpace = curLabel.get(CoreAnnotations.SpaceBeforeAnnotation.class);
     }
     // Get set of successors in search graph:
-    Set inputs = tSource.continuingInputs();
+    Set<String> inputs = tSource.continuingInputs();
     // Only keep most probable transition out of initial state:
-    Object answerConstraint = null;
+    String answerConstraint = null;
     if(pos == 0) {
       double minCost = Double.POSITIVE_INFINITY;
-      DFSATransition bestTransition = null;
-      for (Iterator iter = inputs.iterator(); iter.hasNext();) {
-        Object predictSpace = iter.next();
-        DFSATransition transition = tSource.transition(predictSpace);
+      DFSATransition<String, Integer> bestTransition = null;
+      for (Iterator<String> iter = inputs.iterator(); iter.hasNext();) {
+        String predictSpace = iter.next();
+        DFSATransition<String, Integer> transition = tSource.transition(predictSpace);
         double transitionCost = transition.score();
         if(transitionCost < minCost) {
           if(predictSpace != null) {
@@ -371,11 +359,10 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       }
     }
     // Follow along each transition:
-    for (Iterator iter = inputs.iterator(); iter.hasNext();) {
-      Object predictSpace = iter.next();
-      DFSATransition transition = tSource.transition(predictSpace);
-      DFSAState tDest = transition.target();
-      DFSAState newASource = aSource;
+    for (String predictSpace : inputs) {
+      DFSATransition<String, Integer> transition = tSource.transition(predictSpace);
+      DFSAState<String, Integer> tDest = transition.target();
+      DFSAState<String, Integer> newASource = aSource;
       //System.err.printf("tsource=%s tdest=%s asource=%s pos=%d predictSpace=%s\n", tSource, tDest, newASource, pos, predictSpace);
       StringBuilder newAnswer = new StringBuilder(answer.toString());
       int answerLen = newAnswer.length();
@@ -412,17 +399,17 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         if(newAnswer.toString().length() > 0) {
           // If answer destination node visited before, create a new edge and leave:
           if(stateLinks.containsKey(tSource)) {
-            DFSAState aDest = stateLinks.get(tSource);
+            DFSAState<String, Integer> aDest = stateLinks.get(tSource);
             newASource.addTransition
-              (new DFSATransition("", newASource, aDest, newAnswer.toString(), "", newCost));
+              (new DFSATransition<String, Integer>("", newASource, aDest, newAnswer.toString(), "", newCost));
             //System.err.printf("new transition: asource=%s adest=%s edge=%s\n", newASource, aDest, newAnswer.toString());
             continue;
           }
           // If answer destination node not visited before, create it + new edge:
           nodeId.incValue(1);
-          DFSAState aDest = new DFSAState(nodeId.intValue(), answerLattice, 0.0);
+          DFSAState<String, Integer> aDest = new DFSAState<String, Integer>(nodeId.intValue(), answerLattice, 0.0);
           stateLinks.put(tSource,aDest);
-          newASource.addTransition(new DFSATransition("", newASource, aDest, newAnswer.toString(), "", newCost));
+          newASource.addTransition(new DFSATransition<String, Integer>("", newASource, aDest, newAnswer.toString(), "", newCost));
           //System.err.printf("new edge: adest=%s\n", newASource, aDest, newAnswer.toString());
           //System.err.printf("new transition: asource=%s adest=%s edge=%s\n\n\n", newASource, aDest, newAnswer.toString());
           // Reached an accepting state:

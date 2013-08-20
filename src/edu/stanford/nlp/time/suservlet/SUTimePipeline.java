@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-import edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.time.GUTimeAnnotator;
 import edu.stanford.nlp.time.HeidelTimeAnnotator;
 import edu.stanford.nlp.time.TimeAnnotator;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations;
 
 public class SUTimePipeline {
   final StanfordCoreNLP pipeline;
@@ -72,7 +72,7 @@ public class SUTimePipeline {
     System.err.println("Processing text \"" + sentence + "\" with dateString = " + dateString);
     Annotation anno = new Annotation(sentence);
     if (dateString != null && !dateString.equals("")) {
-      anno.set(DocDateAnnotation.class, dateString);
+      anno.set(CoreAnnotations.DocDateAnnotation.class, dateString);
     }
     pipeline.annotate(anno);
 
@@ -87,7 +87,7 @@ public class SUTimePipeline {
     System.out.print("> ");
     for(String line; (line = is.readLine()) != null; ){
       Annotation ann = pipeline.process(line, null, timeAnnotator);
-      System.out.println(ann.get(TimexAnnotations.class));
+      System.out.println(ann.get(TimeAnnotations.TimexAnnotations.class));
       System.out.print("> ");
     }
   }

@@ -3,6 +3,7 @@ package edu.stanford.nlp.trees;
 import edu.stanford.nlp.io.ExtensionFileFilter;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Sets;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.StringLabel;
@@ -11,7 +12,6 @@ import java.io.*;
 import java.text.NumberFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 
@@ -328,7 +328,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
     int shortestSentence = Integer.MAX_VALUE;
     int longestSentence = 0;
     int numNullLabel = 0;
-    Set<String> words = new HashSet<String>();
+    Set<String> words = Generics.newHashSet();
     ClassicCounter<String> tags = new ClassicCounter<String>();
     ClassicCounter<String> cats = new ClassicCounter<String>();
     Tree leafEg = null;
@@ -462,7 +462,7 @@ public abstract class Treebank extends AbstractCollection<Tree> {
       // The problem with the below is that words aren't turned into a basic
       // category, but empties commonly are indexed....  Would need to look
       // for them with a suffix of -[0-9]+
-      Set<String> knownEmpties = new HashSet<String>(Arrays.asList(empties));
+      Set<String> knownEmpties = Generics.newHashSet(Arrays.asList(empties));
       Set<String> emptiesIntersection = Sets.intersection(words, knownEmpties);
       if ( ! emptiesIntersection.isEmpty()) {
         pw.println("  Caution! " + emptiesIntersection.size() +

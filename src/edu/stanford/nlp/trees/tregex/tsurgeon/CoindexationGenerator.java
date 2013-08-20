@@ -10,7 +10,12 @@ import java.util.regex.Matcher;
  */
 class CoindexationGenerator {
 
-  private static final Pattern coindexationPattern = Pattern.compile("-([0-9]+)$");
+  /**
+   * We require at least one character before the - so that negative
+   * numbers do not get treated as indexed nodes.  This seems more
+   * likely than a node having an index on an otherwise blank label.
+   */
+  private static final Pattern coindexationPattern = Pattern.compile(".+?-([0-9]+)$");
 
   private int lastIndex;
 

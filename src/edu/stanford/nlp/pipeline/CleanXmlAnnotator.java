@@ -3,16 +3,11 @@ package edu.stanford.nlp.pipeline;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ForcedSentenceEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.XmlContextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -92,13 +87,13 @@ public class CleanXmlAnnotator implements Annotator{
   }
 
   public void annotate(Annotation annotation) {
-    if (annotation.has(TokensAnnotation.class)) {
-      List<CoreLabel> tokens = annotation.get(TokensAnnotation.class);
+    if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
+      List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> dateTokens = new ArrayList<CoreLabel>();
       List<CoreLabel> newTokens = process(tokens, dateTokens);
       // We assume that if someone is using this annotator, they don't
       // want the old tokens any more and get rid of them
-      annotation.set(TokensAnnotation.class, newTokens);
+      annotation.set(CoreAnnotations.TokensAnnotation.class, newTokens);
 
       // if the doc date was found, save it. it is used by SUTime (inside the "ner" annotator)
       if(dateTokens.size() > 0){
@@ -110,7 +105,7 @@ public class CleanXmlAnnotator implements Annotator{
           first = false;
         }
         //System.err.println("DOC DATE IS: " + os.toString());
-        annotation.set(DocDateAnnotation.class, os.toString());
+        annotation.set(CoreAnnotations.DocDateAnnotation.class, os.toString());
       }
     }
   }
@@ -155,18 +150,18 @@ public class CleanXmlAnnotator implements Annotator{
         // what we removed to the appropriate tokens
         if (removedText.length() > 0) {
           boolean added = false;
-          String before = token.get(BeforeAnnotation.class);
+          String before = token.get(CoreAnnotations.BeforeAnnotation.class);
           if (before != null) {
-            token.set(BeforeAnnotation.class, removedText + before);
+            token.set(CoreAnnotations.BeforeAnnotation.class, removedText + before);
             added = true;
           }
           if (added && newTokens.size() > 1) {
             CoreLabel previous = newTokens.get(newTokens.size() - 2);
-            String after = previous.get(AfterAnnotation.class);
+            String after = previous.get(CoreAnnotations.AfterAnnotation.class);
             if (after != null)
-              previous.set(AfterAnnotation.class, after + removedText);
+              previous.set(CoreAnnotations.AfterAnnotation.class, after + removedText);
             else
-              previous.set(AfterAnnotation.class, removedText.toString());
+              previous.set(CoreAnnotations.AfterAnnotation.class, removedText.toString());
           }
           removedText = new StringBuilder();
         }
@@ -177,7 +172,7 @@ public class CleanXmlAnnotator implements Annotator{
           currentTagSet =
             Collections.unmodifiableList(new ArrayList<String>(enclosingTags));
         }
-        token.set(XmlContextAnnotation.class, currentTagSet);
+        token.set(CoreAnnotations.XmlContextAnnotation.class, currentTagSet);
 
         // is this token part of the doc date sequence?
         if (dateTagMatcher != null &&
@@ -193,14 +188,14 @@ public class CleanXmlAnnotator implements Annotator{
 
       // we are removing a token and its associated text...
       // keep track of that
-      String currentRemoval = token.get(BeforeAnnotation.class);
+      String currentRemoval = token.get(CoreAnnotations.BeforeAnnotation.class);
       if (currentRemoval != null)
         removedText.append(currentRemoval);
-      currentRemoval = token.get(OriginalTextAnnotation.class);
+      currentRemoval = token.get(CoreAnnotations.OriginalTextAnnotation.class);
       if (currentRemoval != null)
         removedText.append(currentRemoval);
       if (token == tokens.get(tokens.size() - 1)) {
-        currentRemoval = token.get(AfterAnnotation.class);
+        currentRemoval = token.get(CoreAnnotations.AfterAnnotation.class);
         if (currentRemoval != null)
           removedText.append(currentRemoval);
       }
@@ -212,7 +207,7 @@ public class CleanXmlAnnotator implements Annotator{
           sentenceEndingTagMatcher.matcher(tag.name).matches() &&
           newTokens.size() > 0) {
         CoreLabel previous = newTokens.get(newTokens.size() - 1);
-        previous.set(ForcedSentenceEndAnnotation.class, true);
+        previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
       }
 
       if (xmlTagMatcher == null)
@@ -273,11 +268,22 @@ public class CleanXmlAnnotator implements Annotator{
       // sometimes AfterAnnotation seems to be null even when we are
       // collecting before & after annotations, but OriginalTextAnnotation
       // is only non-null if we are invertible.  Hopefully.
-      if (lastToken.get(OriginalTextAnnotation.class) != null) {
-        lastToken.set(AfterAnnotation.class, removedText.toString());
+      if (lastToken.get(CoreAnnotations.OriginalTextAnnotation.class) != null) {
+        lastToken.set(CoreAnnotations.AfterAnnotation.class, removedText.toString());
       }
     }
 
     return newTokens;
+  }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(CLEAN_XML_REQUIREMENT);
   }
 }

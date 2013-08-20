@@ -14,12 +14,12 @@ public class Word extends StringLabel implements HasWord {
   /**
    * String representation of an empty.
    */
-  public static final String EMPTYSTRING = "*t*";
+  public static final String EMPTY_STRING = "*t*";
 
   /**
    * Word representation of an empty.
    */
-  public static final Word EMPTY = new Word(EMPTYSTRING);
+  public static final Word EMPTY = new Word(EMPTY_STRING);
 
   /**
    * Construct a new word with a <code>null</code> value.
@@ -58,11 +58,13 @@ public class Word extends StringLabel implements HasWord {
   }
 
 
+  @Override
   public String word() {
     return value();
   }
 
 
+  @Override
   public void setWord(String word) {
     setValue(word);
   }
@@ -72,10 +74,12 @@ public class Word extends StringLabel implements HasWord {
 
     private static final LabelFactory lf = new WordFactory();
 
+    private WordFactoryHolder() { }
+
   }
 
   /**
-   * Return a factory for this kind of label (i.e., <code>Word</code>).
+   * Return a factory for this kind of label (i.e., {@code Word}).
    * The factory returned is always the same one (a singleton).
    *
    * @return The label factory

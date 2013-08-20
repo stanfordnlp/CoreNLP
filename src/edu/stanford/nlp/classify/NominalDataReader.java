@@ -1,8 +1,8 @@
 package edu.stanford.nlp.classify;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.io.File;
@@ -10,6 +10,7 @@ import java.io.File;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 
@@ -22,13 +23,13 @@ import edu.stanford.nlp.util.Index;
  * Made type-safe by Sarah Spikes (sdspikes@cs.stanford.edu)
  */
 public class NominalDataReader {
-  HashMap<String, Index<String>> indices = new HashMap<String, Index<String>>(); // an Index for each feature so that its values are coded as integers
+  Map<String, Index<String>> indices = Generics.newHashMap(); // an Index for each feature so that its values are coded as integers
 
   /**
    * the class is the last column and it skips the next-to-last column because it is a unique id in the audiology data
    *
    */
-  static RVFDatum<String, Integer> readDatum(String line, String separator, HashMap<Integer, Index<String>> indices) {
+  static RVFDatum<String, Integer> readDatum(String line, String separator, Map<Integer, Index<String>> indices) {
     StringTokenizer st = new StringTokenizer(line, separator);
     //int fno = 0;
     ArrayList<String> tokens = new ArrayList<String>();
@@ -37,12 +38,12 @@ public class NominalDataReader {
       tokens.add(token);
     }
     String[] arr = tokens.toArray(new String[tokens.size()]);
-    Set<Integer> skip = new HashSet<Integer>();
+    Set<Integer> skip = Generics.newHashSet();
     skip.add(Integer.valueOf(arr.length - 2));
     return readDatum(arr, arr.length - 1, skip, indices);
   }
 
-  static RVFDatum<String, Integer> readDatum(String[] values, int classColumn, Set<Integer> skip, HashMap<Integer, Index<String>> indices) {
+  static RVFDatum<String, Integer> readDatum(String[] values, int classColumn, Set<Integer> skip, Map<Integer, Index<String>> indices) {
     ClassicCounter<Integer> c = new ClassicCounter<Integer>();
     RVFDatum<String, Integer> d = new RVFDatum<String, Integer>(c);
     int attrNo = 0;
@@ -80,7 +81,7 @@ public class NominalDataReader {
    * Read the data as a list of RVFDatum objects. For the test set we must reuse the indices from the training set
    *
    */
-  static ArrayList<RVFDatum<String, Integer>> readData(String filename, HashMap<Integer, Index<String>> indices) {
+  static ArrayList<RVFDatum<String, Integer>> readData(String filename, Map<Integer, Index<String>> indices) {
     try {
       String sep = ", ";
       ArrayList<RVFDatum<String, Integer>> examples = new ArrayList<RVFDatum<String, Integer>>();

@@ -1,11 +1,11 @@
 package edu.stanford.nlp.graph;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
 import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * get some network statistics
@@ -29,7 +29,7 @@ public class NetworkFeatures {
   };
 
   public static <V, E> Set<ThreeNodeStat> find3NodeStats(Graph<V, E> graph, V a, V b, V c) {
-    Set<ThreeNodeStat> stats = new HashSet<ThreeNodeStat>();
+    Set<ThreeNodeStat> stats = Generics.newHashSet();
 
     if (graph.isEdge(a, b)) {
       stats.add(ThreeNodeStat.GENEROSITY);

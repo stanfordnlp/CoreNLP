@@ -4,15 +4,16 @@ import java.io.File;
 import java.util.*;
 import java.util.regex.*;
 
-import edu.stanford.nlp.process.treebank.Mapper;
+import edu.stanford.nlp.trees.treebank.Mapper;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Applies a default set of lexical transformations that have been empirically validated
  * in various Arabic tasks. This class automatically detects the input encoding and applies
  * the appropriate set of transformations.
- * 
+ *
  * @author Spence Green
- * 
+ *
  */
 public class GaleP4LexMapper implements Mapper {
 
@@ -35,14 +36,14 @@ public class GaleP4LexMapper implements Mapper {
 
   //Patterns to fix segmentation issues observed in the ATB
   private static final Pattern cliticMarker = Pattern.compile("^-|-$");
-  
+
   private static final Pattern hasNum = Pattern.compile("\\d+");
   private final Set<String> parentTagsToEscape;
 
   public GaleP4LexMapper() {
 
     //Tags for the canChangeEncoding() method
-    parentTagsToEscape = new HashSet<String>();
+    parentTagsToEscape = Generics.newHashSet();
     parentTagsToEscape.add("PUNC");
     parentTagsToEscape.add("LATIN");
     parentTagsToEscape.add("-NONE-");
@@ -65,7 +66,7 @@ public class GaleP4LexMapper implements Mapper {
     //Remove characters that only appear in the Qur'an
     Matcher rmQuran = utf8Quran.matcher(element);
     element = rmQuran.replaceAll("");
-    
+
     if(element.length() > 1) {
       Matcher rmCliticMarker = cliticMarker.matcher(element);
       element = rmCliticMarker.replaceAll("");
@@ -103,10 +104,10 @@ public class GaleP4LexMapper implements Mapper {
 
   public String map(String parent, String element) {
     String elem = element.trim();
-    
+
     if(parentTagsToEscape.contains(parent))
       return elem;
-    
+
     Matcher utf8Encoding = utf8ArabicChart.matcher(elem);
     return (utf8Encoding.find()) ? mapUtf8(elem) : mapBuckwalter(elem);
   }
@@ -125,7 +126,7 @@ public class GaleP4LexMapper implements Mapper {
     //UTF-8 text input
     if(parent.contains("NUMERIC_COMMA") || (parent.contains("PUNC") && element.equals("r"))) //Numeric comma
       return true;
-    
+
     Matcher numMatcher = hasNum.matcher(element);
     if(numMatcher.find() || parentTagsToEscape.contains(parent))
       return false;

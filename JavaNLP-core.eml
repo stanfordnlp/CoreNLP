@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component LANGUAGE_LEVEL="JDK_1_6">
+<component LANGUAGE_LEVEL="JDK_1_6" inheritJdk="true">
 	<output-test url="file://$MODULE_DIR$/classes"/>
 	<exclude-output/>
 	<contentEntry url="file://$MODULE_DIR$">
@@ -50,62 +50,6 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-logging-1.1.1-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-logging.jar!/"/>
 	</lib>
-	<lib name="dbparser.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/dbparser1.2-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/dbparser1.2-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/dbparser.jar!/"/>
-	</lib>
-	<lib name="propbank.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/propbank.jar!/"/>
-	</lib>
-	<lib name="serializer.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/serializer.jar!/"/>
-	</lib>
-	<lib name="colt.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/colt-1.2.0-src.zip!/src"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/colt-1.2.0-src.zip!/src"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/colt.jar!/"/>
-	</lib>
-	<lib name="xml-apis.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/Xerces-J-src.2.9.1.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/Xerces-J-src.2.9.1.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xml-apis.jar!/"/>
-	</lib>
-	<lib name="xalan.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/xalan-j_2_7_1-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/xalan-j_2_7_1-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xalan.jar!/"/>
-	</lib>
-	<lib name="html-parser.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/htmlparser-1.2-src.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/htmlparser-1.2-src.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/html-parser.jar!/"/>
-	</lib>
-	<lib name="xercesImpl.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/Xerces-J-src.2.9.1.zip!/xerces-2_9_1/src"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/Xerces-J-src.2.9.1.zip!/xerces-2_9_1/src"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xercesImpl.jar!/"/>
-	</lib>
-	<lib name="mtj.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/mtj-0.9.12.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/mtj-0.9.12.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/mtj.jar!/"/>
-	</lib>
-	<lib name="arpack.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/mtj-0.9.12.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/mtj-0.9.12.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/arpack.jar!/"/>
-	</lib>
-	<lib name="netlib.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/mtj-0.9.12.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/mtj-0.9.12.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/netlib.jar!/"/>
-	</lib>
-	<lib name="libsvm.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/libsvm-3.1-src.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/libsvm-3.1-src.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/libsvm.jar!/"/>
-	</lib>
 	<lib name="junit.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/junit-4.5-src.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/junit-4.5-src.jar!/"/>
@@ -117,50 +61,17 @@
 	<lib name="AppleJavaExtensions.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/AppleJavaExtensions.jar!/"/>
 	</lib>
-	<lib name="counters.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/counters-0.3-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/counters-0.3-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/counters.jar!/"/>
-	</lib>
-	<lib name="fastutil.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/fastutil-5.1.4-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/fastutil-5.1.4-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/fastutil.jar!/"/>
-	</lib>
-	<lib name="ra.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/ra-0.1.16-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ra-0.1.16-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/ra.jar!/"/>
-	</lib>
 	<lib name="JFlex.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/jflex-1.4.3-src.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jflex-1.4.3-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/JFlex.jar!/"/>
-	</lib>
-	<lib name="jwnlx.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/jwnlx-1.4-src.zip!/jwnl/src/test"/>
-		<srcroot url="jar://$MODULE_DIR$/libsrc/jwnlx-1.4-src.zip!/jwnl/src"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jwnlx-1.4-src.zip!/jwnl/src/test"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jwnlx-1.4-src.zip!/jwnl/src"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/jwnlx.jar!/"/>
-	</lib>
-	<lib name="jaws-bin.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/jaws-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jaws-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/jaws-bin.jar!/"/>
 	</lib>
 	<lib name="xom-1.2.8.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/xom-src-1.2.8.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/xom-src-1.2.8.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xom-1.2.8.jar!/"/>
 	</lib>
-	<lib name="commons-math-2.1.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-math-2.1-sources.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-math-2.1-sources.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-math-2.1.jar!/"/>
-	</lib>
 	<lib name="joda-time.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/joda-time-2.0-sources.jar!/"/>
 		<srcroot url="jar://$MODULE_DIR$/libsrc/joda-time-2.1-sources.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/joda-time-2.1-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/joda-time.jar!/"/>
@@ -170,23 +81,14 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jollyday-0.4.7-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/jollyday-0.4.7.jar!/"/>
 	</lib>
-	<lib name="maltparser.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/maltparser-1.7.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/maltparser-1.7.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/maltparser.jar!/"/>
-	</lib>
-	<lib name="liblinear.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/liblinear-1.8-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/liblinear-1.8-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/liblinear.jar!/"/>
-	</lib>
 	<lib name="commons-lang-2.5.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-lang-2.5-sources.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-lang-2.5-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-lang-2.5.jar!/"/>
 	</lib>
 	<lib name="log4j-1.2.16.jar" scope="COMPILE">
-		<srcroot url="file://log4j-1.2.16-src.zip"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/log4j-1.2.16-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/log4j-1.2.16-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/log4j-1.2.16.jar!/"/>
 	</lib>
 </component>

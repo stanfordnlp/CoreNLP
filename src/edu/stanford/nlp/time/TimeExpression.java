@@ -11,8 +11,9 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Interval;
+import edu.stanford.nlp.util.TypesafeMap;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,7 +73,7 @@ public class TimeExpression extends MatchedExpression {
       }
     };
     extractFunc.tokensAnnotationField = CoreAnnotations.NumerizedTokensAnnotation.class;
-    extractFunc.resultAnnotationField = Arrays.asList((Class) TimeExpression.Annotation.class);
+    extractFunc.resultAnnotationField = Collections.singletonList((Class) TimeExpression.Annotation.class);
     extractFunc.resultNestedAnnotationField = TimeExpression.ChildrenAnnotation.class;
     extractFunc.resultAnnotationExtractor = TimeExpressionConverter;
     extractFunc.tokensAggregators = CoreMapAttributeAggregator.DEFAULT_NUMERIC_TOKENS_AGGREGATORS;

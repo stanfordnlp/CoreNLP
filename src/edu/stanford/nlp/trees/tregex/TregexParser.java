@@ -3,12 +3,11 @@ package edu.stanford.nlp.trees.tregex;
 // all generated classes are in this package
 
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.trees.HeadFinder;
 
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,7 +27,7 @@ class TregexParser implements TregexParserConstants {
   // keep track of which variables we've seen, so that we can reject
   // some nonsense patterns such as ones that reset variables or link
   // to variables that haven't been set
-  private Set<String> knownVariables = new HashSet<String>();
+  private Set<String> knownVariables = Generics.newHashSet();
 
   public TregexParser(java.io.Reader stream,
                       Function<String, String> basicCatFunction,
@@ -37,6 +36,9 @@ class TregexParser implements TregexParserConstants {
     this.basicCatFunction = basicCatFunction;
     this.headFinder = headFinder;
   }
+
+// TODO: IDENTIFIER should not allow | after the first character, but
+// it breaks some | queries to allow it.  We should fix that.
 
 // the grammar starts here
 // each of these BNF rules will be converted into a function
@@ -273,10 +275,10 @@ class TregexParser implements TregexParserConstants {
   // variables, we want to separate those done in different parts of the
   // disjunction.  Variables set in one part won't be set in the next
   // part if it gets there, since disjunctions exit once known.
-  Set<String> originalKnownVariables = new HashSet<String>(knownVariables);
+  Set<String> originalKnownVariables = Generics.newHashSet(knownVariables);
   // However, we want to keep track of all the known variables, so that after
   // the disjunction is over, we know them all.
-  Set<String> allKnownVariables = new HashSet<String>(knownVariables);
+  Set<String> allKnownVariables = Generics.newHashSet(knownVariables);
     child = ChildrenConj();
       children.add(child);
       allKnownVariables.addAll(knownVariables);
@@ -290,7 +292,7 @@ class TregexParser implements TregexParserConstants {
         jj_la1[11] = jj_gen;
         break label_2;
       }
-        knownVariables = new HashSet<String>(originalKnownVariables);
+        knownVariables = Generics.newHashSet(originalKnownVariables);
       jj_consume_token(20);
       child = ChildrenConj();
       children.add(child);

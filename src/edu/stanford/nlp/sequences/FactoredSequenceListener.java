@@ -21,8 +21,8 @@ public class FactoredSequenceListener implements SequenceListener {
         models[i].updateSequenceElement(sequence, pos, oldVal);
       return; 
     }
-    model1.updateSequenceElement(sequence, pos, 0);
-    model2.updateSequenceElement(sequence, pos, 0);
+    model1.updateSequenceElement(sequence, pos, oldVal);
+    model2.updateSequenceElement(sequence, pos, oldVal);
   }
 
   /**

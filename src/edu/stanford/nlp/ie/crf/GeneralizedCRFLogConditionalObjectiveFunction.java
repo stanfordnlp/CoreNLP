@@ -6,6 +6,7 @@ import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.util.Index;
 
 import java.util.Arrays;
+import java.util.List;
 
 
 public class GeneralizedCRFLogConditionalObjectiveFunction 
@@ -25,7 +26,7 @@ public class GeneralizedCRFLogConditionalObjectiveFunction
   protected double[] sigmaPower;
   protected double epsilon;
 
-  Index[] labelIndices;
+  List<Index<CRFLabel>> labelIndices;
   Index classIndex;
   Index featureIndex;
   double[][] Ehat; // empirical counts of all the features [feature][class]
@@ -41,20 +42,20 @@ public class GeneralizedCRFLogConditionalObjectiveFunction
 
   public static boolean VERBOSE = false;
 
-//   GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, Index[] labelIndices, int[] map, String backgroundSymbol) {
+//   GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol) {
 //     this(data, labels, featureIndex, window, classIndex, labelIndices, map, QUADRATIC_PRIOR, backgroundSymbol);
 //   }
 
-  GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, Index[] labelIndices, int[] map, String backgroundSymbol, double[] mean,  double[] sigma) {
+  GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, double[] mean,  double[] sigma) {
     this(data, labels, featureIndex, window, classIndex, labelIndices, map, QUADRATIC_PRIOR, backgroundSymbol, mean, sigma);
    }
 
-//   GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, Index[] labelIndices, int[] map, int prior, String backgroundSymbol) {
+//   GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, int prior, String backgroundSymbol) {
     
 //     this(data, labels, featureIndex, window, classIndex, labelIndices, map, prior, backgroundSymbol, 1.0);
 //   }
 
-  GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, Index[] labelIndices, int[] map, int prior, String backgroundSymbol, double[] mean, double[] sigma) {
+  GeneralizedCRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, Index featureIndex, int window, Index classIndex, List<Index<CRFLabel>> labelIndices, int[] map, int prior, String backgroundSymbol, double[] mean, double[] sigma) {
     this.featureIndex = featureIndex;
     this.window = window;
     this.classIndex = classIndex;
@@ -99,7 +100,7 @@ public class GeneralizedCRFLogConditionalObjectiveFunction
       domainDimension = 0;
       for (int i = 0; i < map.length; i++) {
         //System.out.println("      " + labelIndices[map[i]]);
-        domainDimension += labelIndices[map[i]].size();
+        domainDimension += labelIndices.get(map[i]).size();
       }
     }
     return domainDimension;
@@ -117,9 +118,9 @@ public class GeneralizedCRFLogConditionalObjectiveFunction
     double[][] newWeights = new double[map.length][];
     int index = 0;
     for (int i = 0; i < map.length; i++) {
-      newWeights[i] = new double[labelIndices[map[i]].size()];
-      System.arraycopy(weights, index, newWeights[i], 0, labelIndices[map[i]].size());
-      index += labelIndices[map[i]].size();
+      newWeights[i] = new double[labelIndices.get(map[i]).size()];
+      System.arraycopy(weights, index, newWeights[i], 0, labelIndices.get(map[i]).size());
+      index += labelIndices.get(map[i]).size();
     }
     return newWeights;
   }
@@ -138,9 +139,9 @@ public class GeneralizedCRFLogConditionalObjectiveFunction
     double[][] d = new double[map.length][];
     int index = 0;
     for (int i = 0; i < map.length; i++) {
-      d[i] = new double[labelIndices[map[i]].size()];
+      d[i] = new double[labelIndices.get(map[i]).size()];
       Arrays.fill(d[i], 0);
-      index += labelIndices[map[i]].size();
+      index += labelIndices.get(map[i]).size();
     }
     return d;
   }
@@ -176,7 +177,7 @@ public class GeneralizedCRFLogConditionalObjectiveFunction
           int[] cliqueLabel = new int[j + 1];
           System.arraycopy(windowLabels, window - 1 - j, cliqueLabel, 0, j + 1);
           CRFLabel crfLabel = new CRFLabel(cliqueLabel);
-          int labelIndex = labelIndices[j].indexOf(crfLabel);
+          int labelIndex = labelIndices.get(j).indexOf(crfLabel);
           //System.err.println(crfLabel + " " + labelIndex);
 
           for (int k = 0; k < docData[i][j].length; k++) {
@@ -265,7 +266,7 @@ public class GeneralizedCRFLogConditionalObjectiveFunction
       for (int i = 0; i < data[m].length; i++) {
         // for each possible clique at this position
         for (int j = 0; j < data[m][i].length; j++) {
-          Index labelIndex = labelIndices[j];
+          Index labelIndex = labelIndices.get(j);
           // for each possible labeling for that clique
           for (int k = 0; k < labelIndex.size(); k++) {
             int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();

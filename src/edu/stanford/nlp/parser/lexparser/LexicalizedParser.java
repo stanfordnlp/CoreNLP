@@ -27,12 +27,12 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -41,11 +41,14 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 import java.io.*;
 import java.util.*;
@@ -81,7 +84,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser implements Function<Object,Tree>, Serializable {
+public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, ParserQueryFactory, Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -91,6 +94,8 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
 
   private Options op;
   public Options getOp() { return op; }
+
+  public Reranker reranker = null;
 
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
 
@@ -249,27 +254,46 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
    * circumstances, the input will be treated as a single sentence to be
    * parsed.
    *
-   * @param in The input Sentence/List/String
+   * @param words The input sentence (a List of words)
    * @return A Tree that is the parse tree for the sentence.  If the parser
    *         fails, a new Tree is synthesized which attaches all words to the
    *         root.
    * @throws IllegalArgumentException If argument isn't a List or String
    */
   @Override
-  public Tree apply(Object in) {
-    List<? extends HasWord> lst;
-    if (in instanceof String) {
-      TokenizerFactory<? extends HasWord> tf = op.tlpParams.treebankLanguagePack().getTokenizerFactory();
-      Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader((String) in)));
-      lst = tokenizer.tokenize();
-    } else if (in instanceof List) {
-      lst = ErasureUtils.uncheckedCast(in);
-    } else {
-      throw new IllegalArgumentException("Can only parse Sentence/List/String");
-    }
+  public Tree apply(List<? extends HasWord> words) {
+    return parse(words);
+  }
 
+  /**
+   * Will parse the text in <code>sentence</code> as if it represented
+   * a single sentence by first processing it with a tokenizer.
+   */
+  public Tree parse(String sentence) {
+    TokenizerFactory<? extends HasWord> tf = op.tlpParams.treebankLanguagePack().getTokenizerFactory();
+    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
+    return parse(tokenizer.tokenize());
+  }
+
+  /**
+   * Will process a list of strings into a list of HasWord and return
+   * the parse tree associated with that list.
+   */
+  public Tree parseStrings(List<String> lst) {
+    List<Word> words = new ArrayList<Word>();
+    for (String word : lst) {
+      words.add(new Word(word));
+    }
+    return parse(words);
+  }
+
+  /**
+   * Parses the list of HasWord.  If the parse fails for some reason,
+   * an X tree is returned instead of barfing.
+   */
+  public Tree parse(List<? extends HasWord> lst) {
     try {
-      LexicalizedParserQuery pq = new LexicalizedParserQuery(this);
+      ParserQuery pq = parserQuery();
       if (pq.parse(lst)) {
         Tree bestparse = pq.getBestParse();
         // -10000 denotes unknown words
@@ -294,6 +318,42 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     return lstf.newTreeNode("X", lst2);
   }
 
+  public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {
+    List<Tree> trees = new ArrayList<Tree>();
+    for (List<? extends HasWord> sentence : sentences) {
+      trees.add(parse(sentence));
+    }
+    return trees;
+  }
+
+  /**
+   * Will launch multiple threads which calls <code>parse</code> on
+   * each of the <code>sentences</code> in order, returning the
+   * resulting parse trees in the same order.
+   */
+  public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
+    MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<List<? extends HasWord>, Tree>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
+        public Tree process(List<? extends HasWord> sentence) {
+          return parse(sentence);
+        }
+        public ThreadsafeProcessor<List<? extends HasWord>, Tree> newInstance() {
+          return this;
+        }
+      });
+    List<Tree> trees = new ArrayList<Tree>();
+    for (List<? extends HasWord> sentence : sentences) {
+      wrapper.put(sentence);
+      while (wrapper.peek()) {
+        trees.add(wrapper.poll());
+      }
+    }
+    wrapper.join();
+    while (wrapper.peek()) {
+      trees.add(wrapper.poll());
+    }
+    return trees;
+  }
+
   /** Return a TreePrint for formatting parsed output trees.
    *  @return A TreePrint for formatting parsed output trees.
    */
@@ -301,8 +361,11 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     return op.testOptions.treePrint(op.tlpParams);
   }
 
+  /**
+   * Similar to parse(), but instead of returning an X tree on failure, returns null.
+   */
   public Tree parseTree(List<? extends HasWord> sentence) {
-    LexicalizedParserQuery pq = new LexicalizedParserQuery(this);
+    ParserQuery pq = parserQuery();
     if (pq.parse(sentence)) {
       return pq.getBestParse();
     } else {
@@ -310,7 +373,15 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     }
   }
 
-  public LexicalizedParserQuery parserQuery() {
+  public ParserQuery parserQuery() {
+    if (reranker == null) {
+      return new LexicalizedParserQuery(this);
+    } else {
+      return new RerankingParserQuery(op, new LexicalizedParserQuery(this), reranker);
+    }
+  }
+
+  public LexicalizedParserQuery lexicalizedParserQuery() {
     return new LexicalizedParserQuery(this);
   }
 
@@ -374,6 +445,9 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
    * If there is an error, a RuntimeIOException is thrown.
    */
   public void saveParserToTextFile(String filename) {
+    if (reranker != null) {
+      throw new UnsupportedOperationException("Sorry, but parsers with rerankers cannot be saved to text file");
+    }
     try {
       System.err.print("Writing parser in text grammar format to file " + filename);
       OutputStream os;
@@ -451,7 +525,7 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     try {
       Timing tim = new Timing();
       System.err.print("Loading parser from text file " + textFileOrUrl + ' ');
-      BufferedReader in = IOUtils.readReaderFromString(textFileOrUrl);
+      BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
       Timing.startTime();
 
       String line = in.readLine();
@@ -736,16 +810,6 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
   }
 
 
-  // helper function
-  private static int numSubArgs(String[] args, int index) {
-    int i = index;
-    while (i + 1 < args.length && args[i + 1].charAt(0) != '-') {
-      i++;
-    }
-    return i - index;
-  }
-
-
   /**
    * This will set options to the parser, in a way exactly equivalent to
    * passing in the same sequence of command-line arguments.  This is a useful
@@ -777,14 +841,6 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     op.setOptions(flags);
   }
 
-
-  private static void printArgs(String[] args, PrintStream ps) {
-    ps.print("LexicalizedParser invoked with arguments:");
-    for (String arg : args) {
-      ps.print(' ' + arg);
-    }
-    ps.println();
-  }
 
   /**
    * A main program for using the parser with various options.
@@ -997,38 +1053,23 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     }
 
     Options op = new Options();
-    ArrayList<String> optionArgs = new ArrayList<String>();
+    List<String> optionArgs = new ArrayList<String>();
     String encoding = null;
     // while loop through option arguments
     while (argIndex < args.length && args[argIndex].charAt(0) == '-') {
       if (args[argIndex].equalsIgnoreCase("-train") ||
           args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         train = true;
-        int numSubArgs = numSubArgs(args, argIndex);
-        argIndex++;
-        if (numSubArgs >= 1) {
-          treebankPath = args[argIndex];
-          argIndex++;
-        } else {
-          throw new RuntimeException("Error: -train option must have treebankPath as first argument.");
-        }
-        if (numSubArgs == 2) {
-          trainFilter = new NumberRangesFileFilter(args[argIndex++], true);
-        } else if (numSubArgs >= 3) {
-          try {
-            int low = Integer.parseInt(args[argIndex]);
-            int high = Integer.parseInt(args[argIndex + 1]);
-            trainFilter = new NumberRangeFileFilter(low, high, true);
-            argIndex += 2;
-          } catch (NumberFormatException e) {
-            // maybe it's a ranges expression?
-            trainFilter = new NumberRangesFileFilter(args[argIndex], true);
-            argIndex++;
-          }
-        }
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-test");
+        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
+        treebankPath = treebankDescription.first();
+        trainFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-train2")) {
+        // TODO: we could use the fully expressive -train options if
+        // we add some mechanism for returning leftover options from
+        // ArgUtils.getTreebankDescription
         // train = true;     // cdm july 2005: should require -train for this
-        int numSubArgs = numSubArgs(args, argIndex);
+        int numSubArgs = ArgUtils.numSubArgs(args, argIndex);
         argIndex++;
         if (numSubArgs < 2) {
           throw new RuntimeException("Error: -train2 <treebankPath> [<ranges>] <weight>.");
@@ -1088,7 +1129,8 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
       } else if (args[argIndex].equalsIgnoreCase("-tagSeparator")) {
         tagDelimiter = args[argIndex + 1];
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-loadFromSerializedFile")) {
+      } else if (args[argIndex].equalsIgnoreCase("-loadFromSerializedFile") ||
+                 args[argIndex].equalsIgnoreCase("-model")) {
         // load the parser from a binary serialized file
         // the next argument must be the path to the parser file
         serializedInputFileOrUrl = args[argIndex + 1];
@@ -1100,7 +1142,7 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-saveToSerializedFile")) {
         saveToSerializedFile = true;
-        if (numSubArgs(args, argIndex) < 1) {
+        if (ArgUtils.numSubArgs(args, argIndex) < 1) {
           System.err.println("Missing path: -saveToSerialized filename");
         } else {
           serializedOutputFileOrUrl = args[argIndex + 1];
@@ -1115,57 +1157,22 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
         // save the training trees to a binary file
         op.trainOptions.trainTreeFile = args[argIndex + 1];
         argIndex += 2;
-      }
-      else if (args[argIndex].equalsIgnoreCase("-treebank") ||
-          args[argIndex].equalsIgnoreCase("-testTreebank") ||
-          args[argIndex].equalsIgnoreCase("-test")) {
-        // the next arguments are the treebank path and maybe the range for testing
-        int numSubArgs = numSubArgs(args, argIndex);
-        if (numSubArgs > 0 && numSubArgs < 3) {
-          argIndex++;
-          testPath = args[argIndex++];
-          if (numSubArgs == 2) {
-            testFilter = new NumberRangesFileFilter(args[argIndex++], true);
-          } else if (numSubArgs == 3) {
-            try {
-              int low = Integer.parseInt(args[argIndex]);
-              int high = Integer.parseInt(args[argIndex + 1]);
-              testFilter = new NumberRangeFileFilter(low, high, true);
-              argIndex += 2;
-            } catch (NumberFormatException e) {
-              // maybe it's a ranges expression?
-              testFilter = new NumberRangesFileFilter(args[argIndex++], true);
-            }
-          }
-        } else {
-          throw new IllegalArgumentException("Bad arguments after -testTreebank");
-        }
+      } else if (args[argIndex].equalsIgnoreCase("-treebank") ||
+                 args[argIndex].equalsIgnoreCase("-testTreebank") ||
+                 args[argIndex].equalsIgnoreCase("-test")) {
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-test");
+        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
+        testPath = treebankDescription.first();
+        testFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-tune")) {
-        // the next argument is the treebank path and range for tuning
-        int numSubArgs = numSubArgs(args, argIndex);
-        argIndex++;
-        if (numSubArgs == 1) {
-          tuneFilter = new NumberRangesFileFilter(args[argIndex++], true);
-        } else if (numSubArgs > 1) {
-          tunePath = args[argIndex++];
-          if (numSubArgs == 2) {
-            tuneFilter = new NumberRangesFileFilter(args[argIndex++], true);
-          } else if (numSubArgs >= 3) {
-            try {
-              int low = Integer.parseInt(args[argIndex]);
-              int high = Integer.parseInt(args[argIndex + 1]);
-              tuneFilter = new NumberRangeFileFilter(low, high, true);
-              argIndex += 2;
-            } catch (NumberFormatException e) {
-              // maybe it's a ranges expression?
-              tuneFilter = new NumberRangesFileFilter(args[argIndex++], true);
-            }
-          }
-        }
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-tune");
+        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
+        tunePath = treebankDescription.first();
+        tuneFilter = treebankDescription.second();
       } else {
         int oldIndex = argIndex;
         argIndex = op.setOptionOrWarn(args, argIndex);
-        for (int i = oldIndex; i < argIndex; ++i) {
+        for (int i = oldIndex; i < argIndex; i++) {
           optionArgs.add(args[i]);
         }
       }
@@ -1206,7 +1213,7 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
     // all other arguments are order dependent and
     // are processed in order below
 
-    if (tuneFilter != null) {
+    if (tuneFilter != null || tunePath != null) {
       if (tunePath == null) {
         if (treebankPath == null) {
           throw new RuntimeException("No tune treebank path specified...");
@@ -1298,7 +1305,7 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
       testTreebank.loadPath(testPath, testFilter);
     }
 
-    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(op.tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(op.tlpParams.sisterSplitters()));
 
     // at this point we should be sure that op.tlpParams is
     // set appropriately (from command line, or from grammar file),
@@ -1345,21 +1352,22 @@ public class LexicalizedParser implements Function<Object,Tree>, Serializable {
 
     if (testTreebank != null) {
       // test parser on treebank
-      lp.parserQuery().testOnTreebank(testTreebank);
+      EvaluateTreebank evaluator = new EvaluateTreebank(lp);
+      evaluator.testOnTreebank(testTreebank);
     } else if (argIndex >= args.length) {
       // no more arguments, so we just parse our own test sentence
       PrintWriter pwOut = op.tlpParams.pw();
       PrintWriter pwErr = op.tlpParams.pw(System.err);
-      LexicalizedParserQuery pq = lp.parserQuery();
+      ParserQuery pq = lp.parserQuery();
       if (pq.parse(op.tlpParams.defaultTestSentence())) {
-        pq.getTreePrint().printTree(pq.getBestParse(), pwOut);
+        lp.getTreePrint().printTree(pq.getBestParse(), pwOut);
       } else {
         pwErr.println("Error. Can't parse test sentence: " +
                       op.tlpParams.defaultTestSentence());
       }
     } else {
       // We parse filenames given by the remaining arguments
-      lp.parserQuery().parseFiles(args, argIndex, tokenized, tokenizerFactory, elementDelimiter, sentenceDelimiter, escaper, tagDelimiter);
+      ParseFiles.parseFiles(args, argIndex, tokenized, tokenizerFactory, elementDelimiter, sentenceDelimiter, escaper, tagDelimiter, op, lp.getTreePrint(), lp);
     }
 
   } // end main

@@ -1,6 +1,6 @@
 package edu.stanford.nlp.international.arabic;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.io.*;
@@ -8,6 +8,7 @@ import java.io.*;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.process.SerializableFunction;
 
@@ -110,8 +111,8 @@ public class Buckwalter implements SerializableFunction<String,String> {
 	/* IBM also deletes: 654 655 670 */
 
 	private boolean unicode2Buckwalter = false;
-	private final HashMap<Character,Character> u2bMap;
-	private final HashMap<Character,Character> b2uMap;
+	private final Map<Character,Character> u2bMap;
+	private final Map<Character,Character> b2uMap;
 	private ClassicCounter<String> unmappable;
 
 	private static boolean DEBUG = false;
@@ -129,8 +130,8 @@ public class Buckwalter implements SerializableFunction<String,String> {
 		if (arabicChars.length != buckChars.length)
 			throw new RuntimeException(this.getClass().getName() + ": Inconsistent u2b/b2u arrays.");
 
-		u2bMap = new HashMap<Character,Character>(arabicChars.length);
-		b2uMap = new HashMap<Character,Character>(buckChars.length);
+		u2bMap = Generics.newHashMap(arabicChars.length);
+		b2uMap = Generics.newHashMap(buckChars.length);
 		for (int i = 0; i < arabicChars.length; i++) {
 			Character charU = Character.valueOf(arabicChars[i]);
 			Character charB = Character.valueOf(buckChars[i]);

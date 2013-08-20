@@ -1,6 +1,6 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.maxent.Convert;
+import edu.stanford.nlp.util.ConvertByteArray;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -30,7 +30,7 @@ public class ResultStoringMonitor implements Function {
       System.err.print("Storing interim (double) weights to " + filename + " ... ");
       try {
         DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(filename))));
-        Convert.saveDoubleArr(dos, x);
+        ConvertByteArray.saveDoubleArr(dos, x);
         dos.close();
       } catch (IOException e) {
         System.err.println("ERROR!");

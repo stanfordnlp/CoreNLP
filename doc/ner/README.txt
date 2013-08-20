@@ -1,4 +1,4 @@
-Stanford NER - v1.2.7 - 2012-11-11
+Stanford NER - v1.2.8 - 2013-04-04
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -164,6 +164,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2013-04-04    1.2.8     nthreads option 
 
 2012-11-11    1.2.7     Improved English 3 class model by including 
                         data from Wikipedia, release Chinese model 

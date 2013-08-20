@@ -162,6 +162,9 @@ public class FastFactoredParser implements KBestViterbiParser {
       Beam<ScoredObject<Tree>> goodParses = new Beam<ScoredObject<Tree>>(numToFind);
 
       for (ScoredObject<Tree> candidate : pcfgBest) {
+        if (Thread.interrupted()) {
+          throw new RuntimeInterruptedException();
+        }
         double depScore = depScoreTree(candidate.object());
         ScoredObject<Tree> x = new ScoredObject<Tree>(candidate.object(), candidate.score() + depScore);
         goodParses.add(x);

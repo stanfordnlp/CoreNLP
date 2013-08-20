@@ -1,12 +1,12 @@
 package edu.stanford.nlp.truecaser;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.FileReader;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * This utility takes the tokens in a data file and picks the most
@@ -17,9 +17,11 @@ import edu.stanford.nlp.stats.Counter;
  */
 public class MixDisambiguation {
 
-  static Map<String, Counter<String>> map = new HashMap<String, Counter<String>>();
-  static Map<String, String> highest = new HashMap<String, String>();
-  
+  private static Map<String, Counter<String>> map = Generics.newHashMap();
+  private static Map<String, String> highest = Generics.newHashMap();
+
+  private MixDisambiguation() {} // static class
+
   public static void main(String[] args) throws IOException {
     boolean outputLowercase = true;
     for (String arg : args) {
@@ -30,14 +32,13 @@ public class MixDisambiguation {
 
       // everything else is considered a filename
       BufferedReader in = new BufferedReader(new FileReader(arg));
-      String line = null;
-      while((line = in.readLine())!=null) {
+      for (String line; (line = in.readLine()) != null; ) {
         String[] toks = line.split(" ");
         for (String tok : toks) {
           String lctok = tok.toLowerCase();
           Counter<String> counter = map.get(lctok);
-          if (counter == null) { 
-            counter = new ClassicCounter<String>(); 
+          if (counter == null) {
+            counter = new ClassicCounter<String>();
             map.put(lctok, counter);
           }
           counter.incrementCount(tok);
@@ -58,7 +59,7 @@ public class MixDisambiguation {
       }
       highest.put(k, maxstr);
     }
-    
+
     for (String k : highest.keySet()) {
       String cased = highest.get(k);
       if (!outputLowercase && k.equals(cased)) {

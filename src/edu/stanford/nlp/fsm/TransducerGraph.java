@@ -3,7 +3,6 @@ package edu.stanford.nlp.fsm;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -31,9 +30,9 @@ import edu.stanford.nlp.util.StringUtils;
 //takes an Object and does instanceof to see what it is...)
 public class TransducerGraph implements Cloneable {
 
-  public static final Object EPSILON_INPUT = "EPSILON";
+  public static final String EPSILON_INPUT = "EPSILON";
 
-  private static final Object DEFAULT_START_NODE = "START";
+  private static final String DEFAULT_START_NODE = "START";
 
   private static Random r = new Random();
 
@@ -53,13 +52,13 @@ public class TransducerGraph implements Cloneable {
   }
 
   public TransducerGraph() {
-    arcs = new HashSet<Arc>();
+    arcs = Generics.newHashSet();
     arcsBySource = Generics.newHashMap();
     arcsByTarget = Generics.newHashMap();
     arcsByInput = Generics.newHashMap();
     arcsBySourceAndInput = Generics.newHashMap();
     arcsByTargetAndInput = Generics.newHashMap();
-    endNodes = new HashSet();
+    endNodes = Generics.newHashSet();
     setStartNode(DEFAULT_START_NODE);
   }
 
@@ -131,7 +130,7 @@ public class TransducerGraph implements Cloneable {
    * Just does union of keysets of maps.
    */
   public Set getNodes() {
-    Set result = new HashSet();
+    Set result = Generics.newHashSet();
     result.addAll(arcsBySource.keySet());
     result.addAll(arcsByTarget.keySet());
     return result;
@@ -207,7 +206,7 @@ public class TransducerGraph implements Cloneable {
   public Arc getArc(Object source, Object target) {
     Set arcsFromSource = arcsBySource.get(source);
     Set arcsToTarget = arcsByTarget.get(target);
-    HashSet result = Generics.newHashSet();
+    Set result = Generics.newHashSet();
     result.addAll(arcsFromSource);
     result.retainAll(arcsToTarget); // intersection
     if (result.size() < 1) {
@@ -696,7 +695,7 @@ public class TransducerGraph implements Cloneable {
   }
 
   public Map<List, Double> samplePathsFromGraph(int numPaths) {
-    Map<List, Double> result = new HashMap<List, Double>();
+    Map<List, Double> result = Generics.newHashMap();
     for (int i = 0; i < numPaths; i++) {
       List l = sampleUniformPathFromGraph();
       result.put(l, new Double(getOutputOfPathInGraph(l)));
@@ -837,15 +836,19 @@ public class TransducerGraph implements Cloneable {
   public static TransducerGraph createRandomGraph(int numPaths, int pathLengthMean, double pathLengthVariance, int numInputs, List pathList) {
     // compute the path length. Draw from a normal distribution
     int pathLength = (int) (r.nextGaussian() * pathLengthVariance + pathLengthMean);
-    Object input;
+    String input;
     List path;
     for (int i = 0; i < numPaths; i++) {
       // make a path
       path = new ArrayList();
       for (int j = 0; j < pathLength; j++) {
-        input = Integer.valueOf(r.nextInt(numInputs));
+        input = Integer.toString(r.nextInt(numInputs));
         path.add(input);
       }
+      // TODO: createRandomPaths had the following difference:
+      // we're done, add one more arc to get to the endNode.
+      //input = TransducerGraph.EPSILON_INPUT;
+      //path.add(input);
       pathList.add(path);
     }
     return createGraphFromPaths(pathList, -1);
@@ -856,13 +859,13 @@ public class TransducerGraph implements Cloneable {
     // make a bunch of paths, randomly
     // compute the path length. Draw from a normal distribution
     int pathLength = (int) (r.nextGaussian() * pathLengthVariance + pathLengthMean);
-    Object input;
-    List path;
+    String input;
+    List<String> path;
     for (int i = 0; i < numPaths; i++) {
       // make a path
-      path = new ArrayList();
+      path = new ArrayList<String>();
       for (int j = 0; j < pathLength; j++) {
-        input = Integer.valueOf(r.nextInt(numInputs));
+        input = Integer.toString(r.nextInt(numInputs));
         path.add(input);
       }
       // we're done, add one more arc to get to the endNode.
