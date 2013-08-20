@@ -233,17 +233,40 @@ public class StringUtils {
     }, start, end);
   }
 
-  public static String joinFields(List<? extends CoreMap> l, final Class field, String glue, int start, int end) {
+  public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
+                                  String glue, int start, int end) {
     return join(l, glue, new Function<CoreMap, String>() {
       public String apply(CoreMap in) {
         Object val = in.get(field);
-        return (val != null)? val.toString():"";
+        return (val != null)? val.toString():defaultFieldValue;
       }
     }, start, end);
   }
 
   public static String joinFields(List<? extends CoreMap> l, final Class field) {
-    return joinFields(l, field, " ", 0, l.size());
+    return joinFields(l, field, "-", " ", 0, l.size());
+  }
+
+  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
+                                          final String fieldGlue, String glue, int start, int end) {
+    return join(l, glue, new Function<CoreMap, String>() {
+      public String apply(CoreMap in) {
+        StringBuilder sb = new StringBuilder();
+        for (Class field: fields) {
+          if (sb.length() > 0) {
+            sb.append(fieldGlue);
+          }
+          Object val = in.get(field);
+          String str = (val != null)? val.toString():defaultFieldValue;
+          sb.append(str);
+        }
+        return sb.toString();
+      }
+    }, start, end);
+  }
+
+  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields) {
+    return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size());
   }
 
   /**
