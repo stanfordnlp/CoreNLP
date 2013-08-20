@@ -100,7 +100,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * intermediate and we do not want this to be added when we make a
    * second pass over the trees for missing dependencies.
    */
-  @Override
   protected Filter<TypedDependency> extraTreeDepFilter() {
     return extraTreeDepFilter;
   }
@@ -108,22 +107,29 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   private static class ExtraTreeDepFilter implements Filter<TypedDependency> {
     @Override
     public boolean accept(TypedDependency d) {
-      return d != null && d.reln() != RELATIVE;
+      if (d == null) return false;
+
+      if (d.reln() == RELATIVE) {
+        return false;
+      }
+
+      return true;
     }
 
     private static final long serialVersionUID = 1L;
   }
 
   private static final Filter<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
-
+  
 
   /**
    * Tries to return a node representing the <code>SUBJECT</code> (whether
    * nominal or clausal) of the given node <code>t</code>. Probably, node
    * <code>t</code> should represent a clause or verb phrase.
    *
-   * @param t A node in this <code>GrammaticalStructure</code>
-   * @return A node which is the subject of node <code>t</code>, or else
+   * @param t
+   *          a node in this <code>GrammaticalStructure</code>
+   * @return a node which is the subject of node <code>t</code>, or else
    *         <code>null</code>
    */
   public static TreeGraphNode getSubject(TreeGraphNode t) {
@@ -180,9 +186,9 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * the type "rel".  These occur in sentences such as "I saw the man
    * who you love".  In that case, we should produce dobj(love, who).
    * On the other hand, in the sentence "... which Mr. Bush was
-   * fighting for", we should have pobj(for, which).
+   * fighting for", we should have pobj(for, which).  
    */
-  private static void convertRel(List<TypedDependency> list) {
+  private void convertRel(List<TypedDependency> list) {
     List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
     for (TypedDependency rel : list) {
       if (rel.reln() != RELATIVE) {
@@ -218,13 +224,12 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           foundPobj = true;
           break;
         }
-
+        
         if (!foundPobj) {
           foundPrep = true;
           TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, prep.dep(), rel.dep());
           newDeps.add(newDep);
           rel.setReln(KILL);
-          // break; // only put it in one place (or do we want to allow across-the-board effects?
         }
       }
       if (!foundPrep) {
@@ -243,7 +248,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Alters a list in place by removing all the KILL relations
    */
-  private static void filterKill(List<TypedDependency> deps) {
+  private void filterKill(List<TypedDependency> deps) {
     List<TypedDependency> filtered = Generics.newArrayList();
     for (TypedDependency dep : deps) {
       if (dep.reln() != KILL) {
@@ -256,7 +261,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   /**
-   * Destructively modifies this {@code Collection<TypedDependency>}
+   * Destructively modifies this <code>Collection&lt;TypedDependency&gt;</code>
    * by collapsing several types of transitive pairs of dependencies.
    * If called with a tree of dependencies and both CCprocess and
    * includeExtras set to false, then the tree structure is preserved.
