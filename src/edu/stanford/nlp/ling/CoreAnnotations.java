@@ -948,6 +948,12 @@ public class CoreAnnotations {
     }
   }
 
+  public static class SectionDateAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
   public static class WordPositionAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
@@ -1375,7 +1381,16 @@ public class CoreAnnotations {
   }
 
   // Document type
+  // What kind of document is it: story, multi-part article, listing, email, etc
   public static class DocTypeAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  // Document source type
+  // What kind of place did the document come from: newswire, discussion forum, web...
+  public static class DocSourceTypeAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
