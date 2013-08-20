@@ -172,9 +172,9 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
                 <td><xsl:value-of select="head"/> <xsl:if test="@representative"> (gov) </xsl:if></td>
                 <td><xsl:value-of select="text"/></td>
                 <td><xsl:if test="leftContext or rightContext">
-                    <xsl:value-of select="leftContext"/>
-                    &nbsp;<span style="background-color: #99ff99;"><xsl:value-of select="text"/></span>&nbsp;
-                    <xsl:value-of select="rightContext"/>
+                    ...<xsl:value-of select="leftContext"/>
+                    <span style="background-color: #99ff99;"><xsl:value-of select="text"/></span>
+                    <xsl:value-of select="rightContext"/>...
                     </xsl:if>
                 </td>
             </tr>
