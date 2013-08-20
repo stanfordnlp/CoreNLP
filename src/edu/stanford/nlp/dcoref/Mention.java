@@ -296,7 +296,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       convertedStr.add(mStr.get(len-1));
       if(dict.genderNumber.containsKey(convertedStr)) return dict.genderNumber.get(convertedStr);
     }
-    if(mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
+    if(dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
 
     return null;
   }
@@ -324,7 +324,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       if(dict.genderNumber.containsKey(mStr.subList(firstNameIdx, firstNameIdx+1))) return dict.genderNumber.get(mStr.subList(firstNameIdx, firstNameIdx+1));
     }
 
-    if(mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
+    if(dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
     return null;
   }
   private void setDiscourse() {
@@ -709,13 +709,13 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {
       // make sure that the head of a NE is not a known suffix, e.g., Corp.
       int start = headIndex - startIndex;
-      if (originalSpan.size() > 0 && start >= originalSpan.size()) {
+      if (start >= originalSpan.size()) {
         throw new RuntimeException("Invalid start index " + start + "=" + headIndex + "-" + startIndex
                 + ": originalSpan=[" + StringUtils.joinWords(originalSpan, " ") + "], head=" + headWord);
       }
       while(start >= 0){
-        String head = originalSpan.size() > 0 ? originalSpan.get(start).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";
-        if(!knownSuffix(head)){
+        String head = originalSpan.get(start).get(CoreAnnotations.TextAnnotation.class).toLowerCase();
+        if(knownSuffix(head) == false){
           this.headString = head;
           break;
         } else {
