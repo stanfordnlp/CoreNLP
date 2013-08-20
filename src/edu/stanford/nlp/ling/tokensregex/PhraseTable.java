@@ -180,6 +180,7 @@ public class PhraseTable implements Serializable
     timer.doing("Reading phrases: " + filename);
     BufferedReader br = IOUtils.getBufferedFileReader(filename);
     String line;
+    int lineno = 0;
     while ((line = br.readLine()) != null) {
       String[] columns = fieldDelimiterPattern.split(line);
       String phrase = columns[0];
@@ -188,10 +189,21 @@ public class PhraseTable implements Serializable
               MapFactory.<String,MutableDouble>arrayMapFactory(): MapFactory.<String,MutableDouble>linkedHashMapFactory();
       Counter<String> counts = new ClassicCounter<String>(mapFactory);
       for (int i = 1; i < columns.length; i++) {
-        String[] tagCount = fieldDelimiterPattern.split(columns[i]);
-        counts.setCount(tagCount[0], Double.parseDouble(tagCount[1]));
+        String[] tagCount = countDelimiterPattern.split(columns[i], 2);
+        if (tagCount.length == 2) {
+          try {
+            counts.setCount(tagCount[0], Double.parseDouble(tagCount[1]));
+          } catch (NumberFormatException ex) {
+            throw new RuntimeException("Error processing field " + i + ": '" + columns[i] +
+                    "' from (" + filename + ":" + lineno + "): " + line, ex);
+          }
+        } else {
+          throw new RuntimeException("Error processing field " + i + ": '" + columns[i] +
+                  "' from + (" + filename + ":" + lineno + "): " + line);
+        }
       }
       addPhrase(phrase, null, counts);
+      lineno++;
     }
     br.close();
     timer.done();
@@ -939,6 +951,10 @@ public class PhraseTable implements Serializable
 
     public String getTag() {
       return tag;
+    }
+
+    public Object getData() {
+      return data;
     }
 
     public Collection<String> getAlternateForms() {
