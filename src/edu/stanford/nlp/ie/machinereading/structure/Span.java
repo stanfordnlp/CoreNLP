@@ -17,11 +17,7 @@ public class Span implements Serializable, Iterable<Integer> {
 
   private int start;
   private int end;
-
-  /** For Kryo serializer */
-  @SuppressWarnings("UnusedDeclaration")
-  private Span() { }
-
+  
   /**
    * This assumes that s &lt;= e.  Use fromValues if you can't guarantee this.
    */
@@ -44,7 +40,6 @@ public class Span implements Serializable, Iterable<Integer> {
   /**
    * Safe way to construct Spans if you're not sure which value is higher.
    */
-  @SuppressWarnings("UnusedDeclaration")
   public static Span fromValues(int val1, int val2) {
     if (val1 <= val2) {
       return new Span(val1, val2);
@@ -63,7 +58,10 @@ public class Span implements Serializable, Iterable<Integer> {
   public boolean equals(Object other) {
     if(! (other instanceof Span)) return false;
     Span otherSpan = (Span) other;
-    return start == otherSpan.start && end == otherSpan.end;
+    if(start == otherSpan.start && end == otherSpan.end){
+      return true;
+    }
+    return false;
   }
   
   @Override
@@ -116,7 +114,6 @@ public class Span implements Serializable, Iterable<Integer> {
    * 
    * @throws IllegalArgumentException if either span contains the other span
    */
-  @SuppressWarnings("UnusedDeclaration")
   public boolean isAfter(Span otherSpan) {
     if (this.contains(otherSpan) || otherSpan.contains(this)) {
       throw new IllegalArgumentException("Span " + toString() + " contains otherSpan " + otherSpan + " (or vice versa)");
