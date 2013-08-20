@@ -635,7 +635,7 @@ public class Iterables {
 
     // shuffle the indexes and select the first k
     Collections.shuffle(indexes, random);
-    final Set<Integer> indexSet = new HashSet<Integer>(indexes.subList(0, k));
+    final Set<Integer> indexSet = Generics.newHashSet(indexes.subList(0, k));
 
     // filter down to only the items at the selected indexes
     return Iterables.filter(items, new Function<T, Boolean>() {

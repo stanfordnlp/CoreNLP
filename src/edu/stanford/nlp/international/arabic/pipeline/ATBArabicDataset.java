@@ -12,7 +12,7 @@ import java.util.Properties;
 
 import edu.stanford.nlp.international.arabic.Buckwalter;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.process.treebank.AbstractDataset;
+import edu.stanford.nlp.trees.treebank.AbstractDataset;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.Filter;
 
 /**
  * Converts raw ATB trees into a format appropriate for treebank parsing.
- * 
+ *
  * @author Spence Green
  *
  */
@@ -54,7 +54,7 @@ public class ATBArabicDataset extends AbstractDataset {
       flatFile = (makeFlatFile) ? new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(flatFileName),"UTF-8"))) : null;
 
       treebank.apply(new ArabicRawTreeNormalizer(outfile,flatFile));
-      
+
       outputFileList.add(outFileName);
 
       if(makeFlatFile) {
@@ -83,7 +83,7 @@ public class ATBArabicDataset extends AbstractDataset {
       lexMapper = new DefaultLexicalMapper();
       lexMapper.setup(null, lexMapOptions.split(","));
     }
-    
+
     if(pathsToMappings.size() != 0) {
       if(posMapper == null) {
       	posMapper = new LDCPosMapper(addDeterminer);
@@ -95,7 +95,7 @@ public class ATBArabicDataset extends AbstractDataset {
 
     return ret;
   }
-  
+
 
   /**
    * A {@link edu.stanford.nlp.trees.TreeVisitor} for raw ATB trees. This class performs
@@ -121,7 +121,7 @@ public class ATBArabicDataset extends AbstractDataset {
 
       nullFilter = new ArabicTreeNormalizer.ArabicEmptyFilter();
       aOverAFilter = new AOverAFilter();
-      
+
       tf = new LabeledScoredTreeFactory();
       tlp = new ArabicTreebankLanguagePack();
     }
@@ -138,12 +138,12 @@ public class ATBArabicDataset extends AbstractDataset {
         posTag = posTag.equals("NOUN.VN") ? "CONJ" : "CC";
         rawWord = "f";
       }
-      
+
       // Hack for annotation error in ATB
       if (rawWord.startsWith("MERGE_with_previous_token:")) {
         rawWord = rawWord.replace("MERGE_with_previous_token:", "");
       }
-      
+
       // Hack for annotation error in ATB
       if (rawWord.contains("e")) {
         rawWord = rawWord.replace("e", "");
@@ -161,29 +161,29 @@ public class ATBArabicDataset extends AbstractDataset {
         node.firstChild().setValue(finalWord + morphDelim + rawTag);
       }
     }
-    
+
     //Modifies the tree in-place...should be run after
     //mapping to reduced tag set
     public Tree arabicAoverAFilter(Tree t) {
-    	if(t == null || t.isLeaf() || t.isPreTerminal()) 
+    	if(t == null || t.isLeaf() || t.isPreTerminal())
     		return t;
-    	
+
     	//Specific nodes to filter out
     	if(t.numChildren() == 1) {
     		final Tree fc = t.firstChild();
- 
+
     		//A over A nodes i.e. from BobChrisTreeNormalizer
     		if(t.label() != null && fc.label() != null && t.value().equals(fc.value())) {
     			t.setChildren(fc.children());
     		}
     	}
-    	
+
     	for(Tree kid : t.getChildrenAsList())
     		arabicAoverAFilter(kid);
-    	
+
     	return t;
     }
-    
+
 
     public void visitTree(Tree t) {
       // Filter out XBar trees
@@ -193,7 +193,7 @@ public class ATBArabicDataset extends AbstractDataset {
       // Strip out traces and pronoun deletion markers,
       t = t.prune(nullFilter, tf);
       t = arabicAoverAFilter(t);
-  
+
       // Visit nodes with a custom visitor
       if(customTreeVisitor != null)
         customTreeVisitor.visitTree(t);
@@ -205,17 +205,17 @@ public class ATBArabicDataset extends AbstractDataset {
         }
         if(removeDashTags && !node.isLeaf())
           node.setValue(tlp.basicCategory(node.value()));
-      }      
+      }
 
       // Add a ROOT node if necessary
       if (addRoot && t.value() != null && !t.value().equals("ROOT")) {
         t = tf.newTreeNode("ROOT", Collections.singletonList(t));
       }
-      
+
       // Output the trees to file
       outfile.println(t.toString());
       if(flatFile != null) {
-        String flatString = (removeEscapeTokens) ? 
+        String flatString = (removeEscapeTokens) ?
             ATBTreeUtils.unEscape(ATBTreeUtils.flattenTree(t)) : ATBTreeUtils.flattenTree(t);
         flatFile.println(flatString);
       }

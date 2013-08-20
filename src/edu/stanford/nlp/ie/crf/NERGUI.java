@@ -28,6 +28,7 @@
 package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import javax.swing.*;
@@ -38,7 +39,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -692,7 +692,7 @@ public class NERGUI {
                                                      String backgroundSymbol) {
     int numColors = tags.size() - 1;
     Color[] colors = getNColors(numColors);
-    Map<String, Color> result = new HashMap<String, Color>();
+    Map<String, Color> result = Generics.newHashMap();
 
     int i = 0;
     for (String tag : tags) {

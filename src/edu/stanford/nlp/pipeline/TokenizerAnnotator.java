@@ -2,7 +2,9 @@ package edu.stanford.nlp.pipeline;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -57,7 +59,7 @@ abstract public class TokenizerAnnotator implements Annotator {
       List<CoreLabel> tokens = getTokenizer(r).tokenize();
       // cdm 2010-05-15: This is now unnecessary, as it is done in CoreLabelTokenFactory
       // for (CoreLabel token: tokens) {
-      //   token.set(CoreAnnotations.TextAnnotation.class, token.get(TextAnnotation.class));
+      //   token.set(CoreAnnotations.TextAnnotation.class, token.get(CoreAnnotations.TextAnnotation.class));
       // }
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
@@ -67,5 +69,16 @@ abstract public class TokenizerAnnotator implements Annotator {
     } else {
       throw new RuntimeException("unable to find text in annotation: " + annotation);
     }
+  }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 }

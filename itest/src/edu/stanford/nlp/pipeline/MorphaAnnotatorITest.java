@@ -5,10 +5,7 @@ import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
@@ -48,7 +45,7 @@ public class MorphaAnnotatorITest extends TestCase {
 
     for (int i = 0 ; i < answer.length ; i++){
       CoreLabel word = words.get(i);
-      String lemma = word.get(LemmaAnnotation.class);
+      String lemma = word.get(CoreAnnotations.LemmaAnnotation.class);
       assertEquals(lemma, answer[i]);
     }
   }
@@ -56,7 +53,7 @@ public class MorphaAnnotatorITest extends TestCase {
   public void testMorphaAnnotator() throws Exception {
     Annotation document = new Annotation(text);
     fullPipeline.annotate(document);
-    checkResult(document.get(TokensAnnotation.class));
+    checkResult(document.get(CoreAnnotations.TokensAnnotation.class));
   }
 
   private static List<CoreLabel> getTestWords() {
@@ -68,7 +65,7 @@ public class MorphaAnnotatorITest extends TestCase {
     for (int i = 0; i < tokenizedText.length; ++i) {
       CoreLabel word = new CoreLabel();
       word.setWord(tokenizedText[i]);
-      word.set(TextAnnotation.class, tokenizedText[i]);
+      word.set(CoreAnnotations.TextAnnotation.class, tokenizedText[i]);
       word.setTag(tokenizedTags[i]);
       words.add(word);
     }
@@ -79,11 +76,11 @@ public class MorphaAnnotatorITest extends TestCase {
     List<CoreLabel> words = getTestWords();
 
     CoreMap sentence = new ArrayCoreMap();
-    sentence.set(TokensAnnotation.class, words);
+    sentence.set(CoreAnnotations.TokensAnnotation.class, words);
     List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
     Annotation document = new Annotation(text);
-    document.set(SentencesAnnotation.class, sentences);
+    document.set(CoreAnnotations.SentencesAnnotation.class, sentences);
 
     shortPipeline.annotate(document);
     checkResult(words);

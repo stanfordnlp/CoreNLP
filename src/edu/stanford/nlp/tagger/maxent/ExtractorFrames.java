@@ -244,9 +244,21 @@ public class ExtractorFrames {
       } else if (arg.startsWith("allwordshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
-        for (int i = lWindow; i <= rWindow; i++) {
-          extrs.add(new ExtractorWordShapeClassifier(i, "chris2"));
+        String wsc = Extractor.getParenthesizedArg(arg, 3);
+        if (wsc == null) {
+          wsc = "chris2";
         }
+        for (int i = lWindow; i <= rWindow; i++) {
+          extrs.add(new ExtractorWordShapeClassifier(i, wsc));
+        }
+      } else if (arg.startsWith("allwordshapeconjunction(")) {
+        int lWindow = Extractor.getParenthesizedNum(arg, 1);
+        int rWindow = Extractor.getParenthesizedNum(arg, 2);
+        String wsc = Extractor.getParenthesizedArg(arg, 3);
+        if (wsc == null) {
+          wsc = "chris2";
+        }
+        extrs.add(new ExtractorWordShapeConjunction(lWindow, rWindow, wsc));
       } else if (arg.startsWith("allunicodeshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
@@ -263,6 +275,7 @@ public class ExtractorFrames {
                  arg.equalsIgnoreCase("naacl2003conjunctions") ||
                  arg.equalsIgnoreCase("frenchunknowns") ||
                  arg.startsWith("wordshapes(") ||
+                 arg.startsWith("wordshapeconjunction(") ||
                  arg.equalsIgnoreCase("motleyUnknown") ||
                  arg.startsWith("suffix(") ||
                  arg.startsWith("prefix(") ||
@@ -667,6 +680,7 @@ public class ExtractorFrames {
 class ExtractorWordShapeClassifier extends Extractor {
 
   private final int wordShaper;
+  private final String name;
 
   // This cache speeds things up a little bit.  I used
   // -Xrunhprof:cpu=samples,interval=1 when using the "distsim" tagger
@@ -684,13 +698,14 @@ class ExtractorWordShapeClassifier extends Extractor {
   // note that if you want to bring it back, make it a map from wsc to
   // cache rather than just a single cache.  -- horatio
   //private static final Map<String, String> shapes =
-  //  new HashMap<String, String>();
+  //  Generics.newHashMap();
   // --- should be:
   //private static final Map<String, Map<String, String>> ...
 
   ExtractorWordShapeClassifier(int position, String wsc) {
     super(position, false);
     wordShaper = WordShapeClassifier.lookupShaper(wsc);
+    name = "ExtractorWordShapeClassifier(" + position+ ',' + wsc + ')';
   }
 
   @Override
@@ -701,6 +716,11 @@ class ExtractorWordShapeClassifier extends Extractor {
   }
 
   private static final long serialVersionUID = 101L;
+
+  @Override
+  public String toString() {
+    return name;
+  }
 
   @Override public boolean isLocal() { return position == 0; }
   @Override public boolean isDynamic() { return false; }
@@ -724,7 +744,7 @@ class ExtractorWordShapeConjunction extends Extractor {
     this.left = left;
     this.right = right;
     wordShaper = WordShapeClassifier.lookupShaper(wsc);
-    name = "ExtractorWordShapeConjunction(" + left + ',' + right + ')';
+    name = "ExtractorWordShapeConjunction(" + left + ',' + right + ',' + wsc + ')';
   }
 
   @Override

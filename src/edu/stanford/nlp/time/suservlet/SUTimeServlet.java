@@ -10,14 +10,11 @@ import java.util.List;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.time.Options;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -136,7 +133,7 @@ public class SUTimeServlet extends HttpServlet
   }
 
   private void displayAnnotation(PrintWriter out, String query, Annotation anno, boolean includeOffsets) {
-    List<CoreMap> timexAnns = anno.get(TimexAnnotations.class);
+    List<CoreMap> timexAnns = anno.get(TimeAnnotations.TimexAnnotations.class);
     List<String> pieces = new ArrayList<String>();
     List<Boolean> tagged = new ArrayList<Boolean>();
     int previousEnd = 0;
@@ -180,7 +177,7 @@ public class SUTimeServlet extends HttpServlet
       out.println("<th>Timex3 Tag</th></tr>");
       for (CoreMap timexAnn : timexAnns) {
         out.println("<tr>");
-        Timex timex = timexAnn.get(TimexAnnotation.class);
+        Timex timex = timexAnn.get(TimeAnnotations.TimexAnnotation.class);
         int begin =
                 timexAnn.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
         int end =
@@ -203,8 +200,8 @@ public class SUTimeServlet extends HttpServlet
 
     out.println("<h3>POS Tags</h3>");
     out.println("<table><tr><td>");
-    for (CoreMap sentence : anno.get(SentencesAnnotation.class)) {
-      List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
+    for (CoreMap sentence : anno.get(CoreAnnotations.SentencesAnnotation.class)) {
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       for (CoreLabel token : tokens) {
         String tokenOutput =
                 StringEscapeUtils.escapeHtml(token.word() + "/" + token.tag());

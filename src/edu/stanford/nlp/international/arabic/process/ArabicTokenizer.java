@@ -11,16 +11,13 @@ import java.util.Properties;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
-import edu.stanford.nlp.process.AbstractTokenizer;
-import edu.stanford.nlp.process.CoreLabelTokenFactory;
-import edu.stanford.nlp.process.LexedTokenFactory;
-import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Tokenizer for UTF-8 Arabic. Buckwalter encoding is *not* supported.
- * 
+ *
  * <p>
  * A single instance of an Arabic Tokenizer is not thread safe, as it
  * uses a non-threadsafe jflex object to do the processing.  Multiple
@@ -159,7 +156,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * <li><code>atbEscaping</code> : Replace left/right parentheses with ATB escape characters</li>
    * </ul>
    * </p>
-   * 
+   *
    * @param args
    */
   public static void main(String[] args) {
@@ -176,13 +173,13 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     final TokenizerFactory<CoreLabel> tf = tokenizerOptions.containsKey("atb") ?
         ArabicTokenizer.atbFactory() : ArabicTokenizer.factory();
     for (String option : tokenizerOptions.stringPropertyNames()) {
-      tf.setOptions(option);        
+      tf.setOptions(option);
     }
- 
+
     // Replace line separators with a token so that we can
     // count lines
     tf.setOptions("tokenizeNLs");
-    
+
     // Read the file
     int nLines = 0;
     int nTokens = 0;

@@ -4,7 +4,6 @@ package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -17,7 +16,9 @@ import org.xml.sax.SAXException;
 import edu.stanford.nlp.ie.machinereading.common.DomReader;
 
 /**
- * Dom reader for an ACE specification
+ * DOM reader for an ACE specification.
+ *
+ * @author David McClosky
  */
 public class AceDomReader extends DomReader {
 
@@ -26,8 +27,8 @@ public class AceDomReader extends DomReader {
     String start = getAttributeValue(child, "START");
     String end = getAttributeValue(child, "END");
     String text = child.getFirstChild().getNodeValue();
-    return new AceCharSeq(text, 
-			  Integer.parseInt(start), 
+    return new AceCharSeq(text,
+			  Integer.parseInt(start),
 			  Integer.parseInt(end));
   }
 
@@ -39,7 +40,7 @@ public class AceDomReader extends DomReader {
     String type = getAttributeValue(node, "TYPE");
     String ldctype = getAttributeValue(node, "LDCTYPE");
     AceCharSeq extent = parseCharSeq(getChildByName(node, "extent"));
-    AceCharSeq head = parseCharSeq(getChildByName(node, "head"));    
+    AceCharSeq head = parseCharSeq(getChildByName(node, "head"));
     return (new AceEntityMention(id, type, ldctype, extent, head));
   }
 
@@ -60,7 +61,7 @@ public class AceDomReader extends DomReader {
     for(Node arg: args){
       String role = getAttributeValue(arg, "ROLE");
       String refid = getAttributeValue(arg, "REFID");
-      AceEntityMention am = doc.getEntityMention(refid); 
+      AceEntityMention am = doc.getEntityMention(refid);
 
       if(am != null){
       	am.addRelationMention(mention);
@@ -94,7 +95,7 @@ public class AceDomReader extends DomReader {
     for (Node arg : args) {
       String role = getAttributeValue(arg, "ROLE");
       String refid = getAttributeValue(arg, "REFID");
-      AceEntityMention am = doc.getEntityMention(refid); 
+      AceEntityMention am = doc.getEntityMention(refid);
 
       if(am != null){
         am.addEventMention(mention);
@@ -104,14 +105,14 @@ public class AceDomReader extends DomReader {
 
     return mention;
   }
-  
+
   /**
    * Parses one ACE specification
    * @return Simply displays the events to stdout
    */
-  public static AceDocument parseDocument(File f) 
+  public static AceDocument parseDocument(File f)
     throws IOException, SAXException, ParserConfigurationException {
-    
+
     // parse the Dom document
     Document document = readDocument(f);
 
@@ -119,7 +120,7 @@ public class AceDomReader extends DomReader {
     // create the ACE document object
     //
     Node docElement = document.getElementsByTagName("document").item(0);
-    AceDocument aceDoc = 
+    AceDocument aceDoc =
       new AceDocument(getAttributeValue(docElement, "DOCID"));
 
     //
@@ -137,7 +138,7 @@ public class AceDomReader extends DomReader {
       String type = getAttributeValue(node, "TYPE");
       String subtype = getAttributeValue(node, "SUBTYPE");
       String cls = getAttributeValue(node, "CLASS");
-      
+
       // create the entity
       AceEntity entity = new AceEntity(id, type, subtype, cls);
       aceDoc.addEntity(entity);
@@ -146,13 +147,13 @@ public class AceDomReader extends DomReader {
       List<Node> mentions = getChildrenByName(node, "entity_mention");
 
       // parse all its mentions
-      for(Iterator<Node> it = mentions.iterator(); it.hasNext(); ){
-	AceEntityMention mention = parseEntityMention(it.next());
-	entity.addMention(mention);
-	aceDoc.addEntityMention(mention);
+      for (Node mention1 : mentions) {
+        AceEntityMention mention = parseEntityMention(mention1);
+        entity.addMention(mention);
+        aceDoc.addEntityMention(mention);
       }
 
-      entityCount ++;
+      entityCount++;
     }
     //System.err.println("Parsed " + entityCount + " XML entities.");
 
@@ -173,7 +174,7 @@ public class AceDomReader extends DomReader {
       String tense = getAttributeValue(node, "TENSE");
 
       // create the relation
-      AceRelation relation = new AceRelation(id, type, subtype, 
+      AceRelation relation = new AceRelation(id, type, subtype,
 					     modality, tense);
       aceDoc.addRelation(relation);
 
@@ -183,13 +184,13 @@ public class AceDomReader extends DomReader {
       List<Node> mentions = getChildrenByName(node, "relation_mention");
 
       // traverse all mentions
-      for(Iterator<Node> it = mentions.iterator(); it.hasNext(); ){
-        AceRelationMention mention = parseRelationMention(it.next(), aceDoc);
+      for (Node mention1 : mentions) {
+        AceRelationMention mention = parseRelationMention(mention1, aceDoc);
         relation.addMention(mention);
         aceDoc.addRelationMention(mention);
       }
     }
-    
+
     //
     // read all events
     //
@@ -209,7 +210,7 @@ public class AceDomReader extends DomReader {
       String tense = getAttributeValue(node, "TENSE");
 
       // create the event
-      AceEvent event = new AceEvent(id, type, subtype, 
+      AceEvent event = new AceEvent(id, type, subtype,
                modality, polarity, genericity, tense);
       aceDoc.addEvent(event);
 
@@ -217,13 +218,13 @@ public class AceDomReader extends DomReader {
       List<Node> mentions = getChildrenByName(node, "event_mention");
 
       // traverse all mentions
-      for(Iterator<Node> it = mentions.iterator(); it.hasNext(); ){
-        AceEventMention mention = parseEventMention(it.next(), aceDoc);
+      for (Node mention1 : mentions) {
+        AceEventMention mention = parseEventMention(mention1, aceDoc);
         event.addMention(mention);
         aceDoc.addEventMention(mention);
       }
     }
-    
+
     return aceDoc;
   }
 

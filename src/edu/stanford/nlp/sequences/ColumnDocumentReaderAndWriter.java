@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.DelimitRegExIterator;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.util.Function;
@@ -98,8 +97,8 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
     for (CoreLabel wi : doc) {
-      String answer = wi.get(AnswerAnnotation.class);
-      String goldAnswer = wi.get(GoldAnswerAnnotation.class);
+      String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
+      String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
       out.println(wi.word() + "\t" + goldAnswer + "\t" + answer);
     }
     out.println();

@@ -2,8 +2,7 @@ package edu.stanford.nlp.process;
 
 import java.io.Serializable;
 
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 
 /**
@@ -62,8 +61,8 @@ public class CoreLabelTokenFactory implements CoreTokenFactory<CoreLabel>, Lexed
     cl.setWord(tokenText);
     cl.setOriginalText(originalText);
     if(addIndices) {
-      cl.set(CharacterOffsetBeginAnnotation.class, begin);
-      cl.set(CharacterOffsetEndAnnotation.class, begin+length);
+      cl.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
+      cl.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, begin+length);
     }
     return cl;
   }

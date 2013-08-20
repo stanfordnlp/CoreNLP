@@ -2,8 +2,8 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.util.ArrayMap;
+import edu.stanford.nlp.util.Generics;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
  */
 public class EnglishDateTimeUtils {
 
-  static final Pattern teFixedHolPattern = Pattern.compile("\\b(new\\s+year|inauguration|valentine|ground|candlemas|patrick|fool|(saint|st\\.)\\s+george|walpurgisnacht|may\\s+day|beltane|cinco|flag|baptiste|canada|dominion|independence|bastille|halloween|allhallow|all\\s+(saint|soul)s|day\\s+of\\s+the\\s+dead|fawkes|veteran|christmas|xmas|boxing)\\b", Pattern.CASE_INSENSITIVE);
-  static final Pattern teNthDOWHolPattern = Pattern.compile("\\b(mlk|king|president|canberra|mother|father|labor|columbus|thanksgiving)\\b", Pattern.CASE_INSENSITIVE);
-  static final Pattern teLunarHolPattern = Pattern.compile("\\b(easter|palm\\s+sunday|good\\s+friday|ash\\s+wednesday|shrove\\s+tuesday|mardis\\s+gras)\\b", Pattern.CASE_INSENSITIVE);
-  static final Pattern teDayHolPattern   = Pattern.compile("\\b(election|memorial|C?Hanukk?ah|Rosh|Kippur|tet|diwali|halloween)\\b", Pattern.CASE_INSENSITIVE);
+  // private static final Pattern teFixedHolPattern = Pattern.compile("\\b(new\\s+year|inauguration|valentine|ground|candlemas|patrick|fool|(saint|st\\.)\\s+george|walpurgisnacht|may\\s+day|beltane|cinco|flag|baptiste|canada|dominion|independence|bastille|halloween|allhallow|all\\s+(saint|soul)s|day\\s+of\\s+the\\s+dead|fawkes|veteran|christmas|xmas|boxing)\\b", Pattern.CASE_INSENSITIVE);
+  // private static final Pattern teNthDOWHolPattern = Pattern.compile("\\b(mlk|king|president|canberra|mother|father|labor|columbus|thanksgiving)\\b", Pattern.CASE_INSENSITIVE);
+  // private static final Pattern teLunarHolPattern = Pattern.compile("\\b(easter|palm\\s+sunday|good\\s+friday|ash\\s+wednesday|shrove\\s+tuesday|mardis\\s+gras)\\b", Pattern.CASE_INSENSITIVE);
+  // private static final Pattern teDayHolPattern   = Pattern.compile("\\b(election|memorial|C?Hanukk?ah|Rosh|Kippur|tet|diwali|halloween)\\b", Pattern.CASE_INSENSITIVE);
 
   // holidays that appear on fixed date
-  static Map<String,String> fixedHol2Date = new HashMap<String,String>(30);
+  private static final Map<String,String> fixedHol2Date = Generics.newHashMap(30);
   static {
     fixedHol2Date.put("newyear",   "0101");
     fixedHol2Date.put("inauguration", "0120");
@@ -55,7 +55,7 @@ public class EnglishDateTimeUtils {
 
   // holidays that appear on certain day of the week
   // format is month-DOW-nth
-  static Map<String,String> nthDOWHol2Date = new HashMap<String,String>(9);
+  private static final Map<String,String> nthDOWHol2Date = Generics.newHashMap(9);
   static {
     nthDOWHol2Date.put("mlk",        "1-1-3");
     nthDOWHol2Date.put("king",         "1-1-3");
@@ -71,8 +71,8 @@ public class EnglishDateTimeUtils {
   // "jan" => 1, "feb" =>  2, "mar" =>  3, "apr" =>  4,
 	//	 "may" => 5, "jun" =>  6, "jul" =>  7, "aug" =>  8,
 	//	 "sep" => 9, "oct" => 10, "nov" => 11, "dec" => 12
-  static String[] months = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
-  public static Map<String,Integer> month2Num = new HashMap<String,Integer>(months.length);
+  private static final String[] months = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
+  private static final Map<String,Integer> month2Num = Generics.newHashMap(months.length);
   static {
     for (int i = 0; i < months.length; i++) {
       month2Num.put(months[i], i+1);
@@ -81,8 +81,8 @@ public class EnglishDateTimeUtils {
 
   // "sunday"    => 0, "monday"   => 1, "tuesday" => 2,  "wednesday" => 3,
   // "thursday" => 4, "friday"  => 5, "saturday"  => 6
-  static String[] dayOfWeek = { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
-  static Map<String,Integer> day2Num = new HashMap<String,Integer>(dayOfWeek.length);
+  private static final String[] dayOfWeek = { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
+  private static final Map<String,Integer> day2Num = Generics.newHashMap(dayOfWeek.length);
   static {
     for (int i = 0; i < dayOfWeek.length; i++) {
       day2Num.put(dayOfWeek[i], i);
@@ -91,7 +91,7 @@ public class EnglishDateTimeUtils {
 
   // TODO: Java also knows about time zones...
   // %TE_TimeZones    = ("E" => -5, "C" => -6, "M" => -7, "P" => -8);
-  static Map<String,Integer> teTimeZones = new ArrayMap<String,Integer>(4);
+  private static final Map<String,Integer> teTimeZones = new ArrayMap<String,Integer>(4);
   static {
     teTimeZones.put("E", -5);
     teTimeZones.put("C", -6);
@@ -101,7 +101,7 @@ public class EnglishDateTimeUtils {
 
   // %TE_Season       = ("spring" => "SP", "summer" => "SU",
   //     "autumn" => "FA", "fall" => "FA", "winter" => "WI");
-  static Map<String,String> teSeason = new ArrayMap<String,String>(5);
+  private static final Map<String,String> teSeason = new ArrayMap<String,String>(5);
   static {
     teSeason.put("spring", "SP");
     teSeason.put("summer", "SU");
@@ -111,7 +111,7 @@ public class EnglishDateTimeUtils {
   }
 
   // %TE_Season2Month = ("SP" => 4, "SU" => 6, "FA" => 9, "WI" => 12);
-  static Map<String,Integer> teSeason2Month = new ArrayMap<String,Integer>(4);
+  private static final Map<String,Integer> teSeason2Month = new ArrayMap<String,Integer>(4);
   static {
     teSeason2Month.put("SP", 4);
     teSeason2Month.put("SU", 6);
@@ -121,12 +121,12 @@ public class EnglishDateTimeUtils {
 
 
   // Length of month in days (without leap years)
-  static int[] teMl    = new int[]{0, 31, 28, 31,  30,  31,  30,  31,  31,  30,  31,  30, 31};
+  private static final int[] teMl    = new int[]{0, 31, 28, 31,  30,  31,  30,  31,  31,  30,  31,  30, 31};
   // Cumulative number of days from beginning for each month (without leap years)
-  static int[] teCumMl = new int[]{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
+  private static final int[] teCumMl = new int[]{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
 
   // time expression ordinals - like ordWord2Num but only goes to thirty
-  static Map<String,Integer> teOrd2Num = new HashMap<String,Integer>(31);
+  private static final Map<String,Integer> teOrd2Num = Generics.newHashMap(31);
   static {
     teOrd2Num.put("first", 1);
     teOrd2Num.put("second", 2);
@@ -161,7 +161,7 @@ public class EnglishDateTimeUtils {
 	  teOrd2Num.put("thirty-first", 31);
   }
 
-  static Map<String,Integer> teDecadeNums = new HashMap<String,Integer>(9);
+  private static final Map<String,Integer> teDecadeNums = Generics.newHashMap(9);
   static {
     teDecadeNums.put("twenties", 2);
     teDecadeNums.put("thirties", 3);
@@ -173,6 +173,8 @@ public class EnglishDateTimeUtils {
     teDecadeNums.put("nineties", 9);
   }
 
+  private EnglishDateTimeUtils() {} // static class
+
 
   private static int getMonthLength(int year, int month) {
     int ml;
@@ -183,10 +185,8 @@ public class EnglishDateTimeUtils {
 
   private static boolean isLeapYear(int year) {
     // This is the Gregorian Calendar
-    if(((year % 400) == 0) ||
-       (((year % 4) == 0) && ((year % 100) != 0))) {
-	    return true;
-    } else { return false; }
+    return ((year % 400) == 0) ||
+        (((year % 4) == 0) && ((year % 100) != 0));
   } // End of subroutine isLeapYear
 
   // TODO: handle \A (match beginning of string, just once even when /m)
@@ -226,7 +226,7 @@ public class EnglishDateTimeUtils {
       return null;
     }
   }
-  private static Pattern isoYearWeekFormat = Pattern.compile("(\\d\\d\\d\\d)W(\\d\\d)");
+  private static final Pattern isoYearWeekFormat = Pattern.compile("(\\d\\d\\d\\d)W(\\d\\d)");
   @SuppressWarnings("unused")
   private static String week2DateIso(String iso)
   {
@@ -257,6 +257,7 @@ public class EnglishDateTimeUtils {
     return isoOut;
   } // End of subroutine week2DateIso
 
+  @SuppressWarnings("UnusedDeclaration")
   protected static String date2Week(String iso) {
     SUTime.IsoDate isoDate = parseIsoDate(iso);
     if (isoDate != null) {
@@ -278,7 +279,7 @@ public class EnglishDateTimeUtils {
 
 	  int w = (doy + dl +5)/7;
 	  if(dl > 4) { w--; }
-	  String weekStr = String.format("%4.dW%02.d", year, w);
+	  String weekStr = String.format("%4dW%02d", year, w);
 	  return weekStr;
   } // End of subroutine date2Week
 
@@ -306,9 +307,10 @@ public class EnglishDateTimeUtils {
   } // End of subroutine date2DOW
 
 
-  //#######################################
-  // Figures the nth DOW in month
-  // as a date for a given year
+  /** Figures the nth DOW in month
+   *  as a date for a given year.
+   */
+  @SuppressWarnings("UnusedDeclaration")
   protected static int nthDOW2Date(int month, int dow, int nth, int year)
   {
     if (dow == 7) { dow = 0; }
@@ -388,13 +390,14 @@ public class EnglishDateTimeUtils {
     }
   }
 
+  @SuppressWarnings("UnusedDeclaration")
   protected static int year2Num(String year)
   {
     if (year == null) return -1;
     return Integer.parseInt(year);
   }
 
-  private static Pattern yearEraPattern = Pattern.compile("\\s*\\b(a\\.?d|b\\.?c)(?:\\.|\\b)\\s*", Pattern.CASE_INSENSITIVE);
+  private static final Pattern yearEraPattern = Pattern.compile("\\s*\\b(a\\.?d|b\\.?c)(?:\\.|\\b)\\s*", Pattern.CASE_INSENSITIVE);
 
   /**
    * Takes a basic string representation of year and returns a normalized ISO representation
@@ -433,7 +436,7 @@ public class EnglishDateTimeUtils {
         Integer decade = teDecadeNums.get(fields[1]);
         if (decade != null && century != null) {
           // TODO: Do we allow things like nineteen fifties B.C.?
-          String res = String.format("%02d%01dX", century, decade);
+          String res = String.format("%02d%01dX", century.intValue(), decade);
           return (negative)? "-" + res: res;
         } else {
           throw new IllegalArgumentException("Invalid year: " + year);
@@ -459,7 +462,7 @@ public class EnglishDateTimeUtils {
         Number decade = NumberNormalizer.wordToNumber(fields[1]);
         if (decade != null && century != null) {
           // TODO: Do we allow things like 1950s B.C.?
-          String res = String.format("%02d%01dX", century, decade.intValue()/10);
+          String res = String.format("%02d%01dX", century.intValue(), decade.intValue()/10);
           return (negative)? "-" + res: res;
         } else {
           throw new IllegalArgumentException("Invalid year: " + year);
@@ -516,8 +519,9 @@ public class EnglishDateTimeUtils {
           return String.format("%04d", v);
         }
       } else {
-        throw new IllegalArgumentException("Invalid year: " + year);        
+        throw new IllegalArgumentException("Invalid year: " + year);
       }
     }
   }
+
 }

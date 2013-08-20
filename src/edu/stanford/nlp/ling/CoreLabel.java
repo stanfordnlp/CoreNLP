@@ -1,26 +1,22 @@
 package edu.stanford.nlp.ling;
 
-import java.util.HashMap;
-import java.util.Set;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CategoryAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.DocIDAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentenceIndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ValueAnnotation;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**
+ * A CoreLabel represents a single word with ancillary information
+ * attached using CoreAnnotations.  If the proper annotations are set,
+ * the CoreLabel also provides convenient methods to access tags,
+ * lemmas, etc.
+ * <p>
  * A CoreLabel is a Map from keys (which are Class objects) to values,
  * whose type is determined by the key.  That is, it is a heterogeneous
  * typesafe Map (see Josh Bloch, Effective Java, 2nd edition).
@@ -81,8 +77,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
     super(label.size());
-    Set<Class<?>> otherKeys = label.keySet();
-    for (Class key : otherKeys) {
+    for (Class key : label.keySet()) {
       set(key, label.get(key));
     }
   }
@@ -90,19 +85,19 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   /**
    * Returns a new CoreLabel instance based on the contents of the given
    * label.   Warning: The behavior of this method is a bit disjunctive!
-   * If label is a CoreMap (including CoreLabel), then it's entire
+   * If label is a CoreMap (including CoreLabel), then its entire
    * contents is copied into this label.  But, otherwise, just the
-   * value() is copied.
+   * value() and word iff it implements HasWord is copied.
    *
    * @param label Basis for this label
    */
+  @SuppressWarnings("unchecked")
   public CoreLabel(Label label) {
-    super(1);
+    super(0);
     if (label instanceof CoreMap) {
       CoreMap cl = (CoreMap) label;
-      Set<Class<?>> otherKeys = cl.keySet();
-      setCapacity(otherKeys.size());
-      for (Class key : otherKeys) {
+      setCapacity(cl.size());
+      for (Class key : cl.keySet()) {
         set(key, cl.get(key));
       }
     } else {
@@ -137,9 +132,9 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   public static interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
   //Unchecked is below because eclipse can't handle the level of type inference if we correctly parameterize GenericAnnotation with String
   @SuppressWarnings("unchecked")
-  public static HashMap<String, Class<? extends GenericAnnotation>> genericKeys = new HashMap<String, Class<? extends GenericAnnotation>>();
+  public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
   @SuppressWarnings("unchecked")
-  public static HashMap<Class<? extends GenericAnnotation>, String> genericValues = new HashMap<Class<? extends GenericAnnotation>, String>();
+  public static final Map<Class<? extends GenericAnnotation>, String> genericValues = Generics.newHashMap();
 
 
   @SuppressWarnings("unchecked")
@@ -181,15 +176,15 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
         try {
           Class<?> valueClass = AnnotationLookup.getValueType(lookup.coreKey);
           if(valueClass.equals(String.class)) {
-            this.set((Class<? extends CoreAnnotation>)lookup.coreKey, values[i]);
+            this.set(lookup.coreKey, values[i]);
           } else if(valueClass == Integer.class) {
-            this.set((Class<? extends CoreAnnotation>)lookup.coreKey, Integer.parseInt(values[i]));
+            this.set(lookup.coreKey, Integer.parseInt(values[i]));
           } else if(valueClass == Double.class) {
-            this.set((Class<? extends CoreAnnotation>)lookup.coreKey, Double.parseDouble(values[i]));
+            this.set(lookup.coreKey, Double.parseDouble(values[i]));
           } else if(valueClass == Long.class) {
-            this.set((Class<? extends CoreAnnotation>)lookup.coreKey, Long.parseLong(values[i]));
+            this.set(lookup.coreKey, Long.parseLong(values[i]));
           }
-        } catch(Exception e) {
+        } catch (Exception e) {
           e.printStackTrace();
           // unexpected value type
           System.err.println("CORE: CoreLabel.initFromStrings: "
@@ -204,16 +199,19 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
 
   private static class CoreLabelFactory implements LabelFactory {
 
+    @Override
     public Label newLabel(String labelStr) {
       CoreLabel label = new CoreLabel();
       label.setValue(labelStr);
       return label;
     }
 
+    @Override
     public Label newLabel(String labelStr, int options) {
       return newLabel(labelStr);
     }
 
+    @Override
     public Label newLabel(Label oldLabel) {
       if (oldLabel instanceof CoreLabel) {
         return new CoreLabel((CoreLabel)oldLabel);
@@ -241,6 +239,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
       }
     }
 
+    @Override
     public Label newLabelFromString(String encodedLabelStr) {
       throw new UnsupportedOperationException("This code branch left blank" +
       " because we do not understand what this method should do.");
@@ -261,6 +260,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   /**
    * {@inheritDoc}
    */
+  @Override
   public LabelFactory labelFactory() {
     return CoreLabel.factory();
   }
@@ -277,7 +277,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * @return "" if the key is not in the map or has the value <code>null</code>
    *     and the String value of the key otherwise
    */
-  public <KEY extends Key<CoreMap, String>> String getString(Class<KEY> key) {
+  public <KEY extends Key<String>> String getString(Class<KEY> key) {
     String value = get(key);
     if (value == null) {
       return "";
@@ -296,6 +296,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setFromString(String labelStr) {
     throw new UnsupportedOperationException("Cannot set from string");
   }
@@ -303,94 +304,107 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   /**
    * {@inheritDoc}
    */
+  @Override
   public final void setValue(String value) {
-    set(ValueAnnotation.class, value);
+    set(CoreAnnotations.ValueAnnotation.class, value);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public final String value() {
-    return get(ValueAnnotation.class);
+    return get(CoreAnnotations.ValueAnnotation.class);
   }
 
   /**
    * Set the word value for the label.  Also, clears the lemma, since
    * that may have changed if the word changed.
    */
+  @Override
   public void setWord(String word) {
-    set(TextAnnotation.class, word);
+    set(CoreAnnotations.TextAnnotation.class, word);
     // pado feb 09: if you change the word, delete the lemma.
-    remove(LemmaAnnotation.class);
+    remove(CoreAnnotations.LemmaAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public String word() {
-    return get(TextAnnotation.class);
+    return get(CoreAnnotations.TextAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setTag(String tag) {
-    set(PartOfSpeechAnnotation.class, tag);
+    set(CoreAnnotations.PartOfSpeechAnnotation.class, tag);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public String tag() {
-    return get(PartOfSpeechAnnotation.class);
+    return get(CoreAnnotations.PartOfSpeechAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setCategory(String category) {
-    set(CategoryAnnotation.class, category);
+    set(CoreAnnotations.CategoryAnnotation.class, category);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public String category() {
-    return get(CategoryAnnotation.class);
+    return get(CoreAnnotations.CategoryAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setAfter(String after) {
-    set(AfterAnnotation.class, after);
+    set(CoreAnnotations.AfterAnnotation.class, after);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public String after() {
-    return getString(AfterAnnotation.class);
+    return getString(CoreAnnotations.AfterAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setBefore(String before) {
-    set(BeforeAnnotation.class, before);
+    set(CoreAnnotations.BeforeAnnotation.class, before);
   }
 
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public String before() {
-    return getString(BeforeAnnotation.class);
+    return getString(CoreAnnotations.BeforeAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setOriginalText(String originalText) {
     set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
   }
@@ -398,22 +412,25 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   /**
    * {@inheritDoc}
    */
+  @Override
   public String originalText() {
-    return getString(OriginalTextAnnotation.class);
+    return getString(CoreAnnotations.OriginalTextAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public String docID() {
-    return get(DocIDAnnotation.class);
+    return get(CoreAnnotations.DocIDAnnotation.class);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setDocID(String docID) {
-    set(DocIDAnnotation.class, docID);
+    set(CoreAnnotations.DocIDAnnotation.class, docID);
   }
 
   /**
@@ -422,32 +439,36 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * @return String the word value for the label
    */
   public String ner() {
-    return get(NamedEntityTagAnnotation.class);
+    return get(CoreAnnotations.NamedEntityTagAnnotation.class);
   }
 
   public void setNER(String ner) {
-    set(NamedEntityTagAnnotation.class, ner);
+    set(CoreAnnotations.NamedEntityTagAnnotation.class, ner);
   }
 
   /**
-   * Return the lemma of the label (or null if none).
-   *
-   * @return String the word value for the label
+   * {@inheritDoc}
    */
+  @Override
   public String lemma() {
-    return get(LemmaAnnotation.class);
+    return get(CoreAnnotations.LemmaAnnotation.class);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void setLemma(String lemma) {
-    set(LemmaAnnotation.class, lemma);
+    set(CoreAnnotations.LemmaAnnotation.class, lemma);
   }
 
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public int index() {
-    Integer n = get(IndexAnnotation.class);
+    Integer n = get(CoreAnnotations.IndexAnnotation.class);
     if(n == null)
       return -1;
     return n;
@@ -456,15 +477,17 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setIndex(int index) {
-    set(IndexAnnotation.class, index);
+    set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
   /**
    * {@inheritDoc}
    */
+  @Override
   public int sentIndex() {
-    Integer n = get(SentenceIndexAnnotation.class);
+    Integer n = get(CoreAnnotations.SentenceIndexAnnotation.class);
     if(n == null)
       return -1;
     return n;
@@ -473,26 +496,43 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   /**
    * {@inheritDoc}
    */
+  @Override
   public void setSentIndex(int sentIndex) {
-    set(SentenceIndexAnnotation.class, sentIndex);
+    set(CoreAnnotations.SentenceIndexAnnotation.class, sentIndex);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public int beginPosition() {
     Integer i = get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
     if(i != null) return i;
     return -1;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public int endPosition() {
     Integer i = get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
     if(i != null) return i;
     return -1;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void setBeginPosition(int beginPos) {
     set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, beginPos);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void setEndPosition(int endPos) {
     set(CoreAnnotations.CharacterOffsetEndAnnotation.class, endPos);
   }
@@ -502,66 +542,104 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    */
   public static final String TAG_SEPARATOR = "/";
 
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUE>>
-//  VALUE get(Class<KEY> key) {
-//    return map.get(key);
-//  }
+  public static final String DEFAULT_FORMAT = "value-index";
 
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUE>>
-//  boolean has(Class<KEY> key) {
-//    return map.has(key);
-//  }
+  @Override
+  public String toString() {
+    return toString(DEFAULT_FORMAT);
+  }
 
-  /** {@inheritDoc} */
-//  public Set<Class<?>> keySet() {
-//    return map.keySet();
-//  }
+  /**
+   * Returns a formatted string representing this label.  The
+   * desired format is passed in as a <code>String</code>.
+   * Currently supported formats include:
+   * <ul>
+   * <li>"value": just prints the value</li>
+   * <li>"{map}": prints the complete map</li>
+   * <li>"value{map}": prints the value followed by the contained
+   * map (less the map entry containing key <code>CATEGORY_KEY</code>)</li>
+   * <li>"value-index": extracts a value and an integer index from
+   * the contained map using keys  <code>INDEX_KEY</code>,
+   * respectively, and prints them with a hyphen in between</li>
+   * <li>"value-index{map}": a combination of the above; the index is
+   * displayed first and then not shown in the map that is displayed</li>
+   * <li>"word": Just the value of HEAD_WORD_KEY in the map</li>
+   * </ul>
+   * <p/>
+   * Map is printed in alphabetical order of keys.
+   */
+  @SuppressWarnings("unchecked")
+  public String toString(String format) {
+    StringBuilder buf = new StringBuilder();
+    if (format.equals("value")) {
+      buf.append(value());
+    } else if (format.equals("{map}")) {
+      Map map2 = new TreeMap();
+      for(Class key : this.keySet()) {
+        map2.put(key.getName(), get(key));
+      }
+      buf.append(map2);
+    } else if (format.equals("value{map}")) {
+      buf.append(value());
+      Map map2 = new TreeMap(asClassComparator);
+      for(Class key : this.keySet()) {
+        map2.put(key, get(key));
+      }
+      map2.remove(CoreAnnotations.ValueAnnotation.class);
+      buf.append(map2);
+    } else if (format.equals("value-index")) {
+      buf.append(value());
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      buf.append(toPrimes());
+    } else if (format.equals("value-index{map}")) {
+      buf.append(value());
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      Map<String,Object> map2 = new TreeMap<String,Object>();
+      for(Class key : this.keySet()) {
+        String cls = key.getName();
+        // special shortening of all the Annotation classes
+        int idx = cls.indexOf('$');
+        if (idx >= 0) {
+          cls = cls.substring(idx + 1);
+        }
+        map2.put(cls, this.get(key));
+      }
+      map2.remove("IndexAnnotation");
+      map2.remove("ValueAnnotation");
+      if (!map2.isEmpty()) {
+        buf.append(map2);
+      }
+    } else if (format.equals("word")) {
+      buf.append(word());
+    } else if (format.equals("text-index")) {
+      buf.append(this.get(CoreAnnotations.TextAnnotation.class));
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      buf.append(toPrimes());
+    }
+    return buf.toString();
+  }
 
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUE>>
-//  VALUE remove(Class<KEY> key) {
-//    return map.remove(key);
-//  }
+  public String toPrimes() {
+    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
+    if (copy == null || copy == 0)
+      return "";
+    return StringUtils.repeat('\'', copy);
+  }
 
-  /** {@inheritDoc} */
-//  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUEBASE>>
-//  VALUE set(Class<KEY> key, VALUE value) {
-//    return map.set(key, value);
-//  }
-
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends Key<CoreMap, VALUE>>
-//  boolean containsKey(Class<KEY> key) {
-//    return map.containsKey(key);
-//  }
-
- // @Override
-//  public String toString() {
-//    return value();
-//    return map.toString();
-//  }
-
- // @Override
-//  public boolean equals(Object other) {
-//    if (other instanceof CyclicCoreLabel) {
-//      // CyclicCoreLabel overrides our equality, use its
-//      return other.equals(this);
-//    } else if (other instanceof CoreLabel) {
-//      // If its a CoreLabel, compare our map with its
-//      return map.equals(((CoreLabel)other).map);
-//    } else if (other instanceof CoreMap) {
-//      // If its any other type of CoreMap, compare our map with it directly
-//      return map.equals(other);
-//    } else {
-//      return false;
-//    }
-//  }
-
- // @Override
-//  public int hashCode() {
-//    return map.hashCode();
-//  }
+  private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {
+    @Override
+    public int compare(Class<?> o1, Class<?> o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
 
 }

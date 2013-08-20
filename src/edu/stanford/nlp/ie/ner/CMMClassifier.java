@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -53,10 +52,7 @@ import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.WordTag;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GazAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.IDAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PositionAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.objectbank.ObjectBank;
@@ -71,8 +67,9 @@ import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -153,7 +150,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    * @return The Set of entities recognized by this Classifier.
    */
   public Set<String> getTags() {
-    Set<String> tags = new HashSet<String>(classIndex.objectsList());
+    Set<String> tags = Generics.newHashSet(classIndex.objectsList());
     tags.remove(flags.backgroundSymbol);
     return tags;
   }
@@ -198,7 +195,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
         // kind of side effect.  Specifically, the symptom is that
         // if scoresOf is not evaluated at every position, the
         // answers are different
-        if ("NEWGENE".equals(wordInfo.get(GazAnnotation.class))) {
+        if ("NEWGENE".equals(wordInfo.get(CoreAnnotations.GazAnnotation.class))) {
           for (String label : scores.keySet()) {
             if ("G".equals(label)) {
               System.err.println(wordInfo.word() + ':' + scores.getCount(label));
@@ -208,7 +205,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
             }
           }
         }
-        wordInfo.set(AnswerAnnotation.class, answer);
+        wordInfo.set(CoreAnnotations.AnswerAnnotation.class, answer);
       }
     } else {
       for (int i = 0, listSize = document.size(); i < listSize; i++) {
@@ -216,14 +213,14 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
         CoreLabel wordInfo = document.get(i);
         //System.err.println("XXX answer for " +
         //        wordInfo.word() + " is " + answer);
-        wordInfo.set(AnswerAnnotation.class, answer);
+        wordInfo.set(CoreAnnotations.AnswerAnnotation.class, answer);
       }
       if (flags.justify && (classifier instanceof LinearClassifier)) {
         LinearClassifier<String, String> lc = (LinearClassifier<String, String>) classifier;
         for (int i = 0, lsize = document.size(); i < lsize; i++) {
           CoreLabel lineInfo = document.get(i);
           System.err.print("@@ Position " + i + ": ");
-          System.err.println(lineInfo.word() + " chose " + lineInfo.get(AnswerAnnotation.class));
+          System.err.println(lineInfo.word() + " chose " + lineInfo.get(CoreAnnotations.AnswerAnnotation.class));
           lc.justificationOf(makeDatum(document, i, featureFactory));
         }
       }
@@ -340,12 +337,12 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       for (int i = 0, dSize = document.size(); i < dSize; i++) {
         CoreLabel wordInfo =document.get(i);
 
-        if ("NEWGENE".equals(wordInfo.get(GazAnnotation.class))) {
+        if ("NEWGENE".equals(wordInfo.get(CoreAnnotations.GazAnnotation.class))) {
           int start = i;
           int j;
           for (j = i; j < document.size(); j++) {
             wordInfo = document.get(j);
-            if (!"NEWGENE".equals(wordInfo.get(GazAnnotation.class))) {
+            if (!"NEWGENE".equals(wordInfo.get(CoreAnnotations.GazAnnotation.class))) {
               break;
             }
           }
@@ -401,10 +398,10 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
               if (score >= flags.newgeneThreshold && (!prevScores.containsKey(al) || score > prevScores.getCount(al)) && (!prevScores.containsKey(ar) || score > prevScores.getCount(ar)) && (!prevScores.containsKey(sl) || score > prevScores.getCount(sl)) && (!prevScores.containsKey(sr) || score > prevScores.getCount(sr))) {
                 StringBuilder sb = new StringBuilder();
                 wordInfo = document.get(j);
-                String docId = wordInfo.get(IDAnnotation.class);
-                String startIndex = wordInfo.get(PositionAnnotation.class);
+                String docId = wordInfo.get(CoreAnnotations.IDAnnotation.class);
+                String startIndex = wordInfo.get(CoreAnnotations.PositionAnnotation.class);
                 wordInfo = document.get(k);
-                String endIndex = wordInfo.get(PositionAnnotation.class);
+                String endIndex = wordInfo.get(CoreAnnotations.PositionAnnotation.class);
                 for (int m = j; m <= k; m++) {
                   wordInfo = document.get(m);
                   sb.append(wordInfo.word());
@@ -431,7 +428,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     for (int i = 0, docSize = document.size(); i < docSize; i++) {
       CoreLabel lineInfo = document.get(i);
       String answer = classIndex.get(tags[i]);
-      lineInfo.set(AnswerAnnotation.class, answer);
+      lineInfo.set(CoreAnnotations.AnswerAnnotation.class, answer);
     }
 
     if (flags.justify && classifier instanceof LinearClassifier) {
@@ -442,7 +439,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       for (int i = 0, docSize = document.size(); i < docSize; i++) {
         CoreLabel lineInfo = document.get(i);
         System.err.print("@@ Position is: " + i + ": ");
-        System.err.println(lineInfo.word() + ' ' + lineInfo.get(AnswerAnnotation.class));
+        System.err.println(lineInfo.word() + ' ' + lineInfo.get(CoreAnnotations.AnswerAnnotation.class));
         lc.justificationOf(makeDatum(document, i, featureFactory));
       }
     }
@@ -1139,7 +1136,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    */
   private void makeAnswerArraysAndTagIndex(Collection<List<IN>> docs) {
     if (answerArrays == null) {
-      answerArrays = new HashSet<List<String>>();
+      answerArrays = Generics.newHashSet();
     }
     if (classIndex == null) {
       classIndex = new HashIndex<String>();
@@ -1155,14 +1152,14 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
         for (int diff = 1; diff <= flags.maxLeft && start + diff <= leng; diff++) {
           String[] seq = new String[diff];
           for (int i = start; i < start + diff; i++) {
-            seq[i - start] = doc.get(i).get(AnswerAnnotation.class);
+            seq[i - start] = doc.get(i).get(CoreAnnotations.AnswerAnnotation.class);
           }
           answerArrays.add(Arrays.asList(seq));
         }
       }
       for (int i = 0; i < leng; i++) {
         CoreLabel wordInfo = doc.get(i);
-        classIndex.add(wordInfo.get(AnswerAnnotation.class));
+        classIndex.add(wordInfo.get(CoreAnnotations.AnswerAnnotation.class));
       }
 
       if (flags.useReverse) {
@@ -1191,7 +1188,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
     printFeatures(pInfo.get(loc), features);
     CoreLabel c = info.get(loc);
-    return new BasicDatum<String, String>(features, c.get(AnswerAnnotation.class));
+    return new BasicDatum<String, String>(features, c.get(CoreAnnotations.AnswerAnnotation.class));
   }
 
 
@@ -1206,12 +1203,12 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   private static Collection<String> addOtherClasses(Collection<String> feats, List<? extends CoreLabel> info,
                                      int loc, Clique c) {
     String addend = null;
-    String pAnswer = info.get(loc - 1).get(AnswerAnnotation.class);
-    String p2Answer = info.get(loc - 2).get(AnswerAnnotation.class);
-    String p3Answer = info.get(loc - 3).get(AnswerAnnotation.class);
-    String p4Answer = info.get(loc - 4).get(AnswerAnnotation.class);
-    String p5Answer = info.get(loc - 5).get(AnswerAnnotation.class);
-    String nAnswer = info.get(loc + 1).get(AnswerAnnotation.class);
+    String pAnswer = info.get(loc - 1).get(CoreAnnotations.AnswerAnnotation.class);
+    String p2Answer = info.get(loc - 2).get(CoreAnnotations.AnswerAnnotation.class);
+    String p3Answer = info.get(loc - 3).get(CoreAnnotations.AnswerAnnotation.class);
+    String p4Answer = info.get(loc - 4).get(CoreAnnotations.AnswerAnnotation.class);
+    String p5Answer = info.get(loc - 5).get(CoreAnnotations.AnswerAnnotation.class);
+    String nAnswer = info.get(loc + 1).get(CoreAnnotations.AnswerAnnotation.class);
     // cdm 2009: Is this really right? Do we not need to differentiate names that would collide???
     if (c == FeatureFactory.cliqueCpC) {
       addend = '|' + pAnswer;
@@ -1239,7 +1236,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     if (addend == null) {
       return feats;
     }
-    Collection<String> newFeats = new HashSet<String>();
+    Collection<String> newFeats = Generics.newHashSet();
     for (String feat : feats) {
       String newFeat = feat + addend;
       newFeats.add(newFeat);
@@ -1438,7 +1435,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
         }
         answers[i] = tagIndex.get(tags[absPos]);
         CoreLabel li = lineInfos.get(absPos);
-        li.set(AnswerAnnotation.class, answers[i]);
+        li.set(CoreAnnotations.AnswerAnnotation.class, answers[i]);
         if (i < leftWindow()) {
           pre[i] = answers[i];
         }

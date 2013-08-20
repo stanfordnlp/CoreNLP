@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import edu.stanford.nlp.util.Generics;
+
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
  * (e.g. main->tagging->sentence 2) using the startTrack() and endTrack() methods.
@@ -88,7 +90,7 @@ public class Redwood {
   /**
    * Queue of tasks to be run in various threads
    */
-  private static final Map<Long,Queue<Runnable>> threadedLogQueue = new HashMap<Long,Queue<Runnable>>();
+  private static final Map<Long,Queue<Runnable>> threadedLogQueue = Generics.newHashMap();
   /**
    * Thread id which currently has control of the Redwood
    */
@@ -393,7 +395,7 @@ public class Redwood {
    * Removes all classes from the list of known logging classes
    */
   protected static void clearLoggingClasses(){
-    if(loggingClasses == null){ loggingClasses = new HashSet<String>(); }
+    if(loggingClasses == null){ loggingClasses = Generics.newHashSet(); }
     loggingClasses.clear();
   }
 
@@ -443,6 +445,11 @@ public class Redwood {
     }
   }
 
+  /**
+   * The Redwood equivalent to printf().
+   * @param format The format string, as per java's Formatter.format() object.
+   * @param args The arguments to format.
+   */
   public static void logf(String format, Object... args){ log(new Formatter().format(format, args)); }
 
   /**
@@ -1318,6 +1325,13 @@ public class Redwood {
      * @param numThreads The number of threads to run on
      */
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
+      // (short circuit if single thread)
+      if (numThreads == 1) {
+        startTrack( "Threads (" + title + ")" );
+        for (Runnable toRun : runnables) { toRun.run(); }
+        endTrack( "Threads (" + title + ")" );
+        return;
+      }
       //(create executor)
       ExecutorService exec = Executors.newFixedThreadPool(numThreads);
       //(add threads)
@@ -1521,7 +1535,6 @@ public class Redwood {
     endTrack("Wrapper");
     System.exit(1);
     
-    
     forceTrack("Track 1");
     log("tag", ERR, "hello world");
     startTrack("Hidden");
@@ -1667,7 +1680,7 @@ public class Redwood {
     startTrack("I should close");
     log(FORCE,"so I'm nonempty...");
     try {
-      Thread.sleep(3000);
+      Thread.sleep(1000);
     } catch (InterruptedException e) { }
 		throw new IllegalArgumentException();
   }

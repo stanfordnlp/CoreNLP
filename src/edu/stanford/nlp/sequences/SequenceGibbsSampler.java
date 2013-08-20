@@ -4,6 +4,7 @@ import edu.stanford.nlp.util.concurrent.*;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 //debug
@@ -113,7 +114,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
 
     Set<Integer> positionsChanged = null;
     if (speedUpThreshold > 0)
-      positionsChanged = new HashSet<Integer>();
+      positionsChanged = Generics.newHashSet();
 
     for (int i=0; i<schedule.numIterations(); i++) {
       if (BisequenceEmpiricalNERPrior.DEBUG) System.err.println("\n\niteration: " + i);
@@ -145,7 +146,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
         }      
       }
       if (i % 50 == 0) {
-        System.err.println("itr " + i + ": " + bestScore + "\t");
+        if (verbose > 1) System.err.println("itr " + i + ": " + bestScore + "\t");
       }
       if (verbose>0) System.err.print(".");
     }
@@ -379,9 +380,9 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
    * @param temperature the temperature to control annealing
    */
   public double samplePosition(SequenceModel model, int[] sequence, int pos, double temperature) {
+    int oldTag = sequence[pos];
     Pair<Integer, Double> newPosProb = samplePositionHelper(model, sequence, pos, temperature); 
     int newTag = newPosProb.first();
-    int oldTag = sequence[pos];
 //    System.out.println("Sampled " + oldTag + "->" + newTag);
     sequence[pos] = newTag;
     listener.updateSequenceElement(sequence, pos, oldTag);

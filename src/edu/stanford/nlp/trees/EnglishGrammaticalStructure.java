@@ -2,9 +2,10 @@ package edu.stanford.nlp.trees;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.CoreAnnotations.CopyAnnotation;
-import edu.stanford.nlp.ling.CyclicCoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.*;
 
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
@@ -117,6 +118,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   @Override
   protected void correctDependencies(Collection<TypedDependency> list) {
     correctSubjPassAndPoss(list);
+    removeExactDuplicates(list);
   }
 
   private static void printListSorted(String title, Collection<TypedDependency> list) {
@@ -128,9 +130,25 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     System.err.println(lis);
   }
 
+  @Override
+  protected void getExtras(List<TypedDependency> list) {
+    addRef(list);
+    if (DEBUG) {
+      printListSorted("After adding ref:", list);
+    }
+      
+    addXSubj(list);
+    if (DEBUG) {
+      printListSorted("After adding xsubj:", list);
+    }
+  }
+
+
   /**
    * Destructively modifies this <code>Collection&lt;TypedDependency&gt;</code>
    * by collapsing several types of transitive pairs of dependencies.
+   * If called with a tree of dependencies and both CCprocess and
+   * includeExtras set to false, then the tree structure is preserved.
    * <dl>
    * <dt>prepositional object dependencies: pobj</dt>
    * <dd>
@@ -156,9 +174,9 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * </dl>
    */
   @Override
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
     if (DEBUG) {
-      printListSorted("collapseDependencies: CCproc: " + CCprocess, list);
+      printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, list);
     }
     correctDependencies(list);
     if (DEBUG) {
@@ -200,15 +218,29 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       printListSorted("After conj:", list);
     }
 
-    collapseReferent(list);
-    if (DEBUG) {
-      printListSorted("After collapse referent:", list);
+    if (includeExtras) {
+      addRef(list);
+      if (DEBUG) {
+        printListSorted("After adding ref:", list);
+      }
+      
+      collapseReferent(list);
+      if (DEBUG) {
+        printListSorted("After collapse referent:", list);
+      }
     }
 
     if (CCprocess) {
       treatCC(list);
       if (DEBUG) {
         printListSorted("After treatCC:", list);
+      }
+    }
+
+    if (includeExtras) {
+      addXSubj(list);
+      if (DEBUG) {
+        printListSorted("After adding xsubj:", list);
       }
     }
 
@@ -223,74 +255,9 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
-  /**
-   * Destructively modifies this <code>Collection&lt;TypedDependency&gt;</code>
-   * by collapsing several types of transitive pairs of dependencies, but
-   * keeping the tree structure.
-   * <dl>
-   * <dt>prepositional object dependencies: pobj</dt>
-   * <dd>
-   * <code>prep(cat, in)</code> and <code>pobj(in, hat)</code> are collapsed to
-   * <code>prep_in(cat, hat)</code></dd>
-   * <dt>prepositional complement dependencies: pcomp</dt>
-   * <dd>
-   * <code>prep(heard, of)</code> and <code>pcomp(of, attacking)</code> are
-   * collapsed to <code>prepc_of(heard, attacking)</code></dd>
-   * <dt>conjunct dependencies</dt>
-   * <dd>
-   * <code>cc(investors, and)</code> and
-   * <code>conj(investors, regulators)</code> are collapsed to
-   * <code>conj_and(investors,regulators)</code></dd>
-   * <dt>possessive dependencies: possessive</dt>
-   * <dd>
-   * <code>possessive(Montezuma, 's)</code> will be erased. This is like a collapsing, but
-   * due to the flatness of NPs, two dependencies are not actually composed.</dd>
-   */
   @Override
   protected void collapseDependenciesTree(List<TypedDependency> list) {
-    correctDependencies(list);
-    if (DEBUG) {
-      printListSorted("After correctDependencies:", list);
-    }
-    eraseMultiConj(list);
-    if (DEBUG) {
-      printListSorted("After collapse multi conj:", list);
-    }
-
-    collapse2WP(list);
-    if (DEBUG) {
-      printListSorted("After collapse2WP:", list);
-    }
-
-    collapseFlatMWP(list);
-    if (DEBUG) {
-      printListSorted("After collapseFlatMWP:", list);
-    }
-
-    collapse2WPbis(list);
-    if (DEBUG) {
-      printListSorted("After collapse2WPbis:", list);
-    }
-
-    collapse3WP(list);
-    if (DEBUG) {
-      printListSorted("After collapse3WP:", list);
-    }
-
-    collapsePrepAndPoss(list);
-    if (DEBUG) {
-      printListSorted("After PrepAndPoss:", list);
-    }
-
-    collapseConj(list);
-    if (DEBUG) {
-      printListSorted("After conj:", list);
-    }
-
-    Collections.sort(list);
-    if (DEBUG) {
-      printListSorted("After all collapse:", list);
-    }
+    collapseDependencies(list, false, false);
   }
 
   /**
@@ -316,12 +283,12 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   private static void treatCC(Collection<TypedDependency> list) {
     // Construct a map from tree nodes to the set of typed
     // dependencies in which the node appears as dependent.
-    Map<TreeGraphNode, Set<TypedDependency>> map = new HashMap<TreeGraphNode, Set<TypedDependency>>();
+    Map<TreeGraphNode, Set<TypedDependency>> map = Generics.newHashMap();
     // Construct a map of tree nodes being governor of a subject grammatical
     // relation to that relation
-    Map<TreeGraphNode, TypedDependency> subjectMap = new HashMap<TreeGraphNode, TypedDependency>();
+    Map<TreeGraphNode, TypedDependency> subjectMap = Generics.newHashMap();
     // Construct a set of TreeGraphNodes with a passive auxiliary on them
-    Set<TreeGraphNode> withPassiveAuxiliary = new HashSet<TreeGraphNode>();
+    Set<TreeGraphNode> withPassiveAuxiliary = Generics.newHashSet();
     // Construct a map of tree nodes being governor of an object grammatical
     // relation to that relation
     // Map<TreeGraphNode, TypedDependency> objectMap = new
@@ -575,6 +542,142 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
+  // TODO: is there some better pattern to look for?  
+  // We do not have tag information at this point
+  private static final String RELATIVIZING_WORD_REGEX = "(?i:that|what|which|who|whom|whose)";
+  private static final Pattern RELATIVIZING_WORD_PATTERN = Pattern.compile(RELATIVIZING_WORD_REGEX);
+
+  /**
+   * Look for ref rules for a given word.  We look through the
+   * children and grandchildren of the rcmod dependency, and if any
+   * children or grandchildren depend on a that/what/which/etc word,
+   * we take the leftmost that/what/which/etc word as the dependent
+   * for the ref TypedDependency.
+   */
+  private static void addRef(Collection<TypedDependency> list) {
+    List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
+    
+    for (TypedDependency rcmod : list) {
+      if (rcmod.reln() != RELATIVE_CLAUSE_MODIFIER) {
+        // we only add ref dependencies across relative clauses
+        continue;
+      }
+
+      TreeGraphNode head = rcmod.gov();
+      TreeGraphNode modifier = rcmod.dep();
+
+      TypedDependency leftChild = null;
+      for (TypedDependency child : list) {
+        if (child.gov() == modifier && 
+            RELATIVIZING_WORD_PATTERN.matcher(child.dep().label().value()).matches() &&
+            (leftChild == null || child.dep().index() < leftChild.dep().index())) {
+          leftChild = child;
+        }
+      }
+
+      // TODO: could be made more efficient
+      TypedDependency leftGrandchild = null;
+      for (TypedDependency child : list) {
+        if (child.gov() != modifier) {
+          continue;
+        }
+        for (TypedDependency grandchild : list) {
+          if (grandchild.gov() == child.dep() && 
+              RELATIVIZING_WORD_PATTERN.matcher(grandchild.dep().label().value()).matches() &&
+              (leftGrandchild == null || grandchild.dep().index() < leftGrandchild.dep().index())) {
+            leftGrandchild = grandchild;
+          }
+        }
+      }
+
+      TypedDependency newDep = null;
+      if (leftGrandchild != null && (leftChild == null || leftGrandchild.dep().index() < leftChild.dep().index())) {
+        newDep = new TypedDependency(REFERENT, head, leftGrandchild.dep());
+      } else if (leftChild != null) {
+        newDep = new TypedDependency(REFERENT, head, leftChild.dep());
+      }
+      if (newDep != null) {
+        newDeps.add(newDep);
+      }
+    }
+
+    for (TypedDependency newDep : newDeps) {
+      if (!list.contains(newDep)) {
+        newDep.setExtra();
+        list.add(newDep);
+      }
+    }
+  }
+
+  /**
+   * Add xsubj dependencies when collapsing basic dependencies.  
+   * <br>
+   * In the general case, we look for an aux modifier under an xcomp
+   * modifier, and assuming there aren't already associated nsubj
+   * dependencies as daughters of the original xcomp dependency, we
+   * add xsubj dependencies for each nsubj daughter of the aux.
+   * <br>
+   * There is also a special case for "to" words, in which case we add
+   * a dependency if and only if there is no nsubj associated with the
+   * xcomp and there is no other aux dependency.  This accounts for
+   * sentences such as "he decided not to" with no following verb.
+   */
+  private static void addXSubj(Collection<TypedDependency> list) {
+    List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
+    
+    for (TypedDependency xcomp : list) {
+      if (xcomp.reln() != XCLAUSAL_COMPLEMENT) {
+        // we only add xsubj dependencies to some xcomp dependencies
+        continue;
+      }
+
+      TreeGraphNode modifier = xcomp.dep();
+      TreeGraphNode head = xcomp.gov();
+      
+      boolean hasSubjectDaughter = false;
+      boolean hasAux = false;
+      List<TreeGraphNode> subjects = new ArrayList<TreeGraphNode>();
+      for (TypedDependency dep : list) {
+        // already have a subject dependency
+        if ((dep.reln() == NOMINAL_SUBJECT || dep.reln() == NOMINAL_PASSIVE_SUBJECT) && dep.gov() == modifier) {
+          hasSubjectDaughter = true;
+          break;
+        }
+
+        if (dep.reln() == AUX_MODIFIER && dep.gov() == modifier) {
+          hasAux = true;
+        }
+
+        // TODO: create an xsubjpass to go with the NOMINAL_PASSIVE_SUBJECT
+        if ((dep.reln() == NOMINAL_SUBJECT || dep.reln() == NOMINAL_PASSIVE_SUBJECT) && dep.gov() == head) {
+          subjects.add(dep.dep());
+        }
+      }
+
+      // if we already have an nsubj dependency, no need to add an xsubj
+      if (hasSubjectDaughter) {
+        continue;
+      }
+
+      if ((modifier.label().value().equalsIgnoreCase("to") && hasAux) ||
+          (!modifier.label().value().equalsIgnoreCase("to") && !hasAux)) {
+        continue;
+      }
+
+      for (TreeGraphNode subject : subjects) {
+        TypedDependency newDep = new TypedDependency(CONTROLLING_SUBJECT, modifier, subject);
+        newDeps.add(newDep);
+      }
+    }
+    
+    for (TypedDependency newDep : newDeps) {
+      if (!list.contains(newDep)) {
+        newDep.setExtra();
+        list.add(newDep);
+      }
+    }
+  }
+
   /**
    * This method corrects subjects of verbs for which we identified an auxpass,
    * but didn't identify the subject as passive. It also corrects the possessive
@@ -633,7 +736,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     // Construct a map from tree nodes to the set of typed
     // dependencies in which the node appears as governor.
     // cdm: could use CollectionValuedMap here!
-    HashMap<TreeGraphNode, SortedSet<TypedDependency>> map = new HashMap<TreeGraphNode, SortedSet<TypedDependency>>();
+    Map<TreeGraphNode, SortedSet<TypedDependency>> map = Generics.newHashMap();
     List<TreeGraphNode> partmod = new ArrayList<TreeGraphNode>();
 
     for (TypedDependency typedDep : list) {
@@ -885,12 +988,12 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // OK, we have a conjunction over different PPs
         // we create a new node;
         // in order to make a distinction between the original node and its copy
-        // we add a "copy" entry in the CyclicCoreLabel
+        // we add a "copy" entry in the CoreLabel
         // existence of copy key is checked at printing (toString method of
         // TypedDependency)
         TreeGraphNode copy = new TreeGraphNode(td1.gov());
-        CyclicCoreLabel label = new CyclicCoreLabel(td1.gov().label());
-        label.set(CopyAnnotation.class, copyNumber);
+        CoreLabel label = new CoreLabel(td1.gov().label());
+        label.set(CoreAnnotations.CopyAnnotation.class, copyNumber);
         copyNumber++;
         copy.setLabel(label);
 
@@ -1741,7 +1844,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list A list of typed dependencies to check through
    */
   private static void removeDep(Collection<TypedDependency> list) {
-    Set<GrammaticalRelation> prepRels = new HashSet<GrammaticalRelation>(EnglishGrammaticalRelations.getPreps());
+    Set<GrammaticalRelation> prepRels = Generics.newHashSet(EnglishGrammaticalRelations.getPreps());
     prepRels.addAll(EnglishGrammaticalRelations.getPrepsC());
     for (TypedDependency td1 : list) {
       if (prepRels.contains(td1.reln())) { // if we have a prep_ relation
@@ -1767,6 +1870,21 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
   }
+
+  /**
+   * Find and remove any exact duplicates from a dependency list.  
+   * For example, the method that "corrects" nsubj dependencies can
+   * turn them into nsubjpass dependencies.  If there is some other
+   * source of nsubjpass dependencies, there may now be multiple
+   * copies of the nsubjpass dependency.  If the containing data type
+   * is a List, they may both now be in the List.
+   */
+  private static void removeExactDuplicates(Collection<TypedDependency> list) {
+    Set<TypedDependency> set = new TreeSet<TypedDependency>(list);
+    list.clear();
+    list.addAll(set);
+  }
+
 
   public static List<GrammaticalStructure> readCoNLLXGrammaticStructureCollection(String fileName) throws IOException {
     return readCoNLLXGrammaticStructureCollection(fileName, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());

@@ -14,12 +14,12 @@ import java.io.PrintWriter;
  * @author Michel Galley
  */
 
-public interface LatticeWriter<IN extends CoreMap> {
+public interface LatticeWriter<IN extends CoreMap, T, S> {
   
   /**
    * This method prints the output lattice (typically, Viterbi search graph) of 
    * the classifier to a {@link PrintWriter}.
    */
-  public void printLattice(DFSA tagLattice, List<IN> doc, PrintWriter out) ;
+  public void printLattice(DFSA<T, S> tagLattice, List<IN> doc, PrintWriter out) ;
   
 }

@@ -37,6 +37,7 @@ import java.util.Set;
 import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefCluster;
 import edu.stanford.nlp.dcoref.Dictionaries;
+import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
 import edu.stanford.nlp.dcoref.Dictionaries.Person;
 import edu.stanford.nlp.dcoref.Document;
@@ -46,8 +47,7 @@ import edu.stanford.nlp.dcoref.Rules;
 import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.dcoref.SieveOptions;
-import edu.stanford.nlp.ling.CoreAnnotations.SpeakerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UtteranceAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Pair;
 
@@ -103,7 +103,7 @@ public abstract class DeterministicCorefSieve  {
       }
 
       if(skip) {
-        SieveCoreferenceSystem.logger.finest("MENTION SKIPPED:\t" + m1.spanToString() + "(" + m1.sentNum + ")"+"\toriginalRef: "+m1.originalRef + " in discourse "+m1.headWord.get(UtteranceAnnotation.class));
+        SieveCoreferenceSystem.logger.finest("MENTION SKIPPED:\t" + m1.spanToString() + "(" + m1.sentNum + ")"+"\toriginalRef: "+m1.originalRef + " in discourse "+m1.headWord.get(CoreAnnotations.UtteranceAnnotation.class));
       }
     }
 
@@ -141,7 +141,7 @@ public abstract class DeterministicCorefSieve  {
         && mention2.person!=Person.I && mention2.person!=Person.YOU) return false;
     if(mention2.spanToString().toLowerCase().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) return false;
     if(mention2.person==Person.YOU && document.docType==DocType.ARTICLE
-        && mention2.headWord.get(SpeakerAnnotation.class).equals("PER0")) return false;
+        && mention2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0")) return false;
     if(document.conllDoc != null) {
       if(ant.generic && ant.person==Person.YOU) return false;
       if(mention2.generic) return false;
@@ -171,7 +171,7 @@ public abstract class DeterministicCorefSieve  {
       // previous I - you or previous you - I in two person conversation
       if(((mention.person==Person.I && ant.person==Person.YOU
           || (mention.person==Person.YOU && ant.person==Person.I))
-          && (mention.headWord.get(UtteranceAnnotation.class)-ant.headWord.get(UtteranceAnnotation.class) == 1)
+          && (mention.headWord.get(CoreAnnotations.UtteranceAnnotation.class)-ant.headWord.get(CoreAnnotations.UtteranceAnnotation.class) == 1)
           && document.docType==DocType.CONVERSATION)) {
         SieveCoreferenceSystem.logger.finest("discourse match: between two person");
         return true;
@@ -190,7 +190,7 @@ public abstract class DeterministicCorefSieve  {
             document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
             return false;
           }
-          int dist = Math.abs(m.headWord.get(UtteranceAnnotation.class) - a.headWord.get(UtteranceAnnotation.class));
+          int dist = Math.abs(m.headWord.get(CoreAnnotations.UtteranceAnnotation.class) - a.headWord.get(CoreAnnotations.UtteranceAnnotation.class));
           if(document.docType!=DocType.ARTICLE && dist==1 && !Rules.entitySameSpeaker(document, m, a)) {
             if(m.person==Person.I && a.person==Person.I) {
               SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor I: " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
@@ -320,6 +320,44 @@ public abstract class DeterministicCorefSieve  {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    
+    if(flags.USE_DISTANCE && Rules.entityTokenDistance(mention2, ant)){
+      return false;
+    }
+    
+    if(flags.USE_COREF_DICT){
+
+      // Head match
+      if(ant.headWord.lemma().equals(mention2.headWord.lemma())) return false;
+      
+      // Constraint: ignore pairs commonNoun - properNoun
+      if(ant.mentionType != MentionType.PROPER && 
+         ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP") 
+           || !mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) return false;      
+      
+      // Constraint: ignore plurals
+      if(ant.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")
+          && mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")) return false;
+     
+      // Constraint: ignore mentions with indefinite determiners
+      if(dict.indefinitePronouns.contains(ant.originalSpan.get(0).lemma()) 
+          || dict.indefinitePronouns.contains(mention2.originalSpan.get(0).lemma())) return false;  
+      
+      // Constraint: ignore coordinated mentions
+      if(ant.isCoordinated() || mention2.isCoordinated()) return false;
+
+      // Constraint: context incompatibility
+      if(Rules.contextIncompatible(mention2, ant, dict)) return false;
+
+      // Constraint: sentence context incompatibility when the mentions are common nouns
+      if(Rules.sentenceContextIncompatible(mention2, ant, dict)) return false;
+      
+      if(Rules.entityClusterAllCorefDictionary(mentionCluster, potentialAntecedent, dict, 1, 8)) return true;            
+      if(Rules.entityCorefDictionary(mention, ant, dict, 2, 2)) return true;     
+      if(Rules.entityCorefDictionary(mention, ant, dict, 3, 2)) return true; 
+      if(Rules.entityCorefDictionary(mention, ant, dict, 4, 2)) return true;           
+    }
+    
     if(flags.DO_PRONOUN){
       Mention m;
       if (mention.predicateNominatives!=null && mention.predicateNominatives.contains(mention2)) {

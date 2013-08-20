@@ -2,15 +2,15 @@ package edu.stanford.nlp.international.arabic.process;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Characters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 /**
@@ -38,7 +38,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
    * @param loc  The index at which to extract features.
    */
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Collection<String> features = new HashSet<String>();
+    Collection<String> features = Generics.newHashSet();
 
     if (clique == cliqueC) {
       addAllInterningAndSuffixing(features, featuresC(cInfo, loc), "C");
@@ -61,11 +61,11 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
 
-    String charc = c.get(CharAnnotation.class);
-    String charn = n.get(CharAnnotation.class);
-    String charn2 = n2.get(CharAnnotation.class);
-    String charp = p.get(CharAnnotation.class);
-    String charp2 = p2.get(CharAnnotation.class);
+    String charc = c.get(CoreAnnotations.CharAnnotation.class);
+    String charn = n.get(CoreAnnotations.CharAnnotation.class);
+    String charn2 = n2.get(CoreAnnotations.CharAnnotation.class);
+    String charp = p.get(CoreAnnotations.CharAnnotation.class);
+    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
 
     // Default feature set...a 5 character window
     // plus a few other language-independent features
@@ -107,8 +107,8 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
 
-    String charc = c.get(CharAnnotation.class);
-    String charp = p.get(CharAnnotation.class);
+    String charc = c.get(CoreAnnotations.CharAnnotation.class);
+    String charp = p.get(CoreAnnotations.CharAnnotation.class);
     
     features.add(charc + charp + "-cngram");
     
@@ -124,9 +124,9 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
 
-    String charc = c.get(CharAnnotation.class);
-    String charp = p.get(CharAnnotation.class);
-    String charp2 = p2.get(CharAnnotation.class);
+    String charc = c.get(CoreAnnotations.CharAnnotation.class);
+    String charp = p.get(CoreAnnotations.CharAnnotation.class);
+    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
 
     features.add(charc + charp + charp2 + "-cngram");
 
@@ -143,10 +143,10 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
 
-    String charc = c.get(CharAnnotation.class);
-    String charp = p.get(CharAnnotation.class);
-    String charp2 = p2.get(CharAnnotation.class);
-    String charp3 = p3.get(CharAnnotation.class);
+    String charc = c.get(CoreAnnotations.CharAnnotation.class);
+    String charp = p.get(CoreAnnotations.CharAnnotation.class);
+    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
+    String charp3 = p3.get(CoreAnnotations.CharAnnotation.class);
     
     features.add(charc + charp + charp2 + charp3 + "-cngram");
     
