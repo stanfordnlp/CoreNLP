@@ -368,6 +368,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String dateTags =
           properties.getProperty("clean.datetags",
                             CleanXmlAnnotator.DEFAULT_DATE_TAGS);
+        String docIdTags =
+                properties.getProperty("clean.docIdtags",
+                        CleanXmlAnnotator.DEFAULT_DOCID_TAGS);
+        String docTypeTags =
+                properties.getProperty("clean.docTypetags",
+                        CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS);
         String utteranceTurnTags =
                 properties.getProperty("clean.turntags",
                         CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS);
@@ -378,6 +384,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             sentenceEndingTags,
             dateTags,
             allowFlawed);
+        annotator.setDocIdTagMatcher(docIdTags);
+        annotator.setDocTypeTagMatcher(docTypeTags);
         annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
         return annotator;
       }
@@ -396,6 +404,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 "clean.datetags:" +
                 properties.getProperty("clean.datetags",
                   CleanXmlAnnotator.DEFAULT_DATE_TAGS) +
+                "clean.docidtags:" +
+                properties.getProperty("clean.docid",
+                        CleanXmlAnnotator.DEFAULT_DOCID_TAGS) +
+                "clean.doctypetags:" +
+                properties.getProperty("clean.doctype",
+                        CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS) +
                 "clean.turntags:" +
                 properties.getProperty("clean.turntags",
                   CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS) +
@@ -1122,6 +1136,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             case SERIALIZED: defaultExtension = ".ser.gz"; break;
             default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
             }
+            AnnotationSerializer serializer = null;
+            String serializerClass = properties.getProperty("serializer");
+            if (serializerClass != null) {
+              serializer = ReflectionLoading.loadByReflection(serializerClass);
+            }
+
             String extension = properties.getProperty("outputExtension", defaultExtension);
             // ensure we don't make filenames with doubled extensions like .xml.xml
             if (!outputFilename.endsWith(extension)) {
@@ -1165,9 +1185,17 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               annotation = new Annotation(text);
             }
 
-            annotate(annotation);
-
             forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
+
+            startTrack("Annotating file " + file.getAbsoluteFile());
+            try {
+              annotate(annotation);
+            } catch (Exception ex) {
+              warn("Error annotating " + file.getAbsoluteFile(), ex);
+              throw new RuntimeException(ex);
+            } finally {
+              endTrack("Annotating file " + file.getAbsoluteFile());
+            }
 
             //--Output File
             switch (outputFormat) {
@@ -1184,7 +1212,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               break;
             }
             case SERIALIZED: {
-              IOUtils.writeObjectToFile(annotation, outputFilename);
+              if (serializer != null) {
+                OutputStream fos = IOUtils.getFileOutputStream(outputFilename);
+                serializer.save(annotation, fos);
+                fos.close();
+              } else {
+                IOUtils.writeObjectToFile(annotation, outputFilename);
+              }
               break;
             }
             default:
