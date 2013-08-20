@@ -186,7 +186,9 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     SimpleMatrix W = dvModel.getWForNode(tree);
     if (W == null) {
       String error = "Could not find W for tree " + tree;
-      System.err.println(error);
+      if (op.testOptions.verbose) {
+        System.err.println(error);
+      }
       throw new NoSuchParseException(error);
     }
     SimpleMatrix currentVector = W.mult(childVec);
@@ -196,7 +198,9 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     SimpleMatrix scoreW = dvModel.getScoreWForNode(tree);
     if (scoreW == null) {
       String error = "Could not find scoreW for tree " + tree;
-      System.err.println(error);
+      if (op.testOptions.verbose) {
+        System.err.println(error);
+      }
       throw new NoSuchParseException(error);
     }
     double score = scoreW.dot(currentVector);
