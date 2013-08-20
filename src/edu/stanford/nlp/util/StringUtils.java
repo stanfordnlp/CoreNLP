@@ -233,6 +233,19 @@ public class StringUtils {
     }, start, end);
   }
 
+  public static String joinFields(List<? extends CoreMap> l, final Class field, String glue, int start, int end) {
+    return join(l, glue, new Function<CoreMap, String>() {
+      public String apply(CoreMap in) {
+        Object val = in.get(field);
+        return (val != null)? val.toString():"";
+      }
+    }, start, end);
+  }
+
+  public static String joinFields(List<? extends CoreMap> l, final Class field) {
+    return joinFields(l, field, " ", 0, l.size());
+  }
+
   /**
    * Joins all the tokens together (more or less) according to their original whitespace.
    * It assumes all whitespace was " "
