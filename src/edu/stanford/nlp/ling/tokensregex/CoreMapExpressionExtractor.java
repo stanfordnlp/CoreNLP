@@ -41,7 +41,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
   private Logger logger = Logger.getLogger(CoreMapExpressionExtractor.class.getName());
   Env env;
   /* Keeps temporary tags created by extractor */
-  boolean keepTags = true;
+  boolean keepTags = false;
   Class tokensAnnotationKey;
   Map<Integer, Stage<T>> stages;
 
@@ -331,25 +331,36 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     return res;
   }
 
-  private void cleanupTags(Collection objs) {
+  private void cleanupTags(Collection objs, Map<Object, Boolean> cleaned) {
     for (Object obj:objs) {
-      if (obj instanceof CoreMap) {
-        cleanupTags((CoreMap) obj);
-      } else if (obj instanceof Collection) {
-        cleanupTags((Collection) obj);
+      if (!cleaned.containsKey(obj)) {
+        cleaned.put(obj, false);
+        if (obj instanceof CoreMap) {
+          cleanupTags((CoreMap) obj, cleaned);
+        } else if (obj instanceof Collection) {
+          cleanupTags((Collection) obj, cleaned);
+        }
+        cleaned.put(obj, true);
       }
     }
   }
 
   private void cleanupTags(CoreMap cm) {
-    // TODO: Handle coremaps that are recursively linked
+    cleanupTags(cm, new IdentityHashMap<Object, Boolean>());
+  }
+
+  private void cleanupTags(CoreMap cm, Map<Object, Boolean> cleaned) {
     cm.remove(Tags.TagsAnnotation.class);
     for (Class key:cm.keySet()) {
       Object obj = cm.get(key);
-      if (obj instanceof CoreMap) {
-        cleanupTags((CoreMap) obj);
-      } else if (obj instanceof Collection) {
-        cleanupTags((Collection) obj);
+      if (!cleaned.containsKey(obj)) {
+        cleaned.put(obj, false);
+        if (obj instanceof CoreMap) {
+          cleanupTags((CoreMap) obj, cleaned);
+        } else if (obj instanceof Collection) {
+          cleanupTags((Collection) obj, cleaned);
+        }
+        cleaned.put(obj, true);
       }
     }
   }
