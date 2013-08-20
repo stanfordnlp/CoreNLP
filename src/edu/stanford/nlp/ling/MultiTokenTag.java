@@ -42,8 +42,4 @@ public class MultiTokenTag implements Serializable {
   public boolean isEnd() {
     return index == tag.length - 1;
   }
-
-  public String toString() {
-    return  tag.name + "/" + tag.tag +  "(" + index + "/" + tag.length + ")";
-  }
 }
