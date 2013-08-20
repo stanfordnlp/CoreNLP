@@ -1,6 +1,9 @@
 package edu.stanford.nlp.maxent.iis;
 
-import edu.stanford.nlp.io.*;
+import edu.stanford.nlp.io.InDataStreamFile;
+import edu.stanford.nlp.io.OutDataStreamFile;
+import edu.stanford.nlp.io.PrintFile;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.maxent.*;
 import edu.stanford.nlp.util.MutableDouble;
@@ -23,23 +26,17 @@ import java.io.ObjectOutputStream;
 public class LambdaSolve {
 
   /**
-   * These are the model parameters that have to be learned.
-   * This field is used at runtime in all tagger and other IIS/Kristina code.
+   * These are the model parameters that have to be learned
    */
   public double[] lambda;
-
-  /** Only allocated and used in the IIS optimization routines. */
-  protected boolean[] lambda_converged;
-
-  /** Only used in the IIS optimization routines. Convergence threshold / allowed "newtonErr" */
-  protected double eps;
+  protected boolean[] lambda_converged;  // Now only allocated and used if you're using IIS.
+  protected double eps; // only used by IIS. Convergence threshold / allowed "newtonErr"
   // protected double newtonerr;
 
   /**
-   * This flag is true if all (x,y) have the same f# in which case the newton equation solving is avoided.
+   * This flag is true if all (x,y)  have the same f# in which case the newton equation solving is avoided
    */
   private boolean fixedFnumXY;
-
   protected Problem p;
 
   /**
@@ -75,7 +72,7 @@ public class LambdaSolve {
    */
   private boolean ASSUME_BINARY = false;
 
-  private double[] aux;  // auxiliary array used by some procedures for computing objective functions and their derivatives
+  private double[] aux;  // auxiliary array to be used by some procedures for computing objective functions and their derivatives
   private double[][] sum;// auxiliary array
   private double[][] sub;// auxiliary array
   public boolean weightRanks = false;
@@ -197,12 +194,12 @@ public class LambdaSolve {
       ftildeArr[i] = p.functions.get(i).ftilde();
       p.functions.get(i).setSum();
 
-      // if the expectation of a feature is zero make sure we are not
+      // if the expectation of a fetaure is zero make sure we are not
       // trying to find a lambda for it
-      // if (ftildeArr[i] == 0) {
-      //   lambda_converged[i]=true;
-      //   lambda[i]=0;
-      // }
+      if (ftildeArr[i] == 0) {
+        //lambda_converged[i]=true;
+        //lambda[i]=0;
+      }
 
       //dumb smoothing that is not sound and doesn't seem to work
       if (smooth) {
@@ -648,7 +645,7 @@ public class LambdaSolve {
    */
   public void save_lambdas(String filename) {
     try {
-      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
+      OutDataStreamFile rf = new OutDataStreamFile(filename);
       save_lambdas(rf, lambda);
       rf.close();
     } catch (IOException e) {
@@ -682,7 +679,7 @@ public class LambdaSolve {
    */
   public void readL(String filename) {
     try {
-      DataInputStream rf = IOUtils.getDataInputStream(filename);
+      InDataStreamFile rf = new InDataStreamFile(filename);
       lambda = read_lambdas(rf);
       rf.close();
     } catch (Exception e) {
@@ -699,7 +696,7 @@ public class LambdaSolve {
    */
   static double[] read_lambdas(String modelFilename) {
     try {
-      DataInputStream rf = IOUtils.getDataInputStream(modelFilename);
+      InDataStreamFile rf = new InDataStreamFile(modelFilename);
       double[] lamb = read_lambdas(rf);
       rf.close();
       return lamb;
@@ -1070,7 +1067,7 @@ public class LambdaSolve {
     //add up in pcond y|x the unnormalized scores
 
     for (int fNo = 0, fSize = p.fSize; fNo < fSize; fNo++) {
-      // add for all occurrences of the function the values to probConds
+      // add for all occurences of the function the values to probConds
       Feature f = p.functions.get(fNo);
       double fLambda = lambda[fNo];
 

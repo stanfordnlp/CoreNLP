@@ -189,14 +189,15 @@ public class CacheParseHypotheses {
    * <br>
    * java -mx1g edu.stanford.nlp.parser.dvparser.CacheParseHypotheses -model /scr/horatio/dvparser/wsjPCFG.nocompact.simple.ser.gz -output cached9.simple.ser.gz  -treebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-202
    * <br>
-   * java -mx4g edu.stanford.nlp.parser.dvparser.CacheParseHypotheses -model ~/scr/dvparser/wsjPCFG.nocompact.simple.ser.gz -output cached.train.simple.ser.gz -treebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-2199 -numThreads 6
+   * java -mx4g edu.stanford.nlp.parser.dvparser.CacheParseHypotheses -model ~/scr/dvparser/wsjPCFG.nocompact.simple.ser.gz -output cached.train.simple.ser.gz -treebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-2199
    * <br>
    * java -mx4g edu.stanford.nlp.parser.dvparser.CacheParseHypotheses -model ~/scr/dvparser/chinese/xinhuaPCFG.ser.gz -output cached.xinhua.train.ser.gz -treebank /afs/ir/data/linguistic-data/Chinese-Treebank/6/data/utf8/bracketed  026-270,301-499,600-999
    */
   public static void main(String[] args) throws IOException {
     String parserModel = null;
     String output = null;
-    List<Pair<String, FileFilter>> treebanks = Generics.newArrayList();
+    String treebankPath = null;
+    FileFilter treebankFilter = null;
     int dvKBest = 200;
     int numThreads = 1;
     for (int argIndex = 0; argIndex < args.length; ) {
@@ -218,7 +219,8 @@ public class CacheParseHypotheses {
       if (args[argIndex].equalsIgnoreCase("-treebank")) {
         Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-treebank");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
-        treebanks.add(treebankDescription);
+        treebankPath = treebankDescription.first();
+        treebankFilter = treebankDescription.second();
         continue;
       }
       if (args[argIndex].equalsIgnoreCase("-numThreads")) {
@@ -235,28 +237,26 @@ public class CacheParseHypotheses {
     if (output == null) {
       throw new IllegalArgumentException("Need to supply an output filename with -output");
     }
-    if (treebanks.size() == 0) {
+    if (treebankPath == null) {
       throw new IllegalArgumentException("Need to supply a treebank with -treebank");
     }
 
+    System.err.println("Reading trees from " + treebankPath);
     System.err.println("Writing output to " + output);
     System.err.println("Loading parser model " + parserModel);
     System.err.println("Writing " + dvKBest + " hypothesis trees for each tree");
 
     LexicalizedParser parser = LexicalizedParser.loadModel(parserModel, "-dvKBest", Integer.toString(dvKBest));
     CacheParseHypotheses cacher = new CacheParseHypotheses(parser);
+    Treebank treebank = parser.getOp().tlpParams.memoryTreebank();
+    treebank.loadPath(treebankPath, treebankFilter);
+
+    System.err.println("Processing " + treebank.size() + " trees");
+
     TreeTransformer transformer = DVParser.buildTrainTransformer(parser.getOp());
+    treebank = treebank.transform(transformer);
     List<Tree> sentences = new ArrayList<Tree>();
-    for (Pair<String, FileFilter> description : treebanks) {
-      System.err.println("Reading trees from " + description.first);
-      Treebank treebank = parser.getOp().tlpParams.memoryTreebank();
-      treebank.loadPath(description.first, description.second);
-
-      treebank = treebank.transform(transformer);
-      sentences.addAll(treebank);
-    }
-
-    System.err.println("Processing " + sentences.size() + " trees");
+    sentences.addAll(treebank);
 
     List<Pair<Tree, byte[]>> cache = Generics.newArrayList();
     transformer = new SynchronizedTreeTransformer(transformer);

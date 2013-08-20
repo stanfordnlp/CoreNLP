@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import edu.stanford.nlp.util.Pair;
 
@@ -143,7 +144,7 @@ public class Extractors implements Serializable {
   /*
   public void save(String filename) {
     try {
-      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
+      OutDataStreamFile rf = new OutDataStreamFile(filename);
       rf.writeInt(v.length);
       for (Extractor extr : v) {
         rf.writeBytes(extr.toString());
