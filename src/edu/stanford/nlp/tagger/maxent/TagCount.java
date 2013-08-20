@@ -8,11 +8,9 @@
 
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.Generics;
 
-import java.io.IOException;
 import java.util.Map;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -31,9 +29,9 @@ class TagCount {
   private int ambClassId = -1; /* This is a numeric ID shared by all words that have the same set of possible tags. */
 
   private String[] getTagsCache; // = null;
-  private int sumCache;
+  int sumCache;
 
-  private TagCount() { } // used internally
+  TagCount() { }
 
   TagCount(IntCounter<String> tagCounts) {
     for (String tag : tagCounts.keySet()) {
@@ -77,28 +75,27 @@ class TagCount {
     return ambClassId;
   }
 
-  /** A TagCount object's fields are read from the file. They are read from
-   *  the current position and the file is not closed afterwards.
-   */
-  public static TagCount readTagCount(DataInputStream rf) {
+  // The object's fields are read form the file. They are read from
+  // the current position and the file is not closed afterwards.
+  // todo [cdm 2013]: Change this into a static load method so you don't have to make a null TagCount to then call this method on
+  protected void read(DataInputStream rf) {
     try {
-      TagCount tc = new TagCount();
+
       int numTags = rf.readInt();
-      tc.map = Generics.newHashMap(numTags);
+      map = Generics.newHashMap(numTags);
 
       for (int i = 0; i < numTags; i++) {
 	String tag = rf.readUTF();
         int count = rf.readInt();
 
 	if (tag.equals(NULL_SYMBOL)) tag = null;
-	tc.map.put(tag, count);
+	map.put(tag, count);
       }
 
-      tc.getTagsCache = tc.map.keySet().toArray(new String[tc.map.keySet().size()]);
-      tc.sumCache = tc.calculateSumCache();
-      return tc;
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
+      getTagsCache = map.keySet().toArray(new String[map.keySet().size()]);
+      sumCache = calculateSumCache();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
