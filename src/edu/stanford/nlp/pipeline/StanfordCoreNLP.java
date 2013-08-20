@@ -391,6 +391,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String docAnnotations =
                 properties.getProperty("clean.docAnnotations",
                         CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
+        String tokenAnnotations =
+                properties.getProperty("clean.tokenAnnotations",
+                        CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS);
+        String sectionTags =
+                properties.getProperty("clean.sectiontags",
+                        CleanXmlAnnotator.DEFAULT_SECTION_TAGS);
+        String sectionAnnotations =
+                properties.getProperty("clean.sectionAnnotations",
+                        CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
         CleanXmlAnnotator annotator = new CleanXmlAnnotator(xmlTags,
             sentenceEndingTags,
             dateTags,
@@ -399,7 +408,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         annotator.setDocIdTagMatcher(docIdTags);
         annotator.setDocTypeTagMatcher(docTypeTags);
         annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
-        annotator.addTagAnnotationPatterns(docAnnotations);
+        annotator.setDocAnnotationPatterns(docAnnotations);
+        annotator.setTokenAnnotationPatterns(tokenAnnotations);
+        annotator.setSectionTagMatcher(sectionTags);
+        annotator.setSectionAnnotationPatterns(sectionAnnotations);
         return annotator;
       }
 
@@ -434,7 +446,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                   CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS) +
                 "clean.docAnnotations:" +
                 properties.getProperty("clean.docAnnotations",
-                  CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
+                  CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS) +
+                "clean.tokenAnnotations:" +
+                properties.getProperty("clean.tokenAnnotations",
+                        CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS) +
+                "clean.sectiontags:" +
+                properties.getProperty("clean.sectiontags",
+                  CleanXmlAnnotator.DEFAULT_SECTION_TAGS) +
+                "clean.sectionAnnotations:" +
+                properties.getProperty("clean.sectionAnnotations",
+                        CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
       }
     });
 
@@ -1028,7 +1049,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("\n\tIf annotator \"cleanxml\" is defined:");
     os.println("\t\"clean.xmltags\" - regex of tags to extract text from");
     os.println("\t\"clean.sentenceendingtags\" - regex of tags which mark sentence endings");
-    os.println("\t\"clean.allowflawedxml\" - if set to false, don't complain about XML errors");
+    os.println("\t\"clean.allowflawedxml\" - if set to true, don't complain about XML errors");
 
     os.println("\n\tIf annotator \"pos\" is defined:");
     os.println("\t\"pos.maxlen\" - maximum length of sentence to POS tag");

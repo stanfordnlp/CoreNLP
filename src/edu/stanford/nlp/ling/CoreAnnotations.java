@@ -967,13 +967,47 @@ public class CoreAnnotations {
     }
   }
 
+  /**
+   * Section of a document
+   */
   public static class SectionAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
   }
 
+  /**
+   * Date for a section of a document
+   */
   public static class SectionDateAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * Id for a section of a document
+   */
+  public static class SectionIDAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * Indicates that the token starts a new section and the attributes
+   *   that should go into that section
+   */
+  public static class SectionStartAnnotation implements CoreAnnotation<CoreMap> {
+    public Class<CoreMap> getType() {
+      return CoreMap.class;
+    }
+  }
+
+  /**
+   * Indicates that the token end a section and the label of the section
+   */
+  public static class SectionEndAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
@@ -1405,17 +1439,40 @@ public class CoreAnnotations {
     }
   }
 
-  // Document type
-  // What kind of document is it: story, multi-part article, listing, email, etc
+  /**
+   * Document type
+   * What kind of document is it: story, multi-part article, listing, email, etc
+   */
   public static class DocTypeAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
   }
 
-  // Document source type
-  // What kind of place did the document come from: newswire, discussion forum, web...
+  /**
+   * Document source type
+   * What kind of place did the document come from: newswire, discussion forum, web...
+   */
   public static class DocSourceTypeAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * Reference location for the document
+   */
+  public static class LocationAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
+   * Author for the document
+   * (really should be a set of authors, but just have single string for simplicity)
+   */
+  public static class AuthorAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
