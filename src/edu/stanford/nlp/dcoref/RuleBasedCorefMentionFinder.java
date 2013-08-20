@@ -117,11 +117,18 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         if (t.isEnd()) {
           // end of mention
           int endIndex = w.get(CoreAnnotations.IndexAnnotation.class);
-          IntPair mSpan = new IntPair(beginIndex, endIndex);
-          int mentionId = assignIds? ++maxID:-1;
-          Mention m = new Mention(mentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
-          mentions.add(m);
-          mentionSpanSet.add(mSpan);
+          if (beginIndex >= 0) {
+            IntPair mSpan = new IntPair(beginIndex, endIndex);
+            int mentionId = assignIds? ++maxID:-1;
+            Mention m = new Mention(mentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
+            mentions.add(m);
+            mentionSpanSet.add(mSpan);
+            beginIndex = -1;
+          } else {
+            SieveCoreferenceSystem.logger.warning("Start of marked mention not found in sentence: "
+                    + t + " at tokenIndex=" + (w.get(CoreAnnotations.IndexAnnotation.class)-1)+ " for "
+                    + s.get(CoreAnnotations.TextAnnotation.class));
+          }
         }
       }
     }
@@ -339,7 +346,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
     // this shouldn't happen
     //    throw new RuntimeException("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
-    System.err.println("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
+    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
     return leaves.get(leaves.size() - 1);
   }
 
@@ -534,7 +541,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
     for (String p : patterns) {
       if (checkPleonastic(m, tree, p)) {
-        System.err.printf("XXXX %s%n", tree);
+        SieveCoreferenceSystem.logger.fine("RuleBasedCorefMentionFinder: matched pleonastic pattern '" + p + "' for " + tree);
         return true;
       }
     }
