@@ -1,6 +1,10 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -410,6 +414,22 @@ public class MetaClassTest{
     assertEquals(Fruits.grape, MetaClass.cast("grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("Grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("GRAPE", Fruits.class));
+  }
+
+  @Test
+  public void testCastCollection() {
+    Set<String> set = new HashSet<String>();
+    set.add("apple");
+    set.add("banana");
+    Set<String> castedSet = MetaClass.cast("[apple, banana]", Set.class);
+    Set<String> castedSet2 = MetaClass.cast("{apple ,    banana }", Set.class);
+    assertEquals(set, castedSet);
+
+    List<String> list = new LinkedList<String>();
+    list.add("apple");
+    list.add("banana");
+    List<String> castedList = MetaClass.cast("[apple, banana]", List.class);
+    assertEquals(list, castedList);
   }
 
   private static class FromStringable {
