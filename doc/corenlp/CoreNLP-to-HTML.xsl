@@ -12,12 +12,6 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <center><h2>Stanford CoreNLP XML Output</h2></center>
     <hr size="3" color="#333333"/>
     <center><h3>Document</h3></center>
-    <xsl:if test="root/document/docId">
-        <br/>DocId: <xsl:value-of select="root/document/docId"/>
-    </xsl:if>
-    <xsl:if test="root/document/docDate">
-        <br/>DocDate: <xsl:value-of select="root/document/docDate"/>
-    </xsl:if>
     <table border="1" style="background-color:#f0f0f0;" align="center">
     <tr><th>Sentences</th></tr>
     <xsl:for-each select="root/document/sentences/sentence">
