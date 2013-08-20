@@ -749,17 +749,18 @@ public class MetaClass {
   public static <E> E castWithoutKnowingType(String value){
     Object rtn;
     Class[] typesToTry = new Class[]{
+      Integer.class, Double.class,
       File.class, Date.class, List.class, Set.class, Queue.class,
       Integer[].class, Double[].class, Character[].class,
-      Integer.class, Double.class, String.class
+      String.class
     };
     for (Class toTry : typesToTry) {
       if (Collection.class.isAssignableFrom(toTry) && !value.contains(",") || value.contains(" ")) { continue; }
+      //noinspection EmptyCatchBlock
       try {
         if ((rtn = cast(value, toTry)) != null &&
-            (!File.class.isAssignableFrom(rtn.getClass()) || ((File) rtn).exists()) &&
-            true) {
-          return (E) rtn;
+            (!File.class.isAssignableFrom(rtn.getClass()) || ((File) rtn).exists())) {
+          return ErasureUtils.uncheckedCast(rtn);
         }
       } catch (NumberFormatException e) { }
     }
