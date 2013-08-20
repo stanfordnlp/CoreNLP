@@ -19,8 +19,6 @@ public class NameMatch extends DeterministicCorefSieve {
     super();
     flags.USE_iwithini = true;
     flags.USE_NAME_MATCH = true;
-    flags.USE_ATTRIBUTES_AGREE = true;
-    flags.USE_INCOMPATIBLE_MODIFIER = true;
   }
 
   public MentionMatcher getMentionMatcher() { return mentionMatcher; }
