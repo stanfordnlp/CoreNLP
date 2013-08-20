@@ -9,10 +9,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
@@ -25,6 +25,7 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
@@ -521,7 +522,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     pw.println();
     for (int i = 0; i < labels.length; i++) {
       pw.print(labelIndex.get(i));
-      Set<Integer> feats = new HashSet<Integer>();
+      Set<Integer> feats = Generics.newHashSet();
       for (int j = 0; j < data[i].length; j++) {
         int feature = data[i][j];
         feats.add(Integer.valueOf(feature));
@@ -550,7 +551,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     pw.println();
     for (int i = 0; i < size; i++) { // changed labels.length to size
       pw.print(labelIndex.get(labels[i])); // changed i to labels[i]
-      HashMap<Integer, Double> feats = new HashMap<Integer, Double>();
+      Map<Integer, Double> feats = Generics.newHashMap();
       for (int j = 0; j < data[i].length; j++) {
         int feature = data[i][j];
         double val = values[i][j];

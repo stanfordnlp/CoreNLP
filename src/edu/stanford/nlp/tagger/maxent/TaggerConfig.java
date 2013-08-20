@@ -3,16 +3,17 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Reads and stores configuration information for a POS tagger.
  *
  * <i>Implementation note:</i> To add a new parameter: (1) define a default
- * String value, (2) add it to defaultValues hash, (3) add line to constructor,
+ * String value, (2) add it to defaultValues map, (3) add line to constructor,
  * (4) add getter method, (5) add to dump() method, (6) add to printGenProps()
  * method, (7) add to class javadoc of MaxentTagger.
  *
@@ -27,8 +28,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
   public enum Mode {
     TRAIN, TEST, TAG, DUMP
   }
-
-  private Mode mode = Mode.TAG;
 
   /* defaults. sentenceDelimiter might be null; the others all have non-null values. */
   public static final String
@@ -69,11 +68,11 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
   OUTPUT_FORMAT_OPTIONS = "",
   NTHREADS = "1";
 
-  public static final String
-  ENCODING_PROPERTY = "encoding",
+  public static final String ENCODING_PROPERTY = "encoding",
   TAG_SEPARATOR_PROPERTY = "tagSeparator";
 
-  private static final HashMap<String, String> defaultValues = new HashMap<String, String>();
+
+  private static final Map<String, String> defaultValues = Generics.newHashMap();
   static {
     defaultValues.put("arch", ARCH);
     defaultValues.put("wordFunction", WORD_FUNCTION);
@@ -134,7 +133,28 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
   }
 
   public TaggerConfig(Properties props) {
-    super();
+    // load up the default properties
+    this();
+
+    /* Try and use the default properties from the model */
+    //Properties modelProps = new Properties();
+    TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
+    if (!props.containsKey("trainFile")) {
+      try {
+        System.err.println("Loading default properties from tagger " + props.getProperty("model"));
+        DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(props.getProperty("model")));
+        this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
+        in.close();
+      } catch (Exception e) {
+        System.err.println("Error: No such trained tagger config file found.");
+        e.printStackTrace();
+      }
+    }
+
+    setProperties(props);
+  }
+
+  public void setProperties(Properties props) {
     if (props.getProperty("") != null) {
       throw new RuntimeException("unknown argument(s): \"" + props.getProperty("") + '\"');
     }
@@ -144,110 +164,98 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
       System.exit(0);
     }
 
-    if (props.containsKey("trainFile")) {
+    if (props.containsKey("mode") && props.containsKey("file")) {
+      this.setProperty("mode", props.getProperty("mode"));
+      this.setProperty("file", props.getProperty("file"));
+    } else if (props.containsKey("trainFile")) {
       //Training mode
-      mode = Mode.TRAIN;
+      this.setProperty("mode", Mode.TRAIN.toString());
       this.setProperty("file", props.getProperty("trainFile", "").trim());
     } else if (props.containsKey("testFile")) {
       //Testing mode
-      mode = Mode.TEST;
+      this.setProperty("mode", Mode.TEST.toString());
       this.setProperty("file", props.getProperty("testFile", "").trim());
     } else if (props.containsKey("textFile")) {
       //Tagging mode
-      mode = Mode.TAG;
+      this.setProperty("mode", Mode.TAG.toString());
       this.setProperty("file", props.getProperty("textFile", "").trim());
     } else if (props.containsKey("dump")) {
-      mode = Mode.DUMP;
+      this.setProperty("mode", Mode.DUMP.toString());
       this.setProperty("file", props.getProperty("dump").trim());
       props.setProperty("model", props.getProperty("dump").trim());
     } else {
-      mode = Mode.TAG;
+      this.setProperty("mode", Mode.TAG.toString());
       this.setProperty("file", "stdin");
     }
     //for any mode other than train, we load a classifier, which means we load a config - model always needs to be specified
     //on command line/in props file
     //Get the path to the model (or the path where you'd like to save the model); this is necessary for training, testing, and tagging
-    this.setProperty("model", props.getProperty("model", "").trim());
-    if ( ! (mode == Mode.DUMP) && this.getProperty("model").equals("")) {
+    this.setProperty("model", props.getProperty("model", this.getProperty("model", "")).trim());
+    if ( ! (this.getMode() == Mode.DUMP) && this.getProperty("model").equals("")) {
       throw new RuntimeException("'model' parameter must be specified");
     }
 
-    /* Try and use the default properties from the model */
-    //Properties modelProps = new Properties();
-    TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
-    if (mode != Mode.TRAIN) {
-      try {
-        System.err.println("Loading default properties from tagger " + getProperty("model"));
-        DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(getProperty("model")));
-        oldConfig.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
-        in.close();
-      } catch (Exception e) {
-        System.err.println("Error: No such trained tagger config file found.");
-        e.printStackTrace();
-      }
-    }
-
-    this.setProperty("search", props.getProperty("search", oldConfig.getProperty("search")).trim().toLowerCase());
+    this.setProperty("search", props.getProperty("search", this.getProperty("search")).trim().toLowerCase());
     String srch = this.getProperty("search");
-    if ( ! (srch.equals("cg") || srch.equals("iis") || srch.equals("owlqn") || srch.equals("qn"))) {
-      throw new RuntimeException("'search' must be one of 'iis', 'cg', 'qn' or 'owlqn': " + srch);
+    if ( ! (srch.equals("cg") || srch.equals("iis") || srch.equals("owlqn") || srch.equals("qn") || srch.equals("owlqn2"))) {
+      throw new RuntimeException("'search' must be one of 'iis', 'cg', 'qn' or 'owlqn' or 'owlqn2': " + srch);
     }
 
-    this.setProperty("sigmaSquared", props.getProperty("sigmaSquared", oldConfig.getProperty("sigmaSquared")));
+    this.setProperty("sigmaSquared", props.getProperty("sigmaSquared", this.getProperty("sigmaSquared")));
 
-    this.setProperty(TAG_SEPARATOR_PROPERTY, props.getProperty(TAG_SEPARATOR_PROPERTY, oldConfig.getProperty(TAG_SEPARATOR_PROPERTY)));
+    this.setProperty(TAG_SEPARATOR_PROPERTY, props.getProperty(TAG_SEPARATOR_PROPERTY, this.getProperty(TAG_SEPARATOR_PROPERTY)));
 
-    this.setProperty("iterations", props.getProperty("iterations", oldConfig.getProperty("iterations")));
-    this.setProperty("rareWordThresh", props.getProperty("rareWordThresh", oldConfig.getProperty("rareWordThresh")));
-    this.setProperty("minFeatureThresh", props.getProperty("minFeatureThresh", oldConfig.getProperty("minFeatureThresh")));
-    this.setProperty("curWordMinFeatureThresh", props.getProperty("curWordMinFeatureThresh", oldConfig.getProperty("curWordMinFeatureThresh")));
-    this.setProperty("rareWordMinFeatureThresh", props.getProperty("rareWordMinFeatureThresh", oldConfig.getProperty("rareWordMinFeatureThresh")));
-    this.setProperty("veryCommonWordThresh", props.getProperty("veryCommonWordThresh", oldConfig.getProperty("veryCommonWordThresh")));
-    this.setProperty("occurringTagsOnly", props.getProperty("occurringTagsOnly", oldConfig.getProperty("occurringTagsOnly")));
-    this.setProperty("possibleTagsOnly", props.getProperty("possibleTagsOnly", oldConfig.getProperty("possibleTagsOnly")));
+    this.setProperty("iterations", props.getProperty("iterations", this.getProperty("iterations")));
+    this.setProperty("rareWordThresh", props.getProperty("rareWordThresh", this.getProperty("rareWordThresh")));
+    this.setProperty("minFeatureThresh", props.getProperty("minFeatureThresh", this.getProperty("minFeatureThresh")));
+    this.setProperty("curWordMinFeatureThresh", props.getProperty("curWordMinFeatureThresh", this.getProperty("curWordMinFeatureThresh")));
+    this.setProperty("rareWordMinFeatureThresh", props.getProperty("rareWordMinFeatureThresh", this.getProperty("rareWordMinFeatureThresh")));
+    this.setProperty("veryCommonWordThresh", props.getProperty("veryCommonWordThresh", this.getProperty("veryCommonWordThresh")));
+    this.setProperty("occurringTagsOnly", props.getProperty("occurringTagsOnly", this.getProperty("occurringTagsOnly", OCCURRING_TAGS_ONLY)));
+    this.setProperty("possibleTagsOnly", props.getProperty("possibleTagsOnly", this.getProperty("possibleTagsOnly")));
 
-    this.setProperty("lang", props.getProperty("lang", oldConfig.getProperty("lang")));
+    this.setProperty("lang", props.getProperty("lang", this.getProperty("lang")));
 
-    this.setProperty("openClassTags", props.getProperty("openClassTags", oldConfig.getProperty("openClassTags")).trim());
-    this.setProperty("closedClassTags", props.getProperty("closedClassTags", oldConfig.getProperty("closedClassTags")).trim());
+    this.setProperty("openClassTags", props.getProperty("openClassTags", this.getProperty("openClassTags")).trim());
+    this.setProperty("closedClassTags", props.getProperty("closedClassTags", this.getProperty("closedClassTags")).trim());
 
-    this.setProperty("learnClosedClassTags", props.getProperty("learnClosedClassTags", oldConfig.getProperty("learnClosedClassTags")));
+    this.setProperty("learnClosedClassTags", props.getProperty("learnClosedClassTags", this.getProperty("learnClosedClassTags")));
 
-    this.setProperty("closedClassTagThreshold", props.getProperty("closedClassTagThreshold", oldConfig.getProperty("closedClassTagThreshold")));
+    this.setProperty("closedClassTagThreshold", props.getProperty("closedClassTagThreshold", this.getProperty("closedClassTagThreshold")));
 
-    this.setProperty("arch", props.getProperty("arch", oldConfig.getProperty("arch")));
-    if (mode == Mode.TRAIN && this.getProperty("arch").equals("")) {
+    this.setProperty("arch", props.getProperty("arch", this.getProperty("arch")));
+    if (this.getMode() == Mode.TRAIN && this.getProperty("arch").equals("")) {
       throw new IllegalArgumentException("No architecture specified; " +
                                          "set the -arch flag with " +
                                          "the features to be used");
     }
 
-    this.setProperty("wordFunction", props.getProperty("wordFunction", oldConfig.getProperty("wordFunction")));
+    this.setProperty("wordFunction", props.getProperty("wordFunction", this.getProperty("wordFunction", WORD_FUNCTION)));
 
-    this.setProperty("tokenize", props.getProperty("tokenize", oldConfig.getProperty("tokenize")));
-    this.setProperty("tokenizerFactory", props.getProperty("tokenizerFactory", oldConfig.getProperty("tokenizerFactory")));
+    this.setProperty("tokenize", props.getProperty("tokenize", this.getProperty("tokenize")));
+    this.setProperty("tokenizerFactory", props.getProperty("tokenizerFactory", this.getProperty("tokenizerFactory")));
 
-    this.setProperty("debugPrefix", props.getProperty("debugPrefix", oldConfig.getProperty("debugPrefix", "")));
+    this.setProperty("debugPrefix", props.getProperty("debugPrefix", this.getProperty("debugPrefix", "")));
     this.setProperty("debug", props.getProperty("debug", DEBUG));
 
-    this.setProperty(ENCODING_PROPERTY, props.getProperty(ENCODING_PROPERTY, oldConfig.getProperty(ENCODING_PROPERTY)));
-    this.setProperty("sgml", props.getProperty("sgml", oldConfig.getProperty("sgml")));
-    this.setProperty("verbose", props.getProperty("verbose", oldConfig.getProperty("verbose")));
-    this.setProperty("verboseResults", props.getProperty("verboseResults", oldConfig.getProperty("verboseResults")));
+    this.setProperty(ENCODING_PROPERTY, props.getProperty(ENCODING_PROPERTY, this.getProperty(ENCODING_PROPERTY)));
+    this.setProperty("sgml", props.getProperty("sgml", this.getProperty("sgml")));
+    this.setProperty("verbose", props.getProperty("verbose", this.getProperty("verbose")));
+    this.setProperty("verboseResults", props.getProperty("verboseResults", this.getProperty("verboseResults")));
 
-    this.setProperty("regL1", props.getProperty("regL1", oldConfig.getProperty("regL1")));
+    this.setProperty("regL1", props.getProperty("regL1", this.getProperty("regL1")));
 
     //this is a property that is stored (not like the general properties)
-    this.setProperty("xmlInput", props.getProperty("xmlInput", oldConfig.getProperty("xmlInput")).trim());
+    this.setProperty("xmlInput", props.getProperty("xmlInput", this.getProperty("xmlInput")).trim());
 
-    this.setProperty("tagInside", props.getProperty("tagInside", oldConfig.getProperty("tagInside"))); //this isn't something we save from time to time
-    this.setProperty("approximate", props.getProperty("approximate", oldConfig.getProperty("approximate"))); //this isn't something we save from time to time
-    this.setProperty("tokenizerOptions", props.getProperty("tokenizerOptions", oldConfig.getProperty("tokenizerOptions"))); //this isn't something we save from time to time
-    this.setProperty("outputFile", props.getProperty("outputFile", oldConfig.getProperty("outputFile")).trim()); //this isn't something we save from time to time
-    this.setProperty("outputFormat", props.getProperty("outputFormat", oldConfig.getProperty("outputFormat")).trim()); //this isn't something we save from time to time
-    this.setProperty("outputFormatOptions", props.getProperty("outputFormatOptions", oldConfig.getProperty("outputFormatOptions")).trim()); //this isn't something we save from time to time
-    this.setProperty("nthreads", props.getProperty("nthreads", oldConfig.getProperty("nthreads")).trim());
-    String sentenceDelimiter = props.getProperty("sentenceDelimiter", oldConfig.getProperty("sentenceDelimiter"));
+    this.setProperty("tagInside", props.getProperty("tagInside", this.getProperty("tagInside"))); //this isn't something we save from time to time
+    this.setProperty("approximate", props.getProperty("approximate", this.getProperty("approximate"))); //this isn't something we save from time to time
+    this.setProperty("tokenizerOptions", props.getProperty("tokenizerOptions", this.getProperty("tokenizerOptions"))); //this isn't something we save from time to time
+    this.setProperty("outputFile", props.getProperty("outputFile", this.getProperty("outputFile")).trim()); //this isn't something we save from time to time
+    this.setProperty("outputFormat", props.getProperty("outputFormat", this.getProperty("outputFormat")).trim()); //this isn't something we save from time to time
+    this.setProperty("outputFormatOptions", props.getProperty("outputFormatOptions", this.getProperty("outputFormatOptions")).trim()); //this isn't something we save from time to time
+    this.setProperty("nthreads", props.getProperty("nthreads", this.getProperty("nthreads", NTHREADS)).trim());
+    String sentenceDelimiter = props.getProperty("sentenceDelimiter", this.getProperty("sentenceDelimiter"));
     if (sentenceDelimiter != null) {
       // this isn't something we save from time to time.
       // It is only relevant when tagging text files.
@@ -420,11 +428,11 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     pw.println("                   model = " + getProperty("model"));
     pw.println("                    arch = " + getProperty("arch"));
     pw.println("            wordFunction = " + getProperty("wordFunction"));
-    if (mode == Mode.TRAIN) {
+    if (this.getMode() == Mode.TRAIN) {
       pw.println("               trainFile = " + getProperty("file"));
-    } else if (mode == Mode.TAG) {
+    } else if (this.getMode() == Mode.TAG) {
       pw.println("                textFile = " + getProperty("file"));
-    } else if (mode == Mode.TEST) {
+    } else if (this.getMode() == Mode.TEST) {
       pw.println("                testFile = " + getProperty("file"));
     }
 
@@ -707,7 +715,10 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
   }
 
   public Mode getMode() {
-    return mode;
+    if (!containsKey("mode")) {
+      return null;
+    }
+    return Mode.valueOf(getProperty("mode"));
   }
 
 

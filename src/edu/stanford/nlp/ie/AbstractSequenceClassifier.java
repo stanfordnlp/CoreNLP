@@ -32,7 +32,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -47,11 +46,13 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.Sampler;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.concurrent.*;
 
 import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -89,10 +90,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   // so we need a concurrent data structure
   protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
+  private boolean VERBOSE = true;
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
   }
+
+  private AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
@@ -150,8 +154,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * reinitialize them from the flags?
    */
   protected final void reinit() {
-    pad.set(AnswerAnnotation.class, flags.backgroundSymbol);
-    pad.set(GoldAnswerAnnotation.class, flags.backgroundSymbol);
+    pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
+    pad.set(CoreAnnotations.GoldAnswerAnnotation.class, flags.backgroundSymbol);
 
     featureFactory.init(flags);
 
@@ -175,8 +179,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public DocumentReaderAndWriter<IN> makeReaderAndWriter() {
     DocumentReaderAndWriter<IN> readerAndWriter;
     try {
-      readerAndWriter = (DocumentReaderAndWriter<IN>)
-                         Class.forName(flags.readerAndWriter).newInstance();
+      readerAndWriter = ReflectionLoading.loadByReflection(flags.readerAndWriter);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Error loading flags.readerAndWriter: '%s'", flags.readerAndWriter), e);
     }
@@ -201,7 +204,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     DocumentReaderAndWriter<IN> readerAndWriter;
     try {
-      readerAndWriter = (DocumentReaderAndWriter<IN>) Class.forName(readerClassName).newInstance();
+      readerAndWriter = ReflectionLoading.loadByReflection(readerClassName);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Error loading flags.plainTextDocumentReaderAndWriter: '%s'", flags.plainTextDocumentReaderAndWriter), e);
     }
@@ -219,7 +222,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   public Set<String> labels() {
-    return new HashSet<String>(classIndex.objectsList());
+    return Generics.newHashSet(classIndex.objectsList());
   }
 
   /**
@@ -230,7 +233,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *
    * @param sentence The List of IN to be classified.
    * @return The classified List of IN, where the classifier output for
-   *         each token is stored in its {@link AnswerAnnotation} field.
+   *         each token is stored in its
+   *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation}
+   *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
     List<IN> document = new ArrayList<IN>();
@@ -247,8 +252,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         wi.set(CoreAnnotations.TextAnnotation.class, word.word());
         // wi.setWord(word.word());
       }
-      wi.set(PositionAnnotation.class, Integer.toString(i));
-      wi.set(AnswerAnnotation.class, backgroundSymbol());
+      wi.set(CoreAnnotations.PositionAnnotation.class, Integer.toString(i));
+      wi.set(CoreAnnotations.AnswerAnnotation.class, backgroundSymbol());
       document.add(wi);
       i++;
     }
@@ -286,8 +291,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         wi.set(CoreAnnotations.TextAnnotation.class, word.word());
         // wi.setWord(word.word());
       }
-      wi.set(PositionAnnotation.class, Integer.toString(i));
-      wi.set(AnswerAnnotation.class, backgroundSymbol());
+      wi.set(CoreAnnotations.PositionAnnotation.class, Integer.toString(i));
+      wi.set(CoreAnnotations.AnswerAnnotation.class, backgroundSymbol());
       document.add(wi);
       i++;
     }
@@ -318,7 +323,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         for (IN word : input) {
 
           IN newWord = tokenFactory.makeToken(word);
-          newWord.set(AnswerAnnotation.class, classIndex.get(sampleArray[i++]));
+          newWord.set(CoreAnnotations.AnswerAnnotation.class, classIndex.get(sampleArray[i++]));
           sample.add(newWord);
         }
         return sample;
@@ -350,7 +355,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       for (IN fi : doc) {
         IN newFL = tokenFactory.makeToken(fi);
         String guess = classIndex.get(seq[pos]);
-        fi.remove(AnswerAnnotation.class); // because fake answers will get
+        fi.remove(CoreAnnotations.AnswerAnnotation.class); // because fake answers will get
                                            // added during testing
         newFL.set(answerField, guess);
         pos++;
@@ -602,7 +607,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       classify(doc);
 
       for (IN fl : doc) {
-        String guessedAnswer = fl.get(AnswerAnnotation.class);
+        String guessedAnswer = fl.get(CoreAnnotations.AnswerAnnotation.class);
         if (guessedAnswer.equals(flags.backgroundSymbol)) {
           if (prevEntity != null) {
             entities.add(prevEntity);
@@ -614,11 +619,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
               entities.add(prevEntity);
             }
             prevEntity = new Triple<String, Integer, Integer>(guessedAnswer, fl
-                .get(CharacterOffsetBeginAnnotation.class), fl.get(CharacterOffsetEndAnnotation.class));
+                .get(CoreAnnotations.CharacterOffsetBeginAnnotation.class), fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
           } else {
             assert prevEntity != null; // if you read the code carefully, this
                                        // should always be true!
-            prevEntity.setThird(fl.get(CharacterOffsetEndAnnotation.class));
+            prevEntity.setThird(fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
           }
         }
         prevEntityType = guessedAnswer;
@@ -682,7 +687,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *
    * @param document A {@link List} of something that extends {@link CoreMap}.
    * @return The same {@link List}, but with the elements annotated with their
-   *         answers (stored under the {@link AnswerAnnotation} key).
+   *         answers (stored under the
+   *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation}
+   *         key).
    */
   public abstract List<IN> classify(List<IN> document);
 
@@ -1012,7 +1019,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
             IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), readerWriter);
   }
 
-  public void classifyAndWriteAnswers(ObjectBank<List<IN>> documents,
+  public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
                                       DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
@@ -1023,16 +1030,55 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     Counter<String> entityFP = new ClassicCounter<String>();
     Counter<String> entityFN = new ClassicCounter<String>();
     boolean resultsCounted = true;
-
     int numWords = 0;
     int numDocs = 0;
-    for (List<IN> doc : documents) {
-      classify(doc);
-      numWords += doc.size();
-      writeAnswers(doc, printWriter, readerWriter);
-      resultsCounted = resultsCounted && countResults(doc, entityTP, entityFP, entityFN);
-      numDocs++;
+
+    ThreadsafeProcessor<List<IN>, List<IN>> threadProcessor =
+        new ThreadsafeProcessor<List<IN>, List<IN>>() {
+      @Override
+      public List<IN> process(List<IN> doc) {
+        doc = classify(doc);
+
+        int completedNo = threadCompletionCounter.incrementAndGet();
+        if (VERBOSE) System.err.println(completedNo + " examples completed");
+        return doc;
+      }
+      @Override
+      public ThreadsafeProcessor<List<IN>, List<IN>> newInstance() {
+        return this;
+      }
+    };
+
+    MulticoreWrapper<List<IN>, List<IN>> wrapper = null;
+    if (flags.multiThreadClassifier != 0) {
+      wrapper = new MulticoreWrapper<List<IN>, List<IN>>(flags.multiThreadClassifier, threadProcessor);
     }
+
+    for (List<IN> doc: documents) {
+      numWords += doc.size();
+      numDocs++;
+      if (flags.multiThreadClassifier != 0) {
+        wrapper.put(doc);
+        while (wrapper.peek()) {
+          List<IN> results = wrapper.poll();
+          writeAnswers(results, printWriter, readerWriter);
+          resultsCounted = resultsCounted && countResults(results, entityTP, entityFP, entityFN);
+        }
+      } else {
+        List<IN> results = threadProcessor.process(doc);
+        writeAnswers(results, printWriter, readerWriter);
+        resultsCounted = resultsCounted && countResults(results, entityTP, entityFP, entityFN);
+      }
+    }
+    if (flags.multiThreadClassifier != 0) {
+      wrapper.join();
+      while (wrapper.peek()) {
+        List<IN> results = wrapper.poll();
+        writeAnswers(results, printWriter, readerWriter);
+        resultsCounted = resultsCounted && countResults(results, entityTP, entityFP, entityFN);
+      }
+    }
+
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     NumberFormat nf = new DecimalFormat("0.00"); // easier way!
@@ -1076,7 +1122,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     int numSentences = 0;
 
     for (List<IN> doc : documents) {
-      Counter<List<IN>> kBest = classifyKBest(doc, AnswerAnnotation.class, k);
+      Counter<List<IN>> kBest = classifyKBest(doc, CoreAnnotations.AnswerAnnotation.class, k);
       numWords += doc.size();
       List<List<IN>> sorted = Counters.toSortedList(kBest);
       int n = 1;
@@ -1111,13 +1157,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     int numSentences = 0;
 
     for (List<IN> doc : documents) {
-      DFSA<String, Integer> tagLattice = getViterbiSearchGraph(doc, AnswerAnnotation.class);
+      DFSA<String, Integer> tagLattice = getViterbiSearchGraph(doc, CoreAnnotations.AnswerAnnotation.class);
       numWords += doc.size();
       PrintWriter latticeWriter = new PrintWriter(new FileOutputStream(searchGraphPrefix + '.' + numSentences
           + ".wlattice"));
       PrintWriter vsgWriter = new PrintWriter(new FileOutputStream(searchGraphPrefix + '.' + numSentences + ".lattice"));
       if (readerAndWriter instanceof LatticeWriter)
-        ((LatticeWriter<IN>) readerAndWriter).printLattice(tagLattice, doc, latticeWriter);
+        ((LatticeWriter<IN, String, Integer>) readerAndWriter).printLattice(tagLattice, doc, latticeWriter);
       tagLattice.printAttFsmFormat(vsgWriter);
       latticeWriter.close();
       vsgWriter.close();
@@ -1185,20 +1231,20 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     String previousGuessEntity = "";
 
     for (CoreMap word : doc) {
-      String gold = word.get(GoldAnswerAnnotation.class);
-      String guess = word.get(AnswerAnnotation.class);
+      String gold = word.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String guess = word.get(CoreAnnotations.AnswerAnnotation.class);
       String goldEntity = (!gold.equals(background)) ? gold.substring(2) : "";
       String guessEntity = (!guess.equals(background)) ? guess.substring(2) : "";
 
       //System.out.println(gold + " (" + goldEntity + ") ; " + guess + " (" + guessEntity + ")");
 
-      boolean newGold = (!gold.equals(background) && 
+      boolean newGold = (!gold.equals(background) &&
                          (!goldEntity.equals(previousGoldEntity)) || gold.startsWith("B-"));
-      boolean newGuess = (!guess.equals(background) && 
+      boolean newGuess = (!guess.equals(background) &&
                           (!guessEntity.equals(previousGuessEntity)) || guess.startsWith("B-"));
-      boolean goldEnded = (!previousGold.equals(background) && 
+      boolean goldEnded = (!previousGold.equals(background) &&
                            (gold.startsWith("B-") || !goldEntity.equals(previousGoldEntity)));
-      boolean guessEnded = (!previousGuess.equals(background) && 
+      boolean guessEnded = (!previousGuess.equals(background) &&
                             (guess.startsWith("B-") || !guessEntity.equals(previousGuessEntity)));
 
       //System.out.println("  " + newGold + " " + newGuess + " " + goldEnded + " " + guessEnded);
@@ -1262,8 +1308,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                                         String background) {
     // first, check that all answers exist and are either O, B-, or I-
     for (CoreMap line : doc) {
-      String gold = line.get(GoldAnswerAnnotation.class);
-      String guess = line.get(AnswerAnnotation.class);
+      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
 
       if (gold == null) {
         System.err.println("Blank gold answer");
@@ -1296,15 +1342,15 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     int index = 0;
     while (index < doc.size()) {
       index = tallyOneEntityIOB(doc, index,
-                                GoldAnswerAnnotation.class,
-                                AnswerAnnotation.class,
+                                CoreAnnotations.GoldAnswerAnnotation.class,
+                                CoreAnnotations.AnswerAnnotation.class,
                                 entityTP, entityFN, background);
     }
     index = 0;
     while (index < doc.size()) {
       index = tallyOneEntityIOB(doc, index,
-                                AnswerAnnotation.class,
-                                GoldAnswerAnnotation.class,
+                                CoreAnnotations.AnswerAnnotation.class,
+                                CoreAnnotations.GoldAnswerAnnotation.class,
                                 null, entityFP, background);
     }
 
@@ -1378,8 +1424,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // match entity type, we have a true positive.  Otherwise we
     // either have a false positive or a false negative.
     for (CoreMap line : doc) {
-      String gold = line.get(GoldAnswerAnnotation.class);
-      String guess = line.get(AnswerAnnotation.class);
+      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
 
       if (gold == null || guess == null)
         return false;
@@ -1672,9 +1718,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   /**
    * This function will load a classifier that is stored inside a jar file (if
-   * it is so stored). The classifier should be specified as its full filename,
-   * but the path in the jar file (<code>/classifiers/</code>) is coded in this
-   * class. If the classifier is not stored in the jar file or this is not run
+   * it is so stored). The classifier should be specified as its full path
+   * in a jar. If the classifier is not stored in the jar file or this is not run
    * from inside a jar file, then this function will throw a RuntimeException.
    *
    * @param modelName
@@ -1715,7 +1760,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {
-      cliqueWriter.print(wi.get(TextAnnotation.class) + ' ' + wi.get(PartOfSpeechAnnotation.class) + ' '
+      cliqueWriter.print(wi.get(CoreAnnotations.TextAnnotation.class) + ' ' + wi.get(CoreAnnotations.PartOfSpeechAnnotation.class) + ' '
           + wi.get(CoreAnnotations.GoldAnswerAnnotation.class) + '\t');
     } else {
       cliqueWriter.print(wi.get(CoreAnnotations.TextAnnotation.class)
@@ -1746,7 +1791,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {
-      cliqueWriter.print(wi.get(TextAnnotation.class) + ' ' + wi.get(PartOfSpeechAnnotation.class) + ' '
+      cliqueWriter.print(wi.get(CoreAnnotations.TextAnnotation.class) + ' ' + wi.get(CoreAnnotations.PartOfSpeechAnnotation.class) + ' '
           + wi.get(CoreAnnotations.GoldAnswerAnnotation.class) + '\t');
     } else {
       cliqueWriter.print(wi.get(CoreAnnotations.TextAnnotation.class)

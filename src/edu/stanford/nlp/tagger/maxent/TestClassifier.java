@@ -131,9 +131,9 @@ public class TestClassifier {
   }
 
 
-  String resultsString(TaggerConfig config, MaxentTagger maxentTagger) {
+  String resultsString(MaxentTagger maxentTagger) {
     StringBuilder output = new StringBuilder();
-    output.append("Model " + config.getModel() + " has xSize=" + maxentTagger.xSize +
+    output.append("Model " + maxentTagger.config.getModel() + " has xSize=" + maxentTagger.xSize +
                   ", ySize=" + maxentTagger.ySize + ", and numFeatures=" +
                   maxentTagger.prob.lambda.length + ".\n");
     output.append("Results on " + numSentences + " sentences and " +
@@ -155,9 +155,9 @@ public class TestClassifier {
     return output.toString();
   }
 
-  void printModelAndAccuracy(TaggerConfig config, MaxentTagger maxentTagger) {
+  void printModelAndAccuracy(MaxentTagger maxentTagger) {
     // print the output all at once so that multiple threads don't clobber each other's output
-    System.err.println(resultsString(config, maxentTagger));
+    System.err.println(resultsString(maxentTagger));
   }
 
 

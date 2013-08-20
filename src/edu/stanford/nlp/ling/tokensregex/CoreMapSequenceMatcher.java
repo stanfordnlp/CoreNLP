@@ -18,7 +18,7 @@ import java.util.Map;
  * @author Angel Chang
  */
 public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T> {
-  protected static Function<List<? extends CoreMap>, String> COREMAP_LIST_TO_STRING_CONVERTER =
+  protected static final Function<List<? extends CoreMap>, String> COREMAP_LIST_TO_STRING_CONVERTER =
           new Function<List<? extends CoreMap>, String>() {
             public String apply(List<? extends CoreMap> in) {
               return (in != null)? ChunkAnnotationUtils.getTokenText(in, CoreAnnotations.TextAnnotation.class): null;

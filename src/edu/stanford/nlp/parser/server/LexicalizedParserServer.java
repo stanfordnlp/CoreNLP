@@ -130,7 +130,7 @@ public class LexicalizedParserServer {
     if (arg == null) {
       return;
     }
-    Tree tree = parser.apply(arg);
+    Tree tree = parser.parse(arg);
     System.err.println(tree);
     if (tree != null) {
       ObjectOutputStream oos = new ObjectOutputStream(outStream);
@@ -148,7 +148,7 @@ public class LexicalizedParserServer {
     if (arg == null) {
       return;
     }
-    Tree tree = parser.apply(arg);
+    Tree tree = parser.parse(arg);
     System.err.println(tree);
     if (tree != null) {
       OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");

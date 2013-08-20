@@ -1,4 +1,3 @@
-
 package edu.stanford.nlp.util.logging;
 
 import java.util.logging.ConsoleHandler;
@@ -8,16 +7,17 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 
-import java.lang.reflect.*;
-
-
 /**
  * Reroutes java.util.logging messages to the Redwood logging system.
- * 
+ *
  * @author David McClosky
  */
 public class JavaUtilLoggingAdaptor {
-  private static boolean addedRedwoodHandler = false;
+
+  private static boolean addedRedwoodHandler; // = false;
+
+  private JavaUtilLoggingAdaptor() {
+  }
 
   public static void adapt() {
     // get the top Logger:
@@ -36,7 +36,7 @@ public class JavaUtilLoggingAdaptor {
     }
 
     if (oldConsoleHandler != null) {
-      // it's safe to call this after it's been removed    
+      // it's safe to call this after it's been removed
       topLogger.removeHandler(oldConsoleHandler);
     }
 
@@ -67,7 +67,7 @@ public class JavaUtilLoggingAdaptor {
      * This is a no-op since Redwood doesn't have this.
      */
     @Override
-    public void flush() {      
+    public void flush() {
     }
 
     /**
@@ -101,37 +101,48 @@ public class JavaUtilLoggingAdaptor {
    * Simple test case.
    */
   public static void main(String[] args) {
-//    Redwood.log(Redwood.DBG, "at the top");
-//    Redwood.startTrack("Adaptation test");
-//
-//    Logger topLogger = Logger.getLogger("global");
-//    topLogger.warning("I'm warning you!");
-//    topLogger.severe("Now I'm using my severe voice.");
-//    topLogger.info("FYI");
-//
-//    Redwood.log(Redwood.DBG, "adapting");
-//    JavaUtilLoggingAdaptor.adapt();
-//    topLogger.warning("I'm warning you in Redwood!");
-//    JavaUtilLoggingAdaptor.adapt(); // should be safe to call this twice
-//    topLogger.severe("Now I'm using my severe voice in Redwood!");
-//    topLogger.info("FYI: Redwood rocks");
-//
-//    // make sure original java.util.logging levels are respected
-//    topLogger.setLevel(Level.OFF);
-//    topLogger.severe("We shouldn't see this message.");
-//
-//    Redwood.log(Redwood.DBG, "at the bottom");
-//    Redwood.endTrack("Adaptation test");
-    
-    // Reverse mapping
-    Logger topLogger = Logger.getLogger("global");
-    Redwood.log("Hello from Redwood!");
-    RedwoodConfiguration.empty().rootHandler(
-        RedirectOutputHandler.fromJavaUtilLogging(topLogger)).apply();
-    Redwood.log("Hello from Redwood -> Java!");
-    Redwood.log("Hello from Redwood -> Java again!");
-    Redwood.startTrack("a track");
-    Redwood.log("Inside a track");
-    Redwood.endTrack("a track");
+    if (args.length > 0 && args[0].equals("redwood")) {
+      Redwood.log(Redwood.DBG, "at the top");
+      Redwood.startTrack("Adaptor test controlled by redwood");
+
+      Logger topLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+      topLogger.warning("I'm warning you!");
+      topLogger.severe("Now I'm using my severe voice.");
+      topLogger.info("FYI");
+
+      Redwood.log(Redwood.DBG, "adapting");
+      JavaUtilLoggingAdaptor.adapt();
+      topLogger.warning("I'm warning you in Redwood!");
+      JavaUtilLoggingAdaptor.adapt(); // should be safe to call this twice
+      topLogger.severe("Now I'm using my severe voice in Redwood!");
+      topLogger.info("FYI: Redwood rocks");
+
+      // make sure original java.util.logging levels are respected
+      topLogger.setLevel(Level.OFF);
+      topLogger.severe("We shouldn't see this message.");
+
+      Redwood.log(Redwood.DBG, "at the bottom");
+      Redwood.endTrack("Adaptor test controlled by redwood");
+    } else {
+      // Reverse mapping
+      Logger topLogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME); // Can be Logger.getGlobal() in jdk1.7
+      // topLogger.addHandler(new ConsoleHandler());
+      Logger logger = Logger.getLogger(JavaUtilLoggingAdaptor.class.getName());
+      topLogger.info("Starting test");
+      logger.log(Level.INFO, "Hello from the class logger");
+
+      Redwood.log("Hello from Redwood!");
+      RedwoodConfiguration.empty().rootHandler(
+          RedirectOutputHandler.fromJavaUtilLogging(topLogger)).apply();
+      Redwood.log("Hello from Redwood -> Java!");
+      Redwood.log("Hello from Redwood -> Java again!");
+      logger.log(Level.INFO, "Hello again from the class logger");
+      Redwood.startTrack("a track");
+      Redwood.log("Inside a track");
+      logger.log(Level.INFO, "Hello a third time from the class logger");
+      Redwood.endTrack("a track");
+      logger.log(Level.INFO, "Hello a fourth time from the class logger");
+    }
   }
+
 }

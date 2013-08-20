@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Timing;
 
@@ -24,7 +25,7 @@ public class GrammarCoverageChecker {
     // I've hardwired this to load English ones.  Otherwise need training data.
     // op.trainOptions.splitters = new HashSet(Arrays.asList(op.tlpParams.splitters()));
     op.trainOptions.splitters = ParentAnnotationStats.getEnglishSplitCategories(treebankRoot);
-    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(op.tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(op.tlpParams.sisterSplitters()));
     for (Tree goldTree : testTreebank) {
       goldTree = annotator.transformTree(goldTree);
       //      System.out.println();

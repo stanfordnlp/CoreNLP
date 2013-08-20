@@ -234,7 +234,8 @@ public class CollocationFinder {
         } else if (wordNetContains(testString.toString())) {
           Pair <Integer, Integer> c = new Pair<Integer,Integer>(leftMostLeaf+leftSistersBuffer,leftMostLeaf+leftSistersBuffer+currWindowLength-1);
 
-          Collocation col = new Collocation(c,t,(ArrayList<Integer>)childConstituents.clone(),testString.toString(),headLabel);
+          ArrayList<Integer> childConstituentsClone = new ArrayList<Integer>(childConstituents);
+          Collocation col = new Collocation(c,t,childConstituentsClone,testString.toString(),headLabel);
           collocationCollector.add(col);
           if (DEBUG) {
             err.println("Found collocation in wordnet: "+ testString.toString());
@@ -251,7 +252,8 @@ public class CollocationFinder {
         } else if (wordNetContains(testStringNonStemmed.toString())) {
           Pair <Integer, Integer> c = new Pair<Integer,Integer>(leftMostLeaf+leftSistersBuffer,leftMostLeaf+leftSistersBuffer+currWindowLength-1);
 
-          Collocation col = new Collocation(c,t,(ArrayList<Integer>)childConstituents.clone(),testStringNonStemmed.toString(),headLabel);
+          ArrayList<Integer> childConstituentsClone = new ArrayList<Integer>(childConstituents);
+          Collocation col = new Collocation(c,t,childConstituentsClone,testStringNonStemmed.toString(),headLabel);
           collocationCollector.add(col);
           if (DEBUG) {
             err.println("Found collocation in wordnet: "+ testStringNonStemmed.toString());

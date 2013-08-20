@@ -7,8 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.DelimitRegExIterator;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.util.Function;
@@ -55,8 +54,8 @@ public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
         }
         CoreLabel wi = new CoreLabel();
         String[] info = lines[i].split("\\s+");              
-        wi.set(AnswerAnnotation.class, info[0]);
-        wi.set(GoldAnswerAnnotation.class, info[0]);
+        wi.set(CoreAnnotations.AnswerAnnotation.class, info[0]);
+        wi.set(CoreAnnotations.GoldAnswerAnnotation.class, info[0]);
         for (int j = 1; j < info.length; j++) {
           String[] bits = info[j].split(":");
           //wi.set(bits[0], bits[1]);
@@ -70,8 +69,8 @@ public class LibSVMReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>
   
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
     for (CoreLabel wi : doc) {
-      String answer = wi.get(AnswerAnnotation.class);
-      String goldAnswer = wi.get(GoldAnswerAnnotation.class);
+      String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
+      String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
       out.println(goldAnswer + "\t" + answer);
     }
     out.println();

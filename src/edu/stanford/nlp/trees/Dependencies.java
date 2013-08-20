@@ -3,7 +3,6 @@ package edu.stanford.nlp.trees;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +11,12 @@ import java.util.Set;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Generics;
 
 /** Utilities for Dependency objects.
  *
@@ -104,8 +104,8 @@ public class Dependencies {
       public int compare(Dependency dep1, Dependency dep2) {
         CoreMap dep1lab = (CoreMap) dep1.dependent();
         CoreMap dep2lab = (CoreMap) dep2.dependent();
-        Integer dep1idx = dep1lab.get(IndexAnnotation.class);
-        Integer dep2idx = dep2lab.get(IndexAnnotation.class);
+        Integer dep1idx = dep1lab.get(CoreAnnotations.IndexAnnotation.class);
+        Integer dep2idx = dep2lab.get(CoreAnnotations.IndexAnnotation.class);
         return dep1idx - dep2idx;
       }
 
@@ -116,7 +116,7 @@ public class Dependencies {
   }
   
   public static Map<TreeGraphNode,List<TypedDependency>> govToDepMap(List<TypedDependency> deps) {
-    Map<TreeGraphNode,List<TypedDependency>> govToDepMap = new HashMap<TreeGraphNode,List<TypedDependency>>();
+    Map<TreeGraphNode,List<TypedDependency>> govToDepMap = Generics.newHashMap();
     for (TypedDependency dep : deps) {
       TreeGraphNode gov = dep.gov();
       
@@ -131,7 +131,7 @@ public class Dependencies {
   }
   
   private static Set<List<TypedDependency>> getGovMaxChains(Map<TreeGraphNode,List<TypedDependency>> govToDepMap, TreeGraphNode gov, int depth) {
-    Set<List<TypedDependency>> depLists = new HashSet<List<TypedDependency>>();
+    Set<List<TypedDependency>> depLists = Generics.newHashSet();
     List<TypedDependency> children = govToDepMap.get(gov);
     
     if (depth > 0 && children != null) {

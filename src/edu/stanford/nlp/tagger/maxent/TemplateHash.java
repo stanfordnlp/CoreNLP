@@ -7,10 +7,11 @@
 
 package edu.stanford.nlp.tagger.maxent;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -96,7 +97,7 @@ class ListInstances {
 public class TemplateHash {
 
   // the positions of the feature extractors
-  private final HashMap<Pair<Integer,String>,ListInstances> tempHash = new HashMap<Pair<Integer,String>,ListInstances>();
+  private final Map<Pair<Integer,String>,ListInstances> tempHash = Generics.newHashMap();
 
   private final MaxentTagger maxentTagger;
 

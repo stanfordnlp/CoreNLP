@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -14,18 +13,19 @@ import java.util.Properties;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
 import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Tokenizer for raw French text. This tokenization scheme is a derivative
  * of PTB tokenization, but with extra rules for French elision and compounding.
- * 
+ *
  * <p>
  * The tokenizer implicitly inserts segmentation markers by not normalizing
  * the apostrophe and hyphen. Detokenization can thus be performed by right-concatenating
@@ -147,16 +147,16 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     sb.append("   -encoding type : Encoding format.").append(nl);
     return sb.toString();
   }
-  
+
   private static Map<String,Integer> argOptionDefs() {
-    Map<String,Integer> argOptionDefs = new HashMap<String,Integer>();
+    Map<String,Integer> argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
     argOptionDefs.put("ftb", 0);
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
     return argOptionDefs;
   }
-  
+
   /**
    * A fast, rule-based tokenizer for Modern Standard French.
    * Performs punctuation splitting and light tokenization by default.
@@ -165,7 +165,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * file is delimited by the system line separator. The output will be equivalently
    * delimited.
    * </p>
-   * 
+   *
    * @param args
    */
   public static void main(String[] args) {
@@ -179,12 +179,12 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     final TokenizerFactory<CoreLabel> tf = options.containsKey("ftb") ?
         FrenchTokenizer.ftbFactory() : FrenchTokenizer.factory();
     for (String option : options.stringPropertyNames()) {
-      tf.setOptions(option);        
+      tf.setOptions(option);
     }
-    
+
     // Normalize line separators so that we can count lines in the output
     tf.setOptions("tokenizeNLs");
-    
+
     // Read the file from stdin
     int nLines = 0;
     int nTokens = 0;

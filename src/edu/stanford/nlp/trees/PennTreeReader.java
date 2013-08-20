@@ -10,7 +10,7 @@ import edu.stanford.nlp.ling.HasWord;
 
 /**
  * This class implements the <code>TreeReader</code> interface to read Penn Treebank-style
- * files. The reader is implemented as a pushdown automaton (PDA) that parses the Lisp-style
+ * files. The reader is implemented as a push-down automaton (PDA) that parses the Lisp-style
  * format in which the trees are stored. This reader is compatible with both PTB
  * and PATB trees.
  *
@@ -100,9 +100,9 @@ public class PennTreeReader implements TreeReader {
 
     if (DEBUG) {
       System.err.printf("%s: Built from\n %s ", this.getClass().getName(), in.getClass().getName());
-      System.err.println(" " + ((tf == null) ? "no tf" : tf.getClass().getName()));
-      System.err.println(" " + ((tn == null) ? "no tn" : tn.getClass().getName()));
-      System.err.println(" " + ((st == null) ? "no st" : st.getClass().getName()));
+      System.err.println(' ' + ((tf == null) ? "no tf" : tf.getClass().getName()));
+      System.err.println(' ' + ((tn == null) ? "no tn" : tn.getClass().getName()));
+      System.err.println(' ' + ((st == null) ? "no st" : st.getClass().getName()));
     }
   }
 
@@ -120,6 +120,7 @@ public class PennTreeReader implements TreeReader {
    *
    * @return A single tree, or <code>null</code> at end of token stream.
    */
+  @Override
   public Tree readTree() throws IOException {
     Tree t = null;
 
@@ -141,8 +142,9 @@ public class PennTreeReader implements TreeReader {
         // while(t != null && (t.value() == null || t.value().equals("")) && t.numChildren() <= 1)
         //   t = t.firstChild();
 
-        if (t != null && treeNormalizer != null && treeFactory != null)
+        if (treeNormalizer != null && treeFactory != null) {
           t = treeNormalizer.normalizeWholeTree(t, treeFactory);
+        }
       }
     }
 
@@ -227,6 +229,7 @@ public class PennTreeReader implements TreeReader {
    * Closes the underlying <code>Reader</code> used to create this
    * class.
    */
+  @Override
   public void close() throws IOException {
     reader.close();
   }

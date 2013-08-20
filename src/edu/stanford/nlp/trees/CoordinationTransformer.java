@@ -28,6 +28,7 @@ public class CoordinationTransformer implements TreeTransformer {
   private static final boolean VERBOSE = false;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
   private final TreeTransformer qp = new QPTreeTransformer();         //to restructure the QP constituents
+  private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns
 
 
   // default constructor
@@ -60,9 +61,13 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After CCTransformer:              " + t);
     }
-    Tree ret = qp.transformTree(ttt);
+    Tree tttt = qp.transformTree(ttt);
     if (VERBOSE) {
       System.err.println("After QPTreeTransformer:          " + t);
+    }
+    Tree ret = dates.transformTree(tttt);
+    if (VERBOSE) {
+      System.err.println("After DateTreeTransformer:        " + t);
     }
     return ret;
   }
@@ -71,20 +76,20 @@ public class CoordinationTransformer implements TreeTransformer {
   private static final TregexPattern[][] matchPatterns = {
     {
       // UCP (JJ ...) -> ADJP
-      TregexPattern.safeCompile("UCP=ucp <, /^JJ|ADJP/", true),
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^JJ|ADJP/", true),
       // UCP (DT JJ ...) -> ADJP
-      TregexPattern.safeCompile("UCP=ucp <, (DT $+ /^JJ|ADJP/)", true)
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)", true)
     },
     {
       // UCP (N ...) -> NP
-      TregexPattern.safeCompile("UCP=ucp <, /^N/", true),
-      TregexPattern.safeCompile("UCP=ucp <, (DT $+ /^N/)", true)
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^N/", true),
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^N/)", true)
     }
   };
 
   private static final TsurgeonPattern[] operations = {
-    Tsurgeon.parseOperation("relabel ucp ADJP"),
-    Tsurgeon.parseOperation("relabel ucp NP"),
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADJP$1/"),
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/NP$1/"),
   };
 
   /**

@@ -3,7 +3,7 @@ package edu.stanford.nlp.sequences;
 import java.util.*;
 import java.io.Serializable;
 
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.PaddedList;
 
@@ -117,7 +117,7 @@ public abstract class FeatureFactory<IN> implements Serializable {
    *     a function (flags.wordFunction)
    */
   protected String getWord(CoreLabel label) {
-    String word = label.getString(TextAnnotation.class);
+    String word = label.getString(CoreAnnotations.TextAnnotation.class);
     if (flags.wordFunction != null) {
       word = flags.wordFunction.apply(word);
     }

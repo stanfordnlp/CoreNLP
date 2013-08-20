@@ -153,7 +153,7 @@ public abstract class TregexMatcher {
    */
   public boolean findAt(Tree node) {
     if (findCurrent != null && findCurrent != node) {
-      throw new AssertionError("Error: must all reset() before changing nodes for a call to findRootedAt");
+      throw new AssertionError("Error: must call reset() before changing nodes for a call to findRootedAt");
     }
     if (findCurrent != null) {
       return matches();
@@ -178,6 +178,7 @@ public abstract class TregexMatcher {
     return false;
   }
 
+  // todo [cdm 2013]: This just seems unused. What's it meant to do? Eliminable???
   abstract boolean getChangesVariables();
 
   /**

@@ -3,11 +3,11 @@ package edu.stanford.nlp.process;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
+import edu.stanford.nlp.util.Generics;
 
 %%
 
@@ -338,7 +338,7 @@ import java.util.logging.Logger;
  * Loads a list of words from the array and stores them in a HashSet.
  */
 private Set<String> loadVerbStemSet(String[] verbStems) {
-  HashSet<String> set = new HashSet<String>(verbStems.length);
+  Set<String> set = Generics.newHashSet(verbStems.length);
   for (String stem : verbStems) {
     set.add(stem);
   }
@@ -1452,6 +1452,7 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <noun,any>"menservants"  { return(stem(10,"anservant","s")); } /* disprefer */
 <noun,any>"mesdemoiselles"  { return(stem(13,"ademoiselle","s")); }
 <noun,any>"messieurs"  { return(stem(8,"onsieur","s")); }
+<noun,any>"metadata"  { return(stem(2,"tum","s")); }         
 <noun,any>"metatheses"  { return(stem(2,"is","s")); }    
 <noun,any>"metropolises"  { return(stem(2,"","s")); }    
 <noun,any>"mice"  { return(stem(3,"ouse","s")); }        
@@ -1469,6 +1470,7 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <noun,any>"novelle"  { return(stem(2,"la","s")); }       
 <noun,any>"oases"  { return(stem(2,"is","s")); }         
 <noun,any>"obloquies"  { return(stem(3,"y","s")); }      
+<noun,any>"octopodes"  { return(stem(4,"us","s")); }
 <noun,any>{A}+"hedra"  { return(stem(2,"ron","s")); }    
 <noun,any>"optima"  { return(stem(2,"mum","s")); }       
 <noun,any>"ora"  { return(stem(2,"s","s")); }            

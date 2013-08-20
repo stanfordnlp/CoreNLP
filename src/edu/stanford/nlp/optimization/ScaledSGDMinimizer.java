@@ -2,8 +2,6 @@ package edu.stanford.nlp.optimization;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,20 +10,20 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Pair;
+
 /**
- * <p>
- * Stochastic Gradient Descent To Quasi Newton Minimizer
+ * Stochastic Gradient Descent To Quasi Newton Minimizer.
  *
  *  An experimental minimizer which takes a stochastic function (one implementing AbstractStochasticCachingDiffFunction)
  * and executes SGD for the first couple passes,  During the final iterations a series of approximate hessian vector
- * products are built up...  These are then passed to the QNminimizer so that it can start right up without the typical
+ * products are built up...  These are then passed to the QNMinimizer so that it can start right up without the typical
  * delay.
  *
  * @author <a href="mailto:akleeman@stanford.edu">Alex Kleeman</a>
  * @version 1.0
  * @since 1.0
  */
-public class ScaledSGDMinimizer extends StochasticMinimizer {
+public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction> extends StochasticMinimizer<Q> {
 
 
   private static int method = 1;  // 0=MinErr  1=Bradley
@@ -372,11 +370,11 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
   }
 
 
-  public void serializeWeights(String serializePath,double[] weights){
+  public static void serializeWeights(String serializePath,double[] weights) {
     serializeWeights(serializePath,weights,null);
   }
 
-  public void serializeWeights(String serializePath,double[] weights,double[] diag) {
+  public static void serializeWeights(String serializePath,double[] weights,double[] diag) {
 
     System.err.println("Serializing weights to " + serializePath + "...");
 
@@ -391,7 +389,7 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
   }
 
 
-  public double[] getWeights(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
+  public static double[] getWeights(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
     System.err.println("Loading weights from " + loadPath + "...");
     double[] wt;
@@ -404,7 +402,7 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
 
   }
 
-  public double[] getDiag(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
+  public static double[] getDiag(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
     System.err.println("Loading weights from " + loadPath + "...");
     double[] diag;

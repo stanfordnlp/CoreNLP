@@ -1,9 +1,7 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PositionAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.objectbank.LineIterator;
@@ -73,17 +71,17 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     
     for (CoreLabel wi : doc) {
       StringBuilder sb = new StringBuilder();
-      if (! wi.get(AnswerAnnotation.class).equals(wi.get(GoldAnswerAnnotation.class))) {
+      if (! wi.get(CoreAnnotations.AnswerAnnotation.class).equals(wi.get(CoreAnnotations.GoldAnswerAnnotation.class))) {
         wrong++;
       }
-      if (!THREE_CLASSES && wi.get(AnswerAnnotation.class).equals("UPPER")) {
+      if (!THREE_CLASSES && wi.get(CoreAnnotations.AnswerAnnotation.class).equals("UPPER")) {
         sb.append(wi.word().toUpperCase());
-      } else if (wi.get(AnswerAnnotation.class).equals("LOWER")) {
+      } else if (wi.get(CoreAnnotations.AnswerAnnotation.class).equals("LOWER")) {
         sb.append(wi.word().toLowerCase());
-      } else if (wi.get(AnswerAnnotation.class).equals("INIT_UPPER")) {
+      } else if (wi.get(CoreAnnotations.AnswerAnnotation.class).equals("INIT_UPPER")) {
         sb.append(wi.word().substring(0,1).toUpperCase())
           .append(wi.word().substring(1));
-      } else if (wi.get(AnswerAnnotation.class).equals("O")) {
+      } else if (wi.get(CoreAnnotations.AnswerAnnotation.class).equals("O")) {
         // in this case, if it cotains a-z at all, then append "MIX" at the end
         sb.append(wi.word());
         Matcher alphaMatcher = alphabet.matcher(wi.word());
@@ -94,9 +92,9 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
 
       if (verboseForTrueCasing) {
         sb.append("/GOLD-")
-          .append(wi.get(GoldAnswerAnnotation.class))
+          .append(wi.get(CoreAnnotations.GoldAnswerAnnotation.class))
           .append("/GUESS-")
-          .append(wi.get(AnswerAnnotation.class));
+          .append(wi.get(CoreAnnotations.AnswerAnnotation.class));
       }
       sentence.add(sb.toString());
     }
@@ -123,13 +121,13 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
         Matcher lowerMatcher = allLower.matcher(word);
         
         if (lowerMatcher.matches()) {
-          wi.set(AnswerAnnotation.class, "LOWER");
-          wi.set(GoldAnswerAnnotation.class, "LOWER");
+          wi.set(CoreAnnotations.AnswerAnnotation.class, "LOWER");
+          wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "LOWER");
         } else {
           Matcher upperMatcher = allUpper.matcher(word);
           if (!THREE_CLASSES && upperMatcher.matches()) {
-            wi.set(AnswerAnnotation.class, "UPPER");
-            wi.set(GoldAnswerAnnotation.class, "UPPER");
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "UPPER");
+            wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "UPPER");
           } else {
             Matcher startUpperMatcher = startUpper.matcher(word);
 
@@ -143,17 +141,17 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
             }
 
             if (startUpperMatcher.matches() && isINIT_UPPER) {
-              wi.set(AnswerAnnotation.class, "INIT_UPPER");
-              wi.set(GoldAnswerAnnotation.class, "INIT_UPPER");
+              wi.set(CoreAnnotations.AnswerAnnotation.class, "INIT_UPPER");
+              wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "INIT_UPPER");
             } else {
-              wi.set(AnswerAnnotation.class, "O");
-              wi.set(GoldAnswerAnnotation.class, "O");
+              wi.set(CoreAnnotations.AnswerAnnotation.class, "O");
+              wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "O");
             }
           }
         }
         
         wi.setWord(word.toLowerCase());
-        wi.set(PositionAnnotation.class, pos + "");
+        wi.set(CoreAnnotations.PositionAnnotation.class, pos + "");
         doc.add(wi);
         pos++;
       }
