@@ -818,7 +818,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // add annotators loaded via reflection from classnames specified
     // in the properties
-    for (Object propertyKey : inputProps.stringPropertyNames()) {
+    for (Object propertyKey : inputProps.keySet()) {
       if (!(propertyKey instanceof String))
         continue; // should this be an Exception?
       String property = (String) propertyKey;
