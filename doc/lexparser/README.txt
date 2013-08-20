@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.2.0 - 2013-06-09
+Stanford Lexicalized Parser v3.2.0 - 2013-06-19
 -----------------------------------------------
 
 Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
@@ -207,7 +207,7 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2013-06-09    3.2.0     New RNN model for WSJ and English with 
+2013-06-19    3.2.0     New RNN model for WSJ and English with 
                         improved test set accuracy, rel dependency 
                         removed 
 
