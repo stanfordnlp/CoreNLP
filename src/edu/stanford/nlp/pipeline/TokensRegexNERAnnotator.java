@@ -7,7 +7,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.ling.tokensregex.matcher.TrieMap;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -51,9 +50,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   }
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
-    String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol",
-            SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC");
-    String[] backgroundSymbols = backgroundSymbol.split("\\s*,\\s*");
+    String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol", SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
     String mapping = properties.getProperty(name + ".mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
     String validPosRegex = properties.getProperty(name + ".validpospattern");
     boolean overwriteMyLabels = true;
@@ -78,8 +75,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     multiPatternMatcher = createPatternMatcher();
     myLabels = Generics.newHashSet();
     // Can always override background or none.
-    for (String s:backgroundSymbols)
-      myLabels.add(s);
+    myLabels.add(backgroundSymbol);
     myLabels.add(null);
     if (overwriteMyLabels) {
       for (Entry entry: entries) myLabels.add(entry.type);
@@ -247,19 +243,14 @@ public class TokensRegexNERAnnotator implements Annotator {
           key[i] = regexes[i].toLowerCase();
         }
       }
-      String type = split[1].trim();
-
       if (seenRegexes.containsKey(key)) {
-        Entry oldEntry = seenRegexes.get(key);
-        String[] types = oldEntry.type.split("\\s*,\\s*");
-        if (!CollectionUtils.asSet(types).contains(type)) {
-          if (verbose) {
-            System.err.println("Ignoring duplicate entry: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
-          }
+        if (verbose) {
+          System.err.println("Ignoring duplicate entry: " + split[0]);
         }
         continue;
       }
 
+      String type = split[1].trim();
       Set<String> overwritableTypes = Generics.newHashSet();
       double priority = 0.0;
 
