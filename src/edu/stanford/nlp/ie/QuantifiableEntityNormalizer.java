@@ -1349,9 +1349,9 @@ public class QuantifiableEntityNormalizer {
       String curWord = (wi.get(CoreAnnotations.TextAnnotation.class) != null ? wi.get(CoreAnnotations.TextAnnotation.class) : "");
       String currNerTag = wi.get(CoreAnnotations.NamedEntityTagAnnotation.class);
 
+      if (DEBUG) { System.err.println("fixupNerBeforeNormalization: wi is " + wi); }
       // Attempts repairs to NER tags only if not marked by SUTime already
-      if (timex != null && numericType != null) {
-        if (DEBUG) { System.err.println("fixupNerBeforeNormalization: wi is " + wi); }
+      if (timex == null && numericType == null) {
         // repairs commas in between dates...  String constant first in equals() in case key has null value....
         if ((i+1) < sz && ",".equals(wi.get(CoreAnnotations.TextAnnotation.class)) && "DATE".equals(prevNerTag)) {
           if (prevTimex == null && prevNumericType == null) {
@@ -1405,6 +1405,12 @@ public class QuantifiableEntityNormalizer {
               prev.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DURATION");
             }
           }
+        }
+      } else {
+        // Fixup SUTime marking of twenty-second
+        if ("DURATION".equals(currNerTag) && ordinalsToValues.containsKey(curWord)
+                && curWord.endsWith("second") && timex.text().equals(curWord)) {
+          wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, "ORDINAL");
         }
       }
 
