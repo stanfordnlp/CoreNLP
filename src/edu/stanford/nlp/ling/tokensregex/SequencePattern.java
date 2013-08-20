@@ -20,16 +20,6 @@ import java.util.*;
  * </p>
  *
  * <p>
- * To support sequence matching on a new type T, the following is needed:
- * <ul>
- *   <li>Implement a {@link NodePattern for matching type T}</li>
- *   <li>Optionally define a language for node matches and implement {@link SequencePattern.Parser} to compile a
- *       regular expression into a SequencePattern.
- *   </li>
- *   <li>Optionally implement a {@link MultiPatternMatcher.NodePatternTrigger}
- *        for optimzing matches across multiple patterns</li>
- *   <li>Optionally implement a {@link NodesMatchChecker} to support backreferences</li>
- * </ul>
  * See {@link TokenSequencePattern} for example of how this class can be extended
  * to support a specific type <code>T</code>.
  * <p>
@@ -86,8 +76,7 @@ public class SequencePattern<T> {
   //  1. Validate backref capture groupid
   //  2. Actions
   //  3. Inconsistent templating with T
-  //  4. Match sequence begin/end (update TokensSequenceParser to map ^ => SEQ_BEGIN_PATTERN_EXPR, and $ to SEQ_END_PATTERN_EXPR)
-  //  5. Update TokensSequenceParser to handle backref of other attributes (\9{attr1,attr2,...})
+  //  4. Match sequence begin/end
   private String patternStr;
   private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;
