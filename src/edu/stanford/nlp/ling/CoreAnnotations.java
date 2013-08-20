@@ -1601,7 +1601,9 @@ public class CoreAnnotations {
    * entire pumpkin pie", then "dog" would have the
    * AntecedentAnnotation "cirrus".
    *
-   * This annotation is currently used ONLY in the KBP slot filling project
+   * This annotation is currently used ONLY in the KBP slot filling project.
+   * In that project, "cirrus" from the example above would also have an
+   * AntecedentAnnotation of "cirrus".
    * Generally, you want to use the usual coref graph annotations
    */
   public static class AntecedentAnnotation implements CoreAnnotation<String> {

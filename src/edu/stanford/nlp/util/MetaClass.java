@@ -5,9 +5,7 @@ import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -664,6 +662,45 @@ public class MetaClass {
                     value.substring(1));
           }
         }
+      }
+    } else if (ObjectOutputStream.class.isAssignableFrom(clazz)) {
+      // (case: object output stream)
+      try {
+        return (E) new ObjectOutputStream((OutputStream) cast(value, OutputStream.class));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    } else if (ObjectInputStream.class.isAssignableFrom(clazz)) {
+      // (case: object input stream)
+      try {
+        return (E) new ObjectInputStream((InputStream) cast(value, InputStream.class));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    } else if (OutputStream.class.isAssignableFrom(clazz)) {
+      // (case: output stream)
+      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
+      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
+      File toWriteTo = cast(value, File.class);
+      try {
+        if (!toWriteTo.exists() && !toWriteTo.createNewFile()) {
+          throw new IllegalStateException("Could not create output stream (cannot write file): " + value);
+        }
+        return (E) new FileOutputStream((File) cast(value, File.class));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    } else if (InputStream.class.isAssignableFrom(clazz)) {
+      // (case: input stream)
+      if (value.equalsIgnoreCase("stdin") || value.equalsIgnoreCase("in")) { return (E) System.in; }
+      File toReadFrom = cast(value, File.class);
+      try {
+        if (!toReadFrom.exists() || !toReadFrom.canRead()) {
+          throw new IllegalStateException("Could not create input stream (cannot read file): " + value);
+        }
+        return (E) new FileInputStream((File) cast(value, File.class));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
     } else {
       try {
