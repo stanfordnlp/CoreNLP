@@ -36,8 +36,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.trees.GrammaticalStructureFactory;
-import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -81,7 +79,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, SERIALIZED };
+  enum OutputFormat { TEXT, XML, SERIALIZED }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -94,8 +92,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private TreePrint constituentTreePrinter;
   /** Formats the dependency parse trees for human-readable display */
   private TreePrint dependencyTreePrinter;
-  /** Converts the constituent tree to a set of dependencies (for display) */
-  private GrammaticalStructureFactory gsf;
 
   /** Stores the overall number of words processed */
   private int numWords;
@@ -234,7 +230,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
-    this.gsf = new PennTreebankLanguagePack().grammaticalStructureFactory();
 
     if (props == null) {
       // if undefined, find the properties file in the classpath
@@ -434,6 +429,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           } else {
             wts = WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
           }
+
+          wts.setCountLineNumbers(true);
+
           return wts;
         } else {
           WordsToSentencesAnnotator wts;
@@ -1158,7 +1156,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 // and class not found exceptions go through.
               } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
-              } 
+              }
             }
             //(read file)
             if (annotation == null) {
