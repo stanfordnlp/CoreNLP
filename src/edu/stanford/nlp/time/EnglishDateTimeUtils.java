@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
+@Deprecated
 public class EnglishDateTimeUtils {
 
   // private static final Pattern teFixedHolPattern = Pattern.compile("\\b(new\\s+year|inauguration|valentine|ground|candlemas|patrick|fool|(saint|st\\.)\\s+george|walpurgisnacht|may\\s+day|beltane|cinco|flag|baptiste|canada|dominion|independence|bastille|halloween|allhallow|all\\s+(saint|soul)s|day\\s+of\\s+the\\s+dead|fawkes|veteran|christmas|xmas|boxing)\\b", Pattern.CASE_INSENSITIVE);
