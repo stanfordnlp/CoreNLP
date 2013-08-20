@@ -2084,7 +2084,7 @@ public class SUTime {
       if (base != null) {
         p = base.getJodaTimePartial();
       }
-      if (p == null && range != null) {
+      if (p == null && range != null && range.mid() != null) {
         p = range.mid().getJodaTimePartial();
       }
       return p;
