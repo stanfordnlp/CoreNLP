@@ -24,7 +24,7 @@ public class POSTaggerAnnotator implements Annotator {
 
   private final MaxentTagger pos;
 
-  private int maxSentenceLength;
+  private final int maxSentenceLength;
 
   private int nThreads = 1;
 
@@ -62,10 +62,6 @@ public class POSTaggerAnnotator implements Annotator {
     this.pos = loadModel(posLoc, verbose);
     this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", Integer.MAX_VALUE);
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
-  }
-
-  public void setMaxSentenceLength(int maxLen) {
-    this.maxSentenceLength = maxLen;
   }
 
   private static MaxentTagger loadModel(String loc, boolean verbose) {
@@ -122,10 +118,12 @@ public class POSTaggerAnnotator implements Annotator {
 
   private CoreMap doOneSentence(CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<TaggedWord> tagged = pos.apply(tokens);
+    if (tokens.size() <= maxSentenceLength) {
+      List<TaggedWord> tagged = pos.apply(tokens);
 
-    for (int i = 0; i < tokens.size(); ++i) {
-      tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
+      for (int i = 0; i < tokens.size(); ++i) {
+        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
+      }
     }
     return sentence;
   }

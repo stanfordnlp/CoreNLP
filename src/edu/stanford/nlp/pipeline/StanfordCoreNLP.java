@@ -1275,15 +1275,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         public void run(){
           //catching exceptions...
           try {
-            // Check whether this file should be skipped again
-            if (noClobber && new File(finalOutputFilename).exists()) {
-              err("Skipping " + file.getName() + ": output file " + finalOutputFilename + " as it already exists.  Don't use the noClobber option to override this.");
-              synchronized (totalSkipped) {
-                totalSkipped.incValue(1);
-              }
-              return;
-            }
-
             forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
 
             //--Process File
