@@ -375,21 +375,54 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(this.isPronominal()) return;
   }
 
+  /** Check list member? True if this mention is inside the other mention and the other mention is a list */
+  public boolean isListMemberOf(Mention m) {
+    if (m.mentionType == MentionType.LIST) {
+      return this.includedIn(m);
+    }
+    return false;
+  }
+
   private boolean isListLike() {
     // See if this mention looks to be a conjunction of things
     // Check for "or" and "and" and ","
+    int commas = 0;
+//    boolean firstLabelLike = false;
+//    if (originalSpan.size() > 1) {
+//      String w = originalSpan.get(1).word();
+//      firstLabelLike = (w.equals(":") || w.equals("-"));
+//    }
+    boolean first = true;
     for (CoreLabel t:originalSpan) {
-      if (t.word().equalsIgnoreCase("and") || t.word().equalsIgnoreCase("or")) {
-        // Check NER type
-        if (t.ner() == null || "O".equals(t.ner())) return true;
+      String tag = t.tag();
+      String ner = t.ner();
+      String w = t.word();
+      if (tag.equals("TO") || tag.equals("IN") || tag.startsWith("VB")) {
+        // prepositions and verbs are too hard for us
+        return false;
       }
+      if (!first) {
+        if (w.equalsIgnoreCase("and") || w.equalsIgnoreCase("or")) {
+          // Check NER type
+          if (ner == null || "O".equals(ner)) {
+            return true;
+          }
+        } else if (w.equals(",")) {
+          if (ner == null || "O".equals(ner)) {
+            commas++;
+          }
+
+        }
+      }
+      first = false;
     }
-    return false;
+    return (commas > 2);
   }
 
   private void setType(Dictionaries dict) {
     if (isListLike()) {
       mentionType = MentionType.LIST;
+      SieveCoreferenceSystem.logger.finer("IS LIST: " + this);
     } else if (headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){    // ACE gold mention type
       if (headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("PRO")) {
         mentionType = MentionType.PRONOMINAL;

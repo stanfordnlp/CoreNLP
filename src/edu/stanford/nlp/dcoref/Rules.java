@@ -356,6 +356,7 @@ public class Rules {
       Dictionaries dict,
       Set<Mention> roleSet){
     if(roleSet.contains(mention)) return false;
+    if(mention.mentionType == MentionType.LIST || ant.mentionType == MentionType.LIST) return false;
     if(mention.isPronominal() || ant.isPronominal()
         || dict.allPronouns.contains(mention.spanToString().toLowerCase())
         || dict.allPronouns.contains(ant.spanToString().toLowerCase())) return false;
