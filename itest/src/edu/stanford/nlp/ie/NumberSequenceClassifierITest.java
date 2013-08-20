@@ -300,4 +300,24 @@ public class NumberSequenceClassifierITest extends TestCase {
   public void testTime() {
     run("TIME", timeStrings, timeAnswers, timeNormed);
   }
+
+  private static final String [] durationStrings = {
+          "the past four days was very sunny",
+          "it has been more than seven years",
+          "it took one month",
+  };
+  private static final String [][] durationAnswers = {
+          { "DURATION", "DURATION", "DURATION", "DURATION", null, null, null },
+          { null, null, null, "DURATION", "DURATION", "DURATION", "DURATION" },
+          { null, null, "DURATION", "DURATION" },
+  };
+  private static final String [][] durationNormed = {
+          { "P4D", "P4D", "P4D", "P4D", null, null, null },
+          { null, null, null, "P7Y", "P7Y", "P7Y", "P7Y" },
+          { null, null, "P1M", "P1M" },
+  };
+  public void testDuration() {
+    run("DURATION", durationStrings, durationAnswers, durationNormed);
+  }
+
 }
