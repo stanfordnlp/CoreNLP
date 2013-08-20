@@ -322,6 +322,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   private List<CoreMap> runSUTime(CoreMap sentence, final CoreMap document) {
     // docDate can be null. In such situations we do not disambiguate relative dates
     String docDate = (document != null ? document.get(CoreAnnotations.DocDateAnnotation.class) : null);
+    String sectionDate = sentence.get(CoreAnnotations.SectionDateAnnotation.class);
+    String refDate = (sectionDate != null)? sectionDate:docDate;
 
     /*
     System.err.println("PARSING SENTENCE: " + sentence.get(CoreAnnotations.TextAnnotation.class));
@@ -330,7 +332,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
     */
 
-    List<CoreMap> timeExpressions = timexExtractor.extractTimeExpressionCoreMaps(sentence, docDate);
+    List<CoreMap> timeExpressions = timexExtractor.extractTimeExpressionCoreMaps(sentence, refDate);
     if(timeExpressions != null){
       if(DEBUG) System.out.println("FOUND TEMPORALS: " + timeExpressions);
     }

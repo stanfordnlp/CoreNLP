@@ -1,12 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,10 +8,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
-import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.XMLUtils;
+import edu.stanford.nlp.util.*;
 
 
 /**
@@ -26,6 +17,7 @@ import edu.stanford.nlp.util.XMLUtils;
  * Can also add sentence ending markers depending on the xml tag.
  *
  * @author John Bauer
+ * @author Angel Chang
  */
 public class CleanXmlAnnotator implements Annotator{
   /**
@@ -89,32 +81,24 @@ public class CleanXmlAnnotator implements Annotator{
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
-   * A map of annotation keys (i.e. docid) along with a pattern indicating the tag to match, and the attribute to match
+   * A map of document level annotation keys (i.e. docid) along with a pattern i
+   *  indicating the tag to match, and the attribute to match
    */
   private CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
-   * This tells us what the poster tag is
+   * This tells us what the section tag is
    */
-  private Pattern posterTagMatcher = null;
-
-  public static final String DEFAULT_POSTER_TAGS = "poster";
+  private Pattern sectionTagMatcher = null;
+  public static final String DEFAULT_SECTION_TAGS = null;
 
   /**
-   * This tells us what the post tag is
+   * A map of section level annotation keys (i.e. docid) along with a pattern i
+   *  indicating the tag to match, and the attribute to match
    */
-  private Pattern postTagMatcher = null;
-
-  public static final String DEFAULT_POST_TAGS = "post";
-  public static final String DEFAULT_POST_ANNOTATIONS_PATTERNS = "postid=post[id],postdate=post[date]|postdate,author=post[author]|poster";
-
-  /**
-   * This tells us what the postdate tag is
-   */
-  private Pattern postdateTagMatcher = null;
-
-  public static final String DEFAULT_POSTDATE_TAGS = "postdate";
+  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
    * This setting allows handling of flawed XML.  For example,
@@ -179,13 +163,27 @@ public class CleanXmlAnnotator implements Annotator{
     docTypeTagMatcher = toCaseInsensitivePattern(docTypeTags);
   }
 
+  public void setSectionTagMatcher(String sectionTags) {
+    sectionTagMatcher = toCaseInsensitivePattern(sectionTags);
+  }
+
   public void setDiscourseTags(String utteranceTurnTags, String speakerTags) {
     utteranceTurnTagMatcher = toCaseInsensitivePattern(utteranceTurnTags);
     speakerTagMatcher = toCaseInsensitivePattern(speakerTags);
   }
 
+  public void setDocAnnotationPatterns(String conf) {
+    docAnnotationPatterns.clear();
+    addAnnotationPatterns(docAnnotationPatterns, conf, true);
+  }
+
+  public void setSectionAnnotationPatterns(String conf) {
+    sectionAnnotationPatterns.clear();
+    addAnnotationPatterns(sectionAnnotationPatterns, conf, false);
+  }
+
   private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
-  public void addTagAnnotationPatterns(String conf) {
+  private void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
     String[] annoPatternStrings = conf.trim().split("\\s*,\\s*");
     for (String annoPatternString:annoPatternStrings) {
       String[] annoPattern = annoPatternString.split("\\s*=\\s*", 2);
@@ -202,9 +200,15 @@ public class CleanXmlAnnotator implements Annotator{
       if (m.matches()) {
         Pattern tagPattern = toCaseInsensitivePattern(m.group(1));
         Pattern attrPattern = toCaseInsensitivePattern(m.group(2));
-        docAnnotationPatterns.add(annoKey, Pair.makePair(tagPattern, attrPattern));
+        annotationPatterns.add(annoKey, Pair.makePair(tagPattern, attrPattern));
       } else {
-        throw new IllegalArgumentException("Invalid tag pattern: " + pattern + " for annotation key " + annoKeyString);
+        if (attrOnly) {
+          // attribute is require
+          throw new IllegalArgumentException("Invalid tag pattern: " + pattern + " for annotation key " + annoKeyString);
+        } else {
+          Pattern tagPattern = toCaseInsensitivePattern(pattern);
+          annotationPatterns.add(annoKey, Pair.makePair(tagPattern, (Pattern) null));
+        }
       }
     }
   }
@@ -236,6 +240,55 @@ public class CleanXmlAnnotator implements Annotator{
     } else {
       return StringUtils.joinWords(tokens, " ");
     }
+  }
+
+  // Annotates coremap with information from xml tag
+  private Set<Class> annotateWithTag(Annotation annotation,
+                                     CoreMap cm,
+                                     XMLUtils.XMLTag tag,
+                                     CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns,
+                                     Map<Class, List<CoreLabel>> savedTokens,
+                                     Collection<Class> toAnnotate) {
+    Set<Class> foundAnnotations = new HashSet<Class>();
+    if (toAnnotate == null) {
+      toAnnotate = annotationPatterns.keySet();
+    }
+    for (Class key:toAnnotate) {
+      for (Pair<Pattern,Pattern> pattern: annotationPatterns.get(key)) {
+        Pattern tagPattern = pattern.first;
+        Pattern attrPattern = pattern.second;
+        if (tagPattern.matcher(tag.name).matches()) {
+          boolean matched = false;
+          if (attrPattern != null) {
+            if (tag.attributes != null) {
+              for (Map.Entry<String,String> entry:tag.attributes.entrySet()) {
+                if (attrPattern.matcher(entry.getKey()).matches()) {
+                  cm.set(key, entry.getValue());
+                  foundAnnotations.add(key);
+                  matched = true;
+                  break;
+                }
+              }
+            }
+          } else if (savedTokens != null) {
+            if (tag.isEndTag && !tag.isSingleTag) {
+              // End tag - annotate using saved tokens
+              List<CoreLabel> saved = savedTokens.remove(key);
+              if (saved != null && saved.size() > 0) {
+                cm.set(key, tokensToString(annotation, saved));
+                foundAnnotations.add(key);
+                matched = true;
+              }
+            } else {
+              // Start tag
+              savedTokens.put(key, new ArrayList<CoreLabel>());
+            }
+          }
+          if (matched) break;
+        }
+      }
+    }
+    return foundAnnotations;
   }
 
   public List<CoreLabel> process(Annotation annotation, List<CoreLabel> tokens) {
@@ -270,7 +323,12 @@ public class CleanXmlAnnotator implements Annotator{
     List<CoreLabel> docTypeTokens = new ArrayList<CoreLabel>();
     List<CoreLabel> docIdTokens = new ArrayList<CoreLabel>();
 
-    boolean markSingleSentence = true;
+    XMLUtils.XMLTag sectionStartTag = null;
+    CoreLabel sectionStartToken = null;
+    CoreLabel sectionAnnotations = null;
+    Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<Class, List<CoreLabel>>();
+
+    boolean markSingleSentence = false;
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
       XMLUtils.XMLTag tag = XMLUtils.parseTag(word);
@@ -345,35 +403,20 @@ public class CleanXmlAnnotator implements Annotator{
           speakerTokens.add(token);
         }
 
+        if (sectionStartTag != null) {
+          if (sectionStartToken == null) {
+            sectionStartToken = token;
+          }
+          // Add tokens to saved section tokens
+          for (List<CoreLabel> saved:savedTokensForSection.values()) {
+            saved.add(token);
+          }
+        }
+
         continue;
       }
 
       // At this point, we know we have a tag
-
-      // Check if we want to annotate anything using the tags's attributes
-      if (!toAnnotate.isEmpty() && tag.attributes != null) {
-        Set<Class> foundAnnotations = new HashSet<Class>();
-        for (Class key:toAnnotate) {
-          for (Pair<Pattern,Pattern> pattern: docAnnotationPatterns.get(key)) {
-            Pattern tagPattern = pattern.first;
-            Pattern attrPattern = pattern.second;
-            if (tagPattern.matcher(tag.name).matches()) {
-              boolean matched = false;
-              for (Map.Entry<String,String> entry:tag.attributes.entrySet()) {
-                if (attrPattern.matcher(entry.getKey()).matches()) {
-                  annotation.set(key, entry.getValue());
-                  foundAnnotations.add(key);
-                  matched = true;
-                  break;
-                }
-              }
-              if (matched) break;
-            }
-          }
-        }
-        toAnnotate.removeAll(foundAnnotations);
-      }
-
 
       // we are removing a token and its associated text...
       // keep track of that
@@ -387,6 +430,42 @@ public class CleanXmlAnnotator implements Annotator{
         currentRemoval = token.get(CoreAnnotations.AfterAnnotation.class);
         if (currentRemoval != null)
           removedText.append(currentRemoval);
+      }
+
+      // Process tag
+
+      // Check if we want to annotate anything using the tags's attributes
+      if (!toAnnotate.isEmpty() && tag.attributes != null) {
+        Set<Class> foundAnnotations = annotateWithTag(annotation, annotation, tag, docAnnotationPatterns, null, toAnnotate);
+        toAnnotate.removeAll(foundAnnotations);
+      }
+
+      // Check if the tag matches a section
+      if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
+        if (tag.isEndTag) {
+          annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null);
+          if (sectionStartToken != null) {
+            sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
+          }
+          // Mark previous token as forcing sentence and section end
+          if (newTokens.size() > 0) {
+            CoreLabel previous = newTokens.get(newTokens.size() - 1);
+            previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
+            previous.set(CoreAnnotations.SectionEndAnnotation.class, sectionStartTag.name);
+          }
+          savedTokensForSection.clear();
+          sectionStartTag = null;
+          sectionStartToken = null;
+          sectionAnnotations = null;
+        } else if (!tag.isSingleTag) {
+          // Prepare to mark first token with section information
+          sectionStartTag = tag;
+          sectionAnnotations = new CoreLabel();
+        }
+      }
+      if (sectionStartTag != null) {
+        // store away annotations for section
+        annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null);
       }
 
       // If the tag matches the sentence ending tags, and we have some

@@ -62,7 +62,11 @@ public class AnnotationLookup {
     PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto"),
     DOCTYPE_KEY(CoreAnnotations.DocTypeAnnotation.class,"doctype"),
     DOCDATE_KEY(CoreAnnotations.DocDateAnnotation.class,"docdate"),
-    DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype");
+    DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype"),
+    AUTHORS_KEY(CoreAnnotations.AuthorsAnnotation.class,"authors"),
+    SECTION_KEY(CoreAnnotations.SectionAnnotation.class,"section"),
+    SECTIONID_KEY(CoreAnnotations.SectionIDAnnotation.class,"sectionID"),
+    SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate");
 
     public final Class coreKey;
     public final String oldKey;
