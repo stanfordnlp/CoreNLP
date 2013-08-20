@@ -62,14 +62,10 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * build up the pipeline by adding Annotators, and then
  * you take the objects you wish to annotate and pass
  * them in and get in return a fully annotated object.
- * At the command-line level you can, e.g., tokenize text with StanfordCoreNLP with a command like:
- * <br/><pre>
- * java edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit -file document.txt
- * </pre><br/>
  * Please see the package level javadoc for sample usage
  * and a more complete description.
  * <p>
- * The main entry point for the API is StanfordCoreNLP.process() .
+ * The main entry point for the API is StanfordCoreNLP.process()
  * <p>
  * <i>Implementation note:</i> There are other annotation pipelines, but they
  * don't extend this one. Look for classes that implement Annotator and which
@@ -822,7 +818,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // add annotators loaded via reflection from classnames specified
     // in the properties
-    for (Object propertyKey : inputProps.stringPropertyNames()) {
+    for (Object propertyKey : inputProps.keySet()) {
       if (!(propertyKey instanceof String))
         continue; // should this be an Exception?
       String property = (String) propertyKey;
@@ -1117,17 +1113,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     final String baseOutputDir = properties.getProperty("outputDirectory", ".");
     final String baseInputDir = properties.getProperty("inputDirectory", base);
 
-    // Set of files to exclude
-    final String excludeFilesParam = properties.getProperty("excludeFiles");
-    final Set<String> excludeFiles = new HashSet<String>();
-    if (excludeFilesParam != null) {
-      Iterable<String> lines = IOUtils.readLines(excludeFilesParam);
-      for (String line:lines) {
-        String name = line.trim();
-        if (!name.isEmpty()) excludeFiles.add(name);
-      }
-    }
-
     //(file info)
     final OutputFormat outputFormat =
             OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
@@ -1152,58 +1137,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     final MutableInteger totalProcessed = new MutableInteger(0);
     final MutableInteger totalSkipped = new MutableInteger(0);
     final MutableInteger totalErrorAnnotating = new MutableInteger(0);
-    int nFiles = 0;
 
     //for each file...
     for (final File file : files) {
-      nFiles++;
-      // Determine if there is anything to be done....
-      if (excludeFiles.contains(file.getName())) {
-        err("Skipping excluded file " + file.getName());
-        totalSkipped.incValue(1);
-        continue;
-      }
-
-      //--Get Output File Info
-      //(filename)
-      String outputDir = baseOutputDir;
-      if (baseInputDir != null) {
-        // Get input file name relative to base
-        String relDir = file.getParent().replaceFirst(Pattern.quote(baseInputDir), "");
-        outputDir = outputDir + File.separator + relDir;
-      }
-      // Make sure output directory exists
-      new File(outputDir).mkdirs();
-      String outputFilename = new File(outputDir, file.getName()).getPath();
-      if (replaceExtension) {
-        int lastDot = outputFilename.lastIndexOf('.');
-        // for paths like "./zzz", lastDot will be 0
-        if (lastDot > 0) {
-          outputFilename = outputFilename.substring(0, lastDot);
-        }
-      }
-      // ensure we don't make filenames with doubled extensions like .xml.xml
-      if (!outputFilename.endsWith(extension)) {
-        outputFilename += extension;
-      }
-      // normalize filename for the upcoming comparison
-      outputFilename = new File(outputFilename).getCanonicalPath();
-
-      //--Conditions For Skipping The File
-      // TODO this could fail if there are softlinks, etc. -- need some sort of sameFile tester
-      //      Java 7 will have a Files.isSymbolicLink(file) method
-      if (outputFilename.equals(file.getCanonicalPath())) {
-        err("Skipping " + file.getName() + ": output file " + outputFilename + " has the same filename as the input file -- assuming you don't actually want to do this.");
-        totalSkipped.incValue(1);
-        continue;
-      }
-      if (noClobber && new File(outputFilename).exists()) {
-        err("Skipping " + file.getName() + ": output file " + outputFilename + " as it already exists.  Don't use the noClobber option to override this.");
-        totalSkipped.incValue(1);
-        continue;
-      }
-
-      final String finalOutputFilename = outputFilename;
       //register a task...
       toRun.add(new Runnable(){
         //who's run() method is...
@@ -1211,7 +1147,50 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         public void run(){
           //catching exceptions...
           try {
-            forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
+            //--Get Output File Info
+            //(filename)
+            String outputDir = baseOutputDir;
+            if (baseInputDir != null) {
+              // Get input file name relative to base
+              String relDir = file.getParent().replaceFirst(Pattern.quote(baseInputDir), "");
+              outputDir = outputDir + File.separator + relDir;
+            }
+            // Make sure output directory exists
+            new File(outputDir).mkdirs();
+            String outputFilename = new File(outputDir, file.getName()).getPath();
+            if (replaceExtension) {
+              int lastDot = outputFilename.lastIndexOf('.');
+              // for paths like "./zzz", lastDot will be 0
+              if (lastDot > 0) {
+                outputFilename = outputFilename.substring(0, lastDot);
+              }
+            }
+            // ensure we don't make filenames with doubled extensions like .xml.xml
+            if (!outputFilename.endsWith(extension)) {
+              outputFilename += extension;
+            }
+            // normalize filename for the upcoming comparison
+            outputFilename = new File(outputFilename).getCanonicalPath();
+
+            //--Conditions For Skipping The File
+            // TODO this could fail if there are softlinks, etc. -- need some sort of sameFile tester
+            //      Java 7 will have a Files.isSymbolicLink(file) method
+            if (outputFilename.equals(file.getCanonicalPath())) {
+              err("Skipping " + file.getName() + ": output file " + outputFilename + " has the same filename as the input file -- assuming you don't actually want to do this.");
+              synchronized (totalSkipped) {
+                totalSkipped.incValue(1);
+              }
+              return;
+            }
+            if (noClobber && new File(outputFilename).exists()) {
+              err("Skipping " + file.getName() + ": output file " + outputFilename + " as it already exists.  Don't use the noClobber option to override this.");
+              synchronized (totalSkipped) {
+                totalSkipped.incValue(1);
+              }
+              return;
+            }
+
+            forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
 
             //--Process File
             Annotation annotation = null;
@@ -1268,13 +1247,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               //--Output File
               switch (outputFormat) {
               case XML: {
-                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
                 xmlPrint(annotation, fos);
                 fos.close();
                 break;
               }
               case TEXT: {
-                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
                 prettyPrint(annotation, fos);
                 fos.close();
                 break;
@@ -1282,11 +1261,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               case SERIALIZED: {
                 if (outputSerializerClass != null) {
                   AnnotationSerializer outputSerializer = ReflectionLoading.loadByReflection(inputSerializerClass);
-                  OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                  OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
                   outputSerializer.save(annotation, fos);
                   fos.close();
                 } else {
-                  IOUtils.writeObjectToFile(annotation, finalOutputFilename);
+                  IOUtils.writeObjectToFile(annotation, outputFilename);
                 }
                 break;
               }
@@ -1300,10 +1279,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 }
               }
             } else {
-              warn("Error annotating " + file.getAbsoluteFile() + " not saved to " + finalOutputFilename);
+              warn("Error annotating " + file.getAbsoluteFile() + " not saved to " + outputFilename);
             }
 
-            endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
+
+            endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
+
+
 
           } catch (IOException e) {
             throw new RuntimeIOException(e);
@@ -1316,7 +1298,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       log("Randomly shuffling input");
       Collections.shuffle(toRun);
     }
-    log("Ready to process: " + toRun.size() + " files, skipped " + totalSkipped + ", total " + nFiles);
+    log("Ready to process: " + toRun.size() + " files");
     //--Run Jobs
     if(numThreads == 1){
       for(Runnable r : toRun){ r.run(); }

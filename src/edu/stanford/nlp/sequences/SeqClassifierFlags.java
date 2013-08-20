@@ -938,28 +938,7 @@ public class SeqClassifierFlags implements Serializable {
   public String splitWordRegex = null;
   public boolean groupByInput = false;
   public boolean groupByHiddenUnit = false;
-
-  public String unigramLM = null;
-  public String bigramLM = null;
-  public int wordSegBeamSize = 1000;
-  public String vocabFile = null;
-  public boolean averagePerceptron = true;
-  public String loadCRFSegmenterPath = null;
-  public String loadPCTSegmenterPath = null;
-  public String crfSegmenterProp = null;
-  public String pctSegmenterProp = null;
-  public String intermediateSegmenterOut = null;
-  public String intermediateSegmenterModel = null;
-
-  public int dualDecompMaxItr = 0;
-  public double dualDecompInitialStepSize = 0.1;
-  public boolean dualDecompDebug = false;
-  public boolean useCWSWordFeatures = false;
-  public boolean useCWSWordFeaturesAll = false;
-  public boolean useCWSWordFeaturesBigram = false;
-  public boolean pctSegmenterLenAdjust = false;
-  public boolean useTrainLexicon = false;
-
+  
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1265,8 +1244,6 @@ public class SeqClassifierFlags implements Serializable {
         }
       } else if (key.equalsIgnoreCase("useSum")) {
         useSum = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("verbose")) {
-        verboseMode = Boolean.parseBoolean(val);        
       } else if (key.equalsIgnoreCase("verboseMode")) {
         verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("tolerance")) {
@@ -2309,44 +2286,6 @@ public class SeqClassifierFlags implements Serializable {
         groupByInput = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("groupByHiddenUnit")){
         groupByHiddenUnit = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("unigramLM")){
-        unigramLM = val;
-      } else if (key.equalsIgnoreCase("bigramLM")){
-        bigramLM = val;
-      } else if (key.equalsIgnoreCase("wordSegBeamSize")){
-        wordSegBeamSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("vocabFile")){
-        vocabFile = val;
-      } else if (key.equalsIgnoreCase("averagePerceptron")){
-        averagePerceptron = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadCRFSegmenterPath")){
-        loadCRFSegmenterPath = val;
-      } else if (key.equalsIgnoreCase("loadPCTSegmenterPath")){
-        loadPCTSegmenterPath = val;
-      } else if (key.equalsIgnoreCase("crfSegmenterProp")){
-        crfSegmenterProp = val;
-      } else if (key.equalsIgnoreCase("pctSegmenterProp")){
-        pctSegmenterProp = val;
-      } else if (key.equalsIgnoreCase("dualDecompMaxItr")){
-        dualDecompMaxItr = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("dualDecompInitialStepSize")){
-        dualDecompInitialStepSize = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dualDecompDebug")){
-        dualDecompDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("intermediateSegmenterOut")){
-        intermediateSegmenterOut = val;
-      } else if (key.equalsIgnoreCase("intermediateSegmenterModel")){
-        intermediateSegmenterModel = val;
-      } else if (key.equalsIgnoreCase("useCWSWordFeatures")){
-        useCWSWordFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSWordFeaturesAll")){
-        useCWSWordFeaturesAll = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSWordFeaturesBigram")){
-        useCWSWordFeaturesBigram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterLenAdjust")){
-        pctSegmenterLenAdjust = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTrainLexicon")){
-        useTrainLexicon = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
