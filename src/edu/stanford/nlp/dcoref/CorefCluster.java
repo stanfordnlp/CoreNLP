@@ -163,15 +163,10 @@ public class CorefCluster implements Serializable{
       forSortedPrint.put(m.mentionID, m);
     }
     for(Mention m : forSortedPrint.values()){
-      String rep = (representative == m)? "*":"";
       if(m.goldCorefClusterID==-1){
-        logger.finer(rep + "mention-> id:"+m.mentionID+"\toriginalRef: "
-                +m.originalRef+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "
-                +m.startIndex+"\tType: "+m.mentionType+"\tNER: "+m.nerString);
+        logger.finer("mention-> id:"+m.mentionID+"\toriginalRef: "+m.originalRef+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex+"\tType: "+m.mentionType);
       } else{
-        logger.finer(rep + "mention-> id:"+m.mentionID+"\toriginalClusterID: "
-                +m.goldCorefClusterID+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "
-                +m.startIndex +"\toriginalRef: "+m.originalRef+"\tType: "+m.mentionType+"\tNER: "+m.nerString);
+        logger.finer("mention-> id:"+m.mentionID+"\toriginalClusterID: "+m.goldCorefClusterID+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex +"\toriginalRef: "+m.originalRef+"\tType: "+m.mentionType);
       }
     }
   }
