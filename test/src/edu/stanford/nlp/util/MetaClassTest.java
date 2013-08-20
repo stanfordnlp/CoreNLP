@@ -420,8 +420,11 @@ public class MetaClassTest {
     set.add("apple");
     set.add("banana");
     Set<String> castedSet = MetaClass.cast("[apple, banana]", Set.class);
-    Set<String> castedSet2 = MetaClass.cast("{apple ,    banana }", Set.class);
+    Set<String> castedSet2 = MetaClass.cast("[apple ,    banana ]", Set.class);
+    Set<String> castedSet3 = MetaClass.cast("{apple ,    banana }", Set.class);
     assertEquals(set, castedSet);
+    assertEquals(set, castedSet2);
+    assertEquals(set, castedSet3);
 
     List<String> list = new LinkedList<String>();
     list.add("apple");
