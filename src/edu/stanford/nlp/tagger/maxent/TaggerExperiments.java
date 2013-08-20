@@ -75,9 +75,7 @@ public class TaggerExperiments extends Experiments {
     feats = new TaggerFeatures(maxentTagger.tags, this);
   }
 
-  /** This method gets feature statistics from a training file found in the TaggerConfig.
-   *  It is the start of the training process.
-   */
+  /** This method gets feature statistics from a training file found in the TaggerConfig. */
   protected TaggerExperiments(TaggerConfig config, MaxentTagger maxentTagger) throws IOException {
     this(maxentTagger);
 
