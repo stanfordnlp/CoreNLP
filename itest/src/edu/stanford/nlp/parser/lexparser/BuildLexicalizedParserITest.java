@@ -81,7 +81,7 @@ public class BuildLexicalizedParserITest extends TestCase {
 
   public static final String baseTestSerCommandLine = "-encoding utf-8 -loadFromSerializedFile %s -testTreebank %s 0-1";
   public static final String baseTestTextCommandLine = "-encoding utf-8 -loadFromTextFile %s -testTreebank %s 0-1";
-  // public static final String PERF_EVAL = "factor LP/LR summary evalb: LP: ";
+  public static final String PERF_EVAL = "factor LP/LR summary evalb: LP: ";
 
 
   public static final String englishOneTree = "projects/core/data/edu/stanford/nlp/parser/trees/en-onetree.txt";
@@ -114,10 +114,10 @@ public class BuildLexicalizedParserITest extends TestCase {
       this.textFile = textFile;
     }
 
-    public static ParserTestCase
+    public static ParserTestCase 
       buildOneTreebankTestCase(String baseCommandLine,
                                String trainPath,
-                               String testPath)
+                               String testPath) 
       throws IOException
     {
       File parserFile = File.createTempFile("parser", ".ser.gz");
@@ -129,7 +129,7 @@ public class BuildLexicalizedParserITest extends TestCase {
       // unknown trees in the next step.
       commandLineFormatter.format(baseCommandLine, parserFile.getPath(),
                                   textFile.getPath(), trainPath, trainPath);
-      String[] trainCommandLine =
+      String[] trainCommandLine = 
         commandLineFormatter.toString().split("\\s+");
 
       ParserTestCase test = new ParserTestCase(trainCommandLine, testPath,
@@ -137,11 +137,11 @@ public class BuildLexicalizedParserITest extends TestCase {
       return test;
     }
 
-    public static ParserTestCase
+    public static ParserTestCase 
       buildTwoTreebankTestCase(String baseCommandLine,
                                String trainPath,
                                String secondaryPath,
-                               String testPath)
+                               String testPath) 
       throws IOException
     {
       File parserFile = File.createTempFile("parser", ".ser.gz");
@@ -152,9 +152,9 @@ public class BuildLexicalizedParserITest extends TestCase {
       // get 100% accuracy if everything worked.  We will test on
       // unknown trees in the next step.
       commandLineFormatter.format(baseCommandLine, parserFile.getPath(),
-                                  textFile.getPath(), trainPath,
+                                  textFile.getPath(), trainPath, 
                                   secondaryPath, trainPath);
-      String[] trainCommandLine =
+      String[] trainCommandLine = 
         commandLineFormatter.toString().split("\\s+");
 
       ParserTestCase test = new ParserTestCase(trainCommandLine, testPath,
@@ -179,7 +179,7 @@ public class BuildLexicalizedParserITest extends TestCase {
     PrintStream teeErrPS = new PrintStream(teeErr);
     System.setOut(teeOutPS);
     System.setErr(teeErrPS);
-
+    
     LexicalizedParser.main(test.trainCommandLine);
 
     teeOutPS.flush();
@@ -187,16 +187,16 @@ public class BuildLexicalizedParserITest extends TestCase {
     teeOut.flush();
     teeErr.flush();
 
-    String[] outputLines =
+    String[] outputLines = 
       savedOutput.toString().split("(?:\\n|\\r)+");
     String perfLine = outputLines[outputLines.length - 5];
     System.out.println(perfLine);
     assertEquals("factor LP/LR summary evalb: LP: 100.0 LR: 100.0 F1: 100.0 Exact: 100.0 N: 1", perfLine.trim());
 
     Formatter commandLineFormatter = new Formatter();
-    commandLineFormatter.format(baseTestSerCommandLine,
+    commandLineFormatter.format(baseTestSerCommandLine, 
                                 test.parserFile.getPath(), test.testPath);
-    String[] testCommandLine =
+    String[] testCommandLine = 
       commandLineFormatter.toString().split("\\s");
 
     System.out.println("Testing:");
@@ -227,7 +227,7 @@ public class BuildLexicalizedParserITest extends TestCase {
    * This tests that building and running a simple English parser
    * model works correctly.
    */
-  public void testBuildEnglishParser()
+  public void testBuildEnglishParser() 
     throws IOException
   {
     for (String englishCommandLine : englishCommandLines) {

@@ -1,13 +1,17 @@
 package edu.stanford.nlp.ie.regexp;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Properties;
@@ -16,12 +20,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * A sequence classifier that labels tokens with types based on a simple manual mapping from
@@ -80,7 +83,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     entries = readEntries(mapping, ignoreCase);
     this.ignoreCase = ignoreCase;
     this.overwriteMyLabels = overwriteMyLabels;
-    myLabels = Generics.newHashSet();
+    myLabels = new HashSet<String>();
     if(this.overwriteMyLabels) {
       for(Entry entry: entries) myLabels.add(entry.type);
     }
@@ -150,7 +153,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
           // annotate each matching token
           for (int i = start; i < start + entry.regex.size(); i++) {
             CoreLabel token = document.get(i);
-            token.set(CoreAnnotations.AnswerAnnotation.class, entry.type);
+            token.set(AnswerAnnotation.class, entry.type);
           }
         }
         start++;
@@ -180,7 +183,11 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     List<Entry> entries = new ArrayList<Entry>();
 
     try {
-      BufferedReader rd = IOUtils.readerFromString(mapping);
+      // ms, 2010-10-05: try to load the file from the CLASSPATH first
+      InputStream is = getClass().getClassLoader().getResourceAsStream(mapping);
+      // if not found in the CLASSPATH, load from the file system
+      if (is == null) is = new FileInputStream(mapping);
+      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 
       int lineCount = 0;
       for (String line; (line = rd.readLine()) != null; ) {
@@ -191,7 +198,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
 
         String[] regexes = split[0].trim().split("\\s+");
         String type = split[1].trim();
-        Set<String> overwritableTypes = Generics.newHashSet();
+        Set<String> overwritableTypes = new HashSet<String>();
         overwritableTypes.add(flags.backgroundSymbol);
         overwritableTypes.add(null);
         double priority = 0;
@@ -215,6 +222,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
         entries.add(new Entry(tokens, type, overwritableTypes, priority));
       }
       rd.close();
+      is.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -238,8 +246,8 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
       for (int i = 0; i < regex.size(); i++) {
         Pattern pattern = regex.get(i);
         CoreLabel token = document.get(start + i);
-        String NERType = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-        String currentType = token.get(CoreAnnotations.AnswerAnnotation.class);
+        String NERType = token.get(NamedEntityTagAnnotation.class);
+        String currentType = token.get(AnswerAnnotation.class);
 
         if (! pattern.matcher(token.word()).matches() ||
             currentType != null ||

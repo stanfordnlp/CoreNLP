@@ -2,6 +2,8 @@ package edu.stanford.nlp.trees;
 
 import java.io.Serializable;
 
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+
 /**
  * A <code>TypedDependency</code> is a relation between two words in a
  * <code>GrammaticalStructure</code>.  Each <code>TypedDependency</code>

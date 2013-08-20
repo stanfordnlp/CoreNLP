@@ -1,0 +1,570 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h1><font color="#a40526">The Stanford Parser: A statistical parser</font></h1>
+</center>
+
+<center><p><font color="#a40526"><a href="#About">About</a> | 
+<a href="#Citing">Citing</a> |
+<a href="#Questions">Questions</a> |
+<a href="#Mail">Mailing lists</a> |
+<a href="#Download">Download</a> |
+<a href="#Tools">Included Tools</a> |
+<a href="#Extensions">Extensions</a> |
+<a href="#History">Release history</a> |
+<a href="#Sample">Sample output</a> |
+<a href="http://nlp.stanford.edu:8080/parser/">Online</a> |
+<a href="parser-faq.shtml">FAQ</a></font></p></center>
+
+<h3><a name="About">About</a></h3>
+
+<p>
+A natural language parser is a program that works out the grammatical
+<b>structure of sentences</b>, for instance, which groups of words go together
+(as "phrases") and which words are the <b>subject</b> or <b>object</b> of a
+verb. Probabilistic parsers use knowledge of language gained from
+hand-parsed sentences to try to produce the <i>most likely</i> analysis of new
+sentences. These statistical parsers still make some mistakes, but
+commonly work 
+rather well. Their development was one of the biggest breakthroughs in
+natural language processing in the 1990s.  You can 
+<a href="http://nlp.stanford.edu:8080/parser/">try out our parser
+online</a>. 
+</p>
+
+<p>
+This package is a Java implementation of probabilistic natural language
+parsers, 
+both highly optimized PCFG and lexicalized dependency parsers, and a
+lexicalized PCFG parser. 
+The original version of this parser was mainly written by Dan Klein,
+with support code and linguistic grammar development by Christopher Manning. 
+Extensive additional work (internationalization and language-specific
+modeling, flexible input/output, grammar compaction, lattice parsing,
+<i>k</i>-best parsing,
+typed dependencies output,
+user support, etc.) has been done by Roger Levy, Christopher Manning,
+Teg Grenager, Galen Andrew, Marie-Catherine de Marneffe, Bill
+MacCartney, Anna Rafferty, Spence Green, Huihsin Tseng, Pi-Chuan Chang, Wolfgang
+Maier, and Jenny Finkel. 
+</p>
+
+<p>
+The lexicalized probabilistic parser implements a factored product
+	model, with separate PCFG 
+    phrase structure and lexical dependency experts, whose preferences
+    are combined by efficient exact inference, using an A* algorithm.
+Or the software can be used simply as an accurate unlexicalized stochastic
+context-free grammar parser.
+Either of these yields a good performance statistical parsing system.
+A GUI is provided for viewing the phrase structure tree output of the parser.
+</p>
+
+<p>
+As well as providing an <b>English</b> parser, the parser can be
+and has been adapted to work with other languages.
+A <b>Chinese</b> parser based on the Chinese Treebank, a <b>German</b>
+parser based on the Negra corpus and <b>Arabic</b> 
+parsers based on 
+the Penn Arabic Treebank are also included.
+The parser has also been used for other languages, such as Italian,
+Bulgarian, and Portuguese.
+</p>
+
+<p>
+The parser provides <a href="stanford-dependencies.shtml">Stanford Dependencies</a> output as 
+well as phrase structure trees.  Typed dependencies are
+otherwise known <b>grammatical relations</b>. This style of output is available only for English and Chinese.
+For more details, please refer to the <a href="stanford-dependencies.shtml">Stanford Dependencies webpage</a>.
+
+<!--They are produced by using the
+<code>-outputFormat typedDependencies</code> option. These are produced
+using hand-written  
+<a href="tregex.shtml"><code>tregex</code></a> patterns as described in:</p>
+<blockquote>
+Marie-Catherine de Marneffe, Bill MacCartney and Christopher
+D. Manning. 2006. 
+<a href="http://nlp.stanford.edu/pubs/LREC06_dependencies.pdf">Generating
+Typed Dependency Parses from Phrase Structure Parses</a>.  In <i>LREC 2006</i>.
+<br>
+Marie-Catherine de Marneffe and Christopher D. Manning. 2008. 
+<a href="http://nlp.stanford.edu/pubs/dependencies-coling08.pdf">The
+Stanford typed dependencies representation</a>. In COLING 2008 Workshop on
+Cross-framework and Cross-domain Parser Evaluation.
+</blockquote>
+There is now a 
+<a href="dependencies_manual.pdf">Stanford Dependencies manual</a>
+for English, and a brief description of the Chinese grammatical
+relations in 
+<a href="http://nlp.stanford.edu/pubs/ssst09-chang.pdf">this paper</a>.</p> -->
+
+<p>
+<b>The current version of the parser requires Java 6 (JDK1.6) or later.</b>
+
+(You can also download an old version of the parser, version 1.4,
+which runs under JDK 1.4, or version 2.0 which runs under JDK 1.5, but
+those distributions are no longer supported.)
+
+The parser also requires a reasonable amount of memory 
+(at least 100MB to run as a PCFG parser on sentences up to 40 words
+      in length; typically around 500MB of memory to be able to
+    parse similarly long typical-of-newswire sentences using the
+      factored model).  
+</p>
+
+<p>The parser is available for download,
+<b>licensed under the <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU
+General Public License</a></b> (v2 or later). Source is included.  
+The package
+includes components for command-line invocation, a Java parsing
+GUI, and a Java API.
+The parser 
+code is dual licensed (in a similar manner to MySQL, etc.).  
+Open source licensing is under the <i>full</i> GPL,
+which allows many free uses.
+For distributors of 
+<a href="http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem">proprietary
+software</a>, <b>commercial licensing</b> with a 
+<a href="http://otlportal.stanford.edu/techfinder/technology/ID=24472">ready-to-sign
+agreement</a> is available.
+If you don't need a commercial license, but would like to support
+maintenance of these tools, we welcome gift funding.
+</p>
+
+<!-- <i>does not allow</i> its incorporation into any type of
+	distributed proprietary software 
+	even in part or in translation. -->
+
+<p>The download is a 54 MB zipped file (mainly consisting of
+    included grammar data files).  If you unpack the zip file, you
+    should have everything needed.  
+    Simple scripts are included to
+    invoke the parser on a Unix or Windows system.  For another
+    system, you merely need to similarly configure the classpath.</p>
+
+
+<h3><a name="Citing">Citing the Stanford Parser</a></h3>
+
+<p>
+The main technical ideas behind how these parsers work appear in these
+papers.  Feel free to cite one or more of the following papers depending on what you
+are using.  Since the parser is regularly updated, we appreciate it if
+papers with numerical results reflecting parser performance mention the
+version of the parser being used.
+<blockquote>
+<span class="review"><i>For the PCFG parser:</i></span><br> Dan Klein and Christopher D. Manning. 2003. 
+<a href="http://nlp.stanford.edu/~manning/papers/unlexicalized-parsing.pdf">Accurate Unlexicalized
+Parsing</a>. <i>Proceedings of the 41st Meeting of the Association for
+	    Computational Linguistics</i>, pp. 423-430. 
+</blockquote>
+<blockquote>
+<span class="review"><i>For the factored parser:</i></span><br> Dan Klein and Christopher D. Manning. 2003. 
+<a href="http://www-nlp.stanford.edu/~manning/papers/lex-parser.pdf">Fast 
+Exact Inference with a
+Factored Model for Natural Language Parsing</a>. In <i>Advances
+in Neural Information Processing Systems 15 (NIPS 2002)</i>, Cambridge,
+MA: MIT Press, pp. 3-10. 
+</blockquote>
+<blockquote>
+<span class="review"><i>For the (English) Stanford Dependencies
+representation:</i></span><br>
+Marie-Catherine de Marneffe, Bill MacCartney and Christopher
+D. Manning. 2006. 
+<a href="http://nlp.stanford.edu/pubs/LREC06_dependencies.pdf">Generating
+Typed Dependency Parses from Phrase Structure Parses</a>.  In <i>LREC 2006</i>.
+</blockquote>
+
+<blockquote>
+<span class="review"><i>For the German parser:</i></span><br>
+Anna Rafferty
+and Christopher D. Manning. 
+2008.
+<a href="/pubs/german-acl08.pdf">Parsing Three German Treebanks: Lexicalized and Unlexicalized Baselines</a>.
+In <i>ACL Workshop on Parsing German</i>.
+</blockquote>
+
+<blockquote>
+<span class="review"><i>For the Chinese Parser:</i></span><br>
+Roger Levy and Christopher D. Manning.
+2003.
+<a href="/pubs/acl2003-chinese.pdf">Is it harder to parse Chinese, or the Chinese Treebank?</a>
+<i>ACL 2003</i>, pp. 439-446. 
+</blockquote>
+
+<blockquote>
+<span class="review"><i>For the Chinese Stanford Dependencies:</i></span><br>
+Pi-Chuan Chang, Huihsin Tseng, Dan Jurafsky, 
+and Christopher D. Manning.
+2009.
+<a href="/pubs/ssst09-chang.pdf">Discriminative Reordering with Chinese Grammatical Relations Features</a>.
+In <i>Proceedings of the Third Workshop on Syntax and Structure in Statistical Translation</i>.
+</blockquote>
+
+<blockquote>
+<span class="review"><i>For the Arabic parser:</i></span><br>
+Spence Green and Christopher D. Manning.
+2010.
+<a href="/pubs/coling2010-arabic.pdf">Better Arabic Parsing: Baselines, Evaluations, and Analysis</a>.
+In <i>COLING 2010</i>.
+</blockquote>
+
+<blockquote>
+<span class="review"><i>For the French parser:</i></span><br>
+Spence Green, Marie-Catherine de Marneffe, John Bauer, and Christopher D. Manning.
+2010.
+<a href="/pubs/green+demarneffe+bauer+manning.emnlp11.pdf">Multiword Expression Identification with Tree Substitution Grammars: A Parsing <em>tour de force</em> with French.</a>.
+In <i>EMNLP 2011</i>.
+</blockquote>
+
+
+
+<h3><a name="Questions">Questions about the parser?</a></h3>
+
+<ol>
+<li>If you're new to parsing, you can start by running the GUI to try
+out the parser.  Scripts are included for linux (lexparser-gui.sh) and
+Windows (lexparser-gui.bat).
+<li>Take a look at the Javadoc <code>lexparser</code> package
+documentation and <code>LexicalizedParser</code> class documentation.
+(Point your web browser at the <code>index.html</code> file in the included 
+<code>javadoc</code> directory and navigate to those items.)</li>
+<li>Look at the 
+<a href="parser-faq.shtml">parser FAQ</a> for answers to common questions.</li>
+<li>Please send
+    any other questions or feedback, or extensions and bugfixes to <a
+    href="mailto:parser-user@lists.stanford.edu"><code>parser-user@lists.stanford.edu</code></a>.</li>
+</ol>
+
+<BR>
+<h3><a name="Mail">Mailing lists</a></h3>
+
+<p>
+We have 3 mailing lists for the parser, each <code>@lists.stanford.edu</code>:
+</p>
+<ol>
+<li><code>parser-user</code> This is the best list to post to in order
+to ask questions, make announcements, or for discussion among parser
+users.  Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/parser-user">this webpage</a> or by emailing
+<code>parser-user-join@lists.stanford.edu</code>.   (Leave the
+subject and message body empty.)  You can also 
+<a href="https://mailman.stanford.edu/pipermail/parser-user/">look at
+the list archives</a>.
+<li><code>parser-announce</code> This list will be used only to announce
+new parser versions.  So it will be very low volume (expect 1-3
+message a year).  Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/parser-announce">this webpage</a> or by emailing
+<code>parser-announce-join@lists.stanford.edu</code>.  (Leave the
+subject and message body empty.)
+<li><code>parser-support</code> This list goes only to the parser
+maintainers.  It's a good address for licensing questions, etc.  <b>For
+general use and support questions, you're better off joining and using
+<code>parser-user</code>.</b>
+You cannot join <code>parser-support</code>, but you can mail questions to 
+<code>parser-support@lists.stanford.edu</code>. 
+</ol>
+
+<BR>
+<h3><a name="Download">Download</a></h3>
+
+<CENTER>
+<b><font color="#a40526"><a href="stanford-parser-2012-11-12.zip">Download
+	  Stanford Parser version 2.0.4</a></font></b><br><br>
+</CENTER>
+
+<BR>
+<h3><a name="Tools">Included Tools</a></h3>
+
+<ul>
+<li> 
+
+Included with the Stanford Parser release is a dependency scoring
+tool, edu.stanford.nlp.trees.DependencyScoring.  This tool measures
+scores for dependency trees, doing f1 and labeled attachment scoring.
+The included usage message gives a detailed description of how to use
+the tool.
+
+</li>
+</ul>
+
+<BR>
+
+<h3><a name="Extensions">Extensions: Packages by others using the parser</a></h3>
+
+<p>
+<a href="http://tydevi.sourceforge.net">tydevi</a> Typed Dependency
+Viewer that makes a picture of the Stanford Dependencies analysis of a sentence.  By Bernard Bou.
+</p>
+
+<p>
+<a href="http://chaoticity.com/dependensee-a-dependency-parse-visualisation-tool/">
+DependenSee<a/> A Dependency Parse Visualisation Tool that makes
+pictures of Stanford Dependency output. By Awais Athar.
+</p>
+
+<p>
+<a href="http://gate.ac.uk/sale/tao/splitch17.html#sec:parsers:stanford">GATE
+plug-in</a>.  By the GATE Team (esp. Adam Funk).
+</p>
+
+<p>
+<a href="http://grammarscope.sourceforge.net/">GrammarScope</a>
+grammatical relation browser.  GUI, especially focusing on 
+grammatical relations (typed dependencies), including an editor.  By
+Bernard Bou.
+</p>
+
+<p>
+<a href="http://projects.csail.mit.edu/spatial/Stanford_Parser">Python
+interface</a>.
+Built using JPype by Stefanie Tellex.
+</p>
+
+<p>
+<a href="https://github.com/vpekar/stanford-parser-in-jython">Jython
+  interface.</a>
+By Viktor Pekar.</a>
+</p>
+
+<p>
+<a href="http://stanfordparser.rubyforge.org/">Ruby wrapper to the
+Stanford Natural Language Parser</a>.  By Bill McNeill.  An extended and
+better packaged version of this by John Wilkinson is <a
+href="http://github.com/jcwilk/stanfordparser">available at github</a>.
+</p>
+
+<!--
+<a href="http://hlt030.cse.ust.hk/research/c-assert/">HKUST Chinese
+Semantic Parser</a>. Based on top of Stanford Chinese Parser and Word
+Segmenter and an adaptation of <a
+href="http://cemantix.org/assert">ASSERT</a> to Chinese.  By HKUST
+Chinese Semantic Parsing Team.
+
+<a href="http://sourceforge.net/projects/miex/">MIEX</a>. The aim of
+MIEX (Metadata and Information Extractor from small XML documents)
+is to create a wrapper for the Stanford Parser, to extract and store
+metadata (syntactic structures, relationships among words...) from
+simple XML documents.
+-->
+
+<BR>
+
+<h3><a name="History">Release history</a></h3>
+
+<BR>
+<table>
+<tr>
+  <td><a href="stanford-parser-2012-11-12.zip">Version 2.0.4</a></td>
+  <td>2012-11-12</td>
+  <td>Improved dependency code extraction efficiency, other dependency changes</td>
+</tr>
+<tr>
+  <td><a href="stanford-parser-2012-07-09.tgz">Version 2.0.3</a></td>
+  <td>2012-07-09</td>
+  <td>Minor bug fixes</td>
+</tr>
+<tr>
+  <td><a href="stanford-parser-2012-05-22.tgz">Version 2.0.2</a></td>
+  <td>2012-05-22</td>
+  <td>Some models now support training with extra tagged, non-tree data</td>
+</tr>
+<tr>
+  <td><a href="stanford-parser-2012-03-09.tgz">Version 2.0.1</a></td>
+  <td>2012-03-09</td>
+  <td>Caseless English model included, bugfix for enforced tags</td>
+</tr>
+<tr>
+  <td><a href="stanford-parser-2012-02-03.tgz">Version 2.0</a></td>
+  <td>2012-02-03</td>
+  <td>Threadsafe!</td>
+</tr>
+<tr>
+  <td><a href="stanford-parser-2011-09-14.tgz">Version 1.6.9</a></td>
+  <td>2011-09-14</td>
+  <td>Improved recognition of imperatives, dependencies now explicitely include a root, parser knows osprey is a noun</td>
+</tr>
+<tr>
+  <td><a href="stanford-parser-2011-08-04.tgz">Version 1.6.8</a></td>
+  <td>2011-06-19</td>
+  <td>New French model, improved foreign language models, bug fixes</td></tr>
+<tr>
+  <td><a href="stanford-parser-2011-05-15.tgz">Version 1.6.7</a></td>
+  <td>2011-05-15</td>
+  <td>Minor bug fixes.</td></tr>
+<tr>
+  <td><a href="stanford-parser-2011-04-20.tgz">Version 1.6.6</a></td>
+  <td>2011-04-20</td>
+  <td>Internal code and API changes (ArrayLists rather than Sentence; use of CoreLabel objects) to match tagger and CoreNLP.</td></tr>
+<tr>
+  <td><a href="stanford-parser-2010-11-30.tgz">Version 1.6.5</a></td>
+  <td>2010-11-30</td>
+  <td>Further improvements to English Stanford Dependencies and other minor changes</td></tr>
+<tr>
+  <td><a href="stanford-parser-2010-08-20.tgz">Version 1.6.4</a></td>
+  <td>2010-08-20</td>
+  <td>More minor bug fixes and improvements to English Stanford Dependencies and question parsing</td></tr>
+<tr>
+  <td><a href="stanford-parser-2010-07-09.tgz">Version 1.6.3</a></td>
+  <td>2010-07-09</td>
+  <td>Improvements to English Stanford Dependencies and question parsing, minor bug fixes</td></tr>
+<tr>
+  <td><a href="stanford-parser-2010-02-26.tgz">Version 1.6.2</a></td>
+  <td>2010-02-26</td>
+  <td>Improvements to Arabic parser models, and to English and Chinese Stanford Dependencies</td></tr>
+<tr>
+  <td><a href="stanford-parser-2008-10-26.tgz">Version 1.6.1</a></td>
+  <td>2008-10-26</td>
+  <td>Slightly improved Arabic and German parsing, and Stanford Dependencies</td></tr>
+<tr>
+  <td><a href="stanford-parser-2007-08-19.tar.gz">Version 1.6</a></td>
+  <td>2007-08-19</td>
+  <td>Added Arabic, k-best PCCFG parsing; improved English grammatical
+  relations</td></tr>
+<tr>
+  <td><a href="StanfordParser-2006-06-11.tar.gz">Version 1.5.1</a></td>
+  <td>2006-06-11</td>
+  <td>Improved English and Chinese grammatical relations; 
+  fixed UTF-8 handling</td></tr>
+<tr>
+  <td><a href="StanfordParser-2005-07-21.tar.gz">Version 1.5</a></td>
+  <td>2005-07-21</td>
+  <td>Added grammatical relations output;
+  fixed bugs introduced in 1.4</td></tr>
+<tr><td>Version 1.4</td><td>2004-03-24</td>
+  <td>Made PCFG faster again (by FSA minimization);
+      added German support</td></tr>
+<tr><td>Version 1.3</td><td>2003-09-06</td>
+  <td>Made parser over twice as fast; added tokenization options</td></tr>
+<tr><td>Version 1.2</td><td>2003-07-20</td>
+  <td>Halved PCFG memory usage; added support for Chinese</td></tr>
+<tr><td>Version 1.1</td><td>2003-03-25</td>
+  <td>Improved parsing speed; included GUI, improved PCFG grammar</td></tr>
+<tr><td>Version 1.0</td><td>2002-12-05</td>
+  <td>Initial release</td></tr>
+</table>
+
+<BR>
+
+<h3><a name="Sample">Sample input and output</a></h3>
+
+<p>
+The parser can read various forms of plain text input and can output
+various analysis formats, including part-of-speech tagged text, phrase
+structure trees, and a grammatical relations (typed dependency) format.
+For example, consider the text:
+</p>
+<quote>
+<code>The strongest rain ever recorded in India shut down the financial
+hub of Mumbai, snapped communication lines, closed airports and forced
+thousands of people to sleep in their offices or walk home during the
+night, officials said today.</code></quote>
+<p>
+The following output shows
+part-of-speech tagged text, then a context-free phrase structure grammar
+representation, and finally a typed dependency representation. All of
+these are different views of the output of the parser.
+</p> 
+<quote>
+<pre>
+The/DT strongest/JJS rain/NN ever/RB recorded/VBN in/IN India/NNP
+shut/VBD down/RP the/DT financial/JJ hub/NN of/IN Mumbai/NNP ,/,
+snapped/VBD communication/NN lines/NNS ,/, closed/VBD airports/NNS
+and/CC forced/VBD thousands/NNS of/IN people/NNS to/TO sleep/VB in/IN
+their/PRP$ offices/NNS or/CC walk/VB home/NN during/IN the/DT night/NN
+,/, officials/NNS said/VBD today/NN ./. 
+
+(ROOT
+  (S
+    (S
+      (NP
+        (NP (DT The) (JJS strongest) (NN rain))
+        (VP
+          (ADVP (RB ever))
+          (VBN recorded)
+          (PP (IN in)
+            (NP (NNP India)))))
+      (VP
+        (VP (VBD shut)
+          (PRT (RP down))
+          (NP
+            (NP (DT the) (JJ financial) (NN hub))
+            (PP (IN of)
+              (NP (NNP Mumbai)))))
+        (, ,)
+        (VP (VBD snapped)
+          (NP (NN communication) (NNS lines)))
+        (, ,)
+        (VP (VBD closed)
+          (NP (NNS airports)))
+        (CC and)
+        (VP (VBD forced)
+          (NP
+            (NP (NNS thousands))
+            (PP (IN of)
+              (NP (NNS people))))
+          (S
+            (VP (TO to)
+              (VP
+                (VP (VB sleep)
+                  (PP (IN in)
+                    (NP (PRP$ their) (NNS offices))))
+                (CC or)
+                (VP (VB walk)
+                  (NP (NN home))
+                  (PP (IN during)
+                    (NP (DT the) (NN night))))))))))
+    (, ,)
+    (NP (NNS officials))
+    (VP (VBD said)
+      (NP-TMP (NN today)))
+    (. .)))
+
+det(rain-3, The-1)
+amod(rain-3, strongest-2)
+nsubj(shut-8, rain-3)
+nsubj(snapped-16, rain-3)
+nsubj(closed-20, rain-3)
+nsubj(forced-23, rain-3)
+advmod(recorded-5, ever-4)
+partmod(rain-3, recorded-5)
+prep_in(recorded-5, India-7)
+ccomp(said-40, shut-8)
+prt(shut-8, down-9)
+det(hub-12, the-10)
+amod(hub-12, financial-11)
+dobj(shut-8, hub-12)
+prep_of(hub-12, Mumbai-14)
+conj_and(shut-8, snapped-16)
+ccomp(said-40, snapped-16)
+nn(lines-18, communication-17)
+dobj(snapped-16, lines-18)
+conj_and(shut-8, closed-20)
+ccomp(said-40, closed-20)
+dobj(closed-20, airports-21)
+conj_and(shut-8, forced-23)
+ccomp(said-40, forced-23)
+dobj(forced-23, thousands-24)
+prep_of(thousands-24, people-26)
+aux(sleep-28, to-27)
+xcomp(forced-23, sleep-28)
+poss(offices-31, their-30)
+prep_in(sleep-28, offices-31)
+xcomp(forced-23, walk-33)
+conj_or(sleep-28, walk-33)
+dobj(walk-33, home-34)
+det(night-37, the-36)
+prep_during(walk-33, night-37)
+nsubj(said-40, officials-39)
+root(ROOT-0, said-40)
+tmod(said-40, today-41)
+</pre>
+</quote>
+<p>
+This output was generated with the <a name="sample-command">command</a>:
+</p>
+<quote><code>
+java -mx200m edu.stanford.nlp.parser.lexparser.LexicalizedParser
+-retainTMPSubcategories -outputFormat
+"wordsAndTags,penn,typedDependencies" englishPCFG.ser.gz mumbai.txt
+</code></quote>
+
+<!--#include virtual="/footer.html" -->
+

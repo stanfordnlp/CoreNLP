@@ -23,7 +23,7 @@ public class RedwoodPrintStream extends PrintStream {
 		this.realStream = realStream;
   }
 
-  private synchronized void log(Object message){
+  private void log(Object message){
     if(buffer.length() > 0){
       logB(message);
       logB("\n");
@@ -32,7 +32,7 @@ public class RedwoodPrintStream extends PrintStream {
     }
   }
 
-  private synchronized void logf(String format, Object[] args){
+  private void logf(String format, Object[] args){
     if(tag != null){
       Redwood.channels(tag).logf(format, args);
     } else {
@@ -40,7 +40,7 @@ public class RedwoodPrintStream extends PrintStream {
     }
   }
 
-  private synchronized void logB(Object message){
+  private void logB(Object message){
     char[] str = message.toString().toCharArray();
     for(char c : str){
       if(c == '\n'){

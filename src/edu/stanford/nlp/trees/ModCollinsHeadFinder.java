@@ -1,6 +1,6 @@
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.util.Generics;
+import java.util.HashMap;
 
 /**
  * Implements a variant on the HeadFinder found in Michael Collins' 1999
@@ -51,7 +51,7 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
   public ModCollinsHeadFinder(TreebankLanguagePack tlp) {
     super(tlp, tlp.punctuationTags()); // avoid punctuation as head in final default rule
 
-    nonTerminalInfo = Generics.newHashMap();
+    nonTerminalInfo = new HashMap<String, String[][]>();
 
     // This version from Collins' diss (1999: 236-238)
     // NNS, NN is actually sensible (money, etc.)!
@@ -82,9 +82,7 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     // (PP (JJ next) (PP to them))
     // When you have both JJ and IN daughters, it is invariably "such as" -- not so clear which should be head, but leave as IN
     // should prefer JJ? (PP (JJ such) (IN as) (NP (NN crocidolite)))  Michel thinks we should make JJ a head of PP
-    // added SYM as used in new treebanks for symbols filling role of IN
-    // Changed PP search to left -- just what you want for conjunction (and consistent with SemanticHeadFinder)
-    nonTerminalInfo.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ", "SYM"}, {"left", "PP"}});
+    nonTerminalInfo.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ"}, {"right", "PP"}});
 
     nonTerminalInfo.put("PRN", new String[][]{{"left", "VP", "NP", "PP", "SQ", "S", "SINV", "SBAR", "ADJP", "JJP", "ADVP", "INTJ", "WHNP", "NAC", "VBP", "JJ", "NN", "NNP"}});
     nonTerminalInfo.put("PRT", new String[][]{{"right", "RP"}});

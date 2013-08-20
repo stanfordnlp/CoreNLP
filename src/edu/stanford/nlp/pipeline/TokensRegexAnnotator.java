@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
@@ -9,10 +10,8 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * <p>Uses TokensRegex patterns to annotate tokens.</p>
@@ -126,9 +125,9 @@ public class TokensRegexAnnotator implements Annotator {
       addTokenOffsets(annotation);
     }
     List<CoreMap> allMatched;
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+    if (annotation.containsKey(SentencesAnnotation.class)) {
       allMatched = new ArrayList<CoreMap>();
-      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+      List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
       for (CoreMap sentence : sentences) {
         List<CoreMap> matched = extract(sentence);
         if (matched != null && options.matchedExpressionsAnnotationKey != null) {
@@ -148,16 +147,5 @@ public class TokensRegexAnnotator implements Annotator {
 
     if (verbose)
       timer.stop("done.");
-  }
-
-  @Override
-  public Set<Requirement> requires() {
-    return Collections.singleton(TOKENIZE_REQUIREMENT);
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    // TODO: not sure what goes here
-    return Collections.emptySet();
   }
 }

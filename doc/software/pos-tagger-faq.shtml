@@ -1,0 +1,409 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2><font color="#a40526">Stanford POS tagger FAQ</font></h2>
+</center>
+
+<h3>Questions</h3>
+
+<ol>
+<li><a href="#g">How can I unpack the gzipped tar file?</a></li>
+<li><a href="#b">Why do I get <code>Exception in thread "main"
+java.lang.NoClassDefFoundError:edu/stanford/nlp/tagger/maxent/MaxentTagger</code>?</a></li>
+<li><a href="#a">How can I lemmatize (reduce to a base, dictionary form)
+words that have been tagged with the POS tagger?</a></li>
+<li><a href="#pretagged">How do I use pre-tokenized text?</a></li>
+<li><a href="#d">How can I achieve a single jar file deployment of the
+POS tagger?</a></li>
+<li><a href="#e">Can I run the tagger as a server?</a></li>
+<li><a href="#oom">Why am I running out of memory in general?</a></li>
+<li><a href="#c">Why am I running out of memory tagging a lot of data (using the 2008-10-26 version)?</a></li>
+<li><a href="#f">What different output formats are available?</a></li>
+<li><a href="#h">Is your tagger slow?</a></li>
+<li><a href="#train">How do I train a tagger?</a></li>
+<li><a href="#models">What model should I use?</a></li>
+<li><a href="#newline">How do I tag one sentence per line?</a></li>
+<li><a href="#owlqn">Why does it crash when I try to optimize with search=owlqn?  Is owlqn available anywhere?</a></li>
+<li><a href="#outputfile">How do I output the results to a file?</a></li>
+</ol>
+
+
+<h3>Questions with answers</h3>
+
+<ol>
+
+<li><h4><a name="g">How can I unpack the gzipped tar file?</a></h4>
+<p>
+On Unix/Linux (or command-line Mac OS X), use GNU tar, if you're not already.  (If you're using
+Linux, you're almost certainly using GNU tar.)  For some reason we don't
+understand, it doesn't seem to unpack with classic Unix tar.  Make sure you
+specify the <code>-z</code> option if you are not gunzipping it in
+advance: <code>tar -xzf stanford-ner-2008-05-07.tar.gz</code>.</p>
+
+<p>On Windows, it unpacks fine
+with most common tools, such as WinZip or 7-Zip.  The latter is open
+source. (As of Sep 2007, WinRAR doesn't work: it apparently does not handle
+tar files correctly.)</p>
+
+<p>On the Mac, just double-click it to unpack.  The default unarchiver
+(BOMArchiveHelper) works fine.</p>
+
+<p>If it won't unpack, you normally have either a corrupted download
+(try downloading it again) or
+there is some configuration error on your system, which we can't help
+with.
+</p>
+</li>
+
+<li><h4><a name="b">Why do I get <code>Exception in thread "main"
+java.lang.NoClassDefFoundError:edu/stanford/nlp/tagger/maxent/MaxentTagger</code>?</a></h4>
+<p>
+This means your Java CLASSPATH isn't set correctly, so the tagger (in  
+stanford-tagger.jar) isn't being found.  See the examples in the
+<code>README.txt</code> file for how to set the classpath with  
+the <code>-cp</code> or <code>-classpath</code> option.
+</p>
+<p>
+See, e.g., <a href="http://en.wikipedia.org/wiki/Classpath_(Java)"><code>http://en.wikipedia.org/wiki/Classpath_(Java)</code></a>
+for general discussion of the Java classpath.
+</p>
+</li>
+
+<li><h4><a name="a">How can I lemmatize (reduce to a base, dictionary form)
+words that have been tagged with the POS tagger?</a></h4>
+<p>
+For English (only), you can do this using the included <code>Morphology</code> class.
+However, unlike for the Stanford parser, there is at present no support
+for doing this automatically using options of the command-line version
+of the tagger.  You'd have to do it using code you write.
+</li>
+
+<li><h4><a name="pretagged">How do I use pre-tokenized text?</a></h4>
+<p>
+Use the flag "-tokenize false".
+</li>
+
+<li><h4><a name="d">How can I achieve a single jar file deployment of the
+POS tagger?</a></h4>
+<p>
+This is easy - with version 2.0 or later of the Stanford POS tagger.  You
+can insert one or more tagger models into the jar file and give options
+to load a model from there.  Here are detailed instructions.
+<ol>
+<li>Start in the home directory of the unpacked tagger download</li>
+<li>Make a copy of the jar file, into which we'll insert a tagger model:
+<blockquote><code>cp stanford-postagger.jar stanford-postagger-withModel.jar
+</code></blockquote></li>
+<li>Insert one or more models into the jar file - we usually do it under <code>edu/stanford/nlp/models/</code>.
+<blockquote><code>jar -uf stanford-postagger-withModel.jar edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger
+</code></blockquote></li>
+<li>You can now specify loading this model by loading it directly from the classpath. 
+<blockquote><code>
+java -mx300m -cp stanford-postagger-withModel.jar
+edu.stanford.nlp.tagger.maxent.MaxentTagger -model
+"edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger" -textFile sample-input.txt
+</code></blockquote></li>
+</li>
+<li>Or, in code, you can similarly load the tagger like this:
+<blockquote><code>
+MaxentTagger tagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger");
+</code></blockquote></li>
+</ol>
+</li>
+
+<li><h4><a name="e">Can I run the tagger as a server?</a></h4>
+<p>
+Yes! (This was added in version 2.0.)  We provide MaxentTaggerServer as
+a simple example of a socket-based server using the POS tagger.  With a
+bit of work, we're sure you can 
+adapt this example to work in a REST, SOAP, AJAX, or whatever system.  If not,
+pay us a lot of money, and we'll work it out for you.
+</p><p>
+If you're doing this, you may also
+be interested in single jar deployment.  We'll use a continuation of the
+answer to the <a href="#d">previous question</a> in our example (but
+the two features are independent).  The commands shown are for a
+Unix/Linux/Mac OS X system.  For Windows, you reverse the slashes, etc.
+You start the server on some host by
+specifying a model and a port for it to run on:
+<blockquote><code>
+java -mx300m -cp stanford-postagger-withModel.jar
+edu.stanford.nlp.tagger.maxent.MaxentTaggerServer -model
+"jar:left3words-distsim-wsj-0-18.tagger" -port 2020 &amp;
+</code></blockquote>
+The same class then includes a demonstration client, which you'll want
+to adapt to your own needs.  You can invoke it like this:
+<blockquote><code>
+$ java -cp stanford-postagger.jar
+edu.stanford.nlp.tagger.maxent.MaxentTaggerServer -client
+ -host nlp.stanford.edu -port 2020 <br>
+Input some text and press RETURN to POS tag it, or just RETURN to finish.<br>
+I hope this'll show the server working.<br>
+I_PRP hope_VBP this_DT 'll_MD show_VB the_DT server_NN working_VBG ._. 
+</code></blockquote>
+If you're running the server and client on the same machine, then you
+can omit the <code>-host</code> argument.  You can provide other
+<code>MaxentTagger</code> options to the <i>server</i> invocation of 
+<code>MaxentTaggerServer</code>,
+such as <code>-outputFormat tsv</code>, as needed.
+</li>
+
+<li><h4><a name="oom">Why am I running out of memory, in general?</a></h4>
+<p>
+If you run the tagger without changing how much memory you give to Java,
+there is a good chance you will run out of memory.  This will be
+evident when the program terminates with an OutOfMemoryError.
+</p><p>
+When running from the command line, you need to supply a flag like
+<code>-mx1000m</code>.  Note that the number 1000m is just an example;
+if you do not have that much memory available, use less so your
+computer doesn't start paging; for training a tagger, you may need more memory.
+</p><p>
+When running from within Eclipse, follow <a href="http://help.eclipse.org/galileo/index.jsp?topic=/org.eclipse.platform.doc.user/tasks/running_eclipse.htm">these instructions</a> to increase the memory given to the program.
+</p>
+<p>
+Note also that the method <code>tagger.tokenizeText(reader)</code> will
+tokenize all the text in a reader, and put it in memory.  This is okay
+for reasonable-size files.  However, if you have huge files, this can 
+consume an unbounded amount of memory.  You will
+need to adopt an alternate strategy where you only tokenize part of the
+text at a time.
+</p>
+</li>
+
+<li><h4><a name="c">Why am I running out of memory tagging a lot of data (using the 2008-10-26 version)?</a></h4>
+<p>
+You're probably using the <code>tagString()</code> method.
+Unfortunately, it does use increasing memory in this version.  That
+method may well not be what you want anyway.  It assumes that the input is
+correctly tokenized according to the conventions of the tagger training
+corpus.  For the English models we use derived from the Penn Treebank,
+this means things like separating off contractions of "be" and "n't",
+rendering parentheses as -LRB-, -RRB-, etc.  If you don't do this
+correctly, then accuracy will suffer. 
+<p>
+(For no very good reason) in the 2008-09-28 distribution, the
+tagSentence method is set up to do tagging by using a beam search,
+whereas the main method of MaxentTagger and the tagSentence(Sentence)
+method called in TaggerDemo.java call a different Viterbi search routine
+to do the part-of-speech tagging.  There seem to be problems with the
+former, and so you should use <code>tagSentence()</code>.
+If you have <code>String</code>s which you are happy with the tokenization of, you
+can convert to using <code>tagSentence()</code> easily: rather than calling
+<code>tagString(String)</code> you could use the line:
+<blockquote><code>
+String taggedLine =
+MaxentTagger.tagSentence(Sentence.toSentence(line.split("\\s+"\))).toString(false);
+</code></blockquote>
+<p>
+But at this point in time, you should just upgrade to the current
+version.
+</p>
+</li>
+
+<li><h4><a name="f">What different output formats are available?</a></h4>
+<p>The output tagged text can be produced in several styles. The tags can be separated from the words by a character, which you can specify (this is the default, with an underscore as the separator), or you can get two tab-separated columns (good for spreadsheets or the Unix <code>cut</code> command), or you can get ouptput in XML.  An example of each option appears below:
+</p>
+<blockquote><pre>
+$ cat > short.txt
+This is a short sentence.
+So is this.
+$ java -cp stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/left3words-wsj-0-18.tagger -textFile short.txt -outputFormat slashTags 2> /dev/null
+This_DT is_VBZ a_DT short_JJ sentence_NN ._.
+So_RB is_VBZ this_DT ._.
+$ java -cp stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/left3words-wsj-0-18.tagger -textFile short.txt -outputFormat slashTags -tagSeparator \# 2> /dev/null
+This#DT is#VBZ a#DT short#JJ sentence#NN .#.
+So#RB is#VBZ this#DT .#.
+$ java -cp stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/left3words-wsj-0-18.tagger -textFile short.txt -outputFormat tsv 2> /dev/null
+This	DT
+is	VBZ
+a	DT
+short	JJ
+sentence	NN
+.	.
+
+So	RB
+is	VBZ
+this	DT
+.	.
+
+$ java -cp stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/left3words-wsj-0-18.tagger -textFile short.txt -outputFormat xml 2&gt; /dev/null
+&lt;sentence id="0"&gt;
+  &lt;word wid="0" pos="DT"&gt;This&lt;/word&gt;
+  &lt;word wid="1" pos="VBZ"&gt;is&lt;/word&gt;
+  &lt;word wid="2" pos="DT"&gt;a&lt;/word&gt;
+  &lt;word wid="3" pos="JJ"&gt;short&lt;/word&gt;
+  &lt;word wid="4" pos="NN"&gt;sentence&lt;/word&gt;
+  &lt;word wid="5" pos="."&gt;.&lt;/word&gt;
+&lt;/sentence&gt;
+&lt;sentence id="1"&gt;
+  &lt;word wid="0" pos="RB"&gt;So&lt;/word&gt;
+  &lt;word wid="1" pos="VBZ"&gt;is&lt;/word&gt;
+  &lt;word wid="2" pos="DT"&gt;this&lt;/word&gt;
+  &lt;word wid="3" pos="."&gt;.&lt;/word&gt;
+&lt;/sentence&gt;
+</pre></blockquote>
+</li>
+
+<li><h4><a name="h">Is your tagger slow?</a></h4>
+
+<p><b>No!</b>  Most people who think that the tagger is slow have made the
+mistake of running it
+with the model <code>bidirectional-distsim-wsj-0-18.tagger</code>.  That
+model <i>is fairly slow</i>.  Essentially, that model is trying to
+pull out all stops to maximize tagger accuracy.  Speed consequently
+suffers due to choices like using 4th order bidirectional tag conditioning.
+</p>
+
+<p>
+In applications, we nearly always use the
+<code>left3words-wsj-0-18.tagger</code> model, and we suggest you do
+too.  It's <emph>nearly</emph> as accurate (96.97% accuracy
+vs. 97.32% on the standard WSJ22-24 test set) and is <emph>an order of
+magnitude faster</emph>.  Comparing apples-to-apples, the Stanford POS tagger
+isn't slow.  For example, with the <code>left3words-wsj-0-18.tagger</code> model,
+it's directly comparable to
+the quite well known MXPOST tagger by Adwait Ratnaparkhi (both use a
+second order conditioning model and maximum entropy classifiers; both
+are in Java).
+Compared to MXPOST, the Stanford POS Tagger running the left3words model
+is <b>both</b> <i>more accurate</i> and <i>considerably faster</i>.  Want a number?
+It all depends, but on a 2008 nothing-special Intel server, it tags about
+15000 words per second.  This is also about 4 times faster than <a
+href="http://www-tsujii.is.s.u-tokyo.ac.jp/~tsuruoka/postagger/">Tsuruoka's
+C++ tagger</a> which has an accuracy in between our left3words and
+bidirectional-distsim models.  The 
+<a href="http://www.cis.upenn.edu/~xtag/spinal/">LTAG-spinal</a> POS
+tagger, another recent Java POS tagger, is fractionally more accurate
+than our best model (97.33% accuracy) but it is over 3 times slower than
+our best model (and hence over 30 times slower than the
+<code>left3words-wsj-0-18.tagger</code> model).
+</p>
+
+<p>
+However, if speed is your paramount concern, you might want something
+still faster. This can be done by using a cheaper conditioning model
+class (you can get another 50% speed up in the Stanford POS tagger, with
+still little accuracy loss), using some other classifier type (an HMM-based tagger
+is just going to be faster than a discriminative, feature-based model
+like our maxent tagger), or doing more code optimization (probably more
+to be done here, but the current state is not so bad).
+</p>
+
+<p>
+Some people also use <a href="http://nlp.stanford.edu/software/lex-parser.shtml">the
+Stanford Parser</a> as just a POS tagger.  It's a
+quite accurate POS tagger, and so this is okay if you don't care about
+speed.  But, if you do, it's not a good idea.  Use the Stanford POS tagger.
+</p>
+
+</li>
+
+<li><h4><a name="train">How do I train a tagger?</a></h4>
+
+<p>
+You need to start with a .props file which contains options for the
+tagger to use.  The .props files we used to create the sample taggers
+are included in the models directory; you can start from whichever one
+seems closest to the language you want to tag.  For example, to train
+a new English tagger, start with the left3words tagger props file.  To
+train a tagger for a western language other than English, you can
+consider the props files for the German or the French taggers, which
+are included in the full distribution.  For languages using a
+different character set, you can start from the Chinese or Arabic
+props files.  Or you can use the -genprops option to MaxentTagger, and
+it will write a sample properties file, with documentation, for you to
+modify.  It writes it to stdout, so you'll want to save it to some file
+by redirecting output (usually with &gt;). The # at the start of the line 
+makes things a comment, so you'll want to delete the # before properties
+you wish to specify.
+</p><p>
+In these props files, there are two parameters you absolutely have to
+change.  The first is the model parameter, which specifies the file
+which the trained model is output to
+(that is, it is created during the tagger training process).  
+The other is the trainFile parameter,
+which specifies the file to load the training data from (data that you
+must provide).
+</p><p>
+You can specify input files in a few different formats.  This is part
+of the trainFile property.  To learn more about the formats you can
+use and what other the options mean, look at the javadoc for MaxentTagger.
+</p><p> 
+In its most basic format, the training data is sentences of tagged
+text.  The words should be tagged by having the word and the tag
+separated by the tagSeparator parameter.  For example, if the
+tagSeparator is <code>_</code>, one of your training lines might look like
+</p><p>
+<code>An_DT avocet_NN is_VBZ a_DT small_JJ ,_, cute_JJ bird_NN ._.</code>
+</p><p>
+There are other options available for training files.  For example,
+you can use tab separated blocks, where each line represents a
+word/tag pair and sentences are separated by blank lines.  You can
+also specify PTB format trees, where the tags are extracted from the
+bottom layer of the tree.
+</p><p>
+You may want to experiment with other feature architectures for your
+tagger.  This is the "arch" property.  Look at the javadoc for
+ExtractorFrames and ExtractorFramesRare to learn what other arch
+options exist.
+</p>
+
+</li>
+
+<li><h4><a name="models">What model should I use?</a></h4>
+
+<p>
+
+Included in the distribution is a file, README-Models.txt, which
+describes all of the available models.  For English, there are models
+trained on wsj ptb, which are useful for the purposes of academic
+comparisons.  There are also models titled "english" which are trained
+on wsj with additional training data, which are more useful for
+general purpose text.  There are models for other languages, as well,
+such as Chinese, Arabic, etc.
+
+<li><h4><a name="newline">How do I tag one sentence per line?</a></h4>
+
+<p>
+
+Run the tagger with the flags 
+  <code>-sentenceDelimiter newline -tokenize false</code>
+
+</li>
+
+<li><h4><a name="owlqn">Why does it crash when I try to optimize with search=owlqn?  Is owlqn available anywhere?</a></li>
+
+<p>
+
+Unfortunately, we do not have a license to redistribute owlqn.  This
+causes it to crash if you model your training file off a .props file
+that used owlqn internally.  We do distribute a different optimizer,
+though, which you can use with the option
+<br>
+<code>search=qn</code>
+
+</p>
+</li>
+
+<li><h4><a name="outputfile">How do I output the results to a file?</a></li>
+
+<p>
+
+Use the shell redirect &gt; filename
+
+</p>
+</li>
+
+</ol>
+
+<p>
+You can discuss other topics with <a href="tagger.shtml">Stanford POS Tagger</a> developers and users by 
+<a
+href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-user">joining
+the <code>java-nlp-user</code> mailing list</a>
+(via a webpage).  Or you can send other questions and feedback to 
+<a href="mailto:java-nlp-support@lists.stanford.edu"><code>java-nlp-support@lists.stanford.edu</code></a>.  
+</p>
+
+<!--#include virtual="/footer.html" -->

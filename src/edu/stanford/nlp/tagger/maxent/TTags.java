@@ -4,9 +4,8 @@ import edu.stanford.nlp.io.InDataStreamFile;
 import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.tagger.common.TaggerConstants;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.HashIndex;
 
 import java.io.IOException;
 import java.io.DataInputStream;
@@ -27,8 +26,8 @@ import java.util.*;
 public class TTags {
 
   private Index<String> index = new HashIndex<String>();
-  private final Set<String> closed = Generics.newHashSet();
-  private Set<String> openTags = null; /* cache */
+  private final HashSet<String> closed = new HashSet<String>();
+  private HashSet<String> openTags = null; /* cache */
   private final boolean isEnglish; // for speed
   private static final boolean doDeterministicTagExpansion = true;
 
@@ -60,9 +59,9 @@ public class TTags {
     String[] closedArray = config.getClosedClassTags();
     String[] openArray = config.getOpenClassTags();
     if(closedArray.length > 0) {
-      closed = Generics.newHashSet(Arrays.asList(closedArray));
+      closed = new HashSet<String>(Arrays.asList(closedArray));
     } else if(openArray.length > 0) {
-      openTags = Generics.newHashSet(Arrays.asList(openArray));
+      openTags = new HashSet<String>(Arrays.asList(openArray));
     } else {
       learnClosedTags = config.getLearnClosedClassTags();
       closedTagThreshold = config.getClosedTagThreshold();
@@ -256,7 +255,7 @@ public class TTags {
    */
   public Set<String> getOpenTags() {
     if (openTags == null) { /* cache check */
-      Set<String> open = Generics.newHashSet();
+      HashSet<String> open = new HashSet<String>();
 
       for (String tag : index) {
         if ( ! closed.contains(tag)) {
@@ -270,7 +269,6 @@ public class TTags {
   }
 
   protected int add(String tag) {
-    // todo [cdm 2013]: couldn't this just be 1 call to index.indexOf(tag, true) ?
     index.add(tag);
     return index.indexOf(tag);
   }
@@ -280,7 +278,7 @@ public class TTags {
   }
 
   protected void save(String filename,
-                      Map<String, Set<String>> tagTokens) {
+                      HashMap<String, HashSet<String>> tagTokens) {
     try {
       DataOutputStream out = new OutDataStreamFile(filename);
       save(out, tagTokens);
@@ -291,7 +289,7 @@ public class TTags {
   }
 
   protected void save(DataOutputStream file,
-                      Map<String, Set<String>> tagTokens) {
+                      HashMap<String, HashSet<String>> tagTokens) {
     try {
       file.writeInt(index.size());
       for (String item : index) {
@@ -354,7 +352,7 @@ public class TTags {
   }
 
   public void setOpenClassTags(String[] openClassTags) {
-    openTags = Generics.newHashSet();
+    openTags = new HashSet<String>();
     openTags.addAll(Arrays.asList(openClassTags));
     for (String tag : openClassTags) {
       add(tag);

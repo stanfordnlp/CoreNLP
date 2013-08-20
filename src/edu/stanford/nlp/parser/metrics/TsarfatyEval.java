@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -17,7 +18,6 @@ import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Character level segmentation and tagging metric from (Tsarfaty, 2006). For evaluating parse
@@ -42,7 +42,7 @@ public class TsarfatyEval extends AbstractEval {
 
   @Override
   protected Set<?> makeObjects(Tree tree) {
-    Set<Constituent> deps = Generics.newHashSet();
+    Set<Constituent> deps = new HashSet<Constituent>();
     if(tree != null) extractDeps(tree, 0, deps);
     return deps;
   }

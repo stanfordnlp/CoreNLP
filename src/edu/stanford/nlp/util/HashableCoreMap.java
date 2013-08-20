@@ -12,7 +12,7 @@ import java.util.Set;
 public class HashableCoreMap extends ArrayCoreMap {
 
   /** Set of immutable keys */
-  private final Set<Class<? extends TypesafeMap.Key<?>>> immutableKeys;
+  private final Set<Class<? extends TypesafeMap.Key<CoreMap, ?>>> immutableKeys;
   
   /** Pre-computed hashcode */
   private final int hashcode;
@@ -22,17 +22,18 @@ public class HashableCoreMap extends ArrayCoreMap {
    * for the immutable, hashable keys as provided in the given map.
    */
   @SuppressWarnings("unchecked")
-  public HashableCoreMap(Map<Class<? extends TypesafeMap.Key<?>>,Object> hashkey) {
+  public HashableCoreMap(Map<Class<? extends TypesafeMap.Key<CoreMap, ?>>,Object> hashkey) {
     int keyHashcode = 0;
     int valueHashcode = 0;
     
-    for (Map.Entry<Class<? extends TypesafeMap.Key<?>>,Object> entry : hashkey.entrySet()) {
+    for (Map.Entry<Class<? extends TypesafeMap.Key<CoreMap, ?>>,Object> entry : hashkey.entrySet()) {
       // NB it is important to compose these hashcodes in an order-independent
       // way, so we just add them all here.
       keyHashcode += entry.getKey().hashCode();
       valueHashcode += entry.getValue().hashCode();
       
-      super.set((Class) entry.getKey(), entry.getValue());
+      super.set((Class<? extends TypesafeMap.Key>)entry.getKey(),
+          entry.getValue());
     }
     
     this.immutableKeys = hashkey.keySet();
@@ -45,13 +46,13 @@ public class HashableCoreMap extends ArrayCoreMap {
    * the immutable, hashable keys used by hashcode and equals.
    */
   @SuppressWarnings("unchecked")
-  public HashableCoreMap(ArrayCoreMap other, Set<Class<? extends TypesafeMap.Key<?>>> hashkey) {
+  public HashableCoreMap(ArrayCoreMap other, Set<Class<? extends TypesafeMap.Key<CoreMap, ?>>> hashkey) {
     super(other);
     
     int keyHashcode = 0;
     int valueHashcode = 0;
     
-    for (Class<? extends TypesafeMap.Key<?>> key : hashkey) {
+    for (Class<? extends TypesafeMap.Key<CoreMap, ?>> key : hashkey) {
       // NB it is important to compose these hashcodes in an order-independent
       // way, so we just add them all here.
       keyHashcode += key.hashCode();
@@ -70,7 +71,8 @@ public class HashableCoreMap extends ArrayCoreMap {
    *   immutable, hashable key.
    */
   @Override
-  public <VALUE> VALUE set(Class<? extends Key<VALUE>> key, VALUE value) {
+  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends Key<CoreMap, VALUEBASE>>
+    VALUE set(Class<KEY> key, VALUE value) {
     
     if (immutableKeys.contains(key)) {
       throw new HashableCoreMapException("Attempt to change value " +
@@ -102,7 +104,7 @@ public class HashableCoreMap extends ArrayCoreMap {
       if (!other.immutableKeys.equals(this.immutableKeys)) {
         return false;
       }
-      for (Class<? extends TypesafeMap.Key<?>> key : immutableKeys) {
+      for (Class<? extends TypesafeMap.Key<CoreMap, ?>> key : immutableKeys) {
         if (!this.get((Class)key).equals(other.get((Class)key))) {
           return false;
         }

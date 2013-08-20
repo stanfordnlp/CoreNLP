@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Random;
 
 import junit.framework.TestCase;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMapTest.IntegerA;
 
 /**

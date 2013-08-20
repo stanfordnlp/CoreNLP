@@ -87,14 +87,14 @@ class TestThreadedTagger {
    * specified in the config.
    */
   static class TaggerThread extends Thread {
-    private final Properties config;
+    private final TaggerConfig config;
     private final MaxentTagger tagger;
     private final String threadName;
 
     private String resultsString = "";
     public String getResultsString() { return resultsString; }
 
-    TaggerThread(Properties config, MaxentTagger tagger, String name) {
+    TaggerThread(TaggerConfig config, MaxentTagger tagger, String name) {
       this.config = config;
       this.tagger = tagger;
       this.threadName = name;
@@ -106,7 +106,7 @@ class TestThreadedTagger {
         Timing t = new Timing();
         TestClassifier testClassifier = new TestClassifier(tagger);
         long millis = t.stop();
-        resultsString = testClassifier.resultsString(tagger);
+        resultsString = testClassifier.resultsString(config, tagger);
         System.out.println("Thread " + threadName + " took " + millis +
                            " milliseconds to tag " + testClassifier.getNumWords() +
                            " words.\n" + resultsString);
@@ -132,7 +132,7 @@ class TestThreadedTagger {
   public static void runThreadedTest(Properties props)
     throws ClassNotFoundException, IOException, InterruptedException
   {
-    ArrayList<Properties> configs = new ArrayList<Properties>();
+    ArrayList<TaggerConfig> configs = new ArrayList<TaggerConfig>();
     ArrayList<MaxentTagger> taggers = new ArrayList<MaxentTagger>();
     int numThreads = DEFAULT_NUM_THREADS;
 
@@ -147,8 +147,8 @@ class TestThreadedTagger {
     System.out.println();
 
     if (props.getProperty("model") != null) {
-      configs.add(props);
-      taggers.add(new MaxentTagger(configs.get(0).getProperty("model"), configs.get(0)));
+      configs.add(new TaggerConfig(props));
+      taggers.add(new MaxentTagger(configs.get(0).getModel(), configs.get(0)));
     } else {
       int taggerNum = 1;
       String taggerName = "model" + taggerNum;
@@ -156,8 +156,8 @@ class TestThreadedTagger {
         Properties newProps = new Properties();
         newProps.putAll(props);
         newProps.setProperty("model", props.getProperty(taggerName));
-        configs.add(newProps);
-        taggers.add(new MaxentTagger(configs.get(taggerNum - 1).getProperty("model"),
+        configs.add(new TaggerConfig(newProps));
+        taggers.add(new MaxentTagger(configs.get(taggerNum - 1).getModel(),
                                      configs.get(taggerNum - 1)));
 
         ++taggerNum;

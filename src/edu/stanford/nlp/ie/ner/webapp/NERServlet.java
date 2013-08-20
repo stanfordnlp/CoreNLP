@@ -13,8 +13,9 @@ import org.apache.commons.lang.StringEscapeUtils;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.crf.NERGUI;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
 
 /**
  *  This is a servlet interface to the CRFClassifier.
@@ -31,7 +32,7 @@ public class NERServlet extends HttpServlet
   private boolean spacing;
   private String defaultClassifier;
   private List<String> classifiers = new ArrayList<String>();
-  private Map<String, CRFClassifier> ners;
+  private HashMap<String, CRFClassifier> ners;
 
   private static final int MAXIMUM_QUERY_LENGTH = 3000;
   
@@ -60,7 +61,7 @@ public class NERServlet extends HttpServlet
       log(classifier);
     }
 
-    ners = Generics.newHashMap();
+    ners = new HashMap<String, CRFClassifier>();
     for (String classifier : classifiers) {
       CRFClassifier model = null;
       String filename = "/WEB-INF/data/models/" + classifier;
@@ -178,9 +179,9 @@ public class NERServlet extends HttpServlet
     int lastEndOffset = 0;
     for (List<CoreMap> sentence : sentences) {
       for (CoreMap word : sentence) {
-        int beginOffset = word.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-        int endOffset = word.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        String answer = word.get(CoreAnnotations.AnswerAnnotation.class);
+        int beginOffset = word.get(CharacterOffsetBeginAnnotation.class);
+        int endOffset = word.get(CharacterOffsetEndAnnotation.class);
+        String answer = word.get(AnswerAnnotation.class);
 
         if (beginOffset > lastEndOffset) {
           result.append(StringEscapeUtils.escapeHtml(input.substring(lastEndOffset, beginOffset)));

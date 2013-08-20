@@ -4,7 +4,7 @@ import java.util.List;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.ErasureUtils;
 
 /**

@@ -1,6 +1,8 @@
 package edu.stanford.nlp.process;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -11,9 +13,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Produces a list of sentences from either a plain text or XML document.
@@ -44,7 +46,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
   private final DocType docType;
 
   //Configurable options
-  private TokenizerFactory<? extends HasWord> tokenizerFactory = PTBTokenizer.coreLabelFactory();
+  private TokenizerFactory<? extends HasWord> tokenizerFactory = PTBTokenizer.factory();
   private String[] sentenceFinalPuncWords = {".", "?", "!"};
   private Function<List<HasWord>,List<HasWord>> escaper = null;
   private String sentenceDelimiter = null;
@@ -105,7 +107,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
     docType = t;
     try {
-      inputReader = IOUtils.readerFromString(docPath, encoding);
+      inputReader = IOUtils.readReaderFromString(docPath, encoding);
     } catch (IOException ioe) {
       System.err.printf("%s: Could not open path %s\n", this.getClass().getName(), docPath);
       throw new RuntimeIOException(ioe);
@@ -202,15 +204,15 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     public PlainTextIterator() {
       // Establish how to find sentence boundaries
       boolean eolIsSignificant = false;
-      sentDelims = Generics.newHashSet();
+      sentDelims = new HashSet<String>();
       if (sentenceDelimiter == null) {
         if (sentenceFinalPuncWords != null) {
           sentDelims.addAll(Arrays.asList(sentenceFinalPuncWords));
         }
-        delimFollowers = Generics.newHashSet(Arrays.asList(sentenceFinalFollowers));
+        delimFollowers = new HashSet<String>(Arrays.asList(sentenceFinalFollowers));
       } else {
         sentDelims.add(sentenceDelimiter);
-        delimFollowers = Generics.newHashSet();
+        delimFollowers = new HashSet<String>();
         eolIsSignificant = wsPattern.matcher(sentenceDelimiter).matches();
         if(eolIsSignificant) { // For Stanford English Tokenizer
           sentDelims.add(PTBLexer.NEWLINE_TOKEN);

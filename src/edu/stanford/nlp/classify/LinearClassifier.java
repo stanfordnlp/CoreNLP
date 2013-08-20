@@ -351,7 +351,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * @return Set of indicies
    */
   protected Set<Integer> getLabelIndices(Set<L> labels) {
-    Set<Integer> iLabels = Generics.newHashSet();
+    Set<Integer> iLabels = new HashSet<Integer>();
     for (L label:labels) {
       int iLabel = labelIndex.indexOf(label);
       iLabels.add(iLabel);
@@ -1177,7 +1177,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
  */
 
   public Map<L,Counter<F>> weightsAsMapOfCounters() {
-    Map<L,Counter<F>> mapOfCounters = Generics.newHashMap();
+    Map<L,Counter<F>> mapOfCounters = new HashMap<L,Counter<F>>();
     for(L label : labelIndex){
       int labelID = labelIndex.indexOf(label);
       Counter<F> c = new ClassicCounter<F>();

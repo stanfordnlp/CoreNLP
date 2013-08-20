@@ -29,10 +29,7 @@ endif
 
 set wsjptb=/afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj
 # now ctb6
-set ctb=/afs/ir/data/linguistic-data/Chinese-Treebank/6/data/utf8/bracketed
-# now ctb7!
-set ctb7train=/u/nlp/data/chinese/ctb7/train.mrg
-set ctb7test=/u/nlp/data/chinese/ctb7/test.mrg
+set ctb=/afs/ir/data/linguistic-data/Chinese-Treebank/6/data/gbk/bracketed
 set negra=/afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test
 
 set host=`hostname | cut -d. -f1`
@@ -92,7 +89,7 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 
 # Xinhua Mainland Chinese PCFG binary
 
-( echo "Running xinhuaPCFG on $host -server" ; time java -server -mx800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -saveToSerializedFile xinhuaPCFG.ser.gz -maxLength 40 -train $ctb 026-270,301-499,600-999 -test $ctb 001-025 ) >>& ./serializedParsers.log
+( echo "Running xinhuaPCFG on $host -server" ; time java -server -mx800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -encoding GB18030 -saveToSerializedFile xinhuaPCFG.ser.gz -maxLength 40 -train $ctb 026-270,301-499,600-999 -test $ctb 001-025 ) >>& ./serializedParsers.log
 # new train list (Galen and Huihsin): 026-270,301-499,555-589,597-1041
 # newer train list (Galen and Huihsin): 026-270,301-499,600-999
 # this is all Xinhua minus Stanford devel and Bikel test
@@ -103,7 +100,7 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 
 # Mixed dialect Chinese on lots of data (with chineseFactored)
 
-( echo "Running chineseFactored on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -saveToSerializedFile chineseFactored.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
+( echo "Running chineseFactored on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -saveToSerializedFile chineseFactored.ser.gz -maxLength 40 -train $ctb 026-270,301-1139,2000-2199 -test $ctb 001-025 ) >>& ./serializedParsers.log
 # new train list (Galen and Huihsin): 026-270,301-499,555-589,597-1041
 # newer train list (Galen and Huihsin): 026-270,301-499,600-999
 # this is all Xinhua minus Stanford devel and Bikel test
@@ -116,7 +113,7 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 
 # Mixed dialect Chinese PCFG on lots of data
 
-( echo "Running chinesePCFG on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -useUnicodeType -saveToSerializedFile chinesePCFG.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
+( echo "Running chinesePCFG on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -useUnicodeType -encoding GB18030 -saveToSerializedFile chinesePCFG.ser.gz -maxLength 40 -train $ctb 026-270,301-1139,2000-2199 -test $ctb 001-025 ) >>& ./serializedParsers.log
 # new train list (Galen and Huihsin): 026-270,301-499,555-589,597-1041
 # newer train list (Galen and Huihsin): 026-270,301-499,600-999
 # this is all Xinhua minus Stanford devel and Bikel test
@@ -173,7 +170,6 @@ if( ! -e $ar_data_dir ) then
   mkdir $ar_data_dir
 endif
 
-echo Running $tree_pipe -p $ar_data_dir -v $ar_conf_file >>& ./serializedParsers.log
 $tree_pipe -p $ar_data_dir -v $ar_conf_file >& $ar_data_dir/build.log
 
 echo "" >>& ./serializedParsers.log
@@ -191,11 +187,10 @@ if( ! -e $fr_data_dir ) then
   mkdir $fr_data_dir
 endif
 
-echo Running $tree_pipe -p $fr_data_dir -v $fr_conf_file >>& ./serializedParsers.log
+echo Running $tree_pipe -p $fr_data_dir -v $fr_conf_file
 $tree_pipe -p $fr_data_dir -v $fr_conf_file >& $fr_data_dir/build.log
 
 echo "" >>& ./serializedParsers.log
-echo time $train_sh $fr_train_args >>& ./serializedParsers.log
 ( echo "Training French Factored grammar using baseline feature set" ; time $train_sh $fr_train_args ) >>& ./serializedParsers.log
 
 
