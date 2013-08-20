@@ -1,4 +1,4 @@
-Tregex GUI v3.2.0 - 2013-06-19
+Tregex GUI v3.2.0 - 2013-06-09
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -156,7 +156,7 @@ LICENSE
 CHANGES
 ----------------------------
 
-2013-06-19    3.2.0     Fix for tsurgeon number reading bug 
+2013-06-09    3.2.0     Fix for tsurgeon number reading bug 
 
 2013-04-04    2.0.6     Update to maintain compatibility 
 
