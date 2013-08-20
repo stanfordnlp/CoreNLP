@@ -950,9 +950,6 @@ public class Redwood {
     public static void forceTrack(String title){ Redwood.startTrack(FORCE, title); }
     public static void endTrack(String check){ Redwood.endTrack(check); }
     public static void endTrack(){ Redwood.endTrack(); }
-    public static void endTrackIfOpen(String check) {
-      if (Redwood.titleStack.peek().equals(check)) { Redwood.endTrack(check); }
-    }
 
     public static void startThreads(String title){ Redwood.startThreads(title); }
     public static void finishThread(){ Redwood.finishThread(); }
