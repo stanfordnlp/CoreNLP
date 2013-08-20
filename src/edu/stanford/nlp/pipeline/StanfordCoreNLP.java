@@ -1231,7 +1231,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               if (continueOnAnnotateError) {
                 // Error annotating but still wanna continue
                 // (maybe in the middle of long job and maybe next one will be okay)
-                warn("Error annotating " + file.getAbsoluteFile(), ex);
+                err("Error annotating " + file.getAbsoluteFile(), ex);
                 annotationOkay = false;
                 synchronized (totalErrorAnnotating) {
                   totalErrorAnnotating.incValue(1);
@@ -1278,7 +1278,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                   log("Processed " + totalProcessed + " documents");
                 }
               }
+            } else {
+              warn("Error annotating " + file.getAbsoluteFile() + " not saved to " + outputFilename);
             }
+
 
             endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
 
