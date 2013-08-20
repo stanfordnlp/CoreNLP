@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.parser.metrics.Eval;
 
 /**
  * A scorer which the RerankingParserQuery can use to rescore
@@ -24,13 +23,9 @@ import edu.stanford.nlp.parser.metrics.Eval;
  * subsequent calls to process() will not clobber existing data, and
  * the RerankerQuery can potentially have RerankerQuery.score() called
  * for different trees from different threads.
- * <br>
- * getEvals should return a list of Eval objects specific to this reranker.
  *
  * @author John Bauer
  */
 public interface Reranker extends Serializable {
   RerankerQuery process(List<? extends HasWord> sentence);
-
-  List<Eval> getEvals();
 }
