@@ -131,10 +131,10 @@ public class CleanXmlAnnotator implements Annotator{
                            boolean allowFlawedXml) {
     this.allowFlawedXml = allowFlawedXml;
     if (xmlTagsToRemove != null) {
-      xmlTagMatcher = toCaseInsensitivePattern(xmlTagsToRemove);
+      xmlTagMatcher = Pattern.compile(xmlTagsToRemove);
       if (sentenceEndingTags != null &&
           sentenceEndingTags.length() > 0) {
-        sentenceEndingTagMatcher = toCaseInsensitivePattern(sentenceEndingTags);
+        sentenceEndingTagMatcher = Pattern.compile(sentenceEndingTags);
       } else {
         sentenceEndingTagMatcher = null;
       }
@@ -143,7 +143,11 @@ public class CleanXmlAnnotator implements Annotator{
       sentenceEndingTagMatcher = null;
     }
 
-    dateTagMatcher = toCaseInsensitivePattern(dateTags);
+    if(dateTags != null){
+      dateTagMatcher = Pattern.compile(dateTags, Pattern.CASE_INSENSITIVE);
+    } else {
+      dateTagMatcher = null;
+    }
   }
 
   private Pattern toCaseInsensitivePattern(String tags) {
@@ -270,7 +274,7 @@ public class CleanXmlAnnotator implements Annotator{
                                      CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns,
                                      Map<Class, List<CoreLabel>> savedTokens,
                                      Collection<Class> toAnnotate,
-                                     Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations) {
+                                     boolean clearAnnotationFromAttrOnTagEnd) {
     Set<Class> foundAnnotations = new HashSet<Class>();
     if (annotationPatterns == null) { return foundAnnotations; }
     if (toAnnotate == null) {
@@ -286,13 +290,6 @@ public class CleanXmlAnnotator implements Annotator{
             if (tag.attributes != null) {
               for (Map.Entry<String,String> entry:tag.attributes.entrySet()) {
                 if (attrPattern.matcher(entry.getKey()).matches()) {
-                  if (savedTokenAnnotations != null) {
-                    Stack<Pair<String, String>> stack = savedTokenAnnotations.get(key);
-                    if (stack == null) {
-                      savedTokenAnnotations.put(key, stack = new Stack<Pair<String,String>>());
-                    }
-                    stack.push(Pair.makePair(tag.name, entry.getValue()));
-                  }
                   cm.set(key, entry.getValue());
                   foundAnnotations.add(key);
                   matched = true;
@@ -300,21 +297,10 @@ public class CleanXmlAnnotator implements Annotator{
                 }
               }
             }
-            if (savedTokenAnnotations != null) {
+            if (clearAnnotationFromAttrOnTagEnd) {
               if (tag.isEndTag) {
-                // tag ended - clear this annotation
-                Stack<Pair<String, String>> stack = savedTokenAnnotations.get(key);
-                if (stack != null && !stack.isEmpty()) {
-                  Pair<String,String> p = stack.peek();
-                  if (p.first.equalsIgnoreCase(tag.name)) {
-                    stack.pop();
-                    if (!stack.isEmpty()) {
-                      cm.set(key, stack.peek().second);
-                    } else {
-                      cm.remove(key);
-                    }
-                  }
-                }
+                // tag ended - clear this annotation (TODO: should only clear if we got it from this tag)
+                cm.remove(key);
               }
             }
           } else if (savedTokens != null) {
@@ -372,7 +358,6 @@ public class CleanXmlAnnotator implements Annotator{
 
     // Local variables for additional per token annotations
     CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;
-    Map<Class, Stack<Pair<String, String>>> savedTokenAnnotations = new ArrayMap<Class, Stack<Pair<String, String>>>();
 
     // Local variable for annotating sections
     XMLUtils.XMLTag sectionStartTag = null;
@@ -491,14 +476,14 @@ public class CleanXmlAnnotator implements Annotator{
 
       // Check if we want to annotate anything using the tags's attributes
       if (!toAnnotate.isEmpty() && tag.attributes != null) {
-        Set<Class> foundAnnotations = annotateWithTag(annotation, annotation, tag, docAnnotationPatterns, null, toAnnotate, null);
+        Set<Class> foundAnnotations = annotateWithTag(annotation, annotation, tag, docAnnotationPatterns, null, toAnnotate, false);
         toAnnotate.removeAll(foundAnnotations);
       }
 
       // Check if the tag matches a section
       if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
-          annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, null);
+          annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, false);
           if (sectionStartToken != null) {
             sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
           }
@@ -521,10 +506,10 @@ public class CleanXmlAnnotator implements Annotator{
       }
       if (sectionStartTag != null) {
         // store away annotations for section
-        annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, null);
+        annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, false);
       }
       if (tokenAnnotations != null) {
-        annotateWithTag(annotation, tokenAnnotations, tag, tokenAnnotationPatterns, null, null, savedTokenAnnotations);
+        annotateWithTag(annotation, tokenAnnotations, tag, tokenAnnotationPatterns, null, null, true);
       }
 
       // If the tag matches the sentence ending tags, and we have some
