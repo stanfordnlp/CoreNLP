@@ -385,6 +385,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String speakerTags =
                 properties.getProperty("clean.speakertags",
                         CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
+        String docAnnotations =
+                properties.getProperty("clean.docAnnotations",
+                        CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
         CleanXmlAnnotator annotator = new CleanXmlAnnotator(xmlTags,
             sentenceEndingTags,
             dateTags,
@@ -392,6 +395,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         annotator.setDocIdTagMatcher(docIdTags);
         annotator.setDocTypeTagMatcher(docTypeTags);
         annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
+        annotator.addTagAnnotationPatterns(docAnnotations);
         return annotator;
       }
 
@@ -1110,6 +1114,18 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return ObjectBank.getLineIterator(fileName, new ObjectBank.PathToFileFunction());
   }
 
+  private AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
+    AnnotationSerializer serializer = null;
+    try {
+      // Try loading with properties
+      serializer = ReflectionLoading.loadByReflection(serializerClass, name, properties);
+    } catch (ReflectionLoading.ReflectionLoadingException ex) {
+      // Try loading with just default constructor
+      serializer = ReflectionLoading.loadByReflection(serializerClass);
+    }
+    return serializer;
+  }
+
   public void processFiles(String base, final Collection<File> files, int numThreads) throws IOException {
     List<Runnable> toRun = new LinkedList<Runnable>();
 
@@ -1140,7 +1156,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
     final String serializerClass = properties.getProperty("serializer");
     final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
+    final String inputSerializerName = (serializerClass == inputSerializerClass)? "serializer":"inputSerializer";
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
+    final String outputSerializerName = (serializerClass == outputSerializerClass)? "serializer":"outputSerializer";
 
     final String extension = properties.getProperty("outputExtension", defaultExtension);
     final boolean replaceExtension = Boolean.parseBoolean(properties.getProperty("replaceExtension", "false"));
@@ -1220,8 +1238,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               try {
                 // Create serializers
                 if (inputSerializerClass != null) {
-                  AnnotationSerializer inputSerializer = ReflectionLoading.loadByReflection(inputSerializerClass);
-                  annotation = inputSerializer.load(new BufferedInputStream(new FileInputStream(file)));
+                  AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
+                  InputStream is = new BufferedInputStream(new FileInputStream(file));
+                  annotation = inputSerializer.load(is);
+                  IOUtils.closeIgnoringExceptions(is);
                 } else {
                   annotation = IOUtils.readObjectFromFile(file);
                 }
@@ -1281,7 +1301,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               }
               case SERIALIZED: {
                 if (outputSerializerClass != null) {
-                  AnnotationSerializer outputSerializer = ReflectionLoading.loadByReflection(inputSerializerClass);
+                  AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
                   OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
                   outputSerializer.save(annotation, fos);
                   fos.close();

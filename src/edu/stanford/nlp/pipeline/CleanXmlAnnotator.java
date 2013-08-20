@@ -2,14 +2,20 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
+import edu.stanford.nlp.ling.tokensregex.EnvLookup;
+import edu.stanford.nlp.util.CollectionValuedMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -76,6 +82,33 @@ public class CleanXmlAnnotator implements Annotator{
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
+   * A map of annotation keys (i.e. docid) along with a pattern indicating the tag to match, and the attribute to match
+   */
+  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
+
+  /**
+   * This tells us what the poster tag is
+   */
+  private Pattern posterTagMatcher = null;
+
+  public static final String DEFAULT_POSTER_TAGS = "poster";
+
+  /**
+   * This tells us what the post tag is
+   */
+  private Pattern postTagMatcher = null;
+
+  public static final String DEFAULT_POST_TAGS = "post";
+
+  /**
+   * This tells us what the postdate tag is
+   */
+  private Pattern postdateTagMatcher = null;
+
+  public static final String DEFAULT_POSTDATE_TAGS = "postdate";
+
+  /**
    * This setting allows handling of flawed XML.  For example,
    * a lot of the news articles we parse go: <br>
    *  &lt;text&gt; <br>
@@ -139,6 +172,31 @@ public class CleanXmlAnnotator implements Annotator{
     speakerTagMatcher = toCaseInsensitivePattern(speakerTags);
   }
 
+  private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
+  public void addTagAnnotationPatterns(String conf) {
+    String[] annoPatternStrings = conf.trim().split("\\s*,\\s*");
+    for (String annoPatternString:annoPatternStrings) {
+      String[] annoPattern = annoPatternString.split("\\s*=\\s*", 2);
+      if (annoPattern.length != 2) {
+        throw new IllegalArgumentException("Invalid annotation to tag pattern: " + annoPatternString);
+      }
+      String annoKeyString = annoPattern[0];
+      String pattern = annoPattern[1];
+      Class annoKey = EnvLookup.lookupAnnotationKey(null, annoKeyString);
+      if (annoKey == null) {
+        throw new IllegalArgumentException("Cannot resolve annotation key " + annoKeyString);
+      }
+      Matcher m = TAG_ATTR_PATTERN.matcher(pattern);
+      if (m.matches()) {
+        Pattern tagPattern = toCaseInsensitivePattern(m.group(1));
+        Pattern attrPattern = toCaseInsensitivePattern(m.group(2));
+        docAnnotationPatterns.add(annoKey, Pair.makePair(tagPattern, attrPattern));
+      } else {
+        throw new IllegalArgumentException("Invalid tag pattern: " + pattern + " for annotation key " + annoKeyString);
+      }
+    }
+  }
+
   public void annotate(Annotation annotation) {
     if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -185,6 +243,10 @@ public class CleanXmlAnnotator implements Annotator{
     StringBuilder removedText = new StringBuilder();
     // we keep track of this so we can look at the last tag after
     // we're outside the loop
+
+    // Keeps track of what we still need to doc level annotations
+    // we still need to look for
+    Set<Class> toAnnotate = docAnnotationPatterns.keySet();
 
     int utteranceIndex = 0;
     boolean inUtterance = false;
@@ -270,7 +332,32 @@ public class CleanXmlAnnotator implements Annotator{
 
       // At this point, we know we have a tag
 
-      // we are removing a token and its associated text...
+      // Check if we want to annotate anything using the tags's attributes
+      if (!toAnnotate.isEmpty() && tag.attributes != null) {
+        Set<Class> foundAnnotations = new HashSet<Class>();
+        for (Class key:toAnnotate) {
+          for (Pair<Pattern,Pattern> pattern: docAnnotationPatterns.get(key)) {
+            Pattern tagPattern = pattern.first;
+            Pattern attrPattern = pattern.second;
+            if (tagPattern.matcher(tag.name).matches()) {
+              boolean matched = false;
+              for (Map.Entry<String,String> entry:tag.attributes.entrySet()) {
+                if (attrPattern.matcher(entry.getKey()).matches()) {
+                  annotation.set(key, entry.getValue());
+                  foundAnnotations.add(key);
+                  matched = true;
+                  break;
+                }
+              }
+              if (matched) break;
+            }
+          }
+        }
+        toAnnotate.removeAll(foundAnnotations);
+      }
+
+
+        // we are removing a token and its associated text...
       // keep track of that
       String currentRemoval = token.get(CoreAnnotations.BeforeAnnotation.class);
       if (currentRemoval != null)
