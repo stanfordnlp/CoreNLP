@@ -1,12 +1,15 @@
 package edu.stanford.nlp.util;
 
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
+import edu.stanford.nlp.trees.PennTreeReader;
+import edu.stanford.nlp.trees.Tree;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.*;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * A meta class using Java's reflection library. Can be used to create a single
@@ -671,8 +674,33 @@ public class MetaClass {
       } catch (IllegalAccessException e) {
       } catch (ClassCastException e) {
       }
-      // We could not cast this object
-      return null;
+
+      // Pass 2: Guess what the object could be
+      if (Tree.class.isAssignableFrom(clazz)) {
+        // (case: reading a tree)
+        try {
+          return (E) new PennTreeReader(new StringReader(value), new LabeledScoredTreeFactory(CoreLabel.factory())).readTree();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else if (Collection.class.isAssignableFrom(clazz)) {
+        // (case: reading a collection)
+        Collection rtn;
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+          rtn = abstractToConcreteCollectionMap.get(clazz).createInstance();
+        } else {
+          rtn = MetaClass.create(clazz).createInstance();
+        }
+        Class <?> subType = clazz.getComponentType();
+        String[] strings = decodeArray(value);
+        for (String string : strings) {
+          rtn.add(cast(string, subType == null ? String.class : subType));
+        }
+        return (E) rtn;
+      } else {
+        // We could not cast this object
+        return null;
+      }
     }
   }
 
@@ -691,4 +719,13 @@ public class MetaClass {
     }
     return argmin;
   }
+
+  private static final HashMap<Class, MetaClass> abstractToConcreteCollectionMap = new HashMap<Class, MetaClass>();
+  static {
+    abstractToConcreteCollectionMap.put(Collection.class, MetaClass.create(ArrayList.class));
+    abstractToConcreteCollectionMap.put(List.class, MetaClass.create(ArrayList.class));
+    abstractToConcreteCollectionMap.put(Set.class, MetaClass.create(HashSet.class));
+    abstractToConcreteCollectionMap.put(Queue.class, MetaClass.create(LinkedList.class));
+    abstractToConcreteCollectionMap.put(Deque.class, MetaClass.create(LinkedList.class));
+  };
 }
