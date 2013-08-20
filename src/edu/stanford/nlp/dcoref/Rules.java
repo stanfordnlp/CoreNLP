@@ -311,39 +311,6 @@ public class Rules {
     return matched;
   }
 
-  private static boolean isNamedMention(Mention m, Dictionaries dict, Set<Mention> roleSet) {
-//    if(roleSet.contains(m)) return false;
-//    if(m.isPronominal()) {
-//      return false;
-//    }
-//    String mSpan = m.spanToString().toLowerCase();
-//    if(dict.allPronouns.contains(mSpan)) {
-//      return false;
-//    }
-//    return true;
-    return m.mentionType == MentionType.PROPER;
-  }
-
-  public static boolean entityNameMatch(MentionMatcher mentionMatcher, CorefCluster mentionCluster, CorefCluster potentialAntecedent,
-                                        Document document,
-                                        Dictionaries dict, Set<Mention> roleSet){
-    Boolean matched = false;
-    Mention mainMention = mentionCluster.getRepresentativeMention();
-    Mention antMention = potentialAntecedent.getRepresentativeMention();
-    // Check if the representative mentions are compatible
-    if (isNamedMention(mainMention, dict, roleSet) && isNamedMention(antMention, dict, roleSet)) {
-      matched = mentionMatcher.isCompatible(mainMention, antMention);
-      if (matched != null) {
-        if (!matched) {
-          document.addIncompatible(mainMention, antMention);
-        }
-      } else {
-        matched = false;
-      }
-    }
-    return matched;
-  }
-
   /**
    * Exact string match except phrase after head (only for proper noun):
    * For dealing with a error like "[Mr. Bickford] <- [Mr. Bickford , an 18-year mediation veteran]"
@@ -356,7 +323,6 @@ public class Rules {
       Dictionaries dict,
       Set<Mention> roleSet){
     if(roleSet.contains(mention)) return false;
-    if(mention.mentionType == MentionType.LIST || ant.mentionType == MentionType.LIST) return false;
     if(mention.isPronominal() || ant.isPronominal()
         || dict.allPronouns.contains(mention.spanToString().toLowerCase())
         || dict.allPronouns.contains(ant.spanToString().toLowerCase())) return false;
