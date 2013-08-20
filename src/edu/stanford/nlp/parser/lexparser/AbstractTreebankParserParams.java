@@ -3,7 +3,7 @@ package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.tools.PunctEquivalenceClasser;
 import edu.stanford.nlp.process.SerializableFunction;
@@ -149,6 +149,9 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     outputEncoding = tlp.getEncoding();
   }
 
+  public void setupForEval() {
+  }
+
   public Label processHeadWord(Label headWord) {
     return headWord;
   }
@@ -245,7 +248,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
       encoding = "UTF-8";
     }
 
-    //System.err.println("TreebankParserParams.pw(): encoding is " + encoding);
+    System.err.println("TreebankParserParams.pw(): encoding is " + encoding);
     try {
       return new PrintWriter(new OutputStreamWriter(o, encoding), true);
     } catch (UnsupportedEncodingException e) {

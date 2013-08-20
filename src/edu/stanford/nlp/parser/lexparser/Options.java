@@ -4,7 +4,6 @@ import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -268,7 +267,7 @@ public class Options implements Serializable {
       i += 2;
     } else if (args[i].equalsIgnoreCase("-deleteSplitters") && (i+1 < args.length)) {
       String[] toDel = args[i+1].split(" *, *");
-      trainOptions.deleteSplitters = Generics.newHashSet(Arrays.asList(toDel));
+      trainOptions.deleteSplitters = new HashSet<String>(Arrays.asList(toDel));
       i += 2;
     } else if (args[i].equalsIgnoreCase("-postSplitWithBaseCategory")) {
       trainOptions.postSplitWithBaseCategory = true;
@@ -342,9 +341,6 @@ public class Options implements Serializable {
       i += 2;
     } else if (args[i].equalsIgnoreCase("-tagPA")) {
       trainOptions.tagPA = true;
-      i += 1;
-    } else if (args[i].equalsIgnoreCase("-noTagPA")) {
-      trainOptions.tagPA = false;
       i += 1;
     } else if (args[i].equalsIgnoreCase("-tagSelSplitCutOff") && (i + 1 < args.length)) {
       trainOptions.tagSelectiveSplitCutOff = Double.parseDouble(args[i + 1]);
@@ -728,15 +724,10 @@ public class Options implements Serializable {
       i += 2;
     } else if (args[i].equalsIgnoreCase("-splitRecombineRate")) {
       trainOptions.splitRecombineRate = Double.parseDouble(args[i + 1]);
-      i += 2;
-    } else if (args[i].equalsIgnoreCase("-trainingThreads") ||
-               args[i].equalsIgnoreCase("-nThreads")) {
-      trainOptions.trainingThreads = Integer.parseInt(args[i + 1]);
-      testOptions.testingThreads = Integer.parseInt(args[i + 1]);
-      i += 2;
-    } else if (args[i].equalsIgnoreCase("-testingThreads")) {
-      testOptions.testingThreads = Integer.parseInt(args[i + 1]);
-      i += 2;
+      i +=2;
+    } else if (args[i].equalsIgnoreCase("-splitTrainingThreads")) {
+      trainOptions.splitTrainingThreads = Integer.parseInt(args[i + 1]);
+      i +=2;
     } else if (args[i].equalsIgnoreCase("-evals")) {
       testOptions.evals = StringUtils.stringToProperties(args[i+1], testOptions.evals);
       i += 2;
@@ -752,12 +743,6 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-noRebinarization")) {
       trainOptions.noRebinarization = true;
       i += 1;
-    } else if (args[i].equalsIgnoreCase("-rerankerKBest")) {
-      rerankerKBest = Integer.parseInt(args[i + 1]);
-      i += 2;
-    } else if (args[i].equalsIgnoreCase("-baseParserWeight")) {
-      baseParserWeight = Double.parseDouble(args[i + 1]);
-      i += 2;
     }
     return i;
   }
@@ -1008,17 +993,6 @@ public class Options implements Serializable {
    */
   public Function<String, String> wordFunction = null;
 
-  /**
-   * If the parser has a reranker, it looks at this many trees when
-   * building the reranked list.
-   */
-  public int rerankerKBest = 100;
-
-  /**
-   * If reranking sentences, we can use the score from the original
-   * parser as well.  This tells us how much weight to give that score.
-   */
-  public double baseParserWeight = 0.0;
 
   /**
    * Making the TestOptions transient means it won't even be

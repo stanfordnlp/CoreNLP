@@ -8,7 +8,7 @@ import java.util.*;
 
 /**
  * @author Mengqiu Wang
- * TODO(mengqiu) currently only works with disjoint feature sets
+ @ TODO(mengqiu) currently only works with disjoint feature sets
  * for non-disjoint feature sets, need to recompute EHat each iteration, and multiply in the scale
  * in EHat and E calculations for each lopExpert
  */
@@ -16,7 +16,7 @@ import java.util.*;
 public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDiffFunction implements HasCliquePotentialFunction {
 
   /** label indices - for all possible label sequences - for each feature */
-  List<Index<CRFLabel>> labelIndices;
+  Index<CRFLabel>[] labelIndices;
   Index<String> classIndex;  // didn't have <String> before. Added since that's what is assumed everywhere.
   double[][][] Ehat; // empirical counts of all the features [lopIter][feature][class]
   double[] sumOfObservedLogPotential; // empirical sum of all log potentials [lopIter]
@@ -41,7 +41,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
   public static boolean VERBOSE = false;
 
   CRFLogConditionalObjectiveFunctionForLOP(int[][][][] data, int[][] labels, double[][] lopExpertWeights, int window,
-      Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, int numLopExpert,
+      Index<String> classIndex, Index[] labelIndices, int[] map, String backgroundSymbol, int numLopExpert,
       List<Set<Integer>> featureIndicesSetArray, List<List<Integer>> featureIndicesListArray, boolean backpropTraining) {
     this.window = window;
     this.classIndex = classIndex;
@@ -117,7 +117,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
       double[][] d = new double[map.length][];
       // int index = 0;
       for (int i = 0; i < map.length; i++) {
-        d[i] = new double[labelIndices.get(map[i]).size()];
+        d[i] = new double[labelIndices[map[i]].size()];
         // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.) 4.12.5
         // Arrays.fill(d[i], 0.0);
         // index += labelIndices[map[i]].size();
@@ -161,7 +161,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
           int[] cliqueLabel = new int[j + 1];
           System.arraycopy(windowLabels, window - 1 - j, cliqueLabel, 0, j + 1);
           CRFLabel crfLabel = new CRFLabel(cliqueLabel);
-          Index<CRFLabel> labelIndex = labelIndices.get(j);
+          Index<CRFLabel> labelIndex = labelIndices[j];
 
           int observedLabelIndex = labelIndex.indexOf(crfLabel);
           //System.err.println(crfLabel + " " + observedLabelIndex);
@@ -212,7 +212,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
           int[] cliqueLabel = new int[j + 1];
           System.arraycopy(windowLabels, window - 1 - j, cliqueLabel, 0, j + 1);
           CRFLabel crfLabel = new CRFLabel(cliqueLabel);
-          Index<CRFLabel> labelIndex = labelIndices.get(j);
+          Index<CRFLabel> labelIndex = labelIndices[j];
 
           double[][] sumOfELPmij = new double[numLopExpert][];  
 
@@ -366,7 +366,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
         double[][][] sumOfELPmi = sumOfELPm[i];
         for (int j = 0; j < docData[i].length; j++) {
           double[][] sumOfELPmij = sumOfELPmi[j];
-          Index<CRFLabel> labelIndex = labelIndices.get(j);
+          Index<CRFLabel> labelIndex = labelIndices[j];
           // for each possible labeling for that clique
           for (int l = 0; l < labelIndex.size(); l++) {
             int[] label = labelIndex.get(l).getLabel();

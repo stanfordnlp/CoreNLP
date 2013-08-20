@@ -1,0 +1,273 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2>Stanford Deterministic Coreference Resolution System</h2>
+</center>
+
+<center><p>
+<a href="#News">News</a> |
+<a href="#About">About</a> |
+<a href="#Download">Download</a> |
+<a href="#Usage">Usage</a> |
+<a href="#Questions">Questions</a> |
+<a href="#Mail">Mailing lists</a> |
+<a href="#History">Release history</a>
+</p></center>
+
+<h3><a name="News">News</a></h3>
+
+<p>June 30, 2011: This system was the top ranked system at the CoNLL-2011 shared task.
+
+<h3><a name="About">About</a></h3>
+<p>This system implements the multi-pass sieve coreference resolution
+(or anaphora resolution) system described in 
+<a href="http://nlp.stanford.edu/pubs/conllst2011-coref.pdf">Lee et al. (CoNLL Shared Task 2011)</a> and 
+<a href="http://nlp.stanford.edu/pubs/coreference-emnlp10.pdf">Raghunathan et al. (EMNLP 2010)</a>.
+
+<p>The score is higher than that in EMNLP 2010 paper because of additional sieves and better rules (see <a href="http://nlp.stanford.edu/pubs/conllst2011-coref.pdf">Lee et al. 2011</a> for details).
+Mention detection is included in the package. (see <a href="#Usage">Usage</a> for instructions).
+
+
+<p>
+The papers to cite for this system are as follows:<br>
+
+<blockquote>
+Heeyoung Lee, Yves Peirsman, Angel Chang, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky. 
+<br><a href="http://nlp.stanford.edu/pubs/conllst2011-coref.pdf">Stanford's Multi-Pass Sieve Coreference Resolution System at the CoNLL-2011 Shared Task.</a>
+<br>In Proceedings of the CoNLL-2011 Shared Task, 2011.
+</blockquote>
+
+<blockquote>
+Karthik Raghunathan, Heeyoung Lee, Sudarshan Rangarajan, Nathanael Chambers, Mihai Surdeanu, Dan Jurafsky, Christopher Manning
+<br><a href="http://nlp.stanford.edu/pubs/coreference-emnlp10.pdf">A Multi-Pass Sieve for Coreference Resolution</a>
+<br>EMNLP-2010, Boston, USA. 2010.
+</blockquote>
+
+<br>
+<h3><a name="Results">Current Evaluation Results</a></h3>
+
+<br>
+The official scores on CoNLL-2011 Shared Task data set.
+<pre>
+-----------------------------------------------------------------------------------------------------------------------------------------
+                   conllst         MUC               B cubed              CEAF (M)            CEAF (E)            BLANC          
+                    track     P     R     F1      P     R     F1      P     R     F1      P     R     F1      P     R     F1     Avg F1
+-----------------------------------------------------------------------------------------------------------------------------------------
+conllst2011 dev   | close |  59.1  57.5  58.3  | 69.2  71.0  70.1  | 58.6  58.6  58.6  | 46.5  48.1  47.3  | 72.2  78.1  74.8  |  58.6  
+conllst2011 dev   | open  |  60.1  59.5  59.8  | 69.5  71.9  70.7  | 59.0  59.0  59.0  | 46.5  47.1  46.8  | 73.8  78.6  76.0  |  59.1
+conllst2011 test  | close |  57.5  61.8  59.6  | 68.2  68.4  68.3  | 56.4  56.4  56.4  | 47.8  43.4  45.5  | 76.2  70.6  73.0  |  57.8 
+conllst2011 test  | open  |  59.3  62.8  61.0  | 69.0  68.9  68.9  | 56.7  56.7  56.7  | 46.8  43.3  45.0  | 76.6  71.9  74.0  |  58.3
+-----------------------------------------------------------------------------------------------------------------------------------------
+* Automatic mention detection used. Avg F1 = (MUC + B cubed + CEAFE)/3.
+</pre>
+
+<br>
+Scores on various corpora described in <a href="http://nlp.stanford.edu/pubs/coreference-emnlp10.pdf">Raghunathan et al. 2010</a> 
+<pre>
+----------------------------------------------------------------------------
+                      MUC               B cubed             Pairwise
+                 P     R     F1      P     R     F1      P     R     F1
+----------------------------------------------------------------------------
+ACE2004 dev   | 86.0  75.5  80.4  | 89.3  76.5  82.4  | 81.7  55.2  65.9 
+ACE2004 test  | 82.7  70.2  75.9  | 88.7  74.5  81.0  | 77.2  44.6  56.6 
+ACE2004 nwire | 84.6  75.1  79.6  | 87.3  74.1  80.2  | 79.4  50.1  61.4
+MUC6 test     | 90.6  69.1  78.4  | 90.6  63.1  74.4  | 89.7  57.0  69.7
+----------------------------------------------------------------------------
+* Gold mentions are used. 
+</pre>
+
+
+<br>
+<h3><a name="Download">Download</a></h3>
+
+<p>
+The coreference resolution system is integrated in the Stanford suite of NLP tools, <a href="corenlp.shtml">StanfordCoreNLP</a>. Please download the entire suite from <a href="corenlp.shtml#Download">this page</a>.
+</p>
+
+
+<br>
+<h3><a name="Usage">Usage</a></h3>
+
+<p><b><u>Running coreference resolution on raw text</u></b>
+
+<p>This software is now fully incorporated in <a href="corenlp.shtml">StanfordCoreNLP</a>, so all you have to do is add the <i>dcoref</i> annotator to the "annotators" property in StanfordCoreNLP.  For example, add "dcoref" to the end of the list of text annotators:
+<pre>
+annotators = tokenize, ssplit, pos, lemma, ner, parse, dcoref
+</pre>
+
+The properties you can set for the dcoref system itself are the following:
+<pre>
+dcoref.demonym                   // The path for a file that includes a list of demonyms 
+dcoref.animate                   // The list of animate/inanimate mentions (Ji and Lin, 2009)
+dcoref.inanimate 
+dcoref.male                      // The list of male/neutral/female mentions (Bergsma and Lin, 2006) 
+dcoref.neutral                   // Neutral means a mention that is usually referred by 'it'
+dcoref.female 
+dcoref.plural                    // The list of plural/singular mentions (Bergsma and Lin, 2006)
+dcoref.singular
+
+// above 8 options do not have to be set; default models in StanfordCoreNLP package will be used if unspecified.
+
+dcoref.score = false             // Scoring the output of the system
+dcoref.postprocessing = false    // Do post processing
+dcoref.maxdist = -1              // Maximum sentence distance between two mentions for resolution (-1: no constraint on the distance)
+dcoref.big.gender.number = false // Load a big list of gender and number information
+dcoref.replicate.conll = false   // Turn on this for replicating conllst result
+
+// if above 5 options are omitted, default values (as shown in above) are used.
+
+sievePasses                      // Sieve passes - each class is defined in dcoref/sievepasses/
+                                 // If omitted, the default sieves will be used (recommended).
+</pre>
+
+See StanfordCoreNLP for more details.
+</p>
+
+<br>
+<p><b><u>How to replicate the results in our CoNLL Shared Task 2011 paper</u></b>
+
+<p>To replicate the results in the paper run:
+<pre>
+java -Xmx8g edu.stanford.nlp.dcoref.SieveCoreferenceSystem -props &lt;properties file&gt;
+</pre>
+
+A sample properties file (coref.properties) is included in the dcoref package.
+The properties file includes the following:
+
+<pre>
+annotators = pos, lemma, ner, parse    // annotators needed for coreference resolution
+
+dcoref.score = true                    // Scoring the output of the system. 
+                                       // Scores in log file are different from the output of CoNLL scorer because it is before post processing.
+dcoref.postprocessing = true           // Do post processing
+dcoref.maxdist = -1                    // Maximum sentence distance between two mentions for resolution (-1: no constraint on the distance)
+dcoref.big.gender.number = true        // Load a big list of gender and number information
+dcoref.replicate.conll = true          // Turn on this for replicating conllst result
+dcoref.conll.score = /PATH/FOR/SCORER  // Path for the official CoNLL 2011 scorer script. if omitted, no scoring
+
+dcoref.logFile = /PATH/FOR/LOGS        // Path for log file for coref system evaluation 
+dcoref.conll2011 = /PATH/FOR/CORPUS    // for scoring on other corpora, one of following options can be set 
+                                // dcoref.conll2011: path for the directory containing conllst files
+                                // dcoref.ace2004: path for the directory containing ACE2004 files
+                                // dcoref.mucfile: path for the MUC file
+</pre>
+
+This system can process ACE2004, MUC6, and CoNLL Shared Task 2011 corpora in their original formats.
+Examples from the corpora are given here:
+<p>CoNLLst 2011:
+<pre>
+nw/wsj/00/wsj_0020          0          0        The         DT (TOP_(S_(NP_*          -          -          -          -          *          *     (ARG0*          *          *          *        (11
+nw/wsj/00/wsj_0020          0          1       U.S.        NNP         *)          -          -          -          -      (GPE)          *         *)          *          *          *        11)     
+nw/wsj/00/wsj_0020          0          2          ,          ,          *          -          -          -          -          *          *          *          *          *          *          -
+nw/wsj/00/wsj_0020          0          3   claiming        VBG   (S_(VP_*      claim         01          2          -          *       (V*) (ARGM-ADV*          *          *          *          -
+
+</pre>
+
+<p>MUC6:
+<pre>
+...
+&lt;s&gt; By/IN proposing/VBG &lt;COREF ID="13" TYPE="IDENT" REF="6" MIN="date"&gt; a/DT meeting/NN date/NN&lt;/COREF&gt; ,/, &lt;COREF ID="14" TYPE="IDENT" REF="0"&gt;
+&lt;ORGANIZATION&gt; Eastern/NNP&lt;/ORGANIZATION&gt;&lt;/COREF&gt; moved/VBD one/CD step/NN closer/JJR toward/IN reopening/VBG current/JJ high-cost/JJ contract/NN agreements/NNS with/IN &lt;COREF ID="15" TYPE="IDENT" REF="8" MIN="unions"&gt;&lt;COREF ID="16" TYPE="IDENT" REF="14"&gt; its/PRP$&lt;/COREF&gt; unions/NNS&lt;/COREF&gt; ./. &lt;/s&gt;
+...
+</pre>
+
+ACE2004:
+<pre>
+...
+&lt;document DOCID="20001115_AFP_ARB.0212.eng"&gt;
+&lt;entity ID="20001115_AFP_ARB.0212.eng-E1" TYPE="ORG" SUBTYPE="Educational" CLASS="SPC"&gt;
+  &lt;entity_mention ID="1-47" TYPE="NAM" LDCTYPE="NAM"&gt;
+      &lt;extent&gt;
+            &lt;charseq START="475" END="506"&gt;the Globalization Studies Center&lt;/charseq&gt;
+                &lt;/extent&gt;
+                    &lt;head&gt;
+                          &lt;charseq START="479" END="506"&gt;Globalization Studies Center&lt;/charseq&gt;
+                              &lt;/head&gt;
+                                &lt;/entity_mention&gt;
+                                ...
+</pre>
+
+
+<h3><a name="Questions">Questions</a></h3>
+
+<p>
+Questions, feedback, and bug reports/fixes can be sent to our <a
+href="#Mail">mailing lists</a>.
+</p>
+
+
+<h3><a name="Mail">Mailing Lists</a></h3>
+<p>
+We have 3 mailing lists for the Stanford Coreference Rersolution System, all of which are shared
+with other JavaNLP tools (with the exclusion of the parser). Each address is
+at <code>@lists.stanford.edu</code>:
+</p>
+<ol>
+<li><code>java-nlp-user</code> This is the best list to post to in order
+to ask questions, make announcements, or for discussion among JavaNLP
+users.  You have to subscribe to be able to use it.
+Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-user">this webpage</a> or by emailing
+<code>java-nlp-user-join@lists.stanford.edu</code>.   (Leave the
+subject and message body empty.)  You can also
+<a href="https://mailman.stanford.edu/pipermail/java-nlp-user/">look at
+the list archives</a>.
+<li><code>java-nlp-announce</code> This list will be used only to announce
+new versions of Stanford JavaNLP tools.  So it will be very low volume (expect 1-3
+messages a year).  Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce">this webpage</a> or by emailing
+<code>java-nlp-announce-join@lists.stanford.edu</code>.  (Leave the
+subject and message body empty.)
+<li><code>java-nlp-support</code> This list goes only to the software
+maintainers.  It's a good address for licensing questions, etc.  <b>For
+general use and support questions, you're better off joining and using
+<code>java-nlp-user</code>.</b>
+You cannot join <code>java-nlp-support</code>, but you can mail questions to
+<code>java-nlp-support@lists.stanford.edu</code>.
+</ol>
+
+
+<br>
+<h3><a name="History">Release History</a></h3>
+<p><b>June 6, 2011</b>
+<p>This release is the code used for CoNLL Shared Task 2011. The score may differ due to the change in Parser or NER.  
+<pre>
+-----------------------------------------------------------------------------------------------------------------------------------------
+                   conllst         MUC               B cubed              CEAF (M)            CEAF (E)            BLANC          
+                    track     P     R     F1      P     R     F1      P     R     F1      P     R     F1      P     R     F1     Avg F1
+-----------------------------------------------------------------------------------------------------------------------------------------
+conllst2011 dev   | close |  59.1  57.5  58.3  | 69.2  71.0  70.1  | 58.6  58.6  58.6  | 46.5  48.1  47.3  | 72.2  78.1  74.8  |  58.6  
+conllst2011 dev   | open  |  60.1  59.5  59.8  | 69.5  71.9  70.7  | 59.0  59.0  59.0  | 46.5  47.1  46.8  | 73.8  78.6  76.0  |  59.1
+conllst2011 test  | close |  57.5  61.8  59.6  | 68.2  68.4  68.3  | 56.4  56.4  56.4  | 47.8  43.4  45.5  | 76.2  70.6  73.0  |  57.8 
+conllst2011 test  | open  |  59.3  62.8  61.0  | 69.0  68.9  68.9  | 56.7  56.7  56.7  | 46.8  43.3  45.0  | 76.6  71.9  74.0  |  58.3
+-----------------------------------------------------------------------------------------------------------------------------------------
+* Automatic mention detection used. Avg F1 = (MUC + B cubed + CEAFE)/3.
+
+----------------------------------------------------------------------------
+                      MUC               B cubed             Pairwise
+                 P     R     F1      P     R     F1      P     R     F1
+----------------------------------------------------------------------------
+ACE2004 dev   | 86.0  75.5  80.4  | 89.3  76.5  82.4  | 81.7  55.2  65.9 
+ACE2004 test  | 82.7  70.2  75.9  | 88.7  74.5  81.0  | 77.2  44.6  56.6 
+ACE2004 nwire | 84.6  75.1  79.6  | 87.3  74.1  80.2  | 79.4  50.1  61.4
+MUC6 test     | 90.6  69.1  78.4  | 90.6  63.1  74.4  | 89.7  57.0  69.7
+----------------------------------------------------------------------------
+* Gold mentions are used. 
+</pre>
+
+<p><b>August 26, 2010</b>
+<p>This release is generally similar to the code used for EMNLP 2010, with one additional sieve: relaxed exact string match. 
+<pre>
+----------------------------------------------------------------------------
+                      MUC               B cubed             Pairwise
+                 P     R     F1      P     R     F1      P     R     F1
+----------------------------------------------------------------------------
+ACE2004 dev   | 84.1  73.9  78.7  | 88.3  74.2  80.7  | 80.0  51.0  62.3
+ACE2004 test  | 80.5  72.4  76.2  | 85.4  75.9  80.4  | 68.7  47.9  56.4 
+ACE2004 nwire | 83.8  72.8  77.9  | 87.5  72.1  79.0  | 79.3  47.6  59.5
+MUC6 test     | 90.3  68.9  78.2  | 90.5  62.3  73.8  | 89.4  55.5  68.5
+----------------------------------------------------------------------------
+</pre>
+
+
+
+<!--#include virtual="/footer.html" -->
+

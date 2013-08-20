@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
+import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.EventMentionsAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IdentityHashSet;
 
@@ -101,12 +103,12 @@ public class EventMention extends RelationMention {
       }
       System.err.println("DOC " + sentence.get(CoreAnnotations.DocIDAnnotation.class));
       System.err.print("SENTENCE:");
-      for(CoreLabel t: sentence.get(CoreAnnotations.TokensAnnotation.class)){
+      for(CoreLabel t: sentence.get(TokensAnnotation.class)){
         System.err.print(" " + t.word());
       }
       System.err.println("EVENTS IN SENTENCE:");
       count = 1;
-      for(EventMention e: sentence.get(MachineReadingAnnotations.EventMentionsAnnotation.class)){
+      for(EventMention e: sentence.get(EventMentionsAnnotation.class)){
         System.err.println("EVENT #" + count + ": " + e);
         count ++;
       }
@@ -157,7 +159,7 @@ public class EventMention extends RelationMention {
           // safe to discard this arg: we already have it with the same name
           return;
         } else {
-          logger.info("Trying to add one argument: " + a + " with name " + an + " when this already exists with a different name: " + this + " in sentence: " + getSentence().get(CoreAnnotations.TextAnnotation.class));
+          logger.info("Trying to add one argument: " + a + " with name " + an + " when this already exists with a different name: " + this + " in sentence: " + getSentence().get(TextAnnotation.class));
           if(discardSameArgDifferentName) return;
         }
       }

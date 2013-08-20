@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.SentenceIDAnnotation;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReaderFactory;
@@ -32,7 +33,6 @@ import edu.stanford.nlp.trees.international.french.FrenchTreeReader;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Performs the pre-processing of raw (XML) FTB trees for the EMNLP2011 and CL2011 experiments.
@@ -97,7 +97,7 @@ public final class SplitCanditoTrees {
     throws IOException
   {
     final TreeReaderFactory trf = new FrenchTreeReaderFactory();
-    Map<String, Tree> treeMap = Generics.newHashMap();
+    Map<String, Tree> treeMap = new HashMap<String, Tree>();
     for (String filename : filenames) {
       File file = new File(filename);
       String canonicalFilename =
@@ -111,7 +111,7 @@ public final class SplitCanditoTrees {
       Tree t = null;
       int numTrees;
       for (numTrees = 0; (t = tr.readTree()) != null; numTrees++) {
-        String id = canonicalFilename + "-" + ((CoreLabel) t.label()).get(CoreAnnotations.SentenceIDAnnotation.class);
+        String id = canonicalFilename + "-" + ((CoreLabel) t.label()).get(SentenceIDAnnotation.class);
         treeMap.put(id, t);
       }
 

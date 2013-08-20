@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.tools;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -14,7 +15,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -49,7 +49,7 @@ public class RuleBranchingFactor {
     usage = sb.toString();
   }
   
-  public static final Map<String,Integer> optionArgDefinitions = Generics.newHashMap();
+  public static final Map<String,Integer> optionArgDefinitions = new HashMap<String,Integer>();
   static {
     optionArgDefinitions.put("l", 1);
     optionArgDefinitions.put("e", 1);

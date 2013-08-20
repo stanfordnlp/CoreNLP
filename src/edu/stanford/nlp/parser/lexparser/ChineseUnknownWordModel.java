@@ -1,7 +1,8 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
@@ -11,7 +12,6 @@ import edu.stanford.nlp.ling.Tag;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 /**
@@ -49,8 +49,8 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
                                  Index<String> wordIndex, 
                                  Index<String> tagIndex,
                                  ClassicCounter<IntTaggedWord> unSeenCounter,
-                                 Map<Label,ClassicCounter<String>> tagHash,
-                                 Map<String,Float> unknownGT,
+                                 HashMap<Label,ClassicCounter<String>> tagHash,
+                                 HashMap<String,Float> unknownGT,
                                  boolean useGT,
                                  Set<String> seenFirst) {
     super(op, lex, wordIndex, tagIndex, 
@@ -73,9 +73,9 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
                                  Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex, 
          new ClassicCounter<IntTaggedWord>(),
-         Generics.<Label,ClassicCounter<String>>newHashMap(),
-         Generics.<String,Float>newHashMap(),
-         false, Generics.<String>newHashSet());
+         new HashMap<Label,ClassicCounter<String>>(),
+         new HashMap<String,Float>(),
+         false, new HashSet<String>());
   }
 
   @Override

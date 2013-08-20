@@ -43,8 +43,14 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.MultiClassAccuracyStats;
 import edu.stanford.nlp.stats.Scorer;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.Triple;
 
 /**
  * Builds various types of linear classifiers, with functionality for
@@ -72,7 +78,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   //private int prior;
   //private double epsilon = 0.0;
   private LogPrior logPrior;
-  //private Minimizer<DiffFunction> minimizer;
+  private Minimizer<DiffFunction> minimizer;
   //private boolean useSum = false;
   private boolean tuneSigmaHeldOut = false;
   private boolean tuneSigmaCV = false;
@@ -81,19 +87,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private double min = 0.1;
   private double max = 10.0;
   private boolean retrainFromScratchAfterSigmaTuning = false;
-
-  private Factory<Minimizer<DiffFunction>> minimizerCreator = null;
-  private int evalIters = -1;
-  private Evaluator[] evaluators = null;
-
-  private Minimizer<DiffFunction> getMinimizer() {
-    // Create a new minimizer
-    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
-    if (minimizer instanceof HasEvaluators) {
-      ((HasEvaluators) minimizer).setEvaluators(evalIters, evaluators);
-    }
-    return minimizer;
-  }
 
 
   /**
@@ -104,7 +97,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * @return adapted weights
    */
   public double[][] adaptWeights(double[][] origWeights, GeneralDataset<L, F> adaptDataset) {
-    Minimizer<DiffFunction> minimizer = getMinimizer();
     System.err.println("adaptWeights in LinearClassifierFactory. increase weight dim only");
     double[][] newWeights = new double[adaptDataset.featureIndex.size()][adaptDataset.labelIndex.size()];
 
@@ -130,11 +122,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma) {
-    return trainWeights(dataset, initial, bypassTuneSigma, null);
-  }
-
-  public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma, Minimizer<DiffFunction> minimizer) {
-    if (minimizer == null) minimizer = minimizerCreator.create();
     if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
     double[] interimWeights = null;
@@ -168,7 +155,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   public double[][] trainWeightsSemiSup(GeneralDataset<L, F> data, GeneralDataset<L, F> biasedData, double[][] confusionMatrix, double[] initial) {
-    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(data, new LogPrior(LogPrior.LogPriorType.NULL));
     BiasedLogConditionalObjectiveFunction biasedObjective = new BiasedLogConditionalObjectiveFunction(biasedData, confusionMatrix, new LogPrior(LogPrior.LogPriorType.NULL));
     SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, biasedObjective, logPrior);
@@ -187,7 +173,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * other features are allowed to be real valued.
    */
   public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList, List<F> GEFeatures, double convexComboCoeff) {
-    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(labeledDataset, new LogPrior(LogPrior.LogPriorType.NULL));
     GeneralizedExpectationObjectiveFunction<L,F> geObjective = new GeneralizedExpectationObjectiveFunction<L,F>(labeledDataset, unlabeledDataList, GEFeatures);
     SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, geObjective, null,convexComboCoeff);
@@ -290,15 +275,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return new LinearClassifier<L, F>(weights, train.featureIndex(), train.labelIndex());
   }
 
-  /** NOTE: Constructors that takes in a Minimizer creates a LinearClassifierFactory that will reuse the minimizer
-   *  and will not be threadsafe (unless the Minimzer itself is ThreadSafe which is probably not the case)
-   */
-
 
   public LinearClassifierFactory() {
     this(new QNMinimizer(15));
-    this.mem = 15;
-    this.useQuasiNewton();
   }
 
   public LinearClassifierFactory(Minimizer<DiffFunction> min) {
@@ -307,14 +286,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public LinearClassifierFactory(boolean useSum) {
     this(new QNMinimizer(15), useSum);
-    this.mem = 15;
-    this.useQuasiNewton();
   }
 
   public LinearClassifierFactory(double tol) {
     this(new QNMinimizer(15), tol, false);
-    this.mem = 15;
-    this.useQuasiNewton();
   }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, boolean useSum) {
     this(min, 1e-4, useSum);
@@ -324,8 +299,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
   public LinearClassifierFactory(double tol, boolean useSum, double sigma) {
     this(new QNMinimizer(15), tol, useSum, sigma);
-    this.mem = 15;
-    this.useQuasiNewton();
   }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, double sigma) {
     this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
@@ -335,13 +308,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
   public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon) {
     this(new QNMinimizer(15), tol, useSum, new LogPrior(prior, sigma, epsilon));
-    this.mem = 15;
-    this.useQuasiNewton();
   }
 
   public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, int mem) {
     this(new QNMinimizer(mem), tol, useSum, new LogPrior(prior, sigma, epsilon));
-    this.useQuasiNewton();
   }
 
   /**
@@ -363,19 +333,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
   }
 
-  public LinearClassifierFactory(final Minimizer<DiffFunction> min, double tol, boolean useSum, LogPrior logPrior) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return min;
-      }
-    };
-    this.TOL = tol;
-    //this.useSum = useSum;
-    this.logPrior = logPrior;
-  }
-
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> minimizerCreator, double tol, boolean useSum, LogPrior logPrior) {
-    this.minimizerCreator = minimizerCreator;
+  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, LogPrior logPrior) {
+    this.minimizer = min;
     this.TOL = tol;
     //this.useSum = useSum;
     this.logPrior = logPrior;
@@ -412,8 +371,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   /**
    * Sets the minimizer.  {@link QNMinimizer} is the default.
    */
-  public void setMinimizerCreator(Factory<Minimizer<DiffFunction>> minimizerCreator) {
-    this.minimizerCreator = minimizerCreator;
+  public void setMinimizer(Minimizer<DiffFunction> min) {
+    this.minimizer = min;
   }
 
   /**
@@ -435,100 +394,62 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Sets the minimizer to QuasiNewton. {@link QNMinimizer} is the default.
    */
   public void useQuasiNewton() {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new QNMinimizer(LinearClassifierFactory.this.mem);
-      }
-    };
+    this.minimizer = new QNMinimizer(mem);
   }
 
-  public void useQuasiNewton(final boolean useRobust) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
-      }
-    };
+  public void useQuasiNewton(boolean useRobust) {
+    this.minimizer = new QNMinimizer(mem,useRobust);
   }
 
-  public void useStochasticQN(final double initialSMDGain, final int stochasticBatchSize){
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
-      }
-    };
+  public void useStochasticQN(double initialSMDGain, int stochasticBatchSize){
+    this.minimizer = new SQNMinimizer<DiffFunction>(mem,initialSMDGain,stochasticBatchSize,false);
   }
 
   public void useStochasticMetaDescent(){
     useStochasticMetaDescent(0.1,15,StochasticCalculateMethods.ExternalFiniteDifference,20);
   }
 
-  public void useStochasticMetaDescent(final double initialSMDGain, final int stochasticBatchSize,
-                                       final StochasticCalculateMethods stochasticMethod,final int passes) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SMDMinimizer<DiffFunction>(initialSMDGain,stochasticBatchSize,stochasticMethod,passes);
-      }
-    };
+  public void useStochasticMetaDescent(double initialSMDGain, int stochasticBatchSize,StochasticCalculateMethods stochasticMethod,int passes) {
+    this.minimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,passes);
   }
 
   public void useStochasticGradientDescent(){
     useStochasticGradientDescent(0.1,15);
   }
 
-  public void useStochasticGradientDescent(final double gainSGD, final int stochasticBatchSize){
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
-      }
-    };
+  public void useStochasticGradientDescent(double gainSGD, int stochasticBatchSize){
+    this.minimizer = new SGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
   }
 
   public void useInPlaceStochasticGradientDescent() {
     useInPlaceStochasticGradientDescent(-1, -1, 1.0);
   }
 
-  public void useInPlaceStochasticGradientDescent(final int SGDPasses, final int tuneSampleSize, final double sigma) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
-      }
-    };
+  public void useInPlaceStochasticGradientDescent(int SGDPasses, int tuneSampleSize, double sigma) {
+    this.minimizer = new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
   }
 
-  public void useHybridMinimizerWithInPlaceSGD(final int SGDPasses, final int tuneSampleSize, final double sigma) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        Minimizer<DiffFunction> firstMinimizer = new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
-        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
-        return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
-      }
-    };
+  public void useHybridMinimizerWithInPlaceSGD(int SGDPasses, int tuneSampleSize, double sigma) {
+    Minimizer<DiffFunction> firstMinimizer = new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+    Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+    this.minimizer = new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
   }
 
-  public void useStochasticGradientDescentToQuasiNewton(final double SGDGain, final int batchSize, final int sgdPasses,
-                                                        final int qnPasses, final int hessSamples, final int QNMem,
-                                                        final boolean outputToFile) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
-                                    qnPasses, hessSamples, QNMem, outputToFile);
-      }
-    };
+  public void useStochasticGradientDescentToQuasiNewton(double SGDGain, int batchSize, int sgdPasses,
+                                                        int qnPasses, int hessSamples, int QNMem,
+                                                        boolean outputToFile) {
+    this.minimizer = new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
+                                          qnPasses, hessSamples, QNMem, outputToFile);
   }
 
   public void useHybridMinimizer() {
     useHybridMinimizer(0.1,15,StochasticCalculateMethods.ExternalFiniteDifference , 0);
   }
 
-  public void useHybridMinimizer(final double initialSMDGain, final int stochasticBatchSize,
-                                 final StochasticCalculateMethods stochasticMethod, final int cutoffIteration){
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
-        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
-        return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
-      }
-    };
+  public void useHybridMinimizer(double initialSMDGain, int stochasticBatchSize,StochasticCalculateMethods stochasticMethod,int cutoffIteration){
+    Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
+    Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+    this.minimizer = new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
   }
 
   /**
@@ -559,11 +480,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Sets the minimizer to {@link CGMinimizer}.
    */
   public void useConjugateGradientAscent() {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new CGMinimizer(!LinearClassifierFactory.this.verbose);
-      }
-    };
+    this.minimizer = new CGMinimizer(!this.verbose);
   }
 
   /**
@@ -790,7 +707,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
 
   public Classifier<L, F> trainClassifier(Iterable<Datum<L, F>> dataIterable) {
-    Minimizer<DiffFunction> minimizer = getMinimizer();
     Index<F> featureIndex = Generics.newIndex();
     Index<L> labelIndex = Generics.newIndex();
     for (Datum<L, F> d : dataIterable) {
@@ -810,7 +726,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   public Classifier<L, F> trainClassifier(GeneralDataset<L, F> dataset, float[] dataWeights, LogPrior prior) {
-    Minimizer<DiffFunction> minimizer = getMinimizer();
     if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, dataWeights, logPrior);
@@ -834,15 +749,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(weights, dataset.featureIndex(), dataset.labelIndex());
     return classifier;
   }
-  public LinearClassifier<L, F> trainClassifierWithInitialWeights(GeneralDataset<L, F> dataset, double[][] initialWeights2D) {
-    double[] initialWeights = (initialWeights2D != null)? ArrayUtils.flatten(initialWeights2D):null;
-    return trainClassifier(dataset, initialWeights);
-  }
-  public LinearClassifier<L, F> trainClassifierWithInitialWeights(GeneralDataset<L, F> dataset, LinearClassifier<L,F> initialClassifier) {
-    double[][] initialWeights2D = (initialClassifier != null)? initialClassifier.weights():null;
-    return trainClassifierWithInitialWeights(dataset, initialWeights2D);
-  }
-
 
   /**
    * Given the path to a file representing the text based serialization of a
@@ -900,10 +806,14 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return null;
   }
 
-  public void setEvaluators(int iters, Evaluator[] evaluators)
+  public boolean setEvaluators(int iters, Evaluator[] evaluators)
   {
-    this.evalIters = iters;
-    this.evaluators = evaluators;
+    if (minimizer instanceof HasEvaluators) {
+      ((HasEvaluators) minimizer).setEvaluators(iters, evaluators);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public LinearClassifierCreator<L,F> getClassifierCreator(GeneralDataset<L, F> dataset) {

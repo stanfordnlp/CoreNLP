@@ -6,11 +6,11 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
+import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.DataFilePaths;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.SystemUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -137,7 +137,7 @@ public class HeidelTimeAnnotator implements Annotator {
     
     // get Timex annotations
     List<CoreMap> timexAnns = toTimexCoreMaps(outputXML, document);
-    document.set(TimeAnnotations.TimexAnnotations.class, timexAnns);
+    document.set(TimexAnnotations.class, timexAnns);
     if (outputResults) {
       System.out.println(timexAnns);
     }
@@ -164,7 +164,7 @@ public class HeidelTimeAnnotator implements Annotator {
     	}
     	
     	// set the sentence timexes
-    	sentence.set(TimeAnnotations.TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
+    	sentence.set(TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
     }
   }
   
@@ -178,8 +178,8 @@ public class HeidelTimeAnnotator implements Annotator {
   
   private static List<CoreMap> toTimexCoreMaps(Element docElem, CoreMap originalDocument) {
     //--Collect Token Offsets
-    Map<Integer,Integer> beginMap = Generics.newHashMap();
-    Map<Integer,Integer> endMap = Generics.newHashMap();
+    HashMap<Integer,Integer> beginMap = new HashMap<Integer,Integer>();
+    HashMap<Integer,Integer> endMap = new HashMap<Integer,Integer>();
     boolean haveTokenOffsets = true;
     for(CoreMap sent : originalDocument.get(CoreAnnotations.SentencesAnnotation.class)){
       for(CoreLabel token : sent.get(CoreAnnotations.TokensAnnotation.class)){
@@ -209,7 +209,7 @@ public class HeidelTimeAnnotator implements Annotator {
           }
           String timexText = child.getTextContent();
           CoreMap timexMap = new ArrayCoreMap();
-          timexMap.set(TimeAnnotations.TimexAnnotation.class, timex);
+          timexMap.set(TimexAnnotation.class, timex);
           timexMap.set(CoreAnnotations.TextAnnotation.class, timexText);
           int charBegin = offset;
           timexMap.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, offset);
@@ -248,15 +248,5 @@ public class HeidelTimeAnnotator implements Annotator {
       }
     }
     return timexMaps;
-  }
-
-  @Override
-  public Set<Requirement> requires() {
-    return TOKENIZE_AND_SSPLIT;
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(HEIDELTIME_REQUIREMENT);
   }
 }

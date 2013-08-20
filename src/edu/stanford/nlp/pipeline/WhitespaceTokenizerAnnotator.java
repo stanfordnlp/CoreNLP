@@ -4,7 +4,7 @@ import java.io.Reader;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
@@ -28,10 +28,10 @@ public class WhitespaceTokenizerAnnotator extends TokenizerAnnotator {
 
   public WhitespaceTokenizerAnnotator(Properties props) {
     super(false);
-    boolean eolIsSignificant =
+    boolean eolIsSignificant = 
       Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
-    eolIsSignificant =
-      (eolIsSignificant ||
+    eolIsSignificant = 
+      (eolIsSignificant || 
        Boolean.valueOf(props.getProperty
                        (StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")));
     factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<CoreLabel>

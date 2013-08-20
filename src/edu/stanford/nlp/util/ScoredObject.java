@@ -2,7 +2,7 @@ package edu.stanford.nlp.util;
 
 
 /**
- * Wrapper class for holding a scored object.
+ * Wrapper class for holding a scored object
  *
  * @author Dan Klein
  * @version 2/7/01
@@ -11,7 +11,6 @@ public class ScoredObject<T> implements Scored {
 
   private double score;
 
-  @Override
   public double score() {
     return score;
   }
@@ -31,6 +30,8 @@ public class ScoredObject<T> implements Scored {
     this.object = object;
   }
 
+  public ScoredObject() {
+  }
 
   public ScoredObject(T object, double score) {
     this.object = object;

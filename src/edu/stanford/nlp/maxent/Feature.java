@@ -9,12 +9,11 @@ package edu.stanford.nlp.maxent;
 
 import edu.stanford.nlp.io.InDataStreamFile;
 import edu.stanford.nlp.io.OutDataStreamFile;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
 
 import java.io.PrintStream;
-import java.util.Map;
+import java.util.HashMap;
 
 
 /**
@@ -43,7 +42,7 @@ public class Feature {
    */
   public double[] valuesI;
   static Experiments domain;
-  protected Map<Integer,Double> hashValues;
+  protected HashMap<Integer,Double> hashValues;
   public double sum; // the sum of all values
 
   public Index<IntPair> instanceIndex;
@@ -57,7 +56,7 @@ public class Feature {
    */
   public Feature(Experiments e, double[] vals, Index<IntPair> instanceIndex) {
     this.instanceIndex = instanceIndex;
-    Map<Integer, Double> setNonZeros = Generics.newHashMap();
+    HashMap<Integer, Double> setNonZeros = new HashMap<Integer, Double>();
     for (int i = 0; i < vals.length; i++) {
       if (vals[i] != 0.0) {
         Integer in = Integer.valueOf(indexOf(e.get(i)[0], e.get(i)[1]));// new Integer(e.get(i)[0]*e.ySize+e.get(i)[1]);
@@ -265,7 +264,7 @@ public class Feature {
    * required for use of getVal(x,y)
    */
   public void initHashVals() {
-    hashValues = Generics.newHashMap();
+    hashValues = new HashMap<Integer,Double>();
     for (int i = 0; i < len(); i++) {
       int x = getX(i);
       int y = getY(i);

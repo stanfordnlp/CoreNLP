@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.lexparser;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -31,7 +32,6 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
@@ -76,7 +76,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
     optionsString = new StringBuilder();
     optionsString.append("FrenchTreebankParserParams\n");
 
-    annotationPatterns = Generics.newHashMap();
+    annotationPatterns = new HashMap<String,Pair<TregexPattern,Function<TregexMatcher,String>>>();
     activeAnnotations = new ArrayList<Pair<TregexPattern,Function<TregexMatcher,String>>>();
 
     initializeAnnotationPatterns();

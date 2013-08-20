@@ -61,7 +61,7 @@ public class PropertiesUtils {
    * Tired of Properties not behaving like Map<String,String>s?  This method will solve that problem for you.
    */
   public static Map<String, String> asMap(Properties properties) {
-    Map<String, String> map = Generics.newHashMap();
+    Map<String, String> map = new HashMap<String, String>();
     for (Entry<Object, Object> entry : properties.entrySet()) {
       map.put((String)entry.getKey(), (String)entry.getValue());
     }

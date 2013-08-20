@@ -3,14 +3,16 @@ package edu.stanford.nlp.pipeline;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -59,7 +61,7 @@ public class WordsToSentencesAnnotator implements Annotator {
                                                    Collections.<String>emptySet(),
                                                    Collections.singleton(nlToken[0]));
     } else {
-      Set<String> nlTokens = Generics.newHashSet(Arrays.asList(nlToken));
+      Set<String> nlTokens = new HashSet<String>(Arrays.asList(nlToken));
       wts = new WordToSentenceProcessor<CoreLabel>("",
                                                    Collections.<String>emptySet(),
                                                    nlTokens);
@@ -101,20 +103,19 @@ public class WordsToSentencesAnnotator implements Annotator {
         }
 
         // get the sentence text from the first and last character offsets
-        int begin = sentenceTokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int begin = sentenceTokens.get(0).get(CharacterOffsetBeginAnnotation.class);
         int last = sentenceTokens.size() - 1;
-        int end = sentenceTokens.get(last).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        int end = sentenceTokens.get(last).get(CharacterOffsetEndAnnotation.class);
         String sentenceText = text.substring(begin, end);
 
         // create a sentence annotation with text and token offsets
         Annotation sentence = new Annotation(sentenceText);
-        sentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
-        sentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
+        sentence.set(CharacterOffsetBeginAnnotation.class, begin);
+        sentence.set(CharacterOffsetEndAnnotation.class, end);
         sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
         sentence.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
         tokenOffset += sentenceTokens.size();
         sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
-        sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
 
         // add the sentence to the list
         sentences.add(sentence);
@@ -135,14 +136,4 @@ public class WordsToSentencesAnnotator implements Annotator {
     }
   }
 
-
-  @Override
-  public Set<Requirement> requires() {
-    return Collections.singleton(TOKENIZE_REQUIREMENT);
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(SSPLIT_REQUIREMENT);
-  }
 }

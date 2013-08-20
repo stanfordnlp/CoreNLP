@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.metrics;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,6 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -57,8 +57,8 @@ public class LeafAncestorEval {
   public LeafAncestorEval(String str) {
     this.name = str;
 
-    catAvg = Generics.newHashMap();
-    catNum = Generics.newHashMap();
+    catAvg = new HashMap<List<CoreLabel>,Double>();
+    catNum = new HashMap<List<CoreLabel>,Double>();
   }
 
   /**
@@ -269,7 +269,7 @@ public class LeafAncestorEval {
   private static File guessFile = null;
   private static File goldFile = null;
 
-  public static final Map<String,Integer> optionArgDefs = Generics.newHashMap();
+  public static final Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
   static {
     optionArgDefs.put("-y", 1);
     optionArgDefs.put("-l", 1);

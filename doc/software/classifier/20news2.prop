@@ -1,0 +1,7 @@
+trainFile=20news-bydate-devtrain-stanford-classifier.txt
+testFile=20news-bydate-devtest-stanford-classifier.txt
+2.useSplitWords=true
+2.splitWordsTokenizerRegexp=M[ -_]{60} |[\\p{L}][\\p{L}0-9]*|(?:\\$ ?)?[0-9]+(?:\\.[0-9]{2})?%?|\\s+|[\\x80-\\uFFFD]|.
+2.splitWordsIgnoreRegexp=M[ -_]{60} |\\s+
+2.binnedLengths=500,1500,4500,13500
+2.binnedLengthsStatistics=true

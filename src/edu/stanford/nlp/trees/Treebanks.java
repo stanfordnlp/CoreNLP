@@ -13,8 +13,6 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Filter;
-import edu.stanford.nlp.util.ReflectionLoading;
 
 
 /** This is just a main method and other static methods for
@@ -83,7 +81,6 @@ public class Treebanks {
     String suffix = Treebank.DEFAULT_TREE_FILE_SUFFIX;
     TreeReaderFactory trf = null;
     TreebankLanguagePack tlp = null;
-    List<Filter<Tree>> filters = new ArrayList<Filter<Tree>>();
 
     while (i < args.length && args[i].startsWith("-")) {
       if (args[i].equals("-maxLength") && i + 1 < args.length) {
@@ -166,10 +163,6 @@ public class Treebanks {
       } else if (args[i].equals("-removeCodeTrees")) {
         removeCodeTrees = true;
         i++;
-      } else if (args[i].equals("-filter")) {
-        Filter<Tree> filter = ReflectionLoading.loadByReflection(args[i+1]);
-        filters.add(filter);
-        i += 2;
       } else {
         System.err.println("Unknown option: " + args[i]);
         i++;
@@ -190,10 +183,6 @@ public class Treebanks {
       treebank = new DiskTreebank();
     } else {
       treebank = new DiskTreebank(trf, encoding);
-    }
-
-    for (Filter<Tree> filter : filters) {
-      treebank = new FilteringTreebank(treebank, filter);
     }
 
     final PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, encoding), true);

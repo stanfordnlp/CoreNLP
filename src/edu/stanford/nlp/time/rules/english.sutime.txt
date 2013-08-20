@@ -7,12 +7,12 @@
 
   $NUM = ( [ { numcomptype:NUMBER } ] );
   $INT = ( [ { numcomptype:NUMBER } & !{ word:/.*\.\d+.*/} & !{ word:/.*,.*/ } ] );
-  $INTORD = ( [ ({ numcomptype:NUMBER } | { numcomptype:ORDINAL }) & !{ word:/.*\.\d+.*/} & !{ word:/.*,.*/ } ] );
+  $INTORD = ( [ ({ numcomptype:NUMBER } | { numcomptype:ORDINAL }) & !{ word:/.*\.\d+.*/} & !{ word:/.*,.*/ } ] );  
   $INT1000TO3000 = ( [ $INT & !{ word:/\+.*/} & { numcompvalue>1000 } & { numcompvalue<3000 } ] );
   $INT1TO31 = ( [ $INTORD & !{ word:/\+.*/} & { numcompvalue>=1 } & { numcompvalue<=31 } ] );
   $NUM_ORD = ( [ { numcomptype:ORDINAL } ] );
 
-  $INT_TIMES = ( $INT /times/ | once | twice | thrice );
+  $INT_TIMES = ( $INT /times/ | once | twice | trice );
   $REL_MOD = ( /the/? /next|following|last|previous/ | /this/ /coming|past/? | /the/ /coming|past/ );
   $FREQ_MOD = ( /each/ | /every/ $NUM_ORD | /every/ /other|alternate|alternating/? | /alternate|alternating/ );
   $EARLY_LATE_MOD = ( /late|early|mid-?/ | /the/? /beginning|start|dawn|middle|end/ /of/ );
@@ -23,42 +23,40 @@
 
   # Decades
   DECADES_MAP = {
-    "twenties": "2X",
-    "thirties": "3X",
-    "forties": "4X",
-    "fifties": "5X",
-    "sixties": "6X",
-    "seventies": "7X",
-    "eighties": "8X",
-    "nineties": "9X"
+    "twenties": "2X", 	
+    "thirties": "3X", 	
+    "forties": "4X", 	
+    "fifties": "5X", 	
+    "sixties": "6X", 	
+    "seventies": "7X", 	
+    "eighties": "8X", 	
+    "nineties": "9X" 	
   }
   $Decades = CreateRegex(Keys(DECADES_MAP))
 
   # Durations
   TIMEUNIT_MAP = {
-    "year": YEAR,
-    "yr": YEAR,
-    "month": MONTH,
-    "mo": MONTH,
-    "day": DAY,
-    "hour": HOUR,
-    "hr": HOUR,
-    "minute": MINUTE,
-    "min": MINUTE,
-    "second": SECOND,
-    "sec": SECOND,
-    "millisecond": MILLIS,
-    "millisec": MILLIS,
-    "week": WEEK,
-    "wk": WEEK,
-    "fortnight": FORTNIGHT,
-    "quarter": QUARTER,
-    "century": CENTURY,
-    "centuries": CENTURY,
-    "millennia": MILLENNIUM,
-    "millennium": MILLENNIUM,
-    "millenia": MILLENNIUM,
-    "millenium": MILLENNIUM
+    "year": YEAR, 
+    "yr": YEAR, 
+    "month": MONTH, 
+    "mo": MONTH, 
+    "day": DAY, 
+    "hour": HOUR, 
+    "hr": HOUR, 
+    "minute": MINUTE, 
+    "min": MINUTE, 
+    "second": SECOND, 
+    "sec": SECOND, 
+    "millisecond": MILLIS, 
+    "millisec": MILLIS, 
+    "week": WEEK, 
+    "wk": WEEK, 
+    "fortnight": FORTNIGHT, 
+    "quarter": QUARTER, 
+    "century": CENTURY, 
+    "centuries": CENTURY, 
+    "millenia": MILLENIUM, 
+    "millenium": MILLENIUM
   }
   $TEUnits = CreateRegex(Keys(TIMEUNIT_MAP))
   BASIC_NUMBER_MAP = {
@@ -81,15 +79,15 @@
     "seventeen": 17,
     "eighteen": 18,
     "nineteen": 19,
-    "twenty": 20,
-    "thirty": 30,
-    "forty": 40,
-    "fifty": 50,
-    "sixty": 60,
-    "seventy": 70,
-    "eighty": 80,
-    "ninety": 90,
-    "hundred": 100
+    "twenty": 20, 	
+    "thirty": 30, 	
+    "forty": 40, 	
+    "fifty": 50, 	
+    "sixty": 60, 	
+    "seventy": 70, 	
+    "eighty": 80, 	
+    "ninety": 90, 	
+    "hundred": 100 	
   }
   $BasicNumTerm = CreateRegex(Keys(BASIC_NUMBER_MAP))
   BASIC_ORDINAL_MAP = {
@@ -112,18 +110,18 @@
     "seventeenth": 17,
     "eighteenth": 18,
     "nineteenth": 19,
-    "twentieth": 20,
-    "thirtieth": 30,
-    "fortieth": 40,
-    "fiftieth": 50,
-    "sixtieth": 60,
-    "seventieth": 70,
-    "eightieth": 80,
-    "ninetieth": 90,
-    "hundredth": 100
+    "twentieth": 20, 	
+    "thirtieth": 30, 	
+    "fortieth": 40, 	
+    "fiftieth": 50, 	
+    "sixtieth": 60, 	
+    "seventieth": 70, 	
+    "eightieth": 80, 	
+    "ninetieth": 90, 	
+    "hundredth": 100 	
   }
   $BasicOrdTerm = CreateRegex(Keys(BASIC_ORDINAL_MAP))
-
+  
   ########################################################################################################################
 
   ENV.defaults["stage"] = 0
@@ -135,7 +133,7 @@
                 :case {
 				   $0 =~ ( /\w+teen|twenty/ [ $INT ] ) => Add(Multiply($0[0].numcompvalue, 100), $0[1].numcompvalue),
 				   :else => $0[0].numcompvalue
-                }
+                }				
 	          ),
 			  Tag($0, "YEAR_ERA",
 			    :case {
@@ -144,49 +142,49 @@
 				   :else => ERA_UNKNOWN
 				}
 		      )
-            )
+            )			  
   }
 
   # Operators
-  { pattern: ( /this/ ),
+  { pattern: ( /this/ ), 
 	action: Tag($0, "TemporalOp", THIS) }
-  { pattern: ( /next/ ),
+  { pattern: ( /next/ ), 
 	action: Tag($0, "TemporalOp", NEXT) }
-  { pattern: ( /following/ ),
+  { pattern: ( /following/ ), 
 	action: Tag($0, "TemporalOp", NEXT)  }
-  { pattern: ( /previous/ ),
+  { pattern: ( /previous/ ), 
 	action: Tag($0, "TemporalOp", PREV) }
-  { pattern: ( /last/ ),
+  { pattern: ( /last/ ), 
 	action: Tag($0, "TemporalOp", PREV) }
-  { pattern: ( /this|the/ /coming|following|next/ ),
+  { pattern: ( /this|the/ /coming|following|next/ ), 
 	action: Tag($0, "TemporalOp", NEXT_IMMEDIATE) }
-  { pattern: ( /this|the/ /past|previous|last/ ),
+  { pattern: ( /this|the/ /past|previous|last/ ), 
 	action: Tag($0, "TemporalOp", PREV_IMMEDIATE) }
 
   # Modifiers
-
+   
   # Early late modifiers
-  { pattern: ( /late/ | /end/ ),
+  { pattern: ( /late/ | /end/ ), 
 	action: Tag($0, "Modifier", "LATE") }
-  { pattern: ( /early/ | /beginning|start|dawn/ ),
+  { pattern: ( /early/ | /beginning|start|dawn/ ), 
 	action: Tag($0, "Modifier", "EARLY") }
-  { pattern: ( /mid-?/ | /middle/ ),
+  { pattern: ( /mid-?/ | /middle/ ), 
 	action: Tag($0, "Modifier", "MID") }
-
+   
   # Frequency modifiers
-  { pattern: ( /each/ | /every/ ),
-    action: ( Tag($0, "PTS.quant", $0), Tag($0, "PTS.multiple", 1 ) ) }
-  { pattern: ( /every/ ($NUM_ORD|$INT) ),
-    action: ( Tag($0, "PTS.quant", $0), Tag($0, "PTS.multiple", $1[0].numcompvalue ) ) }
-  { pattern: ( /every/ /other|alternate|alternating/ | /alternate|alternating/ ),
-    action: ( Tag($0, "PTS.quant", $0), Tag($0, "PTS.multiple", 2 ) ) }
-
+  { pattern: ( /each/ | /every/ ), 
+    action: ( Tag($0, "PTS.quant", $0), Tag($0, "PTS.multiple", 1 ) ) } 
+  { pattern: ( /every/ ($NUM_ORD|$INT) ), 
+    action: ( Tag($0, "PTS.quant", $0), Tag($0, "PTS.multiple", $1[0].numcompvalue ) ) } 
+  { pattern: ( /every/ /other|alternate|alternating/ | /alternate|alternating/ ), 
+    action: ( Tag($0, "PTS.quant", $0), Tag($0, "PTS.multiple", 2 ) ) } 
+   
   # Approximate modifiers
   { pattern: ( /about|around|some/ ),
 	action: Tag($0, "Modifier", "APPROX") }
   { pattern: ( /exactly|precisely/ ),
 	action: Tag($0, "Modifier", "EXACT") }
-
+   
   # Periodic Set
   PERIODIC_SET = {
     "centennial": TemporalCompose(MULTIPLY, YEARLY, 100),
@@ -209,10 +207,10 @@
 
   ENV.defaults["stage"] = 1
   ENV.defaults["ruleType"] = "text"
-
+  
   # Durations: 3-months old   or   three-months old
   { text: /(\d+)[-]($TEUnits)(s)?([-\s]old)?/ => Duration( TIMEUNIT_MAP[Lowercase($2)], $1 ) }
-  { text: /($BasicNumTerm)[-]($TEUnits)(s)?([-\s]old)?/ =>
+  { text: /($BasicNumTerm)[-]($TEUnits)(s)?([-\s]old)?/ => 
            Duration( TIMEUNIT_MAP[Lowercase($2)], BASIC_NUMBER_MAP[Lowercase($1)] ) }
 
   # Durations
@@ -229,9 +227,9 @@
   { (/quarters?/) => QUARTER }
   { (/decades?/) => DECADE }
   { (/centurys?|centuries?/) => CENTURY }
-  { (/millenn?ias?|millenn?iums?/) => MILLENNIUM }
-
-  # Time of Day
+  { (/millenias?|milleniums?/) => MILLENIUM }
+   
+  # Time of Day   
   { (/mornings?/) => MORNING }
   { (/afternoons?/) => AFTERNOON }
   { (/evenings?/) => EVENING }
@@ -312,12 +310,12 @@
   }
 
   ########################################################################################################################
-
+   
   ENV.defaults["ruleType"] = "tokens"
   ENV.defaults["priority"] = 0
-
+  
   # ISO date/times
-  # TODO: Support other timezone formats
+  # TODO: Support other timezone formats 
   { ruleType: "time", pattern: /yyyy-?MM-?dd-?'T'HH(:?mm(:?ss([.,]S{1,3})?)?)?(Z)?/ }
   { ruleType: "time", pattern: /yyyy-MM-dd/ }
   { ruleType: "time", pattern: /'T'HH(:?mm(:?ss([.,](S{1,3}))?)?)?(Z)?/ }
@@ -333,18 +331,18 @@
   { ruleType: "time", pattern: /HH?''hmm/ }
 
   # two digit year
-  { ruleType: "time", pattern: /''yy/ }
-
+  { ruleType: "time", pattern: /''yy/ }  
+  
   # Birthdays
   { ( [ { tag:NNP } ]+ [ { tag:POS } ] /birthday/ ) => SimpleTime($0) }
 
   # Generic decade
   { ( /the/? ( /\w+teen/ /$Decades/ ) )
-       => IsoDate( Concat( Format("%02d", $0[0].numcompvalue), DECADES_MAP[Lowercase($0[1].word)]), NIL, NIL)
-  }
+       => IsoDate( Concat( Format("%02d", $0[0].numcompvalue), DECADES_MAP[Lowercase($0[1].word)]), NIL, NIL) 
+  }  
   { ( /the/? ( /$Decades/ ) )
-       => IsoDate( Concat("XX", DECADES_MAP[Lowercase($0[0].word)]) , NIL, NIL)
-  }
+       => IsoDate( Concat("XX", DECADES_MAP[Lowercase($0[0].word)]) , NIL, NIL) 
+  }  
   { (/the/?  /'/ /\d\d/ ) => IsoDate( Format( "XX%02d", $0[-1].numcompvalue), NIL, NIL) }
   { (/the/?  /'/ /\d0s/ | /the/? /'\d0s/ ) => IsoDate( Replace($0[-1].word, /'?(\d)0s/, "XX$1X"), NIL, NIL) }
   { (/the/? /\d\d\d0s/) => IsoDate( Replace($0[-1].word, /(\d\d\d)0s/, "$1X"), NIL, NIL) }
@@ -354,13 +352,13 @@
 
   # some century expressions
   { ( (/every/ $NUM_ORD) (/centurys?|ies/) ) =>
-    MakePeriodicTemporalSet(CENTURY, GetTag($1[0], "PTS.quant"), GetTag($1[0], "PTS.multiple") ) }
-
+    MakePeriodicTemporalSet(CENTURY, GetTag($1[0], "PTS.quant"), GetTag($1[0], "PTS.multiple") ) } 
+  
   { ( /the/? ($NUM_ORD) /-/? /century/ (/b\.?c\.?/)  )
 	  => IsoDate(
 			Format("-%02dXX", Subtract($1[0].numcompvalue, 1)),
-			NIL, NIL)
-  }
+			NIL, NIL) 
+  } 
   {   pattern: ( /the/? (/($BasicOrdTerm)-century/) (/b\.?c\.?/) ),
       matchWithResults: TRUE,
 	  result: IsoDate(
@@ -377,8 +375,8 @@
   { ( /the/? ($NUM_ORD) /-/? /century/ (/a\.?d\.?/)? )
 	  => IsoDate(
 		    Format("%02dXX", Subtract($1[0].numcompvalue, 1)),
-			NIL, NIL)
-  }
+			NIL, NIL) 
+  } 
 
   {   pattern: ( /the/? (/($BasicOrdTerm)-century/) (/a\.?d\.?/)? ),
       matchWithResults: TRUE,
@@ -396,10 +394,10 @@
   # some quarter expressions - need to add year refs
   { ( /the/? [{tag:JJ}]? ($NUM_ORD) /-/? [{tag:JJ}]? /quarter/ ) =>
       TemporalCompose(CREATE, QUARTER_OF_YEAR, $1[0].numcompvalue) }
-  { text: /(\d+)(st|nd|rd|th)-quarter/ =>
+  { text: /(\d+)(st|nd|rd|th)-quarter/ => 
       TemporalCompose(CREATE, QUARTER_OF_YEAR, $1 )
   }
-  { text: /($BasicOrdTerm)-quarter/ =>
+  { text: /($BasicOrdTerm)-quarter/ => 
       TemporalCompose(CREATE, QUARTER_OF_YEAR, BASIC_ORDINAL_MAP[Lowercase($1)])
   }
 
@@ -414,7 +412,7 @@
   }
 
   # some interval expressions
-  { text: /\b(\d{4})\s*(?:-)\s*(\d{4})\b/ =>
+  { text: /\b(\d{4})\s*(?:-)\s*(\d{4})\b/ => 
           TimeRange( IsoDate($1, NIL, NIL), IsoDate($2, NIL, NIL) ) }
   { ( /the/ /weekend/ ) => WEEKEND }
 
@@ -428,7 +426,7 @@
 
   { ( /the/ /hour/ /of/ ([ $INT & { numcompvalue<=24 } ]) )=> IsoTime($1[0].numcompvalue, 0, NIL) }
   { ( (?: /the/ /hour/ /of/?)? ([ $INT & { numcompvalue<=24 } ]) /o'?clock/ ) => IsoTime($1[0].numcompvalue, 0, NIL) }
-
+  
   { ( /the/? /year/ ($POSSIBLE_YEAR) )
       => IsoDate( GetTag($1[0], "YEAR"), NIL, NIL, GetTag($1[0], "YEAR_ERA"), TRUE) }
   { ( ($POSSIBLE_YEAR) & [ { ner::IS_NIL } | { ner:DATE } | { ner:O } | { ner:NUMBER } ]+ )
@@ -441,7 +439,7 @@
   # Compositional rules
 
   ENV.defaults["ruleType"] = "composite"
-
+  
   { name: "temporal-composite-6b",
     priority: 20,
     pattern: ( ( $REL_MOD ) ( [ $hasTemporal & !{ temporal::IS_TIMEX_SET } ] ) ),
@@ -451,18 +449,18 @@
   ########################################################################################################################
   # Composite Duration rules
 
-  ENV.defaults["priority"] = 10
+  ENV.defaults["priority"] = 10  
   ENV.defaults["stage"] = 2
-
+  
   # Duration (start, end, unit, range_start, range_end)
   # Duration rules
   # i.e. "the past twenty four years"
   { pattern: ( /the/ /past|last|previous/ (?: ($NUM) /to|-/ )? ($NUM)? ([ { temporal::IS_TIME_UNIT } ]) ),
 	result: Duration($1,$2,$3,TIME_UNKNOWN,TIME_REF)
   }
-
+  
   { pattern: ( /the/ /next|following/ (?: ($NUM) /to|-/ )? ($NUM)? ([ { temporal::IS_TIME_UNIT } ]) ),
-	result: Duration($1,$2,$3,TIME_REF,TIME_UNKNOWN)
+	result: Duration($1,$2,$3,TIME_REF,TIME_UNKNOWN) 
   }
 
   # i.e. "another 3 years", "another thirteen months"
@@ -479,22 +477,22 @@
   { pattern: ( /the/ /first|initial|last|final|latest/ (?: ($NUM) /to|-/ )? ($NUM)? ([ { temporal::IS_TIME_UNIT } ]) ),
 	result: Duration( $1, $2, $3 ) }
 
-  # i.e. "the fifth straight year", "the third straight month in a row", "the ninth day consecutively"
+  # i.e. "the fifth straight year", "the third straight month in a row", "the ninth day consecutively" 
   # i.e. "the eighth consecutive day in a row"
   # i.e. "the twenty ninth day straight"
   { pattern: ( /the/ ($NUM_ORD) /straight|consecutive/ ([ { temporal::IS_TIME_UNIT } ]) (?: /in/ /a/ /row/ | /consecutively/ )? ),
 	result: Duration (NIL, $1, $2, TIME_UNKNOWN, TIME_REF) }
-  { pattern: ( /the/ ($NUM_ORD) /straight|consecutive/? ([ { temporal::IS_TIME_UNIT } ]) (?: /in/ /a/ /row/ | /consecutively/ ) ),
+  { pattern: ( /the/ ($NUM_ORD) /straight|consecutive/? ([ { temporal::IS_TIME_UNIT } ]) (?: /in/ /a/ /row/ | /consecutively/ ) ), 
 	result: Duration (NIL, $1, $2, TIME_UNKNOWN, TIME_REF) }
 
   # hundreds of years
   { pattern: ( (/(ten|hundred|thousand|million|billion|trillion)s/) /of/ ([ { temporal::IS_TIME_UNIT } ]) ),
 	result: Duration ( NIL, $1, $2) }
 
-  # i.e. "recent weeks", "several days"
+  # i.e. "recent weeks", "several days"	       
   { pattern: ( (/recent|several/) /-/? ([ { temporal::IS_TIME_UNIT } ]) ),
 	result: InexactDuration( Duration(NIL, NIL, $2) ) }
-
+  
   # i.e. 3-months old, "four years", "four minutes"
   { pattern: ( ($NUM) /to|-/ ($NUM) [ "-" ]? ([ { temporal::IS_TIME_UNIT } ]) (?: [ "-" ]? /old/ )? ),
     result: Duration( $1, $2, $3) }
@@ -511,14 +509,14 @@
     priority: -1,
     result:	InexactDuration( $1[0].temporal.value ) }
 
-  { pattern: ( /a|an/ ([ { temporal::IS_TIME_UNIT } ]) ),
+  { pattern: ( /a|an/ ([ { temporal::IS_TIME_UNIT } ]) ),  
     result: Duration( $1[0].temporal.value, 1) }
-
+	 
   ######################################################################################################################
-  # Compositional date rules
+  # Compositional date rules  
 
   ENV.defaults["priority"] = 0
-
+  
   { name: "composite-date-expression-1a",
 	priority: 1,
 	pattern: ( (/every/ $NUM_ORD) (?$month [ { temporal::MONTH }]) ),
@@ -529,12 +527,12 @@
   { name: "composite-date-expression-1",
 	priority: 1,
 	pattern: ( ( /the/? (?$day $NUM_ORD & $INT1TO31) /of/? | (?$day /\d\d?/ & $INT1TO31) )?
-	           (?$month [ { temporal::MONTH } ])
-			   (?$day $NUM_ORD|/\d\d?/ & $INT1TO31)?
+	           (?$month [ { temporal::MONTH } ]) 
+			   (?$day $NUM_ORD|/\d\d?/ & $INT1TO31)? 
 			   (?: /of|,/? (?$year $POSSIBLE_YEAR))? ),
-	result: IsoDate( GetTag($year[0].numtokens[0], "YEAR"),
+	result: IsoDate( GetTag($year[0].numtokens[0], "YEAR"), 
 	                 $month[0].temporal.value.month, $day[0].numcompvalue) }
-
+	
   { name: "composite-date-expression-1b",
 	pattern: ( /the/? /ides/ /of|in/? (?$month [ { temporal::MONTH } ]) (?: /of|,/? (?$year $POSSIBLE_YEAR))? ),
 	result: IsoDate(
@@ -576,21 +574,21 @@
   { name: "composite-date-expression-3",
 	pattern: ( /the/? (?$weeknum ($NUM_ORD|last)) (?$week /week(end)?/ ) /of|in/? [ { temporal::IS_TIMEX_DATE } ] ),
 	result: TemporalCompose(
-              IN,
+              IN, 
 			  $0[-1].temporal,
               TemporalCompose(
 			     CREATE,
                  $week[0].temporal,
 			     :case {
 			       $weeknum =~ (/last/) => -1,
-			       :else => $weeknum[0].numcompvalue
+			       :else => $weeknum[0].numcompvalue 
                  } ))
   }
 
   { name: "composite-date-expression-3b",
 	pattern: ( /the/? (?$week /week(end)?/ ) /of|in/? [ { temporal::IS_TIMEX_DATE } ] ),
 	result: TemporalCompose(
-              INTERSECT,
+              INTERSECT, 
 			  $0[-1].temporal,
 			  $week[0].temporal)
   }
@@ -598,7 +596,7 @@
   { name: "composite-date-expression-3c",
 	pattern: ( ( [ { temporal::DAYOFWEEK } ] ) /the/? (?$day $NUM_ORD) ),
 	result: TemporalCompose(
-              INTERSECT,
+              INTERSECT, 
 			  $1[0].temporal,
 			  IsoDate(NIL, NIL, $day[0].numcompvalue))
   }
@@ -606,8 +604,8 @@
   { name: "composite-date-expression-6",
     pattern: ( ([ { temporal::IS_TIMEX_DATE } ]) (morning|afternoon|evening|night) ),
 	result: TemporalCompose(INTERSECT, $1[0].temporal, $2[0].temporal)
-  }
-
+  }			   
+  
   { name: "composite-date-expression-7a",
     pattern: ( (?: /the/? /day/ (/before/|/prior/ /to/) ([ { temporal::IS_TIMEX_DATE } ]) ) ),
 	result: TemporalCompose(
@@ -617,7 +615,7 @@
 			   MULTIPLY,
 			   DAY,
 			   -1))
-  }
+  }			   
 
   { name: "composite-date-expression-7b",
     pattern: ( (?: /the/? /day/ (/after/) ([ { temporal::IS_TIMEX_DATE } ]) ) ),
@@ -625,21 +623,21 @@
 	          PLUS,
 			  $2[0].temporal,
 			  DAY)
-  }
+  }			   
 
   { name: "composite-date-expression-8",
-    pattern: ( /the/ [ { tag:JJ } ]* ([ { temporal::IS_TIME_UNIT }
+    pattern: ( /the/ [ { tag:JJ } ]* ([ { temporal::IS_TIME_UNIT } 
 	                                     & !{ word:/.*s/ } ] )),
 	result: RelativeTime( THIS, $1[0].temporal.value )
   }
-
+  
   ########################################################################################################################
   # Composite time expressions
 
   { name: "composite-time-expression-1a",
     active: TRUE,
     pattern: (   (?: (?$time [ { temporal::IS_TIMEX_TIME } ]) | (?$hour [ $INT & { numcompvalue<=24 } ]))
-                 (?$context /in/ /the/ /morning/ | /a\.?m\.?/)
+                 (?$context /in/ /the/ /morning/ | /a\.?m\.?/)	
              ),
 	result: :case {
 			    $time => TemporalCompose(INTERSECT, $time[0].temporal.value, AM),
@@ -651,7 +649,7 @@
   { name: "composite-time-expression-1b",
     active: TRUE,
     pattern: (   (?: (?$time [ { temporal::IS_TIMEX_TIME } ]) | (?$hour [ $INT & { numcompvalue<=24 } ]))
-                 (?$context /in/ /the/ /afternoon|evening/| /at/ /night/| /p\.?m\.?/)
+                 (?$context /in/ /the/ /afternoon|evening/| /at/ /night/| /p\.?m\.?/)	
              ),
 	result: :case {
 			    $time => TemporalCompose(INTERSECT, $time[0].temporal.value, PM),
@@ -661,7 +659,7 @@
 				:else => IsoTime($hour[0].numcompvalue, 0, NIL)
 			}
   }
-
+    
   { name: "composite-time-expression-1c",
     active: TRUE,
     pattern: (   (?: (?$time [ { temporal::IS_TIMEX_TIME } ]) | (?$hour [ $INT & { numcompvalue==12 } ]))
@@ -675,9 +673,9 @@
   }
 
   { name: "composite-time-expression-2",
-    pattern: (  (?$minute /a/? /quarter/ | /a/? /half/ | [ $INT & { numcompvalue<=60 } ] /minutes?/? )
-		        (?$rel /past|after|of|before|to|until/)
-				(?: (?$time [ { temporal::IS_TIMEX_TIME } ]) | (?$hour [ $INT & { numcompvalue<=24 } ]))
+    pattern: (  (?$minute /a/? /quarter/ | /a/? /half/ | [ $INT & { numcompvalue<=60 } ] /minutes?/? ) 
+		        (?$rel /past|after|of|before|to|until/) 
+				(?: (?$time [ { temporal::IS_TIMEX_TIME } ]) | (?$hour [ $INT & { numcompvalue<=24 } ]))				
              ),
 	result: TemporalCompose(
 	          :case {
@@ -710,43 +708,43 @@
   ENV.defaults["stage"] = 3
 
   { name: "temporal-composite-1",
-    pattern: ( /the/?
+    pattern: ( /the/? 
 	 (( [ $hasTemporal ] ) /,|of|in/? ( [ { temporal::IS_TIMEX_DATE } | { temporal::IS_TIMEX_TIME } ] ) |
-      ( [ { temporal::IS_TIMEX_DATE } ] ) /at/  ( [ { temporal::IS_TIMEX_TIME } ] ) |
+      ( [ { temporal::IS_TIMEX_DATE } ] ) /at/  ( [ { temporal::IS_TIMEX_TIME } ] ) | 
       ( [ { temporal::IS_TIMEX_TIME } | { temporal::IS_TIMEX_DURATION } ] ) /on/  ( [ { temporal::IS_TIMEX_DATE } ] | [ { temporal::IS_TIMEX_SET } ]) |
       ( [ { temporal::IS_TIMEX_DATE } | { temporal::IS_TIMEX_TIME } ] ) (/'s/ | /'/ /s/) ( [ $hasTemporal ] )) ),
-	result: TemporalCompose(INTERSECT, $1[0].temporal, $1[-1].temporal)
+	result: TemporalCompose(INTERSECT, $1[0].temporal, $1[-1].temporal) 
   }
-
+    
   { name: "temporal-composite-2",
     pattern: ( ( [ { temporal::IS_TIMEX_DATE } | { temporal::IS_TIMEX_TIME } ] )  (/today|tonight/) ),
-	result: $0[0].temporal.value
+	result: $0[0].temporal.value 
   }
 
   { name: "temporal-composite-3",
-    pattern: ( ( [ { temporal::IS_TIMEX_DURATION } ] )  (/before|from|since|after/ | /prior/ /to/)
+    pattern: ( ( [ { temporal::IS_TIMEX_DURATION } ] )  (/before|from|since|after/ | /prior/ /to/) 
 	   ( [ ({ temporal::IS_TIMEX_TIME }  |  { temporal::IS_TIMEX_DATE }) ] ) ),
 	result: TemporalCompose(
-	          OFFSET, $0[-1].temporal,
+	          OFFSET, $0[-1].temporal, 
 			  TemporalCompose(
 			   MULTIPLY,
 			   $0[0].temporal,
 			   :case {
 			     $2 =~ (/before/|/prior/ /to/) => -1,
-			     :else => 1
-               } ))
+			     :else => 1 
+               } )) 
   }
 
   # expand: timex later|earlier|late => one timex
   { name: "temporal-composite-4",
     pattern: ( ( [ { temporal::IS_TIMEX_DURATION } ] )  (/earlier|later|ago|hence/ | /from/ /now/) ),
 	result: TemporalCompose(OFFSET, TIME_REF,
-	         TemporalCompose( MULTIPLY, $0[0].temporal,
+	         TemporalCompose( MULTIPLY, $0[0].temporal, 
 			 :case {
 			   $2 =~ (/earlier/|/ago/) => -1,
 			   :else => 1
              }))
-  }
+  }			 
 
   # expand: timex later|earlier|late => one timex
   { name: "temporal-composite-5",
@@ -764,36 +762,36 @@
     pattern: ( ( $REL_MOD ) ( [ $hasTemporal & !{ temporal::IS_TIMEX_SET } ] ) ),
 	result: RelativeTime( GetTag($1[0], "TemporalOp"), $2[0].temporal.value )
   }
-
+  
   { name: "temporal-composite-6b1",
     priority: 4,
-    pattern: ( (  /no/ /more/ /than/ | /at/ /most/ | /up/ /to/ )
+    pattern: ( (  /no/ /more/ /than/ | /at/ /most/ | /up/ /to/ ) 
 	           ( [ { temporal::IS_TIMEX_DURATION } & !{{ temporal.value.mod }} ] ) ),
     result: TemporalCompose( ADD_MODIFIER, $0[-1].temporal.value, "EQUAL_OR_LESS" )
   }
   { name: "temporal-composite-6b2",
     priority: 4,
-    pattern: ( (  /more/ /than/ )
+    pattern: ( (  /more/ /than/ ) 
 	           ( [ { temporal::IS_TIMEX_DURATION } & !{{ temporal.value.mod }} ] ) ),
     result: TemporalCompose( ADD_MODIFIER, $0[-1].temporal.value, "MORE_THAN" )
   }
   { name: "temporal-composite-6b3",
     priority: 4,
-    pattern: ( (  /no/ /less/ /than/ | /at/ /least/ )
+    pattern: ( (  /no/ /less/ /than/ | /at/ /least/ ) 
 	           ( [ { temporal::IS_TIMEX_DURATION } & !{{ temporal.value.mod }} ] ) ),
     result: TemporalCompose( ADD_MODIFIER, $0[-1].temporal.value, "EQUAL_OR_MORE" )
   }
   { name: "temporal-composite-6b4",
     priority: 4,
-    pattern: ( (  /less/ /than/ )
+    pattern: ( (  /less/ /than/ ) 
 	           ( [ { temporal::IS_TIMEX_DURATION } & !{{ temporal.value.mod }} ] ) ),
     result: TemporalCompose( ADD_MODIFIER, $0[-1].temporal.value, "LESS_THAN" )
   }
-
+  
   # expand: (the|this|about|nearly|early|later|earlier|late) timex => one timex
   # expand: more than| up to| less than timex => one timex
   { name: "temporal-composite-6c",
-    pattern: ( ( /this|about|nearly|early|later|earlier|late/ )
+    pattern: ( ( /this|about|nearly|early|later|earlier|late/ ) 
 	           ( [ $hasTemporal & !{ temporal::IS_TIMEX_SET } ] ) ),
     result: $0[-1].temporal.value
   }
@@ -808,16 +806,16 @@
     pattern: ( ( $FREQ_MOD ) ( [ $hasTemporal ] ) ),
 	result: MakePeriodicTemporalSet($2[0].temporal, GetTag($1[0], "PTS.quant"), GetTag($1[0], "PTS.multiple") )
   }
-
+  
   { name: "temporal-composite-8:ranges",
 	active: options."markTimeRanges",
-    pattern: ( /from/? ( [ { temporal::IS_TIMEX_TIME } | { temporal::IS_TIMEX_DATE } ] ) /to|-/ ( [ { temporal::IS_TIMEX_TIME } |   {   temporal::IS_TIMEX_DATE } ] ) ),
+    pattern: ( /from/? ( [ { temporal::IS_TIMEX_TIME } | { temporal::IS_TIMEX_DATE } ] ) /to|-/ ( [ { temporal::IS_TIMEX_TIME } |   {   temporal::IS_TIMEX_DATE } ] ) ), 
 	result: TimeRange( $1[0].temporal.value, $2[0].temporal.value ) }
 
   { name: "temporal-composite-9",
 	pattern: ( [{ temporal::IS_TIMEX_TIME }] (?: /sharp/|/exactly/|/precisely/|/on/ /the/ /dot/) ),
-    result: $0[0].temporal.value }
-
+    result: $0[0].temporal.value }	
+	
   ########################################################################################################################
 
   ENV.defaults["stage"] = 4
@@ -829,7 +827,7 @@
   { ( /past|once|medieval|previously/ ) => TIME_PAST }
   { ( /present|current|currently/ | /right/? /now/ ) => TIME_PRESENT }
   { (  /the/? /near/? /future/ ) => TIME_FUTURE }
-
+  
   # Final rules to determine how to resolve date
   ENV.defaults["ruleType"] = "composite"
   ENV.defaults["stage.limitIters"] = 1
@@ -856,10 +854,11 @@
 
   ENV.defaults["ruleType"] = "filter"
   ENV.defaultTokensAnnotationKey = tokens
-
+ 
   {  pattern: ( $NUM /to/ $NUM) }
   {  pattern: ( /(quarter|sun)s?/ ) }
   {  pattern: ( [ { word:/(fall|spring|second|march|may|sat|sun|min)s?/ } & !{ tag:/NN.*/ } ] )  }
   {  pattern: ( /the/ [ { word:/second/ } & !{ tag:/NN.*/ } ] )  }
-  {  pattern: ( [ {{ temporal.value == NON_TEMPORAL }} ] ), over: NIL }
-
+  {  pattern: ( [ {{ temporal.value == NON_TEMPORAL }} ] ), over: NIL }  
+  
+ 

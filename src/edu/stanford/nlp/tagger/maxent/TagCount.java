@@ -8,12 +8,11 @@
 
 package edu.stanford.nlp.tagger.maxent;
 
+import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.util.Generics;
 
-import java.util.Map;
+import java.util.HashMap;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 
 
 /**
@@ -25,7 +24,7 @@ import java.io.DataOutputStream;
  */
 class TagCount {
 
-  private Map<String, Integer> map = Generics.newHashMap();
+  private HashMap<String, Integer> map = new HashMap<String, Integer>();
   private int ambClassId = -1; /* This is a numeric ID shared by all words that have the same set of possible tags. */
 
   private String[] getTagsCache; // = null;
@@ -50,7 +49,7 @@ class TagCount {
    * @param rf is a file handle
    *           Supposedly other objects will be written after this one in the file. The method does not close the file. The TagCount is saved at the current position.
    */
-  protected void save(DataOutputStream rf) {
+  protected void save(OutDataStreamFile rf) {
     try {
       rf.writeInt(map.size());
       for (String tag : map.keySet()) {
@@ -77,12 +76,11 @@ class TagCount {
 
   // The object's fields are read form the file. They are read from
   // the current position and the file is not closed afterwards.
-  // todo [cdm 2013]: Change this into a static load method so you don't have to make a null TagCount to then call this method on
   protected void read(DataInputStream rf) {
     try {
 
       int numTags = rf.readInt();
-      map = Generics.newHashMap(numTags);
+      map = new HashMap<String, Integer>(numTags);
 
       for (int i = 0; i < numTags; i++) {
 	String tag = rf.readUTF();

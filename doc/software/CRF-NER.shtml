@@ -1,0 +1,320 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2>Stanford Named Entity Recognizer (NER)</h2>
+</center>
+
+<center><p><font color="#a40526"><a href="#About">About</a> |
+<a href="#Questions">Questions</a> |
+<a href="#Mail">Mailing lists</a> |
+<a href="#Download">Download</a> |
+<a href="#Extensions">Extensions</a> |
+<a href="#Models">Models</a> |
+<a href="#Demo">Online demo</a> |
+<a href="#History">Release history</a> |
+<a href="crf-faq.shtml">FAQ</a></font></p></center>
+
+
+<h3><a name="About">About</a></h3>
+<p>
+Stanford NER (also known as CRFClassifier) is a Java implementation of a
+Named Entity Recognizer.  
+Named Entity Recognition (NER) labels sequences of words in a text which are
+the names of things, such as person and company names, or gene and
+protein names. 
+The software provides a general (arbitrary order) implementation of linear chain
+Conditional Random Field (CRF)  
+sequence models, coupled with well-engineered feature
+extractors for Named Entity Recognition.  
+(CRF models were pioneered by 
+<a href="http://www.cis.upenn.edu/~pereira/papers/crf.pdf">Lafferty,
+McCallum, and Pereira (2001)</a>; see 
+<a
+href="http://www.cs.umass.edu/~mccallum/papers/crf-tutorial.pdf">Sutton
+and McCallum (2006)</a> for a better introduction.)
+Included with the download are good 3 class
+(PERSON, ORGANIZATION, LOCATION) named entity recognizers for English (in
+versions with and 
+without additional distributional similarity features) and another pair
+of models trained on the <a href="http://www.cnts.ua.ac.be/conll2003/ner/">CoNLL 2003</a>
+English training data.  The
+distributional similarity features improve performance but the models
+require considerably more memory.
+</p>
+<p>
+The CRF code is by Jenny Finkel.  The feature extractors are by Dan
+Klein, Christopher Manning, and Jenny Finkel.  Much of the documentation and
+usability is due to Anna Rafferty.  The CRF sequence models
+provided here do not precisely correspond to 
+any published paper, but the correct paper to cite for the software is:
+</p>
+<blockquote>
+Jenny Rose Finkel, Trond Grenager, and Christopher
+Manning. 2005. Incorporating Non-local Information into Information
+Extraction Systems by Gibbs Sampling. <i>Proceedings of the 43nd Annual
+Meeting of the Association for Computational Linguistics (ACL 2005),</i>
+pp. 363-370. 
+<a href="http://nlp.stanford.edu/~manning/papers/gibbscrf3.pdf"><code>http://nlp.stanford.edu/~manning/papers/gibbscrf3.pdf</code></a>
+</blockquote>
+<p>
+The software provided here is similar to the baseline local+Viterbi
+model in that paper, but adds new 
+distributional similarity based features (in the <code>-distSim</code>
+classifiers).  The big models were trained on a mixture of CoNLL, MUC-6, MUC-7
+and ACE named entity corpora, and as a result the models are fairly robust
+across domains.
+</p>
+
+<p>
+You can look at a Powerpoint Introduction to NER and the Stanford NER
+package [<a href="jenny-ner-2007.ppt">ppt</a>] 
+[<a href="jenny-ner-2007.pdf">pdf</a>] or the 
+<a href="crf-faq.shtml">FAQ</a>, which has some information on training models.
+Further documentation is provided in the included
+README and in the javadocs.  
+</p>
+
+<p>Stanford NER is available for download,
+<b>licensed under the <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU
+General Public License</a></b> (v2 or later). Source is included.  
+The package includes components for command-line invocation, running as a
+server, and a Java API. 
+Stanford NER
+code is dual licensed (in a similar manner to MySQL, etc.).  
+Open source licensing is under the <i>full</i> GPL,
+which allows many free uses.
+For distributors of 
+<a href="http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem">proprietary
+software</a>, <b>commercial licensing</b> with a 
+<a href="http://otlportal.stanford.edu/techfinder/technology/ID=24628">ready-to-sign
+agreement</a> is available.
+If you don't need a commercial license, but would like to support
+maintenance of these tools, we welcome gift funding.
+</p>
+
+<h3><a name="Questions">Questions</a></h3>
+
+<p>
+There is also a list of <a href="crf-faq.shtml">Frequently Asked
+    Questions</a> (with answers!).
+ Additional questions, feedback, and bug reports/fixes can be sent to our <a
+href="#Mail">mailing lists</a>.
+</p>
+
+
+<BR>
+
+<h3><a name="Mail">Mailing Lists</a></h3>
+<p>
+We have 3 mailing lists for the Stanford Named Entity Recognizer, all of which are shared
+with other JavaNLP tools (with the exclusion of the parser). Before writing, please check to see if your question has been answered in the <a href="crf-faq.shtml">FAQ</a>.  Each address is
+at <code>@lists.stanford.edu</code>:
+</p>
+<ol>
+<li><code>java-nlp-user</code> This is the best list to post to in order
+to ask questions, make announcements, or for discussion among JavaNLP
+users.  You have to subscribe to be able to use it.
+Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-user">this webpage</a> or by emailing
+<code>java-nlp-user-join@lists.stanford.edu</code>.   (Leave the
+subject and message body empty.)  You can also
+<a href="https://mailman.stanford.edu/pipermail/java-nlp-user/">look at
+the list archives</a>.
+<li><code>java-nlp-announce</code> This list will be used only to announce
+new versions of Stanford JavaNLP tools.  So it will be very low volume (expect 1-3
+messages a year).  Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce">this webpage</a> or by emailing
+<code>java-nlp-announce-join@lists.stanford.edu</code>.  (Leave the
+subject and message body empty.)
+<li><code>java-nlp-support</code> This list goes only to the software
+maintainers.  It's a good address for licensing questions, etc.  <b>For
+general use and support questions, you're better off joining and using
+<code>java-nlp-user</code>.</b>
+You cannot join <code>java-nlp-support</code>, but you can mail questions to
+<code>java-nlp-support@lists.stanford.edu</code>.
+</ol>
+<BR>
+<h3><a name="Download">Download</a></h3>
+
+<center>
+<b><a href="stanford-ner-2012-11-11.zip">Download
+          Stanford Named Entity Recognizer version 1.2.7</a></b><br>
+</center>
+
+
+<p>The download is a 66M zipped file (mainly consisting of
+    classifier data objects).  If you unpack that file,
+    you should have everything needed.   It includes batch files for
+    running under Windows or Unix/Linux/MacOSX, a simple GUI, and the
+    ability to run as a server.  Stanford NER requires Java v1.6+.  
+</p>
+
+<h3><a name="Extensions">Extensions: Packages by others using Stanford NER</a></h3>
+
+<ul>
+<li>
+Florian Laws has made a Stanford NER <a
+href="http://incubator.apache.org/uima/">UIMA</a> annotator using a
+modified version of Stanford NER, which is available on his 
+<a href="http://www.florianlaws.de/">homepage</a>.  (This may not track
+recent changes in either Apache UIMA or Stanford NER.)
+</li>
+<li>
+Kieren Diment has written <a
+href="http://search.cpan.org/~zarquon/Text-NLP-Stanford-EntityExtract-0.06/lib/Text/NLP/Stanford/EntityExtract.pm">Text-NLP-Stanford-EntityExtract</a>, a Perl module that provides
+an interface to Stanford NER running as a server.
+</li>
+<li>
+tiendung has written <a href="http://github.com/tiendung/ruby-nlp">a
+Ruby Binding</a> for the Stanford POS tagger and Named Entity Recognizer.
+</li>
+<li>
+Dat Hoang has written a <a href="https://github.com/dat/pyner">Python
+    interface to Stanford NER</a>.
+</li>
+</ul>
+
+
+<br>
+<h3><a name="Models">Models</a></h3>
+
+<br>
+
+Included with the Stanford NER are a 4 class model trained for CoNLL,
+a 7 class model trained for MUC, and a 3 class model trained on both
+data sets for the intersection of those class sets.
+
+<table>
+<tr><td>3 class</td><td>Location, Person, Organization</td></tr>
+<tr><td>4 class</td><td>Location, Person, Organization, Misc</td></tr>
+<tr><td>7 class</td>
+<td>Time, Location, Organization, Person, Money, Percent, Date</td></tr>
+</table>
+
+<br>
+
+These models each use distributional similarity features, which
+provide some performance gain at the cost of increasing their size and
+runtime.  Also available are the same models missing those features.
+
+<br>
+<br>
+
+<center><a href="stanford-ner-2012-11-11-nodistsim.zip">Models with no distsim features</a>
+</center>
+
+<br>
+<br>
+
+Also available, as part of a package of caseless models for several of
+our tools, are caseless versions of these same three models.  You can
+either unpack the jar file or add it to the classpath; if you add the
+jar file to the classpath, you can then load the models from the path
+<code>edu/stanford/nlp/models/...</code>.  You can run 
+<code>jar -t</code> to get the list of files in the jar file.
+
+<br>
+<br>
+
+<center><a href="stanford-corenlp-caseless-2012-11-09-models.jar">Models which ignore capitalization</a></center>
+
+<br>
+<br>
+
+Furthermore, a pair of German models are available.  For citation and
+other information relating to the German classifiers, please
+see 
+<a href="http://www.nlpado.de/~sebastian/software/ner_german.shtml">
+Sebastian Pado's German NER page
+</a>.
+
+<br><br>
+
+<center><a href="stanford-ner-2012-05-22-german.tgz">German NER</a></center>
+<br>
+
+<br>
+<br>
+
+We also provide Chinese models built from the Ontonotes Chinese named
+entity data.  There are two models, one using distributional
+similarity clusters and one without.
+
+<br><br>
+
+<center><a href="stanford-ner-2012-11-11-chinese.zip">Chinese NER</a></center>
+<br>
+
+<h3><a name="Demo">Online Demo</a></h3>
+
+<br>
+
+We have an <a href="http://nlp.stanford.edu:8080/ner">online demo</a>
+of several of our NER models.  Special thanks to
+<a href="https://github.com/dat">Dat Hoang</a>, who provided the
+initial version.  Note that the online demo demonstrates single CRF
+models; in order to see the effect of the time annotator or the
+combined models, see
+<a href="http://nlp.stanford.edu/software/corenlp.shtml">CoreNLP</a>.
+
+<h3><a name="History">Release History</a></h3>
+
+<br>
+
+
+<table cellspacing="5">
+<tr>
+<th align="left">Version</th><th align="left">Date</th><th align="left">Description</th>
+</tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2012-11-11.zip">1.2.7</a></td>
+  <td><nobr>2012-11-11</nobr></td>
+  <td>Add Chinese model, include Wikipedia data in 3-class English model</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2012-07-09.tgz">1.2.6</a></td>
+  <td><nobr>2012-07-09</nobr></td>
+  <td>Minor bug fixes</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2012-05-22.tgz">1.2.5</a></td>
+  <td><nobr>2012-05-22</nobr></td>
+  <td>Fix encoding issue</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2012-04-07.tgz">1.2.4</a></td>
+  <td><nobr>2012-04-07</nobr></td>
+  <td>Caseless versions of models supported</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2012-01-06.tgz">1.2.3</a></td>
+  <td><nobr>2012-01-06</nobr></td>
+  <td>Minor bug fixes</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2011-09-14.tgz">1.2.2</a></td>
+  <td><nobr>2011-09-14</nobr></td>
+  <td>Improved thread safety</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2011-06-19.tgz">1.2.1</a></td>
+  <td><nobr>2011-06-19</nobr></td>
+  <td>Models reduced in size but on average improved in accuracy 
+      (improved distsim clusters)</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2011-05-16.tgz">1.2</a></td>
+  <td><nobr>2011-05-16</nobr></td>
+  <td>Normal download includes 3, 4, and 7 class models.  
+      Updated for compatibility with other software releases.</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2009-01-16.tgz">1.1.1</a></td>
+  <td><nobr>2009-01-16</nobr></td>
+  <td>Minor bug and usability fixes, and changed API (in particular the methods to
+  classify and output tagged text)</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2008-05-07.tgz">1.1</a></td>
+  <td><nobr>2008-05-07</nobr></td>
+  <td>Additional feature flags, various code updates</td></tr>
+<tr valign="top">
+  <td><a href="stanford-ner-2006-09-18.tar.gz">1.0</a></td>
+  <td><nobr>2006-09-18</nobr></td>
+  <td>Initial release</td></tr>
+</table>
+
+
+
+
+<!--#include virtual="/footer.html" -->
+

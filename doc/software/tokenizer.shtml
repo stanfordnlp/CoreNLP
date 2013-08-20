@@ -1,0 +1,366 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2><font color="#a40526">Stanford Tokenizer</font></h2>
+</center>
+
+<center><p><font color="#a40526"><a href="#About">About</a> |
+<a href="#Obtaining">Obtaining</a> |
+<a href="#Usage">Usage</a> |
+<a href="#Mail">Mailing Lists</a>
+</font></p></center>
+
+<h3><a name="About">About</a></h3>
+
+<p>
+A tokenizer divides text into a sequence of tokens, which roughly
+correspond to "words".  We provide a class suitable for tokenization of
+English, called PTBTokenizer.  It was initially designed to largely
+mimic 
+<a href="http://www.ldc.upenn.edu/Catalog/CatalogEntry.jsp?catalogId=LDC99T42">Penn
+Treebank 3</a> (PTB) tokenization, hence its name, though over
+time the tokenizer has added quite a few options and a fair amount of
+Unicode compatibility, so in general it will work well over text encoded
+in the Unicode Basic Multilingual Plane that does not require word
+segmentation (such as writing systems that do not put spaces between words) or
+more exotic language-particular rules (such as writing systems that use
+: or ? as a character inside words, etc.).  An ancillary tool uses this
+tokenization to provide the ability to split text into sentences.
+PTBTokenizer mainly targets formal English writing rather than SMS-speak.
+</p>
+
+<p>
+PTBTokenizer is a an efficient, fast, deterministic tokenizer.  (For the
+more technically inclined, it is implemented as a finite automaton,
+produced by <a href="http://jflex.de/">JFlex</a>.)  On a typical 2010
+computer, it will tokenize text at a rate of about 200,000 tokens per
+second. While deterministic, it uses some quite good heuristics, so it
+can usually decide when single quotes are parts of words, when periods
+do an don't imply sentence boundaries, etc. Sentence 
+splitting is a deterministic consequence of tokenization: a sentence
+ends when a sentence-ending character (., !, or ?) is found which is not
+grouped with other characters into a token (such as for an abbreviation
+or number), though it may still include a few tokens that can follow a sentence
+ending character as part of the same sentence (such as quotes and brackets).
+</p>
+ 
+<p>
+PTBTokenizer has been developed by Christopher Manning, Tim Grow, Teg Grenager, Jenny Finkel,
+and John Bauer.
+</p>
+
+<h3><a name="Obtaining">Obtaining</a></h3>
+
+<p>
+The Stanford Tokenizer is not distributed separately but is included in
+several of our <a href="/software/">software downloads</a>,
+including the Stanford Parser, Stanford Part-of-Speech Tagger, Stanford
+Named Entity Recognizer, and Stanford CoreNLP.  Choose a tool that has
+been updated recently, download it, and you're ready to go.  See these
+software packages for details on software licenses.
+</p>
+
+<h3><a name="Usage">Usage</a></h3>
+
+<p> 
+The tokenizer requires Java (JDK1.5+).  As well as API
+access, the program includes an easy-to-use 
+command-line interface, <code>PTBTokenizer</code>.  For the examples
+below, we assume you have set up your CLASSPATH to find
+<code>PTBTokenizer</code>, for example with a command like the following
+(the details depend on your operating system and shell):
+</p>
+<blockquote>
+<pre>
+export CLASSPATH=stanford-parser.jar
+</pre>
+</blockquote>
+You can also specify this on each command-line by adding <code>-cp
+stanford-parser.jar</code> after <code>java</code>.
+
+<h4>Command-line usage</h4>
+
+<p>
+The basic operation is to convert a plain text file into a sequence of
+tokens, which are printed out one per line.  Here is an example (on Unix):
+</p>
+<blockquote>
+<pre>
+$ cat >sample.txt
+"Oh, no," she's saying, "our $400 blender can't handle something this hard!"
+$ java edu.stanford.nlp.process.PTBTokenizer sample.txt
+``
+Oh
+,
+no
+,
+''
+she
+'s
+saying
+,
+``
+our
+$
+400
+blender
+ca
+n't
+handle
+something
+this
+hard
+!
+''
+PTBTokenizer tokenized 23 tokens at 370.97 tokens per second.
+</pre>
+</blockquote>
+<p>
+Here, we gave a filename argument which contained the text.
+PTBTokenizer can also read from a gzip-compressed file or a URL, or it
+can run as a filter, reading from stdin.  There are a bunch of other
+things it
+can do, using command-line
+flags:
+</p>
+<ul>
+<li> <b>-charset</b> By default, it assumues utf-8, but you can tell it to use
+another character encoding.
+<li> <b>-preserveLines</b> Keep the input line breaks rather than changing
+things to one token per line
+<li> <b>-ioFileList</b> Treat the files on the command line as files that
+themselves contain lists of files to process.  These files should be
+formatted in two tab-separated columns of input files and corresponding
+output files.
+<li> <b>-parseInside regex</b> Only tokenize information inside the SGML/XML
+elements which match the regex.  This is regex-based matching of
+SGML/XML, and so isn't perfect, but works perfectly well with simple
+SGML/XML such as LDC corpora, such as English Gigaword (for which the
+regex you'll probably want is "HEADLINE|P").
+<li> <b>-untok</b> Makes a best effort attempt at undoing PTB tokenization.
+Slightly less perfect than the tokenization but not bad.  It doesn't
+join tokens over newlines, though.
+<blockquote>
+<pre>
+$ java edu.stanford.nlp.process.PTBTokenizer -preserveLines < sample.txt | java edu.stanford.nlp.process.PTBTokenizer -untok > roundtrip.txt
+$ diff sample.txt roundtrip.txt
+$
+</pre>
+</blockquote>
+<li> <b>-dump</b> Print out everything about each token.  (Find out how we
+really represent tokens!)
+<li> <b>-options optionString</b> Let's you set a bunch of options that affect tokenization;
+see below.
+<li> <b>-help</b> Print some usage information
+</ul>
+
+<p>
+The output of PTBTokenizer can be post-processed to divide a test into
+sentences.  One way to get the output of that from the command-line is
+through
+calling <code>edu.stanfordn.nlp.process.DocumentPreprocessor</code>.
+For example: 
+</p>
+<blockquote>
+<pre>
+$ cat >sample.txt
+Another ex-Golden Stater, Paul Stankowski from Oxnard, is contending
+for a berth on the U.S. Ryder Cup team after winning his first PGA Tour
+event last year and staying within three strokes of the lead through
+three rounds of last month's U.S. Open. H.J. Heinz Company said it
+completed the sale of its Ore-Ida frozen-food business catering to the
+service industry to McCain Foods Ltd. for about $500 million.
+It's the first group action of its kind in Britain and one of
+only a handful of lawsuits against tobacco companies outside the
+U.S. A Paris lawyer last year sued France's Seita SA on behalf of
+two cancer-stricken smokers. Japan Tobacco Inc. faces a suit from
+five smokers who accuse the government-owned company of hooking
+them on an addictive product.
+$
+$ java edu.stanford.nlp.process.DocumentPreprocessor sample.txt 
+Another ex-Golden Stater , Paul Stankowski from Oxnard , is contending
+for a berth on the U.S. Ryder Cup team after winning his first PGA Tour
+event last year and staying within three strokes of the lead through
+three rounds of last month 's U.S. Open .
+H.J. Heinz Company said it completed the sale of its Ore-Ida frozen-food
+business catering to the service industry to McCain Foods Ltd. for about
+$ 500 million .
+It 's the first group action of its kind in Britain and one of only a
+handful of lawsuits against tobacco companies outside the U.S. .
+A Paris lawyer last year sued France 's Seita SA on behalf of two
+cancer-stricken smokers .
+Japan Tobacco Inc. faces a suit from five smokers who accuse the
+government-owned company of hooking them on an addictive product .
+Read in 5 sentences.
+</pre>
+</blockquote>
+
+<h4>API usage</h4>
+
+<p>
+There are various ways to call the code, but here's a simple example to
+get started with using either <code>PTBTokenizer</code> directly or
+calling <code>DocumentPreprocessor</code>.
+</p>
+<blockquote>
+<pre>
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.process.DocumentPreprocessor;
+import edu.stanford.nlp.process.PTBTokenizer;
+
+public class TokenizerDemo {
+
+  public static void main(String[] args) throws IOException {
+    for (String arg : args) {
+      // option #1: By sentence.
+      DocumentPreprocessor dp = new DocumentPreprocessor(arg);
+      for (List<HasWord> sentence : dp) {
+        System.out.println(sentence);
+      }
+      // option #2: By token
+      PTBTokenizer<CoreLabel> ptbt = new PTBTokenizer<CoreLabel>(new FileReader(arg),
+              new CoreLabelTokenFactory(), "");
+      for (CoreLabel label; ptbt.hasNext(); ) {
+        label = ptbt.next();
+        System.out.println(label);
+      }
+    }
+  }
+}
+</pre>
+</blockquote>
+
+<h4><a name="Options">Options</a></h4>
+
+<p>There are a number of options that affect how tokenization is
+performed.  These can be specified on the command line, with the flag
+<tt>-options</tt> (or <tt>-tokenizerOptions</tt> in tools like the
+Stanford Parser) or in the constructor to <code>PTBTokenizer</code> or
+the factory methods in <code>PTBTokenizerFactory</code>.  Here are the
+current options.  They are specified as a single string, with options
+separated by commas, and values given in option=value syntax, for
+instance
+<tt>"americanize=false,unicodeQuotes=true,unicodeEllipsis=true"</tt>. 
+</p>
+<ul>
+<li>invertible: Store enough information about the original form of
+ the
+    token and the whitespace around it that a list of tokens can be
+    faithfully converted back to the original String.  Valid only if
+ the
+    LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
+    keys used are: TextAnnotation for the tokenized form,
+    OriginalTextAnnotation for the original string, BeforeAnnotation and
+    AfterAnnotation for the whitespace before and after a token, and
+    perhaps BeginPositionAnnotation and EndPositionAnnotation to
+ record
+    token begin/after end character offsets, if they were specified
+ to be recorded
+    in TokenFactory construction.  (Like the String class, begin and
+ end
+    are done so end - begin gives the token length.)
+<li>tokenizeNLs: Whether end-of-lines should become tokens (or just
+    be treated as part of whitespace)
+<li>ptb3Escaping: Enable all traditional PTB3 token transforms
+    (like parentheses becoming -LRB-, -RRB-).  This is a macro flag
+ that
+    sets or clears all the options below.
+<li>americanize: Whether to rewrite common British English spellings
+    as American English spellings
+<li>normalizeSpace: Whether any spaces in tokens (phone numbers,
+ fractions
+    get turned into U+00A0 (non-breaking space).  It's dangerous to
+ turn
+    this off for most of our Stanford NLP software, which assumes no
+    spaces in tokens.
+<li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
+     ampersand
+<li>normalizeCurrency: Whether to do some awful lossy currency
+ mappings
+    to turn common currency characters into $, #, or "cents",
+ reflecting
+    the fact that nothing else appears in the old PTB3 WSJ.  (No
+ Euro!)
+<li>normalizeFractions: Whether to map certain common composed
+    fraction characters to spelled out letter forms like "1/2"
+<li>normalizeParentheses: Whether to map round parentheses to -LRB-,
+    -RRB-, as in the Penn Treebank
+<li>normalizeOtherBrackets: Whether to map other common bracket
+ characters
+    to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank
+<li>asciiQuotes Whether to map quote characters to the traditional '
+ and " <!-- " -->
+<li>latexQuotes: Whether to map to ``, `, ', '' for quotes, as in
+ Latex
+    and the PTB3 WSJ (though this is now heavily frowned on in
+ Unicode).
+    If true, this takes precedence over the setting of unicodeQuotes;
+    if both are false, no mapping is done.
+<li>unicodeQuotes: Whether to map quotes to the range U+2018 to
+ U+201D,
+    the preferred unicode encoding of single and double quotes.
+<li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the
+ old PTB3 WSJ coding
+    of an ellipsis. If true, this takes precedence over the setting
+ of
+    unicodeEllipsis; if both are false, no mapping is done.
+<li>unicodeEllipsis: Whether to map dot and optional space sequences
+ to
+    U+2026, the Unicode ellipsis character
+<li>ptb3Dashes: Whether to turn various dash characters into "--",
+    the dominant encoding of dashes in the PTB3 WSJ
+<li>escapeForwardSlashAsterisk: Whether to put a backslash escape in
+ front
+    of / and * as the old PTB3 WSJ does for some reason (something to
+ do
+    with Lisp readers??).
+<li>untokenizable: What to do with untokenizable characters (ones not
+    known to the tokenizer).  Six options combining whether to log a
+    warning for none, the first, or all, and whether to delete them
+ or
+    to include them as single character tokens in the output:
+ noneDelete,
+    firstDelete, allDelete, noneKeep, firstKeep, allKeep.
+    The default is "firstDelete".
+</ul>
+
+
+
+<h3><a name="Mail">Mailing Lists</a></h3>
+<p>
+We have 3 mailing lists for the Stanford Classifier, all of which are shared
+with other JavaNLP tools (with the exclusion of the parser). Each address is
+at <code>@lists.stanford.edu</code>:
+</p>
+<ol>
+<li><code>java-nlp-user</code> This is the best list to post to in order
+to ask questions, make announcements, or for discussion among JavaNLP
+users.  You have to subscribe to be able to use it.
+Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-user">this webpage</a> or by emailing
+<code>java-nlp-user-join@lists.stanford.edu</code>.   (Leave the
+subject and message body empty.)  You can also
+<a href="https://mailman.stanford.edu/pipermail/java-nlp-user/">look at
+the list archives</a>.
+<li><code>java-nlp-announce</code> This list will be used only to announce
+new versions of Stanford JavaNLP tools.  So it will be very low volume (expect 1-3
+message a year).  Join the list via via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce">this webpage</a> or by emailing
+<code>java-nlp-announce-join@lists.stanford.edu</code>.  (Leave the
+subject and message body empty.)
+<li><code>java-nlp-support</code> This list goes only to the software
+maintainers.  It's a good address for licensing questions, etc.  <b>For
+general use and support questions, please join and use
+<code>java-nlp-user</code>.</b>
+You cannot join <code>java-nlp-support</code>, but you can mail questions to
+<code>java-nlp-support@lists.stanford.edu</code>.
+</ol>
+<BR>
+
+
+<!--#include virtual="/footer.html" -->
+

@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -37,7 +36,7 @@ public final class JointParser {
     return classUsage.toString();
   }
   private static Map<String, Integer> optionArgDefs() {
-    Map<String, Integer> optionArgDefs = Generics.newHashMap();
+    Map<String, Integer> optionArgDefs = new HashMap<String,Integer>();
     optionArgDefs.put("v", 0);
     optionArgDefs.put("t", 1);
     optionArgDefs.put("l", 1);
