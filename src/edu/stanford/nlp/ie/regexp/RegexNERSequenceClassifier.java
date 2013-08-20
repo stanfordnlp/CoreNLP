@@ -1,10 +1,7 @@
 package edu.stanford.nlp.ie.regexp;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 
 import java.util.ArrayList;
@@ -19,6 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
@@ -182,11 +180,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     List<Entry> entries = new ArrayList<Entry>();
 
     try {
-      // ms, 2010-10-05: try to load the file from the CLASSPATH first
-      InputStream is = getClass().getClassLoader().getResourceAsStream(mapping);
-      // if not found in the CLASSPATH, load from the file system
-      if (is == null) is = new FileInputStream(mapping);
-      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+      BufferedReader rd = IOUtils.readerFromString(mapping);
 
       int lineCount = 0;
       for (String line; (line = rd.readLine()) != null; ) {
@@ -221,7 +215,6 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
         entries.add(new Entry(tokens, type, overwritableTypes, priority));
       }
       rd.close();
-      is.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
