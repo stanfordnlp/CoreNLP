@@ -109,6 +109,8 @@ public class WordsToSentencesAnnotator implements Annotator {
       int tokenOffset = 0;
       int lineNumber = 0;
       List<CoreMap> sentences = new ArrayList<CoreMap>();
+      // section annotations to mark sentences with
+      CoreMap sectionAnnotations = null;
       for (List<CoreLabel> sentenceTokens: this.wts.process(tokens)) {
         if (countLineNumbers) {
           ++lineNumber;
@@ -140,6 +142,26 @@ public class WordsToSentencesAnnotator implements Annotator {
         if (countLineNumbers) {
           sentence.set(CoreAnnotations.LineNumberAnnotation.class, lineNumber);
         }
+
+        // Annotation sentence with section information
+        // Assume section start and end appear as first and last tokens of sentence
+        CoreLabel sentenceStartToken = sentenceTokens.get(0);
+        CoreLabel sentenceEndToken = sentenceTokens.get(sentenceTokens.size()-1);
+
+        CoreMap sectionStart = sentenceStartToken.get(CoreAnnotations.SectionStartAnnotation.class);
+        if (sectionStart != null) {
+          // Section is started
+          sectionAnnotations = sectionStart;
+        }
+        if (sectionAnnotations != null) {
+          // transfer annotations over to sentence
+          ChunkAnnotationUtils.copyUnsetAnnotations(sectionAnnotations, sentence);
+        }
+        String sectionEnd = sentenceEndToken.get(CoreAnnotations.SectionEndAnnotation.class);
+        if (sectionEnd != null) {
+          sectionAnnotations = null;
+        }
+
 
         // add the sentence to the list
         sentences.add(sentence);

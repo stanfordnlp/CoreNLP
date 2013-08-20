@@ -197,8 +197,11 @@ public class TimeAnnotator implements Annotator {
         CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence); 
         // uncomment the next line for verbose dumping of tokens....
         // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
+        String sectionDate = sentence.get(CoreAnnotations.SectionDateAnnotation.class);
+        String refDate = (sectionDate != null)? sectionDate:docDate;
+
         List<CoreMap> timeExpressions = 
-          timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
+          timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, refDate, timeIndex);
         if (timeExpressions != null) {
           allTimeExpressions.addAll(timeExpressions);
           sentence.set(TimeAnnotations.TimexAnnotations.class, timeExpressions);

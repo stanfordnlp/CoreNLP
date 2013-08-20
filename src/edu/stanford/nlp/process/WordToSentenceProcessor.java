@@ -194,7 +194,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         if (DEBUG) {
         EncodingPrintWriter.err.println("Word is " + word, "UTF-8");
       }
-      if (!forcedEnd && sentenceRegionBeginPattern != null && ! insideRegion) {
+      if (sentenceRegionBeginPattern != null && ! insideRegion) {
         if (sentenceRegionBeginPattern.matcher(word).matches()) {
           insideRegion = true;
         }
@@ -203,7 +203,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         }
         continue;
       }
-      if (!forcedEnd && sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
+      if (sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
         lastSentence.add(o);
         if (DEBUG) {
           System.err.println("  added to last");
