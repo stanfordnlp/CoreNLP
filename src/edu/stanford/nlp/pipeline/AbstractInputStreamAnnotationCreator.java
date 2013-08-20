@@ -27,7 +27,7 @@ public abstract class AbstractInputStreamAnnotationCreator implements Annotation
 
   @Override
   public Annotation createFromFile(File file) throws IOException {
-    return createFromFile(file.getAbsolutePath());
+    return createFromFile(file.getAbsoluteFile());
   }
 
   @Override
