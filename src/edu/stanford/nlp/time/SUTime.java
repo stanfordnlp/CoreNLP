@@ -538,7 +538,7 @@ public class SUTime {
       return new DateTimeFieldType[] { DateTimeFieldType.centuryOfEra() };
     }
   };
-  public static final Duration MILLENIUM = new DurationWithFields(Period.years(1000));
+  public static final Duration MILLENNIUM = new DurationWithFields(Period.years(1000));
 
   public static final Time TIME_REF = new RefTime("REF") {
   };
@@ -641,7 +641,7 @@ public class SUTime {
   public static enum TimeUnit {
     // Basic time units
     MILLIS(SUTime.MILLIS), SECOND(SUTime.SECOND), MINUTE(SUTime.MINUTE), HOUR(SUTime.HOUR), DAY(SUTime.DAY), WEEK(SUTime.WEEK), MONTH(SUTime.MONTH), QUARTER(SUTime.QUARTER), YEAR(
-            SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENIUM(SUTime.MILLENIUM), UNKNOWN(SUTime.DURATION_UNKNOWN);
+            SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENNIUM(SUTime.MILLENNIUM), UNKNOWN(SUTime.DURATION_UNKNOWN);
 
     protected Duration duration;
 
