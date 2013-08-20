@@ -13,6 +13,9 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <hr size="3" color="#333333"/>
     <center><h3>Document</h3></center>
 
+    <table border="1" style="background-color:#f0f0f0;" align="center">
+    <tr><th>Document Info</th></tr>
+    <tr><td>
     <xsl:if test="root/document/docId">
         <br/>DocId: <xsl:value-of select="root/document/docId"/>
     </xsl:if>
@@ -31,12 +34,14 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <xsl:if test="root/document/location">
         <br/>Location: <xsl:value-of select="root/document/location"/>
     </xsl:if>
-    <table border="1" style="background-color:#f0f0f0;" align="center">
+    </td></tr>
 
     <xsl:if test="root/document/text">
         <tr><th>Text</th></tr>
         <tr><td>
-        <xsl:value-of select="root/document/text"/>
+            <div class="preformatted">
+              <xsl:value-of select="root/document/text"/>
+            </div>
         </td></tr>
     </xsl:if>
 
@@ -112,6 +117,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <th>POS</th>
     <th>NER</th>
     <th>Normalized NER</th>
+    <th>Speaker</th>
   </tr>
   <xsl:for-each select="token">
     <tr>
