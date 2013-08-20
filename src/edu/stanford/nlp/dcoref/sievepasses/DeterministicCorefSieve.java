@@ -43,13 +43,13 @@ import edu.stanford.nlp.dcoref.Dictionaries.Person;
 import edu.stanford.nlp.dcoref.Document;
 import edu.stanford.nlp.dcoref.Document.DocType;
 import edu.stanford.nlp.dcoref.Mention;
-import edu.stanford.nlp.dcoref.MentionMatcher;
 import edu.stanford.nlp.dcoref.Rules;
 import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.dcoref.SieveOptions;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Pair;
 
 /**
  *  Base class for a Coref Sieve.
@@ -73,8 +73,6 @@ public abstract class DeterministicCorefSieve  {
   public String flagsToString() { return flags.toString(); }
 
   public boolean useRoleSkip() { return flags.USE_ROLE_SKIP; }
-
-  public MentionMatcher getMentionMatcher() { return null; }
 
   /** Skip this mention? (search pruning) */
   public boolean skipThisMention(Document document, Mention m1, CorefCluster c, Dictionaries dict) {
@@ -138,11 +136,6 @@ public abstract class DeterministicCorefSieve  {
       Semantics semantics) throws Exception {
 
     boolean ret = false;
-    if (flags.USE_INCOMPATIBLES) {
-      // Check our list of incompatible mentions and don't cluster them together
-      // Allows definite no's from previous sieves to propagate down
-      if (document.isIncompatible(mentionCluster, potentialAntecedent)) return false;
-    }
     Mention mention = mentionCluster.getRepresentativeMention();
     if(flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3
         && mention2.person!=Person.I && mention2.person!=Person.YOU) return false;
@@ -194,24 +187,24 @@ public abstract class DeterministicCorefSieve  {
         for(Mention a : potentialAntecedent.getCorefMentions()){
           if(Rules.entityIsSpeaker(document, m, a, dict) && m.person!=Person.I && a.person!=Person.I) {
             SieveCoreferenceSystem.logger.finest("Incompatibles: not match(speaker): " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-            document.addIncompatible(m, a);
+            document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
             return false;
           }
           int dist = Math.abs(m.headWord.get(CoreAnnotations.UtteranceAnnotation.class) - a.headWord.get(CoreAnnotations.UtteranceAnnotation.class));
           if(document.docType!=DocType.ARTICLE && dist==1 && !Rules.entitySameSpeaker(document, m, a)) {
             if(m.person==Person.I && a.person==Person.I) {
               SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor I: " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.addIncompatible(m, a);
+              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
               return false;
             }
             if(m.person==Person.YOU && a.person==Person.YOU) {
               SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor YOU: " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.addIncompatible(m, a);
+              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
               return false;
             }
             if(m.person==Person.WE && a.person==Person.WE) {
               SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor WE: " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.addIncompatible(m, a);
+              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
               return false;
             }
           }
@@ -222,7 +215,7 @@ public abstract class DeterministicCorefSieve  {
           for(Mention a : potentialAntecedent.getCorefMentions()){
             if(Rules.entitySubjectObject(m, a)) {
               SieveCoreferenceSystem.logger.finest("Incompatibles: subject-object: "+ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.addIncompatible(m, a);
+              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
               return false;
             }
           }
@@ -231,16 +224,12 @@ public abstract class DeterministicCorefSieve  {
     }
 
     if(flags.USE_iwithini && Rules.entityIWithinI(mention, ant, dict)) {
-      document.addIncompatible(mention, ant);
+      document.incompatibles.add(new Pair<Integer, Integer>(Math.min(mention.mentionID, ant.mentionID), Math.max(mention.mentionID, ant.mentionID)));
       return false;
     }
     if(flags.USE_EXACTSTRINGMATCH && Rules.entityExactStringMatch(mentionCluster, potentialAntecedent, dict, roleSet)){
       return true;
     }
-    if (flags.USE_NAME_MATCH && Rules.entityNameMatch(getMentionMatcher(), mentionCluster, potentialAntecedent, document, dict, roleSet)) {
-      return true;
-    }
-
     if(flags.USE_RELAXED_EXACTSTRINGMATCH && Rules.entityRelaxedExactStringMatch(mentionCluster, potentialAntecedent, mention, ant, dict, roleSet)){
       return true;
     }
@@ -380,12 +369,12 @@ public abstract class DeterministicCorefSieve  {
       if((m.isPronominal() || dict.allPronouns.contains(m.toString())) && Rules.entityAttributesAgree(mentionCluster, potentialAntecedent)){
 
         if(dict.demonymSet.contains(ant.spanToString().toLowerCase()) && dict.notOrganizationPRP.contains(m.headString)){
-          document.addIncompatible(m, ant);
+          document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, ant.mentionID), Math.max(m.mentionID, ant.mentionID)));
           return false;
         }
         if(Constants.USE_DISCOURSE_CONSTRAINTS && Rules.entityPersonDisagree(document, mentionCluster, potentialAntecedent, dict)){
           SieveCoreferenceSystem.logger.finest("Incompatibles: Person Disagree: "+ant.spanToString()+"("+ant.mentionID+") :: "+mention.spanToString()+"("+mention.mentionID+") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-          document.addIncompatible(m, ant);
+          document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, ant.mentionID), Math.max(m.mentionID, ant.mentionID)));
           return false;
         }
         return true;
