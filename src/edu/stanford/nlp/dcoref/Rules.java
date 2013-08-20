@@ -644,7 +644,7 @@ public class Rules {
    */
   public static int getSpeakerClusterId(Document document, String speakerString) {
     int speakerClusterId = -1;
-    if (NumberMatchingRegex.isDecimalInteger(speakerString)) {
+    if (speakerString != null && NumberMatchingRegex.isDecimalInteger(speakerString)) {
       try {
         int speakerMentionId = Integer.parseInt(speakerString);
         Mention mention = document.allPredictedMentions.get(speakerMentionId);
