@@ -951,7 +951,7 @@ public class Redwood {
     public static void endTrack(String check){ Redwood.endTrack(check); }
     public static void endTrack(){ Redwood.endTrack(); }
     public static void endTrackIfOpen(String check) {
-      if (Redwood.titleStack.peek().equals(check)) { Redwood.endTrack(check); }
+      if (!Redwood.titleStack.empty() && Redwood.titleStack.peek().equals(check)) { Redwood.endTrack(check); }
     }
 
     public static void startThreads(String title){ Redwood.startThreads(title); }
