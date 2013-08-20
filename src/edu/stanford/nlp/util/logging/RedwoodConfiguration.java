@@ -404,7 +404,13 @@ public class RedwoodConfiguration {
    * @return The value of the property at the key
    */
   private static String get(Properties p, String key, String defaultValue, Set<String> used){
-    String rtn = p.getProperty(key, defaultValue);
+    Object cand = p.get(key);
+    String rtn;
+    if (cand == null) {
+      rtn = p.getProperty(key, defaultValue);
+    } else {
+      rtn = cand.toString();
+    }
     used.add(key);
     return rtn;
   }
