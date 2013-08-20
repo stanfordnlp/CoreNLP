@@ -45,6 +45,13 @@ public class CleanXmlAnnotator implements Annotator{
   public static final String DEFAULT_SENTENCE_ENDERS = "";
 
   /**
+   * This tells us what tags denote single sentences (tokens inside should not be sentence split on)
+   */
+  private Pattern singleSentenceTagMatcher = null;
+
+  public static final String DEFAULT_SINGLE_SENTENCE_TAGS = null;
+
+  /**
    * This tells us which XML tags wrap document date
    */
   private final Pattern dateTagMatcher;
@@ -100,6 +107,7 @@ public class CleanXmlAnnotator implements Annotator{
   private Pattern postTagMatcher = null;
 
   public static final String DEFAULT_POST_TAGS = "post";
+  public static final String DEFAULT_POST_ANNOTATIONS_PATTERNS = "postid=post[id],postdate=post[date]|postdate,author=post[author]|poster";
 
   /**
    * This tells us what the postdate tag is
@@ -157,6 +165,10 @@ public class CleanXmlAnnotator implements Annotator{
     } else {
       return null;
     }
+  }
+
+  public void setSingleSentenceTagMatcher(String tags) {
+    singleSentenceTagMatcher = toCaseInsensitivePattern(tags);
   }
 
   public void setDocIdTagMatcher(String docIdTags) {
@@ -246,7 +258,8 @@ public class CleanXmlAnnotator implements Annotator{
 
     // Keeps track of what we still need to doc level annotations
     // we still need to look for
-    Set<Class> toAnnotate = docAnnotationPatterns.keySet();
+    Set<Class> toAnnotate = new HashSet<Class>();
+    toAnnotate.addAll(docAnnotationPatterns.keySet());
 
     int utteranceIndex = 0;
     boolean inUtterance = false;
@@ -257,6 +270,7 @@ public class CleanXmlAnnotator implements Annotator{
     List<CoreLabel> docTypeTokens = new ArrayList<CoreLabel>();
     List<CoreLabel> docIdTokens = new ArrayList<CoreLabel>();
 
+    boolean markSingleSentence = true;
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
       XMLUtils.XMLTag tag = XMLUtils.parseTag(word);
@@ -273,6 +287,10 @@ public class CleanXmlAnnotator implements Annotator{
           if (inUtterance) {
             token.set(CoreAnnotations.UtteranceAnnotation.class, utteranceIndex);
             if (currentSpeaker != null) token.set(CoreAnnotations.SpeakerAnnotation.class, currentSpeaker);
+          }
+          if (markSingleSentence) {
+            token.set(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class, true);
+            markSingleSentence = false;
           }
         }
         // if we removed any text, and the tokens are "invertible" and
@@ -357,7 +375,7 @@ public class CleanXmlAnnotator implements Annotator{
       }
 
 
-        // we are removing a token and its associated text...
+      // we are removing a token and its associated text...
       // keep track of that
       String currentRemoval = token.get(CoreAnnotations.BeforeAnnotation.class);
       if (currentRemoval != null)
@@ -416,6 +434,20 @@ public class CleanXmlAnnotator implements Annotator{
           currentSpeaker = null;
         }
         speakerTokens.clear();
+      }
+
+      if (singleSentenceTagMatcher != null && singleSentenceTagMatcher.matcher(tag.name).matches()) {
+        if (tag.isEndTag) {
+          // Mark previous token as forcing sentence end
+          if (newTokens.size() > 0) {
+            CoreLabel previous = newTokens.get(newTokens.size() - 1);
+            previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
+          }
+          markSingleSentence = false;
+        } else if (!tag.isSingleTag) {
+          // Enforce rest of the tokens to be single token until ForceSentenceEnd is seen
+          markSingleSentence = true;
+        }
       }
 
       if (xmlTagMatcher == null)
