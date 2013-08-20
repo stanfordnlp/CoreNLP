@@ -3,13 +3,13 @@ package edu.stanford.nlp.math;
 import java.util.Collection;
 
 /**
- * The class <code>SloppyMath</code> contains methods for performing basic
+ * The class {@code SloppyMath} contains methods for performing basic
  * numeric operations.  In some cases, such as max and min, they cut a few
  * corners in
  * the implementation for the sake of efficiency.  In particular, they may
  * not handle special notions like NaN and -0.0 correctly.  This was the
  * origin of the class name, but many other methods are just useful
- * math additions, such as logAdd.  This class just has static math methds.
+ * math additions, such as logAdd.  This class just has static math methods.
  *
  * @author Christopher Manning
  * @version 2003/01/02

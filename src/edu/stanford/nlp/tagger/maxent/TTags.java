@@ -1,7 +1,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.InDataStreamFile;
-import edu.stanford.nlp.io.OutDataStreamFile;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.util.Generics;
@@ -282,7 +281,7 @@ public class TTags {
   protected void save(String filename,
                       Map<String, Set<String>> tagTokens) {
     try {
-      DataOutputStream out = new OutDataStreamFile(filename);
+      DataOutputStream out = IOUtils.getDataOutputStream(filename);
       save(out, tagTokens);
       out.close();
     } catch (IOException e) {
@@ -311,7 +310,7 @@ public class TTags {
 
   protected void read(String filename) {
     try {
-      InDataStreamFile in = new InDataStreamFile(filename);
+      DataInputStream in = IOUtils.getDataInputStream(filename);
       read(in);
       in.close();
     } catch (IOException e) {
