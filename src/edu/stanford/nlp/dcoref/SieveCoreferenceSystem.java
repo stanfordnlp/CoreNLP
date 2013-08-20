@@ -854,7 +854,6 @@ public class SieveCoreferenceSystem {
       DeterministicCorefSieve sieve) throws Exception {
 
     //Redwood.forceTrack("Coreference: sieve " + sieve.getClass().getSimpleName());
-    logger.finer("Coreference: sieve " + sieve.getClass().getSimpleName());
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     Map<Integer, CorefCluster> corefClusters = document.corefClusters;
     Set<Mention> roleSet = document.roleSet;
@@ -932,7 +931,6 @@ public class SieveCoreferenceSystem {
 
                 int removeID = c1.clusterID;
                 CorefCluster.mergeClusters(c2, c1);
-                document.mergeIncompatibles(c2, c1);
 //                logger.warning("Removing cluster " + removeID + ", merged with " + c2.getClusterID());
                 corefClusters.remove(removeID);
                 break LOOP;
