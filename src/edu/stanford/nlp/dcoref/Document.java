@@ -40,7 +40,6 @@ import edu.stanford.nlp.dcoref.Dictionaries.Person;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.math.NumberMatchingRegex;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -95,8 +94,7 @@ public class Document implements Serializable {
    * Each mention occurrence with sentence # and position within sentence
    * (Nth mention, not Nth token)
    */
-  public Map<Mention, IntTuple> positions;              // mentions may be removed from this due to post processing
-  public Map<Mention, IntTuple> allPositions;           // all mentions (mentions will not be removed from this)
+  public Map<Mention, IntTuple> positions;
 
   public final Map<IntTuple, Mention> mentionheadPositions;
 
@@ -115,9 +113,6 @@ public class Document implements Serializable {
 
   /** Set of incompatible mention pairs */
   public Set<Pair<Integer, Integer>> incompatibles;
-
-  /** Map of speaker name/id to speaker info */
-  transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
 
   public Document() {
     positions = Generics.newHashMap();
@@ -163,26 +158,15 @@ public class Document implements Serializable {
     // find 'speaker mention' for each mention
     for(Mention m : allPredictedMentions.values()) {
       int utter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
-      String speaker = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
-      if (speaker != null) {
-        // Populate speaker info
-        SpeakerInfo speakerInfo = speakerInfoMap.get(speaker);
-        if (speakerInfo == null) {
-          speakerInfoMap.put(speaker, new SpeakerInfo(speaker));
+      try{
+        int speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
+        if (utter != 0) {
+          speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
+          speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
         }
-
-        if (NumberMatchingRegex.isDecimalInteger(speaker)) {
-          try{
-            int speakerMentionID = Integer.parseInt(speaker);
-            if (utter != 0) {
-              speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
-              speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
-            }
-          } catch (Exception e){
-            // no mention found for the speaker
-            // nothing to do
-          }
-        }
+      } catch (Exception e){
+        // no mention found for the speaker
+        // nothing to do
       }
       // set generic 'you' : e.g., you know in conversation
       if(docType!=DocType.ARTICLE && m.person==Person.YOU && m.endIndex < m.sentenceWords.size()-1
@@ -197,7 +181,6 @@ public class Document implements Serializable {
     if(goldOrderedMentionsBySentence==null) assignOriginalID();
     setParagraphAnnotation();
     initializeCorefCluster();
-    this.allPositions = Generics.newHashMap(this.positions);
   }
 
   /** initialize positions and corefClusters (put each mention in each CorefCluster) */
@@ -750,10 +733,6 @@ public class Document implements Serializable {
       }
     }
     return speaker;
-  }
-
-  public SpeakerInfo getSpeakerInfo(String speaker) {
-    return speakerInfoMap.get(speaker);
   }
 
   /** Check one mention is the speaker of the other mention */
