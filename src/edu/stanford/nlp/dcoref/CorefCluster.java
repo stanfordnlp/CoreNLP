@@ -148,10 +148,7 @@ public class CorefCluster implements Serializable{
     to.words.addAll(from.words);
     if(from.firstMention.appearEarlierThan(to.firstMention) && !from.firstMention.isPronominal()) to.firstMention = from.firstMention;
     if(from.representative.moreRepresentativeThan(to.representative)) to.representative = from.representative;
-    SieveCoreferenceSystem.logger.finer("merged clusters: "+toID+" += "+from.clusterID);
-    to.printCorefCluster(SieveCoreferenceSystem.logger);
-    from.printCorefCluster(SieveCoreferenceSystem.logger);
-    SieveCoreferenceSystem.logger.finer("");
+    SieveCoreferenceSystem.logger.finer("merge clusters: "+toID+" += "+from.clusterID);
   }
 
   /** Print cluster information */
@@ -164,7 +161,7 @@ public class CorefCluster implements Serializable{
     }
     for(Mention m : forSortedPrint.values()){
       if(m.goldCorefClusterID==-1){
-        logger.finer("mention-> id:"+m.mentionID+"\toriginalRef: "+m.originalRef+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex+"\tType: "+m.mentionType);
+        logger.finer("mention-> id:"+m.mentionID+"\toriginalRef: "+m.originalRef+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex);
       } else{
         logger.finer("mention-> id:"+m.mentionID+"\toriginalClusterID: "+m.goldCorefClusterID+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex +"\toriginalRef: "+m.originalRef+"\tType: "+m.mentionType);
       }

@@ -269,7 +269,9 @@ public class TTags {
   }
 
   protected int add(String tag) {
-    return index.indexOf(tag, true);
+    // todo [cdm 2013]: couldn't this just be 1 call to index.indexOf(tag, true) ?
+    index.add(tag);
+    return index.indexOf(tag);
   }
 
   public String getTag(int i) {

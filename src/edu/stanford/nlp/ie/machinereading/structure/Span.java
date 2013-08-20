@@ -1,8 +1,6 @@
 package edu.stanford.nlp.ie.machinereading.structure;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 import edu.stanford.nlp.util.Pair;
 
@@ -12,16 +10,12 @@ import edu.stanford.nlp.util.Pair;
  * Start is inclusive, end is exclusive
  * @author Mihai 
  */
-public class Span implements Serializable, Iterable<Integer> {
+public class Span implements Serializable {
   private static final long serialVersionUID = -3861451490217976693L;
 
   private int start;
   private int end;
-
-  /** For Kryo serializer */
-  @SuppressWarnings("UnusedDeclaration")
-  private Span() { }
-
+  
   /**
    * This assumes that s &lt;= e.  Use fromValues if you can't guarantee this.
    */
@@ -44,7 +38,6 @@ public class Span implements Serializable, Iterable<Integer> {
   /**
    * Safe way to construct Spans if you're not sure which value is higher.
    */
-  @SuppressWarnings("UnusedDeclaration")
   public static Span fromValues(int val1, int val2) {
     if (val1 <= val2) {
       return new Span(val1, val2);
@@ -63,7 +56,10 @@ public class Span implements Serializable, Iterable<Integer> {
   public boolean equals(Object other) {
     if(! (other instanceof Span)) return false;
     Span otherSpan = (Span) other;
-    return start == otherSpan.start && end == otherSpan.end;
+    if(start == otherSpan.start && end == otherSpan.end){
+      return true;
+    }
+    return false;
   }
   
   @Override
@@ -116,30 +112,10 @@ public class Span implements Serializable, Iterable<Integer> {
    * 
    * @throws IllegalArgumentException if either span contains the other span
    */
-  @SuppressWarnings("UnusedDeclaration")
   public boolean isAfter(Span otherSpan) {
     if (this.contains(otherSpan) || otherSpan.contains(this)) {
       throw new IllegalArgumentException("Span " + toString() + " contains otherSpan " + otherSpan + " (or vice versa)");
     }
     return this.start >= otherSpan.end;
-  }
-
-  @Override
-  public Iterator<Integer> iterator() {
-    return new Iterator<Integer>() {
-      int nextIndex = start;
-      @Override
-      public boolean hasNext() {
-        return nextIndex < end;
-      }
-      @Override
-      public Integer next() {
-        if (!hasNext()) { throw new NoSuchElementException(); }
-        nextIndex += 1;
-        return nextIndex - 1;
-      }
-      @Override
-      public void remove() { throw new UnsupportedOperationException(); }
-    };
   }
 }

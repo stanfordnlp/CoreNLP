@@ -124,7 +124,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       try {
         // normalizes numeric entities such as MONEY, TIME, DATE, or PERCENT
         // note: this uses and sets NamedEntityTagAnnotation!
-        QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
+        QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output);
       } catch (Exception e) {
         System.err.println("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
         System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
