@@ -12,6 +12,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <center><h2>Stanford CoreNLP XML Output</h2></center>
     <hr size="3" color="#333333"/>
     <center><h3>Document</h3></center>
+
     <xsl:if test="root/document/docId">
         <br/>DocId: <xsl:value-of select="root/document/docId"/>
     </xsl:if>
@@ -24,7 +25,21 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <xsl:if test="root/document/docType">
         <br/>DocType: <xsl:value-of select="root/document/docType"/>
     </xsl:if>
+    <xsl:if test="root/document/author">
+        <br/>Author: <xsl:value-of select="root/document/author"/>
+    </xsl:if>
+    <xsl:if test="root/document/location">
+        <br/>Location: <xsl:value-of select="root/document/location"/>
+    </xsl:if>
     <table border="1" style="background-color:#f0f0f0;" align="center">
+
+    <xsl:if test="root/document/text">
+        <tr><th>Text</th></tr>
+        <tr><td>
+        <xsl:value-of select="root/document/text"/>
+        </td></tr>
+    </xsl:if>
+
     <tr><th>Sentences</th></tr>
     <xsl:for-each select="root/document/sentences/sentence">
       <tr><td>
@@ -108,6 +123,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
       <td><xsl:value-of select="POS"/></td>
       <td><xsl:value-of select="NER"/></td>
       <td><xsl:value-of select="NormalizedNER"/></td>
+      <td><xsl:value-of select="Speaker"/></td>
     </tr>
   </xsl:for-each>
   </table>
