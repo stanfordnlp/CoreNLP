@@ -59,6 +59,12 @@ public class TextOutputter {
       os.printf("Document Type: %s\n", docType);
     }
 
+    // Display docsourcetype if available
+    String docSourceType =  annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
+    if (docSourceType != null) {
+      os.printf("Document Source Type: %s\n", docSourceType);
+    }
+
     // display each sentence in this annotation
     if (sentences != null) {
       for(int i = 0, sz = sentences.size(); i < sz; i ++) {
