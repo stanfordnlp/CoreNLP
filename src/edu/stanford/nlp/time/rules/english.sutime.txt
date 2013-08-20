@@ -861,5 +861,6 @@
   {  pattern: ( /(quarter|sun)s?/ ) }
   {  pattern: ( [ { word:/(fall|spring|second|march|may|sat|sun|min)s?/ } & !{ tag:/NN.*/ } ] )  }
   {  pattern: ( /the/ [ { word:/second/ } & !{ tag:/NN.*/ } ] )  }
+  {  pattern: ( [ { word:/((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)-)?second/ } ] )  }
   {  pattern: ( [ {{ temporal.value == NON_TEMPORAL }} ] ), over: NIL }
 
