@@ -1,7 +1,8 @@
 package edu.stanford.nlp.stats;
 
-import java.util.HashSet;
 import java.util.Set;
+
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Static methods for operating on {@link Distributions}s.
@@ -25,7 +26,7 @@ public class Distributions {
       throw new RuntimeException("Tried to compare two Distribution<K> objects but d1.numberOfKeys != d2.numberOfKeys");
     }
 
-    Set<K> allKeys = new HashSet<K>(d1.getCounter().keySet());
+    Set<K> allKeys = Generics.newHashSet(d1.getCounter().keySet());
     allKeys.addAll(d2.getCounter().keySet());
     if (allKeys.size() > d1.getNumberOfKeys()){
       throw new RuntimeException("Tried to compare two Distribution<K> objects but d1.counter intersect d2.counter > numberOfKeys");

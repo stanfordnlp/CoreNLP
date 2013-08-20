@@ -354,7 +354,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   public static <E extends Comparable<E>> Interval<E> toInterval(E a, E b, int flags) {
     int comp = a.compareTo(b);
     if (comp <= 0) {
-      return new Interval(a,b, flags);
+      return new Interval<E>(a,b, flags);
     } else {
       return null;
     }
@@ -868,4 +868,6 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     result = 31 * result + flags;
     return result;
   }
+
+  private static final long serialVersionUID = 1;
 }

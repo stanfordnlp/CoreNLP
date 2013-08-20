@@ -3,14 +3,15 @@ package edu.stanford.nlp.international.arabic.pipeline;
 import java.io.*;
 import java.util.*;
 
-import edu.stanford.nlp.process.treebank.ConfigParser;
+import edu.stanford.nlp.trees.treebank.ConfigParser;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Decimates a set of ATB parse trees. For every 10 parse trees, eight are added to the training set, and one
  * is added to each of the dev and test sets.
- * 
+ *
  * @author Spence Green
  *
  */
@@ -63,12 +64,12 @@ public class DecimatedArabicDataset extends ATBArabicDataset {
 
     public ArabicTreeDecimatedNormalizer(String filePrefix, boolean makeFlat, boolean makeTagged) {
     	super(null,null);
-    	
+
       makeFlatFile = makeFlat;
       taggedOutput = makeTagged;
 
       //Setup the decimation output files
-      outFilenames = new HashMap<String,String>();
+      outFilenames = Generics.newHashMap();
       outFilenames.put(trainExtension, filePrefix + trainExtension);
       outFilenames.put(testExtension, filePrefix + testExtension);
       outFilenames.put(devExtension, filePrefix + devExtension);
@@ -87,7 +88,7 @@ public class DecimatedArabicDataset extends ATBArabicDataset {
       String curOutFileName = "";
       try {
 
-        outFiles = new HashMap<String,PrintWriter>();
+        outFiles = Generics.newHashMap();
 
         for(String keyForFile : outFilenames.keySet()) {
 
@@ -104,7 +105,7 @@ public class DecimatedArabicDataset extends ATBArabicDataset {
         e.printStackTrace();
       } catch (FileNotFoundException e) {
         System.err.printf("%s: Could not open %s for writing\n", this.getClass().getName(), curOutFileName);
-      } 
+      }
     }
 
     public void closeOutputFiles() {
@@ -116,11 +117,11 @@ public class DecimatedArabicDataset extends ATBArabicDataset {
       if(t == null || t.value().equals("X")) return;
 
       t = t.prune(nullFilter, new LabeledScoredTreeFactory());
-      
+
       //Do *not* strip traces here. The ArabicTreeReader will do that if needed
       for(Tree node : t)
         if(node.isPreTerminal())
-          processPreterminal(node);          
+          processPreterminal(node);
 
       treesVisited++;
 

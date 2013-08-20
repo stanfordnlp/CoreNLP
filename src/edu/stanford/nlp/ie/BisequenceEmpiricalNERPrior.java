@@ -21,7 +21,7 @@ import java.util.*;
  * @author Mengqiu Wang
  */
 
-public class BisequenceEmpiricalNERPrior<IN extends CoreMap> implements SequenceModel, SequenceListener {
+public class BisequenceEmpiricalNERPrior<IN extends CoreMap> {
 
   private Index<String> tagIndex;
   private int backgroundSymbolIndex;
@@ -190,7 +190,8 @@ public class BisequenceEmpiricalNERPrior<IN extends CoreMap> implements Sequence
               entityList.add(new Entity(i-currWords.size(), currWords, tagIndex.indexOf(currTag)));
               currWords.clear();
             }
-            currTag = "";
+            currWords.add(wordDoc.get(i));
+            currTag = parts[1];
           }
         }
       } else {
@@ -230,128 +231,6 @@ public class BisequenceEmpiricalNERPrior<IN extends CoreMap> implements Sequence
     }
 
     return entityList;
-  }
-
-  public double scoreOf(int[] sequence) {
-    double p = 0.0;
-    
-    entityList = extractEntities(sequence, wordDoc, tagIndex, classIndex, backgroundSymbolIndex);
-    // System.err.println(this);
-
-    for (Entity entity: entityList) {
-      int length = entity.wordsSize;
-      int tag1 = entity.type;
-      for (Entity match: entity.exactMatch) {
-        int tag2 = match.type;
-        double factor = entityMatrix[tag1][tag2] + entityMatrix[tag2][tag1];
-        if (tag1 == tag2) {
-          if (flags.matchNERIncentive) 
-            factor *= -1;
-          else 
-            factor = 0;
-        }
-        p += length * factor;
-        // System.err.println("p += " + length + " * (" + entityMatrix[tag1][tag2] + " + " + entityMatrix[tag2][tag1] + ")");
-      }
-      for (Entity match: entity.subMatch) {
-        int olength = match.wordsSize;
-        int tag2 = match.type;
-        double factor = subEntityMatrix[tag1][tag2];
-        if (tag1 == tag2) {
-          if (flags.matchNERIncentive) 
-            factor *= -1;
-          else 
-            factor = 0;
-        }
-
-        p += olength * factor;
-        // System.err.println("p += " + olength + " * (" + subEntityMatrix[tag1][tag2] + ")");
-      }
-    }
-
-    // System.err.println("score: " + p);
-    return p;
-  }
-
-  public int leftWindow() {
-    return Integer.MAX_VALUE; // not Markovian!
-  }
-
-  public int rightWindow() {
-    return Integer.MAX_VALUE; // not Markovian!
-  }
-
-  public int[] getPossibleValues(int position) {
-    return possibleValues;
-  }
-
-  public double scoreOf(int[] sequence, int pos) {
-    return scoresOf(sequence, pos)[sequence[pos]];
-  }
-
-  /**
-   * @return the length of the sequence
-   */
-  public int length() {
-    return wordDoc.size();
-  }
-
-  /**
-   * get the number of classes in the sequence model.
-   */
-  public int getNumClasses() {
-    return classIndex.size();
-  }
-
-  public double[] getConditionalDistribution(int[] sequence, int position) {
-    double[] probs = scoresOf(sequence, position);
-    ArrayMath.logNormalize(probs);
-    probs = ArrayMath.exp(probs);
-    //System.err.println(this);
-    return probs;
-  }
-
-  public double[] scoresOf(int[] sequence, int pos) {
-    double[] probs = new double[numClasses];
-    int origClass = sequence[pos];
-    int lastVal = -1;
-    for (int label = 0; label < numClasses; label++) {
-      if (label == origClass)
-        continue;
-      int oldVal = sequence[pos];
-      lastVal = label;
-      sequence[pos] = label;
-      updateSequenceElement(sequence, pos, oldVal);
-      probs[label] = scoreOf(sequence);
-      if (DEBUG) {
-        if (pos == 597) {
-        // if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) { 
-          System.err.println("scoreOf("+pos+")\t"+ classIndex.get(label)); // + " = " + probs[label]);
-        }
-      }
-    }
-    sequence[pos] = origClass;
-    updateSequenceElement(sequence, pos, lastVal);
-    probs[origClass] = scoreOf(sequence);
-    if (DEBUG) {
-      if (pos == 597) {
-      // if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) { 
-        System.err.println("scoreOf("+pos+")\t"+ classIndex.get(origClass)); // + " = " + probs[label]);
-      }
-    }
-
-    // System.err.println(this);
-    return probs;
-  }
-
-  public void setInitialSequence(int[] initialSequence) {
-    this.currSequence = initialSequence;
-  }
-
-  public void updateSequenceElement(int[] sequence, int position, int oldVal) {
-    if (VERBOSE) System.err.println("changing position "+position+" from " +classIndex.get(oldVal)+" to "+classIndex.get(sequence[position]));
-
-    this.currSequence = sequence;
   }
 
   @Override

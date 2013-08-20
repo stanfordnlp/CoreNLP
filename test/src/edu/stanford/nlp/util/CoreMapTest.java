@@ -10,19 +10,6 @@ import java.util.Random;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import junit.framework.TestCase;
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ArgumentAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CategoryAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.DocIDAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.MarkingAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ProjectedCategoryAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ShapeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ValueAnnotation;
 import edu.stanford.nlp.math.ArrayMath;
 
 
@@ -89,11 +76,11 @@ public class CoreMapTest extends TestCase {
 
   public void testToShorterString() {
     ArrayCoreMap a = new ArrayCoreMap();
-    a.set(TextAnnotation.class, "Australia");
-    a.set(NamedEntityTagAnnotation.class, "LOCATION");
-    a.set(BeforeAnnotation.class, "  ");
-    a.set(PartOfSpeechAnnotation.class, "NNP");
-    a.set(ShapeAnnotation.class, "Xx");
+    a.set(CoreAnnotations.TextAnnotation.class, "Australia");
+    a.set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
+    a.set(CoreAnnotations.BeforeAnnotation.class, "  ");
+    a.set(CoreAnnotations.PartOfSpeechAnnotation.class, "NNP");
+    a.set(CoreAnnotations.ShapeAnnotation.class, "Xx");
     assertEquals("Incorrect toShorterString()", "[Text=Australia NamedEntityTag=LOCATION]",
             a.toShorterString("Text", "NamedEntityTag"));
     assertEquals("Incorrect toShorterString()", "[Text=Australia]",
@@ -139,12 +126,12 @@ public class CoreMapTest extends TestCase {
   @SuppressWarnings({"StringEquality"})
   public static void main(String[] args) {
     @SuppressWarnings("unchecked")
-    Class<CoreAnnotation<String>>[] allKeys = new Class[]{TextAnnotation.class, LemmaAnnotation.class,
-        PartOfSpeechAnnotation.class, ShapeAnnotation.class, NamedEntityTagAnnotation.class,
-        DocIDAnnotation.class, ValueAnnotation.class, CategoryAnnotation.class,
-        BeforeAnnotation.class, AfterAnnotation.class, CoreAnnotations.OriginalTextAnnotation.class,
-        ProjectedCategoryAnnotation.class, ArgumentAnnotation.class,
-        MarkingAnnotation.class
+    Class<CoreAnnotation<String>>[] allKeys = new Class[]{CoreAnnotations.TextAnnotation.class, CoreAnnotations.LemmaAnnotation.class,
+        CoreAnnotations.PartOfSpeechAnnotation.class, CoreAnnotations.ShapeAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class,
+        CoreAnnotations.DocIDAnnotation.class, CoreAnnotations.ValueAnnotation.class, CoreAnnotations.CategoryAnnotation.class,
+        CoreAnnotations.BeforeAnnotation.class, CoreAnnotations.AfterAnnotation.class, CoreAnnotations.OriginalTextAnnotation.class,
+        CoreAnnotations.ProjectedCategoryAnnotation.class, CoreAnnotations.ArgumentAnnotation.class,
+        CoreAnnotations.MarkingAnnotation.class
     };
 
     // how many iterations

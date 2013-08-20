@@ -1,6 +1,8 @@
 package edu.stanford.nlp.ie.pascal;
 
 import java.util.*;
+import edu.stanford.nlp.util.Generics;
+
 /**
  * Generates {@link Alignment} objects for acronym alignment.
  *
@@ -18,7 +20,7 @@ public class AlignmentFactory {
   private  char[] lcShortForm;
   private  int [][]alignMatrix;
   private byte [][]backMatrix;
-  private HashSet<Alignment> alignments;
+  private Set<Alignment> alignments;
 
   public AlignmentFactory(String longForm, String shortForm) {
     this(longForm.toCharArray(), shortForm.toCharArray());
@@ -57,7 +59,7 @@ public class AlignmentFactory {
       }
     }
 
-    alignments = new HashSet<Alignment>();
+    alignments = Generics.newHashSet();
     int[] pointers = new int[lcShortForm.length];
     Arrays.fill(pointers, -1);
 

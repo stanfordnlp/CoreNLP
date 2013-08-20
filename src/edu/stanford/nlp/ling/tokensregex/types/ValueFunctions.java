@@ -14,11 +14,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * ValueFunctions supported by tokensregex
+ * ValueFunctions supported by tokensregex.
  *
  * @author Angel Chang
  */
 public class ValueFunctions {
+
+  private ValueFunctions() {} // static methods
+
   protected static Object lookupFunctionObject(Env env, String name) {
     if (env != null) {
       Object obj = env.get(name);
@@ -29,7 +32,7 @@ public class ValueFunctions {
     return registeredFunctions.get(name);
   }
 
-  public static abstract class NamedValueFunction implements ValueFunction {
+  public abstract static class NamedValueFunction implements ValueFunction {
     protected String name;
     protected String signature;
 
@@ -53,10 +56,10 @@ public class ValueFunctions {
   }
 
   public static class ParamInfo {
-    public String name;
-    public String typeName;
-    public Class className;
-    public boolean nullable;
+    public final String name;
+    public final String typeName;
+    public final Class className;
+    public final boolean nullable;
 
     public ParamInfo(String name, String typeName, Class className, boolean nullable) {
       this.name = name;
@@ -66,7 +69,7 @@ public class ValueFunctions {
     }
   }
 
-  public static abstract class TypeCheckedFunction extends NamedValueFunction {
+  public abstract static class TypeCheckedFunction extends NamedValueFunction {
     List<ParamInfo> paramInfos;
     int nargs;
 
@@ -82,6 +85,7 @@ public class ValueFunctions {
       nargs = (paramInfos != null)? paramInfos.length:0;
     }
 
+    @Override
     public String getParamDesc() {
       StringBuilder sb = new StringBuilder();
       for (ParamInfo p:paramInfos) {
@@ -97,6 +101,7 @@ public class ValueFunctions {
       return sb.toString();
     }
 
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != nargs) {
         return false;
@@ -123,7 +128,7 @@ public class ValueFunctions {
     }
   }
 
-  public static abstract class NumericFunction extends NamedValueFunction {
+  public abstract static class NumericFunction extends NamedValueFunction {
     protected String resultTypeName = "Number";
     protected int nargs = 2;
 
@@ -138,14 +143,14 @@ public class ValueFunctions {
       this.nargs = nargs;
     }
 
-    abstract public Number compute(Number...ns);
+    public abstract Number compute(Number...ns);
 
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         return false;
       }
-      for (int i = 0; i < in.size(); i++) {
-        Value v = in.get(i);
+      for (Value v : in) {
         if (v == null || !(v.get() instanceof Number)) {
           return false;
         }
@@ -153,6 +158,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         throw new IllegalArgumentException(nargs + " arguments expected, got " + in.size());
@@ -167,6 +173,7 @@ public class ValueFunctions {
   }
 
   public static final ValueFunction ADD_FUNCTION = new NumericFunction("ADD", 2) {
+    @Override
     public Number compute(Number... in) {
       if (isInteger(in[0]) && isInteger(in[1])) {
         return in[0].longValue() + in[1].longValue();
@@ -177,6 +184,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction SUBTRACT_FUNCTION = new NumericFunction("SUBTRACT", 2) {
+    @Override
     public Number compute(Number... in) {
       if (isInteger(in[0]) && isInteger(in[1])) {
         return in[0].longValue() - in[1].longValue();
@@ -187,6 +195,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction MULTIPLY_FUNCTION = new NumericFunction("MULTIPLY", 2) {
+    @Override
     public Number compute(Number... in) {
       if (isInteger(in[0]) && isInteger(in[1])) {
         return in[0].longValue() * in[1].longValue();
@@ -197,6 +206,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction DIVIDE_FUNCTION = new NumericFunction("DIVIDE", 2) {
+    @Override
     public Number compute(Number... in) {
       if (isInteger(in[0]) && isInteger(in[1])) {
         return in[0].longValue() / in[1].longValue();
@@ -207,6 +217,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction MOD_FUNCTION = new NumericFunction("MOD", 2) {
+    @Override
     public Number compute(Number... in) {
       if (isInteger(in[0]) && isInteger(in[1])) {
         return in[0].longValue() % in[1].longValue();
@@ -217,6 +228,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction NEGATE_FUNCTION = new NumericFunction("NEGATE", 1) {
+    @Override
     public Number compute(Number... in) {
       if (isInteger(in[0])) {
         return - in[0].longValue();
@@ -226,7 +238,7 @@ public class ValueFunctions {
     }
   };
 
-  public static abstract class BooleanFunction extends NamedValueFunction {
+  public abstract static class BooleanFunction extends NamedValueFunction {
     protected String resultTypeName = Expressions.TYPE_BOOLEAN;
     protected int nargs = 2;
 
@@ -241,14 +253,14 @@ public class ValueFunctions {
       this.nargs = nargs;
     }
 
-    abstract public Boolean compute(Boolean...ns);
+    public abstract Boolean compute(Boolean...ns);
 
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         return false;
       }
-      for (int i = 0; i < in.size(); i++) {
-        Value v = in.get(i);
+      for (Value v : in) {
         if (v == null || !(v.get() instanceof Boolean)) {
           return false;
         }
@@ -256,6 +268,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         throw new IllegalArgumentException(nargs + " arguments expected, got " + in.size());
@@ -270,6 +283,7 @@ public class ValueFunctions {
   }
 
   public static final ValueFunction AND_FUNCTION = new BooleanFunction("AND", -1) {
+    @Override
     public Boolean compute(Boolean... in) {
       for (Boolean b:in) {
         if (!b) return false;
@@ -279,6 +293,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction OR_FUNCTION = new BooleanFunction("OR", -1) {
+    @Override
     public Boolean compute(Boolean... in) {
       for (Boolean b:in) {
         if (b) return true;
@@ -288,13 +303,14 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction NOT_FUNCTION = new BooleanFunction("NOT", 1) {
+    @Override
     public Boolean compute(Boolean... in) {
       Boolean res = !in[0];
       return res;
     }
   };
 
-  public static abstract class StringFunction extends NamedValueFunction {
+  public abstract static class StringFunction extends NamedValueFunction {
     protected String resultTypeName = Expressions.TYPE_STRING;
     protected int nargs = 2;
 
@@ -309,14 +325,14 @@ public class ValueFunctions {
       this.nargs = nargs;
     }
 
-    abstract public String compute(String...strs);
+    public abstract String compute(String... strs);
 
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         return false;
       }
-      for (int i = 0; i < in.size(); i++) {
-        Value v = in.get(i);
+      for (Value v : in) {
         if (v == null /*|| !(v.get() instanceof String) */) {
           return false;
         }
@@ -324,6 +340,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         throw new IllegalArgumentException(nargs + " arguments expected, got " + in.size());
@@ -344,24 +361,28 @@ public class ValueFunctions {
   }
 
   public static final ValueFunction CONCAT_FUNCTION = new StringFunction("CONCAT", -1) {
+    @Override
     public String compute(String... in) {
       return StringUtils.join(in, "");
     }
   };
 
   public static final ValueFunction UPPERCASE_FUNCTION = new StringFunction("UPPERCASE", 1) {
+    @Override
     public String compute(String... in) {
       return in[0].toUpperCase();
     }
   };
 
   public static final ValueFunction LOWERCASE_FUNCTION = new StringFunction("LOWERCASE", 1) {
+    @Override
     public String compute(String... in) {
       return in[0].toLowerCase();
     }
   };
 
   public static final ValueFunction FORMAT_FUNCTION = new NamedValueFunction("FORMAT") {
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 1) {
         return false;
@@ -372,6 +393,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       String format = (String) in.get(0).get();
       Object[] args = new Object[in.size()-1];
@@ -384,6 +406,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction JOIN_FUNCTION = new NamedValueFunction("JOIN") {
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 1) {
         return false;
@@ -394,6 +417,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       String glue = (String) in.get(0).get();
       Object[] args = new Object[in.size()-1];
@@ -406,6 +430,7 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction CREATE_REGEX_FUNCTION = new NamedValueFunction("CREATE_REGEX") {
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 1) {
         return false;
@@ -416,6 +441,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       List list = (List) in.get(0).get();
       String[] args = new String[list.size()];
@@ -431,9 +457,10 @@ public class ValueFunctions {
   private static final ParamInfo PARAM_INFO_VALUE_FUNCTION = new ParamInfo("FUNCTION", Expressions.TYPE_FUNCTION, ValueFunction.class, false);
   private static final ParamInfo PARAM_INFO_LIST = new ParamInfo("LIST", null, List.class, true);
   public static final ValueFunction MAP_VALUES_FUNCTION =
-          new TypeCheckedFunction("MAP_VALUES", new ParamInfo[]{ PARAM_INFO_LIST, PARAM_INFO_VALUE_FUNCTION}) {
+          new TypeCheckedFunction("MAP_VALUES", PARAM_INFO_LIST, PARAM_INFO_VALUE_FUNCTION) {
             // First argument is list of elements to apply function to
             // Second argument is function to apply
+            @Override
             public Value apply(Env env, List<Value> in) {
               if (in.get(0) == null) return null;
               List list = (List) in.get(0).get();
@@ -449,9 +476,10 @@ public class ValueFunctions {
           };
   private static final ParamInfo PARAM_INFO_FUNCTION = new ParamInfo("FUNCTION", Expressions.TYPE_FUNCTION, Function.class, false);
   public static final ValueFunction MAP_FUNCTION =
-          new TypeCheckedFunction("MAP", new ParamInfo[]{ PARAM_INFO_LIST, PARAM_INFO_FUNCTION}) {
+          new TypeCheckedFunction("MAP", PARAM_INFO_LIST, PARAM_INFO_FUNCTION) {
             // First argument is list of elements to apply function to
             // Second argument is function to apply
+            @Override
             public Value apply(Env env, List<Value> in) {
               if (in.get(0) == null) return null;
               List list = (List) in.get(0).get();
@@ -468,10 +496,12 @@ public class ValueFunctions {
   private static final ParamInfo PARAM_INFO_TOKEN_REGEX = new ParamInfo("TOKEN_REGEX", Expressions.TYPE_TOKEN_REGEX, TokenSequencePattern.class, false);
   private static final ParamInfo PARAM_INFO_TOKEN_LIST = new ParamInfo("TOKEN_LIST", null, List.class, true);
   private static final ParamInfo PARAM_INFO_TOKEN_LIST_REPLACE = new ParamInfo("TOKEN_LIST_REPLACEMENT", null, List.class, true);
+
   public static final ValueFunction TOKENS_MATCH_FUNCTION =
-          new TypeCheckedFunction("TOKENS_MATCH", new ParamInfo[]{ PARAM_INFO_TOKEN_LIST, PARAM_INFO_TOKEN_REGEX}) {
+          new TypeCheckedFunction("TOKENS_MATCH", PARAM_INFO_TOKEN_LIST, PARAM_INFO_TOKEN_REGEX) {
             // First argument is list of tokens to match
             // Second argument is pattern to match
+            @Override
             public Value apply(Env env, List<Value> in) {
               if (in.get(0) == null || in.get(0).get() == null) return Expressions.FALSE;
               List<CoreMap> cms = (List<CoreMap>) in.get(0).get();
@@ -484,10 +514,11 @@ public class ValueFunctions {
 
   public static final ValueFunction TOKENS_REPLACE_FUNCTION =
           new TypeCheckedFunction("TOKENS_REPLACE",
-                  new ParamInfo[]{ PARAM_INFO_TOKEN_LIST, PARAM_INFO_TOKEN_REGEX, PARAM_INFO_TOKEN_LIST_REPLACE}) {
+              PARAM_INFO_TOKEN_LIST, PARAM_INFO_TOKEN_REGEX, PARAM_INFO_TOKEN_LIST_REPLACE) {
             // First argument is list of tokens to match
             // Second argument is pattern to match
             // Third argument is replacement tokens
+            @Override
             public Value apply(Env env, List<Value> in) {
               if (in.get(0) == null || in.get(0).get() == null) return Expressions.FALSE;
               List<CoreMap> cms = (List<CoreMap>) in.get(0).get();
@@ -502,10 +533,12 @@ public class ValueFunctions {
   private static final ParamInfo PARAM_INFO_STRING_REGEX = new ParamInfo("REGEX", Expressions.TYPE_REGEX, null, false);
   private static final ParamInfo PARAM_INFO_STRING = new ParamInfo("STRING", null, String.class, true);
   private static final ParamInfo PARAM_INFO_STRING_REPLACE = new ParamInfo("STRING_REPLACEMENT", null, String.class, true);
+
   public static final ValueFunction STRING_MATCH_FUNCTION =
-          new TypeCheckedFunction("STRING_MATCH", new ParamInfo[]{ PARAM_INFO_STRING, PARAM_INFO_STRING_REGEX}) {
+          new TypeCheckedFunction("STRING_MATCH", PARAM_INFO_STRING, PARAM_INFO_STRING_REGEX) {
             // First argument is string to match
             // Second argument is pattern to match
+            @Override
             public Value apply(Env env, List<Value> in) {
               if (in.get(0) == null || in.get(0).get() == null) return Expressions.FALSE;
               String str = (String) in.get(0).get();
@@ -519,10 +552,11 @@ public class ValueFunctions {
 
   public static final ValueFunction STRING_REPLACE_FUNCTION =
           new TypeCheckedFunction("STRING_REPLACE",
-                  new ParamInfo[]{ PARAM_INFO_STRING, PARAM_INFO_STRING_REGEX, PARAM_INFO_STRING_REPLACE}) {
+              PARAM_INFO_STRING, PARAM_INFO_STRING_REGEX, PARAM_INFO_STRING_REPLACE) {
             // First argument is string to match
             // Second argument is pattern to match
             // Third argument is replacement string
+            @Override
             public Value apply(Env env, List<Value> in) {
               if (in.get(0) == null || in.get(0).get() == null) return Expressions.FALSE;
               String str = (String) in.get(0).get();
@@ -539,10 +573,11 @@ public class ValueFunctions {
   private static final ParamInfo PARAM_INFO_TOKEN = new ParamInfo("TOKEN", null, CoreMap.class, false);
   public static final ValueFunction TOKEN_STRING_SPLIT_FUNCTION =
           new TypeCheckedFunction("TOKEN_STRING_SPLIT",
-                  new ParamInfo[]{ PARAM_INFO_TOKEN, PARAM_INFO_STRING_REGEX,
-                          new ParamInfo("INCLUDE_MATCHED", null, Boolean.class, false)}) {
+              PARAM_INFO_TOKEN, PARAM_INFO_STRING_REGEX,
+              new ParamInfo("INCLUDE_MATCHED", null, Boolean.class, false)) {
             // First argument is token to split
             // Second argument is pattern to split on
+            @Override
             public Value apply(Env env, List<Value> in) {
               CoreMap cm = (CoreMap) in.get(0).get();
               String regex = (String) in.get(1).get();
@@ -557,9 +592,10 @@ public class ValueFunctions {
   public static boolean isInteger(Number n) {
     return (n instanceof Long || n instanceof Integer || n instanceof Short);
   }
-  public final static NumericComparator NUMBER_COMPARATOR = new NumericComparator();
+  public static final NumericComparator NUMBER_COMPARATOR = new NumericComparator();
 
   public static class NumericComparator implements Comparator<Number> {
+    @Override
     public int compare(Number o1, Number o2) {
       if (isInteger(o1) && isInteger(o2)) {
         Long l1 = o1.longValue();
@@ -571,12 +607,13 @@ public class ValueFunctions {
   }
 
   public static class ComparableComparator<T extends Comparable<T>> implements Comparator<T> {
+    @Override
     public int compare(T o1, T o2) {
       return o1.compareTo(o2);
     }
   }
 
-  public static enum CompareType { GT, LT, GE, LE, EQ, NE };
+  public static enum CompareType { GT, LT, GE, LE, EQ, NE }
   public static class CompareFunction<T> extends NamedValueFunction {
     Comparator<T> comparator;
     CompareType compType;
@@ -602,6 +639,7 @@ public class ValueFunctions {
       }
     }
 
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2) {
         return false;
@@ -617,6 +655,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.size() != 2) {
         throw new IllegalArgumentException("2 arguments expected, got " + in.size());
@@ -629,14 +668,13 @@ public class ValueFunctions {
     }
   }
 
-  public static ValueFunction NOT_EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
+  public static final ValueFunction NOT_EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
+    @Override
     public boolean checkArgs(List<Value> in) {
-      if (in.size() != 2) {
-        return false;
-      }
-      return true;
+      return in.size() == 2;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.size() != 2) {
         throw new IllegalArgumentException("2 arguments expected, got " + in.size());
@@ -654,14 +692,13 @@ public class ValueFunctions {
   };
 
 
-  public static ValueFunction EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
+  public static final ValueFunction EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
+    @Override
     public boolean checkArgs(List<Value> in) {
-      if (in.size() != 2) {
-        return false;
-      }
-      return true;
+      return in.size() == 2;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.size() != 2) {
         throw new IllegalArgumentException("2 arguments expected, got " + in.size());
@@ -679,9 +716,10 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction ANNOTATION_FUNCTION = new NamedValueFunction("ANNOTATION_VALUE") {
-    // First argument is what (Coremap) to get annotation for
+    // First argument is what (CoreMap) to get annotation for
     // Second argument is field (Class or String) to get annotation for
     // Third argument (optional) is annotation value to set
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -696,6 +734,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       Value cmv = in.get(0);
       Object field = in.get(1).get();
@@ -743,6 +782,7 @@ public class ValueFunctions {
   public static final ValueFunction GET_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("GET_ANNOTATION_TAG") {
     // First argument is what (CoreMap or List<CoreMap>) to tag
     // Second argument is tag
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2) {
         return false;
@@ -764,6 +804,7 @@ public class ValueFunctions {
       return (tags != null)? tags.getTag(tag): null;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null) return null;
       Value v = in.get(0);
@@ -789,6 +830,7 @@ public class ValueFunctions {
     // First argument is what (CoreMap or List<CoreMap>) to tag
     // Second argument is tag
     // Third argument is tag value
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -812,6 +854,7 @@ public class ValueFunctions {
       tags.addTag(tag, tagValue);
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       Value v = in.get(0);
       String tag = (String) in.get(1).get();
@@ -831,8 +874,9 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction REMOVE_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("REMOVE_ANNOTATION_TAG") {
-    // First argument is what (Coremap) to tag
+    // First argument is what (CoreMap) to tag
     // Second argument is tag
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2) {
         return false;
@@ -854,6 +898,7 @@ public class ValueFunctions {
       }
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       Value v = in.get(0);
       String tag = (String) in.get(1).get();
@@ -875,6 +920,7 @@ public class ValueFunctions {
     // First argument is tags object
     // Second argument is tag
     // Third argument (optional) is tag value
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -887,6 +933,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       Value v = in.get(0);
       Tags tags = (Tags) v.get();
@@ -903,6 +950,7 @@ public class ValueFunctions {
     // First argument is what to tag
     // Second argument is tag
     // Third argument is tag value
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -915,6 +963,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       Value v = in.get(0);
       Tags tags = v.getTags();
@@ -931,6 +980,7 @@ public class ValueFunctions {
   public static final ValueFunction GET_VALUE_TAG_FUNCTION = new NamedValueFunction("GET_VALUE_TAG") {
     // First argument is what to tag
     // Second argument is tag
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2) {
         return false;
@@ -944,6 +994,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       Value v = in.get(0);
       Tags tags = v.getTags();
@@ -953,8 +1004,9 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction REMOVE_VALUE_TAG_FUNCTION = new NamedValueFunction("REMOVE_VALUE_TAG") {
-    // First argument is what (Coremap) to tag
+    // First argument is what (CoreMap) to tag
     // Second argument is tag
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2) {
         return false;
@@ -967,6 +1019,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       Value v = in.get(0);
       Tags tags = v.getTags();
@@ -983,6 +1036,7 @@ public class ValueFunctions {
     // First argument is composite value
     // Second argument is field to select
     // Third argument (optional) is value to set composite value field to
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -996,6 +1050,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Expressions.CompositeValue v = (Expressions.CompositeValue) in.get(0);
@@ -1009,6 +1064,7 @@ public class ValueFunctions {
 
   public static final ValueFunction COMPOSITE_KEYS_FUNCTION = new NamedValueFunction("COMPOSITE_KEYS") {
     // First argument is composite value
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 1) {
         return false;
@@ -1019,6 +1075,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Expressions.CompositeValue v = (Expressions.CompositeValue) in.get(0);
@@ -1031,6 +1088,7 @@ public class ValueFunctions {
     // First argument is object
     // Second argument is field to select
     // Third argument (optional) is value to assign to object field
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -1045,6 +1103,7 @@ public class ValueFunctions {
       return true;
     }
 
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Value v = in.get(0);
@@ -1103,6 +1162,7 @@ public class ValueFunctions {
     // First argument is List
     // Second argument is index of element to select
     // Third argument (optional) is value to assign list element
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -1116,6 +1176,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       List list = (List) in.get(0).get();
@@ -1141,6 +1202,7 @@ public class ValueFunctions {
     // First argument is Map
     // Second argument is key of element to select
     // Third argument (optional) is value to assign to element
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 2 && in.size() != 3) {
         return false;
@@ -1154,6 +1216,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Map map = (Map) in.get(0).get();
@@ -1181,6 +1244,7 @@ public class ValueFunctions {
 
   public static final ValueFunction MAP_KEYS_FUNCTION = new NamedValueFunction("MAP_KEYS") {
     // First argument is Map
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() != 1) {
         return false;
@@ -1191,6 +1255,7 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       if (in.get(0) == null || in.get(0).get() == null ) return null;   // Allow for null
       Map map = (Map) in.get(0).get();
@@ -1202,6 +1267,7 @@ public class ValueFunctions {
   public static final ValueFunction AGGREGATE_FUNCTION = new NamedValueFunction("AGGREGATE") {
     // First argument is function to apply
     // Second argument is initial value
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 2) {
         return false;
@@ -1214,10 +1280,11 @@ public class ValueFunctions {
       }
       return true;
     }
+    @Override
     public Value apply(Env env, List<Value> in) {
       ValueFunction func = (ValueFunction) in.get(0).get();
       Value res = in.get(1);
-      List<Value> args = new ArrayList(2);
+      List<Value> args = new ArrayList<Value>(2);
       for (int i = 2; i < in.size(); i++) {
         args.set(0, res);
         args.set(1, in.get(i));
@@ -1227,7 +1294,7 @@ public class ValueFunctions {
     }
   };
 
-  final static CollectionValuedMap<String, ValueFunction> registeredFunctions =
+  static final CollectionValuedMap<String, ValueFunction> registeredFunctions =
           new CollectionValuedMap<String,ValueFunction>(CollectionFactory.<ValueFunction>arrayListFactory());
   static {
     registeredFunctions.add("Add", ADD_FUNCTION);

@@ -26,4 +26,4 @@ import edu.stanford.nlp.util.logging.PrettyLoggable;
  * @author dramage
  * @author rafferty
  */
-public interface CoreMap extends TypesafeMap<CoreMap>, PrettyLoggable { }
+public interface CoreMap extends TypesafeMap, PrettyLoggable { }

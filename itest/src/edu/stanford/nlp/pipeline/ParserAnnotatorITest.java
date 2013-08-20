@@ -7,16 +7,13 @@ import java.util.List;
 import java.util.Properties;
 
 import edu.stanford.nlp.dcoref.Constants;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.parser.lexparser.ParserConstraint;
 import edu.stanford.nlp.parser.lexparser.ParserAnnotations.ConstraintAnnotation;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 /**
@@ -62,11 +59,11 @@ public class ParserAnnotatorITest extends TestCase {
   public void testNoPOSParserAnnotator() throws Exception {
     Annotation document = new Annotation("John Bauer works at Stanford.");
     noPOSPipeline.annotate(document);
-    assertEquals(1, document.get(SentencesAnnotation.class).size());
-    CoreMap sentence = document.get(SentencesAnnotation.class).get(0);
-    Tree parse = sentence.get(TreeAnnotation.class);
+    assertEquals(1, document.get(CoreAnnotations.SentencesAnnotation.class).size());
+    CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
     assertEquals("(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))", parse.toString());
-    List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     List<Label> leaves = parse.yield();
     assertEquals(6, tokens.size());
     assertEquals(6, leaves.size());
@@ -83,8 +80,8 @@ public class ParserAnnotatorITest extends TestCase {
     pipeline.annotate(document);
     
     int i = 0;
-    for (CoreMap sentence : document.get(SentencesAnnotation.class)) {
-      Tree parse = sentence.get(TreeAnnotation.class);
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
       assertEquals(parse.toString(), answer[i++]);
     }
   }
@@ -96,10 +93,10 @@ public class ParserAnnotatorITest extends TestCase {
     String expectedResult = "(ROOT (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))";
     Annotation annotation = new Annotation("My dog also likes eating sausage.");
     noParserPipeline.annotate(annotation);
-    CoreMap sentence = annotation.get(SentencesAnnotation.class).get(0);
+    CoreMap sentence = annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0);
 
     parserOnlyPipeline.annotate(annotation);
-    assertEquals(expectedResult, sentence.get(TreeAnnotation.class).toString());
+    assertEquals(expectedResult, sentence.get(TreeCoreAnnotations.TreeAnnotation.class).toString());
 
     ParserConstraint constraint = new ParserConstraint(0, 2, "SBAR|SBAR[^a-zA-Z].*");
     List<ParserConstraint> constraints = new ArrayList<ParserConstraint>();
@@ -107,7 +104,7 @@ public class ParserAnnotatorITest extends TestCase {
     sentence.set(ConstraintAnnotation.class, constraints);
 
     parserOnlyPipeline.annotate(annotation);
-    String result = sentence.get(TreeAnnotation.class).toString();
+    String result = sentence.get(TreeCoreAnnotations.TreeAnnotation.class).toString();
     assertFalse("Tree should not match the original tree any more",
                 expectedResult.equals(result));
     assertTrue("Tree should be forced to contain SBAR",

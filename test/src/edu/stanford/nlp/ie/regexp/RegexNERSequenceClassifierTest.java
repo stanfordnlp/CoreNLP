@@ -4,8 +4,8 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.util.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
 
 /**
  * A simple test for the regex ner.  Writes out a temporary file with
@@ -72,10 +72,10 @@ public class RegexNERSequenceClassifierTest extends TestCase {
     assertEquals(expected.length, sentence.size());
     for (int i = 0; i < expected.length; ++i) {
       if (expected[i].equals("-")) {
-        assertEquals(null, sentence.get(i).get(AnswerAnnotation.class));
+        assertEquals(null, sentence.get(i).get(CoreAnnotations.AnswerAnnotation.class));
       } else {
         assertEquals(expected[i], 
-                     sentence.get(i).get(AnswerAnnotation.class));        
+                     sentence.get(i).get(CoreAnnotations.AnswerAnnotation.class));        
       }
     }
   }

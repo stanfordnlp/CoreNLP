@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.StringLabelFactory;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import java.io.Reader;
 import java.text.NumberFormat;
@@ -28,14 +29,14 @@ public class ParentAnnotationStats implements TreeVisitor {
 
   private final boolean doTags;
 
-  private Map<String,ClassicCounter<List<String>>> nodeRules = new HashMap<String,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> pRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> gPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
+  private Map<String,ClassicCounter<List<String>>> nodeRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> pRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> gPRules = Generics.newHashMap();
 
   // corresponding ones for tags
-  private Map<String,ClassicCounter<List<String>>> tagNodeRules = new HashMap<String,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> tagPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> tagGPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
+  private Map<String,ClassicCounter<List<String>>> tagNodeRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> tagPRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> tagGPRules = Generics.newHashMap();
 
   /**
    * Minimum support * KL to be included in output and as feature
@@ -133,17 +134,17 @@ public class ParentAnnotationStats implements TreeVisitor {
       javaSB[i] = new StringBuffer("  private static String[] splitters" + (i + 1) + " = new String[] {");
     }
 
-    ClassicCounter allScores = new ClassicCounter();
+    ClassicCounter<List<String>> allScores = new ClassicCounter<List<String>>();
     // do value of parent
     for (String node : nodeRules.keySet()) {
-      ArrayList answers = new ArrayList();
-      ClassicCounter cntr = (ClassicCounter) nodeRules.get(node);
+      ArrayList<Pair<List<String>,Double>> answers = Generics.newArrayList();
+      ClassicCounter<List<String>> cntr = nodeRules.get(node);
       double support = (cntr.totalCount());
       System.out.println("Node " + node + " support is " + support);
       for (Iterator<List<String>> it2 = pRules.keySet().iterator(); it2.hasNext();) {
         List<String> key = it2.next();
         if (key.get(0).equals(node)) {   // only do it if they match
-          ClassicCounter cntr2 = pRules.get(key);
+          ClassicCounter<List<String>> cntr2 = pRules.get(key);
           double support2 = (cntr2.totalCount());
           double kl = Counters.klDivergence(cntr2, cntr);
           System.out.println("KL(" + key + "||" + node + ") = " + nf.format(kl) + "\t" + "support(" + key + ") = " + support2);
@@ -154,13 +155,9 @@ public class ParentAnnotationStats implements TreeVisitor {
       }
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
-      Collections.sort(answers, new Comparator() {
-        public int compare(Object o1, Object o2) {
-          Pair p1 = (Pair) o1;
-          Pair p2 = (Pair) o2;
-          Double p12 = (Double) p1.second();
-          Double p22 = (Double) p2.second();
-          return p22.compareTo(p12);
+      Collections.sort(answers, new Comparator<Pair<List<String>, Double>>() {
+        public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+          return o2.second().compareTo(o1.second());
         }
       });
       for (int i = 0, size = answers.size(); i < size; i++) {
@@ -237,38 +234,32 @@ public class ParentAnnotationStats implements TreeVisitor {
     */
 
     // do value of grandparent
-    for (Iterator it = pRules.keySet().iterator(); it.hasNext();) {
-      List node = (List) it.next();
-      ArrayList answers = new ArrayList();
-      ClassicCounter cntr = (ClassicCounter) pRules.get(node);
+    for (List<String> node : pRules.keySet()) {
+      ArrayList<Pair<List<String>, Double>> answers = Generics.newArrayList();
+      ClassicCounter<List<String>> cntr = pRules.get(node);
       double support = (cntr.totalCount());
       if (support < SUPPCUTOFF) {
         continue;
       }
       System.out.println("Node " + node + " support is " + support);
-      for (Iterator it2 = gPRules.keySet().iterator(); it2.hasNext();) {
-        List key = (List) it2.next();
+      for (List<String> key : gPRules.keySet()) {
         if (key.get(0).equals(node.get(0)) && key.get(1).equals(node.get(1))) {  // only do it if they match
-          ClassicCounter cntr2 = (ClassicCounter) gPRules.get(key);
+          ClassicCounter<List<String>> cntr2 = gPRules.get(key);
           double support2 = (cntr2.totalCount());
           double kl = Counters.klDivergence(cntr2, cntr);
           System.out.println("KL(" + key + "||" + node + ") = " + nf.format(kl) + "\t" + "support(" + key + ") = " + support2);
           double score = kl * support2;
-          answers.add(new Pair(key, new Double(score)));
+          answers.add(Pair.makePair(key, new Double(score)));
           allScores.setCount(key,score);
         }
       }
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
-      Collections.sort(answers, new Comparator() {
-        public int compare(Object o1, Object o2) {
-          Pair p1 = (Pair) o1;
-          Pair p2 = (Pair) o2;
-          Double p12 = (Double) p1.second();
-          Double p22 = (Double) p2.second();
-          return p22.compareTo(p12);
-        }
-      });
+      Collections.sort(answers, new Comparator<Pair<List<String>, Double>>() {
+          public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+            return o2.second().compareTo(o1.second());
+          }
+        });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
@@ -292,9 +283,9 @@ public class ParentAnnotationStats implements TreeVisitor {
     System.out.println();
 
     System.out.println("All scores:");
-    edu.stanford.nlp.util.PriorityQueue pq = Counters.toPriorityQueue(allScores);
+    edu.stanford.nlp.util.PriorityQueue<List<String>> pq = Counters.toPriorityQueue(allScores);
     while (! pq.isEmpty()) {
-      Object key = pq.getFirst();
+      List<String> key = pq.getFirst();
       double score = pq.getPriority(key);
       pq.removeFirst();
       System.out.println(key + "\t" + score);
@@ -341,12 +332,10 @@ public class ParentAnnotationStats implements TreeVisitor {
         }
       }
       Collections.sort(answers, new Comparator<Pair<List<String>,Double>>() {
-        public int compare(Pair<List<String>,Double> p1, Pair<List<String>,Double> p2) {
-          Double p12 = p1.second();
-          Double p22 = p2.second();
-          return p22.compareTo(p12);
-        }
-      });
+          public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+            return o2.second().compareTo(o1.second());
+          }
+        });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair<List<String>,Double> p = answers.get(i);
         double psd = p.second().doubleValue();
@@ -406,10 +395,9 @@ public class ParentAnnotationStats implements TreeVisitor {
     */
 
     // do value of grandparent
-    for (Iterator it = pr.keySet().iterator(); it.hasNext();) {
-      ArrayList answers = new ArrayList();
-      List node = (List) it.next();
-      ClassicCounter cntr = pr.get(node);
+    for (List<String> node : pr.keySet()) {
+      ArrayList<Pair<List<String>,Double>> answers = Generics.newArrayList();
+      ClassicCounter<List<String>> cntr = pr.get(node);
       double support = (cntr.totalCount());
       if (support < SUPPCUTOFF) {
         continue;
@@ -417,21 +405,17 @@ public class ParentAnnotationStats implements TreeVisitor {
       for (List<String> key : gpr.keySet()) {
         if (key.get(0).equals(node.get(0)) && key.get(1).equals(node.get(1))) {
           // only do it if they match
-          ClassicCounter cntr2 = gpr.get(key);
+          ClassicCounter<List<String>> cntr2 = gpr.get(key);
           double support2 = (cntr2.totalCount());
           double kl = Counters.klDivergence(cntr2, cntr);
           answers.add(new Pair<List<String>,Double>(key, new Double(kl * support2)));
         }
       }
-      Collections.sort(answers, new Comparator() {
-        public int compare(Object o1, Object o2) {
-          Pair p1 = (Pair) o1;
-          Pair p2 = (Pair) o2;
-          Double p12 = (Double) p1.second();
-          Double p22 = (Double) p2.second();
-          return p22.compareTo(p12);
-        }
-      });
+      Collections.sort(answers, new Comparator<Pair<List<String>, Double>>() {
+          public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+            return o2.second().compareTo(o1.second());
+          }
+        });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
@@ -527,7 +511,7 @@ public class ParentAnnotationStats implements TreeVisitor {
   public static Set<String> getSplitCategories(Treebank t, boolean doTags, int algorithm, double phrasalCutOff, double tagCutOff, TreebankLanguagePack tlp) {
     ParentAnnotationStats pas = new ParentAnnotationStats(tlp, doTags);
     t.apply(pas);
-    Set<String> splitters = new HashSet<String>();
+    Set<String> splitters = Generics.newHashSet();
     pas.getSplitters(phrasalCutOff, pas.nodeRules, pas.pRules, pas.gPRules, splitters);
     pas.getSplitters(tagCutOff, pas.tagNodeRules, pas.tagPRules, pas.tagGPRules, splitters);
     return splitters;

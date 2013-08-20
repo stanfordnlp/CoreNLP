@@ -1,15 +1,17 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -20,10 +22,6 @@ import java.util.List;
  * them in and get in return a fully annotated object.
  * Please see package level javadocs for sample usage
  * and a more complete description.
- * <p>
- * At the moment this mainly serves as an example of using
- * the system and actually more complex annotation pipelines are
- * in their own classes that don't extend this one.
  *
  * @author Jenny Finkel
  */
@@ -197,6 +195,21 @@ public class AnnotationPipeline implements Annotator {
     return sb.toString();
   }
 
+  public Set<Requirement> requirementsSatisfied() {
+    Set<Requirement> satisfied = Generics.newHashSet();
+    for (Annotator annotator : annotators) {
+      satisfied.addAll(annotator.requirementsSatisfied());
+    }
+    return satisfied;
+  }
+
+  public Set<Requirement> requires() {
+    if (annotators.size() == 0) {
+      return Collections.emptySet();
+    }
+    return annotators.get(0).requires();
+  }
+
 
   public static void main(String[] args) throws IOException, ClassNotFoundException {
     Timing tim = new Timing();
@@ -220,9 +233,9 @@ public class AnnotationPipeline implements Annotator {
     String text = ("USAir said in the filings that Mr. Icahn first contacted Mr. Colodny last September to discuss the benefits of combining TWA and USAir -- either by TWA's acquisition of USAir, or USAir's acquisition of TWA.");
     Annotation a = new Annotation(text);
     ap.annotate(a);
-    System.out.println(a.get(TokensAnnotation.class));
-    for (CoreMap sentence : a.get(SentencesAnnotation.class)) {
-      System.out.println(sentence.get(TreeAnnotation.class));
+    System.out.println(a.get(CoreAnnotations.TokensAnnotation.class));
+    for (CoreMap sentence : a.get(CoreAnnotations.SentencesAnnotation.class)) {
+      System.out.println(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
     }
 
     if (TIME) {

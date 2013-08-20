@@ -4,7 +4,7 @@ import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.List;
 import java.io.IOException;
@@ -55,14 +55,14 @@ public class NERDemo {
         List<List<CoreLabel>> out = classifier.classify(fileContents);
         for (List<CoreLabel> sentence : out) {
           for (CoreLabel word : sentence) {
-            System.out.print(word.word() + '/' + word.get(AnswerAnnotation.class) + ' ');
+            System.out.print(word.word() + '/' + word.get(CoreAnnotations.AnswerAnnotation.class) + ' ');
           }
           System.out.println();
         }
         out = classifier.classifyFile(args[1]);
         for (List<CoreLabel> sentence : out) {
           for (CoreLabel word : sentence) {
-            System.out.print(word.word() + '/' + word.get(AnswerAnnotation.class) + ' ');
+            System.out.print(word.word() + '/' + word.get(CoreAnnotations.AnswerAnnotation.class) + ' ');
           }
           System.out.println();
         }

@@ -2,8 +2,7 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -135,7 +134,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -143,7 +142,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20100217");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -205,7 +204,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -214,7 +213,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20100217");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -250,7 +249,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -259,7 +258,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20100217");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -324,7 +323,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -333,7 +332,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20100217");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -414,7 +413,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -423,7 +422,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "19950720");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -491,7 +490,7 @@ public class SUTimeITest extends TestCase {
     TimeAnnotator sutime = getTimeAnnotator();
     sutime.annotate(document);
 
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -500,7 +499,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "1999-12-30");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -542,7 +541,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -551,7 +550,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "19980417");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -580,7 +579,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -589,7 +588,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20030414");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -625,7 +624,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -634,7 +633,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20030414");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -687,7 +686,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -696,7 +695,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20030414");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -716,13 +715,13 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    List<CoreMap> timexes = document.get(TimexAnnotations.class);
+    List<CoreMap> timexes = document.get(TimeAnnotations.TimexAnnotations.class);
     assertEquals(0, timexes.size());
 
     Annotation documentWithRefTime = createDocument(testText, "2007-05-14");
     sutime.annotate(documentWithRefTime);
 
-    timexes = document.get(TimexAnnotations.class);
+    timexes = document.get(TimeAnnotations.TimexAnnotations.class);
     assertEquals(0, timexes.size());
   }
 
@@ -751,7 +750,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -760,7 +759,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20030414");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -792,7 +791,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -801,7 +800,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20030414");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -863,7 +862,7 @@ public class SUTimeITest extends TestCase {
     sutime.annotate(document);
 
     // Check answers
-    for (CoreMap timexAnn: document.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexes.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -872,7 +871,7 @@ public class SUTimeITest extends TestCase {
     Annotation documentWithRefTime = createDocument(testText, "20050812");
     sutime.annotate(documentWithRefTime);
 
-    for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
       Timex expectedTimex = expectedTimexesResolved.next();
       testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
     }
@@ -1147,7 +1146,7 @@ public class SUTimeITest extends TestCase {
       TimeAnnotator sutime = getTimeAnnotator();
       sutime.annotate(documentWithRefTime);
 
-      List<CoreMap> timexes = documentWithRefTime.get(TimexAnnotations.class);
+      List<CoreMap> timexes = documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class);
       assertEquals(1, timexes.size());
       testTimex(testText, expectedTimex.text(), expectedTimex, timexes.get(0));
     }
@@ -1373,7 +1372,7 @@ public class SUTimeITest extends TestCase {
         sutime.annotate(documentWithRefTime);
 
         int k = 0;
-        for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+        for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
           Timex expectedTimex = expectedTimexes[k];
           testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
           k++;
@@ -1495,7 +1494,7 @@ public class SUTimeITest extends TestCase {
         sutime.annotate(documentWithRefTime);
 
         k = 0;
-        for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+        for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
           Timex expectedTimex = expectedTimexes[k];
           testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
           k++;
@@ -1599,7 +1598,7 @@ public class SUTimeITest extends TestCase {
       sutime.annotate(documentWithRefTime);
 
       int k = 0;
-      for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+      for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
         Timex expectedTimex = expectedTimexes[k];
         testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
         k++;
@@ -1672,7 +1671,7 @@ public class SUTimeITest extends TestCase {
       sutime.annotate(documentWithRefTime);
 
       int k = 0;
-      for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+      for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
         Timex expectedTimex = expectedTimexes[k];
         testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
         k++;
@@ -1739,7 +1738,7 @@ public class SUTimeITest extends TestCase {
       sutime.annotate(documentWithRefTime);
 
       i = 0;
-      for (CoreMap timexAnn: documentWithRefTime.get(TimexAnnotations.class)) {
+      for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
         Timex expectedTimex = expectedTimexes[i];
         testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
         i++;
@@ -1758,7 +1757,7 @@ public class SUTimeITest extends TestCase {
     int end = timexAnn.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
     Assert.assertEquals(expectedText, documentText.substring(begin, end));
 
-    Timex actualTimex = timexAnn.get(TimexAnnotation.class);
+    Timex actualTimex = timexAnn.get(TimeAnnotations.TimexAnnotation.class);
     Assert.assertEquals("Expected \"" + expectedTimex + "\" but got \"" + actualTimex + "\"", 
                         expectedTimex.toString(), actualTimex.toString());
   }

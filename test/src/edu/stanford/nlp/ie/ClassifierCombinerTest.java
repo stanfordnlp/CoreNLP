@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreUtilities;
 import junit.framework.TestCase;
@@ -112,7 +112,7 @@ public class ClassifierCombinerTest extends TestCase {
     ClassifierCombiner.mergeTwoDocuments(input1, input2, auxLabels, "O");
     for (CoreLabel word : input1) {
       System.out.println(word.word() + " " + word.tag() + " " + 
-                         word.get(AnswerAnnotation.class));
+                         word.get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
 

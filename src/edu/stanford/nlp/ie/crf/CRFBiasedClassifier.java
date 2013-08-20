@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ie.crf;
 
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.GoldenSectionLineSearch;
 import edu.stanford.nlp.optimization.LineSearcher;
@@ -9,6 +9,7 @@ import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -51,11 +52,11 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
   @Override
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc, FeatureFactory<IN> featureFactory) {
 
-    pad.set(AnswerAnnotation.class, flags.backgroundSymbol);
+    pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
     PaddedList<IN> pInfo = new PaddedList<IN>(info, pad);
 
     List<List<String>> features = new ArrayList<List<String>>();
-    Collection<Clique> done = new HashSet<Clique>();
+    Collection<Clique> done = Generics.newHashSet();
     for (int i = 0; i < windowSize; i++) {
       List<String> featuresC = new ArrayList<String>();
       List<Clique> windowCliques = featureFactory.getCliques(i, 0);
@@ -73,7 +74,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
 
     int[] labels = new int[windowSize];
     for (int i = 0; i < windowSize; i++) {
-      String answer = pInfo.get(loc + i - windowSize + 1).get(AnswerAnnotation.class);
+      String answer = pInfo.get(loc + i - windowSize + 1).get(CoreAnnotations.AnswerAnnotation.class);
       labels[i] = classIndex.indexOf(answer);
     }
 

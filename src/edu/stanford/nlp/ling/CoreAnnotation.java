@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.TypesafeMap;
  * @author rafferty
  */
 public interface CoreAnnotation<V>
-  extends TypesafeMap.Key<CoreMap, V> {
+  extends TypesafeMap.Key<V> {
 
   /**
    * Returns the type associated with this annotation.  This method must

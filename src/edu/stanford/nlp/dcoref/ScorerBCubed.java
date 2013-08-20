@@ -2,23 +2,22 @@ package edu.stanford.nlp.dcoref;
 
 import java.util.*;
 
-/** 
+/**
  * B^3 scorer
  * @author heeyoung
  *
  */
 public class ScorerBCubed extends CorefScorer {
 
-  protected enum BCubedType {B0, Ball, Brahman, Bcai, Bconll};
-  
-  private BCubedType type;
-  
-  public ScorerBCubed(BCubedType _type){
-    super();
-    scoreType = ScoreType.BCubed;
+  protected enum BCubedType {B0, Ball, Brahman, Bcai, Bconll}
+
+  private final BCubedType type;
+
+  public ScorerBCubed(BCubedType _type) {
+    super(ScoreType.BCubed);
     type = _type;
   }
-  
+
   @Override
   protected void calculatePrecision(Document doc){
     switch(type){
@@ -41,7 +40,7 @@ public class ScorerBCubed extends CorefScorer {
   private void calculatePrecisionBall(Document doc){
     int pDen = 0;
     double pNum = 0.0;
-    
+
     Map<Integer, Mention> goldMentions = doc.allGoldMentions;
     Map<Integer, Mention> predictedMentions = doc.allPredictedMentions;
 
@@ -50,9 +49,9 @@ public class ScorerBCubed extends CorefScorer {
       double total = 0.0;
 
       for(Mention m2 : doc.corefClusters.get(m.corefClusterID).getCorefMentions()){
-        if(m==m2 || 
-            (goldMentions.containsKey(m.mentionID) 
-                && goldMentions.containsKey(m2.mentionID) 
+        if(m==m2 ||
+            (goldMentions.containsKey(m.mentionID)
+                && goldMentions.containsKey(m2.mentionID)
                 && goldMentions.get(m.mentionID).goldCorefClusterID == goldMentions.get(m2.mentionID).goldCorefClusterID)) {
           correct++;
         }
@@ -89,7 +88,7 @@ public class ScorerBCubed extends CorefScorer {
 
     recallDenSum += rDen;
     recallNumSum += rNum;
-    
+
   }
   private void calculatePrecisionBcai(Document doc) {
     int pDen = 0;
@@ -104,9 +103,9 @@ public class ScorerBCubed extends CorefScorer {
       double correct = 0.0;
       double total = 0.0;
       for(Mention m2 : doc.corefClusters.get(m.corefClusterID).getCorefMentions()){
-        if(m==m2 || 
-            (goldMentions.containsKey(m.mentionID) 
-                && goldMentions.containsKey(m2.mentionID) 
+        if(m==m2 ||
+            (goldMentions.containsKey(m.mentionID)
+                && goldMentions.containsKey(m2.mentionID)
                 && goldMentions.get(m.mentionID).goldCorefClusterID == goldMentions.get(m2.mentionID).goldCorefClusterID)) {
           correct++;
         }
@@ -135,9 +134,9 @@ public class ScorerBCubed extends CorefScorer {
       double correct = 0.0;
       double total = 0.0;
       for(Mention m2 : doc.goldCorefClusters.get(m.goldCorefClusterID).getCorefMentions()){
-        if(m==m2 || 
-            (predictedMentions.containsKey(m.mentionID) 
-                && predictedMentions.containsKey(m2.mentionID) 
+        if(m==m2 ||
+            (predictedMentions.containsKey(m.mentionID)
+                && predictedMentions.containsKey(m2.mentionID)
                 && predictedMentions.get(m.mentionID).corefClusterID == predictedMentions.get(m2.mentionID).corefClusterID)) {
           correct++;
         }
@@ -164,9 +163,9 @@ public class ScorerBCubed extends CorefScorer {
       double correct = 0.0;
       double total = 0.0;
       for(Mention m2 : doc.goldCorefClusters.get(m.goldCorefClusterID).getCorefMentions()){
-        if(m==m2 || 
-            (predictedMentions.containsKey(m.mentionID) 
-                && predictedMentions.containsKey(m2.mentionID) 
+        if(m==m2 ||
+            (predictedMentions.containsKey(m.mentionID)
+                && predictedMentions.containsKey(m2.mentionID)
                 && predictedMentions.get(m.mentionID).corefClusterID == predictedMentions.get(m2.mentionID).corefClusterID)) {
           correct++;
         }
@@ -184,6 +183,6 @@ public class ScorerBCubed extends CorefScorer {
     }
 
     recallDenSum += rDen;
-    recallNumSum += rNum;    
+    recallNumSum += rNum;
   }
 }

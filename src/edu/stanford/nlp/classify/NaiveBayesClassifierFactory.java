@@ -34,6 +34,7 @@ import edu.stanford.nlp.optimization.Minimizer;
 import edu.stanford.nlp.optimization.QNMinimizer;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
@@ -72,7 +73,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
 
   private NaiveBayesClassifier<L, F> trainClassifier(int[][] data, int[] labels, int numFeatures,
       int numClasses, Index<L> labelIndex, Index<F> featureIndex) {
-    Set<L> labelSet = new HashSet<L>();
+    Set<L> labelSet = Generics.newHashSet();
     NBWeights nbWeights = trainWeights(data, labels, numFeatures, numClasses);
     Counter<L> priors = new ClassicCounter<L>();
     double[] pr = nbWeights.priors;
@@ -332,7 +333,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
     String trainFile = args[0];
     String testFile = args[1];
     NominalDataReader nR = new NominalDataReader();
-    HashMap<Integer, Index<String>> indices = new HashMap<Integer, Index<String>>();
+    Map<Integer, Index<String>> indices = Generics.newHashMap();
     List<RVFDatum<String, Integer>> train = nR.readData(trainFile, indices);
     List<RVFDatum<String, Integer>> test = nR.readData(testFile, indices);
     System.out.println("Constrained conditional likelihood no prior :");

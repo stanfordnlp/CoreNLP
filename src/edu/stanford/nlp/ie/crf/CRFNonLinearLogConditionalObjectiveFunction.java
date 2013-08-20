@@ -4,6 +4,7 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.optimization.HasL1ParamRange;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
@@ -36,7 +37,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
   protected double epsilon;
   Random random = new Random(2147483647L);
   /** label indices - for all possible label sequences - for each feature */
-  Index<CRFLabel>[] labelIndices;
+  List<Index<CRFLabel>> labelIndices;
   Index<String> classIndex;  // didn't have <String> before. Added since that's what is assumed everywhere.
   double[][] Ehat; // empirical counts of all the linear features [feature][class]
   double[][] Uhat; // empirical counts of all the output layer features [num of class][input layer size]
@@ -88,7 +89,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     }
   }
 
-  CRFNonLinearLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, Index[] labelIndices, int[] map, SeqClassifierFlags flags, int numNodeFeatures, int numEdgeFeatures, double[][][][] featureVal) {
+  CRFNonLinearLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, SeqClassifierFlags flags, int numNodeFeatures, int numEdgeFeatures, double[][][][] featureVal) {
     this.window = window;
     this.classIndex = classIndex;
     this.numClasses = classIndex.size();
@@ -128,11 +129,11 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
   public int domainDimension() {
     if (domainDimension < 0) {
       domainDimension = 0;
-      edgeParamCount = numEdgeFeatures * labelIndices[1].size();
+      edgeParamCount = numEdgeFeatures * labelIndices.get(1).size();
 
       originalFeatureCount = 0;
       for (int i = 0; i < map.length; i++) {
-        int s = labelIndices[map[i]].size();
+        int s = labelIndices.get(map[i]).size();
         originalFeatureCount += s;
       }
 
@@ -271,7 +272,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
         int[] cliqueLabel = new int[j + 1];
         System.arraycopy(windowLabels, window - 1 - j, cliqueLabel, 0, j + 1);
         CRFLabel crfLabel = new CRFLabel(cliqueLabel);
-        int labelIndex = labelIndices[j].indexOf(crfLabel);
+        int labelIndex = labelIndices.get(j).indexOf(crfLabel);
         int[] cliqueFeatures = docData[i][j];
         //System.err.println(crfLabel + " " + labelIndex);
         for (int n = 0; n < cliqueFeatures.length; n++) {
@@ -420,7 +421,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
         System.arraycopy(windowLabels, 1, windowLabels, 0, window - 1);
         windowLabels[window - 1] = docLabels[i];
         for (int j = 0; j < docData[i].length; j++) {
-          Index<CRFLabel> labelIndex = labelIndices[j];
+          Index<CRFLabel> labelIndex = labelIndices.get(j);
           // for each possible labeling for that clique
           int[] cliqueFeatures = docData[i][j];
           double[] As = null;
@@ -827,18 +828,18 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
 
   public Set<Integer> getL1ParamRange(double[] x) {
     if (prior == L1_PRIOR) {
-      Set<Integer> paramRange = new HashSet<Integer>(x.length);
+      Set<Integer> paramRange = Generics.newHashSet(x.length);
       for (int i = 0; i < x.length; i++)
         paramRange.add(i);
       return paramRange;
     } else if (prior == L1_NODE_L2_EDGE_PRIOR) {
-      Set<Integer> paramRange = new HashSet<Integer>(beforeOutputWeights - edgeParamCount);
+      Set<Integer> paramRange = Generics.newHashSet(beforeOutputWeights - edgeParamCount);
       for (int i = edgeParamCount; i < beforeOutputWeights; i++)
         paramRange.add(i);
       return paramRange;
     } else if (prior == L1_SPARSENODE_L2_EDGE_PRIOR) {
       double[][] W = separateWeights(x).second(); // inputLayerWeights 
-      Set<Integer> paramRange = new HashSet<Integer>();
+      Set<Integer> paramRange = Generics.newHashSet();
       for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
         for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
           double maxParamAbsVal = 0;
@@ -862,14 +863,14 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       }
       return paramRange;
     } else {
-      return new HashSet<Integer>();
+      return Generics.newHashSet();
     }
   }
 
   public double[][] to2D(double[] linearWeights) {
     double[][] newWeights = new double[numEdgeFeatures][];
     int index = 0;
-    int labelIndicesSize = labelIndices[1].size();
+    int labelIndicesSize = labelIndices.get(1).size();
     for (int i = 0; i < numEdgeFeatures; i++) {
       newWeights[i] = new double[labelIndicesSize];
       System.arraycopy(linearWeights, index, newWeights[i], 0, labelIndicesSize);
@@ -881,12 +882,12 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
   public double[][] empty2D() {
     double[][] d = new double[numEdgeFeatures][];
     // int index = 0;
-    int labelIndicesSize = labelIndices[1].size();
+    int labelIndicesSize = labelIndices.get(1).size();
     for (int i = 0; i < numEdgeFeatures; i++) {
       d[i] = new double[labelIndicesSize];
       // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.) 4.12.5
       // Arrays.fill(d[i], 0.0);
-      // index += labelIndices[map[i]].size();
+      // index += labelIndices.get(map[i]).size();
     }
     return d;
   }
@@ -895,10 +896,10 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     double[][] d = new double[map.length][];
     // int index = 0;
     for (int i = 0; i < map.length; i++) {
-      d[i] = new double[labelIndices[map[i]].size()];
+      d[i] = new double[labelIndices.get(map[i]).size()];
       // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.) 4.12.5
       // Arrays.fill(d[i], 0.0);
-      // index += labelIndices[map[i]].size();
+      // index += labelIndices.get(map[i]).size();
     }
     return d;
   }

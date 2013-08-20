@@ -1,7 +1,6 @@
 package edu.stanford.nlp.objectbank;
 
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.AbstractIterator;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -16,25 +15,25 @@ import java.util.regex.Pattern;
  * A class which iterates over Strings occurring between the begin and end of
  * a selected tag or tags. The element is specified by a regexp, matched
  * against the name of the element (i.e., excluding the angle bracket
- * characters) using <code>matches()</code>).
+ * characters) using {@code matches()}).
  * The class ignores all other characters in the input Reader.
  * There are a few different ways to modify the output of the
  * XMLBeginEndIterator.  One way is to ask it to keep internal tags;
- * if <code>keepInternalTags</code> is set, then
- * &lt;text&gt;A&lt;foo/&gt;B&lt;/text&gt; will be printed as A&lt;foo/&gt;B.
+ * if {@code keepInternalTags} is set, then
+ * {@literal <text>A<foo>B</text>} will be printed as {@literal A<foo>B}.
  *
  * Another is to tell it to keep delimiting tags; in the above example,
- * &lt;text&gt; will be kept as well.
+ * {@literal <text>} will be kept as well.
  *
  * Finally, you can ask it to keep track of the nesting depth; the
  * ordinary behavior of this iterator is to close all tags with just
  * one close tag.  This is incorrect XML behavior, but is kept in case
- * any code relies on it.  If <code>countDepth</code> is set, though,
+ * any code relies on it.  If {@code countDepth} is set, though,
  * the iterator keeps track of how much it has nested.
  *
  * @author Teg Grenager (grenager@stanford.edu)
  */
-public class XMLBeginEndIterator<E> extends AbstractIterator<E> implements Tokenizer<E> {
+public class XMLBeginEndIterator<E> extends AbstractIterator<E> {
 
   private final Pattern tagNamePattern;
   private final BufferedReader inputReader;
@@ -172,15 +171,21 @@ public class XMLBeginEndIterator<E> extends AbstractIterator<E> implements Token
     return token;
   }
 
+  /* ---
+
+  // Omit methods that made this class a Tokenizer.
+  // Just have it an Iterator as the name suggests.
+  // That's all that was used, and this simplifies
+  // inter-package dependencies.
+
   public E peek() {
     return nextToken;
   }
 
-  /**
    * Returns pieces of text in element as a List of tokens.
    *
    * @return A list of all tokens remaining in the underlying Reader
-   */
+   *
   public List<E> tokenize() {
     // System.out.println("tokenize called");
     List<E> result = new ArrayList<E>();
@@ -190,6 +195,7 @@ public class XMLBeginEndIterator<E> extends AbstractIterator<E> implements Token
     return result;
   }
 
+  --- */
 
   /**
    * Returns a factory that vends BeginEndIterators that reads the contents of
@@ -229,6 +235,7 @@ public class XMLBeginEndIterator<E> extends AbstractIterator<E> implements Token
       this.keepDelimitingTags = keepDelimitingTags;
     }
 
+    @Override
     public Iterator<E> getIterator(Reader r) {
       return new XMLBeginEndIterator<E>(r, tag, op, keepInternalTags, keepDelimitingTags);
     }

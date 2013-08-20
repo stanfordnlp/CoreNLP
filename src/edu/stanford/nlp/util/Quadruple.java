@@ -7,7 +7,17 @@ import edu.stanford.nlp.util.logging.PrettyLoggable;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
-public class Quadruple<T1,T2,T3,T4> implements Serializable, PrettyLoggable {
+/**
+ * A quadruple of ordered objects.
+ * 
+ * @author Spence Green
+ *
+ * @param <T1>
+ * @param <T2>
+ * @param <T3>
+ * @param <T4>
+ */
+public class Quadruple<T1,T2,T3,T4> implements Comparable<Quadruple<T1,T2,T3,T4>>, Serializable, PrettyLoggable {
 
   private static final long serialVersionUID = 6295043666955910662L;
   
@@ -112,6 +122,27 @@ public class Quadruple<T1,T2,T3,T4> implements Serializable, PrettyLoggable {
     return CollectionUtils.makeList(first, second, third, fourth);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public int compareTo(Quadruple<T1, T2, T3, T4> another) {
+    int comp = ((Comparable<T1>) first()).compareTo(another.first());
+    if (comp != 0) {
+      return comp;
+    } else {
+      comp = ((Comparable<T2>) second()).compareTo(another.second());
+      if (comp != 0) {
+        return comp;
+      } else {
+        comp = ((Comparable<T3>) third()).compareTo(another.third());
+        if (comp != 0) {
+          return comp;
+        } else {
+          return ((Comparable<T4>) fourth()).compareTo(another.fourth());
+        }
+      }
+    }
+  }
+  
   /**
    * {@inheritDoc}
    */

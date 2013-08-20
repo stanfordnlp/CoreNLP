@@ -1,10 +1,10 @@
 package edu.stanford.nlp.trees.international.tuebadz;
 
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.trees.AbstractCollinsHeadFinder;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 
 /** A HeadFinder for TueBa-D/Z.  First version.
  *  <i>Notes:</i> EN_ADD seems to be replaced by ENADD in 2008 ACL German.
@@ -33,7 +33,7 @@ public class TueBaDZHeadFinder extends AbstractCollinsHeadFinder {
     headMarkedPattern = Pattern.compile("^[^" + excluded + "]*:HD");
     headMarkedPattern2 = Pattern.compile("^[^" + excluded + "]*-HD");
 
-    nonTerminalInfo = new HashMap<String,String[][]>();
+    nonTerminalInfo = Generics.newHashMap();
 
     left = (coordSwitch ? "right" : "left");
     right = (coordSwitch ? "left" : "right");

@@ -6,13 +6,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.NormalizedNamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NumericCompositeTypeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NumericCompositeValueAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
@@ -35,18 +31,18 @@ public class NumberSequenceClassifierITest extends TestCase {
     Annotation doc = new Annotation(text);
     pipe.annotate(doc);
 
-    assertTrue(doc.get(SentencesAnnotation.class) != null);
-    assertTrue(doc.get(SentencesAnnotation.class).size() > 0);
-    CoreMap sent = doc.get(SentencesAnnotation.class).get(0);
-    assertTrue(sent.get(TokensAnnotation.class) != null);
-    List<CoreLabel> tokens = sent.get(TokensAnnotation.class);
+    assertTrue(doc.get(CoreAnnotations.SentencesAnnotation.class) != null);
+    assertTrue(doc.get(CoreAnnotations.SentencesAnnotation.class).size() > 0);
+    CoreMap sent = doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    assertTrue(sent.get(CoreAnnotations.TokensAnnotation.class) != null);
+    List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
     if(VERBOSE){
       for(CoreLabel token: tokens) {
         System.out.println("\t" + token.word() + " " + 
             token.tag() + " " + 
             token.ner() + " " + 
-            (token.containsKey(NumericCompositeTypeAnnotation.class) ? token.get(NumericCompositeValueAnnotation.class) + " " : "") +
-            (token.containsKey(TimexAnnotation.class) ? token.get(TimexAnnotation.class) + " " : "")); 
+            (token.containsKey(CoreAnnotations.NumericCompositeTypeAnnotation.class) ? token.get(CoreAnnotations.NumericCompositeValueAnnotation.class) + " " : "") +
+            (token.containsKey(TimeAnnotations.TimexAnnotation.class) ? token.get(TimeAnnotations.TimexAnnotation.class) + " " : "")); 
       }
     }
     
@@ -69,10 +65,10 @@ public class NumberSequenceClassifierITest extends TestCase {
       assertTrue(tokens.size() == normed.length);
       for(int i = 0; i < normed.length; i ++){
         if(normed[i] == null){
-          assertTrue(tokens.get(i).get(NormalizedNamedEntityTagAnnotation.class) == null);
+          assertTrue(tokens.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) == null);
         } else {
           Pattern p = Pattern.compile(normed[i]);
-          String n = tokens.get(i).get(NormalizedNamedEntityTagAnnotation.class);
+          String n = tokens.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
           System.err.println("COMPARING NORMED \"" + normed[i] + "\" with \"" + n + "\"");
           System.err.flush();
           assertTrue(n != null);

@@ -9,7 +9,7 @@ DOCUMENTATION
 
 Please look at the URL below for documention for Stanford CoreNLP:
 
-  http://http://nlp.stanford.edu/software/corenlp.shtml
+  http://nlp.stanford.edu/software/corenlp.shtml
 
 LICENSE
 

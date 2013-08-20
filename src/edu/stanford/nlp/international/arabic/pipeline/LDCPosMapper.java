@@ -5,14 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.process.treebank.Mapper;
+import edu.stanford.nlp.trees.treebank.Mapper;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Maps pre-terminal ATB morphological analyses to the shortened Bies tag set.
@@ -42,10 +42,10 @@ public class LDCPosMapper implements Mapper {
 
 	public LDCPosMapper(boolean addDeterminer) {
 		addDT = addDeterminer;
-		tagMap = new HashMap<String,String>();
+		tagMap = Generics.newHashMap();
 
 		//Pre-terminal tags that do not appear in LDC tag maps
-		tagsToEscape = new HashSet<String>();
+		tagsToEscape = Generics.newHashSet();
 		tagsToEscape.add("-NONE-");             //Traces
 		tagsToEscape.add("PUNC");               //Punctuation
 	}
@@ -77,13 +77,13 @@ public class LDCPosMapper implements Mapper {
 		  shortTag = LDCdeterminer.matcher(shortTag).replaceAll("");
 		if(longTag.equals("NUMERIC_COMMA"))
 		  shortTag = "PUNC";
-		
+
 		//As recommended by (Kulick et al., 2006)
 		if(addDT && (longTag != null)) {
 			Matcher detInLongTag = determiner.matcher(longTag);
 			Matcher someKindOfNoun = nounBaseTag.matcher(shortTag);
 			Matcher someKindOfAdj = adjBaseTag.matcher(shortTag);
-	
+
 			if(detInLongTag.find() && (someKindOfNoun.find() || someKindOfAdj.find()))
 				shortTag = "DT" + shortTag.trim();
 		}
@@ -107,7 +107,7 @@ public class LDCPosMapper implements Mapper {
 			boolean insideTagMap = false;
 			for(String line; (line = reader.readLine()) != null; ) {
 				line = line.trim();
-				
+
 				Matcher isStartSymbol = startOfTagMap.matcher(line);
 				insideTagMap = (isStartSymbol.matches() || insideTagMap);
 

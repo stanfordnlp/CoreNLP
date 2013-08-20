@@ -4,28 +4,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import edu.stanford.nlp.ie.crf.CRFBiasedClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TrueCaseAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TrueCaseTextAnnotation;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 public class TrueCaseAnnotator implements Annotator {
 
   @SuppressWarnings("unchecked")
   private CRFBiasedClassifier trueCaser;
   
-  private Map<String,String> mixedCaseMap = new HashMap<String,String>();
+  private Map<String,String> mixedCaseMap = Generics.newHashMap();
   
   private boolean VERBOSE = true;
   
@@ -90,7 +89,7 @@ public class TrueCaseAnnotator implements Annotator {
         for (int i = 0; i < tokens.size(); ++i) {
           
           // add the named entity tag to each token
-          String neTag = output.get(i).get(AnswerAnnotation.class);
+          String neTag = output.get(i).get(CoreAnnotations.AnswerAnnotation.class);
           tokens.get(i).set(CoreAnnotations.TrueCaseAnnotation.class, neTag);
           setTrueCaseText(tokens.get(i));
         }
@@ -101,7 +100,7 @@ public class TrueCaseAnnotator implements Annotator {
   }
   
   private void setTrueCaseText(CoreLabel l) {
-    String trueCase = l.getString(TrueCaseAnnotation.class);
+    String trueCase = l.getString(CoreAnnotations.TrueCaseAnnotation.class);
     String text = l.word();
     String trueCaseText = text;
     
@@ -117,11 +116,11 @@ public class TrueCaseAnnotator implements Annotator {
         trueCaseText = mixedCaseMap.get(text);
     }
     
-    l.set(TrueCaseTextAnnotation.class, trueCaseText);
+    l.set(CoreAnnotations.TrueCaseTextAnnotation.class, trueCaseText);
   }
   
   public static Map<String,String> loadMixedCaseMap(String mapFile) {
-    Map<String,String> map = new HashMap<String,String>();
+    Map<String,String> map = Generics.newHashMap();
     try {
       InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(mapFile);
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -138,5 +137,15 @@ public class TrueCaseAnnotator implements Annotator {
       throw new RuntimeException(e);
     }
     return map;
+  }
+
+  @Override
+  public Set<Requirement> requires() {
+    return TOKENIZE_SSPLIT_POS_LEMMA;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TRUECASE_REQUIREMENT);
   }
 }
