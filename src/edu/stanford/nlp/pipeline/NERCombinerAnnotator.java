@@ -77,6 +77,7 @@ public class NERCombinerAnnotator implements Annotator {
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         doOneSentence(annotation, sentence);
       }
+      this.ner.finalizeAnnotation(annotation);
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
     }
