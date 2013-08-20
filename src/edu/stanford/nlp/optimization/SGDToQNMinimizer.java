@@ -2,8 +2,6 @@ package edu.stanford.nlp.optimization;
 
 import java.io.Serializable;
 
-import edu.stanford.nlp.sequences.SeqClassifierFlags;
-
 /**
  * Stochastic Gradient Descent To Quasi Newton Minimizer
  *
