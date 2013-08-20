@@ -33,6 +33,8 @@ public class TimeExpressionExtractorFactory implements Factory<TimeExpressionExt
       Class clazz = Class.forName(DEFAULT_TIME_EXPRESSION_EXTRACTOR_CLASS);
     } catch (ClassNotFoundException ex) {
       return false;
+    } catch (NoClassDefFoundError ex) {
+      return false;
     }
     return true;
   }

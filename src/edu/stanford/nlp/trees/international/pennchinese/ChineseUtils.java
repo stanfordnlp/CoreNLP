@@ -45,8 +45,8 @@ public class ChineseUtils {
   public static final int DELETE_EXCEPT_BETWEEN_ASCII = 4;
   public static final int MAX_LEGAL = 4;
 
-  private int[] puaChars = { 0xE005 };
-  private int[] uniChars = { 0x42B5 };
+  // private int[] puaChars = { 0xE005 };
+  // private int[] uniChars = { 0x42B5 };
 
 
   // not instantiable
@@ -347,12 +347,14 @@ public class ChineseUtils {
   private final static Pattern midDotPattern = Pattern.compile(ChineseUtils.MID_DOT_REGEX_STR + "+");
 
 
-  public static String shapeOf(String input, 
+  public static String shapeOf(String input,
                                boolean augmentedDateChars,
                                boolean useMidDotShape) {
     String shape;
     if (augmentedDateChars && dateCharsPlus.matcher(input).matches()) {
       shape = "D";
+    } else if (input.charAt(0) == '第') {
+      return "o"; // detect those Chinese ordinals!
     } else if (dateChars.matcher(input).matches()) {
       shape = "D";
     } else if (numberChars.matcher(input).matches()) {
@@ -371,7 +373,7 @@ public class ChineseUtils {
       shape = "C";
     }
     return shape;
-    
+
   }
 
 }

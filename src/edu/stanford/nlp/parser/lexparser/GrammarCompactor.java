@@ -4,6 +4,7 @@ import edu.stanford.nlp.fsm.TransducerGraph;
 import edu.stanford.nlp.fsm.TransducerGraph.Arc;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Distribution;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
@@ -47,7 +48,7 @@ public abstract class GrammarCompactor {
   protected abstract TransducerGraph doCompaction(TransducerGraph graph, List<List<String>> trainPaths, List<List<String>> testPaths);
 
   public Triple<Index<String>, UnaryGrammar, BinaryGrammar> compactGrammar(Pair<UnaryGrammar,BinaryGrammar> grammar, Index<String> originalStateIndex) {
-    return compactGrammar(grammar, new HashMap<String, List<List<String>>>(), new HashMap<String, List<List<String>>>(), originalStateIndex);
+    return compactGrammar(grammar, Generics.<String, List<List<String>>>newHashMap(), Generics.<String, List<List<String>>>newHashMap(), originalStateIndex);
   }
 
   /**
@@ -63,10 +64,10 @@ public abstract class GrammarCompactor {
     // BinaryGrammar bg = grammar.second;
     this.stateIndex = originalStateIndex;
     List<List<String>> trainPaths, testPaths;
-    Set<UnaryRule> unaryRules = new HashSet<UnaryRule>();
-    Set<BinaryRule> binaryRules = new HashSet<BinaryRule>();
+    Set<UnaryRule> unaryRules = Generics.newHashSet();
+    Set<BinaryRule> binaryRules = Generics.newHashSet();
     Map<String, TransducerGraph> graphs = convertGrammarToGraphs(grammar, unaryRules, binaryRules);
-    compactedGraphs = new HashSet<TransducerGraph>();
+    compactedGraphs = Generics.newHashSet();
     if (verbose) {
       System.out.println("There are " + graphs.size() + " categories to compact.");
     }
@@ -158,7 +159,7 @@ public abstract class GrammarCompactor {
     int numRules = 0;
     UnaryGrammar ug = grammar.first;
     BinaryGrammar bg = grammar.second;
-    Map<String, TransducerGraph> graphs = new HashMap<String, TransducerGraph>();
+    Map<String, TransducerGraph> graphs = Generics.newHashMap();
     // go through the BinaryGrammar and add everything
     for (BinaryRule rule : bg) {
       numRules++;

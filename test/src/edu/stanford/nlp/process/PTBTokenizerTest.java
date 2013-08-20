@@ -8,9 +8,6 @@ import edu.stanford.nlp.ling.Sentence;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
 
@@ -22,12 +19,40 @@ public class PTBTokenizerTest extends TestCase {
   private String[] ptbInputs = {
     "This is a sentence.",
     "U.S. insurance: Conseco acquires Kemper Corp. \n</HEADLINE>\n<P>\nU.S insurance",
+    "Based in Eugene,Ore., PakTech needs a new distributor after Sydney-based Creative Pack Pty. Ltd. went into voluntary administration.",
+    "The Iron Age (ca. 1300 – ca. 300 BC).",
+    "Indo\u00ADnesian ship\u00ADping \u00AD",
+    "Gimme a phone, I'm gonna call.",
+    "\"John & Mary's dog,\" Jane thought (to herself).\n\"What a #$%!\na- ``I like AT&T''.\"",
+    "I said at 4:45pm.",
+    "I can't believe they wanna keep 40% of that.\"\n``Whatcha think?''\n\"I don't --- think so...,\"",
+    "You `paid' US$170,000?!\nYou should've paid only$16.75.",
+    "1. Buy a new Chevrolet (37%-owned in the U.S..) . 15%",
+    "I like you ;-) but do you care )8<. I'm happy (^_^) but shy x.x!",
   };
 
   private String[][] ptbGold = {
     { "This", "is", "a", "sentence", "." },
     { "U.S.", "insurance", ":", "Conseco", "acquires", "Kemper", "Corp.", ".",
       "</HEADLINE>", "<P>", "U.S", "insurance" },
+    { "Based", "in", "Eugene", ",", "Ore.", ",", "PakTech", "needs", "a", "new",
+      "distributor", "after", "Sydney-based", "Creative", "Pack", "Pty.", "Ltd.",
+      "went", "into", "voluntary", "administration", "." },
+    { "The", "Iron", "Age", "-LRB-", "ca.", "1300", "--", "ca.", "300", "BC", "-RRB-", "." },
+    { "Indonesian", "shipping", "-" },
+    { "Gim", "me", "a", "phone", ",", "I", "'m", "gon", "na", "call", "."},
+    { "``", "John", "&", "Mary", "'s", "dog", ",", "''", "Jane", "thought", "-LRB-", "to", "herself", "-RRB-",
+      ".", "``", "What", "a", "#", "$", "%", "!", "a", "-", "``", "I", "like", "AT&T", "''", ".", "''" },
+    { "I", "said", "at", "4:45", "pm", "."},
+    { "I", "ca", "n't", "believe", "they", "wan", "na", "keep", "40", "%", "of", "that", ".", "''",
+      "``", "Whatcha", "think", "?", "''", "``", "I", "do", "n't", "--", "think", "so", "...", ",", "''" },
+          // We don't yet split "Whatcha" but probably should following model of "Whaddya" --> What d ya. Maybe What cha
+    { "You", "`", "paid", "'", "US$", "170,000", "?!", "You", "should", "'ve", "paid", "only", "$", "16.75", "." },
+    { "1", ".", "Buy", "a", "new", "Chevrolet",
+      "-LRB-", "37", "%", "-", "owned", "in", "the", "U.S.", ".", "-RRB-", ".", "15", "%" },
+          // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
+    { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  "-RRB-8<", ".",
+      "I", "'m", "happy", "-LRB-^_^-RRB-", "but", "shy", "x.x", "!" },
   };
 
   public void testPTBTokenizerWord() {
@@ -135,33 +160,33 @@ public class PTBTokenizerTest extends TestCase {
       PTBTokenizer.newPTBTokenizer(new StringReader(text), false, true);
     List<CoreLabel> tokens = tokenizer.tokenize();
     assertEquals(6, tokens.size());
-    assertEquals("  ", tokens.get(0).get(BeforeAnnotation.class));
-    assertEquals("     ", tokens.get(0).get(AfterAnnotation.class));
+    assertEquals("  ", tokens.get(0).get(CoreAnnotations.BeforeAnnotation.class));
+    assertEquals("     ", tokens.get(0).get(CoreAnnotations.AfterAnnotation.class));
     assertEquals("Wrong begin char offset", 2, (int) tokens.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
     assertEquals("Wrong end char offset", 6, (int) tokens.get(0).get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-    assertEquals("This", tokens.get(0).get(OriginalTextAnnotation.class));
+    assertEquals("This", tokens.get(0).get(CoreAnnotations.OriginalTextAnnotation.class));
     // note: after(x) and before(x+1) are the same
-    assertEquals("     ", tokens.get(0).get(AfterAnnotation.class));
-    assertEquals("     ", tokens.get(1).get(BeforeAnnotation.class));
+    assertEquals("     ", tokens.get(0).get(CoreAnnotations.AfterAnnotation.class));
+    assertEquals("     ", tokens.get(1).get(CoreAnnotations.BeforeAnnotation.class));
     assertEquals("colorful", tokens.get(3).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("colourful", tokens.get(3).get(OriginalTextAnnotation.class));
+    assertEquals("colourful", tokens.get(3).get(CoreAnnotations.OriginalTextAnnotation.class));
     assertEquals("", tokens.get(4).after());
     assertEquals("", tokens.get(5).before());
-    assertEquals("    ", tokens.get(5).get(AfterAnnotation.class));
+    assertEquals("    ", tokens.get(5).get(CoreAnnotations.AfterAnnotation.class));
 
     StringBuilder result = new StringBuilder();
-    result.append(tokens.get(0).get(BeforeAnnotation.class));
+    result.append(tokens.get(0).get(CoreAnnotations.BeforeAnnotation.class));
     for (CoreLabel token : tokens) {
       result.append(token.get(CoreAnnotations.OriginalTextAnnotation.class));
-      String after = token.get(AfterAnnotation.class);
+      String after = token.get(CoreAnnotations.AfterAnnotation.class);
       if (after != null)
         result.append(after);
     }
     assertEquals(text, result.toString());
 
     for (int i = 0; i < tokens.size() - 1; ++i) {
-      assertEquals(tokens.get(i).get(AfterAnnotation.class),
-                   tokens.get(i + 1).get(BeforeAnnotation.class));
+      assertEquals(tokens.get(i).get(CoreAnnotations.AfterAnnotation.class),
+                   tokens.get(i + 1).get(CoreAnnotations.BeforeAnnotation.class));
     }
   }
 

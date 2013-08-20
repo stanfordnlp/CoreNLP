@@ -1,6 +1,6 @@
 package edu.stanford.nlp.trees.international.arabic;
 
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.international.arabic.ArabicMorphoFeatureSpecification;
 import edu.stanford.nlp.international.arabic.process.ArabicTokenizer;
@@ -9,7 +9,7 @@ import edu.stanford.nlp.ling.HasWord;
 
 /**
  * Specifies the treebank/language specific components needed for
- * parsing the Penn Arabic Treebank (ATB). This language pack has been updated for 
+ * parsing the Penn Arabic Treebank (ATB). This language pack has been updated for
  * ATB1v4, ATB2v3, and ATB3v3.2
  * <p>
  * The encoding for the ATB is the default UTF-8 specified in AbstractTreebankLanguagePack.
@@ -18,18 +18,18 @@ import edu.stanford.nlp.ling.HasWord;
  * @author Mona Diab
  * @author Roger Levy
  * @author Spence Green
- * 
+ *
  */
 public class ArabicTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final long serialVersionUID = 9081305982861675328L;
-  
+
   private static final String[] collinsPunctTags = {"PUNC"};
 
   private static final String[] pennPunctTags = {"PUNC"};
 
   private static final String[] pennPunctWords = {".","\"",",","-LRB-","-RRB-","-",":","/","?","_","*","%","!",">","-PLUS-","...",";","..","&","=","ر","'","\\","`","......"};
-  
+
   private static final String[] pennSFPunctTags = {"PUNC"};
 
   private static final String[] pennSFPunctWords = {".", "!", "?"};
@@ -48,7 +48,7 @@ public class ArabicTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~'};
 
   /**
-   * This is valid for "BobChrisTreeNormalizer" conventions only. 
+   * This is valid for "BobChrisTreeNormalizer" conventions only.
    * wsg: "ROOT" should always be the first value. See {@link #startSymbol} in
    * the parent class.
    */
@@ -142,7 +142,7 @@ public class ArabicTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /**
    * TODO: there is no way to change this using options.
    */
-  private TokenizerFactory<? extends HasWord> tf = 
+  private TokenizerFactory<? extends HasWord> tf =
     ArabicTokenizer.atbFactory();
 
   /**
@@ -189,10 +189,10 @@ public class ArabicTreebankLanguagePack extends AbstractTreebankLanguagePack {
   public MorphoFeatureSpecification morphFeatureSpec() {
     return new ArabicMorphoFeatureSpecification();
   }
-  
-  
+
+
   /**
-   * 
+   *
    * @param args
    */
   public static void main(String[] args) {

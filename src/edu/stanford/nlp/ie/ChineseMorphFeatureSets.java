@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ie;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
@@ -21,8 +22,8 @@ public class ChineseMorphFeatureSets implements Serializable {
   private static final long serialVersionUID = -1055526945031459198L;
 
   private Index<String> featIndex = new HashIndex<String>();
-  private Map<String, Set<Character>> singletonFeatures = new HashMap<String, Set<Character>>();
-  private Map<String, Pair<Set<Character>, Set<Character>>> affixFeatures = new HashMap<String, Pair<Set<Character>, Set<Character>>>();
+  private Map<String, Set<Character>> singletonFeatures = Generics.newHashMap();
+  private Map<String, Pair<Set<Character>, Set<Character>>> affixFeatures = Generics.newHashMap();
 
   public Map<String, Set<Character>> getSingletonFeatures() {
     return singletonFeatures;
@@ -75,7 +76,7 @@ public class ChineseMorphFeatureSets implements Serializable {
     featIndex.add(singleFeatName);
     String singleFeatIndexString = Integer.toString(featIndex.indexOf(singleFeatName));
 
-    Set<Character> featureSet = new HashSet<Character>();
+    Set<Character> featureSet = Generics.newHashSet();
     String line;
     Pattern typedDoubleFeatPattern = Pattern.compile("([A-Za-z]+)\\s+(.)\\s+(.)\\s*");
     Pattern typedSingleFeatPattern = Pattern.compile("([A-Za-z]+)\\s+(.)\\s*");
@@ -138,7 +139,7 @@ public class ChineseMorphFeatureSets implements Serializable {
           } else {
             p.setSecond(featureSet);
           }
-          featureSet = new HashSet<Character>();
+          featureSet = Generics.newHashSet();
         }
         featType = FeatType.PREFIX;
         if (line.startsWith("prefix")) {
@@ -175,12 +176,12 @@ public class ChineseMorphFeatureSets implements Serializable {
     if (isPrefix) {
       feature = p.first();
       if (feature == null) {
-        p.setFirst(feature = new HashSet<Character>());
+        p.setFirst(feature = Generics.newHashSet());
       }
     } else {
       feature = p.second();
       if (feature == null) {
-        p.setSecond(feature = new HashSet<Character>());
+        p.setSecond(feature = Generics.newHashSet());
       }
     }
     feature.add(featChar);

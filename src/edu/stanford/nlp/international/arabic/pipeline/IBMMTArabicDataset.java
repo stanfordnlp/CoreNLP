@@ -6,16 +6,17 @@ import java.util.regex.*;
 
 import edu.stanford.nlp.international.arabic.IBMArabicEscaper;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.process.treebank.ConfigParser;
-import edu.stanford.nlp.process.treebank.Dataset;
-import edu.stanford.nlp.process.treebank.Mapper;
+import edu.stanford.nlp.trees.treebank.ConfigParser;
+import edu.stanford.nlp.trees.treebank.Dataset;
+import edu.stanford.nlp.trees.treebank.Mapper;
+import edu.stanford.nlp.util.Generics;
 
-/** 
+/**
  * Applies the same orthographic transformations developed for ATB parse trees to flat
  * MT input. This data set escapes IBM Arabic (for example, it removes explicit clitic markings).
  * <p>
  * NOTE: This class expects UTF-8 input (not Buckwalter)
- * 
+ *
  * @author Spence Green
  *
  */
@@ -35,14 +36,14 @@ public class IBMMTArabicDataset implements Dataset {
   protected final StringBuilder toStringBuffer;
 
   public IBMMTArabicDataset() {
-    configuredOptions = new HashSet<String>();
+    configuredOptions = Generics.newHashSet();
     toStringBuffer = new StringBuilder();
     pathsToData = new ArrayList<File>();
 
     escaper = new IBMArabicEscaper(true);
     escaper.disableWarnings();
 
-    requiredOptions = new HashSet<String>();
+    requiredOptions = Generics.newHashSet();
     requiredOptions.add(ConfigParser.paramName);
     requiredOptions.add(ConfigParser.paramPath);
   }
@@ -60,7 +61,7 @@ public class IBMMTArabicDataset implements Dataset {
 
         while(infile.ready()) {
           ArrayList<Word> sent = Sentence.toUntaggedList(infile.readLine().split("\\s+"));
-          
+
           for(Word token : sent) {
             Matcher hasArabic = utf8ArabicChart.matcher(token.word());
             if(hasArabic.find()) {

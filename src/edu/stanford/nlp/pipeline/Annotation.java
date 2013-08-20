@@ -26,8 +26,14 @@
 
 package edu.stanford.nlp.pipeline;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
 
 /**
  * An annotation representing a span of text in a document.
@@ -75,6 +81,28 @@ public class Annotation extends ArrayCoreMap {
     return this.get(CoreAnnotations.TextAnnotation.class);
   }
 
+  public Annotation(List<CoreMap> sentences) {
+    super();
+    this.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+    StringBuilder text = new StringBuilder();
+    for (CoreMap sentence : sentences) {
+      List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      tokens.addAll(sentenceTokens);
+      if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
+        text.append(sentence.get(CoreAnnotations.TokensAnnotation.class));
+      } else {
+        // If there is no text in the sentence, fake it as best as we can
+        if (text.length() > 0) {
+          text.append("\n");
+        }
+        text.append(Sentence.listToString(sentenceTokens));
+      }
+    }
+    this.set(CoreAnnotations.TokensAnnotation.class, tokens);
+    this.set(CoreAnnotations.TextAnnotation.class, text.toString());
+  }
+
   // ==================
   // Old Deprecated API
   // ==================
@@ -83,5 +111,4 @@ public class Annotation extends ArrayCoreMap {
   public Annotation() {
     super(12);
   }
-
 }

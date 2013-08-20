@@ -1,0 +1,258 @@
+// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/semgraph/semgrex" projects/core/src/edu/stanford/nlp/semgraph/semgrex/SemgrexParser.jj
+
+options { UNICODE_INPUT = true;
+          SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+          STATIC = false; }
+
+
+PARSER_BEGIN(SemgrexParser)
+package edu.stanford.nlp.semgraph.semgrex;
+// all generated classes are in this package
+
+//imports
+import java.io.StringReader;
+import java.util.*;
+import edu.stanford.nlp.util.Generics;
+
+class SemgrexParser {
+
+	// this is so we can tell, at any point during the parse
+	// whether we are under a negation, which we need to know
+  	// because labeling nodes under negation is illegal
+	private boolean underNegation = false;
+      	private boolean underNodeNegation = false;
+}
+
+PARSER_END(SemgrexParser)
+
+SKIP:
+{
+	" "
+|	"\r"
+|	"\t"
+}
+
+TOKEN:
+{
+	< RELATION: "<" | ">" | ">>" | "<<">
+|	< ALIGNRELN: "@" >
+|	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}"])+ >
+|	< NUMBER: ( ["0"-"9"] )+ >
+|	< EMPTY: "#" >
+|	< ROOT: "$" >
+|	< REGEX: "/" ("\\/"|~["\n","\r","/"])* "/" >
+}
+
+SemgrexPattern Root() : {
+  SemgrexPattern node;
+  Token reverse = null;
+  List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+  // a local variable
+} {
+  ( 
+    (reverse = <ALIGNRELN> node = SubNode(GraphRelation.ALIGNED_ROOT) "\n")
+    |
+    ( node = SubNode(GraphRelation.ROOT) { children.add(node); } 
+      ( ":" node = SubNode(GraphRelation.ITERATOR) { children.add(node); } )*
+      "\n"
+    )
+  )
+  { 
+    if (children.size() <= 1)
+      return node;
+    return new CoordinationPattern(true, children, true);
+  }
+
+}
+
+SemgrexPattern SubNode(GraphRelation r) : {
+	SemgrexPattern result =  null;
+	SemgrexPattern child = null;
+} {
+	( "(" result = SubNode(r) ")" ( child = RelationDisj() )? )
+	{ 	
+		if (child != null) {
+		List<SemgrexPattern> newChildren = new ArrayList<SemgrexPattern>();
+		newChildren.addAll(result.getChildren());
+		newChildren.add(child);
+		result.setChild(new CoordinationPattern(false, newChildren, true));
+	}
+	return result;
+    }
+ | ( result = ModNode(r) (child = RelationDisj() )? )
+ 	{  if (child != null) result.setChild(child);
+ 		return result;}
+}
+
+SemgrexPattern RelationDisj() : {
+	SemgrexPattern child;
+	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+} {
+    (	 (child = RelationConj() ) { children.add(child); }
+	( ( "|" child = RelationConj() ) { children.add(child); } )* )
+ 	{ if (children.size() == 1)
+		return child;
+	  else
+		return new CoordinationPattern(false, children, false);
+  }
+}
+
+SemgrexPattern RelationConj() : {
+	SemgrexPattern child;
+	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+} {
+    (	  (child = ModRelation() ) { children.add(child); }
+	( ( ("&")? child = ModRelation() ) { children.add(child); } )* )
+ 	{ if (children.size() == 1)
+		return child;
+	  else
+		return new CoordinationPattern(false, children, true);
+  }
+}
+
+SemgrexPattern ModRelation() : {
+  SemgrexPattern child;
+  boolean startUnderNeg;
+} {
+  ( child = RelChild()
+    | ( "!"
+        { startUnderNeg = underNegation;
+          underNegation = true; } child = RelChild() { underNegation = startUnderNeg; } )
+      { child.negate(); }
+    | ( "?" child = RelChild() ) { child.makeOptional(); } )
+  { return child; }
+}
+
+SemgrexPattern RelChild() : {
+  SemgrexPattern child;
+} {
+  (( "[" child = RelationDisj() "]")
+    | child = Relation() )
+  { return child; }
+}
+
+SemgrexPattern Relation() : {
+	GraphRelation reln;
+	Token rel = null;
+	Token relnType = null;
+	Token numArg = null;
+	Token numArg2 = null;
+	Token name = null;
+	SemgrexPattern node;
+	boolean pC = false;
+} {
+	(
+	( ( ( (numArg = <IDENTIFIER> ("," numArg2 = <IDENTIFIER>)?)? rel = <RELATION> 
+		(relnType = <IDENTIFIER> | relnType = <REGEX>)?)
+		(( ("=") name = <IDENTIFIER> )   )? )
+	  | (rel = <ALIGNRELN>))
+	  
+	{
+          if (numArg == null && numArg2 == null) {
+            reln = GraphRelation.getRelation(rel != null ? rel.image : null, 
+                      relnType != null ? relnType.image : null, 
+                      name != null ? name.image : null);
+          } else if (numArg2 == null) {
+            reln = GraphRelation.getRelation(rel != null ? rel.image : null, 
+                      relnType != null ? relnType.image : null, 
+	              Integer.parseInt(numArg.image),
+                      name != null ? name.image : null);
+          } else {
+            reln = GraphRelation.getRelation(rel != null ? rel.image : null, 
+                      relnType != null ? relnType.image : null, 
+                      Integer.parseInt(numArg.image), 
+                      Integer.parseInt(numArg2.image),
+                      name != null ? name.image : null);
+	  }
+	}
+	( (node = ModNode(reln)) |
+	  	("(" node = SubNode(reln) ")") ) )
+	
+	 { 		
+	 return node;
+	}
+}
+
+SemgrexPattern NodeDisj(GraphRelation r) : {
+	SemgrexPattern child;
+	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+} {
+    ((	 "[" ( child = NodeConj(r) )  { children.add(child); }
+	( ( "|" child = NodeConj(r) ) { children.add(child); } )* "]" )
+ 	{ if (children.size() == 1)
+		return child;
+	  else
+		return new CoordinationPattern(true, children, false);
+     })
+}
+
+SemgrexPattern NodeConj(GraphRelation r) : {
+	SemgrexPattern child;
+	List<SemgrexPattern> children = new ArrayList<SemgrexPattern>();
+} {
+    (	 (child = ModNode(r) ) { children.add(child); }
+	( ( ("&")? child = ModNode(r) ) { children.add(child); } )* )
+ 	{ if (children.size() == 1)
+		return child;
+	  else
+		return new CoordinationPattern(true, children, true);
+  }
+}
+
+SemgrexPattern ModNode(GraphRelation r) : {
+	SemgrexPattern child;
+	boolean startUnderNeg;
+} {
+	( child = Child(r)
+	  | ( "!"
+		  { startUnderNeg = underNodeNegation;
+		    underNodeNegation = true; } child = Child(r) { underNodeNegation = startUnderNeg; } )
+	   )
+	   { 
+	   	return child; }
+}
+
+
+SemgrexPattern Child(GraphRelation r) : {
+	SemgrexPattern child;
+} {
+	(( child = NodeDisj(r) )
+		| child = Description(r) )
+	  { 
+	  return child; }
+}
+
+NodePattern Description(GraphRelation r) : {
+	Token name = null;
+	boolean link = false;
+	boolean isRoot = false;
+	boolean isEmpty = false;
+	Token attr = null;
+	Token value = null;
+	Map<String, String> attributes = Generics.newHashMap();
+	NodePattern pat;
+} {
+	
+	( "{" ( (  ( (attr = <IDENTIFIER> ":" (value = <IDENTIFIER> | value = <REGEX>) )
+	 { if (attr != null && value != null) attributes.put(attr.image, value.image); } )
+	 
+			 (";" ((attr = <IDENTIFIER> ":" (value = <IDENTIFIER> | value = <REGEX>)) {
+		if (attr != null && value != null) attributes.put(attr.image, value.image); }) )* "}")
+	|
+	(( attr = <ROOT> "}") { 
+	isRoot = true; } )
+	|
+	(( attr = <EMPTY> "}") {
+	isEmpty = true; } )
+	| ( "}") ) 
+
+	(( ("=" { link = true; }) name = <IDENTIFIER> ) 
+		{if (underNegation)
+				throw new ParseException("No named semgrex nodes allowed in the scope of negation");} 
+	  )? 
+	)
+  	{ pat = new NodePattern(r, underNodeNegation, attributes, isRoot, isEmpty, name != null ? name.image : null); 
+	   if (link) pat.makeLink();
+	  return pat;
+	}
+}

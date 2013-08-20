@@ -12,14 +12,10 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
-import edu.stanford.nlp.trees.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -87,7 +83,7 @@ public class AnnotationUtils {
       boolean useSubTypes,
       boolean useBIO) {
     /*
-    Tree completeTree = sentence.get(TreeAnnotation.class);
+    Tree completeTree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
     if(completeTree == null){
       throw new RuntimeException("ERROR: TreeAnnotation MUST be set before calling this method!");
     }
@@ -102,12 +98,12 @@ public class AnnotationUtils {
     for (Tree tree : tokenList) {
       Word word = new Word(tree.label());
       CoreLabel label = new CoreLabel();
-      label.set(TextAnnotation.class, word.value());
+      label.set(CoreAnnotations.TextAnnotation.class, word.value());
       if (addAnswerAnnotation) {
-        label.set(AnswerAnnotation.class,
+        label.set(CoreAnnotations.AnswerAnnotation.class,
             SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
       }
-      label.set(PartOfSpeechAnnotation.class, tree.parent(completeTree).label().value());
+      label.set(CoreAnnotations.PartOfSpeechAnnotation.class, tree.parent(completeTree).label().value());
       labels.add(label);
     }
     */
@@ -116,7 +112,7 @@ public class AnnotationUtils {
     for(CoreLabel l: sentence.get(CoreAnnotations.TokensAnnotation.class)){
       CoreLabel nl = new CoreLabel(l);
       if (addAnswerAnnotation) {
-        nl.set(AnswerAnnotation.class, SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+        nl.set(CoreAnnotations.AnswerAnnotation.class, SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
       }
       labels.add(nl);
     }
@@ -140,7 +136,7 @@ public class AnnotationUtils {
                 if(i == entity.getHeadTokenStart()) tag = "B-" + tag;
                 else tag = "I-" + tag;
               }
-              labels.get(i).set(AnswerAnnotation.class, tag);
+              labels.get(i).set(CoreAnnotations.AnswerAnnotation.class, tag);
             }
           }
         }
@@ -151,8 +147,8 @@ public class AnnotationUtils {
     // Displaying the CoreLabels generated for this sentence
     System.err.print("sentence to core labels:");
     for(CoreLabel l: labels){
-      System.err.print(" " + l.word() + "/" + l.getString(PartOfSpeechAnnotation.class));
-      String tag = l.getString(AnswerAnnotation.class);
+      System.err.print(" " + l.word() + "/" + l.getString(CoreAnnotations.PartOfSpeechAnnotation.class));
+      String tag = l.getString(CoreAnnotations.AnswerAnnotation.class);
       if(tag != null && ! tag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL)){
         System.err.print("/" + tag);
       }
@@ -225,7 +221,7 @@ public class AnnotationUtils {
     Annotation newSent = new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class));
 
     newSent.set(CoreAnnotations.TokensAnnotation.class, sentence.get(CoreAnnotations.TokensAnnotation.class));
-    newSent.set(TreeAnnotation.class, sentence.get(TreeAnnotation.class));
+    newSent.set(TreeCoreAnnotations.TreeAnnotation.class, sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
     newSent.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
     newSent.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
     newSent.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class));
@@ -444,7 +440,7 @@ public class AnnotationUtils {
 
   public static String tokensAndNELabelsToString(CoreMap sentence) {
     StringBuffer os = new StringBuffer();
-    List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if(tokens != null){
       boolean first = true;
       for(CoreLabel token: tokens) {
@@ -520,8 +516,8 @@ public class AnnotationUtils {
    */
   public static void updateOffsetsInCoreLabels(List<CoreLabel> tokens, int offset) {
     for(CoreLabel l: tokens) {
-      l.set(CharacterOffsetBeginAnnotation.class, l.get(CharacterOffsetBeginAnnotation.class) + offset);
-      l.set(CharacterOffsetEndAnnotation.class, l.get(CharacterOffsetEndAnnotation.class) + offset);
+      l.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, l.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) + offset);
+      l.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, l.get(CoreAnnotations.CharacterOffsetEndAnnotation.class) + offset);
     }
   }
 

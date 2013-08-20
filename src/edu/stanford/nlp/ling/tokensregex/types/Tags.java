@@ -1,10 +1,10 @@
 package edu.stanford.nlp.ling.tokensregex.types;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.util.Generics;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,7 +21,7 @@ public class Tags implements Serializable {
 
   public Tags(String... tags) {
     if (tags != null) {
-      this.tags = new HashMap<String,Value>();
+      this.tags = Generics.newHashMap();
       for (String tag:tags) {
         this.tags.put(tag, null);
       }
@@ -41,7 +41,7 @@ public class Tags implements Serializable {
   }
 
   public void addTag(String tag, Value v) {
-    if (tags == null) { tags = new HashMap<String, Value>(1); }
+    if (tags == null) { tags = Generics.newHashMap(1); }
     tags.put(tag, v);
   }
 

@@ -2,18 +2,14 @@ package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PositionAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -58,7 +54,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     }
 
     private static final Map<String, OutputStyle> shortNames =
-      new HashMap<String, OutputStyle>();
+      Generics.newHashMap();
     static {
       for (OutputStyle style : OutputStyle.values())
         shortNames.put(style.shortName, style);
@@ -140,15 +136,15 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
         prepend.append(before).append(word);
         if (previous != null) {
           String previousTokenAfter = StringUtils.getNotNullString(previous.get(CoreAnnotations.AfterAnnotation.class));
-          previous.set(AfterAnnotation.class, previousTokenAfter + word + after);
+          previous.set(CoreAnnotations.AfterAnnotation.class, previousTokenAfter + word + after);
         }
         // previous.appendAfter(w.word() + w.after());
       } else {
 
         String before = StringUtils.getNotNullString(w.get(CoreAnnotations.BeforeAnnotation.class));
         if (prepend.length() > 0) {
-          // todo: change to prepend.append(before); w.set(BeforeAnnotation.class, prepend.toString());
-          w.set(BeforeAnnotation.class, prepend.toString() + before);
+          // todo: change to prepend.append(before); w.set(CoreAnnotations.BeforeAnnotation.class, prepend.toString());
+          w.set(CoreAnnotations.BeforeAnnotation.class, prepend.toString() + before);
           // w.prependBefore(prepend.toString());
           prepend = new StringBuilder();
         }
@@ -163,14 +159,14 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     for (List<IN> sentence : sentences) {
       int pos = 0;
       for (IN w : sentence) {
-        w.set(PositionAnnotation.class, Integer.toString(pos));
+        w.set(CoreAnnotations.PositionAnnotation.class, Integer.toString(pos));
         after = StringUtils.getNotNullString(w.get(CoreAnnotations.AfterAnnotation.class));
-        w.remove(AfterAnnotation.class);
+        w.remove(CoreAnnotations.AfterAnnotation.class);
         last = w;
       }
     }
     if (last != null) {
-      last.set(AfterAnnotation.class, after);
+      last.set(CoreAnnotations.AfterAnnotation.class, after);
     }
 
     return sentences.iterator();
@@ -244,9 +240,9 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
 
   private static <IN extends CoreMap> void printAnswersTokenizedText(List<IN> l, PrintWriter out) {
     for (IN wi : l) {
-      out.print(StringUtils.getNotNullString(wi.get(TextAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class)));
       out.print('/');
-      out.print(StringUtils.getNotNullString(wi.get(AnswerAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class)));
       out.print(' ');
     }
     out.println(); // put a single newline at the end [added 20091024].
@@ -254,28 +250,28 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
 
   private static <IN extends CoreMap> void printAnswersAsIsText(List<IN> l, PrintWriter out) {
     for (IN wi : l) {
-      out.print(StringUtils.getNotNullString(wi.get(BeforeAnnotation.class)));
-      out.print(StringUtils.getNotNullString(wi.get(TextAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.BeforeAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class)));
       out.print('/');
-      out.print(StringUtils.getNotNullString(wi.get(AnswerAnnotation.class)));
-      out.print(StringUtils.getNotNullString(wi.get(AfterAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AfterAnnotation.class)));
     }
   }
 
   private static <IN extends CoreMap> void printAnswersXML(List<IN> doc, PrintWriter out) {
     int num = 0;
     for (IN wi : doc) {
-      String prev = StringUtils.getNotNullString(wi.get(BeforeAnnotation.class));
+      String prev = StringUtils.getNotNullString(wi.get(CoreAnnotations.BeforeAnnotation.class));
       out.print(prev);
       out.print("<wi num=\"");
       // tag.append(wi.get("position"));
       out.print(num++);
       out.print("\" entity=\"");
-      out.print(StringUtils.getNotNullString(wi.get(AnswerAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class)));
       out.print("\">");
-      out.print(XMLUtils.escapeXML(StringUtils.getNotNullString(wi.get(TextAnnotation.class))));
+      out.print(XMLUtils.escapeXML(StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class))));
       out.print("</wi>");
-      String after = StringUtils.getNotNullString(wi.get(AfterAnnotation.class));
+      String after = StringUtils.getNotNullString(wi.get(CoreAnnotations.AfterAnnotation.class));
       out.print(after);
     }
   }
@@ -287,9 +283,9 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
       // tag.append(wi.get("position"));
       out.print(num++);
       out.print("\" entity=\"");
-      out.print(StringUtils.getNotNullString(wi.get(AnswerAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class)));
       out.print("\">");
-      out.print(XMLUtils.escapeXML(StringUtils.getNotNullString(wi.get(TextAnnotation.class))));
+      out.print(XMLUtils.escapeXML(StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class))));
       out.println("</wi>");
     }
   }
@@ -299,9 +295,9 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     String prevTag = background;
     for (Iterator<IN> wordIter = doc.iterator(); wordIter.hasNext();) {
       IN wi = wordIter.next();
-      String tag = StringUtils.getNotNullString(wi.get(AnswerAnnotation.class));
+      String tag = StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class));
 
-      String before = StringUtils.getNotNullString(wi.get(BeforeAnnotation.class));
+      String before = StringUtils.getNotNullString(wi.get(CoreAnnotations.BeforeAnnotation.class));
 
       String current = StringUtils.getNotNullString(wi.get(CoreAnnotations.OriginalTextAnnotation.class));
       if (!tag.equals(prevTag)) {
@@ -328,7 +324,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
         out.print(before);
       }
       out.print(current);
-      String afterWS = StringUtils.getNotNullString(wi.get(AfterAnnotation.class));
+      String afterWS = StringUtils.getNotNullString(wi.get(CoreAnnotations.AfterAnnotation.class));
 
       if (!tag.equals(background) && !wordIter.hasNext()) {
         out.print("</");
@@ -348,7 +344,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     boolean first = true;
     for (Iterator<IN> wordIter = doc.iterator(); wordIter.hasNext();) {
       IN wi = wordIter.next();
-      String tag = StringUtils.getNotNullString(wi.get(AnswerAnnotation.class));
+      String tag = StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class));
       if (!tag.equals(prevTag)) {
         if (!prevTag.equals(background) && !tag.equals(background)) {
           out.print("</");
@@ -432,7 +428,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
  * for (Object o : secondSplit) { if (o instanceof List) { List doc = (List) o;
  * List<IN> document = new ArrayList<IN>(); int pos = 0; for (Iterator wordIter
  * = doc.iterator(); wordIter.hasNext(); pos++) { IN w = (IN) wordIter.next();
- * w.set(PositionAnnotation.class, Integer.toString(pos)); if (first &&
+ * w.set(CoreAnnotations.PositionAnnotation.class, Integer.toString(pos)); if (first &&
  * prevTags.length() > 0) { w.set(PrevSGMLAnnotation.class, prevTags); } first =
  * false; lastWord = w; document.add(w); } documents.add(document); } else {
  * //String tag = ((Word) o).word(); IN word = (IN) o; String tag =
@@ -457,19 +453,19 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
  * (Iterator<IN> wordIter = doc.iterator(); wordIter.hasNext(); ) { IN wi =
  * wordIter.next(); String prev = wi.getString(PrevSGMLAnnotation.class);
  * out.print(prev); if (prev.length() > 0) { prevTag = background; } String tag
- * = wi.getString(AnswerAnnotation.class); if ( ! tag.equals(prevTag)) { if ( !
+ * = wi.getString(CoreAnnotations.AnswerAnnotation.class); if ( ! tag.equals(prevTag)) { if ( !
  * prevTag.equals(background) && ! tag.equals(background)) { out.print("</");
  * out.print(prevTag); out.print('>');
- * out.print(wi.getString(BeforeAnnotation.class)); out.print('<');
+ * out.print(wi.getString(CoreAnnotations.BeforeAnnotation.class)); out.print('<');
  * out.print(tag); out.print('>'); } else if ( ! prevTag.equals(background)) {
  * out.print("</"); out.print(prevTag); out.print('>');
- * out.print(wi.getString(BeforeAnnotation.class)); } else if ( !
- * tag.equals(background)) { out.print(wi.getString(BeforeAnnotation.class));
+ * out.print(wi.getString(CoreAnnotations.BeforeAnnotation.class)); } else if ( !
+ * tag.equals(background)) { out.print(wi.getString(CoreAnnotations.BeforeAnnotation.class));
  * out.print('<'); out.print(tag); out.print('>'); } } else {
- * out.print(wi.getString(BeforeAnnotation.class)); }
- * out.print(wi.getString(OriginalTextAnnotation.class)); String after =
+ * out.print(wi.getString(CoreAnnotations.BeforeAnnotation.class)); }
+ * out.print(wi.getString(CoreAnnotations.OriginalTextAnnotation.class)); String after =
  * wi.getString(AfterSGMLAnnotation.class); String afterWS =
- * wi.getString(AfterAnnotation.class);
+ * wi.getString(CoreAnnotations.AfterAnnotation.class);
  *
  * if ( ! tag.equals(background) && ( ! wordIter.hasNext() || after.length() >
  * 0)) { out.print("</"); out.print(tag); out.print('>'); prevTag = background;

@@ -15,14 +15,13 @@ public interface ThreadsafeProcessor<I,O> {
    * Set the input item that will be processed when a thread is allocated to
    * this processor.
    * 
-   * @param input
+   * @param input the object to be processed
+   * @return the result of the processing
    */
   public O process(I input);
   
   /**
    * Return a new threadsafe instance.
-   * 
-   * @return
    */
   public ThreadsafeProcessor<I,O> newInstance();
 }

@@ -924,6 +924,13 @@ public class SeqClassifierFlags implements Serializable {
   public int numOfFeatureSlices = 0;
   public boolean addBiasToEmbedding = false;
   public boolean hardcodeSoftmaxOutputWeights = false;
+
+  public boolean useNERPriorBIO = false;
+  public String entityMatrix = null;
+  public int multiThreadClassifier = 0;
+  
+  public String splitWordRegex = null;
+  
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1380,7 +1387,8 @@ public class SeqClassifierFlags implements Serializable {
         answerFile = val;
       } else if (key.equalsIgnoreCase("altAnswerFile")) {
         altAnswerFile = val;
-      } else if (key.equalsIgnoreCase("loadClassifier")) {
+      } else if (key.equalsIgnoreCase("loadClassifier") ||
+                 key.equalsIgnoreCase("model")) {
         loadClassifier = val;
       } else if (key.equalsIgnoreCase("loadTextClassifier")) {
         loadTextClassifier = val;
@@ -2244,6 +2252,16 @@ public class SeqClassifierFlags implements Serializable {
         addBiasToEmbedding = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("hardcodeSoftmaxOutputWeights")) {
         hardcodeSoftmaxOutputWeights = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useNERPriorBIO")) {
+        useNERPriorBIO = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("entityMatrix")) {
+        entityMatrix = val;
+      } else if (key.equalsIgnoreCase("multiThreadClassifier")) {
+        multiThreadClassifier = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("useGenericFeatures")) {
+        useGenericFeatures = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("splitWordRegex")){
+        splitWordRegex = val;
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');

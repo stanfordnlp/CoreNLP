@@ -1,17 +1,18 @@
 package edu.stanford.nlp.wordseg;
 
-import edu.stanford.nlp.util.PaddedList;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.Serializable;
-import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalCharAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.sequences.Clique;
+import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PaddedList;
 
 /**
  * A Chinese segmenter Feature Factory for GALE project. (modified from Sighan Bakeoff 2005.)
@@ -60,7 +61,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
    * @param loc  The index at which to extract features.
    */
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Collection<String> features = new HashSet<String>();
+    Collection<String> features = Generics.newHashSet();
 
     if (clique == cliqueC) {
       addAllInterningAndSuffixing(features, featuresC(cInfo, loc), "C");
@@ -123,13 +124,13 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
-    String charc = c.get(CharAnnotation.class);
-    String charc1 = c1.get(CharAnnotation.class);
-    String charc2 = c2.get(CharAnnotation.class);
-    String charc3 = c3.get(CharAnnotation.class);
-    String charp = p.get(CharAnnotation.class);
-    String charp2 = p2.get(CharAnnotation.class);
-    String charp3 = p3.get(CharAnnotation.class);
+    String charc = c.get(CoreAnnotations.CharAnnotation.class);
+    String charc1 = c1.get(CoreAnnotations.CharAnnotation.class);
+    String charc2 = c2.get(CoreAnnotations.CharAnnotation.class);
+    String charc3 = c3.get(CoreAnnotations.CharAnnotation.class);
+    String charp = p.get(CoreAnnotations.CharAnnotation.class);
+    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
+    String charp3 = p3.get(CoreAnnotations.CharAnnotation.class);
 
     /**
      * N-gram features. N is upto 2.
@@ -160,13 +161,13 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
-    String charc = c.get(CharAnnotation.class);
-    String charc1 = c1.get(CharAnnotation.class);
-    String charc2 = c2.get(CharAnnotation.class);
-    String charc3 = c3.get(CharAnnotation.class);
-    String charp = p.get(CharAnnotation.class);
-    String charp2 = p2.get(CharAnnotation.class);
-    String charp3 = p3.get(CharAnnotation.class);
+    String charc = c.get(CoreAnnotations.CharAnnotation.class);
+    String charc1 = c1.get(CoreAnnotations.CharAnnotation.class);
+    String charc2 = c2.get(CoreAnnotations.CharAnnotation.class);
+    String charc3 = c3.get(CoreAnnotations.CharAnnotation.class);
+    String charp = p.get(CoreAnnotations.CharAnnotation.class);
+    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
+    String charp3 = p3.get(CoreAnnotations.CharAnnotation.class);
 
 
     /*
@@ -360,7 +361,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
 
     // features using "Character.getType" information!
-    String origS = c.get(OriginalCharAnnotation.class);
+    String origS = c.get(CoreAnnotations.OriginalCharAnnotation.class);
     char origC = ' ';
     if (origS.length() > 0) { origC = origS.charAt(0); }
     int type = Character.getType(origC);
@@ -388,9 +389,9 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
     CoreLabel p = cInfo.get(loc - 1);
-    String charc = c.get(CharAnnotation.class);
-    String charc1 = c1.get(CharAnnotation.class);
-    String charp = p.get(CharAnnotation.class);
+    String charc = c.get(CoreAnnotations.CharAnnotation.class);
+    String charc1 = c1.get(CoreAnnotations.CharAnnotation.class);
+    String charp = p.get(CoreAnnotations.CharAnnotation.class);
 
 
     if (flags.useWordn) {

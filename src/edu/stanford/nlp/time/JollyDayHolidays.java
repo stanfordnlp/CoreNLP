@@ -3,22 +3,23 @@ package edu.stanford.nlp.time;
 import de.jollyday.HolidayManager;
 import de.jollyday.config.Configuration;
 import de.jollyday.config.Holidays;
-import de.jollyday.configuration.ConfigurationProvider;
+// import de.jollyday.configuration.ConfigurationProvider;
 import de.jollyday.impl.XMLManager;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.net.ClasspathURLStreamHandler;
 import edu.stanford.nlp.util.CollectionValuedMap;
+import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Partial;
 
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
+// import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
 /**
  * Wrapper around jollyday library so we can hook in holiday
- * configurations from jollyday with SUTime
+ * configurations from jollyday with SUTime.
  *
  * @author Angel Chang
  */
@@ -28,6 +29,7 @@ public class JollyDayHolidays implements Env.Binder {
   Map<String, JollyHoliday> holidays;
   String varPrefix = "JH_";
 
+  @Override
   public void init(String prefix, Properties props) {
     String country = props.getProperty(prefix + "country", "sutime");
     varPrefix = props.getProperty(prefix + "prefix", varPrefix);
@@ -38,7 +40,7 @@ public class JollyDayHolidays implements Env.Binder {
     } catch (java.net.MalformedURLException e) {
       throw new RuntimeException(e);
     }
-    System.err.println("Initialization JollyDayHoliday for " + country);
+    System.err.println("Initializing JollyDayHoliday for " + country);
     if (!(holidayManager instanceof MyXMLManager)) {
       throw new AssertionError("Did not get back JollyDayHolidays$MyXMLManager");
     }
@@ -57,7 +59,7 @@ public class JollyDayHolidays implements Env.Binder {
 
   public Map<String, JollyHoliday> getAllHolidaysMap(Set<de.jollyday.config.Holiday> allHolidays)
   {
-    Map<String, JollyHoliday> map = new HashMap<String, JollyHoliday>();
+    Map<String, JollyHoliday> map = Generics.newHashMap();
     for (de.jollyday.config.Holiday h:allHolidays) {
       String descKey = h.getDescriptionPropertiesKey();
       if (descKey != null) {
@@ -121,7 +123,7 @@ public class JollyDayHolidays implements Env.Binder {
 
   public static Set<de.jollyday.config.Holiday> getAllHolidays(Configuration config)
   {
-    Set<de.jollyday.config.Holiday> allHolidays = new HashSet<de.jollyday.config.Holiday>();
+    Set<de.jollyday.config.Holiday> allHolidays = Generics.newHashSet();
     getAllHolidays(config, allHolidays);
     return allHolidays;
   }

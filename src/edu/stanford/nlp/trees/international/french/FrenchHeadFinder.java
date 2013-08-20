@@ -2,8 +2,8 @@ package edu.stanford.nlp.trees.international.french;
 
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 
-import java.util.HashMap;
 
 /**
  * TODO wsg2010: Compare these head finding rules to those found in Arun Abishek's 
@@ -28,7 +28,7 @@ public class FrenchHeadFinder extends AbstractCollinsHeadFinder {
     // D (determiner), ET (foreign word), I (interjection), N (noun),
     // P (preposition), PREF (prefix), PRO (strong pronoun -- very confusing), V (verb), PUNC (punctuation)
 
-    nonTerminalInfo = new HashMap<String, String[][]>();
+    nonTerminalInfo = Generics.newHashMap();
 
     // "sentence"
     nonTerminalInfo.put(tlp.startSymbol(), new String[][]{{"left", "VN", "NP"}, {"left"}});

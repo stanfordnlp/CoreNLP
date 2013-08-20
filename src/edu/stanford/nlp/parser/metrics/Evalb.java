@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +26,7 @@ import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Triple;
@@ -64,7 +64,7 @@ public class Evalb extends AbstractEval {
    */
   @Override
   protected Set<Constituent> makeObjects(Tree tree) {
-    Set<Constituent> set = new HashSet<Constituent>();
+    Set<Constituent> set = Generics.newHashSet();
     if(tree != null) set.addAll(tree.constituents(cf));
     return set;
   }
@@ -144,7 +144,7 @@ public class Evalb extends AbstractEval {
     return sb.toString();
   }
   private static Map<String,Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
+    Map<String,Integer> optionArgDefs = Generics.newHashMap();
     optionArgDefs.put("v", 0);
     optionArgDefs.put("l", 1);
     optionArgDefs.put("y", 1);
@@ -288,14 +288,14 @@ public class Evalb extends AbstractEval {
         guessPw.println(trees.third().toString());
 
         //Output the set differences
-        Set<Constituent> goldDeps = new HashSet<Constituent>();
+        Set<Constituent> goldDeps = Generics.newHashSet();
         goldDeps.addAll(trees.second().constituents(cFact));
         goldDeps.removeAll(trees.third().constituents(cFact));
         for(Constituent c : goldDeps)
           goldDepPw.print(c.toString() + "  ");
         goldDepPw.println();
 
-        Set<Constituent> guessDeps = new HashSet<Constituent>();
+        Set<Constituent> guessDeps = Generics.newHashSet();
         guessDeps.addAll(trees.third().constituents(cFact));
         guessDeps.removeAll(trees.second().constituents(cFact));
         for(Constituent c : guessDeps)
