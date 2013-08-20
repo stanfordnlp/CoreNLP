@@ -86,15 +86,16 @@ class TestThreadedTagger {
    * The "run" method then runs the given tagger on the data file
    * specified in the config.
    */
-  private static class TaggerThread extends Thread {
-
+  static class TaggerThread extends Thread {
+    private final Properties config;
     private final MaxentTagger tagger;
     private final String threadName;
 
     private String resultsString = "";
     public String getResultsString() { return resultsString; }
 
-    TaggerThread(MaxentTagger tagger, String name) {
+    TaggerThread(Properties config, MaxentTagger tagger, String name) {
+      this.config = config;
       this.tagger = tagger;
       this.threadName = name;
     }
@@ -113,7 +114,7 @@ class TestThreadedTagger {
         throw new RuntimeException(e);
       }
     }
-  } // end class TaggerThread
+  }
 
   public static void compareResults(String results, String baseline) {
     if (!results.equals(baseline)) {
@@ -165,7 +166,7 @@ class TestThreadedTagger {
     }
 
     // no models at all => bad
-    if (taggers.isEmpty()) {
+    if (taggers.size() == 0) {
       throw new IllegalArgumentException("Please specify at least one of " +
                                          "-model or -model1");
     }
@@ -176,7 +177,7 @@ class TestThreadedTagger {
 
     // run baseline results for the first tagger model
     TaggerThread baselineThread =
-      new TaggerThread(taggers.get(0), "BaseResults-1");
+      new TaggerThread(configs.get(0), taggers.get(0), "BaseResults-1");
     baselineThread.start();
     baselineThread.join();
 
@@ -191,7 +192,7 @@ class TestThreadedTagger {
     // at the end of this test, those X threads should produce the same results
     ArrayList<TaggerThread> threads = new ArrayList<TaggerThread>();
     for (int i = 0; i < numThreads; ++i) {
-      threads.add(new TaggerThread(taggers.get(0),
+      threads.add(new TaggerThread(configs.get(0), taggers.get(0),
                                    "Simultaneous-" + (i + 1)));
     }
     for (TaggerThread thread : threads) {
@@ -214,7 +215,7 @@ class TestThreadedTagger {
         System.out.println("Running the baseline results for tagger " + (i + 1));
         System.out.println();
 
-        baselineThread = new TaggerThread(taggers.get(i),
+        baselineThread = new TaggerThread(configs.get(i), taggers.get(i),
                                           "BaseResults-" + (i + 1));
         baselineThread.start();
         baselineThread.join();
@@ -232,7 +233,7 @@ class TestThreadedTagger {
       // be a problem any more
       threads.clear();
       for (int i = 0; i < taggers.size(); ++i) {
-        threads.add(new TaggerThread(taggers.get(i),
+        threads.add(new TaggerThread(configs.get(i), taggers.get(i),
                                      "DifferentTaggers-" + (i + 1)));
       }
       for (TaggerThread thread : threads) {
