@@ -661,11 +661,10 @@ public class StringUtils {
    * the String[] value for that flag.
    *
    * @param args           the argument array to be parsed
-   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer
+   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer}
    *                       values specifying the number of arguments
    *                       for that flag (default min 0, max 1).
-   * @return a {@link Map} of flag names to flag argument {@link
-   *         String} arrays.
+   * @return a {@link Map} of flag names to flag argument {@link String}
    */
   public static Map<String, String[]> argsToMap(String[] args, Map<String, Integer> flagsToNumArgs) {
     Map<String, String[]> result = Generics.newHashMap();
@@ -1863,10 +1862,6 @@ public class StringUtils {
   
   /**
    * n grams for already splitted string. the ngrams are joined with a single space
-   * @param s string
-   * @param minSize
-   * @param maxSize
-   * @return
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
@@ -1879,10 +1874,6 @@ public class StringUtils {
   
   /**
    * The string is split on whitespace and the ngrams are joined with a single space
-   * @param s string
-   * @param minSize
-   * @param maxSize
-   * @return
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
