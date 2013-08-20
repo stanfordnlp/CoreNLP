@@ -1,23 +1,21 @@
 /**
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
+ * Copyright:    Copyright (c) Trustees of Leland Stanford University
  * Company:      Stanford University<p>
- * @author Kristina Toutanova
- * @version 1.0
  */
-
 
 package edu.stanford.nlp.maxent;
 
 import edu.stanford.nlp.io.PrintFile;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.IntPair;
 
 
 /**
- * This is a general class for Problem to be solved by the MaxEnt toolkit.
- * There have to be experiments and features
+ * This is a general class for a Problem to be solved by the MaxEnt toolkit.
+ * There have to be experiments and features.
+ *
+ * @author Kristina Toutanova
+ * @version 1.0
  */
 public class Problem {
 

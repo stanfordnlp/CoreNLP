@@ -902,7 +902,6 @@ public class SieveCoreferenceSystem {
               // (only for non-NE mentions)
               // Recasens, de Marneffe, and Potts (NAACL 2013)
               if (m1.isSingleton && m2.isSingleton) continue;
-
               if (m1.corefClusterID == m2.corefClusterID) continue;
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
               CorefCluster c2 = corefClusters.get(m2.corefClusterID);
@@ -965,7 +964,7 @@ public class SieveCoreferenceSystem {
 
   /** Remove singletons, appositive, predicate nominatives, relative pronouns */
   private static void postProcessing(Document document) {
-    Set<IntTuple> removeSet = Generics.newHashSet();
+    Set<Mention> removeSet = Generics.newHashSet();
     Set<Integer> removeClusterSet = Generics.newHashSet();
 
     for(CorefCluster c : document.corefClusters.values()){
@@ -976,7 +975,7 @@ public class SieveCoreferenceSystem {
                 || (m.predicateNominatives!=null && m.predicateNominatives.size() > 0)
                 || (m.relativePronouns!=null && m.relativePronouns.size() > 0))){
           removeMentions.add(m);
-          removeSet.add(document.positions.get(m));
+          removeSet.add(m);
           m.corefClusterID = m.mentionID;
         }
       }
@@ -988,9 +987,8 @@ public class SieveCoreferenceSystem {
     for (int removeId : removeClusterSet){
       document.corefClusters.remove(removeId);
     }
-    // todo [cdm 2013]: This is buggy: positions is Map<Mention,IntTuple>, so can't remove IntTuple
-    for(IntTuple pos : removeSet){
-      document.positions.remove(pos);
+    for(Mention m : removeSet){
+      document.positions.remove(m);
     }
   }
 
