@@ -1,8 +1,8 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.Label;
@@ -10,7 +10,6 @@ import edu.stanford.nlp.ling.Tag;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 public class ChineseUnknownWordModelTrainer 
@@ -23,14 +22,14 @@ public class ChineseUnknownWordModelTrainer
   // c has a map from tags as Label to a Counter from word
   // signatures to Strings; it is used to collect counts that will
   // initialize the probabilities in tagHash
-  Map<Label,ClassicCounter<String>> c;
+  HashMap<Label,ClassicCounter<String>> c;
   // tc record the marginal counts for each tag as an unknown.  It
   // should be the same as c's totalCount ??
   ClassicCounter<Label> tc;
 
   boolean useFirst, useGT, useUnicodeType;
 
-  Map<Label, ClassicCounter<String>> tagHash;
+  HashMap<Label, ClassicCounter<String>> tagHash;
 
   Set<String> seenFirst;
 
@@ -70,18 +69,18 @@ public class ChineseUnknownWordModelTrainer
       System.err.println("ChineseUWM: using Good-Turing smoothing for unknown words.");
     }
 
-    this.c = Generics.newHashMap();
+    this.c = new HashMap<Label,ClassicCounter<String>>();
     this.tc = new ClassicCounter<Label>();
     this.unSeenCounter = new ClassicCounter<IntTaggedWord>();
     this.seenCounter = new ClassicCounter<IntTaggedWord>();
-    this.seenFirst = Generics.newHashSet();
-    this.tagHash = Generics.newHashMap();
+    this.seenFirst = new HashSet<String>();
+    this.tagHash = new HashMap<Label, ClassicCounter<String>>();
     
     this.indexToStartUnkCounting = (totalTrees * op.trainOptions.fractionBeforeUnseenCounting);
     
     this.unknownGTTrainer = (useGT) ? new UnknownGTTrainer() : null;
 
-    Map<String,Float> unknownGT = null;
+    HashMap<String,Float> unknownGT = null;
     if (useGT) {
       unknownGT = unknownGTTrainer.unknownGT;
     }
@@ -138,7 +137,7 @@ public class ChineseUnknownWordModelTrainer
   }
   
   public UnknownWordModel finishTraining() {
-    Map<String,Float> unknownGT = null;
+    HashMap<String,Float> unknownGT = null;
     if (useGT) {
       unknownGTTrainer.finishTraining();
       unknownGT = unknownGTTrainer.unknownGT;

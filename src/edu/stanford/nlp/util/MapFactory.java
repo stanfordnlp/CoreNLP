@@ -122,23 +122,23 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Map<K,V> newMap() {
-      return Generics.newHashMap();
+      return new HashMap<K,V>();
     }
 
     @Override
     public Map<K,V> newMap(int initCapacity) {
-      return Generics.newHashMap(initCapacity);
+      return new HashMap<K,V>(initCapacity);
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
-      map = Generics.newHashMap();
+      map = new HashMap<K1,V1>();
       return map;
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      map = Generics.newHashMap(initCapacity);
+      map = new HashMap<K1,V1>(initCapacity);
       return map;
     }
 

@@ -12,7 +12,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.io.ReaderInputStream;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.SentenceIDAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasContext;
@@ -21,6 +21,7 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.ling.CoreAnnotations.UTypeAnnotation;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
@@ -28,7 +29,6 @@ import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.XMLUtils;
 
 /**
@@ -124,7 +124,7 @@ public class FrenchTreeReader implements TreeReader {
         t = treeNormalizer.normalizeWholeTree(t, treeFactory);
         if(t.label() instanceof CoreLabel) {
           String ftbId = ((Element) sentRoot).getAttribute(ATTR_NUMBER);
-          ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class, ftbId);
+          ((CoreLabel) t.label()).set(SentenceIDAnnotation.class, ftbId);
         }
       }
     }
@@ -341,7 +341,7 @@ public class FrenchTreeReader implements TreeReader {
 
     TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
     int totalTrees = 0;
-    Set<String> morphAnalyses = Generics.newHashSet();
+    Set<String> morphAnalyses = new HashSet<String>();
     try {
       for(File file : fileList) {
         TreeReader tr = trf.newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8")));
@@ -351,7 +351,7 @@ public class FrenchTreeReader implements TreeReader {
         String canonicalFileName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 
         for(numTrees = 0; (t = tr.readTree()) != null; numTrees++) {
-          String ftbID = ((CoreLabel) t.label()).get(CoreAnnotations.SentenceIDAnnotation.class);
+          String ftbID = ((CoreLabel) t.label()).get(SentenceIDAnnotation.class);
           System.out.printf("%s-%s\t%s%n",canonicalFileName, ftbID, t.toString());
           List<Label> leaves = t.yield();
           for(Label label : leaves) {

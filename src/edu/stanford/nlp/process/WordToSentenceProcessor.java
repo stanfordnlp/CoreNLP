@@ -8,8 +8,6 @@ import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.process.PTBLexer;
-import edu.stanford.nlp.process.WhitespaceLexer;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -56,8 +54,6 @@ import edu.stanford.nlp.util.Generics;
 public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> {
 
   private static final boolean DEBUG = false;
-
-  public static final Set<String> DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(WhitespaceLexer.NEWLINE, PTBLexer.NEWLINE_TOKEN)));
 
   /**
    * Regex for tokens (Strings) that qualify as sentence-final tokens.
@@ -267,11 +263,10 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    * Flexibly set the set of acceptable sentence boundary tokens and
    * also the set of tokens commonly following sentence boundaries, and
    * the set of discarded separator tokens.
-   * The default set of discarded separator tokens includes the
-   * newline tokens used by WhitespaceLexer and PTBLexer.
+   * The default set of discarded separator tokens is: {"\n"}.
    */
   public WordToSentenceProcessor(String boundaryTokenRegex, Set<String> boundaryFollowers) {
-    this(boundaryTokenRegex, boundaryFollowers, DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD);
+    this(boundaryTokenRegex, boundaryFollowers, Collections.singleton("\n"));
   }
 
 

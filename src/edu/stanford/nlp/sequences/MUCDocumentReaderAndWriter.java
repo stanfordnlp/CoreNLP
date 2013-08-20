@@ -12,6 +12,14 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.EntityClassAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.ParaPositionAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.SectionAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.WordPositionAnnotation;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
 import edu.stanford.nlp.util.Function;
@@ -19,7 +27,6 @@ import edu.stanford.nlp.process.PTBTokenizer;
 
 /**
  * DocumentReader for MUC format.
- *
  * @author Jenny Finkel
  */
 public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
@@ -29,7 +36,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
    */
   private static final long serialVersionUID = -8334720781758500037L;
   private SeqClassifierFlags flags;
-  private IteratorFromReaderFactory<List<CoreLabel>> factory;
+  private IteratorFromReaderFactory factory;
 
   public void init(SeqClassifierFlags flags) {
     this.flags = flags;
@@ -42,9 +49,9 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
 
   static class MUCDocumentParser implements Function<String, List<CoreLabel>> {
 
-    private static final Pattern sgml = Pattern.compile("<([^>\\s]*)[^>]*>");
-    private static final Pattern beginEntity = Pattern.compile("<(ENAMEX|TIMEX|NUMEX) TYPE=\"([a-z]+)\"[^>]*>", Pattern.CASE_INSENSITIVE);
-    private static final Pattern endEntity = Pattern.compile("</(ENAMEX|TIMEX|NUMEX)>");
+    private static Pattern sgml = Pattern.compile("<([^>\\s]*)[^>]*>");
+    private static Pattern beginEntity = Pattern.compile("<(ENAMEX|TIMEX|NUMEX) TYPE=\"([a-z]+)\"[^>]*>", Pattern.CASE_INSENSITIVE);
+    private static Pattern endEntity = Pattern.compile("</(ENAMEX|TIMEX|NUMEX)>");
 
     public List<CoreLabel> apply(String doc) {
 
@@ -61,7 +68,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
       PTBTokenizer ptb = PTBTokenizer.newPTBTokenizer(new BufferedReader(new StringReader(doc)), false, true);
       List<CoreLabel> words = ptb.tokenize();
 
-      List<CoreLabel> result = new ArrayList<CoreLabel>();
+      List<CoreLabel> result = new ArrayList();
 
       CoreLabel prev = null;
       String prevString = "";
@@ -77,9 +84,9 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
             wNum = 0;
 
             if (prev != null) {
-              String s = prev.get(CoreAnnotations.AfterAnnotation.class);
+              String s = prev.get(AfterAnnotation.class);
               s += word.originalText()+word.after();
-              prev.set(CoreAnnotations.AfterAnnotation.class, s);
+              prev.set(AfterAnnotation.class, s);
             }
             prevString += word.before() + word.originalText();
 
@@ -88,9 +95,9 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
             wNum = 0;
 
             if (prev != null) {
-              String s = prev.get(CoreAnnotations.AfterAnnotation.class);
+              String s = prev.get(AfterAnnotation.class);
               s += word.originalText()+word.after();
-              prev.set(CoreAnnotations.AfterAnnotation.class, s);
+              prev.set(AfterAnnotation.class, s);
             }
             prevString += word.before() + word.originalText();
 
@@ -100,9 +107,9 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
               entityClass = matcher.group(1);
               entity = matcher.group(2);
               if (prev != null) {
-                String s = prev.get(CoreAnnotations.AfterAnnotation.class);
+                String s = prev.get(AfterAnnotation.class);
                 s += word.after();
-                prev.set(CoreAnnotations.AfterAnnotation.class, s);
+                prev.set(AfterAnnotation.class, s);
               }
               prevString += word.before();
             } else {
@@ -111,23 +118,23 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
                 entityClass = "";
                 entity = "O";
                 if (prev != null) {
-                  String s = prev.get(CoreAnnotations.AfterAnnotation.class);
+                  String s = prev.get(AfterAnnotation.class);
                   s += word.after();
-                  prev.set(CoreAnnotations.AfterAnnotation.class, s);
+                  prev.set(AfterAnnotation.class, s);
                 }
                 prevString += word.before();
               } else if (word.word().equalsIgnoreCase("<doc>")) {
                 prevString += word.before() + word.originalText();
               } else if (word.word().equalsIgnoreCase("</doc>")) {
-                String s = prev.get(CoreAnnotations.AfterAnnotation.class);
+                String s = prev.get(AfterAnnotation.class);
                 s += word.originalText();
-                prev.set(CoreAnnotations.AfterAnnotation.class, s);
+                prev.set(AfterAnnotation.class, s);
               } else {
                 section = tag.toUpperCase();
                 if (prev != null) {
-                  String s = prev.get(CoreAnnotations.AfterAnnotation.class);
+                  String s = prev.get(AfterAnnotation.class);
                   s += word.originalText() + word.after();
-                  prev.set(CoreAnnotations.AfterAnnotation.class, s);
+                  prev.set(AfterAnnotation.class, s);
                 }
                 prevString += word.before() + word.originalText();
               }
@@ -136,15 +143,15 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
         } else {
           CoreLabel wi = new CoreLabel();
           wi.setWord(word.word());
-          wi.set(CoreAnnotations.OriginalTextAnnotation.class, word.originalText());
-          wi.set(CoreAnnotations.BeforeAnnotation.class, prevString+word.before());
-          wi.set(CoreAnnotations.AfterAnnotation.class, word.after());
-          wi.set(CoreAnnotations.WordPositionAnnotation.class, ""+wNum);
+          wi.set(OriginalTextAnnotation.class, word.originalText());
+          wi.set(BeforeAnnotation.class, prevString+word.before());
+          wi.set(AfterAnnotation.class, word.after());
+          wi.set(WordPositionAnnotation.class, ""+wNum);
           wi.set(CoreAnnotations.SentencePositionAnnotation.class, ""+sNum);
-          wi.set(CoreAnnotations.ParaPositionAnnotation.class, ""+pNum);
-          wi.set(CoreAnnotations.SectionAnnotation.class, section);
-          wi.set(CoreAnnotations.AnswerAnnotation.class, entity);
-          wi.set(CoreAnnotations.EntityClassAnnotation.class, entityClass);
+          wi.set(ParaPositionAnnotation.class, ""+pNum);
+          wi.set(SectionAnnotation.class, section);
+          wi.set(AnswerAnnotation.class, entity);
+          wi.set(EntityClassAnnotation.class, entityClass);
           wNum++;
           prevString = "";
           result.add(wi);
@@ -165,31 +172,31 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
     String prevClass = "";
     String afterLast = "";
     for (CoreLabel word : doc) {
-      if (!prevAnswer.equals("O") && !prevAnswer.equals(word.get(CoreAnnotations.AnswerAnnotation.class))) {
+      if (!prevAnswer.equals("O") && !prevAnswer.equals(word.get(AnswerAnnotation.class))) {
         pw.print("</"+prevClass+">");
         prevClass = "";
       }
-      pw.print(word.get(CoreAnnotations.BeforeAnnotation.class));
-      if (!word.get(CoreAnnotations.AnswerAnnotation.class).equals("O") && !word.get(CoreAnnotations.AnswerAnnotation.class).equals(prevAnswer)) {
-        if (word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("PERSON") ||
-            word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("ORGANIZATION") ||
-            word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("LOCATION")) {
+      pw.print(word.get(BeforeAnnotation.class));
+      if (!word.get(AnswerAnnotation.class).equals("O") && !word.get(AnswerAnnotation.class).equals(prevAnswer)) {
+        if (word.get(AnswerAnnotation.class).equalsIgnoreCase("PERSON") ||
+            word.get(AnswerAnnotation.class).equalsIgnoreCase("ORGANIZATION") ||
+            word.get(AnswerAnnotation.class).equalsIgnoreCase("LOCATION")) {
           prevClass = "ENAMEX";
-        } else if (word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("DATE") ||
-                   word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("TIME")) {
+        } else if (word.get(AnswerAnnotation.class).equalsIgnoreCase("DATE") ||
+                   word.get(AnswerAnnotation.class).equalsIgnoreCase("TIME")) {
           prevClass = "TIMEX";
-        } else if (word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("PERCENT") ||
-                   word.get(CoreAnnotations.AnswerAnnotation.class).equalsIgnoreCase("MONEY")) {
+        } else if (word.get(AnswerAnnotation.class).equalsIgnoreCase("PERCENT") ||
+                   word.get(AnswerAnnotation.class).equalsIgnoreCase("MONEY")) {
           prevClass = "NUMEX";
         } else {
-          System.err.println("unknown type: "+word.get(CoreAnnotations.AnswerAnnotation.class));
+          System.err.println("unknown type: "+word.get(AnswerAnnotation.class));
           System.exit(0);
         }
-        pw.print("<"+prevClass+" TYPE=\""+word.get(CoreAnnotations.AnswerAnnotation.class)+"\">");
+        pw.print("<"+prevClass+" TYPE=\""+word.get(AnswerAnnotation.class)+"\">");
       }
-      pw.print(word.get(CoreAnnotations.OriginalTextAnnotation.class));
-      afterLast = word.get(CoreAnnotations.AfterAnnotation.class);
-      prevAnswer = word.get(CoreAnnotations.AnswerAnnotation.class);
+      pw.print(word.get(OriginalTextAnnotation.class));
+      afterLast = word.get(AfterAnnotation.class);
+      prevAnswer = word.get(AnswerAnnotation.class);
     }
     if (!prevAnswer.equals("O")) {
       pw.print("</"+prevClass+">");

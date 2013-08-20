@@ -5,7 +5,6 @@ import java.io.*;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * affixation information
@@ -31,7 +30,7 @@ public class affDict {
 
   
   private Set<String> readDict(String filename)  {
-    Set<String> a = Generics.newHashSet();
+    Set<String> a = new HashSet<String>();
    
     //System.err.println("XM:::readDict(filename: " + filename + ")");
     System.err.println("Loading affix dictionary from " + filename);

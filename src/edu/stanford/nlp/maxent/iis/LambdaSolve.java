@@ -10,7 +10,6 @@ package edu.stanford.nlp.maxent.iis;
 import edu.stanford.nlp.io.InDataStreamFile;
 import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.PrintFile;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.maxent.*;
 import edu.stanford.nlp.util.MutableDouble;
@@ -18,9 +17,6 @@ import edu.stanford.nlp.util.MutableDouble;
 import java.text.NumberFormat;
 import java.io.IOException;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 
 /**
@@ -662,11 +658,11 @@ public class LambdaSolve {
   /**
    * Writes the lambdas to a stream.
    */
-  public static void save_lambdas(DataOutputStream rf, double[] lambdas) {
+  public static void save_lambdas(OutDataStreamFile rf, double[] lambdas) {
     try {
-      ObjectOutputStream oos = new ObjectOutputStream(rf);
-      oos.writeObject(lambdas);
-      oos.flush();
+      rf.writeInt(lambdas.length);
+      byte[] lArr = Convert.doubleArrToByteArr(lambdas);
+      rf.write(lArr);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -723,16 +719,16 @@ public class LambdaSolve {
       System.err.println("Entering read_lambdas");
     }
     try {
-      ObjectInputStream ois = new ObjectInputStream(rf);
-      Object o = ois.readObject();
-      if (o instanceof double[]) {
-        return (double[]) o;
+      int funsize = rf.readInt();
+      byte[] b = new byte[funsize * 8];
+      if (rf.read(b) != b.length) {
+        System.err.println("Whoops! Incomplete read. Rewrite the code!");
       }
-      throw new RuntimeIOException("Failed to read lambdas from given input stream");
+      rf.close();
+      return Convert.byteArrToDoubleArr(b);
     } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
+      e.printStackTrace();
+      return null;
     }
   }
 

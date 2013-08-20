@@ -283,50 +283,14 @@ public class TrainOptions implements Serializable {
   public boolean noRebinarization = false;
 
   /**
-   * If the training algorithm allows for parallelization, how many
-   * threads to use
+   * How many simultaneous threads to launch when counting up trees on
+   * each iteration of the split/merge algorithm.  For example, you
+   * could set this to the number of processors you have
    */
-  public int trainingThreads = 1;
+  public int splitTrainingThreads = 1;
 
   public void display() {
-    System.err.println(toString());
-  }
-
-  @Override
-  public String toString() {
-    return("Train parameters:" + 
-           " smooth=" + smoothing + 
-           " PA=" + PA + 
-           " GPA=" + gPA + 
-           " selSplit=" + selectiveSplit + 
-           " (" + selectiveSplitCutOff + ((deleteSplitters != null) ? ("; deleting " + deleteSplitters): "") + ")" + 
-           " mUnary=" + markUnary + 
-           " mUnaryTags=" + markUnaryTags + 
-           " sPPT=" + splitPrePreT + 
-           " tagPA=" + tagPA + 
-           " tagSelSplit=" + tagSelectiveSplit + " (" + tagSelectiveSplitCutOff + ")" + 
-           " rightRec=" + rightRec + 
-           " leftRec=" + leftRec + 
-           " collinsPunc=" + collinsPunc + 
-           " markov=" + markovFactor + 
-           " mOrd=" + markovOrder + 
-           " hSelSplit=" + hSelSplit + " (" + HSEL_CUT + ")" + 
-           " compactGrammar=" + compactGrammar() + 
-           " postPA=" + postPA + 
-           " postGPA=" + postGPA + 
-           " selPSplit=" + selectivePostSplit + " (" + selectivePostSplitCutOff + ")" + 
-           " tagSelPSplit=" + tagSelectivePostSplit + " (" + tagSelectivePostSplitCutOff + ")" + 
-           " postSplitWithBase=" + postSplitWithBaseCategory + 
-           " fractionBeforeUnseenCounting=" + fractionBeforeUnseenCounting + 
-           " openClassTypesThreshold=" + openClassTypesThreshold + 
-           " preTransformer=" + preTransformer + 
-           " taggedFiles=" + taggedFiles + 
-           " predictSplits=" + predictSplits + 
-           " splitCount=" + splitCount + 
-           " splitRecombineRate=" + splitRecombineRate + 
-           " simpleBinarizedLabels=" + simpleBinarizedLabels + 
-           " noRebinarization=" + noRebinarization + 
-           " trainingThreads=" + trainingThreads);
+    System.err.println("Train parameters: smooth=" + smoothing + " PA=" + PA + " GPA=" + gPA + " selSplit=" + selectiveSplit + " (" + selectiveSplitCutOff + ((deleteSplitters != null) ? ("; deleting " + deleteSplitters): "") + ")" + " mUnary=" + markUnary + " mUnaryTags=" + markUnaryTags + " sPPT=" + splitPrePreT + " tagPA=" + tagPA + " tagSelSplit=" + tagSelectiveSplit + " (" + tagSelectiveSplitCutOff + ")" + " rightRec=" + rightRec + " leftRec=" + leftRec + " collinsPunc=" + collinsPunc + " markov=" + markovFactor + " mOrd=" + markovOrder + " hSelSplit=" + hSelSplit + " (" + HSEL_CUT + ")" + " compactGrammar=" + compactGrammar() + " postPA=" + postPA + " postGPA=" + postGPA + " selPSplit=" + selectivePostSplit + " (" + selectivePostSplitCutOff + ")" + " tagSelPSplit=" + tagSelectivePostSplit + " (" + tagSelectivePostSplitCutOff + ")" + " postSplitWithBase=" + postSplitWithBaseCategory + " fractionBeforeUnseenCounting=" + fractionBeforeUnseenCounting + " openClassTypesThreshold=" + openClassTypesThreshold + " preTransformer=" + preTransformer + " taggedFiles=" + taggedFiles + " predictSplits=" + predictSplits + " splitCount=" + splitCount + " splitRecombineRate=" + splitRecombineRate + " simpleBinarizedLabels=" + simpleBinarizedLabels + " noRebinarization=" + noRebinarization + " splitTrainingThreads=" + splitTrainingThreads);
   }
 
   public static void printTrainTree(PrintWriter pw, String message, Tree t) {

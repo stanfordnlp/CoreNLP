@@ -1,7 +1,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.objectbank.ObjectBank;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
 
 import java.io.File;
@@ -18,7 +17,7 @@ public class ExtractorDistsim extends Extractor {
   private static final long serialVersionUID = 1L;
 
   // avoid loading the same lexicon twice but allow different lexicons
-  private static final Map<String,Map<String,String>> lexiconMap = Generics.newHashMap();
+  private static final Map<String,Map<String,String>> lexiconMap = new HashMap<String, Map<String,String>>();
 
   private final Map<String,String> lexicon;
 
@@ -29,7 +28,7 @@ public class ExtractorDistsim extends Extractor {
         return lex;
       } else {
         Timing.startDoing("Loading distsim lexicon from " + path);
-        Map<String,String> lexic = Generics.newHashMap();
+        Map<String,String> lexic = new HashMap<String, String>();
         for (String word : ObjectBank.getLineIterator(new File(path))) {
           String[] bits = word.split("\\s+");
           lexic.put(bits[0].toLowerCase(), bits[1]);

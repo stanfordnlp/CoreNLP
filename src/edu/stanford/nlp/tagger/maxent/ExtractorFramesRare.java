@@ -28,7 +28,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
@@ -249,22 +248,8 @@ public class ExtractorFramesRare {
       } else if (arg.startsWith("wordshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
-        String wsc = Extractor.getParenthesizedArg(arg, 3);
-        if (wsc == null) {
-          wsc = "chris2";
-        }
         for (int i = lWindow; i <= rWindow; i++) {
-          extrs.add(new ExtractorWordShapeClassifier(i, wsc));
-        }
-      } else if (arg.startsWith("wordshapeconjunction(")) {
-        int lWindow = Extractor.getParenthesizedNum(arg, 1);
-        int rWindow = Extractor.getParenthesizedNum(arg, 2);
-        String wsc = Extractor.getParenthesizedArg(arg, 3);
-        if (wsc == null) {
-          wsc = "chris2";
-        }
-        for (int i = lWindow; i <= rWindow; i++) {
-          extrs.add(new ExtractorWordShapeConjunction(lWindow, rWindow, wsc));
+          extrs.add(new ExtractorWordShapeClassifier(i, "chris2"));
         }
       } else if (arg.startsWith("unicodeshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
@@ -618,7 +603,7 @@ class CompanyNameDetector extends RareExtractor {
   final Set<String> companyNameEnds;
 
   public CompanyNameDetector() {
-    companyNameEnds = Generics.newHashSet();
+    companyNameEnds = new HashSet<String>();
     companyNameEnds.add("Company");
     companyNameEnds.add("COMPANY");
     companyNameEnds.add("Co.");
@@ -680,7 +665,7 @@ class CaselessCompanyNameDetector extends RareExtractor {
   private final Set<String> companyNameEnds;
 
   public CaselessCompanyNameDetector() {
-    companyNameEnds = Generics.newHashSet();
+    companyNameEnds = new HashSet<String>();
     CompanyNameDetector cased = new CompanyNameDetector();
     for (String name : cased.companyNameEnds) {
       companyNameEnds.add(name.toLowerCase());

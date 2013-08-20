@@ -28,14 +28,12 @@ public class ArraySet<E> extends AbstractSet<E> {
   }
 
   /**
-   * Constructs an ArraySet with the specified elements.
-   * @param elements the elements to be put in the set.
+   * Constructs a singleton ArraySet with the specified singleton element.
+   * @param singletonElement the singleton element to be put in the set.
    */
-  public ArraySet(E ... elements) {
-    this(elements.length);
-    for (E element : elements) {
-      add(element);
-    }
+  public ArraySet(E singletonElement) {
+    this(1);
+    add(singletonElement);
   }
 
   /**

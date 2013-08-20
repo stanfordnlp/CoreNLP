@@ -1,0 +1,1178 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2><font color="#a40526"><a href="lex-parser.shtml">Stanford Parser</a> FAQ</font></h2>
+</center>
+
+<h3>Questions</h3>
+
+<ol>
+<li><a href="#a">How can I unpack the gzipped tar file?</a></li>
+<li><a href="#b">Is there technical documentation for the parser?</a></li>
+<li><a href="#c">What is the inventory of tags, phrasal categories, and
+typed dependencies in your parser?</a></li>
+<li><a href="#d">Can I train the parser?</a></li>
+<li><a href="#headfinder">Why do I get the exception "null head found for tree" after training my own parser model?</a></li>
+<li><a href="#e">How do I force the parser to use my sentence
+delimitations?</a></li>
+<li><a href="#ab">Can the parser work as a filter (read from stdin and
+    parse to stdout)?</a></li>
+<li><a href="#q">How can I provide the correct tokenization of my
+sentence to the parser?</a></li>
+<li><a href="#f">Can I give the parser part-of-speech (POS) tagged input and
+force the parser to use those tags?</a></li>
+<li><a href="#constraints">What other constraints are possible?</a></li>
+<li><a href="#g">Is it possible to pre-annotate the corpus with phrasal
+boundaries and labels which the parser has to use?</a></li>
+<li><a href="#h">Can I obtain multiple parse trees for a single input
+sentence?</a></li>
+<li><a href="#i">I don't [understand/like/agree with] the parse tree that is
+assigned to my sentence. Can you [explain/fix] it?</a></li>
+<li><a href="#j">Why does the parser accept incorrect/ungrammatical
+sentences?</a></li>
+<li><a href="#k">How much memory do I need to parse long sentences?</a></li>
+<li><a href="#l">What does an UnsupportedClassVersionError mean?</a></li>
+<li><a href="#m">How can I obtain just the results of the POS tagger for each word in a sentence?</a></li>
+<li><a href="#s">Can I just get your typed dependencies (grammatical
+relations) output from the trees produced by another parser?</a></li>
+<li><a href="#w">How can something be the subject of another thing when
+neither is a verb?</a></li>
+<li><a href="#t">Can I just use your tokenizers for other purposes?</a></li>
+<li><a href="#n">How can I parse my gigabytes of text more quickly?</a></li>
+<li><a href="#o">Can you give me some help in getting started parsing
+Chinese?</a></li> 
+<li><a href="#v">Can you give me some help in getting started parsing
+Arabic?</a></li> 
+<li><a href="#p">Can I just use the parser as a vanilla PCFG parser?</a></li> 
+<li><a href="#r">Can you give me complete documentation of command-line
+options/public APIs/included grammars/ParserDemo/...?</a></li> 
+<li><a href="#u">What output formats can I get with the
+<code>-outputFormat</code> and <code>-outputFormatOptions</code>
+ options?</a></li> 
+<li><a href="#x">Can I have the parser run as a filter (that is, parse
+stuff typed in)?</a></li> 
+<li><a href="#y">Can you explain the different parsers?  How can the
+PCFG parser produce typed dependency parses?  Why if I use the
+getBestDependencyParse() method do I get <code>null</code> or an untyped
+dependency parse?</a></li>
+<li><a href="#z">What are the training sets for the different parser models?</a></li> 
+<li><a href="#aa">How can I adjust the tokenization of words, such as
+turning off the Americanization of spelling?</a></li> 
+<li><a href="#jy">Can I use the parser with Jython?</a></li> 
+<li><a href="#en">What character encoding does the parser assume/use?</a></li> 
+<li><a href="#ca">What do you recommend for parsing tweets? Do you have
+    a caseless parsing model?</a></li> 
+<li><a href="#semanticgraph">How do you get a SemanticGraph from a Tree?</a></li>
+</ol>
+
+<p>
+Please send any other questions or feedback, or extensions and bugfixes to 
+<a href="mailto:parser-support@lists.stanford.edu"><code>parser-support@lists.stanford.edu</code></a>.  
+</p>
+
+<hr>
+
+<h3>Questions with answers</h3>
+
+<ol>
+<li><h4><a name="a">How can I unpack the gzipped tar file?</a></h4>
+<p>
+On Unix, try using GNU tar, if you're not already.  (If you're using
+Linux, you're almost certainly using GNU tar.)  For some reason we don't
+understand, it doesn't seem to unpack with classic Unix tar.  Make sure you
+specify the <code>-z</code> option if you are not gunzipping it in
+advance: <code>tar -xzf filename</code>.</p>
+
+<p>On Windows, it unpacks fine
+with most common tools, such as WinZip or 7-Zip.  The latter is open
+source. (As of Sep 2007, WinRAR doesn't work: it apparently does not handle
+tar files correctly.)</p>
+
+<p>On the Mac, just double-click it to unpack.  The default unarchiver
+(BOMArchiveHelper) works fine.</p>
+
+<p>If it won't unpack, you normally have either a corrupted download
+(try downloading it again) or
+there is some configuration error on your system, which we can't help
+with.  
+<!--   To make it easier to run the parser from
+the GUI by double-clicking, you should rename
+<code>lexparser-gui.csh</code> to <code>lexparser-gui.command</code>.
+The download should be 60,783,166 bytes with an MD5
+checksum of 6a4929a2d4e93697ea9d688ec63e3d6a (for version 1.6). -->
+</p>
+
+<li><h4><a name="b">Is there technical documentation for the parser?</a></h4>
+
+<p>There is considerable Javadoc documentation included in the
+<code>javadoc/</code> 
+directory of the distribution. You should start by looking at the
+javadoc for the parser.lexparser package and the LexicalizedParser class.
+<p>
+(The documentation appearing on the <code>nlp.stanford.edu</code>
+website refers to code under development and is not necessarily consistent
+with the released version of the parser.)  If you're interested in the
+theory and algorithms behind how the parser works, look at the research
+papers listed.</li>
+
+<li><h4><a name="c">What is the inventory of tags, phrasal categories, and
+typed dependencies in your parser?</a></h4>
+
+<p>For part-of-speech tags and phrasal categories, this depends on the
+language and treebank on which 
+the parser was trained (and was decided by the treebank producers not us).  The
+parser can be used for English, Chinese, Arabic, or 
+German (among other languages).  For part of speech and phrasal
+categories, here are relevant links:
+
+<ul>
+<li>English: the  
+<a href="http://www.cis.upenn.edu/~treebank/">Penn Treebank site</a>.
+There is an
+<a href="http://www.ldc.upenn.edu/Catalog/desc/addenda/LDC1999T42/">online copy
+of its documentation</a>; in particular, see 
+TAGGUID1.PDF (POS tagging guide) and 
+PRSGUID1.PDF (phrase structure bracketing guide) and a (slightly dated)
+<a href="http://aclweb.org/anthology-new/J/J93/J93-2004.pdf">introductory
+article</a>.  At least for the parts of speech,
+there are also other simpler listings such as the 
+<a href="http://www.comp.leeds.ac.uk/amalgam/tagsets/upenn.html">AMALGAM
+project page</a>.
+</li>
+
+<li>Chinese: the <a
+href="http://www.cis.upenn.edu/~chinese/">Penn Chinese Treebank</a>
+<li>German: the <a href="http://www.coli.uni-saarland.de/projects/sfb378/negra-corpus/">NEGRA</a> corpus
+</ul>
+<p>
+Please read the documentation for each of these corpora to learn about
+their tagsets and phrasal categories.  You can often also find
+additional documentation resources by doing web searches.
+</p>
+<p>
+The typed dependency (grammatical relations) output available for
+English and Chinese was defined by us.  For English, there is an
+introduction in the paper:
+</p>
+<blockquote>
+Marie-Catherine de Marneffe, Bill MacCartney and Christopher
+D. Manning. 2006. 
+<a href="http://nlp.stanford.edu/pubs/LREC06_dependencies.pdf">Generating
+Typed Dependency Parses from Phrase Structure Parses</a>.  In <i>LREC 2006</i>.
+</blockquote>
+and there is further documentation in the
+<a href="dependencies_manual.pdf">Stanford Dependencies manual</a>.  For
+Chinese, there is brief documentation in the paper:</p>
+<blockquote>
+Pi-Chuan Chang, Huihsin Tseng, Dan Jurafsky, and Christopher
+D. Manning. 2009. <a href="http://nlp.stanford.edu/pubs/ssst09-chang.pdf">Discriminative Reordering with Chinese Grammatical
+Relations Features</a>. In Proceedings of the Third Workshop on Syntax and
+Structure in Statistical Translation.
+</blockquote>
+<p>
+Further information (definitions and examples of nearly all the
+grammatical relations) appear in the included Javadoc documentation.
+Look at the <code>EnglishGrammaticalRelations</code> and
+<code>ChineseGrammaticalRelations</code> classes.  (To do this,
+with a web browser Open File on the index.html file in the javadoc
+folder of the parser distribution, and then click on the given class
+names in the bottom-left scroll list.)  At some point we may
+produce better user-level documentation of these relations, but this is
+what is available currently.
+</p>
+
+<p>A corpus of English biomedical texts, with hand-corrected annotations
+in a slight variant of the Stanford typed dependency format is available
+from <a href="http://www.it.utu.fi/BioInfer/">The BioInfer project</a>.
+<li><h4><a name="d">Can I train the parser?</a></h4>
+
+<p>Yes, you can train a parser.  You will need a collection of
+syntactically annotated data such as the <a
+href="http://www.cis.upenn.edu/~treebank/home.html">Penn Treebank</a>
+to train the parser.  If they are not in the same format as currently
+supported Treebanks, you may need to write classes to read in the trees,
+etc.  Read the Javadocs for the
+main method of the LexicalizedParser class, particularly the
+<code>-train</code> option to find out about the command options for
+training parsers.  The supplied file 
+<code>makeSerialized.csh</code> shows exactly what options we used to
+train the parsers that are included in the distribution.  If you 
+want to train the parser on a new language and/or treebank format,
+you can (and people have done so), but you need to spend a while learning about
+the code, especially if you wish to develop language-specific features.
+Start by trying to <a href="#p">train a plain PCFG</a> on the data, and then
+look at the <code>TreebankLangParserParams</code> class for how to do
+language-specific processing.
+
+<li><h4><a name="headfinder">Why do I get the exception "null head found for tree" after training my own parser model?</a></h4>
+
+<p>The default HeadFinder is written specifically for the PTB.  If you
+train a parser on trees that use a different set of productions, the
+default HeadFinder will not know how to handle this and will throw
+this exception.  The easiest way to get around this problem is to use
+LeftHeadFinder instead.  You can also get a slight performance
+increase by writing a custom HeadFinder for your treebank and using
+that instead.
+
+<li><h4><a name="e">How do I force the parser to use my sentence
+delimitations?</a> I want to give the parser a list of sentences, one
+per line, to parse.</h4>
+
+<p>
+Use the <code> -sentences </code> option.  If you want to give the
+parser one sentence per line, include the option <code>-sentences
+newline</code> in your invocation of <code>LexicalizedParser</code>.</p>
+
+<li><h4><a name="ab">Can the parser work as a filter (read from stdin and
+    parse to stdout)?</a></h4>
+
+<p>
+Yes. The parser treats a filename as <code>-</code> as meaning to read from
+stdin and by default writes to stdout (this can be changed with
+the <code>-writeOutputFiles</code> option).  Note: the tokenizer uses
+lookahead, so you will either need to close the input to get the last
+sentence parsed, or use another option like <code>-sentences newline</code>.
+</p>
+
+
+<li><h4><a name="q">How can I provide the correct tokenization of my
+sentence to the parser?</a></h4>
+
+<p>
+From the commandline, if you give the option <code>-tokenized</code>, then the parser will
+assume white-space separated tokens, and use your tokenization as is.
+Of course, parsing will suffer unless your tokenization accurately
+matches the tokenization of the underlying treebank, for instance Penn
+Treebank tokenization.  A common occurrence is that your text is already
+correctly tokenized but does not escape characters the way the Penn
+Treebank does (turning parentheses into <code>-LRB-</code> and
+<code>-RRB-</code>, and putting a backslash in front of forward slashes
+and asterisks - presumably a holdover from Lisp). In this case, you can
+use the <code>-tokenized</code> option but also add the flag:
+</p>
+<blockquote><code>
+-escaper edu.stanford.nlp.process.PTBEscapingProcessor
+</code></blockquote>
+
+<p>
+If calling the parser within your own program, the main
+<code>parse</code> methods 
+take a List of words which should already be correctly tokenized and
+escaped before calling the parser.  You don't
+need to and cannot give the <code>-tokenized</code> option.  If you have
+untokenized text, it needs to tokenized before parsing.  You may
+use the <code>parse</code> method that takes a String argument to have
+this done for you or you
+may be able to use of classes in the
+<code>process</code> package, such as <code>DocumentPreprocessor</code>
+and <code>PTBTokenizer</code> for tokenization, much as the main method of the parser
+does.  Or you may want to use your own tokenizer.
+</p>
+
+
+<li><h4><a name="f">Can I give the parser part-of-speech (POS) tagged
+input and force the parser to use those tags?</a></h4>
+
+<p>Yes, you can.   However, you will need to provide correctly
+tokenized input if you want to provide POS-annotated input. (That is,
+the input must be tokenized and normalized exactly as the material in
+the treebank underlying the grammar is.)
+
+<p>Read the Javadocs for the main method of the LexicalizedParser
+class. The relevant options are <code>-sentences</code> (see above),
+<code>-tokenized</code>, <code>-tokenizerFactory</code>, 
+<code>-tokenizerMethod</code>, and <code>-tagSeparator</code>.
+If, for example, you want to denote a POS tag by appending <code>/POS</code>
+on a word, you would include the options 
+<code>-tokenized -tagSeparator / 
+ -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer
+ -tokenizerMethod newCoreLabelTokenizerFactory </code> 
+in your invocation of <code>LexicalizedParser</code>. You could then
+give the parser input such as
+
+<blockquote>
+<code>The/DT quick/JJ brown/JJ fox/NN jumped/VBD over/IN the/DT lazy/JJ dog/NN ./. </code>
+</blockquote>
+
+<p>Partially-tagged input (only indicating the POS of some words) is
+also OK.</p>
+
+<p>If you wish to work with POS-tagged text programmatically, then
+things are different.  You pass to the <code>parse</code> method a
+<code>List</code>.  If the items in this list implement
+<code>HasTag</code>, such as being of type <code>TaggedWord</code> 
+or <code>CoreLabel</code>, and the tag value is not <code>null</code>,
+then the parser will use the tags that you provide.  You can use the
+<code>DocumentPreprocessor</code> class, as the <code>main</code> method
+does, to produce these lists, or you could use
+<code>WhitespaceTokenizer</code> followed by
+<code>WordToTaggedWordProcessor</code>, or you can do this with 
+code that you write.  
+Another alternative is to feed the sentences through the 
+<a href="http://nlp.stanford.edu/software/tagger.shtml">tagger</a>,
+which produces either <code>List&lt;TaggedWord&gt;</code> or
+<code>List&lt;CoreLabel&gt;</code> depending on the input.  Either
+form of list will pass the tags to the parser.
+</p>
+
+<li><h4><a name="constraints">What other constraints are possible?</a></h4>
+
+<p>
+There are other constraints which can be added, but they have to be
+added programmatically.  Look at the LexicalizedParserQuery object,
+which you can get from LexicalizedParser.parseQuery().  There is a
+call, setConstraints, which you can make before using the
+LexicalizedParserQuery to run the parser.
+</p><p>
+If you add a ParserConstraint object spanning a set of words, the
+parser will only produce parse trees which include that span of words
+as a constituent.  In general, you will want to use ".*" as the state
+accepted by this constraint.
+</p><p>
+It is also possible to specify constraints such as "NN|JJ" to enforce
+that the parser uses either an NN or JJ, for example, but
+unfortunately there is a subtle and complicated bug in the code that
+enforces that.  If you do try to use this, most of the parsers use
+vertical markovization, which means you will need to make the
+constraints "JJ|JJ[^a-zA-Z].*" instead of "JJ".  In general, though,
+you should not use this part of the feature and simply use ".*".
+</p><p>
+See the existing Javadoc for more information on this.
+</p>
+
+</li>
+
+<li><h4><a name="g">Is it possible to pre-annotate the corpus with phrasal
+boundaries and labels which the parser has to use?</a></h4>
+
+<p>Not yet, but in the future, very possibly.
+
+<li><h4><a name="h">Can I obtain multiple parse trees for a single input
+sentence?</a></h4> 
+
+<p>Yes, for the PCFG parser (only).  With a PCFG parser, you can give
+the option <code>-printPCFGkBest <i>n</i></code> and it will print the 
+<i>n</i> highest-scoring parses for a sentence.  They can be printed
+either as phrase structure trees or as typed dependencies in the usual
+way via the <code>-outputFormat</code> option, and each receives a score
+(log probability).   The <i>k</i> best parses are extracted efficiently
+using the algorithm of Huang and Chiang (2005).
+</p>
+
+<li><h4><a name="i">I don't [understand/like/agree with] the parse tree that is
+assigned to my sentence. Can you [explain/fix] it?</a></h4>
+
+<p>This may be because the parser chose an incorrect structure for
+your sentence, or because the phrase structure annotation conventions
+used for training the parser don't match your expectations.  To make
+sure you understand the annotation conventions, please read the
+bracketing guidelines for the parser model that you're using, which are
+<a href="#c">referenced above.</a>  Or it may be because the parser made
+a mistake. While our goal is to improve the parser when we can, we can't
+fix individual examples. The parser is just choosing the highest
+probability analysis according to its grammar.
+
+
+<li><h4><a name="j">Why does the parser accept incorrect/ungrammatical
+sentences?</a></h4>
+
+<p>This parser is in the space of modern statistical parsers whose goal
+is to give the most likely sentence analysis to a list of words.  It
+does not attempt to determine grammaticality, though it will normally
+prefer a "grammatical" parse for a sentence if one exists. This is
+appropriate in 
+many circumstances, such as when wanting to interpret user input, or
+dealing with conversational speech, web pages, non-native speakers,
+etc.
+
+<p>For other applications, such as grammar checking, this is less
+appropriate. One could attempt to assess grammaticality by looking at
+the probabilities that the parser returns for sentences, but it is
+difficult to normalize this number to give a useful "grammaticality"
+score, since the probability strongly depends on other factors like
+the length of the sentence, the rarity of the words in the sentence, and
+whether word dependencies in the sentence being tested were seen in the
+training data or not. 
+
+<li><h4><a name="k">How much memory do I need to parse long
+sentences?</a></h4> 
+
+<p>The parser uses considerable amounts of memory.  If you see a 
+<code>java.lang.OutOfMemoryError</code>, you either need to give the
+parser more memory or to take steps to reduce the memory needed.  (You
+give java more memory at the command line by using the <code>-mx</code>
+flag, for example <code>-mx500m</code>.)</p>
+
+<p>
+Memory usage by the parser depends on a number of factors:
+<ul>
+<li>Memory usage expands roughly with the square of the sentence
+length.  You may wish to set a <code>-maxLength</code> and to skip long
+sentences.</li>
+<li>The factored parser requires several times as much memory as just
+running the PCFG parser, since it runs 3 parsers.</li>
+<li>The command-line version of the parser currently loads the whole
+of an input file into memory before parsing any of it.  If your file is extremely
+large, splitting it into multiple files and parsing them sequentially
+will reduce memory usage.</li>
+<li>A 64-bit application requires more memory than a 32-bit
+application (Java uses lots of pointers).</li>
+<li>A larger grammar or POS tag set requires more memory than a smaller
+one.</li> 
+</ul>
+<p>Below are some statistics for 32-bit operation with the supplied
+englishPCFG and englishFactoredGrammars.  We have parsed sentences as
+long as 234 words, but you need lots of RAM and patience.</p>
+<center>
+<table border="1">
+<tr><th>Length</th><th>PCFG</th><th>Factored</th></tr>
+<tr><td>20</td><td>50 MB</td><td>250 MB</td></tr>
+<tr><td>50</td><td>125 MB</td><td>600 MB</td></tr>
+<tr><td>100</td><td>350 MB</td><td>2100 MB</td></tr>
+</table>
+</center>
+
+<li><h4><a name="#l">What does an UnsupportedClassVersionError
+mean?</a></h4> 
+
+<p>If you see the error:</p>
+<blockquote><code>
+Exception in thread "main" java.lang.UnsupportedClassVersionError:
+edu/stanford/nlp/parser/lexparser/LexicalizedParser (Unsupported
+major.minor version 49.0)
+</code></blockquote>
+<p>This means that you don't have JDK 1.5 installed.  You should upgrade
+at <a href="http://java.sun.com/javase/downloads/index.jsp">java.sun.com</a>. 
+</li>
+
+<li><h4><a name="m">How can I obtain just the results of the POS tagger
+for each word in a sentence?</a></h4> 
+
+<p>You can use the <code>-outputFormat wordsAndTags</code> option.
+Note: if you want to tag a lot of text, it'd be much faster to use a
+dedicated POS tagger (such as 
+<a href="http://nlp.stanford.edu/software/tagger.shtml">ours</a> or
+<a href="http://nlp.stanford.edu/links/statnlp.html#Taggers">someone else's</a>),
+since this option has the parser parse the sentences
+and just not print the other information.  There isn't a separate included
+tagger; the parser does POS tagging as part of parsing.
+</li>
+
+<li><h4><a name="s">Can I just get your typed dependencies (grammatical
+relations) output from the trees produced by another parser?</a></h4>
+
+<p>
+Yes, you can.   You can use the main method of
+<code>EnglishGrammaticalStructure</code> (for English, or the
+corresponding class for Chinese).  You can give it options like
+<code>-treeFile</code> to read in trees, and, say,
+<code>-collapsed</code> to output
+<code>typedDependenciesCollapsed</code>.   For example, this command
+(with appropriate paths) will convert a Penn Treebank file to uncollapsed
+typed dependencies:
+</p>
+<blockquote><code>
+java -cp stanford-parser.jar
+edu.stanford.nlp.trees.EnglishGrammaticalStructure -treeFile
+wsj/02/wsj_0201.mrg -basic
+</code></blockquote>
+<p>
+Also, here is <a href="TypedDependenciesDemo.java">a sample
+Java class</a> that you can download that converts from an input
+file of trees to typed dependencies.</p>
+
+<p><i>Fine print:</i> There is one subtlety.  The conversion code
+generally expects Penn Treebank style trees which have been stripped of
+functional tags and empty elements. This generally corresponds to the
+output of the Stanford, Charniak or Collins/Bikel parsers.  The
+exception is that it gets value from the <code>-TMP</code> annotation on bare
+temporal NPs in order to recognize them as having temporal function
+(<code>tmod</code>).   (It also allows a <code>-ADV</code> annotation on 
+NPs.)   Without the temporal annotation, some simple temporals like
+<i>today</i> will still be recognized, but a bare temporal like
+<i>last week</i> in <i>I left last week</i> will be tagged as an object
+(<code>dobj</code>).  With the Stanford parser, you can get marking of
+temporal NPs in the tree output by giving the option
+<code>-retainTmpSubcategories</code>, either on the command line or by
+passing it to the <code>setOptionFlags(String[])</code> method of the parser.
+</p>
+<p>
+See the javadoc for the main method of
+edu.stanford.nlp.trees.GrammaticalStructure.java for more information
+on how to extract dependencies using this tool.
+</p>
+</li>
+
+<li><h4><a name="w">How can something be the subject of another thing when
+neither is a verb?  I tried the sentence <i>Jill is a teacher</i>
+and the parser created a <i>nsubj</i> dependency between
+<i>teacher</i> and <i>Jill</i>.  Is that a mistake or have I not
+understood what <i>nsubj</i> is?</a></h4>
+
+<p>
+This is an element of the dependency analysis we adopted.  It's not
+uncontroversial, and it could have been done differently, but we'll try
+to explain briefly why we did things the way we did.  The general
+philosophy of the grammatical relations design is that main predicates
+should be heads and auxiliaries should not.  So, for the sentence <i>Jill
+is singing</i>, you will see <b>nsubj(singing, Jill)</b>.  We feel that
+this is more useful for most semantic interpretation applications,
+because it directly connects the main predicate with its arguments, while
+the auxiliary is rendered as modifying the verb (<b>aux(singing, is)</b>).
+Most people seem to agree.
+</p>
+
+<p>
+What then when the main predicate is an adjective or a noun?  That is,
+sentences like <i>Jill is busy</i> or <i>Jill is a teacher</i>.  We
+continue to regard the adjective or noun as the predicate of which the
+subject is the argument, rather than changing and now regarding the
+copular verb <i>is</i> as the head and <i>busy/teacher</i> as a
+complement.  That is, we produce <b>nsubj(busy, Jill)</b> and
+<b>nsubj(teacher, Jill)</b>.  This frequently seems to confuse people,
+because the main predicate of the clause is now not a verb.
+But we believe that this is the best thing to do for several reasons:
+<ol>
+<li> Consistency of treatment of auxiliary/copula between English
+periphrastic verb forms and adjectival/nominal predications.
+<li> Crosslinguistic generalization of the grammatical relations system:
+many other languages sometimes or always do not use a copular verb when
+using an adjective or noun predicate.  That is, they will just say
+<i>Jill busy</i>.
+<li> Connection to logical representations: If you were to translate
+these sentences into a simple predicate logic form, you would presumably
+use <b>busy(jill)</b> and <b>teacher(jill)</b>.  The treatment of the
+adjective or noun as the predicate in a predicate logic form parallels
+what we do in our grammatical relations representation.
+<li> Similarity of representation across constructions.  While the dependency
+still differs, both the attributive (<i>the white
+daisy</i>) and predicative (<i>the daisy is
+white</i>) use of
+adjectives yields a direct link between the adjective (<i>white</i>) and
+the noun (<i>daisy</i>): <i>amod(daisy, white)</i> and <i>nsubj(white, daisy)</i>.
+</ol>
+</p>
+</li>
+
+<li><h4><a name="t">Can I just use your tokenizers for other purposes?</a></h4>
+
+<p>
+Yes, you can.  Various tokenizers are included.  The one used for
+English is called PTBTokenizer.  It is a hand-written rule-based (FSM)
+tokenizer, but is quite accurate over newswire-style text.  Because it
+is rule-based it is quite fast (about 100,000 tokens per second on an
+Intel box in 2007).  You can use it as follows:
+</p>
+<center><code>
+java edu.stanford.nlp.process.PTBTokenizer <i>inputFile</i> > <i>outputFile</i>
+</code></center>
+<p>
+There are several options, including one for batch-processing lots of
+files; see the Javadoc documentation of the <code>main</code> method of <code>PTBTokenizer</code>.
+</p>
+
+<li><h4><a name="n">How can I parse my gigabytes of text more
+quickly?</a></h4> 
+
+<p>
+Parsing speed depends strongly on the distribution of sentence lengths
+- and on your machine, etc.  As one data point, using englishPCFG and a
+2.8 GHz Intel Core 2 Duo processor (mid 2009 Mac Book Pro vintage), 
+30 word sentences take about 0.6 seconds to parse.
+</p>
+<p>
+There's not much in the way of secret sauce to speed that up (partly by the design of
+the parsers as guaranteed to find <i>model optimal</i> solutions).  
+If you're not using <code>englishPCFG.ser.gz</code> for English, then
+you should be - it's much faster than the Factored parser. If you can
+exclude extremely long sentences (especially ones over 60 words or so),
+then that helps since they take disproportionately long times to parse. 
+If POS-tagging sentences prior to parsing is an option, that speeds
+things up (less possibilities to search).
+</p><p>
+The main tool remaining is to run multiple parsers at once
+in parallel.  This can be on multiple machines, but you can
+usefully run 
+multiple parsing processes on one machine if you have multi-core
+machines and enough memory.  The parser now supports multi-threaded use,
+so you can run multiple parsers simultaneously inside one JVM, or you
+can simply run separate parsing jobs in multiple processes if it's
+simpler (though it's a bit less memory and cache efficient).
+We've parsed large volumes of text 
+at a rate of about 1,000,000 sentences a 
+day by distributing the work over 6 dual core/dual processor machines.
+</p></li>
+
+<li><h4><a name="o">Can you give me some help in getting started parsing
+Chinese?</a></h4>  
+
+<p>
+Sure!!  These instructions concentrate on parsing from the command line,
+since you need to use that to be able to set most options. But you
+can also use the parser on Chinese from within the GUI.
+</p>
+<p>
+The parser is supplied with 5 Chinese grammars (and, with access
+to suitable training data, you could train other versions).  
+You can find them <i>inside</i> the
+supplied <code>stanford-parser-<i>YYYY-MM-DD</i>-models.jar</code> file
+(in the GUI, select this file and then navigate inside it; at the
+command line, use <code>jar -tf</code> to see its contents).
+All of
+these grammars are trained on data from the 
+<a href="http://www.cis.upenn.edu/~chinese/">Penn Chinese Treebank</a>,
+and you should consult their site for details of the syntactic
+representation of Chinese which they use.  They are:
+</p>
+<table border="1">
+<tr>
+<td>&nbsp;</td><td>PCFG</td><td>Factored</td><td>Factored, segmenting</td>
+</tr>
+<tr>
+<td>Xinhua (mainland, newswire)</td>
+<td><code>xinhuaPCFG.ser.gz</code></td>
+<td><code>xinhuaFactored.ser.gz</code></td>
+<td><code>xinhuaFactoredSegmenting.ser.gz</code></td>
+</tr>
+<tr>
+<td>Mixed Chinese</td>
+<td><code>chinesePCFG.ser.gz</code></td>
+<td><code>chineseFactored.ser.gz</code></td>
+</tr>
+</table>
+<p>
+The PCFG parsers are smaller and faster.  But the Factored parser is
+significantly better for Chinese, and we would generally recommend its
+use.  The <code>xinhua</code> grammars are trained solely on Xinhua
+newspaper text from mainland China.  We would recommend their use for
+parsing material from mainland China.  The <code>chinese</code>
+grammars also include some training material from Hong Kong SAR and
+Taiwan.  We'd recommend their use if parsing material from these areas
+or a mixture of text types.  Note, though that all the training material
+uses simplified characters; traditional characters were converted to
+simplified characters (<i>usually</i> correctly).
+Four of the parsers assume input that has already been word
+segmented, while the fifth does word segmentation internal to the
+parser. This is discussed further below.  The parser also comes with 3
+Chinese example sentences, in files whose names all begin with
+<code>chinese</code>. 
+</p>
+<p>
+<b>Character encoding:</b> The first thing to get straight is the
+character encoding of the text you wish to parse.  By default, our
+Chinese parser uses GB18030 (the native character encoding of the Penn
+Chinese Treebank and the national encoding of China) for input and output.
+However, it is
+very easy to parse text in another character encoding: you simply give
+the flag <code>-encoding <i>encoding</i></code> to the parser, where
+<code><i>encoding</i></code> is a 
+<a href="http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html">character set encoding name recognized within Java</a>, such as:
+<code>UTF-8</code>, <code>Big5-HKSCS</code>, or <code>GB18030</code>.
+This changes the input and output encoding.  If you want to display the
+output in a command window, you separately also need
+to work out what character set your computer supports for display.  If
+that is different to the encoding of the file, you will need to convert
+the encoding for display.  If any of this encoding stuff is wrong, then
+you are likely to see gibberish.
+Here are example commands for parsing two of
+the test files, one in UTF-8 and one in GB18030.  The (Linux) computer
+that this is being run on is set up to work with UTF-8 (and this webpage
+is also in UTF-8), so for the case of GB18030, the output is piped
+through the Unix <code>iconv</code> utility for display.
+</p>
+<blockquote><pre>
+$ java -server -mx500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -encoding utf-8 /u/nlp/data/lexparser/chineseFactored.ser.gz chinese-onesent-utf8.txt
+Loading parser from serialized file /u/nlp/data/lexparser/chineseFactored.ser.gz ... done [20.7 sec].
+Parsing file: chinese-onesent-utf8.txt with 2 sentences.
+Parsing [sent. 1 len. 8]: 俄国 希望 伊朗 没有 制造 核武器 计划 。
+(ROOT
+  (IP
+    (NP (NR 俄国))
+    (VP (VV 希望)
+      (IP
+        (NP (NR 伊朗))
+        (VP (VE 没有)
+          (NP (NN 制造) (NN 核武器) (NN 计划)))))
+    (PU 。)))
+
+Parsing [sent. 2 len. 6]: 他 在 学校 里 学习 。
+(ROOT
+  (IP
+    (NP (PN 他))
+    (VP
+      (PP (P 在)
+        (LCP
+          (NP (NN 学校))
+          (LC 里)))
+      (VP (VV 学习)))
+    (PU 。)))
+
+Parsed file: chinese-onesent-utf8.txt [2 sentences].
+Parsed 14 words in 2 sentences (6.55 wds/sec; 0.94 sents/sec).
+</pre></blockquote>
+
+<blockquote><pre>
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser chineseFactored.ser.gz chinese-onesent |& iconv -f gb18030 -t utf-8
+Loading parser from serialized file chineseFactored.ser.gz ... done [13.3 sec].
+Parsing file: chinese-onesent with 1 sentences.
+Parsing [sent. 1 len. 10]: 他 和 我 在 学校 里 常 打 桌球 。
+(ROOT
+  (IP
+    (NP (PN 他)
+      (CC 和)
+      (PN 我))
+    (VP
+      (PP (P 在)
+        (LCP
+          (NP (NN 学校))
+          (LC 里)))
+      (ADVP (AD 常))
+      (VP (VV 打)
+        (NP (NN 桌球))))
+    (PU 。)))
+
+Parsed file: chinese-onesent [1 sentences].
+Parsed 10 words in 1 sentences (10.78 wds/sec; 1.08 sents/sec).
+</pre></blockquote>
+
+<p><b>Normalization:</b> As well as the character set, there are also issues of
+"normalization" for characters: for instance, basic Latin letters can
+appear in either their "regular ASCII" forms or as "full width" forms,
+equivalent in size to Chinese characters.  Character normalization is
+something we may revisit in the future, but at present, <i>the parser was
+trained on text which mainly has fullwidth Latin letters and punctuation
+and does no normalization, and so you will get far better results if you
+also represent such characters as fullwidth letters</i>.  The parser
+does provide an escaper that will do this mapping for you on input.  You
+can invoke it with the <code>-escaper</code> flag, by using a command
+like the following (which also shows output being sent to a file):
+</p>
+<blockquote><pre>
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser -escaper edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper -sentences newline chineseFactored.ser.gz chinese-onesent > chinese-onesent.stp
+</pre></blockquote>
+
+<p><b>Word segmentation:</b> Chinese is not normally written with spaces
+between words.  But the examples shown above were all parsing
+text that had already been segmented into words according to the
+conventions of the Penn Chinese Treebank.  For best results, we
+recommend that you first segment input text with a high quality word
+segmentation system which provides word segmentation according to Penn
+Chinese Treebank conventions (note that there are many different
+conventions for 
+Chinese word segmentation...).  You can find out much more information
+about CTB word segmentation from the 
+<a href="http://www.sighan.org/bakeoff2003/">First</a>,
+<a href="http://www.sighan.org/bakeoff2005/">Second</a>, or
+<a href="http://www.sighan.org/bakeoff2006/">Third</a>
+International Chinese Word Segmentation Bakeoff.  
+In particular, you can now download a version of our CRF-based word
+segmenter (similar to 
+<a href="http://nlp.stanford.edu/~manning/papers/sighan_seg.pdf">the system we used in the Second Sighan Bakeoff</a>)
+from our <a href="/software/">software page</a>.
+However, for
+convenience, we also provide an ability for the parser to do word
+segmentation.  Essentially, it misuses the parser as a first-order HMM
+Chinese word segmentation system.  This gives a reasonable, but not
+excellent, Chinese word segmentation system.  (It's performance 
+<i>isn't</i> as good as the Stanford CRF word segmenter mentioned above.)
+To use it,
+you use the <code>-segmentMarkov</code> option or a grammar trained with
+this option.  For example:
+</p>
+<blockquote><pre>
+$ iconv -f gb18030 -t utf8 < chinese-onesent-unseg.txt
+他在学校学习。
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser xinhuaFactoredSegmenting.ser.gz chinese-onesent-unseg.txt | & iconv -f gb18030 -t utf-8
+Loading parser from serialized file xinhuaFactoredSegmenting.ser.gz ... done [6.8 sec].
+Parsing file: chinese-onesent-unseg.txt with 1 sentences.
+Parsing [sent. 1 len. 5]: 他 在 学校 学习 。
+Trying recovery parse...
+Sentence couldn't be parsed by grammar.... falling back to PCFG parse.
+(ROOT
+  (IP
+    (NP (PN 他))
+    (VP
+      (PP (P 在)
+        (NP (NN 学校)))
+      (VP (VV 学习)))
+    (PU 。)))
+
+Parsed file: chinese-onesent-unseg.txt [1 sentences].
+Parsed 5 words in 1 sentences (6.08 wds/sec; 1.22 sents/sec).
+  1 sentences were parsed by fallback to PCFG.
+</code></blockquote>
+
+<p>
+<b>Grammatical relations:</b> The Chinese parser also supports
+grammatical relations (typed dependencies) output.  For instance: 
+</p>
+<blockquote><pre>
+$ java -mx500m -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser -outputFormat typedDependencies xinhuaFactored.ser.gz chinese-onesent | & iconv -f gb18030 -t utf-8
+Loading parser from serialized file xinhuaFactored.ser.gz ... done [4.9 sec].
+Parsing file: chinese-onesent with 1 sentences.
+Parsing [sent. 1 len. 10]: 他 和 我 在 学校 里 常 打 桌球 。
+conj(我-3, 他-1)
+cc(我-3, 和-2)
+nsubj(打-8, 我-3)
+prep(打-8, 在-4)
+lobj(里-6, 学校-5)
+plmod(在-4, 里-6)
+advmod(打-8, 常-7)
+dobj(打-8, 桌球-9)
+
+Parsed file: chinese-onesent [1 sentences].
+Parsed 10 words in 1 sentences (7.10 wds/sec; 0.71 sents/sec).
+</pre></blockquote>
+
+<li><h4><a name="v">Can you give me some help in getting started parsing
+Arabic?</a></h4>  
+
+<p>Sure!  See the <a href="http://nlp.stanford.edu/software/parser-arabic-faq.shtml">Stanford Arabic Parser IAQ</a>.</p>
+
+<li><h4><a name="p">Can I just use the parser as a vanilla PCFG parser?</a></h4>  
+
+<p>
+There are many kinds of 'vanilla', but, providing your treebank is in
+Penn Treebank format, then, yes, this is easy to do.  You can train and
+test the parser as follows, assuming that your training trees
+are in <code>train.txt</code> and your test trees are in
+<code>test.txt</code>:
+<blockquote><code>
+java -mx1g edu.stanford.nlp.parser.lexparser.LexicalizedParser
+-PCFG -vMarkov 1 -uwm 0 -headFinder
+edu.stanford.nlp.trees.LeftHeadFinder -train train.txt
+-test test.txt > output.txt
+</code></blockquote>
+Going through the options, we ask for just the PCFG model
+(<code>-PCFG</code>), for just conditioning context-free rules based on their
+left-hand side (parent) (<code>-vMarkov 0</code>), whereas the default also
+conditions on grandparents (<code>-vMarkov 1</code>), to use no
+language-specific heuristics for unknown word processing 
+(<code>-uwm 0</code>),
+and to always just choose the left-most category on a rule RHS as the
+head (<code>-headFinder edu.stanford.nlp.trees.LeftHeadFinder</code>).
+When using a plain PCFG (i.e., no markovization of
+rules), the <code>headFinder</code> does not affect results, but unless
+you use this head finder, you will see errors about the parser not
+finding head categories (if your categories differ from those of the
+Penn Treebank).  This HeadFinder will give consistent left-branching
+binarization.
+</p>
+
+<p>If you would like to also get out the true probabilities that a
+vanilla PCFG parser would produce, there are a couple more options that
+you need to set:
+</p>
+<blockquote>
+-smoothTagsThresh 0 -scTags
+</blockquote>
+<p>
+The option <code>-smoothTagsThresh 0</code> stops any probability mass
+being reserved for unknown words.  The <code>-scTags</code> option
+ensures that true values for P(w|t) are used.  Naturally, such a parser
+will be unable to parse any sentence with unknown words in it.
+</p>
+
+<li><h4><a name="r">Can you give me complete documentation of command-line
+options/public APIs/included grammars/ParserDemo/...?</a></h4>
+
+<p>
+At present, we don't have any documentation beyond what you get in the
+download and what's on this page.  If <i>you</i> would like to help by producing
+better documentation, feel free to write to 
+<a href="mailto:parser-support@lists.stanford.edu"><code>parser-support@lists.stanford.edu</code></a>.
+</p>
+<p>
+Some parser command-line options are documented. See the
+<code>parser.lexparser</code> package documentation, the
+<code>LexicalizedParser.main</code> method documentation, the
+<code>TreePrint</code> class, and the documentation of variables in the
+<code>Train</code>, <code>Test</code>, and <code>Options</code> classes,
+and appropriate language-particular
+<code>TreebankLangParserParams</code>.  For the rest, you need to look
+at the source code. The public API is somewhat documented in the
+<code>LexicalizedParser</code> class JavaDoc.  See especially the sample
+invocation in the <code>parser.lexparser</code> package documentation.
+The included file <code>makeSerialized.csh</code> effectively documents
+how the included grammars were made.
+</p>
+
+<p>The included file <code>ParserDemo.java</code> gives a good first example of
+how to call the parser programmatically, including getting
+<code>Tree</code> and <code>typedDependencies</code> output.  It is included in the root directory of the parser download.
+</p>
+
+
+<p>People are often confused about how to get from that example to parsing 
+  paragraphs of text.  You need to split the text into sentences first
+  and then to pass each sentence to the parser.
+  To do that, we use the included
+  class <code>DocumentPreprocessor</code>.  A second example
+  titled <code>ParserDemo2.java</code> is included which demostrates
+  how to use the <code>DocumentPreprocessor</code>.</p>
+
+<p>With this code, you should be able to parse the sentence in a file
+  with a command like this (details depending on your shell, OS,
+  etc.):</p>
+
+<blockquote><code>
+java -mx200m -cp "stanford-parser.jar:." ParserDemo2 englishPCFG.ser.gz testsent.txt
+</code></blockquote>
+
+
+<p>By default, <code>DocumentPreprocessor</code>
+  uses <code>PTBTokenizer</code> for tokenization.  If you need to
+  change that, either because you have a better <code>Tokenizer</code>
+  for your domain or because you have already tokenized your text, you
+  can do that by passing in a <code>TokenizerFactory</code> such as a
+  <code>WhitespaceTokenizerFactory</code> for no tokenization beyond
+  splitting on whitespace.</p>
+
+<p><i>Fine print:</i> The above ParserDemo2 works with the 1.6.x
+  releases of the Stanford Parser, but doesn't work without adaptation
+  with the Stanford CoreNLP release of the parser (and will probably
+  need adaptation with 1.7.x releases of the parser).</p>
+
+<li><h4><a name="u">What output formats can I get with the
+<code>-outputFormat</code> and <code>-outputFormatOptions</code>
+ options?</a></h4>
+
+<p>
+You can give the options <code>-outputFormat typedDependencies</code> or 
+<code>-outputFormat typedDependenciesCollapsed</code> to get typed
+dependencies (or grammatical relations) output (for English and Chinese
+only, currently).
+You can print out lexicalized trees (head words and tags at each phrasal
+node with the <code>-outputFormatOptions lexicalize</code> option.
+You can see all the other options by looking in the Javadoc of the 
+<code>TreePrint</code> class.
+</p>
+
+<li><h4><a name="x">Can I have the parser run as a filter (that is, parse
+stuff typed in)?</a></h4>
+
+<p>
+Yes, you use a filename of a single dash/minus character: -.  E.g.,</p>
+<blockquote><code>
+java -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser
+englishPCFG.ser.gz -
+</code></blockquote>
+<p>For interactive use, you may find it convenient to turn off the
+stderr output.  For example, in bash you could use the command:
+<blockquote><code>
+java -cp stanford-parser.jar edu.stanford.nlp.parser.lexparser.LexicalizedParser
+englishPCFG.ser.gz - 2> /dev/null
+</code></blockquote>
+
+<li><h4><a name="y">Can you explain the different parsers?  How can the
+PCFG parser produce typed dependency parses?  Why if I use the
+getBestDependencyParse() method do I get <code>null</code> or an untyped
+dependency parse?</a></h4> 
+
+<p>
+This answer is specific to English.  It mostly applies to other
+languages although some components are missing in some languages.
+The file <code>englishPCFG.ser.gz</code> comprises just an unlexicalized PCFG
+grammar. It is basically the parser described in the ACL 2003 Accurate
+Unlexicalized Parsing paper.  The typed dependencies are produced in a
+postprocessing step after parsing by matching patterns on CFG trees.
+This process is described in the several papers on the topic by
+Marie-Catherine de Marneffe.  Confusingly, the current code to generate
+Stanford Dependencies <i>requires</i> a phrase structure (CFG) parse.
+It doesn't require or use a dependency parse.  The file
+<code>englishFactored.ser.gz</code> contains two grammars and leads the
+system to run <i>three</i> parsers.  It first runs a (simpler) PCFG
+parser and then an untyped dependency parser, and then runs a third
+parser which finds the parse with the best joint score across the two
+other parsers via a product model.  This is described in the NIPS 
+Fast Exact Inference paper.  You can get Stanford Dependencies from the
+output of this parser, since it generates a phrase structure parse.
+At the API level, with the factored parser, if you ask for
+getBestDependencyParse(), then you will get the best untyped dependency
+parse.  If you call that method with <code>englishPCFG.ser.gz</code>, it
+will return <code>null</code>, as there is no dependency parse.  For
+either, you need to use the separate GrammaticalStructure classes to get
+the typed Stanford Dependencies representation.  In general, with
+appropriate grammars loaded, you can parse with and ask for output of the PCFG,
+(untyped) dependency, or factored parsers.  For English, although the
+grammars and parsing methods differ, the average
+quality of <code>englishPCFG.ser.gz</code> and
+<code>englishFactored.ser.gz</code> is similar, and so many people opt
+for the faster <code>englishPCFG.ser.gz</code>, though
+<code>englishFactored.ser.gz</code> sometimes does better because it
+does include lexicalization.  For other languages, the factored models
+are considerably better than the PCFG models, and are what people
+generally use.  (Since these parsers were written, direct typed
+dependency parsers have been increasingly explored.  Both us and others
+have now built parsers that directly parse to Stanford Dependencies.
+See the <a
+href="http://nlp.stanford.edu/software/stanford-dependencies.shtml">Stanford
+Dependencies</a> page for more information.)
+</p>
+
+
+
+<li><h4><a name="z">What are the training sets for the different parser models?</a></h4> 
+
+<p>
+For Chinese (and Arabic, German, and "WSJ", you can look at the included file makeSerialized.csh , and easily see exactly what files the models are trained on, in terms of LDC or Negra file numbers.
+</p>
+
+<p>
+The only opaque case is english{Factored|PCFG}.  
+
+For comparable results with others, you should use the WSJ models which are trained on standard WSJ sections 2-21, but the english* models should work a bit better for anything other than 1980s WSJ text.
+</p>
+
+<p>
+english{Factored|PCFG} is currently trained on:
+<ul>
+ <li> WSJ sections 1-21
+ <li> Genia (biomedical English).  Originally we used the treebank beta version
+ reformatted by Andrew Clegg, his training split, but more recently
+ (1.6.5+?) we've used the official Treebank,
+ and <a href="http://nlp.stanford.edu/~mcclosky/biomedical.html">David McClosky's splits</a>
+ <li> 2 English Chinese Translation Treebank and 3 English Arabic Translation Treebank files backported to the original treebank annotation standards (by us)
+ <li> <a href="stanford-english-trees.txt">95 sentences parsed by us</a> (mainly questions and imperatives; a few from recent newswire)
+ <li> 3924 questions from QuestionBank, with some
+ <a href="/data/QuestionBank-Stanford.shtml">hand-correction done at
+ Stanford</a>. 
+</ul>
+</p>
+
+<p>
+However, this list is likely to change in future releases, and this FAQ
+question isn't always fully up to date....
+</p>
+</li>
+
+<li><h4><a name="aa">How can I adjust the tokenization of words, such as
+turning off the Americanization of spelling?</a></h4>
+<p>
+By default, the tokenizer used by the English parser
+(<code>PTBTokenizer</code>) performs various normalizations so as to
+make the input closer to the normalized form of English found in the
+Penn Treebank.  One of these normalizations is the Americanization of
+spelling variants (such as changing <i>colour</i> to <i>color</i>).
+Others include things like changing round parentheses to
+<code>-LRB-</code> and <code>-RRB-</code>.</p>
+
+<p>
+Starting with version 1.6.2 of the parser, there is a fairly flexible
+scheme for options in tokenization style.  You can give options such as
+this one to turn off Americanization of spelling:
+</p>
+<blockquote>
+<code> -tokenizerOptions "americanize=false"</code></blockquote>
+<p>
+Or this one to change several options:
+</p>
+<blockquote>
+<code> -tokenizerOptions "americanize=false,normalizeCurrency=false,unicodeEllipsis=true"</code></blockquote>
+<p>
+See the documentation of <code>PTBTokenizer</code> for details.
+Programmatically, you can do the same things by creating a
+TokenizerFactory with the appropriate options, such as:
+</p>
+<blockquote>
+<code>parse(new DocumentPreprocessor(PTBTokenizerFactory.newWordTokenizerFactory("americanize=false")).getWordsFromString(str));</code></blockquote>
+<p>
+There is nevertheless a potential cost of making tokenization changes.
+This normalization was added in the first place because the parser is
+trained on American English, normalized according to Penn Treebank conventions.
+There is no special handling of alternate
+spellings, etc., so in general changing the tokenization will mean that
+variant token forms will be treated via the general unknown
+word handling.  Often, that works out okay, 
+but, overall, results won't be quite as good.</p>
+</li>
+
+
+<li><h4><a name="jy">Can I use the parser with Jython?</a></h4>
+<p>
+Absolutely.  You can find a helpful tuturial here:
+<a href="http://blog.gnucom.cc/2010/using-the-stanford-parser-with-jython/"><code>http://blog.gnucom.cc/2010/using-the-stanford-parser-with-jython/</code></a>.
+</p>
+</li>
+
+<li><h4><a name="en">What character encoding does the parser assume/use?</a></h4>
+<p>
+The default character encoding depends on the language that you are
+parsing.  It is defined in the appropriate TreebankLanguagePack class.
+That is, it will never default to your platform default character
+encoding.  The current defaults are:
+</p>
+<ul>
+<li>Arabic: UTF-8</li>
+<li>Chinese: GB18030</li>
+<li>English: UTF-8</li>
+<li>French: ISO_8859-1</li>
+<li>German: ISO_8859-1</li>
+<li>Hebrew: UTF-8</li>
+</ul>
+<p>
+However, the parser is able to parse text in any encoding, providing
+you pass the correct encoding option on the command line, for example:
+<blockquote>
+<code>-encoding ISO_8859-15</code>
+</blockquote>
+(Or, when used within a program, it is your job to open files
+with the right kind of Reader/Writer.)
+</li>
+
+<li><h4><a name="ca">What do you recommend for parsing tweets? Do you have
+    a caseless parsing model?</a></h4> 
+
+<p>
+We now (v2.0.1+) distribute a caseless English model, which should
+work better for texts, tweets, and similar things. It's named:
+</p>
+<center><code>edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz</code></center>
+<p>
+So try something like this:
+</p>
+<pre>
+$ java -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz -
+Loading parser from serialized file edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz ... done [2.3 sec].
+Parsing file: -
+i can't believe @mistamau doesn't know who channing tatum is ... #loser
+Parsing [sent. 1 len. 14]: i ca n't believe @mistamau does n't know who channing tatum is ... #loser
+(ROOT
+  (S
+    (NP (PRP i))
+    (VP (MD ca) (RB n't)
+      (VP (VB believe)
+        (SBAR
+          (S
+            (NP (NNP @mistamau))
+            (VP (VBZ does) (RB n't)
+              (VP (VB know)
+                (SBAR
+                  (WHNP (WP who))
+                  (S
+                    (NP (NNP channing) (NNP tatum))
+                    (VP (VBZ is) (: ...)
+                      (S
+                        (VP (VB #loser))))))))))))))
+
+Parsed file: - [1 sentences].
+Parsed 14 words in 1 sentences (4.29 wds/sec; 0.31 sents/sec).
+</pre>
+<p>This parse isn't quite correct (it messes up the hashtag at the end),
+  but the caseless model does correctly parse "Channing Tatum" as a
+  proper name.</p>
+</li>
+
+<li><h4><a name="semanticgraph">How do you get a SemanticGraph from a Tree?</a></h4>
+
+The easiest way is to use the conversion methods in
+ParserAnnotatorUtils, which is included in the latest versions of the
+parser (since 2.0.3).
+
+</li>
+
+</ol>
+
+
+<!--#include virtual="/footer.html" -->
+

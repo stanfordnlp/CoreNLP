@@ -9,8 +9,9 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+
+import edu.stanford.nlp.io.OutDataStreamFile;
 
 
 /**
@@ -45,7 +46,7 @@ public class FeatureKey {
     return Integer.toString(num) + ' ' + val + ' ' + tag;
   }
 
-  protected void save(DataOutputStream f) throws IOException {
+  protected void save(OutDataStreamFile f) throws IOException {
     f.writeInt(num);
     f.writeUTF(val);
     f.writeUTF(tag);

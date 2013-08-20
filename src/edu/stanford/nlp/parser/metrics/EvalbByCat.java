@@ -1,6 +1,8 @@
 package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -12,7 +14,6 @@ import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Computes labeled precision and recall (evalb) at the constituent category level.
@@ -64,12 +65,12 @@ public class EvalbByCat extends AbstractEval {
   }
 
   private Map<Label,Set<Constituent>> makeObjectsByCat(Tree t) {
-    Map<Label,Set<Constituent>> objMap = Generics.newHashMap();
+    Map<Label,Set<Constituent>> objMap = new HashMap<Label,Set<Constituent>>();
     Set<Constituent> objSet = makeObjects(t);
     for (Constituent lc : objSet) {
       Label l = lc.label();
       if (!objMap.keySet().contains(l)) {
-        objMap.put(l, Generics.<Constituent>newHashSet());
+        objMap.put(l, new HashSet<Constituent>());
       }
       objMap.get(l).add(lc);
     }
@@ -85,7 +86,7 @@ public class EvalbByCat extends AbstractEval {
 
     Map<Label,Set<Constituent>> guessDeps = makeObjectsByCat(guess);
     Map<Label,Set<Constituent>> goldDeps = makeObjectsByCat(gold);
-    Set<Label> cats = Generics.newHashSet(guessDeps.keySet());
+    Set<Label> cats = new HashSet<Label>(guessDeps.keySet());
     cats.addAll(goldDeps.keySet());
 
     if (pw != null && runningAverages) {
@@ -97,8 +98,8 @@ public class EvalbByCat extends AbstractEval {
     ++num;
 
     for (Label cat : cats) {
-      Set<Constituent> thisGuessDeps = guessDeps.containsKey(cat) ? guessDeps.get(cat) : Generics.<Constituent>newHashSet();
-      Set<Constituent> thisGoldDeps = goldDeps.containsKey(cat) ? goldDeps.get(cat) : Generics.<Constituent>newHashSet();
+      Set<Constituent> thisGuessDeps = guessDeps.containsKey(cat) ? guessDeps.get(cat) : new HashSet<Constituent>();
+      Set<Constituent> thisGoldDeps = goldDeps.containsKey(cat) ? goldDeps.get(cat) : new HashSet<Constituent>();
 
       double currentPrecision = precision(thisGuessDeps, thisGoldDeps);
       double currentRecall = precision(thisGoldDeps, thisGuessDeps);
@@ -129,9 +130,9 @@ public class EvalbByCat extends AbstractEval {
 
   private Set<Label> getEvalLabelSet(Set<Label> labelSet) {
     if (pLabelFilter == null) {
-      return Generics.newHashSet(precisions.keySet());
+      return new HashSet<Label>(precisions.keySet());
     } else {
-      Set<Label> evalSet = Generics.newHashSet(precisions.keySet().size());
+      Set<Label> evalSet = new HashSet<Label>(precisions.keySet().size());
       for (Label label : labelSet) {
         if (pLabelFilter.matcher(label.value()).matches()) {
           evalSet.add(label);

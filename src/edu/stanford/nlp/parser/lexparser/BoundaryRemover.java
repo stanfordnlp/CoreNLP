@@ -9,8 +9,7 @@ import edu.stanford.nlp.trees.TreeTransformer;
  * Removes a boundary symbol (Lexicon.BOUNDARY_TAG or Lexicon.BOUNDARY), which
  * is the rightmost daughter of a tree.  Otherwise does nothing.
  * This is needed because the dependency parser uses such symbols.
- * <p/>
- * <i>Note:</i> This method is a function and not destructive. A new root tree is returned.
+ * <i>Note:</i> the transformTree method is destructive.
  *
  * @author Christopher Manning
  */
@@ -19,7 +18,6 @@ public class BoundaryRemover implements TreeTransformer {
   public BoundaryRemover() {
   }
 
-  @Override
   public Tree transformTree(Tree tree) {
     Tree last = tree.lastChild();
     if (last.label().value().equals(Lexicon.BOUNDARY_TAG) ||

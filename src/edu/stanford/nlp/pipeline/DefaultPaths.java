@@ -17,7 +17,7 @@ public class DefaultPaths {
   public static final String DEFAULT_REGEXNER_RULES = "edu/stanford/nlp/models/regexner/type_map_clean";
   public static final String DEFAULT_GENDER_FIRST_NAMES = "edu/stanford/nlp/models/gender/first_name_map_small";
 
-  public static final String DEFAULT_TRUECASE_MODEL = "edu/stanford/nlp/models/truecase/truecasing.fast.caseless.qn.ser.gz";
+  public static final String DEFAULT_TRUECASE_MODEL = "edu/stanford/nlp/models/truecase/truecasing.fast.qn.ser.gz";
   public static final String DEFAULT_TRUECASE_DISAMBIGUATION_LIST = "edu/stanford/nlp/models/truecase/MixDisambiguation.list";
 
   public static final String DEFAULT_DCOREF_ANIMATE = "edu/stanford/nlp/models/dcoref/animate.unigrams.txt";
@@ -34,13 +34,6 @@ public class DefaultPaths {
   public static final String DEFAULT_DCOREF_STATES_AND_PROVINCES = "edu/stanford/nlp/models/dcoref/statesandprovinces";
   public static final String DEFAULT_DCOREF_GENDER_NUMBER = "edu/stanford/nlp/models/dcoref/gender.data.gz";
   public static final String DEFAULT_DCOREF_EXTRA_GENDER = "edu/stanford/nlp/models/dcoref/namegender.combine.txt";
-  
-  public static final String DEFAULT_DCOREF_SINGLETON_MODEL = "edu/stanford/nlp/models/dcoref/singleton.predictor.ser";
-  public static final String DEFAULT_DCOREF_DICT1 = "edu/stanford/nlp/models/dcoref/coref.dict1.tsv";
-  public static final String DEFAULT_DCOREF_DICT2 = "edu/stanford/nlp/models/dcoref/coref.dict2.tsv";
-  public static final String DEFAULT_DCOREF_DICT3 = "edu/stanford/nlp/models/dcoref/coref.dict3.tsv";
-  public static final String DEFAULT_DCOREF_DICT4 = "edu/stanford/nlp/models/dcoref/coref.dict4.tsv";
-  public static final String DEFAULT_DCOREF_NE_SIGNATURES = "edu/stanford/nlp/models/dcoref/ne.signatures.txt";
 
   public static final String DEFAULT_NFL_ENTITY_MODEL = "edu/stanford/nlp/models/machinereading/nfl/nfl_entity_model.ser";
   public static final String DEFAULT_NFL_RELATION_MODEL = "edu/stanford/nlp/models/machinereading/nfl/nfl_relation_model.ser";

@@ -5,7 +5,9 @@ import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
@@ -43,7 +45,7 @@ public class RegexNERAnnotatorITest extends TestCase {
     assertEquals(tags.length, tokens.size());
     for (int i = 0; i < tags.length; ++i) {
       assertEquals("Mismatch for token " + i + " " + tokens.get(i), 
-                   tags[i], tokens.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class));
+                   tags[i], tokens.get(i).get(NamedEntityTagAnnotation.class));
     }
   }
 
@@ -53,20 +55,20 @@ public class RegexNERAnnotatorITest extends TestCase {
     String[] split = str.split(" ");
 
     List<CoreLabel> tokens = makeTokens(split);
-    tokens.get(1).set(CoreAnnotations.NamedEntityTagAnnotation.class, "PERSON");
-    tokens.get(2).set(CoreAnnotations.NamedEntityTagAnnotation.class, "PERSON");
-    tokens.get(5).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
-    tokens.get(7).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
+    tokens.get(1).set(NamedEntityTagAnnotation.class, "PERSON");
+    tokens.get(2).set(NamedEntityTagAnnotation.class, "PERSON");
+    tokens.get(5).set(NamedEntityTagAnnotation.class, "LOCATION");
+    tokens.get(7).set(NamedEntityTagAnnotation.class, "LOCATION");
 
     CoreMap sentence = new ArrayCoreMap();
-    sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+    sentence.set(TokensAnnotation.class, tokens);
 
     List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
 
     Annotation corpus = new Annotation("President Barack Obama lives in Chicago, Illinois," +
         "and is a practicing Christian.");
-    corpus.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+    corpus.set(SentencesAnnotation.class, sentences);
 
     annotator.annotate(corpus);
 
@@ -84,21 +86,21 @@ public class RegexNERAnnotatorITest extends TestCase {
     String[] split = str.split(" ");
 
     List<CoreLabel> tokens = makeTokens(split);
-    tokens.get(2).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
-    tokens.get(3).set(CoreAnnotations.NamedEntityTagAnnotation.class, "LOCATION");
-    tokens.get(9).set(CoreAnnotations.NamedEntityTagAnnotation.class, "ORGANIZATION");
-    tokens.get(10).set(CoreAnnotations.NamedEntityTagAnnotation.class, "ORGANIZATION");
-    tokens.get(11).set(CoreAnnotations.NamedEntityTagAnnotation.class, "ORGANIZATION");
+    tokens.get(2).set(NamedEntityTagAnnotation.class, "LOCATION");
+    tokens.get(3).set(NamedEntityTagAnnotation.class, "LOCATION");
+    tokens.get(9).set(NamedEntityTagAnnotation.class, "ORGANIZATION");
+    tokens.get(10).set(NamedEntityTagAnnotation.class, "ORGANIZATION");
+    tokens.get(11).set(NamedEntityTagAnnotation.class, "ORGANIZATION");
 
     CoreMap sentence = new ArrayCoreMap();
-    sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+    sentence.set(TokensAnnotation.class, tokens);
 
     List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
 
     Annotation corpus = new Annotation("I like Ontario Place, and I like the Native" +
         "American Church, too.");
-    corpus.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+    corpus.set(SentencesAnnotation.class, sentences);
 
     annotator.annotate(corpus);
 
@@ -117,14 +119,14 @@ public class RegexNERAnnotatorITest extends TestCase {
     List<CoreLabel> tokens = makeTokens(split);
 
     CoreMap sentence = new ArrayCoreMap();
-    sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+    sentence.set(TokensAnnotation.class, tokens);
 
     List<CoreMap> sentences = new ArrayList<CoreMap>();
     sentences.add(sentence);
 
     Annotation corpus = new Annotation("Christianity is of higher regex priority than Early " +
         "Christianity. ");
-    corpus.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+    corpus.set(SentencesAnnotation.class, sentences);
 
     annotator.annotate(corpus);
 
@@ -140,7 +142,7 @@ public class RegexNERAnnotatorITest extends TestCase {
    */
   public void testEmptyAnnotation() {
     try {
-      annotator.annotate(new Annotation(""));
+      annotator.annotate(new Annotation());
     } catch(RuntimeException e) {
       return;
     }

@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.ling.*;
@@ -34,6 +34,13 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * @return A processed {@link edu.stanford.nlp.ling.Label}
    */
   public Label processHeadWord(Label headWord);
+
+  /**
+   * Convenience method for setting state parameters specific to evaluation. For example, if grammatical
+   * functions are retained during training but discarded during evaluation, this method may be used
+   * to make that state change.
+   */
+  public void setupForEval();
 
   public void setInputEncoding(String encoding);
 
