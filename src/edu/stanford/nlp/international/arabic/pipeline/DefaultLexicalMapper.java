@@ -4,14 +4,14 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.international.arabic.Buckwalter;
-import edu.stanford.nlp.process.treebank.Mapper;
+import edu.stanford.nlp.trees.treebank.Mapper;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Applies a default set of lexical transformations that have been empirically validated
@@ -69,21 +69,21 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
   private final String parentTagString = "PUNC LATIN -NONE-";
   private final Set<String> parentTagsToEscape;
 
-  private final String utf8CliticString = "ل ف و ما ه ها هم هن نا كم تن تم ى ي هما ك ب م"; 
+  private final String utf8CliticString = "ل ف و ما ه ها هم هن نا كم تن تم ى ي هما ك ب م";
 //  private final Set<String> utf8Clitics;
   private final Set<String> bwClitics;
 
   public DefaultLexicalMapper() {
-    parentTagsToEscape = 
-      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(parentTagString.split("\\s+"))));
-   
-//    utf8Clitics = 
-//      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(utf8CliticString.split("\\s+"))));
+    parentTagsToEscape =
+      Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(parentTagString.split("\\s+"))));
+
+//    utf8Clitics =
+//      Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(utf8CliticString.split("\\s+"))));
 
     Buckwalter bw = new Buckwalter(true);
     String bwString = bw.apply(utf8CliticString);
-    bwClitics = 
-      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(bwString.split("\\s+"))));
+    bwClitics =
+      Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(bwString.split("\\s+"))));
   }
 
   private String mapUtf8(String element) {
@@ -165,7 +165,7 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
         String strippedElem = cliticMarker.replaceAll("");
         if(strippedElem.length() > 0)
           element = bwClitics.contains(strippedElem) ? element : strippedElem;
-      } 
+      }
 
     } else if (element.length() > 1 && !ATBTreeUtils.reservedWords.contains(element)) {
       Matcher rmCliticMarker = segmentationMarker.matcher(element);

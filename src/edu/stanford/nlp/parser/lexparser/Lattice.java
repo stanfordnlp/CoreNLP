@@ -3,6 +3,8 @@ package edu.stanford.nlp.parser.lexparser;
 import java.io.*;
 import java.util.*;
 
+import edu.stanford.nlp.util.Generics;
+
 public class Lattice implements Serializable, Iterable<LatticeEdge> {
 
 	private static final long serialVersionUID = 5135076134500512556L;
@@ -16,9 +18,9 @@ public class Lattice implements Serializable, Iterable<LatticeEdge> {
 	
 	public Lattice() {
 		edges = new ArrayList<LatticeEdge>();
-		nodes = new HashSet<Integer>();
+		nodes = Generics.newHashSet();
 		constraints = new ArrayList<ParserConstraint>();
-		edgeStartsAt = new HashMap<Integer,List<LatticeEdge>>();
+		edgeStartsAt = Generics.newHashMap();
 	}
 
 	//TODO Do node normalization here

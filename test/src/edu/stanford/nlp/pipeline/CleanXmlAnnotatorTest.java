@@ -5,14 +5,7 @@ import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.XmlContextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -82,9 +75,9 @@ public class CleanXmlAnnotatorTest extends TestCase {
     Annotation[] goldAnnotations = new Annotation[gold.length];
     for (int i = 0; i < gold.length; ++i) {
       goldAnnotations[i] = annotate(gold[i], ptbInvertible, null, null);
-      goldTokens.addAll(goldAnnotations[i].get(TokensAnnotation.class));
+      goldTokens.addAll(goldAnnotations[i].get(CoreAnnotations.TokensAnnotation.class));
     }
-    List<CoreLabel> annotationLabels = annotation.get(TokensAnnotation.class);
+    List<CoreLabel> annotationLabels = annotation.get(CoreAnnotations.TokensAnnotation.class);
 
     if (goldTokens.size() != annotationLabels.size()) {
       for (int i = 0; i < annotationLabels.size(); ++i) {
@@ -103,27 +96,27 @@ public class CleanXmlAnnotatorTest extends TestCase {
                    annotationLabels.get(i).word());
     }
 
-    if (annotation.get(SentencesAnnotation.class) != null) {
-      List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
+    if (annotation.get(CoreAnnotations.SentencesAnnotation.class) != null) {
+      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       assertEquals(gold.length, sentences.size());
     }
   }
 
   public void checkInvert(Annotation annotation, String gold) {
     List<CoreLabel> annotationLabels =
-      annotation.get(TokensAnnotation.class);
+      annotation.get(CoreAnnotations.TokensAnnotation.class);
     StringBuilder original = new StringBuilder();
     for (CoreLabel label : annotationLabels) {
-      original.append(label.get(BeforeAnnotation.class));
-      original.append(label.get(OriginalTextAnnotation.class));
+      original.append(label.get(CoreAnnotations.BeforeAnnotation.class));
+      original.append(label.get(CoreAnnotations.OriginalTextAnnotation.class));
     }
     original.append(annotationLabels.get(annotationLabels.size() - 1).
-                    get(AfterAnnotation.class));
+                    get(CoreAnnotations.AfterAnnotation.class));
     assertEquals(gold, original.toString());
   }
 
   public void checkContext(CoreLabel label, String ... expectedContext) {
-    List<String> xmlContext = label.get(XmlContextAnnotation.class);
+    List<String> xmlContext = label.get(CoreAnnotations.XmlContextAnnotation.class);
     assertEquals(expectedContext.length, xmlContext.size());
     for (int i = 0; i < expectedContext.length; ++i) {
       assertEquals(expectedContext[i], xmlContext.get(i));
@@ -228,7 +221,7 @@ public class CleanXmlAnnotatorTest extends TestCase {
                                      cleanXmlAllTags, wtsSplitter);
 
     List<CoreLabel> annotationLabels =
-      annotation.get(TokensAnnotation.class);
+      annotation.get(CoreAnnotations.TokensAnnotation.class);
     for (int i = 0; i < 3; ++i) {
       checkContext(annotationLabels.get(i), "xml", "foo", "bar");
     }
@@ -242,13 +235,13 @@ public class CleanXmlAnnotatorTest extends TestCase {
     Annotation annotation = annotate(testString, ptbInvertible,
                                      cleanXmlAllTags, wtsSplitter);
     checkResult(annotation, "This text is in a nested tag");
-    List<CoreLabel> labels = annotation.get(TokensAnnotation.class);
+    List<CoreLabel> labels = annotation.get(CoreAnnotations.TokensAnnotation.class);
     assertEquals(6,
                  labels.get(0).
-                 get(CharacterOffsetBeginAnnotation.class).intValue());
+                 get(CoreAnnotations.CharacterOffsetBeginAnnotation.class).intValue());
     assertEquals(10,
                  labels.get(0).
-                 get(CharacterOffsetEndAnnotation.class).intValue());
+                 get(CoreAnnotations.CharacterOffsetEndAnnotation.class).intValue());
   }
 
   public void testAttributes() {

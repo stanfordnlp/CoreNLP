@@ -37,6 +37,11 @@ public class LabeledScoredTreeReaderFactory implements TreeReaderFactory {
     this.tm = tm;
   }
 
+  public LabeledScoredTreeReaderFactory(LabelFactory lf, TreeNormalizer tm) {
+    this.lf = lf;
+    this.tm = tm;
+  }
+
   /**
    * An implementation of the <code>TreeReaderFactory</code> interface.
    * It creates a <code>TreeReader</code> which normalizes trees using

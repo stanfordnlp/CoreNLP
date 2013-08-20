@@ -11,11 +11,7 @@ import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHIT
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalCharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PositionAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SpaceBeforeAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 // TODO: ChineseStringUtils and ChineseUtils should be put somewhere common
@@ -62,18 +58,18 @@ public class ChineseStringUtils {
         CoreLabel pwi = wi;
         wi = wordIter.next();
         //System.err.println(wi);
-        boolean originalWhiteSpace = "1".equals(wi.get(SpaceBeforeAnnotation.class));
+        boolean originalWhiteSpace = "1".equals(wi.get(CoreAnnotations.SpaceBeforeAnnotation.class));
 
         //  if the CRF says "START" (segmented), and it's not the first word..
-        if (wi.get(AnswerAnnotation.class).equals("1") && !("0".equals(String.valueOf(wi.get(PositionAnnotation.class))))) {
+        if (wi.get(CoreAnnotations.AnswerAnnotation.class).equals("1") && !("0".equals(String.valueOf(wi.get(CoreAnnotations.PositionAnnotation.class))))) {
           // check if we need to preserve the "no space" between English
           // characters
           boolean seg = true; // since it's in the "1" condition.. default
                               // is to seg
           if (flags.keepEnglishWhitespaces) {
             if (testContentIdx > 0) {
-              char prevChar = pwi.get(OriginalCharAnnotation.class).charAt(0);
-              char currChar = wi.get(OriginalCharAnnotation.class).charAt(0);
+              char prevChar = pwi.get(CoreAnnotations.OriginalCharAnnotation.class).charAt(0);
+              char currChar = wi.get(CoreAnnotations.OriginalCharAnnotation.class).charAt(0);
               if (isLetterASCII(prevChar) && isLetterASCII(currChar)) {
                 // keep the "non space" before wi
                 if (! originalWhiteSpace) {
@@ -107,8 +103,8 @@ public class ChineseStringUtils {
              I changed the code but I think I'm doing the same thing here.
           */
           if (testContentIdx > 0) {
-            char prevChar = pwi.get(OriginalCharAnnotation.class).charAt(0);
-            char currChar = wi.get(OriginalCharAnnotation.class).charAt(0);
+            char prevChar = pwi.get(CoreAnnotations.OriginalCharAnnotation.class).charAt(0);
+            char currChar = wi.get(CoreAnnotations.OriginalCharAnnotation.class).charAt(0);
             if ((prevChar < (char)128) != (currChar < (char)128)) {
               if (ChineseUtils.isNumber(prevChar) && ChineseUtils.isNumber(currChar)) {
                 // cdm: you would get here if you had an ASCII number next to a
@@ -122,13 +118,13 @@ public class ChineseStringUtils {
 
           if (flags.keepEnglishWhitespaces) {
             if (testContentIdx > 0) {
-              char prevChar = pwi.get(OriginalCharAnnotation.class).charAt(0);
-              char currChar = wi.get(OriginalCharAnnotation.class).charAt(0);
+              char prevChar = pwi.get(CoreAnnotations.OriginalCharAnnotation.class).charAt(0);
+              char currChar = wi.get(CoreAnnotations.OriginalCharAnnotation.class).charAt(0);
               if (isLetterASCII(prevChar) && isLetterASCII(currChar) ||
                   isLetterASCII(prevChar) &&  ChineseUtils.isNumber(currChar) ||
                   ChineseUtils.isNumber(prevChar) && isLetterASCII(currChar)) {
                 // keep the "space" before wi
-                if ("1".equals(wi.get(SpaceBeforeAnnotation.class))) {
+                if ("1".equals(wi.get(CoreAnnotations.SpaceBeforeAnnotation.class))) {
                   seg = true;
                 }
               }
@@ -137,8 +133,8 @@ public class ChineseStringUtils {
 
           // if there was space and keepAllWhitespaces is true, restore it no matter what
           if (flags.keepAllWhitespaces) {
-            if (!("0".equals(String.valueOf(wi.get(PositionAnnotation.class))))
-                && "1".equals(wi.get(SpaceBeforeAnnotation.class))) {
+            if (!("0".equals(String.valueOf(wi.get(CoreAnnotations.PositionAnnotation.class))))
+                && "1".equals(wi.get(CoreAnnotations.SpaceBeforeAnnotation.class))) {
               seg = true;
             }
           }
@@ -150,9 +146,9 @@ public class ChineseStringUtils {
             }
           }
         }
-        ans.append(wi.get(OriginalCharAnnotation.class));
-        unmod_ans.append(wi.get(OriginalCharAnnotation.class));
-        unmod_normed_ans.append(wi.get(CharAnnotation.class));
+        ans.append(wi.get(CoreAnnotations.OriginalCharAnnotation.class));
+        unmod_ans.append(wi.get(CoreAnnotations.OriginalCharAnnotation.class));
+        unmod_normed_ans.append(wi.get(CoreAnnotations.CharAnnotation.class));
       }
       String ansStr = ans.toString();
       if (flags.sighanPostProcessing) {

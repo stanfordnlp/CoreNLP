@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.ArrayMap;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -17,9 +18,8 @@ import java.util.regex.Pattern;
 public class CoreMapNodePattern extends NodePattern<CoreMap> {
   // TODO: Change/Augment from map of class to pattern to list of conditions for matching
   //       (so we can do matches over multiple fields)
-  private Map<Class, NodePattern> annotationPatterns;
+  private final Map<Class, NodePattern> annotationPatterns;
 
-  public CoreMapNodePattern() {}
 
   public CoreMapNodePattern(Map<Class, NodePattern> annotationPatterns) {
     this.annotationPatterns = annotationPatterns;
@@ -30,8 +30,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
   }
 
   public static CoreMapNodePattern valueOf(Env env, String textAnnotationPattern) {
-    CoreMapNodePattern p = new CoreMapNodePattern();
-    p.annotationPatterns = new ArrayMap<Class, NodePattern>(1);
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayMap<Class, NodePattern>(1));
     p.annotationPatterns.put(CoreAnnotations.TextAnnotation.class,
             new StringAnnotationRegexPattern(textAnnotationPattern, (env != null)? env.defaultStringPatternFlags: 0));
     return p;
@@ -40,10 +39,9 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
   public static CoreMapNodePattern valueOf(Map<String, String> attributes) {
     return valueOf(null, attributes);
   }
-  
+
   public static CoreMapNodePattern valueOf(Env env, Map<String, String> attributes) {
-    CoreMapNodePattern p = new CoreMapNodePattern();
-    p.annotationPatterns = new ArrayMap<Class,NodePattern>(attributes.size());
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayMap<Class,NodePattern>(attributes.size()));
     for (String attr:attributes.keySet()) {
       String value = attributes.get(attr);
       Class c = EnvLookup.lookupAnnotationKey(env, attr);
@@ -107,6 +105,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     return p;
   }
 
+  @Override
   public boolean match(CoreMap token)
   {
     boolean matched = true;
@@ -121,8 +120,9 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     return matched;
   }
 
+  @Override
   public Object matchWithResult(CoreMap token) {
-    Map<Class,Object> matchResults = new HashMap();
+    Map<Class,Object> matchResults = Generics.newHashMap();
     if (match(token, matchResults)) {
       return matchResults;
     } else {
@@ -158,7 +158,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
     return sb.toString();
   }
-  
+
   public static class NilAnnotationPattern extends NodePattern<Object> {
     public boolean match(Object obj) {
       return obj == null;
@@ -291,7 +291,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
       LT { boolean accept(double v1, double v2) { return v1 < v2; } },
       LE { boolean accept(double v1, double v2) { return v1 <= v2; } };
       boolean accept(double v1, double v2) { return false; }
-    };
+    }
     CmpType cmpType;
     double value;
 
@@ -343,7 +343,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
 
     public boolean matches(CoreMap o1, CoreMap o2) {
-      for (Class key:keys) {
+      for (Class key : keys) {
         Object v1 = o1.get(key);
         Object v2 = o2.get(key);
         if (v1 != null) {
@@ -358,7 +358,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
   }
 
-  public static AttributesEqualMatchChecker TEXT_ATTR_EQUAL_CHECKER =
+  public static final AttributesEqualMatchChecker TEXT_ATTR_EQUAL_CHECKER =
           new AttributesEqualMatchChecker(CoreAnnotations.TextAnnotation.class);
 
 }

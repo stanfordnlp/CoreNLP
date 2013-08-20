@@ -1,8 +1,5 @@
 package edu.stanford.nlp.ling;
 
-import edu.stanford.nlp.ling.CoreAnnotations.DocIDAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentenceIndexAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 
 /**
@@ -80,19 +77,6 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
   }
 
   /**
-   * Copy Constructor - relies on {@link CoreLabel} copy constructor
-   * It will set the value, and if the word is not set otherwise, set
-   * the word to the value.
-   *
-   * @param w A Label to initialize this IndexedWord from
-   */
-  public IndexedWord(CyclicCoreLabel w) {
-    super(w);
-    if (this.word() == null)
-      this.setWord(this.value());
-  }
-
-  /**
    * Constructor for setting docID, sentenceIndex, and
    * index without any other annotations.
    *
@@ -102,9 +86,9 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
    */
   public IndexedWord(String docID, int sentenceIndex, int index) {
     super();
-    this.set(DocIDAnnotation.class, docID);
-    this.set(SentenceIndexAnnotation.class, sentenceIndex);
-    this.set(IndexAnnotation.class, index);
+    this.set(CoreAnnotations.DocIDAnnotation.class, docID);
+    this.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+    this.set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
 
@@ -120,9 +104,9 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
    */
   public IndexedWord(String docID, int sentenceIndex, int index, CoreLabel label) {
     this(label);
-    this.set(DocIDAnnotation.class, docID);
-    this.set(SentenceIndexAnnotation.class, sentenceIndex);
-    this.set(IndexAnnotation.class, index);
+    this.set(CoreAnnotations.DocIDAnnotation.class, docID);
+    this.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+    this.set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
 
@@ -139,24 +123,24 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
 
     //now compare on appropriate keys
     final IndexedWord otherWord = (IndexedWord) o;
-    String myDocID = getString(DocIDAnnotation.class);
-    String otherDocID = otherWord.getString(DocIDAnnotation.class);
+    String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
+    String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
     if (myDocID == null) {
       if (otherDocID != null)
       return false;
     } else if ( ! myDocID.equals(otherDocID)) {
       return false;
     }
-    Integer mySentInd = get(SentenceIndexAnnotation.class);
-    Integer otherSentInd = otherWord.get(SentenceIndexAnnotation.class);
+    Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
+    Integer otherSentInd = otherWord.get(CoreAnnotations.SentenceIndexAnnotation.class);
     if (mySentInd == null) {
       if (otherSentInd != null)
       return false;
     } else if ( ! mySentInd.equals(otherSentInd)) {
       return false;
     }
-    Integer myInd = get(IndexAnnotation.class);
-    Integer otherInd = otherWord.get(IndexAnnotation.class);
+    Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
+    Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
     if (myInd == null) {
       if (otherInd != null)
       return false;
@@ -168,23 +152,23 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
 
 
   /**
-   * This hashcode uses only the docID, sentenceIndex, and index
-   * See compareTo for more info
+   * This hashCode uses only the docID, sentenceIndex, and index.
+   * See compareTo for more info.
    */
   @Override
   public int hashCode() {
     boolean sensible = false;
     int result = 0;
-    if (get(DocIDAnnotation.class) != null) {
-      result = get(DocIDAnnotation.class).hashCode();
+    if (get(CoreAnnotations.DocIDAnnotation.class) != null) {
+      result = get(CoreAnnotations.DocIDAnnotation.class).hashCode();
       sensible = true;
     }
-    if (has(SentenceIndexAnnotation.class)) {
-      result = 29 * result + get(SentenceIndexAnnotation.class);
+    if (has(CoreAnnotations.SentenceIndexAnnotation.class)) {
+      result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class).hashCode();
       sensible = true;
     }
-    if (has(IndexAnnotation.class)) {
-      result = 29 * result + get(IndexAnnotation.class);
+    if (has(CoreAnnotations.IndexAnnotation.class)) {
+      result = 29 * result + get(CoreAnnotations.IndexAnnotation.class).hashCode();
       sensible = true;
     }
     if ( ! sensible) {
@@ -221,8 +205,8 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
       return 1;
     }
 
-    String docID = this.getString(DocIDAnnotation.class);
-    int docComp = docID.compareTo(w.getString(DocIDAnnotation.class));
+    String docID = this.getString(CoreAnnotations.DocIDAnnotation.class);
+    int docComp = docID.compareTo(w.getString(CoreAnnotations.DocIDAnnotation.class));
     if (docComp != 0) return docComp;
 
     int sentComp = sentIndex() - w.sentIndex();

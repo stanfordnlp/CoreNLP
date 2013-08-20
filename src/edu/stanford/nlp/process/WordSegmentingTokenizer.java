@@ -9,8 +9,6 @@ import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
-import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -21,7 +19,7 @@ import edu.stanford.nlp.util.StringUtils;
  *  @author Spence Green
  */
 public class WordSegmentingTokenizer extends AbstractTokenizer<HasWord> {
-  
+
   private Iterator<HasWord> wordIter;
   private Tokenizer<CoreLabel> tok;
   private WordSegmenter wordSegmenter;
@@ -29,12 +27,12 @@ public class WordSegmentingTokenizer extends AbstractTokenizer<HasWord> {
   public WordSegmentingTokenizer(WordSegmenter segmenter, Reader r) {
     this(segmenter, WhitespaceTokenizer.newCoreLabelWhitespaceTokenizer(r));
   }
-  
+
   public WordSegmentingTokenizer(WordSegmenter segmenter, Tokenizer<CoreLabel> tokenizer) {
     wordSegmenter = segmenter;
-    tok = tokenizer;    
+    tok = tokenizer;
   }
-  
+
   @Override
   protected HasWord getNext() {
     while (wordIter == null || ! wordIter.hasNext()) {

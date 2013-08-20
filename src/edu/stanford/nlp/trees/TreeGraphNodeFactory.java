@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
-import edu.stanford.nlp.ling.CyclicCoreLabel;
+import edu.stanford.nlp.ling.CoreLabel;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  * A <code>TreeGraphNodeFactory</code> acts as a factory for creating
  * nodes in a {@link TreeGraph <code>TreeGraph</code>}.  Unless
  * another {@link LabelFactory <code>LabelFactory</code>} is
- * supplied, it will use a CyclicCoreLabelFactory
+ * supplied, it will use a CoreLabelFactory
  * by default.
  *
  * @author Bill MacCartney
@@ -23,10 +23,10 @@ public class TreeGraphNodeFactory implements TreeFactory {
   /**
    * Make a <code>TreeFactory</code> that produces
    * <code>TreeGraphNode</code>s.  The labels are of class
-   * <code>CyclicCoreLabel</code>.
+   * <code>CoreLabel</code>.
    */
   public TreeGraphNodeFactory() {
-    this(CyclicCoreLabel.factory());
+    this(CoreLabel.factory());
   }
 
   public TreeGraphNodeFactory(LabelFactory mlf) {

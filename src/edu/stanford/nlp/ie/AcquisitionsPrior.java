@@ -1,11 +1,11 @@
 package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.Set;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -25,12 +25,12 @@ public class AcquisitionsPrior<IN extends CoreMap> extends EntityCachingAbstract
 
   public double scoreOf(int[] sequence) {
 
-    Set<String> purchasers = new HashSet<String>();
-    Set<String> purchabrs = new HashSet<String>();
-    Set<String> sellers = new HashSet<String>();
-    Set<String> sellerabrs = new HashSet<String>();
-    Set<String> acquireds = new HashSet<String>();
-    Set<String> acqabrs = new HashSet<String>();
+    Set<String> purchasers = Generics.newHashSet();
+    Set<String> purchabrs = Generics.newHashSet();
+    Set<String> sellers = Generics.newHashSet();
+    Set<String> sellerabrs = Generics.newHashSet();
+    Set<String> acquireds = Generics.newHashSet();
+    Set<String> acqabrs = Generics.newHashSet();
 
     List<Entity> purchasersL = new ArrayList<Entity>();
     List<Entity> purchabrsL = new  ArrayList<Entity>();

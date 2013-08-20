@@ -14,10 +14,9 @@ import java.util.List;
  * @author John Bauer
  * @version 2010
  */
-//public class Sentence<T extends HasWord> extends ArrayList<T> {
 public class Sentence {
 
-  private Sentence() {}
+  private Sentence() {} // static methods
 
   /**
    * Create an ArrayList as a list of <code>TaggedWord</code> from two
@@ -54,20 +53,8 @@ public class Sentence {
   //TODO wsg2010: This should be deprecated in favor of the method below with new labels
   public static ArrayList<Word> toUntaggedList(List<String> lex) {
     ArrayList<Word> sent = new ArrayList<Word>();
-    int ls = lex.size();
-    for (int i = 0; i < ls; i++) {
-      sent.add(new Word(lex.get(i)));
-    }
-    return sent;
-  }
-
-  public static List<HasWord> toWordList(List<String> lex) {
-    List<HasWord> sent = new ArrayList<HasWord>();
-    for(String str : lex) {
-      CoreLabel cl = new CoreLabel();
-      cl.setValue(str);
-      cl.setWord(str);
-      sent.add(cl);
+    for (String str : lex) {
+      sent.add(new Word(str));
     }
     return sent;
   }
@@ -98,13 +85,46 @@ public class Sentence {
     }
     return sent;
   }
-  
+
+  /**
+   * Create a sentence as a List of <code>CoreLabel</code> objects from
+   * an array (or varargs) of String objects.
+   *
+   * @param words The words to make it from
+   * @return The Sentence
+   */
   public static List<CoreLabel> toCoreLabelList(String... words) {
-    List<CoreLabel> sent = new ArrayList<CoreLabel>();
+    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.length);
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setValue(word);
       cl.setWord(word);
+      sent.add(cl);
+    }
+    return sent;
+  }
+
+  /**
+   * Create a sentence as a List of <code>CoreLabel</code> objects from
+   * a List of other label objects.
+   *
+   * @param words The words to make it from
+   * @return The Sentence
+   */
+  public static List<CoreLabel> toCoreLabelList(List<? extends HasWord> words) {
+    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.size());
+    for (HasWord word : words) {
+      CoreLabel cl = new CoreLabel();
+      if (word instanceof Label) {
+        cl.setValue(((Label) word).value());
+      }
+      cl.setWord(word.word());
+      if (word instanceof HasTag) {
+        cl.setTag(((HasTag) word).tag());
+      }
+      if (word instanceof HasLemma) {
+        cl.setLemma(((HasLemma) word).lemma());
+      }
       sent.add(cl);
     }
     return sent;
@@ -199,13 +219,13 @@ public class Sentence {
       // an interface that covered these next four cases would be
       // nice, but we're moving away from these data types anyway
     } else if (separator != null && o instanceof TaggedWord) {
-      return (((TaggedWord) o).toString(separator));
+      return ((TaggedWord) o).toString(separator);
     } else if (separator != null && o instanceof LabeledWord) {
-      return (((LabeledWord) o).toString(separator));
+      return ((LabeledWord) o).toString(separator);
     } else if (separator != null && o instanceof WordLemmaTag) {
-      return (((WordLemmaTag) o).toString(separator));
+      return ((WordLemmaTag) o).toString(separator);
     } else if (separator != null && o instanceof WordTag) {
-      return (((WordTag) o).toString(separator));
+      return ((WordTag) o).toString(separator);
     } else {
       return (o.toString());
     }

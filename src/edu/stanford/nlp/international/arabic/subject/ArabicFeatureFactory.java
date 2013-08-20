@@ -6,7 +6,7 @@ import java.util.regex.*;
 import edu.stanford.nlp.sequences.*;
 import edu.stanford.nlp.international.arabic.ArabicWordLists;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.PaddedList;
 
 
@@ -70,12 +70,12 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
   //TODO Disable agreement on governed verbs
   protected String agreement(PaddedList<? extends CoreLabel> cInfo, int loc,int offset)
   {
-    String nounGender = cInfo.get(loc).getString(MorphoGenAnnotation.class);
-    String nounNum = cInfo.get(loc).getString(MorphoNumAnnotation.class);
-    String nounCase = cInfo.get(loc).getString(MorphoCaseAnnotation.class);
+    String nounGender = cInfo.get(loc).getString(CoreAnnotations.MorphoGenAnnotation.class);
+    String nounNum = cInfo.get(loc).getString(CoreAnnotations.MorphoNumAnnotation.class);
+    String nounCase = cInfo.get(loc).getString(CoreAnnotations.MorphoCaseAnnotation.class);
 
-    String thisTag = cInfo.get(loc - offset).getString(PartOfSpeechAnnotation.class);
-    String thisWord = cInfo.get(loc - offset).getString(TextAnnotation.class);
+    String thisTag = cInfo.get(loc - offset).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+    String thisWord = cInfo.get(loc - offset).getString(CoreAnnotations.TextAnnotation.class);
     Matcher m = verbTagStem.matcher(thisTag);
     if(m.lookingAt() && !kanSisters.contains(thisWord) && !innaSisters.contains(thisWord))
     {
@@ -88,12 +88,12 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
       if(nounCase.startsWith("GEN"))
         return Boolean.toString(false) + "-" + nounCase;
 
-      String verbGender = cInfo.get(loc - offset).getString(MorphoGenAnnotation.class);
-      String verbNum = cInfo.get(loc - offset).getString(MorphoNumAnnotation.class);
-      String verbPers = cInfo.get(loc - offset).getString(MorphoPersAnnotation.class);
+      String verbGender = cInfo.get(loc - offset).getString(CoreAnnotations.MorphoGenAnnotation.class);
+      String verbNum = cInfo.get(loc - offset).getString(CoreAnnotations.MorphoNumAnnotation.class);
+      String verbPers = cInfo.get(loc - offset).getString(CoreAnnotations.MorphoPersAnnotation.class);
 
       //Look for a definite sign of a verb-initial clause
-      String pTag = cInfo.get(loc-offset-1).getString(PartOfSpeechAnnotation.class);
+      String pTag = cInfo.get(loc-offset-1).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
       boolean verbInitialClause = (pTag.equals(flags.backgroundSymbol) || pTag.equals("CC") || pTag.equals("RP") || pTag.equals("IN"));
 
       if(verbGender.equals(nounGender) && verbNum.equals(nounNum))
@@ -115,8 +115,8 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
   }
 
   protected boolean isSVO(PaddedList<? extends CoreLabel> cInfo, int verbPos) {
-    String pWord = cInfo.get(verbPos - 1).getString(TextAnnotation.class);
-    String pTag = cInfo.get(verbPos - 1).getString(PartOfSpeechAnnotation.class);
+    String pWord = cInfo.get(verbPos - 1).getString(CoreAnnotations.TextAnnotation.class);
+    String pTag = cInfo.get(verbPos - 1).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
 
     //Verb preceded by a noun or a personal pronoun
     if(dimirMunfasala.contains(pWord) || innaSisters.contains(pWord))
@@ -133,13 +133,13 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
   {
     int tagsToAdd = length;
     if(loc + 1 < cInfo.size()) {
-      features.add(cInfo.get(loc + 1).getString(PartOfSpeechAnnotation.class) + "-nTAG");
+      features.add(cInfo.get(loc + 1).getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-nTAG");
       --tagsToAdd;
     }
 
     String prefix = "";
     for(int offset = 0; (loc - offset) >= 0 && tagsToAdd > 0; offset++) {
-      features.add(cInfo.get(loc - offset).getString(PartOfSpeechAnnotation.class) + "-" + prefix + "TAG");
+      features.add(cInfo.get(loc - offset).getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-" + prefix + "TAG");
       --tagsToAdd;
       prefix += "p";
     }
@@ -147,13 +147,13 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
 
   protected void printMorphoFeatures(CoreLabel l)
   {
-    String word = l.getString(TextAnnotation.class);
-    String tag = l.getString(PartOfSpeechAnnotation.class);
-    String lCase = l.getString(MorphoCaseAnnotation.class);
-    String lGender = l.getString(MorphoGenAnnotation.class);
-    String lNum = l.getString(MorphoNumAnnotation.class);
-    String lPers = l.getString(MorphoPersAnnotation.class);
-    String lStem = l.getString(StemAnnotation.class);
+    String word = l.getString(CoreAnnotations.TextAnnotation.class);
+    String tag = l.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+    String lCase = l.getString(CoreAnnotations.MorphoCaseAnnotation.class);
+    String lGender = l.getString(CoreAnnotations.MorphoGenAnnotation.class);
+    String lNum = l.getString(CoreAnnotations.MorphoNumAnnotation.class);
+    String lPers = l.getString(CoreAnnotations.MorphoPersAnnotation.class);
+    String lStem = l.getString(CoreAnnotations.StemAnnotation.class);
 
     System.err.printf(" (%s): %s %s %s %s %s %s\n",word,tag,lCase,lGender,lNum,lPers,lStem);
   }
@@ -165,9 +165,9 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
   private Pattern specialSister = Pattern.compile("كان"); //Unvocalized has identical orthography to copular verb
   protected void addInna(Collection<String> features, PaddedList<? extends CoreLabel> cInfo, int loc)
   {
-    String cTag = cInfo.get(loc).getString(PartOfSpeechAnnotation.class);
-    String pWord = cInfo.get(loc - 1).getString(TextAnnotation.class);
-    String pTag = cInfo.get(loc - 1).getString(PartOfSpeechAnnotation.class);
+    String cTag = cInfo.get(loc).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+    String pWord = cInfo.get(loc - 1).getString(CoreAnnotations.TextAnnotation.class);
+    String pTag = cInfo.get(loc - 1).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
 
     boolean fireFeature = false;
     String featureSister = "";
@@ -196,11 +196,11 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
 
   protected void addPath(Collection<String> features, PaddedList<? extends CoreLabel> cInfo, int loc) {
     StringBuilder path = new StringBuilder();
-    String cTag = cInfo.get(loc).getString(PartOfSpeechAnnotation.class);
+    String cTag = cInfo.get(loc).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
     path.append(cTag);
 
     for(int i = 1; i <= pathLength && (loc - i) >= 0; i++) {
-      String thisTag = cInfo.get(loc - i).getString(PartOfSpeechAnnotation.class);
+      String thisTag = cInfo.get(loc - i).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
       path.append("-" + thisTag);
       Matcher m = verbTagStem.matcher(thisTag);
       if(m.lookingAt()) {
@@ -216,9 +216,9 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
     CoreLabel n = (loc + 1 < cInfo.size()) ? cInfo.get(loc + 1) : null;
     CoreLabel p = (loc - 1 >= 0) ? cInfo.get(loc - 1) : null;
 
-    String nWord = (n != null) ? n.getString(TextAnnotation.class) : null;
-    String cWord = (c != null) ? c.getString(TextAnnotation.class) : null;
-    String pWord = (p != null) ? p.getString(TextAnnotation.class) : null;
+    String nWord = (n != null) ? n.getString(CoreAnnotations.TextAnnotation.class) : null;
+    String cWord = (c != null) ? c.getString(CoreAnnotations.TextAnnotation.class) : null;
+    String pWord = (p != null) ? p.getString(CoreAnnotations.TextAnnotation.class) : null;
 
     Collection<String> featuresC = new ArrayList<String>();
 
@@ -258,7 +258,7 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
         cWordPrefix = cWord.substring(0, 2);
         cWordSuffix = cWord.substring(cWord.length()-1,cWord.length());
       }
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
 
       Matcher m = nounTagStem.matcher(cTag);
       if((m.find() || cTag.contains(adjTagStem)) && !cWordPrefix.equals("ال") && cWordSuffix.equals("ا"))
@@ -267,8 +267,8 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
       }
     }
     if(flags.useVB) {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String stem = c.getString(StemAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String stem = c.getString(CoreAnnotations.StemAnnotation.class);
       if(!stem.equals("NA") && !stem.equals(flags.backgroundSymbol))
         featuresC.add(cTag + "-true" + "-USEVB");
       else
@@ -283,7 +283,7 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
         featuresC.add(cWord + "-CTEMPORAL_NN");
     }
     if(flags.usePath) {
-      String cTag = c.getString(PartOfSpeechAnnotation.class).trim();
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class).trim();
       if(cTag.contains("NN") || cTag.startsWith("PRP") || cTag.equals("IN"))
         addPath(featuresC,cInfo,loc);
     }
@@ -299,11 +299,11 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
       }
       if(canAgree)
       {
-        String cTag = c.getString(PartOfSpeechAnnotation.class);
+        String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
         Matcher m = nounTagStem.matcher(cTag);
         if(m.find()) {
           for(int offset = 1; offset <= 5 && (loc - offset) >= 0; offset++) {
-            String pTagi = cInfo.get(loc - offset).getString(PartOfSpeechAnnotation.class);
+            String pTagi = cInfo.get(loc - offset).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
 
             if(pTagi.contains("NN")) {
               break;
@@ -333,28 +333,28 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
       featuresCpC.add("#CpC#");
     if(flags.useTagsCpC && p != null)
     {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String pTag = p.getString(PartOfSpeechAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String pTag = p.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
       featuresCpC.add(cTag + "+" + pTag + "-TAG");
       //addTags(featuresCpC, cInfo, loc, flags.numTags);
     }
     if(flags.useConcord && p != null) //Noun concord
     {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String pTag = p.getString(PartOfSpeechAnnotation.class);
-      String cWord = c.getString(TextAnnotation.class);
-      String pWord = p.getString(TextAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String pTag = p.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String cWord = c.getString(CoreAnnotations.TextAnnotation.class);
+      String pWord = p.getString(CoreAnnotations.TextAnnotation.class);
 
       Matcher m1 = concordable.matcher(cTag);
       Matcher m2 = concordable.matcher(pTag);
       if(m1.find() && cWord.length() > 1 && m2.find() && pWord.length() > 1) {
 
         //Direct observations
-        String cGender = c.getString(MorphoGenAnnotation.class);
+        String cGender = c.getString(CoreAnnotations.MorphoGenAnnotation.class);
         String cWordPrefix = (cWord.length() >= 2) ? cWord.substring(0, 2) : null;
 
         String pWordPrefix = (pWord.length() >= 2) ? pWord.substring(0, 2) : null;
-        String pGender = p.getString(MorphoGenAnnotation.class);
+        String pGender = p.getString(CoreAnnotations.MorphoGenAnnotation.class);
 
 
         //1 letter suffix (feminine)
@@ -395,10 +395,10 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
     }
     if(flags.useConjBreak && p != null)
     {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String pTag = p.getString(PartOfSpeechAnnotation.class);
-      String cWord = c.getString(TextAnnotation.class);
-      String pWord = p.getString(TextAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String pTag = p.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String cWord = c.getString(CoreAnnotations.TextAnnotation.class);
+      String pWord = p.getString(CoreAnnotations.TextAnnotation.class);
 
       //TODO - Re-factor using the regex compiler
       if(!cTag.matches(".*NN.*|.*CD.*|.*VB.*"))
@@ -411,17 +411,17 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
     }
     if(flags.usePPVBPairs && p != null)
     {
-      String cWord = c.getString(TextAnnotation.class);
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
+      String cWord = c.getString(CoreAnnotations.TextAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
       if(cTag.startsWith("IN"))
       {
         //TODO 10 covers all but 8% of NP subjects in the ATB (Green et al., 2009)
         for(int offset = 1; offset < 10 && (loc - offset) >= 0; offset++)
         {
-          String pTag = cInfo.get(loc - offset).getString(PartOfSpeechAnnotation.class);
+          String pTag = cInfo.get(loc - offset).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
           if(pTag.startsWith("VB"))
           {
-            String verbStem = cInfo.get(loc - offset).getString(StemAnnotation.class);
+            String verbStem = cInfo.get(loc - offset).getString(CoreAnnotations.StemAnnotation.class);
             if(!verbStem.equals("NA"))
             {
               featuresCpC.add(cWord + "+" + verbStem + "-PPVBPair");
@@ -433,10 +433,10 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
     }
     if(flags.useParenMatching)
     {
-      String cWord = c.getString(TextAnnotation.class);
+      String cWord = c.getString(CoreAnnotations.TextAnnotation.class);
       if(cWord.equals("\"")) {
         for(int i = 1; i <= 6 && (loc -i) >= 0; i++) {
-          String pWord = cInfo.get(loc-i).getString(TextAnnotation.class);
+          String pWord = cInfo.get(loc-i).getString(CoreAnnotations.TextAnnotation.class);
           if(pWord.equals("\""))
           {
             featuresCpC.add("-QUOTE-MATCH");
@@ -445,7 +445,7 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
         }
       } else if(cWord.equals(")")) {
         for(int i = 1; i <= 6 && (loc -i) >= 0; i++) {
-          String pWord = cInfo.get(loc-i).getString(TextAnnotation.class);
+          String pWord = cInfo.get(loc-i).getString(CoreAnnotations.TextAnnotation.class);
           if(pWord.equals("("))
           {
             featuresCpC.add("-PAREN-MATCH");
@@ -455,28 +455,28 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
       }
     }
     if(flags.useAnnexing && p != null) {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String pTag = p.getString(PartOfSpeechAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String pTag = p.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
 
       if((cTag.startsWith("DTNN") || cTag.startsWith("DTJJ") || cTag.equals(adjNumTag))
           && (pTag.equals("NN") || pTag.equals("NNS")))
         featuresCpC.add(pTag + "-" + cTag + "-ANNEXING");
     }
     if(flags.useTemporalNN && p != null) {
-      String cWord = c.getString(TextAnnotation.class);
-      String pWord = p.getString(TextAnnotation.class);
+      String cWord = c.getString(CoreAnnotations.TextAnnotation.class);
+      String pWord = p.getString(CoreAnnotations.TextAnnotation.class);
       if(temporalNouns.contains(cWord) && temporalNouns.contains(pWord))
         featuresCpC.add(pWord + "-" + cWord + "-CpCTEMPORAL_NN");
     }
     if(flags.markProperNN && p != null) {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String pTag = p.getString(PartOfSpeechAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String pTag = p.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
       if(cTag.endsWith("NNP") && pTag.endsWith("NNP"))
         featuresCpC.add(cTag + "-" + pTag + "-CpCPROPERNN");
     }
     if(flags.markMasdar && p != null) {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String pTag = p.getString(PartOfSpeechAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String pTag = p.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
       if(cTag.equals("PRP$") && pTag.equals("VBG"))
         featuresCpC.add("-CpCMASDAR");
     }
@@ -497,9 +497,9 @@ public class ArabicFeatureFactory<IN extends CoreLabel> extends FeatureFactory<I
         featuresCpCp2C.add("#CpCp2C#");
 
     if (flags.useTagsCpCp2C && p != null && p2 != null) {
-      String cTag = c.getString(PartOfSpeechAnnotation.class);
-      String pTag = p.getString(PartOfSpeechAnnotation.class);
-      String p2Tag = p2.getString(PartOfSpeechAnnotation.class);
+      String cTag = c.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String pTag = p.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+      String p2Tag = p2.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
 
       featuresCpCp2C.add(String.format("%s+%s+%s-TAG", cTag, pTag, p2Tag));
     }

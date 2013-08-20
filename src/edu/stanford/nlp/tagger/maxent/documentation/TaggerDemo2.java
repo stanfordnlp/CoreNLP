@@ -14,7 +14,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 /** This demo shows user-provided sentences (i.e., {@code List<HasWord>})
@@ -43,6 +43,7 @@ class TaggerDemo2 {
       List<TaggedWord> tSentence = tagger.tagSentence(sentence);
       pw.println(Sentence.listToString(tSentence, false));
     }
+    pw.close();
   }
 
 }

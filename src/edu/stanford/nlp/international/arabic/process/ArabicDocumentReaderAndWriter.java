@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.LineIterator;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
@@ -22,7 +20,7 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 /**
  * Reads newline delimited UTF-8 Arabic sentences with or without
  * gold segmentation markers. When segmentation markers are present,
- * this class may be used for 
+ * this class may be used for
  *
  * @author Spence Green
  */
@@ -31,44 +29,44 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   private static final long serialVersionUID = 6730676681967976015L;
 
   private final IteratorFromReaderFactory<List<CoreLabel>> factory;
-  
+
   private final TokenizerFactory<CoreLabel> tf;
 
   // The segmentation marker used in the ATBv3 training data.
   private static final Character DEFAULT_SEG_MARKER = '-';
-  
+
   private final Character segMarker;
 
   // TODO(spenceg): Make this configurable.
   private final String tagDelimiter = "|||";
-  
+
   private final boolean inputHasTags;
-    
+
   /**
-   * 
+   *
    * @param hasSegMarkers if true, input has segmentation markers
    */
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers) {
     this(hasSegMarkers, null);
   }
-  
+
   /**
-   * 
+   *
    * @param hasSegMarkers if true, input has segmentation markers
    * @param tokFactory a TokenizerFactory for the input
    */
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers, TokenizerFactory<CoreLabel> tokFactory) {
     this(hasSegMarkers, false, tokFactory);
   }
-  
+
   /**
-   * 
+   *
    * @param hasSegMarkers if true, input has segmentation markers
    * @param hasTags if true, input has morphological analyses separated by tagDelimiter.
    * @param tokFactory a TokenizerFactory for the input
    */
-  public ArabicDocumentReaderAndWriter(boolean hasSegMarkers, 
-                                       boolean hasTags, 
+  public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
+                                       boolean hasTags,
                                        TokenizerFactory<CoreLabel> tokFactory) {
     tf = tokFactory;
     inputHasTags = hasTags;
@@ -87,7 +85,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
             String word = wordTagPair[0];
             if (tf != null) {
               List<CoreLabel> lexList = tf.getTokenizer(new StringReader(word)).tokenize();
-              if (lexList.size() == 0) { 
+              if (lexList.size() == 0) {
                 continue;
               } else if (lexList.size() > 1) {
                 System.err.printf("%s: Raw token generates multiple segments: %s%n", this.getClass().getName(), word);
@@ -100,16 +98,16 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
             input.add(cl);
           }
           return IOBUtils.StringToIOB(input, segMarker, true);
-        
+
         } else if (tf == null) {
           return IOBUtils.StringToIOB(in, segMarker);
-        
+
         } else {
           List<CoreLabel> line = tf.getTokenizer(new StringReader(in)).tokenize();
           return IOBUtils.StringToIOB(line, segMarker, false);
         }
       }
-    });    
+    });
   }
 
   /**
@@ -127,9 +125,9 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public void printAnswers(List<CoreLabel> doc, PrintWriter pw) {
     pw.println("Answer\tGoldAnswer\tCharacter");
     for(CoreLabel word : doc) {
-      pw.printf("%s\t%s\t%s%n", word.get(AnswerAnnotation.class), 
-                                word.get(GoldAnswerAnnotation.class),
-                                word.get(CharAnnotation.class));
+      pw.printf("%s\t%s\t%s%n", word.get(CoreAnnotations.AnswerAnnotation.class),
+                                word.get(CoreAnnotations.GoldAnswerAnnotation.class),
+                                word.get(CoreAnnotations.CharAnnotation.class));
     }
   }
 }

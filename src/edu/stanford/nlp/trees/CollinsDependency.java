@@ -3,10 +3,9 @@ package edu.stanford.nlp.trees;
 import java.util.*;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ValueAnnotation;
-
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.CollinsRelation.Direction;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Extracts bilexical dependencies from Penn Treebank-style phrase structure trees
@@ -60,8 +59,8 @@ public class CollinsDependency implements Dependency<CoreLabel, CoreLabel, Strin
 
 	private static CoreLabel makeStartLabel(String label) {
 		CoreLabel root = new CoreLabel();
-		root.set(ValueAnnotation.class, label);
-		root.set(IndexAnnotation.class, 0);
+		root.set(CoreAnnotations.ValueAnnotation.class, label);
+		root.set(CoreAnnotations.IndexAnnotation.class, 0);
 		return root;
 	}
 
@@ -84,7 +83,7 @@ public class CollinsDependency implements Dependency<CoreLabel, CoreLabel, Strin
 	private static Set<CollinsDependency> extractFromTree(Tree t, String startSymbol, HeadFinder hf, boolean normPOS) {
 		if(t == null || startSymbol.equals("") || hf == null) return null;
 
-		final Set<CollinsDependency> deps = new HashSet<CollinsDependency>();
+		final Set<CollinsDependency> deps = Generics.newHashSet();
 
 		if(t.value().equals(startSymbol)) t = t.firstChild();
 

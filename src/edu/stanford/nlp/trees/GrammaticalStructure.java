@@ -7,8 +7,8 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.StringLabel;
 import edu.stanford.nlp.ling.Word;
@@ -16,8 +16,7 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.HeadTagAnnotation;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.HeadWordAnnotation;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Function;
@@ -33,7 +32,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
 /**
- * A <code>GrammaticalStructure</code> is a {@link TreeGraph
+ * A {@code GrammaticalStructure} is a {@link TreeGraph
  * <code>TreeGraph</code>} (that is, a tree with additional labeled
  * arcs between nodes) for representing the grammatical relations in a
  * parse tree.  A new <code>GrammaticalStructure</code> is constructed
@@ -68,6 +67,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
   protected final List<TypedDependency> typedDependencies;
   protected final List<TypedDependency> allTypedDependencies;
 
+  protected final Filter<String> puncFilter;
+
   /**
    * Create a new GrammaticalStructure, analyzing the parse tree and
    * populate the GrammaticalStructure with as many labeled
@@ -89,6 +90,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // add head word and tag to phrase nodes
     root.percolateHeads(hf);
     // add dependencies, using heads
+    this.puncFilter = puncFilter;
     NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
     dependencies = root.dependencies(puncDepFilter, null);
@@ -133,18 +135,15 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param posTags
    * @param deps
    */
-  public static GrammaticalStructure fromStringReps(List<String> tokens,
-                                                    List<String> posTags, List<String> deps) {
+  public static GrammaticalStructure fromStringReps(List<String> tokens, List<String> posTags, List<String> deps) {
     if (tokens.size() != posTags.size()) {
       throw new RuntimeException(String.format(
               "tokens.size(): %d != pos.size(): %d\n", tokens.size(), posTags
                       .size()));
     }
 
-    List<TreeGraphNode> tgWordNodes = new ArrayList<TreeGraphNode>(tokens
-            .size());
-    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokens
-            .size());
+    List<TreeGraphNode> tgWordNodes = new ArrayList<TreeGraphNode>(tokens.size());
+    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokens.size());
 
     SemanticHeadFinder headFinder = new SemanticHeadFinder();
 
@@ -163,8 +162,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     TreeGraphNode root = new TreeGraphNode(new StringLabel("ROOT"));
 
-    root.setChildren(tgPOSNodes
-            .toArray(new TreeGraphNode[tgPOSNodes.size()]));
+    root.setChildren(tgPOSNodes.toArray(new TreeGraphNode[tgPOSNodes.size()]));
 
     root.setIndex(0);
 
@@ -180,8 +178,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
       if (depString.charAt(depString.length() - 1) != ')') throwDepFormatException(depString);
 
-      String args = depString.substring(firstBracket + 1,
-              depString.length() - 1);
+      String args = depString.substring(firstBracket + 1, depString.length() - 1);
 
       int argSep = args.indexOf(", ");
       if (argSep == -1) throwDepFormatException(depString);
@@ -199,9 +196,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
       GrammaticalRelation grel = new GrammaticalRelation(GrammaticalRelation.Language.Any, type, null, null, DEPENDENT);
 
-      TypedDependency tdep =
-              new TypedDependency(grel, (parentIdx == 0 ? root: tgWordNodes.get(parentIdx-1)),
-                      tgWordNodes.get(childIdx-1));
+      TypedDependency tdep = new TypedDependency(grel, (parentIdx == 0 ? root: tgWordNodes.get(parentIdx-1)), tgWordNodes.get(childIdx-1));
       tdeps.add(tdep);
     }
 
@@ -214,8 +209,9 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   public GrammaticalStructure(List<TypedDependency> projectiveDependencies, TreeGraphNode root) {
     super(root);
+    this.puncFilter = Filters.acceptFilter();
     allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
-    dependencies = new HashSet<Dependency<Label, Label, Object>>();
+    dependencies = Generics.newHashSet();
     for (TypedDependency tdep : projectiveDependencies) {
       dependencies.add(new NamedDependency(tdep.gov().toString(), tdep.dep().toString(), tdep.reln()));
     }
@@ -314,12 +310,21 @@ public abstract class GrammaticalStructure extends TreeGraph {
     }
 
     if (getExtra) {
-      TreeGraphNode rootTree = root();
-      getDep(rootTree, basicDep, f); // adds stuff to basicDep
+      getExtras(basicDep);
+      getTreeDeps(root(), basicDep, f); // adds stuff to basicDep
     }
     Collections.sort(basicDep);
 
     return basicDep;
+  }
+
+  /**
+   * Get extra dependencies that do not depend on the tree structure,
+   * but rather only depend on the existing dependency structure.
+   * For example, the English xsubj dependency can be extracted that way.
+   */
+  protected void getExtras(List<TypedDependency> basicDep) {
+    // no extra dependencies by default
   }
 
 
@@ -330,11 +335,11 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param basicDep The list of dependencies which may be augmented
    * @param f Additional dependencies are added only if they pass this filter
    */
-  private static void getDep(TreeGraphNode t, List<TypedDependency> basicDep,
-                             Filter<TypedDependency> f) {
+  private static void getTreeDeps(TreeGraphNode t, List<TypedDependency> basicDep,
+                                  Filter<TypedDependency> f) {
     if (t.isPhrasal()) {          // don't do leaves of POS tags (chris changed this from numChildren > 0 in 2010)
-      Map<Class<? extends CoreAnnotation>, Set<TreeGraphNode>> depMap = getAllDependents(t);
-      for (Class<? extends CoreAnnotation> depName : depMap.keySet()) {
+      Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> depMap = getAllDependents(t);
+      for (Class<? extends GrammaticalRelationAnnotation> depName : depMap.keySet()) {
         for (TreeGraphNode depNode : depMap.get(depName)) {
           TreeGraphNode gov = t.headWordNode();
           TreeGraphNode dep = depNode.headWordNode();
@@ -354,7 +359,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
       // now recurse into children
       for (Tree kid : t.children()) {
-        getDep((TreeGraphNode) kid, basicDep, f);
+        getTreeDeps((TreeGraphNode) kid, basicDep, f);
       }
     }
   }
@@ -426,7 +431,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return a <code>Set</code> of nodes which are dependents of
    *         node <code>t</code>, or else <code>null</code>
    */
-  public Set<TreeGraphNode> getDependents(TreeGraphNode t) {
+  public static Set<TreeGraphNode> getDependents(TreeGraphNode t) {
     Set<TreeGraphNode> deps = Generics.newTreeSet();
     for (Tree subtree : t) {
       TreeGraphNode node = (TreeGraphNode) subtree;
@@ -506,11 +511,11 @@ public abstract class GrammaticalStructure extends TreeGraph {
     }
     if (PRINT_DEBUGGING && reln.equals(GrammaticalRelation.DEPENDENT)) {
       String topCat = govH.label().get(CoreAnnotations.ValueAnnotation.class);
-      String topTag = govH.label().get(HeadTagAnnotation.class).value();
-      String topWord = govH.label().get(HeadWordAnnotation.class).value();
+      String topTag = govH.label().get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
+      String topWord = govH.label().get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
       String botCat = depH.label().get(CoreAnnotations.ValueAnnotation.class);
-      String botTag = depH.label().get(HeadTagAnnotation.class).value();
-      String botWord = depH.label().get(HeadWordAnnotation.class).value();
+      String botTag = depH.label().get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
+      String botWord = depH.label().get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
       System.err.println("### dep\t" + topCat + "\t" + topTag + "\t" + topWord +
                          "\t" + botCat + "\t" + botTag + "\t" + botWord + "\t");
     }
@@ -601,8 +606,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return The typed dependencies of this grammatical structure
    */
   public List<TypedDependency> typedDependencies(boolean includeExtras) {
-    List<TypedDependency> deps = includeExtras ? allTypedDependencies
-                                                       : typedDependencies;
+    List<TypedDependency> deps = new ArrayList<TypedDependency>(includeExtras ? allTypedDependencies : typedDependencies);
     correctDependencies(deps);
     return deps;
   }
@@ -653,8 +657,18 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return collapsed dependencies
    */
   public List<TypedDependency> typedDependenciesCollapsed(boolean includeExtras) {
-    List<TypedDependency> tdl = typedDependencies(includeExtras);
-    collapseDependencies(tdl, false);
+    List<TypedDependency> tdl = typedDependencies(false);
+    // Adds stuff to the basic dependencies.
+    // We don't want to simply call typedDependencies with
+    // "includeExtras" because the collapseDependencies method may add
+    // the extras in a way that makes more logical sense.  For
+    // example, the English dependencies, when CC processed, have more
+    // nsubjs than they originally do.  If we wait until that occurs
+    // to add xsubj for xcomp dependencies, we get better coverage.
+    if (includeExtras) {
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
+    }
+    collapseDependencies(tdl, false, includeExtras);
     return tdl;
   }
 
@@ -673,8 +687,18 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return collapsed dependencies with CC processed
    */
   public List<TypedDependency> typedDependenciesCCprocessed(boolean includeExtras) {
-    List<TypedDependency> tdl = typedDependencies(includeExtras);
-    collapseDependencies(tdl, true);
+    List<TypedDependency> tdl = typedDependencies(false);
+    // Adds stuff to the basic dependencies.
+    // We don't want to simply call typedDependencies with
+    // "includeExtras" because the collapseDependencies method may add
+    // the extras in a way that makes more logical sense.  For
+    // example, the English dependencies, when CC processed, have more
+    // nsubjs than they originally do.  If we wait until that occurs
+    // to add xsubj for xcomp dependencies, we get better coverage.
+    if (includeExtras) {
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
+    }
+    collapseDependencies(tdl, true, includeExtras);
     return tdl;
   }
 
@@ -704,7 +728,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param list A list of dependencies to process for possible collapsing
    * @param CCprocess apply CC process?
    */
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
     // do nothing as default operation
   }
 
@@ -778,13 +802,14 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param node The node to return dependents for
    * @return map of dependencies
    */
-  private static Map<Class<? extends CoreAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
-    Map<Class<? extends CoreAnnotation>, Set<TreeGraphNode>> newMap = Generics.newHashMap();
+  private static Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
+    Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> newMap = Generics.newHashMap();
 
     for (Class<?> o : node.label.keySet()) {
       if (GrammaticalRelationAnnotation.class.isAssignableFrom(o)) {
-        // ignore a non-GrammaticalRelationAnnotation element
-        newMap.put((Class<? extends CoreAnnotation>) o, (Set<TreeGraphNode>) node.label.get((Class<? extends CoreAnnotation>) o));//javac doesn't compile properly if generics are fully specified (but eclipse does...)
+        // ignore any non-GrammaticalRelationAnnotation element
+        Class<? extends GrammaticalRelationAnnotation> typedKey = ErasureUtils.uncheckedCast(o);
+        newMap.put(typedKey, node.label.get(typedKey));
       }
     }
     return newMap;
@@ -815,13 +840,13 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     // need to see if more than one governor is not listed somewhere as a dependent
     // first take all the deps
-    Collection<TreeGraphNode> deps = new HashSet<TreeGraphNode>();
+    Collection<TreeGraphNode> deps = Generics.newHashSet();
     for (TypedDependency typedDep : list) {
       deps.add(typedDep.dep());
     }
 
     // go through the list and add typedDependency for which the gov is not a dep
-    Collection<TreeGraphNode> govs = new HashSet<TreeGraphNode>();
+    Collection<TreeGraphNode> govs = Generics.newHashSet();
     for (TypedDependency typedDep : list) {
       TreeGraphNode gov = typedDep.gov();
       if (!deps.contains(gov) && !govs.contains(gov)) {
@@ -868,7 +893,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   public static String dependenciesToString(GrammaticalStructure gs, Collection<TypedDependency> deps, Tree tree, boolean conllx, boolean extraSep) {
     StringBuilder bf = new StringBuilder();
 
-    Map<Integer, Integer> indexToPos = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> indexToPos = Generics.newHashMap();
     indexToPos.put(0,0); // to deal with the special node "ROOT"
     List<Tree> gsLeaves = gs.root.getLeaves();
     for (int i = 0; i < gsLeaves.size(); i++) {
@@ -1200,7 +1225,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     }
   }
 
-  private static Function<Object, Tree> loadParser(String parserFile, String parserOptions, boolean makeCopulaHead) {
+  private static Function<List<? extends HasWord>, Tree> loadParser(String parserFile, String parserOptions, boolean makeCopulaHead) {
     if (parserFile == null || "".equals(parserFile)) {
       parserFile = DEFAULT_PARSER_FILE;
       if (parserOptions == null) {
@@ -1216,8 +1241,12 @@ public abstract class GrammaticalStructure extends TreeGraph {
     parserOptions = parserOptions.trim();
     // Load parser by reflection, so that this class doesn't require parser
     // for runtime use
-    // LexicalizedParser lp = new LexicalizedParser(parserFile);
-    Function<Object, Tree> lp;
+    // LexicalizedParser lp = LexicalizedParser.loadModel(parserFile);
+    // For example, the tregex package uses TreePrint, which uses
+    // GrammaticalStructure, which would then import the
+    // LexicalizedParser.  The tagger can read trees, which means it
+    // would depend on tregex and therefore depend on the parser.
+    Function<List<? extends HasWord>, Tree> lp;
     try {
       Class<?>[] classes = new Class<?>[] { String.class, String[].class };
       Method method = Class.forName("edu.stanford.nlp.parser.lexparser.LexicalizedParser").getMethod("loadModel", classes);
@@ -1225,7 +1254,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       if (parserOptions.length() > 0) {
         opts = parserOptions.split(" +");
       }
-      lp = (Function<Object,Tree>) method.invoke(null, parserFile, opts);
+      lp = (Function<List<? extends HasWord>,Tree>) method.invoke(null, parserFile, opts);
     } catch (Exception cnfe) {
       throw new RuntimeException(cnfe);
     }
@@ -1475,7 +1504,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       String parserFile = props.getProperty("parserFile");
       String parserOpts = props.getProperty("parserOpts");
       boolean tokenized = props.getProperty("tokenized") != null;
-      Function<Object, Tree> lp = loadParser(parserFile, parserOpts, makeCopulaHead);
+      Function<List<? extends HasWord>, Tree> lp = loadParser(parserFile, parserOpts, makeCopulaHead);
       trees = new LazyLoadTreesByParsing(sentFileName, encoding, tokenized, lp);
 
       // Instead of getting this directly from the LP, use reflection
@@ -1503,7 +1532,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     boolean checkConnected = props.getProperty("checkConnected") != null;
     boolean portray = props.getProperty("portray") != null;
 
-    // make keepPunct default if conllx is turned on
+    // enforce keepPunct if conllx is turned on
     if(conllx) {
       keepPunct = true;
     }
@@ -1522,7 +1551,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       // see if we can use SemanticGraph(Factory) to check for being a DAG
       // Do this by reflection to avoid this becoming a dependency when we distribute the parser
       try {
-        Class sgf = Class.forName("edu.stanford.nlp.trees.semgraph.SemanticGraphFactory");
+        Class sgf = Class.forName("edu.stanford.nlp.semgraph.SemanticGraphFactory");
         m = sgf.getDeclaredMethod("makeFromTree", GrammaticalStructure.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, Filter.class, String.class, int.class);
       } catch (Exception e) {
         System.err.println("Test cannot check for cycles in tree format (classes not available)");
@@ -1589,7 +1618,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
           try {
             // the first arg is null because it's a static method....
             Object semGraph = m.invoke(null, gs, false, true, false, false, false, false, null, null, 0);
-            Class sg = Class.forName("edu.stanford.nlp.trees.semgraph.SemanticGraph");
+            Class sg = Class.forName("edu.stanford.nlp.semgraph.SemanticGraph");
             Method mDag = sg.getDeclaredMethod("isDag");
             boolean isDag = (Boolean) mDag.invoke(semGraph);
 
@@ -1664,7 +1693,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       if (portray) {
         try {
           // put up a window showing it
-          Class sgu = Class.forName("edu.stanford.nlp.trees.semgraph.SemanticGraphUtils");
+          Class sgu = Class.forName("edu.stanford.nlp.semgraph.SemanticGraphUtils");
           Method mRender = sgu.getDeclaredMethod("render", GrammaticalStructure.class, String.class);
           // the first arg is null because it's a static method....
           mRender.invoke(null, gs, "Collapsed, CC processed deps");
@@ -1682,16 +1711,16 @@ public abstract class GrammaticalStructure extends TreeGraph {
     final String filename;
     final boolean tokenized;
     final String encoding;
-    final Function<Object, Tree> lp;
+    final Function<List<? extends HasWord>, Tree> lp;
 
-    public LazyLoadTreesByParsing(String filename, String encoding, boolean tokenized, Function<Object, Tree> lp) {
+    public LazyLoadTreesByParsing(String filename, String encoding, boolean tokenized, Function<List<? extends HasWord>, Tree> lp) {
       this.filename = filename;
       this.encoding = encoding;
       this.reader = null;
       this.tokenized = tokenized;
       this.lp = lp;
     }
-    public LazyLoadTreesByParsing(Reader reader, boolean tokenized, Function<Object, Tree> lp) {
+    public LazyLoadTreesByParsing(Reader reader, boolean tokenized, Function<List<? extends HasWord>, Tree> lp) {
       this.filename = null;
       this.encoding = null;
       this.reader = reader;

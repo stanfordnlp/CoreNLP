@@ -49,7 +49,7 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
 
   // Primitive Heap Operations
 
-  private int parent(final int index) {
+  private static int parent(final int index) {
     return (index - 1) / 2;
   }
 
@@ -136,33 +136,32 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
   private void heapifyDown(HeapEntry<E> entry) {
     // int size = size();
 
-    HeapEntry<E> currentEntry = entry;
     HeapEntry<E> minEntry; // = null;
 
     do {
-      minEntry = currentEntry;
+      minEntry = entry;
 
-      HeapEntry<E> leftEntry = leftChild(currentEntry);
+      HeapEntry<E> leftEntry = leftChild(entry);
       if (leftEntry != null) {
         if (compare(minEntry, leftEntry) > 0) {
           minEntry = leftEntry;
         }
       }
 
-      HeapEntry<E> rightEntry = rightChild(currentEntry);
+      HeapEntry<E> rightEntry = rightChild(entry);
       if (rightEntry != null) {
         if (compare(minEntry, rightEntry) > 0) {
           minEntry = rightEntry;
         }
       }
 
-      if (minEntry != currentEntry) {
+      if (minEntry != entry) {
         // Swap min and current
-        swap(minEntry, currentEntry);
+        swap(minEntry, entry);
         // at start of next loop, we set currentIndex to largestIndex
         // this indexation now holds current, so it is unchanged
       }
-    } while (minEntry != currentEntry);
+    } while (minEntry != entry);
     // System.err.println("Done with heapify down");
     // verify();
   }
@@ -172,8 +171,9 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
    * Finds the object with the minimum key, removes it from the heap,
    * and returns it.
    *
-   * @return the object with minimum key
+   * @return The object with minimum key
    */
+  @Override
   public E extractMin() {
     if (isEmpty()) {
       throw new NoSuchElementException();
@@ -195,8 +195,9 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
    * Finds the object with the minimum key and returns it, without
    * modifying the heap.
    *
-   * @return the object with minimum key
+   * @return The object with minimum key
    */
+  @Override
   public E min() {
     HeapEntry<E> minEntry = indexToEntry.get(0);
     return minEntry.object;
@@ -221,9 +222,10 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
    * change in the ordering of o.  If o's key has actually increased,
    * it will do nothing, particularly not an "increase key".
    *
-   * @param o an <code>Object</code> value
-   * @return the number of swaps done on decrease.
+   * @param o An <code>Object</code> value
+   * @return The number of swaps done on decrease.
    */
+  @Override
   public int decreaseKey(E o) {
     HeapEntry<E> entry = getEntry(o);
     if (o != entry.object) {
@@ -307,13 +309,17 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
   public ArrayHeap(Comparator<? super E> cmp) {
     this.cmp = cmp;
     indexToEntry = new ArrayList<HeapEntry<E>>();
-    objectToEntry = new HashMap<E,HeapEntry<E>>();
+    objectToEntry = Generics.newHashMap();
   }
 
   public ArrayHeap(Comparator<? super E> cmp, int initCapacity) {
     this.cmp = cmp;
     indexToEntry = new ArrayList<HeapEntry<E>>(initCapacity);
-    objectToEntry = new HashMap<E,HeapEntry<E>>(initCapacity);
+    objectToEntry = Generics.newHashMap(initCapacity);
+  }
+
+  public List<E> asList() {
+    return new LinkedList<E>(this);
   }
 
   /**

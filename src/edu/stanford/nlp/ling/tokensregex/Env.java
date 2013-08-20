@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
@@ -32,7 +33,7 @@ public class Env {
   /**
    * Mapping of variable names to their values
    */
-  Map<String, Object> variables = new HashMap<String, Object>();
+  Map<String, Object> variables = Generics.newHashMap();
   /**
    * Mapping of variables that can be expanded in a regular expression for strings,
    *   to their regular expressions.
@@ -42,12 +43,12 @@ public class Env {
    *   the name of the variable to be replaced, and a <code>String</code> representing the
    *   regular expression (escaped) that is used to replace the name of the variable.
    */
-  Map<String, Pair<Pattern,String>> stringRegexVariables = new HashMap<String, Pair<Pattern,String>>();
+  Map<String, Pair<Pattern,String>> stringRegexVariables = Generics.newHashMap();
 
   /**
    * Default parameters (used when reading in rules for {@link SequenceMatchRules}.
    */
-  public Map<String, Object> defaults = new HashMap<String, Object>();
+  public Map<String, Object> defaults = Generics.newHashMap();
 
   public int defaultStringPatternFlags = 0;
   public Class sequenceMatchResultExtractor;

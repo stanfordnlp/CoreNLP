@@ -1,6 +1,6 @@
 package edu.stanford.nlp.process;
 
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
@@ -21,7 +21,7 @@ public class WordToSentenceProcessorTest extends TestCase {
                           String ... gold) {
     Annotation annotation = new Annotation(testSentence);
     ptb.annotate(annotation);
-    List<CoreLabel> tokens = annotation.get(TokensAnnotation.class);
+    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     List<List<CoreLabel>> sentences = wts.process(tokens);
 
     assertEquals(gold.length, sentences.size());
@@ -31,7 +31,7 @@ public class WordToSentenceProcessorTest extends TestCase {
       goldAnnotations[i] = new Annotation(gold[i]);
       ptb.annotate(goldAnnotations[i]);
       List<CoreLabel> goldTokens =
-        goldAnnotations[i].get(TokensAnnotation.class);
+        goldAnnotations[i].get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> testTokens = sentences.get(i);
       int goldTokensSize = goldTokens.size();
       assertEquals(goldTokensSize, testTokens.size());
@@ -83,7 +83,7 @@ public class WordToSentenceProcessorTest extends TestCase {
     Annotation annotation = new Annotation("Foo!!");
     ptb.annotate(annotation);
     System.out.println();
-    System.out.println(annotation.get(TokensAnnotation.class));
+    System.out.println(annotation.get(CoreAnnotations.TokensAnnotation.class));
   }
   */
 }

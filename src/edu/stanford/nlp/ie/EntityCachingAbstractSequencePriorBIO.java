@@ -120,6 +120,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
       if (initialSequence[i] != backgroundSymbol) {
         rawTag = classIndex.get(sequence[i]);
         parts = rawTag.split("-");
+        //TODO(mengqiu) this needs to be updated, so that initial can be I as well
         if (parts[0].equals("B")) { // B-
           EntityBIO entity = extractEntity(initialSequence, i, parts[1]);
           addEntityToEntitiesArray(entity);
@@ -214,7 +215,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     if (sequence[position] == backgroundSymbol) { // new tag is O
       String oldRawTag = classIndex.get(oldVal);
       String[] oldParts = oldRawTag.split("-");
-      if (oldParts[0].equals("B")) { // old tag was a B, current entity definitely affeted, also ccheck next one
+      if (oldParts[0].equals("B")) { // old tag was a B, current entity definitely affected, also check next one
         EntityBIO entity = entities[position];
         if (entity == null)
           throw new RuntimeException("oldTag starts with B, entity at position should not be null");
@@ -360,7 +361,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
 
   public String toString(int pos) {
     StringBuffer sb = new StringBuffer();
-    for (int i = Math.max(0, pos - 10); i < Math.min(entities.length, pos + 10); i++) {
+    for (int i = Math.max(0, pos - 3); i < Math.min(entities.length, pos + 3); i++) {
       sb.append(i);
       sb.append("\t");
       String word = wordDoc.get(i);
