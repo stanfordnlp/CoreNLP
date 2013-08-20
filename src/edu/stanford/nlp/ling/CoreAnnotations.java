@@ -1374,13 +1374,6 @@ public class CoreAnnotations {
     }
   }
 
-  // Document type
-  public static class DocTypeAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
   // Numeric annotations
 
   // Per token annotation indicating whether the token represents a NUMBER or ORDINAL
