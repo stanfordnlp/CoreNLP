@@ -274,6 +274,19 @@ public class CoreAnnotations {
   }
 
   /**
+   * This indicates that starting at this token, the sentence should not be ended until
+   * we see a ForcedSentenceEndAnnotation.  Used to force the ssplit annotator
+   * (eg the WordToSentenceProcessor) to keep tokens in the same sentence
+   * until ForcedSentenceEndAnnotation is seen.
+   */
+  public static class ForcedSentenceUntilEndAnnotation
+          implements CoreAnnotation<Boolean> {
+    public Class<Boolean> getType() {
+      return Boolean.class;
+    }
+  }
+
+  /**
    * This indicates the sentence should end at this token.  Used to
    * force the ssplit annotator (eg the WordToSentenceProcessor) to
    * start a new sentence at the next token.
@@ -892,6 +905,18 @@ public class CoreAnnotations {
   public static class IsURLAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
+    }
+  }
+
+  public static class LinkAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class MentionsAnnotation implements CoreAnnotation<List<CoreMap>> {
+    public Class<List<CoreMap>> getType() {
+      return ErasureUtils.uncheckedCast(List.class);
     }
   }
 
