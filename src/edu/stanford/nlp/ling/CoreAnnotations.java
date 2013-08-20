@@ -1469,11 +1469,12 @@ public class CoreAnnotations {
   }
 
   /**
-   * List of authors for the document
+   * Author for the document
+   * (really should be a set of authors, but just have single string for simplicity)
    */
-  public static class AuthorsAnnotation implements CoreAnnotation<List<String>> {
-    public Class<List<String>> getType() {
-      return ErasureUtils.<Class<List<String>>> uncheckedCast(List.class);
+  public static class AuthorAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
     }
   }
 

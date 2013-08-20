@@ -81,11 +81,18 @@ public class CleanXmlAnnotator implements Annotator{
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
-   * A map of document level annotation keys (i.e. docid) along with a pattern i
+   * A map of document level annotation keys (i.e. docid) along with a pattern
    *  indicating the tag to match, and the attribute to match
    */
   private CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
+
+  /**
+   * A map of token level annotation keys (i.e. link, speaker) along with a pattern
+   *  indicating the tag/attribute to match (tokens that belows to the text enclosed in the specified tag witll be annotated)
+   */
+  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  public static final String DEFAULT_TOKEN_ANNOTATIONS_PATTERNS = null;
 
   /**
    * This tells us what the section tag is
@@ -174,7 +181,14 @@ public class CleanXmlAnnotator implements Annotator{
 
   public void setDocAnnotationPatterns(String conf) {
     docAnnotationPatterns.clear();
+    // Patterns can only be tag attributes
     addAnnotationPatterns(docAnnotationPatterns, conf, true);
+  }
+
+  public void setTokenAnnotationPatterns(String conf) {
+    tokenAnnotationPatterns.clear();
+    // Patterns can only be tag attributes
+    addAnnotationPatterns(tokenAnnotationPatterns, conf, true);
   }
 
   public void setSectionAnnotationPatterns(String conf) {
@@ -243,13 +257,26 @@ public class CleanXmlAnnotator implements Annotator{
   }
 
   // Annotates coremap with information from xml tag
+
+  /**
+   * Updates a coremap with attributes (or text context) from a tag
+   * @param annotation - Main document level annotation (from which the original text can be extracted)
+   * @param cm - coremap to annotate
+   * @param tag - tag to process
+   * @param annotationPatterns - list of annotation patterns to match
+   * @param savedTokens - tokens for annotations that are text context of a tag
+   * @param toAnnotate - what keys to annotate
+   * @return
+   */
   private Set<Class> annotateWithTag(Annotation annotation,
                                      CoreMap cm,
                                      XMLUtils.XMLTag tag,
                                      CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns,
                                      Map<Class, List<CoreLabel>> savedTokens,
-                                     Collection<Class> toAnnotate) {
+                                     Collection<Class> toAnnotate,
+                                     boolean clearAnnotationFromAttrOnTagEnd) {
     Set<Class> foundAnnotations = new HashSet<Class>();
+    if (annotationPatterns == null) { return foundAnnotations; }
     if (toAnnotate == null) {
       toAnnotate = annotationPatterns.keySet();
     }
@@ -268,6 +295,12 @@ public class CleanXmlAnnotator implements Annotator{
                   matched = true;
                   break;
                 }
+              }
+            }
+            if (clearAnnotationFromAttrOnTagEnd) {
+              if (tag.isEndTag) {
+                // tag ended - clear this annotation (TODO: should only clear if we got it from this tag)
+                cm.remove(key);
               }
             }
           } else if (savedTokens != null) {
@@ -323,9 +356,13 @@ public class CleanXmlAnnotator implements Annotator{
     List<CoreLabel> docTypeTokens = new ArrayList<CoreLabel>();
     List<CoreLabel> docIdTokens = new ArrayList<CoreLabel>();
 
+    // Local variables for additional per token annotations
+    CoreMap tokenAnnotations = (tokenAnnotationPatterns != null && !tokenAnnotationPatterns.isEmpty())? new ArrayCoreMap():null;
+
+    // Local variable for annotating sections
     XMLUtils.XMLTag sectionStartTag = null;
     CoreLabel sectionStartToken = null;
-    CoreLabel sectionAnnotations = null;
+    CoreMap sectionAnnotations = null;
     Map<Class, List<CoreLabel>> savedTokensForSection = new HashMap<Class, List<CoreLabel>>();
 
     boolean markSingleSentence = false;
@@ -349,6 +386,9 @@ public class CleanXmlAnnotator implements Annotator{
           if (markSingleSentence) {
             token.set(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class, true);
             markSingleSentence = false;
+          }
+          if (tokenAnnotations != null) {
+            ChunkAnnotationUtils.copyUnsetAnnotations(tokenAnnotations, token);
           }
         }
         // if we removed any text, and the tokens are "invertible" and
@@ -436,14 +476,14 @@ public class CleanXmlAnnotator implements Annotator{
 
       // Check if we want to annotate anything using the tags's attributes
       if (!toAnnotate.isEmpty() && tag.attributes != null) {
-        Set<Class> foundAnnotations = annotateWithTag(annotation, annotation, tag, docAnnotationPatterns, null, toAnnotate);
+        Set<Class> foundAnnotations = annotateWithTag(annotation, annotation, tag, docAnnotationPatterns, null, toAnnotate, false);
         toAnnotate.removeAll(foundAnnotations);
       }
 
       // Check if the tag matches a section
       if (sectionTagMatcher != null && sectionTagMatcher.matcher(tag.name).matches()) {
         if (tag.isEndTag) {
-          annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null);
+          annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, false);
           if (sectionStartToken != null) {
             sectionStartToken.set(CoreAnnotations.SectionStartAnnotation.class, sectionAnnotations);
           }
@@ -460,12 +500,16 @@ public class CleanXmlAnnotator implements Annotator{
         } else if (!tag.isSingleTag) {
           // Prepare to mark first token with section information
           sectionStartTag = tag;
-          sectionAnnotations = new CoreLabel();
+          sectionAnnotations = new ArrayCoreMap();
+          sectionAnnotations.set(CoreAnnotations.SectionAnnotation.class, sectionStartTag.name);
         }
       }
       if (sectionStartTag != null) {
         // store away annotations for section
-        annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null);
+        annotateWithTag(annotation, sectionAnnotations, tag, sectionAnnotationPatterns, savedTokensForSection, null, false);
+      }
+      if (tokenAnnotations != null) {
+        annotateWithTag(annotation, tokenAnnotations, tag, tokenAnnotationPatterns, null, null, true);
       }
 
       // If the tag matches the sentence ending tags, and we have some

@@ -391,6 +391,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String docAnnotations =
                 properties.getProperty("clean.docAnnotations",
                         CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
+        String tokenAnnotations =
+                properties.getProperty("clean.tokenAnnotations",
+                        CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS);
         String sectionTags =
                 properties.getProperty("clean.sectiontags",
                         CleanXmlAnnotator.DEFAULT_SECTION_TAGS);
@@ -406,6 +409,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         annotator.setDocTypeTagMatcher(docTypeTags);
         annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
         annotator.setDocAnnotationPatterns(docAnnotations);
+        annotator.setTokenAnnotationPatterns(tokenAnnotations);
         annotator.setSectionTagMatcher(sectionTags);
         annotator.setSectionAnnotationPatterns(sectionAnnotations);
         return annotator;
@@ -443,6 +447,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 "clean.docAnnotations:" +
                 properties.getProperty("clean.docAnnotations",
                   CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS) +
+                "clean.tokenAnnotations:" +
+                properties.getProperty("clean.tokenAnnotations",
+                        CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS) +
                 "clean.sectiontags:" +
                 properties.getProperty("clean.sectiontags",
                   CleanXmlAnnotator.DEFAULT_SECTION_TAGS) +
