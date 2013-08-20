@@ -109,7 +109,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
       return elements.size();
     }
     if (matchedGroups[group] != null) {
-      return matchedGroups[group].matchEnd;
+      return matchedGroups[0].matchEnd;
     } else {
       return -1;
     }
@@ -284,8 +284,6 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
 
   private int getFirstVarGroup(String v)
   {
-    // Trim the variable...
-    v = v.trim();
     for (int i = 0; i < varGroupBindings.varnames.length; i++) {
       String s = varGroupBindings.varnames[i];
       if (v.equals(s)) {
