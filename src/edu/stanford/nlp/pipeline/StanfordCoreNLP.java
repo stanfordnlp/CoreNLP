@@ -366,9 +366,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String sentenceEndingTags =
           properties.getProperty("clean.sentenceendingtags",
                             CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS);
-        String singleSentenceTags =
-                properties.getProperty("clean.singlesentencetags",
-                        CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS);
         String allowFlawedString = properties.getProperty("clean.allowflawedxml");
         boolean allowFlawed = CleanXmlAnnotator.DEFAULT_ALLOW_FLAWS;
         if (allowFlawedString != null)
@@ -388,18 +385,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String speakerTags =
                 properties.getProperty("clean.speakertags",
                         CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
-        String docAnnotations =
-                properties.getProperty("clean.docAnnotations",
-                        CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
         CleanXmlAnnotator annotator = new CleanXmlAnnotator(xmlTags,
             sentenceEndingTags,
             dateTags,
             allowFlawed);
-        annotator.setSingleSentenceTagMatcher(singleSentenceTags);
         annotator.setDocIdTagMatcher(docIdTags);
         annotator.setDocTypeTagMatcher(docTypeTags);
         annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
-        annotator.addTagAnnotationPatterns(docAnnotations);
         return annotator;
       }
 
@@ -412,9 +404,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 "clean.sentenceendingtags:" +
                 properties.getProperty("clean.sentenceendingtags",
                   CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS) +
-                "clean.sentenceendingtags:" +
-                properties.getProperty("clean.singlesentencetags",
-                        CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS) +
                 "clean.allowflawedxml:" +
                 properties.getProperty("clean.allowflawedxml", "") +
                 "clean.datetags:" +
@@ -431,10 +420,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                   CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS) +
                 "clean.speakertags:" +
                 properties.getProperty("clean.speakertags",
-                  CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS) +
-                "clean.docAnnotations:" +
-                properties.getProperty("clean.docAnnotations",
-                  CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
+                  CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
       }
     });
 
@@ -1124,18 +1110,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return ObjectBank.getLineIterator(fileName, new ObjectBank.PathToFileFunction());
   }
 
-  private AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
-    AnnotationSerializer serializer = null;
-    try {
-      // Try loading with properties
-      serializer = ReflectionLoading.loadByReflection(serializerClass, name, properties);
-    } catch (ReflectionLoading.ReflectionLoadingException ex) {
-      // Try loading with just default constructor
-      serializer = ReflectionLoading.loadByReflection(serializerClass);
-    }
-    return serializer;
-  }
-
   public void processFiles(String base, final Collection<File> files, int numThreads) throws IOException {
     List<Runnable> toRun = new LinkedList<Runnable>();
 
@@ -1166,9 +1140,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
     final String serializerClass = properties.getProperty("serializer");
     final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
-    final String inputSerializerName = (serializerClass == inputSerializerClass)? "serializer":"inputSerializer";
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
-    final String outputSerializerName = (serializerClass == outputSerializerClass)? "serializer":"outputSerializer";
 
     final String extension = properties.getProperty("outputExtension", defaultExtension);
     final boolean replaceExtension = Boolean.parseBoolean(properties.getProperty("replaceExtension", "false"));
@@ -1248,10 +1220,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               try {
                 // Create serializers
                 if (inputSerializerClass != null) {
-                  AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
-                  InputStream is = new BufferedInputStream(new FileInputStream(file));
-                  annotation = inputSerializer.load(is);
-                  IOUtils.closeIgnoringExceptions(is);
+                  AnnotationSerializer inputSerializer = ReflectionLoading.loadByReflection(inputSerializerClass);
+                  annotation = inputSerializer.load(new BufferedInputStream(new FileInputStream(file)));
                 } else {
                   annotation = IOUtils.readObjectFromFile(file);
                 }
@@ -1311,7 +1281,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               }
               case SERIALIZED: {
                 if (outputSerializerClass != null) {
-                  AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
+                  AnnotationSerializer outputSerializer = ReflectionLoading.loadByReflection(inputSerializerClass);
                   OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
                   outputSerializer.save(annotation, fos);
                   fos.close();
@@ -1434,15 +1404,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     else if(props.containsKey("filelist")){
       String fileName = props.getProperty("filelist");
-      Collection<File> inputfiles = readFileList(fileName);
-      Collection<File> files = new ArrayList<File>(inputfiles.size());
-      for (File file:inputfiles) {
-        if (file.isDirectory()) {
-          files.addAll(new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true));
-        } else {
-          files.add(file);
-        }
-      }
+      Collection<File> files = readFileList(fileName);
       pipeline.processFiles(null, files, numThreads);
     }
 

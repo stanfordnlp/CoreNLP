@@ -387,9 +387,9 @@ public class QuantifiableEntityNormalizer {
     if(word.get(CoreAnnotations.PartOfSpeechAnnotation.class) == null || word.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
       //one possibility: it's a two digit year with an apostrophe: '90
       if(wordString.length() == 3  && wordString.startsWith("'")) {
-        if (DEBUG) {
-          System.err.println("Found potential two digit year: " + wordString);
-        }
+	if (DEBUG) {
+	  System.err.println("Found potential two digit year: " + wordString);
+	}
         wordString = wordString.substring(1);
         try {
           Integer.parseInt(wordString);
