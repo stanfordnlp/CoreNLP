@@ -60,7 +60,7 @@ public class NameMatch extends DeterministicCorefSieve {
           if (supportedNerTypes.contains(mainMention.nerString) || supportedNerTypes.contains(antMention.nerString)) {
             matched = mentionMatcher.isCompatible(mainMention, antMention);
             if (matched != null) {
-              Redwood.log("Match '" + mainMention + "' with '" + antMention + "' => " + matched);
+              //Redwood.log("Match '" + mainMention + "' with '" + antMention + "' => " + matched);
               if (!matched) {
                 document.addIncompatible(mainMention, antMention);
               }
