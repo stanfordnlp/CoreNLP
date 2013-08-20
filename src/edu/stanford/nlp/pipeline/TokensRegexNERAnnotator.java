@@ -96,7 +96,7 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class TokensRegexNERAnnotator implements Annotator {
-  protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokensRegexNERAnnotator");
+  protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokenRegexNER");
 
   // TODO: Can remove entries and just have a MultiPatternMatcher probably
   private final boolean ignoreCase;

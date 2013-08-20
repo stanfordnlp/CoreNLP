@@ -257,7 +257,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
                 + ": originalSpan=[" + StringUtils.joinWords(m.originalSpan, " ") + "], head=" + m.headWord);
         SieveCoreferenceSystem.logger.warning("Setting head string to entire mention");
         m.headIndex = m.startIndex;
-        m.headWord = m.originalSpan.get(0);
+        m.headWord = m.originalSpan.size() > 0 ? m.originalSpan.get(0) : sent.get(m.startIndex);
         m.headString = m.originalSpan.toString();
       }
     }
@@ -266,9 +266,11 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   protected Tree findSyntacticHead(Mention m, Tree root, List<CoreLabel> tokens) {
     // mention ends with 's
     int endIdx = m.endIndex;
-    String lastWord = m.originalSpan.get(m.originalSpan.size()-1).get(CoreAnnotations.TextAnnotation.class);
-    if((lastWord.equals("'s") || lastWord.equals("'"))
-        && m.originalSpan.size() != 1 ) endIdx--;
+    if (m.originalSpan.size() > 0) {
+      String lastWord = m.originalSpan.get(m.originalSpan.size()-1).get(CoreAnnotations.TextAnnotation.class);
+        if((lastWord.equals("'s") || lastWord.equals("'"))
+            && m.originalSpan.size() != 1 ) endIdx--;
+    }
 
     Tree exactMatch = findTreeWithSpan(root, m.startIndex, endIdx);
     //
@@ -446,7 +448,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       if(dict.nonWords.contains(m.headString)) remove.add(m);
 
       // quantRule : not starts with 'any', 'all' etc
-      if(dict.quantifiers.contains(m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase())) remove.add(m);
+      if(m.originalSpan.size() > 0 && dict.quantifiers.contains(m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase())) remove.add(m);
 
       // partitiveRule
       if(partitiveRule(m, sent, dict)) remove.add(m);
