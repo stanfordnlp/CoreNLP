@@ -9,8 +9,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.Constituent;
+import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
 import edu.stanford.nlp.trees.Tree;
-
+import edu.stanford.nlp.trees.TreeNormalizer;
 
 /**
  * Simple utility class for storing a tree as well as the sentence the tree represents and

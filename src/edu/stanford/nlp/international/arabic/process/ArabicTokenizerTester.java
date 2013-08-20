@@ -6,13 +6,13 @@ import java.util.*;
 import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.trees.treebank.Mapper;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.treebank.Mapper;
 
 /**
  * Compares the output of the JFlex-based ArabicTokenizer to DefaultLexicalMapper, which
  * is used in the parser and elsewhere.
- *
+ * 
  * @author Spence Green
  *
  */
@@ -21,7 +21,7 @@ public class ArabicTokenizerTester {
   /**
    * arg[0] := tokenizer options
    * args[1] := file to tokenize
-   *
+   * 
    * @param args
    */
   public static void main(String[] args) {
@@ -38,15 +38,15 @@ public class ArabicTokenizerTester {
       tf.setOptions(tokOptions);
       Mapper lexMapper = new DefaultLexicalMapper();
       lexMapper.setup(null, "StripSegMarkersInUTF8", "StripMorphMarkersInUTF8");
-
+      
       int lineId = 0;
       for(String line; (line = br.readLine()) != null; lineId++) {
         line = line.trim();
-
+        
         // Tokenize with the tokenizer
         List<CoreLabel> tokenizedLine = tf.getTokenizer(new StringReader(line)).tokenize();
         System.out.println(Sentence.listToString(tokenizedLine));
-
+        
         // Tokenize with the mapper
         StringBuilder sb = new StringBuilder();
         String[] toks = line.split("\\s+");
@@ -55,11 +55,11 @@ public class ArabicTokenizerTester {
           sb.append(mappedTok).append(" ");
         }
         List<String> mappedToks = Arrays.asList(sb.toString().trim().split("\\s+"));
-
+        
         // Evaluate the output
         if (mappedToks.size() != tokenizedLine.size()) {
           System.err.printf("Line length mismatch:%norig: %s%ntok: %s%nmap: %s%n%n",
-              line,
+              line, 
               Sentence.listToString(tokenizedLine),
               Sentence.listToString(mappedToks));
         } else {
@@ -74,15 +74,15 @@ public class ArabicTokenizerTester {
           }
           if (printLines) {
             System.err.printf("orig: %s%ntok: %s%nmap: %s%n%n",
-                line,
+                line, 
                 Sentence.listToString(tokenizedLine),
                 Sentence.listToString(mappedToks));
           }
         }
       }
-
+      
       System.err.printf("Read %d lines.%n", lineId);
-
+    
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (FileNotFoundException e) {

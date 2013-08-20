@@ -1,20 +1,17 @@
 package edu.stanford.nlp.wordseg;
 
-import edu.stanford.nlp.fsm.DFSA;
-import edu.stanford.nlp.fsm.DFSAState;
-import edu.stanford.nlp.fsm.DFSATransition;
-import edu.stanford.nlp.io.EncodingPrintWriter;
-import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.WordSegmenter;
-import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.fsm.DFSA;
+import edu.stanford.nlp.fsm.DFSAState;
+import edu.stanford.nlp.fsm.DFSATransition;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.process.WordSegmenter;
+import edu.stanford.nlp.io.EncodingPrintWriter;
 
 import java.util.*;
 import java.io.*;
@@ -38,12 +35,13 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   private static final boolean DEBUG = false;
 
-  private Set<String> words = Generics.newHashSet();
+  private Set<String> words = new HashSet<String>();
   private int len=-1;
   private int edgesNb=0;
   private static final int maxLength = 10;
-  private List<DFSAState<Word, Integer>> states;
-  private DFSA<Word, Integer> lattice=null;
+  private DFSAState[] states;
+  private DFSA lattice=null;
+  private Sighan2005DocumentReaderAndWriter writer = new Sighan2005DocumentReaderAndWriter();
   public enum MatchHeuristic { MINWORDS, MAXWORDS, MAXLEN }
 
   private static final Pattern chineseStartChars = Pattern.compile("^[\u4E00-\u9FFF]");
@@ -115,7 +113,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
         printlnErr("skipping word: "+str);
         return;
       }
-      // printlnErr("adding word: "+str);
+      printlnErr("adding word: "+str);
       words.add(str);
     }
   }
@@ -148,13 +146,13 @@ public class MaxMatchSegmenter implements WordSegmenter {
     edgesNb = 0;
     len = s.length();
     // Initialize word lattice:
-    states = new ArrayList<DFSAState<Word, Integer>>();
-    lattice = new DFSA<Word, Integer>("wordLattice");
+    states = new DFSAState[len+1];
+    lattice = new DFSA("wordLattice");
     for (int i=0; i<=s.length(); ++i)
-      states.add(new DFSAState<Word, Integer>(i, lattice));
+      states[i] = new DFSAState(Integer.valueOf(i), lattice);
     // Set start and accepting state:
-    lattice.setInitialState(states.get(0));
-    states.get(len).setAccepting(true);
+    lattice.setInitialState(states[0]);
+    states[len].setAccepting(true);
     // Find all instances of lexicon words in input string:
     for (int start=0; start<len; ++start) {
       for (int end=len; end>start; --end) {
@@ -164,10 +162,10 @@ public class MaxMatchSegmenter implements WordSegmenter {
         boolean isInDict = words.contains(str);
         if (isInDict || isOneChar) {
           double cost = isInDict ? 1 : 100;
-          DFSATransition<Word, Integer> trans =
-            new DFSATransition<Word, Integer>(null, states.get(start), states.get(end), new Word(str), null, cost);
+          DFSATransition trans =
+            new DFSATransition(null, states[start], states[end], new Word(str), null, cost);
           //System.err.println("start="+start+" end="+end+" word="+str);
-          states.get(start).addTransition(trans);
+          states[start].addTransition(trans);
           ++edgesNb;
         }
       }
@@ -200,34 +198,31 @@ public class MaxMatchSegmenter implements WordSegmenter {
     List<Word> segmentedWords = new ArrayList<Word>();
     // Init dynamic programming:
     double costs[] = new double[len+1];
-    List<DFSATransition<Word, Integer>> bptrs = new ArrayList<DFSATransition<Word, Integer>>();
-    for (int i = 0; i < len + 1; ++i) {
-      bptrs.add(null);
-    }
+    DFSATransition[] bptrs = new DFSATransition[len+1];
     costs[0]=0.0;
     for (int i=1; i<=len; ++i)
        costs[i] = Double.MAX_VALUE;
     // DP:
     for (int start=0; start<len; ++start) {
-      DFSAState<Word, Integer> fromState = states.get(start);
-      Collection<DFSATransition<Word, Integer>> trs = fromState.transitions();
-      for (DFSATransition<Word, Integer> tr : trs) {
-        DFSAState<Word, Integer> toState = tr.getTarget();
+      DFSAState fromState = states[start];
+      Collection<DFSATransition> trs = fromState.transitions();
+      for (DFSATransition tr : trs) {
+        DFSAState toState = tr.getTarget();
         double lcost = tr.score();
-        int end = toState.stateID();
+        int end = ((Integer)toState.stateID()).intValue();
         //System.err.println("start="+start+" end="+end+" word="+tr.getInput());
         if (h == MatchHeuristic.MINWORDS) {
           // Minimize number of words:
           if (costs[start]+1 < costs[end]) {
             costs[end] = costs[start]+lcost;
-            bptrs.set(end, tr);
+            bptrs[end] = tr;
             //System.err.println("start="+start+" end="+end+" word="+tr.getInput());
           }
         } else if (h == MatchHeuristic.MAXWORDS) {
           // Maximze number of words:
           if (costs[start]+1 < costs[end]) {
             costs[end] = costs[start]-lcost;
-            bptrs.set(end, tr);
+            bptrs[end] = tr;
           }
         } else {
           throw new UnsupportedOperationException("unimplemented heuristic");
@@ -237,12 +232,12 @@ public class MaxMatchSegmenter implements WordSegmenter {
     // Extract min-cost path:
     int i=len;
     while (i>0) {
-      DFSATransition<Word, Integer> tr = bptrs.get(i);
-      DFSAState<Word, Integer> fromState = tr.getSource();
-      Word word = tr.getInput();
+      DFSATransition tr = bptrs[i];
+      DFSAState fromState = tr.getSource();
+      Word word = (Word)tr.getInput();
       if (!word.word().equals(" "))
         segmentedWords.add(0, word);
-      i = fromState.stateID();
+      i = ((Integer)fromState.stateID()).intValue();
     }
     if(DEBUG) {
       // Print lattice density ([1,+inf[) : if equal to 1, it means
@@ -290,8 +285,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
-    // System.err.println(props.toString());
-    SeqClassifierFlags flags = new SeqClassifierFlags(props);
+    System.err.println(props.toString());
     MaxMatchSegmenter seg = new MaxMatchSegmenter();
     String lexiconFile = props.getProperty("lexicon");
     if(lexiconFile != null) {
@@ -301,12 +295,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
       System.exit(1);
     }
 
-    Sighan2005DocumentReaderAndWriter sighanRW = new Sighan2005DocumentReaderAndWriter();
-    sighanRW.init(flags);
-
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-    StringReader strR = null;
-    PrintWriter stdoutW = new PrintWriter(System.out);
     int lineNb = 0;
     for(;;) {
       ++lineNb;
@@ -315,29 +304,22 @@ public class MaxMatchSegmenter implements WordSegmenter {
         String line = br.readLine();
         if(line == null)
           break;
-        String outputLine = null;
         if(props.getProperty("greedy") != null) {
           ArrayList<Word> sentence = seg.greedilySegmentWords(line);
-          outputLine = Sentence.listToString(sentence);
+          System.out.println(Sentence.listToString(sentence));
         } else if(props.getProperty("maxwords") != null) {
           seg.buildSegmentationLattice(line);
-          outputLine = Sentence.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS));
+          System.out.println
+            (Sentence.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS)));
         } else {
           seg.buildSegmentationLattice(line);
-          outputLine = Sentence.listToString(seg.maxMatchSegmentation());
+          System.out.println(Sentence.listToString(seg.maxMatchSegmentation()));
         }
-        strR = new StringReader(outputLine);
-        Iterator<List<CoreLabel>> itr = sighanRW.getIterator(strR);
-        while(itr.hasNext()) {
-          sighanRW.printAnswers(itr.next(), stdoutW);
-        }
-        // System.out.println(outputLine);
       }
       catch (IOException e) {
         break;
       }
     }
-    stdoutW.flush();
   }
 
   private static void printlnErr(String s) {

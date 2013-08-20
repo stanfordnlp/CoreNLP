@@ -80,11 +80,11 @@ lib/tomcat/jasper.jar, el-api.jar, servlet-api.jar, tomcat-juli.jar
 
 ORIGINAL JAR NAME: the same...
 
-VERSION: Tomcat 7.0.42
+VERSION: Tomcat 7.0.12
 
-RELEASE DATE: 2013-06 (?)
+RELEASE DATE: 2011-04-05 (?)
 
-SOURCE AVAILABLE: no
+SOURCE AVAILABLE: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
 
 DESCRIPTION: Various parts of tomcat needed to build .jsp files
 
@@ -93,7 +93,7 @@ URL: http://tomcat.apache.org/download-70.cgi
 USED BY:
 used to build .jsps
 
-LAST UPDATE: 2013-07-09
+LAST UPDATE: 2011-11-21
 
 LAST UPDATE BY: John Bauer
 
@@ -122,6 +122,32 @@ LAST UPDATE BY: John Bauer
 
 
 -----------------------------------------------------------------------
+colt.jar
+
+ORIGINAL JAR NAME: colt.jar
+
+VERSION: 1.2.0
+
+RELEASE DATE: 2002/11/22
+
+SOURCE AVAILABLE: libsrc/colt-1.2.0-src.zip
+
+DESCRIPTION: "Open Source Libraries for High Performance Scientific and
+Technical Computing in Java."
+
+URL: http://acs.lbl.gov/~hoschek/colt/
+
+USED BY:
+used extensively in edu.stanford.nlp.linalg, edu.stanford.nlp.cluster,
+edu.stanford.nlp.parser, several other places
+The only place that this is still used in core is in 
+SentenceProbabilityParser, so it'd be a good candidate to move to more.
+
+LAST UPDATE: 2006/02/06
+
+LAST UPDATE BY: Bill MacCartney
+
+-----------------------------------------------------------------------
 commons-logging.jar
 
 ORIGINAL JAR NAME: commons-logging.jar
@@ -135,6 +161,63 @@ URL: http://jakarta.apache.org/commons/logging
 USED BY: org.mortbay.jetty.jar, jsp compiler
 LAST UPDATE: 2006/02/06
 LAST UPDATE BY: Jeff Michels
+-----------------------------------------------------------------------
+dbparser.jar
+
+ORIGINAL JAR NAME: dbparser.jar
+
+VERSION: 0.9.9c
+
+RELEASE DATE: 2005/09/14
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Dan Bikel's parser
+
+URL: http://www.cis.upenn.edu/~dbikel/software.html
+
+USED BY: Has a couple of uses in propbank and propbank.srl.  Could aim to remove it?
+   [nothing???   -- repository compiles without it, 2006/02/27]
+
+LAST UPDATE: 2006/02/27
+
+LAST UPDATE BY: Bill MacCartney
+
+
+-----------------------------------------------------------------------
+html-parser.jar
+
+ORIGINAL JAR NAME: html-parser.jar
+
+VERSION: 1.1.1
+
+RELEASE DATE: 2005/07/08
+
+SOURCE AVAILABLE: yes (at present the src in libsrc is slightly newer than
+our installed version (1.2 versus 1.1.1) since as of 20071031, I can't find
+src for 1.1.1 - Anna)
+
+DESCRIPTION:
+"This is a JavaCC grammar for parsing HTML documents. It does not enforce
+the DTD, but instead builds a simple parse tree which can be used to
+validate, reformat, display, analyze, or edit the HTML document. The goal
+was to produce a parse tree which threw away very little information
+contained in the source file, so that by dumping the parse tree, an almost
+identical copy of the input document would result. The only source
+information discarded by the parser is whitespace inside of tags (i.e., the
+spaces or newlines between the attributes of a tag.) It is not confused by
+things that look like tags inside of quoted strings."
+
+URL: http://paneris.net/htmlparser/
+
+USED BY:
+src.edu.stanford.nlp.annotation.Annotator,
+src.edu.stanford.nlp.annotation.HTMLCleaner
+(only)
+
+LAST UPDATE: 2006/02/27
+
+LAST UPDATE BY: Bill MacCartney
 
 
 -----------------------------------------------------------------------
@@ -163,6 +246,28 @@ USED BY: src.edu.stanford.nlp.database.SLJDB.java
 LAST UPDATE:
 
 LAST UPDATE BY:
+
+
+-----------------------------------------------------------------------
+jdom.jar
+
+ORIGINAL JAR NAME: jdom.jar
+
+VERSION: 1.1
+
+RELEASE DATE: 2007/11/13
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: JDOM for working with XML documents.
+
+URL: www.jdom.org
+
+USED BY: lots of stuff
+
+LAST UPDATE: 2008/07/24
+
+LAST UPDATE BY: Bill MacCartney
 
 
 -----------------------------------------------------------------------
@@ -209,6 +314,270 @@ USED BY:
 LAST UPDATE: 2008/08/24
 
 LAST UPDATE BY: Ilya Sherman
+
+
+-----------------------------------------------------------------------
+*jwnl.jar* (NOTE: removed and replaced by jwnlx.jar)
+
+ORIGINAL JAR NAME: jwnl.jar
+
+VERSION: 1.4
+
+RELEASE DATE: 2008-01-22
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: "JWNL is a Java API for accessing the WordNet relational
+dictionary. WordNet is widely used for developing NLP applications,
+and a Java API such as JWNL will allow developers to more easily use
+Java for building NLP applications."
+
+NOTE: This has been removed, and superceded by jwnlx.jar.
+
+URL: http://sourceforge.net/projects/jwordnet
+
+USED BY:
+edu.stanford.nlp.rte.BasicWNLexicalResource.java
+edu.stanford.nlp.propbank.srl.LeafPathsExtractor.java
+edu.stanford.nlp.depgraph.MatcherCosts.java
+
+LAST UPDATE: 2008/05/10
+
+LAST UPDATE BY: Eric Yeh
+
+-----------------------------------------------------------------------
+jwnlx.jar
+
+ORIGINAL JAR NAME: jwnlx.jar
+
+VERSION: 1.4
+
+RELEASE DATE: 2008-01-22
+MODIFIED VERSION, CREATION DATE: 2008-05-10
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: "JWNL is a Java API for accessing the WordNet relational
+dictionary. WordNet is widely used for developing NLP applications,
+and a Java API such as JWNL will allow developers to more easily use
+Java for building NLP applications."
+
+URL: http://sourceforge.net/projects/jwordnet
+
+This is a modified version of JWNL.  This corrects issues the following issues:
+
+- Modified FileManagerImpl constructor() to search for sense index
+  files correctly (previous version prefixed sense files with '\',
+  resulting in a Windows filepath).
+- Modified PointerTarget's getPointers() routine, to perform a null
+  check on the value of getType() when iterating through types.  This
+  is likely due to JWNL not being aware of the WN edge type, or a
+  mistake in the file (this is a concession to get stuff working).
+
+Source for this version is in projects/core/libsrc/jwnlx-1.4.src.zip
+
+USED BY:
+edu.stanford.nlp.rte.BasicWNLexicalResource.java
+edu.stanford.nlp.propbank.srl.LeafPathsExtractor.java
+edu.stanford.nlp.depgraph.MatcherCosts.java
+
+LAST UPDATE: 2008/05/10
+
+LAST UPDATE BY: Eric Yeh
+
+
+-----------------------------------------------------------------------
+libsvm.jar
+
+ORIGINAL JAR NAME: libsvm.jar
+
+VERSION: 3.1
+
+RELEASE DATE: April 2011
+
+SOURCE AVAILABLE: yes 
+
+DESCRIPTION:
+
+URL: http://www.csie.ntu.edu.tw/~cjlin/libsvm/
+
+USED BY:
+
+LAST UPDATE: 2011/10/01
+
+LAST UPDATE BY: Sonal Gupta 
+
+
+-----------------------------------------------------------------------
+maltparser.jar
+
+ORIGINAL JAR NAME: maltparser-1.7.jar
+
+VERSION: 1.7
+
+RELEASE DATE: 2012-03-12
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: malt dependency parsing
+
+URL: http://maltparser.org/download.html
+
+USED BY: rte malt annotations
+
+NOTE: Deleted "Class-Path:" line in META-INF/MANIFEST.MF
+
+LAST UPDATE: 2012-04-02
+
+LAST UPDATE BY: Marta Recasens
+
+-----------------------------------------------------------------------
+mtj.jar
+
+ORIGINAL JAR NAME: mtj-0.9.12.jar
+
+VERSION: 0.9.12
+
+RELEASE DATE: 2009/04/06
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: The Matrix Toolkits for Java (MTJ) is a comprehensive collection of matrix datastructures, linear solvers (direct and iterative), least squares methods, eigenvalue- and singular value decompositions. MTJ is designed to be used as a library for developing numerical applications, both for small and large scale computations.
+
+URL: http://code.google.com/p/matrix-toolkits-java/
+
+USED BY: edu.stanford.nlp.cluster edu.stanford.nlp.math.mtj
+
+LAST UPDATE: 2010/06/13
+
+LAST UPDATE BY: Spence Green
+
+-----------------------------------------------------------------------
+arpack.jar
+
+ORIGINAL JAR NAME: arpack_combo-0.1.jar
+
+VERSION: 0.1
+
+RELEASE DATE: 2009/04/06
+
+SOURCE AVAILABLE: yes (in the mtj source archive)
+
+DESCRIPTION: Dependency for mtj.
+
+URL: http://code.google.com/p/matrix-toolkits-java/
+
+USED BY: edu.stanford.nlp.cluster edu.stanford.nlp.math.mtj
+
+LAST UPDATE: 2010/06/13
+
+LAST UPDATE BY: Spence Green
+
+-----------------------------------------------------------------------
+netlib.jar
+
+ORIGINAL JAR NAME: netlib-java-0.9.1.jar
+
+VERSION: 0.9.1
+
+RELEASE DATE: 2009/04/06
+
+SOURCE AVAILABLE: yes (in the mtj source archive)
+
+DESCRIPTION: Dependency for mtj.
+
+URL: http://code.google.com/p/matrix-toolkits-java/
+
+USED BY: edu.stanford.nlp.cluster edu.stanford.nlp.math.mtj
+
+LAST UPDATE: 2010/06/13
+
+LAST UPDATE BY: Spence Green
+
+-----------------------------------------------------------------------
+propbank.jar
+
+VERSION: ---
+
+RELEASE DATE: ---
+
+SOURCE AVAILABLE: unknown (couldn't find on web)
+
+DESCRIPTION: "This API provides an interface to the Propbank
+annotations so one can use the various parts of the annotations and
+connect them to the WSJ Penn Treebank parse trees."
+
+URL: Obtained personally by Chris from Martha Palmer.  Documentation
+at: http://www.cis.upenn.edu/~cotton/pbapi/.  (Note: this URL seems to
+be defunct as of 2006/02/06.)
+
+USED BY: edu.stanford.nlp.propbank
+
+LAST UPDATE: 2004/01/05; moved into CVS 2006/02/06
+
+LAST UPDATE BY: Bill MacCartney
+
+
+-----------------------------------------------------------------------
+ra.jar
+
+ORIGINAL JAR NAME: ra-0.1.10-full.jar
+
+VERSION: 0.1.10
+
+RELEASE DATE:
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: "ResearchAssistant is a library to improve Java's
+effectiveness as a platform for creating scientific research tools."
+
+URL: http://www.stanford.edu/~dramage/ra/
+
+USED BY:
+
+LAST UPDATE: 2008/05/22
+
+LAST UPDATE BY: Daniel Ramage
+
+-----------------------------------------------------------------------
+counters.jar
+
+ORIGINAL JAR NAME: counters-0.3.jar
+
+VERSION: 0.3
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Fast type-safe counters framework based on fastutil
+
+URL: none - developed in-house by dramage
+
+USED BY:
+
+LAST UPDATE: 2008/04/29
+
+LAST UPDATE BY: Daniel Ramage
+
+
+-----------------------------------------------------------------------
+fastutil.jar
+
+ORIGINAL JAR NAME: fastutil-5.1.4.jar
+
+VERSION: 5.1.4
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Fast type-safe collections
+
+URL: http://fastutil.dsi.unimi.it/
+
+USED BY:
+
+LAST UPDATE: 2008/04/29
+
+LAST UPDATE BY: Daniel Ramage
 
 
 
@@ -259,7 +628,95 @@ LAST UPDATE: 2004/10/22
 
 LAST UPDATE BY:
 
-----------------------------------------------------------------------
+
+-----------------------------------------------------------------------
+xalan.jar
+
+ORIGINAL JAR NAME: xalan.jar
+
+VERSION: 2.7.1
+
+RELEASE DATE: 2007-11-27
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: This is an XPath and XSLT processor. Relies on xml-apis.jar, xercesImpl.jar, and serializer.jar.
+
+URL: http://xml.apache.org/xalan-j/
+
+USED BY: xalan.jar
+
+LAST UPDATE: 2011-11-29
+
+LAST UPDATE BY: John Bauer
+
+
+-----------------------------------------------------------------------
+xercesImpl.jar
+
+ORIGINAL JAR NAME: xercesImpl.jar
+
+VERSION: 2.9.0
+
+RELEASE DATE: 23 November 2006
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Apache XML parser
+
+URL: http://xml.apache.org/xalan-j/
+
+USED BY: xalan.jar
+
+LAST UPDATE: 7 August 2009
+
+LAST UPDATE BY: Spence Green
+
+
+-----------------------------------------------------------------------
+xml-apis.jar
+
+ORIGINAL JAR NAME: xml-apis.jar
+
+VERSION: 2.9.0
+
+RELEASE DATE: 27 November 2007
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Support functions for Apache Xerces XML parser
+
+URL: http://xml.apache.org/xalan-j/
+
+USED BY: xalan.jar, xercesImpl.jar
+
+LAST UPDATE: 7 August 2009
+
+LAST UPDATE BY: Spence Green
+
+-----------------------------------------------------------------------
+serializer.jar
+
+ORIGINAL JAR NAME: serializer.jar
+
+VERSION: 2.7.1
+
+RELEASE DATE: 2007-11-27
+
+SOURCE AVAILABLE: yes - part of xalan src
+
+DESCRIPTION: Used for XML work via xalan (used at least in RTE stuff); in earlier
+versions of xalan, these classes were included in the xalan jar
+
+URL: http://xml.apache.org/xalan-j/
+
+USED BY: xalan.jar
+
+LAST UPDATE: 2011-11-29
+
+LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
 AppleJavaExtensions.jar
 
 ORIGINAL JAR NAME: AppleJavaExtensions.jar
@@ -282,6 +739,29 @@ USED BY: TregexGUI.java
 LAST UPDATE: 9/18/2007
 
 LAST UPDATE BY: Anna Rafferty.
+
+-----------------------------------------------------------------------
+jaws-bin.jar
+
+ORIGINAL JAR NAME: jaws-bin.jar
+
+VERSION: 1.3
+
+RELEASE DATE: 2009-12-24
+
+SOURCE AVAILABLE: yes
+
+DESCRIPTION: Brett Spell's Java API for WordNet Searching (JAWS)
+
+URL: http://lyle.smu.edu/~tspell/jaws/index.html#downloads
+
+USED BY: edu.stanford.nlp.coref.PatternMentionExtractor
+
+LAST UPDATE: 2010-03-24
+
+LAST UPDATE BY: Karthik Raghunathan 
+
+This is a redudant jar, since jwnlx.jar (an already present jar) accomplishes the same functionality. This was added since I had no prior experience with the jwnlx API and was in a rush to complete code before CS224U project deadline. Will aim to remove it.
 
 -----------------------------------------------------------------------
 xom-1.2.8.jar
@@ -326,16 +806,16 @@ LAST UPDATE: 2011-03-19
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-commons-lang3-3.1.jar
-ORIGINAL JAR NAME: commons-lang3-3.1.jar
-VERSION: 
-RELEASE DATE: 11-14-2011
+commons-lang-2.5.jar
+ORIGINAL JAR NAME: commons-lang-2.5.jar
+VERSION: 2.5
+RELEASE DATE: 2010-02-23
 SOURCE AVAILABLE: yes
-DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff; changes from 2.5 - no escapeHtml function.
+DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff
 URL: http://commons.apache.org/lang/
-USED BY: edu.stanford.nlp.kbp and web servelets
-LAST UPDATE: 2013-06-05
-LAST UPDATE BY: Sonal Gupta
+USED BY: edu.stanford.nlp.kbp
+LAST UPDATE: 2010-07-15
+LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 log4j-1.2.16.jar
@@ -349,6 +829,18 @@ USED BY: edu.stanford.nlp.parser.ensemble (library required by the Malt module)
   Also used by RTE and the Parser webapp.
 LAST UPDATE: 2011/11/20
 LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------------
+liblinear.jar
+ORIGINAL JAR NAME: liblinear-1.8.jar
+VERSION: 1.8
+RELEASE DATE: 2011-06-02
+SOURCE AVAILABLE: yes
+DESCRIPTION: LIBLINEAR is a linear classifier for data with millions of instances and features.
+URL: http://www.bwaldvogel.de/liblinear-java
+USED BY: Library required by the Malt module
+LAST UPDATE: 2012-04-03
+LAST UPDATE BY: Marta Recasens
 
 -----------------------------------------------------------------------
 joda-time.jar
@@ -373,18 +865,6 @@ USED BY: edu.stanford.nlp.time
 LAST UPDATE: 2012-11-05
 LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------------
-ejml-0.19-nogui.jar
-ORIGINAL JAR NAME: ejml-0.19.jar
-VERSION: 0.19
-RELEASE DATE: 2012-03-23
-SOURCE AVAILABLE: yes
-DESCRIPTION: Another matrix library for Java (perhaps fastest for medium
-    size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
-URL: http://code.google.com/p/efficient-java-matrix-library/
-USED BY: Used in deep learning, especially RNN parser
-LAST UPDATE: 2012-07-17
-LAST UPDATE BY: Christopher Manning
------------------------------------------------------------------
 foo.jar
 
 ORIGINAL JAR NAME:

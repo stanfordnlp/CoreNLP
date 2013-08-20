@@ -2,10 +2,10 @@ package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.io.Serializable;
@@ -15,10 +15,10 @@ class RandomWalk implements Serializable {
 
   private static final long serialVersionUID = -5284941866796561664L;
 
-  private final Map<Object,Counter> model = Generics.newHashMap();
+  private final HashMap<Object,Counter> model = new HashMap<Object,Counter>();
 
-  private final Map<Object,Counter> hiddenToSeen = Generics.newHashMap();
-  private final Map<Object,Counter> seenToHidden = Generics.newHashMap();
+  private final HashMap<Object,Counter> hiddenToSeen = new HashMap<Object,Counter>();
+  private final HashMap<Object,Counter> seenToHidden = new HashMap<Object,Counter>();
 
   private static final double LAMBDA = 0.01;
 
@@ -79,6 +79,7 @@ class RandomWalk implements Serializable {
    * @param data A collection of seen/hidden event <code>Pair</code>s
    */
   public RandomWalk(Collection<Pair<?,?>> data, int steps) {
+    Map m = new HashMap();
     train(data);
     for (Iterator i = seenToHidden.keySet().iterator(); i.hasNext();) {
       Object seen = i.next();

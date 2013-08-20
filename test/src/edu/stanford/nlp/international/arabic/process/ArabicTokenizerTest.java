@@ -3,17 +3,17 @@ package edu.stanford.nlp.international.arabic.process;
 import java.io.StringReader;
 import java.util.List;
 
-import edu.stanford.nlp.process.TokenizerFactory;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.process.Tokenizer;
 
 /**
  * Tests ArabicTokenizer using 50 sentences from the vocalized section
  * of the ATB.
- *
+ * 
  * @author Spence Green
  *
  */
@@ -71,7 +71,7 @@ public class ArabicTokenizerTest extends TestCase {
       "أَمّا ال+مَسِيحِيّ+ُونَ الَّذِينَ لَم يَ+فُوز+ُوا بِ- -أَيّ+ِ مَقْعَد+ٍ نِيابِيّ+ٍ فِي ال+ٱِنْتِخاب+ات+ِ ال+تَشْرِيعِيّ+َة+ِ ال+سابِق+َة+ِ فَ- -حَصَل+ُوا ال+آن+َ عَلَى ثَلاث+َة+ِ مَقاعِد+َ كان+َت مِن نَصِيب+ِ وَزِير+ِ ال+ٱِقْتِصاد+ِ يُوسِف بُطْرُس غالِي ( قِبْطِيّ+ٌ ) وَ- -رَجُل+ِ ال+أَعْمال+ِ مُنِير فَخْر عَبْد ال+نُور مِن حِزْب+ِ ال+وَفْد+ِ إِضاف+َة+ً إِلَى رَجُل+ِ ال+أَعْمال+ِ ال+كاثُولِيكِيّ+ِ رامِي لكح .",
       "أَكَّد+َ ال+عاهِل+ُ ال+سَعُودِيّ+ُ ال+مَلِك+ُ فَهْد بِن عَبْد ال+عَزِيز فِي رِسال+َة+ٍ بَعَث+َ بِ- -ها إِلَى ال+رَئِيس+ِ ال+أَمِيرْكِيّ+ِ جُورْج بُوش فِي ال+ذِكْرَى ال+أُولَى لِ- -هَجَم+ات+ِ 11 أَيْلُول+َ , ٱِلْتِزام+َ بِلاد+ِ- -هِ حَمْل+َة+َ مُكافَح+َة+ِ ال+إِرْهاب+ِ , مُشَدِّد+اً فِي ال+وَقْت+ِ ذات+ِ- -هِ عَلَى \" رُسُوخ+ِ \" ال+عَلاق+ات+ِ ال+ثُنائِيّ+َة+ِ .",
   };
-
+  
   private final String[] tokReferences = {
       "و كان من المقرر ان يشارك في الدورة ايضا فريقا الرياضي اللبناني و الخليج السعودي لكن هما اعتذرا في وقت متاخر من مساء اليوم الثلاثاء .",
       "تستعد الولايات المتحدة ل حرب دولية ضد الارهاب س تنفق علي ها 40 بليون دولار .",
@@ -124,7 +124,7 @@ public class ArabicTokenizerTest extends TestCase {
       "اما المسيحيون الذين لم يفوزوا ب اي مقعد نيابي في الانتخابات التشريعية السابقة ف حصلوا الان على ثلاثة مقاعد كانت من نصيب وزير الاقتصاد يوسف بطرس غالي ( قبطي ) و رجل الاعمال منير فخر عبد النور من حزب الوفد اضافة الى رجل الاعمال الكاثوليكي رامي لكح .",
       "اكد العاهل السعودي الملك فهد بن عبد العزيز في رسالة بعث ب ها الى الرئيس الاميركي جورج بوش في الذكرى الاولى ل هجمات 11 ايلول , التزام بلاد ه حملة مكافحة الارهاب , مشددا في الوقت ذات ه على \" رسوخ \" العلاقات الثنائية .",
   };
-
+  
   public void testArabicTokenizer() {
     assert(untokInputs.length == tokReferences.length);
 
@@ -132,8 +132,8 @@ public class ArabicTokenizerTest extends TestCase {
     tf.setOptions("removeProMarker");
     tf.setOptions("removeSegMarker");
     tf.setOptions("removeMorphMarker");
-
-    for (int i = 0; i < untokInputs.length; ++i) {
+    
+    for (int i = 0; i < untokInputs.length; ++i) {      
       String line = untokInputs[i];
       Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new StringReader(line));
       List<CoreLabel> tokens = tokenizer.tokenize();

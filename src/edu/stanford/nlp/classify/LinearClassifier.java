@@ -55,7 +55,7 @@ import java.util.*;
  * @author Christopher Manning (most of the printing options)
  * @author Eric Yeh (save to text file, new constructor w/thresholds)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) (Templatization)
- * @author {@literal nmramesh@cs.stanford.edu} {@link #weightsAsMapOfCounters()}
+ * @author (nmramesh@cs.stanford.edu) {@link #weightsAsMapOfCounters()}
  * @author Angel Chang (Add functions to get top features, and number of features with weights above a certain threshold)
  *
  * @param <L> The type of the labels in the Classifier
@@ -127,7 +127,6 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   /** Construct a counter with keys the labels of the classifier and
    *  values the score (unnormalized log probability) of each class.
    */
-  @Override
   public Counter<L> scoresOf(Datum<L, F> example) {
     if(example instanceof RVFDatum<?, ?>)return scoresOfRVFDatum((RVFDatum<L,F>)example);
     Collection<F> feats = example.asFeatures();
@@ -248,7 +247,6 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    * that class for a certain example.
    * Looking at the the sum of each count v, should be 1.0.
    */
-  @Override
   public Counter<L> probabilityOf(Datum<L, F> example) {
     if(example instanceof RVFDatum<?, ?>)return probabilityOfRVFDatum((RVFDatum<L,F>)example);
     Counter<L> scores = logProbabilityOf(example);
@@ -334,8 +332,8 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   }
 
   /**
-   * Returns a counter for the log probability of each of the classes.
-   * Looking at the the sum of e^v for each count v, should give 1.
+   * Returns a counter for the log probability of each of the classes
+   * looking at the the sum of e^v for each count v, should be 1
    */
   @Deprecated
   public Counter<L> logProbabilityOf(RVFDatum<L, F> example) {
@@ -349,11 +347,11 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   /**
    * Returns indices of labels
-   * @param labels - Set of labels to get indices
-   * @return Set of indices
+   * @param labels - Set of labels to get indicies
+   * @return Set of indicies
    */
   protected Set<Integer> getLabelIndices(Set<L> labels) {
-    Set<Integer> iLabels = Generics.newHashSet();
+    Set<Integer> iLabels = new HashSet<Integer>();
     for (L label:labels) {
       int iLabel = labelIndex.indexOf(label);
       iLabels.add(iLabel);
@@ -364,8 +362,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   /**
    * Returns number of features with weight above a certain threshold
-   * (across all labels).
-   *
+   *  (across all labels)
    * @param threshold  Threshold above which we will count the feature
    * @param useMagnitude Whether the notion of "large" should ignore
    *                     the sign of the feature weight.
@@ -374,9 +371,9 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   public int getFeatureCount(double threshold, boolean useMagnitude)
   {
     int n = 0;
-    for (double[] weightArray : weights) {
-      for (double weight : weightArray) {
-        double thisWeight = (useMagnitude) ? Math.abs(weight) : weight;
+    for (int feat = 0; feat < weights.length; feat++) {
+      for (int lab = 0; lab < weights[feat].length; lab++) {
+        double thisWeight = (useMagnitude)? Math.abs(weights[feat][lab]):weights[feat][lab];
         if (thisWeight > threshold) {
           n++;
         }
@@ -386,8 +383,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   }
 
   /**
-   * Returns number of features with weight above a certain threshold.
-   *
+   * Returns number of features with weight above a certain threshold
    * @param labels Set of labels we care about when counting features
    *               Use null to get counts across all labels
    * @param threshold  Threshold above which we will count the feature
@@ -406,8 +402,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   }
 
   /**
-   * Returns number of features with weight above a certain threshold.
-   *
+   * Returns number of features with weight above a certain threshold
    * @param iLabels Set of label indices we care about when counting features
    *                Use null to get counts across all labels
    * @param threshold  Threshold above which we will count the feature
@@ -418,9 +413,9 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
   protected int getFeatureCountLabelIndices(Set<Integer> iLabels, double threshold, boolean useMagnitude)
   {
     int n = 0;
-    for (double[] weightArray : weights) {
-      for (int labIndex : iLabels) {
-        double thisWeight = (useMagnitude) ? Math.abs(weightArray[labIndex]) : weightArray[labIndex];
+    for (int feat = 0; feat < weights.length; feat++) {
+      for (int labIndex:iLabels) {
+        double thisWeight = (useMagnitude)? Math.abs(weights[feat][labIndex]):weights[feat][labIndex];
         if (thisWeight > threshold) {
           n++;
         }
@@ -431,8 +426,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 
   /**
    * Returns list of top features with weight above a certain threshold
-   * (list is descending and across all labels).
-   *
+   *  (list is descending and across all labels)
    * @param threshold  Threshold above which we will count the feature
    * @param useMagnitude Whether the notion of "large" should ignore
    *                     the sign of the feature weight.
@@ -673,19 +667,19 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    *
    * @return A human readable string about the classifier distribution.
    */
-  public String toDistributionString(int threshold) {
+  public String toDistributionString(int treshold) {
     Counter<Double> weightCounts = new ClassicCounter<Double>();
     StringBuilder s = new StringBuilder();
     s.append("Total number of weights: ").append(totalSize());
-    for (double[] weightArray : weights) {
-      for (double weight : weightArray) {
-        weightCounts.incrementCount(weight);
+    for (int f = 0; f < weights.length; f++) {
+      for (int l = 0; l < weights[f].length; l++) {
+        weightCounts.incrementCount(weights[f][l]);
       }
     }
 
     s.append("Counts of weights\n");
-    Set<Double> keys = Counters.keysAbove(weightCounts, threshold);
-    s.append(keys.size()).append(" keys occur more than ").append(threshold).append(" times ");
+    Set<Double> keys = Counters.keysAbove(weightCounts, treshold);
+    s.append(keys.size()).append(" keys occur more than ").append(treshold).append(" times ");
     return s.toString();
   }
 
@@ -1183,7 +1177,7 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
  */
 
   public Map<L,Counter<F>> weightsAsMapOfCounters() {
-    Map<L,Counter<F>> mapOfCounters = Generics.newHashMap();
+    Map<L,Counter<F>> mapOfCounters = new HashMap<L,Counter<F>>();
     for(L label : labelIndex){
       int labelID = labelIndex.indexOf(label);
       Counter<F> c = new ClassicCounter<F>();
@@ -1270,7 +1264,6 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
 	  return labelIndex.get(bestI);
   }
 
-  @Override
   public L classOf(Datum<L, F> example) {
     if(example instanceof RVFDatum<?, ?>)return classOfRVFDatum((RVFDatum<L,F>)example);
     Counter<L> scores = scoresOf(example);
@@ -1382,7 +1375,8 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       ois.close();
       return classifier;
     } catch (Exception e) {
-      throw new RuntimeException("Deserialization failed: "+e.getMessage(), e);
+      e.printStackTrace();
+      throw new RuntimeException("Deserialization failed: "+e.getMessage());
     }
   }
 
@@ -1436,5 +1430,4 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       e.printStackTrace();
     }
   }
-
 }

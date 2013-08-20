@@ -15,9 +15,11 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.BeginIndexAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.EndIndexAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.parser.lexparser.ParserConstraint;
-import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations.ConstraintAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -193,7 +195,7 @@ public class GenericDataSetReader {
     int headPos = ent.getExtentTokenEnd() - 1;
     if(sh != null){
       CoreLabel label = (CoreLabel) sh.label();
-      headPos = label.get(CoreAnnotations.BeginIndexAnnotation.class);
+      headPos = label.get(BeginIndexAnnotation.class);
     } else {
       logger.fine("WARNING: failed to find syntactic head for entity: " + ent + " in tree: " + tree);
       logger.fine("Fallback strategy: will set head to last token in mention: " + tokens.get(headPos));
@@ -218,7 +220,7 @@ public class GenericDataSetReader {
     if (processor != null) {
       // we might already have syntactic annotation from offline files
       List<CoreMap> sentences = dataset.get(CoreAnnotations.SentencesAnnotation.class);
-      if (sentences.size() > 0 && !sentences.get(0).containsKey(TreeCoreAnnotations.TreeAnnotation.class)) {
+      if (sentences.size() > 0 && !sentences.get(0).containsKey(TreeAnnotation.class)) {
         logger.info("Annotating dataset with " + processor);
         processor.annotate(dataset);
       } else {
@@ -240,7 +242,7 @@ public class GenericDataSetReader {
     for (CoreMap sentence : sentences) {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       logger.fine("Processing sentence " + tokens);
-      Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      Tree tree = sentence.get(TreeAnnotation.class);
       if(tree == null) throw new RuntimeException("ERROR: MR requires full syntactic analysis!");
 
       // convert tree labels to CoreLabel if necessary
@@ -249,7 +251,7 @@ public class GenericDataSetReader {
 
       // store the tree spans, if not present already
       CoreLabel l = (CoreLabel) tree.label();
-      if(forceGenerationOfIndexSpans || (! l.containsKey(CoreAnnotations.BeginIndexAnnotation.class) && ! l.containsKey(CoreAnnotations.EndIndexAnnotation.class))){
+      if(forceGenerationOfIndexSpans || (! l.containsKey(BeginIndexAnnotation.class) && ! l.containsKey(EndIndexAnnotation.class))){
         tree.indexSpans(0);
         logger.fine("Index spans were generated.");
       } else {
@@ -374,23 +376,23 @@ public class GenericDataSetReader {
     // extentHead is a child in the local extent parse tree. we need to find the corresponding node in the main tree
     // Because we deleted dashes, it's index will be >= the index in the extent parse tree
     CoreLabel l = (CoreLabel) extentHead.label();
-    // Tree realHead = findTreeWithSpan(root, l.get(CoreAnnotations.BeginIndexAnnotation.class), l.get(CoreAnnotations.EndIndexAnnotation.class));
-    Tree realHead = funkyFindLeafWithApproximateSpan(root, l.value(), l.get(CoreAnnotations.BeginIndexAnnotation.class), approximateness);
+    // Tree realHead = findTreeWithSpan(root, l.get(BeginIndexAnnotation.class), l.get(EndIndexAnnotation.class));
+    Tree realHead = funkyFindLeafWithApproximateSpan(root, l.value(), l.get(BeginIndexAnnotation.class), approximateness);
     if(realHead != null) logger.fine("Chosen head: " + realHead);
     return realHead;
   }
 
   private Tree findPartialSpan(Tree current, int start) {
     CoreLabel label = (CoreLabel) current.label();
-    int startIndex = label.get(CoreAnnotations.BeginIndexAnnotation.class);
+    int startIndex = label.get(BeginIndexAnnotation.class);
     if (startIndex == start) {
       logger.fine("findPartialSpan: Returning " + current);
       return current;
     }
     for (Tree kid : current.children()) {
       CoreLabel kidLabel = (CoreLabel) kid.label();
-      int kidStart = kidLabel.get(CoreAnnotations.BeginIndexAnnotation.class);
-      int kidEnd = kidLabel.get(CoreAnnotations.EndIndexAnnotation.class);
+      int kidStart = kidLabel.get(BeginIndexAnnotation.class);
+      int kidEnd = kidLabel.get(EndIndexAnnotation.class);
       // System.err.println("findPartialSpan: Examining " + kidLabel.value() + " from " + kidStart + " to " + kidEnd);
       if (kidStart <= start && kidEnd > start) {
         return findPartialSpan(kid, start);
@@ -404,7 +406,7 @@ public class GenericDataSetReader {
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
-      int ind = label.get(CoreAnnotations.BeginIndexAnnotation.class);
+      int ind = label.get(BeginIndexAnnotation.class);
       // System.err.println("Token #" + ind + ": " + leaf.value());
       if (token.equals(leaf.value()) && ind >= index && ind <= index + approximateness) {
         return leaf;
@@ -458,7 +460,7 @@ public class GenericDataSetReader {
     // extentHead is a child in the local extent parse tree. we need to find the
     // corresponding node in the main tree
     CoreLabel l = (CoreLabel) extentHead.label();
-    Tree realHead = findTreeWithSpan(root, l.get(CoreAnnotations.BeginIndexAnnotation.class), l.get(CoreAnnotations.EndIndexAnnotation.class));
+    Tree realHead = findTreeWithSpan(root, l.get(BeginIndexAnnotation.class), l.get(EndIndexAnnotation.class));
     assert (realHead != null);
 
     return realHead;
@@ -488,14 +490,14 @@ public class GenericDataSetReader {
                        List<ParserConstraint> constraints) {
     CoreMap sent = new Annotation("");
     sent.set(CoreAnnotations.TokensAnnotation.class, tokens);
-    sent.set(ParserAnnotations.ConstraintAnnotation.class, constraints);
+    sent.set(ConstraintAnnotation.class, constraints);
     Annotation doc = new Annotation("");
     List<CoreMap> sents = new ArrayList<CoreMap>();
     sents.add(sent);
     doc.set(CoreAnnotations.SentencesAnnotation.class, sents);
     getParser().annotate(doc);
     sents = doc.get(CoreAnnotations.SentencesAnnotation.class);
-    return sents.get(0).get(TreeCoreAnnotations.TreeAnnotation.class);
+    return sents.get(0).get(TreeAnnotation.class);
   }
 
   /**
@@ -509,9 +511,9 @@ public class GenericDataSetReader {
    */
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
     CoreLabel l = (CoreLabel) tree.label();
-    if (l != null && l.has(CoreAnnotations.BeginIndexAnnotation.class) && l.has(CoreAnnotations.EndIndexAnnotation.class)) {
-      int myStart = l.get(CoreAnnotations.BeginIndexAnnotation.class);
-      int myEnd = l.get(CoreAnnotations.EndIndexAnnotation.class);
+    if (l != null && l.has(BeginIndexAnnotation.class) && l.has(EndIndexAnnotation.class)) {
+      int myStart = l.get(BeginIndexAnnotation.class);
+      int myEnd = l.get(EndIndexAnnotation.class);
       if (start == myStart && end == myEnd){
         // found perfect match
         return tree;

@@ -7,12 +7,12 @@ import java.util.List;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 
 /**
  * Each entity mention is described by a type (possibly subtype) and a span of text
- *
+ * 
  * @author Andrey Gusev
  * @author Mihai
  */
@@ -24,20 +24,20 @@ public class EntityMention extends ExtractionObject {
   private final String mentionType;
   private String corefID = "-1";
 
-  /**
+  /** 
    * Offsets the head span, e.g., "George Bush" in the extent "the president George Bush"
-   * The offsets are relative to the sentence containing this mention
+   * The offsets are relative to the sentence containing this mention 
    */
   private Span headTokenSpan;
 
   /**
    * Position of the syntactic head word of this mention, e.g., "Bush" for the head span "George Bush"
    * The offset is relative the sentence containing this mention
-   * Note: use headTokenSpan when sequence tagging entity mentions not this.
-   *       This is meant to be used only for event/relation feature extraction!
+   * Note: use headTokenSpan when sequence tagging entity mentions not this. 
+   *       This is meant to be used only for event/relation feature extraction! 
    */
   private int syntacticHeadTokenPosition;
-
+  
   private String normalizedName;
 
   public EntityMention(String objectId,
@@ -91,10 +91,10 @@ public class EntityMention extends ExtractionObject {
   }
 
   public Tree getSyntacticHeadTree() {
-    Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+    Tree tree = sentence.get(TreeAnnotation.class);
     return tree.getLeaves().get(syntacticHeadTokenPosition);
   }
-
+  
   public String getNormalizedName() { return normalizedName; }
   public void setNormalizedName(String n) { normalizedName = n; }
 
@@ -116,10 +116,13 @@ public class EntityMention extends ExtractionObject {
   }
 
   public boolean headIncludes(EntityMention otherEnt, boolean useSubType) {
-    return otherEnt.getSyntacticHeadTokenPosition() >= getHeadTokenStart() &&
-            otherEnt.getSyntacticHeadTokenPosition() < getHeadTokenEnd() &&
-            ((type != null && otherEnt.type != null && type.equals(otherEnt.type)) || (type == null && otherEnt.type == null)) &&
-            ( ! useSubType || ((subType != null && otherEnt.subType != null && subType.equals(otherEnt.subType)) || (subType == null && otherEnt.subType == null)));
+    if(otherEnt.getSyntacticHeadTokenPosition() >= getHeadTokenStart() && 
+        otherEnt.getSyntacticHeadTokenPosition() < getHeadTokenEnd() &&
+        ((type != null && otherEnt.type != null && type.equals(otherEnt.type)) || (type == null && otherEnt.type == null)) &&
+        (! useSubType || ((subType != null && otherEnt.subType != null && subType.equals(otherEnt.subType)) || (subType == null && otherEnt.subType == null)))){
+      return true;
+    }
+    return false;
   }
 
   public boolean equals(EntityMention otherEnt, boolean useSubType) {
@@ -154,10 +157,9 @@ public class EntityMention extends ExtractionObject {
     }
     return false;
   }
-
-  /**
-   * Compares the text spans of the two entity mentions.
-   *
+  
+  /** 
+   * Compares the text spans of the two entity mentions
    * @param otherEnt
    */
   public boolean textEquals(EntityMention otherEnt) {
@@ -199,8 +201,8 @@ public class EntityMention extends ExtractionObject {
 
       // we are not guaranteed to have CharacterOffsets so we can't use them...
       /*
-    	Integer start = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-    	Integer end = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+    	Integer start = token.get(CharacterOffsetBeginAnnotation.class);
+    	Integer end = token.get(CharacterOffsetEndAnnotation.class);
 
     	if (start != null && end != null) {
     	  if (lastEnd != -1 && !start.equals(lastEnd)) {
@@ -220,24 +222,23 @@ public class EntityMention extends ExtractionObject {
 
     return sb.toString();
   }
-
-
+  
   @Override
   public String toString() {
-    return "EntityMention [type=" + type
+    return "EntityMention [type=" + type 
     + (subType != null ? ", subType=" + subType : "")
     + (mentionType != null ? ", mentionType=" + mentionType : "")
-    + (objectId != null ? ", objectId=" + objectId : "")
+    + (objectId != null ? ", objectId=" + objectId : "") 
     + (headTokenSpan != null ? ", hstart=" + headTokenSpan.start() + ", hend=" + headTokenSpan.end() : "")
     + (extentTokenSpan != null ? ", estart=" + extentTokenSpan.start() + ", eend=" + extentTokenSpan.end() : "")
     + (syntacticHeadTokenPosition >= 0 ? ", headPosition=" + syntacticHeadTokenPosition : "")
-    + (headTokenSpan != null ? ", value=\"" + getValue() + "\"" : "")
+    + (headTokenSpan != null ? ", value=\"" + getValue() + "\"" : "") 
     + (normalizedName != null ? ", normalizedName=\"" + normalizedName + "\"" : "")
     + ", corefID=" + corefID
     + (typeProbabilities != null ? ", probs=" + probsToString() : "")
     + "]";
   }
-
+  
   static class CompByHead implements Comparator<EntityMention> {
     public int compare(EntityMention o1, EntityMention o2) {
       if(o1.getHeadTokenStart() < o2.getHeadTokenStart()){

@@ -138,7 +138,7 @@ public abstract class TregexMatcher {
   }
 
   /**
-   * Similar to {@code find()}, but matches only if {@code node} is
+   * Similar to find, but matches count only if <code>node</code> is
    * the root of the match.  All other matches are ignored.  If you
    * know you are looking for matches with a particular root, this is
    * much faster than iterating over all matches and taking only the
@@ -147,13 +147,13 @@ public abstract class TregexMatcher {
    * <br>
    * If called multiple times with the same node, this will return
    * subsequent matches in the same manner as find() returns
-   * subsequent matches in the same tree.  If you want to call this using
+   * subsequent matches in the same tree.  If you want to call this on
    * the same TregexMatcher on more than one node, call reset() first;
    * otherwise, an AssertionError will be thrown.
    */
   public boolean findAt(Tree node) {
     if (findCurrent != null && findCurrent != node) {
-      throw new AssertionError("Error: must call reset() before changing nodes for a call to findRootedAt");
+      throw new AssertionError("Error: must all reset() before changing nodes for a call to findRootedAt");
     }
     if (findCurrent != null) {
       return matches();
@@ -178,7 +178,6 @@ public abstract class TregexMatcher {
     return false;
   }
 
-  // todo [cdm 2013]: This just seems unused. What's it meant to do? Eliminable???
   abstract boolean getChangesVariables();
 
   /**

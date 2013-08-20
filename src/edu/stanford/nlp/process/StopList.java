@@ -2,13 +2,12 @@ package edu.stanford.nlp.process;
 
 
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.util.Generics;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Simple stoplist class.
@@ -17,14 +16,14 @@ import java.util.Set;
  */
 
 public class StopList {
-  private Set<Word> wordSet;
+  private HashSet<Word> wordSet;
 
   /*
 	 *     Constructs a stoplist with very few stopwords.
   */
 
   public StopList() {
-    wordSet = Generics.newHashSet();
+    wordSet = new HashSet<Word>();
     addGenericWords();
   }
 
@@ -35,7 +34,7 @@ public class StopList {
    */
 
   public StopList(File list) {
-    wordSet = Generics.newHashSet();
+    wordSet = new HashSet<Word>();
 
     try {
       BufferedReader reader = new BufferedReader(new FileReader(list));

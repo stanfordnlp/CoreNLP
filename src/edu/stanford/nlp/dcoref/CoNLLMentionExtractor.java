@@ -33,15 +33,18 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.stanford.nlp.classify.LogisticClassifier;
+import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.semgraph.SemanticGraphCoreAnnotations.BasicDependenciesAnnotation;
+import edu.stanford.nlp.trees.semgraph.SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation;
+import edu.stanford.nlp.trees.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
@@ -76,12 +79,6 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     stanfordProcessor = loadStanfordProcessor(props);
   }
 
-  public CoNLLMentionExtractor(Dictionaries dict, Properties props, Semantics semantics,
-      LogisticClassifier<String, String> singletonModel) throws Exception {
-    this(dict, props, semantics);
-    singletonPredictor = singletonModel;
-  }
-
   private final boolean collapse = true;
   private final boolean ccProcess = false;
   private final boolean includeExtras = false;
@@ -109,17 +106,17 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     for (CoreMap sentence:sentences) {
       if (!Constants.USE_GOLD_PARSES && !replicateCoNLL) {
         // Remove tree from annotation and replace with parse using stanford parser
-        sentence.remove(TreeCoreAnnotations.TreeAnnotation.class);
+        sentence.remove(TreeAnnotation.class);
       } else {
-        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+        Tree tree = sentence.get(TreeAnnotation.class);
         // generate the dependency graph
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
               collapse, ccProcess, includeExtras, lemmatize, threadSafe);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
               !collapse, ccProcess, includeExtras, lemmatize, threadSafe);
-          sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
-          sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
+          sentence.set(BasicDependenciesAnnotation.class, basicDeps);
+          sentence.set(CollapsedDependenciesAnnotation.class, deps);
         } catch(Exception e) {
           logger.log(Level.WARNING, "Exception caught during extraction of Stanford dependencies. Will ignore and continue...", e);
         }
@@ -127,13 +124,14 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     }
 
     String preSpeaker = null;
+    String curSpeaker = null;
     int utterance = -1;
     for (CoreLabel token:anno.get(CoreAnnotations.TokensAnnotation.class)) {
       if (!token.containsKey(CoreAnnotations.SpeakerAnnotation.class))  {
         token.set(CoreAnnotations.SpeakerAnnotation.class, "");
       }
-      String curSpeaker = token.get(CoreAnnotations.SpeakerAnnotation.class);
-      if (!curSpeaker.equals(preSpeaker)) {
+      curSpeaker = token.get(CoreAnnotations.SpeakerAnnotation.class);
+      if(!curSpeaker.equals(preSpeaker)) {
         utterance++;
         preSpeaker = curSpeaker;
       }
@@ -145,7 +143,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
 
     for (CoreMap sentence:anno.get(CoreAnnotations.SentencesAnnotation.class)) {
       allWords.add(sentence.get(CoreAnnotations.TokensAnnotation.class));
-      allTrees.add(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+      allTrees.add(sentence.get(TreeAnnotation.class));
     }
 
     // Initialize gold mentions
@@ -172,7 +170,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     return doc;
   }
 
-  public static List<List<Mention>> makeCopy(List<List<Mention>> mentions) {
+  public List<List<Mention>> makeCopy(List<List<Mention>> mentions) {
     List<List<Mention>> copy = new ArrayList<List<Mention>>(mentions.size());
     for (List<Mention> sm:mentions) {
       List<Mention> sm2 = new ArrayList<Mention>(sm.size());
@@ -192,12 +190,12 @@ public class CoNLLMentionExtractor extends MentionExtractor {
   }
 
   private static void recallErrors(List<List<Mention>> goldMentions, List<List<Mention>> predictedMentions, Annotation doc) throws IOException {
-    List<CoreMap> coreMaps = doc.get(CoreAnnotations.SentencesAnnotation.class);
+    List<CoreMap> coreMaps = doc.get(SentencesAnnotation.class);
     int numSentences = goldMentions.size();
     for (int i=0;i<numSentences;i++){
       CoreMap coreMap = coreMaps.get(i);
-      List<CoreLabel> words = coreMap.get(CoreAnnotations.TokensAnnotation.class);
-      Tree tree = coreMap.get(TreeCoreAnnotations.TreeAnnotation.class);
+      List<CoreLabel> words = coreMap.get(TokensAnnotation.class);
+      Tree tree = coreMap.get(TreeAnnotation.class);
       List<Mention> goldMentionsSent = goldMentions.get(i);
       List<Pair<Integer,Integer>> goldMentionsSpans = extractSpans(goldMentionsSent);
 
@@ -263,7 +261,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         mention.originalSpan = m.get(CoreAnnotations.TokensAnnotation.class);
 
         // Mention dependency is collapsed dependency for sentence
-        mention.dependency = sentences.get(sentIndex).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        mention.dependency = sentences.get(sentIndex).get(CollapsedDependenciesAnnotation.class);
 
         allGoldMentions.get(sentIndex).add(mention);
       }

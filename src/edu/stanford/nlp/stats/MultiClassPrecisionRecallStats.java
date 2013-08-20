@@ -46,10 +46,6 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
     this.negLabel = negLabel;
   }
 
-  public L getNegLabel() {
-      return negLabel;
-  }
-
   public <F> double score(ProbabilisticClassifier<L,F> classifier, GeneralDataset<L,F> data) {
     return score((Classifier<L,F>)classifier, data);
   }
@@ -232,7 +228,7 @@ public class MultiClassPrecisionRecallStats<L> implements Scorer<L> {
     StringBuffer sb = new StringBuffer();
     sb.append("--- PR Stats ---").append("\n");
     for (L label : labelIndex) {
-      if (label == null || label.equals(negLabel)) { continue; }
+      if (label.equals(negLabel)) { continue; }      
       sb.append("** ").append(label.toString()).append(" **\n");
       sb.append("\tPrec:   ").append(getPrecisionDescription(numDigits, label)).append("\n");
       sb.append("\tRecall: ").append(getRecallDescription(numDigits, label)).append("\n");

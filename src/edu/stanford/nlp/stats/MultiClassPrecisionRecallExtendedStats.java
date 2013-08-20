@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * Extension of MultiClassPrecisionRecallStats that also computes accuracy
+ * Extension of MultiClassPrecisionRecallStats that handles
  * @author Angel Chang
  */
 public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisionRecallStats<L> {
@@ -25,7 +25,6 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   protected IntCounter<L> foundGuessed;
   protected int tokensCount = 0;
   protected int tokensCorrect = 0;
-  protected int noLabel = 0;
 
   protected Function<String,L> stringConverter;
 
@@ -51,9 +50,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   }
 
   public <F> double score(Classifier<L,F> classifier, GeneralDataset<L,F> data) {
-    labelIndex = new HashIndex<L>();
-    labelIndex.addAll(classifier.labels());
-    labelIndex.addAll(data.labelIndex.objectsList());
+    setLabelIndex(data.labelIndex);
     clearCounts();
     int[] labelsArr = data.getLabelsArray();
     for (int i = 0; i < data.size(); i++) {
@@ -159,10 +156,6 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   
   protected void addGuess(L guess, L label, boolean addUnknownLabels)
   {
-    if (label == null) {
-        noLabel++;
-        return;
-    }
     if (addUnknownLabels) {
       if (labelIndex == null) {
         labelIndex = new HashIndex<L>();

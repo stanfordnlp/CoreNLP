@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -21,16 +22,17 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.objectbank.ObjectBank;
-import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -60,7 +62,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
   // Tokenizer options
   private final String optTokenizer = "orthoOptions";
-
+  
   // Mark segmented prefixes with this String
   private final String optPrefix = "prefixMarker";
 
@@ -69,7 +71,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
   // Number of decoding threads
   private final String optThreads = "nthreads";
-
+  
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
   private final TokenizerFactory<CoreLabel> tf;
@@ -77,17 +79,12 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final String suffixMarker;
   private final boolean isTokenized;
   private final String tokenizerOptions;
-
-  /** Make an Arabic Segmenter.
-   *
-   *  @param props Options for how to tokenize. See the main method of
-   *               {@see ArabicTokenizer} for details.
-   */
+  
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
     tf = getTokenizerFactory();
-
+    
     prefixMarker = props.getProperty(optPrefix, "");
     suffixMarker = props.getProperty(optSuffix, "");
 
@@ -104,10 +101,10 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     flags = new SeqClassifierFlags(props);
     classifier = new CRFClassifier<CoreLabel>(flags);
   }
-
+  
   /**
    * Copy constructor.
-   *
+   * 
    * @param other
    */
   public ArabicSegmenter(ArabicSegmenter other) {
@@ -119,17 +116,18 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
     // ArabicTokenizerFactory is *not* threadsafe. Make a new copy.
     tf = getTokenizerFactory();
-
+    
     // CRFClassifier is threadsafe, so return a reference.
     classifier = other.classifier;
   }
 
   /**
-   * Creates an ArabicTokenizer. The default tokenizer
-   * is ArabicTokenizer.atbFactory(), which produces the
+   * Creates an ArabicTokenizer from the user-specified options. The
+   * default is ArabicTokenizer.atbFactory(), which produces the 
    * same orthographic normalization as Green and Manning (2010).
-   *
-   * @return A TokenizerFactory that produces each Arabic token as a CoreLabel
+   * 
+   * @param props
+   * @return
    */
   private TokenizerFactory<CoreLabel> getTokenizerFactory() {
     TokenizerFactory<CoreLabel> tokFactory = null;
@@ -190,7 +188,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     String segmentedString = segmentString(line);
     return Sentence.toWordList(segmentedString.split("\\s+"));
   }
-
+  
   public String segmentString(String line) {
     List<CoreLabel> tokenList;
     if (tf == null) {
@@ -199,7 +197,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     } else {
       List<CoreLabel> tokens = tf.getTokenizer(new StringReader(line)).tokenize();
       tokenList = IOBUtils.StringToIOB(tokens, null, false);
-    }
+    } 
     tokenList = classifier.classify(tokenList);
     String segmentedString = IOBUtils.IOBToString(tokenList, prefixMarker, suffixMarker);
     return segmentedString;
@@ -207,7 +205,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
   /**
    * Segment all strings from an input.
-   *
+   * 
    * @param br -- input stream to segment
    * @param pwOut -- output stream to write the segmenter text
    * @return number of input characters segmented
@@ -232,9 +230,9 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   public void train() {
     boolean hasSegmentationMarkers = true;
     boolean hasTags = true;
-    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
+    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers, 
                                                                                      hasTags, tf);
-    ObjectBank<List<CoreLabel>> lines =
+    ObjectBank<List<CoreLabel>> lines = 
       classifier.makeObjectBankFromFile(flags.trainFile, docReader);
 
     classifier.train(lines, docReader);
@@ -245,16 +243,16 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
    * Evaluate accuracy when the input is gold segmented text *with* segmentation
    * markers and morphological analyses. In other words, the evaluation file has the
    * same format as the training data.
-   *
+   * 
    * @param pwOut
    */
   private void evaluate(PrintWriter pwOut) {
     System.err.println("Starting evaluation...");
     boolean hasSegmentationMarkers = true;
     boolean hasTags = true;
-    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
+    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers, 
                                                                                      hasTags, tf);
-    ObjectBank<List<CoreLabel>> lines =
+    ObjectBank<List<CoreLabel>> lines = 
       classifier.makeObjectBankFromFile(flags.testFile, docReader);
 
     Counter<String> labelTotal = new ClassicCounter<String>();
@@ -265,11 +263,11 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
       line = classifier.classify(line);
       for (CoreLabel label : line) {
         // Do not evaluate labeling of whitespace
-        String observation = label.get(CoreAnnotations.CharAnnotation.class);
+        String observation = label.get(CharAnnotation.class);
         if ( ! observation.equals(IOBUtils.getBoundaryCharacter())) {
           total++;
-          String hypothesis = label.get(CoreAnnotations.AnswerAnnotation.class);
-          String reference = label.get(CoreAnnotations.GoldAnswerAnnotation.class);
+          String hypothesis = label.get(AnswerAnnotation.class);
+          String reference = label.get(GoldAnswerAnnotation.class);
           labelTotal.incrementCount(reference);
           if (hypothesis.equals(reference)) {
             correct++;
@@ -287,7 +285,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     pwOut.printf("#correct:\t%d%n", correct);
     pwOut.printf("accuracy:\t%.2f%n", accuracy);
     pwOut.println("==================");
-
+    
     // Output the per label accuracies
     pwOut.println("PER LABEL ACCURACIES");
     for (String refLabel : labelTotal.keySet()) {
@@ -351,9 +349,9 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     sb.append(nl).append(" Otherwise, all flags correspond to those present in SeqClassifierFlags.java.").append(nl);
     return sb.toString();
   }
-
+  
   private static Map<String,Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = Generics.newHashMap();
+    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
     optionArgDefs.put("help", 0);
     optionArgDefs.put("orthoOptions", 1);
     optionArgDefs.put("tokenized", 0);
@@ -368,7 +366,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   }
 
   /**
-   *
+   * 
    * @param args
    */
   public static void main(String[] args) {
@@ -393,11 +391,11 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
         }
 
       } else {
-        BufferedReader br = (segmenter.flags.textFile == null) ?
-            new BufferedReader(new InputStreamReader(System.in)) :
-              new BufferedReader(new InputStreamReader(new FileInputStream(segmenter.flags.textFile),
+        BufferedReader br = (segmenter.flags.textFile == null) ? 
+            new BufferedReader(new InputStreamReader(System.in)) : 
+              new BufferedReader(new InputStreamReader(new FileInputStream(segmenter.flags.textFile), 
                   segmenter.flags.inputEncoding));
-
+            
         double charsPerSec = decode(segmenter, br, pwOut, nThreads);
         IOUtils.closeIgnoringExceptions(br);
         System.err.printf("Done! Processed input text at %.2f input characters/second%n", charsPerSec);
@@ -412,14 +410,14 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
   /**
    * Segment input and write to output stream.
-   *
+   * 
    * @param segmenter
    * @param br
    * @param pwOut
    * @param nThreads
    * @return input characters processed per second
    */
-  private static double decode(ArabicSegmenter segmenter, BufferedReader br,
+  private static double decode(ArabicSegmenter segmenter, BufferedReader br, 
                                PrintWriter pwOut, int nThreads) {
     assert nThreads > 0;
     long nChars = 0;
@@ -434,7 +432,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
             pwOut.println(wrapper.poll());
           }
         }
-
+        
         wrapper.join();
         while (wrapper.peek()) {
           pwOut.println(wrapper.poll());
@@ -443,9 +441,9 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
       } catch (IOException e) {
         e.printStackTrace();
       }
-
+    
     } else {
-      nChars = segmenter.segment(br, pwOut);
+      nChars = segmenter.segment(br, pwOut);      
     }
     long duration = System.nanoTime() - startTime;
     double charsPerSec = (double) nChars / (duration / 1000000000.0);
@@ -454,7 +452,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
   /**
    * Train a new segmenter or load an trained model from file.
-   *
+   * 
    * @param options
    * @return
    */

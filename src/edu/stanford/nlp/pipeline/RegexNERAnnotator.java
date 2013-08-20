@@ -1,14 +1,15 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-
+import edu.stanford.nlp.util.Timing;
 
 /**
  * This class adds NER information to an annotation using the RegexNERSequenceClassifier.
@@ -16,14 +17,17 @@ import edu.stanford.nlp.util.CoreMap;
  * into Lists of CoreLabels. Adds NER information to each CoreLabel as a NamedEntityTagAnnotation.
  *
  * @author jtibs
+ *
  */
+
 public class RegexNERAnnotator implements Annotator {
 
   private final RegexNERSequenceClassifier classifier;
+  private final Timing timer;
   private final boolean verbose;
 
   public RegexNERAnnotator(String mapping) {
-    this(mapping, false);
+    this(mapping, false, true, RegexNERSequenceClassifier.DEFAULT_VALID_POS, false);
   }
 
   public RegexNERAnnotator(String mapping, boolean ignoreCase) {
@@ -36,33 +40,34 @@ public class RegexNERAnnotator implements Annotator {
 
   public RegexNERAnnotator(String mapping, boolean ignoreCase, boolean overwriteMyLabels, String validPosPattern, boolean verbose) {
     classifier = new RegexNERSequenceClassifier(mapping, ignoreCase, overwriteMyLabels, validPosPattern);
+    timer = new Timing();
     this.verbose = verbose;
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      System.err.print("Adding RegexNER annotations ... ");
+      timer.start();
+      System.err.print("Adding RegexNER annotation...");
     }
 
-    if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
+    if (! annotation.containsKey(SentencesAnnotation.class))
       throw new RuntimeException("Unable to find sentences in " + annotation);
 
-    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+    List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
     for (CoreMap sentence : sentences) {
-      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
       classifier.classify(tokens);
 
       for (CoreLabel token : tokens) {
-        if (token.get(CoreAnnotations.NamedEntityTagAnnotation.class) == null)
-          token.set(CoreAnnotations.NamedEntityTagAnnotation.class, classifier.flags.backgroundSymbol);
+        if (token.get(NamedEntityTagAnnotation.class) == null)
+          token.set(NamedEntityTagAnnotation.class, classifier.flags.backgroundSymbol);
       }
 
       for (int start = 0; start < tokens.size(); start++) {
         CoreLabel token = tokens.get(start);
-        String answerType = token.get(CoreAnnotations.AnswerAnnotation.class);
+        String answerType = token.get(AnswerAnnotation.class);
+        String NERType = token.get(NamedEntityTagAnnotation.class);
         if (answerType == null) continue;
-        String NERType = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
 
         int answerEnd = findEndOfAnswerAnnotation(tokens, start);
         int NERStart = findStartOfNERAnnotation(tokens, start);
@@ -75,47 +80,34 @@ public class RegexNERAnnotator implements Annotator {
 
           // annotate each token in the span
           for (int i = start; i < answerEnd; i ++)
-            tokens.get(i).set(CoreAnnotations.NamedEntityTagAnnotation.class, answerType);
+            tokens.get(i).set(NamedEntityTagAnnotation.class, answerType);
         }
         start = answerEnd - 1;
       }
     }
 
     if (verbose)
-      System.err.println("done.");
+      timer.stop("done.");
   }
 
   private static int findEndOfAnswerAnnotation(List<CoreLabel> tokens, int start) {
-    String type = tokens.get(start).get(CoreAnnotations.AnswerAnnotation.class);
-    while (start < tokens.size() && type.equals(tokens.get(start).get(CoreAnnotations.AnswerAnnotation.class)))
+    String type = tokens.get(start).get(AnswerAnnotation.class);
+    while (start < tokens.size() && type.equals(tokens.get(start).get(AnswerAnnotation.class)))
       start++;
     return start;
   }
 
   private static int findStartOfNERAnnotation(List<CoreLabel> tokens, int start) {
-    String type = tokens.get(start).get(CoreAnnotations.NamedEntityTagAnnotation.class);
-    while (start >= 0 && type.equals(tokens.get(start).get(CoreAnnotations.NamedEntityTagAnnotation.class)))
+    String type = tokens.get(start).get(NamedEntityTagAnnotation.class);
+    while (start >= 0 && type.equals(tokens.get(start).get(NamedEntityTagAnnotation.class)))
       start--;
     return start + 1;
   }
 
   private static int findEndOfNERAnnotation(List<CoreLabel> tokens, int start) {
-    String type = tokens.get(start).get(CoreAnnotations.NamedEntityTagAnnotation.class);
-    while (start < tokens.size() && type.equals(tokens.get(start).get(CoreAnnotations.NamedEntityTagAnnotation.class)))
+    String type = tokens.get(start).get(NamedEntityTagAnnotation.class);
+    while (start < tokens.size() && type.equals(tokens.get(start).get(NamedEntityTagAnnotation.class)))
       start++;
     return start;
-  }
-
-
-  @Override
-  public Set<Requirement> requires() {
-    return StanfordCoreNLP.TOKENIZE_AND_SSPLIT;
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    // TODO: we might want to allow for different RegexNER annotators
-    // to satisfy different requirements
-    return Collections.emptySet();
   }
 }

@@ -9,10 +9,6 @@
         <webroots>
           <root url="file://$MODULE_DIR$/src/edu/stanford/nlp/parser/webapp" relative="/" />
         </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/itest/src" />
-          <root url="file://$MODULE_DIR$/src" />
-        </sourceRoots>
       </configuration>
     </facet>
     <facet type="web" name="Web2">
@@ -23,10 +19,6 @@
         <webroots>
           <root url="file://$MODULE_DIR$/src/edu/stanford/nlp/time/suservlet" relative="/" />
         </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/itest/src" />
-          <root url="file://$MODULE_DIR$/src" />
-        </sourceRoots>
       </configuration>
     </facet>
     <facet type="web" name="Web3">
@@ -37,10 +29,6 @@
         <webroots>
           <root url="file://$MODULE_DIR$/src/edu/stanford/nlp/ie/ner/webapp" relative="/" />
         </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/itest/src" />
-          <root url="file://$MODULE_DIR$/src" />
-        </sourceRoots>
       </configuration>
     </facet>
     <facet type="web" name="Web4">
@@ -51,10 +39,6 @@
         <webroots>
           <root url="file://$MODULE_DIR$/src/edu/stanford/nlp/pipeline/webapp" relative="/" />
         </webroots>
-        <sourceRoots>
-          <root url="file://$MODULE_DIR$/itest/src" />
-          <root url="file://$MODULE_DIR$/src" />
-        </sourceRoots>
       </configuration>
     </facet>
   </component>

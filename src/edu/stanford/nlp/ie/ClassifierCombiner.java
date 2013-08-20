@@ -2,12 +2,11 @@ package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -148,7 +147,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
   @Override
   public Set<String> labels() {
-    Set<String> labs = Generics.newHashSet();
+    Set<String> labs = new HashSet<String>();
     for(AbstractSequenceClassifier<? extends CoreMap> cls: baseClassifiers)
       labs.addAll(cls.labels());
     return labs;
@@ -175,7 +174,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
     // baseLabels.get(i) points to the labels assigned by baseClassifiers.get(i)
     List<Set<String>> baseLabels = new ArrayList<Set<String>>();
-    Set<String> seenLabels = Generics.newHashSet();
+    Set<String> seenLabels = new HashSet<String>();
     for (AbstractSequenceClassifier<? extends CoreMap> baseClassifier : baseClassifiers) {
       Set<String> labs = baseClassifier.labels();
       labs.removeAll(seenLabels);
@@ -194,7 +193,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
         System.err.printf("Output of model #%d:", i);
         for (IN l : baseDocuments.get(i)) {
           System.err.print(' ');
-          System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
+          System.err.print(l.get(AnswerAnnotation.class));
         }
         System.err.println();
       }
@@ -212,7 +211,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       System.err.print("Output of combined model:");
       for (IN l: mainDocument) {
         System.err.print(' ');
-        System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
+        System.err.print(l.get(AnswerAnnotation.class));
       }
       System.err.println();
       System.err.println();
@@ -236,9 +235,9 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     Iterator<INN> auxIterator = auxDocument.listIterator();
 
     for (INN wMain : mainDocument) {
-      String mainAnswer = wMain.get(CoreAnnotations.AnswerAnnotation.class);
+      String mainAnswer = wMain.get(AnswerAnnotation.class);
       INN wAux = auxIterator.next();
-      String auxAnswer = wAux.get(CoreAnnotations.AnswerAnnotation.class);
+      String auxAnswer = wAux.get(AnswerAnnotation.class);
       boolean insideMainTag = !mainAnswer.equals(background);
 
       /* if the auxiliary classifier gave it one of the labels unique to
@@ -247,7 +246,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
         if ( ! prevAnswer.equals(auxAnswer) && ! prevAnswer.equals(background)) {
           if (auxTagValid){
             for (INN wi : constituents) {
-              wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
+              wi.set(AnswerAnnotation.class, prevAnswer);
             }
           }
           auxTagValid = true;
@@ -261,7 +260,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
         if (insideAuxTag) {
           if (auxTagValid){
             for (INN wi : constituents) {
-              wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
+              wi.set(AnswerAnnotation.class, prevAnswer);
             }
           }
           constituents = new ArrayList<INN>();
@@ -274,7 +273,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // deal with a sequence final auxLabel
     if (auxTagValid){
       for (INN wi : constituents) {
-        wi.set(CoreAnnotations.AnswerAnnotation.class, prevAnswer);
+        wi.set(AnswerAnnotation.class, prevAnswer);
       }
     }
   }
@@ -297,7 +296,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     List<IN> output = baseClassifiers.get(0).classifySentence(tokens);
     // classify(List<IN>) is supposed to work in place, so add AnswerAnnotation to tokens!
     for (int i = 0, sz = output.size(); i < sz; i++) {
-      tokens.get(i).set(CoreAnnotations.AnswerAnnotation.class, output.get(i).get(CoreAnnotations.AnswerAnnotation.class));
+      tokens.get(i).set(AnswerAnnotation.class, output.get(i).get(AnswerAnnotation.class));
     }
     baseOutputs.add(tokens);
 

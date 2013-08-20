@@ -105,7 +105,8 @@ public class ChunkAnnotationUtils {
    * Copies annotation over to this coremap if not already set
    */
   public static void copyUnsetAnnotations(CoreMap src, CoreMap dest) {
-    for (Class key : src.keySet()) {
+    Set<Class<?>> otherKeys = src.keySet();
+    for (Class key : otherKeys) {
       if (!dest.has(key)) {
         dest.set(key, src.get(key));
       }
@@ -788,7 +789,7 @@ public class ChunkAnnotationUtils {
       }
       int tokenEnd = j;
 
-      List<CoreLabel> chunkTokens = new ArrayList<CoreLabel>(annoTokens.subList(tokenBegin, tokenEnd));
+      List<CoreLabel> chunkTokens = new ArrayList(annoTokens.subList(tokenBegin, tokenEnd));
       String chunkText = annoText.substring(beginRelCharOffset, endRelCharOffset);
       Annotation chunk = new Annotation(chunkText);
       chunk.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, beginCharOffset);
@@ -824,18 +825,18 @@ public class ChunkAnnotationUtils {
           try {
             Class valueClass = AnnotationLookup.getValueType(lookup.coreKey);
             if (valueClass == String.class) {
-              chunk.set(lookup.coreKey, value);              
+              chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, value);              
             } else {
              Method valueOfMethod = valueClass.getMethod("valueOf", String.class);
               if (valueOfMethod != null) {
-                chunk.set(lookup.coreKey, valueOfMethod.invoke(valueClass, value));
+                chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, valueOfMethod.invoke(valueClass, value));
               }
             }
           } catch (Exception ex) {
             throw new RuntimeException("Unable to annotate attribute " + attr, ex);
           }
         } else {
-          chunk.set(lookup.coreKey, null);
+          chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, null);
         }
       } else {
         throw new UnsupportedOperationException("Unknown attributes: " + attr);
@@ -872,7 +873,7 @@ public class ChunkAnnotationUtils {
     }
   }
 
-  public static <T extends CoreMap> void appendCoreMap(List<T> res,
+  public static <T extends CoreMap> void appendCoreMap(List res,
                                                        CoreMap cm, String text, int start, int end,
                                                        CoreTokenFactory<T> factory) {
     T scm = createCoreMap(cm, text, start, end, factory);

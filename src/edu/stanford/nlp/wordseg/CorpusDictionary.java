@@ -7,7 +7,6 @@ import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Check if a bigram exists in bakeoff corpora.
@@ -42,7 +41,7 @@ public class CorpusDictionary {
 
 
   private static Set<String> readDict(String filename, boolean normalize)  {
-    Set<String> word = Generics.newHashSet();
+    Set<String> word = new HashSet<String>();
 
     System.err.println("Loading " + (normalize ? "normalized" : "unnormalized") + " dictionary from " + filename);
 
