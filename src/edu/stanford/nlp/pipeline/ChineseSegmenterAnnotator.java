@@ -96,7 +96,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
   }
   
   private void loadModel(String segLoc, Properties props) {
-    if (VERBOSE) {    
+    if (VERBOSE) {
       timer.start();
       System.err.print("Loading Segmentation Model ["+segLoc+"]...");
     }
@@ -195,6 +195,9 @@ public class ChineseSegmenterAnnotator implements Annotator {
     for (String w : words) {
       CoreLabel fl = sentChars.get(pos);
       fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
+      if (w.length() == 0) {
+        continue;
+      }
       CoreLabel token = new CoreLabel();
       token.setWord(w);
       token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
