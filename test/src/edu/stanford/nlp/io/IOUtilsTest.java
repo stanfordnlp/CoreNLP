@@ -84,39 +84,7 @@ public class IOUtilsTest extends TestCase {
     Assert.assertEquals("!zipped!text", StringUtils.join(iterable, "!"));
     Assert.assertEquals("!zipped!text", StringUtils.join(iterable, "!"));
   }
-
-  private void checkLineIterable(boolean includeEol) throws IOException {
-    String[] expected = {
-            "abcdefhij\r\n",
-            "klnm\r\n",
-            "opqrst\n",
-            "uvwxyz\r",
-            "I am a longer line than the rest\n",
-            "12345"
-    };
-    String testString = StringUtils.join(expected, "");
-
-    Reader reader = new StringReader(testString);
-    int i = 0;
-    Iterable<String> iterable = IOUtils.getLineIterable(reader, 10, includeEol);
-    for (String line:iterable) {
-      String expLine = expected[i];
-      if (!includeEol) expLine = expLine.replaceAll("\\r|\\n", "");
-      assertEquals("Checking line " + i, expLine, line);
-      i++;
-    }
-    assertEquals("Check got all lines", expected.length, i);
-    IOUtils.closeIgnoringExceptions(reader);
-  }
-
-  public void testLineIterableWithEol() throws IOException {
-    checkLineIterable(true);
-  }
-
-  public void testLineIterableWithoutEol() throws IOException {
-    checkLineIterable(false);
-  }
-
+  
   public void testIterFilesRecursive() throws IOException {
     File dir = new File(this.dir, "recursive");
     File a = new File(dir, "x/a");
