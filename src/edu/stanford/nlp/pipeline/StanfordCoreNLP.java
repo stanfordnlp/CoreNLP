@@ -400,6 +400,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String sectionAnnotations =
                 properties.getProperty("clean.sectionAnnotations",
                         CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
+        String ssplitDiscardTokens =
+                properties.getProperty("clean.ssplitDiscardTokens");
         CleanXmlAnnotator annotator = new CleanXmlAnnotator(xmlTags,
             sentenceEndingTags,
             dateTags,
@@ -412,6 +414,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         annotator.setTokenAnnotationPatterns(tokenAnnotations);
         annotator.setSectionTagMatcher(sectionTags);
         annotator.setSectionAnnotationPatterns(sectionAnnotations);
+        annotator.setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
         return annotator;
       }
 
@@ -496,6 +499,18 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             wts = new WordsToSentencesAnnotator();
           }
 
+          // multi token sentence boundaries
+          String boundaryMultiTokenRegex = properties.getProperty("ssplit.boundaryMultiTokenRegex");
+          if (boundaryMultiTokenRegex != null){
+            wts.setSentenceBoundaryMultiTokenRegex(boundaryMultiTokenRegex);
+          }
+
+          // Discard these tokens without marking them as sentence boundaries
+          String tokenPatternsToDiscard = properties.getProperty("ssplit.tokenPatternsToDiscard");
+          if (tokenPatternsToDiscard != null){
+            String [] toks = tokenPatternsToDiscard.split(",");
+            wts.setTokenPatternsToDiscard(Generics.newHashSet (Arrays.asList(toks)));
+          }
           // regular boundaries
           String bounds = properties.getProperty("ssplit.boundariesToDiscard");
           if (bounds != null){
