@@ -247,7 +247,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       }
     }
     boolean overwriteOriginalNer = false;
-    if (prevNerEndIndex != (start-1) || nextNerStartIndex != end) {
+    if (prevNerEndIndex != (start-1) && nextNerStartIndex != end) {
       // Cutting across already recognized NEs don't disturb
     } else if (startNer == null) {
       // No old ner, okay to replace
