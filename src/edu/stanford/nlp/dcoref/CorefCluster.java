@@ -148,7 +148,10 @@ public class CorefCluster implements Serializable{
     to.words.addAll(from.words);
     if(from.firstMention.appearEarlierThan(to.firstMention) && !from.firstMention.isPronominal()) to.firstMention = from.firstMention;
     if(from.representative.moreRepresentativeThan(to.representative)) to.representative = from.representative;
-    SieveCoreferenceSystem.logger.finer("merge clusters: "+toID+" += "+from.clusterID);
+    SieveCoreferenceSystem.logger.finer("merged clusters: "+toID+" += "+from.clusterID);
+    to.printCorefCluster(SieveCoreferenceSystem.logger);
+    from.printCorefCluster(SieveCoreferenceSystem.logger);
+    SieveCoreferenceSystem.logger.finer("");
   }
 
   /** Print cluster information */
