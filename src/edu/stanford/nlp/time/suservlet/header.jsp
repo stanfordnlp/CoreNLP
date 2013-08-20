@@ -3,7 +3,7 @@
 <%@ page import="edu.stanford.nlp.time.Options" %>
 <%@ page import="edu.stanford.nlp.time.suservlet.SUTimeServlet" %>
 
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
 
 <html>
 <head>
@@ -78,7 +78,7 @@ Date:
 <input type="text" id="d" name="d" <%
   String dateString = request.getParameter("d");
   if (dateString != null) {
-    %>value="<%=StringEscapeUtils.escapeHtml(dateString)%>"<%
+    %>value="<%=StringEscapeUtils.escapeHtml4(dateString)%>"<%
   }%>  />
 <input type="button" value="Calendar" id="popupCalendar"/>
 </td><td>
@@ -99,7 +99,7 @@ Please enter your text here (<a href="javascript:sampleSentence()">sample senten
          rows="31" cols="7"><%
   String query = request.getParameter("q");
   if (query != null && !query.equals("")) {
-    %><%=StringEscapeUtils.escapeHtml(query)%><%
+    %><%=StringEscapeUtils.escapeHtml4(query)%><%
   }
 %></textarea>
 <br>
