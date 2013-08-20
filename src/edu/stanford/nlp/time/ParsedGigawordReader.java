@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,30 +23,24 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Iterables;
 
-
-/**
- * @author Karthik Raghunathan
- */
 public class ParsedGigawordReader implements Iterable<Annotation> {
-
+  
   private Iterable<File> files;
 
   public ParsedGigawordReader(File directory) {
     this.files = IOUtils.iterFilesRecursive(directory);
   }
 
-  @Override
   public Iterator<Annotation> iterator() {
     return new Iterator<Annotation>() {
       private Iterator<BufferedReader> readers = Iterables.transform(files,
           new Function<File, BufferedReader>() {
-            @Override
             public BufferedReader apply(File file) {
               return new BufferedReader(new InputStreamReader(IOUtils.openFile(file)));
             }
@@ -52,30 +49,24 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
       private BufferedReader reader = findReader();
       private Annotation annotation = findAnnotation();
 
-      @Override
       public boolean hasNext() {
         return this.annotation != null;
       }
 
-      @Override
       public Annotation next() {
-        if (this.annotation == null) {
-          throw new NoSuchElementException();
-        }
-        Annotation toReturn = this.annotation;
+        Annotation annotation = this.annotation;
         this.annotation = this.findAnnotation();
-        return toReturn;
+        return annotation;
       }
 
-      @Override
       public void remove() {
         throw new UnsupportedOperationException();
       }
-
+      
       private BufferedReader findReader() {
         return this.readers.hasNext() ? this.readers.next() : null;
       }
-
+      
       private Annotation findAnnotation() {
         if (this.reader == null) {
           return null;
@@ -101,10 +92,10 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
             this.reader = findReader();
           }
           String xml = doc.toString().replaceAll("&", "&amp;");
-          if(xml == null || xml.equals("")) {
+          if(xml.equals(null)||xml.equals("")){
             return findAnnotation();
-          }
-
+          }         
+          
           xml = xml.replaceAll("num=([0-9]+) (.*)", "num=\"$1\" $2");
           xml = xml.replaceAll("sid=(.*)>", "sid=\"$1\">");
           xml = xml.replaceAll("</SENT>\n</DOC>", "</SENT>\n</TEXT>\n</DOC>");
@@ -118,10 +109,9 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     };
   }
 
-  private static final Pattern datePattern = Pattern.compile("^\\w+_\\w+_(\\d+)\\.");
-
+  private static Pattern datePattern = Pattern.compile("^\\w+_\\w+_(\\d+)\\.");
   /*
-   * Old implementation based on JDOM.
+   * Old implementation based on JDOM. 
    * No longer maintained due to JDOM licensing issues.
   private static Annotation toAnnotation(String xml) throws IOException {
     Element docElem;
@@ -163,10 +153,10 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
       }
       sentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, offset - 1);
       sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
-      sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
+      sentence.set(TreeAnnotation.class, tree);
       sentences.add(sentence);
     }
-
+    
     String docID = docElem.getAttributeValue("id");
     Matcher matcher = datePattern.matcher(docID);
     matcher.find();
@@ -179,7 +169,6 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     return document;
   }
   */
-
   private static Annotation toAnnotation(String xml) throws IOException {
     Element docElem;
     try {
@@ -191,7 +180,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     } catch(IOException e) {
       throw new RuntimeException(String.format("error:\n%s\ninput:\n%s", e, xml));
     }
-
+    
     Element textElem = docElem.getFirstChildElement("TEXT");
     StringBuilder text = new StringBuilder();
     int offset = 0;
@@ -226,10 +215,10 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
       }
       sentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, offset - 1);
       sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
-      sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
+      sentence.set(TreeAnnotation.class, tree);
       sentences.add(sentence);
     }
-
+    
     String docID = docElem.getAttributeValue("id");
     Matcher matcher = datePattern.matcher(docID);
     matcher.find();
@@ -241,10 +230,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     document.set(CoreAnnotations.SentencesAnnotation.class, sentences);
     return document;
   }
-
-  // todo [cdm 2013]: replace the methods below with ones in Tree?
-  // It depends on whether the code is somehow using preterminals with multiple children.
-
+  
   private static List<Tree> preTerminals(Tree tree) {
     List<Tree> preTerminals = new ArrayList<Tree>();
     for (Tree descendant: tree) {
@@ -254,7 +240,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     }
     return preTerminals;
   }
-
+  
   private static boolean isPreterminal(Tree tree) {
     if (tree.isLeaf()) {
       return false;
@@ -266,5 +252,4 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     }
     return true;
   }
-
 }

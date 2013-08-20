@@ -1,0 +1,313 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2><font color="#a40526">Stanford Log-linear Part-Of-Speech Tagger</font></h2> 
+</center>
+
+<center><p><font color="#a40526"><a href="#About">About</a> |
+<a href="#Questions">Questions</a> |
+<a href="#Mail">Mailing lists</a> |
+<a href="#Download">Download</a> |
+<a href="#Extensions">Extensions</a> |
+<a href="#History">Release history</a> |
+<a href="pos-tagger-faq.shtml">FAQ</a>
+</font></p></center>
+
+<h3><a name="About">About</a></h3>
+
+<p>
+A Part-Of-Speech Tagger (POS Tagger) is a piece of software that reads
+text in some language and assigns parts of speech to each word (and
+other token), such as noun, verb, adjective, etc., although generally
+computational applications use more fine-grained POS tags like
+'noun-plural'. 
+This software is a Java implementation of the log-linear part-of-speech
+taggers described in these papers (if citing just one paper, cite the
+2003 one):
+<blockquote>
+ Kristina Toutanova and Christopher D. Manning. 2000.  
+ <a href="http://nlp.stanford.edu/~manning/papers/emnlp2000.pdf">Enriching the
+ Knowledge Sources Used in a Maximum Entropy Part-of-Speech Tagger</a>. In
+ <i>Proceedings of the Joint SIGDAT Conference on Empirical Methods in
+ Natural Language Processing and Very Large Corpora
+ (EMNLP/VLC-2000)</i>, pp. 63-70.
+</blockquote>
+
+<blockquote>
+ Kristina Toutanova, Dan Klein, Christopher Manning, and Yoram
+ Singer. 2003. 
+ <a href="http://nlp.stanford.edu/~manning/papers/tagging.pdf">Feature-Rich
+ Part-of-Speech Tagging with a Cyclic
+ Dependency Network</a>. In <i>Proceedings of HLT-NAACL 2003</i>, pp. 252-259. 
+</blockquote>
+<p>
+The tagger was originally written by Kristina Toutanova.  Since that
+time, Dan Klein, Christopher Manning, William Morgan, Anna Rafferty, 
+Michel Galley, and John Bauer have improved its speed, performance, usability, and
+support for other languages.
+</p>
+<p>
+The system requires Java 1.6+ to be installed. Depending on whether
+you're running 32 or 64 bit Java and the complexity of the tagger model,
+you'll need somewhere between 60 and 200 MB of memory to run a trained
+tagger (i.e., you may need to give java an 
+option like <code>java -mx200m</code>). Plenty of memory is needed  
+to train a tagger. It again depends on the complexity of the model but at
+least 1GB is usually needed, often more.
+</p>
+
+<p>
+Several downloads are available.  The basic download contains two trained 
+tagger models for English.  The full download contains three trained English
+tagger models, an Arabic tagger model, a Chinese tagger model, and a 
+German tagger model.  Both versions include the same source and other
+required files. The tagger can be retrained on any language, given
+POS-annotated training text for the language. 
+</p>
+
+<p>
+<b>Part-of-speech name abbreviations:</b> The English taggers use
+the Penn Treebank tag set.  Here are some links to
+documentation of the Penn Treebank English POS tag set:
+<a href="http://acl.ldc.upenn.edu/J/J93/J93-2004.pdf">1993
+<i>Computational Linguistics</i> article in PDF</a>,
+<a href="http://www.comp.leeds.ac.uk/amalgam/tagsets/upenn.html">AMALGAM
+page</a>,
+<a href="http://www.computing.dcu.ie/~acahill/tagset.html">Aoife
+Cahill's list</a>.  
+See the included README-Models.txt in the models directory for more information
+about the tagsets for the other languages.
+</p>
+
+<p>The tagger is 
+<b>licensed under the <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU
+General Public License</a></b> (v2 or later). Source is included.  
+Source is included.
+The package includes components for command-line invocation, running as a
+server, and a Java API. 
+The tagger
+code is dual licensed (in a similar manner to MySQL, etc.).  
+Open source licensing is under the <i>full</i> GPL,
+which allows many free uses.
+For distributors of 
+<a href="http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem">proprietary
+software</a>, <b>commercial licensing</b> with a 
+ <a href="http://otlportal.stanford.edu/techfinder/technology/ID=26062"><b>ready-to-sign
+agreement</b></a> is available.
+If you don't need a commercial license, but would like to support
+maintenance of these tools, we welcome gift funding.
+</p>
+
+<br>
+<h3><a name="Questions">Questions</a></h3>
+
+<p>
+For documentation, first take a look at the included
+ <code>README.txt</code>.</p>
+
+<p>
+
+<p>Matthew Jockers has kindly produced 
+<!--
+Nate note: this was the real page that needed to be redirected.  Matthew might fix it in the future to work again.
+<a href="http://www.stanford.edu/~mjockers/cgi-bin/digHum/tagging/postaggingxml.html">
+-->
+<a href="http://www.stanford.edu/~mjockers/cgi-bin/drupal/node/17">
+an example and tutorial for running the tagger</a>. This particularly
+ concentrates on command-line usage with XML and (Mac OS X) xGrid.</p>
+</p>
+
+<p>Galal Aly wrote a
+<a href="http://www.galalaly.me/index.php/2011/05/tagging-text-with-stanford-pos-tagger-in-java-applications/">tagging
+tutorial</a> focused on usage in Java with Eclipse.
+</p>
+
+<p>For more details, look at our included javadocs,
+particularly the javadoc for MaxentTagger.
+</p>
+
+<p>
+There is a brief <a href="http://nlp.stanford.edu/software/pos-tagger-faq.shtml">FAQ</a>.
+Additional questions, feedback, and bugs/bug-fixes) can be sent to our <a
+href="#Mail">mailing lists</a>.
+</p>
+
+<br>
+
+<h3><a name="Mail">Mailing Lists</a></h3>
+<p>
+We have 3 mailing lists for the Stanford POS Tagger, all of which are shared
+with other JavaNLP tools (with the exclusion of the parser). Each address is
+at <code>@lists.stanford.edu</code>:
+</p>
+<ol>
+<li><code>java-nlp-user</code> This is the best list to post to in order
+to ask questions, make announcements, or for discussion among JavaNLP
+users.  You have to subscribe to be able to use it.
+Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-user">this webpage</a> or by emailing
+<code>java-nlp-user-join@lists.stanford.edu</code>.   (Leave the
+subject and message body empty.)  You can also
+<a href="https://mailman.stanford.edu/pipermail/java-nlp-user/">look at
+the list archives</a>.
+<li><code>java-nlp-announce</code> This list will be used only to announce
+new versions of Stanford JavaNLP tools.  So it will be very low volume (expect 1-3
+message a year).  Join the list via via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce">this webpage</a> or by emailing
+<code>java-nlp-announce-join@lists.stanford.edu</code>.  (Leave the
+subject and message body empty.)
+<li><code>java-nlp-support</code> This list goes only to the software
+maintainers.  It's a good address for licensing questions, etc.  <b>For
+general use and support questions, please join and use
+<code>java-nlp-user</code>.</b>
+You cannot join <code>java-nlp-support</code>, but you can mail questions to
+<code>java-nlp-support@lists.stanford.edu</code>.
+</ol>
+<BR>
+<h3><a name="Download">Download</a></h3>
+<CENTER>
+
+<p><a href="stanford-postagger-2012-11-11.zip">
+    Download basic English Stanford Tagger version 3.1.4</a> [43 MB]</p>
+<p><a href="stanford-postagger-full-2012-11-11.zip">
+    Download full Stanford Tagger version 3.1.4 </a> [164 MB]</p>
+
+</CENTER>
+<br>
+<p>
+    The basic download is a 43 MB zipped file with support for 
+    tagging English.  The full download is a 164 MB zipped
+    file, which includes additional English models and trained models
+    for Arabic, Chinese, and German. 
+    In both cases most of the file size is due to the trained model
+    files.  The only difference between the two downloads is the number 
+    of trained models included.
+    If you unpack the tar file, you should have everything
+    needed.  This software provides a GUI demo, a command-line interface,
+    and an API.  Simple scripts are included to invoke the tagger.
+    For more information on use, see the included README.txt.  
+</p>
+
+
+<br>
+<h3><a name="Extensions">Extensions: Packages by others using Stanford NER</a></h3>
+
+<ul>
+<li>
+Richard Vanhook write 
+<a href="http://blog.platinumsolutions.com/node/152">a Windows GUI
+interface</a> to the Stanford POS tagger.
+</li>
+<li>
+tiendung has written <a href="http://github.com/tiendung/ruby-nlp">a
+Ruby Binding</a> for the Stanford POS tagger and Named Entity Recognizer.
+</li>
+<li>
+Nitin Madnani wrote 
+<a href="http://code.google.com/p/nltk/source/browse/trunk/nltk/nltk/tag/stanford.py?r=8712">an
+NLTK (Python) interface to the Stanford POS tagger</a>.
+</li>
+<li>
+Ali Afshar wrote 
+<a href="https://github.com/turian/stanford-pos-tagger-service">an
+XML-RPC service interface</a> to the Stanford POS tagger.
+</ul>
+
+
+<br>
+<h3><a name="History">Release History</a></h3>
+<br>
+<table cellspacing="5">
+<tr>
+<th align="left">Version</th><th align="left">Date</th><th align="left">Description</th>
+</tr>
+<tr valign="top">
+  <td>3.1.4</td>
+  <td nowrap>2012-11-11</td>
+  <td>Improved Chinese model
+    <br><a href="stanford-postagger-2012-11-11.zip">English</a> / 
+        <a href="stanford-postagger-full-2012-11-11.zip">Full</a></td></tr>
+<tr valign="top">
+  <td>3.1.3</td>
+  <td nowrap>2012-07-09</td>
+  <td>Minor bug fixes
+    <br><a href="stanford-postagger-2012-07-09.tgz">English</a> / 
+        <a href="stanford-postagger-full-2012-07-09.tgz">Full</a></td></tr>
+<tr valign="top">
+  <td>3.1.2</td>
+  <td nowrap>2012-05-22</td>
+  <td>Included some "tech" words in the latest model
+    <br><a href="stanford-postagger-2012-05-22.tgz">English</a> / 
+        <a href="stanford-postagger-full-2012-05-22.tgz">Full</a></td></tr>
+<tr valign="top">
+  <td>3.1.1</td>
+  <td nowrap>2012-03-09</td>
+  <td>Caseless models added for English
+    <br><a href="stanford-postagger-2012-03-09.tgz">English</a> / 
+        <a href="stanford-postagger-full-2012-03-09.tgz">Full</a></td></tr>
+<tr valign="top">
+  <td>3.1.0</td>
+  <td nowrap>2012-01-06</td>
+  <td>French tagger added, tagging speed improved
+    <br><a href="stanford-postagger-2012-01-06.tgz">English</a> / 
+        <a href="stanford-postagger-full-2012-01-06.tgz">Full</a></td></tr>
+<tr valign="top">
+  <td>3.0.4</td>
+  <td nowrap>2011-09-14</td>
+  <td>Compatible with other recent Stanford releases.
+    <br><a href="stanford-postagger-2011-09-14.tgz">English</a> / 
+        <a href="stanford-postagger-full-2011-09-14.tgz">Full</a></td></tr>
+<tr valign="top">
+<td>3.0.3</td><td nowrap>2011-06-19</td>
+  <td>Compatible with other recent Stanford releases.
+    <br><a href="stanford-postagger-2011-06-19.tgz">English</a> / 
+        <a href="stanford-postagger-full-2011-06-19.tgz">Full</a></td></tr>
+<tr valign="top">
+<td>3.0.2</td><td nowrap>2011-05-15</td>
+  <td>Addition of TSV input format.
+    <br><a href="stanford-postagger-2011-05-15.tgz">English</a> / 
+        <a href="stanford-postagger-full-2011-05-15.tgz">Full</a></td></tr>
+<tr valign="top">
+<td>3.0.1</td><td nowrap>2011-04-20</td>
+  <td>Faster Arabic and German models.
+      Compatible with other recent Stanford releases.
+    <br><a href="stanford-postagger-2011-04-20.tgz">English</a> / 
+        <a href="stanford-postagger-full-2011-04-20.tgz">Full</a></td></tr>
+<tr valign="top">
+<td>3.0</td><td nowrap>2010-05-21</td>
+  <td>Tagger is now re-entrant.  New tagger objects are loaded with <i>tagger = new MaxentTagger(path)</i> and then used with <i>tagger.tagMethod...</i>
+    <br><a href="stanford-postagger-2010-05-26.tgz">English</a> / 
+        <a href="stanford-postagger-full-2010-05-26.tgz">Full</a></td></tr>
+<tr valign="top">
+<td>2.0</td><td nowrap>2009-12-24</td>
+  <td>An order of magnitude faster, slightly more accurate best model,
+  more options for training and deployment.
+    <br><a href="stanford-postagger-2009-12-24.tgz">English</a> / 
+        <a href="stanford-postagger-full-2009-12-24.tgz">Full</a></td></tr>
+<tr valign="top">
+<td>1.6</td><td nowrap>2008-09-28</td>
+  <td>A fraction better, a fraction faster, more flexible model specification,
+      and quite a few less bugs.
+    <br><a href="stanford-postagger-2008-09-28.tar.gz">English</a> / 
+        <a href="stanford-postagger-full-2008-09-28.tar.gz">Full</a></td></tr>
+<tr valign="top">
+<td>1.5.1</td><td nowrap>2008-06-06</td>
+  <td>Tagger properties are now saved with the tagger, making taggers more portable; tagger can be trained off of treebank data or tagged text; fixes classpath bugs in 2 June 2008 patch; new foreign language taggers released on 7 July 2008 and packaged with 1.5.1.
+    <br><a href="stanford-postagger-2008-06-06.tar.gz">English</a> / 
+        <a href="stanford-postagger-full-2008-06-06.tar.gz">Full</a> /
+        <a href="stanford-postagger-full-2008-07-07.tar.gz">Updated models</a>
+  </td></tr>
+<tr valign="top">
+<td>1.5</td><td nowrap>2008-05-21</td>
+  <td>Added taggers for several languages, support for reading from and writing to XML, better support for 
+changing the encoding, distributional similarity options, and many more small changes; patched on 2 June 2008 to fix a bug with tagging pre-tokenized text.
+    <br><a href="stanford-postagger-2008-05-19.tar.gz">English</a> / 
+        <a href="stanford-postagger-full-2008-05-19.tar.gz">Full</a></td></tr>
+<tr valign="top"><td nowrap>1.0</td><td>2006-01-10</td>
+  <td>First cleaned-up release after Kristina graduated.
+    <br><a href="postagger-2006-01-20.tar.gz">Old School</a></td></tr>
+<tr valign="top"><td nowrap>0.1</td><td>2004-08-16</td>
+  <td>First release.</td></tr>
+</table>
+
+
+<!--#include virtual="/footer.html" -->
+

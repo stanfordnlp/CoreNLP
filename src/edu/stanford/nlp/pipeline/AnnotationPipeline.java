@@ -1,22 +1,29 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
  * This class is designed to apply multiple Annotators
  * to an Annotation.  The idea is that you first
  * build up the pipeline by adding Annotators, and then
- * you take the objects you wish to annotate and pass
- * them in and get back in return a fully annotated object.
- * Please see the package level javadoc for sample usage
+ * you takes the objects you wish to annotate and pass
+ * them in and get in return a fully annotated object.
+ * Please see package level javadocs for sample usage
  * and a more complete description.
+ * <p>
+ * At the moment this mainly serves as an example of using
+ * the system and actually more complex annotation pipelines are
+ * in their own classes that don't extend this one.
  *
  * @author Jenny Finkel
  */
@@ -25,14 +32,14 @@ public class AnnotationPipeline implements Annotator {
 
   protected static final boolean TIME = true;
 
-  private final List<Annotator> annotators;
+  private List<Annotator> annotators;
   private List<MutableInteger> accumulatedTime;
 
   public AnnotationPipeline(List<Annotator> annotators) {
     this.annotators = annotators;
     if (TIME) {
       int num = annotators.size();
-      accumulatedTime = new ArrayList<MutableInteger>(num);
+      accumulatedTime = new ArrayList<MutableInteger>(annotators.size());
       for (int i = 0; i < num; i++) {
         accumulatedTime.add(new MutableInteger());
       }
@@ -52,11 +59,9 @@ public class AnnotationPipeline implements Annotator {
 
   /**
    * Run the pipeline on an input annotation.
-   * The annotation is modified in place.
-   *
+   * The annotation is modified in place
    * @param annotation The input annotation, usually a raw document
    */
-  @Override
   public void annotate(Annotation annotation) {
     Iterator<MutableInteger> it = accumulatedTime.iterator();
     Timing t = new Timing();
@@ -76,35 +81,30 @@ public class AnnotationPipeline implements Annotator {
   /**
    * Annotate a collection of input annotations IN PARALLEL, making use of
    * all available cores.
-   *
    * @param annotations The input annotations to process
    */
-  public void annotate(Iterable<Annotation> annotations) {
+  public void annotate(Iterable<Annotation> annotations){
     annotate(annotations, Runtime.getRuntime().availableProcessors());
   }
 
-  /**
-   * Annotate a collection of input annotations IN PARALLEL, making use of
-   * all available cores.
-   *
-   * @param annotations The input annotations to process
-   * @param callback A function to be called when an annotation finishes.
-   *                 The return value of the callback is ignored.
-   */
-  public void annotate(final Iterable<Annotation> annotations, final Function<Annotation,Object> callback) {
+	/**
+	 * Annotate a collection of input annotations IN PARALLEL, making use of
+	 * all available cores
+	 * @param annotations The input annotations to process
+	 * @param callback A function to be called when an annotation finishes. The return value of the callback is ignored
+	 */
+  public void annotate(final Iterable<Annotation> annotations, final Function<Annotation,Object> callback){
     annotate(annotations, Runtime.getRuntime().availableProcessors(), callback);
   }
 
-  /**
-   * Annotate a collection of input annotations IN PARALLEL, making use of
-   * threads given in numThreads.
-   *
-   * @param annotations The input annotations to process
-   * @param numThreads The number of threads to run on
-   */
-  public void annotate(final Iterable<Annotation> annotations, int numThreads) {
+	/**
+	 * Annotate a collection of input annotations IN PARALLEL, making use of
+	 * threads given in numThreads
+	 * @param annotations The input annotations to process
+	 * @param numThreads The number of threads to run on
+	 */
+  public void annotate(final Iterable<Annotation> annotations, int numThreads){
     annotate(annotations, numThreads, new Function<Annotation, Object>() {
-      @Override
       public Object apply(Annotation in) { return null; }
     });
   }
@@ -114,36 +114,30 @@ public class AnnotationPipeline implements Annotator {
    * threads given in numThreads
    * @param annotations The input annotations to process
    * @param numThreads The number of threads to run on
-   * @param callback A function to be called when an annotation finishes.
-   *                 The return value of the callback is ignored.
+	 * @param callback A function to be called when an annotation finishes.
+	 *                 The return value of the callback is ignored.
    */
   public void annotate(final Iterable<Annotation> annotations, int numThreads, final Function<Annotation,Object> callback){
     // case: single thread (no point in spawning threads)
-    if(numThreads == 1) {
-      for(Annotation ann : annotations) {
+    if(numThreads == 1){
+      for(Annotation ann : annotations){
         annotate(ann);
         callback.apply(ann);
       }
     }
     // Java's equivalent to ".map{ lambda(annotation) => annotate(annotation) }
-    Iterable<Runnable> threads = new Iterable<Runnable>() {
-      @Override
+    Iterable<Runnable> threads = new Iterable<Runnable>(){
       public Iterator<Runnable> iterator() {
         final Iterator<Annotation> iter = annotations.iterator();
-        return new Iterator<Runnable>() {
-          @Override
+        return new Iterator<Runnable>(){
           public boolean hasNext() {
             return iter.hasNext();
           }
-          @Override
           public Runnable next() {
-            if ( ! iter.hasNext()) {
-              throw new NoSuchElementException();
-            }
             final Annotation input = iter.next();
-            return new Runnable() {
-              @Override
-              public void run() {
+            return new Runnable(){
+              public void run(){
+                //Jesus Christ, finally the body of the code
                 //(logging)
                 String beginningOfDocument = input.toString().substring(0,Math.min(50,input.toString().length()));
                 Redwood.startTrack("Annotating \"" + beginningOfDocument + "...\"");
@@ -156,7 +150,6 @@ public class AnnotationPipeline implements Annotator {
               }
             };
           }
-          @Override
           public void remove() {
             iter.remove();
           }
@@ -182,8 +175,8 @@ public class AnnotationPipeline implements Annotator {
   /** Return a String that gives detailed human-readable information about
    *  how much time was spent by each annotator and by the entire annotation
    *  pipeline.  This String includes newline characters but does not end
-   *  with one, and so it is suitable to be printed out with a
-   *  {@code println()}.
+   *  with one, and so it is suitable to be printed out with a 
+   *  <code>println()</code>.
    *
    *  @return Human readable information on time spent in processing.
    */
@@ -202,23 +195,6 @@ public class AnnotationPipeline implements Annotator {
       sb.append("TOTAL: ").append(Timing.toSecondsString(total)).append(" sec.");
     }
     return sb.toString();
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    Set<Requirement> satisfied = Generics.newHashSet();
-    for (Annotator annotator : annotators) {
-      satisfied.addAll(annotator.requirementsSatisfied());
-    }
-    return satisfied;
-  }
-
-  @Override
-  public Set<Requirement> requires() {
-    if (annotators.isEmpty()) {
-      return Collections.emptySet();
-    }
-    return annotators.get(0).requires();
   }
 
 
@@ -244,9 +220,9 @@ public class AnnotationPipeline implements Annotator {
     String text = ("USAir said in the filings that Mr. Icahn first contacted Mr. Colodny last September to discuss the benefits of combining TWA and USAir -- either by TWA's acquisition of USAir, or USAir's acquisition of TWA.");
     Annotation a = new Annotation(text);
     ap.annotate(a);
-    System.out.println(a.get(CoreAnnotations.TokensAnnotation.class));
-    for (CoreMap sentence : a.get(CoreAnnotations.SentencesAnnotation.class)) {
-      System.out.println(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+    System.out.println(a.get(TokensAnnotation.class));
+    for (CoreMap sentence : a.get(SentencesAnnotation.class)) {
+      System.out.println(sentence.get(TreeAnnotation.class));
     }
 
     if (TIME) {

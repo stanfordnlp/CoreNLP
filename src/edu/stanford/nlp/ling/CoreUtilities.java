@@ -3,6 +3,7 @@ package edu.stanford.nlp.ling;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 
 public class CoreUtilities {
@@ -19,7 +20,7 @@ public class CoreUtilities {
     StringBuilder text = new StringBuilder();
     for (int i = 0, sz = sentence.size(); i < sz; i++) {
       CoreMap iw = sentence.get(i);
-      text.append(iw.get(CoreAnnotations.TextAnnotation.class));
+      text.append(iw.get(TextAnnotation.class));
       if (i < sz - 1) {
         text.append(" ");
       }

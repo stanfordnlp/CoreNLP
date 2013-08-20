@@ -2,11 +2,11 @@ package edu.stanford.nlp.international.morph;
 
 import java.io.Serializable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -37,7 +37,7 @@ public abstract class MorphoFeatureSpecification implements Serializable {
   protected final Set<MorphoFeatureType> activeFeatures;
   
   public MorphoFeatureSpecification() {
-    activeFeatures = Generics.newHashSet();
+    activeFeatures = new HashSet<MorphoFeatureType>();
   }
   
   public void activate(MorphoFeatureType feat) {

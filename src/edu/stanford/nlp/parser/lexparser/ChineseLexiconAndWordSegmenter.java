@@ -4,14 +4,17 @@ import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.process.WordSegmentingTokenizer;
+import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Timing;
@@ -22,6 +25,8 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.NumberFormat;
+import java.text.DecimalFormat;
 
 /**
  * This class lets you train a lexicon and segmenter at the same time.
@@ -37,6 +42,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   public ChineseLexiconAndWordSegmenter(ChineseLexicon lex, WordSegmenter seg) {
     chineseLexicon = lex;
     wordSegmenter = seg;
+    ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(seg));
   }
 
   public List<HasWord> segment(String s) {
@@ -79,7 +85,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   @Override
   public void train(Collection<Tree> trees, double weight) {
-    for (Tree tree : trees) {
+    for (Tree tree : trees) {      
       train(tree, weight);
     }
   }
@@ -102,7 +108,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   @Override
   public void train(List<TaggedWord> sentence, double weight) {
     chineseLexicon.train(sentence, weight);
-    wordSegmenter.train(sentence);
+    wordSegmenter.train(sentence);    
   }
 
   @Override
@@ -123,8 +129,8 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   @Override
   public void finishTraining() {
-    chineseLexicon.finishTraining();
-    wordSegmenter.finishTraining();
+    chineseLexicon.finishTraining();    
+    wordSegmenter.finishTraining();    
   }
 
   public float score(IntTaggedWord iTW, int loc, String word, String featureSpec) {
@@ -142,6 +148,11 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   public void writeData(Writer w) throws IOException {
     chineseLexicon.writeData(w);
+  }
+
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(wordSegmenter));
   }
 
   // the data & functions below are for standalone segmenter. -pichuan
@@ -379,7 +390,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     String textOutputFileOrUrl = null;
     String treebankPath = null;
     Treebank testTreebank = null;
-    // Treebank tuneTreebank = null;
+    Treebank tuneTreebank = null;
     String testPath = null;
     FileFilter testFilter = null;
     FileFilter trainFilter = null;
@@ -390,14 +401,14 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 //    DocumentPreprocessor documentPreprocessor = new DocumentPreprocessor();
     boolean tokenized = false; // whether or not the input file has already been tokenized
     Function<List<HasWord>, List<HasWord>> escaper = new ChineseEscaper();
-    // int tagDelimiter = -1;
-    // String sentenceDelimiter = "\n";
-    // boolean fromXML = false;
+    int tagDelimiter = -1;
+    String sentenceDelimiter = "\n";
+    boolean fromXML = false;
     int argIndex = 0;
     if (args.length < 1) {
-      System.err.println("usage: java edu.stanford.nlp.parser.lexparser." +
+      System.err.println("usage: java edu.stanford.nlp.parser.lexparser." + 
                          "LexicalizedParser parserFileOrUrl filename*");
-      return;
+      System.exit(1);
     }
 
     Options op = new Options();
@@ -558,7 +569,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
       testTreebank.loadPath(testPath, testFilter);
     }
 
-    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(tlpParams.sisterSplitters()));
 
     // at this point we should be sure that op.tlpParams is
     // set appropriately (from command line, or from grammar file),
@@ -703,7 +714,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   @Override
   public void train(Collection<Tree> trees, Collection<Tree> rawTrees) {
     train(trees);
-
+    
   }
 
 }

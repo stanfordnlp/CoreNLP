@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -887,7 +886,7 @@ public class Expressions {
   */
   public static class CompositeValue extends SimpleCachedExpression<Map<String,Expression>> implements Value<Map<String,Expression>>{
     public CompositeValue(String... tags) {
-      super(TYPE_COMPOSITE, Generics.<String,Expression>newHashMap(), tags);
+      super(TYPE_COMPOSITE, new HashMap<String,Expression>(), tags);
     }
 
     public CompositeValue(Map<String, Expression> m, boolean isEvaluated, String... tags) {
@@ -1048,7 +1047,7 @@ public class Expressions {
 
     public CompositeValue simplifyNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String,Expression> (m.size());
       for (String s:m.keySet()) {
         res.put(s, m.get(s).simplify(env));
       }
@@ -1057,7 +1056,7 @@ public class Expressions {
 
     private CompositeValue evaluateNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String,Expression> (m.size());
       for (String s:m.keySet()) {
         res.put(s, m.get(s).evaluate(env, args));
       }
@@ -1068,7 +1067,7 @@ public class Expressions {
       Value v = attemptTypeConversion(this, env, args);
       if (v != null) return v;
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String,Expression> (m.size());
       for (String s:m.keySet()) {
         res.put(s, m.get(s).evaluate(env, args));
       }

@@ -28,16 +28,16 @@ public class ArrayMath {
   public static int numRows(double[] v) {
     return v.length;
   }
-
+  
   // GENERATION -----------------------------------------------------------------
 
   /**
    * Generate a range of integers from start (inclusive) to end (exclusive).
    * Similar to the Python range() builtin function.
-   *
+   * 
    * @param start
    * @param end
-   * @return integers from [start...end)
+   * @return
    */
   public static int[] range(int start, int end) {
     assert end > start;
@@ -185,16 +185,6 @@ public class ArrayMath {
       a[i] = (float) (a[i] * b);
     }
   }
-
-  /**
-   * Divides the values in this array by b. Does it in place.
-   */
-  public static void divideInPlace(double[] a, double b) {
-    for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] / b;
-    }
-  }
-
 
   /**
    * Scales the values in this array by c.
@@ -506,11 +496,9 @@ public class ArrayMath {
 
   public static int countPositive(double[] v) {
     int c = 0;
-    for (double a : v) {
-      if (a > 0.0) {
+    for (int i = 0; i < v.length; i++)
+      if (v[i] > 0.0)
         ++c;
-      }
-    }
     return c;
   }
 
@@ -580,9 +568,9 @@ public class ArrayMath {
 
   public static int sum(int[][] a) {
     int result = 0;
-    for (int[] v : a) {
-      for (int item : v) {
-        result += item;
+    for (int i = 0; i < a.length; i++) {
+      for (int j=0; j<a[i].length; j++) {
+        result += a[i][j];
       }
     }
     return result;
@@ -883,9 +871,9 @@ public class ArrayMath {
    * magnitude), with high accuracy, and without numerical overflow.
    *
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
-   * @return {@literal log(x1 + ... + xn)}
+   * @return log(x1 + ... + xn)
    */
-  public static double logSum(double... logInputs) {
+  public static double logSum(double[] logInputs) {
     return logSum(logInputs,0,logInputs.length);
   }
 
@@ -903,7 +891,7 @@ public class ArrayMath {
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
    * @param fromIndex The array index to start the sum from
    * @param toIndex The array index after the last element to be summed
-   * @return {@literal log(x1 + ... + xn)}
+   * @return log(x1 + ... + xn)
    */
   public static double logSum(double[] logInputs, int fromIndex, int toIndex) {
     if (logInputs.length == 0)
@@ -950,7 +938,7 @@ public class ArrayMath {
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
    * @param fromIndex The array index to start the sum from
    * @param afterIndex The array index after the last element to be summed
-   * @return {@literal log(x1 + ... + xn)}
+   * @return log(x1 + ... + xn)
    */
   public static double logSum(double[] logInputs, int fromIndex, int afterIndex, int stride) {
     if (logInputs.length == 0)
@@ -1197,17 +1185,15 @@ public class ArrayMath {
 
   /**
    * Standardize values in this array, i.e., subtract the mean and divide by the standard deviation.
-   * If standard deviation is 0.0, throws a RuntimeException.
+   * If standard deviation is 0.0, throws an RuntimeException.
    */
   public static void standardize(double[] a) {
     double m = mean(a);
-    if (Double.isNaN(m)) {
+    if (Double.isNaN(m))
       throw new RuntimeException("Can't standardize array whose mean is NaN");
-    }
     double s = stdev(a);
-    if (s == 0.0 || Double.isNaN(s)) {
+    if(s == 0.0 || Double.isNaN(s))
       throw new RuntimeException("Can't standardize array whose standard deviation is 0.0 or NaN");
-    }
     addInPlace(a, -m); // subtract mean
     multiplyInPlace(a, 1.0/s); // divide by standard deviation
   }

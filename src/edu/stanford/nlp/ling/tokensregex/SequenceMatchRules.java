@@ -12,14 +12,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Rules for matching sequences using regular expressions.
+ * Rules for matching sequences using regular expressions
  * <p>
  * There are 2 types of rules:
  * <ol>
  * <li><b>Assignment rules</b> which assign a value to a variable for later use.
  * </li>
- * <li><b>Extraction rules</b> which specify how regular expression patterns are to be matched against text,
- *   which matched text expressions are to be extracted, and what value to assign to the matched expression.</li>
+ * <li><b>Extraction rules</b> which specifies how regular expression patterns are to be matched against text,
+ *   which matched text expressions are to extracted, and what value to assign to the matched expression.</li>
  * </ol>
  * </p>
  *
@@ -94,7 +94,7 @@ import java.util.regex.Pattern;
  * </table>
  * </p>
 
- * <p><b>Extraction Rules</b> specify how regular expression patterns are to be matched against text.
+ * <p><b>Extraction Rules</b> specifies how regular expression patterns are to be matched against text.
  * See {@link CoreMapExpressionExtractor} for more information on the types of the rules, and in what sequence the rules are applied.
  * A basic rule can be specified using the following template:
  * <pre>{
@@ -131,9 +131,9 @@ import java.util.regex.Pattern;
  *   <tr><td><code>result</code></td><td><code>...</code></td>
  *      <td><code></code></td><td>Resulting value to go into the resulting annotation</td></tr>
  *   <tr><td><code>name</code></td><td><code>STRING</code></td>
- *      <td><code></code></td><td>Name to identify the extraction rule</td></tr>
+ *      <td><code></code></td><td>Name to identify the extraction rule/td></tr>
  *   <tr><td><code>stage</code></td><td><code>INTEGER</code></td>
- *      <td><code></code></td><td>Stage at which the rule is to be applied</td></tr>
+ *      <td><code></code></td><td>Stage at which the rule is to be applied/td></tr>
  *   <tr><td><code>active</code></td><td><code>Boolean</code></td>
  *      <td><code></code></td><td>Whether this rule is enabled (active) or not</td></tr>
  *   <tr><td><code>priority</code></td><td><code>DOUBLE</code></td>
@@ -155,9 +155,6 @@ import java.util.regex.Pattern;
  * @see TokenSequencePattern
  */
 public class SequenceMatchRules {
-
-  // A container class
-  private SequenceMatchRules() {}
 
   /** A sequence match rule */
   public static interface Rule {
@@ -268,7 +265,7 @@ public class SequenceMatchRules {
   public static Rule createRule(Env env, Expressions.CompositeValue cv) {
     Map<String, Object> attributes;
     cv = cv.simplifyNoTypeConversion(env);
-    attributes = Generics.newHashMap();
+    attributes = new HashMap<String,Object>();
     for (String s:cv.getAttributes()) {
       attributes.put(s, cv.getExpression(s));
     }
@@ -296,7 +293,7 @@ public class SequenceMatchRules {
     }
     AnnotationExtractRuleCreator ruleCreator = lookupExtractRuleCreator(env, ruleType);
     if (ruleCreator != null) {
-      Map<String,Object> attributes = Generics.newHashMap();
+      Map<String,Object> attributes = new HashMap<String,Object>();
       attributes.put("ruleType", ruleType);
       attributes.put("pattern", pattern);
       attributes.put("result", result);
@@ -314,7 +311,7 @@ public class SequenceMatchRules {
   public final static CompositeExtractRuleCreator COMPOSITE_EXTRACT_RULE_CREATOR = new CompositeExtractRuleCreator();
   public final static TextPatternExtractRuleCreator TEXT_PATTERN_EXTRACT_RULE_CREATOR = new TextPatternExtractRuleCreator();
   public final static AnnotationExtractRuleCreator DEFAULT_EXTRACT_RULE_CREATOR = TOKEN_PATTERN_EXTRACT_RULE_CREATOR;
-  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = Generics.newHashMap();
+  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = new HashMap<String,AnnotationExtractRuleCreator>();
   static {
     registeredRuleTypes.put(TOKEN_PATTERN_RULE_TYPE, TOKEN_PATTERN_EXTRACT_RULE_CREATOR);
     registeredRuleTypes.put(COMPOSITE_RULE_TYPE, COMPOSITE_EXTRACT_RULE_CREATOR);
@@ -584,7 +581,7 @@ public class SequenceMatchRules {
       this.action = action;
       this.result = result;
     }
-
+    
     public StringMatchResultExtractor(Env env, Expression result) {
       this.env = env;
       this.result = result;
@@ -630,20 +627,10 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Interface for a rule that extracts a list of matched items from a input
-   * @param <I>
-   * @param <O>
-   */
   public static interface ExtractRule<I,O> {
     public boolean extract(I in, List<O> out);
-  }
+  };
 
-  /**
-   * Extraction rule that filters the input before passing it on to the next extractor
-   * @param <I>
-   * @param <O>
-   */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
   {
     Filter<I> filter;
@@ -668,12 +655,6 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Extraction rule that applies a list of rules in sequence and aggregates
-   *   all matches found
-   * @param <I>
-   * @param <O>
-   */
   public static class ListExtractRule<I,O> implements ExtractRule<I,O>
   {
     List<ExtractRule<I,O>> rules;
@@ -714,11 +695,6 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Extraction rule to apply a extraction rule on a particular CoreMap field
-   * @param <T>
-   * @param <O>
-   */
   public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
   {
     Class annotationField;

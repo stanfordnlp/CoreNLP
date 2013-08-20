@@ -1,6 +1,5 @@
 package edu.stanford.nlp.util;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
@@ -12,7 +11,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -121,7 +119,7 @@ public class StringUtils {
    */
   public static Map<String, String> mapStringToMap(String map) {
     String[] m = map.split("[,;]");
-    Map<String, String> res = Generics.newHashMap();
+    Map<String, String> res = new HashMap<String, String>();
     for (String str : m) {
       int index = str.lastIndexOf('=');
       String key = str.substring(0, index);
@@ -184,7 +182,7 @@ public class StringUtils {
     Set<String> ret = null;
     if (str != null) {
       String[] fields = str.split(delimiter);
-      ret = Generics.newHashSet(fields.length);
+      ret = new HashSet<String>(fields.length);
       for (String field:fields) {
         field = field.trim();
         ret.add(field);
@@ -346,34 +344,7 @@ public class StringUtils {
     return (Arrays.asList(str.split(regex)));
   }
 
-  /**
-   * Splits a string into whitespace tokenized fields based on a delimiter. For example,
-   * "aa bb | bb cc | ccc ddd" would be split into "[aa,bb],[bb,cc],[ccc,ddd]" based on
-   * the delimiter "|". This method uses the old StringTokenizer class, which is up to
-   * 3x faster than the regex-based "split()" methods.
-   * 
-   * @param delimiter
-   * @return
-   */
-  public static List<List<String>> splitFieldsFast(String str, String delimiter) {
-    List<List<String>> fields = Generics.newArrayList();
-    StringTokenizer tokenizer = new StringTokenizer(str.trim());
-    List<String> currentField = Generics.newArrayList();
-    while(tokenizer.hasMoreTokens()) {
-      String token = tokenizer.nextToken();
-      if (token.equals(delimiter)) {
-        fields.add(currentField);
-        currentField = Generics.newArrayList();
-      } else {
-        currentField.add(token.trim());
-      }
-    }
-    if (currentField.size() > 0) {
-      fields.add(currentField);
-    }
-    return fields;
-  }
-  
+
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
    *  like correctly split quoted strings or parenthesized arguments.
@@ -657,7 +628,7 @@ public class StringUtils {
    *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args) {
-    return argsToMap(args, Collections.<String,Integer>emptyMap());
+    return argsToMap(args, new HashMap<String, Integer>());
   }
 
   /**
@@ -688,22 +659,22 @@ public class StringUtils {
    * the String[] value for that flag.
    *
    * @param args           the argument array to be parsed
-   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer}
-   *                       values specifying the number of arguments
-   *                       for that flag (default min 0, max 1).
-   * @return a {@link Map} of flag names to flag argument {@link String}
+   * @param flagsToNumArgs a {@link Map} of flag names to {@link
+   *                       Integer} values specifying the maximum number of
+   *                       allowed arguments for that flag (default 0).
+   * @return a {@link Map} of flag names to flag argument {@link
+   *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args, Map<String, Integer> flagsToNumArgs) {
-    Map<String, String[]> result = Generics.newHashMap();
+    Map<String, String[]> result = new HashMap<String, String[]>();
     List<String> remainingArgs = new ArrayList<String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.charAt(0) == '-') { // found a flag
-        Integer numFlagArgs = flagsToNumArgs.get(key);
-        int max = numFlagArgs == null ? 1 : numFlagArgs.intValue();
-        int min = numFlagArgs == null ? 0 : numFlagArgs.intValue();
+        Integer maxFlagArgs = flagsToNumArgs.get(key);
+        int max = maxFlagArgs == null ? 0 : maxFlagArgs.intValue();
         List<String> flagArgs = new ArrayList<String>();
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && args[i + 1].charAt(0) != '-'; i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (result.containsKey(key)) { // append the second specification into the args.
@@ -772,7 +743,7 @@ public class StringUtils {
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
         List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].length() > 0 && args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (flagArgs.isEmpty()) {
@@ -782,10 +753,9 @@ public class StringUtils {
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
           {
             try {
-              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
-              InputStreamReader reader = new InputStreamReader(is, "utf-8");
+              InputStream is = new BufferedInputStream(new FileInputStream(result.getProperty(key)));
               result.remove(key); // location of this line is critical
-              result.load(reader);
+              result.load(is);
               // trim all values
               for(Object propKey : result.keySet()){
                 String newVal = result.getProperty((String)propKey);
@@ -795,7 +765,7 @@ public class StringUtils {
             } catch (IOException e) {
               result.remove(key);
               System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
-              throw new RuntimeIOException(e);
+              throw new RuntimeException(e);
             }
           }
         }
@@ -1041,7 +1011,7 @@ public class StringUtils {
    * @return A Map from keys to possible values (String or null)
    */
   public static Map<String, Object> parseCommandLineArguments(String[] args, boolean parseNumbers) {
-    Map<String, Object> result = Generics.newHashMap();
+    Map<String, Object> result = new HashMap<String, Object>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.charAt(0) == '-') {
@@ -1247,7 +1217,7 @@ public class StringUtils {
    * of "colo".
    */
   public static int longestCommonContiguousSubstring(String s, String t) {
-    if (s.isEmpty() || t.isEmpty()) {
+    if (s.length() == 0 || t.length() == 0) {
       return 0;
     }
     int M = s.length();
@@ -1353,9 +1323,6 @@ public class StringUtils {
    *         <code>ArrayList</code>
    */
   public static String getShortClassName(Object o) {
-    if (o == null) {
-      return "null";
-    }
     String name = o.getClass().getName();
     int index = name.lastIndexOf('.');
     if (index >= 0) {
@@ -1424,15 +1391,15 @@ public class StringUtils {
           throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException
   {
     StringBuilder sb = new StringBuilder();
-    for (String fieldName : fieldNames) {
+    for (int i = 0; i < fieldNames.length; i++) {
       if (sb.length() > 0) {
         sb.append(delimiter);
       }
       try {
-        Field field = object.getClass().getDeclaredField(fieldName);
-        sb.append(field.get(object));
+        Field field = object.getClass().getDeclaredField(fieldNames[i]);
+        sb.append(field.get(object)) ;
       } catch (IllegalAccessException ex) {
-        Method method = object.getClass().getDeclaredMethod("get" + StringUtils.capitalize(fieldName));
+        Method method = object.getClass().getDeclaredMethod("get" + StringUtils.capitalize(fieldNames[i]));
         sb.append(method.invoke(object));
       }
     }
@@ -1802,141 +1769,4 @@ public class StringUtils {
       return s;
   }
 
-  /**
-   * Resolve variable. If it is the props file, then substitute that variable with
-   * the value mentioned in the props file, otherwise look for the variable in the environment variables.
-   * If the variable is not found then substitute it for empty string.
-   */
-  public static String resolveVars(String str, Map props) {
-    if (str == null)
-      return null;
-    // ${VAR_NAME} or $VAR_NAME
-    Pattern p = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
-    Matcher m = p.matcher(str);
-    StringBuffer sb = new StringBuffer();
-    while (m.find()) {
-      String varName = null == m.group(1) ? m.group(2) : m.group(1);
-      String vrValue;
-      //either in the props file
-      if (props.containsKey(varName)) {
-        vrValue = (String) props.get(varName);
-      } else {
-        //or as the environment variable
-        vrValue = System.getenv(varName);
-      }
-      m.appendReplacement(sb, null == vrValue ? "" : vrValue);
-    }
-    m.appendTail(sb);
-    return sb.toString();
-  }
-
-
-  /**
-   * convert args to properties with variable names resolved. for each value
-   * having a ${VAR} or $VAR, its value is first resolved using the variables
-   * listed in the props file, and if not found then using the environment
-   * variables. if the variable is not found then substitute it for empty string
-   */
-  public static Properties argsToPropertiesWithResolve(String[] args) {
-    TreeMap<String, String> result = new TreeMap<String, String>();
-    Map<String, String> existingArgs = new TreeMap<String, String>();
-    for (int i = 0; i < args.length; i++) {
-      String key = args[i];
-      if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
-        if (key.length() > 1 && key.charAt(1) == '-')
-          key = key.substring(2); // strip off 2 hyphens
-        else
-          key = key.substring(1); // strip off the hyphen
-
-        int max = 1;
-        int min = 0;
-        List<String> flagArgs = new ArrayList<String>();
-        // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
-          flagArgs.add(args[i + 1]);
-        }
-        if (flagArgs.isEmpty()) {
-          existingArgs.put(key, "true");
-        } else {
-          
-          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-            result.putAll(propFileToTreeMap(join(flagArgs," "), existingArgs));
-            i++;
-            existingArgs.clear();
-          } else
-            existingArgs.put(key, join(flagArgs, " "));
-        }
-      }
-    }
-    result.putAll(existingArgs);
-    
-    for (Entry<String, String> o : result.entrySet()) {
-      String val = resolveVars(o.getValue(), result);
-      result.put(o.getKey(), val);
-    }
-    Properties props = new Properties();
-    props.putAll(result);
-    return props;
-  }
-
-  /**
-   * This method reads in properties listed in a file in the format prop=value,
-   * one property per line. and reads them into a TreeMap (order preserving)
-   * Flags not having any arguments is set to "true".
-   *
-   * @param filename A properties file to read
-   * @return The corresponding TreeMap where the ordering is the same as in the
-   *         props file
-   */
-  public static TreeMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
-    
-    TreeMap<String, String> result = new TreeMap<String, String>();
-    result.putAll(existingArgs);
-    for (String l : IOUtils.readLines(filename)) {
-      l = l.trim();
-      if (l.isEmpty() || l.startsWith("#"))
-        continue;
-      int index = l.indexOf('=');
-
-      if (index == -1)
-        result.put(l, "true");
-      else
-        result.put(l.substring(0, index).trim(), l.substring(index + 1).trim());
-    }
-    return result;
-  }
-  
-  /**
-   * n grams for already splitted string. the ngrams are joined with a single space
-   */
-  public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
-    List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<String>();
-    for(List<String> n: ng)
-      ngrams.add(StringUtils.join(n," "));
-  
-    return ngrams;
-  }
-  
-  /**
-   * n grams for already splitted string. the ngrams are joined with a single space
-   */
-  public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
-    List<String> wordsStr = new ArrayList<String>();
-    for(CoreLabel l : words)
-      wordsStr.add(l.word());
-    List<List<String>> ng = CollectionUtils.getNGrams(wordsStr, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<String>();
-    for(List<String> n: ng)
-      ngrams.add(StringUtils.join(n," "));
-  
-    return ngrams;
-  }
-  
-  /**
-   * The string is split on whitespace and the ngrams are joined with a single space
-   */
-  public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
-    return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
-  }
 }

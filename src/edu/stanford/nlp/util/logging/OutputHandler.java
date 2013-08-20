@@ -2,13 +2,12 @@
 package edu.stanford.nlp.util.logging;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 import edu.stanford.nlp.util.logging.Redwood.Record;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * An abstract handler incorporating the logic of outputing a log message,
@@ -62,14 +61,14 @@ public abstract class OutputHandler extends LogRecordHandler{
    * The color to use for track beginning and ends
    */
   protected Color trackColor = Color.NONE;
-  protected Map<String,Color> channelColors = null;
+  protected HashMap<String,Color> channelColors = null;
   protected boolean addRandomColors = false;
 
   /**
    * The style to use for track beginning and ends
    */
   protected Style trackStyle = Style.NONE;
-  protected Map<String,Style> channelStyles = null;
+  protected HashMap<String,Style> channelStyles = null;
 
   /**
    * Print a string to an output without the trailing newline.
@@ -90,7 +89,7 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   public void colorChannel(String channel, Color color){
     if(this.channelColors == null){
-      this.channelColors = Generics.newHashMap();
+      this.channelColors = new HashMap<String,Color>();
     }
     this.channelColors.put(channel.toLowerCase(),color);
   }
@@ -102,14 +101,14 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   public void styleChannel(String channel, Style style){
     if(this.channelStyles == null){
-      this.channelStyles = Generics.newHashMap();
+      this.channelStyles = new HashMap<String,Style>();
     }
     this.channelStyles.put(channel.toLowerCase(),style);
   }
 
   public void setColorChannels(boolean colorChannels){
     this.addRandomColors = colorChannels;
-    if(colorChannels){ this.channelColors = Generics.newHashMap(); }
+    if(colorChannels){ this.channelColors = new HashMap<String,Color>(); }
   }
 
   /**

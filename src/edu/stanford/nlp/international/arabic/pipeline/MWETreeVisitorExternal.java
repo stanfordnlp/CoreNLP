@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,6 @@ import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeVisitor;
 import edu.stanford.nlp.trees.international.arabic.ArabicTreeReaderFactory;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Converts all contiguous MWEs listed in an MWE list to flattened trees.
@@ -35,7 +35,7 @@ public class MWETreeVisitorExternal implements TreeVisitor {
   }
   
   private Set<String> loadMWEs() {
-    Set<String> mweSet = Generics.newHashSet();  
+    Set<String> mweSet = new HashSet<String>();  
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(mweFile), "UTF-8"));
       for (String line; (line = br.readLine()) != null;) {

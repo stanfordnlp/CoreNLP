@@ -1,8 +1,19 @@
 package edu.stanford.nlp.ie.regexp;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.NumericCompositeTypeAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.NumericCompositeValueAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.NumerizedTokensAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokenBeginAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokenEndAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -114,8 +125,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     // set everything to "O" by default
     //
     for(CoreLabel token: tokenSequence) {
-      if(token.get(CoreAnnotations.AnswerAnnotation.class) == null)
-        token.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
+      if(token.get(AnswerAnnotation.class) == null)
+        token.set(AnswerAnnotation.class, flags.backgroundSymbol);
     }
 
     //
@@ -128,20 +139,20 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
         alignSentence(sentence) :
         buildSentenceFromTokens(tokenSequence));
     List<CoreMap> timeExpressions = runSUTime(timeSentence, document);
-    List<CoreMap> numbers = timeSentence.get(CoreAnnotations.NumerizedTokensAnnotation.class);
+    List<CoreMap> numbers = timeSentence.get(NumerizedTokensAnnotation.class);
 
     //
     // store DATE and TIME
     //
     if(timeExpressions != null){
       for(CoreMap timeExpression: timeExpressions) {
-        int start = timeExpression.get(CoreAnnotations.TokenBeginAnnotation.class);
-        int end = timeExpression.get(CoreAnnotations.TokenEndAnnotation.class);
+        int start = timeExpression.get(TokenBeginAnnotation.class);
+        int end = timeExpression.get(TokenEndAnnotation.class);
         int offset = 0;
-        if(sentence != null && sentence.containsKey(CoreAnnotations.TokenBeginAnnotation.class)) {
-          offset = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
+        if(sentence != null && sentence.containsKey(TokenBeginAnnotation.class)) {
+          offset = sentence.get(TokenBeginAnnotation.class);
         }
-        Timex timex = timeExpression.get(TimeAnnotations.TimexAnnotation.class);
+        Timex timex = timeExpression.get(TimexAnnotation.class);
         if(timex != null){
           if(DEBUG){
             System.err.println("FOUND DATE/TIME \"" + timeExpression +
@@ -153,9 +164,9 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
           String label = timex.timexType();
           for(int i = start; i < end; i ++){
             CoreLabel token = tokenSequence.get(i - offset);
-            if(token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)){
-              token.set(CoreAnnotations.AnswerAnnotation.class, label);
-              token.set(TimeAnnotations.TimexAnnotation.class, timex);
+            if(token.get(AnswerAnnotation.class).equals(flags.backgroundSymbol)){
+              token.set(AnswerAnnotation.class, label);
+              token.set(TimexAnnotation.class, timex);
             }
           }
         }
@@ -167,23 +178,23 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     //
     if(numbers != null){
       for(CoreMap number: numbers) {
-        if(number.containsKey(CoreAnnotations.NumericCompositeValueAnnotation.class)){
-          int start = number.get(CoreAnnotations.TokenBeginAnnotation.class);
-          int end = number.get(CoreAnnotations.TokenEndAnnotation.class);
+        if(number.containsKey(NumericCompositeValueAnnotation.class)){
+          int start = number.get(TokenBeginAnnotation.class);
+          int end = number.get(TokenEndAnnotation.class);
           int offset = 0;
-          if(sentence != null && sentence.containsKey(CoreAnnotations.TokenBeginAnnotation.class)) {
-            offset = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
+          if(sentence != null && sentence.containsKey(TokenBeginAnnotation.class)) {
+            offset = sentence.get(TokenBeginAnnotation.class);
           }
-          String type = number.get(CoreAnnotations.NumericCompositeTypeAnnotation.class);
-          Number value = number.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+          String type = number.get(NumericCompositeTypeAnnotation.class);
+          Number value = number.get(NumericCompositeValueAnnotation.class);
           if(type != null){
             if(DEBUG) System.err.println("FOUND NUMBER \"" + number + "\" with offsets " + start + " " + end + " and value " + value + " and type " + type);
             for(int i = start; i < end; i ++){
               CoreLabel token = tokenSequence.get(i - offset);
-              if(token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)){
-                token.set(CoreAnnotations.AnswerAnnotation.class, type);
+              if(token.get(AnswerAnnotation.class).equals(flags.backgroundSymbol)){
+                token.set(AnswerAnnotation.class, type);
                 if(value != null){
-                  token.set(CoreAnnotations.NumericCompositeValueAnnotation.class, value);
+                  token.set(NumericCompositeValueAnnotation.class, value);
                 }
               }
             }
@@ -195,8 +206,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     // NumberNormalizer probably catches these but let's be safe
     for(CoreLabel token: tokenSequence) {
       if(token.tag().equals("CD") &&
-         token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)){
-        token.set(CoreAnnotations.AnswerAnnotation.class, "NUMBER");
+         token.get(AnswerAnnotation.class).equals(flags.backgroundSymbol)){
+        token.set(AnswerAnnotation.class, "NUMBER");
       }
     }
 
@@ -223,14 +234,14 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
 
     CoreMap newSentence = buildSentenceFromTokens(
-        sentence.get(CoreAnnotations.TokensAnnotation.class),
-        sentence.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-        sentence.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+        sentence.get(TokensAnnotation.class),
+        sentence.get(CharacterOffsetBeginAnnotation.class),
+        sentence.get(CharacterOffsetEndAnnotation.class));
 
-    newSentence.set(CoreAnnotations.TokenBeginAnnotation.class,
-        sentence.get(CoreAnnotations.TokenBeginAnnotation.class));
-    newSentence.set(CoreAnnotations.TokenEndAnnotation.class,
-        sentence.get(CoreAnnotations.TokenEndAnnotation.class));
+    newSentence.set(TokenBeginAnnotation.class,
+        sentence.get(TokenBeginAnnotation.class));
+    newSentence.set(TokenEndAnnotation.class,
+        sentence.get(TokenEndAnnotation.class));
 
     return newSentence;
   }
@@ -252,9 +263,9 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     //
     boolean adjustCharacterOffsets = false;
     // try to recover the text from the original tokens
-    String text = buildText(tokens, CoreAnnotations.OriginalTextAnnotation.class);
+    String text = buildText(tokens, OriginalTextAnnotation.class);
     if(text == null){
-      text = buildText(tokens, CoreAnnotations.TextAnnotation.class);
+      text = buildText(tokens, TextAnnotation.class);
       // character offset will point to the original tokens
       //   so we need to align them to the text built from normalized tokens
       adjustCharacterOffsets = true;
@@ -267,44 +278,45 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     List<CoreLabel> tokenSequence = copyTokens(tokens, adjustCharacterOffsets, false);
 
     Annotation newSentence = new Annotation(text);
-    newSentence.set(CoreAnnotations.TokensAnnotation.class, tokenSequence);
+    newSentence.set(TokensAnnotation.class, tokenSequence);
     if (! adjustCharacterOffsets &&
         characterOffsetStart != null &&
         characterOffsetEnd != null){
-      newSentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, characterOffsetStart);
-      newSentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, characterOffsetEnd);
+      newSentence.set(CharacterOffsetBeginAnnotation.class, characterOffsetStart);
+      newSentence.set(CharacterOffsetEndAnnotation.class, characterOffsetEnd);
     } else {
-      int tokenCharStart = tokenSequence.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-      int tokenCharEnd = tokenSequence.get(tokenSequence.size() - 1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-      newSentence.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, tokenCharStart);
-      newSentence.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, tokenCharEnd);
+      int tokenCharStart = tokenSequence.get(0).get(CharacterOffsetBeginAnnotation.class);
+      int tokenCharEnd = tokenSequence.get(tokenSequence.size() - 1).get(CharacterOffsetEndAnnotation.class);
+      newSentence.set(CharacterOffsetBeginAnnotation.class, tokenCharStart);
+      newSentence.set(CharacterOffsetEndAnnotation.class, tokenCharEnd);
     }
 
     // some default token offsets
-    newSentence.set(CoreAnnotations.TokenBeginAnnotation.class, 0);
-    newSentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenSequence.size());
+    newSentence.set(TokenBeginAnnotation.class, 0);
+    newSentence.set(TokenEndAnnotation.class, tokenSequence.size());
 
     return newSentence;
   }
 
-  private static String buildText(List<CoreLabel> tokens, Class<? extends CoreAnnotation<String>> textAnnotation) {
+  @SuppressWarnings("unchecked")
+  private static String buildText(List<CoreLabel> tokens, Class textAnnotation) {
     StringBuilder os = new StringBuilder();
     for (int i = 0, sz = tokens.size(); i < sz; i ++) {
       CoreLabel crt = tokens.get(i);
-      // System.out.println("\t" + crt.word() + "\t" + crt.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) + "\t" + crt.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+      // System.out.println("\t" + crt.word() + "\t" + crt.get(CharacterOffsetBeginAnnotation.class) + "\t" + crt.get(CharacterOffsetEndAnnotation.class));
       if (i > 0) {
         CoreLabel prev = tokens.get(i - 1);
         int spaces = 1;
-        if (crt.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class)) {
-          spaces = crt.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) -
-              prev.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        if (crt.containsKey(CharacterOffsetBeginAnnotation.class)) {
+          spaces = crt.get(CharacterOffsetBeginAnnotation.class) -
+              prev.get(CharacterOffsetEndAnnotation.class);
         }
         while (spaces > 0) {
           os.append(' ');
           spaces--;
         }
       }
-      String word = crt.get(textAnnotation);
+      String word = (String) crt.get(textAnnotation);
       if (word == null) {
         // this annotation does not exist; bail out
         return null;
@@ -324,9 +336,9 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     String docDate = (document != null ? document.get(CoreAnnotations.DocDateAnnotation.class) : null);
 
     /*
-    System.err.println("PARSING SENTENCE: " + sentence.get(CoreAnnotations.TextAnnotation.class));
-    for(CoreLabel t: sentence.get(CoreAnnotations.TokensAnnotation.class)){
-      System.err.println("TOKEN: \"" + t.word() + "\" \"" + t.get(CoreAnnotations.OriginalTextAnnotation.class) + "\" " + t.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) + " " + t.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+    System.err.println("PARSING SENTENCE: " + sentence.get(TextAnnotation.class));
+    for(CoreLabel t: sentence.get(TokensAnnotation.class)){
+      System.err.println("TOKEN: \"" + t.word() + "\" \"" + t.get(OriginalTextAnnotation.class) + "\" " + t.get(CharacterOffsetBeginAnnotation.class) + " " + t.get(CharacterOffsetEndAnnotation.class));
     }
     */
 
@@ -351,10 +363,10 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
       // $5
       if(CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches() && next != null &&
-         (next.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") || next.tag().equals("CD"))){
-        crt.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
+         (next.get(AnswerAnnotation.class).equals("NUMBER") || next.tag().equals("CD"))){
+        crt.set(AnswerAnnotation.class, "MONEY");
         i = changeLeftToRight(tokenSequence, i + 1,
-            next.get(CoreAnnotations.AnswerAnnotation.class),
+            next.get(AnswerAnnotation.class),
             next.tag(), "MONEY") - 1;
       }
 
@@ -362,12 +374,12 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       else if((CURRENCY_WORD_PATTERN.matcher(crt.word()).matches() ||
                CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches()) &&
                prev != null &&
-               (prev.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") ||
+               (prev.get(AnswerAnnotation.class).equals("NUMBER") ||
                 prev.tag().equals("CD")) &&
                ! leftScanFindsWeightWord(tokenSequence, i)){
-        crt.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
+        crt.set(AnswerAnnotation.class, "MONEY");
         changeRightToLeft(tokenSequence, i - 1,
-            prev.get(CoreAnnotations.AnswerAnnotation.class),
+            prev.get(AnswerAnnotation.class),
             prev.tag(), "MONEY");
       }
 
@@ -375,11 +387,11 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       else if((PERCENT_WORD_PATTERN.matcher(crt.word()).matches() ||
                PERCENT_SYMBOL_PATTERN.matcher(crt.word()).matches()) &&
                prev != null &&
-               (prev.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") ||
+               (prev.get(AnswerAnnotation.class).equals("NUMBER") ||
                 prev.tag().equals("CD"))){
-        crt.set(CoreAnnotations.AnswerAnnotation.class, "PERCENT");
+        crt.set(AnswerAnnotation.class, "PERCENT");
         changeRightToLeft(tokenSequence, i - 1,
-            prev.get(CoreAnnotations.AnswerAnnotation.class),
+            prev.get(AnswerAnnotation.class),
             prev.tag(), "PERCENT");
       }
     }
@@ -391,10 +403,10 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
    */
   private void ordinalRecognizer(List<CoreLabel> tokenSequence) {
     for (CoreLabel crt : tokenSequence) {
-      if ((crt.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol) ||
-              crt.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER")) &&
+      if ((crt.get(AnswerAnnotation.class).equals(flags.backgroundSymbol) ||
+              crt.get(AnswerAnnotation.class).equals("NUMBER")) &&
               ORDINAL_PATTERN.matcher(crt.word()).matches()) {
-        crt.set(CoreAnnotations.AnswerAnnotation.class, "ORDINAL");
+        crt.set(AnswerAnnotation.class, "ORDINAL");
       }
     }
   }
@@ -407,7 +419,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     while(start < tokens.size()) {
       CoreLabel crt = tokens.get(start);
       // we are scanning for a NER tag and found something different
-      if(! oldTag.equals(flags.backgroundSymbol) && ! crt.get(CoreAnnotations.AnswerAnnotation.class).equals(oldTag)) {
+      if(! oldTag.equals(flags.backgroundSymbol) && ! crt.get(AnswerAnnotation.class).equals(oldTag)) {
         break;
       }
       // the NER tag is not set, so we scan for similar POS tags
@@ -415,7 +427,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
         break;
       }
 
-      crt.set(CoreAnnotations.AnswerAnnotation.class, newTag);
+      crt.set(AnswerAnnotation.class, newTag);
       start ++;
     }
     return start;
@@ -429,7 +441,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     while(start >= 0) {
       CoreLabel crt = tokens.get(start);
       // we are scanning for a NER tag and found something different
-      if(! oldTag.equals(flags.backgroundSymbol) && ! crt.get(CoreAnnotations.AnswerAnnotation.class).equals(oldTag)) {
+      if(! oldTag.equals(flags.backgroundSymbol) && ! crt.get(AnswerAnnotation.class).equals(oldTag)) {
         break;
       }
       // the NER tag is not set, so we scan for similar POS tags
@@ -437,7 +449,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
         break;
       }
 
-      crt.set(CoreAnnotations.AnswerAnnotation.class, newTag);
+      crt.set(AnswerAnnotation.class, newTag);
       start --;
     }
     return start;
@@ -461,15 +473,15 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     int offset = 0; // for when offsets are not available
     for(CoreLabel src: srcList) {
       if(adjustCharacterOffsets) {
-        int wordLength = (src.containsKey(CoreAnnotations.OriginalTextAnnotation.class))?
-          src.get(CoreAnnotations.OriginalTextAnnotation.class).length():src.word().length();
+        int wordLength = (src.containsKey(OriginalTextAnnotation.class))?
+          src.get(OriginalTextAnnotation.class).length():src.word().length();
 
         // We try to preserve the old character offsets but they just don't work well for normalized token text
         // Also, in some cases, these offsets are not set
-        if(src.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class) &&
-           src.containsKey(CoreAnnotations.CharacterOffsetEndAnnotation.class)){
-          int start = src.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-          int end = src.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        if(src.containsKey(CharacterOffsetBeginAnnotation.class) &&
+           src.containsKey(CharacterOffsetEndAnnotation.class)){
+          int start = src.get(CharacterOffsetBeginAnnotation.class);
+          int end = src.get(CharacterOffsetEndAnnotation.class);
           int origLength = end - start;
           start += adjustment;
           end = start + wordLength;
@@ -510,9 +522,9 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     //
     // annotations set by SUTime
     //
-    if(src.containsKey(TimeAnnotations.TimexAnnotation.class))
-      dst.set(TimeAnnotations.TimexAnnotation.class,
-          src.get(TimeAnnotations.TimexAnnotation.class));
+    if(src.containsKey(TimexAnnotation.class))
+      dst.set(TimexAnnotation.class,
+          src.get(TimexAnnotation.class));
   }
 
   /**
@@ -522,10 +534,10 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
    */
   public static List<CoreLabel> copyTokens(List<CoreLabel> srcTokens, CoreMap srcSentence) {
     boolean adjustCharacterOffsets = false;
-    if (srcSentence == null ||
-        srcSentence.get(CoreAnnotations.TextAnnotation.class) == null ||
-        srcTokens.isEmpty() ||
-        srcTokens.get(0).get(CoreAnnotations.OriginalTextAnnotation.class) == null) {
+    if(srcSentence == null ||
+        srcSentence.get(TextAnnotation.class) == null ||
+        srcTokens.size() == 0 ||
+        srcTokens.get(0).get(OriginalTextAnnotation.class) == null){
       adjustCharacterOffsets = true;
     }
 
@@ -533,26 +545,25 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   }
 
   /**
-   * Copies only the fields required for numeric entity extraction into  the new CoreLabel.
-   *
-   * @param src Source CoreLabel to copy.
+   * Copies only the fields required for numeric entity extraction in the new CoreLabel
+   * @param src
    */
   private static CoreLabel copyCoreLabel(CoreLabel src, Integer startOffset, Integer endOffset) {
     CoreLabel dst = new CoreLabel();
     dst.setWord(src.word());
     dst.setTag(src.tag());
-    if (src.containsKey(CoreAnnotations.OriginalTextAnnotation.class)) {
+    if (src.containsKey(OriginalTextAnnotation.class)) {
       dst.set(CoreAnnotations.OriginalTextAnnotation.class, src.get(CoreAnnotations.OriginalTextAnnotation.class));
     }
     if(startOffset == null){
-      dst.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, src.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
+      dst.set(CharacterOffsetBeginAnnotation.class, src.get(CharacterOffsetBeginAnnotation.class));
     } else {
-      dst.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, startOffset);
+      dst.set(CharacterOffsetBeginAnnotation.class, startOffset);
     }
     if(endOffset == null){
-      dst.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, src.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+      dst.set(CharacterOffsetEndAnnotation.class, src.get(CharacterOffsetEndAnnotation.class));
     } else {
-      dst.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, endOffset);
+      dst.set(CharacterOffsetEndAnnotation.class, endOffset);
     }
 
     transferAnnotations(src, dst);
@@ -560,21 +571,21 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     return dst;
   }
 
-  private static final Pattern MONTH_PATTERN = Pattern.compile("January|Jan\\.?|February|Feb\\.?|March|Mar\\.?|April|Apr\\.?|May|June|Jun\\.?|July|Jul\\.?|August|Aug\\.?|September|Sept?\\.?|October|Oct\\.?|November|Nov\\.?|December|Dec\\.");
+  public static final Pattern MONTH_PATTERN = Pattern.compile("January|Jan\\.?|February|Feb\\.?|March|Mar\\.?|April|Apr\\.?|May|June|Jun\\.?|July|Jul\\.?|August|Aug\\.?|September|Sept?\\.?|October|Oct\\.?|November|Nov\\.?|December|Dec\\.");
 
-  private  static final Pattern YEAR_PATTERN = Pattern.compile("[1-3][0-9]{3}|'?[0-9]{2}");
+  public static final Pattern YEAR_PATTERN = Pattern.compile("[1-3][0-9]{3}|'?[0-9]{2}");
 
-  private static final Pattern DAY_PATTERN = Pattern.compile("(?:[1-9]|[12][0-9]|3[01])(?:st|nd|rd)?");
+  public static final Pattern DAY_PATTERN = Pattern.compile("(?:[1-9]|[12][0-9]|3[01])(?:st|nd|rd)?");
 
-  private static final Pattern DATE_PATTERN = Pattern.compile("(?:[1-9]|[0-3][0-9])\\\\?/(?:[1-9]|[0-3][0-9])\\\\?/[1-3][0-9]{3}");
+  public static final Pattern DATE_PATTERN = Pattern.compile("(?:[1-9]|[0-3][0-9])\\\\?/(?:[1-9]|[0-3][0-9])\\\\?/[1-3][0-9]{3}");
 
-  private static final Pattern DATE_PATTERN2 = Pattern.compile("[12][0-9]{3}[-/](?:0?[1-9]|1[0-2])[-/][0-3][0-9]");
+  public static final Pattern DATE_PATTERN2 = Pattern.compile("[12][0-9]{3}[-/](?:0?[1-9]|1[0-2])[-/][0-3][0-9]");
 
-  private static final Pattern TIME_PATTERN = Pattern.compile("[0-2]?[0-9]:[0-5][0-9]");
+  public static final Pattern TIME_PATTERN = Pattern.compile("[0-2]?[0-9]:[0-5][0-9]");
 
-  private static final Pattern TIME_PATTERN2 = Pattern.compile("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]");
+  public static final Pattern TIME_PATTERN2 = Pattern.compile("[0-2][0-9]:[0-5][0-9]:[0-5][0-9]");
 
-  private static final Pattern AM_PM = Pattern.compile("(a\\.?m\\.?)|(p\\.?m\\.?)", Pattern.CASE_INSENSITIVE);
+  public static final Pattern AM_PM = Pattern.compile("(a\\.?m\\.?)|(p\\.?m\\.?)", Pattern.CASE_INSENSITIVE);
 
   public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(?:dollar|cent|euro|pound)s?|penny|pence|yen|yuan|won", Pattern.CASE_INSENSITIVE);
   public static final Pattern CURRENCY_SYMBOL_PATTERN = Pattern.compile("\\$|&#163|\u00A3|\u00A5|#|\u20AC|US\\$|HK\\$|A\\$", Pattern.CASE_INSENSITIVE);
@@ -597,83 +608,83 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       CoreLabel next = pl.get(i + 1);
       CoreLabel next2 = pl.get(i + 2);
       //if (DEBUG) { System.err.println("Tagging:" + me.word()); }
-      me.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
+      me.set(AnswerAnnotation.class, flags.backgroundSymbol);
       if (CURRENCY_SYMBOL_PATTERN.matcher(me.word()).matches() &&
-              (prev.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD") ||
-               next.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD"))) {
+              (prev.getString(PartOfSpeechAnnotation.class).equals("CD") ||
+               next.getString(PartOfSpeechAnnotation.class).equals("CD"))) {
         // dollar, pound, pound, yen,
         // Penn Treebank ancient # as pound, euro,
         if (DEBUG) {
           System.err.println("Found currency sign:" + me.word());
         }
-        me.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
-      } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
+        me.set(AnswerAnnotation.class, "MONEY");
+      } else if (me.getString(PartOfSpeechAnnotation.class).equals("CD")) {
         if (DEBUG) {
           System.err.println("Tagging CD:" + me.word());
         }
 
         if (TIME_PATTERN.matcher(me.word()).matches()) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "TIME");
+          me.set(AnswerAnnotation.class, "TIME");
         } else if (TIME_PATTERN2.matcher(me.word()).matches()) {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "TIME");
+            me.set(AnswerAnnotation.class, "TIME");
         } else if (DATE_PATTERN.matcher(me.word()).matches()) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+          me.set(AnswerAnnotation.class, "DATE");
         } else if (DATE_PATTERN2.matcher(me.word()).matches()) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+          me.set(AnswerAnnotation.class, "DATE");
 
-        } else if (next.get(CoreAnnotations.TextAnnotation.class) != null &&
-            me.get(CoreAnnotations.TextAnnotation.class) != null &&
-            DAY_PATTERN.matcher(me.get(CoreAnnotations.TextAnnotation.class)).matches() &&
-            MONTH_PATTERN.matcher(next.get(CoreAnnotations.TextAnnotation.class)).matches()) {
+        } else if (next.get(TextAnnotation.class) != null &&
+            me.get(TextAnnotation.class) != null &&
+            DAY_PATTERN.matcher(me.get(TextAnnotation.class)).matches() &&
+            MONTH_PATTERN.matcher(next.get(TextAnnotation.class)).matches()) {
           // deterministically make DATE for British-style number before month
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
-        } else if (prev.get(CoreAnnotations.TextAnnotation.class) != null &&
-            MONTH_PATTERN.matcher(prev.get(CoreAnnotations.TextAnnotation.class)).matches() &&
-            me.get(CoreAnnotations.TextAnnotation.class) != null &&
-            DAY_PATTERN.matcher(me.get(CoreAnnotations.TextAnnotation.class)).matches()) {
+          me.set(AnswerAnnotation.class, "DATE");
+        } else if (prev.get(TextAnnotation.class) != null &&
+            MONTH_PATTERN.matcher(prev.get(TextAnnotation.class)).matches() &&
+            me.get(TextAnnotation.class) != null &&
+            DAY_PATTERN.matcher(me.get(TextAnnotation.class)).matches()) {
           // deterministically make DATE for number after month
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+          me.set(AnswerAnnotation.class, "DATE");
         } else if (rightScanFindsMoneyWord(pl, i) && ! leftScanFindsWeightWord(pl, i)) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
+          me.set(AnswerAnnotation.class, "MONEY");
         } else if(ARMY_TIME_MORNING.matcher(me.word()).matches()) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "TIME");
+          me.set(AnswerAnnotation.class, "TIME");
         } else
         if (YEAR_PATTERN.matcher(me.word()).matches() &&
-            prev.getString(CoreAnnotations.AnswerAnnotation.class).equals("DATE") &&
+            prev.getString(AnswerAnnotation.class).equals("DATE") &&
             (MONTH_PATTERN.matcher(prev.word()).matches() ||
-             pl.get(i - 2).get(CoreAnnotations.AnswerAnnotation.class).equals("DATE")))
+             pl.get(i - 2).get(AnswerAnnotation.class).equals("DATE")))
         {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+          me.set(AnswerAnnotation.class, "DATE");
         } else {
           if (DEBUG) {
             System.err.println("Found number:" + me.word());
           }
-          if (prev.getString(CoreAnnotations.AnswerAnnotation.class).equals("MONEY")) {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
+          if (prev.getString(AnswerAnnotation.class).equals("MONEY")) {
+            me.set(AnswerAnnotation.class, "MONEY");
           } else {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "NUMBER");
+            me.set(AnswerAnnotation.class, "NUMBER");
           }
         }
       } else if(AM_PM.matcher(me.word()).matches() &&
-          prev.get(CoreAnnotations.AnswerAnnotation.class).equals("TIME")){
-        me.set(CoreAnnotations.AnswerAnnotation.class, "TIME");
-      } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class) != null &&
-          me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals(",") &&
-          prev.getString(CoreAnnotations.AnswerAnnotation.class).equals("DATE") &&
+          prev.get(AnswerAnnotation.class).equals("TIME")){
+        me.set(AnswerAnnotation.class, "TIME");
+      } else if (me.getString(PartOfSpeechAnnotation.class) != null &&
+          me.getString(PartOfSpeechAnnotation.class).equals(",") &&
+          prev.getString(AnswerAnnotation.class).equals("DATE") &&
           next.word() != null && YEAR_PATTERN.matcher(next.word()).matches()) {
-        me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
-      } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP") &&
+        me.set(AnswerAnnotation.class, "DATE");
+      } else if (me.getString(PartOfSpeechAnnotation.class).equals("NNP") &&
           MONTH_PATTERN.matcher(me.word()).matches()) {
-        if (prev.getString(CoreAnnotations.AnswerAnnotation.class).equals("DATE") ||
-            next.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+        if (prev.getString(AnswerAnnotation.class).equals("DATE") ||
+            next.getString(PartOfSpeechAnnotation.class).equals("CD")) {
+          me.set(AnswerAnnotation.class, "DATE");
         }
-      } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class) != null &&
-          me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CC")) {
+      } else if (me.getString(PartOfSpeechAnnotation.class) != null &&
+          me.getString(PartOfSpeechAnnotation.class).equals("CC")) {
         if (prev.tag() != null && prev.tag().equals("CD") &&
             next.tag() != null && next.tag().equals("CD") &&
-            me.get(CoreAnnotations.TextAnnotation.class) != null &&
-            me.get(CoreAnnotations.TextAnnotation.class).equalsIgnoreCase("and")) {
+            me.get(TextAnnotation.class) != null &&
+            me.get(TextAnnotation.class).equalsIgnoreCase("and")) {
           if (DEBUG) {
             System.err.println("Found number and:" + me.word());
           }
@@ -684,51 +695,51 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
               wd.equalsIgnoreCase("billion") ||
               wd.equalsIgnoreCase("trillion"))
           {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "NUMBER");
+            me.set(AnswerAnnotation.class, "NUMBER");
           }
         }
-      } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class) != null &&
-          (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NN") ||
-           me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS"))) {
+      } else if (me.getString(PartOfSpeechAnnotation.class) != null &&
+          (me.getString(PartOfSpeechAnnotation.class).equals("NN") ||
+           me.getString(PartOfSpeechAnnotation.class).equals("NNS"))) {
         if (CURRENCY_WORD_PATTERN.matcher(me.word()).matches()) {
-          if (prev.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD") &&
-              prev.getString(CoreAnnotations.AnswerAnnotation.class).equals("MONEY")) {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
+          if (prev.getString(PartOfSpeechAnnotation.class).equals("CD") &&
+              prev.getString(AnswerAnnotation.class).equals("MONEY")) {
+            me.set(AnswerAnnotation.class, "MONEY");
           }
         } else if (me.word().equals("m") || me.word().equals("b")) {
           // could be metres, but it's probably million or billion in our
           // applications
-          if (prev.getString(CoreAnnotations.AnswerAnnotation.class).equals("MONEY")) {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
+          if (prev.getString(AnswerAnnotation.class).equals("MONEY")) {
+            me.set(AnswerAnnotation.class, "MONEY");
           } else {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "NUMBER");
+            me.set(AnswerAnnotation.class, "NUMBER");
           }
         } else if (ORDINAL_PATTERN.matcher(me.word()).matches()) {
           if ((next.word() != null && MONTH_PATTERN.matcher(next.word()).matches()) ||
               (next.word() != null && next.word().equalsIgnoreCase("of") &&
                next2.word() != null && MONTH_PATTERN.matcher(next2.word()).matches())) {
-            me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+            me.set(AnswerAnnotation.class, "DATE");
           }
         } else if(GENERIC_TIME_WORDS.matcher(me.word()).matches()){
-          me.set(CoreAnnotations.AnswerAnnotation.class, "TIME");
+          me.set(AnswerAnnotation.class, "TIME");
         }
-      } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("JJ")) {
+      } else if (me.getString(PartOfSpeechAnnotation.class).equals("JJ")) {
         if ((next.word() != null && MONTH_PATTERN.matcher(next.word()).matches()) ||
             next.word() != null && next.word().equalsIgnoreCase("of") &&
             next2.word() != null && MONTH_PATTERN.matcher(next2.word()).matches()) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+          me.set(AnswerAnnotation.class, "DATE");
         } else if (ORDINAL_PATTERN.matcher(me.word()).matches()) {
           // don't do other tags: don't want 'second' as noun, or 'first' as adverb
           // introducing reasons
-          me.set(CoreAnnotations.AnswerAnnotation.class, "ORDINAL");
+          me.set(AnswerAnnotation.class, "ORDINAL");
         }
-      } else if (me.getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("IN") &&
+      } else if (me.getString(PartOfSpeechAnnotation.class).equals("IN") &&
           me.word().equalsIgnoreCase("of")) {
-        if (prev.get(CoreAnnotations.TextAnnotation.class) != null &&
-            ORDINAL_PATTERN.matcher(prev.get(CoreAnnotations.TextAnnotation.class)).matches() &&
-            next.get(CoreAnnotations.TextAnnotation.class) != null &&
-            MONTH_PATTERN.matcher(next.get(CoreAnnotations.TextAnnotation.class)).matches()) {
-          me.set(CoreAnnotations.AnswerAnnotation.class, "DATE");
+        if (prev.get(TextAnnotation.class) != null &&
+            ORDINAL_PATTERN.matcher(prev.get(TextAnnotation.class)).matches() &&
+            next.get(TextAnnotation.class) != null &&
+            MONTH_PATTERN.matcher(next.get(TextAnnotation.class)).matches()) {
+          me.set(AnswerAnnotation.class, "DATE");
         }
       }
     }
@@ -775,13 +786,13 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       System.err.println("rightScan from: " + pl.get(j).word());
     }
     int sz = pl.size();
-    while (j < sz && pl.get(j).getString(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
+    while (j < sz && pl.get(j).getString(PartOfSpeechAnnotation.class).equals("CD")) {
       j++;
     }
     if (j >= sz) {
       return false;
     }
-    String tag = pl.get(j).getString(CoreAnnotations.PartOfSpeechAnnotation.class);
+    String tag = pl.get(j).getString(PartOfSpeechAnnotation.class);
     String word = pl.get(j).word();
     if (DEBUG) {
       System.err.println("rightScan testing: " + word + '/' + tag + "; answer is: " + Boolean.toString((tag.equals("NN") || tag.equals("NNS")) && CURRENCY_WORD_PATTERN.matcher(word).matches()));
@@ -791,6 +802,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   // Implement other methods of AbstractSequenceClassifier interface
 
+  @SuppressWarnings("unchecked")
   @Override
   public void train(Collection<List<CoreLabel>> docs,
                     DocumentReaderAndWriter<CoreLabel> readerAndWriter) {
@@ -810,6 +822,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException, ClassNotFoundException {
   }
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     Properties props = StringUtils.argsToProperties(args);
     NumberSequenceClassifier nsc =
@@ -836,8 +849,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
 
     if (textFile != null) {
-      DocumentReaderAndWriter<CoreLabel> readerAndWriter =
-        new PlainTextDocumentReaderAndWriter<CoreLabel>();
+      DocumentReaderAndWriter readerAndWriter =
+        new PlainTextDocumentReaderAndWriter();
       nsc.classifyAndWriteAnswers(textFile, readerAndWriter);
     }
   } // end main

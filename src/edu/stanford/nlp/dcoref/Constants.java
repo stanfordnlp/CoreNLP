@@ -4,8 +4,6 @@ import java.util.logging.Logger;
 
 public class Constants {
 
-  protected Constants() {} // static class but extended by jcoref
-
   /** if true, use truecase annotator */
   public static final boolean USE_TRUECASE = false;
 
@@ -102,7 +100,6 @@ public class Constants {
   public static final String RUN_DIST_CMD_PROP = "dcoref.dist.cmd";
   public static final String RUN_DIST_CMD_WORK_DIR = "dcoref.dist.workdir";
   public static final String SCORE_FILE_PROP = "dcoref.score.output";
-  public static final String SINGLETON_PROP = "dcoref.singleton.predictor";
 
   public static final int MONITOR_DIST_CMD_FINISHED_WAIT_MILLIS = 60000;
 
@@ -147,5 +144,4 @@ public class Constants {
     else logger.info("REMOVE_APPOSITION_PREDICATENOMINATIVES off");
     logger.info("=================================================================");
   }
-
 }

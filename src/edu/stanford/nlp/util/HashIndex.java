@@ -32,7 +32,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
 
   // these variables are also used in IntArrayIndex
   ArrayList<E> objects = new ArrayList<E>();
-  Map<E,Integer> indexes = Generics.newHashMap();
+  HashMap<E,Integer> indexes = new HashMap<E,Integer>();
   boolean locked; // = false;
 
   /**
@@ -245,7 +245,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   public HashIndex(int capacity) {
     super();
     objects = new ArrayList<E>(capacity);
-    indexes = Generics.newHashMap(capacity);
+    indexes = new HashMap<E,Integer>(capacity);
   }
 
   /**
@@ -285,8 +285,8 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
 
   /**
    * This assumes each line is of the form (number=value) and it adds each value in order of the lines in the file
-   * @param file Which file to load
-   * @return An index built out of the lines in the file
+   * @param file
+   * @return
    */
   public static Index<String> loadFromFilename(String file) {
     Index<String> index = new HashIndex<String>();
@@ -455,8 +455,8 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   
   /**
    * This assumes each line is one value and creates index by adding values in the order of the lines in the file
-   * @param file Which file to load
-   * @return An index built out of the lines in the file
+   * @param file
+   * @return
    */
   public static Index<String> loadFromFileWithList(String file) {
     Index<String> index = new HashIndex<String>();

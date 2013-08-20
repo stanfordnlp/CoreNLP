@@ -1,6 +1,6 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.util.ConvertByteArray;
+import edu.stanford.nlp.maxent.Convert;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -30,7 +30,7 @@ public class ResultStoringFloatMonitor implements FloatFunction {
       System.err.print("Storing interim (float) weights to " + filename + " ... ");
       try {
         DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(filename))));
-        ConvertByteArray.saveFloatArr(dos, x);
+        Convert.saveFloatArr(dos, x);
         dos.close();
       } catch (IOException e) {
         System.err.println("ERROR!");

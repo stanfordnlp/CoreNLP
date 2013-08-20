@@ -86,11 +86,11 @@ public class CollectionUtils {
 
   /** Returns a new Set containing all the objects in the specified array. */
   public static <T> Set<T> asSet(T[] o) {
-    return Generics.newHashSet(Arrays.asList(o));
+    return new HashSet<T>(Arrays.asList(o));
   }
 
   public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
-    Set<T> intersect = Generics.newHashSet();
+    Set<T> intersect = new HashSet<T>();
     for (T t : set1) {
       if (set2.contains(t)) {
         intersect.add(t);
@@ -111,7 +111,7 @@ public class CollectionUtils {
   }
 
   public static <T> Set<T> unionAsSet(Collection<T> set1, Collection<T> set2) {
-    Set<T> union = Generics.newHashSet();
+    Set<T> union = new HashSet<T>();
     for (T t : set1) {
       union.add(t);
     }
@@ -131,24 +131,6 @@ public class CollectionUtils {
    */
   public static <T> Collection<T> diff(Collection<T> list1, Collection<T> list2) {
     Collection<T> diff = new ArrayList<T>();
-    for (T t : list1) {
-      if (!list2.contains(t)) {
-        diff.add(t);
-      }
-    }
-    return diff;
-  }
-  
-  /**
-   * Returns all objects in list1 that are not in list2
-   *
-   * @param <T> Type of items in the collection
-   * @param list1 First collection
-   * @param list2 Second collection
-   * @return The collection difference list1 - list2
-   */
-  public static <T> Set<T> diffAsSet(Collection<T> list1, Collection<T> list2) {
-    Set<T> diff = new HashSet<T>();
     for (T t : list1) {
       if (!list2.contains(t)) {
         diff.add(t);
@@ -178,7 +160,7 @@ public class CollectionUtils {
    *          String constructor.
    */
   public static <T> Collection<T> loadCollection(File file, Class<T> c, CollectionFactory<T> cf) throws Exception {
-    Constructor<T> m = c.getConstructor(new Class[] { String.class });
+    Constructor<T> m = c.getConstructor(new Class[] { Class.forName("java.lang.String") });
     Collection<T> result = cf.newCollection();
     BufferedReader in = new BufferedReader(new FileReader(file));
     String line = in.readLine();
@@ -242,8 +224,8 @@ public class CollectionUtils {
 
   public static <K, V> Map<K, V> getMapFromString(String s, Class<K> keyClass, Class<V> valueClass, MapFactory<K, V> mapFactory) throws ClassNotFoundException,
       NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-    Constructor<K> keyC = keyClass.getConstructor(new Class[] { String.class });
-    Constructor<V> valueC = valueClass.getConstructor(new Class[] { String.class });
+    Constructor<K> keyC = keyClass.getConstructor(new Class[] { Class.forName("java.lang.String") });
+    Constructor<V> valueC = valueClass.getConstructor(new Class[] { Class.forName("java.lang.String") });
     if (s.charAt(0) != '{')
       throw new RuntimeException("");
     s = s.substring(1); // get rid of first brace
@@ -556,7 +538,7 @@ public class CollectionUtils {
    * @return A set consisting of the items from the Iterable.
    */
   public static <T> Set<T> toSet(Iterable<T> items) {
-    Set<T> set = Generics.newHashSet();
+    Set<T> set = new HashSet<T>();
     addAll(set, items);
     return set;
   }
@@ -773,7 +755,7 @@ public class CollectionUtils {
    * for them for limited-use hashing.
    */
   public static <ObjType, Hashable> Collection<ObjType> uniqueNonhashableObjects(Collection<ObjType> objects, Function<ObjType, Hashable> customHasher) {
-    Map<Hashable, ObjType> hashesToObjects = Generics.newHashMap();
+    Map<Hashable, ObjType> hashesToObjects = new HashMap<Hashable, ObjType>();
     for (ObjType object : objects) {
       hashesToObjects.put(customHasher.apply(object), object);
     }
@@ -866,74 +848,16 @@ public class CollectionUtils {
     return modes.iterator().next();
   }
 
-
   /**
-   * Transforms the keyset of collection according to the given Function and returns a set of the keys
+   * Transforms the keyset of collection according to the given function and returns a set of the keys
    *
    */
-  public static<T1, T2> Set<T2> transformAsSet(Collection<? extends T1> original, Function<T1, ? extends T2> f){
-    Set<T2> transformed = Generics.newHashSet();
+  public static<T1, T2> Set<T2> transformAsSet(Collection<T1> original, Function<T1, T2> f){
+    Set<T2> transformed = new HashSet<T2>();
     for(T1 t: original){
       transformed.add(f.apply(t));
     }
     return transformed;
   }
 
-
-  /**
-   * Transforms the keyset of collection according to the given Function and returns a list
-   *
-   */
-  public static<T1, T2> List<T2> transformAsList(Collection<? extends T1> original, Function<T1, ? extends T2> f){
-    List<T2> transformed = new ArrayList<T2>();
-    for(T1 t: original){
-      transformed.add(f.apply(t));
-    }
-    return transformed;
-  }
-
-  /**
-   * Filters the objects in the collection according to the given Filter and returns a list
-   *
-   */
-  public static<T> List<T> filterAsList(Collection<? extends T> original, Filter<? super T> f){
-    List<T> transformed = new ArrayList<T>();
-    for (T t: original) {
-      if (f.accept(t)) {
-        transformed.add(t);
-      }
-    }
-    return transformed;
-  }
-  
-  /**
-   * get all values corresponding to the indices (if they exist in the map)
-   * @param map
-   * @param indices
-   * @return
-   */
-  public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices){
-    List<V> result = new ArrayList<V>();
-    for(T i: indices)
-      if(map.containsKey(i)){
-        result.add(map.get(i));
-      }
-    return result;
-  }
-  
-  public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
-   T max = null;;
-   int i = 0;
-   int maxindex = -1;
-   for(T t: list)
-   {
-     if(max == null || t.compareTo(max) > 0)
-     {
-       max = t;
-       maxindex = i;
-     }
-     i++;
-   }
-   return maxindex;
-  }
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
@@ -15,17 +15,41 @@ import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.trees.Trees;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.util.CoreMap;
 
 /** @author David McClosky */
 public class ParserAnnotatorUtils {
 
   private ParserAnnotatorUtils() {} // static methods
+
+
+  public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
+    return SemanticGraphFactory.makeFromTree(tree, false, false, false, true, true);
+  }
+
+  public static SemanticGraph generateCollapsedDependencies(Tree tree) {
+    return SemanticGraphFactory.makeFromTree(tree, true, false, false, true, true);
+  }
+
+  public static SemanticGraph generateCCProcessedDependencies(Tree tree) {
+    return SemanticGraphFactory.makeFromTree(tree, true, true, false, true, true);
+  }
+
+  public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs) {
+    return SemanticGraphFactory.makeFromTree(gs, false, false, false, true, true);
+  }
+
+  public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs) {
+    return SemanticGraphFactory.makeFromTree(gs, true, false, false, true, true);
+  }
+
+  public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs) {
+    return SemanticGraphFactory.makeFromTree(gs, true, true, false, true, true);
+  }
 
   /**
    * Thread safety note: nothing special is done to ensure the thread
@@ -36,31 +60,23 @@ public class ParserAnnotatorUtils {
   public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs, GrammaticalStructureFactory gsf, CoreMap sentence, Tree tree) {
     // make sure all tree nodes are CoreLabels
     // TODO: why isn't this always true? something fishy is going on
-    Trees.convertToCoreLabels(tree);
+    ParserAnnotatorUtils.convertToCoreLabels(tree);
 
     // index nodes, i.e., add start and end token positions to all nodes
     // this is needed by other annotators down stream, e.g., the NFLAnnotator
     tree.indexSpans(0);
 
-    sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
+    sentence.set(TreeAnnotation.class, tree);
     if (verbose) {
       System.err.println("Tree is:");
       tree.pennPrint(System.err);
     }
 
     if (buildGraphs) {
-      String docID = sentence.get(CoreAnnotations.DocIDAnnotation.class);
-      if (docID == null) {
-        docID = "";
-      }
-
-      Integer sentenceIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
-      int index = (sentenceIndex == null) ? 0 : sentenceIndex;
-
       // generate the dependency graph
-      SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
-      SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
-      SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
+      SemanticGraph deps = generateCollapsedDependencies(gsf.newGrammaticalStructure(tree));
+      SemanticGraph uncollapsedDeps = generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree));
+      SemanticGraph ccDeps = generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree));
       if (verbose) {
         System.err.println("SDs:");
         System.err.println(deps.toString("plain"));
@@ -80,7 +96,7 @@ public class ParserAnnotatorUtils {
   public static void setMissingTags(CoreMap sentence, Tree tree) {
     List<TaggedWord> taggedWords = null;
     List<Label> leaves = null;
-    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
     for (int i = 0; i < tokens.size(); ++i) {
       CoreLabel token = tokens.get(i);
       if (token.tag() == null) {
@@ -96,6 +112,24 @@ public class ParserAnnotatorUtils {
           ((HasTag) leaf).setTag(taggedWords.get(i).tag());
         }
       }
+    }
+  }
+
+  /**
+   * Converts the tree labels to CoreLabels.
+   * We need this because we store additional info in the CoreLabel, like token span.
+   * @param tree
+   */
+  public static void convertToCoreLabels(Tree tree) {
+    Label l = tree.label();
+    if (!(l instanceof CoreLabel)) {
+      CoreLabel cl = new CoreLabel();
+      cl.setValue(l.value());
+      tree.setLabel(cl);
+    }
+
+    for (Tree kid : tree.children()) {
+      convertToCoreLabels(kid);
     }
   }
 

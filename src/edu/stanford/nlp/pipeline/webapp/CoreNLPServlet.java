@@ -17,7 +17,7 @@ import nu.xom.Document;
 import nu.xom.Nodes;
 import nu.xom.xslt.XSLTransform;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -169,7 +169,7 @@ public class CoreNLPServlet extends HttpServlet {
       
       // Inject the brat stylesheet (removing this line breaks visualisation).
       out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-                  bratLocation + "/style-vis.css\"/>");
+          bratLocation + "/style.css\"/>");
       
       // Include the Javascript libraries necessary to run brat.
       out.println("<script type=\"text/javascript\" src=\"" + bratLocation +
@@ -208,7 +208,7 @@ public class CoreNLPServlet extends HttpServlet {
     pipeline.xmlPrint(annotation, xmlOutput);
     xmlOutput.flush();
 
-    String escapedXml = StringEscapeUtils.escapeHtml4(xmlOutput.toString());
+    String escapedXml = StringEscapeUtils.escapeHtml(xmlOutput.toString());
     String[] lines = escapedXml.split("\n");
     out.print("<div>");
     for (String line : lines) {

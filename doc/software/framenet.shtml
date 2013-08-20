@@ -1,0 +1,50 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2><font color="#a40526">Stanford FrameNet II Reader download</font></h2>
+</center>
+
+<p class="cardinal">
+<i>End-of-life distribution. This is software that we at one point
+distributed. But we feel either that we are unable to or it isn't useful
+to maintain it any more. It's still here in case it's useful, but we
+won't answer questions about it.</i>
+</p>
+
+<p>
+This is a Java package for reading the FrameNet (version II) XML corpus
+files.  It was used for the work described in:
+<blockquote>
+Cynthia A. Thompson, Roger Levy, and Christopher D. Manning. 2003. 
+A Generative Model for Semantic Role Labeling.  <i>ECML 2003</i>, 
+pp. 397-408.
+</blockquote>
+
+The system requires Java (JDK1.2+), and you need to have separately
+downloaded the FrameNet data.
+</p>
+
+<p>It is licensed under the GNU GPL.  (Note that this is the <i>full</i>
+      GPL - which allows its use for research purposes or other free
+      software projects but <i>does not</i> allow its incorporation into
+      any type of commercial software, even in part or in translation.) 
+      Source is included.  The package
+      includes components for command-line invocation and a Java API.</p>
+
+<p>The download is a 97KB gzipped tar file.
+    If you unpack the tar file,
+    you should have everything needed.  A simple script is included to 
+    invoke the tagger on a Unix system.  For another system,
+    one merely needs to similarly configure the CLASSPATH variable.
+    Please send any questions or feedback, or extensions and bugfixes to
+<a href="mailto:java-nlp-support@lists.stanford.edu"><code>java-nlp-support@lists.stanford.edu</code></a>.
+</p>
+
+<CENTER>
+<B><font color="#a40526"><a href="StanfordFrameNetReader.tar.gz">Download
+	  Stanford FrameNet Reader version 1.0</font></a></B>
+</CENTER>
+
+<BR>
+<!--#include virtual="/footer.html" -->
+
