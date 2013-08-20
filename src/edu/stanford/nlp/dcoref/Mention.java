@@ -142,6 +142,9 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   /** Set of other mentions in the same sentence that I am a member of */
   public Set<Mention> belongToLists = null;
 
+  // Mention is identified as being this speaker....
+  public SpeakerInfo speakerInfo;
+
   transient private String spanString = null;
   transient private String lowercaseNormalizedSpanString = null;
 
