@@ -5,11 +5,11 @@ import edu.stanford.nlp.util.*;
 import java.util.*;
 
 /**
- * Generic Sequence Pattern for regular expressions
+ * Generic Sequence Pattern for regular expressions.
  *
  * <p>
  * Similar to Java's {@link java.util.regex.Pattern} except it is for sequences over arbitrary types T instead
- *  of just characters. 
+ *  of just characters.
  * </p>
  *
  * <p> A regular expression must first be compiled into
