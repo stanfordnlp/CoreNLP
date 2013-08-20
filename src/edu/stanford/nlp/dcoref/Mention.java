@@ -161,6 +161,36 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return os.toString();
   }
 
+  // Retrieves part of the span that corresponds to the NER (going out from head)
+  public String nerName() {
+    StringBuilder os = new StringBuilder();
+    if (nerString == null || "O".equals(nerString)) return null;
+
+    int start = headIndex-startIndex;
+    int end = headIndex-startIndex+1;
+    while (start > 0) {
+      CoreLabel prev = originalSpan.get(start-1);
+      if (nerString.equals(prev.ner())) {
+        start--;
+      } else {
+        break;
+      }
+    }
+    while (end < originalSpan.size()) {
+      CoreLabel next = originalSpan.get(end);
+      if (nerString.equals(next.ner())) {
+        end++;
+      } else {
+        break;
+      }
+    }
+    for(int i = start; i < end; i++){
+      if(i > 0) os.append(" ");
+      os.append(originalSpan.get(i).get(CoreAnnotations.TextAnnotation.class));
+    }
+    return os.toString();
+  }
+
   /** Set attributes of a mention:
    * head string, mention type, NER label, Number, Gender, Animacy
    * @throws Exception
@@ -382,15 +412,15 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         if(gender == Gender.UNKNOWN)  {
           if(dict.maleWords.contains(headString)) {
             gender = Gender.MALE;
-            SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tMale:\t" +  headString);
+            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
           }
           else if(dict.femaleWords.contains(headString))  {
             gender = Gender.FEMALE;
-            SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tFemale:\t" +  headString);
+            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
           }
           else if(dict.neutralWords.contains(headString))   {
             gender = Gender.NEUTRAL;
-            SieveCoreferenceSystem.logger.finest("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString);
+            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
           }
         }
       }
@@ -401,10 +431,14 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
         if (male * 0.5 > female + neutral && male > 2) {
           this.gender = Gender.MALE;
+          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
         } else if (female * 0.5 > male + neutral && female > 2) {
           this.gender = Gender.FEMALE;
-        } else if (neutral * 0.5 > male + female && neutral > 2)
+          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
+        } else if (neutral * 0.5 > male + female && neutral > 2) {
           this.gender = Gender.NEUTRAL;
+          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
+        }
       }
     }
   }
@@ -555,7 +589,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private void setNERString() {
     if(headWord.has(CoreAnnotations.EntityTypeAnnotation.class)){ // ACE
-      if(headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class) && headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")){
+      if(headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class) &&
+              headWord.get(CoreAnnotations.EntityTypeAnnotation.class).equals("NAM")){
         this.nerString = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       } else {
         this.nerString = "O";
