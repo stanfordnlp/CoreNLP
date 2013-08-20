@@ -1520,8 +1520,8 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     wordToTemporal.put("year", SUTime.YEAR);
     wordToTemporal.put("decade", SUTime.DECADE);
     wordToTemporal.put("century", SUTime.CENTURY);
-    wordToTemporal.put("millenium", SUTime.MILLENIUM);
-    wordToTemporal.put("millenia", SUTime.MILLENIUM);
+    wordToTemporal.put("millenium", SUTime.MILLENNIUM);
+    wordToTemporal.put("millenia", SUTime.MILLENNIUM);
 
     // Vague times
     wordToTemporal.put("past", SUTime.TIME_PAST);
@@ -1572,10 +1572,10 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     abbToTimeUnit.put("century",  SUTime.CENTURY);
     abbToTimeUnit.put("centuries",  SUTime.CENTURY);
     abbToTimeUnit.put("centurie",  SUTime.CENTURY);
-    abbToTimeUnit.put("millenias",  SUTime.MILLENIUM);
-    abbToTimeUnit.put("millenia", SUTime.MILLENIUM);
-    abbToTimeUnit.put("milleniums", SUTime.MILLENIUM);
-    abbToTimeUnit.put("millenium", SUTime.MILLENIUM);
+    abbToTimeUnit.put("millenias",  SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millenia", SUTime.MILLENNIUM);
+    abbToTimeUnit.put("milleniums", SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millenium", SUTime.MILLENNIUM);
   }
 
   protected SUTime.Temporal addSet(String expression, SUTime.Temporal temporal)
