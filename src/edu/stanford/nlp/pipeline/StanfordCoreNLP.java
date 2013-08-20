@@ -45,6 +45,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -1050,6 +1051,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("\t\"outputDirectory\" - where to put output (defaults to the current directory)");
     os.println("\t\"outputExtension\" - extension to use for the output file (defaults to \".xml\" for XML, \".ser.gz\" for serialized).  Don't forget the dot!");
     os.println("\t\"outputFormat\" - \"xml\" to output XML (default), \"serialized\" to output serialized Java objects, \"text\" to output text");
+    os.println("\t\"serializer\" - Class of annotation serializer to use when outputFormat is \"serialized\".  By default, uses Java serialization.");
     os.println("\t\"replaceExtension\" - flag to chop off the last extension before adding outputExtension to file");
     os.println("\t\"noClobber\" - don't automatically override (clobber) output files that already exist");
 		os.println("\t\"threads\" - multithread on this number of threads");
@@ -1106,8 +1108,37 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
 
 
-  public void processFiles(final Collection<File> files, int numThreads) throws IOException {
+  public void processFiles(String base, final Collection<File> files, int numThreads) throws IOException {
     List<Runnable> toRun = new LinkedList<Runnable>();
+
+    // Process properties here
+    final String baseOutputDir = properties.getProperty("outputDirectory", ".");
+    final String baseInputDir = properties.getProperty("inputDirectory", base);
+
+    //(file info)
+    final OutputFormat outputFormat =
+            OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
+    String defaultExtension;
+    switch (outputFormat) {
+      case XML: defaultExtension = ".xml"; break;
+      case TEXT: defaultExtension = ".out"; break;
+      case SERIALIZED: defaultExtension = ".ser.gz"; break;
+      default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
+    }
+    String serializerClass = properties.getProperty("serializer");
+    AnnotationSerializer annotationSerializer = null;
+    if (serializerClass != null) {
+      annotationSerializer = ReflectionLoading.loadByReflection(serializerClass);
+    }
+    final AnnotationSerializer loadingSerializer = annotationSerializer;
+    final AnnotationSerializer outputSerializer = annotationSerializer;
+
+    final String extension = properties.getProperty("outputExtension", defaultExtension);
+    final boolean replaceExtension = Boolean.parseBoolean(properties.getProperty("replaceExtension", "false"));
+
+    final boolean noClobber = Boolean.parseBoolean(properties.getProperty("noClobber", "false"));
+    final MutableInteger totalProcessed = new MutableInteger(0);
+
     //for each file...
     for (final File file : files) {
       //register a task...
@@ -1119,30 +1150,22 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           try {
             //--Get Output File Info
             //(filename)
-            String outputFilename = new File(properties.getProperty("outputDirectory", "."), file.getName()).getPath();
-            if (properties.getProperty("replaceExtension") != null) {
+            String outputDir = baseOutputDir;
+            if (baseInputDir != null) {
+              // Get input file name relative to base
+              String relDir = file.getParent().replaceFirst(Pattern.quote(baseInputDir), "");
+              outputDir = outputDir + File.separator + relDir;
+            }
+            // Make sure output directory exists
+            new File(outputDir).mkdirs();
+            String outputFilename = new File(outputDir, file.getName()).getPath();
+            if (replaceExtension) {
               int lastDot = outputFilename.lastIndexOf('.');
               // for paths like "./zzz", lastDot will be 0
               if (lastDot > 0) {
                 outputFilename = outputFilename.substring(0, lastDot);
               }
             }
-            //(file info)
-            OutputFormat outputFormat = OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
-            String defaultExtension;
-            switch (outputFormat) {
-            case XML: defaultExtension = ".xml"; break;
-            case TEXT: defaultExtension = ".out"; break;
-            case SERIALIZED: defaultExtension = ".ser.gz"; break;
-            default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
-            }
-            AnnotationSerializer serializer = null;
-            String serializerClass = properties.getProperty("serializer");
-            if (serializerClass != null) {
-              serializer = ReflectionLoading.loadByReflection(serializerClass);
-            }
-
-            String extension = properties.getProperty("outputExtension", defaultExtension);
             // ensure we don't make filenames with doubled extensions like .xml.xml
             if (!outputFilename.endsWith(extension)) {
               outputFilename += extension;
@@ -1157,17 +1180,23 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               err("Skipping " + file.getName() + ": output file " + outputFilename + " has the same filename as the input file -- assuming you don't actually want to do this.");
               return;
             }
-            if (properties.getProperty("noClobber") != null && new File(outputFilename).exists()) {
+            if (noClobber && new File(outputFilename).exists()) {
               err("Skipping " + file.getName() + ": output file " + outputFilename + " as it already exists.  Don't use the noClobber option to override this.");
               return;
             }
+
+            forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
 
             //--Process File
             Annotation annotation = null;
             if (file.getAbsolutePath().endsWith(".ser.gz")) {
               // maybe they want to continue processing a partially processed annotation
               try {
-                annotation = IOUtils.readObjectFromFile(file);
+                if (loadingSerializer != null) {
+                  annotation = loadingSerializer.load(new BufferedInputStream(new FileInputStream(file)));
+                } else {
+                  annotation = IOUtils.readObjectFromFile(file);
+                }
               } catch (IOException e) {
                 // guess that's not what they wanted
                 // We hide IOExceptions because ones such as file not
@@ -1178,6 +1207,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 throw new RuntimeException(e);
               }
             }
+
             //(read file)
             if (annotation == null) {
               String encoding = getEncoding();
@@ -1185,9 +1215,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               annotation = new Annotation(text);
             }
 
-            forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
-
-            startTrack("Annotating file " + file.getAbsoluteFile());
+            forceTrack("Annotating file " + file.getAbsoluteFile());
             try {
               annotate(annotation);
             } catch (Exception ex) {
@@ -1212,9 +1240,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               break;
             }
             case SERIALIZED: {
-              if (serializer != null) {
-                OutputStream fos = IOUtils.getFileOutputStream(outputFilename);
-                serializer.save(annotation, fos);
+              if (outputSerializer != null) {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(outputFilename));
+                outputSerializer.save(annotation, fos);
                 fos.close();
               } else {
                 IOUtils.writeObjectToFile(annotation, outputFilename);
@@ -1224,7 +1252,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             default:
               throw new IllegalArgumentException("Unknown output format " + outputFormat);
             }
+
             endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
+
+            synchronized (totalProcessed) {
+              totalProcessed.incValue(1);
+              if (totalProcessed.intValue() % 1000 == 0) {
+                log("Processed " + totalProcessed + " documents");
+              }
+            }
+
           } catch (IOException e) {
             throw new RuntimeIOException(e);
           }
@@ -1238,6 +1275,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     } else {
       Redwood.Util.threadAndRun("StanfordCoreNLP <" + numThreads + " threads>", toRun, numThreads);
     }
+    log("Processed " + totalProcessed + " documents");
+  }
+
+  public void processFiles(final Collection<File> files, int numThreads) throws IOException {
+    processFiles(null, files, numThreads);
   }
 
   public void processFiles(final Collection<File> files) throws IOException {
@@ -1305,7 +1347,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     if(props.containsKey("file")){
       String fileName = props.getProperty("file");
       Collection<File> files = new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true);
-      pipeline.processFiles(files, numThreads);
+      pipeline.processFiles(fileName, files, numThreads);
     }
 
     //
@@ -1314,7 +1356,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     else if(props.containsKey("filelist")){
       String fileName = props.getProperty("filelist");
       Collection<File> files = readFileList(fileName);
-      pipeline.processFiles(files, numThreads);
+      pipeline.processFiles(null, files, numThreads);
     }
 
     //
