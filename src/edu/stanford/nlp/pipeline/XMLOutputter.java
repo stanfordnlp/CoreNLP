@@ -37,38 +37,10 @@ public class XMLOutputter {
   private static final String NAMESPACE_URI = null;
   private static final String STYLESHEET_NAME = "CoreNLP-to-HTML.xsl";
 
-  private static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
-  private static final Options DEFAULT_OPTIONS = new Options();
-
-  public static class Options {
-    public boolean includeText = false;
-    public double relationsBeam = 0.0;
-    public String encoding = "UTF-8";
-    public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
-  }
-
-  /**
-   * Populates options from StanfordCoreNLP pipeline
-   */
-  public static Options getOptions(StanfordCoreNLP pipeline) {
-    Options options = new Options();
-    options.relationsBeam = pipeline.getBeamPrintingOption();
-    options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
-    options.encoding = pipeline.getEncoding();
-    return options;
-  }
-
-  public static void xmlPrint(Annotation annotation, OutputStream os) throws IOException {
-    xmlPrint(annotation, os, DEFAULT_OPTIONS);
-  }
 
   public static void xmlPrint(Annotation annotation, OutputStream os, StanfordCoreNLP pipeline) throws IOException {
-    xmlPrint(annotation, os, getOptions(pipeline));
-  }
-
-  public static void xmlPrint(Annotation annotation, OutputStream os, Options options) throws IOException {
-    Document xmlDoc = annotationToDoc(annotation, options);
-    Serializer ser = new Serializer(os, options.encoding);
+    Document xmlDoc = annotationToDoc(annotation, pipeline);
+    Serializer ser = new Serializer(os, pipeline.getEncoding());
     ser.setIndent(2);
     ser.setMaxLength(0);
     ser.write(xmlDoc);
@@ -76,17 +48,12 @@ public class XMLOutputter {
   }
 
   /**
-   * Converts the given annotation to an XML document using options taken from the StanfordCoreNLP pipeline
+   * Converts the given annotation to an XML document
    */
   public static Document annotationToDoc(Annotation annotation, StanfordCoreNLP pipeline) {
-    Options options = getOptions(pipeline);
-    return annotationToDoc(annotation, options);
-  }
+    double beam = pipeline.getBeamPrintingOption();
+    TreePrint constituentTreePrinter = pipeline.getConstituentTreePrinter();
 
-  /**
-   * Converts the given annotation to an XML document using the specified options
-   */
-  public static Document annotationToDoc(Annotation annotation, Options options) {
     //
     // create the XML document with the root node pointing to the namespace URL
     //
@@ -98,15 +65,24 @@ public class XMLOutputter {
     Element docElem = new Element("document", NAMESPACE_URI);
     root.appendChild(docElem);
 
-    setSingleElement(docElem, "docId", NAMESPACE_URI, annotation.get(CoreAnnotations.DocIDAnnotation.class));
-    setSingleElement(docElem, "docDate", NAMESPACE_URI, annotation.get(CoreAnnotations.DocDateAnnotation.class));
-    setSingleElement(docElem, "docSourceType", NAMESPACE_URI, annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class));
-    setSingleElement(docElem, "docType", NAMESPACE_URI, annotation.get(CoreAnnotations.DocTypeAnnotation.class));
-    setSingleElement(docElem, "author", NAMESPACE_URI, annotation.get(CoreAnnotations.AuthorAnnotation.class));
-    setSingleElement(docElem, "location", NAMESPACE_URI, annotation.get(CoreAnnotations.LocationAnnotation.class));
+    String docId =  annotation.get(CoreAnnotations.DocIDAnnotation.class);
+    if (docId != null) {
+      setSingleElement(docElem, "docId", NAMESPACE_URI, docId);
+    }
 
-    if (options.includeText) {
-      setSingleElement(docElem, "text", NAMESPACE_URI, annotation.get(CoreAnnotations.TextAnnotation.class));
+    String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
+    if(docDate != null){
+      setSingleElement(docElem, "docDate", NAMESPACE_URI, docDate);
+    }
+
+    String docSourceType = annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
+    if(docSourceType != null){
+      setSingleElement(docElem, "docSourceType", NAMESPACE_URI, docSourceType);
+    }
+
+    String docType = annotation.get(CoreAnnotations.DocTypeAnnotation.class);
+    if(docType != null){
+      setSingleElement(docElem, "docType", NAMESPACE_URI, docType);
     }
 
     Element sentencesElem = new Element("sentences", NAMESPACE_URI);
@@ -142,7 +118,7 @@ public class XMLOutputter {
         if(tree != null){
           // add the constituent tree for this sentence
           Element parseInfo = new Element("parse", NAMESPACE_URI);
-          addConstituentTreeInfo(parseInfo, tree, options.constituentTreePrinter);
+          addConstituentTreeInfo(parseInfo, tree, constituentTreePrinter);
           sentElem.appendChild(parseInfo);
 
           // add the dependencies for this sentence
@@ -173,7 +149,7 @@ public class XMLOutputter {
 
           if(relations != null){
             Element relElem = new Element("relations", NAMESPACE_URI);
-            addRelations(relations, relElem, NAMESPACE_URI, options.relationsBeam);
+            addRelations(relations, relElem, NAMESPACE_URI, beam);
             mrElem.appendChild(relElem);
           }
 
@@ -373,10 +349,6 @@ public class XMLOutputter {
       setSingleElement(wordInfo, "NormalizedNER", curNS, token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
     }
 
-    if (token.containsKey(CoreAnnotations.SpeakerAnnotation.class)) {
-      setSingleElement(wordInfo, "Speaker", curNS, token.get(CoreAnnotations.SpeakerAnnotation.class));
-    }
-
     if (token.containsKey(TimeAnnotations.TimexAnnotation.class)) {
       Timex timex = token.get(TimeAnnotations.TimexAnnotation.class);
       Element timexElem = new Element("Timex", curNS);
@@ -417,8 +389,8 @@ public class XMLOutputter {
    * @param value    This is its value
    */
   private static void setSingleElement(Element tokenElement, String elemName, String curNS, String value) {
+    Element cur = new Element(elemName, curNS);
     if (value != null) {
-      Element cur = new Element(elemName, curNS);
       cur.appendChild(value);
       tokenElement.appendChild(cur);
     }
