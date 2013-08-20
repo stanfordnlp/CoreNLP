@@ -138,16 +138,12 @@ public abstract class DeterministicCorefSieve  {
       Semantics semantics) throws Exception {
 
     boolean ret = false;
-    Mention mention = mentionCluster.getRepresentativeMention();
     if (flags.USE_INCOMPATIBLES) {
       // Check our list of incompatible mentions and don't cluster them together
       // Allows definite no's from previous sieves to propagate down
-      if (document.isIncompatible(mentionCluster, potentialAntecedent)) {
-        SieveCoreferenceSystem.logger.finest("INCOMPATIBLE clusters: not match: " +ant.spanToString()+"("+ant.mentionID +
-                ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-        return false;
-      }
+      if (document.isIncompatible(mentionCluster, potentialAntecedent)) return false;
     }
+    Mention mention = mentionCluster.getRepresentativeMention();
     if(flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3
         && mention2.person!=Person.I && mention2.person!=Person.YOU) return false;
     if(mention2.spanToString().toLowerCase().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) return false;
@@ -234,18 +230,15 @@ public abstract class DeterministicCorefSieve  {
       }
     }
 
-    // Incompatibility constraints - do before match checks
     if(flags.USE_iwithini && Rules.entityIWithinI(mention, ant, dict)) {
       document.addIncompatible(mention, ant);
       return false;
     }
-
-    // Match checks
     if(flags.USE_EXACTSTRINGMATCH && Rules.entityExactStringMatch(mentionCluster, potentialAntecedent, dict, roleSet)){
       return true;
     }
     if (flags.USE_NAME_MATCH && Rules.entityNameMatch(getMentionMatcher(), mentionCluster, potentialAntecedent, document, dict, roleSet)) {
-      ret = true;
+      return true;
     }
 
     if(flags.USE_RELAXED_EXACTSTRINGMATCH && Rules.entityRelaxedExactStringMatch(mentionCluster, potentialAntecedent, mention, ant, dict, roleSet)){
@@ -274,7 +267,7 @@ public abstract class DeterministicCorefSieve  {
     }
 
     if(flags.USE_ROLEAPPOSITION && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
-      ret = true;
+      return true;
     }
     if(flags.USE_INCLUSION_HEADMATCH && Rules.entityHeadsAgree(mentionCluster, potentialAntecedent, mention, ant, dict)){
       ret = true;
@@ -282,7 +275,6 @@ public abstract class DeterministicCorefSieve  {
     if(flags.USE_RELAXED_HEADMATCH && Rules.entityRelaxedHeadsAgreeBetweenMentions(mentionCluster, potentialAntecedent, mention, ant) ){
       ret = true;
     }
-
     if(flags.USE_WORDS_INCLUSION && ret && ! Rules.entityWordsIncluded(mentionCluster, potentialAntecedent, mention, ant)) {
       return false;
     }
