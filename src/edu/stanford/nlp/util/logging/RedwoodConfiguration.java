@@ -469,6 +469,9 @@ public class RedwoodConfiguration {
     }
 
     //--Console
+    config = config.output(get(props, "log.output", "stdout", used));
+
+    //--Console
     config = config.handlers(Handlers.chain(chain.toArray(new LogRecordHandler[chain.size()]), Handlers.output));
 
     //--Error Check
