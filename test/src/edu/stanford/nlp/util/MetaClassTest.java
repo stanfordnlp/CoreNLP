@@ -1,6 +1,9 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -399,7 +402,7 @@ public class MetaClassTest {
   private static enum Fruits {
     APPLE,
     Orange,
-    grape;
+    grape
   }
 
   @Test
@@ -457,6 +460,15 @@ public class MetaClassTest {
   public void testCastFromString() {
     assertEquals(new FromStringable("foo"), MetaClass.cast("foo", FromStringable.class));
     assertEquals(new FromStringable("bar"), MetaClass.cast("bar", FromStringable.class));
+  }
+
+  @Test
+  public void testCastStream() {
+    assertEquals(System.out, MetaClass.cast("stdout", OutputStream.class));
+    assertEquals(System.out, MetaClass.cast("out", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("stderr", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("err", OutputStream.class));
+    assertEquals(ObjectOutputStream.class, MetaClass.cast("err", ObjectOutputStream.class).getClass());
   }
 
 //	TODO(gabor) this would be kind of cool to implement
