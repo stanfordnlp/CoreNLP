@@ -1023,7 +1023,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     System.err.println("Samples from " + config.getFile());
     System.err.println("Number of features: " + feats.size());
     Problem p = new Problem(samples, feats);
-    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, 0.00001, maxentTagger.fnumArr);
+    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, maxentTagger.fnumArr);
     maxentTagger.prob = prob;
 
     if (config.getSearch().equals("owlqn")) {
