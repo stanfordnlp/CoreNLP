@@ -18,12 +18,6 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <xsl:if test="root/document/docDate">
         <br/>DocDate: <xsl:value-of select="root/document/docDate"/>
     </xsl:if>
-    <xsl:if test="root/document/docSourceType">
-        <br/>DocSourceType: <xsl:value-of select="root/document/docSourceType"/>
-    </xsl:if>
-    <xsl:if test="root/document/docType">
-        <br/>DocType: <xsl:value-of select="root/document/docType"/>
-    </xsl:if>
     <table border="1" style="background-color:#f0f0f0;" align="center">
     <tr><th>Sentences</th></tr>
     <xsl:for-each select="root/document/sentences/sentence">
