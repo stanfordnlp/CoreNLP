@@ -1482,7 +1482,7 @@ public class SUTime {
     private static final long serialVersionUID = 1;
   }
 
-  // Reference time (some kind of reference time)
+  /** Reference time (some kind of reference time). */
   public static class RefTime extends Time {
     String label;
 
@@ -1510,10 +1510,12 @@ public class SUTime {
       return label;
     }
 
+    @Override
     public Time add(Duration offset) {
       return new RelativeTime(this, TemporalOp.OFFSET, offset);
-    };
+    }
 
+    @Override
     public Time resolve(Time refTime, int flags) {
       if (this == TIME_REF) {
         return refTime;
@@ -3147,14 +3149,14 @@ public class SUTime {
 
     private static final long serialVersionUID = 1;
   }
-  
+
   // TODO: Timezone...
   private static final Pattern PATTERN_ISO = Pattern.compile("(\\d\\d\\d\\d)-?(\\d\\d?)-?(\\d\\d?)(-?(?:T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?))?");
   private static final Pattern PATTERN_ISO_DATETIME = Pattern.compile("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d):(\\d\\d)(\\d\\d)");
   private static final Pattern PATTERN_ISO_TIME = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
   private static final Pattern PATTERN_ISO_DATE_1 = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
   private static final Pattern PATTERN_ISO_DATE_2 = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
-  
+
   // Ambiguous pattern - interpret as MM/DD/YY(YY)
   private static final Pattern PATTERN_ISO_AMBIGUOUS_1 = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
 
@@ -3224,14 +3226,14 @@ public class SUTime {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
-    
+
     if (isoDate == null) {
       m = PATTERN_ISO_AMBIGUOUS_2.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
-    
+
     if (isoDate == null) {
       m = PATTERN_ISO_AMBIGUOUS_3.matcher(dateStr);
       if (m.matches()) {

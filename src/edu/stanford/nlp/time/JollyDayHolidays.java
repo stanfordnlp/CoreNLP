@@ -24,10 +24,11 @@ import java.util.*;
  * @author Angel Chang
  */
 public class JollyDayHolidays implements Env.Binder {
-  HolidayManager holidayManager;
-  //CollectionValuedMap<String, JollyHoliday> holidays;
-  Map<String, JollyHoliday> holidays;
-  String varPrefix = "JH_";
+
+  private HolidayManager holidayManager;
+  // private CollectionValuedMap<String, JollyHoliday> holidays;
+  private Map<String, JollyHoliday> holidays;
+  private String varPrefix = "JH_";
 
   @Override
   public void init(String prefix, Properties props) {
@@ -48,6 +49,7 @@ public class JollyDayHolidays implements Env.Binder {
     holidays = getAllHolidaysMap(config);
   }
 
+  @Override
   public void bind(Env env) {
     if (holidays != null) {
       for (String s:holidays.keySet()) {
@@ -141,17 +143,18 @@ public class JollyDayHolidays implements Env.Binder {
   }
 
   public static class JollyHoliday extends SUTime.Time {
-    HolidayManager holidayManager;
-    de.jollyday.config.Holiday base;
-    String label;
+
+    private final HolidayManager holidayManager;
+    private final de.jollyday.config.Holiday base;
+    private final String label;
 
     public JollyHoliday(String label, HolidayManager holidayManager, de.jollyday.config.Holiday base) {
       this.label = label;
       this.holidayManager = holidayManager;
       this.base = base;
     }
-    public JollyHoliday() {}
 
+    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -162,12 +165,23 @@ public class JollyDayHolidays implements Env.Binder {
       return label;
     }
 
+    @Override
     public boolean isGrounded()  { return false; }
+
+    @Override
     public SUTime.Time getTime() { return this; }
+
     // TODO: compute duration/range => uncertainty of this time
+    @Override
     public SUTime.Duration getDuration() { return SUTime.DURATION_NONE; }
+
+    @Override
     public SUTime.Range getRange(int flags, SUTime.Duration granularity) { return new SUTime.Range(this,this); }
+
+    @Override
     public String toISOString() { return base.toString(); }
+
+    @Override
     public SUTime.Time intersect(SUTime.Time t) {
       SUTime.Time resolved = resolve(t, 0);
       if (resolved != this) {
@@ -176,6 +190,8 @@ public class JollyDayHolidays implements Env.Binder {
         return super.intersect(t);
       }
     }
+
+    @Override
     public SUTime.Time resolve(SUTime.Time t, int flags) {
       Partial p = (t != null)? t.getJodaTimePartial():null;
       if (p != null) {
@@ -194,8 +210,10 @@ public class JollyDayHolidays implements Env.Binder {
       return this;
     }
 
+    @Override
     public SUTime.Time add(SUTime.Duration offset) {
       return new SUTime.RelativeTime(this, SUTime.TemporalOp.OFFSET, offset);
     }
   }
+
 }

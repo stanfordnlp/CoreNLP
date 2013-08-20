@@ -16,7 +16,10 @@ public interface TimeExpressionExtractor {
   void init(Options options);
 
   /**
-   * Returns list of CoreMaps indicating what the time expressions are
+   * Extract time expressions from a sentence in a document.  The document is assumed to contain the document date.
+   * The document is also used to hold stateful information (e.g. the index used by SUTime to generate timex ids).
+   * Both the sentence and document are provided as a CoreMap Annotation.
+   *
    * @param annotation - Annotation holding tokenized text from which the time expressions are to be extracted
    *
    * @param docAnnotation - Annotation for the entire document
@@ -28,10 +31,19 @@ public interface TimeExpressionExtractor {
   List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, CoreMap docAnnotation);
 
   /**
-   * Returns list of CoreMaps indicating what the time expressions are
-   * @param annotation - Annotation holding tokenized text from which the time expressions are to be extracted
-   * @param docDate - String representing document date
-   * @return List of CoreMaps
+   * Extract time expressions in a document (provided as a CoreMap Annotation).
+   *
+   * @param annotation The annotation to run time expression extraction over
+   * @param docDate A date for the document to be used as a reference time.
+   * @return A list of CoreMap.  Each CoreMap represents a detected temporal
+   *     expression.  Each CoreMap is a pipeline.Annotation, and you can get
+   *     various attributes of the temporal expression out of it. For example,
+   *     you can get the list of tokens with:
+   *     <pre>
+   *     {@code
+   *     List<CoreMap> cm = extractTimeExpressionCoreMaps(annotation, docDate);
+   *     List<CoreLabel> tokens = cm.get(CoreAnnotations.TokensAnnotation.class); }
+   *     </pre>
    */
   List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate);
 
