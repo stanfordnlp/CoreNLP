@@ -1148,9 +1148,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     final MutableInteger totalProcessed = new MutableInteger(0);
     final MutableInteger totalSkipped = new MutableInteger(0);
     final MutableInteger totalErrorAnnotating = new MutableInteger(0);
+    int nFiles = 0;
 
     //for each file...
     for (final File file : files) {
+      nFiles++;
       // Determine if there is anything to be done....
       if (excludeFiles.contains(file.getName())) {
         err("Skipping excluded file " + file.getName());
@@ -1310,7 +1312,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       log("Randomly shuffling input");
       Collections.shuffle(toRun);
     }
-    log("Ready to process: " + toRun.size() + " files");
+    log("Ready to process: " + toRun.size() + " files, skipped " + totalSkipped + ", total " + nFiles);
     //--Run Jobs
     if(numThreads == 1){
       for(Runnable r : toRun){ r.run(); }
