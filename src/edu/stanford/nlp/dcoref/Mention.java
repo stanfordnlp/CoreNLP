@@ -1096,6 +1096,9 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         return false;
       }
     } else {
+      // pick mention with head with NER
+      if (nerString == null && m.nerString != null) return false;
+      if (nerString != null && m.nerString == null) return true;
       if (headIndex - startIndex > m.headIndex - m.startIndex) {
         return true;
       } else if (sentNum < m.sentNum || (sentNum == m.sentNum && headIndex < m.headIndex)) {

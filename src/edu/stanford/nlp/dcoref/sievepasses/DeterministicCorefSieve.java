@@ -74,8 +74,6 @@ public abstract class DeterministicCorefSieve  {
 
   public boolean useRoleSkip() { return flags.USE_ROLE_SKIP; }
 
-  public MentionMatcher getMentionMatcher() { return null; }
-
   /** Skip this mention? (search pruning) */
   public boolean skipThisMention(Document document, Mention m1, CorefCluster c, Dictionaries dict) {
     boolean skip = false;
@@ -113,17 +111,14 @@ public abstract class DeterministicCorefSieve  {
   }
 
   public boolean checkEntityMatch(
-      CorefCluster mentionCluster,
-      CorefCluster potentialAntecedent,
-      Mention mention,
-      Mention ant,
-      Dictionaries dict,
-      Set<Mention> roleSet)
+          Document document,
+          CorefCluster mentionCluster,
+          CorefCluster potentialAntecedent,
+          Dictionaries dict,
+          Set<Mention> roleSet)
   {
     return false;
   }
-
-
   /**
    * Checks if two clusters are coreferent according to our sieve pass constraints
    * @param document
@@ -244,7 +239,7 @@ public abstract class DeterministicCorefSieve  {
     if(flags.USE_EXACTSTRINGMATCH && Rules.entityExactStringMatch(mentionCluster, potentialAntecedent, dict, roleSet)){
       return true;
     }
-    if (flags.USE_NAME_MATCH && Rules.entityNameMatch(getMentionMatcher(), mentionCluster, potentialAntecedent, document, dict, roleSet)) {
+    if (flags.USE_NAME_MATCH && checkEntityMatch(document, mentionCluster, potentialAntecedent, dict, roleSet)) {
       ret = true;
     }
 
@@ -252,31 +247,33 @@ public abstract class DeterministicCorefSieve  {
       return true;
     }
     if(flags.USE_APPOSITION && Rules.entityIsApposition(mentionCluster, potentialAntecedent, mention, ant)) {
-      SieveCoreferenceSystem.logger.finest("Apposition: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finer("Apposition: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       return true;
     }
     if(flags.USE_PREDICATENOMINATIVES && Rules.entityIsPredicateNominatives(mentionCluster, potentialAntecedent, mention, ant)) {
-      SieveCoreferenceSystem.logger.finest("Predicate nominatives: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finer("Predicate nominatives: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       return true;
     }
 
     if(flags.USE_ACRONYM && Rules.entityIsAcronym(mentionCluster, potentialAntecedent)) {
-      SieveCoreferenceSystem.logger.finest("Acronym: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finer("Acronym: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       return true;
     }
     if(flags.USE_RELATIVEPRONOUN && Rules.entityIsRelativePronoun(mention, ant)){
-      SieveCoreferenceSystem.logger.finest("Relative pronoun: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finer("Relative pronoun: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       return true;
     }
     if(flags.USE_DEMONYM && mention.isDemonym(ant, dict)){
-      SieveCoreferenceSystem.logger.finest("Demonym: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finer("Demonym: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       return true;
     }
 
     if(flags.USE_ROLEAPPOSITION && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
+      SieveCoreferenceSystem.logger.finer("Role Appositive: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       ret = true;
     }
     if(flags.USE_INCLUSION_HEADMATCH && Rules.entityHeadsAgree(mentionCluster, potentialAntecedent, mention, ant, dict)){
+      SieveCoreferenceSystem.logger.finer("Entity heads agree: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       ret = true;
     }
     if(flags.USE_RELAXED_HEADMATCH && Rules.entityRelaxedHeadsAgreeBetweenMentions(mentionCluster, potentialAntecedent, mention, ant) ){
