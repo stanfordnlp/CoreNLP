@@ -265,7 +265,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param getExtra If true, the list of typed dependencies will contain extra ones.
    *              If false, the list of typed dependencies will respect the tree structure.
    */
-  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter) {
+  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> f) {
     List<TypedDependency> basicDep = Generics.newArrayList();
 
     for (Dependency<Label, Label, Object> d : dependencies()) {
@@ -307,7 +307,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     if (rootDep != null) {
       TypedDependency rootTypedDep =
         new TypedDependency(ROOT, dependencyRoot, rootDep);
-      if (puncTypedDepFilter.accept(rootTypedDep)) {
+      if (f.accept(rootTypedDep)) {
         basicDep.add(rootTypedDep);
       }
     }
@@ -316,24 +316,11 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     if (getExtra) {
       getExtras(basicDep);
-      // adds stuff to basicDep based on the tregex patterns over the tree
-      getTreeDeps(root(), basicDep, puncTypedDepFilter, extraTreeDepFilter());
+      getTreeDeps(root(), basicDep, f); // adds stuff to basicDep
     }
     Collections.sort(basicDep);
 
     return basicDep;
-  }
-
-  /**
-   * Returns a Filter which checks dependencies for usefulness as
-   * extra tree-based dependencies.  By default, everything is
-   * accepted.  One example of how this can be useful is in the
-   * English dependencies, where the REL dependency is used as an
-   * intermediate and we do not want this to be added when we make a
-   * second pass over the trees for missing dependencies.
-   */
-  protected Filter<TypedDependency> extraTreeDepFilter() {
-    return Filters.acceptFilter();
   }
 
   /**
@@ -357,15 +344,14 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
 
   /** Look through the tree t and adds to the List basicDep dependencies
-   *  which aren't in it but which satisfy the filter puncTypedDepFilter.
+   *  which aren't in it but which satisfy the filter f.
    *
    * @param t The tree to examine (not changed)
    * @param basicDep The list of dependencies which may be augmented
    * @param f Additional dependencies are added only if they pass this filter
    */
   private static void getTreeDeps(TreeGraphNode t, List<TypedDependency> basicDep,
-                                  Filter<TypedDependency> puncTypedDepFilter,
-                                  Filter<TypedDependency> extraTreeDepFilter) {
+                                  Filter<TypedDependency> f) {
     if (t.isPhrasal()) {          // don't do leaves of POS tags (chris changed this from numChildren > 0 in 2010)
       Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> depMap = getAllDependents(t);
       for (Class<? extends GrammaticalRelationAnnotation> depName : depMap.keySet()) {
@@ -377,7 +363,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
             if (!rels.isEmpty()) {
               for (GrammaticalRelation rel : rels) {
                 TypedDependency newDep = new TypedDependency(rel, gov, dep);
-                if (!basicDep.contains(newDep) && puncTypedDepFilter.accept(newDep) && extraTreeDepFilter.accept(newDep)) {
+                if (!basicDep.contains(newDep) && f.accept(newDep)) {
                   newDep.setExtra();
                   basicDep.add(newDep);
                 }
@@ -388,7 +374,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
       // now recurse into children
       for (Tree kid : t.children()) {
-        getTreeDeps((TreeGraphNode) kid, basicDep, puncTypedDepFilter, extraTreeDepFilter);
+        getTreeDeps((TreeGraphNode) kid, basicDep, f);
       }
     }
   }
@@ -697,7 +683,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
     if (includeExtras) {
-      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
     }
     collapseDependencies(tdl, false, includeExtras);
     return tdl;
@@ -727,7 +713,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
     if (includeExtras) {
-      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
     }
     collapseDependencies(tdl, true, includeExtras);
     return tdl;

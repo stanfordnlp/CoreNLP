@@ -8,14 +8,13 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.WordSegmenter;
-import edu.stanford.nlp.process.WordSegmentingTokenizer;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.pennchinese.*;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.process.WordSegmenter;
 
 import java.io.IOException;
 import java.util.*;
@@ -111,7 +110,6 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
 
     if (segmenter != null) {
       lex = new ChineseLexiconAndWordSegmenter(clex, segmenter);
-      ctlp.setTokenizerFactory(WordSegmentingTokenizer.factory(segmenter));
     } else {
       lex = clex;
     }
