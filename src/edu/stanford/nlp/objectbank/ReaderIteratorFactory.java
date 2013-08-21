@@ -219,7 +219,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
         } else if (o instanceof Reader) {
           nextObject = new BufferedReader((Reader) o);
         } else {
-          throw new RuntimeException("don't know how to get Reader from " + o);
+          throw new RuntimeException("don't know how to get Reader from class " + o.getClass() + " of object " + o);
         }
       } catch (IOException e) {
         throw new RuntimeException(e);
