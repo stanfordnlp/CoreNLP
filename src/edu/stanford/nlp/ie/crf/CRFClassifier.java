@@ -720,9 +720,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *          {@code List<CoreLabel>}.
    */
   protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob) {
-    makeAnswerArraysAndTagIndex(ob, null);
-  }
-  protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob, Index<String> givenClassIndex) {
     boolean useFeatureCountThresh = flags.featureCountThresh > 1 ? true: false;
 
     Set<String>[] featureIndices = new HashSet[windowSize];
@@ -744,10 +741,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     Index<CRFLabel> labelIndex = labelIndices.get(windowSize - 1);
 
-    if (givenClassIndex == null)
+    if (classIndex == null)
       classIndex = new HashIndex<String>();
-    else
-      classIndex = new HashIndex<String>(givenClassIndex);
     // classIndex.add("O");
     classIndex.add(flags.backgroundSymbol);
 
@@ -1879,6 +1874,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     makeAnswerArraysAndTagIndex(totalDocs);
     long elapsedMs = timer.stop();
     System.err.println("Time to convert docs to feature indices: " + Timing.toSecondsString(elapsedMs) + " seconds");
+
+    if (flags.serializeClassIndexTo != null) {
+      timer.start();
+      serializeClassIndex(flags.serializeClassIndexTo);
+      elapsedMs = timer.stop();
+      System.err.println("Time to export class index : " + Timing.toSecondsString(elapsedMs) + " seconds");
+    }
+
     if (flags.exportFeatures != null) {
       timer.start();
       CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
@@ -3304,6 +3307,45 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
+  public void serializeClassIndex(String serializePath) {
+    System.err.print("Serializing class index to " + serializePath + "...");
+
+    ObjectOutputStream oos = null;
+    try {
+      oos = IOUtils.writeStreamFromString(serializePath);
+      oos.writeObject(classIndex);
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  public static Index<String> loadClassIndexFromFile(String serializePath) {
+    System.err.print("Reading class index from " + serializePath + "...");
+
+    ObjectInputStream ois = null;
+    Index<String> c = null;
+    try {
+      ois = IOUtils.readStreamFromString(serializePath);
+      c = (Index<String>) ois.readObject();
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(ois);
+    }
+
+    return c;
+  }
+
   public void serializeWeights(String serializePath) {
     System.err.print("Serializing weights to " + serializePath + "...");
 
@@ -3322,7 +3364,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
-  public static double[][] readWeightsFromFile(String serializePath) {
+  public static double[][] loadWeightsFromFile(String serializePath) {
     System.err.print("Reading weights from " + serializePath + "...");
 
     ObjectInputStream ois = null;
@@ -3618,7 +3660,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     String loadTextPath = crf.flags.loadTextClassifier;
     String serializeTo = crf.flags.serializeTo;
     String serializeToText = crf.flags.serializeToText;
-    String serializeWeightsTo = crf.flags.serializeWeightsTo;
 
     if (crf.flags.useEmbedding && crf.flags.embeddingWords != null && crf.flags.embeddingVectors != null) {
       System.err.println("Reading Embedding Files");
@@ -3640,6 +3681,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
       System.err.println("Found " + count + " matching embeddings of dimension " + vector.length);
     }
+
+    if (crf.flags.loadClassIndexFrom != null) {
+      crf.classIndex = loadClassIndexFromFile(crf.flags.loadClassIndexFrom);
+    }
+      
 
     if (loadPath != null) {
       crf.loadClassifierNoExceptions(loadPath, props);
@@ -3670,8 +3716,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       crf.serializeClassifier(serializeTo);
     }
 
-    if (serializeWeightsTo != null) {
-      crf.serializeWeights(serializeWeightsTo);
+    if (crf.flags.serializeWeightsTo != null) {
+      crf.serializeWeights(crf.flags.serializeWeightsTo);
     }
 
     if (serializeToText != null) {
