@@ -45,6 +45,8 @@ public class RepeatedRecordHandler extends LogRecordHandler {
           repeatSemantics.message(repeatedRecordCount),
           newTags,
           info.lastRecord.depth,
+          info.lastRecord.callingClass,
+          info.lastRecord.callingMethod,
           info.lastRecord.timesstamp);
       //((pass record))
       willReturn.add(newRecord);
@@ -220,7 +222,9 @@ public class RepeatedRecordHandler extends LogRecordHandler {
       return lastNoNumbers.startsWith(currentNoNumbers.substring(0, Math.min(7, currentNoNumbers.length())));
     }
     public boolean equals(Record lastRecord, Record record) {
-      return Arrays.equals(record.channels(), lastRecord.channels()) &&
+      return record.callingClass.equals(lastRecord.callingClass) &&
+          record.callingMethod.equals(lastRecord.callingMethod) &&
+          Arrays.equals(record.channels(), lastRecord.channels()) &&
           sameMessage(
             lastRecord.content == null ? "null" : lastRecord.content.toString(),
             record.content == null ? "null" : record.content.toString()
@@ -244,7 +248,9 @@ public class RepeatedRecordHandler extends LogRecordHandler {
    */
   public static class ExactRepeatSemantics implements RepeatSemantics {
     public boolean equals(Record lastRecord, Record record) {
-      return Arrays.equals(record.channels(), lastRecord.channels()) &&
+      return record.callingClass.equals(lastRecord.callingClass) &&
+          record.callingMethod.equals(lastRecord.callingMethod) &&
+          Arrays.equals(record.channels(), lastRecord.channels()) &&
           ( (record.content == null && lastRecord.content == null) ||
             (record.content != null && record.content.equals(lastRecord.content)) );
     }
