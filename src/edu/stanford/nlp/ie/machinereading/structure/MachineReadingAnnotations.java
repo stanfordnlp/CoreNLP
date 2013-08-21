@@ -38,6 +38,19 @@ public class MachineReadingAnnotations {
   }
   
   /**
+   * The CoreMap key for getting relation mentions corresponding to a sentence.  Whereas
+   * RelationMentionsAnnotation gives only relations pertaining to a test entity,
+   * AllRelationMentionsAnnotation gives all pairwise relations.
+   * 
+   * This key is typically set on sentence annotations.
+   */
+  public static class AllRelationMentionsAnnotation implements CoreAnnotation<List<RelationMention>> {
+    public Class<List<RelationMention>> getType() {
+      return ErasureUtils.<Class<List<RelationMention>>>uncheckedCast(List.class);
+    }
+  }
+  
+  /**
    * The CoreMap key for getting the event mentions corresponding to a sentence.
    * 
    * This key is typically set on sentence annotations.
