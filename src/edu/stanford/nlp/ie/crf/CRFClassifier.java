@@ -1696,20 +1696,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * Takes a {@link List} of documents and prints the likelihood of each
-   * possible label at each point.
-   *
-   * @param documents
-   *          A {@link List} of {@link List} of INs.
-   */
-  public void printFirstOrderProbsDocuments(ObjectBank<List<IN>> documents) {
-    for (List<IN> doc : documents) {
-      printFirstOrderProbsDocument(doc);
-      System.out.println();
-    }
-  }
-
-  /**
    * Takes the file, reads it in, and prints out the factor table at each position.
    *
    * @param filename
@@ -1721,6 +1707,20 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     ObjectBank<List<IN>> docs = makeObjectBankFromFile(filename, readerAndWriter);
     printFactorTableDocuments(docs);
+  }
+
+  /**
+   * Takes a {@link List} of documents and prints the likelihood of each
+   * possible label at each point.
+   *
+   * @param documents
+   *          A {@link List} of {@link List} of INs.
+   */
+  public void printFirstOrderProbsDocuments(ObjectBank<List<IN>> documents) {
+    for (List<IN> doc : documents) {
+      printFirstOrderProbsDocument(doc);
+      System.out.println();
+    }
   }
 
   /**
