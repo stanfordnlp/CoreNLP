@@ -998,9 +998,6 @@ public class SeqClassifierFlags implements Serializable {
   public transient String serializeWeightsTo = null;
   public boolean geDebug = false;
   public boolean doFeatureDiscovery = false;
-  public transient String loadWeightsFrom = null;
-  public transient String loadClassIndexFrom = null;
-  public transient String serializeClassIndexTo = null;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2475,12 +2472,6 @@ public class SeqClassifierFlags implements Serializable {
         geDebug = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("doFeatureDiscovery")){
         doFeatureDiscovery = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadWeightsFrom")) {
-        loadWeightsFrom = val;
-      } else if (key.equalsIgnoreCase("loadClassIndexFrom")) {
-        loadClassIndexFrom = val;
-      } else if (key.equalsIgnoreCase("serializeClassIndexTo")) {
-        serializeClassIndexTo = val;
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
