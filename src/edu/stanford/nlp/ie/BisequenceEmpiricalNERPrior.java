@@ -115,13 +115,19 @@ public class BisequenceEmpiricalNERPrior<IN extends CoreMap> {
     return new Pair<double[][], double[][]>(matrix, subMatrix);
   }
 
-  static class Entity {
+  public static class Entity implements Comparable{
     public int startPosition;
     public int  wordsSize;
     public String surface;
     public int type;
     public List<Entity> subMatch;
     public List<Entity> exactMatch;
+    public int seqID = -1;
+
+    public int compareTo(Object o) {
+      Entity e = (Entity)o;
+      return startPosition - e.startPosition;
+    } 
   
     public Entity(int startP, List<String> words, int type) {
       this.type = type;
@@ -135,37 +141,90 @@ public class BisequenceEmpiricalNERPrior<IN extends CoreMap> {
      * words appears.
      */
     public int[] otherOccurrences;
-  
-    public String toString(Index<String> tagIndex) {
+
+    public String toString() {
       StringBuffer sb = new StringBuffer();
-      sb.append("\"");
+      sb.append("{\"");
       sb.append(surface);
       sb.append("\" start: ");
       sb.append(startPosition);
       sb.append(" type: ");
-      sb.append(tagIndex.get(type));
-      sb.append(" exact matches: [");
-      for (Entity exact: exactMatch) {
-        sb.append(exact.startPosition);
-        sb.append(":");
-        sb.append(exact.surface);
-        sb.append(" ");
+      sb.append(type);
+      if (seqID != -1) {
+        sb.append(" seqID: ");
+        sb.append(seqID);
       }
-      sb.append("],");
-      sb.append(" sub matches: [");
-      for (Entity sub: subMatch) {
-        sb.append(sub.startPosition);
-        sb.append(":");
-        sb.append(sub.surface);
-        sb.append(" ");
+
+      if (exactMatch != null) {
+        sb.append(" exact matches: [");
+        for (Entity exact: exactMatch) {
+          sb.append(exact.startPosition);
+          sb.append(":");
+          sb.append(exact.surface);
+          sb.append(" ");
+        }
+        sb.append("],");
       }
-      sb.append("]");
+      if (subMatch != null) {
+        sb.append(" sub matches: [");
+        for (Entity sub: subMatch) {
+          sb.append(sub.startPosition);
+          sb.append(":");
+          sb.append(sub.surface);
+          sb.append(" ");
+        }
+        sb.append("]");
+      }
+      sb.append("}");
+      return sb.toString();
+    }
+
+    public String toString(Index<String> classIndex) {
+      StringBuffer sb = new StringBuffer();
+      sb.append("{\"");
+      sb.append(surface);
+      sb.append("\" start: ");
+      sb.append(startPosition);
+      sb.append(" type: ");
+      sb.append(classIndex.get(type));
+      if (seqID != -1) {
+        sb.append(" seqID: ");
+        sb.append(seqID);
+      }
+
+      if (exactMatch != null) {
+        sb.append(" exact matches: [");
+        for (Entity exact: exactMatch) {
+          sb.append(exact.startPosition);
+          sb.append(":");
+          sb.append(exact.surface);
+          sb.append(" ");
+        }
+        sb.append("],");
+      }
+      if (subMatch != null) {
+        sb.append(" sub matches: [");
+        for (Entity sub: subMatch) {
+          sb.append(sub.startPosition);
+          sb.append(":");
+          sb.append(sub.surface);
+          sb.append(" ");
+        }
+        sb.append("]");
+      }
+      sb.append("}");
       return sb.toString();
     }
   }
 
   public static List<Entity> extractEntities(int[] sequence, List<String> wordDoc, Index<String> tagIndex, Index<String> classIndex, int backgroundSymbolIndex) {
+    return extractEntities(sequence, wordDoc, tagIndex, classIndex, backgroundSymbolIndex, true, false);
+  }
+
+  public static List<Entity> extractEntities(int[] sequence, List<String> wordDoc, Index<String> tagIndex, Index<String> classIndex, int backgroundSymbolIndex, boolean findMatch, boolean isNotBIO) {
     String rawTag = null;
+    String prefix = null;
+    String tagPart = null;
     String[] parts = null;
     String currTag = "";
     List<String> currWords = new ArrayList<String>();
@@ -175,15 +234,22 @@ public class BisequenceEmpiricalNERPrior<IN extends CoreMap> {
       if (sequence[i] != backgroundSymbolIndex) {
         rawTag = classIndex.get(sequence[i]);
         parts = rawTag.split("-");
-        if (parts[0].equals("B")) { // B-
+        prefix = null;
+        tagPart = null;
+        if (parts.length > 1) {
+          prefix = parts[0];
+          tagPart = parts[1];
+        } else
+          tagPart = parts[0];
+        if (!isNotBIO && prefix.equals("B")) { // B-
           if (currWords.size() > 0) {
             entityList.add(new Entity(i-currWords.size(), currWords, tagIndex.indexOf(currTag)));
             currWords.clear();
           }
           currWords.add(wordDoc.get(i));
-          currTag = parts[1];
-        } else { // I-
-          if (currWords.size() > 0 && parts[1].equals(currTag)) { // matches proceeding tag
+          currTag = tagPart;
+        } else { // I- or notBIO
+          if (currWords.size() > 0 && tagPart.equals(currTag)) { // matches proceeding tag
             currWords.add(wordDoc.get(i));
           } else { // orphan I- without proceeding B- or mismatch previous tag
             if (currWords.size() > 0) {
@@ -191,7 +257,7 @@ public class BisequenceEmpiricalNERPrior<IN extends CoreMap> {
               currWords.clear();
             }
             currWords.add(wordDoc.get(i));
-            currTag = parts[1];
+            currTag = tagPart;
           }
         }
       } else {
@@ -205,29 +271,32 @@ public class BisequenceEmpiricalNERPrior<IN extends CoreMap> {
     if (currWords.size() > 0) {
       entityList.add(new Entity(sequence.length-currWords.size(), currWords, tagIndex.indexOf(currTag)));
     }
-    // build entity matching and sub-entity matching map
-    for (int i = 0; i < entityList.size(); i++) {
-      Entity curr = entityList.get(i);
-      List<Entity> exact = new ArrayList<Entity>();
-      List<Entity> subMatch = new ArrayList<Entity>();
-      String currStr = curr.surface;
 
-      for (int j = 0; j < entityList.size(); j++) {
-        if (i == j)
-          continue;
-        Entity other = entityList.get(j);
-        if (other.surface.indexOf(currStr) != -1) {
-          if (other.surface.length() == currStr.length()) {
-            if (i < j) // avoid double-counting
-              exact.add(other);
-          } else { // sub-match has no double-counting problem, cause it's one-directional
-            subMatch.add(other);
+    if (findMatch) {
+      // build entity matching and sub-entity matching map
+      for (int i = 0; i < entityList.size(); i++) {
+        Entity curr = entityList.get(i);
+        List<Entity> exact = new ArrayList<Entity>();
+        List<Entity> subMatch = new ArrayList<Entity>();
+        String currStr = curr.surface;
+
+        for (int j = 0; j < entityList.size(); j++) {
+          if (i == j)
+            continue;
+          Entity other = entityList.get(j);
+          if (other.surface.indexOf(currStr) != -1) {
+            if (other.surface.length() == currStr.length()) {
+              if (i < j) // avoid double-counting
+                exact.add(other);
+            } else { // sub-match has no double-counting problem, cause it's one-directional
+              subMatch.add(other);
+            }
           }
         }
-      }
 
-      curr.exactMatch = exact;
-      curr.subMatch = subMatch;
+        curr.exactMatch = exact;
+        curr.subMatch = subMatch;
+      }
     }
 
     return entityList;
