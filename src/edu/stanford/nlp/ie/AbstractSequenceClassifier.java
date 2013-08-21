@@ -809,6 +809,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         readerAndWriter), knownLCWords);
   }
 
+  public ObjectBank<List<IN>> makeObjectBankFromFile(String filename) {
+    return makeObjectBankFromFile(filename, defaultReaderAndWriter);
+  }
+
   public ObjectBank<List<IN>> makeObjectBankFromFile(String filename,
                                                      DocumentReaderAndWriter<IN> readerAndWriter) {
     String[] fileAsArray = { filename };
