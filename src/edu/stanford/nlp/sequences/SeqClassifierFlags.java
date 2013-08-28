@@ -998,6 +998,9 @@ public class SeqClassifierFlags implements Serializable {
   public transient String serializeWeightsTo = null;
   public boolean geDebug = false;
   public boolean doFeatureDiscovery = false;
+  public transient String loadWeightsFrom = null;
+  public transient String loadClassIndexFrom = null;
+  public transient String serializeClassIndexTo = null;
   public boolean learnCHBasedOnEN = true;
   public boolean learnENBasedOnCH = false;
   public String loadWeightsFromEN = null;
@@ -2483,6 +2486,12 @@ public class SeqClassifierFlags implements Serializable {
         geDebug = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("doFeatureDiscovery")){
         doFeatureDiscovery = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("loadWeightsFrom")) {
+        loadWeightsFrom = val;
+      } else if (key.equalsIgnoreCase("loadClassIndexFrom")) {
+        loadClassIndexFrom = val;
+      } else if (key.equalsIgnoreCase("serializeClassIndexTo")) {
+        serializeClassIndexTo = val;
       } else if (key.equalsIgnoreCase("learnCHBasedOnEN")){
         learnCHBasedOnEN = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("learnENBasedOnCH")){

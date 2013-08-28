@@ -69,7 +69,7 @@ public class History {
   }
 
   public String[] getX() {
-    String[] x = new String[extractors.getSize()];
+    String[] x = new String[extractors.size()];
     for (int i = 0; i < x.length; i++) {
       x[i] = getX(i);
     }
@@ -119,7 +119,7 @@ public class History {
   @Override
   public int hashCode() {
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < extractors.getSize(); i++) {
+    for (int i = 0; i < extractors.size(); i++) {
       sb.append(getX(i));
     }
     return sb.toString().hashCode();
