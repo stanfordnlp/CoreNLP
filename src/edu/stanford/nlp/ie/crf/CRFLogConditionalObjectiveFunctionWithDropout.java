@@ -822,32 +822,4 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     }
   }
 
-  public void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
-    for (int i = 0; i < toBeCombined.length; i++)
-      for (int j = 0; j < toBeCombined[i].length; j++)
-        combineInto[i][j] += toBeCombined[i][j];
-  }
-
-  // TODO(mengqiu) add dimension checks
-  public void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined) {
-    double[] source = null;
-    int key = 0;
-    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
-      key = entry.getKey();
-      source = entry.getValue();
-      for (int i = 0; i< source.length; i++)
-        combineInto[key][i] += source[i];
-    }
-  }
-
-  public void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined, double scale) {
-    double[] source = null;
-    int key = 0;
-    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
-      key = entry.getKey();
-      source = entry.getValue();
-      for (int i = 0; i< source.length; i++)
-        combineInto[key][i] += source[i] * scale;
-    }
-  }
 }
