@@ -137,114 +137,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     domainDimension = myDomainDimension;
   }
 
-  // this used to be computed lazily, but that was clearly erroneous for multithreading!
-  @Override
-  public int domainDimension() {
-    return domainDimension;
-  }
-
-  /**
-   * Takes a double array of weights and creates a 2D array where:
-   *
-   * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matcing featuresIndex i
-   * the second element is the number of output classes for that clique size
-   *
-   * @return a 2D weight array
-   */
-  public double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
-    double[][] newWeights = new double[map.length][];
-    int index = 0;
-    for (int i = 0; i < map.length; i++) {
-      int labelSize = labelIndices.get(map[i]).size();
-      newWeights[i] = new double[labelSize];
-      try {
-        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
-      } catch (Exception ex) {
-        System.err.println("weights: " + weights);
-        System.err.println("newWeights["+i+"]: " + newWeights[i]);
-        throw new RuntimeException(ex);
-      }
-      index += labelSize;
-    }
-    return newWeights;
-  }
-
-  public double[][] to2D(double[] weights) {
-    return to2D(weights, this.labelIndices, this.map);
-  }
-
-  public void to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map, double[][] newWeights) {
-    int index = 0;
-    for (int i = 0; i < map.length; i++) {
-      int labelSize = labelIndices.get(map[i]).size();
-      try {
-        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
-      } catch (Exception ex) {
-        System.err.println("weights: " + weights);
-        System.err.println("newWeights["+i+"]: " + newWeights[i]);
-        throw new RuntimeException(ex);
-      }
-      index += labelSize;
-    }
-  }
-
-  public void to2D(double[] weights, double[][] newWeights) {
-    to2D(weights, this.labelIndices, this.map, newWeights);
-  }
-
-  /** Beware: this changes the input weights array in place. */
-  public double[][] to2D(double[] weights, double wscale) {
-    for (int i = 0; i < weights.length; i++)
-      weights[i] = weights[i] * wscale;
-
-    return to2D(weights, this.labelIndices, this.map);
-  }
-
-  public static void clear2D(double[][] arr2D) {
-    for (int i = 0; i < arr2D.length; i++)
-      for (int j = 0; j < arr2D[i].length; j++)
-        arr2D[i][j] = 0;
-  }
-
-  public static double[] to1D(double[][] weights, int domainDimension) {
-    double[] newWeights = new double[domainDimension];
-    int index = 0;
-    for (double[] weightVector : weights) {
-      System.arraycopy(weightVector, 0, newWeights, index, weightVector.length);
-      index += weightVector.length;
-    }
-    return newWeights;
-  }
-
-  public double[] to1D(double[][] weights) {
-    return to1D(weights, domainDimension());
-  }
-
-  public int[][] getWeightIndices()
-  {
-    if (weightIndices == null) {
-      weightIndices = new int[map.length][];
-      int index = 0;
-      for (int i = 0; i < map.length; i++) {
-        weightIndices[i] = new int[labelIndices.get(map[i]).size()];
-        for (int j = 0; j < labelIndices.get(map[i]).size(); j++) {
-          weightIndices[i][j] = index;
-          index++;
-        }
-      }
-    }
-    return weightIndices;
-  }
-
-  protected double[][] empty2D() {
-    double[][] d = new double[map.length][];
-    // int index = 0;
-    for (int i = 0; i < map.length; i++) {
-      d[i] = new double[labelIndices.get(map[i]).size()];
-    }
-    return d;
-  }
-
   protected void empiricalCounts(double[][] eHat) {
     for (int m = 0; m < data.length; m++) {
       empiricalCountsForADoc(eHat, m);
@@ -298,7 +190,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return expectedCountsAndValueForADoc(weights, null, docIndex, true, false);
   }
 
-  private double expectedCountsAndValueForADoc(double[][] weights, double[][] E, int docIndex) {
+  protected double expectedCountsAndValueForADoc(double[][] weights, double[][] E, int docIndex) {
     return expectedCountsAndValueForADoc(weights, E, docIndex, false, false);
   }
 
@@ -816,5 +708,114 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         combineInto[key][i] += source[i] * scale;
     }
   }
+  
+  // this used to be computed lazily, but that was clearly erroneous for multithreading!
+  @Override
+  public int domainDimension() {
+    return domainDimension;
+  }
+
+  /**
+   * Takes a double array of weights and creates a 2D array where:
+   *
+   * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matcing featuresIndex i
+   * the second element is the number of output classes for that clique size
+   *
+   * @return a 2D weight array
+   */
+  public double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
+    double[][] newWeights = new double[map.length][];
+    int index = 0;
+    for (int i = 0; i < map.length; i++) {
+      int labelSize = labelIndices.get(map[i]).size();
+      newWeights[i] = new double[labelSize];
+      try {
+        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
+      } catch (Exception ex) {
+        System.err.println("weights: " + weights);
+        System.err.println("newWeights["+i+"]: " + newWeights[i]);
+        throw new RuntimeException(ex);
+      }
+      index += labelSize;
+    }
+    return newWeights;
+  }
+
+  public double[][] to2D(double[] weights) {
+    return to2D(weights, this.labelIndices, this.map);
+  }
+
+  public void to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map, double[][] newWeights) {
+    int index = 0;
+    for (int i = 0; i < map.length; i++) {
+      int labelSize = labelIndices.get(map[i]).size();
+      try {
+        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
+      } catch (Exception ex) {
+        System.err.println("weights: " + weights);
+        System.err.println("newWeights["+i+"]: " + newWeights[i]);
+        throw new RuntimeException(ex);
+      }
+      index += labelSize;
+    }
+  }
+
+  public void to2D(double[] weights, double[][] newWeights) {
+    to2D(weights, this.labelIndices, this.map, newWeights);
+  }
+
+  /** Beware: this changes the input weights array in place. */
+  public double[][] to2D(double[] weights, double wscale) {
+    for (int i = 0; i < weights.length; i++)
+      weights[i] = weights[i] * wscale;
+
+    return to2D(weights, this.labelIndices, this.map);
+  }
+
+  public static void clear2D(double[][] arr2D) {
+    for (int i = 0; i < arr2D.length; i++)
+      for (int j = 0; j < arr2D[i].length; j++)
+        arr2D[i][j] = 0;
+  }
+
+  public static double[] to1D(double[][] weights, int domainDimension) {
+    double[] newWeights = new double[domainDimension];
+    int index = 0;
+    for (double[] weightVector : weights) {
+      System.arraycopy(weightVector, 0, newWeights, index, weightVector.length);
+      index += weightVector.length;
+    }
+    return newWeights;
+  }
+
+  public double[] to1D(double[][] weights) {
+    return to1D(weights, domainDimension());
+  }
+
+  public int[][] getWeightIndices()
+  {
+    if (weightIndices == null) {
+      weightIndices = new int[map.length][];
+      int index = 0;
+      for (int i = 0; i < map.length; i++) {
+        weightIndices[i] = new int[labelIndices.get(map[i]).size()];
+        for (int j = 0; j < labelIndices.get(map[i]).size(); j++) {
+          weightIndices[i][j] = index;
+          index++;
+        }
+      }
+    }
+    return weightIndices;
+  }
+
+  protected double[][] empty2D() {
+    double[][] d = new double[map.length][];
+    // int index = 0;
+    for (int i = 0; i < map.length; i++) {
+      d[i] = new double[labelIndices.get(map[i]).size()];
+    }
+    return d;
+  }
+
 
 }
