@@ -1012,6 +1012,8 @@ public class SeqClassifierFlags implements Serializable {
   public String unsupFileEN = null;
   public String unsupFileCH = null;
   public String unsupAlignFile = null;
+  public String supFileEN = null;
+  public String supFileCH = null;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2514,6 +2516,10 @@ public class SeqClassifierFlags implements Serializable {
         unsupFileCH = val;
       } else if (key.equalsIgnoreCase("unsupAlignFile")){
         unsupAlignFile = val;
+      } else if (key.equalsIgnoreCase("supFileEN")){
+        supFileEN = val;
+      } else if (key.equalsIgnoreCase("supFileCH")){
+        supFileCH = val;
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
