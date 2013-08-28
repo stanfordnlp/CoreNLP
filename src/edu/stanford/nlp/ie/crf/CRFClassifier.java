@@ -2353,8 +2353,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected double[] initWeightsUsingDoubleCRF(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr) {
-    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+    CRFLogConditionalObjectiveFunction func = null;
+    if ("DROPOUT".equalsIgnoreCase(flags.priorType)) {
+      func = new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
         labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
+    } else {
+      func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null);
+    }
     return func.initial();
   }
 
@@ -2400,9 +2406,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   protected double[] trainWeightsUsingDoubleCRF(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr, double[][][][] featureVals, int[][][][] unsupDropoutData) {
 
+    CRFLogConditionalObjectiveFunction func = null;
+    if ("DROPOUT".equalsIgnoreCase(flags.priorType)) {
+      func = new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
+    } else {
+      func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null);
+    }
 
-    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunction(data, labels,
-        windowSize, classIndex, labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, featureVals, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, unsupDropoutData);
     cliquePotentialFunctionHelper = func;
 
     // create feature grouping
