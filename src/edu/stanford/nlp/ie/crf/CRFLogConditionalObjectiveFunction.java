@@ -283,8 +283,13 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       int tID = threadIDAndDocIndices.first();
       if (tID < 0 || tID >= multiThreadGrad) throw new IllegalArgumentException("threadID must be with in range 0 <= tID < multiThreadGrad(="+multiThreadGrad+")");
       List<Integer> docIDs = threadIDAndDocIndices.second();
-      double[][] partE = parallelE[tID];
-      clear2D(partE);
+      double[][] partE = null;
+      if (multiThreadGrad == 1)
+        partE = E;
+      else {
+        partE = parallelE[tID];
+        clear2D(partE);
+      }
       double probSum = 0;
       for (int docIndex: docIDs) {
         probSum += expectedCountsAndValueForADoc(partE, docIndex);
@@ -302,23 +307,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
   }
 
-  /**
-   * Calculates both value and partial derivatives at the point x, and save them internally.
-   */
-  @Override
-  public void calculate(double[] x) {
-
-    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
-    // final double[][] weights = to2D(x);
-    to2D(x, weights);
-    setWeights(weights);
-
-    // the expectations over counts
-    // first index is feature index, second index is of possible labeling
-    // double[][] E = empty2D();
-    clear2D(E);
-
-
+  protected double regularGradientAndValue() {
+    double objective = 0;
     MulticoreWrapper<Pair<Integer, List<Integer>>, Pair<Integer, Double>> wrapper =
       new MulticoreWrapper<Pair<Integer, List<Integer>>, Pair<Integer, Double>>(multiThreadGrad, gradientThreadProcessor); 
       
@@ -339,9 +329,31 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     while (wrapper.peek()) {
       Pair<Integer, Double> result = wrapper.poll();
       int tID = result.first();
-      prob += result.second();
-      combine2DArr(E, parallelE[tID]);
+      objective += result.second();
+      if (multiThreadGrad > 1)
+        combine2DArr(E, parallelE[tID]);
     }
+
+    return objective;
+  }
+
+  /**
+   * Calculates both value and partial derivatives at the point x, and save them internally.
+   */
+  @Override
+  public void calculate(double[] x) {
+
+    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
+    // final double[][] weights = to2D(x);
+    to2D(x, weights);
+    setWeights(weights);
+
+    // the expectations over counts
+    // first index is feature index, second index is of possible labeling
+    // double[][] E = empty2D();
+    clear2D(E);
+    
+    prob += regularGradientAndValue();
 
     if (Double.isNaN(prob)) { // shouldn't be the case
       throw new RuntimeException("Got NaN for prob in CRFLogConditionalObjectiveFunction.calculate()" +
