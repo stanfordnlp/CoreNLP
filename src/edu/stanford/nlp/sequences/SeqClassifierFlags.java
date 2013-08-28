@@ -998,6 +998,17 @@ public class SeqClassifierFlags implements Serializable {
   public transient String serializeWeightsTo = null;
   public boolean geDebug = false;
   public boolean doFeatureDiscovery = false;
+  public boolean learnCHBasedOnEN = true;
+  public boolean learnENBasedOnCH = false;
+  public String loadWeightsFromEN = null;
+  public String loadWeightsFromCH = null;
+  public String serializeToEN = null;
+  public String serializeToCH = null;
+  public String testFileEN = null;
+  public String testFileCH = null;
+  public String unsupFileEN = null;
+  public String unsupFileCH = null;
+  public String unsupAlignFile = null;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2472,6 +2483,28 @@ public class SeqClassifierFlags implements Serializable {
         geDebug = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("doFeatureDiscovery")){
         doFeatureDiscovery = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("learnCHBasedOnEN")){
+        learnCHBasedOnEN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("learnENBasedOnCH")){
+        learnENBasedOnCH = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("loadWeightsFromEN")){
+        loadWeightsFromEN = val;
+      } else if (key.equalsIgnoreCase("loadWeightsFromCH")){
+        loadWeightsFromCH = val;
+      } else if (key.equalsIgnoreCase("serializeToEN")){
+        serializeToEN = val;
+      } else if (key.equalsIgnoreCase("serializeToCH")){
+        serializeToCH = val;
+      } else if (key.equalsIgnoreCase("testFileEN")){
+        testFileEN = val;
+      } else if (key.equalsIgnoreCase("testFileCH")){
+        testFileCH = val;
+      } else if (key.equalsIgnoreCase("unsupFileEN")){
+        unsupFileEN = val;
+      } else if (key.equalsIgnoreCase("unsupFileCH")){
+        unsupFileCH = val;
+      } else if (key.equalsIgnoreCase("unsupAlignFile")){
+        unsupAlignFile = val;
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
