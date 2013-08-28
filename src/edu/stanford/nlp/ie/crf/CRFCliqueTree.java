@@ -256,6 +256,22 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
     return Math.exp(logProb(position, label));
   }
 
+  public double[] probsToDoubleArr(int position) {
+    double[] probs = new double[classIndex.size()];
+    for (int i = 0, sz = classIndex.size(); i < sz; i++) {
+      probs[i] = prob(position, i);
+    }
+    return probs;
+  }
+
+  public double[] logProbsToDoubleArr(int position) {
+    double[] probs = new double[classIndex.size()];
+    for (int i = 0, sz = classIndex.size(); i < sz; i++) {
+      probs[i] = logProb(position, i);
+    }
+    return probs;
+  }
+
   public Counter<E> probs(int position) {
     Counter<E> c = new ClassicCounter<E>();
     for (int i = 0, sz = classIndex.size(); i < sz; i++) {
