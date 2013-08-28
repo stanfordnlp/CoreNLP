@@ -240,6 +240,14 @@ public class EntityMention extends ExtractionObject {
     + "]";
   }
 
+  @Override
+  public int hashCode() {
+    int result = mentionType != null ? mentionType.hashCode() : 0;
+    result = 31 * result + (headTokenSpan != null ? headTokenSpan.hashCode() : 0);
+    result = 31 * result + (normalizedName != null ? normalizedName.hashCode() : 0);
+    return result;
+  }
+
   static class CompByHead implements Comparator<EntityMention> {
     public int compare(EntityMention o1, EntityMention o2) {
       if(o1.getHeadTokenStart() < o2.getHeadTokenStart()){
