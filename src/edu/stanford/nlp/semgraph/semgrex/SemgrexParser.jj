@@ -34,7 +34,7 @@ SKIP:
 
 TOKEN:
 {
-	< RELATION: "<" | ">" | ">>" | "<<">
+	< RELATION: "<" | ">" | ">>" | "<<" | "==" >
 |	< ALIGNRELN: "@" >
 |	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}"])+ >
 |	< NUMBER: ( ["0"-"9"] )+ >
@@ -244,7 +244,7 @@ NodePattern Description(GraphRelation r) : {
 	|
 	(( attr = <EMPTY> "}") {
 	isEmpty = true; } )
-	| ( "}") ) 
+	| ( "}") ))
 
 	(( ("=" { link = true; }) name = <IDENTIFIER> ) 
 		{if (underNegation)
