@@ -10,11 +10,14 @@ import edu.stanford.nlp.util.Generics;
 
 class SemgrexParser implements SemgrexParserConstants {
 
-        // this is so we can tell, at any point during the parse
-        // whether we are under a negation, which we need to know
-        // because labeling nodes under negation is illegal
-        private boolean underNegation = false;
-        private boolean underNodeNegation = false;
+  // this is so we can tell, at any point during the parse
+  // whether we are under a negation, which we need to know
+  // because labeling nodes under negation is illegal
+  private boolean underNegation = false;
+  private boolean underNodeNegation = false;
+  // keep track of which variables we've already seen
+  // lets us make sure we don't name new nodes under a negation
+  private Set<String> knownVariables = Generics.newHashSet();
 
   final public SemgrexPattern Root() throws ParseException {SemgrexPattern node;
   Token reverse = null;
@@ -555,8 +558,14 @@ isEmpty = true;
       jj_consume_token(22);
 link = true;
       name = jj_consume_token(IDENTIFIER);
-if (underNegation)
-                                {if (true) throw new ParseException("No named semgrex nodes allowed in the scope of negation");}
+String nodeName = name.image;
+              if (underNegation) {
+                if (!knownVariables.contains(nodeName)) {
+                  {if (true) throw new ParseException("Cannot add new variable names under negation.  Node '" + nodeName + "' not seen before");}
+                }
+              } else {
+                knownVariables.add(nodeName);
+              }
       break;
       }
     default:
