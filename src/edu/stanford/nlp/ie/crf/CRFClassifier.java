@@ -1835,9 +1835,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @param docs A Collection (perhaps ObjectBank) of documents
    */
   @Override
-  public void train(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
+  public void train(Collection<List<IN>> objectBankWrapper, DocumentReaderAndWriter<IN> readerAndWriter) {
     Timing timer = new Timing();
     timer.start();
+
+    Collection<List<IN>> docs = new ArrayList<List<IN>>();
+    for (List<IN> doc : objectBankWrapper) {
+      docs.add(doc);
+    }
 
     if (flags.numOfSlices > 0) {
       System.err.println("Taking " + flags.numOfSlices + " out of " + flags.totalDataSlice + " slices of data for training");
@@ -1852,7 +1857,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     List<List<IN>> unsupDocs = null;
     if (flags.unsupDropoutFile != null) {
-      
       System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
       timer.start();
       unsupDocs = new ArrayList<List<IN>>();
@@ -3738,7 +3742,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (crf.flags.loadClassIndexFrom != null) {
       crf.classIndex = loadClassIndexFromFile(crf.flags.loadClassIndexFrom);
     }
-      
 
     if (loadPath != null) {
       crf.loadClassifierNoExceptions(loadPath, props);
