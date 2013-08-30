@@ -108,8 +108,6 @@ public class AverageDVModels {
         for (++argIndex; argIndex < args.length && !args[argIndex].startsWith("-"); ++argIndex) {
           inputModelFilenames.add(args[argIndex]);
         }
-      } else {
-        throw new RuntimeException("Unknown argument " + args[argIndex]);
       }
     }
 
@@ -121,7 +119,7 @@ public class AverageDVModels {
     for (String filename : inputModelFilenames) {
       LexicalizedParser parser = LexicalizedParser.loadModel(filename);
       if (lexparser == null) {
-        lexparser = parser;
+        parser = lexparser;
       }
       models.add(DVParser.getModelFromLexicalizedParser(parser));
     }

@@ -25,8 +25,8 @@ public interface UnknownWordModelTrainer {
    * making this a method instead of a constructor lets the compiler
    * catch silly errors.
    */
-  public void initializeTraining(Options op, Lexicon lex,
-                                 Index<String> wordIndex,
+  public void initializeTraining(Options op, Lexicon lex, 
+                                 Index<String> wordIndex, 
                                  Index<String> tagIndex, double totalTrees);
 
   /**
@@ -42,13 +42,13 @@ public interface UnknownWordModelTrainer {
   public void train(Collection<Tree> trees, double weight);
 
   /**
-   * Tallies statistics for a single tree.
+   * Tallies statistics for a single tree.  
    * Can be called multiple times.
    */
   public void train(Tree tree, double weight);
 
   /**
-   * Tallies statistics for a single word.
+   * Tallies statistics for a single word.  
    * Can be called multiple times.
    */
   public void train(TaggedWord tw, int loc, double weight);
@@ -63,12 +63,12 @@ public interface UnknownWordModelTrainer {
   public UnknownWordModel finishTraining();
 
 
-  public static final String unknown = "UNK";
+  static public final String unknown = "UNK";
 
-  public static final int nullWord = -1;
-  public static final short nullTag = -1;
+  static public final int nullWord = -1;
+  static public final short nullTag = -1;
 
-  public static final IntTaggedWord NULL_ITW =
+  static public final IntTaggedWord NULL_ITW = 
     new IntTaggedWord(nullWord, nullTag);
 
 }

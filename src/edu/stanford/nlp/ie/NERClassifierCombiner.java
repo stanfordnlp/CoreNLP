@@ -7,7 +7,6 @@ import java.util.Properties;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
@@ -125,7 +124,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       try {
         // normalizes numeric entities such as MONEY, TIME, DATE, or PERCENT
         // note: this uses and sets NamedEntityTagAnnotation!
-        QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output, false, useSUTime);
+        QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(output);
       } catch (Exception e) {
         System.err.println("Ignored an exception in QuantifiableEntityNormalizer: (result is that entities were not normalized)");
         System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
@@ -166,10 +165,6 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       NumberSequenceClassifier.transferAnnotations(newWord, origWord);
 
     }
-  }
-
-  public void finalizeAnnotation(Annotation annotation) {
-    nsc.finalizeClassification(annotation);
   }
 }
 
