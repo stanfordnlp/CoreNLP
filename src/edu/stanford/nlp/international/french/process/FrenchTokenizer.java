@@ -46,11 +46,10 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   // The underlying JFlex lexer
   private final FrenchLexer lexer;
 
-  // Produces the normalization for parsing used in Green and Manning (2010)
+  // Produces the normalization for parsing used in Green, de Marneffe, and Manning (2011)
   private static final Properties ftbOptions = new Properties();
   static {
-    // TODO: Add default options
-    String optionsStr = "";
+    String optionsStr = "ptb3Ellipsis=false,ptb3Dashes=false";
     String[] optionToks = optionsStr.split(",");
     for (String option : optionToks) {
       ftbOptions.put(option, "true");
@@ -114,7 +113,15 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     public void setOptions(String options) {
       String[] optionList = options.split(",");
       for (String option : optionList) {
-        lexerProperties.put(option, "true");
+        String[] fields = option.split("=");
+        if (fields.length == 1) {
+          lexerProperties.put(option, "true");
+          
+        } else if (fields.length == 2) {
+          lexerProperties.put(fields[0], fields[1]);
+        } else {
+          System.err.printf("%s: Bad option %s%n", this.getClass().getName(), option);
+        }
       }
     }
 
