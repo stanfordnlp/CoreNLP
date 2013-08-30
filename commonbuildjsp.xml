@@ -1,0 +1,118 @@
+<!-- JavaNLP ... include this file to find & compile .jsp servlets -->
+
+<project name="commonbuildjsp" basedir="../..">
+
+  <!-- This classpath is needed for jasper and javac in this target -->
+  <path id="webapp.classpath">
+    <fileset dir="${project.core}/lib/tomcat">
+      <include name="*.jar"/>
+    </fileset>
+    <pathelement location="${build.path}"/>
+    <pathelement location="${project.core}/lib/commons-logging.jar"/>
+  </path>
+
+  <target name="jsp" depends="classpath,compile">
+    <!-- This target looks for all files that end with .jsp.  It then
+         compiles each directory that those files reside in as a separate
+         webapp.  Since there is currently only one webapp in all of core,
+         the effort taken to make this as general as possible instead of
+         hardcoding the path to that webapp was probably not effort well
+         spent.  Still, one day there will be another webapp under core,
+         and then who will be laughing?  I WILL.
+
+         November 2011: There are now four different webapps under
+         core.  Yeah.  I'm laughing. -->
+    <echo message="${ant.project.name}" />
+
+    <!-- This tool turns .jsp into .java -->
+    <taskdef classname="org.apache.jasper.JspC" name="jasper2" >
+      <classpath refid="webapp.classpath"/>
+    </taskdef>
+
+    <!-- This tool includes all sorts of useful stuff, like "if" and "for" -->
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+      <classpath>
+        <pathelement location="${project.core}/lib/ant-contrib-1.0b3.jar"/>
+      </classpath>
+    </taskdef>
+
+    <!-- This is a list of all the jsp files under this project -->
+    <path id="webapp.jspfiles">
+      <fileset dir="${source.path}">
+        <include name="**/*.jsp"/>
+      </fileset>
+    </path>
+
+    <!-- Turn all of the absolute paths into relative paths -->
+    <pathconvert property="webapp.relativejspfiles"
+                 refid="webapp.jspfiles">
+      <map from="${source.path}${file.separator}" to=""/>
+    </pathconvert>
+
+    <!-- Make sure the paths are all sorted -->
+    <sortlist property="webapp.sortedjspfiles"
+              value="${webapp.relativejspfiles}"
+              delimiter="${path.separator}" />
+
+    <!-- We use this property to make sure we don't compile the same
+         directory twice in a row.  This is where it helps to assume
+         the paths are all sorted.  -->
+    <property name="webapp.previouspath" value=""/>
+
+    <!-- Now, for each file we found earlier... -->
+    <for param="webapp.currentfile" list="${webapp.sortedjspfiles}"
+         delimiter="${path.separator}">
+      <sequential>
+        <!-- First extract the directory containing the file.  This works
+             on both linux and windows, assuming we don't have any \ or /
+             in the file name, but that would just be silly.  However, it
+             would still be nice to find a cleaner way of doing this.  -->
+        <propertyregex property="webapp.path"
+                       override="true"
+                       input="@{webapp.currentfile}"
+                       regexp="(.*)[\\/][^\\/]*.jsp"
+                       select="\1" />
+
+        <!-- Then build the webapp in that path -->
+        <if>
+          <not>
+            <equals arg1="${webapp.path}" arg2="${webapp.previouspath}" />
+          </not>
+          <then>
+            <echo message="Building .jsp ${webapp.path}" />
+            <jasper2
+               validateXml="false"
+               uriroot="${source.path}/${webapp.path}"
+               webXmlFragment="${build.path}/${webapp.path}/WEB-INF/generated_web.xml"
+               outputDir="${build.path}/${webapp.path}/WEB-INF/src" />
+
+            <mkdir dir="${build.path}/${webapp.path}/WEB-INF/classes"/>
+            <mkdir dir="${build.path}/${webapp.path}/WEB-INF/lib"/>
+
+            <javac destdir="${build.path}/${webapp.path}/WEB-INF/classes"
+                   optimize="${compile.optimize}"
+                   encoding="${compile.encoding}"
+                   debug="${compile.debug}"
+                   srcdir="${build.path}/${webapp.path}/WEB-INF/src"
+                   includeantruntime="false"
+	           excludes="**/*.smap">
+              <classpath refid="webapp.classpath"/>
+              <classpath refid="classpath"/>
+              <classpath path="${build.path}"/>
+              <include name="**" />
+              <exclude name="tags/**" />
+            </javac>
+          </then>
+        </if>
+        <!-- Save the path we just looked at to ensure we don't
+        compile it twice in a row.  The compiler will actually be
+        smart enough to not compile twice, but even using it to check
+        would be time consuming. -->
+        <propertycopy name="webapp.previouspath" override="true"
+                      from="webapp.path"/>
+      </sequential>
+    </for>
+  </target>
+
+</project>
+
