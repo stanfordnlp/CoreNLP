@@ -34,27 +34,6 @@
     <delete dir="${build.path}"/>
   </target>
 
-  <target name="javacceverything" depends="classpath"
-          description="javacc everything that can be javacced">
-    <taskdef resource="net/sf/antcontrib/antlib.xml">
-      <classpath>
-        <pathelement location="${project.core}/lib/ant-contrib-1.0b3.jar"/>
-      </classpath>
-    </taskdef>
-
-    <echo message="${ant.project.name}" />
-    <for param="javacc.target">
-      <path>
-        <fileset dir="${source.path}">
-          <include name="**/*.jj"/>
-        </fileset>
-      </path>
-      <sequential>
-        <javacc target="@{javacc.target}" javacchome="${basedir}/lib" />
-      </sequential>
-    </for>
-  </target>
-
   <target name="flexeverything" depends="classpath"
           description="JFlex everything that can be JFlexed">
     <taskdef resource="net/sf/antcontrib/antlib.xml">

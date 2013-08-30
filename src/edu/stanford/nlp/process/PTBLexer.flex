@@ -176,8 +176,6 @@ import edu.stanford.nlp.util.StringUtils;
    *     unicodeEllipsis; if both are false, no mapping is done.
    * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
    *     U+2026, the Unicode ellipsis character
-   * <li>keepAssimilations: true to tokenize "gonna", false to tokenize
-   *                        "gon na".  True by default.
    * <li>ptb3Dashes: Whether to turn various dash characters into "--",
    *     the dominant encoding of dashes in the PTB3 WSJ
    * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
@@ -268,8 +266,6 @@ import edu.stanford.nlp.util.StringUtils;
           latexQuotes = false; // need to override default
           unicodeQuotes = false;
         }
-      } else if ("keepAssimilations".equals(key)) {
-        keepAssimilations = val;
       } else if ("ptb3Ellipsis".equals(key)) {
         ptb3Ellipsis = val;
       } else if ("unicodeEllipsis".equals(key)) {
@@ -343,7 +339,6 @@ import edu.stanford.nlp.util.StringUtils;
   private boolean ptb3Dashes = true;
   private boolean escapeForwardSlashAsterisk = true;
   private boolean strictTreebank3 = false;
-  private boolean keepAssimilations = true;
 
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
@@ -774,12 +769,7 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 cannot                  { yypushback(3) ; return getNext(); }
 gonna|gotta|lemme|gimme|wanna
-                        { if (keepAssimilations) {
-                            yypushback(2) ; return getNext(); 
-                          } else {
-                            return getNext();
-                          }
-                        }
+                        { yypushback(2) ; return getNext(); }
 {SGML}                  { final String origTxt = yytext();
                           String txt = origTxt;
                           if (normalizeSpace) {
