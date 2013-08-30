@@ -859,6 +859,14 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         arr2D[i][j] = 0;
   }
 
+  public static void to1D(double[][] weights, double[] newWeights) {
+    int index = 0;
+    for (double[] weightVector : weights) {
+      System.arraycopy(weightVector, 0, newWeights, index, weightVector.length);
+      index += weightVector.length;
+    }
+  }
+
   public static double[] to1D(double[][] weights, int domainDimension) {
     double[] newWeights = new double[domainDimension];
     int index = 0;
