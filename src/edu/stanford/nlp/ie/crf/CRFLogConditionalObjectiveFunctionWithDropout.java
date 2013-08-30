@@ -21,9 +21,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
 
   private final double delta;
   private final double dropoutScale;
+  private final int multiThreadGrad;
   private double[][] dropoutPriorGrad;
   private final boolean dropoutApprox;
-  private double[][] weightSquare;
 
   private final int[][][][] totalData;  // data[docIndex][tokenIndex][][]
   private int unsupDropoutStartIndex;
@@ -40,22 +40,23 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
   private Map<Integer, List<Integer>> currPrevLabelsMap;
   private Map<Integer, List<Integer>> currNextLabelsMap;
 
-  private ThreadsafeProcessor<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> dropoutPriorThreadProcessor = 
-        new ThreadsafeProcessor<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>() {
+  private ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> dropoutPriorThreadProcessor = 
+        new ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>() {
     @Override
-    public Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> process(Pair<Integer,Boolean> docIndexUnsup) {
-      return expectedCountsAndValueForADoc(docIndexUnsup.first(), false, docIndexUnsup.second());
+    public Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> process(Triple<Integer,Boolean, double[][]> docIndexUnsupWeights) {
+      return expectedCountsAndValueForADoc(docIndexUnsupWeights.third(), docIndexUnsupWeights.first(), false, docIndexUnsupWeights.second());
     }
     @Override
-    public ThreadsafeProcessor<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> newInstance() {
+    public ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> newInstance() {
       return this;
     }
   };
 
   CRFLogConditionalObjectiveFunctionWithDropout(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal, double delta, double dropoutScale, int multiThreadGrad, boolean dropoutApprox, double unsupDropoutScale, int[][][][] unsupDropoutData) {
-    super(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal, multiThreadGrad);
+    super(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal);
     this.delta = delta;
     this.dropoutScale = dropoutScale;
+    this.multiThreadGrad = multiThreadGrad;
     this.dropoutApprox = dropoutApprox;
     dropoutPriorGrad = empty2D();
     this.unsupDropoutStartIndex = data.length;
@@ -99,6 +100,18 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     }
   }
 
+  public double valueForADoc(double[][] weights, int docIndex) {
+    return expectedCountsAndValueForADoc(weights, docIndex, true, false).second();
+  }
+
+  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(double[][] weights, int docIndex) {
+    return expectedCountsAndValueForADoc(weights, docIndex, false, false);
+  }
+
+  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsForADoc(double[][] weights, int docIndex) {
+    return expectedCountsAndValueForADoc(weights, docIndex, false, true);
+  }
+
   private Map<Integer, double[]> sparseE(Set<Integer> activeFeatures) {
     Map<Integer, double[]> aMap = new HashMap<Integer, double[]>(activeFeatures.size());
     for (int f: activeFeatures) {
@@ -117,7 +130,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     return aMap;
   }
 
-  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(int docIndex, 
+  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(double[][] weights, int docIndex, 
       boolean skipExpectedCountCalc, boolean skipValCalc) {
     
     int[] activeFeatures = dataFeatureHashByDoc[docIndex];
@@ -135,6 +148,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     if (featureVal != null)
       featureVal3DArr = featureVal[docIndex];
 
+    CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
     // make a clique tree for this document
     CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
 
@@ -249,7 +263,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       dropoutPriorGrad = sparseE(activeFeatures);
 
       // System.err.print("computing dropout prior for doc " + docIndex + " ... ");
-      prob -= getDropoutPrior(cliqueTree, docData, EForADoc, docDataHash, activeFeatures, dropoutPriorGrad, condensedFeaturesMap, EForADocPos);
+      prob -= getDropoutPrior(weights, cliqueTree, docData, EForADoc, docDataHash, activeFeatures, dropoutPriorGrad, condensedFeaturesMap, EForADocPos);
       // System.err.println(" done!");
       if (TIMED) {
         long elapsedMs = timer.stop();
@@ -364,7 +378,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     System.err.println("initializing data feature hash done!"); 
   }
 
-  private double getDropoutPrior(CRFCliqueTree cliqueTree, int[][][] docData, 
+  private double getDropoutPrior(double[][] weights, CRFCliqueTree cliqueTree, int[][][] docData, 
       Map<Integer, double[]> EForADoc, List<Set<Integer>> docDataHash, int[] activeFeatures, Map<Integer, double[]> dropoutPriorGrad,
       Map<Integer, List<Integer>> condensedFeaturesMap, List<Map<Integer, double[]>> EForADocPos) {
 
@@ -379,19 +393,12 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
 
     double priorValue = 0;
 
-    long elapsedMs = 0;
-    Pair<double[][][], double[][][]> condProbs = getCondProbs(cliqueTree, docData);
-    if (TIMED) {
-      elapsedMs = timer.stop();
-      System.err.println("\t cond prob took: " + Timing.toMilliSecondsString(elapsedMs) + " ms");
-    }
-
     // first index position is curr index, second index curr-class, third index prev-class
     // e.g. [1][2][3] means curr is at position 1 with class 2, prev is at position 0 with class 3
-    double[][][] prevGivenCurr = condProbs.first();
+    double[][][] prevGivenCurr = new double[docData.length][][]; 
     // first index position is curr index, second index curr-class, third index next-class
     // e.g. [0][2][3] means curr is at position 0 with class 2, next is at position 1 with class 3
-    double[][][] nextGivenCurr = condProbs.second();
+    double[][][] nextGivenCurr = new double[docData.length][][]; 
 
     // first dim is doc length (i)
     // second dim is numOfFeatures (fIndex)
@@ -408,6 +415,92 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         FAlpha[i] = new double[activeFeatures.length][][];
         FBeta[i]  = new double[activeFeatures.length][][];
       }
+      // for (int j = 0; j < map.length; j++) {
+      //   FAlpha[i][j] = new double[numClasses];
+      //   FBeta[i][j] = new double[numClasses];
+      // }
+      prevGivenCurr[i] = new double[numClasses][]; 
+      nextGivenCurr[i] = new double[numClasses][]; 
+      for (int j = 0; j < numClasses; j++) {
+        prevGivenCurr[i][j] = new double[numClasses];
+        nextGivenCurr[i][j] = new double[numClasses];
+      }
+    }
+
+    long elapsedMs = 0;
+    if (TIMED) {
+      elapsedMs = timer.stop();
+      System.err.println("\t initialization took: " + Timing.toMilliSecondsString(elapsedMs) + " ms");
+      timer.start();
+    }
+    // computing prevGivenCurr and nextGivenCurr
+    for (int i=0; i < docData.length; i++) {
+      int[] labelPair = new int[2];
+      for (int l1 = 0; l1 < numClasses; l1++) {
+        labelPair[0] = l1;
+        for (int l2 = 0; l2 < numClasses; l2++) {
+          labelPair[1] = l2;
+          double prob = cliqueTree.logProb(i, labelPair);
+          // System.err.println(prob);
+          if (i-1 >= 0)
+            nextGivenCurr[i-1][l1][l2] = prob;
+          prevGivenCurr[i][l2][l1] = prob;
+        }
+      }
+
+      if (DEBUG2) {
+        System.err.println("unnormalized conditionals:");
+        if (i>0) {
+        System.err.println("nextGivenCurr[" + (i-1) + "]:");
+        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
+          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
+            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
+          System.err.println();
+        }
+        }
+        System.err.println("prevGivenCurr[" + (i) + "]:");
+        for (int a = 0; a < prevGivenCurr[i].length; a++) {
+          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
+            System.err.print((prevGivenCurr[i][a][b])+"\t");
+          System.err.println();
+        }
+      }
+
+      for (int j=0; j< numClasses; j++) {
+        if (i-1 >= 0) {
+          // ArrayMath.normalize(nextGivenCurr[i-1][j]);
+          ArrayMath.logNormalize(nextGivenCurr[i-1][j]);
+          for (int k = 0; k < nextGivenCurr[i-1][j].length; k++)
+            nextGivenCurr[i-1][j][k] = Math.exp(nextGivenCurr[i-1][j][k]);
+        }
+        // ArrayMath.normalize(prevGivenCurr[i][j]);
+        ArrayMath.logNormalize(prevGivenCurr[i][j]);
+        for (int k = 0; k < prevGivenCurr[i][j].length; k++)
+          prevGivenCurr[i][j][k] = Math.exp(prevGivenCurr[i][j][k]);
+      }
+
+      if (DEBUG2) {
+        System.err.println("normalized conditionals:");
+        if (i>0) {
+        System.err.println("nextGivenCurr[" + (i-1) + "]:");
+        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
+          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
+            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
+          System.err.println();
+        }
+        }
+        System.err.println("prevGivenCurr[" + (i) + "]:");
+        for (int a = 0; a < prevGivenCurr[i].length; a++) {
+          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
+            System.err.print((prevGivenCurr[i][a][b])+"\t");
+          System.err.println();
+        }
+      }
+    }
+
+    if (TIMED) {
+      elapsedMs = timer.stop();
+      System.err.println("\t cond prob took: " + Timing.toMilliSecondsString(elapsedMs) + " ms");
     }
 
     if (!dropoutApprox) {
@@ -566,7 +659,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
             else
               valIndex = yP;
             try {
-              theta = weights[fIndex][valIndex];
+            theta = weights[fIndex][valIndex];
             }catch (Exception ex) {
               System.err.printf("weights[%d][%d], map[%d]=%d, labelIndices.get(map[%d]).size() = %d, weights.length=%d\n", fIndex, valIndex, fIndex, map[fIndex], fIndex, labelIndices.get(map[fIndex]).size(), weights.length);
               throw new RuntimeException(ex);
@@ -693,10 +786,16 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     return dropoutScale * priorValue;
   }
 
-
+  /**
+   * Calculates both value and partial derivatives at the point x, and save them internally.
+   */
   @Override
-  public void setWeights(double[][] weights) {
-    super.setWeights(weights);
+  public void calculate(double[] x) {
+
+    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
+    // final double[][] weights = to2D(x);
+    to2D(x, weights);
+
     if (weightSquare == null) {
       weightSquare = new double[weights.length][];
       for (int i = 0; i < weights.length; i++)
@@ -709,31 +808,18 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         weightSquare[i][j] = w * w;
       }
     }
-  }
-
-  /**
-   * Calculates both value and partial derivatives at the point x, and save them internally.
-   */
-  @Override
-  public void calculate(double[] x) {
-
-    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
-    // final double[][] weights = to2D(x);
-    to2D(x, weights);
-
-    setWeights(weights);
 
     // the expectations over counts
     // first index is feature index, second index is of possible labeling
     // double[][] E = empty2D();
     clear2D(E);
 
-    MulticoreWrapper<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> wrapper =
-      new MulticoreWrapper<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>(multiThreadGrad, dropoutPriorThreadProcessor); 
+    MulticoreWrapper<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> wrapper =
+      new MulticoreWrapper<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>(multiThreadGrad, dropoutPriorThreadProcessor); 
     // supervised part
     for (int m = 0; m < totalData.length; m++) {
       boolean submitIsUnsup = (m >= unsupDropoutStartIndex);
-      wrapper.put(new Pair<Integer, Boolean>(m, submitIsUnsup));
+      wrapper.put(new Triple<Integer, Boolean, double[][]>(m, submitIsUnsup, weights));
       while (wrapper.peek()) {
         Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> result = wrapper.poll();
         int docIndex = result.first();
@@ -813,5 +899,4 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       }
     }
   }
-
 }
