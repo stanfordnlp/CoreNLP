@@ -85,7 +85,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public FeatureFactory<IN> featureFactory;
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
-  protected int windowSize;
+  public int windowSize;
   // different threads can add or query knownLCWords at the same time,
   // so we need a concurrent data structure
   protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
