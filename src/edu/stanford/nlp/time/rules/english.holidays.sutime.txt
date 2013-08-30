@@ -15,7 +15,7 @@
   { (/x-?mas|christmas/ /day/? ) => IsoDate(NIL, 12, 25) }
 
 
-  { (/martin/ /luther/ /king/ /day/ | /mlk/ /day/) => JH_MARTIN_LURTHER_KING }
+  { (/martin/ /luther/ /king/ /day/ | /mlk/ /day/) => JH_MARTIN_LUTHER_KING }
   { (/memorial/ /day/) => JH_MEMORIAL }
   { (/mother/ $POSS /day/) => JH_MOTHERS_DAY }
   { (/father/ $POSS /day/) => JH_FATHERS_DAY }
