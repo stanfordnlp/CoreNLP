@@ -163,9 +163,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean retainEntitySubclassification = false;
   public boolean useGazettePhrases = false;
   public boolean makeConsistent = false;
-  public boolean useWordLabelCounts = false;
-  // boolean usePrevInstanceLabel = false;
-  // boolean useNextInstanceLabel = false;
   public boolean useViterbi = true;
 
   public int[] binnedLengths = null;
