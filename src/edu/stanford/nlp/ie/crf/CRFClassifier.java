@@ -3388,6 +3388,46 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return w;
   }
 
+  public void serializeFeatureIndex(String serializePath) {
+    System.err.print("Serializing FeatureIndex to " + serializePath + "...");
+
+    ObjectOutputStream oos = null;
+    try {
+      oos = IOUtils.writeStreamFromString(serializePath);
+      oos.writeObject(featureIndex);
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  public static Index<String> loadFeatureIndexFromFile(String serializePath) {
+    System.err.print("Reading FeatureIndex from " + serializePath + "...");
+
+    ObjectInputStream ois = null;
+    Index<String> f = null;
+    try {
+      ois = IOUtils.readStreamFromString(serializePath);
+      f = (Index<String>) ois.readObject();
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(ois);
+    }
+
+    return f;
+  }
+
+
   /**
    * {@inheritDoc}
    */
@@ -3774,6 +3814,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (crf.flags.serializeWeightsTo != null) {
       crf.serializeWeights(crf.flags.serializeWeightsTo);
+    }
+
+    if (crf.flags.serializeFeatureIndexTo != null) {
+      crf.serializeFeatureIndex(crf.flags.serializeFeatureIndexTo);
     }
 
     if (serializeToText != null) {
