@@ -1,20 +1,16 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFeatureType;
 import edu.stanford.nlp.international.morph.MorphoFeatures;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
@@ -330,6 +326,8 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
   private static class AnnotatePunctuationFunction implements SerializableFunction<TregexMatcher,String> {
     static final String key = "term";
 
+    private static final Pattern quote = Pattern.compile("^\"$");
+
     public String apply(TregexMatcher m) {
 
       final String punc = m.getNode(key).value();
@@ -627,6 +625,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
     } catch (IOException e) {
       e.printStackTrace();
     }
+
   }
 
   /**
@@ -739,8 +738,8 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
       tagSpec.activate(MorphoFeatureType.OTHER);
       optionsString.append("Adding CC tagset as POS state splits.\n");
       ++i;
-    } 
-    
+    }
+
     return i;
   }
 }
