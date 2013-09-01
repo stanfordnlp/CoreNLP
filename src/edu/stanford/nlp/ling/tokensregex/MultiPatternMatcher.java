@@ -103,6 +103,12 @@ public class MultiPatternMatcher<T> {
     return Iterables.chain(allMatches);
   }
 
+  /**
+   * Given a sequence, return the collection of patterns that are triggered by the sequence
+   *   (these patterns are the ones that may potentially match a subsequence in the sequence)
+   * @param elements Input sequence
+   * @return Collection of triggered patterns
+   */
   public Collection<SequencePattern<T>> getTriggeredPatterns(List<? extends T> elements) {
     if (patternTrigger != null) {
       return patternTrigger.apply(elements);
@@ -111,9 +117,29 @@ public class MultiPatternMatcher<T> {
     }
   }
 
+  /** Interfaces for optimizing application of many SequencePatterns over a particular sequence */
+
+  /**
+   * A function which returns a collections of patterns that may match when
+   *   given a single node from a larger sequence.
+   * @param <T>
+   */
   public static interface NodePatternTrigger<T> extends Function<T, Collection<SequencePattern<T>>> {}
+
+  /**
+   * A function which returns a collections of patterns that may match when
+   *   a sequence of nodes.  Note that this function needs to be conservative
+   *   and should return ALL patterns that may match.
+   * @param <T>
+   */
   public static interface SequencePatternTrigger<T> extends Function<List<? extends T>, Collection<SequencePattern<T>>> {}
 
+  /**
+   * Simple SequencePatternTrigger that looks at each node, and identifies which
+   *   patterns may potentially match each node, and then aggregates (union)
+   *   all these patterns together.  Original ordering of patterns is preserved.
+   * @param <T>
+   */
   public static class BasicSequencePatternTrigger<T> implements SequencePatternTrigger<T> {
     NodePatternTrigger<T> trigger;
 
@@ -123,6 +149,7 @@ public class MultiPatternMatcher<T> {
 
     @Override
     public Collection<SequencePattern<T>> apply(List<? extends T> elements) {
+      // Use LinkedHashSet to preserve orginal ordering of patterns.
       Set<SequencePattern<T>> triggeredPatterns = new LinkedHashSet<SequencePattern<T>>();
       for (T node:elements) {
         Collection<SequencePattern<T>> triggered = trigger.apply(node);

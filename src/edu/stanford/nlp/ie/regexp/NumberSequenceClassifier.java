@@ -2,12 +2,12 @@ package edu.stanford.nlp.ie.regexp;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.TimeExpressionExtractor;
 import edu.stanford.nlp.time.TimeExpressionExtractorFactory;
 import edu.stanford.nlp.time.Timex;
@@ -99,6 +99,12 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   public List<CoreLabel> classifyWithGlobalInformation(List<CoreLabel> tokens, final CoreMap document, final CoreMap sentence) {
     if(useSUTime) return classifyWithSUTime(tokens, document, sentence);
     return classifyOld(tokens);
+  }
+
+  public void finalizeClassification(final CoreMap document) {
+    if (useSUTime) {
+      timexExtractor.finalize(document);
+    }
   }
 
   // todo [cdm, 2013]: Where does this call NumberNormalizer?  Is it the call buried in SUTime's TimeExpressionExtractorImpl?
@@ -322,9 +328,6 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
    * @param document Contains document-level annotations such as DocDateAnnotation
    */
   private List<CoreMap> runSUTime(CoreMap sentence, final CoreMap document) {
-    // docDate can be null. In such situations we do not disambiguate relative dates
-    String docDate = (document != null ? document.get(CoreAnnotations.DocDateAnnotation.class) : null);
-
     /*
     System.err.println("PARSING SENTENCE: " + sentence.get(CoreAnnotations.TextAnnotation.class));
     for(CoreLabel t: sentence.get(CoreAnnotations.TokensAnnotation.class)){
@@ -332,7 +335,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
     */
 
-    List<CoreMap> timeExpressions = timexExtractor.extractTimeExpressionCoreMaps(sentence, docDate);
+    List<CoreMap> timeExpressions = timexExtractor.extractTimeExpressionCoreMaps(sentence, document);
     if(timeExpressions != null){
       if(DEBUG) System.out.println("FOUND TEMPORALS: " + timeExpressions);
     }
@@ -736,7 +739,6 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
     return document;
   }
-
 
   /**
    * Look for a distance of up to 3 for something that indicates weight not
