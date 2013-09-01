@@ -111,4 +111,5 @@ public class Annotation extends ArrayCoreMap {
   public Annotation() {
     super(12);
   }
+
 }
