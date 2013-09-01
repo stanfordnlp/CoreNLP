@@ -5,6 +5,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 
 import java.io.BufferedReader;
@@ -19,9 +21,23 @@ import java.util.regex.Pattern;
  * This class provides functions for looking up all instances of known phrases in a document in an efficient manner.
  *
  * Phrases can be added to the phrase table using
- *   @link{#readPhrases}
- *   #addPhrase
+ * <ul>
+ *   <li>readPhrases</li>
+ *   <li>readPhrasesWithTagScores</li>
+ *   <li>addPhrase</li>
+ * </ul>
  *
+ * You can lookup phrases in the table using
+ * <ul>
+ *   <li>get</li>
+ *   <li>lookup</li>
+ * </ul>
+ *
+ * You can find phrases occurring in a piece of text using
+ * <ul>
+ *   <li>findAllMatches</li>
+ *   <li>findNonOverlappingPhrases</li>
+ * </ul>
  * @author Angel Chang
  */
 public class PhraseTable implements Serializable
@@ -49,8 +65,29 @@ public class PhraseTable implements Serializable
     this.normalize = normalize;
     this.caseInsensitive = caseInsensitive;
     this.ignorePunctuation = ignorePunctuation;
-  }  
-  
+  }
+
+  public boolean isEmpty() {
+    return (nPhrases == 0);
+  }
+
+  public boolean containsKey(Object key) {
+    return get(key) != null;
+  }
+
+  public Phrase get(Object key) {
+    if (key instanceof String) {
+      return lookup((String) key);
+    } else if (key instanceof WordList) {
+      return lookup((WordList) key);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Clears this table
+   */
   public void clear()
   {
     rootTree = null;
@@ -65,12 +102,32 @@ public class PhraseTable implements Serializable
     normalizedCache = newNormalizedCache;
   }
 
+  /**
+   * Input functions to read in phrases to the table
+   */
+
   private static final Pattern tabPattern = Pattern.compile("\t");
+
+  /**
+   * Read in phrases from a file (assumed to be tab delimited)
+   * @param filename - Name of file
+   * @param checkTag - Indicates if there is a tag column (assumed to be 2nd column)
+   *                   If false, treats entire line as the phrase
+   * @throws IOException
+   */
   public void readPhrases(String filename, boolean checkTag) throws IOException
   {
     readPhrases(filename, checkTag, tabPattern);
   }
 
+  /**
+   * Read in phrases from a file.  Column delimiters are matched using regex
+   * @param filename - Name of file
+   * @param checkTag - Indicates if there is a tag column (assumed to be 2nd column)
+   *                   If false, treats entire line as the phrase
+   * @param delimiterRegex - Regex for identifying column delimiter
+   * @throws IOException
+   */
   public void readPhrases(String filename, boolean checkTag, String delimiterRegex) throws IOException
   {
     readPhrases(filename, checkTag, Pattern.compile(delimiterRegex));
@@ -93,6 +150,60 @@ public class PhraseTable implements Serializable
       } else {
         addPhrase(line);
       }
+    }
+    br.close();
+    timer.done();
+  }
+
+  /**
+   * Read in phrases where there is each pattern has a score of being associated with a certain tag.
+   * The file format is assumed to be
+   *   phrase\ttag1 count\ttag2 count...
+   * where the phrases and tags are delimited by tabs, and each tag and count is delimited by whitespaces
+   * @param filename
+   * @throws IOException
+   */
+  public void readPhrasesWithTagScores(String filename) throws IOException
+  {
+    readPhrasesWithTagScores(filename, tabPattern, whitespacePattern);
+  }
+
+  public void readPhrasesWithTagScores(String filename, String fieldDelimiterRegex,
+                                    String countDelimiterRegex) throws IOException
+  {
+    readPhrasesWithTagScores(filename, Pattern.compile(fieldDelimiterRegex), Pattern.compile(countDelimiterRegex));
+  }
+
+  public void readPhrasesWithTagScores(String filename, Pattern fieldDelimiterPattern, Pattern countDelimiterPattern) throws IOException
+  {
+    Timing timer = new Timing();
+    timer.doing("Reading phrases: " + filename);
+    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    String line;
+    int lineno = 0;
+    while ((line = br.readLine()) != null) {
+      String[] columns = fieldDelimiterPattern.split(line);
+      String phrase = columns[0];
+      // Pick map factory to use depending on number of tags we have
+      MapFactory<String,MutableDouble> mapFactory = (columns.length < 20)?
+              MapFactory.<String,MutableDouble>arrayMapFactory(): MapFactory.<String,MutableDouble>linkedHashMapFactory();
+      Counter<String> counts = new ClassicCounter<String>(mapFactory);
+      for (int i = 1; i < columns.length; i++) {
+        String[] tagCount = countDelimiterPattern.split(columns[i], 2);
+        if (tagCount.length == 2) {
+          try {
+            counts.setCount(tagCount[0], Double.parseDouble(tagCount[1]));
+          } catch (NumberFormatException ex) {
+            throw new RuntimeException("Error processing field " + i + ": '" + columns[i] +
+                    "' from (" + filename + ":" + lineno + "): " + line, ex);
+          }
+        } else {
+          throw new RuntimeException("Error processing field " + i + ": '" + columns[i] +
+                  "' from + (" + filename + ":" + lineno + "): " + line);
+        }
+      }
+      addPhrase(phrase, null, counts);
+      lineno++;
     }
     br.close();
     timer.done();
@@ -840,6 +951,10 @@ public class PhraseTable implements Serializable
 
     public String getTag() {
       return tag;
+    }
+
+    public Object getData() {
+      return data;
     }
 
     public Collection<String> getAlternateForms() {
