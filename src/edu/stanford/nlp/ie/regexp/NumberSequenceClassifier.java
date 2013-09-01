@@ -101,6 +101,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     return classifyOld(tokens);
   }
 
+  // todo [cdm, 2013]: Where does this call NumberNormalizer?  Is it the call buried in SUTime's TimeExpressionExtractorImpl?
   /**
    * Modular classification using NumberNormalizer for numbers, SUTime for date/time.
    * Note: this is slower than classifyOld because it runs multiple passes
@@ -113,8 +114,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     //
     // set everything to "O" by default
     //
-    for(CoreLabel token: tokenSequence) {
-      if(token.get(CoreAnnotations.AnswerAnnotation.class) == null)
+    for (CoreLabel token: tokenSequence) {
+      if (token.get(CoreAnnotations.AnswerAnnotation.class) == null)
         token.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
     }
 
@@ -133,8 +134,9 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     //
     // store DATE and TIME
     //
-    if(timeExpressions != null){
+    if (timeExpressions != null) {
       for(CoreMap timeExpression: timeExpressions) {
+        // todo [cdm 2013]: We should also store these in the Sentence, but we've just got the list of tokens here
         int start = timeExpression.get(CoreAnnotations.TokenBeginAnnotation.class);
         int end = timeExpression.get(CoreAnnotations.TokenEndAnnotation.class);
         int offset = 0;
