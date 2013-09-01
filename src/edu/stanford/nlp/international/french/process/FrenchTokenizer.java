@@ -6,7 +6,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -14,7 +13,6 @@ import java.util.Properties;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -48,25 +46,23 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   // The underlying JFlex lexer
   private final FrenchLexer lexer;
 
-  // Internal fields compound splitting
-  private final boolean splitCompounds;
-  private List<CoreLabel> compoundBuffer;
-  
-  // Produces the tokenization for parsing used by Green, de Marneffe, and Manning (2011)
-  private static final String FTB_OPTIONS = "tokenizeNLs=true,ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
+  // Produces the normalization for parsing used in Green and Manning (2010)
+  private static final Properties ftbOptions = new Properties();
+  static {
+    // TODO: Add default options
+    String optionsStr = "";
+    String[] optionToks = optionsStr.split(",");
+    for (String option : optionToks) {
+      ftbOptions.put(option, "true");
+    }
+  }
 
-  /**
-   * Constructor.
-   * 
-   * @param r
-   * @param tf
-   * @param lexerProperties
-   * @param splitCompounds
-   */
-  public FrenchTokenizer(Reader r, LexedTokenFactory<T> tf, Properties lexerProperties, boolean splitCompounds) {
+  public static FrenchTokenizer<CoreLabel> newFrenchTokenizer(Reader r, Properties lexerProperties) {
+    return new FrenchTokenizer<CoreLabel>(r, new CoreLabelTokenFactory(), lexerProperties);
+  }
+
+  public FrenchTokenizer(Reader r, LexedTokenFactory<T> tf, Properties lexerProperties) {
     lexer = new FrenchLexer(r, tf, lexerProperties);
-    this.splitCompounds = splitCompounds;
-    if (splitCompounds) compoundBuffer = Generics.newLinkedList();
   }
 
   @Override
@@ -78,19 +74,9 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       // some tokens can be obliterated. In this case, keep iterating
       // until we see a non-zero length token.
       do {
-        nextToken = (splitCompounds && compoundBuffer.size() > 0) ?
-            (T) compoundBuffer.remove(0) : 
-              (T) lexer.next();
+        nextToken = (T) lexer.next();
       } while (nextToken != null && nextToken.word().length() == 0);
 
-      // Check for compounds to split
-      if (splitCompounds && nextToken instanceof CoreLabel) {
-        CoreLabel cl = (CoreLabel) nextToken;
-        if (cl.containsKey(ParentAnnotation.class) && cl.get(ParentAnnotation.class).equals(FrenchLexer.COMPOUND_ANNOTATION)) {
-          nextToken = (T) processCompound(cl);
-        }
-      }
-      
       return nextToken;
 
     } catch (IOException e) {
@@ -98,39 +84,14 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
   }
 
-  /**
-   * Splits a compound marked by the lexer.
-   * 
-   * @param cl
-   * @return
-   */
-  private CoreLabel processCompound(CoreLabel cl) {
-    cl.remove(ParentAnnotation.class);
-    String[] parts = cl.word().replaceAll("\\-", " - ").split("\\s+");
-    for (String part : parts) {
-      CoreLabel newLabel = new CoreLabel(cl);
-      newLabel.setWord(part);
-      newLabel.setValue(part);
-      compoundBuffer.add(newLabel);
-    }
-    return compoundBuffer.remove(0);
-  }
-
-  /**
-   * A factory for French tokenizer instances.
-   * 
-   * @author Spence Green
-   *
-   * @param <T>
-   */
   public static class FrenchTokenizerFactory<T extends HasWord> implements TokenizerFactory<T>, Serializable  {
 
     private static final long serialVersionUID = 946818805507187330L;
 
     protected final LexedTokenFactory<T> factory;
+
     protected Properties lexerProperties = new Properties();
-    protected boolean splitCompoundOption = false;
-    
+
     public static TokenizerFactory<CoreLabel> newTokenizerFactory() {
       return new FrenchTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory());
     }
@@ -144,35 +105,16 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
 
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new FrenchTokenizer<T>(r, factory, lexerProperties, splitCompoundOption);
+      return new FrenchTokenizer<T>(r, factory, lexerProperties);
     }
 
     /**
-     * Set underlying tokenizer options.
-     * 
-     * @param options A comma-separated list of options
+     * options: A comma-separated list of options
      */
     public void setOptions(String options) {
       String[] optionList = options.split(",");
       for (String option : optionList) {
-        String[] fields = option.split("=");
-        if (fields.length == 1) {
-          if (fields[0].equals("splitCompounds")) {
-            splitCompoundOption = true;
-          } else {
-            lexerProperties.put(option, "true");
-          }
-        
-        } else if (fields.length == 2) {
-          if (fields[0].equals("splitCompounds")) {
-            splitCompoundOption = Boolean.valueOf(fields[1]);
-          } else {
-            lexerProperties.put(fields[0], fields[1]);
-          }
-        
-        } else {
-          System.err.printf("%s: Bad option %s%n", this.getClass().getName(), option);
-        }
+        lexerProperties.put(option, "true");
       }
     }
 
@@ -182,24 +124,15 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
   }
 
-  /**
-   * Returns a factory for FrenchTokenizer.
-   * 
-   * @return
-   */
   public static TokenizerFactory<CoreLabel> factory() {
     return FrenchTokenizerFactory.newTokenizerFactory();
   }
 
-  /**
-   * Returns a factory for FrenchTokenizer that replicates the tokenization of
-   * Green, de Marneffe, and Manning (2011).
-   * 
-   * @return
-   */
   public static TokenizerFactory<CoreLabel> ftbFactory() {
     TokenizerFactory<CoreLabel> tf = FrenchTokenizerFactory.newTokenizerFactory();
-    tf.setOptions(FTB_OPTIONS);
+    for (String option : ftbOptions.stringPropertyNames()) {
+      tf.setOptions(option);
+    }
     return tf;
   }
 
@@ -212,7 +145,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     sb.append("   -ftb           : Tokenization for experiments in Green et al. (2011).").append(nl);
     sb.append("   -lowerCase     : Apply lowercasing.").append(nl);
     sb.append("   -encoding type : Encoding format.").append(nl);
-    sb.append("   -orthoOpts str : Orthographic options (see FrenchLexer.java)").append(nl);
     return sb.toString();
   }
 
@@ -222,7 +154,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     argOptionDefs.put("ftb", 0);
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
-    argOptionDefs.put("orthoOpts", 1);
     return argOptionDefs;
   }
 
@@ -244,24 +175,21 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       System.exit(-1);
     }
 
-    // Lexer options
+    // Process normalization options
     final TokenizerFactory<CoreLabel> tf = options.containsKey("ftb") ?
         FrenchTokenizer.ftbFactory() : FrenchTokenizer.factory();
-    String orthoOptions = options.getProperty("orthoOpts", "");
-    tf.setOptions(orthoOptions);
-    
-    // Currently we split on sentence-final whitespace. No options for
-    // more granular sentence splitting.
+    for (String option : options.stringPropertyNames()) {
+      tf.setOptions(option);
+    }
+
+    // Normalize line separators so that we can count lines in the output
     tf.setOptions("tokenizeNLs");
-    
-    // Other options
-    final String encoding = options.getProperty("encoding", "UTF-8");
-    final boolean toLower = PropertiesUtils.getBool(options, "lowerCase", false);
 
     // Read the file from stdin
     int nLines = 0;
     int nTokens = 0;
-    final long startTime = System.nanoTime();
+    final String encoding = options.getProperty("encoding", "UTF-8");
+    final boolean toLower = PropertiesUtils.getBool(options, "lowerCase", false);
     try {
       Tokenizer<CoreLabel> tokenizer = tf.getTokenizer(new InputStreamReader(System.in, encoding));
       boolean printSpace = false;
@@ -274,16 +202,13 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           System.out.println();
         } else {
           if (printSpace) System.out.print(" ");
-          String outputToken = toLower ? word.toLowerCase(Locale.FRENCH) : word;
-          System.out.print(outputToken);
+          System.out.print(toLower ? word.toLowerCase(Locale.FRENCH) : word);
           printSpace = true;
         }
       }
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     }
-    long elapsedTime = System.nanoTime() - startTime;
-    double linesPerSec = (double) nLines / (elapsedTime / 1e9);
-    System.err.printf("Done! Tokenized %d lines (%d tokens) at %.2f lines/sec%n", nLines, nTokens, linesPerSec);
+    System.err.printf("Done! Tokenized %d lines (%d tokens)%n", nLines, nTokens);
   }
 }
