@@ -116,6 +116,7 @@ public class WordsToSentencesAnnotator implements Annotator {
         sentence.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
         tokenOffset += sentenceTokens.size();
         sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
+        sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
 
         // add the sentence to the list
         sentences.add(sentence);

@@ -51,7 +51,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
   private static final int INITIAL_CAPACITY = 4;
 
   /** Array of keys */
-  private Class<? extends Key<CoreMap, ?>>[] keys;
+  private Class<? extends Key<?>>[] keys;
 
   /** Array of values */
   private Object[] values;
@@ -118,7 +118,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
+  public <VALUE, KEY extends Key<VALUE>>
     VALUE get(Class<KEY> key) {
     for (int i = 0; i < size; i++) {
       if (key == keys[i]) {
@@ -134,7 +134,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * {@inheritDoc}
    */
   @Override
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
+  public <VALUE, KEY extends Key<VALUE>>
     boolean has(Class<KEY> key) {
 
     for (int i = 0; i < size; i++) {
@@ -151,7 +151,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends Key<CoreMap, VALUEBASE>>
+  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends Key<VALUEBASE>>
     VALUE set(Class<KEY> key, VALUE value) {
 
     // search array for existing value to replace
@@ -229,7 +229,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
+  public <VALUE, KEY extends Key<VALUE>>
     VALUE remove(Class<KEY> key) {
 
     Object rv = null;
@@ -251,7 +251,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * {@inheritDoc}
    */
   @Override
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
+  public <VALUE, KEY extends Key<VALUE>>
   boolean containsKey(Class<KEY> key) {
     for (int i = 0; i < size; i++) {
       if (keys[i] == key) {
