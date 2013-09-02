@@ -80,19 +80,6 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
   }
 
   /**
-   * Copy Constructor - relies on {@link CoreLabel} copy constructor
-   * It will set the value, and if the word is not set otherwise, set
-   * the word to the value.
-   *
-   * @param w A Label to initialize this IndexedWord from
-   */
-  public IndexedWord(CyclicCoreLabel w) {
-    super(w);
-    if (this.word() == null)
-      this.setWord(this.value());
-  }
-
-  /**
    * Constructor for setting docID, sentenceIndex, and
    * index without any other annotations.
    *

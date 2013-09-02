@@ -10,7 +10,9 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -102,4 +104,14 @@ public class MorphaAnnotator implements Annotator{
     return null;
   }
 
+
+  @Override
+  public Set<Requirement> requires() {
+    return TOKENIZE_SSPLIT_POS;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(LEMMA_REQUIREMENT);
+  }
 }

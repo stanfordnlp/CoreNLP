@@ -10,7 +10,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CyclicCoreLabel;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
@@ -25,7 +25,7 @@ import edu.stanford.nlp.util.StringUtils;
  * between arbitrary pairs of nodes.  (So, it's a graph with a tree
  * skeleton.)  A <code>TreeGraphNode</code> represents any node in a
  * treegraph.  The additional labeled arcs are represented by using
- * {@link CyclicCoreLabel <code>CyclicCoreLabel</code>} labels at each node, which
+ * {@link CoreLabel <code>CoreLabel</code>} labels at each node, which
  * contain <code>Map</code>s from arc label strings to
  * <code>Set</code>s of <code>TreeGraphNode</code>s.  Each
  * <code>TreeGraphNode</code> should contain a reference to a {@link
@@ -44,7 +44,7 @@ public class TreeGraphNode extends Tree implements HasParent {
   /**
    * Label for this node.
    */
-  protected CyclicCoreLabel label;
+  protected CoreLabel label;
 
   /**
    * Parent of this node.
@@ -71,7 +71,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    */
   protected static final TreeGraphNode[] ZERO_TGN_CHILDREN = new TreeGraphNode[0];
 
-  private static LabelFactory mlf = CyclicCoreLabel.factory();
+  private static LabelFactory mlf = CoreLabel.factory();
 
   /**
    * Create a new empty <code>TreeGraphNode</code>.
@@ -86,7 +86,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @param label the label for this node.
    */
   public TreeGraphNode(Label label) {
-    this.label = (CyclicCoreLabel) mlf.newLabel(label);
+    this.label = (CoreLabel) mlf.newLabel(label);
   }
 
   /**
@@ -140,7 +140,7 @@ public class TreeGraphNode extends Tree implements HasParent {
         children[i].label.setTag(t.label().value());
       }
     }
-    this.label = (CyclicCoreLabel) mlf.newLabel(t.label());
+    this.label = (CoreLabel) mlf.newLabel(t.label());
   }
 
   /**
@@ -169,7 +169,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return the label of the node
    */
   @Override
-  public CyclicCoreLabel label() {
+  public CoreLabel label() {
     return label;
   }
 
@@ -178,7 +178,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    *
    * @param label the new label to use.
    */
-  public void setLabel(final CyclicCoreLabel label) {
+  public void setLabel(final CoreLabel label) {
     this.label = label;
   }
 
@@ -412,7 +412,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    */
   public Set<Class<? extends GrammaticalRelationAnnotation>> arcLabelsToNode(TreeGraphNode destNode) {
     Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = Generics.newHashSet();
-    CyclicCoreLabel cl = label();
+    CoreLabel cl = label();
     for (Class key : cl.keySet()) {
       if (key == null || !GrammaticalRelationAnnotation.class.isAssignableFrom(key)) {
         continue;
@@ -450,8 +450,8 @@ public class TreeGraphNode extends Tree implements HasParent {
    * Uses the specified {@link HeadFinder <code>HeadFinder</code>}
    * to determine the heads for this node and all its descendants,
    * and to store references to the head word node and head tag node
-   * in this node's {@link CyclicCoreLabel <code>CyclicCoreLabel</code>} and the
-   * <code>CyclicCoreLabel</code>s of all its descendants.<p>
+   * in this node's {@link CoreLabel <code>CoreLabel</code>} and the
+   * <code>CoreLabel</code>s of all its descendants.<p>
    * <p/>
    * Note that, in contrast to {@link Tree#percolateHeads
    * <code>Tree.percolateHeads()</code>}, which assumes {@link
@@ -557,7 +557,7 @@ public class TreeGraphNode extends Tree implements HasParent {
   /**
    * Return the node containing the head word for this node (or
    * <code>null</code> if none), as recorded in this node's {@link
-   * CyclicCoreLabel <code>CyclicCoreLabel</code>}.  (In contrast to {@link
+   * CoreLabel <code>CoreLabel</code>}.  (In contrast to {@link
    * edu.stanford.nlp.ling.CategoryWordTag
    * <code>CategoryWordTag</code>}, we store head words and head
    * tags as references to nodes, not merely as
@@ -575,8 +575,8 @@ public class TreeGraphNode extends Tree implements HasParent {
 
   /**
    * Store the node containing the head word for this node by
-   * storing it in this node's {@link CyclicCoreLabel
-   * <code>CyclicCoreLabel</code>}.  (In contrast to {@link
+   * storing it in this node's {@link CoreLabel
+   * <code>CoreLabel</code>}.  (In contrast to {@link
    * edu.stanford.nlp.ling.CategoryWordTag
    * <code>CategoryWordTag</code>}, we store head words and head
    * tags as references to nodes, not merely as
@@ -591,7 +591,7 @@ public class TreeGraphNode extends Tree implements HasParent {
   /**
    * Return the node containing the head tag for this node (or
    * <code>null</code> if none), as recorded in this node's {@link
-   * CyclicCoreLabel <code>CyclicCoreLabel</code>}.  (In contrast to {@link
+   * CoreLabel <code>CoreLabel</code>}.  (In contrast to {@link
    * edu.stanford.nlp.ling.CategoryWordTag
    * <code>CategoryWordTag</code>}, we store head words and head
    * tags as references to nodes, not merely as
@@ -609,8 +609,8 @@ public class TreeGraphNode extends Tree implements HasParent {
 
   /**
    * Store the node containing the head tag for this node by
-   * storing it in this node's {@link CyclicCoreLabel
-   * <code>CyclicCoreLabel</code>}.  (In contrast to {@link
+   * storing it in this node's {@link CoreLabel
+   * <code>CoreLabel</code>}.  (In contrast to {@link
    * edu.stanford.nlp.ling.CategoryWordTag
    * <code>CategoryWordTag</code>}, we store head words and head
    * tags as references to nodes, not merely as
@@ -671,7 +671,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * produce that kind of <code>Label</code> is supplied to the
    * <code>TreeFactory</code>.  If the <code>Label</code> is
    * <code>null</code>, a
-   * <code>CyclicCoreLabel.factory()</code> will be used.  The factories
+   * <code>CoreLabel.factory()</code> will be used.  The factories
    * returned on different calls are different: a new one is
    * allocated each time.
    *
@@ -683,7 +683,7 @@ public class TreeGraphNode extends Tree implements HasParent {
     if (label() != null) {
       lf = label().labelFactory();
     } else {
-      lf = CyclicCoreLabel.factory();
+      lf = CoreLabel.factory();
     }
     return new TreeGraphNodeFactory(lf);
   }

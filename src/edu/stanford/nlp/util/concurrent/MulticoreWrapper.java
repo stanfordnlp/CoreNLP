@@ -145,7 +145,7 @@ public class MulticoreWrapper<I,O> {
   /**
    * Returns the next available result.
    *
-   * @return
+   * @return the next completed result, or null if no result is available
    */
   public O poll() {
     if (!peek()) return null;

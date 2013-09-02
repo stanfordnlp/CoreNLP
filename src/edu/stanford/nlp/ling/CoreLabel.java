@@ -1,12 +1,16 @@
 package edu.stanford.nlp.ling;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.CategoryAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.CopyAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.DocIDAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
@@ -18,6 +22,7 @@ import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.ValueAnnotation;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**
@@ -500,66 +505,102 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    */
   public static final String TAG_SEPARATOR = "/";
 
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUE>>
-//  VALUE get(Class<KEY> key) {
-//    return map.get(key);
-//  }
+  public static final String DEFAULT_FORMAT = "value-index";
 
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUE>>
-//  boolean has(Class<KEY> key) {
-//    return map.has(key);
-//  }
+  @Override
+  public String toString() {
+    return toString(DEFAULT_FORMAT);
+  }
 
-  /** {@inheritDoc} */
-//  public Set<Class<?>> keySet() {
-//    return map.keySet();
-//  }
+  /**
+   * Returns a formatted string representing this label.  The
+   * desired format is passed in as a <code>String</code>.
+   * Currently supported formats include:
+   * <ul>
+   * <li>"value": just prints the value</li>
+   * <li>"{map}": prints the complete map</li>
+   * <li>"value{map}": prints the value followed by the contained
+   * map (less the map entry containing key <code>CATEGORY_KEY</code>)</li>
+   * <li>"value-index": extracts a value and an integer index from
+   * the contained map using keys  <code>INDEX_KEY</code>,
+   * respectively, and prints them with a hyphen in between</li>
+   * <li>"value-index{map}": a combination of the above; the index is
+   * displayed first and then not shown in the map that is displayed</li>
+   * <li>"word": Just the value of HEAD_WORD_KEY in the map</li>
+   * </ul>
+   * <p/>
+   * Map is printed in alphabetical order of keys.
+   */
+  @SuppressWarnings("unchecked")
+  public String toString(String format) {
+    StringBuilder buf = new StringBuilder();
+    if (format.equals("value")) {
+      buf.append(value());
+    } else if (format.equals("{map}")) {
+      Map map2 = new TreeMap(asClassComparator);
+      for(Class<?> key : this.keySet()) {
+        map2.put(key, get((Class<? extends CoreAnnotation>) key));
+      }
+      buf.append(map2);
+    } else if (format.equals("value{map}")) {
+      buf.append(value());
+      Map map2 = new TreeMap(asClassComparator);
+      for(Class<?> key : this.keySet()) {
+        map2.put(key, get((Class<? extends CoreAnnotation>) key));
+      }
+      map2.remove(ValueAnnotation.class);
+      buf.append(map2);
+    } else if (format.equals("value-index")) {
+      buf.append(value());
+      Integer index = this.get(IndexAnnotation.class);
+      if (index != null) {
+        buf.append("-").append((index).intValue());
+      }
+      buf.append(toPrimes());
+    } else if (format.equals("value-index{map}")) {
+      buf.append(value());
+      Integer index = this.get(IndexAnnotation.class);
+      if (index != null) {
+        buf.append("-").append((index).intValue());
+      }
+      Map<String,Object> map2 = new TreeMap<String,Object>();
+      for(Class<?> key : this.keySet()) {
+        String cls = key.getName();
+        // special shortening of all the Annotation classes
+        int idx = cls.indexOf('$');
+        if (idx >= 0) {
+          cls = cls.substring(idx + 1);
+        }
+        map2.put(cls, this.get((Class<? extends CoreAnnotation>) key));
+      }
+      map2.remove("IndexAnnotation");
+      map2.remove("ValueAnnotation");
+      if (!map2.isEmpty()) {
+        buf.append(map2);
+      }
+    } else if (format.equals("word")) {
+      buf.append(word());
+    } else if (format.equals("text-index")) {
+      buf.append(this.get(TextAnnotation.class));
+      Integer index = this.get(IndexAnnotation.class);
+      if (index != null) {
+        buf.append("-").append((index).intValue());
+      }
+      buf.append(toPrimes());
+    }
+    return buf.toString();
+  }
 
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUE>>
-//  VALUE remove(Class<KEY> key) {
-//    return map.remove(key);
-//  }
+  public String toPrimes() {
+    Integer copy = get(CopyAnnotation.class);
+    if (copy == null || copy == 0)
+      return "";
+    return StringUtils.repeat('\'', copy);
+  }
 
-  /** {@inheritDoc} */
-//  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends edu.stanford.nlp.util.TypesafeMap.Key<CoreMap, VALUEBASE>>
-//  VALUE set(Class<KEY> key, VALUE value) {
-//    return map.set(key, value);
-//  }
-
-  /** {@inheritDoc} */
-//  public <VALUE, KEY extends Key<CoreMap, VALUE>>
-//  boolean containsKey(Class<KEY> key) {
-//    return map.containsKey(key);
-//  }
-
- // @Override
-//  public String toString() {
-//    return value();
-//    return map.toString();
-//  }
-
- // @Override
-//  public boolean equals(Object other) {
-//    if (other instanceof CyclicCoreLabel) {
-//      // CyclicCoreLabel overrides our equality, use its
-//      return other.equals(this);
-//    } else if (other instanceof CoreLabel) {
-//      // If its a CoreLabel, compare our map with its
-//      return map.equals(((CoreLabel)other).map);
-//    } else if (other instanceof CoreMap) {
-//      // If its any other type of CoreMap, compare our map with it directly
-//      return map.equals(other);
-//    } else {
-//      return false;
-//    }
-//  }
-
- // @Override
-//  public int hashCode() {
-//    return map.hashCode();
-//  }
-
+  private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {
+    public int compare(Class<?> o1, Class<?> o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
 }

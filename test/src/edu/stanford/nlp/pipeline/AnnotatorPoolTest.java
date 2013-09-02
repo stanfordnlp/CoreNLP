@@ -1,6 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
+import java.util.Collections;
 import java.util.Properties;
+import java.util.Set;
 import junit.framework.TestCase;
 import junit.framework.Assert;
 
@@ -19,6 +21,18 @@ public class AnnotatorPoolTest extends TestCase {
         @Override
         public void annotate(Annotation annotation) {
           // empty body; we don't actually use it here
+        }
+
+        @Override
+        public Set<Requirement> requirementsSatisfied() {
+          // empty body; we don't actually use it here
+          return Collections.emptySet();
+        }
+
+        @Override
+        public Set<Requirement> requires() {
+          // empty body; we don't actually use it here
+          return Collections.emptySet();
         }
       };
     }

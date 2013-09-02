@@ -76,6 +76,7 @@ class TagCount {
 
   // The object's fields are read form the file. They are read from
   // the current position and the file is not closed afterwards.
+  // todo [cdm 2013]: Change this into a static load method so you don't have to make a null TagCount to then call this method on
   protected void read(DataInputStream rf) {
     try {
 

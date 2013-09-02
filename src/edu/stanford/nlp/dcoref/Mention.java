@@ -908,28 +908,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return false;
   }
 
-  public boolean isAcronym(Mention m) {
-    String s1 = this.spanToString();
-    String s2 = m.spanToString();
-    String acronym="";
-
-    // make s1 shorter (acronym)
-    if(s1.length()>s2.length()){
-      String temp = s1;
-      s1 = s2;
-      s2 = temp;
-    }
-
-    for(int i=0 ; i< s2.length() ; i++){
-      if(s2.charAt(i)>='A' && s2.charAt(i)<='Z'){
-        acronym+=s2.charAt(i);
-      }
-    }
-    if(acronym.equals(s1) && !s2.contains(s1)) return true;
-
-    return false;
-  }
-
   public boolean isRoleAppositive(Mention m, Dictionaries dict) {
     String thisString = this.spanToString();
     if(this.isPronominal() || dict.allPronouns.contains(thisString.toLowerCase())) return false;

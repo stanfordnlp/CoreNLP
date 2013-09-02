@@ -22,8 +22,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
 
   private final boolean applyNumericClassifiers;
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
-  public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY =
-    "ner.applyNumericClassifiers";
+  public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
 
   private final boolean useSUTime;
 
@@ -84,8 +83,12 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
     this.nsc = new NumberSequenceClassifier(useSUTime);
   }
 
-  public boolean isApplyNumericClassifiers() {
+  public boolean appliesNumericClassifiers() {
     return applyNumericClassifiers;
+  }
+
+  public boolean usesSUTime() {
+    return useSUTime;
   }
 
   private static <INN extends CoreMap> void copyAnswerFieldsToNERField(List<INN> l) {

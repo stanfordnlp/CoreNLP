@@ -353,6 +353,8 @@ public class ChineseUtils {
     String shape;
     if (augmentedDateChars && dateCharsPlus.matcher(input).matches()) {
       shape = "D";
+    } else if (input.equals('第')) {
+      return "o"; // detect those Chinese ordinals!
     } else if (dateChars.matcher(input).matches()) {
       shape = "D";
     } else if (numberChars.matcher(input).matches()) {

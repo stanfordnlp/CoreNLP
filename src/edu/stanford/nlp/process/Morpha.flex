@@ -1452,6 +1452,7 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <noun,any>"menservants"  { return(stem(10,"anservant","s")); } /* disprefer */
 <noun,any>"mesdemoiselles"  { return(stem(13,"ademoiselle","s")); }
 <noun,any>"messieurs"  { return(stem(8,"onsieur","s")); }
+<noun,any>"metadata"  { return(stem(2,"tum","s")); }         
 <noun,any>"metatheses"  { return(stem(2,"is","s")); }    
 <noun,any>"metropolises"  { return(stem(2,"","s")); }    
 <noun,any>"mice"  { return(stem(3,"ouse","s")); }        
@@ -1469,6 +1470,7 @@ SKIP = [ \t\r\n\u2028\u2029\u000B\u000C\u0085]
 <noun,any>"novelle"  { return(stem(2,"la","s")); }       
 <noun,any>"oases"  { return(stem(2,"is","s")); }         
 <noun,any>"obloquies"  { return(stem(3,"y","s")); }      
+<noun,any>"octopodes"  { return(stem(4,"us","s")); }
 <noun,any>{A}+"hedra"  { return(stem(2,"ron","s")); }    
 <noun,any>"optima"  { return(stem(2,"mum","s")); }       
 <noun,any>"ora"  { return(stem(2,"s","s")); }            

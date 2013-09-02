@@ -142,7 +142,7 @@ public class RegexNERAnnotatorITest extends TestCase {
    */
   public void testEmptyAnnotation() {
     try {
-      annotator.annotate(new Annotation());
+      annotator.annotate(new Annotation(""));
     } catch(RuntimeException e) {
       return;
     }

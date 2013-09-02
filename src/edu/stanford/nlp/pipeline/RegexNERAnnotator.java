@@ -1,6 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
@@ -109,5 +111,18 @@ public class RegexNERAnnotator implements Annotator {
     while (start < tokens.size() && type.equals(tokens.get(start).get(NamedEntityTagAnnotation.class)))
       start++;
     return start;
+  }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return StanfordCoreNLP.TOKENIZE_AND_SSPLIT;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    // TODO: we might want to allow for different RegexNER annotators
+    // to satisfy different requirements
+    return Collections.emptySet();
   }
 }

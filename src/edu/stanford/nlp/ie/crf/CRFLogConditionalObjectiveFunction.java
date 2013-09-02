@@ -5,6 +5,7 @@ import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction
 import edu.stanford.nlp.util.Index;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Jenny Finkel
@@ -23,7 +24,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   private final double sigma;
   private final double epsilon = 0.1; // You can't actually set this at present
   /** label indices - for all possible label sequences - for each feature */
-  private final Index<CRFLabel>[] labelIndices;
+  private final List<Index<CRFLabel>> labelIndices;
   private final Index<String> classIndex;  // didn't have <String> before. Added since that's what is assumed everywhere.
   private final double[][] Ehat; // empirical counts of all the features [feature][class]
   private final int window;
@@ -56,19 +57,19 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     }
   }
 
-  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, Index[] labelIndices, int[] map, String backgroundSymbol) {
+  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol) {
     this(data, labels, window, classIndex, labelIndices, map, "QUADRATIC", backgroundSymbol);
   }
 
-  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, Index[] labelIndices, int[] map, String priorType, String backgroundSymbol) {
+  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol) {
     this(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, 1.0, null);
   }
 
-  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, Index[] labelIndices, int[] map, String backgroundSymbol, double sigma, double[][][][] featureVal) {
+  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, double sigma, double[][][][] featureVal) {
     this(data, labels, window, classIndex, labelIndices, map, "QUADRATIC", backgroundSymbol, sigma, featureVal);
   }
 
-  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, Index[] labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal) {
+  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal) {
     this.window = window;
     this.classIndex = classIndex;
     this.numClasses = classIndex.size();
@@ -84,7 +85,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     empiricalCounts(Ehat);
     int myDomainDimension = 0;
     for (int dim : map) {
-      myDomainDimension += labelIndices[dim].size();
+      myDomainDimension += labelIndices.get(dim).size();
     }
     domainDimension = myDomainDimension;
   }
@@ -103,13 +104,13 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
    *
    * @return a 2D weight array
    */
-  public static double[][] to2D(double[] weights, Index[] labelIndices, int[] map) {
+  public static double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
     double[][] newWeights = new double[map.length][];
     int index = 0;
     for (int i = 0; i < map.length; i++) {
-      newWeights[i] = new double[labelIndices[map[i]].size()];
-      System.arraycopy(weights, index, newWeights[i], 0, labelIndices[map[i]].size());
-      index += labelIndices[map[i]].size();
+      newWeights[i] = new double[labelIndices.get(map[i]).size()];
+      System.arraycopy(weights, index, newWeights[i], 0, labelIndices.get(map[i]).size());
+      index += labelIndices.get(map[i]).size();
     }
     return newWeights;
   }
@@ -145,8 +146,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       weightIndices = new int[map.length][];
       int index = 0;
       for (int i = 0; i < map.length; i++) {
-        weightIndices[i] = new int[labelIndices[map[i]].size()];
-        for (int j = 0; j < labelIndices[map[i]].size(); j++) {
+        weightIndices[i] = new int[labelIndices.get(map[i]).size()];
+        for (int j = 0; j < labelIndices.get(map[i]).size(); j++) {
           weightIndices[i][j] = index;
           index++;
         }
@@ -159,7 +160,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     double[][] d = new double[map.length][];
     // int index = 0;
     for (int i = 0; i < map.length; i++) {
-      d[i] = new double[labelIndices[map[i]].size()];
+      d[i] = new double[labelIndices.get(map[i]).size()];
     }
     return d;
   }
@@ -194,7 +195,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         int[] cliqueLabel = new int[j + 1];
         System.arraycopy(windowLabels, window - 1 - j, cliqueLabel, 0, j + 1);
         CRFLabel crfLabel = new CRFLabel(cliqueLabel);
-        int labelIndex = labelIndices[j].indexOf(crfLabel);
+        int labelIndex = labelIndices.get(j).indexOf(crfLabel);
         //System.err.println(crfLabel + " " + labelIndex);
         for (int n = 0; n < docData[i][j].length; n++) {
           double fVal = 1.0;
@@ -262,7 +263,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       for (int i = 0; i < docData.length; i++) {
         // for each possible clique at this position
         for (int j = 0; j < docData[i].length; j++) {
-          Index<CRFLabel> labelIndex = labelIndices[j];
+          Index<CRFLabel> labelIndex = labelIndices.get(j);
           // for each possible labeling for that clique
           for (int k = 0; k < labelIndex.size(); k++) {
             int[] label = labelIndex.get(k).getLabel();
@@ -456,7 +457,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       for (int i = 0; i < data[ind].length; i++) {
         // for each possible clique at this position
         for (int j = 0; j < data[ind][i].length; j++) {
-          Index labelIndex = labelIndices[j];
+          Index labelIndex = labelIndices.get(j);
           // for each possible labeling for that clique
           for (int k = 0; k < labelIndex.size(); k++) {
             for (int n = 0; n < data[ind][i][j].length; n++) {

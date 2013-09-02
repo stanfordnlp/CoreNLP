@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +22,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefClusterAnnotation;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefGraphAnnotation;
-import edu.stanford.nlp.ling.CyclicCoreLabel;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
@@ -41,6 +42,7 @@ public class DeterministicCorefAnnotator implements Annotator {
 
   private final MentionExtractor mentionExtractor;
   private final SieveCoreferenceSystem corefSystem;
+
 
   // for backward compatibility
   private final boolean OLD_FORMAT;
@@ -61,15 +63,16 @@ public class DeterministicCorefAnnotator implements Annotator {
     return SieveCoreferenceSystem.signature(props);
   }
 
+  @Override
   public void annotate(Annotation annotation){
     try {
       List<Tree> trees = new ArrayList<Tree>();
       List<List<CoreLabel>> sentences = new ArrayList<List<CoreLabel>>();
-  
+
       // extract trees and sentence words
       // we are only supporting the new annotation standard for this Annotator!
       if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-        int sentNum = 0;
+        // int sentNum = 0;
         for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
           sentences.add(tokens);
@@ -83,11 +86,12 @@ public class DeterministicCorefAnnotator implements Annotator {
         System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
       }
-  
+
       // extract all possible mentions
+      // this is created for each new annotation because it is not threadsafe
       RuleBasedCorefMentionFinder finder = new RuleBasedCorefMentionFinder();
       List<List<Mention>> allUnprocessedMentions = finder.extractPredictedMentions(annotation, 0, corefSystem.dictionaries());
-  
+
       // add the relevant info to mentions and order them for coref
       Document document = mentionExtractor.arrange(annotation, sentences, trees, allUnprocessedMentions);
       List<List<Mention>> orderedMentions = document.getOrderedMentions();
@@ -99,32 +103,35 @@ public class DeterministicCorefAnnotator implements Annotator {
           }
         }
       }
-  
+
       Map<Integer, CorefChain> result = corefSystem.coref(document);
       annotation.set(CorefChainAnnotation.class, result);
-  
+
       // for backward compatibility
       if(OLD_FORMAT) {
         List<Pair<IntTuple, IntTuple>> links = SieveCoreferenceSystem.getLinks(result);
-  
+
         if(VERBOSE){
           System.err.printf("Found %d coreference links:\n", links.size());
           for(Pair<IntTuple, IntTuple> link: links){
             System.err.printf("LINK (%d, %d) -> (%d, %d)\n", link.first.get(0), link.first.get(1), link.second.get(0), link.second.get(1));
           }
         }
-  
+
         //
         // save the coref output as CorefGraphAnnotation
         //
-        List<List<CoreLabel>> sents = new ArrayList<List<CoreLabel>>();
-        for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-          sents.add(tokens);
-        }
+
+        // cdm 2013: this block didn't seem to be doing anything needed....
+        // List<List<CoreLabel>> sents = new ArrayList<List<CoreLabel>>();
+        // for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        //   List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        //   sents.add(tokens);
+        // }
+
         // this graph is stored in CorefGraphAnnotation -- the raw links found by the coref system
         List<Pair<IntTuple, IntTuple>> graph = new ArrayList<Pair<IntTuple,IntTuple>>();
-  
+
         for(Pair<IntTuple, IntTuple> link: links){
           //
           // Note: all offsets in the graph start at 1 (not at 0!)
@@ -143,31 +150,35 @@ public class DeterministicCorefAnnotator implements Annotator {
           graph.add(new Pair<IntTuple, IntTuple>(src, dst));
         }
         annotation.set(CorefGraphAnnotation.class, graph);
-  
+
         for (CorefChain corefChain : result.values()) {
           if(corefChain.getMentionsInTextualOrder().size() < 2) continue;
           Set<CoreLabel> coreferentTokens = new HashSet<CoreLabel>();
-          Set<CoreLabel> cyclicCoreferentTokens = new HashSet<CoreLabel>();
           for (CorefMention mention : corefChain.getMentionsInTextualOrder()) {
             CoreMap sentence = annotation.get(SentencesAnnotation.class).get(mention.sentNum - 1);
             CoreLabel token = sentence.get(TokensAnnotation.class).get(mention.headIndex - 1);
-  
-            // this stuff is so things will mostly work without us replacing all
-            // tokens with CyclicCoreLabels whenever coref is run (which maybe
-            // wouldn't be a terrible thing?)
             coreferentTokens.add(token);
-            cyclicCoreferentTokens.add(new CyclicCoreLabel(token));
           }
           for (CoreLabel token : coreferentTokens) {
-            token.set(CorefClusterAnnotation.class, cyclicCoreferentTokens);
-          }
-          for (CoreLabel token : cyclicCoreferentTokens) {
-            token.set(CorefClusterAnnotation.class, cyclicCoreferentTokens);
+            token.set(CorefClusterAnnotation.class, coreferentTokens);
           }
         }
       }
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, NER_REQUIREMENT, PARSE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(DETERMINISTIC_COREF_REQUIREMENT);
   }
 }

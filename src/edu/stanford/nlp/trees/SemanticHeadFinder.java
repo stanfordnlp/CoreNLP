@@ -52,7 +52,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
   private static final boolean DEBUG = false;
 
-  private static final String[] auxiliaries = {"will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "has", "have", "had", "having", "get", "gets", "getting", "got", "gotten", "do", "does", "did", "to", "'ve", "'d", "'ll"};
+  /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc. */
+  private static final String[] auxiliaries = {"will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "has", "have", "had", "having", "get", "gets", "getting", "got", "gotten", "do", "does", "did", "to", "'ve", "ve", "'d", "d", "'ll", "ll", "na" };
   private static final String[] beGetVerbs = {"be", "being", "been", "am", "are", "is", "was", "were", "'m", "'re", "'s", "s", "get", "getting", "gets", "got"};
   private static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "is", "was", "were", "'m", "'re", "'s", "s", "seem", "seems", "seemed", "appear", "appears", "appeared", "stay", "stays", "stayed", "remain", "remains", "remained", "resemble", "resembles", "resembled", "become", "becomes", "became"};
 

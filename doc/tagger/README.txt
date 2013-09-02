@@ -97,9 +97,11 @@ tagger and descriptions of those options).
 To tag a file using the pre-trained bidirectional model
 =======================================================
 
-java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/bidirectional-distsim-wsj-0-18.tagger -textFile sample-input.txt > sample-tagged.txt
+java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/wsj-0-18-bidirectional-distsim.tagger -textFile sample-input.txt > sample-tagged.txt
 
-Tagged output will be printed to standard out, which you can redirect as above.
+Tagged output will be printed to standard out, which you can redirect
+as above.  Note that the bidirectional model is slightly more accurate
+but significantly slower than the left3words model.
 
 To train a simple model
 =======================

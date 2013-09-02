@@ -248,8 +248,22 @@ public class ExtractorFramesRare {
       } else if (arg.startsWith("wordshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
+        String wsc = Extractor.getParenthesizedArg(arg, 3);
+        if (wsc == null) {
+          wsc = "chris2";
+        }
         for (int i = lWindow; i <= rWindow; i++) {
-          extrs.add(new ExtractorWordShapeClassifier(i, "chris2"));
+          extrs.add(new ExtractorWordShapeClassifier(i, wsc));
+        }
+      } else if (arg.startsWith("wordshapeconjunction(")) {
+        int lWindow = Extractor.getParenthesizedNum(arg, 1);
+        int rWindow = Extractor.getParenthesizedNum(arg, 2);
+        String wsc = Extractor.getParenthesizedArg(arg, 3);
+        if (wsc == null) {
+          wsc = "chris2";
+        }
+        for (int i = lWindow; i <= rWindow; i++) {
+          extrs.add(new ExtractorWordShapeConjunction(lWindow, rWindow, wsc));
         }
       } else if (arg.startsWith("unicodeshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);

@@ -851,11 +851,11 @@ public class ArrayUtils {
   
   /**
    * If l1 is a part of l2, it finds the starting index of l1 in l2
-   * If l1 is not a sub-array of l2, then it returns 1
+   * If l1 is not a sub-array of l2, then it returns -1
    * note that l2 should have the exact elements and order as in l1 
-   * @param l1: array you want to find in l2
+   * @param l1 array you want to find in l2
    * @param l2
-   * @return
+   * @return starting index of the sublist
    */
   public static int getSubListIndex(Object[] l1, Object[] l2){ 
     if(l1.length > l2.length)
@@ -894,4 +894,15 @@ public class ArrayUtils {
       index = index - l1.length + 1;
     return index;
   }
+  
+  public static double[] normalize(double[] ar){
+    double[] ar2 = new double[ar.length];
+    double total = 0;
+    for(int i = 0; i < ar.length; i++)
+      total += ar[i];
+    for(int i = 0; i < ar.length; i++)
+      ar2[i] = ar[i]/total;
+    return ar2;
+  }
+  
 }

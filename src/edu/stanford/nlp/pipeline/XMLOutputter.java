@@ -16,9 +16,11 @@ import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
 import edu.stanford.nlp.time.Timex;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
@@ -28,6 +30,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import nu.xom.*;
+
 
 public class XMLOutputter {
   // the namespace is set in the XSLT file
@@ -105,17 +108,20 @@ public class XMLOutputter {
           sentElem.appendChild(parseInfo);
 
           // add the dependencies for this sentence
-          Element depInfo = new Element("basic-dependencies", NAMESPACE_URI);
-          addDependencyTreeInfo(depInfo, sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          sentElem.appendChild(depInfo);
+          Element depInfo = buildDependencyTreeInfo("basic-dependencies", sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), tokens, NAMESPACE_URI);
+          if (depInfo != null) {
+            sentElem.appendChild(depInfo);
+          }
 
-          depInfo = new Element("collapsed-dependencies", NAMESPACE_URI);
-          addDependencyTreeInfo(depInfo, sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          sentElem.appendChild(depInfo);
+          depInfo = buildDependencyTreeInfo("collapsed-dependencies", sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
+          if (depInfo != null) {
+            sentElem.appendChild(depInfo);
+          }
 
-          depInfo = new Element("collapsed-ccprocessed-dependencies", NAMESPACE_URI);
-          addDependencyTreeInfo(depInfo, sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          sentElem.appendChild(depInfo);
+          depInfo = buildDependencyTreeInfo("collapsed-ccprocessed-dependencies", sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
+          if (depInfo != null) {
+            sentElem.appendChild(depInfo);
+          }
         }
 
         // add the MR entities and relations
@@ -170,33 +176,66 @@ public class XMLOutputter {
     treeInfo.appendChild(temp);
   }
 
-  // todo [cdm 2012]: This should be extended to handle CopyAnnotation.
-  private static void addDependencyTreeInfo(Element depInfo, SemanticGraph graph, List<CoreLabel> tokens, String curNS) {
+  private static Element buildDependencyTreeInfo(String dependencyType, SemanticGraph graph, List<CoreLabel> tokens, String curNS) {
     if(graph != null) {
+      Element depInfo = new Element("dependencies", curNS);
+      depInfo.addAttribute(new Attribute("type", dependencyType));
+      // The SemanticGraph doesn't explicitely encode the ROOT node,
+      // so we print that out ourselves
+      for (IndexedWord root : graph.getRoots()) {
+        String rel = GrammaticalRelation.ROOT.getLongName();
+        rel = rel.replaceAll("\\s+", ""); // future proofing
+        int source = 0;
+        int target = root.index();
+        String sourceWord = "ROOT";
+        String targetWord = tokens.get(target - 1).word();
+        boolean isExtra = false;
+
+        addDependencyInfo(depInfo, rel, isExtra, source, sourceWord, null, target, targetWord, null, curNS);
+      }
       for (SemanticGraphEdge edge : graph.edgeListSorted()) {
         String rel = edge.getRelation().toString();
         rel = rel.replaceAll("\\s+", "");
         int source = edge.getSource().index();
         int target = edge.getTarget().index();
+        String sourceWord = tokens.get(source - 1).word();
+        String targetWord = tokens.get(target - 1).word();
+        Integer sourceCopy = edge.getSource().get(CopyAnnotation.class);
+        Integer targetCopy = edge.getTarget().get(CopyAnnotation.class);
+        boolean isExtra = edge.isExtra();
 
-        Element depElem = new Element("dep", curNS);
-        depElem.addAttribute(new Attribute("type", rel));
-
-        Element govElem = new Element("governor", curNS);
-        govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
-        govElem.appendChild(tokens.get(source - 1).word());
-        depElem.appendChild(govElem);
-
-        Element dependElem = new Element("dependent", curNS);
-        dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
-        dependElem.appendChild(tokens.get(target -1).word());
-        depElem.appendChild(dependElem);
-
-        depInfo.appendChild(depElem);
+        addDependencyInfo(depInfo, rel, isExtra, source, sourceWord, sourceCopy, target, targetWord, targetCopy, curNS);
       }
+      return depInfo;
     }
+    return null;
   }
 
+  private static void addDependencyInfo(Element depInfo, String rel, boolean isExtra, int source, String sourceWord, Integer sourceCopy, int target, String targetWord, Integer targetCopy, String curNS) {
+    Element depElem = new Element("dep", curNS);
+    depElem.addAttribute(new Attribute("type", rel));
+    if (isExtra) {
+      depElem.addAttribute(new Attribute("extra", "true"));
+    }
+    
+    Element govElem = new Element("governor", curNS);
+    govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
+    govElem.appendChild(sourceWord);
+    if (sourceCopy != null) {
+      govElem.addAttribute(new Attribute("copy", Integer.toString(sourceCopy)));
+    }
+    depElem.appendChild(govElem);
+    
+    Element dependElem = new Element("dependent", curNS);
+    dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
+    dependElem.appendChild(targetWord);
+    if (targetCopy != null) {
+      dependElem.addAttribute(new Attribute("copy", Integer.toString(targetCopy)));
+    }
+    depElem.appendChild(dependElem);
+    
+    depInfo.appendChild(depElem);
+  }
 
   /**
    * Generates the XML content for MachineReading entities

@@ -4,6 +4,7 @@ import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
 import edu.stanford.nlp.parser.ViterbiParserWithOptions;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
@@ -17,6 +18,12 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
  *
  * @author Galen Andrew
  * @author Pi-Chuan Chang
+ * @author Daniel Cer - support for printing CoNLL-X format, encoding update, 
+ *                      and preliminary changes to make 
+ *                      ChineseGrammaticalStructure behave more like 
+ *                      EnglishGrammaticalStructure on the command line 
+ *                      (ultimately, both classes should probably use the same 
+ *                      abstract main method).
  */
 public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
@@ -60,7 +67,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
 
   @Override
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
     //      collapseConj(list);
     collapsePrepAndPoss(list);
     //      collapseMultiwordPreps(list);
@@ -152,7 +159,12 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * Tests generation of Chinese grammatical relations from a file.
-   * Default encoding is GB18030.
+   * Default encoding is utf-8.
+   * 
+   * TODO: remove this main method and use the one in the abstract class GrammaticalStructure. Making this
+   * change is non-trivial due to some of the English specific assumptions in the code currently invoked by
+   * GrammaticalStructure#main. 
+   * 
    * Usage: <br> <code>
    * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -treeFile [treeFile] <br>
    * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -sentFile [sentenceFile] </code>
@@ -169,10 +181,29 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
     String treeFileName = props.getProperty("treeFile");
     String treeDirname = props.getProperty("treeDir");
     String sentFileName = props.getProperty("sentFile");
-    String encoding = props.getProperty("encoding", "GB18030");
+    String encoding = props.getProperty("encoding", "utf-8");
+    boolean conllx = props.getProperty("conllx") != null;
+    boolean basic = props.getProperty("basic") != null;
+    boolean collapsed = props.getProperty("collapsed") != null;
+    boolean parseTree = props.getProperty("parseTree") != null;
+    boolean keepPunct = props.getProperty("keepPunct") != null;
+    
+    // force keepPunct, if conllx is turned on
+    if (conllx) {
+      keepPunct = true;
+    }
+    
     String hf = props.getProperty("hf");
     String parserModel = props.getProperty("parserModel", "/u/nlp/data/lexparser/chineseFactored.ser.gz");
 
+    if (!basic && !collapsed) {
+      if (conllx) {
+        basic = true;     // default to basic dependencies for conllx 
+      } else {
+        collapsed = true; // otherwise, default to collapsed dependencies
+      }
+    }
+    
     try {
       if (hf != null) {
         shf = (HeadFinder)Class.forName(hf).newInstance();
@@ -184,8 +215,14 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
 
     if (args.length == 0) {
-      System.err.println("Please provide -treeFile treeFile or -sentFile sentFile");
-    } else {
+      System.err.printf("Usage:\n\t%s [optional flags] -treeFile treeFile\n\nOr:\n\t%s [optional flags] -sentFile sentFile\n", ChineseGrammaticalStructure.class.getName(), ChineseGrammaticalStructure.class.getName());
+      System.err.println("\nOptional flags:");
+      System.err.println("\t-parseTree  : print phrase-structure parse tree");
+      System.err.println("\t-basic : basic non-collapsed dependencies preserving a tree structure");
+      System.err.println("\t-collapsed : collapsed dependencies");      
+      System.err.println("\t-conllx : conllx formatted dependencies, can be used with either basic\n\t or collaped dependencies, but basic is recommended");
+
+    } else { 
       if (treeDirname != null && treeFileName != null) {
         throw new RuntimeException("Only one of treeDirname or treeFileName should be set");
       }
@@ -225,8 +262,8 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
             CHTBTokenizer chtb = new CHTBTokenizer(new StringReader(line));
             List words = chtb.tokenize();
             lp.parse(words);
-            Tree parseTree = lp.getBestParse();
-            tb.add(parseTree);
+            Tree tree = lp.getBestParse();
+            tb.add(tree);
           }
           reader.close();
         } catch (Exception e) {
@@ -235,13 +272,22 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-    System.out.println("Phrase structure tree, then dependencies, then collapsed dependencies");
+    
+    for (Tree t : tb) {      
+      Filter<String> puncFilter;
+      
+      if (keepPunct) {
+        puncFilter = Filters.acceptFilter();        
+      } else {
+        puncFilter = new ChineseTreebankLanguagePack().punctuationWordRejectFilter();
+      }
+      
+      GrammaticalStructure gs = new ChineseGrammaticalStructure(t, puncFilter);
 
-    for (Tree t : tb) {
-      System.out.println("==================================================");
-      GrammaticalStructure gs = new ChineseGrammaticalStructure(t);
-
-      t.pennPrint();
+      if (parseTree) {
+        System.out.println("============= parse tree =======================");
+        t.pennPrint();
+      }
       //System.out.println("----------------------------");
       //TreeGraph tg = new TreeGraph(t);
       //System.out.println(tg);
@@ -249,11 +295,19 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       //System.out.println("----------------------------");
       //System.out.println(gs);
 
-      System.out.println("----------------------------");
-      System.out.println(StringUtils.join(gs.typedDependencies(true), "\n"));
+      if (basic) {
+        if (collapsed) {
+          System.out.println("------------- basic dependencies ---------------");
+        }        
+        printDependencies(gs, gs.typedDependencies(true), t, conllx, false);
+      }
 
-      System.out.println("----------------------------");
-      System.out.println(StringUtils.join(gs.typedDependenciesCollapsed(true), "\n"));
+      if (collapsed) {
+        if (basic) {
+          System.out.println("----------- collapsed dependencies -----------");
+        }
+        printDependencies(gs, gs.typedDependenciesCollapsed(true), t, conllx, false);
+      }
 
       //gs.printTypedDependencies("xml");
     }

@@ -315,4 +315,15 @@ public class GUTimeAnnotator implements Annotator {
     }
     return timexMaps;
   }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return TOKENIZE_AND_SSPLIT;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(GUTIME_REQUIREMENT);
+  }
 }

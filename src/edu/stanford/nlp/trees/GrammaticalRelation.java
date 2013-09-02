@@ -54,7 +54,7 @@ import java.util.regex.Pattern;
  * </ul>
  * For example, for the grammatical relation <code>PREDICATE</code>
  * which holds between a clause and its primary verb phrase, we might
- * want to use the pattern <code>"S < VP=target"</code>, in which the
+ * want to use the pattern <code>"S &lt; VP=target"</code>, in which the
  * root will match a clause and the node labeled <code>"target"</code>
  * will match the verb phrase.<p>
  *
@@ -353,7 +353,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       TregexMatcher m = p.matcher(root);
       while (m.findAt(t)) {
         nodeList.add(m.getNode("target"));
-        //System.out.println("found " + this + "(" + t + ", " + m.getNode("target") + ")");
+        //System.out.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
       }
     }
     return nodeList;

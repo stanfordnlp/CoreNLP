@@ -519,9 +519,7 @@ public class TreePrint {
         pw.println(".]");
       }
       if (formats.containsKey("dependencies")) {
-        // NB: We need a CyclicCoreLabel here as we use	its "value-index" printing method
-        Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory(),
-                                                 CyclicCoreLabel.factory());
+        Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory());
         indexedTree.indexLeaves();
         Set<Dependency<Label, Label, Object>> depsSet = indexedTree.mapDependencies(dependencyWordFilter, hf);
         List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>(depsSet);

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CyclicCoreLabel;
 import edu.stanford.nlp.ling.StringLabelFactory;
 import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
@@ -90,14 +89,14 @@ public class DependencyIndexITest extends TestCase {
     // System.out.println(deps);
 
     // collect all nodes in deps
-    Set<CyclicCoreLabel> nodes = new IdentityHashSet<CyclicCoreLabel>();
+    Set<CoreLabel> nodes = new IdentityHashSet<CoreLabel>();
     for (TypedDependency dep: deps) {
       nodes.add(dep.gov().label());
       nodes.add(dep.dep().label());
     }
 
     // check the indices for all nodes
-    for (CyclicCoreLabel n: nodes) {
+    for (CoreLabel n: nodes) {
       String text = n.value();
       int index = n.get(IndexAnnotation.class);
       if (text.equals("Mary")) assertEquals(1, index);

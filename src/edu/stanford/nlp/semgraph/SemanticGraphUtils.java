@@ -404,7 +404,7 @@ public class SemanticGraphUtils {
     for (SemanticGraphEdge edge : edges) {
       IndexedWord newGov = oldToNewVertices.get(edge.getGovernor());
       IndexedWord newDep = oldToNewVertices.get(edge.getDependent());
-      nsg.addEdge(newGov, newDep, edge.getRelation(), edge.getWeight());
+      nsg.addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
     return nsg;
   }
@@ -426,8 +426,9 @@ public class SemanticGraphUtils {
           IndexedWord gov = edge.getGovernor();
           IndexedWord dep = edge.getDependent();
           double weight = edge.getWeight();
+          boolean isExtra = edge.isExtra();
           sg.removeEdge(edge);
-          sg.addEdge(gov, dep, newReln, weight);
+          sg.addEdge(gov, dep, newReln, weight, isExtra);
         } else {
           if (verbose)
             System.err.println("Warning, could not find matching GrammaticalRelation for reln="+edge.getRelation());
@@ -478,11 +479,11 @@ public class SemanticGraphUtils {
         sg.addVertex(newNode);
       for (SemanticGraphEdge govEdge : govEdges) {
         sg.removeEdge(govEdge);
-        sg.addEdge(newNode, govEdge.getDependent(), govEdge.getRelation(), govEdge.getWeight());
+        sg.addEdge(newNode, govEdge.getDependent(), govEdge.getRelation(), govEdge.getWeight(), govEdge.isExtra());
       }
       for (SemanticGraphEdge depEdge : depEdges) {
         sg.removeEdge(depEdge);
-        sg.addEdge(depEdge.getGovernor(), newNode, depEdge.getRelation(), depEdge.getWeight());
+        sg.addEdge(depEdge.getGovernor(), newNode, depEdge.getRelation(), depEdge.getWeight(), depEdge.isExtra());
       }
     } else {
       System.err.println("SemanticGraphUtils.replaceNode: previous node does not exist");
@@ -577,9 +578,7 @@ public class SemanticGraphUtils {
         if (newDep == null)
           newDep = edge.getDependent();
       }
-      SemanticGraphEdge newEdge = new SemanticGraphEdge(
-          newGov, newDep,
-          edge.getRelation(), edge.getWeight());
+      SemanticGraphEdge newEdge = new SemanticGraphEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
       retList.add(newEdge);
     }
     return retList;

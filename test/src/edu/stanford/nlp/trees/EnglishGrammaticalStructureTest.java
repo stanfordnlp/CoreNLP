@@ -597,7 +597,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       String depString = EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(true), tree, false, false);
-      assertEquals("Unexpected basic dependencies for tree "+testTree,
+      assertEquals("Unexpected collapsed dependencies for tree "+testTree,
           testAnswer, depString);
     }
 

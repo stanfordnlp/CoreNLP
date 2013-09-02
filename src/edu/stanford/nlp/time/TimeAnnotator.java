@@ -11,8 +11,10 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Annotate temporal expressions with {@link SUTime}.
@@ -229,4 +231,13 @@ public class TimeAnnotator implements Annotator {
     return timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docDate, timeIndex);
   }
 
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(SUTIME_REQUIREMENT);
+  }
 }

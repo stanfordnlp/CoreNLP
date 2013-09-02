@@ -10,8 +10,10 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Timing;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * This class will add NER information to an
@@ -29,9 +31,9 @@ import java.util.Properties;
  */
 public class NERCombinerAnnotator implements Annotator {
 
-  private NERClassifierCombiner ner;
+  private final NERClassifierCombiner ner;
 
-  private Timing timer = new Timing();
+  private final Timing timer = new Timing();
   private boolean VERBOSE = true;
 
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
@@ -111,5 +113,21 @@ public class NERCombinerAnnotator implements Annotator {
       throw new RuntimeException("unable to find sentences in: " + annotation);
     }
     //timerStop("done.");
+  }
+
+  @Override
+  public Set<Requirement> requires() {
+    // TODO: we could check the models to see which ones use lemmas
+    // and which ones use pos tags
+    if (ner.usesSUTime() || ner.appliesNumericClassifiers()) {
+      return TOKENIZE_SSPLIT_POS_LEMMA;
+    } else {
+      return TOKENIZE_AND_SSPLIT;
+    }
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(NER_REQUIREMENT);
   }
 }

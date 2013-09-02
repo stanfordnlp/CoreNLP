@@ -688,6 +688,7 @@ public class TestSentence implements SequenceModel {
     return getScores(history);
   }
 
+  // todo [cdm 2013]: Tagging could be sped up quite a bit here if we cached int arrays of tags by index, not Strings
   protected String[] stringTagsAt(int pos) {
     if ((pos < leftWindow()) || (pos >= size + leftWindow())) {
       return naTagArr;

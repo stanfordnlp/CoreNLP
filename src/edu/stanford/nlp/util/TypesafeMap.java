@@ -56,7 +56,8 @@ public interface TypesafeMap<BASE> {
    * Collection of keys currently held in this map.  Some implementations may
    * have the returned set be immutable.
    */
-  public Set<Class<? extends Key<BASE, ?>>> keySet();
+  public Set<Class<?>> keySet();
+  //public Set<Class<? extends Key<BASE, ?>>> keySet();
 
   /**
    * Returns true if contains the given key.

@@ -848,11 +848,12 @@ public class CollectionUtils {
     return modes.iterator().next();
   }
 
+
   /**
-   * Transforms the keyset of collection according to the given function and returns a set of the keys
+   * Transforms the keyset of collection according to the given Function and returns a set of the keys
    *
    */
-  public static<T1, T2> Set<T2> transformAsSet(Collection<T1> original, Function<T1, T2> f){
+  public static<T1, T2> Set<T2> transformAsSet(Collection<? extends T1> original, Function<T1, ? extends T2> f){
     Set<T2> transformed = new HashSet<T2>();
     for(T1 t: original){
       transformed.add(f.apply(t));
@@ -860,4 +861,30 @@ public class CollectionUtils {
     return transformed;
   }
 
+
+  /**
+   * Transforms the keyset of collection according to the given Function and returns a list
+   *
+   */
+  public static<T1, T2> List<T2> transformAsList(Collection<? extends T1> original, Function<T1, ? extends T2> f){
+    List<T2> transformed = new ArrayList<T2>();
+    for(T1 t: original){
+      transformed.add(f.apply(t));
+    }
+    return transformed;
+  }
+
+  /**
+   * Filters the objects in the collection according to the given Filter and returns a list
+   *
+   */
+  public static<T> List<T> filterAsList(Collection<? extends T> original, Filter<? super T> f){
+    List<T> transformed = new ArrayList<T>();
+    for (T t: original) {
+      if (f.accept(t)) {
+        transformed.add(t);
+      }
+    }
+    return transformed;
+  }
 }
