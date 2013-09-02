@@ -2,8 +2,6 @@ package edu.stanford.nlp.tagger.io;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
-
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
@@ -25,12 +23,12 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   final Iterator<Tree> treeIterator;
 
   Tree next = null;
-
-  // int numSentences = 0;
+  
+  int numSentences = 0;
 
   public TreeTaggedFileReader(TaggedFileRecord record) {
     filename = record.file;
-    trf = record.trf == null ? new LabeledScoredTreeReaderFactory() : record.trf;
+    trf = new LabeledScoredTreeReaderFactory();
     transformer = record.treeTransformer;
     normalizer = record.treeNormalizer;
     treeFilter = record.treeFilter;
@@ -53,9 +51,6 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   public boolean hasNext() { return next != null; }
 
   public List<TaggedWord> next() {
-    if (next == null) {
-      throw new NoSuchElementException("Iterator exhausted.");
-    }
     Tree t = next;
     if (normalizer != null) {
       t = normalizer.normalizeWholeTree(t, t.treeFactory());
@@ -81,5 +76,4 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   }
 
   public void remove() { throw new UnsupportedOperationException(); }
-
 }

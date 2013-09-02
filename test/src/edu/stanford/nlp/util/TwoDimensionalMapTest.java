@@ -188,33 +188,5 @@ public class TwoDimensionalMapTest extends TestCase {
     assertEquals("X", valueIterator.next());
     assertFalse(valueIterator.hasNext());
   }
-
-  /**
-   * Tests that addAll works.  Also includes a sneaky equals() test
-   */
-  public void testAddAll() {
-    TwoDimensionalMap<String, String, String> m1 = TwoDimensionalMap.hashMap();
-    m1.put("A", "B", "1");
-    m1.put("Z", "Y", "2");
-    m1.put("Z", "B", "3");
-    m1.put("A", "Y", "4");
-    m1.put("D", "D", "5");
-    m1.put("D", "F", "6");
-    m1.put("K", "G", "7");
-    m1.put("G", "F", "8");
-
-    TwoDimensionalMap<String, String, String> m2 = TwoDimensionalMap.treeMap();
-    m2.addAll(m1, Functions.<String>identityFunction());
-    assertEquals(m1, m2);
-
-    Function<String, Integer> valueOf = new Function<String, Integer>() {
-      public Integer apply(String input) { return Integer.valueOf(input); }
-    };
-
-    TwoDimensionalMap<String, String, Integer> m3 = TwoDimensionalMap.hashMap();
-    m3.addAll(m1, valueOf);
-    assertEquals(m1.size(), m3.size());
-    assertEquals(3, m3.get("Z", "B").intValue());
-  }
 }
 

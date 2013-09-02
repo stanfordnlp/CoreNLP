@@ -18,7 +18,8 @@ public class ChunkAnnotationUtilsTest extends TestCase {
     String text = "I have created sentence1.  And then sentence2.  Now sentence3. Finally sentence4.";
     Annotator tokenizer = new PTBTokenizerAnnotator();
     Annotator ssplit = new WordsToSentencesAnnotator();
-    Annotation annotation = new Annotation(text);
+    Annotation annotation = new Annotation();
+    annotation.set(CoreAnnotations.TextAnnotation.class, text);
     tokenizer.annotate(annotation);
     ssplit.annotate(annotation);
 

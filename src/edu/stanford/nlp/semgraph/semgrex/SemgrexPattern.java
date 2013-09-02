@@ -5,7 +5,6 @@ import java.util.*;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * A SemgrexPattern is a <code>tgrep</code>-type pattern for matching node
@@ -46,7 +45,6 @@ import edu.stanford.nlp.util.Generics;
  * <tr><td>A &gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths
  * <tr><td>A x,y&lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following dep-&gt;gov paths between distances of x and y
  * <tr><td>A x,y&gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths between distances of x and y
- * <tr><td>A == B <td>A and B are the same nodes in the same graph
  * <tr><td>A @ B <td>A is aligned to B
  * </table>
  * <p/>
@@ -196,7 +194,7 @@ public abstract class SemgrexPattern implements Serializable {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg) {
-    return matcher(sg, sg.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(), Generics.<String, String>newHashMap(),
+    return matcher(sg, sg.getFirstRoot(), new HashMap<String, IndexedWord>(), new HashMap<String, String>(),
         new VariableStrings(), false);
   }
 
@@ -205,7 +203,7 @@ public abstract class SemgrexPattern implements Serializable {
    * initial conditions on the variable assignments
    */
   public SemgrexMatcher matcher(SemanticGraph sg, Map<String, IndexedWord> variables) {
-    return matcher(sg, sg.getFirstRoot(), variables, Generics.<String, String>newHashMap(), new VariableStrings(), false);
+    return matcher(sg, sg.getFirstRoot(), variables, new HashMap<String, String>(), new VariableStrings(), false);
   }
 
   /**
@@ -219,18 +217,18 @@ public abstract class SemgrexPattern implements Serializable {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, boolean ignoreCase) {
-    return matcher(sg, sg.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(), Generics.<String, String>newHashMap(),
+    return matcher(sg, sg.getFirstRoot(), new HashMap<String, IndexedWord>(), new HashMap<String, String>(),
         new VariableStrings(), ignoreCase);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
-    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(),
-        Generics.<String, String>newHashMap(), new VariableStrings(), false);
+    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new HashMap<String, IndexedWord>(),
+        new HashMap<String, String>(), new VariableStrings(), false);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph, boolean ignoreCase) {
-    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(),
-        Generics.<String, String>newHashMap(), new VariableStrings(), ignoreCase);
+    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new HashMap<String, IndexedWord>(),
+        new HashMap<String, String>(), new VariableStrings(), ignoreCase);
   }
 
   // compile method

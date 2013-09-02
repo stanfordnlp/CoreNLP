@@ -12,6 +12,7 @@ import java.util.Properties;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -35,7 +36,7 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
 
   private WhitespaceLexer lexer;
   private final boolean eolIsSignificant;
-
+  
   /**
    * A factory which vends WhitespaceTokenizers.
    *
@@ -56,7 +57,7 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
      * @return A TokenizerFactory that returns Word objects
      */
     public static TokenizerFactory<Word> newTokenizerFactory() {
-      return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(),
+      return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(), 
                                                   false);
     }
 
@@ -87,7 +88,7 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
 
     public Tokenizer<T> getTokenizer(Reader r, String extraOptions) {
       Properties prop = StringUtils.stringToProperties(extraOptions);
-      boolean tokenizeNewlines =
+      boolean tokenizeNewlines = 
         PropertiesUtils.getBool(prop, "tokenizeNLs", this.tokenizeNLs);
 
       return new WhitespaceTokenizer<T>(factory, r, tokenizeNewlines);
@@ -140,7 +141,7 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
    * @param r The Reader that is its source.
    * @param eolIsSignificant Whether eol tokens should be returned.
    */
-  public WhitespaceTokenizer(LexedTokenFactory factory,
+  public WhitespaceTokenizer(LexedTokenFactory factory, 
                              Reader r, boolean eolIsSignificant) {
     this.eolIsSignificant = eolIsSignificant;
     // The conditional below is perhaps currently needed in LexicalizedParser, since
@@ -154,21 +155,21 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
   public static WhitespaceTokenizer<CoreLabel> newCoreLabelWhitespaceTokenizer(Reader r) {
     return new WhitespaceTokenizer<CoreLabel>(new CoreLabelTokenFactory(), r, false);
   }
-
+  
   public static WhitespaceTokenizer<CoreLabel> newCoreLabelWhitespaceTokenizer(Reader r, boolean tokenizeNLs) {
     return new WhitespaceTokenizer<CoreLabel>(new CoreLabelTokenFactory(), r, tokenizeNLs);
   }
-
-  public static WhitespaceTokenizer<Word>
-    newWordWhitespaceTokenizer(Reader r)
+  
+  public static WhitespaceTokenizer<Word> 
+    newWordWhitespaceTokenizer(Reader r) 
   {
     return newWordWhitespaceTokenizer(r, false);
   }
 
-  public static WhitespaceTokenizer<Word>
-    newWordWhitespaceTokenizer(Reader r, boolean eolIsSignificant)
+  public static WhitespaceTokenizer<Word> 
+    newWordWhitespaceTokenizer(Reader r, boolean eolIsSignificant) 
   {
-    return new WhitespaceTokenizer<Word>(new WordTokenFactory(), r,
+    return new WhitespaceTokenizer<Word>(new WordTokenFactory(), r, 
                                          eolIsSignificant);
   }
 
@@ -181,12 +182,12 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
   ---- */
 
   public static TokenizerFactory<Word> factory() {
-    return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(),
+    return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(), 
                                                 false);
   }
 
   public static TokenizerFactory<Word> factory(boolean eolIsSignificant) {
-    return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(),
+    return new WhitespaceTokenizerFactory<Word>(new WordTokenFactory(), 
                                                 eolIsSignificant);
   }
 
@@ -202,17 +203,17 @@ public class WhitespaceTokenizer<T extends HasWord> extends AbstractTokenizer<T>
    * @throws IOException If can't open files, etc.
    */
   public static void main(String[] args) throws IOException {
-
+    
     boolean eolIsSignificant = (args.length > 0 && args[0].equals("-cr"));
-    Reader reader = ((args.length > 0 &&
+    Reader reader = ((args.length > 0 && 
                       !args[args.length - 1].equals("-cr")) ?
                      new InputStreamReader(new FileInputStream
                                            (args[args.length - 1]), "UTF-8") :
                      new InputStreamReader(System.in, "UTF-8"));
-    WhitespaceTokenizer<Word> tokenizer =
-      new WhitespaceTokenizer<Word>(new WordTokenFactory(), reader,
+    WhitespaceTokenizer<Word> tokenizer = 
+      new WhitespaceTokenizer<Word>(new WordTokenFactory(), reader, 
                                     eolIsSignificant);
-    PrintWriter pw =
+    PrintWriter pw = 
       new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"), true);
     while (tokenizer.hasNext()) {
       Word w = tokenizer.next();

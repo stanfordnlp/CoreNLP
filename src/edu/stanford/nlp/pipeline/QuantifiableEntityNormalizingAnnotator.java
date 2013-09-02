@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.NormalizedNamedEntityTagAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
@@ -26,7 +27,7 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
   private Timing timer = new Timing();
   private final boolean VERBOSE;
   private static final String DEFAULT_BACKGROUND_SYMBOL = "O";
-  private final boolean collapse;  // TODO: collpase = true won't work properly (see annotateTokens)
+  private final boolean collapse;
 
   public static final String BACKGROUND_SYMBOL_PROPERTY = "background";
   public static final String COLLAPSE_PROPERTY = "collapse";
@@ -45,10 +46,7 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
     // this next line is yuck as QuantifiableEntityNormalizer is still static
     QuantifiableEntityNormalizer.BACKGROUND_SYMBOL = backgroundSymbol;
     property = name + "." + COLLAPSE_PROPERTY;
-    collapse = PropertiesUtils.getBool(props, property, false);
-    if (this.collapse) {
-      System.err.println("WARNING: QuantifiableEntityNormalizingAnnotator does not work well with collapse=true");
-    }
+    collapse = PropertiesUtils.getBool(props, property, true);
     VERBOSE = false;
   }
 
@@ -62,7 +60,7 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
    *          Whether to write messages
    */
   public QuantifiableEntityNormalizingAnnotator(String backgroundSymbol, boolean verbose) {
-    this(backgroundSymbol, verbose, false);
+    this(backgroundSymbol, verbose, true);
   }
 
   /**
@@ -83,9 +81,6 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
     QuantifiableEntityNormalizer.BACKGROUND_SYMBOL = backgroundSymbol;
     VERBOSE = verbose;
     this.collapse = collapse;
-    if (this.collapse) {
-      System.err.println("WARNING: QuantifiableEntityNormalizingAnnotator does not work well with collapse=true");
-    }
   }
 
   public void annotate(Annotation annotation) {
@@ -97,7 +92,25 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-        annotateTokens(tokens);
+        List<CoreLabel> words = new ArrayList<CoreLabel>();
+        for (CoreLabel token : tokens) {
+          CoreLabel word = new CoreLabel();
+          word.setWord(token.word());
+          word.setNER(token.ner());
+          word.setTag(token.tag());
+          
+          // copy fields potentially set by SUTime
+          NumberSequenceClassifier.transferAnnotations(token, word);
+          
+          words.add(word);
+        }
+        doOneSentence(words);
+        for (int i = 0; i < words.size(); i++) {
+          String ner = words.get(i).ner();
+          tokens.get(i).setNER(ner);
+          tokens.get(i).set(NormalizedNamedEntityTagAnnotation.class,
+              words.get(i).get(NormalizedNamedEntityTagAnnotation.class));
+        }
       }
       if (VERBOSE) {
         timer.stop("done.");
@@ -105,34 +118,27 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
       }
     } else if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-      annotateTokens(tokens);
+      List<CoreLabel> words = new ArrayList<CoreLabel>();
+      for (CoreLabel token : tokens) {
+        CoreLabel word = new CoreLabel();
+        word.setWord(token.word());
+        word.setNER(token.ner());
+        word.setTag(token.tag());
+        
+        // copy fields potentially set by SUTime
+        NumberSequenceClassifier.transferAnnotations(token, word);
+        
+        words.add(word);
+      }
+      doOneSentence(words);
+      for (int i = 0; i < words.size(); i++) {
+        String ner = words.get(i).ner();
+        tokens.get(i).setNER(ner);
+        tokens.get(i).set(NormalizedNamedEntityTagAnnotation.class,
+            words.get(i).get(NormalizedNamedEntityTagAnnotation.class));
+      }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
-    }
-  }
-
-  private <TOKEN extends CoreLabel> void annotateTokens(List<TOKEN> tokens) {
-    // Make a copy of the tokens before annotating because QuantifiableEntityNormalizer may change the POS too
-    List<CoreLabel> words = new ArrayList<CoreLabel>();
-    for (CoreLabel token : tokens) {
-      CoreLabel word = new CoreLabel();
-      word.setWord(token.word());
-      word.setNER(token.ner());
-      word.setTag(token.tag());
-
-      // copy fields potentially set by SUTime
-      NumberSequenceClassifier.transferAnnotations(token, word);
-
-      words.add(word);
-    }
-    doOneSentence(words);
-    // TODO: If collapsed is set, tokens for entities are collapsed into one node then
-    // (words.size() != tokens.size() and the logic below just don't work!!!
-    for (int i = 0; i < words.size(); i++) {
-      String ner = words.get(i).ner();
-      tokens.get(i).setNER(ner);
-      tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
-              words.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
     }
   }
 
@@ -140,16 +146,4 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
     QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(words, collapse);
   }
 
-
-  @Override
-  public Set<Requirement> requires() {
-    return Collections.singleton(TOKENIZE_REQUIREMENT);
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    // technically it adds some NER, but someone who wants full NER
-    // labels will be very disappointed, so we do not claim to produce NER
-    return Collections.singleton(QUANTIFIABLE_ENTITY_NORMALIZATION_REQUIREMENT);
-  }
 }

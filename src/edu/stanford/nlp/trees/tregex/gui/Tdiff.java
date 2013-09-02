@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.DoAnnotation;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.ConstituentFactory;
 import edu.stanford.nlp.trees.LabeledConstituent;
@@ -12,7 +12,6 @@ import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 
 /**
@@ -43,7 +42,7 @@ public class Tdiff {
 //    if (t1 == null || t2 == null || ! t1.value().equals(t2.value())) {
 //      System.err.printf("t1 value is %s; t2 value is %s; t1 is %s t2 is %s", t1.value(), t2.value(), t1, t2);
 //    }
-    Set<Constituent> t1Labels = (t1 == null) ? Generics.<Constituent>newHashSet() : t1.constituents(cf);
+    Set<Constituent> t1Labels = (t1 == null) ? new HashSet<Constituent>() : t1.constituents(cf);
     if(t2 != null) {
       t2.setSpans();
       for(Tree subTree : t2) {
@@ -52,9 +51,9 @@ public class Tdiff {
           Constituent c = cf.newConstituent(span.getSource(), span.getTarget(), subTree.label(), 0.0);
           if(t1Labels.contains(c)) {
             t1Labels.remove(c);
-            ((CoreLabel) subTree.label()).set(CoreAnnotations.DoAnnotation.class, false);
+            ((CoreLabel) subTree.label()).set(DoAnnotation.class, false);
           } else {
-            ((CoreLabel) subTree.label()).set(CoreAnnotations.DoAnnotation.class, true);
+            ((CoreLabel) subTree.label()).set(DoAnnotation.class, true);
           }
         }
       }

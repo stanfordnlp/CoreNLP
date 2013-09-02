@@ -1,0 +1,13 @@
+Label	Correct	Predict	Actual	Precn	Recall	F
+Date                 	132.0	190.0	174.0	69.5	75.9	72.5
+FinalScore           	299.0	326.0	347.0	91.7	86.2	88.9
+NFLGame              	76.0	123.0	147.0	61.8	51.7	56.3
+NFLPlayoffGame       	10.0	28.0	38.0	35.7	26.3	30.3
+NFLRegularSeasonGame 	0.0	2.0	6.0	0.0	0.0	0.0
+NFLTeam              	804.0	1110.0	818.0	72.4	98.3	83.4
+ScoreType-1          	326.0	469.0	525.0	69.5	62.1	65.6
+ScoreType-2          	50.0	64.0	79.0	78.1	63.3	69.9
+ScoreType-3          	18.0	28.0	36.0	64.3	50.0	56.3
+ScoreType-4          	8.0	11.0	14.0	72.7	57.1	64.0
+ScoreType-5          	1.0	2.0	4.0	50.0	25.0	33.3
+Total	1724.0	2353.0	2188.0	73.3	78.8	75.9

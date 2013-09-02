@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -65,15 +64,5 @@ public class CharniakParserAnnotator implements Annotator {
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
     }
-  }
-
-  @Override
-  public Set<Requirement> requires() {
-    return TOKENIZE_AND_SSPLIT;
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return PARSE_AND_TAG;
   }
 }

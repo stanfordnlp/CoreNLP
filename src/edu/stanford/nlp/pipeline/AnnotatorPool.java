@@ -1,8 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import edu.stanford.nlp.util.Generics;
 
 /**
  * An object for keeping track of Annotators. Typical use is to allow multiple
@@ -24,8 +23,8 @@ public class AnnotatorPool {
    * Create an empty AnnotatorPool.
    */
   public AnnotatorPool() {
-    this.annotators = Generics.newHashMap();
-    this.factories = Generics.newHashMap();
+    this.annotators = new HashMap<String, Annotator>();
+    this.factories = new HashMap<String, AnnotatorFactory>();
   }
 
   /**

@@ -9,6 +9,8 @@ import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.stats.PrecisionRecallStats;
+import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
+import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
 import edu.stanford.nlp.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -240,7 +242,6 @@ public class SUTimeMain {
   {
     if (sent != null) {
       Collections.sort(sent.timexes, new Comparator<TimebankTimex>() {
-        @Override
         public int compare(TimebankTimex o1, TimebankTimex o2) {
           if (o1.tid == o2.tid) { return 0; }
           else return (o1.tid < o2.tid)? -1:1;
@@ -254,14 +255,14 @@ public class SUTimeMain {
       annotation.set(CoreAnnotations.DocDateAnnotation.class, sent.docPubDate);
       pipeline.annotate(annotation);
 
-      List<CoreMap> timexes = annotation.get(TimeAnnotations.TimexAnnotations.class);
+      List<CoreMap> timexes = annotation.get(TimexAnnotations.class);
       int i = 0;
       for (CoreMap t:timexes) {
         String[] newFields;
         if (sent.timexes.size() > i) {
           String res;
           TimebankTimex goldTimex = sent.timexes.get(i);
-          Timex guessTimex = t.get(TimeAnnotations.TimexAnnotation.class);
+          Timex guessTimex = t.get(TimexAnnotation.class);
           String s1 = goldTimex.timexStr.replaceAll("\\s+", "");
           String s2 = guessTimex.text().replaceAll("\\s+", "");
           if (s1.equals(s2)) {
@@ -273,10 +274,10 @@ public class SUTimeMain {
             res = "BAD";
           }
           newFields = new String[] { res, goldTimex.timexId, goldTimex.timexVal, goldTimex.timexOrigVal, goldTimex.timexStr,
-                  t.get(TimeAnnotations.TimexAnnotation.class).toString() };
+                  t.get(TimexAnnotation.class).toString() };
           i++;
         } else {
-          newFields = new String[] { "NONE" , t.get(TimeAnnotations.TimexAnnotation.class).toString()};
+          newFields = new String[] { "NONE" , t.get(TimexAnnotation.class).toString()};
           evalStats.estPrStats.incrementFP();
         }
         pw.println("GOT | "+ StringUtils.join(newFields, "|"));
@@ -299,7 +300,7 @@ public class SUTimeMain {
               if (t.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) >= index) {
                 found = true;
                 evalStats.prStats.incrementTP();
-                if (goldTimex.timexOrigVal.equals(t.get(TimeAnnotations.TimexAnnotation.class).value())) {
+                if (goldTimex.timexOrigVal.equals(t.get(TimexAnnotation.class).value())) {
                   evalStats.valPrStats.incrementTP();
                 } else {
                   evalStats.valPrStats.incrementFN();
@@ -378,7 +379,6 @@ public class SUTimeMain {
 
   public static String joinWordTags(List<? extends CoreMap> l, String glue, int start, int end) {
     return StringUtils.join(l, glue, new Function<CoreMap, String>() {
-      @Override
       public String apply(CoreMap in) {
         return in.get(CoreAnnotations.TextAnnotation.class) + "/" + in.get(CoreAnnotations.PartOfSpeechAnnotation.class);
       }
@@ -410,10 +410,10 @@ public class SUTimeMain {
     }
     if (attrDebugPw != null) {
       for (CoreMap sent:sents) {
-        List<CoreMap> timexes = sent.get(TimeAnnotations.TimexAnnotations.class);
+        List<CoreMap> timexes = sent.get(TimexAnnotations.class);
         if (timexes != null) {
           for (CoreMap t:timexes) {
-            Timex timex = t.get(TimeAnnotations.TimexAnnotation.class);
+            Timex timex = t.get(TimexAnnotation.class);
             int sentIndex = sent.get(CoreAnnotations.SentenceIndexAnnotation.class);
             int sentTokenStart = sent.get(CoreAnnotations.TokenBeginAnnotation.class);
             int tokenStart;
@@ -439,17 +439,17 @@ public class SUTimeMain {
       }
     }
     if (debugPw != null) {
-      List<CoreMap> timexes = docAnnotation.get(TimeAnnotations.TimexAnnotations.class);
+      List<CoreMap> timexes = docAnnotation.get(TimexAnnotations.class);
       for (CoreMap t:timexes) {
-        String[] newFields = { docId, docDate, t.get(TimeAnnotations.TimexAnnotation.class).toString() };
+        String[] newFields = { docId, docDate, t.get(TimexAnnotation.class).toString() };
         debugPw.println("GOT | "+ StringUtils.join(newFields, "|"));
       }
     }
     if (extPw != null || attrPw != null) {
      for (CoreMap sent:sents) {
       int sentTokenBegin = sent.get(CoreAnnotations.TokenBeginAnnotation.class);
-      for (CoreMap t:sent.get(TimeAnnotations.TimexAnnotations.class)) {
-        Timex tmx = t.get(TimeAnnotations.TimexAnnotation.class);
+      for (CoreMap t:sent.get(TimexAnnotations.class)) {
+        Timex tmx = t.get(TimexAnnotation.class);
         List<CoreLabel> tokens = t.get(CoreAnnotations.TokensAnnotation.class);
         int tokenIndex = 0;
         if (tokens == null) {
@@ -526,7 +526,6 @@ public class SUTimeMain {
   }
 
   private static CoreLabelTokenFactory tokenFactory = new CoreLabelTokenFactory();
-
   private static CoreMap wordsToSentence(List<String> sentWords)
   {
     String sentText = StringUtils.join(sentWords, " ");
@@ -654,7 +653,7 @@ public class SUTimeMain {
 
   private static Map<String,List<TimexAttributes>> readTimexAttrExts(String extentsFile, String attrsFile) throws IOException
   {
-    Map<String,List<TimexAttributes>> timexMap = Generics.newHashMap();
+    Map<String,List<TimexAttributes>> timexMap = new HashMap<String, List<TimexAttributes>>();
     BufferedReader extBr = IOUtils.getBufferedFileReader(extentsFile);
     String line;
     String lastDocId = null;
@@ -805,7 +804,6 @@ public class SUTimeMain {
 
   private static String requiredDocDateFormat;
   private static boolean useGUTime = false;
-
   public static AnnotationPipeline getPipeline(Properties props, boolean tokenize) throws Exception
   {
 //    useGUTime = Boolean.parseBoolean(props.getProperty("gutime", "false"));
@@ -995,5 +993,4 @@ public class SUTimeMain {
         break;
     }
   }
-
 }
