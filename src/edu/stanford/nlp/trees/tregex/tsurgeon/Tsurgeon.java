@@ -33,10 +33,10 @@ import edu.stanford.nlp.trees.tregex.Macros;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -271,7 +271,7 @@ public class Tsurgeon {
     String trfOption = "-trf";
     String macroOption = "-macros";
     String macroFilename = "";
-    Map<String,Integer> flagMap = new HashMap<String,Integer>();
+    Map<String,Integer> flagMap = Generics.newHashMap();
     flagMap.put(patternOperationOption,2);
     flagMap.put(treeFileOption,1);
     flagMap.put(trfOption,1);
@@ -316,7 +316,7 @@ public class Tsurgeon {
       } else {
         hf = ReflectionLoading.loadByReflection(headFinderClassName, (Object[]) headFinderArgs);
       }
-      compiler = new TregexPatternCompiler(hf);      
+      compiler = new TregexPatternCompiler(hf);
     }
     Macros.addAllMacros(compiler, macroFilename, encoding);
     if (argsMap.containsKey(patternOperationOption)) {

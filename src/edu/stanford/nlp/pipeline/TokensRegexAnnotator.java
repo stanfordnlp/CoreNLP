@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.tokensregex.CoreMapExpressionExtractor;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
@@ -127,9 +126,9 @@ public class TokensRegexAnnotator implements Annotator {
       addTokenOffsets(annotation);
     }
     List<CoreMap> allMatched;
-    if (annotation.containsKey(SentencesAnnotation.class)) {
+    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       allMatched = new ArrayList<CoreMap>();
-      List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
+      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       for (CoreMap sentence : sentences) {
         List<CoreMap> matched = extract(sentence);
         if (matched != null && options.matchedExpressionsAnnotationKey != null) {

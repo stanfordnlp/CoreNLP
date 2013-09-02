@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.WordFactory;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 
 import java.io.Reader;
 import java.util.*;
@@ -80,9 +81,9 @@ public class TreebankAnnotator {
     //    op.tlpParams = new EnglishTreebankParserParams();
     // CDM: Aug 2004: With new implementation of treebank split categories,
     // I've hardwired this to load English ones.  Otherwise need training data.
-    // op.trainOptions.splitters = new HashSet(Arrays.asList(op.tlpParams.splitters()));
+    // op.trainOptions.splitters = Generics.newHashSet(Arrays.asList(op.tlpParams.splitters()));
     op.trainOptions.splitters = ParentAnnotationStats.getEnglishSplitCategories(treebankRoot);
-    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(op.tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(op.tlpParams.sisterSplitters()));
     op.setOptions("-acl03pcfg", "-cnf");
     treeTransformer = new TreeAnnotatorAndBinarizer(op.tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), true, op);
     //    BinarizerFactory.TreeAnnotator.setTreebankLang(op.tlpParams);

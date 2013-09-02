@@ -16,6 +16,7 @@ import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.ParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Various modifications to the MWEs in the treebank.
@@ -35,7 +36,7 @@ public final class MWEPreprocessor {
   //UW words extracted from June2010 revision of FTB
   private static class ManualUWModel {
     
-    private static final Set<String> nouns = new HashSet<String>();
+    private static final Set<String> nouns = Generics.newHashSet();
     private static final String nStr = 
       "A. Alezais alfa Annick Appliances Ardenne Artois baptiste Bargue Bellanger Bregenz clefs Coeurs ...conomie consumer " +
       "contrôleur Coopérative Coppée cuisson dédoublement demandeuse défraie Domestic dépistage Elektra Elettrodomestici " +
@@ -43,10 +44,10 @@ public final class MWEPreprocessor {
       "Meydan ménagers Muenchener Parcel Prost R. sam Sara Siège silos SPA Stateman Valley Vanity VF Vidal Vives Yorker Young Zemment";
     //TODO wsg2011: défraie is a verb
     
-    private static final Set<String> adjectives = new HashSet<String>();
+    private static final Set<String> adjectives = Generics.newHashSet();
     private static final String aStr = "astral bis bovin gracieux intégrante italiano sanguin sèche";
     
-    private static final Set<String> preps = new HashSet<String>();
+    private static final Set<String> preps = Generics.newHashSet();
     private static final String pStr = "c o t";
     
     private static int nUnknownWordTypes;

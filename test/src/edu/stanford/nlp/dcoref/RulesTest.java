@@ -4,9 +4,9 @@ import junit.framework.TestCase;
 
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.ling.CoreAnnotations.SpeakerAnnotation;
 
 /**
  * Test some of the "rules" which compose the coref system
@@ -44,7 +44,7 @@ public class RulesTest extends TestCase {
     Mention g4 = new Mention(0, 0, 0, null);
 
     g1.headWord = new CoreLabel();
-    g1.headWord.set(SpeakerAnnotation.class, "john abraham bauer");
+    g1.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "john abraham bauer");
     m1.headString = "john";
     m2.headString = "bauer";
     m3.headString = "foo";
@@ -55,30 +55,30 @@ public class RulesTest extends TestCase {
     m8.headString = "abrahamz";
 
     g2.headWord = new CoreLabel();
-    g2.headWord.set(SpeakerAnnotation.class, "john");
+    g2.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "john");
     
     g3.headWord = new CoreLabel();
-    g3.headWord.set(SpeakerAnnotation.class, "joh");
+    g3.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "joh");
     
     g4.headWord = new CoreLabel();
-    g4.headWord.set(SpeakerAnnotation.class, "johnz");
+    g4.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "johnz");
     
 
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g1, m1));
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g1, m2));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m3));
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g1, m4));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m5));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m6));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m7));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m8));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m1));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m2));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m3));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m4));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m5));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m6));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m7));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m8));
 
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g2, m1));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g3, m1));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g4, m1));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g2, m1));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g3, m1));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g4, m1));
     
     // not symmetrical
     // also, shouldn't blow up if the annotation isn't set
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(m1, g1));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(m1, g1));
   }
 }

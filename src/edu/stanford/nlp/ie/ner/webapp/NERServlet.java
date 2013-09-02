@@ -8,14 +8,13 @@ import java.util.zip.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.crf.NERGUI;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.ling.CoreAnnotations;
 
 /**
  *  This is a servlet interface to the CRFClassifier.
@@ -32,7 +31,7 @@ public class NERServlet extends HttpServlet
   private boolean spacing;
   private String defaultClassifier;
   private List<String> classifiers = new ArrayList<String>();
-  private HashMap<String, CRFClassifier> ners;
+  private Map<String, CRFClassifier> ners;
 
   private static final int MAXIMUM_QUERY_LENGTH = 3000;
   
@@ -61,7 +60,7 @@ public class NERServlet extends HttpServlet
       log(classifier);
     }
 
-    ners = new HashMap<String, CRFClassifier>();
+    ners = Generics.newHashMap();
     for (String classifier : classifiers) {
       CRFClassifier model = null;
       String filename = "/WEB-INF/data/models/" + classifier;
@@ -162,7 +161,7 @@ public class NERServlet extends HttpServlet
     if (outputFormat.equals("highlighted")) {
       outputHighlighting(out, ners.get(classifier), input);
     } else {
-      out.print(StringEscapeUtils.escapeHtml(ners.get(classifier).classifyToString(input, outputFormat, preserveSpacing)));
+      out.print(StringEscapeUtils.escapeHtml4(ners.get(classifier).classifyToString(input, outputFormat, preserveSpacing)));
     }
   }
 
@@ -179,12 +178,12 @@ public class NERServlet extends HttpServlet
     int lastEndOffset = 0;
     for (List<CoreMap> sentence : sentences) {
       for (CoreMap word : sentence) {
-        int beginOffset = word.get(CharacterOffsetBeginAnnotation.class);
-        int endOffset = word.get(CharacterOffsetEndAnnotation.class);
-        String answer = word.get(AnswerAnnotation.class);
+        int beginOffset = word.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int endOffset = word.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        String answer = word.get(CoreAnnotations.AnswerAnnotation.class);
 
         if (beginOffset > lastEndOffset) {
-          result.append(StringEscapeUtils.escapeHtml(input.substring(lastEndOffset, beginOffset)));
+          result.append(StringEscapeUtils.escapeHtml4(input.substring(lastEndOffset, beginOffset)));
         }
         // Add a color bar for any tagged words
         if (!background.equals(answer)) {
@@ -193,7 +192,7 @@ public class NERServlet extends HttpServlet
                         NERGUI.colorToHTML(color) + "\">");
         }
 
-        result.append(StringEscapeUtils.escapeHtml(input.substring(beginOffset, endOffset)));
+        result.append(StringEscapeUtils.escapeHtml4(input.substring(beginOffset, endOffset)));
         // Turn off the color bar
         if (!background.equals(answer)) {
           result.append("</span>");
@@ -203,7 +202,7 @@ public class NERServlet extends HttpServlet
       }
     }
     if (lastEndOffset < input.length()) {
-      result.append(StringEscapeUtils.escapeHtml(input.substring(lastEndOffset)));      
+      result.append(StringEscapeUtils.escapeHtml4(input.substring(lastEndOffset)));      
     }
     result.append("<br><br>");
     result.append("Potential tags:");
@@ -212,7 +211,7 @@ public class NERServlet extends HttpServlet
       Color color = tagToColorMap.get(label);
       result.append("<span style=\"color:#ffffff;background:" + 
                     NERGUI.colorToHTML(color) + "\">");
-      result.append(StringEscapeUtils.escapeHtml(label));
+      result.append(StringEscapeUtils.escapeHtml4(label));
       result.append("</span>");
     }
     out.print(result.toString());

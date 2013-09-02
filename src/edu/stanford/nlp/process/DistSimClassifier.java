@@ -1,10 +1,10 @@
 package edu.stanford.nlp.process;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
 
 
@@ -39,7 +39,7 @@ public class DistSimClassifier implements Serializable {
     this.numberEquivalence = numberEquivalence;
     this.unknownWordClass = unknownWordClass;
     Timing.startDoing("Loading distsim lexicon from " + filename);
-    lexicon = new HashMap<String, String>(1 << 15);  // make a reasonable starting size
+    lexicon = Generics.newHashMap(1 << 15);  // make a reasonable starting size
     boolean terryKoo = "terryKoo".equals(format);
     for (String line : ObjectBank.getLineIterator(filename, encoding)) {
       String word;

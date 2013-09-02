@@ -9,11 +9,10 @@ import junit.framework.TestCase;
 import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefClusterIdAnnotation;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 public class DeterministicCorefAnnotatorITest extends TestCase {
@@ -52,7 +51,7 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     pipeline.annotate(document);
 
     // test CorefGraphAnnotation
-    Map<Integer, CorefChain> corefChains = document.get(CorefChainAnnotation.class);
+    Map<Integer, CorefChain> corefChains = document.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     Assert.assertNotNull(corefChains);
 
     // test chainID = m.corefClusterID
@@ -64,12 +63,12 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     }
 
     // test CorefClusterIdAnnotation
-    List<CoreMap> sentences = document.get(SentencesAnnotation.class);
-    CoreLabel ramageToken = sentences.get(0).get(TokensAnnotation.class).get(1);
-    CoreLabel heToken = sentences.get(1).get(TokensAnnotation.class).get(0);
-    Integer ramageClusterId = ramageToken.get(CorefClusterIdAnnotation.class);
+    List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+    CoreLabel ramageToken = sentences.get(0).get(CoreAnnotations.TokensAnnotation.class).get(1);
+    CoreLabel heToken = sentences.get(1).get(CoreAnnotations.TokensAnnotation.class).get(0);
+    Integer ramageClusterId = ramageToken.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
     Assert.assertNotNull(ramageClusterId);
-    Assert.assertSame(ramageClusterId, heToken.get(CorefClusterIdAnnotation.class));
+    Assert.assertSame(ramageClusterId, heToken.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class));
   }
 
   /**
@@ -85,11 +84,11 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     pipeline.annotate(document);
 
     // test CorefChainAnnotation
-    Map<Integer, CorefChain> chains = document.get(CorefChainAnnotation.class);
+    Map<Integer, CorefChain> chains = document.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     Assert.assertNotNull(chains);
 
     // test CorefGraphAnnotation
-    //    List<Pair<IntTuple, IntTuple>> graph = document.get(CorefGraphAnnotation.class);
+    //    List<Pair<IntTuple, IntTuple>> graph = document.get(CorefCoreAnnotations.CorefGraphAnnotation.class);
     //    Assert.assertNotNull(graph);
 
     //    for( Pair<IntTuple, IntTuple> pair : graph ) {
@@ -105,18 +104,18 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     }
 
     // test CorefClusterIdAnnotation
-    List<CoreMap> sentences = document.get(SentencesAnnotation.class);
-    CoreLabel yourMomsToken = sentences.get(0).get(TokensAnnotation.class).get(1);
-    CoreLabel sheToken1 = sentences.get(0).get(TokensAnnotation.class).get(3);
-    CoreLabel sheToken2 = sentences.get(1).get(TokensAnnotation.class).get(0);
-    CoreLabel denverToken1 = sentences.get(0).get(TokensAnnotation.class).get(6);
-    CoreLabel denverToken2 = sentences.get(1).get(TokensAnnotation.class).get(5);
+    List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+    CoreLabel yourMomsToken = sentences.get(0).get(CoreAnnotations.TokensAnnotation.class).get(1);
+    CoreLabel sheToken1 = sentences.get(0).get(CoreAnnotations.TokensAnnotation.class).get(3);
+    CoreLabel sheToken2 = sentences.get(1).get(CoreAnnotations.TokensAnnotation.class).get(0);
+    CoreLabel denverToken1 = sentences.get(0).get(CoreAnnotations.TokensAnnotation.class).get(6);
+    CoreLabel denverToken2 = sentences.get(1).get(CoreAnnotations.TokensAnnotation.class).get(5);
 
-    Integer yourMomsClusterId = yourMomsToken.get(CorefClusterIdAnnotation.class);
-    Integer she1ClusterId = sheToken1.get(CorefClusterIdAnnotation.class);
-    Integer she2ClusterId = sheToken2.get(CorefClusterIdAnnotation.class);
-    Integer denver1ClusterId = denverToken1.get(CorefClusterIdAnnotation.class);
-    Integer denver2ClusterId = denverToken2.get(CorefClusterIdAnnotation.class);
+    Integer yourMomsClusterId = yourMomsToken.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
+    Integer she1ClusterId = sheToken1.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
+    Integer she2ClusterId = sheToken2.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
+    Integer denver1ClusterId = denverToken1.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
+    Integer denver2ClusterId = denverToken2.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
     Assert.assertNotNull(yourMomsClusterId);
     Assert.assertNotNull(she1ClusterId);
     Assert.assertNotNull(she2ClusterId);
@@ -128,9 +127,9 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     Assert.assertNotSame(yourMomsClusterId, denver1ClusterId);
 
     // test CorefClusterAnnotation
-    //    Assert.assertEquals(yourMomsToken.get(CorefClusterAnnotation.class), sheToken1.get(CorefClusterAnnotation.class));
-    //    Assert.assertEquals(yourMomsToken.get(CorefClusterAnnotation.class), sheToken2.get(CorefClusterAnnotation.class));
-    //    Assert.assertEquals(denverToken1.get(CorefClusterAnnotation.class), denverToken2.get(CorefClusterAnnotation.class));
+    //    Assert.assertEquals(yourMomsToken.get(CorefCoreAnnotations.CorefClusterAnnotation.class), sheToken1.get(CorefCoreAnnotations.CorefClusterAnnotation.class));
+    //    Assert.assertEquals(yourMomsToken.get(CorefCoreAnnotations.CorefClusterAnnotation.class), sheToken2.get(CorefCoreAnnotations.CorefClusterAnnotation.class));
+    //    Assert.assertEquals(denverToken1.get(CorefCoreAnnotations.CorefClusterAnnotation.class), denverToken2.get(CorefCoreAnnotations.CorefClusterAnnotation.class));
   }
 
   public static void main(String[] args) throws Exception {

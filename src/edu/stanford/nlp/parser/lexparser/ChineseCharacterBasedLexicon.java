@@ -3,13 +3,15 @@ package edu.stanford.nlp.parser.lexparser;
 import java.io.*;
 import java.util.*;
 
-import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.stats.*;
-import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.Distribution;
+import edu.stanford.nlp.stats.GeneralizedCounter;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
-import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
 /**
@@ -24,7 +26,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
   // 2: penalty for continuation chars only
   private final int penaltyType;
 
-  private Map<List,Distribution> charDistributions;
+  private Map<List,Distribution<Symbol>> charDistributions;
   private Set<Symbol> knownChars;
 
   private Distribution<String> POSDistribution;
@@ -36,7 +38,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
   private final Index<String> wordIndex;
   private final Index<String> tagIndex;
 
-  public ChineseCharacterBasedLexicon(ChineseTreebankParserParams params, 
+  public ChineseCharacterBasedLexicon(ChineseTreebankParserParams params,
                                       Index<String> wordIndex,
                                       Index<String> tagIndex) {
     this.wordIndex = wordIndex;
@@ -103,7 +105,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
 
   @Override
   public void train(List<TaggedWord> sentence, double weight) {
-    trainingSentences.add(sentence);    
+    trainingSentences.add(sentence);
   }
 
   @Override
@@ -113,8 +115,8 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
 
     // first find all chars that occur only once
     for (List<TaggedWord> labels : trainingSentences) {
-      for (int i = 0, size = labels.size(); i < size; i++) {
-        String word = labels.get(i).word();
+      for (TaggedWord label : labels) {
+        String word = label.word();
         if (word.equals(BOUNDARY)) {
           continue;
         }
@@ -127,7 +129,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     }
 
     Set<Symbol> singletons = Counters.keysBelow(charCounter, 1.5);
-    knownChars = new HashSet<Symbol>(charCounter.keySet());
+    knownChars = Generics.newHashSet(charCounter.keySet());
 
     Timing.tick("Counting nGrams...");
     GeneralizedCounter[] POSspecificCharNGrams = new GeneralizedCounter[CONTEXT_LENGTH + 1];
@@ -197,8 +199,8 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     POSDistribution = Distribution.getDistribution(POSCounter);
     Timing.tick("Creating character prior distribution...");
 
-    charDistributions = new HashMap<List, Distribution>();
-    //    charDistributions = new HashMap<List, Distribution>();  // 1.5
+    charDistributions = Generics.newHashMap();
+    //    charDistributions = Generics.newHashMap();  // 1.5
     //    charCounter.incrementCount(Symbol.UNKNOWN, singletons.size());
     int numberOfKeys = charCounter.size() + singletons.size();
     Distribution<Symbol> prior = Distribution.goodTuringSmoothedCounter(charCounter, numberOfKeys);
@@ -241,6 +243,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     }
   }
 
+  @Override
   public float score(IntTaggedWord iTW, int loc, String word, String featureSpec) {
     String tag = tagIndex.get(iTW.tag);
     assert !word.equals(BOUNDARY);
@@ -355,11 +358,13 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
   }
 
   // don't think this should be used, but just in case...
+  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(int word, int loc, String featureSpec) {
     throw new UnsupportedOperationException("ChineseCharacterBasedLexicon has no rule iterator!");
   }
 
   // don't think this should be used, but just in case...
+  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc, String featureSpec) {
     throw new UnsupportedOperationException("ChineseCharacterBasedLexicon has no rule iterator!");
   }
@@ -368,6 +373,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
    *  This method isn't yet implemented in this class.
    *  It currently just returns 0, which may or may not be helpful.
    */
+  @Override
   public int numRules() {
     return 0;
   }
@@ -387,18 +393,22 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     return genWordLengthDist;
   }
 
+  @Override
   public void readData(BufferedReader in) throws IOException {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void writeData(Writer w) throws IOException {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean isKnown(int word) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean isKnown(String word) {
     throw new UnsupportedOperationException();
   }
@@ -475,7 +485,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
       }
     }
 
-    private Object readResolve() throws ObjectStreamException {
+    protected Object readResolve() throws ObjectStreamException {
       switch (type) {
         case CHAR_TYPE:
           return intern();
@@ -535,11 +545,13 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
 
   private static final long serialVersionUID = -5357655683145854069L;
 
+  @Override
   public UnknownWordModel getUnknownWordModel() {
     // TODO Auto-generated method stub
     return null;
   }
 
+  @Override
   public void setUnknownWordModel(UnknownWordModel uwm) {
     // TODO Auto-generated method stub
 

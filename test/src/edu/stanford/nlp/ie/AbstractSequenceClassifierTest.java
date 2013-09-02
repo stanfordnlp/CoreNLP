@@ -5,9 +5,8 @@ import junit.framework.TestCase;
 import java.util.List;
 import java.util.ArrayList;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 
@@ -35,8 +34,8 @@ public class AbstractSequenceClassifierTest extends TestCase {
     assertEquals("Cannot run test on lists of different length", gold.length, guess.length);
     for (int i = 0; i < gold.length; ++i) {
       CoreLabel word = new CoreLabel();
-      word.set(GoldAnswerAnnotation.class, gold[i]);
-      word.set(AnswerAnnotation.class, guess[i]);
+      word.set(CoreAnnotations.GoldAnswerAnnotation.class, gold[i]);
+      word.set(CoreAnnotations.AnswerAnnotation.class, guess[i]);
       sentence.add(word);
     }
     Counter<String> entityTP = new ClassicCounter<String>();
@@ -119,8 +118,8 @@ public class AbstractSequenceClassifierTest extends TestCase {
     assertEquals("Cannot run test on lists of different length", gold.length, guess.length);
     for (int i = 0; i < gold.length; ++i) {
       CoreLabel word = new CoreLabel();
-      word.set(GoldAnswerAnnotation.class, gold[i]);
-      word.set(AnswerAnnotation.class, guess[i]);
+      word.set(CoreAnnotations.GoldAnswerAnnotation.class, gold[i]);
+      word.set(CoreAnnotations.AnswerAnnotation.class, guess[i]);
       sentence.add(word);
     }
     Counter<String> entityTP = new ClassicCounter<String>();

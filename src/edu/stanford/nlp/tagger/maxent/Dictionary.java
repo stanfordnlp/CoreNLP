@@ -6,13 +6,13 @@
  */
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.InDataStreamFile;
-import edu.stanford.nlp.io.OutDataStreamFile;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.util.Generics;
 
 import java.io.IOException;
 import java.io.DataInputStream;
-import java.util.HashMap;
+import java.io.DataOutputStream;
 import java.util.Map;
 
 
@@ -23,8 +23,8 @@ import java.util.Map;
  */
 public class Dictionary {
 
-  private final HashMap<String,TagCount> dict = new HashMap<String,TagCount>();
-  private final HashMap<Integer,CountWrapper> partTakingVerbs = new HashMap<Integer,CountWrapper>();
+  private final Map<String,TagCount> dict = Generics.newHashMap();
+  private final Map<Integer,CountWrapper> partTakingVerbs = Generics.newHashMap();
   private static final String naWord = "NA";
   private static final boolean VERBOSE = false;
 
@@ -165,7 +165,7 @@ public class Dictionary {
   /*
   public void save(String filename) {
     try {
-      OutDataStreamFile rf = new OutDataStreamFile(filename);
+      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
       save(rf);
       rf.close();
     } catch (Exception e) {
@@ -174,7 +174,7 @@ public class Dictionary {
   }
   */
 
-  void save(OutDataStreamFile file) {
+  void save(DataOutputStream file) {
     String[] arr = dict.keySet().toArray(new String[dict.keySet().size()]);
     try {
       file.writeInt(arr.length);
@@ -207,8 +207,7 @@ public class Dictionary {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = new TagCount();
-      count.read(rf);
+      TagCount count = TagCount.readTagCount(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
@@ -234,8 +233,7 @@ public class Dictionary {
 
     for (int i = 0; i < len; i++) {
       String word = rf.readUTF();
-      TagCount count = new TagCount();
-      count.read(rf);
+      TagCount count = TagCount.readTagCount(rf);
       int numTags = count.numTags();
       if (numTags > maxNumTags) {
         maxNumTags = numTags;
@@ -252,7 +250,7 @@ public class Dictionary {
 
   protected void read(String filename) {
     try {
-      InDataStreamFile rf = new InDataStreamFile(filename);
+      DataInputStream rf = IOUtils.getDataInputStream(filename);
       read(rf, filename);
 
       int len1 = rf.readInt();

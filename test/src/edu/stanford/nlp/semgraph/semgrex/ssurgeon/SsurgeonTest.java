@@ -6,11 +6,8 @@ import java.util.Collection;
 
 import org.junit.Test;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
@@ -43,10 +40,10 @@ public class SsurgeonTest {
 
 		// Attach copula
 		IndexedWord isNode = new IndexedWord();
-		isNode.set(TextAnnotation.class, "is");
-		isNode.set(LemmaAnnotation.class, "is");
-		isNode.set(OriginalTextAnnotation.class, "is");
-		isNode.set(PartOfSpeechAnnotation.class, "VBN");
+		isNode.set(CoreAnnotations.TextAnnotation.class, "is");
+		isNode.set(CoreAnnotations.LemmaAnnotation.class, "is");
+		isNode.set(CoreAnnotations.OriginalTextAnnotation.class, "is");
+		isNode.set(CoreAnnotations.PartOfSpeechAnnotation.class, "VBN");
 		SsurgeonEdit addCopula = new AddDep("a2", EnglishGrammaticalRelations.COPULA, isNode);
 		pattern.addEdit(addCopula);
 

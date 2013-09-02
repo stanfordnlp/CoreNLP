@@ -7,11 +7,12 @@ import org.joda.time.field.OffsetDateTimeField;
 import org.joda.time.field.RemainderDateTimeField;
 import org.joda.time.field.ScaledDurationField;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import static org.joda.time.DateTimeFieldType.*;
 import static org.joda.time.DurationFieldType.*;
+
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Extensions to joda time
@@ -218,6 +219,28 @@ public class JodaTimeUtils {
     }
   }
 
+  protected static boolean hasYYYYMMDD(ReadablePartial base)
+  {
+    if (base == null) {
+      return false;
+    } else {
+      return base.isSupported(DateTimeFieldType.year()) &&
+             base.isSupported(DateTimeFieldType.monthOfYear()) &&
+             base.isSupported(DateTimeFieldType.dayOfMonth());
+    }
+  }
+
+  protected static boolean hasYYMMDD(ReadablePartial base)
+  {
+    if (base == null) {
+      return false;
+    } else {
+      return base.isSupported(DateTimeFieldType.yearOfCentury()) &&
+             base.isSupported(DateTimeFieldType.monthOfYear()) &&
+             base.isSupported(DateTimeFieldType.dayOfMonth());
+    }
+  }
+
   protected static boolean hasField(ReadablePeriod base, DurationFieldType field)
   {
     if (base == null) {
@@ -237,7 +260,7 @@ public class JodaTimeUtils {
 
   public static Set<DurationFieldType> getSupportedDurationFields(Partial p)
   {
-    Set<DurationFieldType> supportedDurations = new HashSet<DurationFieldType>();
+    Set<DurationFieldType> supportedDurations = Generics.newHashSet();
     for (int i = 0; i < p.size(); i++) {
       supportedDurations.add(p.getFieldType(i).getDurationType());
     }

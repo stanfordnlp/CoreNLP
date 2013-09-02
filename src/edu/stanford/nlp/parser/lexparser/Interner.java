@@ -1,13 +1,13 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Map;
-import java.util.HashMap;
+import edu.stanford.nlp.util.Generics;
 
 /** (Someday this should be removed, but at present lexparser needs it)
  *  @author Dan Klein
  */
 class Interner<E> {
-  private Map<E, E> oToO = new HashMap<E, E>();
+  private Map<E, E> oToO = Generics.newHashMap();
 
   public E intern(E o) {
     E i = oToO.get(o);

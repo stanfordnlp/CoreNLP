@@ -1,18 +1,20 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.HashMap;
-import edu.stanford.nlp.ling.Label;
+import java.util.Map;
+
 
 public class GermanUnknownWordModelTrainer
-  extends BaseUnknownWordModelTrainer 
-{
+  extends BaseUnknownWordModelTrainer {
+
+  @Override
   protected UnknownWordModel buildUWM() {
-    HashMap<String,Float> unknownGT = null;
+    Map<String,Float> unknownGT = null;
     if (useGT) {
       unknownGT = unknownGTTrainer.unknownGT;
     }
-    return new GermanUnknownWordModel(op, lex, wordIndex, tagIndex, 
-                                      unSeenCounter, tagHash, 
+    return new GermanUnknownWordModel(op, lex, wordIndex, tagIndex,
+                                      unSeenCounter, tagHash,
                                       unknownGT, seenEnd);
   }
+
 }

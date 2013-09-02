@@ -5,17 +5,18 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
 
+import edu.stanford.nlp.parser.KBestViterbiParser;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.parser.KBestViterbiParser;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A framework for Set-based precision/recall/F1 evaluation.
  *
  * @author Dan Klein
  */
-public abstract class AbstractEval {
+public abstract class AbstractEval implements Eval {
 
   private static final boolean DEBUG = false;
 
@@ -246,7 +247,7 @@ public abstract class AbstractEval {
 
     @Override
     protected Set<String> makeObjects(Tree tree) {
-      Set<String> localTrees = new HashSet<String>();
+      Set<String> localTrees = Generics.newHashSet();
       for (Tree st : tree.subTreeList()) {
         localTrees.add(localize(st));
       }

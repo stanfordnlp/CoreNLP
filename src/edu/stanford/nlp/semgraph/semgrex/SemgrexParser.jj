@@ -1,4 +1,4 @@
-// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/semgrex" projects/core/src/edu/stanford/nlp/semgrex/SemgrexParser.jj
+// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/semgraph/semgrex" projects/core/src/edu/stanford/nlp/semgraph/semgrex/SemgrexParser.jj
 
 options { UNICODE_INPUT = true;
           SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
@@ -6,20 +6,25 @@ options { UNICODE_INPUT = true;
 
 
 PARSER_BEGIN(SemgrexParser)
-package edu.stanford.nlp.semgrex;
+package edu.stanford.nlp.semgraph.semgrex;
 // all generated classes are in this package
 
 //imports
 import java.io.StringReader;
 import java.util.*;
+import edu.stanford.nlp.util.Generics;
 
 class SemgrexParser {
 
-	// this is so we can tell, at any point during the parse
-	// whether we are under a negation, which we need to know
-  	// because labeling nodes under negation is illegal
-	private boolean underNegation = false;
-      	private boolean underNodeNegation = false;
+  // this is so we can tell, at any point during the parse
+  // whether we are under a negation, which we need to know
+  // because labeling nodes under negation is illegal
+  private boolean underNegation = false;
+  private boolean underNodeNegation = false;
+  // keep track of which variables we've already seen
+  // lets us make sure we don't name new nodes under a negation
+  private Set<String> knownVariables = Generics.newHashSet();
+  
 }
 
 PARSER_END(SemgrexParser)
@@ -33,7 +38,7 @@ SKIP:
 
 TOKEN:
 {
-	< RELATION: "<" | ">" | ">>" | "<<">
+	< RELATION: "<" | ">" | ">>" | "<<" | "==" >
 |	< ALIGNRELN: "@" >
 |	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}"])+ >
 |	< NUMBER: ( ["0"-"9"] )+ >
@@ -228,7 +233,7 @@ NodePattern Description(GraphRelation r) : {
 	boolean isEmpty = false;
 	Token attr = null;
 	Token value = null;
-	Map<String, String> attributes = new HashMap<String, String>();
+	Map<String, String> attributes = Generics.newHashMap();
 	NodePattern pat;
 } {
 	
@@ -243,11 +248,19 @@ NodePattern Description(GraphRelation r) : {
 	|
 	(( attr = <EMPTY> "}") {
 	isEmpty = true; } )
-	| ( "}") ) 
+	| ( "}") )
 
 	(( ("=" { link = true; }) name = <IDENTIFIER> ) 
-		{if (underNegation)
-				throw new ParseException("No named semgrex nodes allowed in the scope of negation");} 
+            {
+              String nodeName = name.image;
+              if (underNegation) {
+                if (!knownVariables.contains(nodeName)) {
+                  throw new ParseException("Cannot add new variable names under negation.  Node '" + nodeName + "' not seen before");
+                }
+              } else {
+                knownVariables.add(nodeName);
+              }
+            }
 	  )? 
 	)
   	{ pat = new NodePattern(r, underNodeNegation, attributes, isRoot, isEmpty, name != null ? name.image : null); 

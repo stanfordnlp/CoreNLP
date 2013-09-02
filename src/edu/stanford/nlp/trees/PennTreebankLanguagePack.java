@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.util.Filter;
 
@@ -11,7 +11,7 @@ import edu.stanford.nlp.util.Filter;
  * parsing the English Penn Treebank.
  *
  * @author Christopher Manning
- * @version 1.1
+ * @version 1.2
  */
 public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
@@ -88,6 +88,7 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    *
    * @return The sentence final punctuation tags
    */
+  @Override
   public String[] sentenceFinalPunctuationWords() {
     return pennSFPunctWords;
   }
@@ -139,14 +140,15 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * @return A tokenizer
    */
   @Override
-  public TokenizerFactory<Word> getTokenizerFactory() {
-    return PTBTokenizer.factory();
+  public TokenizerFactory<CoreLabel> getTokenizerFactory() {
+    return PTBTokenizer.coreLabelFactory();
   }
 
   /**
    * Returns the extension of treebank files for this treebank.
    * This is "mrg".
    */
+  @Override
   public String treebankFileExtension() {
     return "mrg";
   }
@@ -179,11 +181,13 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
   /** {@inheritDoc} */
+  @Override
   public HeadFinder headFinder() {
     return new ModCollinsHeadFinder(this);
   }
 
   /** {@inheritDoc} */
+  @Override
   public HeadFinder typedDependencyHeadFinder() {
     return new SemanticHeadFinder(this, true);
   }

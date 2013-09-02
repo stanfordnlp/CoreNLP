@@ -1,10 +1,12 @@
 package edu.stanford.nlp.trees;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.CoreAnnotations.TagLabelAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.*;
 import java.io.*;
@@ -33,7 +35,7 @@ public class Trees {
     if (leftEdge(t, root, i)) {
       return i.intValue();
     } else {
-      throw new RuntimeException("Tree is not a descendent of root.");
+      throw new RuntimeException("Tree is not a descendant of root.");
 //      return -1;
     }
   }
@@ -46,9 +48,8 @@ public class Trees {
       i.set(i.intValue() + j);
       return false;
     } else {
-      Tree[] kids = t1.children();
-      for (int j = 0, n = kids.length; j < n; j++) {
-        if (leftEdge(t, kids[j], i)) {
+      for (Tree kid : t1.children()) {
+        if (leftEdge(t, kid, i)) {
           return true;
         }
       }
@@ -67,7 +68,7 @@ public class Trees {
     if (rightEdge(t, root, i)) {
       return i.intValue();
     } else {
-      throw new RuntimeException("Tree is not a descendent of root.");
+      throw new RuntimeException("Tree is not a descendant of root.");
 //      return root.yield().size() + 1;
     }
   }
@@ -116,9 +117,8 @@ public class Trees {
     if (t.isLeaf()) {
       l.add(t);
     } else {
-      Tree[] kids = t.children();
-      for (int j = 0, n = kids.length; j < n; j++) {
-        leaves(kids[j], l);
+      for (Tree kid : t.children()) {
+        leaves(kid, l);
       }
     }
   }
@@ -133,9 +133,8 @@ public class Trees {
     if (t.isPreTerminal()) {
       l.add(t);
     } else {
-      Tree[] kids = t.children();
-      for (int j = 0, n = kids.length; j < n; j++) {
-        preTerminals(kids[j], l);
+      for (Tree kid : t.children()) {
+        preTerminals(kid, l);
       }
     }
   }
@@ -154,9 +153,8 @@ public class Trees {
     if (t.isLeaf()) {
       l.add(t.label());
     } else {
-      Tree[] kids = t.children();
-      for (int j = 0, n = kids.length; j < n; j++) {
-        leafLabels(kids[j], l);
+      for (Tree kid : t.children()) {
+        leafLabels(kid, l);
       }
     }
   }
@@ -174,27 +172,12 @@ public class Trees {
   private static void taggedLeafLabels(Tree t, List<CoreLabel> l) {
     if (t.isPreTerminal()) {
       CoreLabel fl = (CoreLabel)t.getChild(0).label();
-      fl.set(TagLabelAnnotation.class, t.label());
+      fl.set(CoreAnnotations.TagLabelAnnotation.class, t.label());
       l.add(fl);
     } else {
-      Tree[] kids = t.children();
-      for (int j = 0, n = kids.length; j < n; j++) {
-        taggedLeafLabels(kids[j], l);
+      for (Tree kid : t.children()) {
+        taggedLeafLabels(kid, l);
       }
-    }
-  }
-
-  /**
-   * Returns true iff <code>head</code> (transitively) heads <code>node</code>.
-   * CDM: Nov 2011.  This method is broken.  It never returns true!  I'm
-   * checking in this comment and then deleting the method, since it isn't
-   * actually used.
-   */
-  public static boolean heads(Tree head, Tree node, HeadFinder hf) {
-    if (node.isLeaf()) {
-      return false;
-    } else {
-      return heads(head, hf.determineHead(node), hf);
     }
   }
 
@@ -263,9 +246,8 @@ public class Trees {
         i.set(i.intValue() + tree.yield().size());
         return null;
       } else {
-        Tree[] kids = tree.children();
-        for (int j = 0; j < kids.length; j++) {
-          Tree result = getTerminal(kids[j], i, n);
+        for (Tree kid : tree.children()) {
+          Tree result = getTerminal(kid, i, n);
           if (result != null) {
             return result;
           }
@@ -294,9 +276,8 @@ public class Trees {
         i.set(i.intValue() + tree.yield().size());
         return null;
       } else {
-        Tree[] kids = tree.children();
-        for (int j = 0; j < kids.length; j++) {
-          Tree result = getPreTerminal(kids[j], i, n);
+        for (Tree kid : tree.children()) {
+          Tree result = getPreTerminal(kid, i, n);
           if (result != null) {
             return result;
           }
@@ -331,23 +312,29 @@ public class Trees {
     return -1;
   }
 
-  /** Return information about the objects in this Tree.
+  /** Returns a String reporting what kinds of Tree and Label nodes this
+   *  Tree contains.
+   *
    *  @param t The tree to examine.
-   *  @return A human-readable String
+   *  @return A human-readable String reporting what kinds of Tree and Label nodes this
+   *      Tree contains.
    */
-  public static String toDebugStructureString(Tree t) {
-    StringBuilder sb = new StringBuilder();
+  public static String toStructureDebugString(Tree t) {
     String tCl = StringUtils.getShortClassName(t);
     String tfCl = StringUtils.getShortClassName(t.treeFactory());
     String lCl = StringUtils.getShortClassName(t.label());
     String lfCl = StringUtils.getShortClassName(t.label().labelFactory());
-    Set<String> otherClasses = new HashSet<String>();
+    Set<String> otherClasses = Generics.newHashSet();
+    String leafLabels = null;
+    String tagLabels = null;
+    String phraseLabels = null;
+    String leaves = null;
+    String nodes = null;
     for (Tree st : t) {
       String stCl = StringUtils.getShortClassName(st);
       String stfCl = StringUtils.getShortClassName(st.treeFactory());
       String slCl = StringUtils.getShortClassName(st.label());
       String slfCl = StringUtils.getShortClassName(st.label().labelFactory());
-
       if ( ! tCl.equals(stCl)) {
         otherClasses.add(stCl);
       }
@@ -360,11 +347,53 @@ public class Trees {
       if ( ! lfCl.equals(slfCl)) {
         otherClasses.add(slfCl);
       }
-    }
+      if (st.isPhrasal()) {
+        if (nodes == null) {
+          nodes = stCl;
+        } else if ( ! nodes.equals(stCl)) {
+          nodes = "mixed";
+        }
+        if (phraseLabels == null) {
+          phraseLabels = slCl;
+        } else if ( ! phraseLabels.equals(slCl)) {
+          phraseLabels = "mixed";
+        }
+      } else if (st.isPreTerminal()) {
+        if (nodes == null) {
+          nodes = stCl;
+        } else if ( ! nodes.equals(stCl)) {
+          nodes = "mixed";
+        }
+        if (tagLabels == null) {
+          tagLabels = StringUtils.getShortClassName(slCl);
+        } else if ( ! tagLabels.equals(slCl)) {
+          tagLabels = "mixed";
+        }
+      } else if (st.isLeaf()) {
+        if (leaves == null) {
+          leaves = stCl;
+        } else if ( ! leaves.equals(stCl)) {
+          leaves = "mixed";
+        }
+        if (leafLabels == null) {
+          leafLabels = slCl;
+        } else if ( ! leafLabels.equals(slCl)) {
+          leafLabels = "mixed";
+        }
+      } else {
+        throw new IllegalStateException("Bad tree state: " + t);
+      }
+    } // end for Tree st : this
+    StringBuilder sb = new StringBuilder();
     sb.append("Tree with root of class ").append(tCl).append(" and factory ").append(tfCl);
-    sb.append(" with label class ").append(lCl).append(" and factory ").append(lfCl);
+    sb.append(" and root label class ").append(lCl).append(" and factory ").append(lfCl);
     if ( ! otherClasses.isEmpty()) {
-      sb.append(" with the following classes also found within the tree: ").append(otherClasses);
+      sb.append(" and the following classes also found within the tree: ").append(otherClasses);
+      return " with " + nodes + " interior nodes and " + leaves +
+        " leaves, and " + phraseLabels + " phrase labels, " +
+        tagLabels + " tag labels, and " + leafLabels + " leaf labels.";
+    } else {
+      sb.append(" (and uniform use of these Tree and Label classes throughout the tree).");
     }
     return sb.toString();
   }
@@ -414,94 +443,99 @@ public class Trees {
      return "\\tree"+hierarchy+ '\n' +connections+ '\n';
    }
 
-   private static int treeToLatexHelper(Tree t, StringBuilder c, StringBuilder h, int
-n, int
-nextN, int indent) {
-     StringBuilder sb = new StringBuilder();
-     for (int i=0; i<indent; i++)
-       sb.append("  ");
-     h.append('\n').append(sb);
-     h.append("{\\").append(t.isLeaf() ? "" : "n").append("tnode{z").append(n).append("}{").append(t.label()).append('}');
-     if (!t.isLeaf()) {
-       for (int k=0; k<t.children().length; k++) {
-         h.append(", ");
-         c.append("\\nodeconnect{z").append(n).append("}{z").append(nextN).append("}\n");
-         nextN = treeToLatexHelper(t.children()[k],c,h,nextN,nextN+1,indent+1);
-       }
-     }
-     h.append('}');
-     return nextN;
-   }
+  private static int treeToLatexHelper(Tree t, StringBuilder c, StringBuilder h,
+                                       int n, int nextN, int indent) {
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i<indent; i++)
+      sb.append("  ");
+    h.append('\n').append(sb);
+    h.append("{\\").append(t.isLeaf() ? "" : "n").append("tnode{z").append(n).append("}{").append(t.label()).append('}');
+    if (!t.isLeaf()) {
+      for (int k=0; k<t.children().length; k++) {
+        h.append(", ");
+        c.append("\\nodeconnect{z").append(n).append("}{z").append(nextN).append("}\n");
+        nextN = treeToLatexHelper(t.children()[k],c,h,nextN,nextN+1,indent+1);
+      }
+    }
+    h.append('}');
+    return nextN;
+  }
 
   public static String treeToLatexEven(Tree t) {
-     StringBuilder connections = new StringBuilder();
-     StringBuilder hierarchy = new StringBuilder();
-     int maxDepth = t.depth();
-     treeToLatexEvenHelper(t,connections,hierarchy,0,1,0,0,maxDepth);
-     return "\\tree"+hierarchy+ '\n' +connections+ '\n';
-   }
+    StringBuilder connections = new StringBuilder();
+    StringBuilder hierarchy = new StringBuilder();
+    int maxDepth = t.depth();
+    treeToLatexEvenHelper(t,connections,hierarchy,0,1,0,0,maxDepth);
+    return "\\tree"+hierarchy+ '\n' +connections+ '\n';
+  }
 
   private static int treeToLatexEvenHelper(Tree t, StringBuilder c, StringBuilder h, int n,
-                             int nextN, int indent, int curDepth, int maxDepth) {
-     StringBuilder sb = new StringBuilder();
-     for (int i=0; i<indent; i++)
-       sb.append("  ");
-     h.append('\n').append(sb);
-     int tDepth = t.depth();
-     if (tDepth == 0 && tDepth+curDepth < maxDepth) {
-       for (int pad=0; pad < maxDepth-tDepth-curDepth; pad++) {
-         h.append("{\\ntnode{pad}{}, ");
-       }
-     }
+                                           int nextN, int indent, int curDepth, int maxDepth) {
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i<indent; i++)
+      sb.append("  ");
+    h.append('\n').append(sb);
+    int tDepth = t.depth();
+    if (tDepth == 0 && tDepth+curDepth < maxDepth) {
+      for (int pad=0; pad < maxDepth-tDepth-curDepth; pad++) {
+        h.append("{\\ntnode{pad}{}, ");
+      }
+    }
     h.append("{\\ntnode{z").append(n).append("}{").append(t.label()).append('}');
-     if (!t.isLeaf()) {
-       for (int k=0; k<t.children().length; k++) {
-         h.append(", ");
-         c.append("\\nodeconnect{z").append(n).append("}{z").append(nextN).append("}\n");
-         nextN = treeToLatexEvenHelper(t.children()[k],c,h,nextN,nextN+1,indent+1,curDepth+1,maxDepth);
-       }
-     }
-     if (tDepth == 0 && tDepth+curDepth < maxDepth) {
-       for (int pad=0; pad < maxDepth-tDepth-curDepth; pad++) {
-         h.append('}');
-       }
-     }
-     h.append('}');
-     return nextN;
-   }
+    if (!t.isLeaf()) {
+      for (int k=0; k<t.children().length; k++) {
+        h.append(", ");
+        c.append("\\nodeconnect{z").append(n).append("}{z").append(nextN).append("}\n");
+        nextN = treeToLatexEvenHelper(t.children()[k],c,h,nextN,nextN+1,indent+1,curDepth+1,maxDepth);
+      }
+    }
+    if (tDepth == 0 && tDepth+curDepth < maxDepth) {
+      for (int pad=0; pad < maxDepth-tDepth-curDepth; pad++) {
+        h.append('}');
+      }
+    }
+    h.append('}');
+    return nextN;
+  }
 
-   static String texTree(Tree t) {
-     return treeToLatex(t);
-   }
+  static String texTree(Tree t) {
+    return treeToLatex(t);
+  }
 
-   static String escape(String s) {
-     StringBuilder sb = new StringBuilder();
-     for (int i=0; i<s.length(); i++) {
-       char c = s.charAt(i);
-       if (c == '^')
-         sb.append('\\');
-       sb.append(c);
-       if (c == '^')
-         sb.append("{}");
-     }
-     return sb.toString();
-   }
+  static String escape(String s) {
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i<s.length(); i++) {
+      char c = s.charAt(i);
+      if (c == '^')
+        sb.append('\\');
+      sb.append(c);
+      if (c == '^')
+        sb.append("{}");
+    }
+    return sb.toString();
+  }
 
 
-   public static void main(String[] args) throws IOException {
-     int i = 0;
-     while (i < args.length) {
-       Tree tree = Tree.valueOf(args[i]);
-       System.out.println(escape(texTree(tree)));
-       i++;
-     }
-     if (i == 0) {
-       Tree tree = (new PennTreeReader(new BufferedReader(new
-InputStreamReader(System.in)), new LabeledScoredTreeFactory(new
-StringLabelFactory()))).readTree();
-       System.out.println(escape(texTree(tree)));
-     }
-   }
+  public static void main(String[] args) throws IOException {
+    int i = 0;
+    while (i < args.length) {
+      Tree tree = Tree.valueOf(args[i]);
+      if (tree == null) {
+        // maybe it was a filename
+        tree = Tree.valueOf(IOUtils.slurpFile(args[i]));
+      }
+      if (tree != null) {
+        System.out.println(escape(texTree(tree)));
+      }
+      i++;
+    }
+    if (i == 0) {
+      Tree tree = (new PennTreeReader(new BufferedReader(new
+              InputStreamReader(System.in)), new LabeledScoredTreeFactory(new
+              StringLabelFactory()))).readTree();
+      System.out.println(escape(texTree(tree)));
+    }
+  }
 
   public static Tree normalizeTree(Tree tree, TreeNormalizer tn, TreeFactory tf) {
     for (Tree node : tree) {
@@ -584,8 +618,6 @@ StringLabelFactory()))).readTree();
     //System.out.println(treeListToCatList(fromPath));
     //System.out.println(treeListToCatList(toPath));
 
-
-
     int last = 0;
     int min = fromPath.size() <= toPath.size() ? fromPath.size() : toPath.size();
 
@@ -599,11 +631,9 @@ StringLabelFactory()))).readTree();
       last++;
     }
 
-
     //System.out.println(treeListToCatList(fromPath));
     //System.out.println(treeListToCatList(toPath));
     List<String> totalPath = new ArrayList<String>();
-
 
     for (int i = fromPath.size() - 1; i >= last; i--) {
       Tree t = fromPath.get(i);
@@ -660,10 +690,10 @@ StringLabelFactory()))).readTree();
       return;
     Tree[] kids = t.children();
     List<Tree> newKids = new ArrayList<Tree>(kids.length);
-    for (int i = 0, n = kids.length; i < n; i++) {
-      if (kids[i] != node) {
-        newKids.add(kids[i]);
-        replaceNode(node, node1, kids[i]);
+    for (Tree kid : kids) {
+      if (kid != node) {
+        newKids.add(kid);
+        replaceNode(node, node1, kid);
       } else {
         newKids.add(node1);
       }
@@ -716,7 +746,7 @@ StringLabelFactory()))).readTree();
   public static void outputTreeLabels(Tree tree) {
     outputTreeLabels(tree, 0);
   }
-  
+
   public static void outputTreeLabels(Tree tree, int depth) {
     for (int i = 0; i < depth; ++i) {
       System.out.print(" ");
@@ -726,4 +756,23 @@ StringLabelFactory()))).readTree();
       outputTreeLabels(child, depth + 1);
     }
   }
+
+  /**
+   * Converts the tree labels to CoreLabels.
+   * We need this because we store additional info in the CoreLabel, like token span.
+   * @param tree
+   */
+  public static void convertToCoreLabels(Tree tree) {
+    Label l = tree.label();
+    if (!(l instanceof CoreLabel)) {
+      CoreLabel cl = new CoreLabel();
+      cl.setValue(l.value());
+      tree.setLabel(cl);
+    }
+
+    for (Tree kid : tree.children()) {
+      convertToCoreLabels(kid);
+    }
+  }
+
 }

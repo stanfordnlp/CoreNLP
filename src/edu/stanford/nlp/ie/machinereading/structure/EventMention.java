@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.EventMentionsAnnotation;
+import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IdentityHashSet;
 
@@ -103,12 +101,12 @@ public class EventMention extends RelationMention {
       }
       System.err.println("DOC " + sentence.get(CoreAnnotations.DocIDAnnotation.class));
       System.err.print("SENTENCE:");
-      for(CoreLabel t: sentence.get(TokensAnnotation.class)){
+      for(CoreLabel t: sentence.get(CoreAnnotations.TokensAnnotation.class)){
         System.err.print(" " + t.word());
       }
       System.err.println("EVENTS IN SENTENCE:");
       count = 1;
-      for(EventMention e: sentence.get(EventMentionsAnnotation.class)){
+      for(EventMention e: sentence.get(MachineReadingAnnotations.EventMentionsAnnotation.class)){
         System.err.println("EVENT #" + count + ": " + e);
         count ++;
       }
@@ -159,7 +157,7 @@ public class EventMention extends RelationMention {
           // safe to discard this arg: we already have it with the same name
           return;
         } else {
-          logger.info("Trying to add one argument: " + a + " with name " + an + " when this already exists with a different name: " + this + " in sentence: " + getSentence().get(TextAnnotation.class));
+          logger.info("Trying to add one argument: " + a + " with name " + an + " when this already exists with a different name: " + this + " in sentence: " + getSentence().get(CoreAnnotations.TextAnnotation.class));
           if(discardSameArgDifferentName) return;
         }
       }
@@ -220,5 +218,29 @@ public class EventMention extends RelationMention {
     e.resetArguments();
     // remove e from its parent(s) to avoid using this argument in other merges of the parent
     e.removeFromParents();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof EventMention)) return false;
+    if (!super.equals(o)) return false;
+
+    EventMention that = (EventMention) o;
+
+    if (anchor != null ? !anchor.equals(that.anchor) : that.anchor != null) return false;
+    if (eventModification != null ? !eventModification.equals(that.eventModification) : that.eventModification != null)
+      return false;
+    if (parents != null ? !parents.equals(that.parents) : that.parents != null) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = super.hashCode();
+    result = 31 * result + (eventModification != null ? eventModification.hashCode() : 0);
+    result = 31 * result + (anchor != null ? anchor.hashCode() : 0);
+    return result;
   }
 }

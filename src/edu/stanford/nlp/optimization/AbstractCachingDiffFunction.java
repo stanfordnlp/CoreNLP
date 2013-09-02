@@ -17,23 +17,24 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
   int fEvaluations; // = 0;
   protected double[] derivative; // = null;
   protected double value; // = 0.0;
-  Random generator = new Random(2147483647L);
+  protected Random generator = new Random(2147483647L);
 
   public boolean gradientCheck() {
     return gradientCheck(100, 50, initial());
   }
 
   public boolean gradientCheck(int numOfChecks, int numOfRandomChecks, double[] x) {
-    double epsilon = 1e-4;
-    double diffThreshold = 5e-2;
-    double diffPctThreshold = 1e-1;
+    double epsilon = 1e-5;
+    double diffThreshold = 0.01;
+    double diffPctThreshold = 0.1;
     double twoEpsilon = epsilon * 2;
     int xLen = x.length;
+    // System.err.println("\n\n\ncalling derivativeAt");
     derivativeAt(x);
     double[] savedDeriv = new double[xLen];
     System.arraycopy(derivative, 0, savedDeriv, 0, derivative.length); 
     double oldX, plusVal, minusVal, appDeriv, calcDeriv, diff, pct = 0;
-    int interval = x.length / numOfChecks;
+    int interval = Math.max(1, x.length / numOfChecks);
     List<Integer> indicesToCheck = new ArrayList<Integer>();
     for (int paramIndex = 0; paramIndex < xLen; paramIndex+=interval) {
       indicesToCheck.add(paramIndex);
@@ -47,25 +48,32 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     for (int i = 0; i < numOfRandomChecks; i++) {
       indicesToCheck.add(generator.nextInt(xLen));
     }
+    boolean returnVal = true;
     for (int paramIndex: indicesToCheck) {
       oldX = x[paramIndex];
       x[paramIndex] = oldX + epsilon;
+      // System.err.println("\n\n\ncalling valueAt1");
       plusVal = valueAt(x);
       x[paramIndex] = oldX - epsilon;
+      // System.err.println("\n\n\ncalling valueAt2");
       minusVal = valueAt(x);
       appDeriv = (plusVal - minusVal) / twoEpsilon;
       calcDeriv = savedDeriv[paramIndex];
       diff = Math.abs(appDeriv - calcDeriv);
       pct = diff / Math.min(Math.abs(appDeriv), Math.abs(calcDeriv));
       if (diff > diffThreshold && pct > diffPctThreshold) {
-        System.err.println("Gradient check failed at index "+paramIndex+", appGrad=" + appDeriv+ ", calcGrad="+ calcDeriv + ", diff="+diff + ", pct=" + pct); 
-        return false;
+        System.err.printf("Grad fail at %2d, appGrad=%9.7f, calcGrad=%9.7f, diff=%9.7f, pct=%9.7f\n", paramIndex,appDeriv,calcDeriv,diff,pct); 
+        returnVal= false;
       } else {
-        System.err.println("Gradient check passed at index "+paramIndex+", appGrad=" + appDeriv+ ", calcGrad="+ calcDeriv + ", diff="+diff + ", pct=" + pct); 
+        System.err.printf("Grad good at %2d, appGrad=%9.7f, calcGrad=%9.7f, diff=%9.7f, pct=%9.7f\n", paramIndex,appDeriv,calcDeriv,diff,pct);
       }
       x[paramIndex] = oldX;
     }
-    return true;
+    if (returnVal){
+      System.err.printf("ALL gradients passed. Yay!\n");
+      
+    }
+    return returnVal;
   }
 
   /**
@@ -131,6 +139,10 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
 
   public double lastValue() {
     return value;
+  }
+
+  public double[] getDerivative() {
+    return derivative;
   }
 
 }

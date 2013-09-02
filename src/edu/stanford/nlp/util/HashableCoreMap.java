@@ -32,8 +32,7 @@ public class HashableCoreMap extends ArrayCoreMap {
       keyHashcode += entry.getKey().hashCode();
       valueHashcode += entry.getValue().hashCode();
       
-      super.set((Class<? extends TypesafeMap.Key>)entry.getKey(),
-          entry.getValue());
+      super.set((Class) entry.getKey(), entry.getValue());
     }
     
     this.immutableKeys = hashkey.keySet();
@@ -71,8 +70,7 @@ public class HashableCoreMap extends ArrayCoreMap {
    *   immutable, hashable key.
    */
   @Override
-  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends Key<VALUEBASE>>
-    VALUE set(Class<KEY> key, VALUE value) {
+  public <VALUE> VALUE set(Class<? extends Key<VALUE>> key, VALUE value) {
     
     if (immutableKeys.contains(key)) {
       throw new HashableCoreMapException("Attempt to change value " +

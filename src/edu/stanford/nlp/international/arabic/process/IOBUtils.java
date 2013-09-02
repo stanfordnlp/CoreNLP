@@ -3,7 +3,6 @@ package edu.stanford.nlp.international.arabic.process;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -14,9 +13,8 @@ import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFea
 import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A class for converting strings to input suitable for processing by
@@ -49,7 +47,7 @@ public class IOBUtils {
   private static final Set<String> arAffixSet;
   static {
     String arabicAffixString = "ل ف و ما ه ها هم هن نا كم تن تم ى ي هما ك ب م س";
-    arAffixSet = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(arabicAffixString.split("\\s+"))));
+    arAffixSet = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(arabicAffixString.split("\\s+"))));
   }
 
   // Only static methods
@@ -191,9 +189,9 @@ public class IOBUtils {
    */
   private static CoreLabel createDatum(String token, String label, int index) {
     CoreLabel newTok = new CoreLabel();
-    newTok.set(CharAnnotation.class, token);
-    newTok.set(AnswerAnnotation.class, label);
-    newTok.set(GoldAnswerAnnotation.class, label);
+    newTok.set(CoreAnnotations.CharAnnotation.class, token);
+    newTok.set(CoreAnnotations.AnswerAnnotation.class, label);
+    newTok.set(CoreAnnotations.GoldAnswerAnnotation.class, label);
     newTok.setIndex(index);
     return newTok;
   }
@@ -257,8 +255,8 @@ public class IOBUtils {
     final int sequenceLength = labeledSequence.size();
     for (int i = 0; i < sequenceLength; ++i) {
       CoreLabel labeledChar = labeledSequence.get(i);
-      String token = labeledChar.get(CharAnnotation.class);
-      String label = labeledChar.get(AnswerAnnotation.class);
+      String token = labeledChar.get(CoreAnnotations.CharAnnotation.class);
+      String label = labeledChar.get(CoreAnnotations.AnswerAnnotation.class);
       if (label.equals(BeginSymbol)) {
         if (lastLabel.equals(ContinuationSymbol) || lastLabel.equals(BeginSymbol)) {
           if (addPrefixMarker && addPrefixMarker(i, labeledSequence)) {
@@ -302,8 +300,8 @@ public class IOBUtils {
   private static boolean addPrefixMarker(int focus, List<CoreLabel> labeledSequence) {
     StringBuilder sb = new StringBuilder();
     for (int i = focus-1; i >= 0; --i) {
-      String token = labeledSequence.get(i).get(CharAnnotation.class);
-      String label = labeledSequence.get(i).get(AnswerAnnotation.class);
+      String token = labeledSequence.get(i).get(CoreAnnotations.CharAnnotation.class);
+      String label = labeledSequence.get(i).get(CoreAnnotations.AnswerAnnotation.class);
       sb.append(token);
       if (label.equals(BeginSymbol) || label.equals(BoundarySymbol)) {
         break;
@@ -315,8 +313,8 @@ public class IOBUtils {
   private static boolean addSuffixMarker(int focus, List<CoreLabel> labeledSequence) {
     StringBuilder sb = new StringBuilder();
     for (int i = focus; i < labeledSequence.size(); ++i) {
-      String token = labeledSequence.get(i).get(CharAnnotation.class);
-      String label = labeledSequence.get(i).get(AnswerAnnotation.class);
+      String token = labeledSequence.get(i).get(CoreAnnotations.CharAnnotation.class);
+      String label = labeledSequence.get(i).get(CoreAnnotations.AnswerAnnotation.class);
       if (label.equals(BoundarySymbol)) {
         break;
       } else if (i != focus && label.equals(BeginSymbol)) {

@@ -1,10 +1,7 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ChunkAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalAnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.objectbank.ObjectBank;
@@ -164,11 +161,11 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
       final CoreLabel c = tokens.get(i);
       final CoreLabel p = tokens.get(i - 1);
       final CoreLabel n = tokens.get(i + 1);
-      final String cAns = c.get(AnswerAnnotation.class);
+      final String cAns = c.get(CoreAnnotations.AnswerAnnotation.class);
       if (cAns.length() > 1 && cAns.charAt(1) == '-') {
-        String pAns = p.get(AnswerAnnotation.class);
+        String pAns = p.get(CoreAnnotations.AnswerAnnotation.class);
         if (pAns == null) { pAns = OTHER; }
-        String nAns = n.get(AnswerAnnotation.class);
+        String nAns = n.get(CoreAnnotations.AnswerAnnotation.class);
         if (nAns == null) { nAns = OTHER; }
         final String base = cAns.substring(2, cAns.length());
         String pBase = (pAns.length() > 2 ? pAns.substring(2, pAns.length()) : pAns);
@@ -231,7 +228,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
     }
     for (int i = 0; i < k; i++) {
       CoreLabel c = tokens.get(i);
-      c.set(AnswerAnnotation.class, newAnswers[i]);
+      c.set(CoreAnnotations.AnswerAnnotation.class, newAnswers[i]);
     }
   }
 
@@ -250,22 +247,22 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
     case 0:
     case 1:
       wi.setWord(BOUNDARY);
-      wi.set(AnswerAnnotation.class, OTHER);
+      wi.set(CoreAnnotations.AnswerAnnotation.class, OTHER);
       break;
     case 2:
       wi.setWord(bits[0]);
-      wi.set(AnswerAnnotation.class, bits[1]);
+      wi.set(CoreAnnotations.AnswerAnnotation.class, bits[1]);
       break;
     case 3:
       wi.setWord(bits[0]);
       wi.setTag(bits[1]);
-      wi.set(AnswerAnnotation.class, bits[2]);
+      wi.set(CoreAnnotations.AnswerAnnotation.class, bits[2]);
       break;
     case 4:
       wi.setWord(bits[0]);
       wi.setTag(bits[1]);
-      wi.set(ChunkAnnotation.class, bits[2]);
-      wi.set(AnswerAnnotation.class, bits[3]);
+      wi.set(CoreAnnotations.ChunkAnnotation.class, bits[2]);
+      wi.set(CoreAnnotations.AnswerAnnotation.class, bits[3]);
       break;
     case 5:
       if (flags.useLemmaAsWord) {
@@ -273,15 +270,15 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
       } else {
         wi.setWord(bits[0]);
         }
-      wi.set(LemmaAnnotation.class, bits[1]);
+      wi.set(CoreAnnotations.LemmaAnnotation.class, bits[1]);
       wi.setTag(bits[2]);
-      wi.set(ChunkAnnotation.class, bits[3]);
-      wi.set(AnswerAnnotation.class, bits[4]);
+      wi.set(CoreAnnotations.ChunkAnnotation.class, bits[3]);
+      wi.set(CoreAnnotations.AnswerAnnotation.class, bits[4]);
       break;
     default:
       throw new RuntimeIOException("Unexpected input (many fields): " + line);
     }
-    wi.set(OriginalAnswerAnnotation.class, wi.get(AnswerAnnotation.class));
+    wi.set(CoreAnnotations.OriginalAnswerAnnotation.class, wi.get(CoreAnnotations.AnswerAnnotation.class));
     return wi;
   }
 
@@ -308,23 +305,23 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
     for (int i = 0; i < k; i++) {
       CoreLabel c = tokens.get(i);
       CoreLabel p = tokens.get(i - 1);
-      if (c.get(AnswerAnnotation.class).length() > 1 && c.get(AnswerAnnotation.class).charAt(1) == '-') {
-        String base = c.get(AnswerAnnotation.class).substring(2);
-        String pBase = (p.get(AnswerAnnotation.class).length() <= 2 ? p.get(AnswerAnnotation.class) : p.get(AnswerAnnotation.class).substring(2));
+      if (c.get(CoreAnnotations.AnswerAnnotation.class).length() > 1 && c.get(CoreAnnotations.AnswerAnnotation.class).charAt(1) == '-') {
+        String base = c.get(CoreAnnotations.AnswerAnnotation.class).substring(2);
+        String pBase = (p.get(CoreAnnotations.AnswerAnnotation.class).length() <= 2 ? p.get(CoreAnnotations.AnswerAnnotation.class) : p.get(CoreAnnotations.AnswerAnnotation.class).substring(2));
         boolean isSecond = (base.equals(pBase));
-        boolean isStart = (c.get(AnswerAnnotation.class).charAt(0) == 'B' || c.get(AnswerAnnotation.class).charAt(0) == 'S');
+        boolean isStart = (c.get(CoreAnnotations.AnswerAnnotation.class).charAt(0) == 'B' || c.get(CoreAnnotations.AnswerAnnotation.class).charAt(0) == 'S');
         if (isSecond && isStart) {
           newAnswers[i] = intern("B-" + base);
         } else {
           newAnswers[i] = intern("I-" + base);
         }
       } else {
-        newAnswers[i] = c.get(AnswerAnnotation.class);
+        newAnswers[i] = c.get(CoreAnnotations.AnswerAnnotation.class);
       }
     }
     for (int i = 0; i < k; i++) {
       CoreLabel c = tokens.get(i);
-      c.set(AnswerAnnotation.class, newAnswers[i]);
+      c.set(CoreAnnotations.AnswerAnnotation.class, newAnswers[i]);
     }
   }
 
@@ -348,12 +345,12 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
       if (word == BOUNDARY) { // Using == is okay, because it is set to constant
         out.println();
       } else {
-        String gold = fl.get(OriginalAnswerAnnotation.class);
+        String gold = fl.get(CoreAnnotations.OriginalAnswerAnnotation.class);
         if(gold == null) gold = "";
-        String guess = fl.get(AnswerAnnotation.class);
-        // System.err.println(fl.word() + "\t" + fl.get(AnswerAnnotation.class) + "\t" + fl.get(AnswerAnnotation.class));
+        String guess = fl.get(CoreAnnotations.AnswerAnnotation.class);
+        // System.err.println(fl.word() + "\t" + fl.get(CoreAnnotations.AnswerAnnotation.class) + "\t" + fl.get(CoreAnnotations.AnswerAnnotation.class));
         String pos = fl.tag();
-        String chunk = (fl.get(ChunkAnnotation.class) == null ? "" : fl.get(ChunkAnnotation.class));
+        String chunk = (fl.get(CoreAnnotations.ChunkAnnotation.class) == null ? "" : fl.get(CoreAnnotations.ChunkAnnotation.class));
         out.println(fl.word() + '\t' + pos + '\t' + chunk + '\t' +
                     gold + '\t' + guess);
       }
@@ -377,7 +374,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
         if (fl.word().equals(BOUNDARY)) {
           continue;
         }
-        String ans = fl.get(AnswerAnnotation.class);
+        String ans = fl.get(CoreAnnotations.AnswerAnnotation.class);
         String ansBase;
         String ansPrefix;
         String[] bits = ans.split("-");

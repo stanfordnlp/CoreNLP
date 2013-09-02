@@ -1,6 +1,7 @@
 package edu.stanford.nlp.util;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -67,16 +69,12 @@ public class Generics {
     return new LinkedList<E>(c);
   }
 
-  public static <E> HashSet<E> newHashSet() {
-    return new HashSet<E>();
+  public static <E> Stack<E> newStack() {
+    return new Stack<E>();
   }
 
-  public static <E> HashSet<E> newHashSet(int initialCapacity) {
-    return new HashSet<E>(initialCapacity);
-  }
-
-  public static <E> HashSet<E> newHashSet(Collection<? extends E> c) {
-    return new HashSet<E>(c);
+  public static <E> BinaryHeapPriorityQueue<E> newBinaryHeapPriorityQueue() {
+    return new BinaryHeapPriorityQueue<E>();
   }
 
   public static <E> TreeSet<E> newTreeSet() {
@@ -91,26 +89,133 @@ public class Generics {
     return new TreeSet<E>(s);
   }
 
-  public static <E> Stack<E> newStack() {
-    return new Stack<E>();
+  public static final String HASH_SET_PROPERTY = "edu.stanford.nlp.hashset.impl";
+  public static final String HASH_SET_CLASSNAME = System.getProperty(HASH_SET_PROPERTY);
+  private static final Class<?> HASH_SET_CLASS = getHashSetClass();
+  private static final Constructor HASH_SET_SIZE_CONSTRUCTOR = getHashSetSizeConstructor();
+  private static final Constructor HASH_SET_COLLECTION_CONSTRUCTOR = getHashSetCollectionConstructor();
+
+  private static Class getHashSetClass() {
+    try {
+      if (HASH_SET_CLASSNAME == null) {
+        return HashSet.class;
+      } else {
+        return Class.forName(HASH_SET_CLASSNAME);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public static <E> BinaryHeapPriorityQueue<E> newBinaryHeapPriorityQueue() {
-    return new BinaryHeapPriorityQueue<E>();
+  // must be called after HASH_SET_CLASS is defined
+  private static Constructor getHashSetSizeConstructor() {
+    try {
+      return HASH_SET_CLASS.getConstructor(Integer.TYPE);
+    } catch (Exception e) {
+      System.err.println("Warning: could not find a constructor for objects of " + HASH_SET_CLASS + " which takes an integer argument.  Will use the no argument constructor instead.");
+    }
+    return null;
   }
 
+  // must be called after HASH_SET_CLASS is defined
+  private static Constructor getHashSetCollectionConstructor() {
+    try {
+      return HASH_SET_CLASS.getConstructor(Collection.class);
+    } catch (Exception e) {
+      throw new RuntimeException("Error: could not find a constructor for objects of " + HASH_SET_CLASS + " which takes an existing collection argument.", e);
+    }
+  }
+
+  public static <E> Set<E> newHashSet() {
+    try {
+      return ErasureUtils.uncheckedCast(HASH_SET_CLASS.newInstance());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static <E> Set<E> newHashSet(int initialCapacity) {
+    if (HASH_SET_SIZE_CONSTRUCTOR == null) {
+      return newHashSet();
+    }
+    try {
+      return ErasureUtils.uncheckedCast(HASH_SET_SIZE_CONSTRUCTOR.newInstance(initialCapacity));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static <E> Set<E> newHashSet(Collection<? extends E> c) {
+    try {
+      return ErasureUtils.uncheckedCast(HASH_SET_COLLECTION_CONSTRUCTOR.newInstance(c));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static final String HASH_MAP_PROPERTY = "edu.stanford.nlp.hashmap.impl";
+  public static final String HASH_MAP_CLASSNAME = System.getProperty(HASH_MAP_PROPERTY);
+  private static final Class<?> HASH_MAP_CLASS = getHashMapClass();
+  private static final Constructor HASH_MAP_SIZE_CONSTRUCTOR = getHashMapSizeConstructor();
+  private static final Constructor HASH_MAP_FROM_MAP_CONSTRUCTOR = getHashMapFromMapConstructor();
+
+  private static Class getHashMapClass() {
+    try {
+      if (HASH_MAP_CLASSNAME == null) {
+        return HashMap.class;
+      } else {
+        return Class.forName(HASH_MAP_CLASSNAME);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // must be called after HASH_MAP_CLASS is defined
+  private static Constructor getHashMapSizeConstructor() {
+    try {
+      return HASH_MAP_CLASS.getConstructor(Integer.TYPE);
+    } catch (Exception e) {
+      System.err.println("Warning: could not find a constructor for objects of " + HASH_MAP_CLASS + " which takes an integer argument.  Will use the no argument constructor instead.");
+    }
+    return null;
+  }
+
+  // must be called after HASH_MAP_CLASS is defined
+  private static Constructor getHashMapFromMapConstructor() {
+    try {
+      return HASH_MAP_CLASS.getConstructor(Map.class);
+    } catch (Exception e) {
+      throw new RuntimeException("Error: could not find a constructor for objects of " + HASH_MAP_CLASS + " which takes an existing Map argument.", e);
+    }
+  }
 
   /* Maps */
-  public static <K,V> HashMap<K,V> newHashMap() {
-    return new HashMap<K,V>();
+  public static <K,V> Map<K,V> newHashMap() {
+    try {
+      return ErasureUtils.uncheckedCast(HASH_MAP_CLASS.newInstance());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public static <K,V> HashMap<K,V> newHashMap(int initialCapacity) {
-    return new HashMap<K,V>(initialCapacity);
+  public static <K,V> Map<K,V> newHashMap(int initialCapacity) {
+    if (HASH_MAP_SIZE_CONSTRUCTOR == null) {
+      return newHashMap();
+    }
+    try {
+      return ErasureUtils.uncheckedCast(HASH_MAP_SIZE_CONSTRUCTOR.newInstance(initialCapacity));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public static <K,V> HashMap<K,V> newHashMap(Map<? extends K,? extends V> m) {
-    return new HashMap<K,V>(m);
+  public static <K,V> Map<K,V> newHashMap(Map<? extends K,? extends V> m) {
+    try {
+      return ErasureUtils.uncheckedCast(HASH_MAP_FROM_MAP_CONSTRUCTOR.newInstance(m));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static <K,V> IdentityHashMap<K,V> newIdentityHashMap() {

@@ -1,11 +1,15 @@
 package edu.stanford.nlp.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.*;
+
 import static org.junit.Assert.*;
 import org.junit.*;
 
-import edu.stanford.nlp.util.MetaClass;
-
-public class MetaClassTest{
+public class MetaClassTest {
 	
 	private static final String CLASS =  MetaClassTest.class.getName();
 	
@@ -309,7 +313,6 @@ public class MetaClassTest{
 	@Test
 	public void testConsistencyWithJava(){
 		Object[] options = new Object[]{ new String("hi"), new Something(), new SSomething(), new SubSSomething() };
-		
 		/*
 		 * Single Term
 		 */
@@ -360,15 +363,165 @@ public class MetaClassTest{
 			assertTrue("Should not be able to case Long int Primitive()", true);
 		}
 	}
-	
-//	@Test
-//	TODO this would be kind of cool to implement
-//	public void testVariableArgConstructor(){
-//		VarArgs a = MetaClass.create(CLASS+"$VarArgs").createInstance(1,2,3);
-//		assertEquals(3, a.a.length);
-//		assertTrue(a.a[0] == 1);
-//		assertTrue(a.a[1] == 2);
-//		assertTrue(a.a[2] == 3);
-//	}
+
+  @Test
+  public void testCastSimple() {
+    assertEquals(1.0, MetaClass.cast("1.0", Double.class));
+    assertEquals(1, MetaClass.cast("1", Integer.class));
+    assertEquals(1, MetaClass.cast("1.0", Integer.class));
+    assertEquals(1L, MetaClass.cast("1.0", Long.class));
+    assertEquals(new Short((short) 1), MetaClass.cast("1.0", Short.class));
+    assertEquals(new Byte((byte) 1), MetaClass.cast("1.0", Byte.class));
+    assertEquals("Hello", MetaClass.cast("Hello", String.class));
+    assertEquals(true, MetaClass.cast("true", Boolean.class));
+    assertEquals(true, MetaClass.cast("1", Boolean.class));
+    assertEquals(false, MetaClass.cast("False", Boolean.class));
+    assertEquals(new File("/path/to/file"), MetaClass.cast("/path/to/file", File.class));
+  }
+
+  @Test
+  public void testCastArray() {
+    Integer[] ints1 = MetaClass.cast("[1,2,3]", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints1);
+    Integer[] ints2 = MetaClass.cast("(1,2,3)", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints2);
+    Integer[] ints3 = MetaClass.cast("1, 2, 3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints3);
+    Integer[] ints4 = MetaClass.cast("1 2 3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints4);
+    Integer[] ints5 = MetaClass.cast("1   2   3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints5);
+    Integer[] ints6 = MetaClass.cast("\n1 \n\n  2   3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints6);
+
+    Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
+    assertArrayEquals(new Integer[]{}, intsEmpty);
+  }
+
+  private static enum Fruits {
+    APPLE,
+    Orange,
+    grape
+  }
+
+  @Test
+  public void testCastEnum() {
+    assertEquals(Fruits.APPLE, MetaClass.cast("APPLE", Fruits.class));
+    assertEquals(Fruits.APPLE, MetaClass.cast("apple", Fruits.class));
+    assertEquals(Fruits.APPLE, MetaClass.cast("Apple", Fruits.class));
+    assertEquals(Fruits.APPLE, MetaClass.cast("aPPlE", Fruits.class));
+    assertEquals(Fruits.Orange, MetaClass.cast("orange", Fruits.class));
+    assertEquals(Fruits.grape, MetaClass.cast("grape", Fruits.class));
+    assertEquals(Fruits.grape, MetaClass.cast("Grape", Fruits.class));
+    assertEquals(Fruits.grape, MetaClass.cast("GRAPE", Fruits.class));
+  }
+
+  @Test
+  public void testCastCollection() {
+    Set<String> set = new HashSet<String>();
+    set.add("apple");
+    set.add("banana");
+    Set<String> castedSet = MetaClass.cast("[apple, banana]", Set.class);
+    Set<String> castedSet2 = MetaClass.cast("[apple ,    banana ]", Set.class);
+    Set<String> castedSet3 = MetaClass.cast("{apple ,    banana }", Set.class);
+    assertEquals(set, castedSet);
+    assertEquals(set, castedSet2);
+    assertEquals(set, castedSet3);
+
+    List<String> list = new LinkedList<String>();
+    list.add("apple");
+    list.add("banana");
+    List<String> castedList = MetaClass.cast("[apple, banana]", List.class);
+    assertEquals(list, castedList);
+  }
+
+  private static class Pointer<E> {
+    public E value;
+    public Pointer(E value) {
+      this.value = value;
+    }
+    @SuppressWarnings("UnusedDeclaration") // used via reflection
+    public static <E> Pointer<E> fromString(String value) {
+      E v = MetaClass.castWithoutKnowingType(value);
+      return new Pointer<E>(v);
+    }
+  }
+
+  @Test
+  public void testCastMap() {
+    Map<String, String> a = MetaClass.cast("{ a -> 1, b -> 2 }", Map.class);
+    assertEquals(2, a.size());
+    assertEquals("1", a.get("a"));
+    assertEquals("2", a.get("b"));
+
+    Map<String, String> b = MetaClass.cast("a => 1, b -> 2", Map.class);
+    assertEquals(2, b.size());
+    assertEquals("1", b.get("a"));
+    assertEquals("2", b.get("b"));
+
+    Map<String, String> c = MetaClass.cast("[a->1;b->2]", Map.class);
+    assertEquals(2, c.size());
+    assertEquals("1", c.get("a"));
+    assertEquals("2", c.get("b"));
+
+    Map<String, String> d = MetaClass.cast("\n\na->\n1\n\n\nb->2", Map.class);
+    assertEquals(2, d.size());
+    assertEquals("1", d.get("a"));
+    assertEquals("2", d.get("b"));
+  }
+
+  @Test
+  public void testCastRegression() {
+    // Generics ordering (integer should go relatively early)
+    Pointer<Integer> x1 = MetaClass.cast("1", Pointer.class);
+    assertEquals(1, x1.value.intValue());
+
+  }
+
+  private static class FromStringable {
+    public final String myContents;
+    private FromStringable(String contents) { myContents = contents; }
+    public static FromStringable fromString(String str) {
+      return new FromStringable(str);
+    }
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof FromStringable)) return false;
+      FromStringable that = (FromStringable) o;
+      if (myContents != null ? !myContents.equals(that.myContents) : that.myContents != null) return false;
+      return true;
+    }
+    @Override
+    public int hashCode() {
+      return myContents != null ? myContents.hashCode() : 0;
+    }
+  }
+
+  @Test
+  public void testCastFromString() {
+    assertEquals(new FromStringable("foo"), MetaClass.cast("foo", FromStringable.class));
+    assertEquals(new FromStringable("bar"), MetaClass.cast("bar", FromStringable.class));
+  }
+
+  @Test
+  public void testCastStream() {
+    assertEquals(System.out, MetaClass.cast("stdout", OutputStream.class));
+    assertEquals(System.out, MetaClass.cast("out", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("stderr", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("err", OutputStream.class));
+    assertEquals(ObjectOutputStream.class, MetaClass.cast("err", ObjectOutputStream.class).getClass());
+  }
+
+//	TODO(gabor) this would be kind of cool to implement
+	@Test
+  @Ignore
+	public void testVariableArgConstructor(){
+		VarArgs a = MetaClass.create(CLASS+"$VarArgs").createInstance(1,2,3);
+		assertEquals(3, a.a.length);
+		assertTrue(a.a[0] == 1);
+		assertTrue(a.a[1] == 2);
+		assertTrue(a.a[2] == 3);
+	}
 	
 }

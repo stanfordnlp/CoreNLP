@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
 
 // TODO: put in a regexp for ordinals, fraction num/num and perhaps even 30-5/8
@@ -616,7 +617,7 @@ public class WordShapeClassifier {
   private static String wordShapeChris4Long(String s, boolean omitIfInBoundary, int len, Collection<String> knownLCWords) {
     StringBuilder sb = new StringBuilder(s.length() + 1);
     StringBuilder endSB = new StringBuilder(BOUNDARY_SIZE);
-    Set<Character> boundSet = new HashSet<Character>(BOUNDARY_SIZE * 2);
+    Set<Character> boundSet = Generics.newHashSet(BOUNDARY_SIZE * 2);
     Set<Character> seenSet = new TreeSet<Character>();  // TreeSet guarantees stable ordering
     boolean nonLetters = false;
     for (int i = 0; i < len; i++) {

@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Interner;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.ObjectInputStream;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,8 +46,7 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar {
   protected final IntTaggedWord stopTW;
   protected final IntTaggedWord wildTW;
 
-  protected transient Map<IntDependency,IntDependency> expandDependencyMap =
-      new HashMap<IntDependency,IntDependency>();
+  protected transient Map<IntDependency,IntDependency> expandDependencyMap = Generics.newHashMap();
 
   private static final boolean DEBUG = false;
 

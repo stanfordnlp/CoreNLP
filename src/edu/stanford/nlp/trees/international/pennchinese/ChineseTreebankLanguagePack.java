@@ -1,6 +1,6 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
@@ -19,14 +19,14 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final long serialVersionUID = 5757403475523638802L;
 
-  private static TokenizerFactory<? extends HasWord> tf;
+  private TokenizerFactory<? extends HasWord> tf;
 
-  public static void setTokenizerFactory(TokenizerFactory<? extends HasWord> tf) {
-    ChineseTreebankLanguagePack.tf = tf;
+  public void setTokenizerFactory(TokenizerFactory<? extends HasWord> tf) {
+    this.tf = tf;
   }
 
   @Override
-  public TokenizerFactory<? extends HasWord>  getTokenizerFactory() {
+  public TokenizerFactory<? extends HasWord> getTokenizerFactory() {
     if (tf != null) {
       return tf;
     } else {
@@ -193,20 +193,20 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final String[] douHao = {"、"};
   private static final String[] quoteMark = {"“", "”", "‘", "’", "《", "》", "『", "』", "〈", "〉",
           "「", "」", "＂", "＜", "＞", "'", "`", "＇", "｀", "｢", "｣"};
-  private static final String[] parenthesis = {"（", "）", "-LRB-", "-RRB-", "【", "】",
+  private static final String[] parenthesis = {"（", "）", "［", "］", "｛", "｝", "-LRB-", "-RRB-", "【", "】",
           "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠" };  // ( and ) still must be escaped
   private static final String[] colon = {"：", "；", "∶", ":"};
-  private static final String[] dash = {"…", "—", "——", "———",
-          "－", "－－", "──", "━", "━━", "—－",
+  private static final String[] dash = {"…", "—", "——", "———", 
+          "－", "--", "---", "－－", "──", "━", "━━", "—－",
           "-", "----", "~", "……", "～",
           "．．．" /* 3 full width dots as ellipsis */ };
-  private static final String[] other = {"·", "／", "／", "＊", "＆", "/", "//", "*" };  // slashes are used in urls
+  private static final String[] other = {"·", "／", "／", "＊", "＆", "/", "//", "*", "※", "●", "｜" };  // slashes are used in urls
 
   // Note that these next four should contain only things in quoteMark and parenthesis.  All such things are there but straight quotes
   private static final String[] leftQuoteMark = {"“", "‘", "《", "『", "〈", "「", "＜", "`", "｀", "｢"};
   private static final String[] rightQuoteMark = {"”", "’", "》", "』", "〉", "」", "＞", "＇", "｣"};
-  private static final String[] leftParenthesis = {"（", "-LRB-", "【", "〔", "〖", "〘", "〚", "｟"};
-  private static final String[] rightParenthesis = {"）", "-RRB-", "】", "〕", "〗", "〙", "〛", "｠"};
+  private static final String[] leftParenthesis = {"（", "-LRB-", "［", "｛", "【", "〔", "〖", "〘", "〚", "｟"};
+  private static final String[] rightParenthesis = {"）", "-RRB-", "］", "｝", "】", "〕", "〗", "〙", "〛", "｠"};
 // "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠"
 
   private static final String[] punctWords;

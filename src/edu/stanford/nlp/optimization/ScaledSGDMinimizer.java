@@ -2,30 +2,27 @@ package edu.stanford.nlp.optimization;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Pair;
+
 /**
- * <p>
- * Stochastic Gradient Descent To Quasi Newton Minimizer
+ * Stochastic Gradient Descent To Quasi Newton Minimizer.
  *
  *  An experimental minimizer which takes a stochastic function (one implementing AbstractStochasticCachingDiffFunction)
  * and executes SGD for the first couple passes,  During the final iterations a series of approximate hessian vector
- * products are built up...  These are then passed to the QNminimizer so that it can start right up without the typical
+ * products are built up...  These are then passed to the QNMinimizer so that it can start right up without the typical
  * delay.
  *
  * @author <a href="mailto:akleeman@stanford.edu">Alex Kleeman</a>
  * @version 1.0
  * @since 1.0
  */
-public class ScaledSGDMinimizer extends StochasticMinimizer {
+public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction> extends StochasticMinimizer<Q> {
 
 
   private static int method = 1;  // 0=MinErr  1=Bradley
@@ -130,14 +127,6 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
   }
 
 
-  public ScaledSGDMinimizer(SeqClassifierFlags flags){
-    bSize = flags.stochasticBatchSize;
-    gain = flags.initialGain;
-    this.numPasses = flags.SGDPasses;
-    this.outputIterationsToFile = flags.outputIterationsToFile;
-  }
-
-
   public ScaledSGDMinimizer(double SGDGain, int batchSize, int sgdPasses){
     this(SGDGain,batchSize,sgdPasses, 1,false);
   }
@@ -146,7 +135,7 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
     this(SGDGain,batchSize,sgdPasses, method,false);
   }
 
-  public ScaledSGDMinimizer(double SGDGain, int batchSize, int sgdPasses, int method,boolean outputToFile){
+  public ScaledSGDMinimizer(double SGDGain, int batchSize, int sgdPasses, int method, boolean outputToFile) {
     bSize = batchSize;
     gain = SGDGain;
     this.numPasses = sgdPasses;
@@ -296,7 +285,6 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
 
   private double getRoot(Function<Double,Double> func, double lower, double upper){
     double mid = 0.5*(lower + upper);
-    double fval = 0.0;
     double TOL = 1e-8;
     double skew = 0.4;
     int count = 0;
@@ -305,7 +293,7 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
       say("LOWER AND UPPER SUPPLIED TO GET ROOT DO NOT BOUND THE ROOT.");
     }
 
-    fval = func.apply(mid);
+    double fval = func.apply(mid);
     while( Math.abs(fval) > TOL ){
       count += 1;
       if( fval > 0 ){
@@ -355,16 +343,16 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
 
   }
 
-  public static class weight implements Serializable{
+  public static class Weights implements Serializable {
     public double [] w;
     public double [] d;
     private static final long serialVersionUID = 814182172645533781L;
 
-    public weight(double[] wt){
+    public Weights(double[] wt){
       w = wt;
     }
 
-    public weight(double[] wt,double[] di){
+    public Weights(double[] wt,double[] di){
       w = wt;
       d = di;
     }
@@ -372,16 +360,16 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
   }
 
 
-  public void serializeWeights(String serializePath,double[] weights){
+  public static void serializeWeights(String serializePath,double[] weights) {
     serializeWeights(serializePath,weights,null);
   }
 
-  public void serializeWeights(String serializePath,double[] weights,double[] diag) {
+  public static void serializeWeights(String serializePath,double[] weights,double[] diag) {
 
     System.err.println("Serializing weights to " + serializePath + "...");
 
     try {
-      weight out = new weight(weights,diag);
+      Weights out = new Weights(weights,diag);
       IOUtils.writeObjectToFile(out, serializePath);
     } catch (Exception e) {
       System.err.println("Error serializing to " + serializePath);
@@ -391,26 +379,26 @@ public class ScaledSGDMinimizer extends StochasticMinimizer {
   }
 
 
-  public double[] getWeights(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
+  public static double[] getWeights(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
     System.err.println("Loading weights from " + loadPath + "...");
     double[] wt;
-    weight w;
+    Weights w;
 
-    w = (weight) IOUtils.readObjectFromFile(loadPath);
+    w = IOUtils.readObjectFromFile(loadPath);
     wt = w.w;
 
     return wt;
 
   }
 
-  public double[] getDiag(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
+  public static double[] getDiag(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
     System.err.println("Loading weights from " + loadPath + "...");
     double[] diag;
-    weight w;
+    Weights w;
 
-    w = (weight) IOUtils.readObjectFromFile(loadPath);
+    w = IOUtils.readObjectFromFile(loadPath);
     diag = w.d;
 
     return diag;
