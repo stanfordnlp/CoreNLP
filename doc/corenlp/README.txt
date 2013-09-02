@@ -1,4 +1,4 @@
-Stanford CoreNLP  v3.2.0 - 2013-06-19
+Stanford CoreNLP  v1.3.4 - 2012-11-12
 Stanford's Suite of NLP Tools
 -----------------------------
 
@@ -9,7 +9,7 @@ DOCUMENTATION
 
 Please look at the URL below for documention for Stanford CoreNLP:
 
-  http://nlp.stanford.edu/software/corenlp.shtml
+  http://http://nlp.stanford.edu/software/corenlp.shtml
 
 LICENSE
 
@@ -42,11 +42,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2013-06-19    3.2.0     New RNN parser model, more efficient tagger 
-
-2013-04-04    1.3.5     Speed improvements, coref improvements, 
-                        Chinese version, -nthreads option 
 
 2012-11-12    1.3.4     Improved ner model and dependency code, 
                         now possible to change annotator pool for

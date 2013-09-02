@@ -82,34 +82,35 @@ public class NumberNormalizer {
   private static final Pattern numberTermPattern2 = Pattern.compile("(?i)(" + numberTermPattern.pattern() + "(-" + numberTermPattern.pattern() + ")?)");
   private static final Pattern ordinalUnitPattern = Pattern.compile("(?i)(hundredth|thousandth|millionth)");
 
-  // private static final String[] unitWords = {"trillion", "billion", "million", "thousand", "hundred"};
-  // private static final String[] endUnitWords = {"gross", "dozen", "score"};
+  private static final String[] unitWords = {"trillion", "billion", "million", "thousand", "hundred"};
+  private static final String[] endUnitWords = {"gross", "dozen", "score"};
 
   // Converts numbers in words to numeric form
   // works through trillions
-  protected static final Pattern digitsPattern = Pattern.compile("\\d+");
-  private static final Pattern numPattern = Pattern.compile("[-+]?(?:\\d+(?:,\\d\\d\\d)*(?:\\.\\d*)?|\\.\\d+)");
+  protected static Pattern digitsPattern = Pattern.compile("\\d+");
+  private static Pattern numPattern = Pattern.compile("[-+]?(?:\\d+(?:,\\d\\d\\d)*(?:\\.\\d*)?|\\.\\d+)");
   private static final Pattern numRangePattern = Pattern.compile("(" + numPattern.pattern() + ")-(" + numPattern.pattern() + ")");
-  // private static final Pattern[] endUnitWordsPattern = new Pattern[endUnitWords.length];
-  // private static final Pattern[] unitWordsPattern = new Pattern[unitWords.length];
-  // static {
-  //   int i = 0;
-  //   for (String uw:endUnitWords) {
-  //     endUnitWordsPattern[i] = Pattern.compile("(.*)\\s*" + Pattern.quote(uw) + "\\s*(.*)");
-  //     i++;
-  //   }
-  //   int ii = 0;
-  //   for (String uw:unitWords) {
-  //     unitWordsPattern[ii] = Pattern.compile("(.*)\\s*" + Pattern.quote(uw) + "\\s*(.*)");
-  //     ii++;
-  //   }
-  // }
+  private static Pattern[] endUnitWordsPattern = new Pattern[endUnitWords.length];
+  private static Pattern[] unitWordsPattern = new Pattern[unitWords.length];
+  static {
+    int i = 0;
+    for (String uw:endUnitWords) {
+      endUnitWordsPattern[i] = Pattern.compile("(.*)\\s*" + Pattern.quote(uw) + "\\s*(.*)");
+      i++;
+    }
+    i = 0;
+    for (String uw:unitWords) {
+      unitWordsPattern[i] = Pattern.compile("(.*)\\s*" + Pattern.quote(uw) + "\\s*(.*)");
+      i++;
+    }
+
+  }
 
   // TODO: similar to QuantifiableEntityNormalizer.wordsToValues
   //       QuantifiableEntityNormalizer also has bn (for billion)
   //       should consolidate
   //       here we use Number representation instead of double...
-  private static final  Map<String,Number> word2NumMap = Generics.newHashMap();
+  private static final  Map<String,Number> word2NumMap = new HashMap<String,Number>();
   static
   {
     // Special words for numbers
@@ -159,7 +160,7 @@ public class NumberNormalizer {
   }
 
   // similar to QuantifiableEntityNormalizer.ordinalsToValues
-  private static final Map<String,Number> ordWord2NumMap = Generics.newHashMap();
+  private static final Map<String,Number> ordWord2NumMap = new HashMap<String,Number>();
   static {
     ordWord2NumMap.put("zeroth", 0);
     ordWord2NumMap.put("first", 1);
@@ -190,7 +191,7 @@ public class NumberNormalizer {
     ordWord2NumMap.put("eightieth", 80);
     ordWord2NumMap.put("ninetieth", 90);
     ordWord2NumMap.put("hundredth", 100);
-    ordWord2NumMap.put("hundreth", 100); // really a spelling error
+    ordWord2NumMap.put("hundreth", 100);
     ordWord2NumMap.put("thousandth", 1000);
     ordWord2NumMap.put("millionth", 1000000);
     ordWord2NumMap.put("billionth", 1000000000);
@@ -203,21 +204,20 @@ public class NumberNormalizer {
 
   /**
    * Fairly generous utility function to convert a string representing
-   * a number (hopefully) to a Number.
+   *  a number (hopefully) to a Number
    * Assumes that something else has somehow determined that the string
-   * makes ONE suitable number.
+   *  makes ONE suitable number
    * The value of the number is determined by:
    * 0. Breaking up the string into pieces using whitespace
-   *    (stuff like "and", "-", "," is turned into whitespace);
-   * 1. Determining the numeric value of the pieces;
-   * 2. Finding the numeric value of each piece;
-   * 3. Combining the pieces together to form the overall value:
-   *    a. Find the largest component and its value (X),
-   *    b. Let B = overall value of pieces to the left (recursive),
-   *    c. Let C = overall value of pieces to the right recursive),
-   *    d. The overall value = B*X + C.
-   *
-   * @param str The String to convert
+   *    (stuff like "and", "-", "," is turned into whitespace)
+   * 1. Determining the numeric value of the pieces
+   * 2. Finding the numeric value of each piece
+   * 3. Combining the pieces together to form the overall value
+   *    a. Find the largest component and its value (X)
+   *    b. Let B = overall value of pieces to the left (recursive)
+   *    c. Let C = overall value of pieces to the right recursive)
+   *    d. The overall value = B*X + C
+   * @param str
    * @return numeric value of string
    */
   public static Number wordToNumber(String str){
@@ -391,8 +391,6 @@ public class NumberNormalizer {
 
   private static final Env env = getNewEnv();
 
-  private static final TokenSequencePattern numberPattern = TokenSequencePattern.compile(
-          env, "$NUMTERM ( [/,/ & $BEFORE_WS]? [$POSINTTERM & $BEFORE_WS]  )* ( [/,/ & $BEFORE_WS]? [/and/ & $BEFORE_WS] [$POSINTTERM & $BEFORE_WS]+ )? ");
   /**
    * Find and mark numbers (does not need NumberSequenceClassifier)
    * Each token is annotated with the numeric value and type
@@ -412,8 +410,7 @@ public class NumberNormalizer {
    * The function is overly aggressive in marking possible numbers
    *  - should either do more checks or use in conjunction with NumberSequenceClassifier
    *    to avoid marking certain tokens (like second/NN) as numbers...
-   *
-   * @param annotation The annotation structure
+   * @param annotation
    * @return list of CoreMap representing the identified numbers
    */
   public static List<CoreMap> findNumbers(CoreMap annotation)
@@ -446,7 +443,10 @@ public class NumberNormalizer {
     }
     // TODO: Should we allow "," in written out numbers?
     // TODO: Handle "-" that is not with token?
-    TokenSequenceMatcher matcher = numberPattern.getMatcher(tokens);
+    TokenSequencePattern pattern = TokenSequencePattern.compile(
+            env, "$NUMTERM ( [/,/ & $BEFORE_WS]? [$POSINTTERM & $BEFORE_WS]  )* ( [/,/ & $BEFORE_WS]? [/and/ & $BEFORE_WS] [$POSINTTERM & $BEFORE_WS]+ )? ");
+//            env, "$NUMTERM ( $POSINTTERM /,/? )* ( /and/ $POSINTTERM+ )? ");
+    TokenSequenceMatcher matcher = pattern.getMatcher(tokens);
     List<CoreMap> numbers = new ArrayList<CoreMap>();
     while (matcher.find()) {
       @SuppressWarnings("unused")
@@ -535,7 +535,7 @@ public class NumberNormalizer {
               } else {
                 // unit is increasing - can be okay, maybe five hundred thousand?
                 // what about four hundred five thousand
-                // unit might also be the same, as in thousand thousand,
+                // unit might also be the same, as in thousand thousand, 
                 // which we convert to million
               }
             }
@@ -646,12 +646,11 @@ public class NumberNormalizer {
    *
    * Each number range is marked with
    * - CoreAnnotations.NumericTypeAnnotation.class: NUMBER_RANGE
-   * - CoreAnnotations.NumericObjectAnnotation.class: {@code Pair<Number>} representing the start/end of the range
+   * - CoreAnnotations.NumericObjectAnnotation.class: Pair<Number> representing the start/end of the range
    *
    * @param annotation - annotation where numbers have already been identified
    * @return list of CoreMap representing the identified number ranges
    */
-  private static final TokenSequencePattern rangePattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
   public static List<CoreMap> findNumberRanges(CoreMap annotation)
   {
     List<CoreMap> numerizedTokens = annotation.get(CoreAnnotations.NumerizedTokensAnnotation.class);
@@ -677,7 +676,8 @@ public class NumberNormalizer {
       }
     }
     List<CoreMap> numberRanges = new ArrayList<CoreMap>();
-    TokenSequenceMatcher matcher = rangePattern.getMatcher(numerizedTokens);
+    TokenSequencePattern pattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
+    TokenSequenceMatcher matcher = pattern.getMatcher(numerizedTokens);
     while (matcher.find()) {
       List<? extends CoreMap> matched = matcher.groupNodes();
       if (matched.size() == 1) {
@@ -743,7 +743,6 @@ public class NumberNormalizer {
     final Integer startTokenOffsetFinal = startTokenOffset;
     List<CoreMap> mergedNumbers = numberAggregator.merge(annotation.get(CoreAnnotations.TokensAnnotation.class), numbers,
           new Function<CoreMap, Interval<Integer>>() {
-            @Override
             public Interval<Integer> apply(CoreMap in) {
               return Interval.toInterval(
                     in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
@@ -751,14 +750,14 @@ public class NumberNormalizer {
             }
           });
     //restore token offsets
-    if (!savedTokenBegins.isEmpty() && !savedTokenEnds.isEmpty()) {
+    if(!savedTokenBegins.isEmpty() && !savedTokenEnds.isEmpty()){
       for (CoreMap c : mergedNumbers) {
         // get new indices
         int newBegin = c.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffset;
         int newEnd = c.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffset;
         // get token offsets for those indices
         c.set(CoreAnnotations.TokenBeginAnnotation.class, savedTokenBegins.get(newBegin));
-        c.set(CoreAnnotations.TokenEndAnnotation.class, savedTokenEnds.get(newEnd-1));
+        c.set(CoreAnnotations.TokenEndAnnotation.class, savedTokenEnds.get(newEnd-1));     
       }
     }
     //return
@@ -786,7 +785,6 @@ public class NumberNormalizer {
     List<CoreMap> mergedNumbersWithRanges = CollectionUtils.mergeListWithSortedMatchedPreAggregated(
             annotation.get(CoreAnnotations.NumerizedTokensAnnotation.class), numberRanges,
           new Function<CoreMap, Interval<Integer>>() {
-            @Override
             public Interval<Integer> apply(CoreMap in) {
               return Interval.toInterval(
                     in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
@@ -796,5 +794,4 @@ public class NumberNormalizer {
     annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbersWithRanges);
     return mergedNumbersWithRanges;
   }
-
 }

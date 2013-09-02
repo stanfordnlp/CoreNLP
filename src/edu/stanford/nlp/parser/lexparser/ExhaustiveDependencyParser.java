@@ -43,7 +43,6 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.KBestViterbiParser;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 
 /**
@@ -221,11 +220,6 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
         binDistance[head][loc] = dg.distanceBin(rawDistance[head][loc]);
       }
     }
-
-    if (Thread.interrupted()) {
-      throw new RuntimeInterruptedException();
-    }
-
     // do tags
     for (int start = 0; start + 1 <= length; start++) {
 
@@ -349,9 +343,6 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     }
     // do larger spans
     for (int diff = 2; diff <= length; diff++) {
-      if (Thread.interrupted()) {
-        throw new RuntimeInterruptedException();
-      }
       if (DEBUG_MORE) System.err.println("SPAN " + diff + ": score = headPrev + argLeft + argRight + dep + argLStop + argRStop");
       for (int start = 0; start + diff <= length; start++) {
         int end = start + diff;
@@ -486,9 +477,6 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     oScoreH[length - 1][goalTag][0] = 0.0f;
     oScoreH[length - 1][goalTag][length] = 0.0f;
     for (int diff = length; diff > 1; diff--) {
-      if (Thread.interrupted()) {
-        throw new RuntimeInterruptedException();
-      }
       for (int start = 0; start + diff <= length; start++) {
         int end = start + diff;
         // left half
@@ -562,9 +550,6 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
         Arrays.fill(oPossibleByL[loc][head], false);
         Arrays.fill(oPossibleByR[loc][head], false);
       }
-    }
-    if (Thread.interrupted()) {
-      throw new RuntimeInterruptedException();
     }
     for (int head = 0; head < length; head++) {
       for (int tag = 0; tag < numTags; tag++) {

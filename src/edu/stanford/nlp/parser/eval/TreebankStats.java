@@ -23,7 +23,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
@@ -55,16 +54,16 @@ public class TreebankStats {
   }
 
   public boolean useSplit(String prefix) {
-    Map<Split,File> splitMap = Generics.newHashMap();
+    Map<Split,File> splitMap = new HashMap<Split,File>();
     splitMap.put(Split.Train,new File(prefix + ".train"));
     splitMap.put(Split.Test,new File(prefix + ".test"));
     splitMap.put(Split.Dev,new File(prefix + ".dev"));
 
-    splitFileLists = Generics.newHashMap();
+    splitFileLists = new HashMap<Split,Set<String>>();
     for(Map.Entry<Split, File> entry : splitMap.entrySet()) {
       File f = entry.getValue();
       if(!f.exists()) return false;
-      Set<String> files = Generics.newHashSet();
+      Set<String> files = new HashSet<String>();
       for(String fileName : IOUtils.readLines(f))
         files.add(fileName);
       splitFileLists.put(entry.getKey(), files);
@@ -78,7 +77,7 @@ public class TreebankStats {
   private ObservedCorpusStats gatherStats(DiskTreebank tb, String name) {
     ObservedCorpusStats ocs = new ObservedCorpusStats(name);
 
-    if(makeVocab) trainVocab = Generics.newHashSet();
+    if(makeVocab) trainVocab = new HashSet<String>();
 
     System.out.println("Reading treebank:");
     for(Tree t : tb) {
@@ -208,7 +207,7 @@ public class TreebankStats {
       }
 
     } else {
-      trainVocab = Generics.newHashSet();
+      trainVocab = new HashSet<String>();
       DiskTreebank tb = tlpp.diskTreebank();
       for(String path : pathNames)
         tb.loadPath(path, new FileFilter() {
@@ -363,7 +362,7 @@ public class TreebankStats {
         meanBranchingByLabel.incrementCount(label, mean);
       }
 
-      oovWords = Generics.newHashSet(words.keySet());
+      oovWords = new HashSet<String>(words.keySet());
       oovWords.removeAll(trainVocab);
       OOVRate = (double) oovWords.size() / (double) words.keySet().size();
     }
@@ -422,7 +421,7 @@ public class TreebankStats {
   }
   
   private static Map<String,Integer> optArgDefs() {
-    Map<String,Integer> optArgDefs = Generics.newHashMap(4);
+    Map<String,Integer> optArgDefs = new HashMap<String,Integer>(4);
     optArgDefs.put("s", 1);
     optArgDefs.put("w", 0);
     optArgDefs.put("f", 0);

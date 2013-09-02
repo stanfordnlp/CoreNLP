@@ -1,14 +1,14 @@
-STANFORD DEPENDENCIES.  Stanford Parser v3.2.0 - 2013-06-19
+STANFORD DEPENDENCIES.  Stanford Parser v2.0.4 - 2012-11-12
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
 representation:
 
-    StanfordDependenciesManual.pdf
+    dependencies_manual.pdf
 
 should be consulted for the current set of dependency representations
 and the correct commands for generating Stanford Dependencies together
-with any of the Stanford Parser, another parser, or a treebank.
+with either the Stanford Parser or another parser.
 
 A typed dependencies representation is also available for Chinese.  For
 the moment the documentation consists of the code, and a brief
@@ -41,42 +41,6 @@ For more discussion of the design principles, please see:
 
 These papers can be cited as references for the English Stanford
 Dependencies.
-
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.2, JUNE 2013
-
-Various small fixes were made to the dependencies conversion,
-and one change to the taxonomy of relations:
- - rel was removed. rel was originally used as the relation for an
-    overt relativizer in a relative clause. But it was never a real
-    grammatical relation, and we gradually started labeling easy cases
-    as nsubj or dobj. In this release, rel is removed, pobj cases are
-    also labeled, and the remaining hard cases are labeled as dep.
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v2.0.5, MARCH 2013
-
-We have begun a more major effort to improve the suitability and coverage of
-Stanford Dependencies on less formal text types, and to clean up a couple of
-the more quirky dependencies in the original set. These changes are still
-ongoing, but in this first installment, we have removed 3 dependencies and
-added 2:
- - abbrev was removed, and is now viewed as just a case of appos.
- - complm was removed, and is now viewed as just a case of mark.
-    (This is consistent with an HPSG-like usage of mark.)
- - purpcl was removed, and is now viewed as just a case of advcl.
- - discourse was added. The lack of a dependency type for
-    interjections was an omission even in the early versions, but it
-    became essential as we expanded our consideration of informal
-    text types. It is used for interjections, fillers, discourse markers
-    and emoticons.
-  - goeswith was added. In badly edited text, it is used to join the
-    two parts of a word.
-
-A few other changes and improvements were also made, including improvements
-in the recognition of advcl. There has been a reduction of "dep" dependencies
-of about 14% on newswire (and higher on more informal text genres).
 
 
 --------------------------------------

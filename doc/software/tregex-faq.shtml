@@ -1,0 +1,189 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2><font color="#a40526">Tregex/Tsurgeon FAQ</font></h2>
+</center>
+
+<h3>Questions</h3>
+
+<ol>
+<li><a href="#b">Is there a User Guide?</a></li>
+<li><a href="#d">What command-line options does Tregex have?</a></li>
+<li><a href="#c">Tsurgeon has stopped responding/gone into an infinite
+loop.  Is that a bug?</a></li>
+</ol>
+
+<h3>Questions with answers</h3>
+
+<ol>
+
+<li><h4><a name="b">Is there a User Guide?</a></h4>
+<p>
+At present, no.  There is:
+</p>
+<ul>
+<li>The information in the README-tregex.txt, 
+README-tsurgeon.txt, and README-gui.txt files</li>
+<li>The information on patterns and programmatic use in the Javadocs.  The
+<code>TregexPattern</code> and 
+<code>Tsurgeon</code> class javadoc give relatively complete information on
+the pattern languages of these tools.</li>
+<li>The GUI has help screens, available within the graphical interface
+by clicking on the Help buttons, which provide similar information on
+Tregex and Tsurgeon syntax, as does
+  <a href="http://nlp.stanford.edu/~manning/courses/ling289/Tregex.html">this
+     page</a>.</li>
+<li>There are brief powerpoint tutorials for 
+<a href="tregex/The_Wonderful_World_of_Tregex.ppt">Tregex</a>
+(by Galen Andrew)
+and <a href="tregex/Tsurgeon2.ppt">Tsurgeon</a>
+(by Marie-Catherine de Marneffe).</li>
+<li>For <code>tregex</code>, you may also usefully
+consult user guides for <code>tgrep</code> and <code>tgrep2</code>,
+with which <code>tregex</code> is mainly compatible.</li>
+</ul>
+</li>
+
+<li><h4><a name="d">What command-line options does Tregex have?</a></h4>
+<p>Here are some details on the command-line options of Tregex, taken
+  from the javadoc for the main method of <code>TregexPattern</code>:
+</p>
+<p>
+Usage: <br><br><code>
+java edu.stanford.nlp.trees.tregex.TregexPattern [[-TCwfosnu]
+[-filter] [-h &lt;node-name&gt;]]* pattern
+  filepath   </code>
+</p><p>
+ Arguments:<br>
+ <ul><li><code>pattern</code>: the tree
+ pattern which optionally names some set of nodes (i.e., gives it
+ the "handle") <code>=name</code> (for some arbitrary
+ string "name")
+ <li> <code>filepath</code>: the path to files with trees. If this
+ is a directory, there will be recursive descent and the pattern will
+ be run on all files beneath the specified directory.
+ </ul>
+<p>
+ Options:</p>
+ <ul>
+ <li> <code>-C</code> suppresses printing of matches, so only the
+ number of matches is printed.
+ <li> <code>-w</code> causes the whole of a tree that matches to be
+   printed.
+ <li> <code>-f</code> causes the filename to be printed.
+ <li> <code>-i &lt;filename&gt;</code> causes the pattern to be
+   matched to be read from <code>&lt;filename&gt;</code> rather than the
+   command line.  Don't specify a pattern when this option is used.
+ <li> <code>-o</code> Specifies that each tree node can be reported
+   only once as the root of a match (by default a node will
+    be printed once for every <em>way</em> the pattern matches).
+ <li> <code>-s</code> causes trees to be printed all on one line (by
+   default they are pretty printed).
+ <li> <code>-n</code> causes the number of the tree in which the
+   match was found to be printed before every match.
+ <li> <code>-u</code> causes only the label of each matching node to
+   be printed, not complete subtrees.
+ <li> <code>-t</code> causes only the yield (terminal words) of the
+   selected node to be printed (or
+   the yield of the whole tree, if the <code>-w</code> option is used).
+ <li> <code>-encoding &lt;charset_encoding&gt;</code> option allows
+   specification of character encoding of trees.
+ <li> <code>-h &lt;node-handle&gt;</code> If a <code>-h</code>
+   option is given, the root tree node will not be printed.  Instead,
+ for each <code>node-handle</code> specified, the node matched and
+   given that handle will be printed.  Multiple nodes can be printed by
+   using the
+ <code>-h</code> option multiple times on a single command line.
+ <li> <code>-hf &lt;headfinder-class-name&gt;</code> use the
+   specified {@link HeadFinder} class to determine headship relations.
+ <li> <code>-hfArg &lt;string&gt;</code> pass a string argument in
+   to the {@link HeadFinder} class's constructor.  <code>-hfArg</code>
+   can be used multiple times to pass in multiple arguments.
+ <li> <code>-trf &lt;TreeReaderFactory-class-name&gt;</code> use the
+   specified {@link TreeReaderFactory} class to read trees from files.
+ <li> <code>-v</code> print every tree that contains no matches of
+   the specified pattern, but print no matches to the pattern.
+
+ <li> <code>-x</code> Instead of the matched subtree, print the
+   matched subtree's identifying number as defined in <tt>tgrep2</tt>:a
+ unique identifier for the subtree and is in the form s:n, where s
+   is an integer specifying
+ the sentence number in the corpus (starting with 1), and n is an
+   integer giving the order
+ in which the node is encountered in a depth-first search starting
+   with 1 at top node in the
+ sentence tree.
+
+ <li> <code>-extract &lt;code&gt; &lt;tree-file&gt;</code> extracts
+   the subtree s:n specified by <tt>code</tt> from the
+   specified <tt>tree-file</tt>.  Overrides all other behavior of
+   tregex.  Can't specify multiple encodings etc. yet.
+ <li> <code>-extractFile &lt;code-file&gt; &lt;tree-file&gt;</code>
+   extracts every subtree specified by the subtree codes
+   in <tt>code-file</tt>, which must appear exactly one per line, from
+   the specified <tt>tree-file</tt>.  Overrides all other behavior of
+   tregex. Can't specify multiple encodings etc. yet.
+ <li> <code>-filter</code> causes this to act as a filter, reading
+   tree input from stdin
+<li> <code>-T</code> causes all trees to be printed as
+   processed (for debugging purposes).  Otherwise only matching nodes
+ are printed.
+ </ul>
+</li>
+
+<li><h4><a name="c">Tsurgeon has stopped responding/gone into an infinite
+loop.  Is that a bug?</a></h4>
+<p>
+Probably not (though you never know).  Normally what this means is that
+you have written an infinite loop in your tree surgery script.
+</p>
+<p>
+Tsurgeon script matching and rewriting is applied repeatedly (recursively) until
+no further matching and rewriting is possible.  This is the behavior
+that you want in complex cases: large trees may match several patterns
+in a complex Tsurgeon script, and earlier edits may enable later edits.
+However, unfortunately, it also makes it very easy to write infinite
+loops in Tsurgeon, and this can confuse beginners.  Here's a very simple
+example of how you can produce an infinite loop (you can come up with
+complex examples by yourself!):
+</p>
+<blockquote><code>
+/^VB/=haveaux < have|has|having|had <br>
+<br>
+relabel haveaux /^(.*)$/$1-HAVE/
+</code></blockquote>
+<p>
+The first poor <code>haveaux</code> node that matches the pattern, say
+<code>(VBZ has)</code>, will 
+get repeatedly relabeled as:
+<blockquote><code>
+VBZ-HAVE <br>
+VBZ-HAVE-HAVE <br>
+VBZ-HAVE-HAVE-HAVE <br>
+VBZ-HAVE-HAVE-HAVE-HAVE <br>
+...
+</code></blockquote>
+<p>
+And you can see where that is heading.  It is essential to write edits
+so that they will not apply to their own output forever.  For this
+example, things can easily be fixed with the following changed script:
+</p>
+</li>
+<blockquote><code>
+/^VB.?$/=haveaux < have|has|having|had <br>
+<br>
+relabel haveaux /^(.*)$/$1-HAVE/
+</code></blockquote>
+</li>
+
+</ol>
+
+<p>
+For other questions, feedback, extensions, or bugfixes, please join and
+post to the <code>parser-user@lists.stanford.edu</code> mailing list.
+Or you can send email to <a href="mailto:parser-support@lists.stanford.edu"><code>parser-support@lists.stanford.edu</code></a>.  
+</p>
+
+
+<!--#include virtual="/footer.html" -->
+

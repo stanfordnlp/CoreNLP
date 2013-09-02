@@ -31,29 +31,28 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.ie.machinereading.domains.ace.AceReader;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Extracts {@code <COREF>} mentions from a file annotated in ACE format (ACE2004, ACE2005).
@@ -98,12 +97,6 @@ public class ACEMentionExtractor extends MentionExtractor {
 
     files = new File(corpusPath).list();
   }
-  
-  public ACEMentionExtractor(Dictionaries dict, Properties props, Semantics semantics,
-      LogisticClassifier<String, String> singletonModel) throws Exception {
-    this(dict, props, semantics);
-    singletonPredictor = singletonModel;
-  }
 
   public void resetDocs() {
     super.resetDocs();
@@ -137,18 +130,18 @@ public class ACEMentionExtractor extends MentionExtractor {
       stanfordProcessor.annotate(anno);
 
 
-      List<CoreMap> sentences = anno.get(CoreAnnotations.SentencesAnnotation.class);
+      List<CoreMap> sentences = anno.get(SentencesAnnotation.class);
 
       for (CoreMap s : sentences){
         int i = 1;
-        for(CoreLabel w : s.get(CoreAnnotations.TokensAnnotation.class)){
-          w.set(CoreAnnotations.IndexAnnotation.class, i++);
-          if(!w.containsKey(CoreAnnotations.UtteranceAnnotation.class)) {
-            w.set(CoreAnnotations.UtteranceAnnotation.class, 0);
+        for(CoreLabel w : s.get(TokensAnnotation.class)){
+          w.set(IndexAnnotation.class, i++);
+          if(!w.containsKey(UtteranceAnnotation.class)) {
+            w.set(UtteranceAnnotation.class, 0);
           }
         }
-        allTrees.add(s.get(TreeCoreAnnotations.TreeAnnotation.class));
-        allWords.add(s.get(CoreAnnotations.TokensAnnotation.class));
+        allTrees.add(s.get(TreeAnnotation.class));
+        allWords.add(s.get(TokensAnnotation.class));
         EntityComparator comparator = new EntityComparator();
         extractGoldMentions(s, allGoldMentions, comparator);
       }
@@ -169,14 +162,14 @@ public class ACEMentionExtractor extends MentionExtractor {
     List<Mention> goldMentions = new ArrayList<Mention>();
     allGoldMentions.add(goldMentions);
     List<EntityMention> goldMentionList = s.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
-    List<CoreLabel> words = s.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> words = s.get(TokensAnnotation.class);
 
     TreeSet<EntityMention> treeForSortGoldMentions = new TreeSet<EntityMention>(comparator);
     if(goldMentionList!=null) treeForSortGoldMentions.addAll(goldMentionList);
     if(!treeForSortGoldMentions.isEmpty()){
       for(EntityMention e : treeForSortGoldMentions){
         Mention men = new Mention();
-        men.dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+        men.dependency = s.get(CollapsedDependenciesAnnotation.class);
         men.startIndex = e.getExtentTokenStart();
         men.endIndex = e.getExtentTokenEnd();
 
@@ -203,8 +196,8 @@ public class ACEMentionExtractor extends MentionExtractor {
           CoreLabel word = words.get(j);
           String ner = e.getType() +"-"+ e.getSubType();
           if(Constants.USE_GOLD_NE){
-            word.set(CoreAnnotations.EntityTypeAnnotation.class, e.getMentionType());
-            if(e.getMentionType().equals("NAM")) word.set(CoreAnnotations.NamedEntityTagAnnotation.class, ner);
+            word.set(EntityTypeAnnotation.class, e.getMentionType());
+            if(e.getMentionType().equals("NAM")) word.set(NamedEntityTagAnnotation.class, ner);
           }
         }
       }
@@ -225,18 +218,18 @@ public class ACEMentionExtractor extends MentionExtractor {
       CoreMap sentence = sentences.get(i);
       List<Mention> mentions = allMentions.get(i);
 
-      String[] tokens = sentence.get(CoreAnnotations.TextAnnotation.class).split(" ");
+      String[] tokens = sentence.get(TextAnnotation.class).split(" ");
       String sent = "";
-      List<CoreLabel> t = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      if(previousOffset+2 < t.get(0).get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)) sent += "\n";
-      previousOffset = t.get(t.size()-1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+      List<CoreLabel> t = sentence.get(TokensAnnotation.class);
+      if(previousOffset+2 < t.get(0).get(CharacterOffsetBeginAnnotation.class)) sent += "\n";
+      previousOffset = t.get(t.size()-1).get(CharacterOffsetEndAnnotation.class);
       Counter<Integer> startCounts = new ClassicCounter<Integer>();
       Counter<Integer> endCounts = new ClassicCounter<Integer>();
-      Map<Integer, Set<Integer>> endID = Generics.newHashMap();
+      HashMap<Integer, Set<Integer>> endID = new HashMap<Integer, Set<Integer>>();
       for (Mention m : mentions) {
         startCounts.incrementCount(m.startIndex);
         endCounts.incrementCount(m.endIndex);
-        if(!endID.containsKey(m.endIndex)) endID.put(m.endIndex, Generics.<Integer>newHashSet());
+        if(!endID.containsKey(m.endIndex)) endID.put(m.endIndex, new HashSet<Integer>());
         endID.get(m.endIndex).add(m.goldCorefClusterID);
       }
       for (int j = 0 ; j < tokens.length; j++){

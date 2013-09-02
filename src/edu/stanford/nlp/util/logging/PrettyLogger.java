@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Primarily for debugging, PrettyLogger helps you dump various collection
@@ -220,7 +220,7 @@ public class PrettyLogger {
 
   private static <K,V> void log(RedwoodChannels channels, String description, Dictionary<K,V> dict) {
     //(a real data structure)
-    Map<K, V> map = Generics.newHashMap();
+    Map<K, V> map = new HashMap<K, V>();
     //(copy to map)
     Enumeration<K> keys = dict.keys();
     while(keys.hasMoreElements()){
@@ -243,10 +243,10 @@ public class PrettyLogger {
     } else {
       int index = 0;
       for (T item : iterable) {
-        if (dispatchable(item) && item != iterable) {
+        if (dispatchable(item)) {
           log(channels, "Index " + index, item);
         } else {
-          channels.logf("Index %d: %s", index, item == iterable ? "...<infinite loop>" : item);
+          channels.logf("Index %d: %s", index, item);
         }
         index++;
       }

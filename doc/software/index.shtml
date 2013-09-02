@@ -1,0 +1,201 @@
+<!--#include virtual="/header.html" -->
+
+<!-- THE ACTUAL PAGE CONTENTS START HERE //-->
+
+<table width="100%" cellpadding="10" cellspacing="0">
+  <tr valign="top"> 
+
+    <!-- left bar: main content -->
+    <td width="500">
+
+      <p>
+        The Stanford NLP Group makes parts of our
+        Natural Language Processing software
+        available to the public.  These are statistical NLP toolkits for
+        various major computational linguistics problems.  They can be
+        incorporated into applications with human language technology needs.
+      </p>
+
+      <p>
+        All the software we distribute is written in Java.  All recent
+        distributions require Sun/Oracle JDK 1.5+.
+	Distribution packages include components for command-line
+        invocation, jar files, a Java API, and source code.
+      </p>
+
+      <h3>Supported software distributions</h3>
+
+      <p>
+      This code is being developed, and we try to answer questions and
+      fix bugs on a best-effort basis.
+      </p>
+
+      <p>
+        All these software distributions are open source,
+        <b>licensed under the 
+        <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU
+        General Public License</a></b> (v2 or later). 
+	Note that this is the <i>full</i> GPL,
+        which allows many free uses, but
+        <i>does not allow</i> its incorporation into any type of distributed
+        <a href="http://www.gnu.org/licenses/gpl-faq.html#GPLInProprietarySystem">proprietary software</a>,
+	even in part or in translation.
+        <b>Commercial licensing</b> is also available; please contact us if you are interested.
+      </p>	
+
+      <dl class="indent">
+
+        <dt> <a href="corenlp.shtml">Stanford CoreNLP</a></dt>
+	<dd>
+	An integrated suite of natural language processing tools for English in
+	Java, including tokenization, part-of-speech tagging, named
+	entity recognition, parsing, and coreference.
+        <a href="http://nlp.stanford.edu:8080/corenlp/">Online CoreNLP demo</a>
+	</dd>
+
+        <dt><a href="lex-parser.shtml">Stanford Parser</a></dt>
+	<dd>
+	  Implementations of probabilistic natural language
+	  parsers, both highly optimized PCFG and dependency parsers,
+	  and a lexicalized PCFG parser in Java. Includes: 
+<a href="http://nlp.stanford.edu:8080/parser/">Online parser demo</a>, 
+<a href="http://nlp.stanford.edu/software/stanford-dependencies.shtml">Stanford Dependencies</a> page,
+and <a href="parser-faq.shtml">Parser FAQ</a>.
+	</dd>
+
+        <dt><a href="tagger.shtml">Stanford POS Tagger</a></dt>
+	<dd>
+	A maximum-entropy (CMM) part-of-speech
+	(POS) tagger for English, Arabic, Chinese, French, and German, in Java.
+	</dd>
+
+        <dt><a href="CRF-NER.shtml">Stanford Named Entity Recognizer</a></dt>
+	<dd>
+	A Conditional Random Field sequence
+	model, together with well-engineered features for Named Entity
+	Recognition in English and German. 
+        <a href="http://nlp.stanford.edu:8080/ner/">Online NER demo</a>
+	</dd>
+
+        <dt><a href="segmenter.shtml">Stanford Word Segmenter</a></dt>
+        <dd>
+          A CRF-based word segmenter in Java. Supports Arabic and Chinese.
+        </dd>
+
+        <dt><a href="classifier.shtml">Stanford Classifier</a></dt>
+	<dd>
+	  A machine learning classifier, directed at text
+	categorization. A conditional loglinear classifier
+	  (a.k.a. a maximum entropy or multiclass 
+	  logistic regression model).
+	</dd>
+
+        <dt><a href="tregex.shtml">Tregex</a> and 
+            <a href="tregex.shtml">Tsurgeon</a></dt>
+	<dd>
+	  A Tgrep2-style utility for matching
+            patterns in trees, and a tree-transformation utility built
+            on top of this matching language.
+	</dd>
+
+        <dt><a href="phrasal/">Phrasal</a></dt>
+        <dd>
+         A state-of-the-art phrase-based machine translation system.
+        </dd>
+
+        <dt><a href="eventparser.shtml">Stanford Biomedical Event Parser (SBEP)</a></dt>
+        <dd>
+         Biomedical Event Extraction for the BioNLP 2009/2011 shared task.
+        </dd>
+
+	<dt><a href="tokenizer.shtml">Stanford EnglishTokenizer</a></dt>
+        <dd>A fast tokenizer for English text (producing Penn Treebank
+        tokenization, roughly)</dd>
+	<dt><a href="tokensregex.shtml">Stanford TokensRegex</a></dt>
+        <dd>A tool for matching regular expressions over tokens.</dd>
+	<dt><a href="sutime.shtml">Stanford Temporal Tagger (SUTime) </a></dt>
+        <dd>A rule-based temporal tagger for English text.  
+            <a href="http://nlp.stanford.edu:8080/sutime">Online SUTime demo</a>
+        </dd>
+<!--        <dt><a href="StanfordNLP.pear">Stanford NLP UIMA PEAR
+      file</a> -->
+      </dl>
+
+      <h3>Other open source software distributions</h3>
+
+      <dl class="indent">
+        <dt><a href="tmt/">Topic Modeling Toolbox</a></dt>
+        <dd>
+          A suite of topic modeling tools for social scientists and others
+          who wish to perform analysis on datasets that have a substantial
+          textual component.
+        </dd>
+      </dl>
+
+      <h3>Binary software distributions</h3>
+
+      <p>
+        These systems are not available as source code, but only as
+        compiled Java byte-code and libraries.
+      </p>
+
+      <dl class="indent">
+        <dt><a href="mteval.shtml">Entailment-based MT evaluation
+	software</a>
+        </dt>
+	<dd>
+	  Software to predict the adequacy of MT system output. The
+	  scoring is based in assessing the quality of entailment 
+          between the system output and the reference translation.<br>
+	</dd>
+      </dl>
+
+
+      <h3>End-of-life distributions</h3>
+
+      <p>This is software that we at one point distributed. But we
+      feel either that we are unable to or it isn't useful to maintain it
+      any more.  It's still here in case it's useful, but we won't
+      answer questions about it.</p>
+
+      <dl class="indent">
+        <dt><a href="framenet.shtml">FrameNet Reader software</a></dt>
+	<dd>Support files for reading FrameNet XML files (as they
+	existed in 2002-03 - FrameNet version 0.75/1.0) into Java
+	data structures.</dd>
+
+        <dt>Simple manual annotation tool</a></dt>
+	<dd>A simple tool for annotating spans of text with classes
+	suitable for supervised training of named entity recognition and
+	information extraction models.  Works on plain text and HTML
+	documents.  Click to download
+	<a href="stanford-manual-annotation-tool-2004-05-16.tar.gz">stanford-manual-annotation-tool-2004-05-16.tar.gz</a>.</dd>
+	
+      </dl>
+
+
+    </td>
+    <!-- end left bar -->
+
+    <!-- middle spacer -->
+    <td>
+      <img border="0" src="/img/spacer.gif" width="10" height="1" alt="&nbsp;">
+    </td>
+    <!-- end middle spacer -->
+
+    <!-- right bar -->
+    <td width="200" align="center">
+
+      <img src="/img/dish-200.jpg" width="200" alt="">
+      <br>
+
+    </td>
+    <!-- end right bar -->
+
+  </tr>
+</table>
+
+
+<!-- END OF PAGE CONTENTS ----------------------------- //-->
+<!--#include virtual="/footer.html" -->
+

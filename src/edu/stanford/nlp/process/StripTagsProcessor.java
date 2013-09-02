@@ -3,13 +3,13 @@ package edu.stanford.nlp.process;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.BasicDocument;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * A <code>Processor</code> whose <code>process</code> method deletes all
@@ -26,7 +26,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class StripTagsProcessor<L, F> extends AbstractListProcessor<Word, Word, L, F> {
 
-  private static final Set<String> BLOCKTAGS = Generics.newHashSet(Arrays.asList(
+  private static final HashSet<String> BLOCKTAGS = new HashSet<String>(Arrays.asList(
           "blockquote", "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "li", "ol", "p", "pre", "table", "tr", "ul"));
 
   /**

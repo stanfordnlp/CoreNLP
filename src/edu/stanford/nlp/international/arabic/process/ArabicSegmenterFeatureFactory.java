@@ -2,19 +2,19 @@ package edu.stanford.nlp.international.arabic.process;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
 import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Characters;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 /**
- * Feature factory for the IOB clitic segmentation model described by
- * Green and DeNero (2012).
+ * Feature factory for an IOB clitic segmentation model.
  * 
  * @author Spence Green
  *
@@ -23,6 +23,9 @@ import edu.stanford.nlp.util.PaddedList;
 public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
   
   private static final long serialVersionUID = -4560226365250020067L;
+  
+  private static final Pattern isPunc = Pattern.compile("\\p{Punct}+");
+  private static final Pattern isDigit = Pattern.compile("\\p{Digit}+");
   
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
@@ -35,7 +38,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
    * @param loc  The index at which to extract features.
    */
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Collection<String> features = Generics.newHashSet();
+    Collection<String> features = new HashSet<String>();
 
     if (clique == cliqueC) {
       addAllInterningAndSuffixing(features, featuresC(cInfo, loc), "C");
@@ -58,11 +61,11 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
 
-    String charc = c.get(CoreAnnotations.CharAnnotation.class);
-    String charn = n.get(CoreAnnotations.CharAnnotation.class);
-    String charn2 = n2.get(CoreAnnotations.CharAnnotation.class);
-    String charp = p.get(CoreAnnotations.CharAnnotation.class);
-    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
+    String charc = c.get(CharAnnotation.class);
+    String charn = n.get(CharAnnotation.class);
+    String charn2 = n2.get(CharAnnotation.class);
+    String charp = p.get(CharAnnotation.class);
+    String charp2 = p2.get(CharAnnotation.class);
 
     // Default feature set...a 5 character window
     // plus a few other language-independent features
@@ -71,28 +74,25 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     features.add(charn2 + "-n2" );
     features.add(charp + "-p");
     features.add(charp2 + "-p2");
+
+    // Digit and punctuation features for current word
+    if (isPunc.matcher(charc).find()) {
+      features.add("haspunc");
+    }
+    if (isDigit.matcher(charc).find()) {
+      features.add("hasdigit");
+    }
     
     // Length feature 
     if (charc.length() > 1) {
       features.add("length");
     }
     
-    // Character-level class features
-    boolean seenPunc = false;
-    boolean seenDigit = false;
+    // Unicode block and type features
     for (int i = 0; i < charc.length(); ++i) {
-      char charcC = charc.charAt(i);
-      if ( ! seenPunc && Characters.isPunctuation(charcC)) {
-        seenPunc = true;
-        features.add("haspunc");        
-      }
-      if ( ! seenDigit && Character.isDigit(charcC)) {
-        seenDigit = true;
-        features.add("hasdigit");        
-      }
-      String cuBlock = Characters.unicodeBlockStringOf(charcC);
+      String cuBlock = Characters.unicodeBlockStringOf(charc.charAt(i));
       features.add(cuBlock + "-uBlock");
-      String cuType = String.valueOf(Character.getType(charcC));
+      String cuType = String.valueOf(Character.getType(charc.charAt(i)));
       features.add(cuType + "-uType");
     }
 
@@ -107,8 +107,8 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel c = cInfo.get(loc);
     CoreLabel p = cInfo.get(loc - 1);
 
-    String charc = c.get(CoreAnnotations.CharAnnotation.class);
-    String charp = p.get(CoreAnnotations.CharAnnotation.class);
+    String charc = c.get(CharAnnotation.class);
+    String charp = p.get(CharAnnotation.class);
     
     features.add(charc + charp + "-cngram");
     
@@ -124,9 +124,9 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
 
-    String charc = c.get(CoreAnnotations.CharAnnotation.class);
-    String charp = p.get(CoreAnnotations.CharAnnotation.class);
-    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
+    String charc = c.get(CharAnnotation.class);
+    String charp = p.get(CharAnnotation.class);
+    String charp2 = p2.get(CharAnnotation.class);
 
     features.add(charc + charp + charp2 + "-cngram");
 
@@ -143,10 +143,10 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
 
-    String charc = c.get(CoreAnnotations.CharAnnotation.class);
-    String charp = p.get(CoreAnnotations.CharAnnotation.class);
-    String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
-    String charp3 = p3.get(CoreAnnotations.CharAnnotation.class);
+    String charc = c.get(CharAnnotation.class);
+    String charp = p.get(CharAnnotation.class);
+    String charp2 = p2.get(CharAnnotation.class);
+    String charp3 = p3.get(CharAnnotation.class);
     
     features.add(charc + charp + charp2 + charp3 + "-cngram");
     

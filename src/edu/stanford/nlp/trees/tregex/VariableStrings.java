@@ -1,9 +1,9 @@
 package edu.stanford.nlp.trees.tregex;
 
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.util.Generics;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /** A class that takes care of the stuff necessary for variable strings.
  *
@@ -15,7 +15,7 @@ class VariableStrings {
   private final IntCounter<String> numVarsSet;
 
   public VariableStrings() {
-    varsToStrings = Generics.newHashMap();
+    varsToStrings = new HashMap<String,String>();
     numVarsSet = new IntCounter<String>();
   }
 

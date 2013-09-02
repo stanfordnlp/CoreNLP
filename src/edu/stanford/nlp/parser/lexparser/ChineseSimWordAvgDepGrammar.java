@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
@@ -47,7 +46,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
   }
 
   public Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> getMap(String filename) {
-    Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> hashMap = Generics.newHashMap();
+    Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> hashMap = new HashMap<Pair<Integer, String>, List<Triple<Integer, String, Double>>>();
     try {
       BufferedReader wordMapBReader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
 
