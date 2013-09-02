@@ -117,7 +117,6 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
       positionsChanged = Generics.newHashSet();
 
     for (int i=0; i<schedule.numIterations(); i++) {
-      if (BisequenceEmpiricalNERPrior.DEBUG) System.err.println("\n\niteration: " + i);
       double temperature = schedule.getTemperature(i);
       if (speedUpThreshold <= 0) {
         score = sampleSequenceForward(model, sequence, temperature, null); // modifies tagSequence
@@ -132,8 +131,6 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
           score = sampleSequenceForward(model, sequence, temperature, positionsChanged); // modifies tagSequence
         }
       }
-      if (BisequenceEmpiricalNERPrior.DEBUG) System.err.println(priorEn);
-      if (BisequenceEmpiricalNERPrior.DEBUG) System.err.println(priorCh);
       result.add(sequence);
       if (returnLastFoundSequence) {
         best = sequence;
@@ -358,14 +355,6 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
     }
     ArrayMath.logNormalize(distribution);
     ArrayMath.expInPlace(distribution);
-    if (BisequenceEmpiricalNERPrior.DEBUG) {
-      if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) { 
-        System.err.println("final model:");
-        for (int j = 0; j < distribution.length; j++)
-          System.err.println("\t" + distribution[j]);
-        System.err.println();
-      }
-    }
     int newTag = ArrayMath.sampleFromDistribution(distribution, random);
     double newProb = distribution[newTag];
     return new Pair<Integer, Double>(newTag, newProb);

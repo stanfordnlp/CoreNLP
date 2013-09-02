@@ -221,21 +221,29 @@ public class EntityMention extends ExtractionObject {
     return sb.toString();
   }
 
-
+  
   @Override
   public String toString() {
-    return "EntityMention [type=" + type
+    return "EntityMention [type=" + type 
     + (subType != null ? ", subType=" + subType : "")
     + (mentionType != null ? ", mentionType=" + mentionType : "")
-    + (objectId != null ? ", objectId=" + objectId : "")
+    + (objectId != null ? ", objectId=" + objectId : "") 
     + (headTokenSpan != null ? ", hstart=" + headTokenSpan.start() + ", hend=" + headTokenSpan.end() : "")
     + (extentTokenSpan != null ? ", estart=" + extentTokenSpan.start() + ", eend=" + extentTokenSpan.end() : "")
     + (syntacticHeadTokenPosition >= 0 ? ", headPosition=" + syntacticHeadTokenPosition : "")
-    + (headTokenSpan != null ? ", value=\"" + getValue() + "\"" : "")
+    + (headTokenSpan != null ? ", value=\"" + getValue() + "\"" : "") 
     + (normalizedName != null ? ", normalizedName=\"" + normalizedName + "\"" : "")
     + ", corefID=" + corefID
     + (typeProbabilities != null ? ", probs=" + probsToString() : "")
     + "]";
+  }
+
+  @Override
+  public int hashCode() {
+    int result = mentionType != null ? mentionType.hashCode() : 0;
+    result = 31 * result + (headTokenSpan != null ? headTokenSpan.hashCode() : 0);
+    result = 31 * result + (normalizedName != null ? normalizedName.hashCode() : 0);
+    return result;
   }
 
   static class CompByHead implements Comparator<EntityMention> {
