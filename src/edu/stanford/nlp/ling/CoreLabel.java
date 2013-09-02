@@ -280,7 +280,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * @return "" if the key is not in the map or has the value <code>null</code>
    *     and the String value of the key otherwise
    */
-  public <KEY extends Key<CoreMap, String>> String getString(Class<KEY> key) {
+  public <KEY extends Key<String>> String getString(Class<KEY> key) {
     String value = get(key);
     if (value == null) {
       return "";

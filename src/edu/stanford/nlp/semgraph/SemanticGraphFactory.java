@@ -22,6 +22,50 @@ public class SemanticGraphFactory {
 
   private static final boolean INCLUDE_PUNCTUATION_DEPENDENCIES = false;
 
+  /** 
+   * Produces an Uncollapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
+    return makeFromTree(tree, false, false, false, true, true);
+  }
+
+  /** 
+   * Produces a Collapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCollapsedDependencies(Tree tree) {
+    return makeFromTree(tree, true, false, false, true, true);
+  }
+
+  /** 
+   * Produces a CCProcessed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCCProcessedDependencies(Tree tree) {
+    return makeFromTree(tree, true, true, false, true, true);
+  }
+
+  /** 
+   * Produces an Uncollapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, false, false, false, false, true, true, null, docID, index);
+  }
+
+  /** 
+   * Produces a Collapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, true, false, false, false, true, true, null, docID, index);
+  }
+
+  /** 
+   * Produces a CCProcessed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, true, false, true, false, true, true, null, docID, index);
+  }
+
+
+
   /**
    * Returns a new <code>SemanticGraph</code> constructed from a given {@link
    * Tree} with given options. <p/>
