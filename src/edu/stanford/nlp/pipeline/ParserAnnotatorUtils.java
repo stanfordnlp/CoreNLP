@@ -15,7 +15,8 @@ import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -35,13 +36,13 @@ public class ParserAnnotatorUtils {
   public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs, GrammaticalStructureFactory gsf, CoreMap sentence, Tree tree) {
     // make sure all tree nodes are CoreLabels
     // TODO: why isn't this always true? something fishy is going on
-    ParserAnnotatorUtils.convertToCoreLabels(tree);
+    Trees.convertToCoreLabels(tree);
 
     // index nodes, i.e., add start and end token positions to all nodes
     // this is needed by other annotators down stream, e.g., the NFLAnnotator
     tree.indexSpans(0);
 
-    sentence.set(TreeAnnotation.class, tree);
+    sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
     if (verbose) {
       System.err.println("Tree is:");
       tree.pennPrint(System.err);
@@ -95,24 +96,6 @@ public class ParserAnnotatorUtils {
           ((HasTag) leaf).setTag(taggedWords.get(i).tag());
         }
       }
-    }
-  }
-
-  /**
-   * Converts the tree labels to CoreLabels.
-   * We need this because we store additional info in the CoreLabel, like token span.
-   * @param tree
-   */
-  public static void convertToCoreLabels(Tree tree) {
-    Label l = tree.label();
-    if (!(l instanceof CoreLabel)) {
-      CoreLabel cl = new CoreLabel();
-      cl.setValue(l.value());
-      tree.setLabel(cl);
-    }
-
-    for (Tree kid : tree.children()) {
-      convertToCoreLabels(kid);
     }
   }
 

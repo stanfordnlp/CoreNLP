@@ -9,7 +9,9 @@ public interface LexedTokenFactory<T> {
 
   /**
    * Constructs a token (of arbitrary type) from a String and its position
-   * in the underlying text.
+   * in the underlying text. (The int arguments are used just to record token
+   * character offsets in an underlying text. This method does not take
+   * a substring of {@code str}.)
    *
    * @param str The String extracted by the lexer.
    * @param begin The offset in the document of the first character
@@ -19,5 +21,5 @@ public interface LexedTokenFactory<T> {
    * @return The token of type T.
    */
   public T makeToken(String str, int begin, int length);
-  
+
 }

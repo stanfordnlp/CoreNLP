@@ -114,16 +114,15 @@ public final class CountTagSequences {
     Label boundary = new Tag("<s>");
     // delete empties from the tree!
     Treebank treebank = new DiskTreebank(new TreeReaderFactory() {
+      @Override
       public TreeReader newTreeReader(Reader in) {
         return new PennTreeReader(in, new LabeledScoredTreeFactory(), new BobChrisTreeNormalizer());
       }
     });
     treebank.loadPath(args[0]);
-    Iterator iter = treebank.iterator();
-    while (iter.hasNext()) {
-      Tree t = (Tree) iter.next();
+    for (Tree t : treebank) {
       // System.out.println(t);
-      List ts = new ArrayList();
+      List<Label> ts = new ArrayList<Label>();
       ts.add(boundary);
       t.preTerminalYield(ts);
       ts.add(boundary);

@@ -1,11 +1,6 @@
 package edu.stanford.nlp.sequences;
 
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PositionAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ShapeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.process.Americanize;
 import edu.stanford.nlp.process.WordShapeClassifier;
@@ -130,14 +125,14 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     for (IN fl : doc) {
 
       // position in document
-      fl.set(PositionAnnotation.class, Integer.toString((position++)));
+      fl.set(CoreAnnotations.PositionAnnotation.class, Integer.toString((position++)));
 
       // word shape
       if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && (!flags.useShapeStrings)) {
         // TODO: if we pass in a FeatureFactory, as suggested by an
         // earlier comment, we should use that FeatureFactory's
         // getWord function
-        String word = fl.get(TextAnnotation.class);
+        String word = fl.get(CoreAnnotations.TextAnnotation.class);
         if (flags.wordFunction != null) {
           word = flags.wordFunction.apply(word);
         }
@@ -149,7 +144,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         }
 
         String s = intern(WordShapeClassifier.wordShape(word, flags.wordShape, knownLCWords));
-        fl.set(ShapeAnnotation.class, s);
+        fl.set(CoreAnnotations.ShapeAnnotation.class, s);
       }
 
       // normalizing and interning
@@ -157,10 +152,10 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
       // if ("CTBSegDocumentReader".equalsIgnoreCase(flags.documentReader)) {
       if ("edu.stanford.nlp.wordseg.Sighan2005DocumentReaderAndWriter".equalsIgnoreCase(flags.readerAndWriter)) {
         // for Chinese segmentation, "word" is no use and ignore goldAnswer for memory efficiency.
-        fl.set(CharAnnotation.class,intern(fix(fl.get(CharAnnotation.class))));
+        fl.set(CoreAnnotations.CharAnnotation.class,intern(fix(fl.get(CoreAnnotations.CharAnnotation.class))));
       } else {
-        fl.set(TextAnnotation.class, intern(fix(fl.get(TextAnnotation.class))));
-        fl.set(GoldAnswerAnnotation.class, fl.get(AnswerAnnotation.class));
+        fl.set(CoreAnnotations.TextAnnotation.class, intern(fix(fl.get(CoreAnnotations.TextAnnotation.class))));
+        fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
       }
     }
   }
@@ -212,7 +207,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private void iobTags(List<IN> doc) {
     String lastTag = "";
     for (IN wi : doc) {
-      String answer = wi.get(AnswerAnnotation.class);
+      String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
       if (!flags.backgroundSymbol.equals(answer) && answer != null) {
         int index = answer.indexOf('-');
         String prefix;
@@ -227,9 +222,9 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
 
         if (!prefix.equals("B")) {
           if (!label.equals(lastTag)) {
-            wi.set(AnswerAnnotation.class, "B-" + label);
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "B-" + label);
           } else {
-            wi.set(AnswerAnnotation.class, "I-" + label);
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "I-" + label);
           }
         }
         lastTag = label;
@@ -242,7 +237,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
 
   private void mergeTags(List<IN> doc) {
     for (IN wi : doc) {
-      String answer = wi.get(AnswerAnnotation.class);
+      String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
       if (answer == null) {
         continue;
       }
@@ -252,7 +247,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
           answer = answer.substring(index + 1);
         }
       }
-      wi.set(AnswerAnnotation.class, answer);
+      wi.set(CoreAnnotations.AnswerAnnotation.class, answer);
     }
   }
 

@@ -1,18 +1,17 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 /**
  * An unknown word model for German; relies on BaseUnknownWordModel plus number matching.
  * An assumption of this model is that numbers (arabic digit sequences)
- * are tagged CARD. This is correct for all of NEGRA/Tiger/TuebaDZ.
+ * are tagged CARD. This is correct for all of NEGRA/Tiger/TueBaDZ.
  *
  * @author Roger Levy
  * @author Greg Donaker (corrections and modeling improvements)
@@ -28,10 +27,10 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
                                 Index<String> wordIndex,
                                 Index<String> tagIndex,
                                 ClassicCounter<IntTaggedWord> unSeenCounter,
-                                HashMap<Label,ClassicCounter<String>> tagHash,
-                                HashMap<String,Float> unknownGT,
+                                Map<Label,ClassicCounter<String>> tagHash,
+                                Map<String,Float> unknownGT,
                                 Set<String> seenEnd) {
-    super(op, lex, wordIndex, tagIndex, 
+    super(op, lex, wordIndex, tagIndex,
           unSeenCounter, tagHash, unknownGT, seenEnd);
   }
 
@@ -42,13 +41,13 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
    * lines containing the data.
    */
   public GermanUnknownWordModel(Options op, Lexicon lex,
-                                Index<String> wordIndex, 
+                                Index<String> wordIndex,
                                 Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, 
+    this(op, lex, wordIndex, tagIndex,
          new ClassicCounter<IntTaggedWord>(),
-         new HashMap<Label,ClassicCounter<String>>(),
-         new HashMap<String,Float>(),
-         new HashSet<String>());
+         Generics.<Label,ClassicCounter<String>>newHashMap(),
+         Generics.<String,Float>newHashMap(),
+         Generics.<String>newHashSet());
   }
 
 

@@ -7,11 +7,11 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.DataFilePaths;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.SystemUtils;
 import org.w3c.dom.*;
 
@@ -118,7 +118,7 @@ public class GUTimeAnnotator implements Annotator {
     
     // get Timex annotations
     List<CoreMap> timexAnns = toTimexCoreMaps(outputXML, document);
-    document.set(TimexAnnotations.class, timexAnns);
+    document.set(TimeAnnotations.TimexAnnotations.class, timexAnns);
     if (outputResults) {
       System.out.println(timexAnns);
     }
@@ -145,7 +145,7 @@ public class GUTimeAnnotator implements Annotator {
     	}
     	
     	// set the sentence timexes
-    	sentence.set(TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
+    	sentence.set(TimeAnnotations.TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
     }
   }
   
@@ -229,8 +229,8 @@ public class GUTimeAnnotator implements Annotator {
   
   private static List<CoreMap> toTimexCoreMaps(Element docElem, CoreMap originalDocument) {
     //--Collect Token Offsets 
-    HashMap<Integer,Integer> beginMap = new HashMap<Integer,Integer>();
-    HashMap<Integer,Integer> endMap = new HashMap<Integer,Integer>();
+    Map<Integer,Integer> beginMap = Generics.newHashMap();
+    Map<Integer,Integer> endMap = Generics.newHashMap();
     boolean haveTokenOffsets = true;
     for(CoreMap sent : originalDocument.get(CoreAnnotations.SentencesAnnotation.class)){
       for(CoreLabel token : sent.get(CoreAnnotations.TokensAnnotation.class)){
@@ -272,7 +272,7 @@ public class GUTimeAnnotator implements Annotator {
           String timexText = child.getTextContent();
           CoreMap timexMap = new ArrayCoreMap();
           //(timex)
-          timexMap.set(TimexAnnotation.class, timex);
+          timexMap.set(TimeAnnotations.TimexAnnotation.class, timex);
           //(text)
           timexMap.set(CoreAnnotations.TextAnnotation.class, timexText);
           //(characters)

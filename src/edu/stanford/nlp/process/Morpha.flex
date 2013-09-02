@@ -3,11 +3,11 @@ package edu.stanford.nlp.process;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
+import edu.stanford.nlp.util.Generics;
 
 %%
 
@@ -338,7 +338,7 @@ import java.util.logging.Logger;
  * Loads a list of words from the array and stores them in a HashSet.
  */
 private Set<String> loadVerbStemSet(String[] verbStems) {
-  HashSet<String> set = new HashSet<String>(verbStems.length);
+  Set<String> set = Generics.newHashSet(verbStems.length);
   for (String stem : verbStems) {
     set.add(stem);
   }

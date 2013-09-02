@@ -28,6 +28,7 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
@@ -127,7 +128,7 @@ public class ExtractorFramesRare {
    * "1" if capitalized and one of following 3 words is Inc., Co.,
    * Corp., or similar words
    */
-  private static final Extractor cCaselessCompany = 
+  private static final Extractor cCaselessCompany =
     new CaselessCompanyNameDetector();
 
   /**
@@ -617,7 +618,7 @@ class CompanyNameDetector extends RareExtractor {
   final Set<String> companyNameEnds;
 
   public CompanyNameDetector() {
-    companyNameEnds = new HashSet<String>();
+    companyNameEnds = Generics.newHashSet();
     companyNameEnds.add("Company");
     companyNameEnds.add("COMPANY");
     companyNameEnds.add("Co.");
@@ -679,7 +680,7 @@ class CaselessCompanyNameDetector extends RareExtractor {
   private final Set<String> companyNameEnds;
 
   public CaselessCompanyNameDetector() {
-    companyNameEnds = new HashSet<String>();
+    companyNameEnds = Generics.newHashSet();
     CompanyNameDetector cased = new CompanyNameDetector();
     for (String name : cased.companyNameEnds) {
       companyNameEnds.add(name.toLowerCase());
@@ -706,7 +707,7 @@ class CaselessCompanyNameDetector extends RareExtractor {
   @Override public boolean isLocal() { return false; }
   @Override public boolean isDynamic() { return false; }
 
-  private static final long serialVersionUID = 21L;  
+  private static final long serialVersionUID = 21L;
 }
 
 
@@ -1160,6 +1161,7 @@ class ExtractorDash extends RareExtractor {
 
 class ExtractorWordSuff extends RareExtractor {
 
+  // todo [cdm 2013]: position field in this class could be deleted and use super's position. But will break
   private final int num, position;
 
   ExtractorWordSuff(int num, int position) {
@@ -1181,7 +1183,7 @@ class ExtractorWordSuff extends RareExtractor {
 
   @Override
   public String toString() {
-    return getClass().getName() + "(len" + num + ",w" + position + ")";
+    return StringUtils.getShortClassName(this) + "(len" + num + ",w" + position + ")";
   }
 
   @Override public boolean isLocal() { return (position == 0); }
@@ -1192,6 +1194,7 @@ class ExtractorWordSuff extends RareExtractor {
 
 class ExtractorWordPref extends RareExtractor {
 
+  // todo [cdm 2013]: position field in this class could be deleted and use super's position. But will break
   private final int num, position;
 
   ExtractorWordPref(int num, int position) {
@@ -1214,7 +1217,7 @@ class ExtractorWordPref extends RareExtractor {
 
   @Override
   public String toString() {
-    return getClass().getName() + "(len" + num + ",w" + position + ")";
+    return StringUtils.getShortClassName(this) + "(len" + num + ",w" + position + ")";
   }
 
   @Override public boolean isLocal() { return (position == 0); }

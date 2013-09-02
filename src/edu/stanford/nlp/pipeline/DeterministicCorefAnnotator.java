@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -16,16 +15,13 @@ import edu.stanford.nlp.dcoref.MentionExtractor;
 import edu.stanford.nlp.dcoref.RuleBasedCorefMentionFinder;
 import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefClusterAnnotation;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefGraphAnnotation;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
 
@@ -71,20 +67,33 @@ public class DeterministicCorefAnnotator implements Annotator {
 
       // extract trees and sentence words
       // we are only supporting the new annotation standard for this Annotator!
+      boolean hasSpeakerAnnotations = false;
       if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
         // int sentNum = 0;
         for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
           sentences.add(tokens);
-          Tree tree = sentence.get(TreeAnnotation.class);
+          Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
           trees.add(tree);
 
+          if (!hasSpeakerAnnotations) {
+            // check for speaker annotations
+            for (CoreLabel t:tokens) {
+              if (t.get(CoreAnnotations.SpeakerAnnotation.class) != null) {
+                hasSpeakerAnnotations = true;
+                break;
+              }
+            }
+          }
           MentionExtractor.mergeLabels(tree, tokens);
           MentionExtractor.initializeUtterance(tokens);
         }
       } else {
         System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
+      }
+      if (hasSpeakerAnnotations) {
+        annotation.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);
       }
 
       // extract all possible mentions
@@ -105,7 +114,7 @@ public class DeterministicCorefAnnotator implements Annotator {
       }
 
       Map<Integer, CorefChain> result = corefSystem.coref(document);
-      annotation.set(CorefChainAnnotation.class, result);
+      annotation.set(CorefCoreAnnotations.CorefChainAnnotation.class, result);
 
       // for backward compatibility
       if(OLD_FORMAT) {
@@ -149,18 +158,18 @@ public class DeterministicCorefAnnotator implements Annotator {
           src.set(1, srcTok);
           graph.add(new Pair<IntTuple, IntTuple>(src, dst));
         }
-        annotation.set(CorefGraphAnnotation.class, graph);
+        annotation.set(CorefCoreAnnotations.CorefGraphAnnotation.class, graph);
 
         for (CorefChain corefChain : result.values()) {
           if(corefChain.getMentionsInTextualOrder().size() < 2) continue;
-          Set<CoreLabel> coreferentTokens = new HashSet<CoreLabel>();
+          Set<CoreLabel> coreferentTokens = Generics.newHashSet();
           for (CorefMention mention : corefChain.getMentionsInTextualOrder()) {
-            CoreMap sentence = annotation.get(SentencesAnnotation.class).get(mention.sentNum - 1);
-            CoreLabel token = sentence.get(TokensAnnotation.class).get(mention.headIndex - 1);
+            CoreMap sentence = annotation.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1);
+            CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(mention.headIndex - 1);
             coreferentTokens.add(token);
           }
           for (CoreLabel token : coreferentTokens) {
-            token.set(CorefClusterAnnotation.class, coreferentTokens);
+            token.set(CorefCoreAnnotations.CorefClusterAnnotation.class, coreferentTokens);
           }
         }
       }

@@ -2,28 +2,18 @@ package edu.stanford.nlp.wordseg;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LMiddleAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LMiddleAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalCharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ShapeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UBlockAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UTypeAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 
@@ -84,7 +74,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
    */
   @Override
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Collection<String> features = new HashSet<String>();
+    Collection<String> features = Generics.newHashSet();
 
     if (clique == cliqueC) {
       addAllInterningAndSuffixing(features, featuresC(cInfo, loc), "C");
@@ -179,41 +169,54 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
-    String charc = c.getString(CharAnnotation.class);
-    String charc2 = c2.getString(CharAnnotation.class);
-    String charc3 = c3.getString(CharAnnotation.class);
-    String charp = p.getString(CharAnnotation.class);
-    String charp2 = p2.getString(CharAnnotation.class);
-    String charp3 = p3.getString(CharAnnotation.class);
-    Integer cI = c.get(UTypeAnnotation.class);
+    String charc = c.getString(CoreAnnotations.CharAnnotation.class);
+    String charc2 = c2.getString(CoreAnnotations.CharAnnotation.class);
+    String charc3 = c3.getString(CoreAnnotations.CharAnnotation.class);
+    String charp = p.getString(CoreAnnotations.CharAnnotation.class);
+    String charp2 = p2.getString(CoreAnnotations.CharAnnotation.class);
+    String charp3 = p3.getString(CoreAnnotations.CharAnnotation.class);
+    Integer cI = c.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec = (cI != null ? cI.toString() : "");
-    Integer c2I = c2.get(UTypeAnnotation.class);
+    Integer c2I = c2.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec2 = (c2I != null ? c2I.toString() : "");
-    Integer c3I = c3.get(UTypeAnnotation.class);
+    Integer c3I = c3.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec3 = (c3I != null ? c3I.toString() : "");
-    Integer pI = p.get(UTypeAnnotation.class);
+    Integer pI = p.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypep = (pI != null ? pI.toString() : "");
-    Integer p2I = p2.get(UTypeAnnotation.class);
+    Integer p2I = p2.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypep2 = (p2I != null ? p2I.toString() : "");
 
     /* N-gram features. N is upto 2. */
 
     if (flags.useWord1) {
-      features.add(charc +"c");
-      features.add(charc2+"c2");
-      features.add(charp +"p");
-      features.add(charp + charc  +"pc");
-      features.add(charc + charc2  +"cc2");
+      // features.add(charc +"c");
+      // features.add(charc2+"c2");
+      // features.add(charp +"p");
+      // features.add(charp + charc  +"pc");
+      // features.add(charc + charc2  +"cc2");
       // cdm: need hyphen so you can see which of charp or charc2 is null....
-      features.add(charp + "-" + charc2 + "pc2");
+      // features.add(charp + "-" + charc2 + "pc2");
+
+      features.add(charc +"::c");
+      features.add(charc2+"::c2");
+      features.add(charp +"::p");
+      features.add(charp2 +"::p2");
+      // trying to restore the features that Huishin described in SIGHAN 2005 paper
+      features.add(charc +charc2  +"::cn");
+      features.add(charc +charc3  +"::cn2");
+      features.add(charp +charc  +"::pc");
+      features.add(charp +charc2  +"::pn");
+      features.add(charp2 +charp  +"::p2p");
+      features.add(charp2 +charc  +"::p2c");
+      features.add(charc2 +charc  +"::n2c");
     }
 
     if (flags.dictionary != null || flags.serializedDictionary != null) {
-      dictionaryFeaturesC(LBeginAnnotation.class,LMiddleAnnotation.class,LEndAnnotation.class,"",features, p, c, c2);
+      dictionaryFeaturesC(CoreAnnotations.LBeginAnnotation.class, CoreAnnotations.LMiddleAnnotation.class, CoreAnnotations.LEndAnnotation.class,"",features, p, c, c2);
     }
 
     if (flags.dictionary2 != null) {
-      dictionaryFeaturesC(D2_LBeginAnnotation.class, D2_LMiddleAnnotation.class, D2_LEndAnnotation.class,"-D2-",features, p, c, c2);
+      dictionaryFeaturesC(CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class,"-D2-",features, p, c, c2);
     }
 
     if (flags.useFeaturesC4gram || flags.useFeaturesC5gram || flags.useFeaturesC6gram) {
@@ -239,22 +242,22 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
       features.add(uTypep2 + "-" + uTypep + "-" + uTypec + "-" + uTypec2 + "-" + uTypec3 + "-uType5");
     }
     if (flags.useUnicodeBlock) {
-      features.add(p.getString(UBlockAnnotation.class) + "-" + c.getString(UBlockAnnotation.class) + "-" + c2.getString(UBlockAnnotation.class) + "-uBlock");
+      features.add(p.getString(CoreAnnotations.UBlockAnnotation.class) + "-" + c.getString(CoreAnnotations.UBlockAnnotation.class) + "-" + c2.getString(CoreAnnotations.UBlockAnnotation.class) + "-uBlock");
     }
     if (flags.useShapeStrings) {
       if (flags.useShapeStrings1) {
-        features.add(p.getString(ShapeAnnotation.class) + "ps");
-        features.add(c.getString(ShapeAnnotation.class) + "cs");
-        features.add(c2.getString(ShapeAnnotation.class) + "c2s");
+        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + "ps");
+        features.add(c.getString(CoreAnnotations.ShapeAnnotation.class) + "cs");
+        features.add(c2.getString(CoreAnnotations.ShapeAnnotation.class) + "c2s");
       }
       if (flags.useShapeStrings3) {
-        features.add(p.getString(ShapeAnnotation.class) + c.getString(ShapeAnnotation.class) + c2.getString(ShapeAnnotation.class) + "pscsc2s");
+        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "pscsc2s");
       }
       if (flags.useShapeStrings4) {
-        features.add(p2.getString(ShapeAnnotation.class) + p.getString(ShapeAnnotation.class) + c.getString(ShapeAnnotation.class) + c2.getString(ShapeAnnotation.class) + "p2spscsc2s");
+        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "p2spscsc2s");
       }
       if (flags.useShapeStrings5) {
-        features.add(p2.getString(ShapeAnnotation.class) + p.getString(ShapeAnnotation.class) + c.getString(ShapeAnnotation.class) + c2.getString(ShapeAnnotation.class) + c3.getString(ShapeAnnotation.class) + "p2spscsc2sc3s");
+        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + c3.getString(CoreAnnotations.ShapeAnnotation.class) + "p2spscsc2sc3s");
       }
     }
 
@@ -312,41 +315,61 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
-    String charc = c.getString(CharAnnotation.class);
-    String charc2 = c2.getString(CharAnnotation.class);
-    String charc3 = c3.getString(CharAnnotation.class);
-    String charp = p.getString(CharAnnotation.class);
-    String charp2 = p2.getString(CharAnnotation.class);
-    String charp3 = p3.getString(CharAnnotation.class);
-    Integer cI = c.get(UTypeAnnotation.class);
+    String charc = c.getString(CoreAnnotations.CharAnnotation.class);
+    if (charc == null) charc = "";
+    String charc2 = c2.getString(CoreAnnotations.CharAnnotation.class);
+    if (charc2 == null) charc2 = "";
+    String charc3 = c3.getString(CoreAnnotations.CharAnnotation.class);
+    if (charc3 == null) charc3 = "";
+    String charp = p.getString(CoreAnnotations.CharAnnotation.class);
+    if (charp == null) charp = "";
+    String charp2 = p2.getString(CoreAnnotations.CharAnnotation.class);
+    if (charp2 == null) charp2 = "";
+    String charp3 = p3.getString(CoreAnnotations.CharAnnotation.class);
+    if (charp3 == null) charp3 = "";
+    Integer cI = c.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec = (cI != null ? cI.toString() : "");
-    Integer c2I = c2.get(UTypeAnnotation.class);
+    Integer c2I = c2.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec2 = (c2I != null ? c2I.toString() : "");
-    Integer c3I = c3.get(UTypeAnnotation.class);
+    Integer c3I = c3.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec3 = (c3I != null ? c3I.toString() : "");
-    Integer pI = p.get(UTypeAnnotation.class);
+    Integer pI = p.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypep = (pI != null ? pI.toString() : "");
-    Integer p2I = p2.get(UTypeAnnotation.class);
+    Integer p2I = p2.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypep2 = (p2I != null ? p2I.toString() : "");
 
     if (flags.dictionary != null || flags.serializedDictionary != null) {
-      dictionaryFeaturesCpC(LBeginAnnotation.class, LMiddleAnnotation.class, LEndAnnotation.class,"",features, p2, p, c, c2);
+      dictionaryFeaturesCpC(CoreAnnotations.LBeginAnnotation.class, CoreAnnotations.LMiddleAnnotation.class, CoreAnnotations.LEndAnnotation.class,"",features, p2, p, c, c2);
     }
     if (flags.dictionary2 != null) {
-      dictionaryFeaturesCpC(D2_LBeginAnnotation.class, D2_LMiddleAnnotation.class,D2_LEndAnnotation.class,"-D2-",features, p2, p, c, c2);
+      dictionaryFeaturesCpC(CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class,"-D2-",features, p2, p, c, c2);
     }
 
     /*
      * N-gram features. N is upto 2.
      */
     if (flags.useWord2) {
-      features.add(charc +"c");
-      features.add(charc2+"c2");
-      features.add(charp +"p");
-      features.add(charp + charc  +"pc");
-      features.add(charc + charc2  +"cc2");
-      // cdm: need hyphen so you can see which of charp or charc2 is null....
-      features.add(charp + "-" + charc2 + "pc2");
+      // features.add(charc +"c");
+      // features.add(charc2+"c2");
+      // features.add(charp +"p");
+      // features.add(charp + charc  +"pc");
+      // features.add(charc + charc2  +"cc2");
+      // // cdm: need hyphen so you can see which of charp or charc2 is null....
+      // features.add(charp + "-" + charc2 + "pc2");
+
+
+      features.add(charc +"::c");
+      features.add(charc2+"::c1");
+      features.add(charp +"::p");
+      features.add(charp2 +"::p2");
+      // trying to restore the features that Huishin described in SIGHAN 2005 paper
+      features.add(charc +charc2  +"::cn");
+      features.add(charp +charc  +"::pc");
+      features.add(charp +charc2  +"::pn");
+      features.add(charp2 +charp  +"::p2p");
+      features.add(charp2 +charc  +"::p2c");
+      features.add(charc2 +charc  +"::n2c");
+
     }
     if (flags.useFeaturesCpC4gram || flags.useFeaturesCpC5gram || flags.useFeaturesCpC6gram) {
       features.add(charp2 + charp  +"p2p");
@@ -388,32 +411,32 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
       features.add(charc + uTypec2 + uTypec3 + "ccc2utc3ut");
     }
     if (flags.useUnicodeBlock) {
-      features.add(p.getString(UBlockAnnotation.class) + "-" + c.getString(UBlockAnnotation.class) + "-" + c2.getString(UBlockAnnotation.class) + "-uBlock");
+      features.add(p.getString(CoreAnnotations.UBlockAnnotation.class) + "-" + c.getString(CoreAnnotations.UBlockAnnotation.class) + "-" + c2.getString(CoreAnnotations.UBlockAnnotation.class) + "-uBlock");
     }
 
     if (flags.useShapeStrings) {
       if (flags.useShapeStrings1) {
-        features.add(p.getString(ShapeAnnotation.class) + "ps");
-        features.add(c.getString(ShapeAnnotation.class) + "cs");
-        features.add(c2.getString(ShapeAnnotation.class) + "c2s");
+        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + "ps");
+        features.add(c.getString(CoreAnnotations.ShapeAnnotation.class) + "cs");
+        features.add(c2.getString(CoreAnnotations.ShapeAnnotation.class) + "c2s");
       }
       if (flags.useShapeStrings3) {
-        features.add(p.getString(ShapeAnnotation.class) + c.getString(ShapeAnnotation.class) + c2.getString(ShapeAnnotation.class) + "pscsc2s");
+        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "pscsc2s");
       }
       if (flags.useShapeStrings4) {
-        features.add(p2.getString(ShapeAnnotation.class) + p.getString(ShapeAnnotation.class) + c.getString(ShapeAnnotation.class) + c2.getString(ShapeAnnotation.class) + "p2spscsc2s");
+        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "p2spscsc2s");
       }
       if (flags.useShapeStrings5) {
-        features.add(p2.getString(ShapeAnnotation.class) + p.getString(ShapeAnnotation.class) + c.getString(ShapeAnnotation.class) + c2.getString(ShapeAnnotation.class) + c3.getString(ShapeAnnotation.class) + "p2spscsc2sc3s");
+        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + c3.getString(CoreAnnotations.ShapeAnnotation.class) + "p2spscsc2sc3s");
       }
       if (flags.useWordShapeConjunctions2) {
-        features.add(p.getString(ShapeAnnotation.class) + charc + "pscc");
-        features.add(charp + c.getString(ShapeAnnotation.class) + "pccs");
+        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + charc + "pscc");
+        features.add(charp + c.getString(CoreAnnotations.ShapeAnnotation.class) + "pccs");
       }
       if (flags.useWordShapeConjunctions3) {
-        features.add(p2.getString(ShapeAnnotation.class) + p.getString(ShapeAnnotation.class) + charc + "p2spscc");
-        features.add(p.getString(ShapeAnnotation.class) + charc + c2.getString(ShapeAnnotation.class) + "psccc2s");
-        features.add(charc + c2.getString(ShapeAnnotation.class) + c3.getString(ShapeAnnotation.class) + "ccc2sc3s");
+        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + charc + "p2spscc");
+        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + charc + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "psccc2s");
+        features.add(charc + c2.getString(CoreAnnotations.ShapeAnnotation.class) + c3.getString(CoreAnnotations.ShapeAnnotation.class) + "ccc2sc3s");
       }
     }
 
@@ -595,7 +618,7 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
 
 
     // features using "Character.getType" information!
-    String origS = c.getString(OriginalCharAnnotation.class);
+    String origS = c.getString(CoreAnnotations.OriginalCharAnnotation.class);
     char origC = ' ';
     if (origS.length() > 0) { origC = origS.charAt(0); }
     int type = Character.getType(origC);
@@ -627,10 +650,10 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
       CoreLabel c2 = cInfo.get(loc + 1);
       CoreLabel p = cInfo.get(loc - 1);
       CoreLabel p2 = cInfo.get(loc - 2);
-      String charc = c.getString(CharAnnotation.class);
-      String charc2 = c2.getString(CharAnnotation.class);
-      String charp = p.getString(CharAnnotation.class);
-      String charp2 = p2.getString(CharAnnotation.class);
+      String charc = c.getString(CoreAnnotations.CharAnnotation.class);
+      String charc2 = c2.getString(CoreAnnotations.CharAnnotation.class);
+      String charp = p.getString(CoreAnnotations.CharAnnotation.class);
+      String charp2 = p2.getString(CoreAnnotations.CharAnnotation.class);
 
       features.add(charc +"c");
       features.add(charc2+"c2");
@@ -653,19 +676,19 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
       CoreLabel p = cInfo.get(loc - 1);
       CoreLabel p2 = cInfo.get(loc - 2);
       CoreLabel p3 = cInfo.get(loc - 3);
-      String charc = c.getString(CharAnnotation.class);
-      String charp = p.getString(CharAnnotation.class);
-      String charp2 = p2.getString(CharAnnotation.class);
-      String charp3 = p3.getString(CharAnnotation.class);
-      Integer cI = c.get(UTypeAnnotation.class);
+      String charc = c.getString(CoreAnnotations.CharAnnotation.class);
+      String charp = p.getString(CoreAnnotations.CharAnnotation.class);
+      String charp2 = p2.getString(CoreAnnotations.CharAnnotation.class);
+      String charp3 = p3.getString(CoreAnnotations.CharAnnotation.class);
+      Integer cI = c.get(CoreAnnotations.UTypeAnnotation.class);
       String uTypec = (cI != null ? cI.toString() : "");
-      Integer c2I = c2.get(UTypeAnnotation.class);
+      Integer c2I = c2.get(CoreAnnotations.UTypeAnnotation.class);
       String uTypec2 = (c2I != null ? c2I.toString() : "");
-      Integer pI = p.get(UTypeAnnotation.class);
+      Integer pI = p.get(CoreAnnotations.UTypeAnnotation.class);
       String uTypep = (pI != null ? pI.toString() : "");
-      Integer p2I = p2.get(UTypeAnnotation.class);
+      Integer p2I = p2.get(CoreAnnotations.UTypeAnnotation.class);
       String uTypep2 = (p2I != null ? p2I.toString() : "");
-      Integer p3I = p3.get(UTypeAnnotation.class);
+      Integer p3I = p3.get(CoreAnnotations.UTypeAnnotation.class);
       String uTypep3 = (p3I != null ? p3I.toString() : "");
 
 

@@ -77,7 +77,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
       return HUBER_PRIOR;
     } else if ("QUARTIC".equalsIgnoreCase(priorTypeStr)) {
       return QUARTIC_PRIOR;
-    } else if ("NONE".equalsIgnoreCase(priorTypeStr)) {
+    } else if (priorTypeStr.equalsIgnoreCase("NONE")) {
       return NO_PRIOR;
     } else {
       throw new IllegalArgumentException("Unknown prior type: " + priorTypeStr);
@@ -350,7 +350,6 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     double[][] U4Edge = allParams.second(); // outputLayerWeights4Edge
     double[][] W = allParams.third(); // inputLayerWeights 
     double[][] U = allParams.fourth(); // outputLayerWeights 
-
     return new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags);
   }
 
@@ -399,9 +398,11 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
       int[][][] docData = data[m];
       int[] docLabels = labels[m];
 
+      NonLinearSecondOrderCliquePotentialFunction cliquePotentialFunction = new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags);
+
       // make a clique tree for this document
       CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex,
-        backgroundSymbol, new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags), null);
+        backgroundSymbol, cliquePotentialFunction, null);
 
       // compute the log probability of the document given the model with the parameters x
       int[] given = new int[window - 1];
@@ -449,11 +450,11 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
           if (j == 0) {
             inputSize = inputLayerSize;
             outputSize = outputLayerSize;
-            As = NonLinearCliquePotentialFunction.hiddenLayerOutput(W, cliqueFeatures, flags, null);
+            As = cliquePotentialFunction.hiddenLayerOutput(W, cliqueFeatures, flags, null, j+1);
           } else {
             inputSize = inputLayerSize4Edge;
             outputSize = outputLayerSize4Edge;
-            As = NonLinearCliquePotentialFunction.hiddenLayerOutput(W4Edge, cliqueFeatures, flags, null);
+            As = cliquePotentialFunction.hiddenLayerOutput(W4Edge, cliqueFeatures, flags, null, j+1);
           }
 
           fDeriv = new double[inputSize];
@@ -818,4 +819,5 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     }
     return d;
   }
+
 }

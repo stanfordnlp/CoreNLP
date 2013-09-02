@@ -40,21 +40,21 @@ EOS = .EOS[0-9 ]*
 %%
 
 <YYINITIAL> {
-  {BOS}                 { yybegin(SENTENCE); 
+  {BOS}                 { yybegin(SENTENCE);
 			  /* System.out.println("Beginning of sentence"); */
 			  return ACCEPT; }
   .                     { return IGNORE; }
 }
 
 <SENTENCE> {
-  {EOS}                  { yybegin(YYINITIAL); 
+  {EOS}                  { yybegin(YYINITIAL);
                      /* System.out.println("End of sentence"); */
                             return ACCEPT; }
   {LINEEND}	          { return IGNORE; }
   {FIELD}                 { return ACCEPT; }
-  .	                  { System.err.println("Error: " + yytext());
-                            return IGNORE: }
+/*   .	                  { System.err.println("Error: " + yytext());
+                            return IGNORE: }  // Can't happen as above lines match everything for SENTENCE */
 }
 
 
-  
+

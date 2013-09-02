@@ -8,10 +8,10 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import org.joda.time.format.ISODateTimeFormat;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -29,6 +29,7 @@ import static edu.stanford.nlp.time.EnglishTimeExpressionPatterns.PatternType.ST
  *
  * @author Angel Chang
  */
+@Deprecated
 public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
   private static final Logger logger = Logger.getLogger(EnglishTimeExpressionPatterns.class.getName());
   protected static enum PatternType { TOKENS, STRING }
@@ -1416,7 +1417,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     return temp;
   }
 
-  Map<String,SUTime.TemporalOp> wordToTemporalOp = new HashMap<String,SUTime.TemporalOp>();
+  Map<String,SUTime.TemporalOp> wordToTemporalOp = Generics.newHashMap();
   private void initTemporalOpMap()
   {
     wordToTemporalOp.put("thiscoming", SUTime.TemporalOp.NEXT_IMMEDIATE);
@@ -1428,7 +1429,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     wordToTemporalOp.put("last", SUTime.TemporalOp.PREV);
   }
 
-  Map<String,SUTime.Temporal> wordToTemporal = new HashMap<String,SUTime.Temporal>();
+  Map<String,SUTime.Temporal> wordToTemporal = Generics.newHashMap();
   private void initTemporalMap()
   {
     // Periodic Set
@@ -1534,7 +1535,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     wordToTemporal.put("thefuture", SUTime.TIME_FUTURE);
   }
 
-  Map<String,SUTime.Duration> abbToTimeUnit = new HashMap<String,SUTime.Duration>();
+  Map<String,SUTime.Duration> abbToTimeUnit = Generics.newHashMap();
   private void initTimeUnitsMap() {
     // note - some of the incorrect spelling in this hash is due to the generalized matching which will match things like "centurys"
     // Are the mapped to units used elsewhere?

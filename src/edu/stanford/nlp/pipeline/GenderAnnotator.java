@@ -6,10 +6,8 @@ import java.util.Set;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.GenderAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Timing;
@@ -44,16 +42,16 @@ public class GenderAnnotator implements Annotator {
       System.err.print("Adding gender annotation...");
     }
     
-    if (! annotation.containsKey(SentencesAnnotation.class))
+    if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
       throw new RuntimeException("Unable to find sentences in " + annotation);
   
-    List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap sentence : sentences) {
-      List<CoreLabel> tokens = sentence.get(TokensAnnotation.class);
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       classifier.classify(tokens);
   
       for (CoreLabel token : tokens) 
-        token.set(GenderAnnotation.class, token.get(AnswerAnnotation.class));
+        token.set(MachineReadingAnnotations.GenderAnnotation.class, token.get(CoreAnnotations.AnswerAnnotation.class));
     }
     
     if (verbose)

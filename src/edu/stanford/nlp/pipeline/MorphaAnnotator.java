@@ -1,7 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -54,8 +52,8 @@ public class MorphaAnnotator implements Annotator{
         //System.err.println("Lemmatizing sentence: " + tokens);
         for (CoreLabel token : tokens) {
           String text = token.get(CoreAnnotations.TextAnnotation.class);
-          String posTag = token.get(PartOfSpeechAnnotation.class);
-          this.addLemma(morphology, LemmaAnnotation.class, token, text, posTag);
+          String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+          this.addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
         }
       }
     } else {

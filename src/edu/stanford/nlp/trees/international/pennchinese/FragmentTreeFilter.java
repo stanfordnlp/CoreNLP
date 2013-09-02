@@ -23,7 +23,16 @@ public class FragmentTreeFilter implements Filter<Tree> {
   static final TregexPattern onthewayPattern =
     TregexPattern.compile("FRAG=root <: (NR <: (ontheway !< __)) : =root !> (__ > __)");
 
-  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern };
+  static final TregexPattern singlePuncFragPattern =
+    TregexPattern.compile("__ !> __ <: (PU=punc <: __)");
+
+  static final TregexPattern singlePuncPattern =
+    TregexPattern.compile("PU=punc !> __ <: __");
+
+  static final TregexPattern metaPattern =
+    TregexPattern.compile("META !> __ <: NN");
+
+  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern, metaPattern };
 
   public boolean accept(Tree tree) {
     for (TregexPattern pattern : patterns) {

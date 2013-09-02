@@ -21,28 +21,24 @@ public interface TypesafeMap {
   /**
    * Returns true if the map contains the given key.
    */
-  public <VALUE, KEY extends Key<VALUE>>
-    boolean has(Class<KEY> key);
+  public <VALUE> boolean has(Class<? extends Key<VALUE>> key);
 
   /**
    * Returns the value associated with the given key or null if
    * none is provided.
    */
-  public <VALUE, KEY extends Key<VALUE>>
-    VALUE get(Class<KEY> key);
+  public <VALUE> VALUE get(Class<? extends Key<VALUE>> key);
 
   /**
    * Associates the given value with the given type for future calls
    * to get.  Returns the value removed or null if no value was present.
    */
-  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends Key<VALUEBASE>>
-    VALUE set(Class<KEY> key, VALUE value);
+  public <VALUE> VALUE set(Class<? extends Key<VALUE>> key, VALUE value);
 
   /**
    * Removes the given key from the map, returning the value removed.
    */
-  public <VALUE, KEY extends Key<VALUE>>
-    VALUE remove(Class<KEY> key);
+  public <VALUE> VALUE remove(Class<? extends Key<VALUE>> key);
 
   /**
    * Collection of keys currently held in this map.  Some implementations may
@@ -54,8 +50,7 @@ public interface TypesafeMap {
   /**
    * Returns true if contains the given key.
    */
-  public <VALUE, KEY extends Key<VALUE>>
-    boolean containsKey(Class<KEY> key);
+  public <VALUE> boolean containsKey(Class<? extends Key<VALUE>> key);
 
   /**
    * Returns the number of keys in the map.

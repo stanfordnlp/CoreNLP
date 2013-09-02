@@ -28,12 +28,14 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   private static final long serialVersionUID = -8077192206562696111L;
 
+  private static final int DEFAULT_CAPACITY = 100;
+  
   private final ConcurrentMap<E,Double> map;
   private double totalCount = 0.0;
   private double defaultReturnValue = 0.0;
   
   public ThreadsafeCounter() {
-    this(100);
+    this(DEFAULT_CAPACITY);
   }
   
   public ThreadsafeCounter(int initialCapacity) {
@@ -57,8 +59,8 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
   }
 
   @Override
-  public void setDefaultReturnValue(double rv) {
-    defaultReturnValue = rv;
+  public void setDefaultReturnValue(double value) {
+    defaultReturnValue = value;
   }
 
   @Override
@@ -122,9 +124,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public void addAll(Counter<E> counter) {
-    for (E key : counter.keySet()) {
-      incrementCount(key, counter.getCount(key));
-    }
+    Counters.addInPlace(this, counter);
   }
 
   @Override
@@ -149,7 +149,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public Collection<Double> values() {
-    return map.values();
+    return Collections.unmodifiableCollection(map.values());
   }
 
   @Override

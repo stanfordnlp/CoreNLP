@@ -28,42 +28,36 @@ package edu.stanford.nlp.dcoref;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.dcoref.Semantics;
+import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UtteranceAnnotation;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
- * Extracts <COREF> mentions from a file annotated in MUC format
+ * Extracts {@literal <COREF>} mentions from a file annotated in MUC format.
+ *
  * @author Jenny Finkel, Mihai Surdeanu, Karthik Raghunathan
  */
 public class MUCMentionExtractor extends MentionExtractor {
 
-  private TokenizerFactory<CoreLabel> tokenizerFactory;
-
-  private String fileContents;
+  private final TokenizerFactory<CoreLabel> tokenizerFactory;
+  private final String fileContents;
   private int currentOffset;
 
   public MUCMentionExtractor(Dictionaries dict, Properties props, Semantics semantics) throws Exception {
@@ -71,15 +65,23 @@ public class MUCMentionExtractor extends MentionExtractor {
     String fileName = props.getProperty(Constants.MUC_PROP);
     fileContents = IOUtils.slurpFile(fileName);
     currentOffset = 0;
-    tokenizerFactory = PTBTokenizer.factory(false, new CoreLabelTokenFactory(false));
+    tokenizerFactory = PTBTokenizer.factory(new CoreLabelTokenFactory(false), "");
     stanfordProcessor = loadStanfordProcessor(props);
   }
 
+  public MUCMentionExtractor(Dictionaries dict, Properties props, Semantics semantics,
+      LogisticClassifier<String, String> singletonModel) throws Exception {
+    this(dict, props, semantics);
+    singletonPredictor = singletonModel;
+  }
+
+  @Override
   public void resetDocs() {
     super.resetDocs();
     currentOffset = 0;
   }
 
+  @Override
   public Document nextDoc() throws Exception {
     List<List<CoreLabel>> allWords = new ArrayList<List<CoreLabel>>();
     List<Tree> allTrees = new ArrayList<Tree>();
@@ -114,13 +116,13 @@ public class MUCMentionExtractor extends MentionExtractor {
         if (i > 0 && w.word().equals("$")) {
           if(!words.get(i-1).word().endsWith("PRP") && !words.get(i-1).word().endsWith("WP"))
             continue;
-          words.get(i-1).set(TextAnnotation.class, words.get(i-1).word()+"$");
+          words.get(i-1).set(CoreAnnotations.TextAnnotation.class, words.get(i-1).word()+"$");
           words.remove(i);
           i--;
         } else if (w.word().equals("\\/")) {
           if(words.get(i-1).word().equals("</COREF>"))
             continue;
-          w.set(TextAnnotation.class, words.get(i-1).word()+"\\/"+words.get(i+1).word());
+          w.set(CoreAnnotations.TextAnnotation.class, words.get(i-1).word()+"\\/"+words.get(i+1).word());
           words.remove(i+1);
           words.remove(i-1);
         }
@@ -136,19 +138,19 @@ public class MUCMentionExtractor extends MentionExtractor {
       allGoldMentions.add(mentions);
 
       for (CoreLabel word : words) {
-        String w = word.get(TextAnnotation.class);
+        String w = word.get(CoreAnnotations.TextAnnotation.class);
         // found regular token: WORD/POS
         if (!w.startsWith("<") && w.contains("\\/") && w.lastIndexOf("\\/") != w.length()-2) {
           int i = w.lastIndexOf("\\/");
           String w1 = w.substring(0, i);
           // we do NOT set POS info here. We take the POS tags from the parser!
-          word.set(TextAnnotation.class, w1);
+          word.set(CoreAnnotations.TextAnnotation.class, w1);
           word.remove(CoreAnnotations.OriginalTextAnnotation.class);
           if(Constants.USE_GOLD_NE) {
             if (ner != null) {
-              word.set(NamedEntityTagAnnotation.class, ner);
+              word.set(CoreAnnotations.NamedEntityTagAnnotation.class, ner);
             } else {
-              word.set(NamedEntityTagAnnotation.class, "O");
+              word.set(CoreAnnotations.NamedEntityTagAnnotation.class, "O");
             }
           }
           sentence.add(word);
@@ -176,8 +178,8 @@ public class MUCMentionExtractor extends MentionExtractor {
           mention.startIndex = sentence.size();
 
           // extract GOLD info about this coref chain. needed for eval
-          Pattern idPattern = Pattern.compile("ID=\\\"(.*?)\\\"");
-          Pattern refPattern = Pattern.compile("REF=\\\"(.*?)\\\"");
+          Pattern idPattern = Pattern.compile("ID=\"(.*?)\"");
+          Pattern refPattern = Pattern.compile("REF=\"(.*?)\"");
 
           Matcher m = idPattern.matcher(w);
           m.find();
@@ -200,12 +202,12 @@ public class MUCMentionExtractor extends MentionExtractor {
           // System.err.printf("Found MENTION: ID=%d, REF=%d\n", mention.mentionID, mention.originalRef);
           mentions.add(mention);
         } else {
-          word.remove(OriginalTextAnnotation.class);
+          word.remove(CoreAnnotations.OriginalTextAnnotation.class);
           if(Constants.USE_GOLD_NE){
             if (ner != null) {
-              word.set(NamedEntityTagAnnotation.class, ner);
+              word.set(CoreAnnotations.NamedEntityTagAnnotation.class, ner);
             } else {
-              word.set(NamedEntityTagAnnotation.class, "O");
+              word.set(CoreAnnotations.NamedEntityTagAnnotation.class, "O");
             }
           }
           sentence.add(word);
@@ -214,38 +216,35 @@ public class MUCMentionExtractor extends MentionExtractor {
       StringBuilder textContent = new StringBuilder();
       for (int i=0 ; i<sentence.size(); i++){
         CoreLabel w = sentence.get(i);
-        w.set(IndexAnnotation.class, i+1);
-        w.set(UtteranceAnnotation.class, 0);
+        w.set(CoreAnnotations.IndexAnnotation.class, i+1);
+        w.set(CoreAnnotations.UtteranceAnnotation.class, 0);
         if(i>0) textContent.append(" ");
-        textContent.append(w.getString(TextAnnotation.class));
+        textContent.append(w.getString(CoreAnnotations.TextAnnotation.class));
       }
       CoreMap sentCoreMap = new Annotation(textContent.toString());
       allSentences.add(sentCoreMap);
-      sentCoreMap.set(TokensAnnotation.class, sentence);
+      sentCoreMap.set(CoreAnnotations.TokensAnnotation.class, sentence);
     }
 
     // assign goldCorefClusterID
-    HashMap<Integer, Mention> idMention = new HashMap<Integer, Mention>();    // temporary use
-    for(int i = 0 ; i < allGoldMentions.size(); i++){
-      for(int j = 0 ; j < allGoldMentions.get(i).size(); j++){
-        Mention m = allGoldMentions.get(i).get(j);
+    Map<Integer, Mention> idMention = Generics.newHashMap();    // temporary use
+    for (List<Mention> goldMentions : allGoldMentions) {
+      for (Mention m : goldMentions) {
         idMention.put(m.mentionID, m);
       }
     }
-    for(int i = 0 ; i < allGoldMentions.size(); i++){
-      for(int j = 0 ; j < allGoldMentions.get(i).size(); j++){
-        Mention m = allGoldMentions.get(i).get(j);
-        if(m.goldCorefClusterID==-1){
-          if(m.originalRef==-1) m.goldCorefClusterID = m.mentionID;
+    for (List<Mention> goldMentions : allGoldMentions) {
+      for (Mention m : goldMentions) {
+        if (m.goldCorefClusterID == -1) {
+          if (m.originalRef == -1) m.goldCorefClusterID = m.mentionID;
           else {
-            Mention m2;
             int ref = m.originalRef;
-            while(true){
-              m2 = idMention.get(ref);
-              if(m2.goldCorefClusterID!=-1) {
+            while (true) {
+              Mention m2 = idMention.get(ref);
+              if (m2.goldCorefClusterID != -1) {
                 m.goldCorefClusterID = m2.goldCorefClusterID;
                 break;
-              } else if(m2.originalRef == -1){
+              } else if (m2.originalRef == -1) {
                 m2.goldCorefClusterID = m2.mentionID;
                 m.goldCorefClusterID = m2.goldCorefClusterID;
                 break;
@@ -258,31 +257,29 @@ public class MUCMentionExtractor extends MentionExtractor {
       }
     }
 
-
-    docAnno.set(SentencesAnnotation.class, allSentences);
+    docAnno.set(CoreAnnotations.SentencesAnnotation.class, allSentences);
     stanfordProcessor.annotate(docAnno);
 
-    if(allSentences.size()!=allWords.size()) throw new RuntimeException();
+    if(allSentences.size()!=allWords.size()) throw new IllegalStateException("allSentences != allWords");
     for(int i = 0 ; i< allSentences.size(); i++){
-      List<CoreLabel> annotatedSent = allSentences.get(i).get(TokensAnnotation.class);
+      List<CoreLabel> annotatedSent = allSentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> unannotatedSent = allWords.get(i);
       List<Mention> mentionInSent = allGoldMentions.get(i);
       for (Mention m : mentionInSent){
-        m.dependency = allSentences.get(i).get(CollapsedDependenciesAnnotation.class);
+        m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       }
       if(annotatedSent.size() != unannotatedSent.size()){
-        throw new RuntimeException();
+        throw new IllegalStateException("annotatedSent != unannotatedSent");
       }
-      int k = 0;
-      for(int j = 0 ; j < annotatedSent.size(); j++, k++){
+      for (int j = 0, sz = annotatedSent.size(); j < sz; j++){
         CoreLabel annotatedWord = annotatedSent.get(j);
-        CoreLabel unannotatedWord = unannotatedSent.get(k);
-        if(!annotatedWord.get(TextAnnotation.class).equals(unannotatedWord.get(TextAnnotation.class))) {
-          throw new RuntimeException();
+        CoreLabel unannotatedWord = unannotatedSent.get(j);
+        if ( ! annotatedWord.get(CoreAnnotations.TextAnnotation.class).equals(unannotatedWord.get(CoreAnnotations.TextAnnotation.class))) {
+          throw new IllegalStateException("annotatedWord != unannotatedWord");
         }
       }
       allWords.set(i, annotatedSent);
-      allTrees.add(allSentences.get(i).get(TreeAnnotation.class));
+      allTrees.add(allSentences.get(i).get(TreeCoreAnnotations.TreeAnnotation.class));
     }
 
     // extract predicted mentions

@@ -9,7 +9,13 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.ScoredObject;
 
 public interface ParserQuery {
-  Tree parseWithFallback(List<? extends HasWord> sentence, PrintWriter pwErr, PrintWriter pwo);
+  boolean parse(List<? extends HasWord> sentence);
+  
+  boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr);
+
+  double getPCFGScore();
+
+  Tree getBestParse();
 
   Tree getBestPCFGParse();
 
@@ -32,4 +38,35 @@ public interface ParserQuery {
   KBestViterbiParser getFactoredParser();
 
   KBestViterbiParser getDependencyParser();
+
+  void setConstraints(List<ParserConstraint> constraints);
+
+  boolean saidMemMessage();
+
+  /**
+   * Parsing succeeded without any horrible errors or fallback
+   */
+  boolean parseSucceeded();
+
+  /**
+   * The sentence was skipped, probably because it was too long or of length 0
+   */
+  boolean parseSkipped();
+
+  /**
+   * The model had to fall back to a simpler model on the previous parse
+   */
+  boolean parseFallback();
+
+  /**
+   * The model ran out of memory on the most recent parse
+   */
+  boolean parseNoMemory();
+
+  /**
+   * The model could not parse the most recent sentence for some reason
+   */
+  boolean parseUnparsable();
+
+  List<? extends HasWord> originalSentence();
 }

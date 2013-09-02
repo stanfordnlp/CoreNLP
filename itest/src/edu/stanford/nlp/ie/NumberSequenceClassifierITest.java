@@ -6,13 +6,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.NormalizedNamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NumericCompositeTypeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NumericCompositeValueAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
@@ -35,18 +31,18 @@ public class NumberSequenceClassifierITest extends TestCase {
     Annotation doc = new Annotation(text);
     pipe.annotate(doc);
 
-    assertTrue(doc.get(SentencesAnnotation.class) != null);
-    assertTrue(doc.get(SentencesAnnotation.class).size() > 0);
-    CoreMap sent = doc.get(SentencesAnnotation.class).get(0);
-    assertTrue(sent.get(TokensAnnotation.class) != null);
-    List<CoreLabel> tokens = sent.get(TokensAnnotation.class);
+    assertTrue(doc.get(CoreAnnotations.SentencesAnnotation.class) != null);
+    assertTrue(doc.get(CoreAnnotations.SentencesAnnotation.class).size() > 0);
+    CoreMap sent = doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    assertTrue(sent.get(CoreAnnotations.TokensAnnotation.class) != null);
+    List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
     if(VERBOSE){
       for(CoreLabel token: tokens) {
         System.out.println("\t" + token.word() + " " + 
             token.tag() + " " + 
             token.ner() + " " + 
-            (token.containsKey(NumericCompositeTypeAnnotation.class) ? token.get(NumericCompositeValueAnnotation.class) + " " : "") +
-            (token.containsKey(TimexAnnotation.class) ? token.get(TimexAnnotation.class) + " " : "")); 
+            (token.containsKey(CoreAnnotations.NumericCompositeTypeAnnotation.class) ? token.get(CoreAnnotations.NumericCompositeValueAnnotation.class) + " " : "") +
+            (token.containsKey(TimeAnnotations.TimexAnnotation.class) ? token.get(TimeAnnotations.TimexAnnotation.class) + " " : "")); 
       }
     }
     
@@ -69,14 +65,13 @@ public class NumberSequenceClassifierITest extends TestCase {
       assertTrue(tokens.size() == normed.length);
       for(int i = 0; i < normed.length; i ++){
         if(normed[i] == null){
-          assertTrue(tokens.get(i).get(NormalizedNamedEntityTagAnnotation.class) == null);
+          assertTrue(tokens.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) == null);
         } else {
           Pattern p = Pattern.compile(normed[i]);
-          String n = tokens.get(i).get(NormalizedNamedEntityTagAnnotation.class);
-          System.err.println("COMPARING NORMED \"" + normed[i] + "\" with \"" + n + "\"");
-          System.err.flush();
-          assertTrue(n != null);
-          assertTrue(p.matcher(n).matches());
+          String n = tokens.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+          String message = "COMPARING NORMED \"" + normed[i] + "\" with \"" + n + "\"";
+          assertTrue(message, n != null);
+          assertTrue(message, p.matcher(n).matches());
         }
       }
     }
@@ -142,27 +137,27 @@ public class NumberSequenceClassifierITest extends TestCase {
     { null, null, "MONEY", "MONEY" }
   };
   private static final String [][] moneyNormed = {
-    { null, null, "\\$5.0", null },
-    { null, null, "\\$0.24", null },
-    { null, null, "\\$0.18", null },
-    { null, null, "\u00A35.4", null },
-    { null, null, "\u00A31.0E10", null, null, null },
-    { null, null, "\\$1.0E10", null, null, null },
-    { null, null, "\\$4000000.0", null, null },
-    { null, null, "\\$1000000.0", null },
-    { null, null, "\\$0.5", null },
-    { null, null, "\u00A31500.0", null },
-    { null, null, "\u00A31500.0", null },
-    { null, null, "\u00A30.5", null },
-    { null, null, "\u00A30.5", null },
-    { null, null, "\\$1500.0", null },
-    { null, null, "\\$1500.0", null },
-    { null, null, "\\$1500.0", null },
-    { null, null, "\\$1500.0", null },
-    { null, null, "\\$48.75", null },
-    { null, null, "\\$57.6", null },
-    { null, null, "\\$8000.0", null, null },
-    { null, null, "\\$4233.0", null }
+    { null, null, "\\$5.0", "\\$5.0" },
+    { null, null, "\\$0.24", "\\$0.24" },
+    { null, null, "\\$0.18", "\\$0.18" },
+    { null, null, "\u00A35.4", "\u00A35.4" },
+    { null, null, "\u00A31.0E10", "\u00A31.0E10", "\u00A31.0E10", "\u00A31.0E10" },
+    { null, null, "\\$1.0E10", "\\$1.0E10", "\\$1.0E10", "\\$1.0E10" },
+    { null, null, "\\$4000000.0", "\\$4000000.0", "\\$4000000.0" },
+    { null, null, "\\$1000000.0", "\\$1000000.0" },
+    { null, null, "\\$0.5", "\\$0.5" },
+    { null, null, "\u00A31500.0", "\u00A31500.0" },
+    { null, null, "\u00A31500.0", "\u00A31500.0" },
+    { null, null, "\u00A30.5", "\u00A30.5" },
+    { null, null, "\u00A30.5", "\u00A30.5" },
+    { null, null, "\\$1500.0", "\\$1500.0" },
+    { null, null, "\\$1500.0", "\\$1500.0" },
+    { null, null, "\\$1500.0", "\\$1500.0" },
+    { null, null, "\\$1500.0", "\\$1500.0" },
+    { null, null, "\\$48.75", "\\$48.75" },
+    { null, null, "\\$57.6", "\\$57.6" },
+    { null, null, "\\$8000.0", "\\$8000.0", "\\$8000.0" },
+    { null, null, "\\$4233.0", "\\$4233.0" }
   };
   public void testMoney() {
     run("MONEY", moneyStrings, moneyAnswers, moneyNormed);
@@ -178,8 +173,8 @@ public class NumberSequenceClassifierITest extends TestCase {
   private static final String [][] ordinalAnswers = {
     { null, null, null, "ORDINAL", null },
     { null, null, null, "ORDINAL", null },
-    { null, null, null, "ORDINAL|DURATION", null },
-    { null, null, null, "ORDINAL|DURATION", null },
+    { null, null, null, "ORDINAL", null },
+    { null, null, null, "ORDINAL", null },
     { null, null, null, "ORDINAL", null },
   };
   private static final String [][] ordinalNormed = {
@@ -208,7 +203,8 @@ public class NumberSequenceClassifierITest extends TestCase {
     "yesterday",
     "tomorrow",
     "last year",
-    "next year"
+    "next year",
+    "6 June 2008, 7 June 2008",
   };
   private static final String [][] dateAnswers = {
     { "DATE" , "DATE", "DATE", "DATE" },
@@ -225,25 +221,26 @@ public class NumberSequenceClassifierITest extends TestCase {
     { "DATE" },
     { "DATE" },
     { "DATE" , "DATE" },
-    { "DATE" , "DATE" },    
+    { "DATE" , "DATE" },
+    { "DATE" , "DATE", "DATE", null, "DATE", "DATE", "DATE" },
   };
   private static final String [][] dateNormed = {
-    { "2010-01-14" , null, null, null },
-    { "2009-07-14" , null, null, null },
-    { "2008-06-06" , null, null },
-    { "1923-02-05" , null, null, null },
-    { "XXXX-03-03" , null },
-    { "2005-07-18" , null, null },
-    { "XX05-09-18" , null, null, null },
-    { "XXXX-01-13" , null },
+    { "2010-01-14" , "2010-01-14", "2010-01-14", "2010-01-14" },
+    { "2009-07-14" , "2009-07-14", "2009-07-14", "2009-07-14" },
+    { "2008-06-06" , "2008-06-06", "2008-06-06" },
+    { "1923-02-05" , "1923-02-05", "1923-02-05", "1923-02-05" },
+    { "XXXX-03-03" , "XXXX-03-03" },
+    { "2005-07-18" , "2005-07-18", "2005-07-18" },
+    { "XX05-09-18" , "XX05-09-18", "XX05-09-18", "XX05-09-18" },
+    { "XXXX-01-13" , "XXXX-01-13" },
     { "2009-07-19" },
     { "2007-06-16" },
-    { "32.0", "2010-07", null },
+    { "32.0", "2010-07", "2010-07" },
     { "OFFSET P-1D" },
     { "OFFSET P+1D" },
-    { "THIS P1Y OFFSET P-1Y" , null },
-    { "THIS P1Y OFFSET P+1Y" , null }, 
-    
+    { "THIS P1Y OFFSET P-1Y" , "THIS P1Y OFFSET P-1Y" },
+    { "THIS P1Y OFFSET P+1Y" , "THIS P1Y OFFSET P+1Y" },
+    { "2008-06-06" , "2008-06-06", "2008-06-06", null, "2008-06-07" , "2008-06-07", "2008-06-07" },
   };
   public void testDate() {
     run("DATE", dateStrings, dateAnswers, dateNormed); 
@@ -272,9 +269,9 @@ public class NumberSequenceClassifierITest extends TestCase {
     { "NUMBER", null, "NUMBER", null }
   };
   private static final String [][] numberNormed = {
-    { "100000.0", null, null },
-    { "1300000.0", null },
-    { "1.0E10", null, null },
+    { "100000.0", "100000.0", "100000.0" },
+    { "1300000.0", "1300000.0" },
+    { "1.0E10", "1.0E10", "1.0E10" },
     { "3.625" },
     { "-15.0" },
     { "117.0 - 111.0" },
@@ -304,4 +301,24 @@ public class NumberSequenceClassifierITest extends TestCase {
   public void testTime() {
     run("TIME", timeStrings, timeAnswers, timeNormed);
   }
+
+  private static final String [] durationStrings = {
+          "the past four days was very sunny",
+          "it has been more than seven years",
+          "it took one month",
+  };
+  private static final String [][] durationAnswers = {
+          { "DURATION", "DURATION", "DURATION", "DURATION", null, null, null },
+          { null, null, null, "DURATION", "DURATION", "DURATION", "DURATION" },
+          { null, null, "DURATION", "DURATION" },
+  };
+  private static final String [][] durationNormed = {
+          { "P4D", "P4D", "P4D", "P4D", null, null, null },
+          { null, null, null, "P7Y", "P7Y", "P7Y", "P7Y" },
+          { null, null, "P1M", "P1M" },
+  };
+  public void testDuration() {
+    run("DURATION", durationStrings, durationAnswers, durationNormed);
+  }
+
 }

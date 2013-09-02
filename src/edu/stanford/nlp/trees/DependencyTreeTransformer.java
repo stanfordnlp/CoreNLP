@@ -10,10 +10,11 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Transforms an English structure parse tree in order to get the dependencies right:
- *  -- put a ROOT node
- *  -- remove NONE nodes
- *  -- retain only NP-TMP and NP-ADV tags
+ * Transforms an English structure parse tree in order to get the dependencies right:  <br>
+ *  -- put a ROOT node  <br>
+ *  -- remove NONE nodes  <br>
+ *  -- retain only NP-TMP, NP-ADV, UCP-TMP tags  <br>
+ * The UCP- tags will later be turned into NP- anyway <br>
  *
  * (Note [cdm]: A lot of this overlaps other existing functionality in trees.
  * Could aim to unify it.)
@@ -23,8 +24,8 @@ import edu.stanford.nlp.util.Pair;
 public class DependencyTreeTransformer implements TreeTransformer {
 
 
-  private static final Pattern NPTmpPattern = Pattern.compile("NP.*-TMP.*");
-  private static final Pattern NPAdvPattern = Pattern.compile("NP.*-ADV.*");
+  private static final Pattern TmpPattern = Pattern.compile("(NP|UCP).*-TMP.*");
+  private static final Pattern AdvPattern = Pattern.compile("(NP|UCP).*-ADV.*");
   protected final TreebankLanguagePack tlp;
 
   public DependencyTreeTransformer() {
@@ -55,8 +56,8 @@ public class DependencyTreeTransformer implements TreeTransformer {
     if (label == null) {
       return "";  // This shouldn't really happen, but can happen if there are unlabeled nodes further down a tree, as apparently happens in at least the 20100730 era American National Corpus
     }
-    boolean nptemp = NPTmpPattern.matcher(label).matches();
-    boolean npadv = NPAdvPattern.matcher(label).matches();
+    boolean nptemp = TmpPattern.matcher(label).matches();
+    boolean npadv = AdvPattern.matcher(label).matches();
     label = tlp.basicCategory(label);
     if (nptemp) {
       label = label + "-TMP";

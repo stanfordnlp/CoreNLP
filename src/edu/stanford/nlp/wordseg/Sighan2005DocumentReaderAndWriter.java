@@ -1,16 +1,13 @@
 package edu.stanford.nlp.wordseg;
 
-import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITE;
-import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITEPLUS;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,20 +16,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.D2_LMiddleAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LMiddleAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalCharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PositionAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ShapeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SpaceBeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UBlockAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UTypeAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.LineIterator;
 import edu.stanford.nlp.objectbank.ObjectBank;
@@ -43,6 +27,7 @@ import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.LatticeWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.fsm.DFSA;
@@ -59,7 +44,9 @@ import edu.stanford.nlp.fsm.DFSATransition;
  * @author Pi-Chuan Chang
  * @author Michel Galley (Viterbi seearch graph printing)
  */
-public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer> {
+public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer>, Serializable {
+
+  private static final long serialVersionUID = 3260295150250263237L;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
@@ -118,7 +105,9 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
   }
 
 
-  public class CTBDocumentParser implements Function<String,List<CoreLabel>> {
+  class CTBDocumentParser implements Function<String,List<CoreLabel>>, Serializable {
+    private static final long serialVersionUID = 3260297180259462337L;
+
     private String defaultMap = "char=0,answer=1";
     public String[] map = StringUtils.mapStringToArray(defaultMap);
 
@@ -127,6 +116,8 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       if (line == null) {
         return null;
       }
+
+      // System.err.println("input: " + line);
 
       //Matcher tagMatcher = tagPattern.matcher(line);
       //line = tagMatcher.replaceAll("");
@@ -147,7 +138,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         CoreLabel wi = new CoreLabel();
         String wordString = Character.toString(ch);
         if ( ! Character.isWhitespace(ch) && ! Character.isISOControl(ch)) {
-          wi.set(CharAnnotation.class, intern(wordString));
+          wi.set(CoreAnnotations.CharAnnotation.class, intern(wordString));
           nonspaceLineSB.append(wordString);
 
           // non-breaking space is skipped as well
@@ -156,32 +147,32 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           }
 
           wordString = Character.toString(origLine.charAt(origIndex));
-          wi.set(OriginalCharAnnotation.class, intern(wordString));
+          wi.set(CoreAnnotations.OriginalCharAnnotation.class, intern(wordString));
 
           // put in a word shape
           if (flags.useShapeStrings) {
-            wi.set(ShapeAnnotation.class, shapeOf(wordString));
+            wi.set(CoreAnnotations.ShapeAnnotation.class, shapeOf(wordString));
           }
           if (flags.useUnicodeType || flags.useUnicodeType4gram || flags.useUnicodeType5gram) {
-            wi.set(UTypeAnnotation.class, Character.getType(ch));
+            wi.set(CoreAnnotations.UTypeAnnotation.class, Character.getType(ch));
           }
           if (flags.useUnicodeBlock) {
-            wi.set(UBlockAnnotation.class, Characters.unicodeBlockStringOf(ch));
+            wi.set(CoreAnnotations.UBlockAnnotation.class, Characters.unicodeBlockStringOf(ch));
           }
 
           origIndex++;
 
           if (index == 0) { // first character of a sentence (a line)
-            wi.set(AnswerAnnotation.class, "1");
-            wi.set(SpaceBeforeAnnotation.class, "1");
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
+            wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
           } else if (Character.isWhitespace(line.charAt(index - 1)) || Character.isISOControl(line.charAt(index - 1))) {
-            wi.set(AnswerAnnotation.class, "1");
-            wi.set(SpaceBeforeAnnotation.class, "1");
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
+            wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
           } else {
-            wi.set(AnswerAnnotation.class, "0");
-            wi.set(SpaceBeforeAnnotation.class, "0");
+            wi.set(CoreAnnotations.AnswerAnnotation.class, "0");
+            wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "0");
           }
-          wi.set(PositionAnnotation.class, intern(String.valueOf((position))));
+          wi.set(CoreAnnotations.PositionAnnotation.class, intern(String.valueOf((position))));
           position++;
           if (DEBUG_MORE) EncodingPrintWriter.err.println(wi.toString(), "UTF-8");
           lwi.add(wi);
@@ -189,13 +180,14 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       }
       if (flags.dictionary != null || flags.serializedDictionary != null) {
         String nonspaceLine = nonspaceLineSB.toString();
-        addDictionaryFeatures(cdict, LBeginAnnotation.class, LMiddleAnnotation.class, LEndAnnotation.class, nonspaceLine, lwi);
+        addDictionaryFeatures(cdict, CoreAnnotations.LBeginAnnotation.class, CoreAnnotations.LMiddleAnnotation.class, CoreAnnotations.LEndAnnotation.class, nonspaceLine, lwi);
       }
 
       if (flags.dictionary2 != null) {
         String nonspaceLine = nonspaceLineSB.toString();
-        addDictionaryFeatures(cdict2, D2_LBeginAnnotation.class, D2_LMiddleAnnotation.class, D2_LEndAnnotation.class, nonspaceLine, lwi);
+        addDictionaryFeatures(cdict2, CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class, nonspaceLine, lwi);
       }
+      // System.err.println("output: " + lwi.size());
       return lwi;
     }
   }
@@ -305,7 +297,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     DFSA<String, Integer> answerLattice = new DFSA<String, Integer>(null);
     DFSAState<String, Integer> aInitState = new DFSAState<String, Integer>(nodeId.intValue(),answerLattice);
     answerLattice.setInitialState(aInitState);
-    Map<DFSAState<String, Integer>,DFSAState<String, Integer>> stateLinks = new HashMap<DFSAState<String, Integer>,DFSAState<String, Integer>>();
+    Map<DFSAState<String, Integer>,DFSAState<String, Integer>> stateLinks = Generics.newHashMap();
     // Convert binary lattice into word lattice:
     tagLatticeToAnswerLattice
       (tagLattice.initialState(), aInitState, new StringBuilder(""), nodeId, 0, 0.0, stateLinks, answerLattice, docArray);
@@ -347,9 +339,9 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     CoreLabel curLabel = (pos < docArray.length) ? docArray[pos] : null;
     String curChr = null, origSpace = null;
     if(curLabel != null) {
-      curChr = curLabel.get(OriginalCharAnnotation.class);
+      curChr = curLabel.get(CoreAnnotations.OriginalCharAnnotation.class);
       assert(curChr.length() == 1);
-      origSpace = curLabel.get(SpaceBeforeAnnotation.class);
+      origSpace = curLabel.get(CoreAnnotations.SpaceBeforeAnnotation.class);
     }
     // Get set of successors in search graph:
     Set<String> inputs = tSource.continuingInputs();
@@ -444,7 +436,5 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         tagLatticeToAnswerLattice(tDest, newASource, newAnswer, nodeId, pos+1, newCost, stateLinks, answerLattice, docArray);
     }
   }
-
-  private static final long serialVersionUID = 3260295150250263237L;
 
 }

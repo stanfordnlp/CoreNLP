@@ -9,9 +9,9 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
@@ -30,11 +30,11 @@ public class TimexTreeAnnotator implements Annotator {
   public void annotate(Annotation document) {
     for (CoreMap sentence: document.get(CoreAnnotations.SentencesAnnotation.class)) {
       final List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      Tree tree = sentence.get(TreeAnnotation.class);
+      Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
       tree.indexSpans(0);
       
       // add a tree to each timex annotation
-      for (CoreMap timexAnn: sentence.get(TimexAnnotations.class)) {
+      for (CoreMap timexAnn: sentence.get(TimeAnnotations.TimexAnnotations.class)) {
         Tree subtree;
         final int timexBegin = beginOffset(timexAnn);
         final int timexEnd = endOffset(timexAnn);
@@ -81,7 +81,7 @@ public class TimexTreeAnnotator implements Annotator {
   	
         // add the subtree to the time annotation
         if (subtree != null) {
-          timexAnn.set(TreeAnnotation.class, subtree);
+          timexAnn.set(TreeCoreAnnotations.TreeAnnotation.class, subtree);
         }
       }
     }

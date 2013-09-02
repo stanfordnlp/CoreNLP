@@ -9,6 +9,7 @@ import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Adds a new dependent node, based off of a prototype IndexedWord, with the given relation.
@@ -34,7 +35,7 @@ public class AddDep extends SsurgeonEdit {
    * Creates an EnglishGrammaticalRelation AddDep edit.
    * @param newNode String representation of new dependent IndexedFeatureNode map.
    */
-  public static AddDep createEngAddDep(String govNodeName, String engRelation,  String newNode) throws Exception {
+  public static AddDep createEngAddDep(String govNodeName, String engRelation,  String newNode) {
     GrammaticalRelation relation = EnglishGrammaticalRelations.valueOf(engRelation);
 //  IndexedWord newNodeObj = new IndexedWord(CoreLabel.fromAbstractMapLabel(IndexedFeatureLabel.valueOf(newNode, MapFactory.HASH_MAP_FACTORY)));
     IndexedWord newNodeObj = fromCheapString(newNode);
@@ -141,7 +142,7 @@ public class AddDep extends SsurgeonEdit {
   public static IndexedWord fromCheapString(String rawArg) {
     String arg = rawArg.substring(1, rawArg.length()-1);
     String[] tuples=arg.split(ATOM_DELIMITER);
-    Map<String,String> args = new HashMap<String,String>();
+    Map<String,String> args = Generics.newHashMap();
     for (String tuple : tuples) {
       String[] vals = tuple.split(TUPLE_DELIMITER);
       String key = vals[0];
