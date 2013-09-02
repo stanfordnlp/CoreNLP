@@ -146,4 +146,16 @@ public class QuantifiableEntityNormalizingAnnotator implements Annotator {
     QuantifiableEntityNormalizer.addNormalizedQuantitiesToEntities(words, collapse);
   }
 
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    // technically it adds some NER, but someone who wants full NER
+    // labels will be very disappointed, so we do not claim to produce NER
+    return Collections.singleton(QUANTIFIABLE_ENTITY_NORMALIZATION_REQUIREMENT);
+  }
 }

@@ -163,7 +163,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       synchronized (LOCK) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.dep);
-        graph.addEdge(source, target, rel, 1.0);
+        graph.addEdge(source, target, rel, 1.0, ie.isExtra);
       }
     }
 
@@ -205,10 +205,12 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     int source;
     int target;
     String dep;
-    IntermediateEdge(String dep, int source, int target) {
+    boolean isExtra;
+    IntermediateEdge(String dep, int source, int target, boolean isExtra) {
       this.dep = dep;
       this.source = source;
       this.target = target;
+      this.isExtra = isExtra;
     }
   }
 
@@ -244,13 +246,14 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       String [] bits = line.split("\t");
       for(String bit: bits){
         String [] bbits = bit.split(" ");
-        if(bbits.length != 3){
+        if(bbits.length < 3 || bbits.length > 4){
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         }
         String dep = bbits[0];
         int source = Integer.valueOf(bbits[1]);
         int target = Integer.valueOf(bbits[2]);
-        graph.edges.add(new IntermediateEdge(dep, source, target));
+        boolean isExtra = (bbits.length == 4) ? Boolean.valueOf(bbits[3]) : false;
+        graph.edges.add(new IntermediateEdge(dep, source, target, isExtra));
       }
     }
 
@@ -307,6 +310,10 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       pw.print(edge.getSource().index());
       pw.print(" ");
       pw.print(edge.getTarget().index());
+      if (edge.isExtra()) {
+        pw.print(" ");
+        pw.print(edge.isExtra());
+      }
       first = false;
     }
     pw.println();

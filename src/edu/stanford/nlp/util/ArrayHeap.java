@@ -315,6 +315,15 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
     indexToEntry = new ArrayList<HeapEntry<E>>(initCapacity);
     objectToEntry = new HashMap<E,HeapEntry<E>>(initCapacity);
   }
+  
+  public List<E> asList() {  
+    List<E> res = new LinkedList<E>();
+    Iterator<E> iter = this.iterator();
+    while(iter.hasNext()) {
+      res.add(iter.next());
+    }
+    return res;
+  }
 
   /**
    * Prints the array entries in sorted comparator order.

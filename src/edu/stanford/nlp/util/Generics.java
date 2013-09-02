@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.SortedSet;
@@ -110,6 +111,10 @@ public class Generics {
 
   public static <K,V> HashMap<K,V> newHashMap(Map<? extends K,? extends V> m) {
     return new HashMap<K,V>(m);
+  }
+
+  public static <K,V> IdentityHashMap<K,V> newIdentityHashMap() {
+    return new IdentityHashMap<K,V>();
   }
 
   public static <K,V> WeakHashMap<K,V> newWeakHashMap() {

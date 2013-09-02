@@ -136,4 +136,14 @@ public class WordsToSentencesAnnotator implements Annotator {
     }
   }
 
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(SSPLIT_REQUIREMENT);
+  }
 }

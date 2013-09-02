@@ -52,16 +52,9 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.objectbank.TokenizerFactory;
 import edu.stanford.nlp.parser.KBestViterbiParser;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
-import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
-import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
-import edu.stanford.nlp.parser.metrics.EvalbByCat;
-import edu.stanford.nlp.parser.metrics.Evalb;
-import edu.stanford.nlp.parser.metrics.LeafAncestorEval;
-import edu.stanford.nlp.parser.metrics.TaggingEval;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
 import edu.stanford.nlp.trees.Tree;
@@ -72,7 +65,7 @@ import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.DeltaIndex;
 import edu.stanford.nlp.util.Timing;
 
-public class LexicalizedParserQuery {
+public class LexicalizedParserQuery implements ParserQuery {
 
   private final Options op;
   private final TreeTransformer debinarizer;
@@ -96,18 +89,7 @@ public class LexicalizedParserQuery {
   /** These are the original lemmas */
   private List<String> originalLemmas = null;
 
-  /**
-   * The tagger optionally used before parsing.
-   * <br>
-   * We keep it here as a function rather than a MaxentTagger so that
-   * we can distribute a version of the parser that doesn't include
-   * the entire tagger.
-   * <br>
-   * TODO: pass this in rather than create it here if we wind up using
-   * this in more place.  Right now it's only used in testOnTreebank.
-   */
-  protected Function<List<? extends HasWord>, ArrayList<TaggedWord>> tagger;
-
+  private boolean saidMemMessage = false;
 
   LexicalizedParserQuery(LexicalizedParser parser) {
     this.op = parser.getOp();
@@ -299,7 +281,7 @@ public class LexicalizedParserQuery {
     }
   }
 
-  private void restoreOriginalWords(Tree tree) {
+  public void restoreOriginalWords(Tree tree) {
     if (originalWords == null || tree == null) {
       return;
     }
@@ -386,8 +368,20 @@ public class LexicalizedParserQuery {
     }
   }
 
+  public List<ScoredObject<Tree>> getBestPCFGParses() {
+    return pparser.getBestParses();
+  }
 
+  public boolean hasFactoredParse() {
+    if (bparser == null) {
+      return false;
+    }
+    return parseSucceeded && bparser.hasParse();
+  }
 
+  public Tree getBestFactoredParse() {
+    return bparser.getBestParse();
+  }
 
   public List<ScoredObject<Tree>> getKGoodFactoredParses(int k) {
     if (bparser == null) {
@@ -435,11 +429,11 @@ public class LexicalizedParserQuery {
   }
 
 
-  Tree getBestPCFGParse() {
+  public Tree getBestPCFGParse() {
     return getBestPCFGParse(true);
   }
 
-  Tree getBestPCFGParse(boolean stripSubcategories) {
+  public Tree getBestPCFGParse(boolean stripSubcategories) {
     if (pparser == null) {
       return null;
     }
@@ -468,11 +462,11 @@ public class LexicalizedParserQuery {
     pparser.parse(sentence);
   }
 
-  Tree getBestDependencyParse() {
+  public Tree getBestDependencyParse() {
     return getBestDependencyParse(false);
   }
 
-  Tree getBestDependencyParse(boolean debinarize) {
+  public Tree getBestDependencyParse(boolean debinarize) {
     Tree t = dparser != null ? dparser.getBestParse() : null;
     if (debinarize && t != null) {
       t = debinarizer.transformTree(t);
@@ -481,553 +475,66 @@ public class LexicalizedParserQuery {
     return t;
   }
 
-
-
-  /** Test the parser on a treebank. Parses will be written to stdout, and
-   *  various other information will be written to stderr and stdout,
-   *  particularly if <code>op.testOptions.verbose</code> is true.
-   *
-   *  @param testTreebank The treebank to parse
-   *  @return The labeled precision/recall F<sub>1</sub> (EVALB measure)
-   *          of the parser on the treebank.
+  /**
+   * TODO: separate out the parsing and the output calls?
+   * TODO: Return true/false and keep track of the tree separately?
    */
-  public double testOnTreebank(Treebank testTreebank) {
-    System.err.println("Testing on treebank");
-    Timing treebankTotalTtimer = new Timing();
-    TreePrint treePrint = getTreePrint();
-    TreebankLangParserParams tlpParams = op.tlpParams;
-    TreebankLanguagePack tlp = op.langpack();
-    PrintWriter pwOut = tlpParams.pw();
-    PrintWriter pwErr = tlpParams.pw(System.err);
-    if (op.testOptions.verbose) {
-      pwErr.print("Testing ");
-      pwErr.println(testTreebank.textualSummary(tlp));
-    }
-    if (op.testOptions.evalb) {
-      EvalbFormatWriter.initEVALBfiles(tlpParams);
-    }
-
-    PrintWriter pwo = null;
-    if (op.testOptions.writeOutputFiles) {
-      String fname = op.testOptions.outputFilesPrefix + "." + op.testOptions.outputFilesExtension;
-      try {
-        pwo = op.tlpParams.pw(new FileOutputStream(fname));
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
-    }
-
-    PrintWriter statsPwo = null;
-    if(op.testOptions.outputkBestEquivocation != null) {
-      try {
-        statsPwo = op.tlpParams.pw(new FileOutputStream(op.testOptions.outputkBestEquivocation));
-      } catch(IOException ioe) {
-        ioe.printStackTrace();
-      }
-    }
-
-    TreeTransformer tc = tlpParams.collinizer();
-    TreeTransformer br = new BoundaryRemover();
-
-    // evaluation setup
-    boolean runningAverages = Boolean.parseBoolean(op.testOptions.evals.getProperty("runningAverages"));
-    boolean summary = Boolean.parseBoolean(op.testOptions.evals.getProperty("summary"));
-    boolean tsv = Boolean.parseBoolean(op.testOptions.evals.getProperty("tsv"));
-    tlpParams.setupForEval();
-    // subcategoryStripper = tlpParams.subcategoryStripper(); // NOT NEEDED. THIS WAS DONE ON CLASS INITIALIZATION
-
-    List<BestOfTopKEval> topKEvals = new ArrayList<BestOfTopKEval>();
-    
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgTopK"))) {
-      topKEvals.add(new BestOfTopKEval(new Evalb("pcfg top k comparisons", false), new Evalb("pcfg top k LP/LR", runningAverages)));
-    }
-
-    AbstractEval pcfgLB = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgLB"))) {
-      pcfgLB = new Evalb("pcfg LP/LR", runningAverages);
-    }
-    LeafAncestorEval pcfgLA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgLA"))) {
-      pcfgLA = new LeafAncestorEval("pcfg LeafAncestor");
-    }
-    AbstractEval pcfgCB = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgCB"))) {
-      pcfgCB = new Evalb.CBEval("pcfg CB", runningAverages);
-    }
-    AbstractEval pcfgDA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgDA"))) {
-      pcfgDA = new UnlabeledAttachmentEval("pcfg DA", runningAverages, tlp.headFinder());
-    }
-    AbstractEval pcfgTA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgTA"))) {
-      pcfgTA = new TaggingEval("pcfg Tag", runningAverages, pparser.lex);
-    }
-    AbstractEval depDA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("depDA"))) {
-      depDA = new UnlabeledAttachmentEval("dep DA", runningAverages, null, tlp.punctuationWordRejectFilter());
-    }
-    AbstractEval depTA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("depTA"))) {
-      depTA = new TaggingEval("dep Tag", runningAverages, pparser.lex);
-    }
-    AbstractEval factLB = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factLB"))) {
-      factLB = new Evalb("factor LP/LR", runningAverages);
-    }
-    LeafAncestorEval factLA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factLA"))) {
-      factLA = new LeafAncestorEval("factor LeafAncestor");
-    }
-    AbstractEval factCB = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factCB"))) {
-      factCB = new Evalb.CBEval("fact CB", runningAverages);
-    }
-    AbstractEval factDA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factDA"))) {
-      factDA = new UnlabeledAttachmentEval("factor DA", runningAverages, null);
-    }
-    AbstractEval factTA = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factTA"))) {
-      if (op.doPCFG) {
-        factTA = new TaggingEval("factor Tag", runningAverages, pparser.lex);
-      } else {
-        // only doing dep parser, and need to get tags out in special way....
-        factTA = new TaggingEval("factor Tag", runningAverages, pparser.lex);
-      }
-    }
-    AbstractEval pcfgRUO = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgRUO"))) {
-      pcfgRUO = new AbstractEval.RuleErrorEval("pcfg Rule under/over");
-    }
-    AbstractEval pcfgCUO = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgCUO"))) {
-      pcfgCUO = new AbstractEval.CatErrorEval("pcfg Category under/over");
-    }
-    AbstractEval pcfgCatE = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgCatE"))) {
-      pcfgCatE = new EvalbByCat("pcfg Category Eval", runningAverages);
-    }
-    AbstractEval.ScoreEval pcfgLL = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgLL"))) {
-      pcfgLL = new AbstractEval.ScoreEval("pcfgLL", runningAverages);
-    }
-    AbstractEval.ScoreEval depLL = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("depLL"))) {
-      depLL = new AbstractEval.ScoreEval("depLL", runningAverages);
-    }
-    AbstractEval.ScoreEval factLL = null;
-    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factLL"))) {
-      factLL = new AbstractEval.ScoreEval("factLL", runningAverages);
-    }
-    // this one is for the various k Good/Best options.  Just for individual results
-    AbstractEval kGoodLB = new Evalb("kGood LP/LR", false);
-
-    // no annotation
-    TreeAnnotatorAndBinarizer binarizerOnly;
-    if (!op.trainOptions.leftToRight) {
-      binarizerOnly = new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, false, false, op);
-    } else {
-      binarizerOnly = new TreeAnnotatorAndBinarizer(tlpParams.headFinder(), new LeftHeadFinder(), tlpParams, op.forceCNF, false, false, op);
-    }
-
-    if(op.testOptions.preTag) {
-      try {
-        Class[] argsClass = { String.class };
-        Object[] arguments = { op.testOptions.taggerSerializedFile };
-        System.err.printf("Loading tagger from serialized file %s ...\n",op.testOptions.taggerSerializedFile);
-        tagger = (Function<List<? extends HasWord>,ArrayList<TaggedWord>>) Class.forName("edu.stanford.nlp.tagger.maxent.MaxentTagger").getConstructor(argsClass).newInstance(arguments);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-
-    int numSkippedEvals = 0;
-    boolean saidMemMessage = false;
-    Timing timer = new Timing();
-    for (Tree goldTree : testTreebank) {
-      final ArrayList<? extends HasWord> sentence = getInputSentence(goldTree);
-
-      timer.start();
-
-      pwErr.println("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
-      Tree tree = null;
-      List<ScoredObject<Tree>> kbestPCFGTrees = null;
-      int kbestPCFG = 0;
-      if (topKEvals.size() > 0) {
-        kbestPCFG = op.testOptions.evalPCFGkBest;
-      }
-      if (op.testOptions.printPCFGkBest > 0) {
-        kbestPCFG = Math.max(kbestPCFG, op.testOptions.printPCFGkBest);
-      }
-      try {
-        if ( ! parse(sentence)) {
-          pwErr.print("Sentence couldn't be parsed by grammar.");
-          if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
-            pwErr.println("... falling back to PCFG parse.");
-            tree = getBestPCFGParse();
-            if (kbestPCFG > 0) {
-              kbestPCFGTrees = getKBestPCFGParses(kbestPCFG);
-            }
-          } else {
-            pwErr.println();
-          }
+  public Tree parseWithFallback(List<? extends HasWord> sentence, PrintWriter pwErr, PrintWriter pwo) {
+    Tree tree = null;
+    try {
+      if ( ! parse(sentence)) {
+        pwErr.print("Sentence couldn't be parsed by grammar.");
+        if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
+          pwErr.println("... falling back to PCFG parse.");
+          tree = getBestPCFGParse();
         } else {
-          tree = getBestParse();
-          if (kbestPCFG > 0) {
-            kbestPCFGTrees = getKBestPCFGParses(kbestPCFG);
-          }
-          if (bparser != null) pwErr.println("FactoredParser parse score is " + bparser.getBestScore());
-        }
-
-      } catch (OutOfMemoryError e) {
-        if (op.testOptions.maxLength != -0xDEADBEEF) {
-          // this means they explicitly asked for a length they cannot handle.
-          // Throw exception.  Avoid string concatenation before throw it.
-          pwErr.print("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
-          pwErr.println(op.testOptions.maxLength);
-          throw e;
-
-        } else {
-          if ( ! saidMemMessage) {
-            printOutOfMemory(pwErr);
-            saidMemMessage = true;
-          }
-          if (pparser.hasParse() && fallbackToPCFG) {
-            try {
-              String what = "dependency";
-              if (dparser.hasParse()) {
-                what = "factored";
-              }
-              pwErr.println("Sentence too long for " + what + " parser.  Falling back to PCFG parse...");
-              tree = getBestPCFGParse();
-              if (kbestPCFG > 0) {
-                kbestPCFGTrees = getKBestPCFGParses(kbestPCFG);
-              }
-            } catch (OutOfMemoryError oome) {
-              oome.printStackTrace();
-              pwErr.println("No memory to gather PCFG parse. Skipping...");
-              pparser.nudgeDownArraySize();
-            }
-          } else {
-            pwErr.println("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
-          }
           pwErr.println();
         }
-      } catch (UnsupportedOperationException uoe) {
-        pwErr.println("Sentence too long (or zero words).");
-        if(pwo != null) {
-          pwo.println("(())");
-        }
-        continue;
-      }
-
-      //combo parse goes to pwOut (System.out)
-      if (op.testOptions.verbose) {
-        pwOut.println("ComboParser best");
-        Tree ot = tree;
-        if (ot != null && ! tlpParams.treebankLanguagePack().isStartSymbol(ot.value())) {
-          ot = ot.treeFactory().newTreeNode(tlpParams.treebankLanguagePack().startSymbol(), Collections.singletonList(ot));
-        }
-        treePrint.printTree(ot, pwOut);
       } else {
-        treePrint.printTree(tree, pwOut);
+        tree = getBestParse();
+        if (bparser != null) pwErr.println("FactoredParser parse score is " + bparser.getBestScore());
       }
-
-      // **OUTPUT**
-      // print various n-best like outputs (including 1-best)
-      // print various statistics
-      if (tree != null) {
-        if(op.testOptions.printAllBestParses) {
-          List<ScoredObject<Tree>> parses = pparser.getBestParses();
-          int sz = parses.size();
-          if (sz > 1) {
-            pwOut.println("There were " + sz + " best PCFG parses with score " + parses.get(0).score() + '.');
-            Tree transGoldTree = tc.transformTree(goldTree);
-            int iii = 0;
-            for (ScoredObject<Tree> sot : parses) {
-              iii++;
-              Tree tb = sot.object();
-              Tree tbd = debinarizer.transformTree(tb);
-              tbd = subcategoryStripper.transformTree(tbd);
-              restoreOriginalWords(tbd);
-              pwOut.println("PCFG Parse #" + iii + " with score " + tbd.score());
-              tbd.pennPrint(pwOut);
-              Tree tbtr = tc.transformTree(tbd);
-              // pwOut.println("Tree size = " + tbtr.size() + "; depth = " + tbtr.depth());
-              kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
-            }
-          }
-        }
-        // Huang and Chiang (2006) Algorithm 3 output from the PCFG parser
-        else if (op.testOptions.printPCFGkBest > 0 && op.testOptions.outputkBestEquivocation == null) {
-          List<ScoredObject<Tree>> trees = kbestPCFGTrees.subList(0, op.testOptions.printPCFGkBest);
-          Tree transGoldTree = tc.transformTree(goldTree);
-          int i = 0;
-          for (ScoredObject<Tree> tp : trees) {
-            i++;
-            pwOut.println("PCFG Parse #" + i + " with score " + tp.score());
-            Tree tbd = tp.object();
-            tbd.pennPrint(pwOut);
-            Tree tbtr = tc.transformTree(tbd);
-            kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
-          }
-        }
-        // Chart parser (factored) n-best list
-        else if (op.testOptions.printFactoredKGood > 0 && bparser.hasParse()) {
-          // DZ: debug n best trees
-          List<ScoredObject<Tree>> trees = getKGoodFactoredParses(op.testOptions.printFactoredKGood);
-          Tree transGoldTree = tc.transformTree(goldTree);
-          int ii = 0;
-          for (ScoredObject<Tree> tp : trees) {
-            ii++;
-            pwOut.println("Factored Parse #" + ii + " with score " + tp.score());
-            Tree tbd = tp.object();
-            tbd.pennPrint(pwOut);
-            Tree tbtr = tc.transformTree(tbd);
-            kGoodLB.evaluate(tbtr, transGoldTree, pwOut);
-          }
-        }
-        //1-best output
-        else if(pwo != null) {
-          pwo.println(tree.toString());
-        }
-
-        //Print the derivational entropy
-        if(op.testOptions.outputkBestEquivocation != null && op.testOptions.printPCFGkBest > 0) {
-          List<ScoredObject<Tree>> trees = kbestPCFGTrees.subList(0, op.testOptions.printPCFGkBest);
-
-          double[] logScores = new double[trees.size()];
-          int treeId = 0;
-          for(ScoredObject<Tree> kBestTree : trees)
-            logScores[treeId++] = kBestTree.score();
-
-          //Re-normalize
-          double entropy = 0.0;
-          double denom = ArrayMath.logSum(logScores);
-          for (double logScore : logScores) {
-            double logPr = logScore - denom;
-            entropy += Math.exp(logPr) * (logPr / Math.log(2));
-          }
-          entropy *= -1; //Convert to bits
-          statsPwo.printf("%f\t%d\t%d\n", entropy,trees.size(),sentence.size());
-        }
-      }
-
-
-      // **EVALUATION**
-      // Perform various evaluations specified by the user
-      if (tree != null) {
-        //Strip subcategories and remove punctuation for evaluation
-        tree = subcategoryStripper.transformTree(tree);
-        Tree treeFact = tc.transformTree(tree);
-
-        //Setup the gold tree
-        if (op.testOptions.verbose) {
-          pwOut.println("Correct parse");
-          treePrint.printTree(goldTree, pwOut);
-        }
-        Tree transGoldTree = tc.transformTree(goldTree);
-        if(transGoldTree != null)
-          transGoldTree = subcategoryStripper.transformTree(transGoldTree);
-
-        //Can't do evaluation in these two cases
-        if (transGoldTree == null) {
-          pwErr.println("Couldn't transform gold tree for evaluation, skipping eval. Gold tree was:");
-          goldTree.pennPrint(pwErr);
-          numSkippedEvals++;
-          continue;
-
-        } else if (treeFact == null) {
-          pwErr.println("Couldn't transform hypothesis tree for evaluation, skipping eval. Tree was:");
-          tree.pennPrint(pwErr);
-          numSkippedEvals++;
-          continue;
+      
+    } catch (OutOfMemoryError e) {
+      if (op.testOptions.maxLength != -0xDEADBEEF) {
+        // this means they explicitly asked for a length they cannot handle.
+        // Throw exception.  Avoid string concatenation before throw it.
+        pwErr.print("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
+        pwErr.println(op.testOptions.maxLength);
+        throw e;
         
-        } else if(treeFact.yield().size() != transGoldTree.yield().size()) {
-          List<Label> fYield = treeFact.yield();
-          List<Label> gYield = transGoldTree.yield();
-          pwErr.println("WARNING: Evaluation could not be performed due to guess/gold yield mismatch.");
-          pwErr.println("  sizes: g: " + gYield.size() + " p: " + fYield.size());
-          pwErr.println("  g: " + Sentence.listToString(gYield, true));
-          pwErr.println("  p: " + Sentence.listToString(gYield, true));
-          numSkippedEvals++;
-          continue;
+      } else {
+        if ( ! saidMemMessage) {
+          ParserUtils.printOutOfMemory(pwErr);
+          saidMemMessage = true;
         }
-
-        if (topKEvals.size() > 0) {
-          List<Tree> transGuesses = new ArrayList<Tree>();
-          int kbest = Math.min(op.testOptions.evalPCFGkBest, kbestPCFGTrees.size());
-          for (ScoredObject<Tree> guess : kbestPCFGTrees.subList(0, kbest)) {
-            transGuesses.add(tc.transformTree(guess.object()));
+        if (pparser.hasParse() && fallbackToPCFG) {
+          try {
+            String what = "dependency";
+            if (dparser.hasParse()) {
+              what = "factored";
+            }
+            pwErr.println("Sentence too long for " + what + " parser.  Falling back to PCFG parse...");
+            tree = getBestPCFGParse();
+          } catch (OutOfMemoryError oome) {
+            oome.printStackTrace();
+            pwErr.println("No memory to gather PCFG parse. Skipping...");
+            pparser.nudgeDownArraySize();
           }
-          for (BestOfTopKEval eval : topKEvals) {
-            eval.evaluate(transGuesses, transGoldTree, pwErr);
-          }
+        } else {
+          pwErr.println("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
         }
-
-        //PCFG eval
-        Tree treePCFG = getBestPCFGParse();
-        if (treePCFG != null) {
-          Tree treePCFGeval = tc.transformTree(treePCFG);
-          if (pcfgLB != null) {
-            pcfgLB.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-          if(pcfgLA != null) {
-            pcfgLA.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-          if (pcfgCB != null) {
-            pcfgCB.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-          if (pcfgDA != null) {
-            // Re-index the leaves after Collinization, stripping traces, etc.
-            treePCFGeval.indexLeaves(true);
-            transGoldTree.indexLeaves(true);
-            pcfgDA.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-          if (pcfgTA != null) {
-            pcfgTA.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-          if (pcfgLL != null && pparser != null) {
-            pcfgLL.recordScore(pparser, pwErr);
-          }
-          if (pcfgRUO != null) {
-            pcfgRUO.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-          if (pcfgCUO != null) {
-            pcfgCUO.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-          if (pcfgCatE != null) {
-            pcfgCatE.evaluate(treePCFGeval, transGoldTree, pwErr);
-          }
-        }
-
-        //Dependency eval
-        Tree treeDep = getBestDependencyParse();
-        if (treeDep != null) {
-          Tree goldTreeB = binarizerOnly.transformTree(goldTree);
-
-          Tree goldTreeEval = goldTree.deepCopy();
-          goldTreeEval.indexLeaves(true);
-          goldTreeEval.percolateHeads(tlp.headFinder());
-
-          Tree depDAEval = getBestDependencyParse(true);
-          depDAEval.indexLeaves(true);
-          depDAEval.percolateHeadIndices();
-          if (depDA != null) {
-            depDA.evaluate(depDAEval, goldTreeEval, pwErr);
-          }
-          if (depTA != null) {
-            Tree undoneTree = debinarizer.transformTree(treeDep);
-            undoneTree = subcategoryStripper.transformTree(undoneTree);
-            restoreOriginalWords(undoneTree);
-            // pwErr.println("subcategoryStripped tree: " + undoneTree.toStructureDebugString());
-            depTA.evaluate(undoneTree, goldTree, pwErr);
-          }
-          if (depLL != null && dparser != null) {
-            depLL.recordScore(dparser, pwErr);
-          }
-          Tree factTreeB;
-          if (bparser != null && parseSucceeded) {
-            factTreeB = bparser.getBestParse();
-          } else {
-            factTreeB = treeDep;
-          }
-          if (factDA != null) {
-            factDA.evaluate(factTreeB, goldTreeB, pwErr);
-          }
-        }
-
-        //Factored parser (1best) eval
-        if (factLB != null) {
-          factLB.evaluate(treeFact, transGoldTree, pwErr);
-        }
-        if(factLA != null) {
-          factLA.evaluate(treeFact, transGoldTree, pwErr);
-        }
-        if (factTA != null) {
-          factTA.evaluate(tree, br.transformTree(goldTree), pwErr);
-        }
-        if (factLL != null && bparser != null) {
-          factLL.recordScore(bparser, pwErr);
-        }
-        if (factCB != null) {
-          factCB.evaluate(treeFact, transGoldTree, pwErr);
-        }
-        if (op.testOptions.evalb) {
-          // empty out scores just in case
-          nanScores(tree);
-          EvalbFormatWriter.writeEVALBline(treeFact, transGoldTree);
-        }
+        pwErr.println();
       }
-      pwErr.println();
-    } // for tree iterator
-
-    //Done parsing...print the results of the evaluations
-    treebankTotalTtimer.done("Testing on treebank");
-    if (saidMemMessage) {
-      printOutOfMemory(pwErr);
-    }
-    if (op.testOptions.evalb) {
-      EvalbFormatWriter.closeEVALBfiles();
-    }
-    if(numSkippedEvals != 0) {
-      pwOut.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
-    }
-    if (summary) {
-      if (pcfgLB != null) pcfgLB.display(false, pwErr);
-      if (pcfgLA != null) pcfgLA.display(false, pwErr);
-      if (pcfgCB != null) pcfgCB.display(false, pwErr);
-      if (pcfgDA != null) pcfgDA.display(false, pwErr);
-      if (pcfgTA != null) pcfgTA.display(false, pwErr);
-      if (pcfgLL != null && pparser != null) pcfgLL.display(false, pwErr);
-      if (depDA != null) depDA.display(false, pwErr);
-      if (depTA != null) depTA.display(false, pwErr);
-      if (depLL != null && dparser != null) depLL.display(false, pwErr);
-      if (factLB != null) factLB.display(false, pwErr);
-      if (factLA != null) factLA.display(false, pwErr);
-      if (factCB != null) factCB.display(false, pwErr);
-      if (factDA != null) factDA.display(false, pwErr);
-      if (factTA != null) factTA.display(false, pwErr);
-      if (factLL != null && bparser != null) factLL.display(false, pwErr);
-      if (pcfgCatE != null) pcfgCatE.display(false, pwErr);
-      for (BestOfTopKEval eval : topKEvals) {
-        eval.display(false, pwErr);
+    } catch (UnsupportedOperationException uoe) {
+      pwErr.println("Sentence too long (or zero words).");
+      if(pwo != null) {
+        pwo.println("(())");
       }
+      return null;
     }
-    // these ones only have a display mode, so display if turned on!!
-    if (pcfgRUO != null) pcfgRUO.display(true, pwErr);
-    if (pcfgCUO != null) pcfgCUO.display(true, pwErr);
-    if (tsv) {
-      NumberFormat nf = new DecimalFormat("0.00");
-      pwErr.println("factF1\tfactDA\tfactEx\tpcfgF1\tdepDA\tfactTA\tnum");
-      if (factLB != null) pwErr.print(nf.format(factLB.getEvalbF1Percent()));
-      pwErr.print("\t");
-      if (dparser != null && factDA != null) pwErr.print(nf.format(factDA.getEvalbF1Percent()));
-      pwErr.print("\t");
-      if (factLB != null) pwErr.print(nf.format(factLB.getExactPercent()));
-      pwErr.print("\t");
-      if (pcfgLB != null) pwErr.print(nf.format(pcfgLB.getEvalbF1Percent()));
-      pwErr.print("\t");
-      if (dparser != null && depDA != null) pwErr.print(nf.format(depDA.getEvalbF1Percent()));
-      pwErr.print("\t");
-      if (pparser != null && factTA != null) pwErr.print(nf.format(factTA.getEvalbF1Percent()));
-      pwErr.print("\t");
-      if (factLB != null) pwErr.print(factLB.getNum());
-      pwErr.println();
-    }
-
-    double f1 = 0.0;
-    if (factLB != null) {
-      f1 = factLB.getEvalbF1();
-    }
-
-    //Close files (if necessary)
-    if(pwo != null) pwo.close();
-    if(statsPwo != null) statsPwo.close();
-
-    return f1;
-  } // end testOnTreebank()
-
+    return tree;
+  }
 
 
   /** Parse the files with names given in the String array args elements from
@@ -1046,7 +553,6 @@ public class LexicalizedParserQuery {
     int numNoMemory = 0;
     int numFallback = 0;
     int numSkipped = 0;
-    boolean saidMemMessage = false;
 
     if (op.testOptions.verbose) {
       if(tokenizerFactory != null)
@@ -1176,7 +682,7 @@ public class LexicalizedParserQuery {
             throw e;
           } else {
             if ( ! saidMemMessage) {
-              printOutOfMemory(pwErr);
+              ParserUtils.printOutOfMemory(pwErr);
               saidMemMessage = true;
             }
             if (pparser.hasParse() && fallbackToPCFG) {
@@ -1247,7 +753,7 @@ public class LexicalizedParserQuery {
     }
 
     if (saidMemMessage) {
-      printOutOfMemory(pwErr);
+      ParserUtils.printOutOfMemory(pwErr);
     }
     double wordspersec = numWords / (((double) millis) / 1000);
     double sentspersec = numSents / (((double) millis) / 1000);
@@ -1273,65 +779,23 @@ public class LexicalizedParserQuery {
   } // end parseFiles
 
 
-  private static void printOutOfMemory(PrintWriter pw) {
-    pw.println();
-    pw.println("*******************************************************");
-    pw.println("***  WARNING!! OUT OF MEMORY! THERE WAS NOT ENOUGH  ***");
-    pw.println("***  MEMORY TO RUN ALL PARSERS.  EITHER GIVE THE    ***");
-    pw.println("***  JVM MORE MEMORY, SET THE MAXIMUM SENTENCE      ***");
-    pw.println("***  LENGTH WITH -maxLength, OR PERHAPS YOU ARE     ***");
-    pw.println("***  HAPPY TO HAVE THE PARSER FALL BACK TO USING    ***");
-    pw.println("***  A SIMPLER PARSER FOR VERY LONG SENTENCES.      ***");
-    pw.println("*******************************************************");
-    pw.println();
-  }
-
-
-  // Remove tree scores, so they don't print.
-  // TODO: The printing architecture should be fixed up in the trees package
-  // sometime.
-  private static void nanScores(Tree tree) {
-    tree.setScore(Double.NaN);
-    Tree[] kids = tree.children();
-    for (int i = 0; i < kids.length; i++) {
-      nanScores(kids[i]);
-    }
-  }
-
-
-  /**
-   * Returns the input sentence for the parser.
-   */
-  private ArrayList<? extends HasWord> getInputSentence(Tree t) {
-    if (op.testOptions.forceTags) {
-      if (op.testOptions.preTag) {
-        ArrayList<TaggedWord> s = tagger.apply(t.yieldWords());
-        if(op.testOptions.verbose) {
-          System.err.println("Guess tags: "+Arrays.toString(s.toArray()));
-          System.err.println("Gold tags: "+t.labeledYield().toString());
-        }
-        return s;
-      } else if(op.testOptions.noFunctionalForcing) {
-        ArrayList<? extends HasWord> s = t.taggedYield();
-        for(HasWord word : s) {
-          String tag = ((HasTag) word).tag();
-          tag = tag.split("-")[0];
-          ((HasTag) word).setTag(tag);
-        }
-        return s;
-      } else {
-        return t.taggedYield();
-      }
-    } else {
-      return t.yieldWords();
-    }
-  }
-
   /** Return a TreePrint for formatting parsed output trees.
    *  @return A TreePrint for formatting parsed output trees.
    */
   public TreePrint getTreePrint() {
     return op.testOptions.treePrint(op.tlpParams);
+  }
+
+  public KBestViterbiParser getPCFGParser() {
+    return pparser;
+  }
+
+  public KBestViterbiParser getDependencyParser() {
+    return dparser;
+  }
+
+  public KBestViterbiParser getFactoredParser() {
+    return bparser;
   }
 
   /** Adds a sentence final punctuation mark to sentences that lack one.

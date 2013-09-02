@@ -22,12 +22,20 @@ public class PTBTokenizerTest extends TestCase {
   private String[] ptbInputs = {
     "This is a sentence.",
     "U.S. insurance: Conseco acquires Kemper Corp. \n</HEADLINE>\n<P>\nU.S insurance",
+    "Based in Eugene,Ore., PakTech needs a new distributor after Sydney-based Creative Pack Pty. Ltd. went into voluntary administration.",
+    "The Iron Age (ca. 1300 – ca. 300 BC).",
+    "Indo\u00ADnesian ship\u00ADing \u00AD",
   };
 
   private String[][] ptbGold = {
     { "This", "is", "a", "sentence", "." },
     { "U.S.", "insurance", ":", "Conseco", "acquires", "Kemper", "Corp.", ".",
       "</HEADLINE>", "<P>", "U.S", "insurance" },
+    { "Based", "in", "Eugene", ",", "Ore.", ",", "PakTech", "needs", "a", "new",
+      "distributor", "after", "Sydney-based", "Creative", "Pack", "Pty.", "Ltd.",
+      "went", "into", "voluntary", "administration", "." },
+    { "The", "Iron", "Age", "-LRB-", "ca.", "1300", "--", "ca.", "300", "BC", "-RRB-", "." },
+    { "Indonesian", "shiping", "-" },
   };
 
   public void testPTBTokenizerWord() {

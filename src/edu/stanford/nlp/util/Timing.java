@@ -26,7 +26,7 @@ public class Timing {
   private static long startTime = System.currentTimeMillis();
 
   /** Stores a suitable formatter for printing seconds nicely. */
-  private static NumberFormat nf = new DecimalFormat("0.0");
+  private static final NumberFormat nf = new DecimalFormat("0.0");
 
 
   /**
@@ -278,7 +278,7 @@ public class Timing {
    */
   public static void endDoing() {
     long elapsed = System.currentTimeMillis() - startTime;
-    System.err.println("done [" + nf.format(((double) elapsed) / 1000) + 
+    System.err.println("done [" + nf.format(((double) elapsed) / 1000) +
                        " sec].");
   }
 

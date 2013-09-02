@@ -147,9 +147,9 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td> cleanGazette</td><td>boolean</td><td>false</td><td></td>If true, a gazette feature fires when all tokens of a gazette entry match</tr>
  * <p>
  * <tr><td> wordShape</td><td>String</td><td>none</td><td>Either "none" for no wordShape use, or the name of a word shape function recognized by {@link WordShapeClassifier#lookupShaper(String)}</td></tr>
- * <tr><td> useSequences</td><td>boolean</td><td>true</td><td></td></tr>
- * <tr><td> usePrevSequences</td><td>boolean</td><td>false</td><td></td></tr>
- * <tr><td> useNextSequences</td><td>boolean</td><td>false</td><td></td></tr>
+ * <tr><td> useSequences</td><td>boolean</td><td>true</td><td>Does not use any class combination features if this is false</td></tr>
+ * <tr><td> usePrevSequences</td><td>boolean</td><td>false</td><td>Does not use any class combination features using previous classes if this is false</td></tr>
+ * <tr><td> useNextSequences</td><td>boolean</td><td>false</td><td>Does not use any class combination features using next classes if this is false</td></tr>
  * <tr><td> useLongSequences</td><td>boolean</td><td>false</td><td>Use plain higher-order state sequences out to minimum of length or maxLeft</td></tr>
  * <tr><td> useBoundarySequences</td><td>boolean</td><td>false</td><td>Use extra second order class sequence features when previous is CoNLL boundary, so entity knows it can span boundary.</td></tr>
  * <tr><td> useTaggySequences</td><td>boolean</td><td>false</td><td>Use first, second, and third order class and tag sequence interaction features</td></tr>

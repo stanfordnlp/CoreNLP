@@ -1384,7 +1384,8 @@ public class SeqClassifierFlags implements Serializable {
         answerFile = val;
       } else if (key.equalsIgnoreCase("altAnswerFile")) {
         altAnswerFile = val;
-      } else if (key.equalsIgnoreCase("loadClassifier")) {
+      } else if (key.equalsIgnoreCase("loadClassifier") ||
+                 key.equalsIgnoreCase("model")) {
         loadClassifier = val;
       } else if (key.equalsIgnoreCase("loadTextClassifier")) {
         loadTextClassifier = val;

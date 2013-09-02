@@ -9,9 +9,11 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * This calls NumberSequenceClassifier, which is a rule based classifier, which
@@ -113,4 +115,16 @@ public class NumberAnnotator implements Annotator {
     }
   }
 
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    // technically it adds some NER, but someone who wants full NER
+    // labels will be very disappointed, so we do not claim to produce NER
+    return Collections.singleton(NUMBER_REQUIREMENT);
+  }
 }

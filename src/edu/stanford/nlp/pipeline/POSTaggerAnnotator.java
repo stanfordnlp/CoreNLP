@@ -2,9 +2,11 @@ package edu.stanford.nlp.pipeline;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -170,4 +172,14 @@ public class POSTaggerAnnotator implements Annotator {
     return text;
   }
 
+
+  @Override
+  public Set<Requirement> requires() {
+    return TOKENIZE_AND_SSPLIT;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(POS_REQUIREMENT);
+  }
 }

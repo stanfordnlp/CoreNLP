@@ -34,7 +34,7 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
     }
   }
 
-  public static final String ENCODING = "GB18030";
+  public static final String ENCODING = "utf-8";
 
   /**
    * Return the input Charset encoding for the Treebank.

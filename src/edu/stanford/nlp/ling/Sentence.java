@@ -14,10 +14,9 @@ import java.util.List;
  * @author John Bauer
  * @version 2010
  */
-//public class Sentence<T extends HasWord> extends ArrayList<T> {
 public class Sentence {
 
-  private Sentence() {}
+  private Sentence() {} // static methods
 
   /**
    * Create an ArrayList as a list of <code>TaggedWord</code> from two
@@ -54,14 +53,14 @@ public class Sentence {
   //TODO wsg2010: This should be deprecated in favor of the method below with new labels
   public static ArrayList<Word> toUntaggedList(List<String> lex) {
     ArrayList<Word> sent = new ArrayList<Word>();
-    int ls = lex.size();
-    for (int i = 0; i < ls; i++) {
-      sent.add(new Word(lex.get(i)));
+    for (String str : lex) {
+      sent.add(new Word(str));
     }
     return sent;
   }
 
-  public static List<HasWord> toWordList(List<String> lex) {
+  // TODO: Change this one to work with generic types better and unify with next method
+   public static List<HasWord> toWordList(List<String> lex) {
     List<HasWord> sent = new ArrayList<HasWord>();
     for(String str : lex) {
       CoreLabel cl = new CoreLabel();
@@ -98,7 +97,7 @@ public class Sentence {
     }
     return sent;
   }
-  
+
   public static List<CoreLabel> toCoreLabelList(String... words) {
     List<CoreLabel> sent = new ArrayList<CoreLabel>();
     for (String word : words) {

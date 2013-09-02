@@ -173,6 +173,7 @@ public class Document implements Serializable {
         speakerMentionID = Integer.parseInt(m.headWord.get(SpeakerAnnotation.class));
         if(utter!=0) {
           speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
+          speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
         }
       } catch (Exception e){
         // no mention found for the speaker

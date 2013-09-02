@@ -1613,13 +1613,8 @@ public class SemanticGraph implements Serializable {
     return output.toString();
   }
 
-  public SemanticGraphEdge addEdge(IndexedWord s, IndexedWord d, GrammaticalRelation reln, double weight) {
-    // SemanticGraphEdge e = super.addEdge(s, d);
-    // e.setRelation(reln);
-    // e.setWeight(weight);
-    // return e;
-
-    SemanticGraphEdge newEdge = new SemanticGraphEdge(s, d, reln, weight);
+  public SemanticGraphEdge addEdge(IndexedWord s, IndexedWord d, GrammaticalRelation reln, double weight, boolean isExtra) {
+    SemanticGraphEdge newEdge = new SemanticGraphEdge(s, d, reln, weight, isExtra);
     graph.add(s, d, newEdge);
     return newEdge;
   }
@@ -1669,7 +1664,7 @@ public class SemanticGraph implements Serializable {
     for (SemanticGraphEdge edge : g.edgeIterable()) {
       IndexedWord newGov = prevToNewMap.get(edge.getGovernor());
       IndexedWord newDep = prevToNewMap.get(edge.getDependent());
-      addEdge(newGov, newDep, edge.getRelation(), edge.getWeight());
+      addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
   }
 
@@ -1697,28 +1692,29 @@ public class SemanticGraph implements Serializable {
     for (SemanticGraphEdge edge : g.edgeIterable()) {
       IndexedWord newGov = prevToNewMap.get(edge.getGovernor());
       IndexedWord newDep = prevToNewMap.get(edge.getDependent());
-      addEdge(newGov, newDep, edge.getRelation(), edge.getWeight());
+      addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
   }
 
   /**
    * This is the constructor used by the parser.
    */
-  public SemanticGraph(Collection<TypedDependency> dependencies, Collection<TreeGraphNode> roots) {
-    this(dependencies, roots, "", 0);
+  public SemanticGraph(Collection<TypedDependency> dependencies) {
+    this(dependencies, "", 0);
   }
 
-  public SemanticGraph(Collection<TypedDependency> dependencies, Collection<TreeGraphNode> rootNodes, String docID,
+  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
       int sentIndex) {
-    this(dependencies, rootNodes, docID, sentIndex, false, false);
+    this(dependencies, docID, sentIndex, false);
   }
 
   /**
    *
    *
    */
-  public SemanticGraph(Collection<TypedDependency> dependencies, Collection<TreeGraphNode> rootNodes, String docID,
-      int sentIndex, boolean lemmatize, boolean threadSafe) {
+  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
+      int sentIndex, boolean lemmatize) {
+    Morphology morphology = (lemmatize) ? new Morphology() : null;
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
     roots = new HashSet<IndexedWord>();
@@ -1740,28 +1736,19 @@ public class SemanticGraph implements Serializable {
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
         depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
-          if (!threadSafe) {
-            govVertex.setLemma(Morphology.lemmaStatic(govVertex.value(), govVertex.tag(), true));
-            depVertex.setLemma(Morphology.lemmaStatic(depVertex.value(), depVertex.tag(), true));
-          } else {
-            govVertex.setLemma(Morphology.lemmaStaticSynchronized(govVertex.value(), govVertex.tag(), true));
-            depVertex.setLemma(Morphology.lemmaStaticSynchronized(depVertex.value(), depVertex.tag(), true));
-          }
+          govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
+          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
         addVertex(govVertex);
         addVertex(depVertex);
-        addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY);
+        addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
       }
 
       else { //it's the root and we add it
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
         depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
-          if (!threadSafe) {
-            depVertex.setLemma(Morphology.lemmaStatic(depVertex.value(), depVertex.tag(), true));
-          } else {
-            depVertex.setLemma(Morphology.lemmaStaticSynchronized(depVertex.value(), depVertex.tag(), true));
-          }
+          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
 
         roots.add(depVertex);
@@ -1774,15 +1761,6 @@ public class SemanticGraph implements Serializable {
     // fragments,
     // which meant they were ignored by the RTE system. Changed. (pado)
     // See also SemanticGraphFactory.makeGraphFromTree().
-
-    // this is now ignored -- we reconstruct the real root from the root relation in the list of dependencies
-    //if (rootNodes != null) {
-    // for (TreeGraphNode rootNode : rootNodes) {
-    //   CoreLabel rootLabel = new CoreLabel(rootNode.label());
-    //    IndexedWord root = new IndexedWord(docID, sentIndex, rootNode.index(), rootLabel);
-    //    roots.add(root);
-    //  }
-    //}
   }
 
   /**
@@ -1861,7 +1839,7 @@ public class SemanticGraph implements Serializable {
         sg.addVertex(dep);
         if (gov == null)
           sg.roots.add(dep);
-        sg.addEdge(gov, dep, GrammaticalRelation.valueOf(reln), Double.NEGATIVE_INFINITY);
+        sg.addEdge(gov, dep, GrammaticalRelation.valueOf(reln), Double.NEGATIVE_INFINITY, false);
       } else {
         readLeftBracket();
         String label = readName();
@@ -1870,7 +1848,7 @@ public class SemanticGraph implements Serializable {
         if (gov == null)
           sg.roots.add(dep);
         if (gov != null && reln != null) {
-          sg.addEdge(gov, dep, GrammaticalRelation.valueOf(reln), Double.NEGATIVE_INFINITY);
+          sg.addEdge(gov, dep, GrammaticalRelation.valueOf(reln), Double.NEGATIVE_INFINITY, false);
         }
         readWhiteSpace();
         while (!isRightBracket(peek()) && !isEOF) {

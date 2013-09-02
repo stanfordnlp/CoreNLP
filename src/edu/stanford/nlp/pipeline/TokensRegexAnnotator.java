@@ -10,8 +10,10 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * <p>Uses TokensRegex patterns to annotate tokens.</p>
@@ -147,5 +149,16 @@ public class TokensRegexAnnotator implements Annotator {
 
     if (verbose)
       timer.stop("done.");
+  }
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    // TODO: not sure what goes here
+    return Collections.emptySet();
   }
 }

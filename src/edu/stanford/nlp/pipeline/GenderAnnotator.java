@@ -1,6 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
@@ -56,5 +58,16 @@ public class GenderAnnotator implements Annotator {
     
     if (verbose)
       timer.stop("done.");
+  }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return TOKENIZE_AND_SSPLIT;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(GENDER_REQUIREMENT);
   }
 }

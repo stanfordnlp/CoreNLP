@@ -43,6 +43,7 @@ class TaggerDemo2 {
       List<TaggedWord> tSentence = tagger.tagSentence(sentence);
       pw.println(Sentence.listToString(tSentence, false));
     }
+    pw.close();
   }
 
 }

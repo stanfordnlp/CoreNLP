@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.ling.CoreAnnotations.BeginIndexAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.EndIndexAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
@@ -19,7 +18,6 @@ import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.ValueAnnotation;
-import edu.stanford.nlp.pipeline.DeterministicCorefAnnotator;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -40,15 +38,17 @@ import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.StringUtils;
 
 public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
+
   protected boolean assignIds = true;
   protected int maxID = -1;
-  HeadFinder headFinder;
+  private final HeadFinder headFinder;
   protected Annotator parserProcessor;
 
   public RuleBasedCorefMentionFinder() {
     SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
     headFinder = new SemanticHeadFinder();
   }
+
   /** When mention boundaries are given */
   public List<List<Mention>> filterPredictedMentions(List<List<Mention>> allGoldMentions, Annotation doc, Dictionaries dict){
     List<List<Mention>> predictedMentions = new ArrayList<List<Mention>>();
@@ -61,6 +61,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       mentions.addAll(goldMentions);
       findHead(s, mentions);
 
+      // todo [cdm 2013]: This block seems to do nothing - the two sets are never used
       Set<IntPair> mentionSpanSet = new HashSet<IntPair>();
       Set<IntPair> namedEntitySpanSet = new HashSet<IntPair>();
       for(Mention m : mentions) {
@@ -69,13 +70,17 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
           namedEntitySpanSet.add(new IntPair(m.startIndex, m.endIndex));
         }
       }
+
       setBarePlural(mentions);
       removeSpuriousMentions(s, mentions, dict);
     }
     return predictedMentions;
   }
+
   /** Main method of mention detection.
-   * Extract all NP, PRP or NE, and filter out by manually written patterns */
+   *  Extract all NP, PRP or NE, and filter out by manually written patterns.
+   */
+  @Override
   public List<List<Mention>> extractPredictedMentions(Annotation doc, int _maxID, Dictionaries dict){
     this.maxID = _maxID;
     List<List<Mention>> predictedMentions = new ArrayList<List<Mention>>();
@@ -108,11 +113,10 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     SemanticGraph dependency = s.get(CollapsedDependenciesAnnotation.class);
     String preNE = "O";
     int beginIndex = -1;
-    int endIndex = -1;
     for(CoreLabel w : sent) {
       String nerString = w.get(NamedEntityTagAnnotation.class);
       if(!nerString.equals(preNE)) {
-        endIndex = w.get(IndexAnnotation.class)-1;
+        int endIndex = w.get(IndexAnnotation.class) - 1;
         if(!preNE.equals("O") && !preNE.equals("QUANTITY") && !preNE.equals("CARDINAL") && !preNE.equals("PERCENT")) {
           if(w.get(TextAnnotation.class).equals("'s")) endIndex++;
           IntPair mSpan = new IntPair(beginIndex, endIndex);
@@ -181,18 +185,18 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       matcher.getMatch();
       Tree m1 = matcher.getNode("m1");
       Tree m2 = matcher.getNode("m2");
-      
+
       List<Tree> mLeaves = m1.getLeaves();
       int beginIdx = ((CoreLabel)mLeaves.get(0).label()).get(IndexAnnotation.class)-1;
       int endIdx = ((CoreLabel)mLeaves.get(mLeaves.size()-1).label()).get(IndexAnnotation.class);
       spanToMentionSubTree.put(new IntPair(beginIdx, endIdx), m1);
-      
+
       mLeaves = m2.getLeaves();
       beginIdx = ((CoreLabel)mLeaves.get(0).label()).get(IndexAnnotation.class)-1;
       endIdx = ((CoreLabel)mLeaves.get(mLeaves.size()-1).label()).get(IndexAnnotation.class);
       spanToMentionSubTree.put(new IntPair(beginIdx, endIdx), m2);
     }
-    
+
     for(IntPair mSpan : spanToMentionSubTree.keySet()){
       if(!mentionSpanSet.contains(mSpan) && !insideNE(mSpan, namedEntitySpanSet)) {
         int mentionID = assignIds? ++maxID:-1;
@@ -331,7 +335,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     return parse(tokens, null);
   }
 
-  private Tree parse(List<CoreLabel> tokens, 
+  private Tree parse(List<CoreLabel> tokens,
                      List<ParserConstraint> constraints) {
     CoreMap sent = new Annotation("");
     sent.set(TokensAnnotation.class, tokens);
@@ -469,12 +473,9 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private static boolean partitiveRule(Mention m, List<CoreLabel> sent, Dictionaries dict) {
-    if(m.startIndex >= 2
-        && sent.get(m.startIndex-1).get(TextAnnotation.class).equalsIgnoreCase("of")
-        && dict.parts.contains(sent.get(m.startIndex-2).get(TextAnnotation.class).toLowerCase())) {
-      return true;
-    }
-    return false;
+    return m.startIndex >= 2
+            && sent.get(m.startIndex - 1).get(TextAnnotation.class).equalsIgnoreCase("of")
+            && dict.parts.contains(sent.get(m.startIndex - 2).get(TextAnnotation.class).toLowerCase());
   }
 
   /** Check whether pleonastic 'it'. E.g., It is possible that ... */

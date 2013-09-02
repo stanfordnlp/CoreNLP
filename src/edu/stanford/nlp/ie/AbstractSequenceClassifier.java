@@ -180,8 +180,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public DocumentReaderAndWriter<IN> makeReaderAndWriter() {
     DocumentReaderAndWriter<IN> readerAndWriter;
     try {
-      readerAndWriter = (DocumentReaderAndWriter<IN>)
-                         Class.forName(flags.readerAndWriter).newInstance();
+      readerAndWriter = ReflectionLoading.loadByReflection(flags.readerAndWriter);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Error loading flags.readerAndWriter: '%s'", flags.readerAndWriter), e);
     }
@@ -206,7 +205,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     DocumentReaderAndWriter<IN> readerAndWriter;
     try {
-      readerAndWriter = (DocumentReaderAndWriter<IN>) Class.forName(readerClassName).newInstance();
+      readerAndWriter = ReflectionLoading.loadByReflection(readerClassName);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Error loading flags.plainTextDocumentReaderAndWriter: '%s'", flags.plainTextDocumentReaderAndWriter), e);
     }

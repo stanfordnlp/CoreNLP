@@ -754,8 +754,9 @@ public class StringUtils {
           {
             try {
               InputStream is = new BufferedInputStream(new FileInputStream(result.getProperty(key)));
+              InputStreamReader reader = new InputStreamReader(is, "utf-8");
               result.remove(key); // location of this line is critical
-              result.load(is);
+              result.load(reader);
               // trim all values
               for(Object propKey : result.keySet()){
                 String newVal = result.getProperty((String)propKey);

@@ -160,7 +160,6 @@
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-math-2.1.jar!/"/>
 	</lib>
 	<lib name="joda-time.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/joda-time-2.0-sources.jar!/"/>
 		<srcroot url="jar://$MODULE_DIR$/libsrc/joda-time-2.1-sources.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/joda-time-2.1-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/joda-time.jar!/"/>
@@ -186,7 +185,8 @@
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-lang-2.5.jar!/"/>
 	</lib>
 	<lib name="log4j-1.2.16.jar" scope="COMPILE">
-		<srcroot url="file://log4j-1.2.16-src.zip"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/log4j-1.2.16-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/log4j-1.2.16-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/log4j-1.2.16.jar!/"/>
 	</lib>
 </component>

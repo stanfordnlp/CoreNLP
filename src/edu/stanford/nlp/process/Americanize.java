@@ -38,6 +38,11 @@ public class Americanize implements Function<HasWord,HasWord> {
 
   public static final int DONT_CAPITALIZE_TIMEX = 1;
 
+  /** No word shorter in length than this is changed by Americanize */
+  private static final int MINIMUM_LENGTH_CHANGED = 4;
+  /** No word shorter in length than this can match a Pattern */
+  private static final int MINIMUM_LENGTH_PATTERN_MATCH = 6;
+
   public Americanize() {
     capitalizeTimex = DEFAULT_CAPITALIZE_TIMEX;
   }
@@ -63,6 +68,7 @@ public class Americanize implements Function<HasWord,HasWord> {
    * @param w A HasWord or String to covert to American if needed.
    * @return Either the input or an Americanized version of it.
    */
+  @Override
   public HasWord apply(HasWord w) {
     String str = w.word();
     String outStr = americanize(str, capitalizeTimex);
@@ -102,6 +108,11 @@ public class Americanize implements Function<HasWord,HasWord> {
     // System.err.println("str is |" + str + "|");
     // System.err.println("timexMapping.contains is " +
     //            timexMapping.containsKey(str));
+    // No ver short words are changed, so short circuit them
+    int length = str.length();
+    if (length < MINIMUM_LENGTH_CHANGED) {
+      return str;
+    }
     String result;
     if (capitalizeTimex) {
       result = timexMapping.get(str);
@@ -114,16 +125,19 @@ public class Americanize implements Function<HasWord,HasWord> {
       return result;
     }
 
+    if (length < MINIMUM_LENGTH_PATTERN_MATCH) {
+      return str;
+    }
     for (int i = 0; i < pats.length; i++) {
-      Pattern ex = excepts[i];
-      if (ex != null) {
-        Matcher me = ex.matcher(str);
-        if (me.find()) {
-          continue;
-        }
-      }
       Matcher m = pats[i].matcher(str);
       if (m.find()) {
+        Pattern ex = excepts[i];
+        if (ex != null) {
+          Matcher me = ex.matcher(str);
+          if (me.find()) {
+            continue;
+          }
+        }
         // System.err.println("Replacing " + word + " with " +
         //             pats[i].matcher(word).replaceAll(reps[i]));
         return m.replaceAll(reps[i]);
@@ -135,7 +149,7 @@ public class Americanize implements Function<HasWord,HasWord> {
 
   private static final Pattern[] pats = { Pattern.compile("haem(at)?o"),
                             Pattern.compile("aemia$"),
-                            Pattern.compile("([lL]euk)aem"),
+                            Pattern.compile("([lL])eukaem"),
                             Pattern.compile("programme(s?)$"),
                             Pattern.compile("^([a-z]{3,})our(s?)$") };
 
@@ -155,7 +169,7 @@ public class Americanize implements Function<HasWord,HasWord> {
   };
 
   private static final String[] reps = {
-    "hem$1o", "emia", "$1em", "program$1", "$1or$2"
+    "hem$1o", "emia", "$1eukem", "program$1", "$1or$2"
   };
 
 

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 public class NERGUI {
 
-  private AbstractSequenceClassifier classifier;
+  private AbstractSequenceClassifier<?> classifier;
 
   private JFrame frame;
   private JEditorPane editorPane;

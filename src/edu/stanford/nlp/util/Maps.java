@@ -147,6 +147,17 @@ public class Maps {
     }
   }
 
+  /**
+   * Adds all of the keys in <code>from</code> to <code>to</code>,
+   * applying <code>function</code> to the values to transform them
+   * from <code>V2</code> to <code>V1</code>.
+   */
+  public static <K, V1, V2> void addAll(Map<K, V1> to, Map<K, V2> from, Function<V2, V1> function) {
+    for (Map.Entry<K, V2> entry : from.entrySet()) {
+      to.put(entry.getKey(), function.apply(entry.getValue()));
+    }
+  }
+
   public static void main(String[] args) {
     Map<String, String> map1 = new HashMap<String, String>();
     map1.put("a", "1");

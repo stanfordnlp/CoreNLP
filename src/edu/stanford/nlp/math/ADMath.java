@@ -1,12 +1,12 @@
 package edu.stanford.nlp.math;
 
 /**
- * The class <code>ADMath</code> was created to extend the
+ * The class {@code ADMath} was created to extend the
  * current calculations of gradient to automatically include a calculation of the
- * hessian vector product with another vector <code>v</code>.  It contains all the functions
- * for the DoubleAlgorithmicDifferentiationo class This is used with the
+ * hessian vector product with another vector {@code v}.  It contains all the functions
+ * for the DoubleAlgorithmicDifferentiation class. This is used with
  * Stochastic Meta Descent Optimization, but could be extended for use in any application
- * that requires a additional order of differentiation without explicitly creating the code.
+ * that requires an additional order of differentiation without explicitly creating the code.
  *
  * @author Alex Kleeman
  * @version 2006/12/06
@@ -14,14 +14,16 @@ package edu.stanford.nlp.math;
 
 public class ADMath {
 
-  public static  DoubleAD mult(DoubleAD a,DoubleAD b){
+  private ADMath() {} // static methods
+
+  public static DoubleAD mult(DoubleAD a,DoubleAD b){
     DoubleAD c = new DoubleAD();
     c.setval( a.getval() * b.getval() );
     c.setdot(a.getdot()*b.getval() + b.getdot()*a.getval());
     return c;
   }
 
-  public static  DoubleAD multConst(DoubleAD a,double b){
+  public static DoubleAD multConst(DoubleAD a,double b){
     DoubleAD c = new DoubleAD();
     c.setval( a.getval() * b );
     c.setdot(a.getdot()*b);
@@ -32,11 +34,11 @@ public class ADMath {
   public static DoubleAD divide(DoubleAD a, DoubleAD b){
     DoubleAD c = new DoubleAD();
     c.setval(a.getval()/b.getval());
-    c.setdot(  (  a.getdot()/b.getval() )    -    a.getval()*b.getdot() / (b.getval()*b.getval()) );
+    c.setdot( (a.getdot()/b.getval()) - a.getval()*b.getdot() / (b.getval()*b.getval()) );
     return c;
   }
 
-    public static DoubleAD divideConst(DoubleAD a, double b){
+  public static DoubleAD divideConst(DoubleAD a, double b){
     DoubleAD c = new DoubleAD();
     c.setval(a.getval()/b);
     c.setdot( a.getdot()/b  );
@@ -91,7 +93,8 @@ public class ADMath {
   public static DoubleAD logSum(DoubleAD[] logInputs) {
     return logSum(logInputs,0,logInputs.length);
   }
-    // Some of this might need to change for optimal AD
+
+  // Some of this might need to change for optimal AD
 
 
   public static DoubleAD logSum(DoubleAD[] logInputs, int fromIndex, int toIndex) {
@@ -115,13 +118,12 @@ public class ADMath {
     boolean haveTerms = false;
     double intermediate = 0.0;
     double intermediateDot = 0.0;
-    double curEXP;
     double cutoff = max - SloppyMath.LOGTOLERANCE;
     // we avoid rearranging the array and so test indices each time!
     for (int i = fromIndex; i < toIndex; i++) {
       if (i != maxIdx && logInputs[i].getval() > cutoff) {
         haveTerms = true;
-        curEXP = Math.exp(logInputs[i].getval() - max);
+        double curEXP = Math.exp(logInputs[i].getval() - max);
         intermediate += curEXP;
         intermediateDot += curEXP*logInputs[i].getdot();
       }
@@ -133,10 +135,7 @@ public class ADMath {
       ret.setval(max);
       ret.setdot(maxdot);
     }
-      return ret;
+    return ret;
   }
 
-
-
 }
-

@@ -8,8 +8,11 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -20,10 +23,6 @@ import java.util.List;
  * them in and get in return a fully annotated object.
  * Please see package level javadocs for sample usage
  * and a more complete description.
- * <p>
- * At the moment this mainly serves as an example of using
- * the system and actually more complex annotation pipelines are
- * in their own classes that don't extend this one.
  *
  * @author Jenny Finkel
  */
@@ -195,6 +194,21 @@ public class AnnotationPipeline implements Annotator {
       sb.append("TOTAL: ").append(Timing.toSecondsString(total)).append(" sec.");
     }
     return sb.toString();
+  }
+
+  public Set<Requirement> requirementsSatisfied() {
+    Set<Requirement> satisfied = new HashSet<Requirement>();
+    for (Annotator annotator : annotators) {
+      satisfied.addAll(annotator.requirementsSatisfied());
+    }
+    return satisfied;
+  }
+
+  public Set<Requirement> requires() {
+    if (annotators.size() == 0) {
+      return Collections.emptySet();
+    }
+    return annotators.get(0).requires();
   }
 
 

@@ -3,7 +3,9 @@ package edu.stanford.nlp.dcoref;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.dcoref.Dictionaries.Animacy;
 import edu.stanford.nlp.dcoref.Dictionaries.Gender;
@@ -123,10 +125,66 @@ public class Rules {
     for(Mention m : mentionCluster.corefMentions){
       if(m.isPronominal()) continue;
       for(Mention ant : potentialAntecedent.corefMentions){
-        if(m.isAcronym(ant) || ant.isAcronym(m)) return true;
+        if (isAcronym(m.originalSpan, ant.originalSpan)) {
+          return true;
+        }
       }
     }
     return false;
+  }
+
+  public static boolean isAcronym(List<CoreLabel> first, List<CoreLabel> second) {
+    if (first.size() > 1 && second.size() > 1) {
+      return false;
+    }
+    List<CoreLabel> longer;
+    List<CoreLabel> shorter;
+    
+    if (first.size() == second.size()) {
+      String firstWord = first.get(0).get(TextAnnotation.class);
+      String secondWord = second.get(0).get(TextAnnotation.class);
+      longer = (firstWord.length() > secondWord.length()) ? first : second;
+      shorter = (firstWord.length() > secondWord.length()) ? second : first;;
+    } else {
+      longer = (first.size() > second.size()) ? first : second;
+      shorter = (first.size() > second.size()) ? second : first;
+    }
+
+    String acronym = shorter.get(0).get(TextAnnotation.class);
+    // This check is not strictly necessary, but it saves a chunk of
+    // time iterating through the text of the longer mention
+    for (int acronymPos = 0; acronymPos < acronym.length(); ++acronymPos) {
+      if (acronym.charAt(acronymPos) < 'A' || acronym.charAt(acronymPos) > 'Z') {
+        return false;
+      }
+    }
+    int acronymPos = 0;
+    for (int wordNum = 0; wordNum < longer.size(); ++wordNum) {
+      String word = longer.get(wordNum).get(TextAnnotation.class);
+      for (int charNum = 0; charNum < word.length(); ++charNum) {
+        if (word.charAt(charNum) >= 'A' && word.charAt(charNum) <= 'Z') {
+          // This triggers if there were more "acronym" characters in
+          // the longer mention than in the shorter mention
+          if (acronymPos >= acronym.length()) {
+            return false;
+          }
+          if (acronym.charAt(acronymPos) != word.charAt(charNum)) {
+            return false;
+          }
+          ++acronymPos;
+        }
+      }
+    }
+    if (acronymPos != acronym.length()) {
+      return false;
+    }
+    for (int i = 0; i < longer.size(); ++i) {
+      if (longer.get(i).get(TextAnnotation.class).contains(acronym)) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   public static boolean entityIsPredicateNominatives(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Mention m1, Mention m2) {
@@ -465,22 +523,42 @@ public class Rules {
     return false;
   }
 
+  public static final Pattern WHITESPACE_PATTERN = Pattern.compile(" +");
+
   public static boolean entityIsSpeaker(Document document,
       Mention mention, Mention ant, Dictionaries dict) {
-    if(document.speakerPairs.contains(new Pair<Integer, Integer>(mention.mentionID, ant.mentionID))
-        || document.speakerPairs.contains(new Pair<Integer, Integer>(ant.mentionID, mention.mentionID))) {
+    if(document.speakerPairs.contains(new Pair<Integer, Integer>(mention.mentionID, ant.mentionID))) {
       return true;
     }
 
-    if(mention.headWord.containsKey(SpeakerAnnotation.class)){
-      for(String s : mention.headWord.get(SpeakerAnnotation.class).split(" ")) {
-        if(ant.headString.equalsIgnoreCase(s)) return true;
-      }
+    if(mentionMatchesSpeakerAnnotation(mention, ant)) {
+      return true;
     }
-    if(ant.headWord.containsKey(SpeakerAnnotation.class)){
-      for(String s : ant.headWord.get(SpeakerAnnotation.class).split(" ")) {
-        if(mention.headString.equalsIgnoreCase(s)) return true;
+    if(mentionMatchesSpeakerAnnotation(ant, mention)) {
+      return true;
+    }
+    return false;
+  }
+
+  public static boolean mentionMatchesSpeakerAnnotation(Mention mention, Mention ant) {
+    if (mention.headWord == null) {
+      return false;
+    }
+    String speaker = mention.headWord.get(SpeakerAnnotation.class);
+
+    if (speaker == null) {
+      return false;
+    }
+    // We optimize a little here: if the name has no spaces, which is
+    // the common case, then it is unnecessarily expensive to call
+    // regex split
+    if (speaker.indexOf(" ") >= 0) {
+      // Perhaps we could optimize this, too, but that would be trickier
+      for (String s : WHITESPACE_PATTERN.split(speaker)) {
+        if (ant.headString.equalsIgnoreCase(s)) return true;
       }
+    } else {
+      if (ant.headString.equalsIgnoreCase(speaker)) return true;
     }
     return false;
   }
@@ -539,15 +617,17 @@ public class Rules {
   }
 
   public static boolean entitySameSpeaker(Document document, Mention m, Mention ant) {
-    if(m.headWord.containsKey(SpeakerAnnotation.class) == false ||
-        ant.headWord.containsKey(SpeakerAnnotation.class) == false){
+    String mSpeakerStr = m.headWord.get(SpeakerAnnotation.class);
+    if (mSpeakerStr == null) {
+      return false;
+    }
+    String antSpeakerStr = ant.headWord.get(SpeakerAnnotation.class);
+    if (antSpeakerStr == null) {
       return false;
     }
 
     int mSpeakerID;
     int antSpeakerID;
-    String mSpeakerStr = m.headWord.get(SpeakerAnnotation.class);
-    String antSpeakerStr = ant.headWord.get(SpeakerAnnotation.class);
     if (NumberMatchingRegex.isDecimalInteger(mSpeakerStr) && NumberMatchingRegex.isDecimalInteger(antSpeakerStr)) {
       try {
         mSpeakerID = Integer.parseInt(mSpeakerStr);
@@ -560,7 +640,7 @@ public class Rules {
     }
     int mSpeakerClusterID = document.allPredictedMentions.get(mSpeakerID).corefClusterID;
     int antSpeakerClusterID = document.allPredictedMentions.get(antSpeakerID).corefClusterID;
-    return (mSpeakerClusterID==antSpeakerClusterID);
+    return (mSpeakerClusterID == antSpeakerClusterID);
   }
 
   public static boolean entitySubjectObject(Mention m1, Mention m2) {

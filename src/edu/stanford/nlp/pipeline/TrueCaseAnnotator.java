@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import edu.stanford.nlp.ie.crf.CRFBiasedClassifier;
@@ -138,5 +140,15 @@ public class TrueCaseAnnotator implements Annotator {
       throw new RuntimeException(e);
     }
     return map;
+  }
+
+  @Override
+  public Set<Requirement> requires() {
+    return TOKENIZE_SSPLIT_POS_LEMMA;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TRUECASE_REQUIREMENT);
   }
 }

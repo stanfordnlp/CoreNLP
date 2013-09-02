@@ -9,6 +9,7 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.IntervalTree;
+import edu.stanford.nlp.util.TypesafeMap;
 
 import java.util.*;
 

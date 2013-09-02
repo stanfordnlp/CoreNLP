@@ -153,11 +153,8 @@ public class SemanticGraphFactory {
     // which meant they were ignored by the RTE system. Changed. (pado)
     // See also the SemanticGraph constructor.
 
-    if (gs.root().headWordNode() != null) {
-      roots.add(gs.root().headWordNode());
-    }
     //System.err.println(deps.toString());
-    return new SemanticGraph(deps, roots, docID, sentIndex, lemmatize, threadSafe);
+    return new SemanticGraph(deps, docID, sentIndex, lemmatize);
   }
 
 
@@ -277,7 +274,7 @@ public class SemanticGraphFactory {
       sg.addVertex(vertex);
     }
     for (SemanticGraphEdge edge : edges) {
-      sg.addEdge(edge.getSource(),edge.getTarget(), edge.getRelation(), edge.getWeight());
+      sg.addEdge(edge.getSource(),edge.getTarget(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
 
     sg.resetRoots();
@@ -338,7 +335,7 @@ public class SemanticGraphFactory {
       retSg.addVertex(node);
     }
     for (SemanticGraphEdge edge : edgesToAdd) {
-      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight());
+      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
 
     retSg.resetRoots();
@@ -355,7 +352,7 @@ public class SemanticGraphFactory {
     }
     retSg.setRoots(sg.getRoots());
     for (SemanticGraphEdge edge : sg.edgeIterable()) {
-      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight());
+      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
     return retSg;
   }
@@ -380,7 +377,7 @@ public class SemanticGraphFactory {
         sg.addVertex(currVertex);
       for (SemanticGraphEdge currEdge : currSg.edgeIterable())
         sg.addEdge(currEdge.getGovernor(), currEdge.getDependent(),
-                   currEdge.getRelation(), currEdge.getWeight());
+                   currEdge.getRelation(), currEdge.getWeight(), currEdge.isExtra());
     }
     sg.setRoots(newRoots);
     return sg;
@@ -415,7 +412,7 @@ public class SemanticGraphFactory {
         if (gov == null || dep == null) {
           throw new AssertionError("Counting problem (or broken edge)");
         }
-        newGraph.addEdge(gov, dep, edge.getRelation(), edge.getWeight());
+        newGraph.addEdge(gov, dep, edge.getRelation(), edge.getWeight(), edge.isExtra());
       }
       for (IndexedWord root : graph.getRoots()) {
         newRoots.add(newWords.get(root.index() + vertexOffset));

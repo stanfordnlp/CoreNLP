@@ -69,6 +69,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
   protected final List<TypedDependency> typedDependencies;
   protected final List<TypedDependency> allTypedDependencies;
 
+  protected final Filter<String> puncFilter;
+
   /**
    * Create a new GrammaticalStructure, analyzing the parse tree and
    * populate the GrammaticalStructure with as many labeled
@@ -90,6 +92,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // add head word and tag to phrase nodes
     root.percolateHeads(hf);
     // add dependencies, using heads
+    this.puncFilter = puncFilter;
     NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
     dependencies = root.dependencies(puncDepFilter, null);
@@ -215,6 +218,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   public GrammaticalStructure(List<TypedDependency> projectiveDependencies, TreeGraphNode root) {
     super(root);
+    this.puncFilter = Filters.acceptFilter();
     allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
     dependencies = new HashSet<Dependency<Label, Label, Object>>();
     for (TypedDependency tdep : projectiveDependencies) {
@@ -315,12 +319,21 @@ public abstract class GrammaticalStructure extends TreeGraph {
     }
 
     if (getExtra) {
-      TreeGraphNode rootTree = root();
-      getDep(rootTree, basicDep, f); // adds stuff to basicDep
+      getExtras(basicDep);
+      getTreeDeps(root(), basicDep, f); // adds stuff to basicDep
     }
     Collections.sort(basicDep);
 
     return basicDep;
+  }
+
+  /**
+   * Get extra dependencies that do not depend on the tree structure,
+   * but rather only depend on the existing dependency structure.  
+   * For example, the English xsubj dependency can be extracted that way.
+   */
+  protected void getExtras(List<TypedDependency> basicDep) {
+    // no extra dependencies by default
   }
 
 
@@ -331,11 +344,11 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param basicDep The list of dependencies which may be augmented
    * @param f Additional dependencies are added only if they pass this filter
    */
-  private static void getDep(TreeGraphNode t, List<TypedDependency> basicDep,
-                             Filter<TypedDependency> f) {
+  private static void getTreeDeps(TreeGraphNode t, List<TypedDependency> basicDep,
+                                  Filter<TypedDependency> f) {
     if (t.isPhrasal()) {          // don't do leaves of POS tags (chris changed this from numChildren > 0 in 2010)
-      Map<Class<? extends CoreAnnotation>, Set<TreeGraphNode>> depMap = getAllDependents(t);
-      for (Class<? extends CoreAnnotation> depName : depMap.keySet()) {
+      Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> depMap = getAllDependents(t);
+      for (Class<? extends GrammaticalRelationAnnotation> depName : depMap.keySet()) {
         for (TreeGraphNode depNode : depMap.get(depName)) {
           TreeGraphNode gov = t.headWordNode();
           TreeGraphNode dep = depNode.headWordNode();
@@ -355,7 +368,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
       // now recurse into children
       for (Tree kid : t.children()) {
-        getDep((TreeGraphNode) kid, basicDep, f);
+        getTreeDeps((TreeGraphNode) kid, basicDep, f);
       }
     }
   }
@@ -602,8 +615,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return The typed dependencies of this grammatical structure
    */
   public List<TypedDependency> typedDependencies(boolean includeExtras) {
-    List<TypedDependency> deps = includeExtras ? allTypedDependencies
-                                                       : typedDependencies;
+    List<TypedDependency> deps = new ArrayList<TypedDependency>(includeExtras ? allTypedDependencies : typedDependencies);
     correctDependencies(deps);
     return deps;
   }
@@ -654,8 +666,18 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return collapsed dependencies
    */
   public List<TypedDependency> typedDependenciesCollapsed(boolean includeExtras) {
-    List<TypedDependency> tdl = typedDependencies(includeExtras);
-    collapseDependencies(tdl, false);
+    List<TypedDependency> tdl = typedDependencies(false);
+    // Adds stuff to the basic dependencies.
+    // We don't want to simply call typedDependencies with
+    // "includeExtras" because the collapseDependencies method may add
+    // the extras in a way that makes more logical sense.  For
+    // example, the English dependencies, when CC processed, have more
+    // nsubjs than they originally do.  If we wait until that occurs
+    // to add xsubj for xcomp dependencies, we get better coverage.
+    if (includeExtras) {
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
+    }
+    collapseDependencies(tdl, false, includeExtras);
     return tdl;
   }
 
@@ -674,8 +696,18 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return collapsed dependencies with CC processed
    */
   public List<TypedDependency> typedDependenciesCCprocessed(boolean includeExtras) {
-    List<TypedDependency> tdl = typedDependencies(includeExtras);
-    collapseDependencies(tdl, true);
+    List<TypedDependency> tdl = typedDependencies(false);
+    // Adds stuff to the basic dependencies.
+    // We don't want to simply call typedDependencies with
+    // "includeExtras" because the collapseDependencies method may add
+    // the extras in a way that makes more logical sense.  For
+    // example, the English dependencies, when CC processed, have more
+    // nsubjs than they originally do.  If we wait until that occurs
+    // to add xsubj for xcomp dependencies, we get better coverage.
+    if (includeExtras) {
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
+    }
+    collapseDependencies(tdl, true, includeExtras);
     return tdl;
   }
 
@@ -705,7 +737,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param list A list of dependencies to process for possible collapsing
    * @param CCprocess apply CC process?
    */
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
     // do nothing as default operation
   }
 
@@ -779,8 +811,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param node The node to return dependents for
    * @return map of dependencies
    */
-  private static Map<Class<? extends CoreAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
-    Map<Class<? extends CoreAnnotation>, Set<TreeGraphNode>> newMap = Generics.newHashMap();
+  private static Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
+    Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> newMap = Generics.newHashMap();
 
     for (Class<?> o : node.label.keySet()) {
       if (GrammaticalRelationAnnotation.class.isAssignableFrom(o)) {
@@ -1218,8 +1250,11 @@ public abstract class GrammaticalStructure extends TreeGraph {
     parserOptions = parserOptions.trim();
     // Load parser by reflection, so that this class doesn't require parser
     // for runtime use
-    // LexicalizedParser lp = new LexicalizedParser(parserFile);
-    // TODO: is this still necessary?
+    // LexicalizedParser lp = LexicalizedParser.loadModel(parserFile);
+    // For example, the tregex package uses TreePrint, which uses
+    // GrammaticalStructure, which would then import the
+    // LexicalizedParser.  The tagger can read trees, which means it
+    // would depend on tregex and therefore depend on the parser.
     Function<Object, Tree> lp;
     try {
       Class<?>[] classes = new Class<?>[] { String.class, String[].class };
@@ -1506,7 +1541,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     boolean checkConnected = props.getProperty("checkConnected") != null;
     boolean portray = props.getProperty("portray") != null;
 
-    // make keepPunct default if conllx is turned on
+    // enforce keepPunct if conllx is turned on
     if(conllx) {
       keepPunct = true;
     }

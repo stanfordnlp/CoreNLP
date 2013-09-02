@@ -20,24 +20,34 @@ public class SemanticGraphEdge
 
   public static boolean printOnlyRelation = false; // a hack for displaying SemanticGraph in JGraph.  Should be redone better.
 
-  private GrammaticalRelation relation;
-  private double weight;
+  private final GrammaticalRelation relation;
+  private final double weight;
 
-  private IndexedWord source;
-  private IndexedWord target;
+  private final boolean isExtra;
 
+  private final IndexedWord source;
+  private final IndexedWord target;
+
+  /**
+   * @param source The source IndexedWord for this edge
+   * @param target The target IndexedWord for this edge
+   * @param relation The relation between the two words represented by this edge
+   * @param weight A score or weight to attach to the edge (not often used)
+   * @param isExtra Whether or not the dependency this edge represents was "extra"
+   */
   public SemanticGraphEdge(IndexedWord source,
                            IndexedWord target,
                            GrammaticalRelation relation,
-                           double weight) {
+                           double weight, boolean isExtra) {
     this.source = source;
     this.target = target;
     this.relation = relation;
-    setWeight(weight);
+    this.weight = weight;
+    this.isExtra = isExtra;
   }
 
   public SemanticGraphEdge(SemanticGraphEdge e) {
-    this(e.getSource(), e.getTarget(), e.getRelation(), e.getWeight());
+    this(e.getSource(), e.getTarget(), e.getRelation(), e.getWeight(), e.isExtra());
   }
 
   @Override
@@ -51,10 +61,6 @@ public class SemanticGraphEdge
 
   public GrammaticalRelation getRelation() {
     return relation;
-  }
-
-  public void setRelation(GrammaticalRelation relation) {
-    this.relation = relation;
   }
 
   public IndexedWord getSource() {
@@ -73,12 +79,12 @@ public class SemanticGraphEdge
     return getTarget();
   }
 
-  public void setWeight(double weight) {
-    this.weight = weight;
-  }
-
   public double getWeight() {
     return weight;
+  }
+
+  public boolean isExtra() {
+    return isExtra;
   }
 
   /**

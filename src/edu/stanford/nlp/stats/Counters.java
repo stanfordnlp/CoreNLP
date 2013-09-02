@@ -504,6 +504,17 @@ public class Counters {
   public static <E> void normalize(Counter<E> target) {
     multiplyInPlace(target, 1.0 / target.totalCount());
   }
+  
+  /**
+   * Normalizes the target counter in-place, so the sum of the resulting values
+   * equals 1.
+   *
+   * @param <E> Type of elements in TwoDimensionalCounter
+   * @param <F> Type of elements in TwoDimensionalCounter
+   */
+  public static <E, F> void normalize(TwoDimensionalCounter<E, F> target) {
+    Counters.divideInPlace(target, target.totalCount());
+  }
 
   public static <E> void logInPlace(Counter<E> target) {
     for (E key : target.keySet()) {
@@ -1368,7 +1379,7 @@ public class Counters {
    * Return the sum of squares (squared L2 norm).
    * 
    * @param c
-   * @return
+   * @return the L2 norm of the values in c
    */
   public static <E, C extends Counter<E>> double sumSquares(C c) {
     double lenSq = 0.0;
@@ -2113,7 +2124,7 @@ public class Counters {
    * 
    * @param counter
    * @param index
-   * @return
+   * @return the values corresponding to the index
    */
   public static <E> double[] asArray(Counter<E> counter, Index<E> index) {
     if (index.size() == 0) {
@@ -2129,6 +2140,21 @@ public class Counters {
     }
     return array;
   }
+  
+  /**
+   * Convert a counter to an array, the order of the array is random
+   */
+  public static <E> double[] asArray(Counter<E> counter) {
+    Set<E> keys = counter.keySet();
+    double[] array = new double[counter.size()];
+    int i = 0;
+    for (E key : keys) {
+      array[i] = counter.getCount(key);
+      i++;
+    }
+    return array;
+  }
+  
   
   /**
    * Creates a new TwoDimensionalCounter where all the counts are scaled by d.
@@ -2858,6 +2884,18 @@ public class Counters {
     while(!q.isEmpty() && num < topNum){
      num++;
      list.add(q.removeFirst());
+    }
+    return list;
+  }
+  
+  public static<E> List<Pair<E, Double>> topKeysWithCounts(Counter<E> t, int topNum){
+    List<Pair<E, Double>> list = new ArrayList<Pair<E, Double>>();
+    PriorityQueue<E> q = Counters.toPriorityQueue(t);
+    int num = 0;
+    while(!q.isEmpty() && num < topNum){
+     num++;
+     E k = q.removeFirst();
+     list.add(new Pair<E, Double>(k, t.getCount(k)));
     }
     return list;
   }

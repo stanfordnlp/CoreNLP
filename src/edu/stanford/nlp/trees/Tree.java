@@ -66,8 +66,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
   private static final long serialVersionUID = 5441849457648722744L;
 
-  private double score = Double.NaN;
-
   /**
    * A leaf node should have a zero-length array for its
    * children. For efficiency, classes can use this array as a
@@ -358,7 +356,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return The score
    */
   public double score() {
-    return score;
+    return Double.NaN;
   }
 
 
@@ -368,7 +366,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param score The score
    */
   public void setScore(double score) {
-    this.score = score;
+    throw new UnsupportedOperationException("You must use a tree type that implements scoring in order call setScore()");
   }
 
 
@@ -742,6 +740,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     printLocalTree(new PrintWriter(System.out, true));
   }
 
+  /**
+   * Only prints the local tree structure, does not recurse
+   */
   public void printLocalTree(PrintWriter pw) {
     pw.print("(" + label() + ' ');
     for (Tree kid : children()) {
@@ -1279,9 +1280,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param hf The HeadFinder to use to identify the head of constituents.
    *           The code assumes
    *           that it can use <code>headPreTerminal(hf)</code> to find a
-   *           tag and word to make a CyclicCoreLabel.
+   *           tag and word to make a CoreLabel.
    * @return Set of dependencies (each a <code>Dependency</code> between two
-   *           <code>CyclicCoreLabel</code>s, which each contain a tag(), word(),
+   *           <code>CoreLabel</code>s, which each contain a tag(), word(),
    *           and value(), the last two of which are identical).
    */
   public Set<Dependency<Label, Label, Object>> mapDependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf) {

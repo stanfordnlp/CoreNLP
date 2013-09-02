@@ -24,7 +24,7 @@ import static edu.stanford.nlp.time.EnglishTimeExpressionPatterns.PatternType.ST
 
 /**
  * This class contains rules/patterns for transforming
- *   time related English expressions into temporal representations
+ * time related English expressions into temporal representations.
  * Many of the rules are based on expressions from GUTime (2.00)
  *
  * @author Angel Chang
@@ -59,17 +59,17 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     return expressionExtractor;
   }
 
-  static final Pattern teUnit = Pattern.compile("(second|minute|hour|day|month|quarter|year|week|decade|centur(y|ie)|milleni(um|a))", Pattern.CASE_INSENSITIVE);
-  static final Pattern numTerm = Pattern.compile("(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundreth|thousandth|millionth|billionth|trillionth)", Pattern.CASE_INSENSITIVE);
-  static final Pattern numOrdTerm = Pattern.compile("(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundreth|thousandth|millionth|billionth|trillionth)", Pattern.CASE_INSENSITIVE);
-  static final Pattern numNoOrdTerm = Pattern.compile("(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion)", Pattern.CASE_INSENSITIVE);
-  static final Pattern teDay = Pattern.compile("(monday|tuesday|wednesday|thursday|friday|saturday|sunday)", Pattern.CASE_INSENSITIVE);
-  static final Pattern teDayAbbr = Pattern.compile("(mon\\.?|tue\\?|wed\\.?|thu\\.?|fri\\.?|sat\\.?|\\sun\\.?)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern teUnit = Pattern.compile("(second|minute|hour|day|month|quarter|year|week|decade|centur(y|ie)|millenn?i(um|a))", Pattern.CASE_INSENSITIVE);
+  private static final Pattern numTerm = Pattern.compile("(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundreth|thousandth|millionth|billionth|trillionth)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern numOrdTerm = Pattern.compile("(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundreth|thousandth|millionth|billionth|trillionth)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern numNoOrdTerm = Pattern.compile("(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion|trillion)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern teDay = Pattern.compile("(monday|tuesday|wednesday|thursday|friday|saturday|sunday)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern teDayAbbr = Pattern.compile("(mon\\.?|tue\\?|wed\\.?|thu\\.?|fri\\.?|sat\\.?|\\sun\\.?)", Pattern.CASE_INSENSITIVE);
 
-  static final Pattern teMonth = Pattern.compile("(january|february|march|april|may|june|july|august|september|october|november|december)", Pattern.CASE_INSENSITIVE);
-  static final Pattern teMonthAbbr  = Pattern.compile("(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)", Pattern.CASE_INSENSITIVE);
-  static final Pattern teOrdinalWords = Pattern.compile("(tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|twenty-first|twenty-second|twenty-third|twenty-fourth|twenty-fifth|twenty-sixth|twenty-seventh|twenty-eighth|twenty-ninth|thirtieth|thirty-first|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)", Pattern.CASE_INSENSITIVE);
-  static final Pattern teNumOrds = Pattern.compile("([23]?1-?st|11-?th|[23]?2-?nd|12-?th|[12]?3-?rd|13-?th|[12]?[4-90]-?th|30-?th)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern teMonth = Pattern.compile("(january|february|march|april|may|june|july|august|september|october|november|december)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern teMonthAbbr  = Pattern.compile("(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern teOrdinalWords = Pattern.compile("(tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|twenty-first|twenty-second|twenty-third|twenty-fourth|twenty-fifth|twenty-sixth|twenty-seventh|twenty-eighth|twenty-ninth|thirtieth|thirty-first|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)", Pattern.CASE_INSENSITIVE);
+  private static final Pattern teNumOrds = Pattern.compile("([23]?1-?st|11-?th|[23]?2-?nd|12-?th|[12]?3-?rd|13-?th|[12]?[4-90]-?th|30-?th)", Pattern.CASE_INSENSITIVE);
 
   private static class TimexTypeMatchNodePattern extends NodePattern<TimeExpression> {
       SUTime.TimexType type;
@@ -125,7 +125,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
 //    env.bind("$INT", TokenSequencePattern.compile(env, " [ { numcomptype:NUMBER } & !{ word:/.*\\.\\d+.*/} ]+ "));  // TODO: Only recognize integers
 //    env.bind("$INT1000TO3000", TokenSequencePattern.compile(env, "[ { numcomptype:NUMBER; numcompvalue>1000 } & { numcompvalue<3000 } & !{ word:/.*\\.\\d+.*/} ]+"));
 //    env.bind("$NUM_ORD", TokenSequencePattern.compile(env, "[ { numcomptype:ORDINAL } ]+"));
-    env.bind("$INT_TIMES", TokenSequencePattern.compile(env, " $INT /times/ | once | twice | trice "));
+    env.bind("$INT_TIMES", TokenSequencePattern.compile(env, " $INT /times/ | once | twice | thrice "));
     env.bind("$REL_MOD", TokenSequencePattern.compile(env, "/the/? /next|following|last|previous/ | /this/ /coming|past/? | /the/ /coming|past/"));
     env.bind("$FREQ_MOD", TokenSequencePattern.compile(env, "/each/ | /every/ $NUM_ORD | /every/ /other|alternate|alternating/? | /alternate|alternating/ "));
     env.bind("$EARLY_LATE_MOD", TokenSequencePattern.compile(env, "/late|early|mid-?/ | /the/? /beginning|start|dawn|middle|end/ /of/"));
@@ -508,7 +508,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
   }
 
 
-  private SUTime.Temporal makeSet(SUTime.Temporal t, String freq)
+  private static SUTime.Temporal makeSet(SUTime.Temporal t, String freq)
   {
     if (freq == null) return t;
     // Make into set
@@ -530,7 +530,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
         }
       }
     }
-    if (p != null & scale != 1) {
+    if (p != null && scale != 1) {
       p = p.multiplyBy(scale);
     }
     return new SUTime.PeriodicTemporalSet(t,p,quant,null/*"P1X"*/);
@@ -787,7 +787,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     // (week|month|quarter|year|decade|century|spring|summer|winter|fall|autumn)
     timePatternExtractor = new TimeExpressionExtractors.GenericTimePatternExtractor(
             TokenSequencePattern.compile(env, "( $EARLY_LATE_MOD )? (?: ($FREQ_MOD) | ($REL_MOD) ) " +
-                   "(/millisecond|second|minute|hour|weekend|week|fortnight|month|quarter|year|decade|century|millenium|spring|summer|winter|fall|autumn/)"),
+                   "(/millisecond|second|minute|hour|weekend|week|fortnight|month|quarter|year|decade|century|millenn?ium|spring|summer|winter|fall|autumn/)"),
             new Function<MatchResult, SUTime.Temporal>() {
               public SUTime.Temporal apply(MatchResult in) {
                 // group1: early/mod
@@ -939,7 +939,7 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     // each|every unit - covered somwhere
     //$string =~ s/($OT+(alternate|each|every($CT+\s+$OT+(other|$TENumOrds|$TEOrdinalWords))?)$CT+\s+$OT+(minute|hour|day|week|month|year)s?$CT+)/<TIMEX$tever TYPE=\"DATE\">$1<\/TIMEX$tever>/gosi;
  /*   timePatternExtractor = new TimeExpressionExtractors.GenericTimePatternExtractor(
-            TokenSequencePattern.compile(env, "($FREQ_MOD) (/(second|minute|hour|day|week|month|year|decade|century|millenium)s?/)"),
+            TokenSequencePattern.compile(env, "($FREQ_MOD) (/(second|minute|hour|day|week|month|year|decade|century|millenn?i(?:um|a))s?/)"),
             new Function<MatchResult, SUTime.Temporal>() {
               public SUTime.Temporal apply(MatchResult in) {
                 SUTime.Temporal t = lookupTemporal(in.group(2));
@@ -1520,8 +1520,10 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     wordToTemporal.put("year", SUTime.YEAR);
     wordToTemporal.put("decade", SUTime.DECADE);
     wordToTemporal.put("century", SUTime.CENTURY);
-    wordToTemporal.put("millenium", SUTime.MILLENIUM);
-    wordToTemporal.put("millenia", SUTime.MILLENIUM);
+    wordToTemporal.put("millennium", SUTime.MILLENNIUM);
+    wordToTemporal.put("millennia", SUTime.MILLENNIUM);
+    wordToTemporal.put("millenium", SUTime.MILLENNIUM); // spelling error but common
+    wordToTemporal.put("millenia", SUTime.MILLENNIUM);
 
     // Vague times
     wordToTemporal.put("past", SUTime.TIME_PAST);
@@ -1572,10 +1574,14 @@ public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
     abbToTimeUnit.put("century",  SUTime.CENTURY);
     abbToTimeUnit.put("centuries",  SUTime.CENTURY);
     abbToTimeUnit.put("centurie",  SUTime.CENTURY);
-    abbToTimeUnit.put("millenias",  SUTime.MILLENIUM);
-    abbToTimeUnit.put("millenia", SUTime.MILLENIUM);
-    abbToTimeUnit.put("milleniums", SUTime.MILLENIUM);
-    abbToTimeUnit.put("millenium", SUTime.MILLENIUM);
+    abbToTimeUnit.put("millennias",  SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millennia", SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millenniums", SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millennium", SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millenias",  SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millenia", SUTime.MILLENNIUM);
+    abbToTimeUnit.put("milleniums", SUTime.MILLENNIUM);
+    abbToTimeUnit.put("millenium", SUTime.MILLENNIUM);
   }
 
   protected SUTime.Temporal addSet(String expression, SUTime.Temporal temporal)

@@ -727,7 +727,8 @@ public class GrammarCompactionTester {
     Treebank testTreebank = op.tlpParams.testMemoryTreebank();
     testTreebank.loadPath(path, new NumberRangeFileFilter(testLow, testHigh, true));
     System.out.println("Currently " + new Date());
-    lp.parserQuery().testOnTreebank(testTreebank);
+    EvaluateTreebank evaluator = new EvaluateTreebank(lp);
+    evaluator.testOnTreebank(testTreebank, lp.parserQuery());
     System.out.println("Currently " + new Date());
 
 

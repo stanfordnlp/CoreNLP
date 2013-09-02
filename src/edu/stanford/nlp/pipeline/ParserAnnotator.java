@@ -3,10 +3,10 @@ package edu.stanford.nlp.pipeline;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CyclicCoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParserQuery;
@@ -27,11 +27,8 @@ import edu.stanford.nlp.util.StringUtils;
  * as a List&lt;CoreLabel&gt; in the TokensAnnotation under each
  * particular CoreMap in the SentencesAnnotation.
  * If the words have POS tags, they will be used.
- *
- * If the input does not already have sentences, it adds parse information
- * to the Annotation under the key
- * {@code DeprecatedAnnotations.ParsePLAnnotation.class} as a {@code List<Tree>}.
- * Otherwise, they are added to each sentence's CoreMap (get with
+ * <br>
+ * Parse trees are added to each sentence's CoreMap (get with
  * {@code CoreAnnotations.SentencesAnnotation}) under
  * {@code CoreAnnotations.TreeAnnotation}).
  *
@@ -96,14 +93,12 @@ public class ParserAnnotator implements Annotator {
                                          "Parser annotator " +
                                          annotatorName);
     }
-    this.VERBOSE =
-      PropertiesUtils.getBool(props, annotatorName + ".debug", false);
+    this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 
-    String[] flags =
-      convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
+    // will use DEFAULT_FLAGS if the flags are not set in the properties
+    String[] flags = convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
     this.parser = loadModel(model, VERBOSE, flags);
-    this.maxSentenceLength =
-      PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
+    this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
 
     String treeMapClass = props.getProperty(annotatorName + ".treemap");
     if (treeMapClass == null) {
@@ -112,8 +107,7 @@ public class ParserAnnotator implements Annotator {
       this.treeMap = ReflectionLoading.loadByReflection(treeMapClass, props);
     }
 
-    this.maxParseTime = 
-      PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
+    this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
@@ -259,10 +253,10 @@ public class ParserAnnotator implements Annotator {
 
   @SuppressWarnings("unused")
   private Tree doOneSentence(List<? extends CoreLabel> words) {
-    // convert to CyclicCoreLabels because the parser hates CoreLabels
-    List<CyclicCoreLabel> newWords = new ArrayList<CyclicCoreLabel>();
+    // TODO: might not need to create new tokens
+    List<CoreLabel> newWords = new ArrayList<CoreLabel>();
     for (CoreLabel fl : words) {
-      CyclicCoreLabel ml = new CyclicCoreLabel();
+      CoreLabel ml = new CoreLabel();
       ml.setWord(fl.word());
       ml.setValue(fl.word());
       newWords.add(ml);
@@ -275,4 +269,14 @@ public class ParserAnnotator implements Annotator {
     }
   }
 
+
+  @Override
+  public Set<Requirement> requires() {
+    return TOKENIZE_AND_SSPLIT;
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return PARSE_AND_TAG;
+  }
 }

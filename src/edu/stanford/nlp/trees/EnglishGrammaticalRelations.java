@@ -622,7 +622,8 @@ public class EnglishGrammaticalRelations {
           "VP < (SBAR=target < (S !$- (NN < order) < (VP < TO))) !> (VP < (VB|AUX < be)) ",
           "VP < (S=target !$- (NN < order) <: NP) > VP",
           // stop eating
-          "VP < (S=target !< NP < (VP < VBG))"
+          // note that we eliminate parentheticals and clauses that could match a partmod
+          "(VP < (S=target < (VP < VBG ) !< NP !$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)]) !$-- /^:$/))",
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -696,15 +697,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation REFERENT =
     new GrammaticalRelation(Language.English, "ref", "referent",
-        ReferentGRAnnotation.class, DEPENDENT, "NP", tregexCompiler,
-        new String[] {
-          "NP $+ (SBAR <+(SBAR) (WHNP|WHPP <+(@WHNP|WHPP|NP|PP) /^(?:WDT|WP|WP\\$)$/=target)) > NP",
-          "NP $+ (/^(?:,|PP|PRN)$/ $+ (SBAR < (WHNP|WHPP <+(@WHNP|WHPP|NP|PP) /^(?:WDT|WP|WP\\$)$/=target))) > NP",
-          "NP $+ (/^(?:,|PP|PRN)$/ $+ (/^(?:\"|''|,)$/ $+ (SBAR < (WHNP|WHPP <+(@WHNP|WHPP|NP|PP) /^(?:WDT|WP|WP\\$)$/=target)))) > NP",
-          // to find referent for "the man, who I trust, ..." as well as referent in structure such as NP PP SBAR
-          // Previously !< /^WP\$/ was added to prevent something like "whose wife" to get a referent between the antecedent and "wife"
-          // which is the head of the WHNP, but now we try to trace down to head Wh-word in NP
-        });
+        ReferentGRAnnotation.class, DEPENDENT);
   public static class ReferentGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
@@ -927,7 +920,15 @@ public class EnglishGrammaticalRelations {
    * The "noun compound modifier" grammatical relation.  A noun compound
    * modifier of an NP is any noun that serves to modify the head noun.
    * Note that this has all nouns modify the rightmost a la Penn headship
-   * rules.  There is no intelligent noun compound analysis. <p>
+   * rules.  There is no intelligent noun compound analysis.
+   * <p/>
+   * We eliminate nouns that are detected as part of a POS, since that
+   * will turn into the dependencies denoting possession instead.
+   * Note we have to include (VBZ &lt; /^\'s$/) as part of the POS
+   * elimination, since quite a lot of text such as 
+   * "yesterday's widely published sequester" was misannotated as a
+   * VBZ instead of a POS.  TODO: remove that if a revised PTB is ever
+   * released.
    * <p/>
    * Example: <br/>
    * "Oil price futures" &rarr;
@@ -938,8 +939,8 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "nn", "nn modifier",
         NounCompoundModifierGRAnnotation.class, MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML|ADVP|ADJP)(?:-TMP|-ADV)?", tregexCompiler,
         new String[] {
-          "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW=target $++ NN|NNS|NNP|NNPS|FW|CD !<<- POS !$- /^,$/ )",
-          "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < JJ|JJR|JJS=sister < (NP|NML|NN|NNS|NNP|NNPS|FW=target !<<- POS $+ =sister) <# NN|NNS|NNP|NNPS !<<- POS",
+          "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW=target $++ NN|NNS|NNP|NNPS|FW|CD !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ )",
+          "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < JJ|JJR|JJS=sister < (NP|NML|NN|NNS|NNP|NNPS|FW=target !<<- POS !<<- (VBZ < /^\'s$/) $+ =sister) <# NN|NNS|NNP|NNPS !<<- POS !<<- (VBZ < /^\'s$/) ",
           "ADJP|ADVP < (FW [ $- FW=target | $- (IN=target < in|In) ] )",  // in vitro, in vivo, etc., in Genia
         });
   public static class NounCompoundModifierGRAnnotation extends GrammaticalRelationAnnotation { }
@@ -1013,7 +1014,7 @@ public class EnglishGrammaticalRelations {
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (/^,$/ $+ (VP=target <, VBG|VBN))",
           // to get "John, knowing ..., announced "
           "S|SINV < (S=target < (VP <, VBG|VBN) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
-          "VP < (@S=target < (VP <, VBG|VBN) $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) )",
+          "(VP < (@S=target < (VP <1 VBG|VBN )$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
         });
@@ -1417,24 +1418,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation CONTROLLING_SUBJECT =
     new GrammaticalRelation(Language.English, "xsubj", "controlling subject",
-        ControllingSubjectGRAnnotation.class, SEMANTIC_DEPENDENT, "VP", tregexCompiler,
-        // cdm Nov 2009: I added/will add in a clause to do adjectives with complements like 'able', 'certain'
-        // These vectors are able to transcribe
-        // Nuclei were able to be fused
-        // The cells begin to fuse pairwise
-        // Ths gene seems to be regulated in a similar manner
-        new String[] {
-          "VP < TO > (S !$- NP !< NP !>> (VP < (VB|AUX < be)) >+(VP) (VP $-- NP=target))",
-          "VP < (" + stopKeepRegex + " $+ (VP=target < VBG))"
-          // An infinitive VP under (an S which isn't the right sister of a NP and doesn't contain an NP
-          // The next bit is probably to rule out predicative S with copula like:
-          // The idea would be to administer to patients growth-controlling proteins
-          // but having a >> is clearly too broad, and will rule out adjective cases which sometimes
-          // wrongly have the S as complement of the VP not the ADJP:
-          // 0044: (VP be (ADJP possible) (S to win))
-          // 0071: (VP be (ADJP interesting) (S to see))
-          // 0108: (VP be (ADJP easy) (S to conclude))
-        });
+        ControllingSubjectGRAnnotation.class, SEMANTIC_DEPENDENT);
   public static class ControllingSubjectGRAnnotation extends GrammaticalRelationAnnotation { }
 
 

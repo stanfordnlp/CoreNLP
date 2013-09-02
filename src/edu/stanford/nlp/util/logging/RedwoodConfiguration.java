@@ -7,6 +7,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A class which encapsulates configuration settings for Redwood.
@@ -306,6 +308,8 @@ public class RedwoodConfiguration {
    * Configure Redwood (from scratch) based on a Properties file.
    * Currently recognized properties are:
    * <ul>
+   *   <li>log.method = {default, redwood, java.util.logging}: All logging output will go to this adapter; "default" means it will go to the method specified by the function call</li>
+   *   <li>log.method.name = [string]: A name for the java.util.logging logger</li>
    *   <li>log.toStderr = {true,false}: Print to stderr rather than stdout</li>
    *   <li>log.file = [filename]: Dump the output of the log to the given filename</li>
    *   <li>log.collapse = {exact,approximate,none}: Collapse repeated records (based on either exact or approximate equality)</li>
@@ -316,8 +320,9 @@ public class RedwoodConfiguration {
    *   <li>log.captureStreams = {true,false}: Capture stdout and stderr and route them through Redwood</li>
    *   <li>log.captureStdout = {true,false}: Capture stdout and route it through Redwood</li>
    *   <li>log.captureStderr = {true,false}: Capture stdout and route it through Redwood</li>
-   *   <li>log.hideChannels = [channels]: Hide these channels (comma-separated list)</li>
-   *   <li>log.showOnlyChannels = [channels]: Show only these channels (comma-separated list)</li>
+   *   <li>log.channels.hide = [channels]: Hide these channels (comma-separated list)</li>
+   *   <li>log.channels.show = [channels]: Show only these channels (comma-separated list)</li>
+   *   <li>log.channels.width = [int]: If nonzero, the channels for each logging statement will be printed to their left</li>
    * </ul>
    * @param props The properties to use in configuration
    * @return A new Redwood Configuration based on the passed properties, ignoring any existing custom configuration
@@ -345,7 +350,6 @@ public class RedwoodConfiguration {
       throw new IllegalArgumentException("Unknown collapse type: " + collapseSetting);
     }
     //--Console
-    config.handler(repeat == null ? visibility : repeat, console);
     //((track color))
     console.trackColor = Color.valueOf(get(props,"log.console.trackColor","NONE",used).toUpperCase());
     console.trackStyle = Style.valueOf(get(props,"log.console.trackStyle","NONE",used).toUpperCase());
@@ -393,6 +397,25 @@ public class RedwoodConfiguration {
       }
       //((random colors))
       file.setColorChannels(Boolean.parseBoolean(get(props,"log.file.colorChannels","false",used)));
+    }
+
+    //--Method
+    String method = get(props,"log.method","default",used).toLowerCase();
+    if(method.equalsIgnoreCase("redwood")){
+      edu.stanford.nlp.util.logging.JavaUtilLoggingAdaptor.adapt();
+      config = config.handler(repeat == null ? visibility : repeat, console);
+    } else if(method.equalsIgnoreCase("java.util.logging")){
+      edu.stanford.nlp.util.logging.JavaUtilLoggingAdaptor.adapt();
+      String loggerName = get(props,"log.method.name","``error``",used);
+      if (loggerName.equals("``error``")) {
+        throw new IllegalArgumentException("Logger name (log.method.name) required to adapt with java.util.logging");
+      }
+      RedirectOutputHandler<Logger, Level> adapter = RedirectOutputHandler.fromJavaUtilLogging(Logger.getLogger(loggerName));
+      config = config.handler(repeat == null ? visibility : repeat, adapter);
+    } else if (method.equalsIgnoreCase("default")) {
+      config = config.handler(repeat == null ? visibility : repeat, console);
+    } else {
+      throw new IllegalArgumentException("Unknown value for log.method");
     }
     
     //--System Streams

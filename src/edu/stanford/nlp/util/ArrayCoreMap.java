@@ -7,6 +7,7 @@ import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -98,17 +99,13 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @SuppressWarnings("unchecked")
   public ArrayCoreMap(CoreMap other) {
-    Set<Class<? extends Key<CoreMap, ?>>> otherKeys = other.keySet();
+    Set<Class<?>> otherKeys = other.keySet();
 
     size = otherKeys.size();
     keys = new Class[size];
     values = new Object[size];
 
     int i = 0;
-    // horatio: You should be able to specify
-    //  for (Class<? extends Key<CoreMap, ?>> ...
-    // That throws a compiler error for some reason, but the current
-    // code does not throw either warnings or errors.  Very strange.
     for (Class key : otherKeys) {
       this.keys[i] = key;
       this.values[i] = other.get(key);
@@ -190,12 +187,12 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * {@inheritDoc}
    */
   @Override
-  public Set<Class<? extends Key<CoreMap, ?>>> keySet() {
+  public Set<Class<?>> keySet() {
 
-    return new AbstractSet<Class<? extends Key<CoreMap, ?>>>() {
+    return new AbstractSet<Class<?>>() {
       @Override
-      public Iterator<Class<? extends Key<CoreMap, ?>>> iterator() {
-        return new Iterator<Class<? extends Key<CoreMap, ?>>>() {
+      public Iterator<Class<?>> iterator() {
+        return new Iterator<Class<?>>() {
           private int i; // = 0;
 
           @Override
@@ -204,7 +201,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
           }
 
           @Override
-          public Class<? extends Key<CoreMap, ?>> next() {
+          public Class<?> next() {
             try {
               return keys[i++];
             } catch (ArrayIndexOutOfBoundsException aioobe) {
@@ -300,8 +297,31 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     return size;
   }
 
+  /**
+   * Keeps track of which ArrayCoreMaps have had toString called on
+   * them.  We do not want to loop forever when there are cycles in
+   * the annotation graph.  This is kept on a per-thread basis so that
+   * each thread where toString gets called can keep track of its own
+   * state.  When a call to toString is about to return, this is reset
+   * to null for that particular thread.
+   */
+  private static ThreadLocal<IdentityHashSet<CoreMap>> toStringCalled = new ThreadLocal<IdentityHashSet<CoreMap>>();
+
   @Override
   public String toString() {
+    IdentityHashSet<CoreMap> calledSet = toStringCalled.get();
+    boolean createdCalledSet = (calledSet == null);
+    if (createdCalledSet) {
+      calledSet = new IdentityHashSet<CoreMap>();
+      toStringCalled.set(calledSet);
+    }
+
+    if (calledSet.contains(this)) {
+      return "[...]";
+    }
+
+    calledSet.add(this);
+
     StringBuilder s = new StringBuilder("[");
     for (int i = 0; i < size; i++) {
       s.append(keys[i].getSimpleName());
@@ -312,6 +332,15 @@ public class ArrayCoreMap implements CoreMap, Serializable {
       }
     }
     s.append(']');
+
+    if (createdCalledSet) {
+      toStringCalled.set(null);
+    } else {
+      // Remove the object from the already called set so that
+      // potential later calls in this object graph have something
+      // more description than [...]
+      calledSet.remove(this);
+    }
     return s.toString();
   }
 
@@ -360,6 +389,16 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     return s.toString();
   }
 
+  /**
+   * Keeps track of which pairs of ArrayCoreMaps have had equals
+   * called on them.  We do not want to loop forever when there are
+   * cycles in the annotation graph.  This is kept on a per-thread
+   * basis so that each thread where equals gets called can keep
+   * track of its own state.  When a call to toString is about to
+   * return, this is reset to null for that particular thread.
+   */
+  private static ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>> equalsCalled = new ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>>();
+
 
   /**
    * Two CoreMaps are equal iff all keys and values are .equal.
@@ -380,6 +419,9 @@ public class ArrayCoreMap implements CoreMap, Serializable {
       // specialized equals for ArrayCoreMap
       return equals((ArrayCoreMap)obj);
     }
+
+    // TODO: make the general equality work in the situation of loops
+    // in the object graph
 
     // general equality
     CoreMap other = (CoreMap)obj;
@@ -408,11 +450,33 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     return true;
   }
 
+
   private boolean equals(ArrayCoreMap other) {
-    if (this.size != other.size) {
-      return false;
+    TwoDimensionalMap<CoreMap, CoreMap, Boolean> calledMap = equalsCalled.get();
+    boolean createdCalledMap = (calledMap == null);
+    if (createdCalledMap) {
+      calledMap = TwoDimensionalMap.identityHashMap();
+      equalsCalled.set(calledMap);
     }
 
+    // Note that for the purposes of recursion, we assume the two maps
+    // are equals.  The two maps will therefore be equal if they
+    // encounter each other again during the recursion unless there is
+    // some other key that causes the equality to fail.
+    // We do not need to later put false, as the entire call to equals
+    // will unwind with false if any one equality check returns false.
+    // TODO: since we only ever keep "true", we would rather use a
+    // TwoDimensionalSet, but no such thing exists
+    if (calledMap.contains(this, other)) {
+      return true;
+    }
+    boolean result = true;
+    calledMap.put(this, other, true);
+    calledMap.put(other, this, true);
+    
+    if (this.size != other.size) {
+      result = false;
+    } else {
     for (int i = 0; i < this.size; i++) {
       // test if other contains this key,value pair
       boolean matched = false;
@@ -433,12 +497,28 @@ public class ArrayCoreMap implements CoreMap, Serializable {
       }
 
       if (!matched) {
-        return false;
+        result = false;
+        break;
       }
     }
+    }
 
-    return true;
+    if (createdCalledMap) {
+      equalsCalled.set(null);
+    }
+    return result;
   }
+
+  /**
+   * Keeps track of which ArrayCoreMaps have had hashCode called on
+   * them.  We do not want to loop forever when there are cycles in
+   * the annotation graph.  This is kept on a per-thread basis so that
+   * each thread where hashCode gets called can keep track of its own
+   * state.  When a call to toString is about to return, this is reset
+   * to null for that particular thread.
+   */
+  private static ThreadLocal<IdentityHashSet<CoreMap>> hashCodeCalled = new ThreadLocal<IdentityHashSet<CoreMap>>();
+
 
   /**
    * Returns a composite hashCode over all the keys and values currently
@@ -447,11 +527,34 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @Override
   public int hashCode() {
+    IdentityHashSet<CoreMap> calledSet = hashCodeCalled.get();
+    boolean createdCalledSet = (calledSet == null);
+    if (createdCalledSet) {
+      calledSet = new IdentityHashSet<CoreMap>();
+      hashCodeCalled.set(calledSet);
+    }
+
+    if (calledSet.contains(this)) {
+      return 0;
+    }
+
+    calledSet.add(this);
+
     int keysCode = 0;
     int valuesCode = 0;
     for (int i = 0; i < size; i++) {
       keysCode += keys[i].hashCode();
       valuesCode += (values[i] != null ? values[i].hashCode() : 0);
+    }
+
+    if (createdCalledSet) {
+      hashCodeCalled.set(null);
+    } else {
+      // Remove the object after processing is complete so that if
+      // there are multiple instances of this coremap in the overall
+      // object graph, they each have their hashcode calculated.
+      // TODO: can we cache this for later?
+      calledSet.remove(this);
     }
     return keysCode * 37 + valuesCode;
   }
@@ -473,6 +576,9 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     compact();
     out.defaultWriteObject();
   }
+
+  // TODO: make prettyLog work in the situation of loops
+  // in the object graph
 
   /**
    * {@inheritDoc}

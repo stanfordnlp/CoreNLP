@@ -3,6 +3,7 @@ package edu.stanford.nlp.pipeline;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
@@ -279,5 +280,16 @@ public class CleanXmlAnnotator implements Annotator{
     }
 
     return newTokens;
+  }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(CLEAN_XML_REQUIREMENT);
   }
 }
