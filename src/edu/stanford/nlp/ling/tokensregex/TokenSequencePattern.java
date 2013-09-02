@@ -6,8 +6,7 @@ import edu.stanford.nlp.util.*;
 import java.util.*;
 
 /**
- * TokenSequencePattern provides regular expressions for sequences of tokens
- * (represented as the more general {@code CoreMap}).
+ * Token Sequence Pattern for regular expressions for sequences over tokens (as the more general <code>CoreMap</code>).
  * Sequences over tokens can be matched like strings.
  * <p>
  * To use
@@ -55,15 +54,17 @@ import java.util.*;
  * <br>Possible <code>TOKEN_EXPR</code>:
  * <ul>
  * <li> All specified token attributes match:
- * <br> For Strings:
+ * <br/> For Strings:
  *     <code> { lemma:/.../; tag:"NNP" } </code> = attributes that need to all match
- * <br> NOTE: <code>/.../</code> is used for regular expressions,
+ * <br/> See {@link edu.stanford.nlp.ling.AnnotationLookup AnnotationLookup} for a list of predefined token attribute names.
+ * <br/> Additional attributes can be bound using the environment (see below).
+ * <br/> NOTE: <code>/.../</code> used for regular expressions,
  *            <code>"..."</code> for exact string matches
- * <br> For Numbers:
+ * <br/> For Numbers:
  *      <code>{ word>=2 }</code>
- * <br> NOTE: Relation can be <code>">=", "<=", ">", "<",</code> or <code>"=="</code>
- * <br> Others:
- *      <code>{ word::IS_NUM } , { word::IS_NIL } </code>,
+ * <br/> NOTE: Relation can be <code>">=", "<=", ">", "<",</code> or <code>"=="</code>
+ * <br/> Others:
+ *      <code>{ word::IS_NUM } , { word::IS_NIL } </code> or
  *      <code>{ word::NOT_EXISTS }, { word::NOT_NIL } </code> or <code> { word::EXISTS } </code>
  * </li>
  * <li>Short hand for just word/text match:
@@ -241,6 +242,11 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
     return this.pattern();
   }
 
+  /**
+   * Create a multi pattern matcher for matching across multiple TokensRegex patterns
+   * @param patterns Collection of input patterns
+   * @return a MultiPatternMatcher
+   */
   public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(Collection<TokenSequencePattern> patterns) {
     return new MultiPatternMatcher<CoreMap>(
             new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
@@ -248,6 +254,11 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
             ), patterns);
   }
 
+  /**
+   * Create a multi pattern matcher for matching across multiple TokensRegex patterns
+   * @param patterns input patterns
+   * @return a MultiPatternMatcher
+   */
   public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(TokenSequencePattern... patterns) {
     return new MultiPatternMatcher<CoreMap>(
             new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
