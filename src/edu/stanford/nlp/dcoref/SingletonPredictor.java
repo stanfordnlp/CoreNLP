@@ -34,10 +34,10 @@ import edu.stanford.nlp.util.StringUtils;
  *     dcoref.replicate.conll = true
  *
  *     # Path to the directory containing the CoNLL training files.
- *     dcoref.conll2011 = /u/nlp/scr/data/conll-2012/v4/data/train/data/english/annotations/
+ *     dcoref.conll2011 = /path/to/conll-2012/v4/data/train/data/english/annotations/
  *
  *     # Output file where the serialized model is saved.
- *     singleton.predictor.output = /user/recasens/predictor.output2
+ *     singleton.predictor.output = /path/to/predictor.output
  *
  * @author Marta Recasens, Marie-Catherine de Marneffe
  */
