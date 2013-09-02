@@ -8,12 +8,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
-//import edu.stanford.nlp.dcoref.CoNLLMentionExtractor;
-//import edu.stanford.nlp.dcoref.CorefCluster;
-//import edu.stanford.nlp.dcoref.Dictionaries;
-//import edu.stanford.nlp.dcoref.Mention;
-//import edu.stanford.nlp.dcoref.MentionExtractor;
-//import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.classify.Dataset;
 import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.classify.LogisticClassifier;
@@ -31,15 +25,26 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * Train the singleton predictor using a logistic regression classifier as
  * described in Recasens, de Marneffe and Potts, NAACL 2013
- * 0 = Singleton.
- * 1 = Coreferent.
+ * Label 0 = Singleton mention.
+ * Label 1 = Coreferent mention.
+ *
+ * This is an example of the properties file for this class:
+ *
+ *     # This is set to true so that gold POS, gold parses and gold NEs are used.
+ *     dcoref.replicate.conll = true
+ *
+ *     # Path to the directory containing the CoNLL training files.
+ *     dcoref.conll2011 = /u/nlp/scr/data/conll-2012/v4/data/train/data/english/annotations/
+ *
+ *     # Output file where the serialized model is saved.
+ *     singleton.predictor.output = /user/recasens/predictor.output2
  *
  * @author Marta Recasens, Marie-Catherine de Marneffe
  */
 public class SingletonPredictor {
 
   /**
-   *  Set index for each token and sentence in the document.
+   * Set index for each token and sentence in the document.
    * @param doc
    */
   public static void setTokenIndices(Document doc){
@@ -54,10 +59,10 @@ public class SingletonPredictor {
   /**
    * Generate the training features from the CoNLL input file.
    * @param Properties
-   * @return Dataset of features
+   * @return Dataset of feature vectors
    * @throws Exception
    */
-  public GeneralDataset<String, String> generateFeatures(Properties props) throws Exception {
+  public GeneralDataset<String, String> generateFeatureVectors(Properties props) throws Exception {
 
     GeneralDataset<String, String> dataset = new Dataset<String, String>();    
     
@@ -80,8 +85,9 @@ public class SingletonPredictor {
           IndexedWord head = mention.dependency.
               getNodeByIndexSafe(mention.headWord.index());
           if(head == null) continue;          
+          ArrayList<String> feats = mention.getSingletonFeatures(dict);
           dataset.add(new BasicDatum<String, String>(
-              mention.getSingletonFeatures(dict), "1"));
+              feats, "1"));
         }       
       }
 
@@ -105,6 +111,7 @@ public class SingletonPredictor {
       }
     }
     
+    dataset.summaryStatistics();
     return dataset;
   }
   
@@ -117,6 +124,7 @@ public class SingletonPredictor {
     LogisticClassifierFactory<String, String> lcf =
         new LogisticClassifierFactory<String, String>();
     LogisticClassifier<String, String> classifier = lcf.trainClassifier(pDataset);
+
     return classifier;
   }
   
@@ -151,7 +159,7 @@ public class SingletonPredictor {
     
     SingletonPredictor predictor = new SingletonPredictor();
     
-    GeneralDataset<String, String> data = predictor.generateFeatures(props);
+    GeneralDataset<String, String> data = predictor.generateFeatureVectors(props);
     LogisticClassifier<String, String> classifier = predictor.train(data);
     predictor.saveToSerialized(classifier,
                                props.getProperty("singleton.predictor.output"));      
