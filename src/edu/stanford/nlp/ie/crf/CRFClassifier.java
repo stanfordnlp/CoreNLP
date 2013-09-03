@@ -711,16 +711,16 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * This routine builds the <code>labelIndices</code> which give the
+   * This routine builds the {@code labelIndices} which give the
    * empirically legal label sequences (of length (order) at most
-   * <code>windowSize</code>) and the <code>classIndex</code>, which indexes
+   * {@code windowSize}) and the {@code classIndex}, which indexes
    * known answer classes.
    *
    * @param ob The training data: Read from an ObjectBank, each item in it is a
    *          {@code List<CoreLabel>}.
    */
   protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob) {
-    boolean useFeatureCountThresh = flags.featureCountThresh > 1 ? true: false;
+    boolean useFeatureCountThresh = flags.featureCountThresh > 1;
 
     Set<String>[] featureIndices = new HashSet[windowSize];
     Map<String, Integer>[] featureCountIndices = null;
@@ -871,8 +871,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       featureIndexToTemplateIndex = new HashMap<Integer, Integer>();
     }
 
-    Matcher m  = null;
-    String groupSuffix = null;
     for (int i = 0; i < windowSize; i++) {
       Index<Integer> featureIndexMap = new HashIndex<Integer>();
 
@@ -884,8 +882,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
         // grouping features by template
         if (flags.groupByFeatureTemplate) {
-          m = suffixPatt.matcher(str);
-          groupSuffix = "NoTemplate";
+          Matcher m = suffixPatt.matcher(str);
+          String groupSuffix = "NoTemplate";
           if (m.matches()) {
             groupSuffix = m.group(1);
           }
@@ -932,8 +930,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   protected static Index<CRFLabel> allLabels(int window, Index<String> classIndex) {
     int[] label = new int[window];
-    // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.)
-    // 4.12.5
+    // cdm 2005: array initialization isn't necessary: JLS (3rd ed.) 4.12.5
     // Arrays.fill(label, 0);
     int numClasses = classIndex.size();
     Index<CRFLabel> labelIndex = new HashIndex<CRFLabel>();
@@ -992,95 +989,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       windowCliques.removeAll(done);
       done.addAll(windowCliques);
       double[] featureValArr = null;
-      if (flags.useEmbedding && i == 0) {// only activated for node features
-        List<double[]> embeddingList = new ArrayList<double[]>();
-        int concatEmbeddingLen = 0;
-        String currentWord = null;
-        for (int currLoc = loc-2; currLoc <= loc+2; currLoc++) {
-          double[] embedding = null;
-          if (currLoc >=0 && currLoc < info.size()) {
-            currentWord = info.get(loc).get(CoreAnnotations.TextAnnotation.class);
-            String word = currentWord.toLowerCase();
-            word = word.replaceAll("(-)?\\d+(\\.\\d*)?", "0");
-            if (embeddings.containsKey(word))
-              embedding = embeddings.get(word);
-            else
-              embedding = embeddings.get("UNKNOWN");
-          } else {
-            embedding = embeddings.get("PADDING");
-          }
-
-          for (int e = 0; e < embedding.length; e++) {
-            featuresC.add("EMBEDDING-(" + (currLoc-loc) + ")-" + e);
-          }
-
-          if (flags.addCapitalFeatures) {
-            int numOfCapitalFeatures = 4;
-            double[] newEmbedding = new double[embedding.length + numOfCapitalFeatures];
-            int currLen = embedding.length;
-            System.arraycopy(embedding, 0, newEmbedding, 0, currLen);
-            for (int e = 0; e < numOfCapitalFeatures; e++)
-              featuresC.add("CAPITAL-(" + (currLoc-loc) + ")-" + e);
-
-            if (currLoc >=0 && currLoc < info.size()) { // skip PADDING
-              // check if word is all caps
-              if (currentWord.toUpperCase().equals(currentWord))
-                newEmbedding[currLen] = 1;
-              else {
-                currLen += 1;
-                // check if word is all lower
-                if (currentWord.toLowerCase().equals(currentWord))
-                  newEmbedding[currLen] = 1;
-                else {
-                  currLen += 1;
-                  // check first letter cap
-                  if (Character.isUpperCase(currentWord.charAt(0)))
-                    newEmbedding[currLen] = 1;
-                  else {
-                    currLen += 1;
-                    // check if at least one non-initial letter is cap
-                    String remainder = currentWord.substring(1);
-                    if (!remainder.toLowerCase().equals(remainder))
-                      newEmbedding[currLen] = 1;
-                  }
-                }
-              }
-            }
-            embedding = newEmbedding;
-          }
-
-          embeddingList.add(embedding);
-          concatEmbeddingLen += embedding.length;
-        }
-        double[] concatEmbedding = new double[concatEmbeddingLen];
-        int currPos = 0;
-        for (double[] em: embeddingList) {
-          System.arraycopy(em, 0, concatEmbedding, currPos, em.length);
-          currPos += em.length;
-        }
-
-        if (flags.prependEmbedding) {
-          int additionalFeatureCount = 0;
-          for (Clique c : windowCliques) {
-            Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
-            featuresC.addAll(fCol);
-            additionalFeatureCount += fCol.size();
-          }
-          featureValArr = new double[concatEmbedding.length + additionalFeatureCount];
-          System.arraycopy(concatEmbedding, 0, featureValArr, 0, concatEmbedding.length);
-          Arrays.fill(featureValArr, concatEmbedding.length, featureValArr.length, 1.0);
-        } else {
-          featureValArr = concatEmbedding;
-        }
-
-        if (flags.addBiasToEmbedding) {
-          featuresC.add("BIAS-FEATURE");
-          double[] newFeatureValArr = new double[featureValArr.length + 1];
-          System.arraycopy(featureValArr, 0, newFeatureValArr, 0, featureValArr.length);
-          newFeatureValArr[newFeatureValArr.length-1] = 1;
-          featureValArr = newFeatureValArr;
-        }
-
+      if (flags.useEmbedding && i == 0) { // only activated for node features
+        featureValArr = makeDatumUsingEmbedding(info, loc, featureFactory, pInfo, featuresC, windowCliques);
       } else {
         for (Clique c : windowCliques) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c)); //todo useless copy because of typing reasons
@@ -1103,6 +1013,99 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // System.err.println(d);
     return d;
   }
+
+  private double[] makeDatumUsingEmbedding(List<IN> info, int loc, FeatureFactory<IN> featureFactory, PaddedList<IN> pInfo, List<String> featuresC, List<Clique> windowCliques) {
+    double[] featureValArr;
+    List<double[]> embeddingList = new ArrayList<double[]>();
+    int concatEmbeddingLen = 0;
+    String currentWord = null;
+    for (int currLoc = loc-2; currLoc <= loc+2; currLoc++) {
+      double[] embedding = null;
+      if (currLoc >=0 && currLoc < info.size()) {
+        currentWord = info.get(loc).get(CoreAnnotations.TextAnnotation.class);
+        String word = currentWord.toLowerCase();
+        word = word.replaceAll("(-)?\\d+(\\.\\d*)?", "0");
+        if (embeddings.containsKey(word))
+          embedding = embeddings.get(word);
+        else
+          embedding = embeddings.get("UNKNOWN");
+      } else {
+        embedding = embeddings.get("PADDING");
+      }
+
+      for (int e = 0; e < embedding.length; e++) {
+        featuresC.add("EMBEDDING-(" + (currLoc-loc) + ")-" + e);
+      }
+
+      if (flags.addCapitalFeatures) {
+        int numOfCapitalFeatures = 4;
+        double[] newEmbedding = new double[embedding.length + numOfCapitalFeatures];
+        int currLen = embedding.length;
+        System.arraycopy(embedding, 0, newEmbedding, 0, currLen);
+        for (int e = 0; e < numOfCapitalFeatures; e++)
+          featuresC.add("CAPITAL-(" + (currLoc-loc) + ")-" + e);
+
+        if (currLoc >=0 && currLoc < info.size()) { // skip PADDING
+          // check if word is all caps
+          if (currentWord.toUpperCase().equals(currentWord))
+            newEmbedding[currLen] = 1;
+          else {
+            currLen += 1;
+            // check if word is all lower
+            if (currentWord.toLowerCase().equals(currentWord))
+              newEmbedding[currLen] = 1;
+            else {
+              currLen += 1;
+              // check first letter cap
+              if (Character.isUpperCase(currentWord.charAt(0)))
+                newEmbedding[currLen] = 1;
+              else {
+                currLen += 1;
+                // check if at least one non-initial letter is cap
+                String remainder = currentWord.substring(1);
+                if (!remainder.toLowerCase().equals(remainder))
+                  newEmbedding[currLen] = 1;
+              }
+            }
+          }
+        }
+        embedding = newEmbedding;
+      }
+
+      embeddingList.add(embedding);
+      concatEmbeddingLen += embedding.length;
+    }
+    double[] concatEmbedding = new double[concatEmbeddingLen];
+    int currPos = 0;
+    for (double[] em: embeddingList) {
+      System.arraycopy(em, 0, concatEmbedding, currPos, em.length);
+      currPos += em.length;
+    }
+
+    if (flags.prependEmbedding) {
+      int additionalFeatureCount = 0;
+      for (Clique c : windowCliques) {
+        Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
+        featuresC.addAll(fCol);
+        additionalFeatureCount += fCol.size();
+      }
+      featureValArr = new double[concatEmbedding.length + additionalFeatureCount];
+      System.arraycopy(concatEmbedding, 0, featureValArr, 0, concatEmbedding.length);
+      Arrays.fill(featureValArr, concatEmbedding.length, featureValArr.length, 1.0);
+    } else {
+      featureValArr = concatEmbedding;
+    }
+
+    if (flags.addBiasToEmbedding) {
+      featuresC.add("BIAS-FEATURE");
+      double[] newFeatureValArr = new double[featureValArr.length + 1];
+      System.arraycopy(featureValArr, 0, newFeatureValArr, 0, featureValArr.length);
+      newFeatureValArr[newFeatureValArr.length-1] = 1;
+      featureValArr = newFeatureValArr;
+    }
+    return featureValArr;
+  }
+
 
   public static class TestSequenceModel implements SequenceModel {
 
@@ -1829,11 +1832,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
-  /**
-   * Train a classifier from documents.
-   *
-   * @param docs A Collection (perhaps ObjectBank) of documents
-   */
+  /** {@inheritDoc} */
   @Override
   public void train(Collection<List<IN>> objectBankWrapper, DocumentReaderAndWriter<IN> readerAndWriter) {
     Timing timer = new Timing();
