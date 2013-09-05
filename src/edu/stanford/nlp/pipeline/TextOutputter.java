@@ -93,7 +93,8 @@ public class TextOutputter {
           // printer.  This might be relevant if using corenlp for a
           // language which doesn't have dependencies, for example.
           if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-            pipeline.getDependencyTreePrinter().printTree(tree, os);
+            os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
+            os.print("\n");
           }
         }
 
