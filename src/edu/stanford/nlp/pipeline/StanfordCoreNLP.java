@@ -1476,7 +1476,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     if(props.containsKey("file")){
       String fileName = props.getProperty("file");
       Collection<File> files = new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true);
-      pipeline.processFiles(fileName, files, numThreads);
+      pipeline.processFiles(null, files, numThreads);
     }
 
     //
