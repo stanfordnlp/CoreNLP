@@ -21,7 +21,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
 
   private final double delta;
   private final double dropoutScale;
-  private double[][] dropoutPriorGradTotal;
+  private double[][] dropoutPriorGrad;
   private final boolean dropoutApprox;
   private double[][] weightSquare;
 
@@ -57,7 +57,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     this.delta = delta;
     this.dropoutScale = dropoutScale;
     this.dropoutApprox = dropoutApprox;
-    dropoutPriorGradTotal = empty2D();
+    dropoutPriorGrad = empty2D();
     this.unsupDropoutStartIndex = data.length;
     this.unsupDropoutScale = unsupDropoutScale;
     if (unsupDropoutData != null) {
@@ -727,7 +727,6 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     // first index is feature index, second index is of possible labeling
     // double[][] E = empty2D();
     clear2D(E);
-    clear2D(dropoutPriorGradTotal);
 
     MulticoreWrapper<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> wrapper =
       new MulticoreWrapper<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>(multiThreadGrad, dropoutPriorThreadProcessor); 
@@ -748,9 +747,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         Map<Integer, double[]> partialDropout = result.fourth();
         if (partialDropout != null) {
           if (isUnsup) {
-            combine2DArr(dropoutPriorGradTotal, partialDropout, unsupDropoutScale);
+            combine2DArr(dropoutPriorGrad, partialDropout, unsupDropoutScale);
           } else {
-            combine2DArr(dropoutPriorGradTotal, partialDropout);
+            combine2DArr(dropoutPriorGrad, partialDropout);
           }
         }
 
@@ -775,9 +774,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       Map<Integer, double[]> partialDropout = result.fourth();
       if (partialDropout != null) {
         if (isUnsup) {
-          combine2DArr(dropoutPriorGradTotal, partialDropout, unsupDropoutScale);
+          combine2DArr(dropoutPriorGrad, partialDropout, unsupDropoutScale);
         } else {
-          combine2DArr(dropoutPriorGradTotal, partialDropout);
+          combine2DArr(dropoutPriorGrad, partialDropout);
         }
       }
 
@@ -806,7 +805,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       for (int j = 0; j < E[i].length; j++) {
         // because we minimize -L(\theta)
         derivative[index] = (E[i][j] - Ehat[i][j]);
-        derivative[index] += dropoutScale * dropoutPriorGradTotal[i][j];
+        derivative[index] += dropoutScale * dropoutPriorGrad[i][j];
         if (VERBOSE) {
           System.err.println("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index]);
         }
