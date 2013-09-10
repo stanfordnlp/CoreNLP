@@ -2,10 +2,8 @@ package edu.stanford.nlp.optimization;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 /** A differentiable function that caches the last evaluation of its value and
  *  derivative.
@@ -37,7 +35,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     System.arraycopy(derivative, 0, savedDeriv, 0, derivative.length); 
     double oldX, plusVal, minusVal, appDeriv, calcDeriv, diff, pct = 0;
     int interval = Math.max(1, x.length / numOfChecks);
-    Set<Integer> indicesToCheck = new HashSet<Integer>();
+    List<Integer> indicesToCheck = new ArrayList<Integer>();
     for (int paramIndex = 0; paramIndex < xLen; paramIndex+=interval) {
       indicesToCheck.add(paramIndex);
     }
@@ -112,7 +110,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     System.arraycopy(orig, 0, copy, 0, orig.length);
   }
 
-  public void ensure(double[] x) {
+  void ensure(double[] x) {
     if (Arrays.equals(x, lastX)) {
       return;
     }
