@@ -988,14 +988,6 @@ public class SeqClassifierFlags implements Serializable {
   public transient String serializeFeatureIndexTo = null;
   public String loadFeatureIndexFromEN = null;
   public String loadFeatureIndexFromCH = null;
-  public double lambdaEN = 1.0;
-  public double lambdaCH = 1.0;
-  public boolean alternateTraining = false;
-  public boolean weightByEntropy = false;
-  public boolean useKL = false;
-  public boolean useHardGE = false;
-  public boolean useCRFforUnsup = false;
-  public boolean useGEforSup = false;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2462,22 +2454,6 @@ public class SeqClassifierFlags implements Serializable {
         loadFeatureIndexFromEN = val;
       } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){
         loadFeatureIndexFromCH = val;
-      } else if (key.equalsIgnoreCase("lambdaEN")){
-        lambdaEN = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("lambdaCH")){
-        lambdaCH = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("alternateTraining")){
-        alternateTraining = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("weightByEntropy")){
-        weightByEntropy = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKL")){
-        useKL = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHardGE")){
-        useHardGE = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCRFforUnsup")){
-        useCRFforUnsup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGEforSup")){
-        useGEforSup = Boolean.parseBoolean(val);
 
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
