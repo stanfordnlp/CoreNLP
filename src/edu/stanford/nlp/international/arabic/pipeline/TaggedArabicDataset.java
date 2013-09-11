@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
-import edu.stanford.nlp.trees.treebank.ConfigParser;
+import edu.stanford.nlp.process.treebank.ConfigParser;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
@@ -16,7 +16,7 @@ import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
 /**
  * Converts ATB gold parse trees to a format appropriate for training a POS tagger (especially
  * the Stanford POS tagger!).
- *
+ * 
  * @author Spence Green
  *
  */
@@ -30,7 +30,7 @@ public class TaggedArabicDataset extends ATBArabicDataset {
     if(options.containsKey(ConfigParser.paramTagDelim)) {
       wordTagDelim = options.getProperty(ConfigParser.paramTagDelim);
     }
-
+    
     for(File path : pathsToData) {
       int prevSize = treebank.size();
       if(splitFilter == null) {
@@ -57,7 +57,7 @@ public class TaggedArabicDataset extends ATBArabicDataset {
       if(makeFlatFile) {
         outputFileList.add(flatFileName);
       }
-
+      
     } catch (UnsupportedEncodingException e) {
       System.err.printf("%s: Filesystem does not support UTF-8 output%n", this.getClass().getName());
       e.printStackTrace();
@@ -66,7 +66,7 @@ public class TaggedArabicDataset extends ATBArabicDataset {
     } finally {
       if(outfile != null) {
         outfile.close();
-      }
+      } 
       if(flatFile != null) {
         flatFile.close();
       }
@@ -83,13 +83,13 @@ public class TaggedArabicDataset extends ATBArabicDataset {
       if(t == null || t.value().equals("X")) return;
 
       t = t.prune(nullFilter, new LabeledScoredTreeFactory());
-
+      
       for(Tree node : t) {
         if(node.isPreTerminal()) {
           processPreterminal(node);
         }
       }
-
+      
       outfile.println(ATBTreeUtils.taggedStringFromTree(t, removeEscapeTokens, wordTagDelim));
 
       if(flatFile != null) {

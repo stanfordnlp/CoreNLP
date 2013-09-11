@@ -1,6 +1,8 @@
 package edu.stanford.nlp.semgraph;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.LabeledWord;
 import edu.stanford.nlp.process.Morphology;
@@ -92,7 +94,7 @@ public class SemanticGraphUtils {
    *
    */
   public static Set<SemanticGraphEdge> getSubTreeEdges(IndexedWord vertice, SemanticGraph sg, SemanticGraphEdge excludedEdge) {
-    Set<SemanticGraphEdge> tabu = Generics.newHashSet();
+    HashSet<SemanticGraphEdge> tabu = new HashSet<SemanticGraphEdge>();
     tabu.add(excludedEdge);
     getSubTreeEdgesHelper(vertice, sg, tabu);
     tabu.remove(excludedEdge); // Do not want this in the returned edges
@@ -115,7 +117,7 @@ public class SemanticGraphUtils {
    * edges that are spanned between these nodes.
    */
   public static Collection<SemanticGraphEdge> getEdgesSpannedByVertices(Collection<IndexedWord> nodes, SemanticGraph sg) {
-    Collection<SemanticGraphEdge> ret = Generics.newHashSet();
+    Collection<SemanticGraphEdge> ret = new HashSet<SemanticGraphEdge>();
     for (IndexedWord n1 : nodes)
       for (IndexedWord n2: nodes) {
         if (n1 != n2) {
@@ -242,7 +244,7 @@ public class SemanticGraphUtils {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = Generics.newHashSet();
+    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
     tabuDescendantsHelper(sg, vertex, descendantSet, tabu, null, null);
     return descendantSet;
   }
@@ -258,7 +260,7 @@ public class SemanticGraphUtils {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = Generics.newHashSet();
+    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
     tabuDescendantsHelper(sg, vertex, descendantSet, tabu, tabuRelns, null);
     return descendantSet;
   }
@@ -269,8 +271,8 @@ public class SemanticGraphUtils {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = Generics.newHashSet();
-    tabuDescendantsHelper(sg, vertex, descendantSet, Generics.<IndexedWord>newHashSet(), tabuRelns, null);
+    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
+    tabuDescendantsHelper(sg, vertex, descendantSet, new HashSet<IndexedWord>(), tabuRelns, null);
     return descendantSet;
   }
 
@@ -280,8 +282,8 @@ public class SemanticGraphUtils {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = Generics.newHashSet();
-    tabuDescendantsHelper(sg, vertex, descendantSet, Generics.<IndexedWord>newHashSet(), tabuRelns, tabuTest);
+    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
+    tabuDescendantsHelper(sg, vertex, descendantSet, new HashSet<IndexedWord>(), tabuRelns, tabuTest);
     return descendantSet;
   }
 
@@ -291,7 +293,7 @@ public class SemanticGraphUtils {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = Generics.newHashSet();
+    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
     tabuDescendantsHelper(sg, vertex, descendantSet, tabuNodes, tabuRelns, tabuTest);
     return descendantSet;
   }
@@ -351,7 +353,7 @@ public class SemanticGraphUtils {
    * TODO: optimize
    */
   public static Collection<IndexedWord> getDependencyBlanket(SemanticGraph sg, Collection<IndexedWord> assertedNodes) {
-    Set<IndexedWord> retSet = Generics.newHashSet();
+    HashSet<IndexedWord> retSet = new HashSet<IndexedWord>();
     for (IndexedWord curr : sg.vertexSet()) {
       if (!assertedNodes.contains(curr) && !retSet.contains(curr)) {
         for (IndexedWord assertedNode : assertedNodes) {
@@ -379,7 +381,7 @@ public class SemanticGraphUtils {
     List<IndexedWord> vertices = sg.vertexListSorted();
     List<SemanticGraphEdge> edges = sg.edgeListSorted();
     int index = 1;
-    Map<IndexedWord, IndexedWord> oldToNewVertices = Generics.newHashMap();
+    HashMap<IndexedWord, IndexedWord> oldToNewVertices = new HashMap<IndexedWord, IndexedWord>();
     List<IndexedWord> newVertices = new ArrayList<IndexedWord>();
     for (IndexedWord vertex : vertices) {
       IndexedWord newVertex = new IndexedWord(vertex);
@@ -402,7 +404,7 @@ public class SemanticGraphUtils {
     for (SemanticGraphEdge edge : edges) {
       IndexedWord newGov = oldToNewVertices.get(edge.getGovernor());
       IndexedWord newDep = oldToNewVertices.get(edge.getDependent());
-      nsg.addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
+      nsg.addEdge(newGov, newDep, edge.getRelation(), edge.getWeight());
     }
     return nsg;
   }
@@ -424,9 +426,8 @@ public class SemanticGraphUtils {
           IndexedWord gov = edge.getGovernor();
           IndexedWord dep = edge.getDependent();
           double weight = edge.getWeight();
-          boolean isExtra = edge.isExtra();
           sg.removeEdge(edge);
-          sg.addEdge(gov, dep, newReln, weight, isExtra);
+          sg.addEdge(gov, dep, newReln, weight);
         } else {
           if (verbose)
             System.err.println("Warning, could not find matching GrammaticalRelation for reln="+edge.getRelation());
@@ -447,7 +448,7 @@ public class SemanticGraphUtils {
     List<IndexedWord> nodes = new ArrayList<IndexedWord>(sg.vertexSet());
 
     // Hack: store all of the nodes we know are in the rootset
-    Set<IndexedWord> guaranteed = Generics.newHashSet();
+    Set<IndexedWord> guaranteed = new HashSet<IndexedWord>();
     for (IndexedWord root : sg.getRoots()) {
       guaranteed.add(root);
       guaranteed.addAll(sg.descendants(root));
@@ -477,11 +478,11 @@ public class SemanticGraphUtils {
         sg.addVertex(newNode);
       for (SemanticGraphEdge govEdge : govEdges) {
         sg.removeEdge(govEdge);
-        sg.addEdge(newNode, govEdge.getDependent(), govEdge.getRelation(), govEdge.getWeight(), govEdge.isExtra());
+        sg.addEdge(newNode, govEdge.getDependent(), govEdge.getRelation(), govEdge.getWeight());
       }
       for (SemanticGraphEdge depEdge : depEdges) {
         sg.removeEdge(depEdge);
-        sg.addEdge(depEdge.getGovernor(), newNode, depEdge.getRelation(), depEdge.getWeight(), depEdge.isExtra());
+        sg.addEdge(depEdge.getGovernor(), newNode, depEdge.getRelation(), depEdge.getWeight());
       }
     } else {
       System.err.println("SemanticGraphUtils.replaceNode: previous node does not exist");
@@ -503,11 +504,11 @@ public class SemanticGraphUtils {
    * @param prefix Prefix to assign to this anonymization
    */
   public static Map<IndexedWord, IndexedWord> anonymyizeNodes(Iterable<IndexedWord> verts, String prefix) {
-    Map<IndexedWord, IndexedWord> retMap = Generics.newHashMap();
+    Map<IndexedWord, IndexedWord> retMap = new HashMap<IndexedWord, IndexedWord>();
     int index = 1;
     for (IndexedWord orig: verts) {
       IndexedWord genericVert = new IndexedWord(orig);
-      genericVert.set(CoreAnnotations.LemmaAnnotation.class, "");
+      genericVert.set(LemmaAnnotation.class, "");
       String genericValue = prefix+index;
       genericVert.setValue(genericValue);
       genericVert.setWord(genericValue);
@@ -560,15 +561,15 @@ public class SemanticGraphUtils {
       if (useGenericReplacement) {
         if (newGov == null) {
           newGov = new IndexedWord(gov);
-          newGov.set(CoreAnnotations.TextAnnotation.class, WILDCARD_VERTICE_TOKEN);
+          newGov.set(TextAnnotation.class, WILDCARD_VERTICE_TOKEN);
           newGov.set(CoreAnnotations.OriginalTextAnnotation.class, WILDCARD_VERTICE_TOKEN);
-          newGov.set(CoreAnnotations.LemmaAnnotation.class, WILDCARD_VERTICE_TOKEN);
+          newGov.set(LemmaAnnotation.class, WILDCARD_VERTICE_TOKEN);
         }
         if (newDep == null) {
           newDep = new IndexedWord(dep);
-          newDep.set(CoreAnnotations.TextAnnotation.class, WILDCARD_VERTICE_TOKEN);
+          newDep.set(TextAnnotation.class, WILDCARD_VERTICE_TOKEN);
           newDep.set(CoreAnnotations.OriginalTextAnnotation.class, WILDCARD_VERTICE_TOKEN);
-          newDep.set(CoreAnnotations.LemmaAnnotation.class,WILDCARD_VERTICE_TOKEN);
+          newDep.set(LemmaAnnotation.class,WILDCARD_VERTICE_TOKEN);
         }
       } else {
         if (newGov == null)
@@ -576,7 +577,9 @@ public class SemanticGraphUtils {
         if (newDep == null)
           newDep = edge.getDependent();
       }
-      SemanticGraphEdge newEdge = new SemanticGraphEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
+      SemanticGraphEdge newEdge = new SemanticGraphEdge(
+          newGov, newDep,
+          edge.getRelation(), edge.getWeight());
       retList.add(newEdge);
     }
     return retList;
@@ -587,7 +590,7 @@ public class SemanticGraphUtils {
    * vertices.
    */
   public static Set<SemanticGraphEdge> allEdgesInSet(Iterable<IndexedWord> vertices, SemanticGraph sg) {
-    Set<SemanticGraphEdge> edges = Generics.newHashSet();
+    HashSet<SemanticGraphEdge> edges = new HashSet<SemanticGraphEdge>();
     for (IndexedWord v1 : vertices) {
       for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(v1)) {
         edges.add(edge);
@@ -608,9 +611,9 @@ public class SemanticGraphUtils {
   public static EdgeDiffResult diffEdges(Collection<SemanticGraphEdge> edges1, Collection<SemanticGraphEdge> edges2,
       SemanticGraph sg1, SemanticGraph sg2,
       ISemanticGraphEdgeEql compareObj) {
-    Set<SemanticGraphEdge> remainingEdges1 = Generics.newHashSet();
-    Set<SemanticGraphEdge> remainingEdges2 = Generics.newHashSet();
-    Set<SemanticGraphEdge> sameEdges = Generics.newHashSet();
+    Set<SemanticGraphEdge> remainingEdges1 = new HashSet<SemanticGraphEdge>();
+    Set<SemanticGraphEdge> remainingEdges2 = new HashSet<SemanticGraphEdge>();
+    Set<SemanticGraphEdge> sameEdges = new HashSet<SemanticGraphEdge>();
 
 
     ArrayList<SemanticGraphEdge> edges2Cache = new ArrayList<SemanticGraphEdge>(edges2);
@@ -742,8 +745,8 @@ public class SemanticGraphUtils {
       boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) throws Exception {
     IndexedWord patternRoot = sg.getFirstRoot();
     StringWriter buf = new StringWriter();
-    Set<IndexedWord> tabu = Generics.newHashSet();
-    Set<SemanticGraphEdge> seenEdges = Generics.newHashSet();
+    Set<IndexedWord> tabu = new HashSet<IndexedWord>();
+    Set<SemanticGraphEdge> seenEdges = new HashSet<SemanticGraphEdge>();
 
     buf.append(semgrexFromGraphHelper(patternRoot, sg, tabu, seenEdges, true, true, wildcardNodes,
         useTag, useWord, nodeNameMap));
@@ -927,7 +930,7 @@ public class SemanticGraphUtils {
    * as the key (obviating issues with object equality).
    */
   public static Collection<SemanticGraph> removeDuplicates(Collection<SemanticGraph> graphs) {
-    Map<String, SemanticGraph> map = Generics.newHashMap();
+    Map<String, SemanticGraph> map = new HashMap<String, SemanticGraph>();
     for (SemanticGraph sg : graphs) {
       String keyVal = sg.toString().intern();
       map.put(keyVal, sg);
@@ -941,12 +944,12 @@ public class SemanticGraphUtils {
    */
   public static Collection<SemanticGraph> removeDuplicates(Collection<SemanticGraph> graphs,
       Collection<SemanticGraph> tabuGraphs) {
-    Map<String, SemanticGraph> tabuMap = Generics.newHashMap();
+    Map<String, SemanticGraph> tabuMap = new HashMap<String, SemanticGraph>();
     for (SemanticGraph tabuSg : tabuGraphs) {
       String keyVal = tabuSg.toString().intern();
       tabuMap.put(keyVal, tabuSg);
     }
-    Map<String, SemanticGraph> map = Generics.newHashMap();
+    Map<String, SemanticGraph> map = new HashMap<String, SemanticGraph>();
     for (SemanticGraph sg : graphs) {
       String keyVal = sg.toString().intern();
       if (tabuMap.containsKey(keyVal))
@@ -958,7 +961,7 @@ public class SemanticGraphUtils {
 
   public static Collection<SemanticGraph> removeDuplicates(Collection<SemanticGraph> graphs,
       SemanticGraph tabuGraph) {
-    Collection<SemanticGraph> tabuSet = Generics.newHashSet();
+    Collection<SemanticGraph> tabuSet = new HashSet<SemanticGraph>();
     tabuSet.add(tabuGraph);
     return removeDuplicates(graphs, tabuSet);
   }
@@ -988,7 +991,7 @@ public class SemanticGraphUtils {
         lexToTreeNode.add(proxy.lex, proxy);
     }
 
-    Map<IndexedWord, Integer> depthMap = Generics.newHashMap();
+    Map<IndexedWord, Integer> depthMap = new HashMap<IndexedWord, Integer>();
     for (IndexedWord node : sg.vertexSet()) {
       List<IndexedWord> path = sg.getPathToRoot(node);
       if (path != null)
@@ -1006,7 +1009,7 @@ public class SemanticGraphUtils {
     // hash codes for Tree nodes do not consider position of the tree
     // within a tree: two subtrees with the same layout and child
     // labels will be equal.
-    Map<PositionedTree, IndexedWord> map = Generics.newHashMap();
+    Map<PositionedTree, IndexedWord> map = new HashMap<PositionedTree, IndexedWord>();
     for (String lex : lexToTreeNode.keySet()) {
       for (int i=0;i<lexToTreeNode.size(lex) && i<lexToSemNode.size(lex);i++) {
         map.put(new PositionedTree(lexToTreeNode.get(lex, i).treeNode, tree), lexToSemNode.get(lex,i).node);

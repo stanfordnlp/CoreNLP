@@ -1,5 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -8,9 +10,7 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 
 /**
@@ -52,8 +52,8 @@ public class MorphaAnnotator implements Annotator{
         //System.err.println("Lemmatizing sentence: " + tokens);
         for (CoreLabel token : tokens) {
           String text = token.get(CoreAnnotations.TextAnnotation.class);
-          String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-          this.addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
+          String posTag = token.get(PartOfSpeechAnnotation.class);
+          this.addLemma(morphology, LemmaAnnotation.class, token, text, posTag);
         }
       }
     } else {
@@ -102,14 +102,4 @@ public class MorphaAnnotator implements Annotator{
     return null;
   }
 
-
-  @Override
-  public Set<Requirement> requires() {
-    return TOKENIZE_SSPLIT_POS;
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(LEMMA_REQUIREMENT);
-  }
 }

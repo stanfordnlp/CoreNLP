@@ -13,13 +13,12 @@ import edu.stanford.nlp.trees.TreeTransformer;
  *  Node values with a '@' in them anywhere are assumed to be inserted
  *  nodes for the purpose of binarization, and are removed.
  *  The code also removes the last child of the root node, assuming
- *  that it is an inserted dependency root.
+ *  that is an inserted dependency root.
  */
 public class Debinarizer implements TreeTransformer {
 
   private final TreeFactory tf;
   private final boolean forceCNF;
-  private final TreeTransformer boundaryRemover;
 
 
   protected Tree transformTreeHelper(Tree t) {
@@ -28,7 +27,7 @@ public class Debinarizer implements TreeTransformer {
       leaf.setScore(t.score());
       return leaf;
     }
-    List<Tree> newChildren = new ArrayList<Tree>();
+    List<Tree> newChildren = new ArrayList<Tree>(20);
     for (int childNum = 0, numKids = t.numChildren(); childNum < numKids; childNum++) {
       Tree child = t.getChild(childNum);
       Tree newChild = transformTreeHelper(child);
@@ -43,13 +42,12 @@ public class Debinarizer implements TreeTransformer {
     return node;
   }
 
-  @Override
   public Tree transformTree(Tree t) {
     Tree result = transformTreeHelper(t);
     if (forceCNF) {
       result = new CNFTransformers.FromCNFTransformer().transformTree(result);
     }
-    return boundaryRemover.transformTree(result);
+    return new BoundaryRemover().transformTree(result);
   }
 
   public Debinarizer(boolean forceCNF) {
@@ -59,7 +57,6 @@ public class Debinarizer implements TreeTransformer {
   public Debinarizer(boolean forceCNF, LabelFactory lf) {
     this.forceCNF = forceCNF;
     tf = new LabeledScoredTreeFactory(lf);
-    boundaryRemover = new BoundaryRemover();
   }
 
 } // end class Debinarizer

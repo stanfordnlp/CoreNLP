@@ -3,7 +3,6 @@ package edu.stanford.nlp.graph;
 import java.util.*;
 
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Simple graph library; this is directed for now. This class focuses on time
@@ -20,16 +19,11 @@ import edu.stanford.nlp.util.Generics;
 
 public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
-  Map<V, Map<V, List<E>>> outgoingEdges = Generics.newHashMap();
+  Map<V, Map<V, List<E>>> outgoingEdges = new HashMap<V, Map<V, List<E>>>();
 
-  Map<V, Map<V, List<E>>> incomingEdges = Generics.newHashMap();
+  Map<V, Map<V, List<E>>> incomingEdges = new HashMap<V, Map<V, List<E>>>();
 
   public DirectedMultiGraph() {
-  }
-
-  public DirectedMultiGraph(DirectedMultiGraph<V,E> graph) {
-    outgoingEdges = Generics.newHashMap(graph.outgoingEdges);
-    incomingEdges = Generics.newHashMap(graph.incomingEdges);
   }
 
   /**
@@ -57,8 +51,8 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   public boolean addVertex(V v) {
     if (outgoingEdges.containsKey(v))
       return false;
-    outgoingEdges.put(v, Generics.<V, List<E>>newHashMap());
-    incomingEdges.put(v, Generics.<V, List<E>>newHashMap());
+    outgoingEdges.put(v, new HashMap<V, List<E>>());
+    incomingEdges.put(v, new HashMap<V, List<E>>());
     return true;
   }
 
@@ -213,7 +207,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     if (children == null && parents == null)
       return null;
-    Set<V> neighbors = Generics.newHashSet();
+    Set<V> neighbors = new HashSet<V>();
     neighbors.addAll(children);
     neighbors.addAll(parents);
     return neighbors;

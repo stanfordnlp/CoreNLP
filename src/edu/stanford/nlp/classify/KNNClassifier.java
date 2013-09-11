@@ -6,7 +6,6 @@ import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * A simple k-NN classifier, with the options of using unit votes, or weighted votes (by 
@@ -26,7 +25,7 @@ public class KNNClassifier<K,V> implements Classifier<K, V> {
   private static final long serialVersionUID = 7115357548209007944L;
   private boolean weightedVotes = false; // whether this is a weighted vote (by sim), or not
   private CollectionValuedMap<K, Counter<V>> instances = new CollectionValuedMap<K, Counter<V>>();
-  private Map<Counter<V>, K> classLookup = Generics.newHashMap();
+  private Map<Counter<V>, K> classLookup = new HashMap<Counter<V>, K>();
   private boolean l2Normalize = false;
   int k = 0;
 

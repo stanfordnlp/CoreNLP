@@ -5,18 +5,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ie.machinereading.common.SimpleTokenize;
 import edu.stanford.nlp.ie.machinereading.common.StringDictionary;
 import edu.stanford.nlp.trees.Span;
-import edu.stanford.nlp.util.Generics;
 
 public class AceToken {
-  /**
-   * The actual token bytes
+  /** 
+   * The actual token bytes 
    * Normally we work with mWord (see below), but mLiteral is needed when
    *   we need to check if a sequence of tokens exists in a gazetteer
    */
@@ -54,30 +53,30 @@ public class AceToken {
   private String mMassiWnss;
 
   /** Dictionary for all words in the corpus */
-  public static final StringDictionary WORDS;
+  public static StringDictionary WORDS;
 
   /** Dictionary for all lemmas in the corpus */
-  public static final StringDictionary LEMMAS;
+  public static StringDictionary LEMMAS;
 
   /** Dictionary for all other strings in the corpus */
-  public static final StringDictionary OTHERS;
+  public static StringDictionary OTHERS;
 
   /** Map of all proximity classes */
-  public static final Map<Integer, ArrayList<Integer>> PROX_CLASSES;
+  public static HashMap<Integer, ArrayList<Integer>> PROX_CLASSES = null;
   /** How many elements per proximity class */
   private static final int PROXIMITY_CLASS_SIZE = 5;
 
   /** The location gazetteer */
-  private static Map<String, String> LOC_GAZ = null;
+  private static HashMap<String, String> LOC_GAZ = null;
 
   /** The person first name dictionary */
-  private static Map<String, String> FIRST_GAZ = null;
+  private static HashMap<String, String> FIRST_GAZ = null;
 
   /** The person last name dictionary */
-  private static Map<String, String> LAST_GAZ = null;
+  private static HashMap<String, String> LAST_GAZ = null;
 
   /** List of trigger words */
-  private static Map<String, String> TRIGGER_GAZ = null;
+  private static HashMap<String, String> TRIGGER_GAZ = null;
 
   private final static Pattern SGML_PATTERN;
 
@@ -88,7 +87,7 @@ public class AceToken {
     WORDS.setMode(true);
     LEMMAS.setMode(true);
     OTHERS.setMode(true);
-    PROX_CLASSES = Generics.newHashMap();
+    PROX_CLASSES = new HashMap<Integer, ArrayList<Integer>>();
 
     SGML_PATTERN = Pattern.compile("<[^<>]+>");
   }
@@ -96,28 +95,28 @@ public class AceToken {
   public static void loadGazetteers(String dataPath) throws java.io.FileNotFoundException, java.io.IOException {
 
     System.err.print("Loading location gazetteer... ");
-    LOC_GAZ = Generics.newHashMap();
+    LOC_GAZ = new HashMap<String, String>();
     loadDictionary(LOC_GAZ, dataPath + File.separator + "world_small.gaz.nonambiguous");
     System.err.println("done.");
 
     System.err.print("Loading first-name gazetteer... ");
-    FIRST_GAZ = Generics.newHashMap();
+    FIRST_GAZ = new HashMap<String, String>();
     loadDictionary(FIRST_GAZ, dataPath + File.separator + "per_first.gaz");
     System.err.println("done.");
 
     System.err.print("Loading last-name gazetteer... ");
-    LAST_GAZ = Generics.newHashMap();
+    LAST_GAZ = new HashMap<String, String>();
     loadDictionary(LAST_GAZ, dataPath + File.separator + "per_last.gaz");
     System.err.println("done.");
 
     System.err.print("Loading trigger-word gazetteer... ");
-    TRIGGER_GAZ = Generics.newHashMap();
+    TRIGGER_GAZ = new HashMap<String, String>();
     loadDictionary(TRIGGER_GAZ, dataPath + File.separator + "triggers.gaz");
     System.err.println("done.");
   }
 
   /** Loads one dictionary from disk */
-  private static void loadDictionary(Map<String, String> dict, String file) throws java.io.FileNotFoundException,
+  private static void loadDictionary(HashMap<String, String> dict, String file) throws java.io.FileNotFoundException,
       java.io.IOException {
 
     BufferedReader in = new BufferedReader(new FileReader(file));
@@ -154,7 +153,7 @@ public class AceToken {
   /**
    * Verifies if the given string exists in the given dictionary
    */
-  public static boolean exists(Map<String, String> dict, String elem) {
+  public static boolean exists(HashMap<String, String> dict, String elem) {
     if (dict.get(elem) != null)
       return true;
     return false;
@@ -299,7 +298,7 @@ public class AceToken {
   public static final int CASE_ALLDIGITS = 5;
   public static final int CASE_ALLDIGITSORDOTS = 6;
 
-  private static int detectCase(String word) {
+  private int detectCase(String word) {
 
     //
     // is the word all caps? (e.g. IBM)
@@ -482,13 +481,13 @@ public class AceToken {
   /** Pretty display */
   public String display() {
     if (mByteOffset != null) {
-      return "['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + ", " + mByteOffset.start() + ", "
-          + mByteOffset.end() + "]";
+      return new String("['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + ", " + mByteOffset.start() + ", "
+          + mByteOffset.end() + "]");
     }
 
-    return "['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + "]";
+    return new String("['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + "]");
   }
-
+  
   public String toString() {
     return display();
   }

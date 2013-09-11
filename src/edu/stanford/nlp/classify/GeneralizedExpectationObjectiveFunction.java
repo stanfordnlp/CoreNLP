@@ -6,7 +6,6 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Triple;
 
 import java.util.ArrayList;
@@ -150,8 +149,8 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
       //allocate memory to the containers and initialize them
       geFeature2EmpiricalDist = new double[geFeatures.size()][labeledDataset.labelIndex.size()];
       geFeature2DatumList = new ArrayList<List<Integer>>(geFeatures.size());
-      Map<F,Integer> geFeatureMap = Generics.newHashMap();
-      Set<Integer> activeUnlabeledExamples = Generics.newHashSet();
+      Map<F,Integer> geFeatureMap = new HashMap<F,Integer>();
+      Set<Integer> activeUnlabeledExamples = new HashSet<Integer>();
       for(int n = 0; n < geFeatures.size(); n++){
         F geFeature = geFeatures.get(n);
         geFeature2DatumList.add(new ArrayList<Integer>());

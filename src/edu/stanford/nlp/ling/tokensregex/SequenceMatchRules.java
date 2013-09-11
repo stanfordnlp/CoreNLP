@@ -265,7 +265,7 @@ public class SequenceMatchRules {
   public static Rule createRule(Env env, Expressions.CompositeValue cv) {
     Map<String, Object> attributes;
     cv = cv.simplifyNoTypeConversion(env);
-    attributes = Generics.newHashMap();
+    attributes = new HashMap<String,Object>();
     for (String s:cv.getAttributes()) {
       attributes.put(s, cv.getExpression(s));
     }
@@ -293,7 +293,7 @@ public class SequenceMatchRules {
     }
     AnnotationExtractRuleCreator ruleCreator = lookupExtractRuleCreator(env, ruleType);
     if (ruleCreator != null) {
-      Map<String,Object> attributes = Generics.newHashMap();
+      Map<String,Object> attributes = new HashMap<String,Object>();
       attributes.put("ruleType", ruleType);
       attributes.put("pattern", pattern);
       attributes.put("result", result);
@@ -311,7 +311,7 @@ public class SequenceMatchRules {
   public final static CompositeExtractRuleCreator COMPOSITE_EXTRACT_RULE_CREATOR = new CompositeExtractRuleCreator();
   public final static TextPatternExtractRuleCreator TEXT_PATTERN_EXTRACT_RULE_CREATOR = new TextPatternExtractRuleCreator();
   public final static AnnotationExtractRuleCreator DEFAULT_EXTRACT_RULE_CREATOR = TOKEN_PATTERN_EXTRACT_RULE_CREATOR;
-  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = Generics.newHashMap();
+  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = new HashMap<String,AnnotationExtractRuleCreator>();
   static {
     registeredRuleTypes.put(TOKEN_PATTERN_RULE_TYPE, TOKEN_PATTERN_EXTRACT_RULE_CREATOR);
     registeredRuleTypes.put(COMPOSITE_RULE_TYPE, COMPOSITE_EXTRACT_RULE_CREATOR);
@@ -627,20 +627,10 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Interface for a rule that extracts a list of matched items from a input
-   * @param <I>
-   * @param <O>
-   */
   public static interface ExtractRule<I,O> {
     public boolean extract(I in, List<O> out);
-  }
+  };
 
-  /**
-   * Extraction rule that filters the input before passing it on to the next extractor
-   * @param <I>
-   * @param <O>
-   */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
   {
     Filter<I> filter;
@@ -665,12 +655,6 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Extraction rule that applies a list of rules in sequence and aggregates
-   *   all matches found
-   * @param <I>
-   * @param <O>
-   */
   public static class ListExtractRule<I,O> implements ExtractRule<I,O>
   {
     List<ExtractRule<I,O>> rules;
@@ -711,11 +695,6 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Extraction rule to apply a extraction rule on a particular CoreMap field
-   * @param <T>
-   * @param <O>
-   */
   public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
   {
     Class annotationField;

@@ -3,7 +3,7 @@ package edu.stanford.nlp.sequences;
 import java.util.*;
 import java.io.Serializable;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.PaddedList;
 
@@ -65,8 +65,8 @@ public abstract class FeatureFactory<IN> implements Serializable {
    * This method returns a {@link Collection} of the features
    * calculated for the word at the specified position in info (the list of
    * words) for the specified {@link Clique}.
-   * It should return the actual String features, <b>NOT</b> wrapped in any
-   * other object, as the wrapping
+   * It should return the actual features, <b>NOT</b> wrapped in a
+   * {@link Features} object, as the wrapping
    * will be done automatically.
    * Because it takes a {@link PaddedList} you don't
    * need to worry about indices which are outside of the list.
@@ -117,7 +117,7 @@ public abstract class FeatureFactory<IN> implements Serializable {
    *     a function (flags.wordFunction)
    */
   protected String getWord(CoreLabel label) {
-    String word = label.getString(CoreAnnotations.TextAnnotation.class);
+    String word = label.getString(TextAnnotation.class);
     if (flags.wordFunction != null) {
       word = flags.wordFunction.apply(word);
     }

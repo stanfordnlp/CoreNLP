@@ -1,0 +1,126 @@
+<!--#include virtual="/header.html" -->
+
+<center>
+<h2><font color="#a40526">Stanford Phrasal: A Phrase-Based Translation System</font></h2> 
+</center>
+
+<!--
+<center><p><font color="#a40526"><a href="#About">About</a> |
+<a href="#Questions">Questions</a> |
+<a href="#Mail">Mailing lists</a> |
+<a href="#Download">Download</a> |
+<a href="#History">Release history</a> |
+<a href="http://www.stanford.edu/~mjockers/cgi-bin/drupal/node/17">
+Tagging Tutorial</a> |
+<a href="pos-tagger-faq.shtml">FAQ</a>
+</font></p></center>
+
+<h3><a name="About">About</a></h3>
+-->
+<center><p><a href="#About">About</a> |
+<a href="#Usage">Usage</a> |
+<a href="#Download">Download</a> |
+<a href="#Contributors">Contributors</a> |
+<a href="#Citation">Citation</a> |
+<a href="#Mail">Mailing lists</a> |
+</p></center>
+
+
+<p>
+<strong>The <span style="color: red">Beta4 release</span> of the Stanford Phrasal open source machine translation package has just been released! </strong>
+</p>
+
+<h3><a name="About">About</a></h3>
+<p>
+Stanford Phrasal is a state-of-the-art phrase-based machine translation system. It provides an easy to use API for implementating new decoding model features and supports unique capabilities such as translating using phrases that include gaps <a href="http://www-nlp.stanford.edu/pubs/naacl10-discontinuous_phrases.pdf">(Galley et al. 2010)</a> and conditional extraction of phrase-tables and lexical reordering models.
+</p>
+
+<p>
+<h3><a name="Usage">Usage</a></h3>
+<ul>
+  <li> <a href="http://www-nlp.stanford.edu/wiki/Software/Phrasal">Quick Start Guide</a>.
+</ul>
+
+</p>
+
+<p>
+<h3><a name="Download">Download</a></h3>
+
+<p>Phrasal is available for download,
+<b>licensed under the <a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU
+General Public License</a></b> (v2 or later). Source is included.  
+The package
+includes components for command-line invocation, and a Java API.
+</p>
+
+
+<center>
+<strong>
+<a href="/software/phrasal/phrasal.Beta4.tar.gz">Stanford Phrasal <span style="color: red">Beta4</span></a>
+</strong>
+</center>
+</p>
+
+<h3><a name="Contributors">Contributors</a></h3>
+
+<p>
+
+<strong>Core Developers:</strong>
+<ul>
+  <li><a href="http://dmcer.net">Daniel Cer</a></li>
+  <li><a href="http://www-nlp.stanford.edu/~mgalley/">Michel Galley</a></li>
+</ul>
+
+<strong>Valuable contributions from:</strong>
+<ul>
+  <li><a href="http://www.spencegreen.com/">Spence Green</a></li>
+  <li><a href="http://nlp.stanford.edu/~pichuan/">Pi-Chuan Chang</a></li>
+  <li>Heeyoung Lee</li>
+  <li>John Bauer</li>
+  <li><a href="http://www-nlp.stanford.edu/~rkarthik/">Karthik Raghunathan</a></li>
+  <li><a href="http://nlp.stanford.edu/manning/">Chris Manning</a></li>
+</ul>
+</p>
+
+<h3><a name="Citation">Citation</a></h3>
+<p>
+If you use Stanford Phrasal in your own research, please cite: 
+<br/>
+<br/>
+<strong>Phrasal: A Toolkit for Statistical Machine Translation with Facilities for Extraction and Incorporation of Arbitrary Model Features</strong><br/>
+Daniel Cer, Michel Galley, Daniel Jurafsky and Christopher Manning<br/>
+In Proceedings of the North American Association of Computational Linguistics - Demo Session (NAACL-10). 2010 <a href="http://www.aclweb.org/anthology/N/N10/N10-2003.pdf">[pdf]</a> <a href="CerEtAl10.bib">[bib]</a>
+</p>
+
+
+
+<h3><a name="Mail">Mailing Lists</a></h3>
+<p>
+We have 3 mailing lists for Stanford Phrasal, all of which are shared
+with other JavaNLP tools (with the exclusion of the parser). Each address is
+at <code>@lists.stanford.edu</code>:
+</p>
+<ol>
+<li><code>java-nlp-user</code> This is the best list to post to in order
+to ask questions, make announcements, or for discussion among JavaNLP
+users.  You have to subscribe to be able to use it.
+Join the list via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-user">this webpage</a> or by emailing
+<code>java-nlp-user-join@lists.stanford.edu</code>.   (Leave the
+subject and message body empty.)  You can also
+<a href="https://mailman.stanford.edu/pipermail/java-nlp-user/">look at
+the list archives</a>.
+<li><code>java-nlp-announce</code> This list will be used only to announce
+new versions of Stanford JavaNLP tools.  So it will be very low volume (expect 1-3
+message a year).  Join the list via via <a href="https://mailman.stanford.edu/mailman/listinfo/java-nlp-announce">this webpage</a> or by emailing
+<code>java-nlp-announce-join@lists.stanford.edu</code>.  (Leave the
+subject and message body empty.)
+<li><code>java-nlp-support</code> This list goes only to the software
+maintainers.  It's a good address for licensing questions, etc.  <b>For
+general use and support questions, please join and use
+<code>java-nlp-user</code>.</b>
+You cannot join <code>java-nlp-support</code>, but you can mail questions to
+<code>java-nlp-support@lists.stanford.edu</code>.
+</ol>
+
+<!--#include virtual="/footer.html" -->
+

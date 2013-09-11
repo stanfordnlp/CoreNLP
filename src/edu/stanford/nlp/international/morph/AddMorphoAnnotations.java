@@ -3,6 +3,7 @@ package edu.stanford.nlp.international.morph;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,6 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.arabic.ArabicTreeReaderFactory;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -39,7 +39,7 @@ public final class AddMorphoAnnotations {
     return sb.toString();
   }
   private static Map<String,Integer> argSpec() {
-    Map<String,Integer> argSpec = Generics.newHashMap();
+    Map<String,Integer> argSpec = new HashMap<String,Integer>();
     argSpec.put("g", 0);
     argSpec.put("e", 1);
     return argSpec;

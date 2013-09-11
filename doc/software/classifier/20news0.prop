@@ -1,0 +1,4 @@
+trainFile=20news-bydate-devtrain-stanford-classifier.txt
+testFile=20news-bydate-devtest-stanford-classifier.txt
+2.useSplitWords=true
+2.splitWordsRegexp=\\s+

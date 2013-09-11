@@ -2,7 +2,6 @@ package edu.stanford.nlp.semgraph.semgrex;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.util.Generics;
 
 import java.util.*;
 
@@ -122,7 +121,7 @@ public class Alignment {
    * wcmac: What is this for?  Looks like nothing is using this?
    */
   Alignment patchedAlignment(SemanticGraph hypGraph, SemanticGraph txtGraph) {
-    Map<IndexedWord, IndexedWord> patchedMap = Generics.newHashMap();
+    Map<IndexedWord, IndexedWord> patchedMap = new HashMap<IndexedWord, IndexedWord>();
     Set<IndexedWord> txtVertexSet = txtGraph.vertexSet();
     for (Object o : hypGraph.vertexSet())  {
       IndexedWord vertex = (IndexedWord)o;
@@ -158,7 +157,7 @@ public class Alignment {
       throw new IllegalArgumentException("Index array length " + indexes.length +
                                          " does not match hypGraph size " + hypGraph.size());
     Map<IndexedWord, IndexedWord> map =
-      Generics.newHashMap();
+      new HashMap<IndexedWord, IndexedWord>();
     for (int i = 0; i < indexes.length; i++) {
       IndexedWord hypNode = hypGraph.getNodeByIndex(i);
       IndexedWord txtNode = IndexedWord.NO_WORD;

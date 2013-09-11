@@ -10,7 +10,7 @@ import java.util.*;
  * @param <V>
  */
 public class MapList<U,V> {
-  protected Map<U, List<V>> map = Generics.newHashMap();
+  protected Map<U, List<V>> map = new HashMap<U, List<V>>();
 
   public MapList() { }
 
