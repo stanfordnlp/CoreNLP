@@ -2,7 +2,6 @@ package edu.stanford.nlp.international.arabic.process;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -14,7 +13,8 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 /**
- * Feature factory for an IOB clitic segmentation model.
+ * Feature factory for the IOB clitic segmentation model described by
+ * Green and DeNero (2012).
  * 
  * @author Spence Green
  *
@@ -23,9 +23,6 @@ import edu.stanford.nlp.util.PaddedList;
 public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
   
   private static final long serialVersionUID = -4560226365250020067L;
-  
-  private static final Pattern isPunc = Pattern.compile("\\p{Punct}+");
-  private static final Pattern isDigit = Pattern.compile("\\p{Digit}+");
   
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
@@ -74,25 +71,28 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     features.add(charn2 + "-n2" );
     features.add(charp + "-p");
     features.add(charp2 + "-p2");
-
-    // Digit and punctuation features for current word
-    if (isPunc.matcher(charc).find()) {
-      features.add("haspunc");
-    }
-    if (isDigit.matcher(charc).find()) {
-      features.add("hasdigit");
-    }
     
     // Length feature 
     if (charc.length() > 1) {
       features.add("length");
     }
     
-    // Unicode block and type features
+    // Character-level class features
+    boolean seenPunc = false;
+    boolean seenDigit = false;
     for (int i = 0; i < charc.length(); ++i) {
-      String cuBlock = Characters.unicodeBlockStringOf(charc.charAt(i));
+      char charcC = charc.charAt(i);
+      if ( ! seenPunc && Characters.isPunctuation(charcC)) {
+        seenPunc = true;
+        features.add("haspunc");        
+      }
+      if ( ! seenDigit && Character.isDigit(charcC)) {
+        seenDigit = true;
+        features.add("hasdigit");        
+      }
+      String cuBlock = Characters.unicodeBlockStringOf(charcC);
       features.add(cuBlock + "-uBlock");
-      String cuType = String.valueOf(Character.getType(charc.charAt(i)));
+      String cuType = String.valueOf(Character.getType(charcC));
       features.add(cuType + "-uType");
     }
 

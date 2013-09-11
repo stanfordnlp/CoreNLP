@@ -28,6 +28,8 @@ public class Options {
   boolean includeNested = false;
   // Create range for all temporals and include range attribute in timex annotation
   boolean includeRange = false;
+  // Look for document date in the document text (if not provided)
+  boolean searchForDocDate = false;
   // TODO: Add default country for holidays and default time format
   // would want a per document default as well
   String grammarFilename = null;
@@ -60,6 +62,8 @@ public class Options {
 
     grammarFilename = props.getProperty(name + ".rules", DEFAULT_GRAMMAR_FILES);
 
+    searchForDocDate = PropertiesUtils.getBool(props, name + ".searchForDocDate", searchForDocDate);
+
     String binderProperty = props.getProperty(name + ".binders");
     int nBinders;
     String[] binderClasses;
@@ -74,7 +78,7 @@ public class Options {
         binderClasses[i] = props.getProperty(binderPrefix);
       }
     }
-    if (nBinders > 0) {
+    if (nBinders > 0 && System.getProperty("STS") == null) {
       binders = new Env.Binder[nBinders];
       for (int i = 0; i < nBinders; i++) {
         int bi = i+1;

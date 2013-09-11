@@ -320,6 +320,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
     rif = new ReaderIteratorFactory();
   }
 
+  @Override
   public Object[] toArray() {
     Iterator<E> iter = iterator();
     ArrayList<Object> al = new ArrayList<Object>();
@@ -390,14 +391,14 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
   }
 
   /**
-   * Iterator of Objects
+   * Iterator of Objects.
    */
   class OBIterator extends AbstractIterator<E> {
 
-    Iterator<Reader> readerIterator;
-    Iterator<E> tok;
-    E nextObject;
-    Reader currReader; // = null;
+    private final Iterator<Reader> readerIterator;
+    private Iterator<E> tok;
+    private E nextObject;
+    private Reader currReader; // = null;
 
     public OBIterator() {
       readerIterator = rif.iterator();
@@ -449,7 +450,8 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
       setNextObject();
       return tmp;
     }
-  }
+
+  } // end class OBIterator
 
   private static final long serialVersionUID = -4030295596701541770L;
 
