@@ -87,8 +87,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   private CoreTokenFactory<IN> tokenFactory;
   public int windowSize;
   // different threads can add or query knownLCWords at the same time,
-  // so we need a concurrent data structure.  created in reinit()
-  protected Set<String> knownLCWords = null;
+  // so we need a concurrent data structure
+  protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
@@ -164,12 +164,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       plainTextReaderAndWriter = defaultReaderAndWriter;
     } else {
       plainTextReaderAndWriter = makePlainTextReaderAndWriter();
-    }
-
-    if (!flags.useKnownLCWords) {
-      knownLCWords = Collections.emptySet();
-    } else if (knownLCWords == null || knownLCWords.size() == 0) {
-      knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
     }
   }
 
@@ -1801,16 +1795,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     writtenNum++;
   }
 
-  /** Print the String features generated from a token. */
+  /** Print the String features generated from a token */
   protected void printFeatureLists(IN wi, Collection<List<String>> features) {
     if (flags.printFeatures == null || writtenNum >= flags.printFeaturesUpto) {
       return;
     }
-    printFeatureListsHelper(wi, features);
-  }
-
-  // Separating this method out lets printFeatureLists be inlined, which is good since it is usually a no-op.
-  private void printFeatureListsHelper(IN wi, Collection<List<String>> features) {
     if (cliqueWriter == null) {
       cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
       writtenNum = 0;

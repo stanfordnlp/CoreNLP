@@ -163,6 +163,9 @@ public class SeqClassifierFlags implements Serializable {
   public boolean retainEntitySubclassification = false;
   public boolean useGazettePhrases = false;
   public boolean makeConsistent = false;
+  public boolean useWordLabelCounts = false;
+  // boolean usePrevInstanceLabel = false;
+  // boolean useNextInstanceLabel = false;
   public boolean useViterbi = true;
 
   public int[] binnedLengths = null;
@@ -687,6 +690,32 @@ public class SeqClassifierFlags implements Serializable {
   // entry (usually a
   // filename)
 
+  // Arabic Subject Detector flags
+  public boolean usePos = false;
+  public boolean useAgreement = false;
+  public boolean useAccCase = false;
+  public boolean useInna = false;
+  public boolean useConcord = false;
+  public boolean useFirstNgram = false;
+  public boolean useLastNgram = false;
+  public boolean collapseNN = false;
+  public boolean useConjBreak = false;
+  public boolean useAuxPairs = false;
+  public boolean usePPVBPairs = false;
+  public boolean useAnnexing = false;
+  public boolean useTemporalNN = false;
+  public boolean usePath = false;
+  public boolean innaPPAttach = false;
+  public boolean markProperNN = false;
+  public boolean markMasdar = false;
+  public boolean useSVO = false;
+
+  public int numTags = 3;
+  public boolean useTagsCpC = false;
+  public boolean useTagsCpCp2C = false;
+  public boolean useTagsCpCp2Cp3C = false;
+  public boolean useTagsCpCp2Cp3Cp4C = false;
+
   public double l1reg = 0.0;
 
   // truecaser flags:
@@ -985,18 +1014,6 @@ public class SeqClassifierFlags implements Serializable {
   public String unsupAlignFile = null;
   public String supFileEN = null;
   public String supFileCH = null;
-  public transient String serializeFeatureIndexTo = null;
-  public String loadFeatureIndexFromEN = null;
-  public String loadFeatureIndexFromCH = null;
-  public double lambdaEN = 1.0;
-  public double lambdaCH = 1.0;
-  public boolean alternateTraining = false;
-  public boolean weightByEntropy = false;
-  public boolean useKL = false;
-  public boolean useHardGE = false;
-  public boolean useCRFforUnsup = false;
-  public boolean useGEforSup = false;
-  public boolean useKnownLCWords = true;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2082,6 +2099,52 @@ public class SeqClassifierFlags implements Serializable {
         transferSigmas = val;
       } else if (key.equalsIgnoreCase("announceObjectBankEntries")) {
         announceObjectBankEntries = true;
+      } else if (key.equalsIgnoreCase("usePos")) {
+        usePos = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAgreement")) {
+        useAgreement = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAccCase")) {
+        useAccCase = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useInna")) {
+        useInna = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useConcord")) {
+        useConcord = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useFirstNgram")) {
+        useFirstNgram = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useLastNgram")) {
+        useLastNgram = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("collapseNN")) {
+        collapseNN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpC")) {
+        useTagsCpC = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpCp2C")) {
+        useTagsCpCp2C = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpCp2Cp3C")) {
+        useTagsCpCp2Cp3C = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpCp2Cp3Cp4C")) {
+        useTagsCpCp2Cp3Cp4C = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("numTags")) {
+        numTags = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("useConjBreak")) {
+        useConjBreak = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAuxPairs")) {
+        useAuxPairs = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("usePPVBPairs")) {
+        usePPVBPairs = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAnnexing")) {
+        useAnnexing = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTemporalNN")) {
+        useTemporalNN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("markProperNN")) {
+        markProperNN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("usePath")) {
+        usePath = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("markMasdar")) {
+        markMasdar = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("innaPPAttach")) {
+        innaPPAttach = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useSVO")) {
+        useSVO = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("mixedCaseMapFile")) {
         mixedCaseMapFile = val;
       } else if (key.equalsIgnoreCase("auxTrueCaseModels")) {
@@ -2457,30 +2520,6 @@ public class SeqClassifierFlags implements Serializable {
         supFileEN = val;
       } else if (key.equalsIgnoreCase("supFileCH")){
         supFileCH = val;
-      } else if (key.equalsIgnoreCase("serializeFeatureIndexTo")){
-        serializeFeatureIndexTo = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromEN")){
-        loadFeatureIndexFromEN = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){
-        loadFeatureIndexFromCH = val;
-      } else if (key.equalsIgnoreCase("lambdaEN")){
-        lambdaEN = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("lambdaCH")){
-        lambdaCH = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("alternateTraining")){
-        alternateTraining = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("weightByEntropy")){
-        weightByEntropy = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKL")){
-        useKL = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHardGE")){
-        useHardGE = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCRFforUnsup")){
-        useCRFforUnsup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGEforSup")){
-        useGEforSup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKnownLCWords")){
-        useKnownLCWords = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
