@@ -368,10 +368,10 @@ public class MachineReading {
       MachineReadingProperties.logger.fine("forceRetraining = " + this.forceRetraining+ ", modelFile.exists = " + modelFile.exists());
       if(! this.forceRetraining&& modelFile.exists()){
         MachineReadingProperties.logger.info("Loading entity extraction model from " + modelName + " ...");
-        entityExtractor = BasicEntityExtractor.load(modelName, MachineReadingProperties.entityClassifier, false);
+        entityExtractor = BasicEntityExtractor.load(modelName, MachineReadingProperties.entityClassifierClass, false);
       } else {
         MachineReadingProperties.logger.info("Training entity extraction model...");
-        entityExtractor = makeEntityExtractor(MachineReadingProperties.entityClassifier, MachineReadingProperties.entityGazetteerPath);
+        entityExtractor = makeEntityExtractor(MachineReadingProperties.entityClassifierClass, MachineReadingProperties.entityGazetteerPath);
         entityExtractor.train(training);
         MachineReadingProperties.logger.info("Serializing entity extraction model to " + modelName + " ...");
         entityExtractor.save(modelName);
