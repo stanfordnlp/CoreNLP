@@ -193,8 +193,8 @@ public class EquivalenceClassEval<IN, OUT> {
       internalGolds = new ArrayList<IN>(golds.size());
     }
     else {
-      internalGuesses = new HashSet<IN>(guesses.size());
-      internalGolds = new HashSet<IN>(golds.size());
+      internalGuesses = Generics.newHashSet(guesses.size());
+      internalGolds = Generics.newHashSet(golds.size());
     }
     internalGuesses.addAll(guesses);
     internalGolds.addAll(golds);
@@ -239,7 +239,7 @@ public class EquivalenceClassEval<IN, OUT> {
    */
   public void display(PrintWriter pw) {
     pw.println("*********Final " + summaryName + " eval stats by antecedent category***********");
-    Set<OUT> keys = new HashSet<OUT>();
+    Set<OUT> keys = Generics.newHashSet();
     keys.addAll(guessed.keySet());
     keys.addAll(gold.keySet());
     displayHelper(keys, pw, guessed, guessedCorrect, gold, goldCorrect);
@@ -257,7 +257,7 @@ public class EquivalenceClassEval<IN, OUT> {
    * Displays the results of the previous Collection pair evaluation.
    */
   public void displayLast(PrintWriter pw) {
-    Set<OUT> keys = new HashSet<OUT>();
+    Set<OUT> keys = Generics.newHashSet();
     keys.addAll(previousGuessed.keySet());
     keys.addAll(previousGold.keySet());
     displayHelper(keys, pw, previousGuessed, previousGuessedCorrect, previousGold, previousGoldCorrect);
@@ -406,7 +406,7 @@ public class EquivalenceClassEval<IN, OUT> {
 
   /* find pads for each key based on length of longest key */
   private static <OUT> Map<OUT, String> getPads(Set<OUT> keys) {
-    Map<OUT, String> pads = new HashMap<OUT, String>();
+    Map<OUT, String> pads = Generics.newHashMap();
     int max = 0;
     for (OUT key : keys) {
       String keyString = key==null ? "null" : key.toString();
@@ -570,8 +570,8 @@ public class EquivalenceClassEval<IN, OUT> {
         internalGuesses = new ArrayList<T>(guesses.size());
         internalGolds = new ArrayList<T>(golds.size());
       } else {
-        internalGuesses = new HashSet<T>(guesses.size());
-        internalGolds = new HashSet<T>(golds.size());
+        internalGuesses = Generics.newHashSet(guesses.size());
+        internalGolds = Generics.newHashSet(golds.size());
       }
       internalGuesses.addAll(guesses);
       internalGolds.addAll(golds);

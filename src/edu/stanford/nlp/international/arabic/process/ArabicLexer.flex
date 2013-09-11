@@ -1,14 +1,14 @@
 package edu.stanford.nlp.international.arabic.process;
 
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.LexedTokenFactory;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
@@ -89,7 +89,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  }
 
  private void setupNormalizationMap() {
-   normMap = new HashMap<String,String>(200);
+   normMap = Generics.newHashMap(200);
 
    // Junk characters that we always remove
    normMap.put("\u0600","#");
@@ -263,9 +263,9 @@ import edu.stanford.nlp.util.PropertiesUtils;
       //String str = prevWordAfter.toString();
       //prevWordAfter.setLength(0);
       CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
-      word.set(OriginalTextAnnotation.class, originalText);
-      //word.set(BeforeAnnotation.class, str);
-      //prevWord.set(AfterAnnotation.class, str);
+      word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
+      //word.set(CoreAnnotations.BeforeAnnotation.class, str);
+      //prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
       //prevWord = word;
       return word;
     } else {

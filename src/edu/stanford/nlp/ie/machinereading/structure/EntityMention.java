@@ -7,7 +7,7 @@ import java.util.List;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 /**
@@ -91,7 +91,7 @@ public class EntityMention extends ExtractionObject {
   }
 
   public Tree getSyntacticHeadTree() {
-    Tree tree = sentence.get(TreeAnnotation.class);
+    Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
     return tree.getLeaves().get(syntacticHeadTokenPosition);
   }
   
@@ -201,8 +201,8 @@ public class EntityMention extends ExtractionObject {
 
       // we are not guaranteed to have CharacterOffsets so we can't use them...
       /*
-    	Integer start = token.get(CharacterOffsetBeginAnnotation.class);
-    	Integer end = token.get(CharacterOffsetEndAnnotation.class);
+    	Integer start = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+    	Integer end = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
 
     	if (start != null && end != null) {
     	  if (lastEnd != -1 && !start.equals(lastEnd)) {
@@ -222,6 +222,7 @@ public class EntityMention extends ExtractionObject {
 
     return sb.toString();
   }
+
   
   @Override
   public String toString() {

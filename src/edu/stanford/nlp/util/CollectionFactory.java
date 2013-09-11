@@ -105,7 +105,7 @@ public abstract class CollectionFactory<T> implements Serializable {
 
     @Override
     public Collection<T> newCollection() {
-      return new HashSet<T>();
+      return Generics.newHashSet();
     }
 
     @Override

@@ -32,15 +32,15 @@ public class FilteringTreebank extends Treebank {
   }
 
   /**
-   * Load trees from given path specification.  Not supported for this
-   * type of treebank.
+   * Load trees from given path specification.  Passes the path and
+   * filter to the underlying treebank.
    *
    * @param path file or directory to load from
    * @param filt a FilenameFilter of files to load
    */
   @Override
   public void loadPath(File path, FileFilter filt) {
-    throw new UnsupportedOperationException();
+    treebank.loadPath(path, filt);
   }
 
   /**

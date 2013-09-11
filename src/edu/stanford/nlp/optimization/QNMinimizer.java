@@ -6,12 +6,12 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -93,7 +93,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   private int maxFevals = -1;
   private int mem = 10; // the number of s,y pairs to retain for BFGS
   private int its = 0; // the number of iterations
-  private Function monitor = null;
+  private final Function monitor;
   private boolean quiet;
   private static final NumberFormat nf = new DecimalFormat("0.000E0");
   private static final NumberFormat nfsec = new DecimalFormat("0.00"); // for times
@@ -143,32 +143,25 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   eScaling scaleOpt = eScaling.DIAGONAL;// eScaling.DIAGONAL;
   eState state = eState.CONTINUE;
 
+
+  public QNMinimizer() {
+    this((Function) null);
+  }
+
   public QNMinimizer(int m) {
-    mem = m;
+    this(null, m);
   }
 
   public QNMinimizer(int m, boolean useRobustOptions) {
-    mem = m;
-    if (useRobustOptions) {
-      this.setRobustOptions();
-    }
-  }
-
-  public QNMinimizer() {
+    this(null, m, useRobustOptions);
   }
 
   public QNMinimizer(Function monitor) {
     this.monitor = monitor;
   }
 
-  public QNMinimizer(FloatFunction monitor) {
-    System.err.println("Doesn't support floats yet");
-    System.exit(1);
-  }
-
   public QNMinimizer(Function monitor, int m) {
-    this.monitor = monitor;
-    mem = m;
+    this(monitor, m, false);
   }
 
   public QNMinimizer(Function monitor, int m, boolean useRobustOptions) {
@@ -177,6 +170,10 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     if (useRobustOptions) {
       this.setRobustOptions();
     }
+  }
+
+  public QNMinimizer(FloatFunction monitor) {
+    throw new UnsupportedOperationException("Doesn't support floats yet");
   }
 
   public void setOldOptions() {
@@ -193,6 +190,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     useNumericalZero = true;
     lsOpt = eLineSearch.MINPACK;
     scaleOpt = eScaling.DIAGONAL;
+  }
+
+  public void useOWLQN(boolean use, double lambda) {
+    this.useOWLQN = use;
+    this.lambdaOWL = lambda;
   }
 
   @Override
@@ -460,8 +462,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
           if (evals.get(i) > baseline) {
             improved = true;
             break;
-          }  
-        } 
+          }
+        }
         if (!improved)
           return eState.TERMINATE_EVALIMPROVE;
       }
@@ -1164,27 +1166,27 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     }
   }
 
+  // todo [cdm 2013]: Can this be sped up by returning a Pair rather than copying array?
   private double evaluateFunction(DiffFunction dfunc, double[] x, double[] grad) {
     System.arraycopy(dfunc.derivativeAt(x), 0, grad, 0, grad.length);
     fevals += 1;
     return dfunc.valueAt(x);
   }
 
-  public void useOWLQN(boolean use, double lambda) {
-    this.useOWLQN = use;
-    this.lambdaOWL = lambda;
+  private static Set<Integer> initializeParamRange(Function func, double[] x) {
+    if (func instanceof HasL1ParamRange) {
+      return ((HasL1ParamRange)func).getL1ParamRange(x);
+    } else {
+      Set<Integer> paramRange = Generics.newHashSet(x.length);
+      for (int i = 0; i < x.length; i++) {
+        paramRange.add(i);
+      }
+      return paramRange;
+    }
   }
 
-  private double[] projectOWL(double[] x, double[] orthant, Function func) {
-    Set<Integer> paramRange = null;
-    if (func instanceof HasL1ParamRange) {
-      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
-    } else {
-      paramRange = new HashSet<Integer>(x.length);
-      for (int i = 0; i < x.length; i++)
-        paramRange.add(i);
-    }
-
+  private static double[] projectOWL(double[] x, double[] orthant, Function func) {
+    Set<Integer> paramRange = initializeParamRange(func, x);
     for (int i : paramRange) {
       if (x[i] * orthant[i] <= 0)
         x[i] = 0;
@@ -1192,49 +1194,27 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     return x;
   }
 
-  private double l1NormOWL(double[] x, Function func) {
-    Set<Integer> paramRange = null;
-    if (func instanceof HasL1ParamRange) {
-      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
-    } else {
-      paramRange = new HashSet<Integer>(x.length);
-      for (int i = 0; i < x.length; i++)
-        paramRange.add(i);
-    }
-    double sum = 0;
+  private static double l1NormOWL(double[] x, Function func) {
+    Set<Integer> paramRange = initializeParamRange(func, x);
+    double sum = 0.0;
     for (int i: paramRange) {
       sum += Math.abs(x[i]);
     }
-
     return sum;
   }
 
-  private void constrainSearchDir(double[] dir, double[] fg, double[] x, Function func) {    
-    Set<Integer> paramRange = null;
-    if (func instanceof HasL1ParamRange) {
-      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
-    } else {
-      paramRange = new HashSet<Integer>(x.length);
-      for (int i = 0; i < x.length; i++)
-        paramRange.add(i);
-    }
+  private static void constrainSearchDir(double[] dir, double[] fg, double[] x, Function func) {
+    Set<Integer> paramRange = initializeParamRange(func, x);
     for (int i: paramRange) {
-      if (dir[i] * fg[i] >= 0) {
-        dir[i] = 0;
+      if (dir[i] * fg[i] >= 0.0) {
+        dir[i] = 0.0;
       }
     }
   }
 
   private double[] pseudoGradientOWL(double[] x, double[] grad, Function func) {
+    Set<Integer> paramRange = initializeParamRange(func, x); // initialized below
     double[] newGrad = new double[grad.length];
-    Set<Integer> paramRange = null;
-    if (func instanceof HasL1ParamRange) {
-      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
-    } else {
-      paramRange = new HashSet<Integer>(x.length);
-      for (int i = 0; i < x.length; i++)
-        paramRange.add(i);
-    }
 
     // compute pseudo gradient
     for (int i = 0; i < x.length; i++) {
@@ -1307,7 +1287,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
       // Evaluate the function and gradient values
       double value  =  func.valueAt(newX);
-      
+
       // Compute the L1 norm of the variables and add it to the object value
       double norm = l1NormOWL(newX, func);
       value += norm * lambdaOWL;

@@ -4,15 +4,17 @@ import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Annotate temporal expressions with {@link SUTime}.
@@ -199,7 +201,7 @@ public class TimeAnnotator implements Annotator {
           timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
         if (timeExpressions != null) {
           allTimeExpressions.addAll(timeExpressions);
-          sentence.set(TimexAnnotations.class, timeExpressions);
+          sentence.set(TimeAnnotations.TimexAnnotations.class, timeExpressions);
           for (CoreMap timeExpression:timeExpressions) {
             timeExpression.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
           }
@@ -214,7 +216,7 @@ public class TimeAnnotator implements Annotator {
     } else {
       allTimeExpressions = annotateSingleSentence(annotation, docDate, timeIndex);
     }
-    annotation.set(TimexAnnotations.class, allTimeExpressions);
+    annotation.set(TimeAnnotations.TimexAnnotations.class, allTimeExpressions);
   }
   
   /**
@@ -229,4 +231,13 @@ public class TimeAnnotator implements Annotator {
     return timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docDate, timeIndex);
   }
 
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(SUTIME_REQUIREMENT);
+  }
 }

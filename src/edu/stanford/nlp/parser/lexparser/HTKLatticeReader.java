@@ -571,7 +571,9 @@ public class HTKLatticeReader {
       op.testOptions.maxLength = 80;
       op.testOptions.maxSpanForTags = 80;
       LexicalizedParser lp = LexicalizedParser.loadModel(parseGram, op);
-      LexicalizedParserQuery pq = lp.parserQuery();
+      // TODO: somehow merge this into ParserQuery instead of being
+      // LexicalizedParserQuery specific
+      LexicalizedParserQuery pq = lp.lexicalizedParserQuery();
       pq.parse(lr);
       Tree t = pq.getBestParse();
       t.pennPrint();

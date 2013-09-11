@@ -242,6 +242,9 @@ public class Extractor implements Serializable {
    */
   static String getParenthesizedArg(String str, int num) {
     String[] args = str.split("\\s*[,()]\\s*");
+    if (args.length <= num) {
+      return null;
+    }
     // System.err.println("getParenthesizedArg split " + str + " into " + args.length + " pieces; returning number " + num);
     // for (int i = 0; i < args.length; i++) {
     //   System.err.println("  " + args[i]);

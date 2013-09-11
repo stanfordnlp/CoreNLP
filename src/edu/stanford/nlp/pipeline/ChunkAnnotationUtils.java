@@ -824,18 +824,18 @@ public class ChunkAnnotationUtils {
           try {
             Class valueClass = AnnotationLookup.getValueType(lookup.coreKey);
             if (valueClass == String.class) {
-              chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, value);              
+              chunk.set(lookup.coreKey, value);              
             } else {
              Method valueOfMethod = valueClass.getMethod("valueOf", String.class);
               if (valueOfMethod != null) {
-                chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, valueOfMethod.invoke(valueClass, value));
+                chunk.set(lookup.coreKey, valueOfMethod.invoke(valueClass, value));
               }
             }
           } catch (Exception ex) {
             throw new RuntimeException("Unable to annotate attribute " + attr, ex);
           }
         } else {
-          chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, null);
+          chunk.set(lookup.coreKey, null);
         }
       } else {
         throw new UnsupportedOperationException("Unknown attributes: " + attr);

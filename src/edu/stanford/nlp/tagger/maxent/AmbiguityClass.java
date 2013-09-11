@@ -59,7 +59,7 @@ public class AmbiguityClass {
       for (String tag : tags) {
         add(ttags.getIndex(tag));
       }
-      // s = new HashSet<String>();
+      // s = Generics.newHashSet();
       // for (Integer sortedId : sortedIds) {
       //   s.add(ttags.getTag(sortedId));
       // }

@@ -1,7 +1,7 @@
 package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.Triple;
 
 import java.io.File;
@@ -45,8 +45,8 @@ public class SelfTrainingCRFClassifier extends CRFClassifier<CoreLabel> {
 
     for (int i = 0; i <cliqueTree.length(); i++) {
       CoreLabel wi = document.get(i);
-      //correct = wi.answer().equals(wi.get(GoldAnswerAnnotation.class)) ? 1 : 0;
-      //System.out.print(correct + "\t" + wi.word() + "\t" + wi.answer() + "\t" + wi.get(GoldAnswerAnnotation.class) + "\t <-->");
+      //correct = wi.answer().equals(wi.get(CoreAnnotations.GoldAnswerAnnotation.class)) ? 1 : 0;
+      //System.out.print(correct + "\t" + wi.word() + "\t" + wi.answer() + "\t" + wi.get(CoreAnnotations.GoldAnswerAnnotation.class) + "\t <-->");
       
       String highestLabel = "";
       double highestProb  = 0.0;
@@ -73,12 +73,12 @@ public class SelfTrainingCRFClassifier extends CRFClassifier<CoreLabel> {
       // 1 means entity labeled as other entity
       // 2 means entity labled as other
       // 3 means other labled as entity
-      int errorType  = highestLabel.equals(wi.get(GoldAnswerAnnotation.class)) ? 0 : 1;                   //check if error
+      int errorType  = highestLabel.equals(wi.get(CoreAnnotations.GoldAnswerAnnotation.class)) ? 0 : 1;                   //check if error
       errorType  = highestLabel.equals("O") && errorType    != 0 ? 2 : errorType;  //check if entity labled other
-      errorType  = wi.get(GoldAnswerAnnotation.class).equals("O") && errorType != 0 ? 3 : errorType;  //check if other labled as entity
-      //System.out.print(correct + "\t" + wi.word() + "\t" + highestLabel + "\t" + wi.get(GoldAnswerAnnotation.class) + "\t <-->" + line);
-      //if (!wi.get(GoldAnswerAnnotation.class).equals("O")){
-      System.out.println(highestProb + "\t" + errorType + "\t" + (wi.get(GoldAnswerAnnotation.class).equals("O") ? 1 : 0) );
+      errorType  = wi.get(CoreAnnotations.GoldAnswerAnnotation.class).equals("O") && errorType != 0 ? 3 : errorType;  //check if other labled as entity
+      //System.out.print(correct + "\t" + wi.word() + "\t" + highestLabel + "\t" + wi.get(CoreAnnotations.GoldAnswerAnnotation.class) + "\t <-->" + line);
+      //if (!wi.get(CoreAnnotations.GoldAnswerAnnotation.class).equals("O")){
+      System.out.println(highestProb + "\t" + errorType + "\t" + (wi.get(CoreAnnotations.GoldAnswerAnnotation.class).equals("O") ? 1 : 0) );
       //}
     }
   }
@@ -109,7 +109,7 @@ public class SelfTrainingCRFClassifier extends CRFClassifier<CoreLabel> {
     nGram.offer("junk");
     for (int i = 0; i < gramSize -1; i++) {
       CoreLabel wi = document.get(i);
-      nGram.offer(wi.get(GoldAnswerAnnotation.class));      
+      nGram.offer(wi.get(CoreAnnotations.GoldAnswerAnnotation.class));      
     }
 
     // compute probablities
@@ -117,7 +117,7 @@ public class SelfTrainingCRFClassifier extends CRFClassifier<CoreLabel> {
     for (int docIndex = gramSize-1; docIndex < cliqueTree.length(); docIndex++) {
       //update ngram
       CoreLabel wi = document.get(docIndex);
-      nGram.offer(wi.get(GoldAnswerAnnotation.class));    
+      nGram.offer(wi.get(CoreAnnotations.GoldAnswerAnnotation.class));    
       nGram.remove();
       
       //set labels to zero

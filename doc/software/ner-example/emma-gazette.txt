@@ -1,5 +1,0 @@
-PERS Emma Woodhouse
-PERS Jane Austen
-PERS Miss Taylor
-PERS Mr. Frank Churchill
-PERS Mrs. and Miss Bates

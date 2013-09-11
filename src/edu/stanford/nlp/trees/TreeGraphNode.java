@@ -3,7 +3,6 @@ package edu.stanford.nlp.trees;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -358,7 +357,7 @@ public class TreeGraphNode extends Tree implements HasParent {
       System.err.println("Warning: you are trying to add an arc from node " + this + " to node " + node + ", but they do not belong to the same TreeGraph!");
     }
     if (!label.containsKey(arcLabel)) {
-      label.set(arcLabel, new HashSet<TreeGraphNode>());
+      label.set(arcLabel, Generics.<TreeGraphNode>newHashSet());
     }
     return ((Collection) label.get(arcLabel)).add(node);
   }

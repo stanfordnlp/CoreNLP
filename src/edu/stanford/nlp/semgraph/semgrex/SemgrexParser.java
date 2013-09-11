@@ -5,6 +5,7 @@ package edu.stanford.nlp.semgraph.semgrex;
 //imports
 import java.io.StringReader;
 import java.util.*;
+import edu.stanford.nlp.util.Generics;
 
 class SemgrexParser implements SemgrexParserConstants {
 
@@ -450,7 +451,7 @@ class SemgrexParser implements SemgrexParserConstants {
         boolean isEmpty = false;
         Token attr = null;
         Token value = null;
-        Map<String, String> attributes = new HashMap<String, String>();
+        Map<String, String> attributes = Generics.newHashMap();
         NodePattern pat;
     jj_consume_token(23);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {

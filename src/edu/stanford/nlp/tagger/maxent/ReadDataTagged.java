@@ -14,14 +14,13 @@ import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.tagger.io.TaggedFileReader;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -56,7 +55,7 @@ public class ReadDataTagged {
     this.maxentTagger = maxentTagger;
     this.pairs = pairs;
     fileRecords = TaggedFileRecord.createRecords(config, config.getFile());
-    Map<String, IntCounter<String>> wordTagCounts = new HashMap<String, IntCounter<String>>();
+    Map<String, IntCounter<String>> wordTagCounts = Generics.newHashMap();
     for (TaggedFileRecord record : fileRecords) {
       loadFile(record.reader(), wordTagCounts);
     }
@@ -105,7 +104,7 @@ public class ReadDataTagged {
           words.add(tw.word());
           tags.add(tw.tag());
           if (!maxentTagger.tagTokens.containsKey(tw.tag())) {
-            maxentTagger.tagTokens.put(tw.tag(), new HashSet<String>());
+            maxentTagger.tagTokens.put(tw.tag(), Generics.<String>newHashSet());
           }
           maxentTagger.tagTokens.get(tw.tag()).add(tw.word());
         }

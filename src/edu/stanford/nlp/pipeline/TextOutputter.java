@@ -17,7 +17,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -67,7 +67,7 @@ public class TextOutputter {
         os.println();
 
         // display the parse tree for this sentence
-        Tree tree = sentence.get(TreeAnnotation.class);
+        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         if (tree != null){
           pipeline.getConstituentTreePrinter().printTree(tree, os);
           // It is possible turn off the semantic graphs, in which

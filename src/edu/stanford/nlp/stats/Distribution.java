@@ -12,6 +12,7 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Immutable class for representing normalized, smoothed discrete distributions
@@ -801,7 +802,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
     final double p = 1000;
 
     String UNK = "!*UNKNOWN*!";
-    Set<String> s = new HashSet<String>();
+    Set<String> s = Generics.newHashSet();
     s.add(UNK);
 
     // fill counter with roughly Zipfian distribution
