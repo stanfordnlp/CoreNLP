@@ -16,9 +16,11 @@ import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
 import edu.stanford.nlp.time.Timex;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
@@ -28,6 +30,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import nu.xom.*;
+
 
 public class XMLOutputter {
   // the namespace is set in the XSLT file
@@ -173,30 +176,47 @@ public class XMLOutputter {
   // todo [cdm 2012]: This should be extended to handle CopyAnnotation.
   private static void addDependencyTreeInfo(Element depInfo, SemanticGraph graph, List<CoreLabel> tokens, String curNS) {
     if(graph != null) {
+      // The SemanticGraph doesn't explicitely encode the ROOT node,
+      // so we print that out ourselves
+      for (IndexedWord root : graph.getRoots()) {
+        String rel = GrammaticalRelation.ROOT.getLongName();
+        rel = rel.replaceAll("\\s+", ""); // future proofing
+        int source = 0;
+        int target = root.index();
+        String sourceWord = "ROOT";
+        String targetWord = tokens.get(target - 1).word();
+
+        addDependencyInfo(depInfo, rel, source, sourceWord, target, targetWord, curNS);        
+      }
       for (SemanticGraphEdge edge : graph.edgeListSorted()) {
         String rel = edge.getRelation().toString();
         rel = rel.replaceAll("\\s+", "");
         int source = edge.getSource().index();
         int target = edge.getTarget().index();
+        String sourceWord = tokens.get(source - 1).word();
+        String targetWord = tokens.get(target - 1).word();
 
-        Element depElem = new Element("dep", curNS);
-        depElem.addAttribute(new Attribute("type", rel));
-
-        Element govElem = new Element("governor", curNS);
-        govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
-        govElem.appendChild(tokens.get(source - 1).word());
-        depElem.appendChild(govElem);
-
-        Element dependElem = new Element("dependent", curNS);
-        dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
-        dependElem.appendChild(tokens.get(target -1).word());
-        depElem.appendChild(dependElem);
-
-        depInfo.appendChild(depElem);
+        addDependencyInfo(depInfo, rel, source, sourceWord, target, targetWord, curNS);
       }
     }
   }
 
+  private static void addDependencyInfo(Element depInfo, String rel, int source, String sourceWord, int target, String targetWord, String curNS) {
+    Element depElem = new Element("dep", curNS);
+    depElem.addAttribute(new Attribute("type", rel));
+    
+    Element govElem = new Element("governor", curNS);
+    govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
+    govElem.appendChild(sourceWord);
+    depElem.appendChild(govElem);
+    
+    Element dependElem = new Element("dependent", curNS);
+    dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
+    dependElem.appendChild(targetWord);
+    depElem.appendChild(dependElem);
+    
+    depInfo.appendChild(depElem);
+  }
 
   /**
    * Generates the XML content for MachineReading entities

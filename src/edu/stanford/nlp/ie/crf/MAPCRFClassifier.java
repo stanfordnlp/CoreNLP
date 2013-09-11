@@ -122,16 +122,16 @@
 
     boolean labelIndicesExists = false;
     if (labelIndices == null) {
-      labelIndices = new HashIndex[windowSize];
-      for (int i = 0; i < labelIndices.length; i++) {
-        labelIndices[i] = new HashIndex<CRFLabel>();
+      labelIndices = new ArrayList<Index<CRFLabel>>(windowSize);
+      for (int i = 0; i < labelIndices.size(); i++) {
+        labelIndices.add(new HashIndex<CRFLabel>());
       }
     } else {
       System.err.println("TEST: using old labelIndices");
       labelIndicesExists = true;
     }
 
-    Index<CRFLabel> labelIndex = labelIndices[windowSize - 1];
+    Index<CRFLabel> labelIndex = labelIndices.get(windowSize - 1);
 
     boolean classIndexExists = false;
     if (classIndex == null) {
@@ -282,12 +282,12 @@
           CRFLabel label = labelIndex.get(i);
           for (int j = windowSize - 2; j >= 0; j--) {
             label = label.getOneSmallerLabel();
-            labelIndices[j].add(label);
+            labelIndices.get(j).add(label);
           }
         }
       } else {
-        for (int i = 0; i < labelIndices.length; i++) {
-          labelIndices[i] = allLabels(i + 1, classIndex);
+        for (int i = 0; i < labelIndices.size(); i++) {
+          labelIndices.set(i, allLabels(i + 1, classIndex));
         }
       }
 
@@ -501,7 +501,7 @@
     //find the size of the mean and sigma vectors
     int arraysize = 0;
     for (int count = 0; count < map.length; count++) {
-      arraysize += labelIndices[map[count]].size();
+      arraysize += labelIndices.get(map[count]).size();
     }
 
     System.err.println("trainMaxEnt: new arraysize for mean: " + arraysize);
@@ -622,7 +622,7 @@
       int arraysize = 0;
 
       for (int count = 0; count < map.length; count++) {
-        arraysize += labelIndices[map[count]].size();
+        arraysize += labelIndices.get(map[count]).size();
       }
 
       double[] mean = new double[arraysize];

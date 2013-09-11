@@ -153,11 +153,8 @@ public class SemanticGraphFactory {
     // which meant they were ignored by the RTE system. Changed. (pado)
     // See also the SemanticGraph constructor.
 
-    if (gs.root().headWordNode() != null) {
-      roots.add(gs.root().headWordNode());
-    }
     //System.err.println(deps.toString());
-    return new SemanticGraph(deps, roots, docID, sentIndex, lemmatize, threadSafe);
+    return new SemanticGraph(deps, docID, sentIndex, lemmatize);
   }
 
 

@@ -1704,21 +1704,22 @@ public class SemanticGraph implements Serializable {
   /**
    * This is the constructor used by the parser.
    */
-  public SemanticGraph(Collection<TypedDependency> dependencies, Collection<TreeGraphNode> roots) {
-    this(dependencies, roots, "", 0);
+  public SemanticGraph(Collection<TypedDependency> dependencies) {
+    this(dependencies, "", 0);
   }
 
-  public SemanticGraph(Collection<TypedDependency> dependencies, Collection<TreeGraphNode> rootNodes, String docID,
+  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
       int sentIndex) {
-    this(dependencies, rootNodes, docID, sentIndex, false, false);
+    this(dependencies, docID, sentIndex, false);
   }
 
   /**
    *
    *
    */
-  public SemanticGraph(Collection<TypedDependency> dependencies, Collection<TreeGraphNode> rootNodes, String docID,
-      int sentIndex, boolean lemmatize, boolean threadSafe) {
+  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
+      int sentIndex, boolean lemmatize) {
+    Morphology morphology = (lemmatize) ? new Morphology() : null;
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
     roots = new HashSet<IndexedWord>();
@@ -1740,13 +1741,8 @@ public class SemanticGraph implements Serializable {
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
         depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
-          if (!threadSafe) {
-            govVertex.setLemma(Morphology.lemmaStatic(govVertex.value(), govVertex.tag(), true));
-            depVertex.setLemma(Morphology.lemmaStatic(depVertex.value(), depVertex.tag(), true));
-          } else {
-            govVertex.setLemma(Morphology.lemmaStaticSynchronized(govVertex.value(), govVertex.tag(), true));
-            depVertex.setLemma(Morphology.lemmaStaticSynchronized(depVertex.value(), depVertex.tag(), true));
-          }
+          govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
+          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
         addVertex(govVertex);
         addVertex(depVertex);
@@ -1757,11 +1753,7 @@ public class SemanticGraph implements Serializable {
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
         depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
-          if (!threadSafe) {
-            depVertex.setLemma(Morphology.lemmaStatic(depVertex.value(), depVertex.tag(), true));
-          } else {
-            depVertex.setLemma(Morphology.lemmaStaticSynchronized(depVertex.value(), depVertex.tag(), true));
-          }
+          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
 
         roots.add(depVertex);
@@ -1774,15 +1766,6 @@ public class SemanticGraph implements Serializable {
     // fragments,
     // which meant they were ignored by the RTE system. Changed. (pado)
     // See also SemanticGraphFactory.makeGraphFromTree().
-
-    // this is now ignored -- we reconstruct the real root from the root relation in the list of dependencies
-    //if (rootNodes != null) {
-    // for (TreeGraphNode rootNode : rootNodes) {
-    //   CoreLabel rootLabel = new CoreLabel(rootNode.label());
-    //    IndexedWord root = new IndexedWord(docID, sentIndex, rootNode.index(), rootLabel);
-    //    roots.add(root);
-    //  }
-    //}
   }
 
   /**

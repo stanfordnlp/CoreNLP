@@ -872,7 +872,7 @@ public class ChunkAnnotationUtils {
     }
   }
 
-  public static <T extends CoreMap> void appendCoreMap(List res,
+  public static <T extends CoreMap> void appendCoreMap(List<T> res,
                                                        CoreMap cm, String text, int start, int end,
                                                        CoreTokenFactory<T> factory) {
     T scm = createCoreMap(cm, text, start, end, factory);

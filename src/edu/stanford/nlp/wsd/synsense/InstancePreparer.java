@@ -17,10 +17,10 @@ public class InstancePreparer {
 
   // datasets
   protected static List<String> words;
-  private static List[] senseTrainData = null;
-  private static List[] senseTestData = null;
-  private static List[] subcatTrainData = null;
-  private static List[] subcatTestData = null;
+  private static List<Instance>[] senseTrainData = null;
+  private static List<Instance>[] senseTestData = null;
+  private static List<Instance>[] subcatTrainData = null;
+  private static List<Instance>[] subcatTestData = null;
 
   private static Options op = new Options();
 
@@ -78,13 +78,13 @@ public class InstancePreparer {
     SubcatProbabilityMetric subcatParser = new SubcatProbabilityMetric(word + ".parser", op);
     System.out.println("Parsing data instances.");
     try {
-      senseTrainData[i] = new ArrayList();
+      senseTrainData[i] = new ArrayList<Instance>();
       readSenseMarkedInstances(word + ".v.train", senseTrainData[i], subcatParser);
-      senseTestData[i] = new ArrayList();
+      senseTestData[i] = new ArrayList<Instance>();
       readSenseMarkedInstances(word + ".v.test", senseTestData[i], subcatParser);
-      subcatTrainData[i] = new ArrayList();
+      subcatTrainData[i] = new ArrayList<Instance>();
       readSubcatMarkedInstances(word + ".subcat.train", subcatTrainData[i], subcatParser);
-      subcatTestData[i] = new ArrayList();
+      subcatTestData[i] = new ArrayList<Instance>();
       readSubcatMarkedInstances(word + ".subcat.test", subcatTestData[i], subcatParser);
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -114,7 +114,7 @@ public class InstancePreparer {
     }
   }
 
-  private static void readSenseMarkedInstances(String filename, List list, SubcatProbabilityMetric parser) throws Exception {
+  private static void readSenseMarkedInstances(String filename, List<Instance> list, SubcatProbabilityMetric parser) throws Exception {
     System.out.println("Reading and processing sense instances from " + filename);
     String line;
     BufferedReader senseInstanceFile = new BufferedReader(new FileReader(filename));
@@ -131,7 +131,7 @@ public class InstancePreparer {
     System.out.println("Got " + numTotal + " sense marked data instances");
   }
 
-  private static void readSubcatMarkedInstances(String filename, List list, SubcatProbabilityMetric parser) {
+  private static void readSubcatMarkedInstances(String filename, List<Instance> list, SubcatProbabilityMetric parser) {
     System.out.println("Reading and processing subcat instances from " + filename);
     // cdm Jun 2004: I updated this to be functionally equivalent when I
     // updated NPTmpRetainingTreeNormalizer, but I'm not sure that you're 
@@ -186,7 +186,7 @@ public class InstancePreparer {
     }
     subcatTestData = new List[words.size()];
     for (int i = 0; i < subcatTestData.length; i++) {
-      subcatTestData[i] = new ArrayList();
+      subcatTestData[i] = new ArrayList<Instance>();
     }
   }
 }

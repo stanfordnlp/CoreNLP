@@ -40,7 +40,7 @@ import java.util.*;
  *
  * @author Joseph Smarr (jsmarr@stanford.edu)
  */
-public class PnpClassifier implements Classifier, Serializable {
+public class PnpClassifier implements Classifier<Object, String>, Serializable {
   // runtime debug flags
   private boolean DEBUG = false; // whether to print debugging output
   private boolean PRINT_SCORES = false; // whether to print scores for each category for each line or just the best-guess category (normal mode)
@@ -69,8 +69,8 @@ public class PnpClassifier implements Classifier, Serializable {
   private double lengthNormalization; // learned constant for normalizing word probabilities based on their length
 
   // cross-validation storage and parameters
-  private List[] heldOutExamples; // held-out examples for parameter estimation (for each category)
-  private List[] heldOutWeights; // Double weights for each held-out example (for each category)
+  private List<String>[] heldOutExamples; // held-out examples for parameter estimation (for each category)
+  private List<Double>[] heldOutWeights; // Double weights for each held-out example (for each category)
   private boolean parametersTuned; // has tuneParameters been called
   private final int heldOutPercent;  // percent of training examples to hold out for parameter estimation
   private final double charConvergenceMargin; // stop char n-gram's EM when each param changes by less than this amount
@@ -86,7 +86,7 @@ public class PnpClassifier implements Classifier, Serializable {
   private final boolean usePriorBoost; // whether to boost the category prior in the model
 
   // mapping from Object labels to internal category numbers (used for Classify API)
-  private final Index labelIndex;
+  private final Index<Object> labelIndex;
 
   //////////////////////////////////
   // variables for each category ///
@@ -96,7 +96,7 @@ public class PnpClassifier implements Classifier, Serializable {
   private int[] categoryCounts; // total number of training examples for each category
 
   // length n-gram
-  private ClassicCounter[] lengthSequenceCounts; // List of Integers (length n-gram) -> count
+  private ClassicCounter<String>[] lengthSequenceCounts; // List of Integers (length n-gram) -> count
   private double[][][] lengthInterpolationConstants; // deleted-interpolation weights for length n-gram (category x context-length x bin)
   private int[] wordTotalCounts; // total number of words seen for each category (used to normalize unigram counts)
 
@@ -108,11 +108,11 @@ public class PnpClassifier implements Classifier, Serializable {
   private ClassicCounter<String>[] cachedCharSequenceInterpolatedProbs; // String (char n-gram) -> cached interpolated prob
 
   // words by length
-  private ClassicCounter[] wordCounts; // String (word) -> count
-  private ClassicCounter[] wordTotalsByLength; // Integer (word length) -> total # words
+  private ClassicCounter<String>[] wordCounts; // String (word) -> count
+  private ClassicCounter<Integer>[] wordTotalsByLength; // Integer (word length) -> total # words
 
   // char-word interpolation
-  private ClassicCounter[] charWordInterpolationConstants; // Integer (word length) -> weight [0-1] on n-gram-vs.-word for this length
+  private ClassicCounter<Integer>[] charWordInterpolationConstants; // Integer (word length) -> weight [0-1] on n-gram-vs.-word for this length
 
   // word-length normalization
   private double[] lengthNormalizations; // learned constant in word-legth normalizations for each category
@@ -164,7 +164,7 @@ public class PnpClassifier implements Classifier, Serializable {
     }
   }
 
-  public Collection labels() {
+  public Collection<Object> labels() {
     return labelIndex.objectsList();
   }
 
@@ -249,7 +249,7 @@ public class PnpClassifier implements Classifier, Serializable {
     usePriorBoost = Boolean.parseBoolean(props.getProperty("usePriorBoost"));
 
     // initializes and zeroes all counts
-    labelIndex = new HashIndex();
+    labelIndex = new HashIndex<Object>();
     initCounts();
   }
 
@@ -321,7 +321,7 @@ public class PnpClassifier implements Classifier, Serializable {
     // trains on held-out examples
     for (int c = 1; c <= numCategories; c++) {
       for (int i = 0; i < heldOutExamples[c].size(); i++) {
-        addCounts((String) heldOutExamples[c].get(i), c, false, ((Double) heldOutWeights[c].get(i)).doubleValue());
+        addCounts(heldOutExamples[c].get(i), c, false, (heldOutWeights[c].get(i)).doubleValue());
       }
     }
   }
@@ -409,28 +409,28 @@ public class PnpClassifier implements Classifier, Serializable {
 
     for (int c = 1; c <= numCategories; c++) {
       categoryCounts[c] = 0;
-      lengthSequenceCounts[c] = new ClassicCounter();
+      lengthSequenceCounts[c] = new ClassicCounter<String>();
       for (int i = 0; i < ln; i++) {
         for (int b = 0; b < getLengthBinCount(); b++) {
           lengthInterpolationConstants[c][i][b] = 0.5;
         }
       }
       wordTotalCounts[c] = 0;
-      charSequenceCounts[c] = new ClassicCounter();
+      charSequenceCounts[c] = new ClassicCounter<String>();
       for (int i = 0; i < cn; i++) {
         for (int b = 0; b < getCharBinCount(); b++) {
           charInterpolationConstants[c][i][b] = 0.5;
         }
       }
-      charSequenceTotalsByLength[c] = new ClassicCounter();
+      charSequenceTotalsByLength[c] = new ClassicCounter<Integer>();
       charTotalCounts[c] = 0;
-      cachedCharSequenceInterpolatedProbs[c] = new ClassicCounter();
-      wordCounts[c] = new ClassicCounter();
-      wordTotalsByLength[c] = new ClassicCounter();
-      charWordInterpolationConstants[c] = new ClassicCounter();
+      cachedCharSequenceInterpolatedProbs[c] = new ClassicCounter<String>();
+      wordCounts[c] = new ClassicCounter<String>();
+      wordTotalsByLength[c] = new ClassicCounter<Integer>();
+      charWordInterpolationConstants[c] = new ClassicCounter<Integer>();
       lengthNormalizations[c] = 0;
-      heldOutExamples[c] = new ArrayList();
-      heldOutWeights[c] = new ArrayList();
+      heldOutExamples[c] = new ArrayList<String>();
+      heldOutWeights[c] = new ArrayList<Double>();
     }
 
     priorBoost = 1;
@@ -549,7 +549,7 @@ public class PnpClassifier implements Classifier, Serializable {
    * Note, need to do something better here, because this messes up the probability distributions.
    * Specifically, if you prune the n-gram abcd, you need to remove counts from abc and so on.
    */
-  private void pruneCounts(ClassicCounter counter, double cutoff) {
+  private <T> void pruneCounts(ClassicCounter<T> counter, double cutoff) {
     counter.removeAll(Counters.keysBelow(counter, cutoff));
   }
 
@@ -569,8 +569,8 @@ public class PnpClassifier implements Classifier, Serializable {
           examplesByIndex.put(example, Integer.valueOf(i++));
         } else {
           // collapse weight into original index
-          Double oldWeight = (Double) heldOutWeights[c].get(index.intValue());
-          Double curWeight = (Double) heldOutWeights[c].get(i);
+          Double oldWeight = heldOutWeights[c].get(index.intValue());
+          Double curWeight = heldOutWeights[c].get(i);
           Double combinedWeight = new Double(oldWeight.doubleValue() + curWeight.doubleValue());
           heldOutWeights[c].set(index.intValue(), combinedWeight);
           heldOutWeights[c].remove(i);
@@ -595,15 +595,15 @@ public class PnpClassifier implements Classifier, Serializable {
       ClassicCounter<String> oldCachedInterpolatedProbs = null; // interpolated probs from previous model
       for (int n = 0; n < ln; n++) {
         // pulls out all held-out ngrams for EM
-        List[] ngrams = new List[getLengthBinCount()]; // separate held-out lists for each bin
+        List<String>[] ngrams = new List[getLengthBinCount()]; // separate held-out lists for each bin
         ClassicCounter<String> cachedEmpiricalProbs = new ClassicCounter<String>(); // empirical probs of n-grams
         ClassicCounter<String> cachedInterpolatedProbs = new ClassicCounter<String>(); // interpolated probs of n-1-grams
 
         for (int i = 0; i < ngrams.length; i++) {
-          ngrams[i] = new ArrayList();
+          ngrams[i] = new ArrayList<String>();
         }
         for (int i = 0; i < heldOutExamples[c].size(); i++) {
-          String line = (String) heldOutExamples[c].get(i);
+          String line = heldOutExamples[c].get(i);
           String wordLengths = getWordLengthsString(line);
           for (int j = ln; j <= wordLengths.length(); j++) {
             // adds the n-gram to the appropriate bin, looking at the appropriate history length
@@ -629,7 +629,7 @@ public class PnpClassifier implements Classifier, Serializable {
             eI = 0.001; // ensures weights for bins with no examples stay at 0.5
             for (int i = 0; i < ngrams[b].size(); i++) {
               // computes expectations for each lambda
-              String ngram = (String) ngrams[b].get(i);
+              String ngram = ngrams[b].get(i);
               tE = lengthInterpolationConstants[c][n][b] * cachedEmpiricalProbs.getCount(ngram);
               double interpolatedProb;
               if (oldCachedInterpolatedProbs == null) {
@@ -679,14 +679,14 @@ public class PnpClassifier implements Classifier, Serializable {
       ClassicCounter<String> oldCachedInterpolatedProbs = null; // interpolated probs from previous model
       for (int n = 0; n < cn; n++) {
         // pulls out all held-out ngrams for EM
-        List[] ngrams = new List[getCharBinCount()]; // separate held-out lists for each bin
+        List<String>[] ngrams = new List[getCharBinCount()]; // separate held-out lists for each bin
         ClassicCounter<String> cachedEmpiricalProbs = new ClassicCounter<String>(); // empirical probs of n-grams
         ClassicCounter<String> cachedInterpolatedProbs = new ClassicCounter<String>(); // interpolated probs of n-1-grams
         for (int i = 0; i < ngrams.length; i++) {
-          ngrams[i] = new ArrayList();
+          ngrams[i] = new ArrayList<String>();
         }
         for (int i = 0; i < heldOutExamples[c].size(); i++) {
-          String line = (String) heldOutExamples[c].get(i);
+          String line = heldOutExamples[c].get(i);
           for (int j = cn; j <= line.length(); j++) {
             // adds the n-gram to the appropriate bin, looking at the appropriate history length
             String ngram = line.substring(j - n - 1, j);
@@ -711,7 +711,7 @@ public class PnpClassifier implements Classifier, Serializable {
             eI = 0.001; // ensures weights for bins with no examples stay at 0.5
             for (int i = 0; i < ngrams[b].size(); i++) {
               // computes expectations for each lambda
-              String ngram = (String) ngrams[b].get(i);
+              String ngram = ngrams[b].get(i);
               tE = charInterpolationConstants[c][n][b] * cachedEmpiricalProbs.getCount(ngram);
               double interpolatedProb;
               if (oldCachedInterpolatedProbs == null) {
@@ -759,9 +759,9 @@ public class PnpClassifier implements Classifier, Serializable {
       }
 
       // pulls out each word with context from the held out data and sorts the words by length
-      HashMap<Integer, List> wordsWithContextByLength = new HashMap<Integer, List>(); // Integer (word length) -> List of Strings (words with context)
+      HashMap<Integer, List<String>> wordsWithContextByLength = new HashMap<Integer, List<String>>(); // Integer (word length) -> List of Strings (words with context)
       for (int i = 0; i < heldOutExamples[c].size(); i++) {
-        String line = (String) heldOutExamples[c].get(i);
+        String line = heldOutExamples[c].get(i);
         List<String> wordsWithContext = getWordsWithContext(line);
         for (int j = 0; j < wordsWithContext.size(); j++) {
           // pulls out the word with context
@@ -884,7 +884,7 @@ public class PnpClassifier implements Classifier, Serializable {
       cachedWordsWithContext[c] = new String[heldOutExamples[c].size()][];
       cachedCharWordScores[c] = new double[heldOutExamples[c].size()][][];
       for (int i = 0; i < heldOutExamples[c].size(); i++) {
-        String line = getEndMarkedString((String) heldOutExamples[c].get(i));
+        String line = getEndMarkedString(heldOutExamples[c].get(i));
         endMarkedHeldOutExamples[c][i] = line;
         List<String> wordsWithContext = getWordsWithContext(line);
         cachedWordsWithContext[c][i] = wordsWithContext.toArray(new String[0]);
@@ -915,7 +915,7 @@ public class PnpClassifier implements Classifier, Serializable {
       score = 0; // total weight of correctly classified held-out examples
       for (int c = 1; c <= numCategories; c++) {
         for (int i = 0; i < heldOutExamples[c].size(); i++) {
-          double weight = ((Double) heldOutWeights[c].get(i)).doubleValue();
+          double weight = (heldOutWeights[c].get(i)).doubleValue();
           ClassicCounter<Integer> catScores = new ClassicCounter<Integer>(); // pnp score of this example for each category
           // classifies the current example and sees if it matches the correct category
           for (int cat = 1; cat <= numCategories; cat++) {
@@ -956,7 +956,7 @@ public class PnpClassifier implements Classifier, Serializable {
       cachedLogProbs[c] = new double[heldOutExamples[c].size()][numCategories + 1];
       for (int i = 0; i < heldOutExamples[c].size(); i++) {
         for (int cat = 1; cat <= numCategories; cat++) {
-          cachedLogProbs[c][i][cat] = getLogProb((String) heldOutExamples[c].get(i), cat);
+          cachedLogProbs[c][i][cat] = getLogProb(heldOutExamples[c].get(i), cat);
         }
       }
     }
@@ -973,7 +973,7 @@ public class PnpClassifier implements Classifier, Serializable {
       score = 0; // total weight of correctly classified held-out examples
       for (int c = 1; c <= numCategories; c++) {
         for (int i = 0; i < heldOutExamples[c].size(); i++) {
-          double weight = ((Double) heldOutWeights[c].get(i)).doubleValue();
+          double weight = (heldOutWeights[c].get(i)).doubleValue();
           ClassicCounter<Integer> catScores = new ClassicCounter<Integer>(); // pnp score of this example for each category
 
           // classifies the current example and sees if it matches the correct category
@@ -1006,8 +1006,8 @@ public class PnpClassifier implements Classifier, Serializable {
     for (int cat = 1; cat <= numCategories; cat++) {
       for (int i = 0; i < heldOutExamples[cat].size(); i++) {
         // gets the current held-out example (should already be end-marked)
-        String line = (String) heldOutExamples[cat].get(i);
-        double weight = ((Double) heldOutWeights[cat].get(i)).doubleValue();
+        String line = heldOutExamples[cat].get(i);
+        double weight = (heldOutWeights[cat].get(i)).doubleValue();
         if (getBestCategory(line) == cat) {
           score += weight; // counts weight of correct guesses
         }
@@ -1681,11 +1681,11 @@ public class PnpClassifier implements Classifier, Serializable {
    * (String) targetField as the label. This is useful when evaluating NE
    * classification accuracy on an IE document collection.
    */
-  public static BasicDataCollection makeDatums(Corpus taggedDocs) {
-    BasicDataCollection datums = new BasicDataCollection();
+  public static BasicDataCollection<Object, String> makeDatums(Corpus taggedDocs) {
+    BasicDataCollection<Object, String> datums = new BasicDataCollection<Object, String>();
     for (int i = 0, sz = taggedDocs.size(); i < sz; i++) {
       // for each doc...
-      TypedTaggedDocument ttd = (TypedTaggedDocument) taggedDocs.get(i);
+      TypedTaggedDocument<Integer> ttd = (TypedTaggedDocument<Integer>) taggedDocs.get(i);
       Map<Integer,Set<List<String>>> answerWordSequencesByType = new AnswerChecker(ttd).getAnswerWordSequences(false);
       for (Integer type : answerWordSequencesByType.keySet()) {
         // for each answer (list of Strings)...
@@ -1704,8 +1704,8 @@ public class PnpClassifier implements Classifier, Serializable {
    * Pulls the PNP line (sole String feature) from the given Datum.
    * This only works for Datums made with {@link #makeDatum}.
    */
-  public static String getLine(Datum example) {
-    return ((String) new ArrayList(example.asFeatures()).get(0));
+  public static String getLine(Datum<Object, String> example) {
+    return new ArrayList<String>(example.asFeatures()).get(0);
   }
 
   /**
@@ -1714,7 +1714,7 @@ public class PnpClassifier implements Classifier, Serializable {
    * PnpClassifier (categories numbers start at 1).
    * Don't try to call other methods with 0 for a category!
    */
-  public int getCategory(Datum example) {
+  public int getCategory(Datum<Object, String> example) {
     return (labelIndex.indexOf(example.label()) + 1);
   }
 
@@ -1725,7 +1725,7 @@ public class PnpClassifier implements Classifier, Serializable {
    * a pre-defined number of categories, so adding too many categories will
    * cause errors.
    */
-  public void addCounts(Datum example) {
+  public void addCounts(Datum<Object, String> example) {
     labelIndex.add(example.label());
     addCounts(getLine(example), getCategory(example));
   }
@@ -1735,7 +1735,7 @@ public class PnpClassifier implements Classifier, Serializable {
    * Create Datums from Strings with {@link #makeDatum} (using <tt>null</tt>
    * for label is fine since it's not used here.
    */
-  public Object classOf(Datum example) {
+  public Object classOf(Datum<Object, String> example) {
     return (labelIndex.get(getBestCategory(getLine(example)) - 1)); // category nums start at 1
   }
 
@@ -1746,8 +1746,8 @@ public class PnpClassifier implements Classifier, Serializable {
    *
    * @see #getScore
    */
-  public ClassicCounter scoresOf(Datum example) {
-    ClassicCounter scores = new ClassicCounter();
+  public ClassicCounter<Object> scoresOf(Datum<Object, String> example) {
+    ClassicCounter<Object> scores = new ClassicCounter<Object>();
     String line = getLine(example);
     for (int i = 0; i < labelIndex.size(); i++) {
       scores.setCount(labelIndex.get(i), getScore(line, i + 1)); // category nums start at 1

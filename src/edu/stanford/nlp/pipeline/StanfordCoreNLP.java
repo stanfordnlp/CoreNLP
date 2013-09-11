@@ -237,6 +237,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
     } catch (ClassNotFoundException ex) {
       return false;
+    } catch (NoClassDefFoundError ex) {
+      return false;
     }
     return true;
   }

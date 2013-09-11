@@ -70,22 +70,6 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     Integer ramageClusterId = ramageToken.get(CorefClusterIdAnnotation.class);
     Assert.assertNotNull(ramageClusterId);
     Assert.assertSame(ramageClusterId, heToken.get(CorefClusterIdAnnotation.class));
-
-    /* test old representation - to be deleted
-    // test CorefClusterAnnotation
-    Set<CoreLabel> coreferentToRamage = ramageToken.get(CorefClusterAnnotation.class);
-    Assert.assertEquals(coreferentToRamage, heToken.get(CorefClusterAnnotation.class));
-    /*
-     * These tests fail but should pass!  This appears to be a bug in CyclicCoreLabel -- if you loop over coreferentToRamage, one of the tokens in there .equals(heToken),
-     * but coreferentToRamage.contains(heToken) is false.  This seems to be because the hashCode() for heToken is different from the hashCode for the item in coreferentToRamage which
-     * .equals(heToken).  In other words, x.equals(y) && x.hashCode() != y.hashCode() which is a violation of The Hash Code Contract.  Yikes!
-     * 
-
-    Assert.assertTrue(coreferentToRamage.contains(heToken));
-
-    Set<CoreLabel> coreferentToHe = ramageToken.get(CorefClusterAnnotation.class);
-    Assert.assertTrue(coreferentToHe.contains(ramageToken));
-     */
   }
 
   /**

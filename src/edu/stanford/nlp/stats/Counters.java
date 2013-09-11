@@ -1368,7 +1368,7 @@ public class Counters {
    * Return the sum of squares (squared L2 norm).
    * 
    * @param c
-   * @return
+   * @return the L2 norm of the values in c
    */
   public static <E, C extends Counter<E>> double sumSquares(C c) {
     double lenSq = 0.0;
@@ -2113,7 +2113,7 @@ public class Counters {
    * 
    * @param counter
    * @param index
-   * @return
+   * @return the values corresponding to the index
    */
   public static <E> double[] asArray(Counter<E> counter, Index<E> index) {
     if (index.size() == 0) {

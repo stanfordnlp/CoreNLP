@@ -137,7 +137,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifier<IN> {
 
-  Index<CRFLabel>[] labelIndices;
+  List<Index<CRFLabel>> labelIndices;
   Index<String> tagIndex;
   Pair<double[][], double[][]> entityMatrices;
 
@@ -199,10 +199,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
     this.classIndex = (crf.classIndex != null) ? new HashIndex<String>(crf.classIndex.objectsList()) : null;
     if (crf.labelIndices != null) {
-      this.labelIndices = new HashIndex[crf.labelIndices.length];
-      for (int i = 0; i < crf.labelIndices.length; i++) {
-        this.labelIndices[i] = (crf.labelIndices[i] != null) ? new HashIndex<CRFLabel>(crf.labelIndices[i]
-            .objectsList()) : null;
+      this.labelIndices = new ArrayList<Index<CRFLabel>>(crf.labelIndices.size());
+      for (int i = 0; i < crf.labelIndices.size(); i++) {
+        this.labelIndices.add((crf.labelIndices.get(i) != null) ? new HashIndex<CRFLabel>(crf.labelIndices.get(i).objectsList()) : null);
       }
     } else {
       this.labelIndices = null;
@@ -301,9 +300,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     // Create a map of other crf labels to this crf labels
     Map<CRFLabel, CRFLabel> crfLabelMap = new HashMap<CRFLabel, CRFLabel>();
-    for (int i = 0; i < crf.labelIndices.length; i++) {
-      for (int j = 0; j < crf.labelIndices[i].size(); j++) {
-        CRFLabel labels = crf.labelIndices[i].get(j);
+    for (int i = 0; i < crf.labelIndices.size(); i++) {
+      for (int j = 0; j < crf.labelIndices.get(i).size(); j++) {
+        CRFLabel labels = crf.labelIndices.get(i).get(j);
         int[] newLabelIndices = new int[i + 1];
         for (int ci = 0; ci <= i; ci++) {
           String classLabel = crf.classIndex.get(labels.getLabel()[ci]);
@@ -311,7 +310,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         }
         CRFLabel newLabels = new CRFLabel(newLabelIndices);
         crfLabelMap.put(labels, newLabels);
-        int k = this.labelIndices[i].indexOf(newLabels); // the indexing is needed, even when not printed out!
+        int k = this.labelIndices.get(i).indexOf(newLabels); // the indexing is needed, even when not printed out!
         // System.err.println("LabelIndices " + i + " " + labels + ": " + j +
         // " mapped to " + k);
       }
@@ -326,7 +325,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // Create new weights
     double[][] newWeights = new double[numFeatures][];
     for (int i = 0; i < numFeatures; i++) {
-      int length = labelIndices[map[i]].size();
+      int length = labelIndices.get(map[i]).size();
       newWeights[i] = new double[length];
       if (i < oldNumFeatures) {
         assert (length >= weights[i].length);
@@ -349,9 +348,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
       int featureTypeIndex = map[newIndex];
       for (int j = 0; j < crf.weights[i].length; j++) {
-        CRFLabel labels = crf.labelIndices[featureTypeIndex].get(j);
+        CRFLabel labels = crf.labelIndices.get(featureTypeIndex).get(j);
         CRFLabel newLabels = crfLabelMap.get(labels);
-        int k = this.labelIndices[featureTypeIndex].indexOf(newLabels);
+        int k = this.labelIndices.get(featureTypeIndex).indexOf(newLabels);
         weights[newIndex][k] += crf.weights[i][j] * weight;
       }
     }
@@ -373,7 +372,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (this.windowSize != crf.windowSize) {
       throw new RuntimeException("Incompatible CRFClassifier: windowSize does not match");
     }
-    if (this.labelIndices.length != crf.labelIndices.length) {
+    if (this.labelIndices.size() != crf.labelIndices.size()) {
       // Should match since this should be same as the windowSize
       throw new RuntimeException("Incompatible CRFClassifier: labelIndices length does not match");
     }
@@ -391,8 +390,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     assert (weights.length == oldNumFeatures1);
 
     // Combine weights of this classifier with other classifier
-    for (int i = 0; i < labelIndices.length; i++) {
-      this.labelIndices[i].addAll(crf.labelIndices[i].objectsList());
+    for (int i = 0; i < labelIndices.size(); i++) {
+      this.labelIndices.get(i).addAll(crf.labelIndices.get(i).objectsList());
     }
     System.err.println("Combining weights: will automatically match labelIndices");
     combineWeights(crf, weight);
@@ -596,7 +595,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       List<String> rowHeaders = new ArrayList<String>();
       List<String> line = new ArrayList<String>();
 
-      for (int p = 0; p < labelIndices.length; p++) {
+      for (int p = 0; p < labelIndices.size(); p++) {
         if (j + p >= document.size()) {
           continue;
         }
@@ -610,10 +609,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
             if (index >= 0) {
               // line.add(feature+"["+(-p)+"]");
               rowHeaders.add(feature + '[' + (-p) + ']');
-              double[] values = new double[labelIndices[0].size()];
-              for (CRFLabel label : labelIndices[k]) {
+              double[] values = new double[labelIndices.get(0).size()];
+              for (CRFLabel label : labelIndices.get(k)) {
                 int[] l = label.getLabel();
-                double v = weights[index][labelIndices[k].indexOf(label)];
+                double v = weights[index][labelIndices.get(k).indexOf(label)];
                 values[l[l.length - 1 - p]] += v;
               }
               for (double value : values) {
@@ -758,12 +757,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       featureIndices[i] = new HashSet<String>();
     }
 
-    labelIndices = new HashIndex[windowSize];
-    for (int i = 0; i < labelIndices.length; i++) {
-      labelIndices[i] = new HashIndex<CRFLabel>();
+    labelIndices = new ArrayList<Index<CRFLabel>>(windowSize);
+    for (int i = 0; i < windowSize; i++) {
+      labelIndices.add(new HashIndex<CRFLabel>());
     }
 
-    Index<CRFLabel> labelIndex = labelIndices[windowSize - 1];
+    Index<CRFLabel> labelIndex = labelIndices.get(windowSize - 1);
 
     classIndex = new HashIndex<String>();
     // classIndex.add("O");
@@ -868,12 +867,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         CRFLabel label = labelIndex.get(i);
         for (int j = windowSize - 2; j >= 0; j--) {
           label = label.getOneSmallerLabel();
-          labelIndices[j].add(label);
+          labelIndices.get(j).add(label);
         }
       }
     } else {
-      for (int i = 0; i < labelIndices.length; i++) {
-        labelIndices[i] = allLabels(i + 1, classIndex);
+      for (int i = 0; i < labelIndices.size(); i++) {
+        labelIndices.set(i, allLabels(i + 1, classIndex));
       }
     }
 
@@ -2602,13 +2601,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     String line = br.readLine();
     // first line should be this format:
-    // labelIndices.length=\t%d
+    // labelIndices.size()=\t%d
     String[] toks = line.split("\\t");
     if (!toks[0].equals("labelIndices.length=")) {
       throw new RuntimeException("format error");
     }
     int size = Integer.parseInt(toks[1]);
-    labelIndices = new HashIndex[size];
+    labelIndices = new ArrayList<Index<CRFLabel>>(size);
     for (int labelIndicesIdx = 0; labelIndicesIdx < size; labelIndicesIdx++) {
       line = br.readLine();
       // first line should be this format:
@@ -2619,7 +2618,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         throw new RuntimeException("format error");
       }
       int labelIndexSize = Integer.parseInt(toks[1]);
-      labelIndices[labelIndicesIdx] = new HashIndex<CRFLabel>();
+      labelIndices.add(new HashIndex<CRFLabel>());
       int count = 0;
       while (count < labelIndexSize) {
         line = br.readLine();
@@ -2636,17 +2635,17 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         }
         CRFLabel crfL = new CRFLabel(crflabel);
 
-        labelIndices[labelIndicesIdx].add(crfL);
+        labelIndices.get(labelIndicesIdx).add(crfL);
         count++;
       }
     }
 
     /**************************************/
-    System.err.printf("DEBUG: labelIndices.length=\t%d\n", labelIndices.length);
-    for (int i = 0; i < labelIndices.length; i++) {
-      System.err.printf("DEBUG: labelIndices[%d].size()=\t%d\n", i, labelIndices[i].size());
-      for (int j = 0; j < labelIndices[i].size(); j++) {
-        int[] label = labelIndices[i].get(j).getLabel();
+    System.err.printf("DEBUG: labelIndices.length=\t%d\n", labelIndices.size());
+    for (int i = 0; i < labelIndices.size(); i++) {
+      System.err.printf("DEBUG: labelIndices[%d].size()=\t%d\n", i, labelIndices.get(i).size());
+      for (int j = 0; j < labelIndices.get(i).size(); j++) {
+        int[] label = labelIndices.get(i).get(j).getLabel();
         List<Integer> list = new ArrayList<Integer>();
         for (int l : label) {
           list.add(l);
@@ -3018,11 +3017,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     try {
       PrintWriter pw = new PrintWriter(new GZIPOutputStream(new FileOutputStream(serializePath)));
 
-      pw.printf("labelIndices.length=\t%d\n", labelIndices.length);
-      for (int i = 0; i < labelIndices.length; i++) {
-        pw.printf("labelIndices[%d].size()=\t%d\n", i, labelIndices[i].size());
-        for (int j = 0; j < labelIndices[i].size(); j++) {
-          int[] label = labelIndices[i].get(j).getLabel();
+      pw.printf("labelIndices.length=\t%d\n", labelIndices.size());
+      for (int i = 0; i < labelIndices.size(); i++) {
+        pw.printf("labelIndices[%d].size()=\t%d\n", i, labelIndices.get(i).size());
+        for (int j = 0; j < labelIndices.get(i).size(); j++) {
+          int[] label = labelIndices.get(i).get(j).getLabel();
           List<Integer> list = new ArrayList<Integer>();
           for (int l : label) {
             list.add(l);
@@ -3202,7 +3201,17 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   // can't have right types in deserialization
   public void loadClassifier(ObjectInputStream ois, Properties props) throws ClassCastException, IOException,
       ClassNotFoundException {
-    labelIndices = (Index<CRFLabel>[]) ois.readObject();
+    Object o = ois.readObject();
+    // TODO: when we next break serialization, get rid of this fork and only read the List<Index>
+    if (o instanceof List) {
+      labelIndices = (List<Index<CRFLabel>>) o;
+    } else {
+      Index<CRFLabel>[] indexArray = (Index<CRFLabel>[]) o;
+      labelIndices = new ArrayList<Index<CRFLabel>>(indexArray.length);
+      for (int i = 0; i < indexArray.length; ++i) {
+        labelIndices.add(indexArray[i]);
+      }
+    }
     classIndex = (Index<String>) ois.readObject();
     featureIndex = (Index<String>) ois.readObject();
     flags = (SeqClassifierFlags) ois.readObject();
@@ -3501,7 +3510,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // line.add(feature+"["+(-p)+"]");
       // rowHeaders.add(feature + '[' + (-p) + ']');
       double[] v = weights[index];
-      Index<CRFLabel> l = this.labelIndices[0];
+      Index<CRFLabel> l = this.labelIndices.get(0);
       p.println(feature + "\t\t");
       for (CRFLabel label : l) {
         p.print(label.toString(classIndex) + ":" + v[l.indexOf(label)] + "\t");

@@ -160,9 +160,9 @@ public class BasicModel implements Model {
     ClassicCounter<String> wordCountsGivenThisSense;
     double totalWordsGivenThisSense;
     if (wordsGivenSenseCache.containsKey(sense)) {
-      Pair p = wordsGivenSenseCache.get(sense);
-      wordCountsGivenThisSense = (ClassicCounter<String>) p.first;
-      totalWordsGivenThisSense = ((Double) p.second).doubleValue();
+      Pair<ClassicCounter<String>, Double> p = wordsGivenSenseCache.get(sense);
+      wordCountsGivenThisSense = p.first;
+      totalWordsGivenThisSense = p.second;
     } else {
       wordCountsGivenThisSense = wordsGivenSenseCounts.getCounter(sense);
       totalWordsGivenThisSense = wordCountsGivenThisSense.totalCount();
