@@ -47,6 +47,24 @@ public class TextOutputter {
       os.printf("Document: ID=%s (%d sentences, %d tokens)\n", docId, nSentences, nTokens);
     }
 
+    // Display docdate if available
+    String docDate =  annotation.get(CoreAnnotations.DocDateAnnotation.class);
+    if (docDate != null) {
+      os.printf("Document Date: %s\n", docDate);
+    }
+
+    // Display doctype if available
+    String docType =  annotation.get(CoreAnnotations.DocTypeAnnotation.class);
+    if (docType != null) {
+      os.printf("Document Type: %s\n", docType);
+    }
+
+    // Display docsourcetype if available
+    String docSourceType =  annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
+    if (docSourceType != null) {
+      os.printf("Document Source Type: %s\n", docSourceType);
+    }
+
     // display each sentence in this annotation
     if (sentences != null) {
       for(int i = 0, sz = sentences.size(); i < sz; i ++) {
@@ -75,7 +93,8 @@ public class TextOutputter {
           // printer.  This might be relevant if using corenlp for a
           // language which doesn't have dependencies, for example.
           if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-            pipeline.getDependencyTreePrinter().printTree(tree, os);
+            os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
+            os.print("\n");
           }
         }
 
@@ -130,11 +149,11 @@ public class TextOutputter {
           os.println("\t(" + mention.sentNum + "," +
               mention.headIndex + ",[" +
               mention.startIndex + "," +
-              mention.endIndex + ")) -> (" +
+              mention.endIndex + "]) -> (" +
               representative.sentNum + "," +
               representative.headIndex + ",[" +
               representative.startIndex + "," +
-              representative.endIndex + ")), that is: \"" +
+              representative.endIndex + "]), that is: \"" +
               mention.mentionSpan + "\" -> \"" +
               representative.mentionSpan + "\"");
         }

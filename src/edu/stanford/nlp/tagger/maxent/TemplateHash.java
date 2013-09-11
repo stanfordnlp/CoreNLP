@@ -66,7 +66,7 @@ class ListInstances {
 
   /*
   Methods unused: commented for now.
-  public void save(OutDataStreamFile rf) {
+  public void save(DataOutputStream rf) {
     try {
       rf.writeInt(v.size());
       int[] arr = getInstances();
@@ -78,7 +78,7 @@ class ListInstances {
     }
   }
 
-  public void read(InDataStreamFile rf) {
+  public void read(DataInputStream rf) {
     try {
       int len = rf.readInt();
       for (int i = 0; i < len; i++) {
@@ -131,7 +131,7 @@ public class TemplateHash {
 
   protected void add(int nFeatFrame, History history, int number) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.getSize();
+    int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
       wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
@@ -157,7 +157,7 @@ public class TemplateHash {
 
   protected void addPrev(int nFeatFrame, History history) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.getSize();
+    int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
       wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
@@ -182,7 +182,7 @@ public class TemplateHash {
   }
 
   /* Methods unused. Commented for now.
-  public void save(OutDataStreamFile rf) {
+  public void save(DataOutputStream rf) {
     try {
       Pair[] keys = new Pair[tempHash.keySet().size()];
       tempHash.keySet().toArray(keys);

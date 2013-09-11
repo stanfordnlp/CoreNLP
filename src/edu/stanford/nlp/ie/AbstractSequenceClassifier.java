@@ -85,18 +85,17 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public FeatureFactory<IN> featureFactory;
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
-  protected int windowSize;
+  public int windowSize;
   // different threads can add or query knownLCWords at the same time,
   // so we need a concurrent data structure
   protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
-  private boolean VERBOSE = true;
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
   }
 
-  private AtomicInteger threadCompletionCounter = new AtomicInteger(0);
+  private final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
@@ -707,6 +706,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence);
 
   /**
+   * Classification is finished for the document.
+   * Do any cleanup (if information was stored as part of the document for global classification)
+   * @param document
+   */
+  public void finalizeClassification(final CoreMap document) {
+  }
+
+  /**
    * Train the classifier based on values in flags. It will use the first of
    * these variables that is defined: trainFiles (and baseTrainDir),
    * trainFileList, trainFile.
@@ -800,6 +807,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // TODO
     return new ObjectBankWrapper<IN>(flags, new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(string),
         readerAndWriter), knownLCWords);
+  }
+
+  public ObjectBank<List<IN>> makeObjectBankFromFile(String filename) {
+    return makeObjectBankFromFile(filename, defaultReaderAndWriter);
   }
 
   public ObjectBank<List<IN>> makeObjectBankFromFile(String filename,
@@ -936,7 +947,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   {
     BufferedReader is = new BufferedReader(new InputStreamReader(System.in, flags.inputEncoding));
     for (String line; (line = is.readLine()) != null; ) {
-      ObjectBank<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
+      Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
+      if (flags.keepEmptySentences && documents.size() == 0) {
+        documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
+      }
       classifyAndWriteAnswers(documents, readerWriter);
     }
   }
@@ -996,14 +1010,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter);
   }
 
-  public void classifyAndWriteAnswers(Collection<File> testFiles)
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
     throws IOException
   {
-    classifyAndWriteAnswers(testFiles, plainTextReaderAndWriter);
+    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter);
   }
 
-  public void classifyAndWriteAnswers(Collection<File> testFiles,
-                                      DocumentReaderAndWriter<IN> readerWriter)
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
+                                           DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
@@ -1011,7 +1025,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter);
   }
 
-  private void classifyAndWriteAnswers(ObjectBank<List<IN>> documents,
+  private void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                        DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
@@ -1040,7 +1054,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         doc = classify(doc);
 
         int completedNo = threadCompletionCounter.incrementAndGet();
-        if (VERBOSE) System.err.println(completedNo + " examples completed");
+        if (flags.verboseMode) System.err.println(completedNo + " examples completed");
         return doc;
       }
       @Override
@@ -1781,11 +1795,16 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     writtenNum++;
   }
 
-  /** Print the String features generated from a token */
+  /** Print the String features generated from a token. */
   protected void printFeatureLists(IN wi, Collection<List<String>> features) {
     if (flags.printFeatures == null || writtenNum >= flags.printFeaturesUpto) {
       return;
     }
+    printFeatureListsHelper(wi, features);
+  }
+
+  // Separating this method out lets printFeatureLists be inlined, which is good since it is usually a no-op.
+  private void printFeatureListsHelper(IN wi, Collection<List<String>> features) {
     if (cliqueWriter == null) {
       cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
       writtenNum = 0;

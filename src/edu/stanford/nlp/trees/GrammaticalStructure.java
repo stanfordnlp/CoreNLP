@@ -89,6 +89,9 @@ public abstract class GrammaticalStructure extends TreeGraph {
     super(t); // makes a Tree with TreeGraphNode nodes
     // add head word and tag to phrase nodes
     root.percolateHeads(hf);
+    if (root.value() == null) {
+      root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
+    }
     // add dependencies, using heads
     this.puncFilter = puncFilter;
     NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
@@ -125,7 +128,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   /**
    * Create a grammatical structure from its string representation.
    *
-   * Like buildCoNNLXGrammaticStructure,
+   * Like buildCoNLLXGrammaticalStructure,
    * this method fakes up the parts of the tree structure that are not
    * used by the grammatical relation transformation operations.
    *
@@ -237,12 +240,12 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
   private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations) {
-    // if (t.numChildren() > 0) {          // don't do leaves
     if (t.isPhrasal()) {    // don't do leaves or preterminals!
       TreeGraphNode tHigh = t.highestNodeWithSameHead();
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
           for (Tree u : egr.getRelatedNodes(t, root)) {
+            //System.out.println("Adding " + egr.getShortName() + " from " + t + " to " + u );
             tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
           }
         }
@@ -262,7 +265,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param getExtra If true, the list of typed dependencies will contain extra ones.
    *              If false, the list of typed dependencies will respect the tree structure.
    */
-  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> f) {
+  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter) {
     List<TypedDependency> basicDep = Generics.newArrayList();
 
     for (Dependency<Label, Label, Object> d : dependencies()) {
@@ -304,18 +307,43 @@ public abstract class GrammaticalStructure extends TreeGraph {
     if (rootDep != null) {
       TypedDependency rootTypedDep =
         new TypedDependency(ROOT, dependencyRoot, rootDep);
-      if (f.accept(rootTypedDep)) {
+      if (puncTypedDepFilter.accept(rootTypedDep)) {
         basicDep.add(rootTypedDep);
       }
     }
 
+    postProcessDependencies(basicDep);
+
     if (getExtra) {
       getExtras(basicDep);
-      getTreeDeps(root(), basicDep, f); // adds stuff to basicDep
+      // adds stuff to basicDep based on the tregex patterns over the tree
+      getTreeDeps(root(), basicDep, puncTypedDepFilter, extraTreeDepFilter());
     }
     Collections.sort(basicDep);
 
     return basicDep;
+  }
+
+  /**
+   * Returns a Filter which checks dependencies for usefulness as
+   * extra tree-based dependencies.  By default, everything is
+   * accepted.  One example of how this can be useful is in the
+   * English dependencies, where the REL dependency is used as an
+   * intermediate and we do not want this to be added when we make a
+   * second pass over the trees for missing dependencies.
+   */
+  protected Filter<TypedDependency> extraTreeDepFilter() {
+    return Filters.acceptFilter();
+  }
+
+  /**
+   * Post process the dependencies in whatever way this language
+   * requires.  For example, English might replace "rel" dependencies
+   * with either dobj or pobj depending on the surrounding
+   * dependencies.
+   */
+  protected void postProcessDependencies(List<TypedDependency> basicDep) {
+    // no post processing by default
   }
 
   /**
@@ -328,16 +356,19 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
 
-  /** Look through the tree t and adds to the List basicDep dependencies
-   *  which aren't in it but which satisfy the filter f.
+  /** Look through the tree t and adds to the List basicDep
+   *  additional dependencies which aren't
+   *  in the List but which satisfy the filter puncTypedDepFilter.
    *
    * @param t The tree to examine (not changed)
    * @param basicDep The list of dependencies which may be augmented
-   * @param f Additional dependencies are added only if they pass this filter
+   * @param puncTypedDepFilter The filter that may skip punctuation dependencies
+   * @param extraTreeDepFilter Additional dependencies are added only if they pass this filter
    */
   private static void getTreeDeps(TreeGraphNode t, List<TypedDependency> basicDep,
-                                  Filter<TypedDependency> f) {
-    if (t.isPhrasal()) {          // don't do leaves of POS tags (chris changed this from numChildren > 0 in 2010)
+                                  Filter<TypedDependency> puncTypedDepFilter,
+                                  Filter<TypedDependency> extraTreeDepFilter) {
+    if (t.isPhrasal()) {          // don't do leaves or POS tags (chris changed this from numChildren > 0 in 2010)
       Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> depMap = getAllDependents(t);
       for (Class<? extends GrammaticalRelationAnnotation> depName : depMap.keySet()) {
         for (TreeGraphNode depNode : depMap.get(depName)) {
@@ -348,7 +379,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
             if (!rels.isEmpty()) {
               for (GrammaticalRelation rel : rels) {
                 TypedDependency newDep = new TypedDependency(rel, gov, dep);
-                if (!basicDep.contains(newDep) && f.accept(newDep)) {
+                if (!basicDep.contains(newDep) && puncTypedDepFilter.accept(newDep) && extraTreeDepFilter.accept(newDep)) {
                   newDep.setExtra();
                   basicDep.add(newDep);
                 }
@@ -359,7 +390,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
       // now recurse into children
       for (Tree kid : t.children()) {
-        getTreeDeps((TreeGraphNode) kid, basicDep, f);
+        getTreeDeps((TreeGraphNode) kid, basicDep, puncTypedDepFilter, extraTreeDepFilter);
       }
     }
   }
@@ -371,6 +402,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       this.npf = f;
     }
 
+    @Override
     public boolean accept(Dependency<Label, Label, Object> d) {
       if (d == null) {
         return false;
@@ -394,6 +426,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       this.npf = f;
     }
 
+    @Override
     public boolean accept(TypedDependency d) {
       if (d == null) return false;
 
@@ -666,7 +699,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
     if (includeExtras) {
-      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
     }
     collapseDependencies(tdl, false, includeExtras);
     return tdl;
@@ -696,7 +729,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
     if (includeExtras) {
-      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter));
+      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
     }
     collapseDependencies(tdl, true, includeExtras);
     return tdl;
@@ -802,13 +835,14 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param node The node to return dependents for
    * @return map of dependencies
    */
-  private static Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
+  private static <GR extends GrammaticalRelationAnnotation> // separating this out helps some compilers
+  Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
     Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> newMap = Generics.newHashMap();
 
     for (Class<?> o : node.label.keySet()) {
       if (GrammaticalRelationAnnotation.class.isAssignableFrom(o)) {
         // ignore any non-GrammaticalRelationAnnotation element
-        Class<? extends GrammaticalRelationAnnotation> typedKey = ErasureUtils.uncheckedCast(o);
+        Class<GR> typedKey = ErasureUtils.uncheckedCast(o);
         newMap.put(typedKey, node.label.get(typedKey));
       }
     }
@@ -860,6 +894,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   private static final long serialVersionUID = 2286294455343892678L;
 
   private static class NameComparator<X> implements Comparator<X> {
+    @Override
     public int compare(X o1, X o2) {
       String n1 = o1.toString();
       String n2 = o2.toString();
@@ -977,7 +1012,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    *
    * @throws IOException
    */
-  public static List<GrammaticalStructure> readCoNLLXGrammaticStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
+  public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
     LineNumberReader reader = new LineNumberReader(new FileReader(fileName));
     List<GrammaticalStructure> gsList = new LinkedList<GrammaticalStructure>();
 
@@ -996,7 +1031,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         if (tokenFields.isEmpty())
           continue; // skip excess empty lines
 
-        gsList.add(buildCoNNLXGrammaticStructure(tokenFields, shortNameToGRel, factory));
+        gsList.add(buildCoNLLXGrammaticalStructure(tokenFields, shortNameToGRel, factory));
         tokenFields = new ArrayList<List<String>>();
       }
     }
@@ -1005,7 +1040,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
   public static GrammaticalStructure
-  buildCoNNLXGrammaticStructure(List<List<String>> tokenFields,
+  buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,
                                 Map<String, GrammaticalRelation> shortNameToGRel,
                                 GrammaticalStructureFromDependenciesFactory factory) {
     List<TreeGraphNode> tgWordNodes =
@@ -1063,7 +1098,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         continue;
       int parentId = Integer.parseInt(parentIdStr) - 1;
       String grelString = tokenFields.get(i).get(CoNLLX_RelnField);
-      if (grelString.equals("null"))
+      if (grelString.equals("null") || grelString.equals("erased"))
         continue;
       GrammaticalRelation grel = shortNameToGRel.get(grelString.toLowerCase());
       TypedDependency tdep;
@@ -1522,7 +1557,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     boolean basic = props.getProperty("basic") != null;
     boolean collapsed = props.getProperty("collapsed") != null;
     boolean CCprocessed = props.getProperty("CCprocessed") != null;
-    boolean tree = props.getProperty("collapsedTree") != null;
+    boolean collapsedTree = props.getProperty("collapsedTree") != null;
     boolean nonCollapsed = props.getProperty("nonCollapsed") != null;
     boolean extraSep = props.getProperty("extraSep") != null;
     boolean parseTree = props.getProperty("parseTree") != null;
@@ -1564,15 +1599,15 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     for (GrammaticalStructure gs : gsBank) {
 
-      Tree t;
+      Tree tree;
       if (gsBank instanceof TreeBankGrammaticalStructureWrapper) {
         // System.err.println("Using TreeBankGrammaticalStructureWrapper branch");
-        t = ((TreeBankGrammaticalStructureWrapper) gsBank).getOriginalTree(gs);
+        tree = ((TreeBankGrammaticalStructureWrapper) gsBank).getOriginalTree(gs);
         // System.err.println("Tree is: ");
         // System.err.println(t);
       } else {
         // System.err.println("Using gs.root() branch");
-        t = gs.root(); // recover tree
+        tree = gs.root(); // recover tree
         // System.err.println("Tree from gs is");
         // System.err.println(t);
       }
@@ -1581,7 +1616,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         // CCprocessed
 
         System.out.println("============= parse tree =======================");
-        t.pennPrint();
+        tree.pennPrint();
         System.out.println();
 
         System.out.println("------------- GrammaticalStructure -------------");
@@ -1632,61 +1667,61 @@ public abstract class GrammaticalStructure extends TreeGraph {
       else {
         if (parseTree) {
           System.out.println("============= parse tree =======================");
-          t.pennPrint();
+          tree.pennPrint();
           System.out.println();
         }
 
         if (basic) {
-          if (collapsed || CCprocessed || tree || nonCollapsed) {
+          if (collapsed || CCprocessed || collapsedTree || nonCollapsed) {
             System.out.println("------------- basic dependencies ---------------");
           }
           if (altDepPrinter == null) {
-            printDependencies(gs, gs.typedDependencies(false), t, conllx, false);
+            printDependencies(gs, gs.typedDependencies(false), tree, conllx, false);
           } else {
-            System.out.println(altDepPrinter.dependenciesToString(gs, gs.typedDependencies(false), t));
+            System.out.println(altDepPrinter.dependenciesToString(gs, gs.typedDependencies(false), tree));
           }
         }
 
         if (nonCollapsed) {
-          if (basic || CCprocessed || collapsed || tree) {
+          if (basic || CCprocessed || collapsed || collapsedTree) {
             System.out.println("----------- non-collapsed dependencies (basic + extra) -----------");
           }
-          printDependencies(gs, gs.allTypedDependencies(), t, conllx, extraSep);
+          printDependencies(gs, gs.allTypedDependencies(), tree, conllx, extraSep);
         }
 
         if (collapsed) {
-          if (basic || CCprocessed || tree || nonCollapsed) {
+          if (basic || CCprocessed || collapsedTree || nonCollapsed) {
             System.out.println("----------- collapsed dependencies -----------");
           }
-          printDependencies(gs, gs.typedDependenciesCollapsed(true), t, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCollapsed(true), tree, conllx, false);
         }
 
         if (CCprocessed) {
-          if (basic || collapsed || tree || nonCollapsed) {
+          if (basic || collapsed || collapsedTree || nonCollapsed) {
             System.out.println("---------- CCprocessed dependencies ----------");
           }
           List<TypedDependency> deps = gs.typedDependenciesCCprocessed(true);
           if (checkConnected) {
             if (!GrammaticalStructure.isConnected(deps)) {
               System.err.println("Graph is not connected for:");
-              System.err.println(t);
+              System.err.println(tree);
               System.err.println("possible offending nodes: " + GrammaticalStructure.getRoots(deps));
             }
           }
-          printDependencies(gs, deps, t, conllx, false);
+          printDependencies(gs, deps, tree, conllx, false);
         }
 
-        if (tree) {
+        if (collapsedTree) {
           if (basic || CCprocessed || collapsed || nonCollapsed) {
             System.out.println("----------- collapsed dependencies tree -----------");
           }
-          printDependencies(gs, gs.typedDependenciesCollapsedTree(), t, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCollapsedTree(), tree, conllx, false);
         }
 
         // default use: CCprocessed (to parallel what happens within the parser)
-        if (!basic && !collapsed && !CCprocessed && !tree && !nonCollapsed) {
+        if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed) {
           // System.out.println("----------- CCprocessed dependencies -----------");
-          printDependencies(gs, gs.typedDependenciesCCprocessed(true), t, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCCprocessed(true), tree, conllx, false);
         }
       }
 

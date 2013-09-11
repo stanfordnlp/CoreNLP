@@ -28,6 +28,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 import nu.xom.*;
 
 
@@ -36,10 +37,42 @@ public class XMLOutputter {
   private static final String NAMESPACE_URI = null;
   private static final String STYLESHEET_NAME = "CoreNLP-to-HTML.xsl";
 
+  private static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
+  private static final Options DEFAULT_OPTIONS = new Options();
+
+  public static class Options {
+    /** Should the document text be included as part of the XML output */
+    public boolean includeText = false;
+    /** Should a small window of context be provided with each coreference mention */
+    public int coreferenceContextSize = 0;
+    public double relationsBeam = 0.0;
+    public String encoding = "UTF-8";
+    /** How to print a constituent tree */
+    public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
+  }
+
+  /**
+   * Populates options from StanfordCoreNLP pipeline
+   */
+  public static Options getOptions(StanfordCoreNLP pipeline) {
+    Options options = new Options();
+    options.relationsBeam = pipeline.getBeamPrintingOption();
+    options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
+    options.encoding = pipeline.getEncoding();
+    return options;
+  }
+
+  public static void xmlPrint(Annotation annotation, OutputStream os) throws IOException {
+    xmlPrint(annotation, os, DEFAULT_OPTIONS);
+  }
 
   public static void xmlPrint(Annotation annotation, OutputStream os, StanfordCoreNLP pipeline) throws IOException {
-    Document xmlDoc = annotationToDoc(annotation, pipeline);
-    Serializer ser = new Serializer(os, pipeline.getEncoding());
+    xmlPrint(annotation, os, getOptions(pipeline));
+  }
+
+  public static void xmlPrint(Annotation annotation, OutputStream os, Options options) throws IOException {
+    Document xmlDoc = annotationToDoc(annotation, options);
+    Serializer ser = new Serializer(os, options.encoding);
     ser.setIndent(2);
     ser.setMaxLength(0);
     ser.write(xmlDoc);
@@ -47,12 +80,17 @@ public class XMLOutputter {
   }
 
   /**
-   * Converts the given annotation to an XML document
+   * Converts the given annotation to an XML document using options taken from the StanfordCoreNLP pipeline
    */
   public static Document annotationToDoc(Annotation annotation, StanfordCoreNLP pipeline) {
-    double beam = pipeline.getBeamPrintingOption();
-    TreePrint constituentTreePrinter = pipeline.getConstituentTreePrinter();
+    Options options = getOptions(pipeline);
+    return annotationToDoc(annotation, options);
+  }
 
+  /**
+   * Converts the given annotation to an XML document using the specified options
+   */
+  public static Document annotationToDoc(Annotation annotation, Options options) {
     //
     // create the XML document with the root node pointing to the namespace URL
     //
@@ -64,14 +102,15 @@ public class XMLOutputter {
     Element docElem = new Element("document", NAMESPACE_URI);
     root.appendChild(docElem);
 
-    String docId =  annotation.get(CoreAnnotations.DocIDAnnotation.class);
-    if (docId != null) {
-      setSingleElement(docElem, "docId", NAMESPACE_URI, docId);
-    }
+    setSingleElement(docElem, "docId", NAMESPACE_URI, annotation.get(CoreAnnotations.DocIDAnnotation.class));
+    setSingleElement(docElem, "docDate", NAMESPACE_URI, annotation.get(CoreAnnotations.DocDateAnnotation.class));
+    setSingleElement(docElem, "docSourceType", NAMESPACE_URI, annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class));
+    setSingleElement(docElem, "docType", NAMESPACE_URI, annotation.get(CoreAnnotations.DocTypeAnnotation.class));
+    setSingleElement(docElem, "author", NAMESPACE_URI, annotation.get(CoreAnnotations.AuthorAnnotation.class));
+    setSingleElement(docElem, "location", NAMESPACE_URI, annotation.get(CoreAnnotations.LocationAnnotation.class));
 
-    String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if(docDate != null){
-      setSingleElement(docElem, "docDate", NAMESPACE_URI, docDate);
+    if (options.includeText) {
+      setSingleElement(docElem, "text", NAMESPACE_URI, annotation.get(CoreAnnotations.TextAnnotation.class));
     }
 
     Element sentencesElem = new Element("sentences", NAMESPACE_URI);
@@ -85,6 +124,10 @@ public class XMLOutputter {
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         Element sentElem = new Element("sentence", NAMESPACE_URI);
         sentElem.addAttribute(new Attribute("id", Integer.toString(sentCount)));
+        Integer lineNumber = sentence.get(CoreAnnotations.LineNumberAnnotation.class);
+        if (lineNumber != null) {
+          sentElem.addAttribute(new Attribute("line", Integer.toString(lineNumber)));
+        }
         sentCount ++;
 
         // add the word table with all token-level annotations
@@ -103,7 +146,7 @@ public class XMLOutputter {
         if(tree != null){
           // add the constituent tree for this sentence
           Element parseInfo = new Element("parse", NAMESPACE_URI);
-          addConstituentTreeInfo(parseInfo, tree, constituentTreePrinter);
+          addConstituentTreeInfo(parseInfo, tree, options.constituentTreePrinter);
           sentElem.appendChild(parseInfo);
 
           // add the dependencies for this sentence
@@ -134,7 +177,7 @@ public class XMLOutputter {
 
           if(relations != null){
             Element relElem = new Element("relations", NAMESPACE_URI);
-            addRelations(relations, relElem, NAMESPACE_URI, beam);
+            addRelations(relations, relElem, NAMESPACE_URI, options.relationsBeam);
             mrElem.appendChild(relElem);
           }
 
@@ -152,8 +195,9 @@ public class XMLOutputter {
     Map<Integer, CorefChain> corefChains =
       annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     if (corefChains != null) {
+      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       Element corefInfo = new Element("coreference", NAMESPACE_URI);
-      if (addCorefGraphInfo(corefInfo, corefChains, NAMESPACE_URI))
+      if (addCorefGraphInfo(options, corefInfo, sentences, corefChains, NAMESPACE_URI))
         docElem.appendChild(corefInfo);
     }
 
@@ -179,7 +223,7 @@ public class XMLOutputter {
     if(graph != null) {
       Element depInfo = new Element("dependencies", curNS);
       depInfo.addAttribute(new Attribute("type", dependencyType));
-      // The SemanticGraph doesn't explicitely encode the ROOT node,
+      // The SemanticGraph doesn't explicitly encode the ROOT node,
       // so we print that out ourselves
       for (IndexedWord root : graph.getRoots()) {
         String rel = GrammaticalRelation.ROOT.getLongName();
@@ -216,7 +260,7 @@ public class XMLOutputter {
     if (isExtra) {
       depElem.addAttribute(new Attribute("extra", "true"));
     }
-    
+
     Element govElem = new Element("governor", curNS);
     govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
     govElem.appendChild(sourceWord);
@@ -224,7 +268,7 @@ public class XMLOutputter {
       govElem.addAttribute(new Attribute("copy", Integer.toString(sourceCopy)));
     }
     depElem.appendChild(govElem);
-    
+
     Element dependElem = new Element("dependent", curNS);
     dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
     dependElem.appendChild(targetWord);
@@ -232,7 +276,7 @@ public class XMLOutputter {
       dependElem.addAttribute(new Attribute("copy", Integer.toString(targetCopy)));
     }
     depElem.appendChild(dependElem);
-    
+
     depInfo.appendChild(depElem);
   }
 
@@ -262,7 +306,7 @@ public class XMLOutputter {
    * Generates the XML content for the coreference chain object
    */
   private static boolean addCorefGraphInfo
-    (Element corefInfo, Map<Integer, CorefChain> corefChains, String curNS)
+    (Options options, Element corefInfo, List<CoreMap> sentences, Map<Integer, CorefChain> corefChains, String curNS)
   {
     boolean foundCoref = false;
     for (CorefChain chain : corefChains.values()) {
@@ -271,18 +315,20 @@ public class XMLOutputter {
       foundCoref = true;
       Element chainElem = new Element("coreference", curNS);
       CorefChain.CorefMention source = chain.getRepresentativeMention();
-      addCorefMention(chainElem, curNS, source, true);
+      addCorefMention(options, chainElem, curNS, sentences, source, true);
       for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
         if (mention == source)
           continue;
-        addCorefMention(chainElem, curNS, mention, false);
+        addCorefMention(options, chainElem, curNS, sentences, mention, false);
       }
       corefInfo.appendChild(chainElem);
     }
     return foundCoref;
   }
 
-  private static void addCorefMention(Element chainElem, String curNS,
+  private static void addCorefMention(Options options,
+                                      Element chainElem, String curNS,
+                                      List<CoreMap> sentences,
                                       CorefChain.CorefMention mention,
                                       boolean representative) {
     Element mentionElem = new Element("mention", curNS);
@@ -298,6 +344,21 @@ public class XMLOutputter {
                      Integer.toString(mention.endIndex));
     setSingleElement(mentionElem, "head", curNS,
                      Integer.toString(mention.headIndex));
+
+    String text = mention.mentionSpan;
+    setSingleElement(mentionElem, "text", curNS, text);
+    // Do you want context with your coreference?
+    if (sentences != null && options.coreferenceContextSize > 0) {
+      // If so use sentences to get so context from sentences
+
+      List<CoreLabel> tokens = sentences.get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class);
+      int contextStart = Math.max(mention.startIndex - 1 - 5, 0);
+      int contextEnd = Math.min(mention.endIndex - 1 + 5, tokens.size());
+      String leftContext = StringUtils.joinWords(tokens, " ", contextStart, mention.startIndex - 1);
+      String rightContext = StringUtils.joinWords(tokens, " ", mention.endIndex - 1, contextEnd);
+      setSingleElement(mentionElem, "leftContext", curNS, leftContext);
+      setSingleElement(mentionElem, "rightContext", curNS, rightContext);
+    }
 
     chainElem.appendChild(mentionElem);
   }
@@ -324,6 +385,10 @@ public class XMLOutputter {
 
     if (token.containsKey(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class)) {
       setSingleElement(wordInfo, "NormalizedNER", curNS, token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
+    }
+
+    if (token.containsKey(CoreAnnotations.SpeakerAnnotation.class)) {
+      setSingleElement(wordInfo, "Speaker", curNS, token.get(CoreAnnotations.SpeakerAnnotation.class));
     }
 
     if (token.containsKey(TimeAnnotations.TimexAnnotation.class)) {
@@ -366,8 +431,8 @@ public class XMLOutputter {
    * @param value    This is its value
    */
   private static void setSingleElement(Element tokenElement, String elemName, String curNS, String value) {
-    Element cur = new Element(elemName, curNS);
     if (value != null) {
+      Element cur = new Element(elemName, curNS);
       cur.appendChild(value);
       tokenElement.appendChild(cur);
     }
@@ -384,7 +449,7 @@ public class XMLOutputter {
       nm.appendChild(entity.getNormalizedName());
       top.appendChild(nm);
     }
-    
+
     if (entity.getSubType() != null){
       Element subtype = new Element("subtype", curNS);
       subtype.appendChild(entity.getSubType());
@@ -394,7 +459,7 @@ public class XMLOutputter {
     span.addAttribute(new Attribute("start", Integer.toString(entity.getHeadTokenStart())));
     span.addAttribute(new Attribute("end", Integer.toString(entity.getHeadTokenEnd())));
     top.appendChild(span);
-    
+
     top.appendChild(makeProbabilitiesElement(entity, curNS));
     return top;
   }
@@ -411,14 +476,14 @@ public class XMLOutputter {
       subtype.appendChild(relation.getSubType());
       top.appendChild(relation.getSubType());
     }
-    
+
     List<EntityMention> ents = relation.getEntityMentionArgs();
     Element args = new Element("arguments", curNS);
     for (EntityMention e : ents) {
       args.appendChild(toXML(e, curNS));
     }
     top.appendChild(args);
-    
+
     top.appendChild(makeProbabilitiesElement(relation, curNS));
     return top;
   }
@@ -440,7 +505,7 @@ public class XMLOutputter {
     }
     return probs;
   }
-  
+
 
 
 }

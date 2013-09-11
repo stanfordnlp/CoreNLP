@@ -1,12 +1,10 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
@@ -30,7 +28,7 @@ public class TestClassifier {
   private int numWrongUnknown;
   private int numCorrectSentences;
   private int numSentences;
- 
+
   // TODO: only one boolean here instead of 3?  They all use the same
   // debug status
   private boolean writeUnknDict;
@@ -135,7 +133,7 @@ public class TestClassifier {
     StringBuilder output = new StringBuilder();
     output.append("Model " + maxentTagger.config.getModel() + " has xSize=" + maxentTagger.xSize +
                   ", ySize=" + maxentTagger.ySize + ", and numFeatures=" +
-                  maxentTagger.prob.lambda.length + ".\n");
+                  maxentTagger.getLambdaSolve().lambda.length + ".\n");
     output.append("Results on " + numSentences + " sentences and " +
                   (numRight + numWrong) + " words, of which " +
                   unknownWords + " were unknown.\n");
@@ -184,8 +182,8 @@ public class TestClassifier {
       testS.setCorrectTags(taggedSentence);
       testS.tagSentence(taggedSentence, false);
       return testS;
-    } 
-    
+    }
+
     @Override
     public ThreadsafeProcessor<List<TaggedWord>, TestSentence> newInstance() {
       // MaxentTagger is threadsafe

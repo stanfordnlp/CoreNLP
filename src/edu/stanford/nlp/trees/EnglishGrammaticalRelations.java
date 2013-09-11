@@ -88,13 +88,13 @@ public class EnglishGrammaticalRelations {
     "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter|lot)$/";
   // r is for texting r = are
   private static final String copularWordRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|seem|seems|seemed|seeming|appear|appears|appeared|stay|stays|stayed|remain|remains|remained|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
+    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|stay|stays|stayed|remain|remains|remained|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
   private static final String passiveAuxWordRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
+    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
   private static final String beAuxiliaryRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai)$/";
+    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/";
   private static final String haveRegex =
-    "/^(?i:have|had|has|having)$/";
+    "/^(?i:have|had|has|having|'ve|ve|v|'d|d|hvae|hav|as)$/";
   private static final String stopKeepRegex =
     "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
 
@@ -147,15 +147,15 @@ public class EnglishGrammaticalRelations {
     * "Kennedy has been killed" &rarr; <code>auxpass</code>(killed, been)
     */
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
- 	  new GrammaticalRelation(Language.English, "auxpass", "passive auxiliary",
+     new GrammaticalRelation(Language.English, "auxpass", "passive auxiliary",
               AuxPassiveGRAnnotation.class, AUX_MODIFIER, "VP|SQ|SINV", tregexCompiler,
- 	      new String[] {
-	        "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
+         new String[] {
+          "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
           "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < VBD|VBN))",
- 	        // add handling of tricky VP fronting cases...
- 	        "SINV < (VP=target < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
- 	        "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))",
- 	      });
+           // add handling of tricky VP fronting cases...
+           "SINV < (VP=target < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
+           "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))",
+         });
   public static class AuxPassiveGRAnnotation extends GrammaticalRelationAnnotation { }
 
   /**
@@ -192,19 +192,27 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.English, "conj", "conjunct",
-        ConjunctGRAnnotation.class, DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML", tregexCompiler,
+        ConjunctGRAnnotation.class, DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML|RRC", tregexCompiler,
         new String[] { // remember conjunction can be left or right headed....
           // this is more ugly, but the first 3 patterns are now duplicated and for clausal things, that daughter to the left of the CC/CONJP can't be a PP or RB or ADVP either
           // non-parenthetical or comma in suitable phrase with conjunction to left
-          "VP|S|SBAR|SBARQ|SINV|SQ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
+          "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
           // non-parenthetical or comma in suitable phrase with conj then adverb to left
-          "VP|S|SBAR|SBARQ|SINV|SQ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ (ADVP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
+          "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ (ADVP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
           // content phrase to the right of a comma or a parenthetical
           // The test at the end is to make sure that a conjunction or
           // comma etc actually show up between the target of the conj
           // dependency and the head of the phrase.  Otherwise, a
           // different relationship is probably more appropriate.
-          "VP|S|SBAR|SBARQ|SINV|SQ=root < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ (/^S|SINV$|^(?:A|N|V|PP|PRP|J|W|R)/=target $-- (/^CC|CONJP|:|,$/ $-- (__ ># =root))) )",
+          // Note that this test looks for one of two things: a
+          // cc/conjp which does not have a , between it and the
+          // target or a , which does not appear to the right of a
+          // cc/conjp.  This test eliminates things such as
+          // parenthetics which come after a list, such as in the
+          // sentence "to see the market go down and dump everything,
+          // which ..." where "go down and dump everything, which..."
+          // is all in one VP node.
+          "VP|S|SBAR|SBARQ|SINV|SQ=root < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ (/^S|SINV$|^(?:A|N|V|PP|PRP|J|W|R)/=target [$-- (/^CC|CONJP$/ $-- (__ ># =root) !$++ (/^:|,$/ $++ =target)) | $-- (/^:|,$/ $-- (__ ># =root) [!$-- /^CC|CONJP$/ | $++ (=target < (/^,$/ $++ (__ ># =target)))])] ) )",
 
           // non-parenthetical or comma in suitable phrase with conjunction to left
           "/^(?:ADJP|JJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN)$/ $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
@@ -419,36 +427,49 @@ public class EnglishGrammaticalRelations {
 
   /**
    * The "direct object" grammatical relation.  The direct object
-   * of a VP is the noun phrase which is the (accusative) object of
-   * the verb; the direct object of a clause is the direct object of the VP
-   * which is the predicate of that clause.<p>
+   * of a verb is the noun phrase which is the (accusative) object of
+   * the verb; the direct object of a clause or VP is the direct object of
+   * the head predicate of that clause.<p>
    * <p/>
    * Example: <br/>
    * "She gave me a raise" &rarr;
-   * <code>dobj</code>(gave, raise)
+   * <code>dobj</code>(gave, raise) <p/>
+   * Note that dobj can also be assigned by the conversion of rel in the postprocessing.
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
     new GrammaticalRelation(Language.English, "dobj", "direct object",
-        DirectObjectGRAnnotation.class, OBJECT, "SBARQ|VP|SBAR", tregexCompiler,
+        DirectObjectGRAnnotation.class, OBJECT, "VP|SBARQ?", tregexCompiler,
         new String[] {
-          // case with an iobj before
-          "VP < (NP $+ (NP|WHNP=target !< (/^NN/ < " + timeWordLotRegex + "))) !<(/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
-          // match "give it next week"
-          "VP < (NP < (NP $+ (/^(NP|WHNP)$/=target !< (/^NN/ < " + timeWordLotRegex + "))))!< (/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
-          // basic direct object cases
-          "VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] )",
+          // basic direct object cases: last non-temporal NP of (non-copula) clause.  This case is good.
+          // You can't exclude "lot" in this case since people can "sell a lot" though it sometimes wrongly matches what should be an advmod like "He's done a lot" (even for the second instance, the one case admitted on PTB3 WSJ is good).
+          "VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] )",
+
+          // The rule for Wh-questions
           // cdm Jul 2010: No longer require WHNP as first child of SBARQ below: often not because of adverbials, quotes, etc., and removing restriction does no harm
           // this next pattern used to assume no empty NPs. Corrected.  If you adjust this pattern, also adjust the corresponding one for attr!
-          "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
-          // matches direct object in relative clauses "I saw the book that you bought"
-          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN) !< (S < (VP < TO))))",
+          // One could require the VP at the end of the <+ to also be !< (/^(?:VB|AUX)/ $. SBAR) . This would be right for complement SBAR, but often avoids good matches for adverbial SBAR.  Adding it kills 4 good matches for avoiding 2 wrong matches on sum of TB3-train and EWT
+          "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !< (PP <: IN|TO) $-- (NP !< /^-NONE-$/))",
 
-          // matches direct object in relative clauses "I saw the book that you said you bought"
-          "SBAR !< WHNP|WHADVP < (S < (@NP $++ (VP !$++ NP))) > (VP > (S < NP $- WHNP=target))",
+          // matches direct object in relative clauses with relative pronoun "I saw the book that you bought". Seems okay. If this is changed, also change the pattern for "rel"
+          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN|TO) !< (S < (VP < TO))))",
 
           // matches direct object for long dependencies in relative clause without explicit relative pronouns
-          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $+ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN)))) !$-- CC $-- NP > NP=target",
-          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $+ (ADVP $+ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN))))) !$-- CC $-- NP > NP=target"
+          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target",
+
+          // Now allow $++ in main pattern above so don't need this.
+          // "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $+ (ADVP $+ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO))))) !$-- CC $-- NP > NP=target"
+
+          // Excluding BE doesn't allow cases of NP-PRD followed by NP-TMP or NP-LOC like "These are Europeans next door."
+          // Doc said: case with an iobj before dobj as two regular NPs. (This won't match if second one is explicitly NP-TMP.) But basic case covers this case. Does nothing.
+          // "VP < (NP $+ (NP|WHNP=target !< (/^NN/ < " + timeWordLotRegex + "))) !<(/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
+          // Doc said: match "give it next week".  CDM 2013: I think this was put in to handle parse errors where the 2 NPs of a ditransitive were grouped into 1. But it is in principle wrong, and including it seems to be a no-op on TB3 WSJ. So exclude for now.
+          // "VP < (NP < (NP $+ (/^(NP|WHNP)$/=target !< (/^NN/ < " + timeWordLotRegex + "))))!< (/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
+
+          // Doc said: matches direct object in relative clauses "I saw the book that you said you bought". But it didn't seem to determine anything.
+          // This was various attempts at handling a long distance dependency, but that doesn't work; now handled through rel mechanism.
+          // "SBAR !< WHNP|WHADVP < (S < (@NP $++ (VP !$++ NP))) > (VP > (S < NP $- WHNP=target))",
+          // "SBAR !< WHNP|WHADVP|IN < (S < @NP < (VP !< (NP !<<# " + timeWordRegex + "))) > (VP > (S < NP $- WHNP=target))",
+          // "S < (@NP !< /^-NONE-$/) <+(VP) (VP !< (@NP !< /^-NONE-$/ < (/^VB/ !< " + copularWordRegex + ")) !< CONJP|CC|SBAR) > (@SBAR !< @WHNP|WHADVP $- /^VB/ >+(VP|S|SBAR) (S < (@NP !< /^-NONE-$/ !<<# " + timeWordRegex + ") $- (@WHNP=target !< /^-NONE-$/ !<# WRB)))",
 
           // we now don't match "VBG > PP $+ NP=target", since it seems better to CM to regard these quasi preposition uses (like "including soya") as prepositions rather than verbs with objects -- that's certainly what the phrase structure at least suggests in the PTB.  They're now matched as pobj
         });
@@ -503,16 +524,18 @@ public class EnglishGrammaticalRelations {
           "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (IN|VBG|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP))",
           // We allow ADVP with NP objects for cases like (ADVP earlier this year)
           "/^PP(?:-TMP)?$/ < (/^(?:IN|VBG|TO)$/ $+ (ADVP=target [ < (RB < /^(?i:here|there)$/) | < (ADVP < /^NP(?:-TMP)?$/) ] ))",
-                // second disjunct is weird ADVP, only matches 1 tree in 2-21
+          // second disjunct is weird ADVP, only matches 1 tree in 2-21
           // to deal with preposition stranding in questions (e.g., "Which city do you live in?") -- the preposition is sometimes treated as a particle by the parser (works well but doesn't preserve the tree structure!)
           "PRT >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
           "(PP <: IN|TO) >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
           "(PP <: IN|TO) $- (NP $-- (VBZ|VBD) !$++ VP) >+(SQ) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/)",
 
-         // to deal with preposition stranding in relative clause (works well but doesn't preserve the tree structure!)
-         "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
-         "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
-         "PP < (CC < less) < NP"
+          // to deal with preposition stranding in relative clause (works well but doesn't preserve the tree structure!)
+          "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
+          "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
+          "PP < (CC < less) < NP",
+          // to handle "in and out of government"
+          "@WHPP|PP < (@WHPP|PP $++ (CC|CONJP $++ (@WHPP|PP $+ (NP=target !$+ __))))"
         });
   public static class PrepositionalObjectGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -535,7 +558,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "pcomp", "prepositional complement",
-        PrepositionalComplementGRAnnotation.class, COMPLEMENT, "PP(?:-TMP)?", tregexCompiler,
+        PrepositionalComplementGRAnnotation.class, COMPLEMENT, "(?:WH)?PP(?:-TMP)?", tregexCompiler,
         new String[] {
           "@PP|WHPP < (IN|VBG|VBN|TO $+ @SBAR|S|PP|ADVP=target)", // no intervening NP; VBN is for "compared with"
           "@PP|WHPP < (RB $+ @SBAR|S=target)", // RB is for weird tagging like "after/RB adjusting for inflation"
@@ -559,8 +582,9 @@ public class EnglishGrammaticalRelations {
           "VP < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + ") !$ (NP < EX)",
           // "What is that?"
           "SBARQ < (WHNP|WHADJP=target $+ (SQ < (/^(?:VB|AUX)/ < " + copularWordRegex + " !$++ VP) !< (VP <- (PP <:IN)) !<- (PP <: IN)))",
-          "SBARQ <, (WHNP|WHADJP=target !< WRB) <+(SQ|SINV|S|VP) (VP !< (S < (VP < TO)) < (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
-          //"Is he the man?"
+          "SBARQ < (WHNP|WHADJP=target !< WRB) <+(SQ|SINV|S|VP) (VP !< (S < (VP < TO)) < (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
+
+          // "Is he the man?"
           "SQ <, (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP=target $-- (NP !< EX))"
         });
   public static class AttributiveGRAnnotation extends GrammaticalRelationAnnotation { }
@@ -588,16 +612,17 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "ccomp", "clausal complement",
-        ClausalComplementGRAnnotation.class, COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP", tregexCompiler,
+        ClausalComplementGRAnnotation.class, COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP(?:-.*)?", tregexCompiler,
         new String[] { // note if you add more words in the pattern, be sure to add them in the ADV_CLAUSE_MODIFIER too!
           "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP)",
           "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",
           "VP < (SBAR=target < (SBAR < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/)) < CC|CONJP)",
-          "VP < (SBAR=target < (S < VP) !$-- NP !<, (IN|WHADVP))",
+          "VP < (SBAR=target < (S < VP) !$-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
           "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)))",
           "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
           // to find "...", he said or "...?" he asked.
-          "S|SINV < (S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|:)$/ !< (VP < TO|VBG|VBN))",
+          // We eliminate conflicts with conj by looking for CC
+          "S|SINV < (S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN))",
           "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
           "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
           // That ... he know
@@ -637,37 +662,25 @@ public class EnglishGrammaticalRelations {
           "VP < (S=target !$- (NN < order) <: NP) > VP",
           // stop eating
           // note that we eliminate parentheticals and clauses that could match a partmod
-          "(VP < (S=target < (VP < VBG ) !< NP !$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)]) !$-- /^:$/))",
+          "(VP < (S=target < (VP < VBG ) !< NP !$- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)]) !$-- /^:$/))",
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
   /**
-   * The "relative" grammatical relation.  A
-   * relative of a relative clause is the head word of the WH-phrase
-   * introducing it.
-   * <p/>
-   * <p/>
-   * Examples: <br/>
-   * "I saw the man that you love" &rarr;
-   * <code>rel</code>(love, that) <br/>
-   * "I saw the man whose wife you love" &rarr;
-   * <code>rel</code>(love, wife) <br/>
-   * <p/>
-   * Note that this is designed to *not* match cases when there is no overt
-   * subject NP.  They are instead matched by the nsubj rule.  Effectively
-   * this gives us an HPSG-like relative clause analysis, where subject
-   * relatives are analyzed as regular subject structures.  And "why" (WHADVP)
-   * cases are treated as advmod not as rel.
+   * The RELATIVE grammatical relation is only here as a temporary
+   * relation.  This tregex triggering indicates either a dobj or a
+   * pobj should be here.  We figure this out in a post-processing
+   * step by looking at the surrounding dependencies.
    */
   public static final GrammaticalRelation RELATIVE =
     new GrammaticalRelation(Language.English, "rel", "relative",
         RelativeGRAnnotation.class, COMPLEMENT, "SBAR", tregexCompiler,
         new String[] {
-          "SBAR <, WHNP|WHPP|WHADJP=target > /^NP/ [ !<, /^WHNP/ | < (S < (VP $-- (/^NP/ !< /^-NONE-$/)))]"
+          // matches non-subject, not clearly direct object in relative clauses "I saw the book that you bought"
+          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))",
         });
   public static class RelativeGRAnnotation extends GrammaticalRelationAnnotation { }
-
 
   /**
    * The "referent" grammatical relation.  A
@@ -719,7 +732,10 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "acomp", "adjectival complement",
         AdjectivalComplementGRAnnotation.class, COMPLEMENT, "VP", tregexCompiler,
         new String[] {
-          "VP [ < (ADJP=target !$-- NP) |  < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) ]",
+          // ADJP=target used to be limited by !$-- NP, but that
+          // stopped the converter from finding the right dependency
+          // in cases such as "driving prices lower"
+          "VP [ < ADJP=target |  < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) ]",
         });
   public static class AdjectivalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -757,15 +773,22 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "advcl", "adverbial clause modifier",
         AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
         new String[] {
-          // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses, first case includes regular in order to purpose clauses
-          "VP < (@SBAR=target [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
+          // first case includes regular in order to purpose clauses
+          // second disjunct matches inverted "had he investigated" cases
+          // 3rd case is "so that" purpose clauses and one way of parsing "now that"
+          // 4th case is another way of parsing "now that"
+          "VP < (@SBAR=target [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] )",
           "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV < (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?$).*$/)",
-          "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ @VP $+ /^,$/ $++ @NP)", // this one might just be better, but at any rate license one with quotation marks or a conjunction beforehand
-          "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)", // the last part should probably only be @SQ, but this captures some strays at no cost
-          "VP < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))", // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
-          "S|SQ < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))",
+          // this one might just be better, but at any rate license one with quotation marks or a conjunction beforehand
+          "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ @VP $+ /^,$/ $++ @NP)",
+          // the last part should probably only be @SQ, but this captures some strays at no cost
+          "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)",
+          // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
+          // note that we allow adverb phrases to come before the WHADVP, which allows for phrases such as "even when"
+          // ":" indicates something that should be a parataxis
+          "S|SQ|VP < (SBAR|SBAR-TMP=target < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
           // "S|SQ < (PP=target <, RB < @S)", // caught as prep and pcomp.
           "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
@@ -805,45 +828,45 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation RELATIVE_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "rcmod", "relative clause modifier",
-        RelativeClauseModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP|NML|ADVP", tregexCompiler,
+        RelativeClauseModifierGRAnnotation.class, MODIFIER, "(?:WH)?(?:NP|NML|ADVP)(?:-.*)?", tregexCompiler,
         new String[] {
           // Each of the following expressions includes a section
           // which makes sure it does not have a left sister
           // equivalent to the current node.  The reason for this is
           // to make sure you do not get two neighboring nodes both
-          // labeled as rcmod to the same sbar expression.  For
+          // labeled as rcmod to the same SBAR expression.  For
           // example, this prevents rcmod(34, works) in a sentence
           // such as "John Bauer, 34, who works at Stanford..."
           // It does also prevent rcmods in potentially useful
           // situations, such as "John Bauer, programmer, who works at
           // Stanford..."  However, it seems better to eliminate some
-          // useful dependencies rather than introduce some wrote
+          // useful dependencies rather than introduce some wrong
           // dependencies.
-          "NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- NP|WHNP|NML > @NP|WHNP",
-          "NP|WHNP|NML $++ (SBAR=target <: (S !<, (VP <, TO))) !$-- NP|WHNP|NLP > @NP|WHNP",
+          "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML > @NP|WHNP",
+          "@NP|WHNP|NML $++ (SBAR=target <: (S !<, (VP <, TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
           // this next pattern is restricted to where and why because
           // "when" is usually incorrectly parsed: temporal clauses
           // are put inside the NP; 2nd is for case of relative
           // clauses with no relativizer (it doesn't distinguish
           // whether actually gapped).
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
-          "NP|WHNP|NML $++ RRC=target !$-- NP|WHNP|NML",
+          "@NP|WHNP <# NP|WHNP|NML|DT|S < RRC=target",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
         });
   public static class RelativeClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
  /*
- 	* The "complementizer" grammatical relation is a discontinued grammatical relation. A
- 	* A complementizer of a clausal complement was the word introducing it.
+  * The "complementizer" grammatical relation is a discontinued grammatical relation. A
+  * A complementizer of a clausal complement was the word introducing it.
   * It only matched "that" or "whether". We've now merged this in with "mark" which plays a similar
   * role with other clausal modifiers.
   * <p/>
- 	* <p/>
+  * <p/>
   * Example: <br/>
   * "He says that you like to swim" &rarr;
   * <code>complm</code>(like, that)
- 	*/
+  */
 
 
   /**
@@ -860,7 +883,7 @@ public class EnglishGrammaticalRelations {
         MarkerGRAnnotation.class, MODIFIER, "SBAR(?:-TMP)?", tregexCompiler,
         new String[] {
           "SBAR|SBAR-TMP < (IN|DT=target $++ S|FRAG)",
-     	    "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
+           "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
         });
   public static class MarkerGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -885,7 +908,8 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "amod", "adjectival modifier",
         AdjectivalModifierGRAnnotation.class, MODIFIER, "NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP|ADJP", tregexCompiler,
         new String[] {
-          "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< QP !$- CC)",
+          // QP !< $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
+          "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< (QP !< /^[$]$/) !$- CC)",
                 // IN above is needed for "next" in "next week" etc., which is often tagged IN.
           "ADJP !< CC|CONJP < (JJ|NNP $ JJ|NNP=target)",
           // Cover the case of "John, 34, works at Stanford" - similar to an expression for appos
@@ -905,10 +929,18 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation NUMERIC_MODIFIER =
     new GrammaticalRelation(Language.English, "num", "numeric modifier",
-        NumericModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX", tregexCompiler,
+        NumericModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|ADJP|WHADJP|QP", tregexCompiler,
         new String[] {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
-          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: QP)"
+          // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
+          // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
+          // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.
+          // Note that the earlier tregexes are usually enough to cover those phrases, such as when
+          // the QP is by itself in an ADJP or NP, but sometimes it can have other siblings such
+          // as in the phrase "$ 100 million or more".  In that case, this next expression is needed.
+          "QP < QP=target < /^[$]$/"
         });
   public static class NumericModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -994,7 +1026,7 @@ public class EnglishGrammaticalRelations {
    * "Bill (John's cousin)" &rarr; <code>appos</code>(Bill, cousin).
    *
    * "The Australian Broadcasting Corporation (ABC)" &rarr;
- 	*  <code>appos</code>(Corporation, ABC)
+   *  <code>appos</code>(Corporation, ABC)
    */
   public static final GrammaticalRelation APPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.English, "appos", "appositional modifier",
@@ -1005,14 +1037,15 @@ public class EnglishGrammaticalRelations {
           // which is the normal case for such a pattern.
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target !<: CD $- /^,$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target < (NP < /^(?:NN|CD)/ $-- /^-LRB-$/ $+ /^-RRB-$/))",
-          "@WHNP|NP < (@NP=target !<: CD <, /^-LRB-$/ <` /^-RRB-$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
+          // NP-ADV is a npadvmod, NP-TMP is a tmod
+          "@WHNP|NP < (NP=target !<: CD <, /^-LRB-$/ <` /^-RRB-$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
           // TODO: next pattern with NNP doesn't work because leftmost NNP is deemed head in a
           // structure like (NP (NNP Norway) (, ,) (NNP Verdens_Gang) (, ,))
           "NP|NP-TMP|NP-ADV < (NNP $+ (/^,$/ $+ NNP=target)) !< CC|CONJP",
-         // find abbreviations
-         // for biomedical English, the former NNP heuristic really doesn't work, because they use NN for all chemical entities
- 	       // while not unfoolable, this version produces less false positives and more true positives.
-         "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )"
+          // find abbreviations
+          // for biomedical English, the former NNP heuristic really doesn't work, because they use NN for all chemical entities
+          // while not unfoolable, this version produces less false positives and more true positives.
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )"
 
 
         });
@@ -1056,14 +1089,15 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation PARTICIPIAL_MODIFIER =
     new GrammaticalRelation(Language.English, "partmod", "participial modifier",
-        ParticipialModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|VP|S|SINV", tregexCompiler,
+        ParticipialModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|VP|S|SINV", tregexCompiler,
         new String[] {
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (VP=target < VBG|VBN|VBD $-- NP)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (VP=target < VBG|VBN|VBD $-- @NP|NML|NX)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
           // to get "MBUSA, headquartered ..."
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (/^,$/ $+ (VP=target <, VBG|VBN))",
+          // Allows an adverb to come before the participle
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
           // to get "John, knowing ..., announced "
-          "S|SINV < (S=target < (VP <, VBG|VBN) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
-          "(VP < (@S=target < (VP <1 VBG|VBN )$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
+          "S|SINV < (S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
+          "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
         });
@@ -1207,14 +1241,14 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "Last night, I swam in the pool" &rarr;
-   * <code>tmod</code>(swam, night)
+   * {@code tmod}(swam, night)
    */
   public static final GrammaticalRelation TEMPORAL_MODIFIER =
     new GrammaticalRelation(Language.English, "tmod", "temporal modifier",
-        TemporalModifierGRAnnotation.class, NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP", tregexCompiler,
+        TemporalModifierGRAnnotation.class, NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP|RRC", tregexCompiler,
         new String[] {
-          "VP|ADJP < NP-TMP=target",
-          "VP|ADJP < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old))",
+          "VP|ADJP|RRC < NP-TMP=target",
+          "VP|ADJP|RRC < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old))",
           // CDM Jan 2010: For constructions like "during the same period last year"
           "@PP < (IN|TO|VBG|FW $++ (@NP $+ NP-TMP=target))",
           "@PP < (IN|TO|VBG|FW $++ (@NP $+ (NP=target <# (/^NN/ < " + timeWordRegex + "))))",
@@ -1302,7 +1336,8 @@ public class EnglishGrammaticalRelations {
           // "NP|NP-TMP|NP-ADV < (RB=target $++ (/^PDT$/ $+ /^NN/))", // todo: This matches nothing. Was it meant to be a PDT rule for (NP almost/RB no/DT chairs/NNS)?
           "NP|NP-TMP|NP-ADV <<, PRP <- (NP|DT|RB=target <<- all|both|each)", // we all, them all; various structures
           "WHNP < (NP $-- (WHNP=target < WDT))",
-          "@WHNP|ADVP < (/^(?:NP|NN|CD|RBS)/ $-- DT|WDT|WP=target)"
+          "@WHNP|ADVP < (/^(?:NP|NN|CD|RBS)/ $-- DT|WDT|WP=target)",
+          "@NP < (/^(?:NP|NN|CD|RBS)/ $-- WDT|WP=target)"
         });
   public static class DeterminerGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1326,7 +1361,7 @@ public class EnglishGrammaticalRelations {
 
   /**
    * The "preconjunct" grammatical relation.
-   * <p> <p/>
+   * <p/>
    * Example: <br/>
    * "Both the boys and the girls are here" &rarr; <code>preconj</code>(boys,both)
    */
@@ -1352,21 +1387,21 @@ public class EnglishGrammaticalRelations {
    * </p>
    * Examples: <br/>
    * "their offices" &rarr;
-   * <code>poss</code>(offices, their)<br/>
+   * {@code poss}(offices, their)<br/>
    * "Bill 's clothes" &rarr;
-   * <code>poss</code>(clothes, Bill)
+   * {@code poss}(clothes, Bill)
    */
   public static final GrammaticalRelation POSSESSION_MODIFIER =
     new GrammaticalRelation(Language.English, "poss", "possession modifier",
-        PossessionModifierGRAnnotation.class, MODIFIER, "(?:WH)?(NP|ADJP|INTJ|PRN|NAC|NX|NML)(?:-TMP|-ADV)?", tregexCompiler,
+        PossessionModifierGRAnnotation.class, MODIFIER, "(?:WH)?(NP|ADJP|INTJ|PRN|NAC|NX|NML)(?:-.*)?", tregexCompiler,
         new String[] {
           // possessive pronouns like "my", "whose"; [cdm 2010: Simplified; extra checks seemed unneeded (INTJ for "oh my god", though maybe it should really have internal NP....)
-          "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-TMP|-ADV)?$/ < /^(?:W|PR)P\\$$/=target",
+          "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-.*)?$/ < /^(?:W|PR)P\\$$/=target",
           // todo: possessive pronoun under ADJP needs more work for one case of (ADJP his or her own)
           // basic NP possessive: we want to allow little conjunctions in head noun (NP (NP ... POS) NN CC NN) but not falsely match when there are conjoined NPs.  See tests.
-          "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
+          "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
           // mediocrely handle a few too flat NPs
-          "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (/^NN/=target $+ (POS < /'/ $++ /^NN/))"
+          "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ < (/^NN/=target $+ (POS < /'/ $++ /^NN/))"
         });
   public static class PossessionModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1411,12 +1446,14 @@ public class EnglishGrammaticalRelations {
           // note that we disallow nodes which are next to a CC or
           // CONJP, which can happen to a PP when we are analyzing
           // structure under a UCP
-          // Other PP parents still not covered: UCP, RRC
-          "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !$- (@CC|CONJP $- __))",
+          // Other PP parents still not covered: UCP
+          "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !$- (@CC|CONJP $- __))",
+          "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
           // only allow a PP < PP one if there is not a conj, verb, or other pattern that matches pcomp under it.  Else pcomp
           "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
           "S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
-          "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ"
+          "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
+          "@NP < (@UCP|PRN=target <# @PP)",
         });
   public static class PrepositionalModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1439,10 +1476,10 @@ public class EnglishGrammaticalRelations {
   public static class PhrasalVerbParticleGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
-    /**
+  /**
    * The "parataxis" grammatical relation. Relation between the main verb of a sentence
-   * and other sentential elements, such as a sentential parenthetical, a sentence after a ":" or a ";"
-   * etc.
+   * and other sentential elements, such as a sentential parenthetical, a sentence after a ":" or a ";", when two
+   * sentences are juxtaposed next to each other without any coordinator or subordinator, etc.
    * <p> <p/>
    * Examples: <br/>
    * "The guy, John said, left early in the morning." &rarr; <code>parataxis</code>(left,said) <br/>
@@ -1462,9 +1499,8 @@ public class EnglishGrammaticalRelations {
           // First child can occur in rare circumstances such as
           // "But even if he agrees -- which he won't -- etc etc"
           "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
-          // two juxtaposed sentences; common in web materials.
+          // two juxtaposed sentences; common in web materials (but this also matches quite a few wsj things)
           "@S < (@S $.. @S=target) !< @CC|CONJP",
-
         });
   public static class ParataxisGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1599,7 +1635,7 @@ public class EnglishGrammaticalRelations {
       DISCOURSE_ELEMENT,
       GOES_WITH,
     }));
-  /* Cache frequently used views of the values list */
+  // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> unmodifiableValues =
     Collections.unmodifiableList(values);
   private static final List<GrammaticalRelation> synchronizedValues =
