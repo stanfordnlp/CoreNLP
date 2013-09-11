@@ -9,33 +9,17 @@ import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.dcoref.Dictionaries;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.BasicDependenciesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CopyAnnotation;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefGraphAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.AntecedentAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.DocIDAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NormalizedNamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentenceIndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ValueAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.*;
 
 /**
@@ -92,7 +76,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
         dst.set(1, Integer.parseInt(bits[i + 3]));
         corefGraph.add(new Pair<IntTuple, IntTuple>(src, dst));
       }
-      doc.set(CorefGraphAnnotation.class, corefGraph);
+      doc.set(CorefCoreAnnotations.CorefGraphAnnotation.class, corefGraph);
     }
 
     // read individual sentences
@@ -102,7 +86,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
 
       // first line is the parse tree. construct it with CoreLabels in Tree nodes
       Tree tree = new PennTreeReader(new StringReader(line), new LabeledScoredTreeFactory(CoreLabel.factory())).readTree();
-      sentence.set(TreeAnnotation.class, tree);
+      sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
 
       // read the dependency graphs
       IntermediateSemanticGraph intermCollapsedDeps = loadDependencyGraph(reader);
@@ -116,19 +100,19 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
         CoreLabel token = loadToken(line, haveExplicitAntecedent);
         tokens.add(token);
       }
-      sentence.set(TokensAnnotation.class, tokens);
+      sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
       // convert the intermediate graph to an actual SemanticGraph
       SemanticGraph collapsedDeps = convertIntermediateGraph(intermCollapsedDeps, tokens);
       sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, collapsedDeps);
       SemanticGraph uncollapsedDeps = convertIntermediateGraph(intermUncollapsedDeps, tokens);
-      sentence.set(BasicDependenciesAnnotation.class, uncollapsedDeps);
+      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
       SemanticGraph ccDeps = convertIntermediateGraph(intermCcDeps, tokens);
-      sentence.set(CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
+      sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
 
       sentences.add(sentence);
     }
-    doc.set(SentencesAnnotation.class, sentences);
+    doc.set(CoreAnnotations.SentencesAnnotation.class, sentences);
 
     reader.close();
     return doc;
@@ -140,13 +124,13 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     SemanticGraph graph = new SemanticGraph();
 
     // first construct the actual nodes; keep them indexed by their index
-    Map<Integer, IndexedWord> nodes = new HashMap<Integer, IndexedWord>();
+    Map<Integer, IndexedWord> nodes = Generics.newHashMap();
     for(IntermediateNode in: ig.nodes){
       CoreLabel token = sentence.get(in.index - 1); // index starts at 1!
       IndexedWord word = new IndexedWord(in.docId, in.sentIndex, in.index, token);
-      word.set(ValueAnnotation.class, word.get(TextAnnotation.class));
+      word.set(CoreAnnotations.ValueAnnotation.class, word.get(CoreAnnotations.TextAnnotation.class));
       if(in.copyAnnotation >= 0){
-        word.set(CopyAnnotation.class, in.copyAnnotation);
+        word.set(CoreAnnotations.CopyAnnotation.class, in.copyAnnotation);
       }
       nodes.put(word.index(), word);
     }
@@ -163,7 +147,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       synchronized (LOCK) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.dep);
-        graph.addEdge(source, target, rel, 1.0);
+        graph.addEdge(source, target, rel, 1.0, ie.isExtra);
       }
     }
 
@@ -205,10 +189,12 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     int source;
     int target;
     String dep;
-    IntermediateEdge(String dep, int source, int target) {
+    boolean isExtra;
+    IntermediateEdge(String dep, int source, int target, boolean isExtra) {
       this.dep = dep;
       this.source = source;
       this.target = target;
+      this.isExtra = isExtra;
     }
   }
 
@@ -244,13 +230,14 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       String [] bits = line.split("\t");
       for(String bit: bits){
         String [] bbits = bit.split(" ");
-        if(bbits.length != 3){
+        if(bbits.length < 3 || bbits.length > 4){
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         }
         String dep = bbits[0];
         int source = Integer.valueOf(bbits[1]);
         int target = Integer.valueOf(bbits[2]);
-        graph.edges.add(new IntermediateEdge(dep, source, target));
+        boolean isExtra = (bbits.length == 4) ? Boolean.valueOf(bbits[3]) : false;
+        graph.edges.add(new IntermediateEdge(dep, source, target, isExtra));
       }
     }
 
@@ -274,11 +261,11 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       // from the original tokens the first two tokens in this line
       // indicate: docid, sentence index
       if (!outputHeader) {
-        String docId = node.get(DocIDAnnotation.class);
+        String docId = node.get(CoreAnnotations.DocIDAnnotation.class);
         if(docId != null && docId.length() > 0) pw.print(docId);
         else pw.print("-");
         pw.print("\t");
-        pw.print(node.get(SentenceIndexAnnotation.class));
+        pw.print(node.get(CoreAnnotations.SentenceIndexAnnotation.class));
         outputHeader = true;
       }
 
@@ -286,10 +273,10 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       pw.print(node.index());
       // CopyAnnotations indicate copied (or virtual nodes) generated due to CCs (see EnglishGrammaticalStructure)
       // These annotations are usually not set, so print them only if necessary
-      if(node.containsKey(CopyAnnotation.class)){
+      if(node.containsKey(CoreAnnotations.CopyAnnotation.class)){
         pw.print("-");
-        pw.print(node.get(CopyAnnotation.class));
-        // System.out.println("FOUND COPY ANNOTATION: " + node.get(CopyAnnotation.class));
+        pw.print(node.get(CoreAnnotations.CopyAnnotation.class));
+        // System.out.println("FOUND COPY ANNOTATION: " + node.get(CoreAnnotations.CopyAnnotation.class));
       }
     }
     pw.println();
@@ -307,6 +294,10 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       pw.print(edge.getSource().index());
       pw.print(" ");
       pw.print(edge.getTarget().index());
+      if (edge.isExtra()) {
+        pw.print(" ");
+        pw.print(edge.isExtra());
+      }
       first = false;
     }
     pw.println();
@@ -425,7 +416,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     String line = reader.readLine().trim();
     if(line.length() == 0) return null;
     int clusterCount = Integer.valueOf(line);
-    Map<Integer, CorefChain> chains = new HashMap<Integer, CorefChain>();
+    Map<Integer, CorefChain> chains = Generics.newHashMap();
     // read each cluster
     for(int c = 0; c < clusterCount; c ++) {
       line = reader.readLine().trim();
@@ -433,7 +424,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       int cid = Integer.valueOf(bits[0]);
       int mentionCount = Integer.valueOf(bits[1]);
       Map<IntPair, Set<CorefChain.CorefMention>> mentionMap =
-              new HashMap<IntPair, Set<CorefChain.CorefMention>>();
+              Generics.newHashMap();
       CorefChain.CorefMention representative = null;
       // read each mention in this cluster
       for(int m = 0; m < mentionCount; m ++) {
@@ -478,7 +469,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
         Set<CorefChain.CorefMention> mentionsWithThisHead =
                 mentionMap.get(key);
         if(mentionsWithThisHead == null) {
-          mentionsWithThisHead = new HashSet<CorefChain.CorefMention>();
+          mentionsWithThisHead = Generics.newHashSet();
           mentionMap.put(key, mentionsWithThisHead);
         }
         mentionsWithThisHead.add(mention);
@@ -503,7 +494,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
 
     // save the coref graph on one line
     // Note: this is the old format!
-    List<Pair<IntTuple, IntTuple>> corefGraph = corpus.get(CorefGraphAnnotation.class);
+    List<Pair<IntTuple, IntTuple>> corefGraph = corpus.get(CorefCoreAnnotations.CorefGraphAnnotation.class);
     if(corefGraph != null){
       boolean first = true;
       for(Pair<IntTuple, IntTuple> arc: corefGraph){
@@ -515,10 +506,10 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     pw.println();
 
     // save sentences separated by an empty line
-    List<CoreMap> sentences = corpus.get(SentencesAnnotation.class);
+    List<CoreMap> sentences = corpus.get(CoreAnnotations.SentencesAnnotation.class);
     for(CoreMap sent: sentences){
       // save the parse tree first, on a single line
-      Tree tree = sent.get(TreeAnnotation.class);
+      Tree tree = sent.get(TreeCoreAnnotations.TreeAnnotation.class);
       if(tree != null){
         String treeString = tree.toString();
         // no \n allowed in the parse tree string (might happen due to tokenization of HTML/XML/RDF tags)
@@ -529,13 +520,13 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
 
       SemanticGraph collapsedDeps = sent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       saveDependencyGraph(collapsedDeps, pw);
-      SemanticGraph uncollapsedDeps = sent.get(BasicDependenciesAnnotation.class);
+      SemanticGraph uncollapsedDeps = sent.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       saveDependencyGraph(uncollapsedDeps, pw);
       SemanticGraph ccDeps = sent.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
       saveDependencyGraph(ccDeps, pw);
 
       // save all sentence tokens
-      List<CoreLabel> tokens = sent.get(TokensAnnotation.class);
+      List<CoreLabel> tokens = sent.get(CoreAnnotations.TokensAnnotation.class);
       if(tokens != null){
         for(CoreLabel token: tokens){
           saveToken(token, haveExplicitAntecedent, pw);
@@ -559,30 +550,30 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
 
     // word
     String word = bits[0].replaceAll(SPACE_HOLDER, " ");
-    token.set(TextAnnotation.class, word);
+    token.set(CoreAnnotations.TextAnnotation.class, word);
     // if(word.length() == 0) System.err.println("FOUND 0-LENGTH TOKEN!");
 
     // lemma
     if(bits[1].length() > 0 || bits[0].length() == 0){
       String lemma = bits[1].replaceAll(SPACE_HOLDER, " ");
-      token.set(LemmaAnnotation.class, lemma);
+      token.set(CoreAnnotations.LemmaAnnotation.class, lemma);
     }
     // POS tag
-    if(bits[2].length() > 0) token.set(PartOfSpeechAnnotation.class, bits[2]);
+    if(bits[2].length() > 0) token.set(CoreAnnotations.PartOfSpeechAnnotation.class, bits[2]);
     // NE tag
-    if(bits[3].length() > 0) token.set(NamedEntityTagAnnotation.class, bits[3]);
+    if(bits[3].length() > 0) token.set(CoreAnnotations.NamedEntityTagAnnotation.class, bits[3]);
     // Normalized NE tag
-    if(bits[4].length() > 0) token.set(NormalizedNamedEntityTagAnnotation.class, bits[4]);
+    if(bits[4].length() > 0) token.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, bits[4]);
     // Character offsets
-    if(bits[5].length() > 0) token.set(CharacterOffsetBeginAnnotation.class, Integer.parseInt(bits[5]));
-    if(bits[6].length() > 0) token.set(CharacterOffsetEndAnnotation.class, Integer.parseInt(bits[6]));
+    if(bits[5].length() > 0) token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, Integer.parseInt(bits[5]));
+    if(bits[6].length() > 0) token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, Integer.parseInt(bits[6]));
 
     if(haveExplicitAntecedent){
       // This block is specific to KBP
       // We may have AntecedentAnnotation
       if(bits.length > 7){
         String aa = bits[7].replaceAll(SPACE_HOLDER, " ");
-        if(aa.length() > 0) token.set(AntecedentAnnotation.class, aa);
+        if(aa.length() > 0) token.set(CoreAnnotations.AntecedentAnnotation.class, aa);
       }
     }
 
@@ -595,44 +586,44 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
    * @param pw
    */
   private static void saveToken(CoreLabel token, boolean haveExplicitAntecedent, PrintWriter pw) {
-    String word = token.get(TextAnnotation.class);
+    String word = token.get(CoreAnnotations.TextAnnotation.class);
     if(word != null){
       word = word.replaceAll("\\s+", SPACE_HOLDER); // spaces are used for formatting
       pw.print(word);
     }
 
     pw.print("\t");
-    String lemma = token.get(LemmaAnnotation.class);
+    String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
     if(lemma != null){
       lemma = lemma.replaceAll("\\s+", SPACE_HOLDER); // spaces are used for formatting
       pw.print(lemma);
     }
 
     pw.print("\t");
-    String pos = token.get(PartOfSpeechAnnotation.class);
+    String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
     if(pos != null) pw.print(pos);
 
     pw.print("\t");
-    String ner = token.get(NamedEntityTagAnnotation.class);
+    String ner = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
     if(ner != null) pw.print(ner);
 
     pw.print("\t");
-    String normNer = token.get(NormalizedNamedEntityTagAnnotation.class);
+    String normNer = token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
     if(normNer != null) pw.print(normNer);
 
     pw.print("\t");
-    Integer charBegin = token.get(CharacterOffsetBeginAnnotation.class);
+    Integer charBegin = token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
     if(charBegin != null) pw.print(charBegin);
 
     pw.print("\t");
-    Integer charEnd = token.get(CharacterOffsetEndAnnotation.class);
+    Integer charEnd = token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
     if(charEnd != null) pw.print(charEnd);
 
     if(haveExplicitAntecedent){
       // This block is specific to KBP
       // in some cases where we now the entity in focus (i.e., web queries), AntecedentAnnotation is generated
       // let's save it as an optional, always last, token
-      String aa = token.get(AntecedentAnnotation.class);
+      String aa = token.get(CoreAnnotations.AntecedentAnnotation.class);
       if(aa != null){
         pw.print("\t");
         aa = aa.replaceAll("\\s+", SPACE_HOLDER); // spaces are used for formatting

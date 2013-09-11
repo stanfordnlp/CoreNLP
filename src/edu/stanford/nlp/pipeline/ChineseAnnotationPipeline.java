@@ -2,10 +2,8 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.ChineseCoreAnnotations.CharactersAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.ChineseCoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
@@ -30,7 +28,7 @@ public class ChineseAnnotationPipeline {
     List<CoreMap> coreMaps = new ArrayList<CoreMap>();
     for (String sentence : sentences) {
       CoreMap nextCoreMap = new ArrayCoreMap();
-      nextCoreMap.set(TextAnnotation.class, sentence);
+      nextCoreMap.set(CoreAnnotations.TextAnnotation.class, sentence);
       coreMaps.add(nextCoreMap);
       if (coreMaps.size() > 1) {
         concatenated.append("\n\n");
@@ -38,7 +36,7 @@ public class ChineseAnnotationPipeline {
       concatenated.append(sentence);
     }
     Annotation ann = new Annotation(concatenated.toString());
-    ann.set(SentencesAnnotation.class, coreMaps);
+    ann.set(CoreAnnotations.SentencesAnnotation.class, coreMaps);
     return ann;
   }
 
@@ -78,10 +76,10 @@ public class ChineseAnnotationPipeline {
     ap.annotate(a);
     //System.out.println(a.getAnnotation(Annotation.WORDS_KEY));
     //System.out.println(a.getAnnotation(Annotation.PARSE_KEY));
-    List<CoreMap> coreMaps = a.get(SentencesAnnotation.class);
+    List<CoreMap> coreMaps = a.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap coreMap : coreMaps) {
       System.err.println("------------------------------------");
-      List<CoreLabel> al = coreMap.get(CharactersAnnotation.class);
+      List<CoreLabel> al = coreMap.get(ChineseCoreAnnotations.CharactersAnnotation.class);
       System.err.println(al.size());
       for ( CoreLabel o : al ) {
         System.out.println(o.getClass().getName());

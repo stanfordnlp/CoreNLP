@@ -10,10 +10,11 @@ import javax.swing.SwingConstants;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.CoreAnnotations.DoAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.parser.ui.TreeJPanel;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 
 /**
@@ -192,8 +193,8 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
         cWidth = paintTree(child, new Point2D.Double(childStartX, childStartY), g2, fM, matchedColor);
       else {
         Color col = defaultColor;
-        if(((CoreLabel) child.label()).has(DoAnnotation.class))
-          col = (((CoreLabel) child.label()).get(DoAnnotation.class)) ? tdiffColor : defaultColor;
+        if(((CoreLabel) child.label()).has(CoreAnnotations.DoAnnotation.class))
+          col = (((CoreLabel) child.label()).get(CoreAnnotations.DoAnnotation.class)) ? tdiffColor : defaultColor;
         cWidth = paintTree(child, new Point2D.Double(childStartX, childStartY), g2, fM, col);
       }
       // draw connectors
@@ -271,7 +272,7 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
   }
 
 
-  private Set<Constituent> diffConstituents = new HashSet<Constituent>();
+  private Set<Constituent> diffConstituents = Generics.newHashSet();
   public void setDiffConstituents(Set<Constituent> diffConstituents) {
     this.diffConstituents = diffConstituents;
   }

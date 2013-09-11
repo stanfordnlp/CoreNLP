@@ -1,20 +1,16 @@
 package edu.stanford.nlp.pipeline;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.ChineseCoreAnnotations.CharactersAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ChineseCharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ChineseSegAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.ChineseCoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
@@ -121,7 +117,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
       timer.start();
       System.err.print("Adding Segmentation annotation...");
     }
-    List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
       for (CoreMap sentence : sentences) {
         doOneSentence(sentence);
@@ -141,7 +137,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
   }
 
   public void splitCharacters(CoreMap annotation) {
-    String origText = annotation.get(TextAnnotation.class);
+    String origText = annotation.get(CoreAnnotations.TextAnnotation.class);
     
     boolean seg = true;
     List<CoreLabel> words = new ArrayList<CoreLabel>();
@@ -157,20 +153,20 @@ public class ChineseSegmenterAnnotator implements Annotator {
         continue;
       } else {
         // if this word is a word, put it as a feature label and set seg to false for next word
-        wi.set(ChineseCharAnnotation.class, wordString);
+        wi.set(CoreAnnotations.ChineseCharAnnotation.class, wordString);
         if (seg) {
-          wi.set(ChineseSegAnnotation.class, "1");
+          wi.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
         } else {
-          wi.set(ChineseSegAnnotation.class, "0");
+          wi.set(CoreAnnotations.ChineseSegAnnotation.class, "0");
         }
-        wi.set(CharacterOffsetBeginAnnotation.class, i);
-        wi.set(CharacterOffsetEndAnnotation.class, (i + 1));
+        wi.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, i);
+        wi.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, (i + 1));
         words.add(wi);
         seg = false;
       }
     }
 
-    annotation.set(CharactersAnnotation.class, words);
+    annotation.set(ChineseCoreAnnotations.CharactersAnnotation.class, words);
     if (VERBOSE) {
       System.err.println("output: " + words);
     }    
@@ -183,10 +179,10 @@ public class ChineseSegmenterAnnotator implements Annotator {
     // 0 12 3 4
     // 0, 0+1 , 
     
-    String text = annotation.get(TextAnnotation.class);
-    List<CoreLabel> sentChars = annotation.get(CharactersAnnotation.class);
+    String text = annotation.get(CoreAnnotations.TextAnnotation.class);
+    List<CoreLabel> sentChars = annotation.get(ChineseCoreAnnotations.CharactersAnnotation.class);
     List<CoreLabel> tokens = new ArrayList<CoreLabel>();
-    annotation.set(TokensAnnotation.class, tokens);
+    annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
     List<String> words = segmenter.segmentString(text);
     if (VERBOSE) {
@@ -198,14 +194,25 @@ public class ChineseSegmenterAnnotator implements Annotator {
     int pos = 0;
     for (String w : words) {
       CoreLabel fl = sentChars.get(pos);
-      fl.set(ChineseSegAnnotation.class, "1");
+      fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
       CoreLabel token = new CoreLabel();
       token.setWord(w);
-      token.set(CharacterOffsetBeginAnnotation.class, fl.get(CharacterOffsetBeginAnnotation.class));
+      token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
       pos += w.length();
       fl = sentChars.get(pos - 1);
-      token.set(CharacterOffsetEndAnnotation.class, fl.get(CharacterOffsetEndAnnotation.class));
+      token.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
       tokens.add(token);
     }
+  }
+
+
+  @Override
+  public Set<Requirement> requires() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Set<Requirement> requirementsSatisfied() {
+    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 }

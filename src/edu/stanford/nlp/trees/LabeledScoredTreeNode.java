@@ -88,10 +88,8 @@ public class LabeledScoredTreeNode extends Tree {
 
 	/**
 	 * Sets the children of this <code>Tree</code>.  If given
-	 * <code>null</code>, this method prints a warning and sets the
-	 * Tree's children to the canonical zero-length Tree[] array.
-	 * Constructing a LabeledScoredTreeLeaf is preferable in this
-	 * case.
+	 * <code>null</code>, this method sets the Tree's children to
+	 * the canonical zero-length Tree[] array.
 	 *
 	 * @param children An array of child trees
 	 */
@@ -190,7 +188,7 @@ public class LabeledScoredTreeNode extends Tree {
 		return new LabeledScoredTreeFactory(lf);
 	}
 
-	private static NumberFormat nf = new DecimalFormat("0.000");
+	private static final NumberFormat nf = new DecimalFormat("0.000");
 
 	@Override
 	public String nodeString() {

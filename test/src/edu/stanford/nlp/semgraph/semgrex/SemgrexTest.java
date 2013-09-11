@@ -218,31 +218,31 @@ public class SemgrexTest extends TestCase {
     graph.setRoot(nodes[0]);
     // this graph isn't supposed to make sense
     graph.addEdge(nodes[0], nodes[1], 
-                  EnglishGrammaticalRelations.MODIFIER, 1.0);
+                  EnglishGrammaticalRelations.MODIFIER, 1.0, false);
     graph.addEdge(nodes[0], nodes[2],
-                  EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0);
+                  EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
     graph.addEdge(nodes[0], nodes[3],
-                  EnglishGrammaticalRelations.INDIRECT_OBJECT, 1.0);
+                  EnglishGrammaticalRelations.INDIRECT_OBJECT, 1.0, false);
     graph.addEdge(nodes[1], nodes[4],
-                  EnglishGrammaticalRelations.MARKER, 1.0);
+                  EnglishGrammaticalRelations.MARKER, 1.0, false);
     graph.addEdge(nodes[2], nodes[4],
-                  EnglishGrammaticalRelations.EXPLETIVE, 1.0);
+                  EnglishGrammaticalRelations.EXPLETIVE, 1.0, false);
     graph.addEdge(nodes[3], nodes[4],
-                  EnglishGrammaticalRelations.ADJECTIVAL_COMPLEMENT, 1.0);
+                  EnglishGrammaticalRelations.ADJECTIVAL_COMPLEMENT, 1.0, false);
     graph.addEdge(nodes[4], nodes[5],
-                  EnglishGrammaticalRelations.ADJECTIVAL_MODIFIER, 1.0);
+                  EnglishGrammaticalRelations.ADJECTIVAL_MODIFIER, 1.0, false);
     graph.addEdge(nodes[4], nodes[6],
-                  EnglishGrammaticalRelations.ADVERBIAL_MODIFIER, 1.0);
+                  EnglishGrammaticalRelations.ADVERBIAL_MODIFIER, 1.0, false);
     graph.addEdge(nodes[4], nodes[8],
-                  EnglishGrammaticalRelations.MODIFIER, 1.0);
+                  EnglishGrammaticalRelations.MODIFIER, 1.0, false);
     graph.addEdge(nodes[5], nodes[7],
-                  EnglishGrammaticalRelations.POSSESSION_MODIFIER, 1.0);
+                  EnglishGrammaticalRelations.POSSESSION_MODIFIER, 1.0, false);
     graph.addEdge(nodes[6], nodes[7],
-                  EnglishGrammaticalRelations.POSSESSIVE_MODIFIER, 1.0);
+                  EnglishGrammaticalRelations.POSSESSIVE_MODIFIER, 1.0, false);
     graph.addEdge(nodes[7], nodes[8],
-                  EnglishGrammaticalRelations.AGENT, 1.0);
+                  EnglishGrammaticalRelations.AGENT, 1.0, false);
     graph.addEdge(nodes[8], nodes[9],
-                  EnglishGrammaticalRelations.DETERMINER, 1.0);
+                  EnglishGrammaticalRelations.DETERMINER, 1.0, false);
 
     return graph;
   }

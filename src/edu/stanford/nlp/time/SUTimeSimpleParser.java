@@ -1,18 +1,18 @@
 package edu.stanford.nlp.time;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
 import edu.stanford.nlp.pipeline.PTBTokenizerAnnotator;
 import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 import edu.stanford.nlp.time.SUTime.Temporal;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Simple wrapper around SUTime for parsing lots of strings outside of Annotation objects.
@@ -44,7 +44,7 @@ public class SUTimeSimpleParser {
 
   static {
     pipeline = makeNumericPipeline();
-    cache = new HashMap<String, Temporal>();
+    cache = Generics.newHashMap();
   }
   
   private static AnnotationPipeline makeNumericPipeline() {  
@@ -67,9 +67,9 @@ public class SUTimeSimpleParser {
       Annotation doc = new Annotation(str);
       pipeline.annotate(doc);
 
-      assert doc.get(SentencesAnnotation.class) != null;
-      assert doc.get(SentencesAnnotation.class).size() > 0;
-      List<CoreMap> timexAnnotations = doc.get(TimexAnnotations.class);
+      assert doc.get(CoreAnnotations.SentencesAnnotation.class) != null;
+      assert doc.get(CoreAnnotations.SentencesAnnotation.class).size() > 0;
+      List<CoreMap> timexAnnotations = doc.get(TimeAnnotations.TimexAnnotations.class);
       if (timexAnnotations.size() > 1) {
         throw new RuntimeException("Too many timexes for '" + str + "'");
       }

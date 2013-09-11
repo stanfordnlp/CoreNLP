@@ -1,6 +1,6 @@
 package edu.stanford.nlp.semgraph;
 
-import edu.stanford.nlp.ling.CoreAnnotations.ProjectedCategoryAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.*;
@@ -21,6 +21,50 @@ public class SemanticGraphFactory {
   private SemanticGraphFactory() {} // just static factory methods
 
   private static final boolean INCLUDE_PUNCTUATION_DEPENDENCIES = false;
+
+  /** 
+   * Produces an Uncollapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
+    return makeFromTree(tree, false, false, false, true, true);
+  }
+
+  /** 
+   * Produces a Collapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCollapsedDependencies(Tree tree) {
+    return makeFromTree(tree, true, false, false, true, true);
+  }
+
+  /** 
+   * Produces a CCProcessed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCCProcessedDependencies(Tree tree) {
+    return makeFromTree(tree, true, true, false, true, true);
+  }
+
+  /** 
+   * Produces an Uncollapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, false, false, false, false, true, true, null, docID, index);
+  }
+
+  /** 
+   * Produces a Collapsed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, true, false, false, false, true, true, null, docID, index);
+  }
+
+  /** 
+   * Produces a CCProcessed SemanticGraph with no extras.
+   */
+  public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, true, false, true, false, true, true, null, docID, index);
+  }
+
+
 
   /**
    * Returns a new <code>SemanticGraph</code> constructed from a given {@link
@@ -255,7 +299,7 @@ public class SemanticGraphFactory {
         if (hw != null) {
           TreeGraphNode hwn = (TreeGraphNode) hw;
           CoreLabel hwLabel = hwn.label();
-          hwLabel.set(ProjectedCategoryAnnotation.class, node.value());
+          hwLabel.set(CoreAnnotations.ProjectedCategoryAnnotation.class, node.value());
         }
       }
     }
@@ -274,7 +318,7 @@ public class SemanticGraphFactory {
       sg.addVertex(vertex);
     }
     for (SemanticGraphEdge edge : edges) {
-      sg.addEdge(edge.getSource(),edge.getTarget(), edge.getRelation(), edge.getWeight());
+      sg.addEdge(edge.getSource(),edge.getTarget(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
 
     sg.resetRoots();
@@ -289,7 +333,7 @@ public class SemanticGraphFactory {
    */
   // XXX why is this a List rather than a Set (i.e. are the duplicates useful)?
   public static Set<IndexedWord> getVerticesFromEdgeSet(Iterable<SemanticGraphEdge> edges) {
-    Set<IndexedWord> retSet = new HashSet<IndexedWord>();
+    Set<IndexedWord> retSet = Generics.newHashSet();
     for (SemanticGraphEdge edge : edges) {
       retSet.add(edge.getGovernor());
       retSet.add(edge.getDependent());
@@ -335,7 +379,7 @@ public class SemanticGraphFactory {
       retSg.addVertex(node);
     }
     for (SemanticGraphEdge edge : edgesToAdd) {
-      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight());
+      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
 
     retSg.resetRoots();
@@ -352,7 +396,7 @@ public class SemanticGraphFactory {
     }
     retSg.setRoots(sg.getRoots());
     for (SemanticGraphEdge edge : sg.edgeIterable()) {
-      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight());
+      retSg.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
     return retSg;
   }
@@ -370,14 +414,14 @@ public class SemanticGraphFactory {
    */
   public static SemanticGraph makeFromGraphs(Collection<SemanticGraph> sgList) {
     SemanticGraph sg = new SemanticGraph();
-    Collection<IndexedWord> newRoots = new HashSet<IndexedWord>();
+    Collection<IndexedWord> newRoots = Generics.newHashSet();
     for (SemanticGraph currSg : sgList) {
       newRoots.addAll(currSg.getRoots());
       for (IndexedWord currVertex : currSg.vertexSet())
         sg.addVertex(currVertex);
       for (SemanticGraphEdge currEdge : currSg.edgeIterable())
         sg.addEdge(currEdge.getGovernor(), currEdge.getDependent(),
-                   currEdge.getRelation(), currEdge.getWeight());
+                   currEdge.getRelation(), currEdge.getWeight(), currEdge.isExtra());
     }
     sg.setRoots(newRoots);
     return sg;
@@ -393,7 +437,7 @@ public class SemanticGraphFactory {
   public static SemanticGraph deepCopyFromGraphs(List<SemanticGraph> graphs,
                                                  List<Integer> lengths) {
     SemanticGraph newGraph = new SemanticGraph();
-    Map<Integer, IndexedWord> newWords = new HashMap<Integer, IndexedWord>();
+    Map<Integer, IndexedWord> newWords = Generics.newHashMap();
     List<IndexedWord> newRoots = new ArrayList<IndexedWord>();
     int vertexOffset = 0;
     for (int i = 0; i < graphs.size(); ++i) {
@@ -412,7 +456,7 @@ public class SemanticGraphFactory {
         if (gov == null || dep == null) {
           throw new AssertionError("Counting problem (or broken edge)");
         }
-        newGraph.addEdge(gov, dep, edge.getRelation(), edge.getWeight());
+        newGraph.addEdge(gov, dep, edge.getRelation(), edge.getWeight(), edge.isExtra());
       }
       for (IndexedWord root : graph.getRoots()) {
         newRoots.add(newWords.get(root.index() + vertexOffset));

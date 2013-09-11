@@ -5,9 +5,7 @@ import java.util.logging.Logger;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
 
@@ -302,9 +300,9 @@ import edu.stanford.nlp.process.LexedTokenFactory;
       String str = prevWordAfter.toString();
       prevWordAfter.setLength(0);
       CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
-      word.set(OriginalTextAnnotation.class, originalText);
-      word.set(BeforeAnnotation.class, str);
-      prevWord.set(AfterAnnotation.class, str);
+      word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
+      word.set(CoreAnnotations.BeforeAnnotation.class, str);
+      prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
       prevWord = word;
       return word;
     } else {
@@ -670,7 +668,7 @@ cannot			{ yypushback(3) ; return getNext(); }
             prevWordAfter.append(yytext()); 
             String str = prevWordAfter.toString();
             prevWordAfter.setLength(0);
-            prevWord.set(AfterAnnotation.class, str);
+            prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
           }
           return null;
         }

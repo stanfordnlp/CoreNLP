@@ -3,7 +3,6 @@ package edu.stanford.nlp.fsm;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -131,7 +130,7 @@ public class TransducerGraph implements Cloneable {
    * Just does union of keysets of maps.
    */
   public Set getNodes() {
-    Set result = new HashSet();
+    Set result = Generics.newHashSet();
     result.addAll(arcsBySource.keySet());
     result.addAll(arcsByTarget.keySet());
     return result;
@@ -207,7 +206,7 @@ public class TransducerGraph implements Cloneable {
   public Arc getArc(Object source, Object target) {
     Set arcsFromSource = arcsBySource.get(source);
     Set arcsToTarget = arcsByTarget.get(target);
-    HashSet result = Generics.newHashSet();
+    Set result = Generics.newHashSet();
     result.addAll(arcsFromSource);
     result.retainAll(arcsToTarget); // intersection
     if (result.size() < 1) {
@@ -696,7 +695,7 @@ public class TransducerGraph implements Cloneable {
   }
 
   public Map<List, Double> samplePathsFromGraph(int numPaths) {
-    Map<List, Double> result = new HashMap<List, Double>();
+    Map<List, Double> result = Generics.newHashMap();
     for (int i = 0; i < numPaths; i++) {
       List l = sampleUniformPathFromGraph();
       result.put(l, new Double(getOutputOfPathInGraph(l)));

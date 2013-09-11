@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  *
  * <p>
  * Use {@link TimeAnnotator} to annotate.
- * 
+ *
  * @author Angel Chang
  */
 public class SUTime {
@@ -145,7 +145,7 @@ public class SUTime {
   public static final int FORMAT_FULL = 0x04;
   public static final int FORMAT_PAD_UNKNOWN = 0x1000;
 
-  static final protected int timexVersion = 3;
+  protected static final int timexVersion = 3;
 
   // Index of time id to temporal object
   public static class TimeIndex {
@@ -214,6 +214,7 @@ public class SUTime {
    *         <br>Ex: Every Tuesday</li>
    *  </ul>
    * </li>
+   * </ol>
    */
   public abstract static class Temporal implements Cloneable, Serializable {
     public String mod;
@@ -369,17 +370,13 @@ public class SUTime {
       // TODO: Full string representation
       return toFormattedString(FORMAT_FULL);
     }
-    
+
     public String getTimeLabel() {
       return timeLabel;
     }
 
     public String toFormattedString(int flags) {
-      if (getTimeLabel() != null) {
-        return getTimeLabel();
-      } else {
-        return null;
-      }
+      return getTimeLabel();
     }
 
     // Temporal operations...
@@ -552,7 +549,7 @@ public class SUTime {
     }
     private static final long serialVersionUID = 1;
   };
-  public static final Duration MILLENIUM = new DurationWithFields(Period.years(1000));
+  public static final Duration MILLENNIUM = new DurationWithFields(Period.years(1000));
 
   public static final Time TIME_REF = new RefTime("REF") {
     private static final long serialVersionUID = 1;
@@ -624,7 +621,7 @@ public class SUTime {
   // Dates for seasons are rough with respect to northern hemisphere
   public static final Time SPRING = createTemporal(StandardTemporalType.SEASON_OF_YEAR, "SP",
            new SUTime.InexactTime(SPRING_EQUINOX, QUARTER, new SUTime.Range(SUTime.MARCH, SUTime.JUNE, SUTime.QUARTER)));
-  public static final Time SUMMER = createTemporal(StandardTemporalType.SEASON_OF_YEAR, "SU", 
+  public static final Time SUMMER = createTemporal(StandardTemporalType.SEASON_OF_YEAR, "SU",
            new SUTime.InexactTime(SUMMER_SOLSTICE, QUARTER, new SUTime.Range(SUTime.JUNE, SUTime.SEPTEMBER, SUTime.QUARTER)));
   public static final Time FALL = createTemporal(StandardTemporalType.SEASON_OF_YEAR, "FA",
           new SUTime.InexactTime(FALL_EQUINOX, QUARTER, new SUTime.Range(SUTime.SEPTEMBER, SUTime.DECEMBER, SUTime.QUARTER)));
@@ -665,7 +662,7 @@ public class SUTime {
   public static enum TimeUnit {
     // Basic time units
     MILLIS(SUTime.MILLIS), SECOND(SUTime.SECOND), MINUTE(SUTime.MINUTE), HOUR(SUTime.HOUR), DAY(SUTime.DAY), WEEK(SUTime.WEEK), MONTH(SUTime.MONTH), QUARTER(SUTime.QUARTER), YEAR(
-            SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENIUM(SUTime.MILLENIUM), UNKNOWN(SUTime.DURATION_UNKNOWN);
+            SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENNIUM(SUTime.MILLENNIUM), UNKNOWN(SUTime.DURATION_UNKNOWN);
 
     protected Duration duration;
 
@@ -793,7 +790,7 @@ public class SUTime {
       }
       return t;
     }
-    
+
     public Temporal create(Expressions.CompositeValue compositeValue)
     {
       StandardTemporalType temporalType = compositeValue.get("type");
@@ -806,8 +803,8 @@ public class SUTime {
       return SUTime.createTemporal(temporalType,  label, modifier, temporal);
     }
   }
-  
-  
+
+
 
   // Temporal operators (currently operates on two temporals and returns another
   // temporal)
@@ -1230,7 +1227,7 @@ public class SUTime {
     public Duration getDuration() {
       return DURATION_NONE;
     }
-    
+
     public Duration getGranularity() {
       StandardTemporalType tlt = getStandardTemporalType();
       if (tlt != null) {
@@ -1301,8 +1298,8 @@ public class SUTime {
         long d = Math.abs(refMillis - t.getJodaTimeInstant().getMillis());
         if (res == null || d < min) {
           res = t;
-          min = d; 
-        } 
+          min = d;
+        }
       }
       return res;
     }
@@ -2840,7 +2837,7 @@ public class SUTime {
       this.year = y;
       this.month = m;
       this.day = d;
-      initBase();  
+      initBase();
       this.standardTemporalType = temporalType;
     }
 
@@ -3093,6 +3090,24 @@ public class SUTime {
 
     private static final long serialVersionUID = 1;
   }
+  
+  // TODO: Timezone...
+  private static final Pattern PATTERN_ISO = Pattern.compile("(\\d\\d\\d\\d)-?(\\d\\d?)-?(\\d\\d?)(-?(?:T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?))?");
+  private static final Pattern PATTERN_ISO_DATETIME = Pattern.compile("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d):(\\d\\d)(\\d\\d)");
+  private static final Pattern PATTERN_ISO_TIME = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
+  private static final Pattern PATTERN_ISO_DATE_1 = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
+  private static final Pattern PATTERN_ISO_DATE_2 = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
+  
+  // Ambiguous pattern - interpret as MM/DD/YY(YY)
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_1 = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
+
+  // Ambiguous pattern - interpret as MM-DD-YY(YY)
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_2 = Pattern.compile(".*(\\d\\d?)\\-(\\d\\d?)\\-(\\d\\d(\\d\\d)?).*");
+
+  // Euro date
+  // Ambiguous pattern - interpret as DD.MM.YY(YY)
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_3 = Pattern.compile(".*(\\d\\d?)\\.(\\d\\d?)\\.(\\d\\d(\\d\\d)?).*");
+  private static final Pattern PATTERN_ISO_TIME_OF_DAY = Pattern.compile(".*(\\d?\\d):(\\d\\d)(:(\\d\\d)(\\.\\d+)?)?(\\s*([AP])\\.?M\\.?)?(\\s+([+\\-]\\d+|[A-Z][SD]T|GMT([+\\-]\\d+)?))?.*");
 
   /**
    * Converts a string that represents some kind of date into ISO 8601 format and
@@ -3104,10 +3119,8 @@ public class SUTime {
   public static SUTime.Time parseDateTime(String dateStr)
   {
     if (dateStr == null) return null;
-    // Already ISO
-    // TODO: Timezone...
-    Pattern p = Pattern.compile("(\\d\\d\\d\\d)-?(\\d\\d?)-?(\\d\\d?)(-?(?:T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?))?");
-    Matcher m = p.matcher(dateStr);
+
+    Matcher m = PATTERN_ISO.matcher(dateStr);
     if (m.matches()) {
       String time = m.group(4);
       SUTime.IsoDate isoDate = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
@@ -3119,59 +3132,51 @@ public class SUTime {
       }
     }
 
-    // ACE Format
-    p = Pattern.compile("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d):(\\d\\d)(\\d\\d)");
-    m = p.matcher(dateStr);
+    m = PATTERN_ISO_DATETIME.matcher(dateStr);
     if (m.matches()) {
       SUTime.IsoDate date = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
       SUTime.IsoTime time = new SUTime.IsoTime(m.group(4), m.group(5), null);
       return new SUTime.IsoDateTime(date,time);
     }
 
-    p = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
-    m = p.matcher(dateStr);
+    m = PATTERN_ISO_TIME.matcher(dateStr);
     if (m.matches()) {
       return new SUTime.IsoTime(m.group(1), m.group(2), m.group(3), m.group(4));
     }
 
     SUTime.IsoDate isoDate = null;
     if (isoDate == null) {
-      p = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_DATE_1.matcher(dateStr);
+
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
       }
     }
 
     if (isoDate == null) {
-      p = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_DATE_2.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
       }
     }
 
     if (isoDate == null) {
-      // Ambiguous pattern - interpret as MM/DD/YY(YY)
-      p = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_AMBIGUOUS_1.matcher(dateStr);
+
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
+    
     if (isoDate == null) {
-      // Ambiguous pattern - interpret as MM-DD-YY(YY)
-      p = Pattern.compile(".*(\\d\\d?)\\-(\\d\\d?)\\-(\\d\\d(\\d\\d)?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_AMBIGUOUS_2.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
+    
     if (isoDate == null) {
-      // Euro date
-      // Ambiguous pattern - interpret as DD.MM.YY(YY)
-      p = Pattern.compile(".*(\\d\\d?)\\.(\\d\\d?)\\.(\\d\\d(\\d\\d)?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_AMBIGUOUS_3.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(2), m.group(1));
       }
@@ -3180,8 +3185,7 @@ public class SUTime {
     // Now add Time of Day
     SUTime.IsoTime isoTime = null;
     if (isoTime == null) {
-      p = Pattern.compile(".*(\\d?\\d):(\\d\\d)(:(\\d\\d)(\\.\\d+)?)?(\\s*([AP])\\.?M\\.?)?(\\s+([+\\-]\\d+|[A-Z][SD]T|GMT([+\\-]\\d+)?))?.*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_TIME_OF_DAY.matcher(dateStr);
       if (m.matches()) {
         // TODO: Fix
         isoTime = new SUTime.IsoTime(m.group(1), m.group(2), m.group(4));
@@ -3215,7 +3219,7 @@ public class SUTime {
       tzBase.setZone(tz);           // TODO: setZoneRetainFields?
       return new GroundedTime(this, tzBase);
     }
-    
+
     public boolean hasTime() {
       return true;
     }
@@ -3349,8 +3353,8 @@ public class SUTime {
           // For durations that have corresponding date time fields
           // this = current time without more specific fields than the duration
           DateTimeFieldType[] dtFieldTypes = getDateTimeFields();
-          Time t = null;
           if (dtFieldTypes != null) {
+            Time t = null;
             for (DateTimeFieldType dtft : dtFieldTypes) {
               if (p.isSupported(dtft)) {
                 t = new PartialTime(JodaTimeUtils.discardMoreSpecificFields(p, dtft));
@@ -3493,7 +3497,7 @@ public class SUTime {
 
     public Duration subtract(Duration d) {
       return add(d.multiplyBy(-1));
-    };
+    }
 
     public Duration resolve(Time refTime, int flags) {
       return this;
@@ -3807,7 +3811,7 @@ public class SUTime {
       Duration max2 = (maxDuration != null) ? maxDuration.divideBy(m) : null;
       return new DurationRange(this, min2, max2);
     }
-  
+
     private static final long serialVersionUID = 1;
   }
 
@@ -3874,7 +3878,7 @@ public class SUTime {
       this.end = end;
       this.duration = duration;
     }
-    
+
     public Range setTimeZone(DateTimeZone tz) {
       return new Range(this, (Time) Temporal.setTimeZone(begin, tz), (Time) Temporal.setTimeZone(end, tz), duration);
     }
@@ -4089,7 +4093,7 @@ public class SUTime {
   }
 
   /**
-   * Exciting set of times 
+   * Exciting set of times
    */
   public abstract static class TemporalSet extends Temporal {
     public TemporalSet() {
@@ -4127,7 +4131,7 @@ public class SUTime {
     }
 
     public ExplicitTemporalSet setTimeZone(DateTimeZone tz) {
-      Set<Temporal> tzTemporals = new HashSet<Temporal>(temporals.size());
+      Set<Temporal> tzTemporals = Generics.newHashSet(temporals.size());
       for (Temporal t:temporals) {
         tzTemporals.add(Temporal.setTimeZone(t, tz));
       }
@@ -4182,7 +4186,7 @@ public class SUTime {
         return this;
       if (other == TIME_UNKNOWN || other == DURATION_UNKNOWN)
         return this;
-      Set<Temporal> newTemporals = new HashSet<Temporal>();
+      Set<Temporal> newTemporals = Generics.newHashSet();
       for (Temporal t : temporals) {
         Temporal t2 = t.intersect(other);
         if (t2 != null)
@@ -4214,7 +4218,7 @@ public class SUTime {
     /** Temporal that re-occurs (e.g. Friday 2-3pm) */
     Temporal base;
 
-    /** The periodicity of re-occurance (e.g. week) */
+    /** The periodicity of re-occurrence (e.g. week) */
     Duration periodicity;
 
     // How often (once, twice)

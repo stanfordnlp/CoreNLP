@@ -30,8 +30,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,25 +37,16 @@ import java.util.Set;
 
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
 import edu.stanford.nlp.dcoref.Dictionaries.Person;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ParagraphAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SpeakerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.UtteranceAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
@@ -66,7 +55,7 @@ public class Document implements Serializable {
 
   private static final long serialVersionUID = -4139866807494603953L;
 
-  public enum DocType { CONVERSATION, ARTICLE };
+  public enum DocType { CONVERSATION, ARTICLE }
 
   /** The type of document: conversational or article */
   public DocType docType;
@@ -105,9 +94,9 @@ public class Document implements Serializable {
    * Each mention occurrence with sentence # and position within sentence
    * (Nth mention, not Nth token)
    */
-  public HashMap<Mention, IntTuple> positions;
+  public Map<Mention, IntTuple> positions;
 
-  public final HashMap<IntTuple, Mention> mentionheadPositions;
+  public final Map<IntTuple, Mention> mentionheadPositions;
 
   /** List of gold links in a document by positions */
   private List<Pair<IntTuple,IntTuple>> goldLinks;
@@ -126,23 +115,23 @@ public class Document implements Serializable {
   public Set<Pair<Integer, Integer>> incompatibles;
 
   public Document() {
-    positions = new HashMap<Mention, IntTuple>();
-    mentionheadPositions = new HashMap<IntTuple, Mention>();
-    roleSet = new HashSet<Mention>();
-    corefClusters = new HashMap<Integer, CorefCluster>();
+    positions = Generics.newHashMap();
+    mentionheadPositions = Generics.newHashMap();
+    roleSet = Generics.newHashSet();
+    corefClusters = Generics.newHashMap();
     goldCorefClusters = null;
-    allPredictedMentions = new HashMap<Integer, Mention>();
-    allGoldMentions = new HashMap<Integer, Mention>();
-    speakers = new HashMap<Integer, String>();
-    speakerPairs = new HashSet<Pair<Integer, Integer>>();
-    incompatibles = new HashSet<Pair<Integer, Integer>>();
+    allPredictedMentions = Generics.newHashMap();
+    allGoldMentions = Generics.newHashMap();
+    speakers = Generics.newHashMap();
+    speakerPairs = Generics.newHashSet();
+    incompatibles = Generics.newHashSet();
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
       List<List<Mention>> goldMentions, Dictionaries dict) {
     this();
     annotation = anno;
-    numSentences = anno.get(SentencesAnnotation.class).size();
+    numSentences = anno.get(CoreAnnotations.SentencesAnnotation.class).size();
     predictedOrderedMentionsBySentence = predictedMentions;
     goldOrderedMentionsBySentence = goldMentions;
     if(goldMentions!=null) {
@@ -159,20 +148,21 @@ public class Document implements Serializable {
     processDiscourse(dict);
     printMentionDetection();
   }
+
   /** Process discourse information */
   protected void processDiscourse(Dictionaries dict) {
     docType = findDocType(dict);
-    markQuotations(this.annotation.get(SentencesAnnotation.class), false);
+    markQuotations(this.annotation.get(CoreAnnotations.SentencesAnnotation.class), false);
     findSpeakers(dict);
 
     // find 'speaker mention' for each mention
     for(Mention m : allPredictedMentions.values()) {
-      int utter = m.headWord.get(UtteranceAnnotation.class);
-      int speakerMentionID;
+      int utter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       try{
-        speakerMentionID = Integer.parseInt(m.headWord.get(SpeakerAnnotation.class));
-        if(utter!=0) {
+        int speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
+        if (utter != 0) {
           speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
+          speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
         }
       } catch (Exception e){
         // no mention found for the speaker
@@ -180,11 +170,12 @@ public class Document implements Serializable {
       }
       // set generic 'you' : e.g., you know in conversation
       if(docType!=DocType.ARTICLE && m.person==Person.YOU && m.endIndex < m.sentenceWords.size()-1
-          && m.sentenceWords.get(m.endIndex).get(TextAnnotation.class).equalsIgnoreCase("know")) {
+          && m.sentenceWords.get(m.endIndex).get(CoreAnnotations.TextAnnotation.class).equalsIgnoreCase("know")) {
         m.generic = true;
       }
     }
   }
+
   /** Document initialize */
   protected void initialize() {
     if(goldOrderedMentionsBySentence==null) assignOriginalID();
@@ -215,7 +206,7 @@ public class Document implements Serializable {
         m.sentNum = i;
 
         assert(!corefClusters.containsKey(m.mentionID));
-        corefClusters.put(m.mentionID, new CorefCluster(m.mentionID, new HashSet<Mention>(Arrays.asList(m))));
+        corefClusters.put(m.mentionID, new CorefCluster(m.mentionID, Generics.newHashSet(Arrays.asList(m))));
         m.corefClusterID = m.mentionID;
 
         IntTuple headPosition = new IntTuple(2);
@@ -282,8 +273,8 @@ public class Document implements Serializable {
       List<Mention> golds = goldOrderedMentionsBySentence.get(sentNum);
       List<Mention> predicts = predictedOrderedMentionsBySentence.get(sentNum);
 
-      Map<IntPair, Mention> goldMentionPositions = new HashMap<IntPair, Mention>();
-      Map<Integer, LinkedList<Mention>> goldMentionHeadPositions = new HashMap<Integer, LinkedList<Mention>>();
+      Map<IntPair, Mention> goldMentionPositions = Generics.newHashMap();
+      Map<Integer, LinkedList<Mention>> goldMentionHeadPositions = Generics.newHashMap();
       for(Mention g : golds) {
         goldMentionPositions.put(new IntPair(g.startIndex, g.endIndex), g);
         if(!goldMentionHeadPositions.containsKey(g.headIndex)) {
@@ -293,7 +284,7 @@ public class Document implements Serializable {
       }
 
       List<Mention> remains = new ArrayList<Mention>();
-      for(Mention p : predicts) {
+      for (Mention p : predicts) {
         IntPair pos = new IntPair(p.startIndex, p.endIndex);
         if(goldMentionPositions.containsKey(pos)) {
           Mention g = goldMentionPositions.get(pos);
@@ -301,19 +292,19 @@ public class Document implements Serializable {
           p.twinless = false;
           g.twinless = false;
           goldMentionHeadPositions.get(g.headIndex).remove(g);
-          if(goldMentionHeadPositions.get(g.headIndex).size()==0) {
+          if(goldMentionHeadPositions.get(g.headIndex).isEmpty()) {
             goldMentionHeadPositions.remove(g.headIndex);
           }
         }
         else remains.add(p);
       }
-      for(Mention r : remains){
+      for (Mention r : remains){
         if(goldMentionHeadPositions.containsKey(r.headIndex)) {
           Mention g = goldMentionHeadPositions.get(r.headIndex).poll();
           r.mentionID = g.mentionID;
           r.twinless = false;
           g.twinless = false;
-          if(goldMentionHeadPositions.get(g.headIndex).size()==0) {
+          if(goldMentionHeadPositions.get(g.headIndex).isEmpty()) {
             goldMentionHeadPositions.remove(g.headIndex);
           }
         }
@@ -325,20 +316,20 @@ public class Document implements Serializable {
   private void setParagraphAnnotation() {
     int paragraphIndex = 0;
     int previousOffset = -10;
-    for(CoreMap sent : annotation.get(SentencesAnnotation.class)) {
-      for(CoreLabel w : sent.get(TokensAnnotation.class)) {
-        if(w.containsKey(CharacterOffsetBeginAnnotation.class)) {
-          if(w.get(CharacterOffsetBeginAnnotation.class) > previousOffset+2) paragraphIndex++;
-          w.set(ParagraphAnnotation.class, paragraphIndex);
-          previousOffset = w.get(CharacterOffsetEndAnnotation.class);
+    for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
+        if(w.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class)) {
+          if(w.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class) > previousOffset+2) paragraphIndex++;
+          w.set(CoreAnnotations.ParagraphAnnotation.class, paragraphIndex);
+          previousOffset = w.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
         } else {
-          w.set(ParagraphAnnotation.class, -1);
+          w.set(CoreAnnotations.ParagraphAnnotation.class, -1);
         }
       }
     }
     for(List<Mention> l : predictedOrderedMentionsBySentence) {
       for(Mention m : l){
-        m.paragraph = m.headWord.get(ParagraphAnnotation.class);
+        m.paragraph = m.headWord.get(CoreAnnotations.ParagraphAnnotation.class);
       }
     }
     numParagraph = paragraphIndex;
@@ -347,15 +338,15 @@ public class Document implements Serializable {
   /** Find document type: Conversation or article  */
   private DocType findDocType(Dictionaries dict) {
     boolean speakerChange = false;
-    Set<Integer> discourseWithIorYou = new HashSet<Integer>();
+    Set<Integer> discourseWithIorYou = Generics.newHashSet();
 
-    for(CoreMap sent : annotation.get(SentencesAnnotation.class)) {
-      for(CoreLabel w : sent.get(TokensAnnotation.class)) {
-        int utterIndex = w.get(UtteranceAnnotation.class);
+    for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
+        int utterIndex = w.get(CoreAnnotations.UtteranceAnnotation.class);
         if(utterIndex!=0) speakerChange = true;
         if(speakerChange && utterIndex==0) return DocType.ARTICLE;
-        if(dict.firstPersonPronouns.contains(w.get(TextAnnotation.class).toLowerCase())
-            || dict.secondPersonPronouns.contains(w.get(TextAnnotation.class).toLowerCase())) {
+        if(dict.firstPersonPronouns.contains(w.get(CoreAnnotations.TextAnnotation.class).toLowerCase())
+            || dict.secondPersonPronouns.contains(w.get(CoreAnnotations.TextAnnotation.class).toLowerCase())) {
           discourseWithIorYou.add(utterIndex);
         }
         if(maxUtter < utterIndex) maxUtter = utterIndex;
@@ -387,9 +378,9 @@ public class Document implements Serializable {
     }
   }
 
-  /** Extract gold coref cluster information */
+  /** Extract gold coref cluster information. */
   public void extractGoldCorefClusters(){
-    goldCorefClusters = new HashMap<Integer, CorefCluster>();
+    goldCorefClusters = Generics.newHashMap();
     for (List<Mention> mentions : goldOrderedMentionsBySentence) {
       for (Mention m : mentions) {
         int id = m.goldCorefClusterID;
@@ -398,10 +389,9 @@ public class Document implements Serializable {
         }
         CorefCluster c = goldCorefClusters.get(id);
         if (c == null) {
-          goldCorefClusters.put(id, new CorefCluster());
+          c = new CorefCluster(id);
+          goldCorefClusters.put(id, c);
         }
-        c = goldCorefClusters.get(id);
-        c.clusterID = id;
         c.corefMentions.add(m);
       }
     }
@@ -418,9 +408,9 @@ public class Document implements Serializable {
     List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     // position of each mention in the input matrix, by id
-    HashMap<Integer, IntTuple> positions = new HashMap<Integer, IntTuple>();
+    Map<Integer, IntTuple> positions = Generics.newHashMap();
     // positions of antecedents
-    HashMap<Integer, List<IntTuple>> antecedents = new HashMap<Integer, List<IntTuple>>();
+    Map<Integer, List<IntTuple>> antecedents = Generics.newHashMap();
     for(int i = 0; i < goldOrderedMentionsBySentence.size(); i ++){
       for(int j = 0; j < goldOrderedMentionsBySentence.get(i).size(); j ++){
         Mention m = goldOrderedMentionsBySentence.get(i).get(j);
@@ -493,12 +483,12 @@ public class Document implements Serializable {
   private void markQuotations(List<CoreMap> results, boolean normalQuotationType) {
     boolean insideQuotation = false;
     for(CoreMap m : results) {
-      for(CoreLabel l : m.get(TokensAnnotation.class)) {
-        String w = l.get(TextAnnotation.class);
+      for(CoreLabel l : m.get(CoreAnnotations.TokensAnnotation.class)) {
+        String w = l.get(CoreAnnotations.TextAnnotation.class);
 
-        boolean noSpeakerInfo = !l.containsKey(SpeakerAnnotation.class)
-        || l.get(SpeakerAnnotation.class).equals("")
-        || l.get(SpeakerAnnotation.class).startsWith("PER");
+        boolean noSpeakerInfo = !l.containsKey(CoreAnnotations.SpeakerAnnotation.class)
+        || l.get(CoreAnnotations.SpeakerAnnotation.class).equals("")
+        || l.get(CoreAnnotations.SpeakerAnnotation.class).startsWith("PER");
 
         if(w.equals("``")
             || (!insideQuotation && normalQuotationType && w.equals("\""))) {
@@ -510,10 +500,10 @@ public class Document implements Serializable {
           insideQuotation = false;
         }
         if(insideQuotation) {
-          l.set(UtteranceAnnotation.class, maxUtter);
+          l.set(CoreAnnotations.UtteranceAnnotation.class, maxUtter);
         }
         if(noSpeakerInfo){
-          l.set(SpeakerAnnotation.class, "PER"+l.get(UtteranceAnnotation.class));
+          l.set(CoreAnnotations.SpeakerAnnotation.class, "PER"+l.get(CoreAnnotations.UtteranceAnnotation.class));
         }
       }
     }
@@ -523,10 +513,10 @@ public class Document implements Serializable {
   /** Speaker extraction */
   private void findSpeakers(Dictionaries dict) {
     if(Constants.USE_GOLD_SPEAKER_TAGS) {
-      for(CoreMap sent : annotation.get(SentencesAnnotation.class)) {
-        for(CoreLabel w : sent.get(TokensAnnotation.class)) {
-          int utterIndex = w.get(UtteranceAnnotation.class);
-          speakers.put(utterIndex, w.get(SpeakerAnnotation.class));
+      for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
+          int utterIndex = w.get(CoreAnnotations.UtteranceAnnotation.class);
+          speakers.put(utterIndex, w.get(CoreAnnotations.SpeakerAnnotation.class));
         }
       }
     } else {
@@ -534,27 +524,27 @@ public class Document implements Serializable {
       else if (docType==DocType.ARTICLE) findSpeakersInArticle(dict);
 
       // set speaker info to annotation
-      for(CoreMap sent : annotation.get(SentencesAnnotation.class)) {
-        for(CoreLabel w : sent.get(TokensAnnotation.class)) {
-          int utterIndex = w.get(UtteranceAnnotation.class);
+      for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
+          int utterIndex = w.get(CoreAnnotations.UtteranceAnnotation.class);
           if(speakers.containsKey(utterIndex)) {
-            w.set(SpeakerAnnotation.class, speakers.get(utterIndex));
+            w.set(CoreAnnotations.SpeakerAnnotation.class, speakers.get(utterIndex));
           }
         }
       }
     }
   }
   private void findSpeakersInArticle(Dictionaries dict) {
-    List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     Pair<Integer, Integer> beginQuotation = new Pair<Integer, Integer>();
     Pair<Integer, Integer> endQuotation = new Pair<Integer, Integer>();
     boolean insideQuotation = false;
     int utterNum = -1;
 
     for (int i = 0 ; i < sentences.size(); i++) {
-      List<CoreLabel> sent = sentences.get(i).get(TokensAnnotation.class);
+      List<CoreLabel> sent = sentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
       for(int j = 0 ; j < sent.size() ; j++) {
-        int utterIndex = sent.get(j).get(UtteranceAnnotation.class);
+        int utterIndex = sent.get(j).get(CoreAnnotations.UtteranceAnnotation.class);
 
         if(utterIndex != 0 && !insideQuotation) {
           utterNum = utterIndex;
@@ -578,33 +568,33 @@ public class Document implements Serializable {
       return ;
 
     if(findSpeaker(utterNum, endQuotation.first(), sentences, endQuotation.second(),
-        sentences.get(endQuotation.first()).get(TokensAnnotation.class).size(), dict))
+        sentences.get(endQuotation.first()).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
       return;
 
     if(beginQuotation.second() <= 1 && beginQuotation.first() > 0) {
       if(findSpeaker(utterNum, beginQuotation.first()-1, sentences, 0,
-          sentences.get(beginQuotation.first()-1).get(TokensAnnotation.class).size(), dict))
-        return ;
+          sentences.get(beginQuotation.first()-1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
+        return;
     }
 
     if(endQuotation.second() == sentences.get(endQuotation.first()).size()-1
         && sentences.size() > endQuotation.first()+1) {
       if(findSpeaker(utterNum, endQuotation.first()+1, sentences, 0,
-          sentences.get(endQuotation.first()+1).get(TokensAnnotation.class).size(), dict))
-        return ;
+          sentences.get(endQuotation.first()+1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
+        return;
     }
   }
 
   private boolean findSpeaker(int utterNum, int sentNum, List<CoreMap> sentences,
       int startIndex, int endIndex, Dictionaries dict) {
-    List<CoreLabel> sent = sentences.get(sentNum).get(TokensAnnotation.class);
+    List<CoreLabel> sent = sentences.get(sentNum).get(CoreAnnotations.TokensAnnotation.class);
     for(int i = startIndex ; i < endIndex ; i++) {
-      if(sent.get(i).get(UtteranceAnnotation.class)!=0) continue;
-      String lemma = sent.get(i).get(LemmaAnnotation.class);
-      String word = sent.get(i).get(TextAnnotation.class);
+      if(sent.get(i).get(CoreAnnotations.UtteranceAnnotation.class)!=0) continue;
+      String lemma = sent.get(i).get(CoreAnnotations.LemmaAnnotation.class);
+      String word = sent.get(i).get(CoreAnnotations.TextAnnotation.class);
       if(dict.reportVerb.contains(lemma)) {
         // find subject
-        SemanticGraph dependency = sentences.get(sentNum).get(CollapsedDependenciesAnnotation.class);
+        SemanticGraph dependency = sentences.get(sentNum).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
         IndexedWord w = dependency.getNodeByWordPattern(word);
 
         if (w != null) {
@@ -639,7 +629,7 @@ public class Document implements Serializable {
         if(m.predicateNominatives == null) continue;
         for (Mention a : m.predicateNominatives){
           if(a.spanToString().toLowerCase().equals("i")) {
-            speakers.put(m.headWord.get(UtteranceAnnotation.class), Integer.toString(m.mentionID));
+            speakers.put(m.headWord.get(CoreAnnotations.UtteranceAnnotation.class), Integer.toString(m.mentionID));
           }
         }
       }
@@ -648,8 +638,8 @@ public class Document implements Serializable {
     int paragraphUtterIndex = 0;
     String nextParagraphSpeaker = "";
     int paragraphOffset = 0;
-    for(CoreMap sent : annotation.get(SentencesAnnotation.class)) {
-      int currentUtter = sent.get(TokensAnnotation.class).get(0).get(UtteranceAnnotation.class);
+    for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+      int currentUtter = sent.get(CoreAnnotations.TokensAnnotation.class).get(0).get(CoreAnnotations.UtteranceAnnotation.class);
       if(paragraphUtterIndex!=currentUtter) {
         nextParagraphSpeaker = findParagraphSpeaker(paragraph, paragraphUtterIndex, nextParagraphSpeaker, paragraphOffset, dict);
         paragraphUtterIndex = currentUtter;
@@ -670,10 +660,10 @@ public class Document implements Serializable {
         CoreMap lastSent = paragraph.get(paragraph.size()-1);
         String speaker = "";
         boolean hasVerb = false;
-        for(int i = 0 ; i < lastSent.get(TokensAnnotation.class).size() ; i++){
-          CoreLabel w = lastSent.get(TokensAnnotation.class).get(i);
-          String pos = w.get(PartOfSpeechAnnotation.class);
-          String ner = w.get(NamedEntityTagAnnotation.class);
+        for(int i = 0 ; i < lastSent.get(CoreAnnotations.TokensAnnotation.class).size() ; i++){
+          CoreLabel w = lastSent.get(CoreAnnotations.TokensAnnotation.class).get(i);
+          String pos = w.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+          String ner = w.get(CoreAnnotations.NamedEntityTagAnnotation.class);
           if(pos.startsWith("V")) {
             hasVerb = true;
             break;
@@ -698,10 +688,10 @@ public class Document implements Serializable {
   private String findNextParagraphSpeaker(List<CoreMap> paragraph, int paragraphOffset, Dictionaries dict) {
     CoreMap lastSent = paragraph.get(paragraph.size()-1);
     String speaker = "";
-    for(CoreLabel w : lastSent.get(TokensAnnotation.class)) {
-      if(w.get(LemmaAnnotation.class).equals("report") || w.get(LemmaAnnotation.class).equals("say")) {
-        String word = w.get(TextAnnotation.class);
-        SemanticGraph dependency = lastSent.get(CollapsedDependenciesAnnotation.class);
+    for(CoreLabel w : lastSent.get(CoreAnnotations.TokensAnnotation.class)) {
+      if(w.get(CoreAnnotations.LemmaAnnotation.class).equals("report") || w.get(CoreAnnotations.LemmaAnnotation.class).equals("say")) {
+        String word = w.get(CoreAnnotations.TextAnnotation.class);
+        SemanticGraph dependency = lastSent.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
         IndexedWord t = dependency.getNodeByWordPattern(word);
 
         for(Pair<GrammaticalRelation,IndexedWord> child : dependency.childPairs(t)){
@@ -729,17 +719,17 @@ public class Document implements Serializable {
 
     int countQuotationMark = 0;
     for(int i = Math.min(m.headIndex, ant.headIndex)+1 ; i < Math.max(m.headIndex, ant.headIndex) ; i++) {
-      String word = m.sentenceWords.get(i).get(TextAnnotation.class);
+      String word = m.sentenceWords.get(i).get(CoreAnnotations.TextAnnotation.class);
       if(word.equals("``") || word.equals("''")) countQuotationMark++;
     }
     if(countQuotationMark!=1) return false;
 
-    IndexedWord w = m.dependency.getNodeByWordPattern(m.sentenceWords.get(m.headIndex).get(TextAnnotation.class));
+    IndexedWord w = m.dependency.getNodeByWordPattern(m.sentenceWords.get(m.headIndex).get(CoreAnnotations.TextAnnotation.class));
     if(w== null) return false;
 
     for(Pair<GrammaticalRelation,IndexedWord> parent : m.dependency.parentPairs(w)){
       if(parent.first().getShortName().equals("nsubj")
-          && dict.reportVerb.contains(parent.second().get(LemmaAnnotation.class))) {
+          && dict.reportVerb.contains(parent.second().get(CoreAnnotations.LemmaAnnotation.class))) {
         return true;
       }
     }
@@ -754,4 +744,5 @@ public class Document implements Serializable {
     SieveCoreferenceSystem.logger.fine("# of found gold mentions: "+foundGoldCount + " / # of gold mentions: "+allGoldMentions.size());
     SieveCoreferenceSystem.logger.fine("gold mentions == ");
   }
+
 }

@@ -29,14 +29,14 @@ public class ParentAnnotationStats implements TreeVisitor {
 
   private final boolean doTags;
 
-  private Map<String,ClassicCounter<List<String>>> nodeRules = new HashMap<String,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> pRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> gPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
+  private Map<String,ClassicCounter<List<String>>> nodeRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> pRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> gPRules = Generics.newHashMap();
 
   // corresponding ones for tags
-  private Map<String,ClassicCounter<List<String>>> tagNodeRules = new HashMap<String,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> tagPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
-  private Map<List<String>,ClassicCounter<List<String>>> tagGPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
+  private Map<String,ClassicCounter<List<String>>> tagNodeRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> tagPRules = Generics.newHashMap();
+  private Map<List<String>,ClassicCounter<List<String>>> tagGPRules = Generics.newHashMap();
 
   /**
    * Minimum support * KL to be included in output and as feature
@@ -511,7 +511,7 @@ public class ParentAnnotationStats implements TreeVisitor {
   public static Set<String> getSplitCategories(Treebank t, boolean doTags, int algorithm, double phrasalCutOff, double tagCutOff, TreebankLanguagePack tlp) {
     ParentAnnotationStats pas = new ParentAnnotationStats(tlp, doTags);
     t.apply(pas);
-    Set<String> splitters = new HashSet<String>();
+    Set<String> splitters = Generics.newHashSet();
     pas.getSplitters(phrasalCutOff, pas.nodeRules, pas.pRules, pas.gPRules, splitters);
     pas.getSplitters(tagCutOff, pas.tagNodeRules, pas.tagPRules, pas.tagGPRules, splitters);
     return splitters;

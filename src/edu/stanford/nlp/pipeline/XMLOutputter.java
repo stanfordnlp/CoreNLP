@@ -14,16 +14,15 @@ import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.time.TimeAnnotations.TimexAnnotation;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -70,7 +69,7 @@ public class XMLOutputter {
       setSingleElement(docElem, "docId", NAMESPACE_URI, docId);
     }
 
-    String docDate = annotation.get(DocDateAnnotation.class);
+    String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
     if(docDate != null){
       setSingleElement(docElem, "docDate", NAMESPACE_URI, docDate);
     }
@@ -99,7 +98,7 @@ public class XMLOutputter {
         sentElem.appendChild(wordTable);
 
         // add tree info
-        Tree tree = sentence.get(TreeAnnotation.class);
+        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
 
         if(tree != null){
           // add the constituent tree for this sentence
@@ -108,17 +107,20 @@ public class XMLOutputter {
           sentElem.appendChild(parseInfo);
 
           // add the dependencies for this sentence
-          Element depInfo = new Element("basic-dependencies", NAMESPACE_URI);
-          addDependencyTreeInfo(depInfo, sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          sentElem.appendChild(depInfo);
+          Element depInfo = buildDependencyTreeInfo("basic-dependencies", sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), tokens, NAMESPACE_URI);
+          if (depInfo != null) {
+            sentElem.appendChild(depInfo);
+          }
 
-          depInfo = new Element("collapsed-dependencies", NAMESPACE_URI);
-          addDependencyTreeInfo(depInfo, sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          sentElem.appendChild(depInfo);
+          depInfo = buildDependencyTreeInfo("collapsed-dependencies", sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
+          if (depInfo != null) {
+            sentElem.appendChild(depInfo);
+          }
 
-          depInfo = new Element("collapsed-ccprocessed-dependencies", NAMESPACE_URI);
-          addDependencyTreeInfo(depInfo, sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
-          sentElem.appendChild(depInfo);
+          depInfo = buildDependencyTreeInfo("collapsed-ccprocessed-dependencies", sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class), tokens, NAMESPACE_URI);
+          if (depInfo != null) {
+            sentElem.appendChild(depInfo);
+          }
         }
 
         // add the MR entities and relations
@@ -173,9 +175,10 @@ public class XMLOutputter {
     treeInfo.appendChild(temp);
   }
 
-  // todo [cdm 2012]: This should be extended to handle CopyAnnotation.
-  private static void addDependencyTreeInfo(Element depInfo, SemanticGraph graph, List<CoreLabel> tokens, String curNS) {
+  private static Element buildDependencyTreeInfo(String dependencyType, SemanticGraph graph, List<CoreLabel> tokens, String curNS) {
     if(graph != null) {
+      Element depInfo = new Element("dependencies", curNS);
+      depInfo.addAttribute(new Attribute("type", dependencyType));
       // The SemanticGraph doesn't explicitely encode the ROOT node,
       // so we print that out ourselves
       for (IndexedWord root : graph.getRoots()) {
@@ -185,8 +188,9 @@ public class XMLOutputter {
         int target = root.index();
         String sourceWord = "ROOT";
         String targetWord = tokens.get(target - 1).word();
+        boolean isExtra = false;
 
-        addDependencyInfo(depInfo, rel, source, sourceWord, target, targetWord, curNS);        
+        addDependencyInfo(depInfo, rel, isExtra, source, sourceWord, null, target, targetWord, null, curNS);
       }
       for (SemanticGraphEdge edge : graph.edgeListSorted()) {
         String rel = edge.getRelation().toString();
@@ -195,24 +199,38 @@ public class XMLOutputter {
         int target = edge.getTarget().index();
         String sourceWord = tokens.get(source - 1).word();
         String targetWord = tokens.get(target - 1).word();
+        Integer sourceCopy = edge.getSource().get(CoreAnnotations.CopyAnnotation.class);
+        Integer targetCopy = edge.getTarget().get(CoreAnnotations.CopyAnnotation.class);
+        boolean isExtra = edge.isExtra();
 
-        addDependencyInfo(depInfo, rel, source, sourceWord, target, targetWord, curNS);
+        addDependencyInfo(depInfo, rel, isExtra, source, sourceWord, sourceCopy, target, targetWord, targetCopy, curNS);
       }
+      return depInfo;
     }
+    return null;
   }
 
-  private static void addDependencyInfo(Element depInfo, String rel, int source, String sourceWord, int target, String targetWord, String curNS) {
+  private static void addDependencyInfo(Element depInfo, String rel, boolean isExtra, int source, String sourceWord, Integer sourceCopy, int target, String targetWord, Integer targetCopy, String curNS) {
     Element depElem = new Element("dep", curNS);
     depElem.addAttribute(new Attribute("type", rel));
+    if (isExtra) {
+      depElem.addAttribute(new Attribute("extra", "true"));
+    }
     
     Element govElem = new Element("governor", curNS);
     govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
     govElem.appendChild(sourceWord);
+    if (sourceCopy != null) {
+      govElem.addAttribute(new Attribute("copy", Integer.toString(sourceCopy)));
+    }
     depElem.appendChild(govElem);
     
     Element dependElem = new Element("dependent", curNS);
     dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
     dependElem.appendChild(targetWord);
+    if (targetCopy != null) {
+      dependElem.addAttribute(new Attribute("copy", Integer.toString(targetCopy)));
+    }
     depElem.appendChild(dependElem);
     
     depInfo.appendChild(depElem);
@@ -288,28 +306,28 @@ public class XMLOutputter {
     // store the position of this word in the sentence
     wordInfo.addAttribute(new Attribute("id", Integer.toString(id)));
 
-    setSingleElement(wordInfo, "word", curNS, token.get(TextAnnotation.class));
-    setSingleElement(wordInfo, "lemma", curNS, token.get(LemmaAnnotation.class));
+    setSingleElement(wordInfo, "word", curNS, token.get(CoreAnnotations.TextAnnotation.class));
+    setSingleElement(wordInfo, "lemma", curNS, token.get(CoreAnnotations.LemmaAnnotation.class));
 
-    if (token.containsKey(CharacterOffsetBeginAnnotation.class) && token.containsKey(CharacterOffsetEndAnnotation.class)) {
-      setSingleElement(wordInfo, "CharacterOffsetBegin", curNS, Integer.toString(token.get(CharacterOffsetBeginAnnotation.class)));
-      setSingleElement(wordInfo, "CharacterOffsetEnd", curNS, Integer.toString(token.get(CharacterOffsetEndAnnotation.class)));
+    if (token.containsKey(CoreAnnotations.CharacterOffsetBeginAnnotation.class) && token.containsKey(CoreAnnotations.CharacterOffsetEndAnnotation.class)) {
+      setSingleElement(wordInfo, "CharacterOffsetBegin", curNS, Integer.toString(token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class)));
+      setSingleElement(wordInfo, "CharacterOffsetEnd", curNS, Integer.toString(token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class)));
     }
 
-    if (token.containsKey(PartOfSpeechAnnotation.class)) {
-      setSingleElement(wordInfo, "POS", curNS, token.get(PartOfSpeechAnnotation.class));
+    if (token.containsKey(CoreAnnotations.PartOfSpeechAnnotation.class)) {
+      setSingleElement(wordInfo, "POS", curNS, token.get(CoreAnnotations.PartOfSpeechAnnotation.class));
     }
 
-    if (token.containsKey(NamedEntityTagAnnotation.class)) {
-      setSingleElement(wordInfo, "NER", curNS, token.get(NamedEntityTagAnnotation.class));
+    if (token.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {
+      setSingleElement(wordInfo, "NER", curNS, token.get(CoreAnnotations.NamedEntityTagAnnotation.class));
     }
 
-    if (token.containsKey(NormalizedNamedEntityTagAnnotation.class)) {
-      setSingleElement(wordInfo, "NormalizedNER", curNS, token.get(NormalizedNamedEntityTagAnnotation.class));
+    if (token.containsKey(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class)) {
+      setSingleElement(wordInfo, "NormalizedNER", curNS, token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
     }
 
-    if (token.containsKey(TimexAnnotation.class)) {
-      Timex timex = token.get(TimexAnnotation.class);
+    if (token.containsKey(TimeAnnotations.TimexAnnotation.class)) {
+      Timex timex = token.get(TimeAnnotations.TimexAnnotation.class);
       Element timexElem = new Element("Timex", curNS);
       timexElem.addAttribute(new Attribute("tid", timex.tid()));
       timexElem.addAttribute(new Attribute("type", timex.timexType()));
@@ -319,12 +337,12 @@ public class XMLOutputter {
 
     if (token.containsKey(CoreAnnotations.TrueCaseAnnotation.class)) {
       Element cur = new Element("TrueCase", curNS);
-      cur.appendChild(token.get(TrueCaseAnnotation.class));
+      cur.appendChild(token.get(CoreAnnotations.TrueCaseAnnotation.class));
       wordInfo.appendChild(cur);
     }
     if (token.containsKey(CoreAnnotations.TrueCaseTextAnnotation.class)) {
       Element cur = new Element("TrueCaseText", curNS);
-      cur.appendChild(token.get(TrueCaseTextAnnotation.class));
+      cur.appendChild(token.get(CoreAnnotations.TrueCaseTextAnnotation.class));
       wordInfo.appendChild(cur);
     }
 

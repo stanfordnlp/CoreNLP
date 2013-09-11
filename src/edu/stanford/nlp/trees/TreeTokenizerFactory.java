@@ -1,6 +1,6 @@
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.AbstractTokenizer;
 

@@ -1,10 +1,10 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
@@ -14,8 +14,8 @@ public class BinaryGrammarExtractor extends AbstractTreeExtractor<Pair<UnaryGram
   private ClassicCounter<UnaryRule> unaryRuleCounter = new ClassicCounter<UnaryRule>();
   private ClassicCounter<BinaryRule> binaryRuleCounter = new ClassicCounter<BinaryRule>();
   protected ClassicCounter<String> symbolCounter = new ClassicCounter<String>();
-  private Set<BinaryRule> binaryRules = new HashSet<BinaryRule>();
-  private Set<UnaryRule> unaryRules = new HashSet<UnaryRule>();
+  private Set<BinaryRule> binaryRules = Generics.newHashSet();
+  private Set<UnaryRule> unaryRules = Generics.newHashSet();
 
   //  protected void tallyTree(Tree t, double weight) {
   //    super.tallyTree(t, weight);

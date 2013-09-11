@@ -26,18 +26,13 @@
 
 package edu.stanford.nlp.parser.ui;
 
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.io.ui.OpenPageDialog;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.parser.lexparser.ChineseLexiconAndWordSegmenter;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.parser.lexparser.LexicalizedParserQuery;
-import edu.stanford.nlp.process.DocumentProcessor;
-import edu.stanford.nlp.process.DocumentPreprocessor;
-import edu.stanford.nlp.process.StripTagsProcessor;
-import edu.stanford.nlp.process.Tokenizer;
-import edu.stanford.nlp.process.WordSegmentingTokenizer;
+import edu.stanford.nlp.parser.lexparser.ParserQuery;
+import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.swing.FontDetector;
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.Tree;
@@ -56,14 +51,11 @@ import javax.swing.event.AncestorListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
-import java.io.CharArrayReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.net.URL;
@@ -455,7 +447,7 @@ public class ParserPanel extends JPanel {
    */
   public void saveOutput() {
     if (textPane.getText().trim().length() == 0) {
-      JOptionPane.showMessageDialog(this, "No text to parse ", null, 
+      JOptionPane.showMessageDialog(this, "No text to parse ", null,
                                     JOptionPane.ERROR_MESSAGE);
       return;
     }
@@ -492,13 +484,13 @@ public class ParserPanel extends JPanel {
     JDialog dialog = new JDialog(new Frame(), "Parser Progress", true);
 
     dialog.setSize(300, 150);
-    dialog.add(BorderLayout.NORTH, 
+    dialog.add(BorderLayout.NORTH,
                new JLabel("Parsing " + sentences.size() + " sentences"));
     dialog.add(BorderLayout.CENTER, progress);
     dialog.add(BorderLayout.SOUTH, cancel);
     //dialog.add(progress);
 
-    final SaveOutputThread thread = 
+    final SaveOutputThread thread =
       new SaveOutputThread(filename, progress, dialog, cancel, sentences);
 
     cancel.setText("Cancel");
@@ -511,7 +503,7 @@ public class ParserPanel extends JPanel {
 
     thread.start();
 
-    dialog.setVisible(true);    
+    dialog.setVisible(true);
   }
 
   /**
@@ -531,7 +523,7 @@ public class ParserPanel extends JPanel {
     boolean cancelled;
 
     public SaveOutputThread(String filename, JProgressBar progress,
-                            JDialog dialog, JButton button, 
+                            JDialog dialog, JButton button,
                             List<List<HasWord>> sentences) {
       this.filename = filename;
       this.progress = progress;
@@ -546,7 +538,7 @@ public class ParserPanel extends JPanel {
         FileOutputStream fos = new FileOutputStream(filename);
         OutputStreamWriter ow = new OutputStreamWriter(fos, "utf-8");
         BufferedWriter bw = new BufferedWriter(ow);
-        
+
         for (List<HasWord> sentence : sentences) {
           Tree tree = parser.parseTree(sentence);
           if (tree == null) {
@@ -591,7 +583,7 @@ public class ParserPanel extends JPanel {
     static final int WAIT = 2000;
     static final int CYCLE = 50;
   }
-  
+
   /**
    * Opens dialog to load a serialized parser
    */
@@ -746,7 +738,7 @@ public class ParserPanel extends JPanel {
     @Override
     public void run() {
       boolean successful;
-      LexicalizedParserQuery parserQuery = parser.parserQuery();
+      ParserQuery parserQuery = parser.parserQuery();
       try {
         successful = parserQuery.parse(sentence);
       } catch (Exception e) {
@@ -778,7 +770,7 @@ public class ParserPanel extends JPanel {
 
   private static class JFileChooserLocation implements AncestorListener {
     Point location;
-    
+
     JFileChooser jfc;
 
     JFileChooserLocation(JFileChooser jfc) {

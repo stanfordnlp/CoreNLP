@@ -21,7 +21,7 @@ import java.util.Properties;
 public class TestOptions implements Serializable {
 
   static final String DEFAULT_PRE_TAGGER =
-     "/u/nlp/data/pos-tagger/wsj3t0-18-bidirectional/bidirectional-wsj-0-18.tagger";
+    "/u/nlp/data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger";
 
   public TestOptions() {
     evals = new Properties();
@@ -225,18 +225,22 @@ public class TestOptions implements Serializable {
   /** What evaluations to report and how to report them
    *  (using LexicalizedParser). Known evaluations
    *  are: pcfgLB, pcfgCB, pcfgDA, pcfgTA, pcfgLL, pcfgRUO, pcfgCUO, pcfgCatE,
+   *  pcfgChildSpecific,
    *  depDA, depTA, depLL,
-   *  factLB, factCB, factDA, factTA, factLL.
+   *  factLB, factCB, factDA, factTA, factLL, factChildSpecific.
    *  The default is pcfgLB,depDA,factLB,factTA.  You need to negate those
    *  ones out (e.g., <code>-evals "depDA=false"</code>) if you don't want
    *  them.
-   *  LB = ParseEval labeled bracketing,
-   *  CB = crossing brackets and zero crossing bracket rate,
-   *  DA = dependency accuracy, TA = tagging accuracy,
-   *  LL = log likelihood score,
-   *  RUO/CUO = rules/categories under and over proposed,
-   *  CatE = evaluation by phrasal category.
-   *  Known styles are: runningAverages, summary, tsv.
+   *  LB = ParseEval labeled bracketing,   <br>
+   *  CB = crossing brackets and zero crossing bracket rate,   <br>
+   *  DA = dependency accuracy, TA = tagging accuracy,   <br>
+   *  LL = log likelihood score,   <br>
+   *  RUO/CUO = rules/categories under and over proposed,  <br>
+   *  CatE = evaluation by phrasal category.   <br>
+   *  ChildSpecific: supply an argument with =.  F1 will be returned
+   *    for only the nodes which have at least one child that matches
+   *    this regular expression. <br>
+   *  Known styles are: runningAverages, summary, tsv. <br>
    *  The default style is summary.
    *  You need to negate it out if you don't want it.
    *  Invalid names in the argument to this option are not reported!
@@ -265,6 +269,13 @@ public class TestOptions implements Serializable {
   public boolean useNonProjectiveDependencyParser = false;
 
   /**
+   * Number of threads to use at test time.  For example,
+   * -testTreebank can use this to go X times faster, with the
+   * negative consequence that output is not quite as nicely ordered.
+   */
+  public int testingThreads = 1;
+
+  /**
    * Determines method for print trees on output.
    *
    * @param tlpParams The treebank parser params
@@ -277,8 +288,19 @@ public class TestOptions implements Serializable {
 
 
   public void display() {
-    String str = "Test parameters maxLength=" + maxLength + " preTag=" + preTag + " outputFormat=" + outputFormat + " outputFormatOptions=" + outputFormatOptions + " printAllBestParses=" + printAllBestParses;
+    String str = toString();
     System.err.println(str);
+  }
+
+  @Override
+  public String toString() {
+    return ("Test parameters" + 
+            " maxLength=" + maxLength + 
+            " preTag=" + preTag + 
+            " outputFormat=" + outputFormat + 
+            " outputFormatOptions=" + outputFormatOptions + 
+            " printAllBestParses=" + printAllBestParses + 
+            " testingThreads=" + testingThreads);
   }
 
   private static final long serialVersionUID = 7256526346598L;

@@ -5,8 +5,7 @@ import java.util.*;
 public class ScorerPairwise extends CorefScorer {
 
   public ScorerPairwise(){
-    super();
-    scoreType = ScoreType.Pairwise;
+    super(ScoreType.Pairwise);
   }
 
   @Override
@@ -45,7 +44,7 @@ public class ScorerPairwise extends CorefScorer {
     int pNum = 0;
 
     Map<Integer, Mention> goldMentions = doc.allGoldMentions;
-    
+
     for(CorefCluster c : doc.corefClusters.values()){
       int clusterSize = c.getCorefMentions().size();
       pDen += clusterSize*(clusterSize-1)/2;

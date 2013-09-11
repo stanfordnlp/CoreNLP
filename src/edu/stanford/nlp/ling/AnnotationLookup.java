@@ -1,55 +1,10 @@
 package edu.stanford.nlp.ling;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import edu.stanford.nlp.ling.CoreAnnotations.AfterAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ArgumentAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.BeforeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetBeginAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CategoryAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CategoryFunctionalTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ChineseCharAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ChineseOrigSegAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ChineseSegAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ChunkAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.DocIDAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.CharacterOffsetEndAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.FeaturesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GazetteerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.IDFAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.IndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.InterpretationAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LeftTermAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.MarkingAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.MorphoCaseAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.MorphoGenAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.MorphoNumAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.MorphoPersAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NormalizedNamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PolarityAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ProjectedCategoryAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ProtoAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.RoleAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SemanticHeadTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SemanticHeadWordAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SentenceIndexAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ShapeAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.SpanAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.StemAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ValueAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.VerbSenseAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.WordnetSynAnnotation;
 import edu.stanford.nlp.ling.CoreLabel.GenericAnnotation;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 
 /** @author Anna Rafferty */
 public class AnnotationLookup {
@@ -57,56 +12,56 @@ public class AnnotationLookup {
   private AnnotationLookup() {}
 
   public enum KeyLookup {
-    VALUE_KEY(ValueAnnotation.class, OldFeatureLabelKeys.VALUE_KEY),
-    TAG_KEY(PartOfSpeechAnnotation.class, OldFeatureLabelKeys.TAG_KEY),
-    WORD_KEY(TextAnnotation.class, OldFeatureLabelKeys.WORD_KEY),
-    LEMMA_KEY(LemmaAnnotation.class, OldFeatureLabelKeys.LEMMA_KEY),
-    CATEGORY_KEY(CategoryAnnotation.class, OldFeatureLabelKeys.CATEGORY_KEY),
-    PROJ_CAT_KEY(ProjectedCategoryAnnotation.class, OldFeatureLabelKeys.PROJ_CAT_KEY),
+    VALUE_KEY(CoreAnnotations.ValueAnnotation.class, OldFeatureLabelKeys.VALUE_KEY),
+    TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, OldFeatureLabelKeys.TAG_KEY),
+    WORD_KEY(CoreAnnotations.TextAnnotation.class, OldFeatureLabelKeys.WORD_KEY),
+    LEMMA_KEY(CoreAnnotations.LemmaAnnotation.class, OldFeatureLabelKeys.LEMMA_KEY),
+    CATEGORY_KEY(CoreAnnotations.CategoryAnnotation.class, OldFeatureLabelKeys.CATEGORY_KEY),
+    PROJ_CAT_KEY(CoreAnnotations.ProjectedCategoryAnnotation.class, OldFeatureLabelKeys.PROJ_CAT_KEY),
     HEAD_WORD_KEY("edu.stanford.nlp.ling.TreeCoreAnnotations.HeadWordAnnotation", OldFeatureLabelKeys.HEAD_WORD_KEY),
     HEAD_TAG_KEY("edu.stanford.nlp.ling.TreeCoreAnnotations.HeadTagAnnotation", OldFeatureLabelKeys.HEAD_TAG_KEY),
-    INDEX_KEY(IndexAnnotation.class, OldFeatureLabelKeys.INDEX_KEY),
-    ARG_KEY(ArgumentAnnotation.class, OldFeatureLabelKeys.ARG_KEY),
-    MARKING_KEY(MarkingAnnotation.class, OldFeatureLabelKeys.MARKING_KEY),
-    SEMANTIC_HEAD_WORD_KEY(SemanticHeadWordAnnotation.class, OldFeatureLabelKeys.SEMANTIC_HEAD_WORD_KEY),
-    SEMANTIC_HEAD_POS_KEY(SemanticHeadTagAnnotation.class, OldFeatureLabelKeys.SEMANTIC_HEAD_POS_KEY),
-    VERB_SENSE_KEY(VerbSenseAnnotation.class, OldFeatureLabelKeys.VERB_SENSE_KEY),
-    CATEGORY_FUNCTIONAL_TAG_KEY(CategoryFunctionalTagAnnotation.class, OldFeatureLabelKeys.CATEGORY_FUNCTIONAL_TAG_KEY),
-    NER_KEY(NamedEntityTagAnnotation.class, OldFeatureLabelKeys.NER_KEY),
-    SHAPE_KEY(ShapeAnnotation.class, OldFeatureLabelKeys.SHAPE_KEY),
-    LEFT_TERM_KEY(LeftTermAnnotation.class, OldFeatureLabelKeys.LEFT_TERM_KEY),
-    PARENT_KEY(ParentAnnotation.class, OldFeatureLabelKeys.PARENT_KEY),
-    SPAN_KEY(SpanAnnotation.class, OldFeatureLabelKeys.SPAN_KEY),
-    BEFORE_KEY(BeforeAnnotation.class, OldFeatureLabelKeys.BEFORE_KEY),
-    AFTER_KEY(AfterAnnotation.class, OldFeatureLabelKeys.AFTER_KEY),
-    CURRENT_KEY(OriginalTextAnnotation.class, OldFeatureLabelKeys.CURRENT_KEY),
-    ANSWER_KEY(AnswerAnnotation.class, OldFeatureLabelKeys.ANSWER_KEY),
-    GOLDANSWER_Key(GoldAnswerAnnotation.class, OldFeatureLabelKeys.GOLDANSWER_KEY),
-    FEATURES_KEY(FeaturesAnnotation.class, OldFeatureLabelKeys.FEATURES_KEY),
-    INTERPRETATION_KEY(InterpretationAnnotation.class, OldFeatureLabelKeys.INTERPRETATION_KEY),
-    ROLE_KEY(RoleAnnotation.class, OldFeatureLabelKeys.ROLE_KEY),
-    GAZETTEER_KEY(GazetteerAnnotation.class, OldFeatureLabelKeys.GAZETTEER_KEY),
-    STEM_KEY(StemAnnotation.class, OldFeatureLabelKeys.STEM_KEY),
-    POLARITY_KEY(PolarityAnnotation.class, OldFeatureLabelKeys.POLARITY_KEY),
-    CH_CHAR_KEY(ChineseCharAnnotation.class, OldFeatureLabelKeys.CH_CHAR_KEY),
-    CH_ORIG_SEG_KEY(ChineseOrigSegAnnotation.class, OldFeatureLabelKeys.CH_ORIG_SEG_KEY),
-    CH_SEG_KEY(ChineseSegAnnotation.class, OldFeatureLabelKeys.CH_SEG_KEY),
-    BEGIN_POSITION_KEY(CharacterOffsetBeginAnnotation.class, OldFeatureLabelKeys.BEGIN_POSITION_KEY),
-    END_POSITION_KEY(CharacterOffsetEndAnnotation.class, OldFeatureLabelKeys.END_POSITION_KEY),
-    DOCID_KEY(DocIDAnnotation.class, OldFeatureLabelKeys.DOCID_KEY),
-    SENTINDEX_KEY(SentenceIndexAnnotation.class, OldFeatureLabelKeys.SENTINDEX_KEY),
-    IDF_KEY(IDFAnnotation.class, "idf"),
-    END_POSITION_KEY2(CharacterOffsetEndAnnotation.class, "endPosition"),
-    CHUNK_KEY(ChunkAnnotation.class, "chunk"),
-    NORMALIZED_NER_KEY(NormalizedNamedEntityTagAnnotation.class, "normalized"),
-    MORPHO_NUM_KEY(MorphoNumAnnotation.class,"num"),
-    MORPHO_PERS_KEY(MorphoPersAnnotation.class,"pers"),
-    MORPHO_GEN_KEY(MorphoGenAnnotation.class,"gen"),
-    MORPHO_CASE_KEY(MorphoCaseAnnotation.class,"case"),
-    WORDNET_SYN_KEY(WordnetSynAnnotation.class,"wordnetsyn"),
-    PROTO_SYN_KEY(ProtoAnnotation.class,"proto");
+    INDEX_KEY(CoreAnnotations.IndexAnnotation.class, OldFeatureLabelKeys.INDEX_KEY),
+    ARG_KEY(CoreAnnotations.ArgumentAnnotation.class, OldFeatureLabelKeys.ARG_KEY),
+    MARKING_KEY(CoreAnnotations.MarkingAnnotation.class, OldFeatureLabelKeys.MARKING_KEY),
+    SEMANTIC_HEAD_WORD_KEY(CoreAnnotations.SemanticHeadWordAnnotation.class, OldFeatureLabelKeys.SEMANTIC_HEAD_WORD_KEY),
+    SEMANTIC_HEAD_POS_KEY(CoreAnnotations.SemanticHeadTagAnnotation.class, OldFeatureLabelKeys.SEMANTIC_HEAD_POS_KEY),
+    VERB_SENSE_KEY(CoreAnnotations.VerbSenseAnnotation.class, OldFeatureLabelKeys.VERB_SENSE_KEY),
+    CATEGORY_FUNCTIONAL_TAG_KEY(CoreAnnotations.CategoryFunctionalTagAnnotation.class, OldFeatureLabelKeys.CATEGORY_FUNCTIONAL_TAG_KEY),
+    NER_KEY(CoreAnnotations.NamedEntityTagAnnotation.class, OldFeatureLabelKeys.NER_KEY),
+    SHAPE_KEY(CoreAnnotations.ShapeAnnotation.class, OldFeatureLabelKeys.SHAPE_KEY),
+    LEFT_TERM_KEY(CoreAnnotations.LeftTermAnnotation.class, OldFeatureLabelKeys.LEFT_TERM_KEY),
+    PARENT_KEY(CoreAnnotations.ParentAnnotation.class, OldFeatureLabelKeys.PARENT_KEY),
+    SPAN_KEY(CoreAnnotations.SpanAnnotation.class, OldFeatureLabelKeys.SPAN_KEY),
+    BEFORE_KEY(CoreAnnotations.BeforeAnnotation.class, OldFeatureLabelKeys.BEFORE_KEY),
+    AFTER_KEY(CoreAnnotations.AfterAnnotation.class, OldFeatureLabelKeys.AFTER_KEY),
+    CURRENT_KEY(CoreAnnotations.OriginalTextAnnotation.class, OldFeatureLabelKeys.CURRENT_KEY),
+    ANSWER_KEY(CoreAnnotations.AnswerAnnotation.class, OldFeatureLabelKeys.ANSWER_KEY),
+    GOLDANSWER_Key(CoreAnnotations.GoldAnswerAnnotation.class, OldFeatureLabelKeys.GOLDANSWER_KEY),
+    FEATURES_KEY(CoreAnnotations.FeaturesAnnotation.class, OldFeatureLabelKeys.FEATURES_KEY),
+    INTERPRETATION_KEY(CoreAnnotations.InterpretationAnnotation.class, OldFeatureLabelKeys.INTERPRETATION_KEY),
+    ROLE_KEY(CoreAnnotations.RoleAnnotation.class, OldFeatureLabelKeys.ROLE_KEY),
+    GAZETTEER_KEY(CoreAnnotations.GazetteerAnnotation.class, OldFeatureLabelKeys.GAZETTEER_KEY),
+    STEM_KEY(CoreAnnotations.StemAnnotation.class, OldFeatureLabelKeys.STEM_KEY),
+    POLARITY_KEY(CoreAnnotations.PolarityAnnotation.class, OldFeatureLabelKeys.POLARITY_KEY),
+    CH_CHAR_KEY(CoreAnnotations.ChineseCharAnnotation.class, OldFeatureLabelKeys.CH_CHAR_KEY),
+    CH_ORIG_SEG_KEY(CoreAnnotations.ChineseOrigSegAnnotation.class, OldFeatureLabelKeys.CH_ORIG_SEG_KEY),
+    CH_SEG_KEY(CoreAnnotations.ChineseSegAnnotation.class, OldFeatureLabelKeys.CH_SEG_KEY),
+    BEGIN_POSITION_KEY(CoreAnnotations.CharacterOffsetBeginAnnotation.class, OldFeatureLabelKeys.BEGIN_POSITION_KEY),
+    END_POSITION_KEY(CoreAnnotations.CharacterOffsetEndAnnotation.class, OldFeatureLabelKeys.END_POSITION_KEY),
+    DOCID_KEY(CoreAnnotations.DocIDAnnotation.class, OldFeatureLabelKeys.DOCID_KEY),
+    SENTINDEX_KEY(CoreAnnotations.SentenceIndexAnnotation.class, OldFeatureLabelKeys.SENTINDEX_KEY),
+    IDF_KEY(CoreAnnotations.IDFAnnotation.class, "idf"),
+    END_POSITION_KEY2(CoreAnnotations.CharacterOffsetEndAnnotation.class, "endPosition"),
+    CHUNK_KEY(CoreAnnotations.ChunkAnnotation.class, "chunk"),
+    NORMALIZED_NER_KEY(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, "normalized"),
+    MORPHO_NUM_KEY(CoreAnnotations.MorphoNumAnnotation.class,"num"),
+    MORPHO_PERS_KEY(CoreAnnotations.MorphoPersAnnotation.class,"pers"),
+    MORPHO_GEN_KEY(CoreAnnotations.MorphoGenAnnotation.class,"gen"),
+    MORPHO_CASE_KEY(CoreAnnotations.MorphoCaseAnnotation.class,"case"),
+    WORDNET_SYN_KEY(CoreAnnotations.WordnetSynAnnotation.class,"wordnetsyn"),
+    PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto");
 
-    public final Class<? extends CoreAnnotation<?>> coreKey;
+    public final Class coreKey;
     public final String oldKey;
 
     private <T> KeyLookup(Class<? extends CoreAnnotation<T>> coreKey, String oldKey) {
@@ -148,8 +103,7 @@ public class AnnotationLookup {
     return null;
   }
 
-  private static Map<Class<CoreAnnotation<?>>,Class<?>> valueCache
-  = new HashMap<Class<CoreAnnotation<?>>,Class<?>>();
+  private static Map<Class<CoreAnnotation<?>>,Class<?>> valueCache = Generics.newHashMap();
 
   /**
    * Returns the runtime value type associated with the given key.  Caches

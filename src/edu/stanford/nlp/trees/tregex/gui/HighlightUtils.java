@@ -52,14 +52,11 @@ public class HighlightUtils {
     Highlight hl = hls[0];
     FontMetrics fm = label.getFontMetrics(label.getFont());
     int offset = getCharOffset(fm, label.getText(), e.getX());
-    if(hl.getStartOffset() <= offset && offset < hl.getEndOffset())
-      return true;
-    else
-      return false;
+    return hl.getStartOffset() <= offset && offset < hl.getEndOffset();
   }
 
   private static int getCharOffset(FontMetrics fm, String characters, int xPos) {
-    StringBuffer s = new StringBuffer();
+    StringBuilder s = new StringBuilder();
     char[] sArray = characters.toCharArray();
     int i;
     for(i = 0; i < characters.length() && fm.stringWidth(s.toString()) < xPos; i++) {
@@ -67,5 +64,5 @@ public class HighlightUtils {
     }
     return i;
   }
-  
+
 }

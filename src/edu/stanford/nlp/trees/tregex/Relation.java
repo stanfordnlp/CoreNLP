@@ -2,7 +2,6 @@ package edu.stanford.nlp.trees.tregex;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -14,6 +13,7 @@ import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IdentityHashSet;
 import edu.stanford.nlp.util.Interner;
 
@@ -1077,7 +1077,7 @@ abstract class Relation implements Serializable {
       IMMEDIATE_RIGHT_SISTER_OF, ONLY_CHILD_OF, HAS_ONLY_CHILD, EQUALS,
       PATTERN_SPLITTER,UNARY_PATH_ANCESTOR_OF, UNARY_PATH_DESCENDANT_OF};
 
-  private static final Map<String, Relation> SIMPLE_RELATIONS_MAP = new HashMap<String, Relation>();
+  private static final Map<String, Relation> SIMPLE_RELATIONS_MAP = Generics.newHashMap();
 
   static {
     for (Relation r : SIMPLE_RELATIONS) {

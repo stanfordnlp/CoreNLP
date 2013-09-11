@@ -11,7 +11,9 @@ import edu.stanford.nlp.ling.Word;
  */
 public class WordTokenFactory implements LexedTokenFactory<Word> {
 
+  @Override
   public Word makeToken(String str, int begin, int length) {
     return new Word(str, begin, begin+length);
   }
+
 }

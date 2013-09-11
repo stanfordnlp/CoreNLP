@@ -2,8 +2,8 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.util.ArrayMap;
+import edu.stanford.nlp.util.Generics;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +21,7 @@ public class EnglishDateTimeUtils {
   static final Pattern teDayHolPattern   = Pattern.compile("\\b(election|memorial|C?Hanukk?ah|Rosh|Kippur|tet|diwali|halloween)\\b", Pattern.CASE_INSENSITIVE);
 
   // holidays that appear on fixed date
-  static Map<String,String> fixedHol2Date = new HashMap<String,String>(30);
+  static Map<String,String> fixedHol2Date = Generics.newHashMap(30);
   static {
     fixedHol2Date.put("newyear",   "0101");
     fixedHol2Date.put("inauguration", "0120");
@@ -55,7 +55,7 @@ public class EnglishDateTimeUtils {
 
   // holidays that appear on certain day of the week
   // format is month-DOW-nth
-  static Map<String,String> nthDOWHol2Date = new HashMap<String,String>(9);
+  static Map<String,String> nthDOWHol2Date = Generics.newHashMap(9);
   static {
     nthDOWHol2Date.put("mlk",        "1-1-3");
     nthDOWHol2Date.put("king",         "1-1-3");
@@ -72,7 +72,7 @@ public class EnglishDateTimeUtils {
 	//	 "may" => 5, "jun" =>  6, "jul" =>  7, "aug" =>  8,
 	//	 "sep" => 9, "oct" => 10, "nov" => 11, "dec" => 12
   static String[] months = { "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" };
-  public static Map<String,Integer> month2Num = new HashMap<String,Integer>(months.length);
+  public static Map<String,Integer> month2Num = Generics.newHashMap(months.length);
   static {
     for (int i = 0; i < months.length; i++) {
       month2Num.put(months[i], i+1);
@@ -82,7 +82,7 @@ public class EnglishDateTimeUtils {
   // "sunday"    => 0, "monday"   => 1, "tuesday" => 2,  "wednesday" => 3,
   // "thursday" => 4, "friday"  => 5, "saturday"  => 6
   static String[] dayOfWeek = { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" };
-  static Map<String,Integer> day2Num = new HashMap<String,Integer>(dayOfWeek.length);
+  static Map<String,Integer> day2Num = Generics.newHashMap(dayOfWeek.length);
   static {
     for (int i = 0; i < dayOfWeek.length; i++) {
       day2Num.put(dayOfWeek[i], i);
@@ -126,7 +126,7 @@ public class EnglishDateTimeUtils {
   static int[] teCumMl = new int[]{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
 
   // time expression ordinals - like ordWord2Num but only goes to thirty
-  static Map<String,Integer> teOrd2Num = new HashMap<String,Integer>(31);
+  static Map<String,Integer> teOrd2Num = Generics.newHashMap(31);
   static {
     teOrd2Num.put("first", 1);
     teOrd2Num.put("second", 2);
@@ -161,7 +161,7 @@ public class EnglishDateTimeUtils {
 	  teOrd2Num.put("thirty-first", 31);
   }
 
-  static Map<String,Integer> teDecadeNums = new HashMap<String,Integer>(9);
+  static Map<String,Integer> teDecadeNums = Generics.newHashMap(9);
   static {
     teDecadeNums.put("twenties", 2);
     teDecadeNums.put("thirties", 3);

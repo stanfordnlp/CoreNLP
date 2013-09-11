@@ -568,7 +568,7 @@ public class ArrayUtils {
   /** Return a set containing the same elements as the specified array.
    */
   public static <T> Set<T> asSet(T[] a) {
-    return new HashSet<T>(Arrays.asList(a));
+    return Generics.newHashSet(Arrays.asList(a));
   }
 
   public static void fill(double[][] d, double val) {
@@ -857,9 +857,10 @@ public class ArrayUtils {
    * @param l2
    * @return starting index of the sublist
    */
-  public static int getSubListIndex(Object[] l1, Object[] l2){ 
+  public static List<Integer> getSubListIndex(Object[] l1, Object[] l2){ 
     if(l1.length > l2.length)
-      return -1;
+      return null;
+    List<Integer> allIndices = new ArrayList<Integer>();
     boolean matched = false;
     int index = -1;
     int lastUnmatchedIndex = 0;
@@ -884,14 +885,32 @@ public class ArrayUtils {
         }
         if(i >= l2.length){
           index = -1;
-          break;}
+          break;
+        }
       }
-      if(i == l2.length || matched)
-        break;
+      if(i == l2.length || matched){
+        if(index >= 0)
+          //index = index - l1.length + 1;
+          allIndices.add(index - l1.length + 1);
+        matched = false;
+        lastUnmatchedIndex = index;
+        
+        //break;
+      }
     }
     //get starting point
-    if(index >= 0)
-      index = index - l1.length + 1;
-    return index;
+    
+    return allIndices;
   }
+  
+  public static double[] normalize(double[] ar){
+    double[] ar2 = new double[ar.length];
+    double total = 0;
+    for(int i = 0; i < ar.length; i++)
+      total += ar[i];
+    for(int i = 0; i < ar.length; i++)
+      ar2[i] = ar[i]/total;
+    return ar2;
+  }
+  
 }

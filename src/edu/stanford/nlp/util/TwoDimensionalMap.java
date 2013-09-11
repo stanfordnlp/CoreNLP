@@ -54,11 +54,13 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
     return m.get(key2);
   }
 
-  public void remove(K1 key1, K2 key2) {
-    get(key1).remove(key2);
+  public V remove(K1 key1, K2 key2) {
+    return get(key1).remove(key2);
   }
 
-  // removes almost the associated data with the key in the first map
+  /**
+   * Removes all of the data associated with the first key in the map
+   */
   public void remove(K1 key1) {
     map.remove(key1);
   }
@@ -85,6 +87,7 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
   }
 
   public Collection<V> values() {
+    // TODO: Should return a specialized class
     List<V> s = Generics.newArrayList();
     for (Map<K2, V> innerMap : map.values()) {
       s.addAll(innerMap.values());
@@ -102,6 +105,16 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
       keys.addAll(get(k1).keySet());
     }
     return keys;
+  }
+
+  /**
+   * Adds all of the entries in the <code>other</code> map, performing
+   * <code>function</code> on them to transform the values
+   */
+  public <V2> void addAll(TwoDimensionalMap<? extends K1, ? extends K2, ? extends V2> other, Function<V2, V> function) {
+    for (TwoDimensionalMap.Entry<? extends K1, ? extends K2, ? extends V2> entry : other) {
+      put(entry.getFirstKey(), entry.getSecondKey(), function.apply(entry.getValue()));
+    }
   }
 
   public TwoDimensionalMap() {
@@ -124,6 +137,10 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
     this.map = mf1.newMap();
   }
 
+  public static <K1, K2, V> TwoDimensionalMap<K1, K2, V> hashMap() {
+    return new TwoDimensionalMap<K1, K2, V>(MapFactory.<K1, Map<K2, V>>hashMapFactory(), MapFactory.<K2, V>hashMapFactory());
+  }
+
   public static <K1, K2, V> TwoDimensionalMap<K1, K2, V> treeMap() {
     return new TwoDimensionalMap<K1, K2, V>(MapFactory.<K1, Map<K2, V>>treeMapFactory(), MapFactory.<K2, V>treeMapFactory());
   }
@@ -135,6 +152,23 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
   @Override
   public String toString() {
     return map.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) {
+      return true;
+    }
+    if (!(o instanceof TwoDimensionalMap)) {
+      return false;
+    }
+    TwoDimensionalMap<?, ?, ?> other = (TwoDimensionalMap<?, ?, ?>) o;
+    return map.equals(other.map);
+  }
+
+  @Override
+  public int hashCode() {
+    return map.hashCode();
   }
 
   /**

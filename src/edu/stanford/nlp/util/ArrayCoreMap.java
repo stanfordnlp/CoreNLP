@@ -7,13 +7,11 @@ import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
@@ -51,7 +49,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
   private static final int INITIAL_CAPACITY = 4;
 
   /** Array of keys */
-  private Class<? extends Key<CoreMap, ?>>[] keys;
+  private Class<? extends Key<?>>[] keys;
 
   /** Array of values */
   private Object[] values;
@@ -99,17 +97,13 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @SuppressWarnings("unchecked")
   public ArrayCoreMap(CoreMap other) {
-    Set<Class<? extends Key<CoreMap, ?>>> otherKeys = other.keySet();
+    Set<Class<?>> otherKeys = other.keySet();
 
     size = otherKeys.size();
     keys = new Class[size];
     values = new Object[size];
 
     int i = 0;
-    // horatio: You should be able to specify
-    //  for (Class<? extends Key<CoreMap, ?>> ...
-    // That throws a compiler error for some reason, but the current
-    // code does not throw either warnings or errors.  Very strange.
     for (Class key : otherKeys) {
       this.keys[i] = key;
       this.values[i] = other.get(key);
@@ -122,8 +116,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
-    VALUE get(Class<KEY> key) {
+  public <VALUE> VALUE get(Class<? extends Key<VALUE>> key) {
     for (int i = 0; i < size; i++) {
       if (key == keys[i]) {
         return (VALUE)values[i];
@@ -138,9 +131,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * {@inheritDoc}
    */
   @Override
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
-    boolean has(Class<KEY> key) {
-
+  public <VALUE> boolean has(Class<? extends Key<VALUE>> key) {
     for (int i = 0; i < size; i++) {
       if (keys[i] == key) {
         return true;
@@ -155,8 +146,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public <VALUEBASE, VALUE extends VALUEBASE, KEY extends Key<CoreMap, VALUEBASE>>
-    VALUE set(Class<KEY> key, VALUE value) {
+  public <VALUE> VALUE set(Class<? extends Key<VALUE>> key, VALUE value) {
 
     // search array for existing value to replace
     for (int i = 0; i < size; i++) {
@@ -191,12 +181,12 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * {@inheritDoc}
    */
   @Override
-  public Set<Class<? extends Key<CoreMap, ?>>> keySet() {
+  public Set<Class<?>> keySet() {
 
-    return new AbstractSet<Class<? extends Key<CoreMap, ?>>>() {
+    return new AbstractSet<Class<?>>() {
       @Override
-      public Iterator<Class<? extends Key<CoreMap, ?>>> iterator() {
-        return new Iterator<Class<? extends Key<CoreMap, ?>>>() {
+      public Iterator<Class<?>> iterator() {
+        return new Iterator<Class<?>>() {
           private int i; // = 0;
 
           @Override
@@ -205,7 +195,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
           }
 
           @Override
-          public Class<? extends Key<CoreMap, ?>> next() {
+          public Class<?> next() {
             try {
               return keys[i++];
             } catch (ArrayIndexOutOfBoundsException aioobe) {
@@ -233,8 +223,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
-    VALUE remove(Class<KEY> key) {
+  public <VALUE> VALUE remove(Class<? extends Key<VALUE>> key) {
 
     Object rv = null;
     for (int i = 0; i < size; i++) {
@@ -255,8 +244,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * {@inheritDoc}
    */
   @Override
-  public <VALUE, KEY extends Key<CoreMap, VALUE>>
-  boolean containsKey(Class<KEY> key) {
+  public <VALUE> boolean containsKey(Class<? extends Key<VALUE>> key) {
     for (int i = 0; i < size; i++) {
       if (keys[i] == key) {
         return true;
@@ -283,9 +271,8 @@ public class ArrayCoreMap implements CoreMap, Serializable {
 
   public void setCapacity(int newSize) {
     if (size > newSize) { throw new RuntimeException("You cannot set capacity to smaller than the current size."); }
-    // TODO FIXME: should this be newSize?
-    Class[] newKeys = new Class[size];
-    Object[] newVals = new Object[size];
+    Class[] newKeys = new Class[newSize];
+    Object[] newVals = new Object[newSize];
     System.arraycopy(keys, 0, newKeys, 0, size);
     System.arraycopy(values, 0, newVals, 0, size);
     keys = ErasureUtils.uncheckedCast(newKeys);
@@ -350,7 +337,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
 
 
   /** Attempt to provide a more human readable String for the contents of
-   *  an Annotation.
+   *  an ArrayCoreMap.
    *
    *  @param what An array (varargs) of Strings that say what annotation keys
    *     to print.  These need to be provided in a shortened form where you
@@ -375,6 +362,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
         for (String item : what) {
           if (item.equals(name)) {
             include = true;
+            break;
           }
         }
       } else {
@@ -391,6 +379,58 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     }
     s.append(']');
     return s.toString();
+  }
+
+  /** This gives a very short String representation of a CoreMap
+   *  by leaving it to the content to reveal what field is being printed.
+   *
+   *  @param what An array (varargs) of Strings that say what annotation keys
+   *     to print.  These need to be provided in a shortened form where you
+   *     are just giving the part of the class name without package and up to
+   *     "Annotation". That is,
+   *     edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation
+   *     -&gt; PartOfSpeech . As a special case, an empty array means
+   *     to print everything, not nothing.
+   *  @return Brief string where the field values are just separated by a
+   *     character. If the string contains spaces, it is wrapped in "{...}".
+   */
+  public String toShortString(String... what) {
+    return toShortString('/', what);
+  }
+
+  public String toShortString(char separator, String... what) {
+    StringBuilder s = new StringBuilder();
+    for (int i = 0; i < size; i++) {
+      boolean include;
+      if (what.length > 0) {
+        String name = keys[i].getSimpleName();
+        int annoIdx = name.lastIndexOf("Annotation");
+        if (annoIdx >= 0) {
+          name = name.substring(0, annoIdx);
+        }
+        include = false;
+        for (String item : what) {
+          if (item.equals(name)) {
+            include = true;
+            break;
+          }
+        }
+      } else {
+        include = true;
+      }
+      if (include) {
+        if (s.length() > 0) {
+          s.append(separator);
+        }
+        s.append(values[i]);
+      }
+    }
+    String answer = s.toString();
+    if (answer.indexOf(' ') < 0) {
+      return answer;
+    } else {
+      return '{' + answer + '}';
+    }
   }
 
   /**
@@ -477,7 +517,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     boolean result = true;
     calledMap.put(this, other, true);
     calledMap.put(other, this, true);
-    
+
     if (this.size != other.size) {
       result = false;
     } else {

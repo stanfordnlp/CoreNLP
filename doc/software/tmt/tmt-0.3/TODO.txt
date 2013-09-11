@@ -1,2 +1,0 @@
-Add example for one doc per file in directory
-

@@ -3,7 +3,7 @@ package edu.stanford.nlp.pipeline;
 import java.io.Reader;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
@@ -20,11 +20,11 @@ import edu.stanford.nlp.process.Tokenizer;
  */
 public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 
-  private TokenizerFactory<CoreLabel> factory = 
+  private TokenizerFactory<CoreLabel> factory =
     PTBTokenizer.factory(false, true);
 
   public static final String DEFAULT_OPTIONS = "invertible,ptb3Escaping=true";
-  
+
   public PTBTokenizerAnnotator() {
     this(true);
   }
@@ -32,7 +32,7 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
   public PTBTokenizerAnnotator(boolean verbose) {
    this(verbose, DEFAULT_OPTIONS);
   }
-  
+
   public PTBTokenizerAnnotator(String options){
    this(true, options);
   }
@@ -40,7 +40,7 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
   public PTBTokenizerAnnotator(boolean verbose, String options) {
     super(verbose);
     factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
-  }  
+  }
 
   @Override
   Tokenizer<CoreLabel> getTokenizer(Reader r) {

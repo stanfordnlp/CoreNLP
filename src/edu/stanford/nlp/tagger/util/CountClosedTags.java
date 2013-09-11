@@ -7,7 +7,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.io.TaggedFileReader;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.tagger.maxent.TaggerConfig;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 
@@ -61,11 +61,11 @@ public class CountClosedTags {
   /**
    * Words seen in the first trainingRatio fraction of the trainFiles
    */
-  Map<String, Set<String>> trainingWords = new HashMap<String, Set<String>>();
+  Map<String, Set<String>> trainingWords = Generics.newHashMap();
   /**
    * Words seen in either trainFiles or testFiles
    */
-  Map<String, Set<String>> allWords = new HashMap<String, Set<String>>();
+  Map<String, Set<String>> allWords = Generics.newHashMap();
 
   static final double DEFAULT_TRAINING_RATIO = 2.0 / 3.0;
   /**
@@ -217,7 +217,7 @@ public class CountClosedTags {
   static final public String PRINT_WORDS_PROPERTY = "printWords";
 
   static final Set<String> knownArgs = 
-    new HashSet<String>(Arrays.asList(TEST_FILE_PROPERTY,
+    Generics.newHashSet(Arrays.asList(TEST_FILE_PROPERTY,
                                       TRAIN_FILE_PROPERTY,
                                       CLOSED_TAGS_PROPERTY,
                                       TRAINING_RATIO_PROPERTY,

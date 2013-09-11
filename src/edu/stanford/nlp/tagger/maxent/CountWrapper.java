@@ -6,10 +6,9 @@
  */
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.OutDataStreamFile;
-
 import java.io.IOException;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 
 
 /** A simple data structure for some tag counts.
@@ -90,7 +89,7 @@ public class CountWrapper {
     return word.equals(cw.word);
   }
 
-  protected void save(OutDataStreamFile rf) {
+  protected void save(DataOutputStream rf) {
     try {
       rf.writeInt(word.length());
       rf.write(word.getBytes());

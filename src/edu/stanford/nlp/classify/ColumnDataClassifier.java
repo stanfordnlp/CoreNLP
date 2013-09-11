@@ -31,14 +31,7 @@
 
 package edu.stanford.nlp.classify;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.File;
+import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +54,7 @@ import edu.stanford.nlp.stats.Distribution;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
@@ -143,7 +137,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> printTo</td><td>String</td><td>n/a</td><td>Path to print a text representation of the linear classifier to</td></tr>
  * <tr><td> trainFile</td><td>String</td><td>n/a</td><td>Path of file to use as training data</td></tr>
  * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as test data</td></tr>
- * <tr><td> encoding</td><td>String</td><td><i>platform default</i></td><td>Chaaracter encoding of training and test file, e.g. utf-8 or iso-8859-1</td></tr>
+ * <tr><td> encoding</td><td>String</td><td><i>platform default</i></td><td>Character encoding of training and test file, e.g. utf-8 or iso-8859-1</td></tr>
  * <tr><td> displayedColumn</td><td>int</td><td>1</td><td>Column number that will be printed out to stdout in the output next to the gold class and the chosen class.  This is just an aide memoire.  If the value is negative, nothing is printed. </td></tr>
  * <tr><td> goldAnswerColumn</td><td>int</td><td>0</td><td>Column number that contains the correct class for each data item (again, columns are numbered from 0 up).</td></tr>
  * <tr><td> groupingColumn</td><td>int</td><td>-1</td><td>Column for grouping multiple data items for the purpose of computing ranking accuracy.  This is appropriate when only one datum in a group can be correct, and the intention is to choose the highest probability one, rather than accepting all above a threshold.  Multiple items in the same group must be contiguous in the test file (otherwise it would be necessary to cache probabilities and groups for the entire test file to check matches).  If it is negative, no grouping column is used, and no ranking accuracy is reported.</td></tr>
@@ -219,6 +213,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>featureFormat</td><td>boolean</td><td>false</td><td>Assumes the input file isn't text strings but already featurized.  One column is treated as the class column (as defined by <code>goldAnswerColumn</code>, and all other columns are treated as features of the instance.  (If answers are not present, set <code>goldAnswerColumn</code> to a negative number.)</td></tr>
  * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight webpage</a> for more information)</td></tr>
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
+ * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization)</td></tr>
  * </table>
  *
  * @author Christopher Manning
@@ -659,14 +654,14 @@ public class ColumnDataClassifier {
    */
   private Datum<String,String> makeDatum(String[] strs) {
     List<String> theFeatures = new ArrayList<String>();
-    Collection<String> globalFeatures = new HashSet<String>();
+    Collection<String> globalFeatures = Generics.newHashSet();
     if (globalFlags.useClassFeature) {
       globalFeatures.add("CLASS");
     }
     addAllInterningAndPrefixing(theFeatures, globalFeatures, "");
 
     for (int i = 0; i < flags.length; i++) {
-      Collection<String> featuresC = new HashSet<String>();//important that this is a hash set to prevent same feature from being added multiple times
+      Collection<String> featuresC = Generics.newHashSet();//important that this is a hash set to prevent same feature from being added multiple times
       makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
       addAllInterningAndPrefixing(theFeatures, featuresC, i + "-");
     }
@@ -1119,7 +1114,7 @@ public class ColumnDataClassifier {
     Set<String> limitFeatureLabels = null;
     if (globalFlags.limitFeaturesLabels != null) {
       String[] labels = globalFlags.limitFeaturesLabels.split(",");
-      limitFeatureLabels = new HashSet<String>();
+      limitFeatureLabels = Generics.newHashSet();
       for (String label:labels) {
         limitFeatureLabels.add(label.trim());
       }
@@ -1503,6 +1498,10 @@ public class ColumnDataClassifier {
         myFlags[col].maxWordNGramLeng = Integer.parseInt(val);
       } else if (key.equals("minWordNGramLeng")) {
         myFlags[col].minWordNGramLeng = Integer.parseInt(val);
+        if (myFlags[col].minWordNGramLeng < 1) {
+          System.err.println("minWordNGramLeng set to " + myFlags[col].minWordNGramLeng + ", resetting to 1");
+          myFlags[col].minWordNGramLeng = 1;
+        }
       } else if (key.equals("wordNGramBoundaryRegexp")) {
         myFlags[col].wordNGramBoundaryRegexp = val;
         try {
@@ -1529,6 +1528,8 @@ public class ColumnDataClassifier {
         Flags.testFromSVMLight = Boolean.parseBoolean(val);
       } else if (key.equals("encoding")) {
         Flags.encoding = val;
+      } else if (key.equals("printSVMLightFormatTo")) {
+        Flags.printSVMLightFormatTo = val;
       } else if (key.equals("displayedColumn")) {
         myFlags[col].displayedColumn = Integer.parseInt(val);
       } else if (key.equals("groupingColumn")) {
@@ -1648,7 +1649,7 @@ public class ColumnDataClassifier {
       return false; // ENDS PROCESSING
     }
 
-    // build the classifier
+    // build dataset of training data featureized
     GeneralDataset<String,String> train = readTrainingExamples(trainFile);
     // print any binned value histograms
     for (int i = 0; i < flags.length; i++) {
@@ -1664,10 +1665,19 @@ public class ColumnDataClassifier {
         System.err.println(flags[i].binnedLengthsCounter.toString());
       }
     }
+    // print the training data in SVMlight format if desired
+    if (Flags.printSVMLightFormatTo != null) {
+      PrintWriter pw = new PrintWriter(IOUtils.getPrintWriter(Flags.printSVMLightFormatTo, Flags.encoding));
+      train.printSVMLightFormat(pw);
+      IOUtils.closeIgnoringExceptions(pw);
+      train.featureIndex().saveToFilename(Flags.printSVMLightFormatTo + ".featureIndex");
+      train.labelIndex().saveToFilename(Flags.printSVMLightFormatTo + ".labelIndex");
+    }
 
     if (globalFlags.exitAfterTrainingFeaturization) {
       return false; // ENDS PROCESSING
     }
+    // build the classifier
     classifier = makeClassifier(train);
     String classString = null;
     if (classifier instanceof LinearClassifier<?,?>) {
@@ -1827,16 +1837,17 @@ public class ColumnDataClassifier {
     double l1regmax = 500.0;
     double featureWeightThreshold = 0;
 
+    String testFile = null;
+    String loadClassifier = null;
 
     // these are static because we don't want them serialized
     static String trainFile = null;
-    String testFile = null;
-    String loadClassifier = null;
     static String serializeTo = null;
     static String printTo = null;
-    static boolean trainFromSVMLight = false;//train file is in SVMLight format
-    static boolean testFromSVMLight = false;//test file is in SVMLight format
+    static boolean trainFromSVMLight = false; //train file is in SVMLight format
+    static boolean testFromSVMLight = false; //test file is in SVMLight format
     static String encoding = null;
+    static String printSVMLightFormatTo;
 
     // Distinguishes whether this file has real valued features or if the more efficient non-RVF representation can be used.
     // This is set as a summary flag in globalFeatures based on whether anything uses real values.
