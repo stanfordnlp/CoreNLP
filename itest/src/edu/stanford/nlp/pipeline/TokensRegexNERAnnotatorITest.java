@@ -1,9 +1,13 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.StringUtils;
 import junit.framework.TestCase;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
 
@@ -13,8 +17,7 @@ import java.util.Properties;
  */
 public class TokensRegexNERAnnotatorITest extends TestCase {
   private static final String REGEX_ANNOTATOR_NAME = "tokensregexner";
-  //private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
-  private static final String MAPPING = "C:\\\\code\\\\NLP\\\\itest_map";
+  private static final String MAPPING = "/u/nlp/data/TAC-KBP2010/sentence_extraction/itest_map";
 
   private static StanfordCoreNLP pipeline;
   private static Annotator caseless;
@@ -36,8 +39,23 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     }
   }
 
+  // Helper methods
   protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(Properties props)
   {
+    return new TokensRegexNERAnnotator(REGEX_ANNOTATOR_NAME, props);
+  }
+
+  protected static TokensRegexNERAnnotator getTokensRegexNerAnnotator(String[][] patterns, boolean ignoreCase) throws Exception
+  {
+    Properties props = new Properties();
+    File tempFile = File.createTempFile("tokensregexnertest.patterns", "txt");
+    PrintWriter pw = IOUtils.getPrintWriter(tempFile.getAbsolutePath());
+    for (String[] p: patterns) {
+      pw.println(StringUtils.join(p, "\t"));
+    }
+    pw.close();
+    props.setProperty(REGEX_ANNOTATOR_NAME + ".mapping", tempFile.getAbsolutePath());
+    props.setProperty(REGEX_ANNOTATOR_NAME + ".ignorecase", String.valueOf(ignoreCase));
     return new TokensRegexNERAnnotator(REGEX_ANNOTATOR_NAME, props);
   }
 
@@ -68,7 +86,49 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     }
   }
 
-  public void testBasicMatching() {
+  // Tests for TokensRegex syntax
+  public void testTokensRegexSyntax() throws Exception {
+    String[][] regexes =
+      new String[][]{
+        new String[]{"( /University/ /of/ [ {ner:LOCATION} ] )", "SCHOOL"}
+        // TODO: TokensRegex literal string patterns ignores ignoreCase settings
+        //new String[]{"( University of [ {ner:LOCATION} ] )", "SCHOOL"}
+    };
+    Annotator annotatorCased = getTokensRegexNerAnnotator(regexes, false);
+
+    String str = "University of California is located in California.";
+    Annotation document = createDocument(str);
+    annotatorCased.annotate(document);
+    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+
+    checkTags(tokens,
+            "ORGANIZATION", "ORGANIZATION", "ORGANIZATION", "O", "O", "O", "LOCATION", "O");
+
+    reannotate(tokens, CoreAnnotations.NamedEntityTagAnnotation.class,
+            "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
+    annotatorCased.annotate(document);
+
+    checkTags(tokens,
+            "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
+
+    // Try lowercase
+    Annotator annotatorCaseless = getTokensRegexNerAnnotator(regexes, true);
+
+    str = "university of california is located in california.";
+    document = createDocument(str);
+    tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+    checkTags(tokens,
+            "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
+    annotatorCased.annotate(document);
+    checkTags(tokens,
+            "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
+    annotatorCaseless.annotate(document);
+    checkTags(tokens,
+            "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
+  }
+
+  // Basic tests from RegexNERAnnotatorITest
+  public void testBasicMatching() throws Exception {
     String str = "President Barack Obama lives in Chicago , Illinois , " +
     "and is a practicing Christian .";
     Annotation document = createDocument(str);
@@ -86,7 +146,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * does not span Ontario Place.  Native American Church will overwrite ORGANIZATION with
    * RELIGION.
    */
-  public void testOverwrite() {
+  public void testOverwrite() throws Exception {
     String str = "I like Ontario Place , and I like the Native American Church , too .";
     Annotation document = createDocument(str);
     annotator.annotate(document);
@@ -101,7 +161,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * In the mapping file, Christianity is assigned a higher priority than Early Christianity,
    * and so Early should not be marked as RELIGION.
    */
-  public void testPriority() {
+  public void testPriority() throws Exception {
     String str = "Christianity is of higher regex priority than Early Christianity . ";
     Annotation document = createDocument(str);
     annotator.annotate(document);
@@ -116,7 +176,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
    * and continue, and if we don't get any exceptions, we throw an
    * exception of our own.
    */
-  public void testEmptyAnnotation() {
+  public void testEmptyAnnotation() throws Exception {
     try {
       annotator.annotate(new Annotation(""));
     } catch(RuntimeException e) {
