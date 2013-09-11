@@ -996,7 +996,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useHardGE = false;
   public boolean useCRFforUnsup = false;
   public boolean useGEforSup = false;
-  public boolean useKnownLCWords = true;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2479,8 +2478,7 @@ public class SeqClassifierFlags implements Serializable {
         useCRFforUnsup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useGEforSup")){
         useGEforSup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKnownLCWords")){
-        useKnownLCWords = Boolean.parseBoolean(val);
+
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
