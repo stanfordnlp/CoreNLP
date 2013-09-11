@@ -2563,8 +2563,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         ((QNMinimizer) minimizer).useOWLQN(flags.useOWLQN, flags.priorLambda);
       }
     } else if (flags.useInPlaceSGD) {
-      SGDMinimizer<DiffFunction> sgdMinimizer =
-              new SGDMinimizer<DiffFunction>(flags.sigma, flags.SGDPasses, flags.tuneSampleSize, flags.stochasticBatchSize);
+      StochasticInPlaceMinimizer<DiffFunction> sgdMinimizer =
+              new StochasticInPlaceMinimizer<DiffFunction>(flags.sigma, flags.SGDPasses, flags.tuneSampleSize, flags.stochasticBatchSize);
       if (flags.useSGDtoQN) {
         QNMinimizer qnMinimizer;
         int QNmem;
@@ -2598,7 +2598,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       minimizer = new SMDMinimizer(flags.initialGain, flags.stochasticBatchSize, flags.stochasticMethod,
           flags.SGDPasses);
     } else if (flags.useSGD) {
-      minimizer = new InefficientSGDMinimizer(flags.initialGain, flags.stochasticBatchSize);
+      minimizer = new SGDMinimizer(flags.initialGain, flags.stochasticBatchSize);
     } else if (flags.useScaledSGD) {
       minimizer = new ScaledSGDMinimizer(flags.initialGain, flags.stochasticBatchSize, flags.SGDPasses,
           flags.scaledSGDMethod);
