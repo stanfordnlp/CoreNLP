@@ -43,8 +43,8 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * </p>
  *
  * <p>
- *   If your default classpath has many classes in it, you can select a subset of them by
- *   setting {@link Execution#optionClasses}.
+ *   If your default classpath has many classes in it, you can select a subset of them
+ *   by using {@link Execution#fillOptions(Class[], java.util.Properties)}, or some variant.
  * </p>
  */
 public class Execution {
@@ -339,14 +339,8 @@ public class Execution {
     return classes.toArray(new Class<?>[classes.size()]);
   }
 
-  protected static final Map<String, Field> fillOptions(
-      Class<?>[] classes,
-      Properties options) {
-    return fillOptions(classes, options, false);
-  }
-
   @SuppressWarnings("rawtypes")
-  protected static final Map<String, Field> fillOptions(
+  protected static Map<String, Field> fillOptionsImpl(
       Class<?>[] classes,
       Properties options,
       boolean ensureAllOptions) {
@@ -448,7 +442,7 @@ public class Execution {
           } catch (Exception e) {
             debug("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
           }
-        fillField(target, value);
+          fillField(target, value);
         }
       }
     }
@@ -470,11 +464,22 @@ public class Execution {
     return canFill;
   }
 
+  protected static Map<String, Field> fillOptionsImpl(
+      Class<?>[] classes,
+      Properties options) {
+    return fillOptionsImpl(classes, options, false);
+  }
+
+
 	/*
 	 * ----------
 	 * EXECUTION
 	 * ----------
 	 */
+
+  public static void fillOptions(Class<?>[] classes, Properties options) {
+    fillOptionsImpl(classes, options);
+  }
 
   public static void fillOptions(Properties props, String[] args) {
     //(convert to map)
@@ -483,37 +488,57 @@ public class Execution {
       options.put(key, props.getProperty(key));
     }
     //(bootstrap)
-    fillOptions(BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(BOOTSTRAP_CLASSES, options, false); //bootstrap
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
     if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
-    Map<String, Field> optionFields = fillOptions(visibleClasses, options);//fill
+    Map<String, Field> optionFields = fillOptionsImpl(visibleClasses, options);//fill
+  }
+
+  public static void fillOptions(Class<?>[] optionClasses, Properties props, String[] args) {
+    Execution.optionClasses = optionClasses;
+    fillOptions(props, args);
+
   }
 
   public static void fillOptions(Properties props) {
     fillOptions(props, new String[0]);
   }
 
-  public static final void usingOptions(Class<?>[] classes,
-                                        String[] args) {
+  public static void fillOptions(Class<?>[] classes,
+                                  String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptions(BOOTSTRAP_CLASSES, options, false); //bootstrap
-    fillOptions(classes, options);
+    fillOptionsImpl(BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(classes, options);
   }
 
-  public static final void usingOptions(Class<?> clazz,
-                                        String[] args) {
+  public static void fillOptions(Class<?> clazz,
+                                 String[] args) {
     Class<?>[] classes = new Class<?>[1];
     classes[0] = clazz;
-    usingOptions(classes, args);
+    fillOptions(classes, args);
   }
 
-  public static final void exec(Runnable toRun) {
+  public static void exec(Runnable toRun) {
+    exec(toRun, new String[0]);
+  }
+
+  public static void exec(Runnable toRun, Class[] optionClasses) {
+    Execution.optionClasses = optionClasses;
     exec(toRun, new String[0]);
   }
 
   public static void exec(Runnable toRun, String[] args) {
     exec(toRun, args, false);
+  }
+
+  public static void exec(Runnable toRun, String[] args, Class[] optionClasses) {
+    Execution.optionClasses = optionClasses;
+    exec(toRun, args, false);
+  }
+  public static void exec(Runnable toRun, String[] args, Class[] optionClasses, boolean exit) {
+    Execution.optionClasses = optionClasses;
+    exec(toRun, StringUtils.argsToProperties(args), exit);
   }
 
   public static void exec(Runnable toRun, String[] args, boolean exit) {
@@ -527,12 +552,12 @@ public class Execution {
   public static void exec(Runnable toRun, Properties options, boolean exit) {
     //--Init
     //(bootstrap)
-    fillOptions(BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(BOOTSTRAP_CLASSES, options, false); //bootstrap
     startTrack("init");
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
     if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
-    Map<String, Field> optionFields = fillOptions(visibleClasses, options);//fill
+    Map<String, Field> optionFields = fillOptionsImpl(visibleClasses, options);//fill
     endTrack("init");
     // -- Setup Logging
     StanfordRedwoodConfiguration.apply(options);
