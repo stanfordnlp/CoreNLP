@@ -4,12 +4,15 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.stanford.nlp.ling.Sentence;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.trees.international.negra.NegraPennLanguagePack;
 
 
 /** @author Christopher Manning
@@ -256,7 +259,27 @@ public class PTBTokenizerTest extends TestCase {
     }
   }
 
+  public void testPTBTokenizerGerman() {
+    String sample = "Das TV-Duell von Kanzlerin Merkel und SPD-Herausforderer Steinbrück war eher lahm - können es die Spitzenleute der kleinen Parteien besser? " +
+            "Die erquickende Sicherheit und Festigkeit in der Bewegung, den Vorrat von Kraft, kann ja die Versammlung nicht fühlen, hören will sie sie nicht, also muß sie sie sehen; und die sehe man einmal in einem Paar spitzen Schultern, zylindrischen Schenkeln, oder leeren Ärmeln, oder lattenförmigen Beinen.";
+    String[] tokenized = {
+        "Das", "TV-Duell", "von", "Kanzlerin", "Merkel", "und", "SPD-Herausforderer", "Steinbrück", "war", "eher",
+        "lahm", "-", "können", "es", "die", "Spitzenleute", "der", "kleinen", "Parteien", "besser", "?",
+        "Die", "erquickende", "Sicherheit", "und", "Festigkeit", "in", "der", "Bewegung", ",", "den", "Vorrat", "von",
+        "Kraft", ",", "kann", "ja", "die", "Versammlung", "nicht", "fühlen", ",", "hören", "will", "sie", "sie",
+        "nicht", ",", "also", "muß", "sie", "sie", "sehen", ";", "und", "die", "sehe", "man", "einmal", "in", "einem",
+        "Paar", "spitzen", "Schultern", ",", "zylindrischen", "Schenkeln", ",", "oder", "leeren", "Ärmeln", ",",
+        "oder", "lattenförmigen", "Beinen", "."
 
-
+    };
+    TreebankLanguagePack tlp = new NegraPennLanguagePack();
+    Tokenizer<? extends HasWord> toke =tlp.getTokenizerFactory().getTokenizer(new StringReader(sample));
+    List<? extends HasWord> tokens = toke.tokenize();
+    List<? extends HasWord> goldTokens = Sentence.toWordList(tokenized);
+    assertEquals("Tokenization length mismatch", goldTokens.size(), tokens.size());
+    for (int i = 0, sz = goldTokens.size(); i < sz; i++) {
+      assertEquals("Bad tokenization", goldTokens.get(i).word(), tokens.get(i).word());
+    }
+  }
 
 }
