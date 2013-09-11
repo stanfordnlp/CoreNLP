@@ -1463,6 +1463,174 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
+   *
+   * @param sentence
+   * @param priorModels
+   *          an array of prior models
+   * @param priorListeners
+   *          an array of prior listeners
+   * @param modelWts
+   *          an array of model weights: IMPORTANT: this includes the weight of
+   *          CRF classifier as well at position 0, and therefore is longer than
+   *          priorListeners/priorModels array by 1.
+   * @return A list of INs with
+   * @throws ClassNotFoundException
+   * @throws SecurityException
+   * @throws NoSuchMethodException
+   * @throws IllegalArgumentException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   * TODO(mengqiu) refactor this method to re-use classifyGibbs
+   */
+  public List<IN> classifyGibbsUsingPrior(List<IN> sentence, SequenceModel[] priorModels,
+      SequenceListener[] priorListeners, double[] modelWts) throws ClassNotFoundException, SecurityException,
+      NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException,
+      InvocationTargetException {
+
+    if ((priorModels.length + 1) != modelWts.length)
+      throw new RuntimeException(
+          "modelWts array should be longer than the priorModels array by 1 unit since it also includes the weight of the CRF model at position 0.");
+
+    // System.err.println("Testing using Gibbs sampling.");
+    Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(sentence);
+
+    List<IN> newDocument = sentence; // reversed if necessary
+    if (flags.useReverse) {
+      Collections.reverse(sentence);
+      newDocument = new ArrayList<IN>(sentence);
+      Collections.reverse(sentence);
+    }
+
+    CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
+
+    SequenceModel model = cliqueTree;
+    SequenceListener listener = cliqueTree;
+
+    SequenceModel[] models = new SequenceModel[priorModels.length + 1];
+    models[0] = model;
+    for (int i = 1; i < models.length; i++)
+      models[i] = priorModels[i - 1];
+    model = new FactoredSequenceModel(models, modelWts);
+
+    SequenceListener[] listeners = new SequenceListener[priorListeners.length + 1];
+    listeners[0] = listener;
+    for (int i = 1; i < listeners.length; i++)
+      listeners[i] = priorListeners[i - 1];
+    listener = new FactoredSequenceListener(listeners);
+
+    SequenceGibbsSampler sampler = new SequenceGibbsSampler(0, 0, listener);
+    int[] sequence = new int[cliqueTree.length()];
+
+    if (flags.initViterbi) {
+      TestSequenceModel testSequenceModel = new TestSequenceModel(cliqueTree);
+      ExactBestSequenceFinder tagInference = new ExactBestSequenceFinder();
+      int[] bestSequence = tagInference.bestSequence(testSequenceModel);
+      System.arraycopy(bestSequence, windowSize - 1, sequence, 0, sequence.length);
+    } else {
+      int[] initialSequence = SequenceGibbsSampler.getRandomSequence(model);
+      System.arraycopy(initialSequence, 0, sequence, 0, sequence.length);
+    }
+
+    SequenceGibbsSampler.verbose = 0;
+
+    if (flags.annealingType.equalsIgnoreCase("linear")) {
+      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getLinearSchedule(1.0, flags.numSamples),
+          sequence);
+    } else if (flags.annealingType.equalsIgnoreCase("exp") || flags.annealingType.equalsIgnoreCase("exponential")) {
+      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getExponentialSchedule(1.0, flags.annealingRate,
+          flags.numSamples), sequence);
+    } else {
+      throw new RuntimeException("No annealing type specified");
+    }
+
+    // System.err.println(ArrayMath.toString(sequence));
+
+    if (flags.useReverse) {
+      Collections.reverse(sentence);
+    }
+
+    for (int j = 0, dsize = newDocument.size(); j < dsize; j++) {
+      IN wi = sentence.get(j);
+      if (wi == null) throw new RuntimeException("");
+      if (classIndex == null) throw new RuntimeException("");
+      wi.set(CoreAnnotations.AnswerAnnotation.class, classIndex.get(sequence[j]));
+    }
+
+    if (flags.useReverse) {
+      Collections.reverse(sentence);
+    }
+
+    return sentence;
+  }
+
+
+  //TODO(mengqiu) refactor this method to re-use classifyGibbs
+  public List<IN> classifyGibbsUsingPrior(List<IN> sentence, SequenceModel priorModel, SequenceListener priorListener,
+      double model1Wt, double model2Wt) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
+      IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    // System.err.println("Testing using Gibbs sampling.");
+    Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(sentence);
+    List<IN> newDocument = sentence; // reversed if necessary
+    if (flags.useReverse) {
+      newDocument = new ArrayList<IN>(sentence);
+      Collections.reverse(newDocument);
+    }
+
+    CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
+
+    SequenceModel model = cliqueTree;
+    SequenceListener listener = cliqueTree;
+
+    model = new FactoredSequenceModel(model, priorModel, model1Wt, model2Wt);
+    listener = new FactoredSequenceListener(listener, priorListener);
+
+    SequenceGibbsSampler sampler = new SequenceGibbsSampler(0, 0, listener);
+    int[] sequence = new int[cliqueTree.length()];
+
+    if (flags.initViterbi) {
+      TestSequenceModel testSequenceModel = new TestSequenceModel(cliqueTree);
+      ExactBestSequenceFinder tagInference = new ExactBestSequenceFinder();
+      int[] bestSequence = tagInference.bestSequence(testSequenceModel);
+      System.arraycopy(bestSequence, windowSize - 1, sequence, 0, sequence.length);
+    } else {
+      int[] initialSequence = SequenceGibbsSampler.getRandomSequence(model);
+      System.arraycopy(initialSequence, 0, sequence, 0, sequence.length);
+    }
+
+    SequenceGibbsSampler.verbose = 0;
+
+    if (flags.annealingType.equalsIgnoreCase("linear")) {
+      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getLinearSchedule(1.0, flags.numSamples),
+          sequence);
+    } else if (flags.annealingType.equalsIgnoreCase("exp") || flags.annealingType.equalsIgnoreCase("exponential")) {
+      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getExponentialSchedule(1.0, flags.annealingRate,
+          flags.numSamples), sequence);
+    } else {
+      throw new RuntimeException("No annealing type specified");
+    }
+
+    // System.err.println(ArrayMath.toString(sequence));
+
+    if (flags.useReverse) {
+      Collections.reverse(sentence);
+    }
+
+    for (int j = 0, dsize = newDocument.size(); j < dsize; j++) {
+      IN wi = sentence.get(j);
+      if (wi == null) throw new RuntimeException("");
+      if (classIndex == null) throw new RuntimeException("");
+      wi.set(CoreAnnotations.AnswerAnnotation.class, classIndex.get(sequence[j]));
+    }
+
+    if (flags.useReverse) {
+      Collections.reverse(sentence);
+    }
+
+    return sentence;
+  }
+
+  /**
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the likelihood of each possible label at each point.
    *
