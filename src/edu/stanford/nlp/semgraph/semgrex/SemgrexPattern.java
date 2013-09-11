@@ -245,6 +245,8 @@ public abstract class SemgrexPattern implements Serializable {
    * @return a SemgrexPattern for the string.
    */
   public static SemgrexPattern compile(String semgrex) {
+    // TODO: make this threadsafe by making SemgrexParser threadsafe.
+    // TODO: make semgrex parser objects non-public
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
