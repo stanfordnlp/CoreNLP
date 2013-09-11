@@ -187,10 +187,11 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   private boolean normalizeOtherBrackets;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
-  private boolean ptb3Dashes = true;
+  private boolean ptb3Dashes;
   private boolean escapeForwardSlashAsterisk;
-  private boolean strictTreebank3 = false;
-
+  private boolean strictTreebank3;
+  
+  
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
    * at either their correct Unicode codepoints, or in their invalid
@@ -213,6 +214,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   public static final String ptb3EllipsisStr = "...";
   public static final String unicodeEllipsisStr = "\u2026";
   public static final String NEWLINE_TOKEN = "*NL*";
+  public static final String COMPOUND_ANNOTATION = "comp";
 
 
   private Object normalizeFractions(final String in) {
@@ -286,7 +288,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   }
 
   private Object getNext() {
-    final String txt = removeSoftHyphens(yytext());
+    final String txt = yytext();
     return getNext(txt, txt);
   }
 
@@ -295,19 +297,24 @@ import edu.stanford.nlp.process.LexedTokenFactory;
    *  @param originalText The original String that got transformed into txt
    */
   private Object getNext(String txt, String originalText) {
+    return getNext(txt, originalText, null);
+  }
+  
+  private Object getNext(String txt, String originalText, String annotation) {
     txt = removeSoftHyphens(txt);
+    CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
     if (invertible) {
       String str = prevWordAfter.toString();
       prevWordAfter.setLength(0);
-      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
       word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
       word.set(CoreAnnotations.BeforeAnnotation.class, str);
       prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
       prevWord = word;
-      return word;
-    } else {
-      return tokenFactory.makeToken(txt, yychar, yylength());
-   }
+    }
+    if (annotation != null) {
+      word.set(CoreAnnotations.ParentAnnotation.class, annotation);      
+    }
+    return word;
   }
 
   private Object getNormalizedAmpNext() {
@@ -477,7 +484,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 
 {COMPOUND} |
 {COMPOUND2}             { final String origTxt = yytext();
-                          return getNext(asciiDash(origTxt), origTxt);
+                          return getNext(asciiDash(origTxt), origTxt, COMPOUND_ANNOTATION);
 			}
 
 {WORD}			{ return getNext(); }
