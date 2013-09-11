@@ -1,14 +1,10 @@
 package edu.stanford.nlp.ie.machinereading.domains.roth;
 
-import edu.stanford.nlp.ie.machinereading.BasicEntityExtractor;
-import edu.stanford.nlp.ie.machinereading.structure.EntityMentionFactory;
+import edu.stanford.nlp.tagger.maxent.Extractor;
 
-public class RothEntityExtractor extends BasicEntityExtractor {
+public class RothEntityExtractor extends Extractor {
   private static final long serialVersionUID = 1L;
   
   public static final boolean USE_SUB_TYPES = false;
 
-  public RothEntityExtractor() {
-    super(null, USE_SUB_TYPES, null, true, new EntityMentionFactory());
-  }
 }
