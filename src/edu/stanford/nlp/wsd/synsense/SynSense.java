@@ -4,6 +4,7 @@ import edu.stanford.nlp.classify.ClassifiedDatum;
 import edu.stanford.nlp.classify.ClassifierTester;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
@@ -17,11 +18,11 @@ public class SynSense {
 
   // datasets
   static List<String> words;
-  protected static List[] senseTrainData = null;
-  protected static List[] senseTestData = null;
+  protected static List<Instance>[] senseTrainData = null;
+  protected static List<Instance>[] senseTestData = null;
   //  protected static List[] senseHeldoutData = null;
-  protected static List[] subcatTrainData = null;
-  protected static List[] subcatTestData = null;
+  protected static List<Instance>[] subcatTrainData = null;
+  protected static List<Instance>[] subcatTestData = null;
   //  protected static List[] subcatHeldoutData = null;
   
   protected static int numFolds = 10;
@@ -356,9 +357,8 @@ public class SynSense {
     }
   }
 
-  protected static void printInstances(List instances) {
-    for (Iterator iter = instances.iterator(); iter.hasNext();) {
-      Instance instance = (Instance) iter.next();
+  protected static void printInstances(List<Instance> instances) {
+    for (Instance instance : instances) {
       System.out.println(instance);
     }
   }
@@ -393,10 +393,10 @@ public class SynSense {
     try {
       fis = new FileInputStream(word + ".ser");
       ObjectInputStream ois = new ObjectInputStream(fis);
-      senseTrainData[i] = (List) ois.readObject();
-      senseTestData[i] = (List) ois.readObject();
-      subcatTrainData[i] = (List) ois.readObject();
-      subcatTestData[i] = (List) ois.readObject();
+      senseTrainData[i] = ErasureUtils.uncheckedCast(ois.readObject());
+      senseTestData[i] = ErasureUtils.uncheckedCast(ois.readObject());
+      subcatTrainData[i] = ErasureUtils.uncheckedCast(ois.readObject());
+      subcatTestData[i] = ErasureUtils.uncheckedCast(ois.readObject());
       ois.close();
       System.out.println("Found " + senseTrainData[i].size() + " senseTrain.");
       System.out.println("Found " + senseTestData[i].size() + " senseTest.");
@@ -417,11 +417,11 @@ public class SynSense {
     int illegal = 0;
     int unparsed = 0;
     for (int j = 0; j < subcatTrainData[i].size(); j++) {
-      if (((Instance) subcatTrainData[i].get(j)).logSequenceGivenSubcat.isEmpty()) {
+      if ((subcatTrainData[i].get(j)).logSequenceGivenSubcat.isEmpty()) {
         unparsed++;
       }
-      if (((Instance) subcatTrainData[i].get(j)).subcat == Subcategory.ILLEGAL) {
-        ((Instance) subcatTrainData[i].get(j)).subcat = Subcategory.OTHER;
+      if ((subcatTrainData[i].get(j)).subcat == Subcategory.ILLEGAL) {
+        (subcatTrainData[i].get(j)).subcat = Subcategory.OTHER;
         illegal++;
       }
     }
@@ -431,11 +431,11 @@ public class SynSense {
     illegal = 0;
     unparsed = 0;
     for (int j = 0; j < subcatTestData[i].size(); j++) {
-      if (((Instance) subcatTestData[i].get(j)).logSequenceGivenSubcat.isEmpty()) {
+      if ((subcatTestData[i].get(j)).logSequenceGivenSubcat.isEmpty()) {
         unparsed++;
       }
-      if (((Instance) subcatTestData[i].get(j)).subcat == Subcategory.ILLEGAL) {
-        ((Instance) subcatTestData[i].get(j)).subcat = Subcategory.OTHER;
+      if ((subcatTestData[i].get(j)).subcat == Subcategory.ILLEGAL) {
+        (subcatTestData[i].get(j)).subcat = Subcategory.OTHER;
         illegal++;
       }
     }
@@ -445,7 +445,7 @@ public class SynSense {
     if (senseGranularity == 2) {
       System.out.println("Loading coarse-grained senses.");
       for (int j = 0; j < senseTrainData[i].size(); j++) {
-        Instance ins = (Instance) senseTrainData[i].get(j);
+        Instance ins = senseTrainData[i].get(j);
         for (int k = 0; k < ins.sense.length; k++) {
           if (senseMap.containsKey(ins.sense[k])) {
             ins.sense[k] = senseMap.get(ins.sense[k]);
@@ -455,7 +455,7 @@ public class SynSense {
         }
       }
       for (int j = 0; j < senseTestData[i].size(); j++) {
-        Instance ins = (Instance) senseTestData[i].get(j);
+        Instance ins = senseTestData[i].get(j);
         for (int k = 0; k < ins.sense.length; k++) {
           if (senseMap.containsKey(ins.sense[k])) {
             ins.sense[k] = senseMap.get(ins.sense[k]);

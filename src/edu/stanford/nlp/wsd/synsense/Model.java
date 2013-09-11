@@ -9,6 +9,6 @@ public interface Model {
 
   public void train(List<Instance> data);
 
-  public List test(List<Instance> data);
+  public List<InstanceMarking> test(List<Instance> data);
 
 }

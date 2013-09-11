@@ -95,14 +95,12 @@ public class ParserAnnotator implements Annotator {
                                          "Parser annotator " +
                                          annotatorName);
     }
-    this.VERBOSE =
-      PropertiesUtils.getBool(props, annotatorName + ".debug", false);
+    this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 
-    String[] flags =
-      convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
+    // will use DEFAULT_FLAGS if the flags are not set in the properties
+    String[] flags = convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
     this.parser = loadModel(model, VERBOSE, flags);
-    this.maxSentenceLength =
-      PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
+    this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
 
     String treeMapClass = props.getProperty(annotatorName + ".treemap");
     if (treeMapClass == null) {
@@ -111,8 +109,7 @@ public class ParserAnnotator implements Annotator {
       this.treeMap = ReflectionLoading.loadByReflection(treeMapClass, props);
     }
 
-    this.maxParseTime = 
-      PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
+    this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {

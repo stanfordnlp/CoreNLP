@@ -31,9 +31,9 @@ import edu.stanford.nlp.util.StringUtils;
 //takes an Object and does instanceof to see what it is...)
 public class TransducerGraph implements Cloneable {
 
-  public static final Object EPSILON_INPUT = "EPSILON";
+  public static final String EPSILON_INPUT = "EPSILON";
 
-  private static final Object DEFAULT_START_NODE = "START";
+  private static final String DEFAULT_START_NODE = "START";
 
   private static Random r = new Random();
 
@@ -837,15 +837,19 @@ public class TransducerGraph implements Cloneable {
   public static TransducerGraph createRandomGraph(int numPaths, int pathLengthMean, double pathLengthVariance, int numInputs, List pathList) {
     // compute the path length. Draw from a normal distribution
     int pathLength = (int) (r.nextGaussian() * pathLengthVariance + pathLengthMean);
-    Object input;
+    String input;
     List path;
     for (int i = 0; i < numPaths; i++) {
       // make a path
       path = new ArrayList();
       for (int j = 0; j < pathLength; j++) {
-        input = Integer.valueOf(r.nextInt(numInputs));
+        input = Integer.toString(r.nextInt(numInputs));
         path.add(input);
       }
+      // TODO: createRandomPaths had the following difference:
+      // we're done, add one more arc to get to the endNode.
+      //input = TransducerGraph.EPSILON_INPUT;
+      //path.add(input);
       pathList.add(path);
     }
     return createGraphFromPaths(pathList, -1);
@@ -856,13 +860,13 @@ public class TransducerGraph implements Cloneable {
     // make a bunch of paths, randomly
     // compute the path length. Draw from a normal distribution
     int pathLength = (int) (r.nextGaussian() * pathLengthVariance + pathLengthMean);
-    Object input;
-    List path;
+    String input;
+    List<String> path;
     for (int i = 0; i < numPaths; i++) {
       // make a path
-      path = new ArrayList();
+      path = new ArrayList<String>();
       for (int j = 0; j < pathLength; j++) {
-        input = Integer.valueOf(r.nextInt(numInputs));
+        input = Integer.toString(r.nextInt(numInputs));
         path.add(input);
       }
       // we're done, add one more arc to get to the endNode.

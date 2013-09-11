@@ -16,7 +16,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * logistic regression, which is more efficient than using the
  * LinearClassifier class.
  * 
- * @author Ramesh Nallapati nmramesh@cs.stanford.edu {@link #justificationOf(Collection)}
+ * @author Ramesh Nallapati nmramesh@cs.stanford.edu
  * 
  */
 public class LogisticClassifierFactory<L,F> implements ClassifierFactory<L, F, LogisticClassifier<L,F>> {

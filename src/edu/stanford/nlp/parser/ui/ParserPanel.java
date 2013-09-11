@@ -234,7 +234,7 @@ public class ParserPanel extends JPanel {
     }
     StringReader reader = new StringReader(text);
     DocumentPreprocessor processor = new DocumentPreprocessor(reader);
-    TokenizerFactory tf = tlp.getTokenizerFactory();
+    TokenizerFactory<? extends HasWord> tf = tlp.getTokenizerFactory();
     processor.setTokenizerFactory(tf);
     List<Integer> boundaries = new ArrayList<Integer>();
     for (List<HasWord> sentence : processor) {
@@ -479,7 +479,7 @@ public class ParserPanel extends JPanel {
     String text = textPane.getText();
     StringReader reader = new StringReader(text);
     DocumentPreprocessor processor = new DocumentPreprocessor(reader);
-    TokenizerFactory tf = tlp.getTokenizerFactory();
+    TokenizerFactory<? extends HasWord> tf = tlp.getTokenizerFactory();
     processor.setTokenizerFactory(tf);
     List<List<HasWord>> sentences = new ArrayList<List<HasWord>>();
     for (List<HasWord> sentence : processor) {
