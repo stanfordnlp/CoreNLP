@@ -136,7 +136,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         if (flags.wordFunction != null) {
           word = flags.wordFunction.apply(word);
         }
-        if (word.length() > 0) {
+        if (flags.useKnownLCWords && word.length() > 0) {
           char ch = word.charAt(0);
           if (Character.isLowerCase(ch)) {
             knownLCWords.add(word);
