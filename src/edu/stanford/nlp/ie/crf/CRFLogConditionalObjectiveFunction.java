@@ -46,9 +46,9 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   protected final int numClasses;
   public static Index<String> featureIndex;
   protected final int[] map;
-  protected final int[][][][] data;  // data[docIndex][tokenIndex][][]
-  protected final double[][][][] featureVal;  // featureVal[docIndex][tokenIndex][][]
-  protected final int[][] labels;    // labels[docIndex][tokenIndex]
+  protected int[][][][] data;  // data[docIndex][tokenIndex][][]
+  protected double[][][][] featureVal;  // featureVal[docIndex][tokenIndex][][]
+  protected int[][] labels;    // labels[docIndex][tokenIndex]
   protected final int domainDimension;
   protected double[][] eHat4Update, e4Update;
 
@@ -760,7 +760,13 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return new Pair<double[][][], double[][][]>(prevGivenCurr, nextGivenCurr);
   }
 
-  protected static void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
+  protected void combine2DArr(double[][] combineInto, double[][] toBeCombined, double scale) {
+    for (int i = 0; i < toBeCombined.length; i++)
+      for (int j = 0; j < toBeCombined[i].length; j++)
+        combineInto[i][j] += toBeCombined[i][j] * scale;
+  }
+
+  protected void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
     for (int i = 0; i < toBeCombined.length; i++)
       for (int j = 0; j < toBeCombined[i].length; j++)
         combineInto[i][j] += toBeCombined[i][j];
