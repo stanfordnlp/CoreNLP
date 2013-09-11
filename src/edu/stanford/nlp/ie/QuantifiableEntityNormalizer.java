@@ -2,15 +2,14 @@ package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.ie.pascal.ISODateInstance;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.time.TimeAnnotations.*;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.EditDistance;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -63,7 +62,7 @@ public class QuantifiableEntityNormalizer {
 
   static {
 
-    quantifiable = Generics.newHashSet();
+    quantifiable = new HashSet<String>();
     quantifiable.add("MONEY");
     quantifiable.add("TIME");
     quantifiable.add("DATE");
@@ -72,12 +71,12 @@ public class QuantifiableEntityNormalizer {
     quantifiable.add("ORDINAL");
     quantifiable.add("DURATION");
 
-    collapseBeforeParsing = Generics.newHashSet();
+    collapseBeforeParsing = new HashSet<String>();
     collapseBeforeParsing.add("PERSON");
     collapseBeforeParsing.add("ORGANIZATION");
     collapseBeforeParsing.add("LOCATION");
 
-    timeUnitWords = Generics.newHashSet();
+    timeUnitWords = new HashSet<String>();
     timeUnitWords.add("second");
     timeUnitWords.add("seconds");
     timeUnitWords.add("minute");
@@ -93,7 +92,7 @@ public class QuantifiableEntityNormalizer {
     timeUnitWords.add("year");
     timeUnitWords.add("years");
 
-    currencyWords = Generics.newHashMap();
+    currencyWords = new HashMap<String,Character>();
     currencyWords.put("dollars?", '$');
     currencyWords.put("cents?", '$');
     currencyWords.put("pounds?", '\u00A3');
@@ -110,7 +109,7 @@ public class QuantifiableEntityNormalizer {
     currencyWords.put("\u20A9", '\u20A9');  // Won
     currencyWords.put("yuan", '\u5143');   // Yuan
 
-    moneyMultipliers = Generics.newHashMap();
+    moneyMultipliers = new HashMap<String,Double>();
     moneyMultipliers.put("trillion", 1000000000000.0);  // can't be an integer
     moneyMultipliers.put("billion",1000000000.0);
     moneyMultipliers.put("bn",1000000000.0);
@@ -122,7 +121,7 @@ public class QuantifiableEntityNormalizer {
     moneyMultipliers.put(" m ",1000000.0);
     moneyMultipliers.put(" k ",1000.0);
 
-    moneyMultipliers2 = Generics.newHashMap();
+    moneyMultipliers2 = new HashMap<String,Integer>();
     moneyMultipliers2.put("[0-9](m)(?:[^a-zA-Z]|$)", 1000000);
     moneyMultipliers2.put("[0-9](b)(?:[^a-zA-Z]|$)", 1000000000);
 
@@ -239,18 +238,18 @@ public class QuantifiableEntityNormalizer {
   }
 
   /** Convert the content of a List of CoreMaps to a single
-   *  space-separated String.  This grabs stuff based on the get(CoreAnnotations.NamedEntityTagAnnotation.class) field.
+   *  space-separated String.  This grabs stuff based on the get(NamedEntityTagAnnotation.class) field.
    *  [CDM: Changed to look at NamedEntityTagAnnotation not AnswerClass Jun 2010, hoping that will fix a bug.]
    *
    *  @param l The List
    *  @return one string containing all words in the list, whitespace separated
    */
   public static <E extends CoreMap> String singleEntityToString(List<E> l) {
-    String entityType = l.get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class);
+    String entityType = l.get(0).get(NamedEntityTagAnnotation.class);
     StringBuilder sb = new StringBuilder();
     for (E w : l) {
-      assert(w.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals(entityType));
-      sb.append(w.get(CoreAnnotations.TextAnnotation.class));
+      assert(w.get(NamedEntityTagAnnotation.class).equals(entityType));
+      sb.append(w.get(TextAnnotation.class));
       sb.append(' ');
     }
     return sb.toString();
@@ -273,7 +272,7 @@ public class QuantifiableEntityNormalizer {
   public static List<CoreLabel> collapseNERLabels(List<CoreLabel> l){
     if(DEBUG) {
       for (CoreLabel w: l) {
-        System.err.println("<<"+w.get(CoreAnnotations.TextAnnotation.class)+"::"+w.get(CoreAnnotations.PartOfSpeechAnnotation.class)+"::"+w.get(CoreAnnotations.NamedEntityTagAnnotation.class)+">>");
+        System.err.println("<<"+w.get(TextAnnotation.class)+"::"+w.get(PartOfSpeechAnnotation.class)+"::"+w.get(NamedEntityTagAnnotation.class)+">>");
       }
     }
 
@@ -283,14 +282,14 @@ public class QuantifiableEntityNormalizer {
 
     //Iterate through each word....
     for (CoreLabel w: l) {
-      String entityType = w.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+      String entityType = w.get(NamedEntityTagAnnotation.class);
       //if we've just completed an entity and we're looking at a non-continuation,
       //we want to add that now.
       if (entityStringCollector != null && ! entityType.equals(lastEntity)) {
         CoreLabel nextWord = new CoreLabel();
         nextWord.setWord(entityStringCollector.toString());
-        nextWord.set(CoreAnnotations.PartOfSpeechAnnotation.class, "NNP");
-        nextWord.set(CoreAnnotations.NamedEntityTagAnnotation.class, lastEntity);
+        nextWord.set(PartOfSpeechAnnotation.class, "NNP");
+        nextWord.set(NamedEntityTagAnnotation.class, lastEntity);
         s.add(nextWord);
         if (DEBUG) {
           err.print("Quantifiable: Collapsing ");
@@ -307,11 +306,11 @@ public class QuantifiableEntityNormalizer {
         if (entityType.equals(lastEntity)){
           assert entityStringCollector != null;
           entityStringCollector.append('_');
-          entityStringCollector.append(w.get(CoreAnnotations.TextAnnotation.class));
+          entityStringCollector.append(w.get(TextAnnotation.class));
         } else {
           //and its NOT a continuation, make a new buffer.
           entityStringCollector = new StringBuilder();
-          entityStringCollector.append(w.get(CoreAnnotations.TextAnnotation.class));
+          entityStringCollector.append(w.get(TextAnnotation.class));
         }
       }
       lastEntity=entityType;
@@ -320,12 +319,12 @@ public class QuantifiableEntityNormalizer {
     if (entityStringCollector!=null) {
       CoreLabel nextWord = new CoreLabel();
       nextWord.setWord(entityStringCollector.toString());
-      nextWord.set(CoreAnnotations.PartOfSpeechAnnotation.class, "NNP");
-      nextWord.set(CoreAnnotations.NamedEntityTagAnnotation.class, lastEntity);
+      nextWord.set(PartOfSpeechAnnotation.class, "NNP");
+      nextWord.set(NamedEntityTagAnnotation.class, lastEntity);
       s.add(nextWord);
     }
     for (CoreLabel w : s) {
-      System.err.println("<<"+w.get(CoreAnnotations.TextAnnotation.class)+"::"+w.get(CoreAnnotations.PartOfSpeechAnnotation.class)+"::"+w.get(CoreAnnotations.NamedEntityTagAnnotation.class)+">>");
+      System.err.println("<<"+w.get(TextAnnotation.class)+"::"+w.get(PartOfSpeechAnnotation.class)+"::"+w.get(NamedEntityTagAnnotation.class)+">>");
     }
     return s;
   }
@@ -365,31 +364,17 @@ public class QuantifiableEntityNormalizer {
     return (d.getDateString());
   }
 
-  static String normalizedDurationString(String s, Timex timexFromSUTime) {
-    if(timexFromSUTime != null) {
-      if(timexFromSUTime.value() != null){
-        // fully disambiguated temporal
-        return timexFromSUTime.value();
-      } else {
-        // something else
-        return timexFromSUTime.altVal();
-      }
-    }
-    // TODO: normalize duration ourselves
-    return null;
-  }
-
   /**
    * Tries to heuristically determine if the given word is a year
    */
   static boolean isYear(CoreMap word) {
-    String wordString = word.get(CoreAnnotations.TextAnnotation.class);
-    if(word.get(CoreAnnotations.PartOfSpeechAnnotation.class) == null || word.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
+    String wordString = word.get(TextAnnotation.class);
+    if(word.get(PartOfSpeechAnnotation.class) == null || word.get(PartOfSpeechAnnotation.class).equals("CD")) {
       //one possibility: it's a two digit year with an apostrophe: '90
       if(wordString.length() == 3  && wordString.startsWith("'")) {
-        if (DEBUG) {
-          System.err.println("Found potential two digit year: " + wordString);
-        }
+	if (DEBUG) {
+	  System.err.println("Found potential two digit year: " + wordString);
+	}
         wordString = wordString.substring(1);
         try {
           Integer.parseInt(wordString);
@@ -448,21 +433,20 @@ public class QuantifiableEntityNormalizer {
     //sometimes the year gets tagged as CD but not as a date - if this happens, we want to add it in
     if (next != null && isYear(next)) {
       date.add(next);
-      next.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
+      next.set(NamedEntityTagAnnotation.class, "DATE");
       afterIndex++;
     }
     if (next2 != null && isYear(next2)) {
-      // This code here just seems wrong.... why are we marking next as a date without checking anything?
       date.add(next);
       assert(next != null); // keep the static analysis happy.
-      next.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
+      next.set(NamedEntityTagAnnotation.class, "DATE");
       date.add(next2);
-      next2.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
+      next2.set(NamedEntityTagAnnotation.class, "DATE");
       afterIndex += 2;
     }
 
     //sometimes the date will be stated in a form like "June of 1984" -> we'd like this to be 198406
-    if(next != null && next.get(CoreAnnotations.TextAnnotation.class).matches(datePrepositionAfterWord)) {
+    if(next != null && next.get(TextAnnotation.class).matches(datePrepositionAfterWord)) {
       //check if the next next word is a year or month
       if(next2 != null && (isYear(next2))) {//TODO: implement month!
         date.add(next);
@@ -476,14 +460,14 @@ public class QuantifiableEntityNormalizer {
     //check if it's an open range - two sided ranges get checked elsewhere
     //based on the prev word
     if(prev != null) {
-      String prevWord = prev.get(CoreAnnotations.TextAnnotation.class).toLowerCase();
+      String prevWord = prev.get(TextAnnotation.class).toLowerCase();
       if(prevWord.matches(dateRangeBeforeOneWord)) {
         //we have an open range of the before type - e.g., Before June 6, John was 5
-        prev.set(CoreAnnotations.PartOfSpeechAnnotation.class, "DATE_MOD");
+        prev.set(PartOfSpeechAnnotation.class, "DATE_MOD");
         return ISODateInstance.OPEN_RANGE_BEFORE;
       } else if(prevWord.matches(dateRangeAfterOneWord)) {
         //we have an open range of the after type - e.g., After June 6, John was 6
-        prev.set(CoreAnnotations.PartOfSpeechAnnotation.class, "DATE_MOD");
+        prev.set(PartOfSpeechAnnotation.class, "DATE_MOD");
         return ISODateInstance.OPEN_RANGE_AFTER;
       }
     }
@@ -491,23 +475,6 @@ public class QuantifiableEntityNormalizer {
 
     return ISODateInstance.NO_RANGE;
   }
-
-  // Version of above without any weird stuff
-  private static <E extends CoreMap> String detectDateRangeModifier(E prev)
-  {
-    if(prev != null) {
-      String prevWord = prev.get(CoreAnnotations.TextAnnotation.class).toLowerCase();
-      if(prevWord.matches(dateRangeBeforeOneWord)) {
-        //we have an open range of the before type - e.g., Before June 6, John was 5
-        return ISODateInstance.OPEN_RANGE_BEFORE;
-      } else if(prevWord.matches(dateRangeAfterOneWord)) {
-        //we have an open range of the after type - e.g., After June 6, John was 6
-        return ISODateInstance.OPEN_RANGE_AFTER;
-      }
-    }
-    return ISODateInstance.NO_RANGE;
-  }
-
 
   /**
    * This should detect things like "between 5 and 5 million" and "from April 3 to June 6"
@@ -527,41 +494,41 @@ public class QuantifiableEntityNormalizer {
     E next2 = (afterIndex + 1 < sz) ? list.get(afterIndex + 1) : null;
     List<E> toRemove = new ArrayList<E>();
 
-    String curNER = (firstDate == null ? "" : firstDate.get(CoreAnnotations.NamedEntityTagAnnotation.class));
+    String curNER = (firstDate == null ? "" : firstDate.get(NamedEntityTagAnnotation.class));
     if(curNER == null) curNER = "";
-    if(firstDate == null || firstDate.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) == null) return toRemove;
+    if(firstDate == null || firstDate.get(NormalizedNamedEntityTagAnnotation.class) == null) return toRemove;
     //TODO: make ranges actually work
     //first check if it's of the form "between <date> and <date>"/etc
 
     if (prev != null) {
       for (Pair<String, String> ranges : dateRangeBeforePairedOneWord) {
-        if (prev.get(CoreAnnotations.TextAnnotation.class).matches(ranges.first())) {
+        if (prev.get(TextAnnotation.class).matches(ranges.first())) {
           if (next != null && next2 != null) {
-            String nerNext2 = next2.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-            if (next.get(CoreAnnotations.TextAnnotation.class).matches(ranges.second()) && nerNext2 != null && nerNext2.equals(curNER)) {
+            String nerNext2 = next2.get(NamedEntityTagAnnotation.class);
+            if (next.get(TextAnnotation.class).matches(ranges.second()) && nerNext2 != null && nerNext2.equals(curNER)) {
               //Add rest in
-              prev.set(CoreAnnotations.PartOfSpeechAnnotation.class, "QUANT_MOD");
+              prev.set(PartOfSpeechAnnotation.class, "QUANT_MOD");
               String rangeString;
               if(curNER.equals("DATE")) {
-                ISODateInstance c = new ISODateInstance(new ISODateInstance(firstDate.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class)),
-                    new ISODateInstance(next2.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class)));
+                ISODateInstance c = new ISODateInstance(new ISODateInstance(firstDate.get(NormalizedNamedEntityTagAnnotation.class)),
+                    new ISODateInstance(next2.get(NormalizedNamedEntityTagAnnotation.class)));
                 rangeString = c.getDateString();
               } else {
-                rangeString = firstDate.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + '-' + next2.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+                rangeString = firstDate.get(NormalizedNamedEntityTagAnnotation.class) + '-' + next2.get(NormalizedNamedEntityTagAnnotation.class);
               }
               if (DEBUG) {
-                System.err.println("#1: Changing normalized NER from " + firstDate.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + beforeIndex);
+                System.err.println("#1: Changing normalized NER from " + firstDate.get(NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + beforeIndex);
               }
-              firstDate.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, rangeString);
+              firstDate.set(NormalizedNamedEntityTagAnnotation.class, rangeString);
               if (DEBUG) {
-                System.err.println("#2: Changing normalized NER from " + next2.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + afterIndex);
+                System.err.println("#2: Changing normalized NER from " + next2.get(NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + afterIndex);
               }
-              next2.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, rangeString);
-              next.set(CoreAnnotations.NamedEntityTagAnnotation.class, nerNext2);
+              next2.set(NormalizedNamedEntityTagAnnotation.class, rangeString);
+              next.set(NamedEntityTagAnnotation.class, nerNext2);
               if (DEBUG) {
-                System.err.println("#3: Changing normalized NER from " + next.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + (afterIndex + 1));
+                System.err.println("#3: Changing normalized NER from " + next.get(NormalizedNamedEntityTagAnnotation.class) + " to " + rangeString + " at index " + (afterIndex + 1));
               }
-              next.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, rangeString);
+              next.set(NormalizedNamedEntityTagAnnotation.class, rangeString);
               if (concatenate) {
                 List<E> numberWords = new ArrayList<E>();
                 numberWords.add(firstDate);
@@ -588,7 +555,7 @@ public class QuantifiableEntityNormalizer {
     StringBuilder newText = new StringBuilder();
     E foundEntity = null;
     for (E word : words) {
-      if (foundEntity == null && (word.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD") || word.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNP"))) {
+      if (foundEntity == null && (word.get(PartOfSpeechAnnotation.class).equals("CD") || word.get(PartOfSpeechAnnotation.class).equals("NNP"))) {
         foundEntity = word;
       }
       if (first) {
@@ -596,17 +563,17 @@ public class QuantifiableEntityNormalizer {
       } else {
         newText.append('_');
       }
-      newText.append(word.get(CoreAnnotations.TextAnnotation.class));
+      newText.append(word.get(TextAnnotation.class));
     }
     if (foundEntity == null) {
       foundEntity = words.get(0);//if we didn't find one with the appropriate tag, just take the first one
     }
     toRemove.addAll(words);
     toRemove.remove(foundEntity);
-    foundEntity.set(CoreAnnotations.PartOfSpeechAnnotation.class, "CD");  // cdm 2008: is this actually good for dates??
+    foundEntity.set(PartOfSpeechAnnotation.class, "CD");  // cdm 2008: is this actually good for dates??
     String collapsed = newText.toString();
-    foundEntity.set(CoreAnnotations.TextAnnotation.class, collapsed);
-    foundEntity.set(CoreAnnotations.OriginalTextAnnotation.class, collapsed);
+    foundEntity.set(TextAnnotation.class, collapsed);
+    foundEntity.set(OriginalTextAnnotation.class, collapsed);
   }
 
 
@@ -953,8 +920,8 @@ public class QuantifiableEntityNormalizer {
   /** Fetches the first encountered Number set by SUTime */
   private static <E extends CoreMap> Number fetchNumberFromSUTime(List<E> l) {
     for(E e: l) {
-      if(e.containsKey(CoreAnnotations.NumericCompositeValueAnnotation.class)){
-        return e.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      if(e.containsKey(NumericCompositeValueAnnotation.class)){
+        return e.get(NumericCompositeValueAnnotation.class);
       }
     }
     return null;
@@ -962,8 +929,8 @@ public class QuantifiableEntityNormalizer {
 
   private static <E extends CoreMap> Timex fetchTimexFromSUTime(List<E> l) {
     for(E e: l) {
-      if(e.containsKey(TimeAnnotations.TimexAnnotation.class)){
-        return e.get(TimeAnnotations.TimexAnnotation.class);
+      if(e.containsKey(TimexAnnotation.class)){
+        return e.get(TimexAnnotation.class);
       }
     }
     return null;
@@ -1002,7 +969,7 @@ public class QuantifiableEntityNormalizer {
       p = normalizedOrdinalString(s, numberFromSUTime);
     } else if (entityType.equals("DURATION")) {
       // SUTime marks some ordinals, e.g., "22nd time", as durations
-      p = normalizedDurationString(s, timexFromSUTime);
+      p = normalizedOrdinalString(s, numberFromSUTime);
     } else if (entityType.equals("MONEY")) {
       p = "";
       if(compModifier!=null) {
@@ -1047,12 +1014,12 @@ public class QuantifiableEntityNormalizer {
     for (E wi : l) {
       if (p != null) {
         if (DEBUG) {
-          System.err.println("#4: Changing normalized NER from " + wi.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + p + " at index " + i);
+          System.err.println("#4: Changing normalized NER from " + wi.get(NormalizedNamedEntityTagAnnotation.class) + " to " + p + " at index " + i);
         }
-        wi.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, p);
+        wi.set(NormalizedNamedEntityTagAnnotation.class, p);
       }
       //currently we also write this into the answers;
-      //wi.setAnswer(wi.get(CoreAnnotations.AnswerAnnotation.class)+"("+p+")");
+      //wi.setAnswer(wi.get(AnswerAnnotation.class)+"("+p+")");
       i++;
     }
     return l;
@@ -1063,19 +1030,19 @@ public class QuantifiableEntityNormalizer {
    *  @return the word in the time word list that should be normalized
    */
   private static <E extends CoreMap> String timeEntityToString(List<E> l) {
-    String entityType = l.get(0).get(CoreAnnotations.AnswerAnnotation.class);
+    String entityType = l.get(0).get(AnswerAnnotation.class);
     int size = l.size();
     for (E w : l) {
-      assert(w.get(CoreAnnotations.AnswerAnnotation.class) == null ||
-          w.get(CoreAnnotations.AnswerAnnotation.class).equals(entityType));
-      Matcher m = timePattern.matcher(w.get(CoreAnnotations.TextAnnotation.class));
+      assert(w.get(AnswerAnnotation.class) == null ||
+          w.get(AnswerAnnotation.class).equals(entityType));
+      Matcher m = timePattern.matcher(w.get(TextAnnotation.class));
       if (m.matches())
-        return w.get(CoreAnnotations.TextAnnotation.class);
+        return w.get(TextAnnotation.class);
     }
     if (DEBUG) {
-      System.err.println("default: " + l.get(size-1).get(CoreAnnotations.TextAnnotation.class));
+      System.err.println("default: " + l.get(size-1).get(TextAnnotation.class));
     }
-    return l.get(size-1).get(CoreAnnotations.TextAnnotation.class);
+    return l.get(size-1).get(TextAnnotation.class);
   }
 
 
@@ -1119,13 +1086,13 @@ public class QuantifiableEntityNormalizer {
    * Any of these words may be <code>null</code> or an empty String.
    */
   private static <E extends CoreMap> String detectQuantityModifier(List<E> list, int beforeIndex, int afterIndex) {
-    String prev = (beforeIndex >= 0) ? list.get(beforeIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
-    String prev2 = (beforeIndex - 1 >= 0) ? list.get(beforeIndex - 1).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
-    String prev3 = (beforeIndex - 2 >= 0) ? list.get(beforeIndex - 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
+    String prev = (beforeIndex >= 0) ? list.get(beforeIndex).get(TextAnnotation.class).toLowerCase(): "";
+    String prev2 = (beforeIndex - 1 >= 0) ? list.get(beforeIndex - 1).get(TextAnnotation.class).toLowerCase(): "";
+    String prev3 = (beforeIndex - 2 >= 0) ? list.get(beforeIndex - 2).get(TextAnnotation.class).toLowerCase(): "";
     int sz = list.size();
-    String next = (afterIndex < sz) ? list.get(afterIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
-    String next2 = (afterIndex + 1 < sz) ? list.get(afterIndex + 1).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
-    String next3 = (afterIndex + 2 < sz) ? list.get(afterIndex + 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase(): "";
+    String next = (afterIndex < sz) ? list.get(afterIndex).get(TextAnnotation.class).toLowerCase(): "";
+    String next2 = (afterIndex + 1 < sz) ? list.get(afterIndex + 1).get(TextAnnotation.class).toLowerCase(): "";
+    String next3 = (afterIndex + 2 < sz) ? list.get(afterIndex + 2).get(TextAnnotation.class).toLowerCase(): "";
 
     if (DEBUG) {
       err.println("Quantifiable: previous: " + prev3 + ' ' + prev2+ ' ' + prev);
@@ -1181,13 +1148,13 @@ public class QuantifiableEntityNormalizer {
    * Any of these words may be <code>null</code> or an empty String.
    */
   private static <E extends CoreMap> String detectTimeOfDayModifier(List<E> list, int beforeIndex, int afterIndex) {
-    String prev = (beforeIndex >= 0) ? list.get(beforeIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";
-    String prev2 = (beforeIndex - 1 >= 0) ? list.get(beforeIndex - 1).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";
-    String prev3 = (beforeIndex - 2 >= 0) ? list.get(beforeIndex - 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";
+    String prev = (beforeIndex >= 0) ? list.get(beforeIndex).get(TextAnnotation.class).toLowerCase() : "";
+    String prev2 = (beforeIndex - 1 >= 0) ? list.get(beforeIndex - 1).get(TextAnnotation.class).toLowerCase() : "";
+    String prev3 = (beforeIndex - 2 >= 0) ? list.get(beforeIndex - 2).get(TextAnnotation.class).toLowerCase() : "";
     int sz = list.size();
-    String next = (afterIndex < sz) ? list.get(afterIndex).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";
-    String next2 = (afterIndex + 1 < sz) ? list.get(afterIndex + 1).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";
-    String next3 = (afterIndex + 2 < sz) ? list.get(afterIndex + 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase() : "";
+    String next = (afterIndex < sz) ? list.get(afterIndex).get(TextAnnotation.class).toLowerCase() : "";
+    String next2 = (afterIndex + 1 < sz) ? list.get(afterIndex + 1).get(TextAnnotation.class).toLowerCase() : "";
+    String next3 = (afterIndex + 2 < sz) ? list.get(afterIndex + 2).get(TextAnnotation.class).toLowerCase() : "";
 
     String longPrev = prev3 + ' ' + prev2 + ' ' + prev;
     if (longPrev.matches(earlyThreeWords)) {
@@ -1253,15 +1220,12 @@ public class QuantifiableEntityNormalizer {
    *      document.  Note: the Labels are updated in place.
    */
   public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> l) {
-    addNormalizedQuantitiesToEntities(l, false, false);
+    addNormalizedQuantitiesToEntities(l, false);
   }
 
-  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> l, boolean concatenate) {
-    addNormalizedQuantitiesToEntities(l, concatenate, false);
-  }
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
-   * and tags each of their constituents with a "normalizedQuantity"
+   * and tags each of their consitituents with a "normalizedQuantity"
    * label which contains the appropriate normalized string corresponding to
    * the full quantity.
    *
@@ -1269,55 +1233,88 @@ public class QuantifiableEntityNormalizer {
    *      document.  Note: the Labels are updated in place.
    * @param concatenate true if quantities should be concatenated into one label, false otherwise
    */
-  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list, boolean concatenate, boolean usesSUTime) {
+  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list, boolean concatenate) {
     List<E> toRemove = new ArrayList<E>(); // list for storing those objects we're going to remove at the end (e.g., if concatenate, we replace 3 November with 3_November, have to remove one of the originals)
 
-    // Goes through tokens and tries to fix up NER annotations
-    fixupNerBeforeNormalization(list);
-
-    // Now that NER tags has been fixed up, we do another pass to add the normalization
-    String prevNerTag = BACKGROUND_SYMBOL;
+    String lastEntity = BACKGROUND_SYMBOL;
     String timeModifier = "";
     int beforeIndex = -1;
     ArrayList<E> collector = new ArrayList<E>();
-    for (int i = 0, sz = list.size(); i <= sz; i++) {
-      E wi = null;
-      String currNerTag = null;
-      String nextWord = "";
-      if (i < list.size()) {
-        wi = list.get(i);
-        if (DEBUG) { System.err.println("addNormalizedQuantitiesToEntities: wi is " + wi + "; collector is " + collector); }
-        if ((i+1) < sz) {
-          nextWord = list.get(i+1).get(CoreAnnotations.TextAnnotation.class);
-          if(nextWord == null) nextWord = "";
+    for (int i = 0, sz = list.size(); i < sz; i++) {
+      E wi = list.get(i);
+      if (DEBUG) { System.err.println("addNormalizedQuantitiesToEntities: wi is " + wi + "; collector is " + collector); }
+      // repairs commas in between dates...  String constant first in equals() in case key has null value....
+      if ((i+1) < sz && ",".equals(wi.get(TextAnnotation.class)) && "DATE".equals(lastEntity)) {
+        E nextWord = list.get(i+1);
+        String nextNER = nextWord.get(NamedEntityTagAnnotation.class);
+        if (nextNER != null && nextNER.equals("DATE")) {
+          wi.set(NamedEntityTagAnnotation.class, "DATE");
         }
+      }
 
-        currNerTag = wi.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-        if ("TIME".equals(currNerTag)) {
-          if (timeModifier.equals("")) {
-            timeModifier = detectTimeOfDayModifier(list, i-1, i+1);
+      //repairs mistagged multipliers after a numeric quantity
+      String curWord = (wi.get(TextAnnotation.class) != null ? wi.get(TextAnnotation.class) : "");
+      String nextWord = "";
+      if ((i+1) < sz) {
+        nextWord = list.get(i+1).get(TextAnnotation.class);
+        if(nextWord == null)
+          nextWord = "";
+      }
+
+      if (!curWord.equals("") && (moneyMultipliers.containsKey(curWord) || (getOneSubstitutionMatch(curWord, moneyMultipliers.keySet()) != null)) && lastEntity != null && (lastEntity.equals("MONEY") || lastEntity.equals("NUMBER"))) {
+        wi.set(NamedEntityTagAnnotation.class, lastEntity);
+      }
+
+      //repairs four digit ranges (2002-2004) that have not been tagged as years - maybe bad? (empirically useful)
+      if (curWord.contains("-")) {
+        String[] sides = curWord.split("-");
+        if (sides.length == 2) {
+          try {
+            int first = Integer.parseInt(sides[0]);
+            int second = Integer.parseInt(sides[1]);
+            //they're both integers, see if they're both between 1000-3000 (likely years)
+            if (1000 <= first && first <= 3000 && 1000 <= second && second <= 3000) {
+              wi.set(NamedEntityTagAnnotation.class, "DATE");
+              String dateStr = new ISODateInstance(new ISODateInstance(sides[0]), new ISODateInstance(sides[1])).getDateString();
+              if (DEBUG) {
+                System.err.println("#5: Changing normalized NER from " + wi.get(NormalizedNamedEntityTagAnnotation.class) + " to " + dateStr + " at index " + i);
+              }
+              wi.set(NormalizedNamedEntityTagAnnotation.class, dateStr);
+              continue;
+            }
+          } catch (Exception e) {
+            // they weren't numbers.
           }
+        }
+      }
+
+      // Marks time units as NUMBER if they are preceded by a CD tag.  e.g. "two years" or "5 minutes"
+      String prevTag = (i-1 > 0 ? list.get(i-1).get(PartOfSpeechAnnotation.class) : null);
+      if ( timeUnitWords.contains(curWord) &&
+          (wi.get(NamedEntityTagAnnotation.class) == null || !wi.get(NamedEntityTagAnnotation.class).equals("DATE")) &&
+          (prevTag != null && prevTag.equals("CD")) ) {
+        wi.set(NamedEntityTagAnnotation.class, "NUMBER");
+      }
+
+      String currEntity = wi.get(NamedEntityTagAnnotation.class);
+      if (currEntity != null && currEntity.equals("TIME")) {
+        if (timeModifier.equals("")) {
+          timeModifier = detectTimeOfDayModifier(list, i-1, i+1);
         }
       }
 
       // if the current wi is a non-continuation and the last one was a
       // quantity, we close and process the last segment.
-      if ((currNerTag == null || ! currNerTag.equals(prevNerTag)) && quantifiable.contains(prevNerTag)) {
+      if ((currEntity == null || ! currEntity.equals(lastEntity)) && quantifiable.contains(lastEntity)) {
         String compModifier = null;
         // special handling of TIME
-        if (prevNerTag.equals("TIME")) {
-          processEntity(collector, prevNerTag, timeModifier, nextWord);
-        } else if (prevNerTag.equals(("DATE"))) {
+        if (lastEntity.equals("TIME")) {
+          processEntity(collector, lastEntity, timeModifier, nextWord);
+        } else if (lastEntity.equals(("DATE"))) {
           //detect date range modifiers by looking at nearby words
-          E prev = (beforeIndex >= 0) ? list.get(beforeIndex) : null;
-          if (usesSUTime) {
-            // If sutime was used don't do any weird relabeling of more things as DATE
-            compModifier = detectDateRangeModifier(prev);
-          } else {
-            compModifier = detectDateRangeModifier(collector, list, beforeIndex, i);
-          }
+          compModifier = detectDateRangeModifier(collector, list, beforeIndex, i);
           if (!compModifier.equals(ISODateInstance.BOUNDED_RANGE))
-            processEntity(collector, prevNerTag, compModifier, nextWord);
+            processEntity(collector, lastEntity, compModifier, nextWord);
           //now repair this date if it's more than one word
           //doesn't really matter which one we keep ideally we should be doing lemma/etc matching anyway
           //but we vaguely try to deal with this by choosing the NNP or the CD
@@ -1325,11 +1322,11 @@ public class QuantifiableEntityNormalizer {
             concatenateNumericString(collector, toRemove);
         } else {
           // detect "more than", "nearly", etc. by looking at nearby words.
-          if (prevNerTag.equals("MONEY") || prevNerTag.equals("NUMBER") ||
-              prevNerTag.equals("PERCENT")) {
+          if (lastEntity.equals("MONEY") || lastEntity.equals("NUMBER") ||
+              lastEntity.equals("PERCENT")) {
             compModifier = detectQuantityModifier(list, beforeIndex, i);
           }
-          processEntity(collector, prevNerTag, compModifier, nextWord);
+          processEntity(collector, lastEntity, compModifier, nextWord);
           if (concatenate) {
             concatenateNumericString(collector, toRemove);
           }
@@ -1338,16 +1335,41 @@ public class QuantifiableEntityNormalizer {
         collector = new ArrayList<E>();
         timeModifier = "";
       }
-
       // if the current wi is a quantity, we add it to the collector.
       // if its the first word in a quantity, we record index before it
-      if (quantifiable.contains(currNerTag)) {
+      if (quantifiable.contains(currEntity)) {
         if (collector.isEmpty()) {
           beforeIndex = i - 1;
         }
         collector.add(wi);
       }
-      prevNerTag = currNerTag;
+      lastEntity=currEntity;
+    }
+    // process any final entity
+    if (quantifiable.contains(lastEntity)) {
+      String compModifier = null;
+      if (lastEntity.equals("TIME")) {
+        processEntity(collector, lastEntity, timeModifier, "");
+      } else if(lastEntity.equals(("DATE"))) {
+        compModifier = detectDateRangeModifier(collector, list, beforeIndex, list.size());
+        processEntity(collector, lastEntity, compModifier, "");
+        //now repair this date if it's more than one word
+        //doesn't really matter which one we keep ideally we should be doing lemma/etc matching anyway
+        //but we vaguely try to deal with this by choosing the NNP or the CD
+        if (concatenate) {
+          concatenateNumericString(collector,toRemove);
+        }
+      } else {
+        // detect "more than", "nearly", etc. by looking at nearby words.
+        if (lastEntity.equals("MONEY") || lastEntity.equals("NUMBER") ||
+            lastEntity.equals("PERCENT")) {
+          compModifier = detectQuantityModifier(list, beforeIndex, list.size());
+        }
+        processEntity(collector, lastEntity, compModifier, "");
+        if(concatenate) {
+          concatenateNumericString(collector, toRemove);
+        }
+      }
     }
     if (concatenate) {
       list.removeAll(toRemove);
@@ -1362,101 +1384,17 @@ public class QuantifiableEntityNormalizer {
     }
   }
 
-  public static <E extends CoreMap> void fixupNerBeforeNormalization(List<E> list)
-  {
-    // Goes through tokens and tries to fix up NER annotations
-    String prevNerTag = BACKGROUND_SYMBOL;
-    String prevNumericType = null;
-    Timex prevTimex = null;
-    for (int i = 0, sz = list.size(); i < sz; i++) {
-      E wi = list.get(i);
-      Timex timex = wi.get(TimeAnnotations.TimexAnnotation.class);
-      String numericType = wi.get(CoreAnnotations.NumericCompositeTypeAnnotation.class);
 
-      String curWord = (wi.get(CoreAnnotations.TextAnnotation.class) != null ? wi.get(CoreAnnotations.TextAnnotation.class) : "");
-      String currNerTag = wi.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-
-      if (DEBUG) { System.err.println("fixupNerBeforeNormalization: wi is " + wi); }
-      // Attempts repairs to NER tags only if not marked by SUTime already
-      if (timex == null && numericType == null) {
-        // repairs commas in between dates...  String constant first in equals() in case key has null value....
-        if ((i+1) < sz && ",".equals(wi.get(CoreAnnotations.TextAnnotation.class)) && "DATE".equals(prevNerTag)) {
-          if (prevTimex == null && prevNumericType == null) {
-            E nextToken = list.get(i+1);
-            String nextNER = nextToken.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-            if (nextNER != null && nextNER.equals("DATE")) {
-              wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
-            }
-          }
-        }
-
-        //repairs mistagged multipliers after a numeric quantity
-        if (!curWord.equals("") && (moneyMultipliers.containsKey(curWord) ||
-                (getOneSubstitutionMatch(curWord, moneyMultipliers.keySet()) != null)) &&
-                prevNerTag != null && (prevNerTag.equals("MONEY") || prevNerTag.equals("NUMBER"))) {
-          wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, prevNerTag);
-        }
-
-        //repairs four digit ranges (2002-2004) that have not been tagged as years - maybe bad? (empirically useful)
-        if (curWord.contains("-")) {
-          String[] sides = curWord.split("-");
-          if (sides.length == 2) {
-            try {
-              int first = Integer.parseInt(sides[0]);
-              int second = Integer.parseInt(sides[1]);
-              //they're both integers, see if they're both between 1000-3000 (likely years)
-              if (1000 <= first && first <= 3000 && 1000 <= second && second <= 3000) {
-                wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
-                String dateStr = new ISODateInstance(new ISODateInstance(sides[0]), new ISODateInstance(sides[1])).getDateString();
-                if (DEBUG) {
-                  System.err.println("#5: Changing normalized NER from " +
-                          wi.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class) + " to " + dateStr + " at index " + i);
-                }
-                wi.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, dateStr);
-                continue;
-              }
-            } catch (Exception e) {
-              // they weren't numbers.
-            }
-          }
-        }
-
-        // Marks time units as DURATION if they are preceded by a NUMBER tag.  e.g. "two years" or "5 minutes"
-        if ( timeUnitWords.contains(curWord) &&
-                (currNerTag == null || !"DURATION".equals(currNerTag) ) &&
-                ("NUMBER".equals(prevNerTag))) {
-          wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DURATION");
-          for (int j = i-1; j > 0; j--) {
-            E prev = list.get(j);
-            if ("NUMBER".equals(prev.get(CoreAnnotations.NamedEntityTagAnnotation.class))) {
-              prev.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DURATION");
-            }
-          }
-        }
-      } else {
-        // Fixup SUTime marking of twenty-second
-        if ("DURATION".equals(currNerTag) && ordinalsToValues.containsKey(curWord)
-                && curWord.endsWith("second") && timex.text().equals(curWord)) {
-          wi.set(CoreAnnotations.NamedEntityTagAnnotation.class, "ORDINAL");
-        }
-      }
-
-      prevNerTag = currNerTag;
-      prevNumericType = numericType;
-      prevTimex = timex;
-    }
-  }
-
-    /**
-     * Runs a deterministic named entity classifier which is good at recognizing
-     * numbers and money and date expressions not recognized by our statistical
-     * NER.  It then changes any BACKGROUND_SYMBOL's from the list to
-     * the value tagged by this deterministic NER.
-     * It then adds normalized values for quantifiable entities.
-     *
-     * @param l A document to label
-     * @return The list with results of 'specialized' (rule-governed) NER filled in
-     */
+  /**
+   * Runs a deterministic named entity classifier which is good at recognizing
+   * numbers and money and date expressions not recognized by our statistical
+   * NER.  It then changes any BACKGROUND_SYMBOL's from the list to
+   * the value tagged by this deterministic NER.
+   * It then adds normalized values for quantifiable entities.
+   *
+   * @param l A document to label
+   * @return The list with results of 'specialized' (rule-governed) NER filled in
+   */
   public static <E extends CoreLabel> List<E> applySpecializedNER(List<E> l) {
     int sz = l.size();
     // copy l
@@ -1464,7 +1402,7 @@ public class QuantifiableEntityNormalizer {
     for (int i = 0; i < sz; i++) {
       if (DEBUG2) {
         if (i == 1) {
-          String tag = l.get(i).get(CoreAnnotations.PartOfSpeechAnnotation.class);
+          String tag = l.get(i).get(PartOfSpeechAnnotation.class);
           if (tag == null || tag.equals("")) {
             err.println("Quantifiable: error! tag is " + tag);
           }
@@ -1479,12 +1417,12 @@ public class QuantifiableEntityNormalizer {
     for (int i = 0; i < sz; i++) {
       E before = l.get(i);
       CoreLabel nscAnswer = copyL.get(i);
-      if (before.get(CoreAnnotations.NamedEntityTagAnnotation.class) == null && before.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals(BACKGROUND_SYMBOL) &&
-          (nscAnswer.get(CoreAnnotations.AnswerAnnotation.class) != null && !nscAnswer.get(CoreAnnotations.AnswerAnnotation.class).equals(BACKGROUND_SYMBOL))) {
+      if (before.get(NamedEntityTagAnnotation.class) == null && before.get(NamedEntityTagAnnotation.class).equals(BACKGROUND_SYMBOL) &&
+          (nscAnswer.get(AnswerAnnotation.class) != null && !nscAnswer.get(AnswerAnnotation.class).equals(BACKGROUND_SYMBOL))) {
         System.err.println("Quantifiable: updating class for " +
-            before.get(CoreAnnotations.TextAnnotation.class) + '/' +
-            before.get(CoreAnnotations.NamedEntityTagAnnotation.class) + " to " + nscAnswer.get(CoreAnnotations.AnswerAnnotation.class));
-        before.set(CoreAnnotations.NamedEntityTagAnnotation.class, nscAnswer.get(CoreAnnotations.AnswerAnnotation.class));
+            before.get(TextAnnotation.class) + '/' +
+            before.get(NamedEntityTagAnnotation.class) + " to " + nscAnswer.get(AnswerAnnotation.class));
+        before.set(NamedEntityTagAnnotation.class, nscAnswer.get(AnswerAnnotation.class));
       }
     }
 

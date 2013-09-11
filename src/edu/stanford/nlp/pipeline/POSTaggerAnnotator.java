@@ -1,78 +1,74 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
-import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 /**
  * Wrapper for the maxent part of speech tagger.
  *
  * @author Anna Rafferty
+ *
  */
 public class POSTaggerAnnotator implements Annotator {
 
   private final MaxentTagger pos;
 
-  private final int maxSentenceLength;
+  private int maxSentenceLength;
 
-  private final int nThreads;
-
-  /** Create a tagger annotator using the default English tagger from the models jar
-   *  (and non-verbose initialization).
-   */
   public POSTaggerAnnotator() {
-    this(false);
+    this(true);
   }
 
   public POSTaggerAnnotator(boolean verbose) {
-    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_JAR_PATH), verbose);
+    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_NLP_GROUP_MODEL_PATH), verbose);
   }
 
   public POSTaggerAnnotator(String posLoc, boolean verbose) {
-    this(posLoc, verbose, Integer.MAX_VALUE, 1);
+    this(posLoc, verbose, Integer.MAX_VALUE);
   }
 
-  /** Create a POS tagger annotator.
-   *
-   *  @param posLoc Location of POS tagger model (may be file path, classpath resource, or URL
-   *  @param verbose Whether to show verbose information on model loading
-   *  @param maxSentenceLength Sentences longer than this length will be skipped in processing
-   *  @param numThreads The number of threads for the POS tagger annotator to use
-   */
-  public POSTaggerAnnotator(String posLoc, boolean verbose, int maxSentenceLength, int numThreads) {
-    this(loadModel(posLoc, verbose), maxSentenceLength, numThreads);
+  public POSTaggerAnnotator(String posLoc, boolean verbose, int maxSentenceLength) {
+    this(loadModel(posLoc, verbose), maxSentenceLength);
   }
 
   public POSTaggerAnnotator(MaxentTagger model) {
-    this(model, Integer.MAX_VALUE, 1);
+    this(model, Integer.MAX_VALUE);
   }
 
-  public POSTaggerAnnotator(MaxentTagger model, int maxSentenceLength, int numThreads) {
+  public POSTaggerAnnotator(MaxentTagger model, int maxSentenceLength) {
     this.pos = model;
     this.maxSentenceLength = maxSentenceLength;
-    this.nThreads = numThreads;
   }
 
   public POSTaggerAnnotator(String annotatorName, Properties props) {
     String posLoc = props.getProperty(annotatorName + ".model");
     if (posLoc == null) {
-      posLoc = DefaultPaths.DEFAULT_POS_MODEL;
+      throw new IllegalArgumentException("No model specified for " +
+                                         "POS tagger annotator " +
+                                         annotatorName);
     }
-    boolean verbose = PropertiesUtils.getBool(props, annotatorName + ".verbose", false);
+    boolean verbose =
+      PropertiesUtils.getBool(props, annotatorName + ".verbose", true);
     this.pos = loadModel(posLoc, verbose);
-    this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", Integer.MAX_VALUE);
-    this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
+    this.maxSentenceLength =
+      PropertiesUtils.getInt(props, annotatorName + ".maxlen",
+                             Integer.MAX_VALUE);
+  }
+
+  public void setMaxSentenceLength(int maxLen) {
+    this.maxSentenceLength = maxLen;
   }
 
   private static MaxentTagger loadModel(String loc, boolean verbose) {
@@ -81,7 +77,16 @@ public class POSTaggerAnnotator implements Annotator {
       timer = new Timing();
       timer.doing("Loading POS Model [" + loc + ']');
     }
-    MaxentTagger tagger = new MaxentTagger(loc);
+    MaxentTagger tagger;
+    try {
+      tagger = new MaxentTagger(loc);
+    } catch (IOException e) {
+      RuntimeException runtimeException = new RuntimeException(e);
+      throw runtimeException;
+    } catch (ClassNotFoundException e) {
+      RuntimeException runtimeException = new RuntimeException(e);
+      throw runtimeException;
+    }
     if (verbose) {
       timer.done();
     }
@@ -92,21 +97,12 @@ public class POSTaggerAnnotator implements Annotator {
   public void annotate(Annotation annotation) {
     // turn the annotation into a sentence
     if (annotation.has(CoreAnnotations.SentencesAnnotation.class)) {
-      if (nThreads == 1) {
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          doOneSentence(sentence);
-        }
-      } else {
-        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new POSTaggerProcessor());
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          wrapper.put(sentence);
-          while (wrapper.peek()) {
-            wrapper.poll();
-          }
-        }
-        wrapper.join();
-        while (wrapper.peek()) {
-          wrapper.poll();
+      for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        List<TaggedWord> tagged = pos.apply(tokens);
+
+        for (int i = 0; i < tokens.size(); ++i) {
+          tokens.get(i).set(PartOfSpeechAnnotation.class, tagged.get(i).tag());
         }
       }
     } else {
@@ -114,38 +110,64 @@ public class POSTaggerAnnotator implements Annotator {
     }
   }
 
-  private class POSTaggerProcessor implements ThreadsafeProcessor<CoreMap, CoreMap> {
-    @Override
-    public CoreMap process(CoreMap sentence) {
-      return doOneSentence(sentence);
+  /**
+   * Takes in a list of words and POS tags them. Tagging is done in place - the
+   * returned CoreLabels are the same ones you passed in, with tags added.
+   *
+   * @param text
+   *          List of tokens to tag
+   * @return Tokens with tags
+   */
+  public List<? extends CoreLabel> processText(List<? extends CoreLabel> text) {
+    // cdm 2009: copying isn't necessary; the POS tagger's apply()
+    // method does not change the parameter passed in. But I think you
+    // can't have it correctly generic without copying. Sigh.
+
+    // if the text size is more than the max length allowed
+    if (text.size() > maxSentenceLength) {
+      return processTextLargerThanMaxLen(text);
     }
 
-    @Override
-    public ThreadsafeProcessor<CoreMap, CoreMap> newInstance() {
-      return this;
+    // todo: Is the list copy in the next line required??
+    List<TaggedWord> tagged = pos.apply(new ArrayList<CoreLabel>(text));
+    // copy in the tags
+    Iterator<TaggedWord> taggedIter = tagged.iterator();
+    for (CoreLabel word : text) {
+      TaggedWord cur = taggedIter.next();
+      word.setTag(cur.tag());
     }
+    return text;
   }
 
-  private CoreMap doOneSentence(CoreMap sentence) {
-    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    if (tokens.size() <= maxSentenceLength) {
-      List<TaggedWord> tagged = pos.apply(tokens);
+  /**
+   * if the text length is more than specified than the text is divided into
+   * (length/MaxLen) sentences and tagged individually
+   *
+   * @param text
+   */
+  private List<? extends CoreLabel> processTextLargerThanMaxLen(List<? extends CoreLabel> text) {
 
-      for (int i = 0, sz = tokens.size(); i < sz; i++) {
-        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
+    int startIndx = 0;
+    int endIndx = (startIndx + maxSentenceLength < text.size() ? startIndx + maxSentenceLength : text.size());
+    while (true) {
+      System.out.println(startIndx + "\t" + endIndx);
+      List<? extends CoreLabel> textToTag = text.subList(startIndx, endIndx);
+      List<TaggedWord> tagged = pos.apply(textToTag);
+
+      Iterator<TaggedWord> taggedIter = tagged.iterator();
+      for (CoreLabel word : textToTag) {
+        TaggedWord cur = taggedIter.next();
+        word.setTag(cur.tag());
       }
+
+      if (startIndx + maxSentenceLength >= text.size())
+        break;
+
+      startIndx += maxSentenceLength;
+      endIndx = (startIndx + maxSentenceLength < text.size() ? startIndx + maxSentenceLength : text.size());
+
     }
-    return sentence;
-  }
-
-  @Override
-  public Set<Requirement> requires() {
-    return TOKENIZE_AND_SSPLIT;
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(POS_REQUIREMENT);
+    return text;
   }
 
 }

@@ -1,9 +1,6 @@
 package edu.stanford.nlp.util;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -35,27 +32,6 @@ public class PropertiesUtils {
     return ! (value.equals("false") || value.equals("no") || value.equals("off"));
   }
 
-  // Convert from properties to string and from string to properties
-  public static String asString(Properties props) {
-    try {
-      StringWriter sw = new StringWriter();
-      props.store(sw, null);
-      return sw.toString();
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
-  }
-
-  public static Properties fromString(String str) {
-    try {
-      StringReader sr = new StringReader(str);
-      Properties props = new Properties();
-      props.load(sr);
-      return props;
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
-  }
 
   // printing -------------------------------------------------------------------
 
@@ -85,7 +61,7 @@ public class PropertiesUtils {
    * Tired of Properties not behaving like Map<String,String>s?  This method will solve that problem for you.
    */
   public static Map<String, String> asMap(Properties properties) {
-    Map<String, String> map = Generics.newHashMap();
+    Map<String, String> map = new HashMap<String, String>();
     for (Entry<Object, Object> entry : properties.entrySet()) {
       map.put((String)entry.getKey(), (String)entry.getValue());
     }
@@ -237,16 +213,9 @@ public class PropertiesUtils {
   public static String[] getStringArray(Properties props, String key) {
     String[] results = MetaClass.cast(props.getProperty(key), String [].class);
     if (results == null) {
-      results = new String[]{};
+      results =new String[] {};
     }
-    return results;
-  }
-
-  public static String[] getStringArray(Properties props, String key, String[] defaults) {
-    String[] results = MetaClass.cast(props.getProperty(key), String [].class);
-    if (results == null) {
-      results = defaults;
-    }
+    
     return results;
   }
 }

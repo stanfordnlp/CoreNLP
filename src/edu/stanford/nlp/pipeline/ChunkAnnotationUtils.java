@@ -467,11 +467,6 @@ public class ChunkAnnotationUtils {
         }
       }
     }
-    // Set sentence indices
-    for (int i = 0; i < sentences.size(); i++) {
-      CoreMap sentence = sentences.get(i);
-      sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, i);
-    }
     return true;
   }
   /**
@@ -829,18 +824,18 @@ public class ChunkAnnotationUtils {
           try {
             Class valueClass = AnnotationLookup.getValueType(lookup.coreKey);
             if (valueClass == String.class) {
-              chunk.set(lookup.coreKey, value);              
+              chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, value);              
             } else {
              Method valueOfMethod = valueClass.getMethod("valueOf", String.class);
               if (valueOfMethod != null) {
-                chunk.set(lookup.coreKey, valueOfMethod.invoke(valueClass, value));
+                chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, valueOfMethod.invoke(valueClass, value));
               }
             }
           } catch (Exception ex) {
             throw new RuntimeException("Unable to annotate attribute " + attr, ex);
           }
         } else {
-          chunk.set(lookup.coreKey, null);
+          chunk.set((Class<? extends CoreAnnotation>) lookup.coreKey, null);
         }
       } else {
         throw new UnsupportedOperationException("Unknown attributes: " + attr);
@@ -877,7 +872,7 @@ public class ChunkAnnotationUtils {
     }
   }
 
-  public static <T extends CoreMap> void appendCoreMap(List<T> res,
+  public static <T extends CoreMap> void appendCoreMap(List res,
                                                        CoreMap cm, String text, int start, int end,
                                                        CoreTokenFactory<T> factory) {
     T scm = createCoreMap(cm, text, start, end, factory);

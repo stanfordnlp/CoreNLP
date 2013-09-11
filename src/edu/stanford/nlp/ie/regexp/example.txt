@@ -1,0 +1,27 @@
+# Sample regular expressions for extraction format is:
+# Concept	Field	Group	Regexp
+# Concept is a String concept name or * for any or $ for none
+# Group is 0 for whole regexp, otherwise backreference number
+# Regexps will do back substitution with ${FIELD} like lex/perl, (bracketed),
+# however, this has yet to be implemented.
+# The Concept name is also at present ignored.  Groups work though.
+#
+# You can make an extractor from this example file with:
+#
+#    java edu.stanford.nlp.ie.regexp.RegexpsFieldExtractorCreator example.txt example.obj
+#
+# NAME: This Name extractor will often work on webpages.  One can't really 
+# expect too much from a simple regexp though
+*	Name	0	[A-Z][a-z]+ {1,2}(?:[A-Z]\. {1,2})?[A-Z][a-z]+(?:-?[A-Z][a-z]+)?
+#
+# PHONE: this one is now pretty okay -- even for Australian phone numbers!
+# (use of \b is bad before ( because bracket is punct but okay inside it)
+# it won't handle a Dutch one like this, but: +31-(0)50 3635977
+*	Phone	0	(?:(?:\+ ?)?[1-9]+[ -]?)?\(?\b[0-9]{1,3}\)?[ -.][0-9]{3,4}[- .][0-9]{3,4}\b
+#
+# EMAIL: 
+*	Email	0	[A-Za-z][A-Za-z0-9_.-]*\+?@(?:[a-zA-Z0-9]+\.)+[a-zA-Z]{2,}
+#
+# These are not very serious examples used for testing groups
+USAddr	State	2	([A-Za-z ]+),? +(CA|NY|MA) +([0-9]{5}(?:-[0-9]{4})?)
+USAddr	ZIP	3	([A-Za-z ]+),? +(CA|NY|MA) +([0-9]{5}(?:-[0-9]{4})?)

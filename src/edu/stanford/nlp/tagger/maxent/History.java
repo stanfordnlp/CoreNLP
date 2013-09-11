@@ -41,7 +41,7 @@ public class History {
   }
 
   /*
-  public void save(DataOutputStream rf) {
+  public void save(OutDataStreamFile rf) {
     try {
       rf.writeInt(start);
       rf.writeInt(end);
@@ -69,7 +69,7 @@ public class History {
   }
 
   public String[] getX() {
-    String[] x = new String[extractors.size()];
+    String[] x = new String[extractors.getSize()];
     for (int i = 0; i < x.length; i++) {
       x[i] = getX(i);
     }
@@ -94,7 +94,7 @@ public class History {
     }
     System.out.println();
   }
-
+  
   protected void setTag(int pos, String tag) {
     pairs.setTag(pos + start, tag);
   }
@@ -119,7 +119,7 @@ public class History {
   @Override
   public int hashCode() {
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < extractors.size(); i++) {
+    for (int i = 0; i < extractors.getSize(); i++) {
       sb.append(getX(i));
     }
     return sb.toString().hashCode();

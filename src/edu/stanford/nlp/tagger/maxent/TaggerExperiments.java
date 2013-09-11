@@ -28,7 +28,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.maxent.Experiments;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.io.File;
@@ -36,6 +35,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Arrays;
 
 
@@ -52,7 +53,7 @@ public class TaggerExperiments extends Experiments {
   private static final String zeroSt = "0";
 
   private final TaggerFeatures feats;
-  private final Set<FeatureKey> sTemplates = Generics.newHashSet();
+  private final Set<FeatureKey> sTemplates = new HashSet<FeatureKey>();
   private final HistoryTable tHistories = new HistoryTable();
 
   private final int numFeatsGeneral;
@@ -62,22 +63,15 @@ public class TaggerExperiments extends Experiments {
 
   private final TemplateHash tFeature;
 
-  private byte[][] fnumArr;
-
-
-
   // This constructor is only used by unit tests.
   TaggerExperiments(MaxentTagger maxentTagger) {
     this.maxentTagger = maxentTagger;
     this.tFeature = new TemplateHash(maxentTagger);
-    numFeatsGeneral = maxentTagger.extractors.size();
-    numFeatsAll = numFeatsGeneral + maxentTagger.extractorsRare.size();
-    feats = new TaggerFeatures(this);
+    numFeatsGeneral = maxentTagger.extractors.getSize();
+    numFeatsAll = numFeatsGeneral + maxentTagger.extractorsRare.getSize();
+    feats = new TaggerFeatures(maxentTagger.tags, this);
   }
 
-  /** This method gets feature statistics from a training file found in the TaggerConfig.
-   *  It is the start of the training process.
-   */
   protected TaggerExperiments(TaggerConfig config, MaxentTagger maxentTagger) throws IOException {
     this(maxentTagger);
 
@@ -101,7 +95,7 @@ public class TaggerExperiments extends Experiments {
       vArray[i][1] = indY;
 
       if (i > 0 && (i % 10000) == 0) {
-        System.err.printf("%d ", i);
+        System.err.printf("%d ",i);
         if (i % 100000 == 0) { System.err.println(); }
       }
     }
@@ -143,17 +137,13 @@ public class TaggerExperiments extends Experiments {
     return true;
   }
 
-  byte[][] getFnumArr() {
-    return fnumArr;
-  }
-
   /** This method uses and deletes a file tempXXXXXX.x in the current directory! */
   private void getFeaturesNew() {
     // todo: Change to rethrow a RuntimeIOException.
-    // todo: can fnumArr overflow?
+    // todo: Move the fnumArr variable to this class. Btw, can it overflow?
     try {
       System.err.println("TaggerExperiments.getFeaturesNew: initializing fnumArr.");
-      fnumArr = new byte[xSize][ySize]; // what is the maximum number of active features
+      maxentTagger.fnumArr = new byte[xSize][ySize]; // what is the maximum number of active features
       File hFile = File.createTempFile("temp",".x", new File("./"));
       RandomAccessFile hF = new RandomAccessFile(hFile, "rw");
       System.err.println("  length of sTemplates keys: " + sTemplates.size());
@@ -184,7 +174,7 @@ public class TaggerExperiments extends Experiments {
           if (maxentTagger.possibleTagsOnly) {
             String word = ExtractorFrames.cWord.extract(tHistories.getHistory(xValue));
             String[] tags = maxentTagger.dict.getTags(word);
-            Set<String> s = Generics.newHashSet(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
+            Set<String> s = new HashSet<String>(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
             if(DEBUG)
               System.err.printf("possible tags for %s: %s\n", word, Arrays.toString(s.toArray()));
             if(!s.contains(fK.tag))
@@ -215,17 +205,17 @@ public class TaggerExperiments extends Experiments {
               if(maxentTagger.possibleTagsOnly) {
                 String word = ExtractorFrames.cWord.extract(tHistories.getHistory(x));
                 String[] tags = maxentTagger.dict.getTags(word);
-                Set<String> s = Generics.newHashSet(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
+                Set<String> s = new HashSet<String>(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
                 if(!s.contains(fK.tag))
                   continue;
               }
               numElements++;
 
               hF.writeInt(x);
-              fnumArr[x][y]++;
+              maxentTagger.fnumArr[x][y]++;
             }
             TaggerFeature tF = new TaggerFeature(current, current + numElements - 1, fK,
-                                                 maxentTagger.getTagIndex(fK.tag), this);
+                                                 maxentTagger.tags, this);
             tFeature.addPositions(current, current + numElements - 1, fK);
             current = current + numElements;
             feats.add(tF);
@@ -235,11 +225,11 @@ public class TaggerExperiments extends Experiments {
           } else {
 
             for(int x : xValues) {
-              fnumArr[x][y]++;
+              maxentTagger.fnumArr[x][y]++;
             }
             // this is the second time to write these values
             TaggerFeature tF = new TaggerFeature(positions[0], positions[1], fK,
-                                                 maxentTagger.getTagIndex(fK.tag), this);
+                                                 maxentTagger.tags, this);
             feats.add(tF);
             if (VERBOSE) {
               System.err.println("  added feature with key " + fK.toString() + " has support " + xValues.length);
@@ -250,7 +240,7 @@ public class TaggerExperiments extends Experiments {
           // look up the tag # in the index
           if (maxentTagger.fAssociations.size() <= fK.num) {
             for (int i = maxentTagger.fAssociations.size(); i <= fK.num; ++i) {
-              maxentTagger.fAssociations.add(Generics.<String, int[]>newHashMap());
+              maxentTagger.fAssociations.add(new HashMap<String, int[]>());
             }
           }
           Map<String, int[]> fValueAssociations = maxentTagger.fAssociations.get(fK.num);
@@ -288,10 +278,10 @@ public class TaggerExperiments extends Experiments {
       for (int x = 0; x < xSize; x++) {
         int numGt = 0;
         for (int y = 0; y < ySize; y++) {
-          if (fnumArr[x][y] > 0) {
+          if (maxentTagger.fnumArr[x][y] > 0) {
             numGt++;
-            if (max < fnumArr[x][y]) {
-              max = fnumArr[x][y];
+            if (max < maxentTagger.fnumArr[x][y]) {
+              max = maxentTagger.fnumArr[x][y];
             }
           } else {
             // if 00
@@ -316,8 +306,8 @@ public class TaggerExperiments extends Experiments {
 
 
   private void hashHistories() {
-    int fAll = maxentTagger.extractors.size() + maxentTagger.extractorsRare.size();
-    int fGeneral = maxentTagger.extractors.size();
+    int fAll = maxentTagger.extractors.getSize() + maxentTagger.extractorsRare.getSize();
+    int fGeneral = maxentTagger.extractors.getSize();
     System.err.println("Hashing histories ...");
     for (int x = 0; x < xSize; x++) {
       History h = tHistories.getHistory(x);
@@ -358,7 +348,7 @@ public class TaggerExperiments extends Experiments {
     // Feature number 0 is hard-coded as the current word feature, which has a special threshold
     if (fNo == 0) {
       return (size > maxentTagger.curWordMinFeatureThresh);
-    } else if (fNo < maxentTagger.extractors.size()) {
+    } else if (fNo < maxentTagger.extractors.getSize()) {
       return (size > maxentTagger.minFeatureThresh);
     } else {
       return (size > maxentTagger.rareWordMinFeatureThresh);
@@ -381,10 +371,10 @@ public class TaggerExperiments extends Experiments {
       } //do not add the feature
       //iterate over tags in dictionary
       if (maxentTagger.alltags) {
-        int numTags = maxentTagger.numTags();
+        int numTags = maxentTagger.tags.getSize();
         for (int j = 0; j < numTags; j++) {
 
-          String tag1 = maxentTagger.getTag(j);
+          String tag1 = maxentTagger.tags.getTag(j);
 
           FeatureKey key = new FeatureKey(i, s, tag1);
 
@@ -422,10 +412,10 @@ public class TaggerExperiments extends Experiments {
         continue;
       } //do not add the feature
       if (maxentTagger.alltags) {
-        int numTags = maxentTagger.numTags();
+        int numTags = maxentTagger.tags.getSize();
         for (int j = 0; j < numTags; j++) {
 
-          String tag1 = maxentTagger.getTag(j);
+          String tag1 = maxentTagger.tags.getTag(j);
 
           FeatureKey key = new FeatureKey(i, s, tag1);
 

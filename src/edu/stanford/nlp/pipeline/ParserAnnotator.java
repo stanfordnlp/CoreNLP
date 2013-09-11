@@ -3,16 +3,14 @@ package edu.stanford.nlp.pipeline;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
-import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
+import edu.stanford.nlp.parser.lexparser.LexicalizedParserQuery;
 import edu.stanford.nlp.parser.lexparser.ParserConstraint;
-import edu.stanford.nlp.parser.lexparser.ParserQuery;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations.ConstraintAnnotation;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -20,10 +18,7 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
-import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 /**
  * This class will add parse information to an Annotation.
@@ -31,8 +26,11 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  * as a List&lt;CoreLabel&gt; in the TokensAnnotation under each
  * particular CoreMap in the SentencesAnnotation.
  * If the words have POS tags, they will be used.
- * <br>
- * Parse trees are added to each sentence's CoreMap (get with
+ *
+ * If the input does not already have sentences, it adds parse information
+ * to the Annotation under the key
+ * {@code DeprecatedAnnotations.ParsePLAnnotation.class} as a {@code List<Tree>}.
+ * Otherwise, they are added to each sentence's CoreMap (get with
  * {@code CoreAnnotations.SentencesAnnotation}) under
  * {@code CoreAnnotations.TreeAnnotation}).
  *
@@ -56,8 +54,6 @@ public class ParserAnnotator implements Annotator {
   private final long maxParseTime;
 
   private final GrammaticalStructureFactory gsf;
-
-  private final int nThreads;
 
   public static final String[] DEFAULT_FLAGS = { "-retainTmpSubcategories" };
 
@@ -89,7 +85,6 @@ public class ParserAnnotator implements Annotator {
     } else {
       this.gsf = null;
     }
-    this.nThreads = 1;
   }
 
 
@@ -100,12 +95,14 @@ public class ParserAnnotator implements Annotator {
                                          "Parser annotator " +
                                          annotatorName);
     }
-    this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
+    this.VERBOSE =
+      PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 
-    // will use DEFAULT_FLAGS if the flags are not set in the properties
-    String[] flags = convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
+    String[] flags =
+      convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
     this.parser = loadModel(model, VERBOSE, flags);
-    this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
+    this.maxSentenceLength =
+      PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
 
     String treeMapClass = props.getProperty(annotatorName + ".treemap");
     if (treeMapClass == null) {
@@ -114,7 +111,8 @@ public class ParserAnnotator implements Annotator {
       this.treeMap = ReflectionLoading.loadByReflection(treeMapClass, props);
     }
 
-    this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
+    this.maxParseTime = 
+      PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
@@ -132,8 +130,6 @@ public class ParserAnnotator implements Annotator {
     } else {
       this.gsf = null;
     }
-
-    this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
   }
 
   public static String signature(String annotatorName, Properties props) {
@@ -153,8 +149,6 @@ public class ParserAnnotator implements Annotator {
             props.getProperty(annotatorName + ".maxtime", "0"));
     os.append(annotatorName + ".buildgraphs:" +
             props.getProperty(annotatorName + ".buildgraphs", "true"));
-    os.append(annotatorName + ".nthreads:" + 
-              props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
     return os.toString();
   }
 
@@ -181,82 +175,72 @@ public class ParserAnnotator implements Annotator {
     return result;
   }
 
-  private class ParserAnnotatorProcessor implements ThreadsafeProcessor<CoreMap, CoreMap> {
-    @Override
-    public CoreMap process(CoreMap sentence) {
-      doOneSentence(sentence);
-      return sentence;
-    }
-
-    @Override
-    public ThreadsafeProcessor<CoreMap, CoreMap> newInstance() {
-      return this;
-    }
-  }
-
   @Override
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      if (nThreads != 1 || maxParseTime > 0) {
-        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new ParserAnnotatorProcessor());
-        if (maxParseTime > 0) {
-          wrapper.setMaxBlockTime(maxParseTime);
+      // parse a tree for each sentence
+      for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
+        if (VERBOSE) {
+          System.err.println("Parsing: " + words);
         }
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          wrapper.put(sentence);
-          while (wrapper.peek()) {
-            wrapper.poll();
+        Tree tree = null;
+        // generate the constituent tree
+        if (maxSentenceLength <= 0 || words.size() < maxSentenceLength) {
+          final List<ParserConstraint> constraints = sentence.get(ConstraintAnnotation.class);
+          // If there is a max time specified, we parse in a separate
+          // thread and interrupt that thread if it takes too long.
+          if (maxParseTime > 0) {
+            final Tree[] treeMem = { null };
+            Thread thread = new Thread(new Runnable() {
+                public void run() {
+                  treeMem[0] = process(constraints, words);
+                }
+              });
+            try {
+              thread.start();
+              thread.join(maxParseTime);
+              tree = treeMem[0];
+              if (thread.isAlive()) {
+                // We've already waited as long as we're willing to wait
+                thread.stop();
+                if (VERBOSE) {
+                  System.err.println("WARNING: " + 
+                                     "The parser took too long to parse: " +
+                                     Sentence.listToString(words));
+                }
+              }
+            } catch (InterruptedException e) {
+              if (VERBOSE) {
+                System.err.println("WARNING: Parsing of sentence failed: " +
+                                   Sentence.listToString(words));
+                e.printStackTrace();
+              }
+            }
+          } else {
+            tree = process(constraints, words);
           }
         }
-        wrapper.join();
-        while (wrapper.peek()) {
-          wrapper.poll();
+        // tree == null may happen if the parser takes too long or if
+        // the sentence is longer than the max length
+        if (tree == null) {
+          tree = ParserAnnotatorUtils.xTree(words);
         }
-      } else {
-        // parse a tree for each sentence
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          doOneSentence(sentence);
+
+        if (treeMap != null) {
+          tree = treeMap.apply(tree);
         }
+
+        ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
     }
   }
 
-  private void doOneSentence(CoreMap sentence) {
-    final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    if (VERBOSE) {
-      System.err.println("Parsing: " + words);
-    }
-    Tree tree = null;
-    // generate the constituent tree
-    if (maxSentenceLength <= 0 || words.size() < maxSentenceLength) {
-      try {
-        final List<ParserConstraint> constraints = sentence.get(ParserAnnotations.ConstraintAnnotation.class);
-        tree = doOneSentence(constraints, words);
-      } catch (RuntimeInterruptedException e) {
-        if (VERBOSE) {
-          System.err.println("Took too long parsing: " + words);
-        }
-        tree = null;
-      }
-    }
-    // tree == null may happen if the parser takes too long or if
-    // the sentence is longer than the max length
-    if (tree == null) {
-      tree = ParserAnnotatorUtils.xTree(words);
-    }
-    
-    if (treeMap != null) {
-      tree = treeMap.apply(tree);
-    }
-    
-    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
-  }
-
-  private Tree doOneSentence(List<ParserConstraint> constraints, 
-                             List<CoreLabel> words) {
-    ParserQuery pq = parser.parserQuery();
+  private Tree process(List<ParserConstraint> constraints, 
+                       List<CoreLabel> words) {
+    LexicalizedParserQuery pq = parser.parserQuery();
     pq.setConstraints(constraints);
     pq.parse(words);
     Tree tree = null;
@@ -266,10 +250,6 @@ public class ParserAnnotator implements Annotator {
       tree.setScore(pq.getPCFGScore() % -10000.0);
     } catch (OutOfMemoryError e) {
       System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
-                         "Will ignore and continue: " +
-                         Sentence.listToString(words));
-    } catch (NoSuchParseException e) {
-      System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
                          "Will ignore and continue: " +
                          Sentence.listToString(words));
     }
@@ -294,14 +274,4 @@ public class ParserAnnotator implements Annotator {
     }
   }
 
-
-  @Override
-  public Set<Requirement> requires() {
-    return TOKENIZE_AND_SSPLIT;
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return PARSE_AND_TAG;
-  }
 }

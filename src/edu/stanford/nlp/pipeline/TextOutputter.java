@@ -17,7 +17,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -47,24 +47,6 @@ public class TextOutputter {
       os.printf("Document: ID=%s (%d sentences, %d tokens)\n", docId, nSentences, nTokens);
     }
 
-    // Display docdate if available
-    String docDate =  annotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if (docDate != null) {
-      os.printf("Document Date: %s\n", docDate);
-    }
-
-    // Display doctype if available
-    String docType =  annotation.get(CoreAnnotations.DocTypeAnnotation.class);
-    if (docType != null) {
-      os.printf("Document Type: %s\n", docType);
-    }
-
-    // Display docsourcetype if available
-    String docSourceType =  annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
-    if (docSourceType != null) {
-      os.printf("Document Source Type: %s\n", docSourceType);
-    }
-
     // display each sentence in this annotation
     if (sentences != null) {
       for(int i = 0, sz = sentences.size(); i < sz; i ++) {
@@ -85,7 +67,7 @@ public class TextOutputter {
         os.println();
 
         // display the parse tree for this sentence
-        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+        Tree tree = sentence.get(TreeAnnotation.class);
         if (tree != null){
           pipeline.getConstituentTreePrinter().printTree(tree, os);
           // It is possible turn off the semantic graphs, in which
@@ -93,8 +75,7 @@ public class TextOutputter {
           // printer.  This might be relevant if using corenlp for a
           // language which doesn't have dependencies, for example.
           if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-            os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
-            os.print("\n");
+            pipeline.getDependencyTreePrinter().printTree(tree, os);
           }
         }
 
@@ -149,11 +130,11 @@ public class TextOutputter {
           os.println("\t(" + mention.sentNum + "," +
               mention.headIndex + ",[" +
               mention.startIndex + "," +
-              mention.endIndex + "]) -> (" +
+              mention.endIndex + ")) -> (" +
               representative.sentNum + "," +
               representative.headIndex + ",[" +
               representative.startIndex + "," +
-              representative.endIndex + "]), that is: \"" +
+              representative.endIndex + ")), that is: \"" +
               mention.mentionSpan + "\" -> \"" +
               representative.mentionSpan + "\"");
         }

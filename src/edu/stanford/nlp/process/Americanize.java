@@ -2,7 +2,6 @@ package edu.stanford.nlp.process;
 
 
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 
@@ -11,7 +10,7 @@ import edu.stanford.nlp.ling.HasWord;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,28 +32,28 @@ import java.util.regex.Pattern;
  */
 public class Americanize implements Function<HasWord,HasWord> {
 
-  /** Whether to capitalize month and day names. The default is true. */
+  private static boolean DEFAULT_CAPITALIZE_TIMEX = true;
+
   private final boolean capitalizeTimex;
 
   public static final int DONT_CAPITALIZE_TIMEX = 1;
 
-  /** No word shorter in length than this is changed by Americanize */
-  private static final int MINIMUM_LENGTH_CHANGED = 4;
-  /** No word shorter in length than this can match a Pattern */
-  private static final int MINIMUM_LENGTH_PATTERN_MATCH = 6;
-
   public Americanize() {
-    this(0);
+    capitalizeTimex = DEFAULT_CAPITALIZE_TIMEX;
   }
 
   /** Make an object for Americanizing spelling.
    *
    * @param flags An integer representing bit flags. At present the only
    *      recognized flag is DONT_CAPITALIZE_TIMEX = 1 which suppresses
-   *      capitalization of days of the week and months.
+   *      capitalization of days of the week and months
    */
   public Americanize(int flags) {
-    capitalizeTimex = (flags & DONT_CAPITALIZE_TIMEX) == 0;
+    if ((flags & DONT_CAPITALIZE_TIMEX) != 0) {
+      capitalizeTimex = false;
+    } else {
+      capitalizeTimex = DEFAULT_CAPITALIZE_TIMEX;
+    }
   }
 
 
@@ -64,7 +63,6 @@ public class Americanize implements Function<HasWord,HasWord> {
    * @param w A HasWord or String to covert to American if needed.
    * @return Either the input or an Americanized version of it.
    */
-  @Override
   public HasWord apply(HasWord w) {
     String str = w.word();
     String outStr = americanize(str, capitalizeTimex);
@@ -86,7 +84,7 @@ public class Americanize implements Function<HasWord,HasWord> {
    * @return The American spelling of the word.
    */
   public static String americanize(String str) {
-    return americanize(str, true);
+    return americanize(str, DEFAULT_CAPITALIZE_TIMEX);
   }
 
 
@@ -104,11 +102,6 @@ public class Americanize implements Function<HasWord,HasWord> {
     // System.err.println("str is |" + str + "|");
     // System.err.println("timexMapping.contains is " +
     //            timexMapping.containsKey(str));
-    // No ver short words are changed, so short circuit them
-    int length = str.length();
-    if (length < MINIMUM_LENGTH_CHANGED) {
-      return str;
-    }
     String result;
     if (capitalizeTimex) {
       result = timexMapping.get(str);
@@ -121,24 +114,16 @@ public class Americanize implements Function<HasWord,HasWord> {
       return result;
     }
 
-    if (length < MINIMUM_LENGTH_PATTERN_MATCH) {
-      return str;
-    }
-    // first do one disjunctive regex and return unless matches. Faster!
-    // (But still allocates matcher each time; avoiding this would make this class not threadsafe....)
-    if ( ! disjunctivePattern.matcher(str).find()) {
-      return str;
-    }
     for (int i = 0; i < pats.length; i++) {
+      Pattern ex = excepts[i];
+      if (ex != null) {
+        Matcher me = ex.matcher(str);
+        if (me.find()) {
+          continue;
+        }
+      }
       Matcher m = pats[i].matcher(str);
       if (m.find()) {
-        Pattern ex = excepts[i];
-        if (ex != null) {
-          Matcher me = ex.matcher(str);
-          if (me.find()) {
-            continue;
-          }
-        }
         // System.err.println("Replacing " + word + " with " +
         //             pats[i].matcher(word).replaceAll(reps[i]));
         return m.replaceAll(reps[i]);
@@ -147,29 +132,12 @@ public class Americanize implements Function<HasWord,HasWord> {
     return str;
   }
 
-  private static final String[] patStrings = { "haem(at)?o", "aemia$", "([lL])eukaem",
-          "programme(s?)$", "^([a-z]{3,})our(s?)$",
 
-  };
-
-  private static final Pattern[] pats = new Pattern[patStrings.length];
-
-  private static final Pattern disjunctivePattern;
-
-  static {
-    StringBuilder foo = new StringBuilder();
-    for (int i = 0, len = pats.length; i < len; i++) {
-      pats[i] = Pattern.compile(patStrings[i]);
-      if (i > 0) {
-        foo.append('|');
-      }
-      foo.append("(?:");
-      // Remove groups from String before appending for speed
-      foo.append(patStrings[i].replaceAll("[()]", ""));
-      foo.append(')');
-    }
-    disjunctivePattern = Pattern.compile(foo.toString());
-  }
+  private static final Pattern[] pats = { Pattern.compile("haem(at)?o"),
+                            Pattern.compile("aemia$"),
+                            Pattern.compile("([lL]euk)aem"),
+                            Pattern.compile("programme(s?)$"),
+                            Pattern.compile("^([a-z]{3,})our(s?)$") };
 
   private static final String[] OUR_EXCEPTIONS = {
     "abatjour", "beflour", "bonjour",
@@ -187,7 +155,7 @@ public class Americanize implements Function<HasWord,HasWord> {
   };
 
   private static final String[] reps = {
-    "hem$1o", "emia", "$1eukem", "program$1", "$1or$2"
+    "hem$1o", "emia", "$1em", "program$1", "$1or$2"
   };
 
 
@@ -209,9 +177,9 @@ public class Americanize implements Function<HasWord,HasWord> {
   private static final String[] timexConverted = {"January", "February", /* not "march" ! */
                                                               "April", /* Not "may"! */ "June", "July", "August", "September", "October", "November", "December", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
-  private static final Map<String,String> mapping = Generics.newHashMap();
+  private static final HashMap<String,String> mapping = new HashMap<String,String>();
 
-  private static final Map<String,String> timexMapping = Generics.newHashMap();
+  private static final HashMap<String,String> timexMapping = new HashMap<String,String>();
 
 
   // static initialization block
@@ -230,7 +198,7 @@ public class Americanize implements Function<HasWord,HasWord> {
 
   @Override
   public String toString() {
-    return ("Americanize[capitalizeTimex is " + capitalizeTimex +
+    return ("Americanize[capitalizeTimex is " + DEFAULT_CAPITALIZE_TIMEX +
             "; " + "mapping has " + mapping.size() + " mappings; " +
             "timexMapping has " + timexMapping.size() + " mappings]");
   }
@@ -251,8 +219,7 @@ public class Americanize implements Function<HasWord,HasWord> {
       String line;
       while((line = buf.readLine()) != null) {
         for(String w : line.split("\\s+")) {
-          System.out.print(Americanize.americanize(w));
-          System.out.print(' ');
+          System.out.print(Americanize.americanize(w)+" ");
         }
         System.out.println();
       }

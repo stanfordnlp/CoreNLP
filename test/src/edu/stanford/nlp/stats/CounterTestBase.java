@@ -4,8 +4,8 @@ import java.util.*;
 import java.io.*;
 
 import junit.framework.TestCase;
+import edu.stanford.cs.ra.util.IOUtils;
 import edu.stanford.nlp.util.Factory;
-import edu.stanford.nlp.io.IOUtils;
 
 
 /**
@@ -189,7 +189,7 @@ public abstract class CounterTestBase extends TestCase {
         // reconstitute
         byte[] bytes = baos.toByteArray();
         ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new ByteArrayInputStream(bytes)));
-        c = IOUtils.readObjectFromObjectStream(in);
+        c = IOUtils.readObject(in);
         in.close();
         if (!this.integral) {
           assertEquals(-2.5, c.totalCount());
@@ -201,9 +201,7 @@ public abstract class CounterTestBase extends TestCase {
           assertEquals(0.0, c.totalCount());
         }
       } catch (IOException ioe) {
-        fail("IOException: " + ioe);
-      } catch (ClassNotFoundException cce) {
-      fail("ClassNotFoundException: " + cce);
+        fail("IOError: " + ioe);
       }
     }
   }

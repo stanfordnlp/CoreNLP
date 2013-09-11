@@ -13,7 +13,6 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.ReflectionLoading;
 
 
 /** This is just a main method and other static methods for
@@ -82,7 +81,6 @@ public class Treebanks {
     String suffix = Treebank.DEFAULT_TREE_FILE_SUFFIX;
     TreeReaderFactory trf = null;
     TreebankLanguagePack tlp = null;
-    List<Filter<Tree>> filters = new ArrayList<Filter<Tree>>();
 
     while (i < args.length && args[i].startsWith("-")) {
       if (args[i].equals("-maxLength") && i + 1 < args.length) {
@@ -165,10 +163,6 @@ public class Treebanks {
       } else if (args[i].equals("-removeCodeTrees")) {
         removeCodeTrees = true;
         i++;
-      } else if (args[i].equals("-filter")) {
-        Filter<Tree> filter = ReflectionLoading.loadByReflection(args[i+1]);
-        filters.add(filter);
-        i += 2;
       } else {
         System.err.println("Unknown option: " + args[i]);
         i++;
@@ -180,7 +174,6 @@ public class Treebanks {
     Treebank treebank;
     if (trf == null) {
       trf = new TreeReaderFactory() {
-          @Override
           public TreeReader newTreeReader(Reader in) {
             return new PennTreeReader(in, new LabeledScoredTreeFactory());
           }
@@ -190,10 +183,6 @@ public class Treebanks {
       treebank = new DiskTreebank();
     } else {
       treebank = new DiskTreebank(trf, encoding);
-    }
-
-    for (Filter<Tree> filter : filters) {
-      treebank = new FilteringTreebank(treebank, filter);
     }
 
     final PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, encoding), true);
@@ -230,7 +219,6 @@ public class Treebanks {
 
     if (pennPrintTrees) {
       treebank.apply(new TreeVisitor() {
-          @Override
           public void visitTree(Tree tree) {
             int length = tree.yield().size();
             if (length >= minLength && length <= maxLength) {
@@ -243,7 +231,6 @@ public class Treebanks {
 
     if (oneLinePrint) {
       treebank.apply(new TreeVisitor() {
-          @Override
           public void visitTree(Tree tree) {
             int length = tree.yield().size();
             if (length >= minLength && length <= maxLength) {
@@ -256,7 +243,6 @@ public class Treebanks {
     if (printWords) {
       final TreeNormalizer tn = new BobChrisTreeNormalizer();
       treebank.apply(new TreeVisitor() {
-        @Override
         public void visitTree(Tree tree) {
           Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
           int length = tPrime.yield().size();
@@ -270,7 +256,6 @@ public class Treebanks {
     if (printTaggedWords) {
       final TreeNormalizer tn = new BobChrisTreeNormalizer();
       treebank.apply(new TreeVisitor() {
-        @Override
         public void visitTree(Tree tree) {
           Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
           pw.println(Sentence.listToString(tPrime.taggedYield(), false, "_"));
@@ -284,7 +269,6 @@ public class Treebanks {
 
     if (yield) {
       treebank.apply(new TreeVisitor() {
-          @Override
           public void visitTree(Tree tree) {
             int length = tree.yield().size();
             if (length >= minLength && length <= maxLength) {
@@ -339,7 +323,6 @@ public class Treebanks {
   private static void countTaggings(Treebank tb, final PrintWriter pw) {
     final TwoDimensionalCounter<String,String> wtc = new TwoDimensionalCounter<String,String>();
     tb.apply(new TreeVisitor() {
-        @Override
         public void visitTree(Tree tree) {
           List<TaggedWord> tags = tree.taggedYield();
           for (TaggedWord tag : tags)
@@ -370,7 +353,6 @@ public class Treebanks {
 
     treebank.apply(new TreeVisitor() {
         int num = 0;
-        @Override
         public void visitTree(final Tree t) {
           num += t.yield().size();
         }

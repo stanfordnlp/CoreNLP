@@ -34,11 +34,11 @@ import edu.stanford.nlp.util.DataFilePaths;
 
 public class ThreadedTaggerITest extends TestCase {
   public static final String tagger1 = DataFilePaths.convert(
-    "$NLP_DATA_HOME/data/pos-tagger/distrib/" + 
-    "english-left3words-distsim.tagger");
+    "$NLP_DATA_HOME/data/pos-tagger/english/" + 
+    "wsj-0-18-left3words.tagger");
 
   public static final String tagger2 = DataFilePaths.convert(
-    "$NLP_DATA_HOME/data/pos-tagger/distrib/" +
+    "$NLP_DATA_HOME/data/pos-tagger/english/" +
     "wsj-0-18-left3words-distsim.tagger");
 
   public static final String testFile = 

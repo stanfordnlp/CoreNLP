@@ -2,9 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -27,7 +25,7 @@ import edu.stanford.nlp.util.Timing;
  * @author Jenny Finkel
  * @author John Bauer
  */
-public abstract class TokenizerAnnotator implements Annotator {
+abstract public class TokenizerAnnotator implements Annotator {
 
   private final boolean VERBOSE;
 
@@ -38,20 +36,19 @@ public abstract class TokenizerAnnotator implements Annotator {
   /**
    * Abstract: returns a tokenizer
    */
-  abstract public Tokenizer<CoreLabel> getTokenizer(Reader r);
+  abstract Tokenizer<CoreLabel> getTokenizer(Reader r);
 
   /**
    * Does the actual work of splitting TextAnnotation into CoreLabels,
    * which are then attached to the TokensAnnotation.
    */
-  @Override
   public void annotate(Annotation annotation) {
     Timing timer = null;
 
     if (VERBOSE) {
       timer = new Timing();
       timer.start();
-      System.err.print("Tokenizing ... ");
+      System.err.print("PTB tokenizing ... ");
     }
 
     if (annotation.has(CoreAnnotations.TextAnnotation.class)) {
@@ -60,27 +57,15 @@ public abstract class TokenizerAnnotator implements Annotator {
       List<CoreLabel> tokens = getTokenizer(r).tokenize();
       // cdm 2010-05-15: This is now unnecessary, as it is done in CoreLabelTokenFactory
       // for (CoreLabel token: tokens) {
-      //   token.set(CoreAnnotations.TextAnnotation.class, token.get(CoreAnnotations.TextAnnotation.class));
+      //   token.set(CoreAnnotations.TextAnnotation.class, token.get(TextAnnotation.class));
       // }
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
         timer.stop("done.");
-        System.err.println("output: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
-        System.err.println();
+        System.err.println("output: "+annotation.get(CoreAnnotations.TokensAnnotation.class)+"\n");
       }
     } else {
       throw new RuntimeException("unable to find text in annotation: " + annotation);
     }
-  }
-
-
-  @Override
-  public Set<Requirement> requires() {
-    return Collections.emptySet();
-  }
-
-  @Override
-  public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
 }
