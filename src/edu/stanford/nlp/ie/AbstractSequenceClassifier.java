@@ -40,7 +40,6 @@ import edu.stanford.nlp.objectbank.ResettableReaderIteratorFactory;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.CoreTokenFactory;
 import edu.stanford.nlp.sequences.*;
-import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -83,6 +82,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
   public FeatureFactory<IN> featureFactory;
+  
+  // Thang Sep13: multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory)
+  public List<FeatureFactory<IN>> featureFactories; 
+  
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
   public int windowSize;
@@ -124,8 +127,15 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     this.flags = flags;
 
     // try {
-    this.featureFactory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs);
-    //   this.featureFactory = (FeatureFactory<IN>) Class.forName(flags.featureFactory).newInstance();
+    // Thang Sep13: allow for multiple feature factories.
+    this.featureFactory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
+    this.featureFactories = new ArrayList<FeatureFactory<IN>>();
+    for (int i = 0; i < flags.featureFactories.length; i++) {
+      FeatureFactory<IN> indFeatureFactory = new MetaClass(flags.featureFactories[i]).
+          createInstance(flags.featureFactoriesArgs.get(i));
+      this.featureFactories.add(indFeatureFactory);
+    }
+    
     if (flags.tokenFactory == null) {
       tokenFactory = (CoreTokenFactory<IN>) new CoreLabelTokenFactory();
     } else {
@@ -156,7 +166,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
     pad.set(CoreAnnotations.GoldAnswerAnnotation.class, flags.backgroundSymbol);
 
-    featureFactory.init(flags);
+    // Thang Sep13: allow for multiple feature factories.
+    featureFactory.init(flags); // for compatible use
+    for (FeatureFactory<IN> indFeatureFactory : featureFactories) {
+      indFeatureFactory.init(flags);
+    }
 
     defaultReaderAndWriter = makeReaderAndWriter();
     if (flags.readerAndWriter != null &&
