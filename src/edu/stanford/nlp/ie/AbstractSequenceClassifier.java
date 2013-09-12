@@ -129,14 +129,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // try {
     // Thang Sep13: allow for multiple feature factories.
     this.featureFactory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
-    if(flags.featureFactories!=null){
-      this.featureFactories = new ArrayList<FeatureFactory<IN>>();
-      for (int i = 0; i < flags.featureFactories.length; i++) {
-        FeatureFactory<IN> indFeatureFactory = new MetaClass(flags.featureFactories[i]).
-            createInstance(flags.featureFactoriesArgs.get(i));
-        this.featureFactories.add(indFeatureFactory);
-      }
+    this.featureFactories = new ArrayList<FeatureFactory<IN>>();
+    for (int i = 0; i < flags.featureFactories.length; i++) {
+      FeatureFactory<IN> indFeatureFactory = new MetaClass(flags.featureFactories[i]).
+          createInstance(flags.featureFactoriesArgs.get(i));
+      this.featureFactories.add(indFeatureFactory);
     }
+    
     if (flags.tokenFactory == null) {
       tokenFactory = (CoreTokenFactory<IN>) new CoreLabelTokenFactory();
     } else {
@@ -169,12 +168,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     // Thang Sep13: allow for multiple feature factories.
     featureFactory.init(flags); // for compatible use
-    if(flags.featureFactories!=null){
-      for (FeatureFactory<IN> indFeatureFactory : featureFactories) {
-        indFeatureFactory.init(flags);
-      }
+    for (FeatureFactory<IN> indFeatureFactory : featureFactories) {
+      indFeatureFactory.init(flags);
     }
-    
+
     defaultReaderAndWriter = makeReaderAndWriter();
     if (flags.readerAndWriter != null &&
         flags.readerAndWriter.equals(flags.plainTextDocumentReaderAndWriter)) {
