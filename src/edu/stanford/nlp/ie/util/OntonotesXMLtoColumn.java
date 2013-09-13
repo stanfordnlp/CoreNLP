@@ -1,14 +1,6 @@
 package edu.stanford.nlp.ie.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,7 +91,7 @@ public class OntonotesXMLtoColumn {
 
         line = line.trim();
         if (line.equals("（ 完 ）") || line.equals("完")) {
-          continue;
+          // continue;
         }
         
         InputSource source = new InputSource(new StringReader("<xml>" + line + "</xml>"));
@@ -179,8 +171,20 @@ public class OntonotesXMLtoColumn {
 
   public static void main(String[] args) {
     OntonotesXMLtoColumn processor = new OntonotesXMLtoColumn();
-    for (String filename : args) {
-      processor.processXML(filename);
+    if (args.length == 0) {
+      try {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String line = null;
+        while ( (line = br.readLine()) != null) {
+          processor.processXML(line);
+        }
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    } else {
+      for (String filename : args) {
+        processor.processXML(filename);
+      }
     }
   }
 

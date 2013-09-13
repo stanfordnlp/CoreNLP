@@ -2,6 +2,8 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.util.logging.PrettyLoggable;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * Base type for all annotatable core objects. Should usually be instantiated as
@@ -26,4 +28,4 @@ import edu.stanford.nlp.util.logging.PrettyLoggable;
  * @author dramage
  * @author rafferty
  */
-public interface CoreMap extends TypesafeMap, PrettyLoggable { }
+public interface CoreMap extends TypesafeMap, PrettyLoggable, Serializable { }
