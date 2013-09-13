@@ -12,14 +12,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Rules for matching sequences using regular expressions
+ * Rules for matching sequences using regular expressions.
  * <p>
  * There are 2 types of rules:
  * <ol>
  * <li><b>Assignment rules</b> which assign a value to a variable for later use.
  * </li>
- * <li><b>Extraction rules</b> which specifies how regular expression patterns are to be matched against text,
- *   which matched text expressions are to extracted, and what value to assign to the matched expression.</li>
+ * <li><b>Extraction rules</b> which specify how regular expression patterns are to be matched against text,
+ *   which matched text expressions are to be extracted, and what value to assign to the matched expression.</li>
  * </ol>
  * </p>
  *
@@ -94,7 +94,7 @@ import java.util.regex.Pattern;
  * </table>
  * </p>
 
- * <p><b>Extraction Rules</b> specifies how regular expression patterns are to be matched against text.
+ * <p><b>Extraction Rules</b> specify how regular expression patterns are to be matched against text.
  * See {@link CoreMapExpressionExtractor} for more information on the types of the rules, and in what sequence the rules are applied.
  * A basic rule can be specified using the following template:
  * <pre>{
@@ -131,9 +131,9 @@ import java.util.regex.Pattern;
  *   <tr><td><code>result</code></td><td><code>...</code></td>
  *      <td><code></code></td><td>Resulting value to go into the resulting annotation</td></tr>
  *   <tr><td><code>name</code></td><td><code>STRING</code></td>
- *      <td><code></code></td><td>Name to identify the extraction rule/td></tr>
+ *      <td><code></code></td><td>Name to identify the extraction rule</td></tr>
  *   <tr><td><code>stage</code></td><td><code>INTEGER</code></td>
- *      <td><code></code></td><td>Stage at which the rule is to be applied/td></tr>
+ *      <td><code></code></td><td>Stage at which the rule is to be applied</td></tr>
  *   <tr><td><code>active</code></td><td><code>Boolean</code></td>
  *      <td><code></code></td><td>Whether this rule is enabled (active) or not</td></tr>
  *   <tr><td><code>priority</code></td><td><code>DOUBLE</code></td>
@@ -155,6 +155,9 @@ import java.util.regex.Pattern;
  * @see TokenSequencePattern
  */
 public class SequenceMatchRules {
+
+  // A container class
+  private SequenceMatchRules() {}
 
   /** A sequence match rule */
   public static interface Rule {
@@ -581,7 +584,7 @@ public class SequenceMatchRules {
       this.action = action;
       this.result = result;
     }
-    
+
     public StringMatchResultExtractor(Env env, Expression result) {
       this.env = env;
       this.result = result;
