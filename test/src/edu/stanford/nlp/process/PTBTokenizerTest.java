@@ -30,7 +30,8 @@ public class PTBTokenizerTest extends TestCase {
     "1. Buy a new Chevrolet (37%-owned in the U.S..) . 15%",
     "I like you ;-) but do you care :(. I'm happy ^_^ but shy (x.x)!",
     "Diamond (``Not even the chair'') lives near Udaipur (84km). {1. A potential Palmer trade:}",
-    "No. I like No. 24 and no.47."
+    "No. I like No. 24 and no.47.",
+    "You can get a B.S. or a B. A. or a Ph.D (sometimes a Ph. D) from Stanford."
   };
 
   private String[][] ptbGold = {
@@ -58,6 +59,7 @@ public class PTBTokenizerTest extends TestCase {
     { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
       "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
     { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
+    { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
   };
 
   public void testPTBTokenizerWord() {
@@ -203,6 +205,12 @@ public class PTBTokenizerTest extends TestCase {
     "Hi! <foo bar=\"baz xy = foo !$*) 422\" > <?PITarget PIContent?> <?PITarget PIContent> Hi!",
     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<?xml-stylesheet type=\"text/xsl\" href=\"style.xsl\"?>\n<book xml:id=\"simple_book\" xmlns=\"http://docbook.org/ns/docbook\" version=\"5.0\">\n",
     "<chapter xml:id=\"chapter_1\"><?php echo $a; ?>\n<!-- This is an SGML/XML comment \"Hi!\" -->\n<p> </p> <p-fix / >",
+    "<a href=\"http:\\\\it's\\here\"> <quote orig_author='some \"dude'/> <not sgmltag",
+    "<quote previouspost=\"\n" +
+            "&gt; &gt; I really don't want to process this junk.\n" +
+            "&gt; No one said you did, runny.  What's got you so scared, anyway?-\n" +
+            "\">",
+    "&lt;b...@canada.com&gt; funky@thedismalscience.net <myemail@where.com>",
   };
 
   private String[][] sgmlGold = {
@@ -220,7 +228,13 @@ public class PTBTokenizerTest extends TestCase {
     { "<?xml\u00A0version=\"1.0\"\u00A0encoding=\"UTF-8\"\u00A0?>", "<?xml-stylesheet\u00A0type=\"text/xsl\"\u00A0href=\"style.xsl\"?>",
             "<book\u00A0xml:id=\"simple_book\"\u00A0xmlns=\"http://docbook.org/ns/docbook\"\u00A0version=\"5.0\">", },
     { "<chapter\u00A0xml:id=\"chapter_1\">", "<?php\u00A0echo\u00A0$a;\u00A0?>", "<!--\u00A0This\u00A0is\u00A0an\u00A0SGML/XML\u00A0comment\u00A0\"Hi!\"\u00A0-->",
-            "<p>", "</p>", "<p-fix\u00A0/\u00A0>", },
+            "<p>", "</p>", "<p-fix\u00A0/\u00A0>"},
+    { "<a href=\"http:\\\\it's\\here\">", "<quote orig_author='some \"dude'/>", "<", "not", "sgmltag" },
+    { "<quote previouspost=\"\n" +
+            "&gt; &gt; I really don't want to process this junk.\n" +
+            "&gt; No one said you did, runny.  What's got you so scared, anyway?-\n" +
+            "\">" },
+    { "&lt;b...@canada.com&gt;", "funky@thedismalscience.net", "<myemail@where.com>" },
   };
 
   public void testPTBTokenizerSGML() {

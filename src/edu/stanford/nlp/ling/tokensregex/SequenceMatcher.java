@@ -371,6 +371,10 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     return matched;
   }
 
+  /**
+   * Applies the matcher and returns all non overlapping matches
+   * @return a Iterable of match results
+   */
   public Iterable<SequenceMatchResult<T>> findAllNonOverlapping() {
     Iterator<SequenceMatchResult<T>> iter = new Iterator<SequenceMatchResult<T>>() {
       SequenceMatchResult<T> next;
@@ -574,6 +578,12 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     return regionStart;
   }
 
+  /**
+   * Returns a copy of the current match results.  Use this method
+   * to save away match results for later use, since future operations
+   * using the SequenceMatcher changes the match results.
+   * @return Copy of the the current match results
+   */
   public BasicSequenceMatchResult<T> toBasicSequenceMatchResult() {
     if (matchingCompleted && matched) {
       return super.toBasicSequenceMatchResult();
