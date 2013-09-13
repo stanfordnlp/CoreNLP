@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -491,6 +492,24 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
       }*/
   }
 
+  // private int[] trimToSize(int[] i, int size) {
+  // int[] newI = new int[size];
+  // System.arraycopy(i, 0, newI, 0, size);
+  // return newI;
+  // }
+  //
+  // private int[][] trimToSize(int[][] i, int size) {
+  // int[][] newI = new int[size][];
+  // System.arraycopy(i, 0, newI, 0, size);
+  // return newI;
+  // }
+
+  private static double[][] trimToSize(double[][] i, int size) {
+    double[][] newI = new double[size][];
+    System.arraycopy(i, 0, newI, 0, size);
+    return newI;
+  }
+
   /**
    * prints the full feature matrix in tab-delimited form. These can be BIG
    * matrices, so be careful! [Can also use printFullFeatureMatrixWithValues]
@@ -880,11 +899,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
 
   @Override
   public double[][] getValuesArray() {
-    if (size == 0) {
-      return new double[0][];
-    }
-    values = trimToSize(values);
-    data = trimToSize(data);
+    values = trimToSize(values, size);
     return values;
   }
 
