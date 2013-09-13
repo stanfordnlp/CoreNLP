@@ -77,4 +77,15 @@ public final class Characters {
         cType == Character.MODIFIER_SYMBOL ||
         cType == Character.OTHER_SYMBOL;
   }
+
+  /**
+   * Returns true if a character is a control character, and
+   * false otherwise.
+   * 
+   * @param c
+   * @return
+   */
+  public static boolean isControl(char c) {
+    return Character.getType(c) == Character.CONTROL;
+  }
 }
