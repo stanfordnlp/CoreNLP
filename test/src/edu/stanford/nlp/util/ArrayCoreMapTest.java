@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
  * Test various operations of the ArrayCoreMap: equals, toString, etc.
  */
 public class ArrayCoreMapTest extends TestCase {
+
   public void testCreate() {
     ArrayCoreMap foo = new ArrayCoreMap();
     assertEquals(0, foo.size());
@@ -213,7 +214,7 @@ public class ArrayCoreMapTest extends TestCase {
     foo.set(CoreAnnotations.ParagraphsAnnotation.class, p1);
 
     foo.toString();
-    foo.hashCode();
+    int fh = foo.hashCode();
 
     ArrayCoreMap bar = new ArrayCoreMap();
     bar.set(CoreAnnotations.TextAnnotation.class, "foo");
@@ -227,10 +228,11 @@ public class ArrayCoreMapTest extends TestCase {
     bar.set(CoreAnnotations.ParagraphsAnnotation.class, p2);
 
     bar.toString();
-    bar.hashCode();
+    int bh = bar.hashCode();
 
     assertEquals(foo, bar);
     assertEquals(bar, foo);
+    assertEquals(fh, bh);
 
     ArrayCoreMap baz = new ArrayCoreMap();
     baz.set(CoreAnnotations.TextAnnotation.class, "foo");
@@ -277,4 +279,5 @@ public class ArrayCoreMapTest extends TestCase {
     barfooParagraph.add(bar);
     assertEquals(baz, biff);
   }
+
 }
