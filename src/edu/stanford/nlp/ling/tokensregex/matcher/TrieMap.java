@@ -213,7 +213,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   @Override
   public void putAll(Map<? extends Iterable<K>, ? extends V> m) {
     for (Iterable<K> k : m.keySet()) {
-      put(k, m.get(m));
+      put(k, m.get(k));
     }
   }
 
