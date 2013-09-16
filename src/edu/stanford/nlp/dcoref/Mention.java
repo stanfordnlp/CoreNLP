@@ -1133,7 +1133,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       // If the mentions are short, take the longer one
       else if (originalSpan.size() <= 5 && originalSpan.size() > m.originalSpan.size()) { return true; }
       else if (originalSpan.size() <= 5 && originalSpan.size() < m.originalSpan.size()) { return false; }
-      // If the mentions are long, take the shorter one (w're getting into the realm of nonsense by here)
+      // If the mentions are long, take the shorter one (we're getting into the realm of nonsense by here)
       else if (originalSpan.size() < m.originalSpan.size()) { return true; }
       else if (originalSpan.size() > m.originalSpan.size()) { return false; }
       else {
