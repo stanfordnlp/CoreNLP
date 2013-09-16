@@ -932,8 +932,17 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       } else {
         if (this.endIndex > m.endIndex) {
           return true;
-        } else {
+        } else if (this.endIndex < m.endIndex) {
           return false;
+        } else if (this.headIndex != m.headIndex) {
+          // Meaningless, but an arbitrary tiebreaker
+          return this.headIndex < m.headIndex;
+        } else if (this.mentionType != m.mentionType) {
+          // Meaningless, but an arbitrary tiebreaker
+          return this.mentionType.representativeness > m.mentionType.representativeness;
+        } else {
+          // Meaningless, but an arbitrary tiebreaker
+          return this.hashCode() < m.hashCode();
         }
       }
     }
