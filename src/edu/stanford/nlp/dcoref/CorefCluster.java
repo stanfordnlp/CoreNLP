@@ -108,7 +108,12 @@ public class CorefCluster implements Serializable{
     }
     representative = firstMention;
     for (Mention m : mentions) {
-      if(m.moreRepresentativeThan(representative)) representative = m;
+      if(m != representative && m.moreRepresentativeThan(representative)) {
+        assert representative == null || !representative.moreRepresentativeThan(m);
+        representative = m;
+      } else if (m != representative && representative != null) {
+        assert representative.moreRepresentativeThan(m);
+      }
     }
   }
 
