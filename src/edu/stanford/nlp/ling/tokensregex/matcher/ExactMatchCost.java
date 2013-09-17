@@ -37,7 +37,7 @@ public final class ExactMatchCost<K,V> implements MatchCostFunction<K,V> {
   }
 
   @Override
-  public double multiMatchDeltaCost(List<K> ks, V v, int n) {
+  public double multiMatchDeltaCost(List<K> ks, V v, List<Match<K,V>> prevMatched, List<Match<K,V>> curMatched) {
     return 0;
   }
 }

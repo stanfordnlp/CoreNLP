@@ -46,6 +46,7 @@ import edu.stanford.nlp.util.Generics;
  * <tr><td>A &gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths
  * <tr><td>A x,y&lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following dep-&gt;gov paths between distances of x and y
  * <tr><td>A x,y&gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths between distances of x and y
+ * <tr><td>A == B <td>A and B are the same nodes in the same graph
  * <tr><td>A @ B <td>A is aligned to B
  * </table>
  * <p/>
