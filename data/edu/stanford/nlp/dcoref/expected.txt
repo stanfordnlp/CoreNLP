@@ -1,5 +1,5 @@
 CONLL EVAL SUMMARY (Before COREF)
-Identification of Mentions: Recall: (12407 / 14291) 86.81%  Precision: (12407 / 34999) 35.44%F1: 50.34%
+Identification of Mentions: Recall: (12407 / 14291) 86.81%  Precision: (12407 / 34999) 35.44% F1: 50.34%
 
 CONLL EVAL SUMMARY (After COREF)
 METRIC muc:Coreference: Recall: (6278 / 10539) 59.56% Precision: (6278 / 10038) 62.54%  F1: 61.01%
