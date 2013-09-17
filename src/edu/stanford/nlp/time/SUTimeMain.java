@@ -9,6 +9,7 @@ import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.stats.PrecisionRecallStats;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -240,7 +241,6 @@ public class SUTimeMain {
   {
     if (sent != null) {
       Collections.sort(sent.timexes, new Comparator<TimebankTimex>() {
-        @Override
         public int compare(TimebankTimex o1, TimebankTimex o2) {
           if (o1.tid == o2.tid) { return 0; }
           else return (o1.tid < o2.tid)? -1:1;
@@ -378,7 +378,6 @@ public class SUTimeMain {
 
   public static String joinWordTags(List<? extends CoreMap> l, String glue, int start, int end) {
     return StringUtils.join(l, glue, new Function<CoreMap, String>() {
-      @Override
       public String apply(CoreMap in) {
         return in.get(CoreAnnotations.TextAnnotation.class) + "/" + in.get(CoreAnnotations.PartOfSpeechAnnotation.class);
       }
@@ -526,7 +525,6 @@ public class SUTimeMain {
   }
 
   private static CoreLabelTokenFactory tokenFactory = new CoreLabelTokenFactory();
-
   private static CoreMap wordsToSentence(List<String> sentWords)
   {
     String sentText = StringUtils.join(sentWords, " ");
@@ -805,7 +803,6 @@ public class SUTimeMain {
 
   private static String requiredDocDateFormat;
   private static boolean useGUTime = false;
-
   public static AnnotationPipeline getPipeline(Properties props, boolean tokenize) throws Exception
   {
 //    useGUTime = Boolean.parseBoolean(props.getProperty("gutime", "false"));
@@ -995,5 +992,4 @@ public class SUTimeMain {
         break;
     }
   }
-
 }

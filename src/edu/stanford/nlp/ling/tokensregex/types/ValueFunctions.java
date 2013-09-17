@@ -1184,10 +1184,6 @@ public class ValueFunctions {
       if (index < 0) {
         index = list.size() + index;
       }
-      if (index >= list.size() || index < 0) {
-        // index out of bounds
-        return null;
-      }
       if (in.size() >= 3) {
         Value fieldValue = in.get(2);
         if (fieldValue != null) {
