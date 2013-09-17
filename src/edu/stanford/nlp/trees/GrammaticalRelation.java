@@ -9,6 +9,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.Serializable;
+import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -208,8 +209,16 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return reln;
   }
 
+  private static Map<String, SoftReference<GrammaticalRelation>> valueOfCache = new HashMap<String, SoftReference<GrammaticalRelation>>();
   public static GrammaticalRelation valueOf(String s) {
-    return valueOf(Language.English, s);
+    GrammaticalRelation value = null;
+    SoftReference<GrammaticalRelation> possiblyCachedValue = valueOfCache.get(s);
+    if (possiblyCachedValue != null) { value = possiblyCachedValue.get(); }
+    if (value == null) {
+      value = valueOf(Language.English, s);
+      valueOfCache.put(s, new SoftReference<GrammaticalRelation>(value));
+    }
+    return value;
   }
 
   /**
