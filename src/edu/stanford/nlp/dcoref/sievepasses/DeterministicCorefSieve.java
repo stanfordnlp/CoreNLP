@@ -150,8 +150,8 @@ public abstract class DeterministicCorefSieve  {
     if(document.conllDoc != null) {
       if(ant.generic && ant.person==Person.YOU) return false;
       if(mention2.generic) return false;
-      if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
     }
+    if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
 
     if(flags.USE_DISCOURSEMATCH) {
       String mString = mention.lowercaseNormalizedSpanString();
@@ -413,9 +413,18 @@ public abstract class DeterministicCorefSieve  {
           document.addIncompatible(m, ant);
           return false;
         }
+        
+        if(mention2.spanToString().toLowerCase().equals("you") && ant.spanToString().toLowerCase().equals("bill")) {
+          System.err.println(ant.speakerInfo.getSpeakerName());
+          System.err.println();
+        }
         if(Constants.USE_DISCOURSE_CONSTRAINTS && Rules.entityPersonDisagree(document, mentionCluster, potentialAntecedent, dict)){
           SieveCoreferenceSystem.logger.finest("Incompatibles: Person Disagree: "+ant.spanToString()+"("+ant.mentionID+") :: "+mention.spanToString()+"("+mention.mentionID+") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
           document.addIncompatible(m, ant);
+          if(mention2.spanToString().toLowerCase().equals("you") && ant.spanToString().toLowerCase().equals("bill")) {
+            System.err.println("persondisagree!!!!!!!!!!!");
+            System.err.println();
+          }
           return false;
         }
         return true;
