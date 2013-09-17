@@ -19,15 +19,7 @@ import edu.stanford.nlp.util.Pair;
 
 public class Dictionaries {
 
-  public enum MentionType {
-    PRONOMINAL(1), NOMINAL(3), PROPER(4), LIST(2);
-    /**
-     * A higher representativeness means that this type of mention is more preferred for choosing
-     * the representative mention. See {@link Mention#moreRepresentativeThan(Mention)}.
-     */
-    public final int representativeness;
-    MentionType(int representativeness) { this.representativeness = representativeness; }
-  }
+  public enum MentionType { PRONOMINAL, NOMINAL, PROPER, LIST }
 
   public enum Gender { MALE, FEMALE, NEUTRAL, UNKNOWN }
 
