@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
@@ -21,6 +22,17 @@ public class RegexNERAnnotator implements Annotator {
 
   private final RegexNERSequenceClassifier classifier;
   private final boolean verbose;
+
+  public RegexNERAnnotator(String name, Properties properties) {
+    String mapping = properties.getProperty(name + ".mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
+    boolean ignoreCase = Boolean.parseBoolean(properties.getProperty(name + ".ignorecase", "false"));
+    String validPosPattern = properties.getProperty(name + ".validpospattern", RegexNERSequenceClassifier.DEFAULT_VALID_POS);
+    boolean overwriteMyLabels = true;
+    boolean verbose = Boolean.parseBoolean(properties.getProperty(name + ".verbose", "false"));
+
+    classifier = new RegexNERSequenceClassifier(mapping, ignoreCase, overwriteMyLabels, validPosPattern);
+    this.verbose = verbose;
+  }
 
   public RegexNERAnnotator(String mapping) {
     this(mapping, false);

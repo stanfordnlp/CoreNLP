@@ -361,6 +361,7 @@ import edu.stanford.nlp.util.Timing;
  * @author Christopher Manning
  * @author Shipra Dingare
  * @author Huy Nguyen
+ * @author Mengqiu Wang
  */
 public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
 
@@ -370,6 +371,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     super();
   }
 
+  @Override
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
     initGazette();
@@ -752,7 +754,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   private Set<String> maleNames; // = null;
   private Set<String> femaleNames; // = null;
 
-  private final Pattern titlePattern = Pattern.compile("(Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
+  private final Pattern titlePattern = Pattern.compile("(?:Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
 
 
   protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
@@ -1520,18 +1522,20 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
     //Stuff to add arbitrary features
     if (flags.useGenericFeatures) {
-      //see if we need to cach the keys
+      //see if we need to cache the keys
       if (genericAnnotationKeys == null) {
         makeGenericKeyCache(c);
       }
       //now look through the cached keys
       for (Class key : genericAnnotationKeys) {
         //System.err.println("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
-        if(c.get(key) != null && c.get(key) instanceof Collection){
-          for(Object ob: (Collection)c.get(key))
-          featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
-        }else
-        featuresC.add(c.get(key) + "-" + CoreLabel.genericValues.get(key));
+        if (c.get(key) != null && c.get(key) instanceof Collection) {
+          for (Object ob: (Collection)c.get(key)) {
+            featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
+          }
+        } else {
+          featuresC.add(c.get(key) + "-" + CoreLabel.genericValues.get(key));
+        }
       }
     }
 
@@ -1958,7 +1962,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     CoreLabel p2 = cInfo.get(loc - 2);
 
     String pWord = getWord(p);
-    String p2Word = getWord(p2);
+    // String p2Word = getWord(p2);
 
     Collection<String> featuresCpCp2C = new ArrayList<String>();
 

@@ -49,15 +49,16 @@ import edu.stanford.nlp.util.Function;
  * Builds various types of linear classifiers, with functionality for
  * setting objective function, optimization method, and other parameters.
  * Classifiers can be defined with passed constructor arguments or using setter methods.
- * Defaults to Quasi-newton optimization of a {@code LogConditionalObjectiveFunction}
- * (Merges old classes: CGLinearClassifierFactory, QNLinearClassifierFactory, and MaxEntClassifierFactory).
+ * Defaults to Quasi-newton optimization of a {@code LogConditionalObjectiveFunction}.
+ * (Merges old classes: CGLinearClassifierFactory, QNLinearClassifierFactory, and MaxEntClassifierFactory.)
  * Note that a bias term is not assumed, and so if you want to learn
  * a bias term you should add an "always-on" feature to your examples.
  *
  * @author Jenny Finkel
  * @author Chris Cox (merged factories, 8/11/04)
  * @author Dan Klein (CGLinearClassifierFactory, MaxEntClassifierFactory)
- * @author Galen Andrew (tuneSigma), Marie-Catherine de Marneffe (CV in tuneSigma)
+ * @author Galen Andrew (tuneSigma),
+ * @author Marie-Catherine de Marneffe (CV in tuneSigma)
  * @author Sarah Spikes (Templatization, though I don't know what to do with the Minimizer)
  * @author Ramesh Nallapati (nmramesh@cs.stanford.edu) {@link #trainSemiSupGE} methods
  */
@@ -98,8 +99,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
 
   /**
-   * Adapt classifier (adjust the mean of Gaussian prior)
-   * under construction -pichuan
+   * Adapt classifier (adjust the mean of Gaussian prior).
+   * Under construction -pichuan
+   *
    * @param origWeights the original weights trained from the training data
    * @param adaptDataset the Dataset used to adapt the trained weights
    * @return adapted weights
@@ -135,7 +137,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   public double[][] trainWeights(GeneralDataset<L, F> dataset, double[] initial, boolean bypassTuneSigma, Minimizer<DiffFunction> minimizer) {
-    if (minimizer == null) minimizer = minimizerCreator.create();
+    if (minimizer == null) minimizer = getMinimizer();
     if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
     double[] interimWeights = null;
@@ -169,7 +171,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   public double[][] trainWeightsSemiSup(GeneralDataset<L, F> data, GeneralDataset<L, F> biasedData, double[][] confusionMatrix, double[] initial) {
-    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
+    Minimizer<DiffFunction> minimizer = getMinimizer();
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(data, new LogPrior(LogPrior.LogPriorType.NULL));
     BiasedLogConditionalObjectiveFunction biasedObjective = new BiasedLogConditionalObjectiveFunction(biasedData, confusionMatrix, new LogPrior(LogPrior.LogPriorType.NULL));
     SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, biasedObjective, logPrior);
@@ -188,7 +190,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * other features are allowed to be real valued.
    */
   public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList, List<F> GEFeatures, double convexComboCoeff) {
-    Minimizer<DiffFunction> minimizer = minimizerCreator.create();
+    Minimizer<DiffFunction> minimizer = getMinimizer();
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(labeledDataset, new LogPrior(LogPrior.LogPriorType.NULL));
     GeneralizedExpectationObjectiveFunction<L,F> geObjective = new GeneralizedExpectationObjectiveFunction<L,F>(labeledDataset, unlabeledDataList, GEFeatures);
     SemiSupervisedLogConditionalObjectiveFunction semiSupObjective = new SemiSupervisedLogConditionalObjectiveFunction(objective, geObjective, null,convexComboCoeff);
@@ -220,6 +222,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   /**
    * Returns a list of featured thresholded by minPrecision and sorted by their frequency of occurrence.
    * precision in this case, is defined as the frequency of majority label over total frequency for that feature.
+   *
    * @return list of high precision features.
    */
   private List<F> getHighPrecisionFeatures(GeneralDataset<L,F> dataset, double minPrecision, int maxNumFeatures){
@@ -291,57 +294,76 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return new LinearClassifier<L, F>(weights, train.featureIndex(), train.labelIndex());
   }
 
-  /** NOTE: Constructors that takes in a Minimizer creates a LinearClassifierFactory that will reuse the minimizer
-   *  and will not be threadsafe (unless the Minimzer itself is ThreadSafe which is probably not the case)
-   */
-
-
   public LinearClassifierFactory() {
-    this(new QNMinimizer(15));
+    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } });
     this.mem = 15;
     this.useQuasiNewton();
   }
 
+  /** NOTE: Constructors that takes in a Minimizer creates a LinearClassifierFactory that will reuse the minimizer
+   *  and will not be threadsafe (unless the Minimizer itself is ThreadSafe which is probably not the case)
+   */
   public LinearClassifierFactory(Minimizer<DiffFunction> min) {
     this(min, false);
   }
 
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min) {
+    this(min, false);
+  }
+
   public LinearClassifierFactory(boolean useSum) {
-    this(new QNMinimizer(15), useSum);
+    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
+         useSum);
     this.mem = 15;
     this.useQuasiNewton();
   }
 
   public LinearClassifierFactory(double tol) {
-    this(new QNMinimizer(15), tol, false);
+    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
+        tol, false);
     this.mem = 15;
     this.useQuasiNewton();
   }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, boolean useSum) {
     this(min, 1e-4, useSum);
   }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, boolean useSum) {
+    this(min, 1e-4, useSum);
+  }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum) {
     this(min, tol, useSum, 1.0);
   }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum) {
+    this(min, tol, useSum, 1.0);
+  }
   public LinearClassifierFactory(double tol, boolean useSum, double sigma) {
-    this(new QNMinimizer(15), tol, useSum, sigma);
+    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
+        tol, useSum, sigma);
     this.mem = 15;
     this.useQuasiNewton();
   }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, double sigma) {
     this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
   }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, double sigma) {
+    this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
+  }
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma) {
     this(min, tol, useSum, prior, sigma, 0.0);
   }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma) {
+    this(min, tol, useSum, prior, sigma, 0.0);
+  }
   public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon) {
-    this(new QNMinimizer(15), tol, useSum, new LogPrior(prior, sigma, epsilon));
+    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
+        tol, useSum, new LogPrior(prior, sigma, epsilon));
     this.mem = 15;
     this.useQuasiNewton();
   }
 
-  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, int mem) {
-    this(new QNMinimizer(mem), tol, useSum, new LogPrior(prior, sigma, epsilon));
+  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, final int mem) {
+    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(mem); } },
+        tol, useSum, new LogPrior(prior, sigma, epsilon));
     this.useQuasiNewton();
   }
 
@@ -361,6 +383,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    *                by the Huber prior)
    */
   public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
+    this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
+  }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
     this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
   }
 
@@ -393,8 +418,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Set the prior.
    *
    * @param logPrior One of the priors defined in
-   *              <code>LogConditionalObjectiveFunction</code>.
-   *              <code>LogPrior.QUADRATIC</code> is the default.
+   *              {@code LogConditionalObjectiveFunction}.
+   *              {@code LogPrior.QUADRATIC} is the default.
    */
   public void setPrior(LogPrior logPrior) {
     this.logPrior = logPrior;
@@ -405,7 +430,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * Only used with conjugate-gradient minimization.
    * <code>false</code> is the default.
    */
-
   public void setVerbose(boolean verbose) {
     this.verbose = verbose;
   }
@@ -549,7 +573,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * Sets the minimizer to {@link CGMinimizer}, with the passed <code>verbose</code> flag.
+   * Sets the minimizer to {@link CGMinimizer}, with the passed {@code verbose} flag.
    */
   public void useConjugateGradientAscent(boolean verbose) {
     this.verbose = verbose;
@@ -623,9 +647,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
 
   /**
-   * callls the method {@link #crossValidateSetSigma(GeneralDataset, int, Scorer, LineSearcher)} with
+   * Calls the method {@link #crossValidateSetSigma(GeneralDataset, int, Scorer, LineSearcher)} with
    * multi-class log-likelihood scoring (see {@link MultiClassAccuracyStats}) and golden-section line search
    * (see {@link GoldenSectionLineSearch}).
+   *
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold) {
@@ -641,7 +666,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   }
   /**
    * Sets the sigma parameter to a value that optimizes the cross-validation score given by <code>scorer</code>.  Search for an optimal value
-   * is carried out by <code>minimizer</code>
+   * is carried out by <code>minimizer</code>.
+   *
    * @param dataset the data set to optimize sigma on.
    */
   public void crossValidateSetSigma(GeneralDataset<L, F> dataset,int kfold, final Scorer<L> scorer, LineSearcher minimizer) {
@@ -727,6 +753,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * is carried out by <code>minimizer</code>
    * dataset the data set to optimize sigma on.
    * kfold
+   * 
    * @return an interim set of optimal weights: the weights
    */
   public double[] heldOutSetSigma(final GeneralDataset<L, F> trainSet, final GeneralDataset<L, F> devSet, final Scorer<L> scorer, LineSearcher minimizer) {
@@ -829,8 +856,17 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     return trainClassifier(dataset, null);
   }
   public LinearClassifier<L, F> trainClassifier(GeneralDataset<L, F> dataset, double[] initial) {
+    // Sanity check
     if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
+    if (initial != null) {
+      for (double weight : initial) {
+        if (Double.isNaN(weight) || Double.isInfinite(weight)) {
+          throw new IllegalArgumentException("Initial weights are invalid!");
+        }
+      }
+    }
+    // Train classifier
     double[][] weights =  trainWeights(dataset, initial, false);
     LinearClassifier<L, F> classifier = new LinearClassifier<L, F>(weights, dataset.featureIndex(), dataset.labelIndex());
     return classifier;
@@ -896,8 +932,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   @Deprecated
   @Override
   public LinearClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException("Unsupported deprecated method");
   }
 
   public void setEvaluators(int iters, Evaluator[] evaluators)
