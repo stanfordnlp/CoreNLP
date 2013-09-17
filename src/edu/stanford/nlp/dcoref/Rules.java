@@ -638,7 +638,8 @@ public class Rules {
         if(ant.person==Person.I || ant.person==Person.WE || ant.person==Person.YOU) return true;
       }
     }
-    if(m.person==Person.YOU && ant.appearEarlierThan(m)) {
+    if(m.person==Person.YOU && m != ant && ant.appearEarlierThan(m)) {
+      assert !m.appearEarlierThan(ant);
       int mUtter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(mUtter - 1)) {
         String previousSpeaker = document.speakers.get(mUtter - 1);
@@ -652,7 +653,8 @@ public class Rules {
       } else {
         return true;
       }
-    } else if (ant.person==Person.YOU && m.appearEarlierThan(ant)) {
+    } else if (ant.person==Person.YOU && m != ant && m.appearEarlierThan(ant)) {
+      assert !(ant.appearEarlierThan(m));
       int aUtter = ant.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(aUtter - 1)) {
         String previousSpeaker = document.speakers.get(aUtter - 1);
