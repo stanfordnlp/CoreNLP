@@ -170,7 +170,7 @@ public class Document implements Serializable {
         // Populate speaker info
         SpeakerInfo speakerInfo = speakerInfoMap.get(speaker);
         if (speakerInfo == null) {
-          speakerInfoMap.put(speaker, speakerInfo = new SpeakerInfo(speaker));
+          speakerInfoMap.put(speaker, speakerInfo = new SpeakerInfo(speaker, m));
           // span indicates this is the speaker
           if (Rules.mentionMatchesSpeaker(m, speakerInfo, true)) {
             m.speakerInfo = speakerInfo;
