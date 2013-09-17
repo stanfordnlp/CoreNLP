@@ -2700,9 +2700,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         HasIndex hi = (HasIndex) label();
         int oldIndex = hi.index();
         if (!overWrite && oldIndex >= 0) {
-          startIndex = oldIndex;
-        } else {
-          hi.setIndex(startIndex);
+            startIndex = oldIndex;
+        }
+        else {
+            hi.setIndex(startIndex);
         }
         startIndex++;
       } 
