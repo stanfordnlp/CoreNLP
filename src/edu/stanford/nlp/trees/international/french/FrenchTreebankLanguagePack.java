@@ -1,7 +1,10 @@
 package edu.stanford.nlp.trees.international.french;
 
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
+import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.AbstractTreebankLanguagePack;
 import edu.stanford.nlp.trees.HeadFinder;
 
@@ -34,7 +37,11 @@ public class FrenchTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] frenchStartSymbols = {"ROOT"};
 
-
+  @Override
+  public TokenizerFactory<? extends HasWord> getTokenizerFactory() {
+    return FrenchTokenizer.ftbFactory();
+  }
+  
   @Override
   public String getEncoding() {
     return FTB_ENCODING;
