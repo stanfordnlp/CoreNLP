@@ -90,12 +90,6 @@ public class AverageDVModels {
     return averages;
   }
 
-  /**
-   * Command line arguments for this program:
-   * <br>
-   * -output: the model file to output
-   * -input: a list of model files to input
-   */
   public static void main(String[] args) {
     String outputModelFilename = null;
     List<String> inputModelFilenames = Generics.newArrayList();
@@ -108,8 +102,6 @@ public class AverageDVModels {
         for (++argIndex; argIndex < args.length && !args[argIndex].startsWith("-"); ++argIndex) {
           inputModelFilenames.add(args[argIndex]);
         }
-      } else {
-        throw new RuntimeException("Unknown argument " + args[argIndex]);
       }
     }
 
@@ -121,7 +113,7 @@ public class AverageDVModels {
     for (String filename : inputModelFilenames) {
       LexicalizedParser parser = LexicalizedParser.loadModel(filename);
       if (lexparser == null) {
-        lexparser = parser;
+        parser = lexparser;
       }
       models.add(DVParser.getModelFromLexicalizedParser(parser));
     }

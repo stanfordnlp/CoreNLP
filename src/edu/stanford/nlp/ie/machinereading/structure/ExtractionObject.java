@@ -246,7 +246,6 @@ public class ExtractionObject implements Serializable {
    * @param nilLabel
    */
   public boolean printableObject(double beam, String nilLabel) {
-    if (typeProbabilities == null) { return false; }
     List<Pair<String, Double>> sorted = Counters.toDescendingMagnitudeSortedListWithCounts(typeProbabilities);
     
     // first choice not nil

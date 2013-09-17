@@ -187,16 +187,6 @@ public class ArrayMath {
   }
 
   /**
-   * Divides the values in this array by b. Does it in place.
-   */
-  public static void divideInPlace(double[] a, double b) {
-    for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] / b;
-    }
-  }
-
-
-  /**
    * Scales the values in this array by c.
    */
   public static void powInPlace(double[] a, double c) {
@@ -434,20 +424,6 @@ public class ArrayMath {
     }
   }
 
-  /**
-   * Divide the first array by the second elementwise,
-   * and store results in place. Assume arrays have 
-   * the same length
-   */
-  public static void pairwiseDivideInPlace(double[] a, double[] b) {
-    if (a.length != b.length) {
-      throw new RuntimeException();
-    }
-    for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] / b[i];
-    }
-  }
-
   // ERROR CHECKING
 
   public static boolean hasNaN(double[] a) {
@@ -520,11 +496,9 @@ public class ArrayMath {
 
   public static int countPositive(double[] v) {
     int c = 0;
-    for (double a : v) {
-      if (a > 0.0) {
+    for (int i = 0; i < v.length; i++)
+      if (v[i] > 0.0)
         ++c;
-      }
-    }
     return c;
   }
 
@@ -594,9 +568,9 @@ public class ArrayMath {
 
   public static int sum(int[][] a) {
     int result = 0;
-    for (int[] v : a) {
-      for (int item : v) {
-        result += item;
+    for (int i = 0; i < a.length; i++) {
+      for (int j=0; j<a[i].length; j++) {
+        result += a[i][j];
       }
     }
     return result;
@@ -897,7 +871,7 @@ public class ArrayMath {
    * magnitude), with high accuracy, and without numerical overflow.
    *
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
-   * @return {@literal log(x1 + ... + xn)}
+   * @return log(x1 + ... + xn)
    */
   public static double logSum(double... logInputs) {
     return logSum(logInputs,0,logInputs.length);
@@ -917,7 +891,7 @@ public class ArrayMath {
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
    * @param fromIndex The array index to start the sum from
    * @param toIndex The array index after the last element to be summed
-   * @return {@literal log(x1 + ... + xn)}
+   * @return log(x1 + ... + xn)
    */
   public static double logSum(double[] logInputs, int fromIndex, int toIndex) {
     if (logInputs.length == 0)
@@ -964,7 +938,7 @@ public class ArrayMath {
    * @param logInputs An array of numbers [log(x1), ..., log(xn)]
    * @param fromIndex The array index to start the sum from
    * @param afterIndex The array index after the last element to be summed
-   * @return {@literal log(x1 + ... + xn)}
+   * @return log(x1 + ... + xn)
    */
   public static double logSum(double[] logInputs, int fromIndex, int afterIndex, int stride) {
     if (logInputs.length == 0)
@@ -1211,17 +1185,15 @@ public class ArrayMath {
 
   /**
    * Standardize values in this array, i.e., subtract the mean and divide by the standard deviation.
-   * If standard deviation is 0.0, throws a RuntimeException.
+   * If standard deviation is 0.0, throws an RuntimeException.
    */
   public static void standardize(double[] a) {
     double m = mean(a);
-    if (Double.isNaN(m)) {
+    if (Double.isNaN(m))
       throw new RuntimeException("Can't standardize array whose mean is NaN");
-    }
     double s = stdev(a);
-    if (s == 0.0 || Double.isNaN(s)) {
+    if(s == 0.0 || Double.isNaN(s))
       throw new RuntimeException("Can't standardize array whose standard deviation is 0.0 or NaN");
-    }
     addInPlace(a, -m); // subtract mean
     multiplyInPlace(a, 1.0/s); // divide by standard deviation
   }
@@ -2025,21 +1997,11 @@ public class ArrayMath {
    * @param newSize
    */
   public static double[] copyOf(double[] original, int newSize) {
-    double[] a = new double[newSize];
-    System.arraycopy(original, 0, a, 0, original.length);
-    return a;
+     double[] a = new double[newSize];
+     System.arraycopy(original, 0, a, 0, original.length);
+     return a;
   }
 
-  public static double entropy(double[] probs) {
-    double e = 0;
-    double p = 0;
-    for (int i = 0; i < probs.length; i++) {
-      p = probs[i];
-      if (p != 0.0)
-        e -= p * Math.log(p);
-    }
-    return e;
-  }
 
   public static void assertFinite(double[] vector, String vectorName) throws InvalidElementException {
     for(int i=0; i<vector.length; i++){
@@ -2050,6 +2012,7 @@ public class ArrayMath {
       }
     }
   }
+
 
   public static class InvalidElementException extends RuntimeException {
 

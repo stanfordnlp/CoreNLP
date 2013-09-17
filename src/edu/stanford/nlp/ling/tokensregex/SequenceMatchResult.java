@@ -37,12 +37,6 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   public List<? extends T> elements();
 
   /**
-   * Returns pattern used to create this sequence match result
-   * @return the SequencePattern against which this sequence match result was matched
-   */
-  public SequencePattern<T> pattern();
-
-  /**
    * Returns the entire matched subsequence as a list.
    * @return the matched subsequence as a list
    * @throws  IllegalStateException
@@ -305,9 +299,9 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
 
   // Compares two match results.
   // Use to order match results by:
-   //   score (highest first)
+   //   score
   //    length (longest first),
-  //       and then beginning token offset (smaller offset first)
+  //       and then begining token offset (smaller offset first)
   //    original order (smaller first)
   public final static Comparator<MatchResult> SCORE_LENGTH_ORDER_OFFSET_COMPARATOR =
           Comparators.chain(SCORE_COMPARATOR, LENGTH_COMPARATOR, ORDER_COMPARATOR, OFFSET_COMPARATOR);
