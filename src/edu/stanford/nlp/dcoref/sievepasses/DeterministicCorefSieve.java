@@ -156,8 +156,8 @@ public abstract class DeterministicCorefSieve  {
     if (document.conllDoc != null) {
       if (ant.generic && ant.person==Person.YOU) return false;
       if (mention2.generic) return false;
+      if (mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
     }
-    if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
 
     if(flags.USE_DISCOURSEMATCH) {
       String mString = mention.lowercaseNormalizedSpanString();
@@ -289,7 +289,7 @@ public abstract class DeterministicCorefSieve  {
       return true;
     }
 
-    if(flags.USE_ACRONYM && Rules.entityIsAcronym(document, mentionCluster, potentialAntecedent)) {
+    if(flags.USE_ACRONYM && Rules.entityIsAcronym(mentionCluster, potentialAntecedent)) {
       SieveCoreferenceSystem.logger.finest("Acronym: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
