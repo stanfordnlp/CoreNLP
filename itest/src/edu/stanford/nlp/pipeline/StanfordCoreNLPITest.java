@@ -6,6 +6,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -114,6 +115,69 @@ public class StanfordCoreNLPITest extends TestCase {
         "Ramage</governor>\\s*<dependent idx=\"1\">Dan</dependent>\\s*</dep>"));
   }
 
+
+  private void checkNer(String message, String[][][] expected, CoreMap coremap, String coremapOutput) {
+    List<CoreMap> sentences = coremap.get(CoreAnnotations.SentencesAnnotation.class);
+    assertEquals(message + ": number of sentences for\n" + coremapOutput, expected.length, sentences.size());
+    for (int i = 0; i < expected.length; i++) {
+      CoreMap sentence = sentences.get(i);
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      assertEquals(message + ": number of tokens for sentence " + (i+1) + "\n" + coremapOutput, expected[i].length, tokens.size());
+      for (int j = 0; j < expected[i].length; j++) {
+        String text = expected[i][j][0];
+        String ner = expected[i][j][1];
+        String debug = "sentence " + (i+1) + ", token " + (j+1);
+        assertEquals(message + ": text mismatch for " + debug + "\n" + coremapOutput, text, tokens.get(j).word());
+        assertEquals(message + ": ner mismatch for " + debug + "(" + tokens.get(j).word() + ")\n" + coremapOutput, ner, tokens.get(j).ner());
+      }
+    }
+
+  }
+  public void testRegexNer() throws Exception {
+    // Check the regexner is integrated with the StanfordCoreNLP
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,regexner");
+    props.setProperty("regexner.ignorecase", "true");  // Maybe ignorecase should be on by default...
+    props.putAll(System.getProperties());
+
+    String text = "Barack Obama is the 44th President of the United States.  He is the first African American president.";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    StringWriter stringWriter = new StringWriter();
+    pipeline.prettyPrint(document, new PrintWriter(stringWriter));
+    String result = stringWriter.getBuffer().toString();
+
+    // Check the named entity types
+    String[][][] expected = {
+      {
+        {"Barack", "PERSON"},
+        {"Obama", "PERSON"},
+        {"is", "O"},
+        {"the", "O"},
+        {"44th", "ORDINAL"},
+        {"President", "TITLE"},
+        {"of", "O"},
+        {"the", "O"},
+        {"United", "LOCATION"},
+        {"States", "LOCATION"},
+        {".", "O"},
+      },
+      {
+        {"He", "O"},
+        {"is", "O"},
+        {"the", "O"},
+        {"first", "ORDINAL"},
+        {"African", "MISC"},
+        {"American", "NATIONALITY"},
+        {"president", "TITLE"},
+        {".", "O"},
+      },
+    };
+
+    checkNer("testRegexNer", expected, document, result);
+  }
   /* This test no longer supported. Do not mess with AnnotatorPool outside of StanfordCoreNLP */
   /*
   public void testAnnotatorPool() throws Exception {
