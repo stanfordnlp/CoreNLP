@@ -26,6 +26,10 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     String baseLogFile = WORK_DIR_FILE + File.separator + "log";
 
     System.err.println("Base log file name: " + WORK_DIR_FILE);
+    String current = new java.io.File( "." ).getCanonicalPath();
+    System.err.println("Current dir:"+current);
+    String currentDir = System.getProperty("user.dir");
+    System.err.println("Current dir using System:" +currentDir);
 
     String expectedResults = IOUtils.slurpFile("edu/stanford/nlp/dcoref/expected.txt");
 
