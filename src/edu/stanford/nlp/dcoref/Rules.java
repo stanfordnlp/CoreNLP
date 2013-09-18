@@ -123,19 +123,16 @@ public class Rules {
       return m1.isRelativePronoun(m2) || m2.isRelativePronoun(m1);
   }
 
-  public static boolean entityIsAcronym(Document document, CorefCluster mentionCluster, CorefCluster potentialAntecedent) {
-    Pair<Integer, Integer> idPair = Pair.makePair(Math.min(mentionCluster.clusterID, potentialAntecedent.clusterID), Math.max(mentionCluster.clusterID, potentialAntecedent.clusterID));
-    if(!document.acronymCache.containsKey(idPair)) {
-      boolean isAcronym = false;
-      for(Mention m : mentionCluster.corefMentions){
-        if(m.isPronominal()) continue;
-        for(Mention ant : potentialAntecedent.corefMentions){
-          if(isAcronym(m.originalSpan, ant.originalSpan)) isAcronym = true;
+  public static boolean entityIsAcronym(CorefCluster mentionCluster, CorefCluster potentialAntecedent) {
+    for(Mention m : mentionCluster.corefMentions){
+      if(m.isPronominal()) continue;
+      for(Mention ant : potentialAntecedent.corefMentions){
+        if (isAcronym(m.originalSpan, ant.originalSpan)) {
+          return true;
         }
       }
-      document.acronymCache.put(idPair, isAcronym);
     }
-    return document.acronymCache.get(idPair);
+    return false;
   }
 
   public static boolean isAcronym(List<CoreLabel> first, List<CoreLabel> second) {
