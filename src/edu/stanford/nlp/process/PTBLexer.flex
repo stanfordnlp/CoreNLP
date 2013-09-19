@@ -30,7 +30,6 @@ package edu.stanford.nlp.process;
 import java.io.Reader;
 import java.util.logging.Logger;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -129,84 +128,14 @@ import edu.stanford.nlp.util.StringUtils;
    * If the String is <code>null</code> or empty, you get the traditional
    * PTB3 normalization behaviour (i.e., you get ptb3Escaping=false).  If you
    * want no normalization, then you should pass in the String
-   * "ptb3Escaping=false".  The known option names are:
-   * <ol>
-   * <li>invertible: Store enough information about the original form of the
-   *     token and the whitespace around it that a list of tokens can be
-   *     faithfully converted back to the original String.  Valid only if the
-   *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
-   *     keys used in it are TextAnnotation for the tokenized form,
-   *     OriginalTextAnnotation for the original string, BeforeAnnotation and
-   *     AfterAnnotation for the whitespace before and after a token, and
-   *     perhaps BeginPositionAnnotation and EndPositionAnnotation to record
-   *     token begin/after end offsets, if they were specified to be recorded
-   *     in TokenFactory construction.  (Like the String class, begin and end
-   *     are done so end - begin gives the token length.)
-   * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
-   *     be treated as part of whitespace)
-   * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
-   *     (like -LRB-, -RRB-).  This is a macro flag that sets or clears all the
-   *     options below.
-   * <li>americanize: Whether to rewrite common British English spellings
-   *     as American English spellings
-   * <li>normalizeSpace: Whether any spaces in tokens (phone numbers, fractions
-   *     get turned into U+00A0 (non-breaking space).  It's dangerous to turn
-   *     this off for most of our Stanford NLP software, which assumes no
-   *     spaces in tokens.
-   * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
-   *      ampersand
-   * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
-   *     to turn common currency characters into $, #, or "cents", reflecting
-   *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
-   * <li>normalizeFractions: Whether to map certain common composed
-   *     fraction characters to spelled out letter forms like "1/2"
-   * <li>normalizeParentheses: Whether to map round parentheses to -LRB-,
-   *     -RRB-, as in the Penn Treebank
-   * <li>normalizeOtherBrackets: Whether to map other common bracket characters
-   *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank
-   * <li>asciiQuotes Whether to map quote characters to the traditional ' and "
-   * <li>latexQuotes: Whether to map to ``, `, ', '' for quotes, as in Latex
-   *     and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
-   *     If true, this takes precedence over the setting of unicodeQuotes;
-   *     if both are false, no mapping is done.
-   * <li>unicodeQuotes: Whether to map quotes to the range U+2018 to U+201D,
-   *     the preferred unicode encoding of single and double quotes.
-   * <li>ptb3Ellipsis: Whether to map ellipses to ..., the old PTB3 WSJ coding
-   *     of an ellipsis. If true, this takes precedence over the setting of
-   *     unicodeEllipsis; if both are false, no mapping is done.
-   * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
-   *     U+2026, the Unicode ellipsis character
-   * <li>keepAssimilations: true to tokenize "gonna", false to tokenize
-   *                        "gon na".  True by default.
-   * <li>ptb3Dashes: Whether to turn various dash characters into "--",
-   *     the dominant encoding of dashes in the PTB3 WSJ
-   * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
-   *     of / and * as the old PTB3 WSJ does for some reason (something to do
-   *     with Lisp readers??).
-   * <li>untokenizable: What to do with untokenizable characters (ones not
-   *     known to the tokenizers).  Six options combining whether to log a
-   *     warning for none, the first, or all, and whether to delete them or
-   *     to include them as single character tokens in the output: noneDelete,
-   *     firstDelete, allDelete, noneKeep, firstKeep, allKeep.
-   *     The default is "firstDelete".
-   * <li>strictTreebank3: PTBTokenizer deliberately deviates from strict PTB3
-   *      WSJ tokenization in two cases.  Setting this improves compatibility
-   *      for those cases.  They are: (i) When an acronym is followed by a
-   *      sentence end, such as "Corp." at the end of a sentence, the PTB3
-   *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
-   *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
-   *      will return numbers with a whole number and a fractional part like
-   *      "5 7/8" as a single token (with a non-breaking space in the middle),
-   *      while the PTB3 separates them into two tokens "5" and "7/8".
-   *      (Exception: for "U.S." the treebank does have the two tokens
-   *      "U.S." and "." like our default; strictTreebank3 now does that too.)
-   * </ol>
+   * "ptb3Escaping=false".  See the documentation in the {@link PTBTokenizer}
+   * class for full discussion of all the available options.
    *
    * @param r The Reader to tokenize text from
    * @param tf The LexedTokenFactory that will be invoked to convert
    *    each substring extracted by the lexer into some kind of Object
    *    (such as a Word or CoreLabel).
-   * @param options Options to the tokenizer (see constructor Javadoc)
+   * @param options Options to the tokenizer (see {@link PTBTokenizer})
    */
   public PTBLexer(Reader r, LexedTokenFactory<?> tf, String options) {
     this(r);
@@ -268,8 +197,8 @@ import edu.stanford.nlp.util.StringUtils;
           latexQuotes = false; // need to override default
           unicodeQuotes = false;
         }
-      } else if ("keepAssimilations".equals(key)) {
-        keepAssimilations = val;
+      } else if ("splitAssimilations".equals(key)) {
+        splitAssimilations = val;
       } else if ("ptb3Ellipsis".equals(key)) {
         ptb3Ellipsis = val;
       } else if ("unicodeEllipsis".equals(key)) {
@@ -343,7 +272,7 @@ import edu.stanford.nlp.util.StringUtils;
   private boolean ptb3Dashes = true;
   private boolean escapeForwardSlashAsterisk = true;
   private boolean strictTreebank3 = false;
-  private boolean keepAssimilations = true;
+  private boolean splitAssimilations = true;
 
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
@@ -359,31 +288,36 @@ import edu.stanford.nlp.util.StringUtils;
    * em dash    97      0151    2014    8212
    */
 
-  /* Bracket characters:
+  /* Bracket characters and forward slash and asterisk:
    *
-   * Original Treebank 3 WSJ 
-   * Uses -LRB- -RRB- as the representation for ( ) and -LCB- -RCB- as the representation for { }. 
+   * Original Treebank 3 WSJ
+   * Uses -LRB- -RRB- as the representation for ( ) and -LCB- -RCB- as the representation for { }.
    * There are no occurrences of [ ], though there is some mention of -LSB- -RSB- in early documents.
    * There are no occurrences of < >.
    * All brackets are tagged -LRB- -RRB-  [This stays constant.]
+   * Forward slash and asterisk are escaped by a preceding \ (as \/ and \*)
    *
    * Treebank 3 Brown corpus
    * Has -LRB- -RRB-
    * Has a few instances of unescaped [ ] in compounds (the token "A[fj]"
+   * Neither forward slash or asterisk appears.
    *
-   * Ontonotes (r4) 
+   * Ontonotes (r4)
    * Uses -LRB- -RRB- -LCB- -RCB- -LSB- -RSB-.
-   * Has a very few uses of < and > in longer forms, which are not escaped.
-   * 
+   * Has a very few uses of < and > in longer tokens, which are not escaped.
+   * Slash is not escaped. Asterisk is not escaped.
+   *
    * LDC2012T13-eng_web_tbk (Google web treebank)
    * Has -LRB- -RRB-
    * Has { and } used unescaped, treated as brackets.
    * Has < and > used unescaped, sometimes treated as brackets.  Sometimes << and >> are treated as brackets!
    * Has [ and ] used unescaped, treated as brackets.
+   * Slash is not escaped. Asterisk is not escaped.
    *
    * Reasonable conclusions for now:
    * - Never escape < >
    * - Still by default escape [ ] { } but it can be turned off.  Use -LSB- -RSB- -LCB- -RCB-.
+   * Move to not escaping slash and asterisk, and delete escaping in PennTreeReader.
    */
 
   public static final String openparen = "-LRB-";
@@ -772,10 +706,15 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
-cannot                  { yypushback(3) ; return getNext(); }
+cannot                  { if (splitAssimilations) {
+                            yypushback(3) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
 gonna|gotta|lemme|gimme|wanna
-                        { if (keepAssimilations) {
-                            yypushback(2) ; return getNext(); 
+                        { if (splitAssimilations) {
+                            yypushback(2) ; return getNext();
                           } else {
                             return getNext();
                           }
