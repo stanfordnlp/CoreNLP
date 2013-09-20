@@ -178,6 +178,25 @@ public class StanfordCoreNLPITest extends TestCase {
 
     checkNer("testRegexNer", expected, document, result);
   }
+  
+  public void testRelationExtractor() throws Exception {
+    // Check the regexner is integrated with the StanfordCoreNLP
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,relation");
+    props.putAll(System.getProperties());
+
+    String text = "Barack Obama is the 44th President of the United States.  He is the first African American president.";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    StringWriter stringWriter = new StringWriter();
+    pipeline.prettyPrint(document, new PrintWriter(stringWriter));
+    String result = stringWriter.getBuffer().toString();
+  }
+  
+  
+  
   /* This test no longer supported. Do not mess with AnnotatorPool outside of StanfordCoreNLP */
   /*
   public void testAnnotatorPool() throws Exception {

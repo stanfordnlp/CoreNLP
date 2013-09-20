@@ -891,6 +891,21 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
 
 
+    pool.register(STANFORD_RELATION, new AnnotatorFactory(inputProps) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        final String className = "edu.stanford.nlp.pipeline.RelationExtractorAnnotator";
+        return ReflectionLoading.loadByReflection(className, properties);
+      }
+
+      @Override
+      public String signature() {
+        // keep track of all relevant properties for this annotator here!
+        return "TODO";
+      }
+    });
+    
     //
     // add more annotators here!
     //
