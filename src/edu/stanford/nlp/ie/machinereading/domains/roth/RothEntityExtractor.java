@@ -24,7 +24,6 @@ public class RothEntityExtractor extends BasicEntityExtractor {
   
   @Override
   public  String getEntityTypeForTag(String ner){
-    System.out.println("ner is" + ner);
     ner = ner.toLowerCase();
     if(entityTagForNer.containsKey(ner))
       return entityTagForNer.get(ner); 
