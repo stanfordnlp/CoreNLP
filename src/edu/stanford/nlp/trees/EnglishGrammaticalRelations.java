@@ -1006,8 +1006,6 @@ public class EnglishGrammaticalRelations {
           "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW|AFX=target $++ NN|NNS|NNP|NNPS|FW|CD !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ )",
           "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < JJ|JJR|JJS=sister < (NP|NML|NN|NNS|NNP|NNPS|FW=target !<<- POS !<<- (VBZ < /^\'s$/) $+ =sister) <# NN|NNS|NNP|NNPS !<<- POS !<<- (VBZ < /^\'s$/) ",
           "ADJP|ADVP < (FW [ $- FW=target | $- (IN=target < in|In) ] )",  // in vitro, in vivo, etc., in Genia
-          // for cases such as "Columbus Ohio"
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target <: NNP $- (/^(?:WH)?NP/ !< POS < NNP) !$ CC|CONJP)"
         });
   public static class NounCompoundModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1048,9 +1046,7 @@ public class EnglishGrammaticalRelations {
           // for biomedical English, the former NNP heuristic really doesn't work, because they use NN for all chemical entities
           // while not unfoolable, this version produces less false positives and more true positives.
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )",
-          // Handles cases such as "(NP (Her daughter) Jordan)" 
-          // The !< NNP avoids cases such as "Columbus Ohio"
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target <: NNP $- (/^(?:WH)?NP/ !< POS !< NNP) !$ CC|CONJP)"
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target <: NNP $- (/^(?:WH)?NP/ !< POS) !$ CC|CONJP)"
 
         });
   public static class AppositionalModifierGRAnnotation extends GrammaticalRelationAnnotation { }
