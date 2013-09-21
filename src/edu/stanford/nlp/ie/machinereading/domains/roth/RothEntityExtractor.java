@@ -1,10 +1,34 @@
 package edu.stanford.nlp.ie.machinereading.domains.roth;
 
-import edu.stanford.nlp.tagger.maxent.Extractor;
+import java.util.HashMap;
+import java.util.Map;
 
-public class RothEntityExtractor extends Extractor {
+import edu.stanford.nlp.ie.machinereading.BasicEntityExtractor;
+import edu.stanford.nlp.ie.machinereading.structure.EntityMentionFactory;
+
+public class RothEntityExtractor extends BasicEntityExtractor {
   private static final long serialVersionUID = 1L;
   
   public static final boolean USE_SUB_TYPES = false;
+
+  private Map<String, String> entityTagForNer;
+  
+  public RothEntityExtractor() {
+    super(null, USE_SUB_TYPES, null, true, new EntityMentionFactory(), true);
+    entityTagForNer = new HashMap<String, String>();
+    entityTagForNer.put("person", "Peop");
+    entityTagForNer.put("organization", "Org");
+    entityTagForNer.put("location", "Loc");
+    
+  }
+  
+  @Override
+  public  String getEntityTypeForTag(String ner){
+    ner = ner.toLowerCase();
+    if(entityTagForNer.containsKey(ner))
+      return entityTagForNer.get(ner); 
+    else
+      return "O";
+  }
 
 }

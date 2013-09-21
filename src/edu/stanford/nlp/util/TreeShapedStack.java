@@ -21,7 +21,7 @@ public class TreeShapedStack<T> {
     this(null, null, 0);
   }
 
-  private TreeShapedStack(TreeShapedStack previous, T data, int size) {
+  private TreeShapedStack(TreeShapedStack<T> previous, T data, int size) {
     this.previous = previous;
     this.data = data;
     this.size = size;
@@ -32,7 +32,7 @@ public class TreeShapedStack<T> {
    * exception is thrown.  If the size is 1, an empty node is
    * returned.
    */
-  public TreeShapedStack pop() {
+  public TreeShapedStack<T> pop() {
     if (size == 0) {
       throw new EmptyStackException();
     }
@@ -42,8 +42,8 @@ public class TreeShapedStack<T> {
   /**
    * Returns a new node with the new data attached.
    */
-  public TreeShapedStack push(T data) {
-    return new TreeShapedStack(this, data, size + 1);
+  public TreeShapedStack<T> push(T data) {
+    return new TreeShapedStack<T>(this, data, size + 1);
   }
 
   /**
@@ -57,7 +57,14 @@ public class TreeShapedStack<T> {
     return data;
   }
 
+  /**
+   * How many nodes in this branch of the stack
+   */
+  public int size() { 
+    return size; 
+  }
+
   final T data;
   final int size;
-  final TreeShapedStack previous;
+  final TreeShapedStack<T> previous;
 }
