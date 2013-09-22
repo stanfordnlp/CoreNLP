@@ -62,22 +62,19 @@ public class BasicEntityExtractor implements Extractor {
   protected EntityMentionFactory entityMentionFactory;
 
   public final Logger logger;
-  
-  protected boolean useNERTags;
-  
+
   public BasicEntityExtractor(
 		  String gazetteerLocation,
 		  boolean useSubTypes,
 		  Set<String> annotationsToSkip,
 		  boolean useBIO,
-		  EntityMentionFactory factory, boolean useNERTags) {
+		  EntityMentionFactory factory) {
     this.annotationsToSkip = annotationsToSkip;
     this.gazetteerLocation = gazetteerLocation;
     this.logger = Logger.getLogger(BasicEntityExtractor.class.getName());
     this.useSubTypes = useSubTypes;
     this.useBIO = useBIO;
     this.entityMentionFactory = factory;
-    this.useNERTags = useNERTags;
   }
 
   /**
@@ -105,11 +102,7 @@ public class BasicEntityExtractor implements Extractor {
     List<CoreMap> sents = doc.get(CoreAnnotations.SentencesAnnotation.class);
     int sentCount = 1;
     for (CoreMap sentence : sents) {
-      if(useNERTags){
-        this.makeAnnotationFromAllNERTags(sentence);
-      } 
-      else
-        extractEntities(sentence, sentCount);
+      extractEntities(sentence, sentCount);
       sentCount ++;
     }
 
@@ -126,12 +119,6 @@ public class BasicEntityExtractor implements Extractor {
     */
   }
 
-  public String getEntityTypeForTag(String tag){
-    //need to be overridden by the extending class;
-    return tag;
-  }
-  
-  
   /**
    * Label entities in an ExtractionSentence. Assumes the classifier has already
    * been trained.
@@ -221,16 +208,16 @@ public class BasicEntityExtractor implements Extractor {
    * @param sentence
    *          A sentence, ideally annotated with NamedEntityTagAnnotation
    * @param nerTag
-   *          The name of the NER tag to copy, e.g. "DATE".
+   *          The name of the NER tag to copy, e.g. "DATE"
    * @param entityType
    *          The type of the {@link EntityMention} objects created
    */
-  public void makeAnnotationFromGivenNERTag(CoreMap sentence, String nerTag, String entityType) {
+  public void makeAnnotationFromNERTags(CoreMap sentence, String nerTag, String entityType) {
     List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
     List<EntityMention> mentions = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
     assert words != null;
     assert mentions != null;
-    
+
     for (int start = 0; start < words.size(); start ++) {
       int end;
       // find the first token after start that isn't of nerType
@@ -242,7 +229,6 @@ public class BasicEntityExtractor implements Extractor {
       }
 
       if (end > start) {
-        
         // found a match!
         EntityMention m = entityMentionFactory.constructEntityMention(
             EntityMention.makeUniqueId(),
@@ -250,63 +236,6 @@ public class BasicEntityExtractor implements Extractor {
             new Span(start, end),
             new Span(start, end),
             entityType, null, null);
-        logger.info("Created " + entityType + " entity mention: " + m);
-        start = end - 1;
-        mentions.add(m);
-      }
-    }
-
-    sentence.set(MachineReadingAnnotations.EntityMentionsAnnotation.class, mentions);
-  }
-
-  
-  /**
-   * Converts NamedEntityTagAnnotation tags into {@link EntityMention}s. This
-   * finds the longest sequence of NamedEntityTagAnnotation tags of the matching
-   * type.
-   *
-   * @param sentence
-   *          A sentence, ideally annotated with NamedEntityTagAnnotation
-   * @param nerTag
-   *          The name of the NER tag to copy, e.g. "DATE". Use "ALL" for all tags - added by sonalg
-   * @param entityType
-   *          The type of the {@link EntityMention} objects created
-   */
-  public void makeAnnotationFromAllNERTags(CoreMap sentence) {
-    List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<EntityMention> mentions = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
-    assert words != null;
-    if(mentions == null)
-    {  
-      this.logger.info("mentions are null");
-      mentions = new ArrayList<EntityMention>();
-    }
-
-    for (int start = 0; start < words.size(); start ++) {
-      
-      int end;
-      // find the first token after start that isn't of nerType
-      String lastneTag = null;
-      String ne= null;
-      for (end = start; end < words.size(); end ++) {
-        ne = words.get(end).get(NamedEntityTagAnnotation.class);
-        if(ne.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL) || (lastneTag != null && !ne.equals(lastneTag))){
-          break;
-        }
-        lastneTag = ne;
-      }
-
-      if (end > start) {
-        
-        // found a match!
-        String entityType = this.getEntityTypeForTag(lastneTag);
-        EntityMention m = entityMentionFactory.constructEntityMention(
-            EntityMention.makeUniqueId(),
-            sentence,
-            new Span(start, end),
-            new Span(start, end),
-            entityType, null, null);
-        //TODO: changed entityType in the above sentence to nerTag - Sonal
         logger.info("Created " + entityType + " entity mention: " + m);
         start = end - 1;
         mentions.add(m);
@@ -544,6 +473,7 @@ public class BasicEntityExtractor implements Extractor {
    * @throws ClassNotFoundException
    *           this would probably indicate a serious classpath problem
    */
+  @SuppressWarnings("unchecked")
   public static BasicEntityExtractor load(String path, Class<? extends BasicEntityExtractor> entityClassifier, boolean preferDefaultGazetteer) throws ClassCastException, IOException, ClassNotFoundException {
 
 
