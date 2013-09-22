@@ -49,6 +49,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   {
     Properties props = new Properties();
     File tempFile = File.createTempFile("tokensregexnertest.patterns", "txt");
+    tempFile.deleteOnExit();
     PrintWriter pw = IOUtils.getPrintWriter(tempFile.getAbsolutePath());
     for (String[] p: patterns) {
       pw.println(StringUtils.join(p, "\t"));
