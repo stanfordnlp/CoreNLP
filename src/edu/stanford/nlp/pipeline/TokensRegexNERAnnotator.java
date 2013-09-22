@@ -218,10 +218,8 @@ public class TokensRegexNERAnnotator implements Annotator {
   private MultiPatternMatcher<CoreMap> createPatternMatcher() {
     // Convert to tokensregex pattern
     int patternFlags = ignoreCase? Pattern.CASE_INSENSITIVE:0;
-    int stringMatchFlags = ignoreCase? NodePattern.CASE_INSENSITIVE:0;
     Env env = TokenSequencePattern.getNewEnv();
     env.setDefaultStringPatternFlags(patternFlags);
-    env.setDefaultStringMatchFlags(stringMatchFlags);
     NodePattern<String> posTagPattern = (validPosPattern != null && PosMatchType.MATCH_ALL_TOKENS.equals(posMatchType))?
             new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPattern):null;
     List<TokenSequencePattern> patterns = new ArrayList<TokenSequencePattern>(entries.size());
