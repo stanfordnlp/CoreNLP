@@ -38,6 +38,15 @@ public class StanfordCoreNLPITest extends TestCase {
     // create a properties that enables all the anotators
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
+    // We can assume the models are in the classpath
+    /*
+    props.setProperty("pos.model", "/u/nlp/data/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger");
+    props.setProperty("ner.model.3class", "/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz");
+    props.setProperty("ner.model.7class", "/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz");
+    props.setProperty("ner.model.MISCclass", "/u/nlp/data/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz");
+    props.setProperty("parse.model", "/u/nlp/data/lexparser/englishPCFG.ser.gz");
+    */
+    props.putAll(System.getProperties());
     
     // run an annotation through the pipeline
     String text = "Dan Ramage is working for\nMicrosoft. He's in Seattle! \n";
@@ -129,6 +138,7 @@ public class StanfordCoreNLPITest extends TestCase {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,regexner");
     props.setProperty("regexner.ignorecase", "true");  // Maybe ignorecase should be on by default...
+    props.putAll(System.getProperties());
 
     String text = "Barack Obama is the 44th President of the United States.  He is the first African American president.";
     Annotation document = new Annotation(text);
@@ -172,7 +182,8 @@ public class StanfordCoreNLPITest extends TestCase {
   public void testRelationExtractor() throws Exception {
     // Check the regexner is integrated with the StanfordCoreNLP
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,relation");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,relation");
+    props.putAll(System.getProperties());
 
     String text = "Barack Obama is the 44th President of the United States.  He is the first African American president.";
     Annotation document = new Annotation(text);
