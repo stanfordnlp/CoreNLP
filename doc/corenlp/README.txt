@@ -1,4 +1,4 @@
-Stanford CoreNLP  v224n - 2013-09-24
+Stanford CoreNLP  v3.2.0 - 2013-06-19
 Stanford's Suite of NLP Tools
 -----------------------------
 
@@ -42,8 +42,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2013-09-24     224n     Prepare a release for CS224n 
 
 2013-06-19    3.2.0     New RNN parser model, more efficient tagger 
 
