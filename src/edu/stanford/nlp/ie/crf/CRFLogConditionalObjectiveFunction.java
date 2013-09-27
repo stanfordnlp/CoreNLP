@@ -44,7 +44,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   protected final int window;
   protected final int numClasses;
-  // public static Index<String> featureIndex;  // no idea why this was here [cdm 2013]
+  public static Index<String> featureIndex;
   protected final int[] map;
   protected int[][][][] data;  // data[docIndex][tokenIndex][][]
   protected double[][][][] featureVal;  // featureVal[docIndex][tokenIndex][][]
@@ -264,7 +264,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
     double startPosLogProb = cliqueTree.logProbStartPos();
     if (VERBOSE) {
-      System.err.printf("P_-1(Background) = % 5.3f%n", startPosLogProb);
+      System.err.printf("P_-1(Background) = % 5.3f\n", startPosLogProb);
     }
     double prob = startPosLogProb;
 
@@ -760,13 +760,13 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return new Pair<double[][][], double[][][]>(prevGivenCurr, nextGivenCurr);
   }
 
-  protected static void combine2DArr(double[][] combineInto, double[][] toBeCombined, double scale) {
+  protected void combine2DArr(double[][] combineInto, double[][] toBeCombined, double scale) {
     for (int i = 0; i < toBeCombined.length; i++)
       for (int j = 0; j < toBeCombined[i].length; j++)
         combineInto[i][j] += toBeCombined[i][j] * scale;
   }
 
-  protected static void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
+  protected void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
     for (int i = 0; i < toBeCombined.length; i++)
       for (int j = 0; j < toBeCombined[i].length; j++)
         combineInto[i][j] += toBeCombined[i][j];
@@ -800,7 +800,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   /**
    * Takes a double array of weights and creates a 2D array where:
    *
-   * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matching featuresIndex i
+   * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matcing featuresIndex i
    * the second element is the number of output classes for that clique size
    *
    * @return a 2D weight array
@@ -815,7 +815,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         System.arraycopy(weights, index, newWeights[i], 0, labelSize);
       } catch (Exception ex) {
         System.err.println("weights: " + Arrays.toString(weights));
-        System.err.println("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
+        System.err.println("newWeights["+i+"]: " + newWeights[i]);
         throw new RuntimeException(ex);
       }
       index += labelSize;
@@ -835,7 +835,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         System.arraycopy(weights, index, newWeights[i], 0, labelSize);
       } catch (Exception ex) {
         System.err.println("weights: " + Arrays.toString(weights));
-        System.err.println("newWeights["+i+"]: " + Arrays.toString(newWeights[i]));
+        System.err.println("newWeights["+i+"]: " + newWeights[i]);
         throw new RuntimeException(ex);
       }
       index += labelSize;
