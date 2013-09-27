@@ -296,7 +296,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     List<Tree> leaves = tree.getLeaves();
     if (leaves.size() != originalSentence.size()) {
       throw new IllegalStateException("originalWords and sentence of different sizes: " + originalSentence.size() + " vs. " + leaves.size() +
-                                      "\n Orig: " + Sentence.listToString(originalSentence) + 
+                                      "\n Orig: " + Sentence.listToString(originalSentence) +
                                       "\n Pars: " + Sentence.listToString(leaves));
     }
     Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();
@@ -464,6 +464,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     return t;
   }
 
+  @Override
   public double getPCFGScore() {
     return pparser.getBestScore();
   }
@@ -487,6 +488,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     return getBestDependencyParse(false);
   }
 
+  @Override
   public Tree getBestDependencyParse(boolean debinarize) {
     if (dparser == null || parseSkipped || parseUnparsable) {
       return null;
@@ -574,6 +576,7 @@ public class LexicalizedParserQuery implements ParserQuery {
    * Implements the same parsing with fallback that parse() does, but
    * also outputs status messages for failed parses to pwErr.
    */
+  @Override
   public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
     boolean result = parse(sentence);
     if (result) {
@@ -637,6 +640,7 @@ public class LexicalizedParserQuery implements ParserQuery {
    *  in a parser language pack) to sentences that don't have one within
    *  the last 3 words (to allow for close parentheses, etc.).  It checks
    *  tags for punctuation, if available, otherwise words.
+   *
    *  @param sentence The sentence to check
    *  @param length The length of the sentence (just to avoid recomputation)
    */
@@ -645,25 +649,20 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (start < 0) start = 0;
     TreebankLanguagePack tlp = op.tlpParams.treebankLanguagePack();
     for (int i = length - 1; i >= start; i--) {
-      Object item = sentence.get(i);
-      // An object (e.g., MapLabel) can implement HasTag but not actually store
+      HasWord item = sentence.get(i);
+      // An object (e.g., CoreLabel) can implement HasTag but not actually store
       // a tag so we need to check that there is something there for this case.
       // If there is, use only it, since word tokens can be ambiguous.
       String tag = null;
       if (item instanceof HasTag) {
         tag = ((HasTag) item).tag();
       }
-      if (tag != null && ! "".equals(tag)) {
+      if (tag != null && ! tag.isEmpty()) {
         if (tlp.isSentenceFinalPunctuationTag(tag)) {
           return;
         }
-      } else if (item instanceof HasWord) {
-        String str = ((HasWord) item).word();
-        if (tlp.isPunctuationWord(str)) {
-          return;
-        }
       } else {
-        String str = item.toString();
+        String str = item.word();
         if (tlp.isPunctuationWord(str)) {
           return;
         }
