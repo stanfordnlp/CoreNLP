@@ -43,8 +43,6 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2013-09-24     224n     Prepare a release for CS224n 
-
 2013-06-19    3.2.0     New RNN parser model, more efficient tagger 
 
 2013-04-04    1.3.5     Speed improvements, coref improvements, 
