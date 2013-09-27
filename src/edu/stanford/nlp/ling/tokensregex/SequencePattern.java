@@ -30,8 +30,8 @@ import java.util.*;
  *        for optimzing matches across multiple patterns</li>
  *   <li>Optionally implement a {@link NodesMatchChecker} to support backreferences</li>
  * </ul>
- * See {@link TokenSequencePattern} for example of how this class can be extended
- * to support a specific type <code>T</code>.
+ * See {@link TokenSequencePattern} for an example of how this class can be extended
+ * to support a specific type {@code T}.
  * <p>
  * To use
  * <pre><code>
@@ -43,9 +43,9 @@ import java.util.*;
  *
  *
  * <p>
- * To support a new type <code>T</code>:
+ * To support a new type {@code T}:
  * <ol>
- * <li> For a type <code>T</code> to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
+ * <li> For a type {@code T} to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
  *    whether a node is matched or not  (see <code>CoreMapNodePattern</code> for example)</li>
  * <li> To compile a string into corresponding pattern, will need to create a parser
  *    (see inner class <code>Parser</code>, <code>TokenSequencePattern</code> and <code>TokenSequenceParser.jj</code>)</li>
@@ -186,7 +186,8 @@ public class SequencePattern<T> {
     while (!todo.isEmpty()) {
       State state = todo.poll();
       if (state instanceof NodePatternState) {
-        OUT res = filter.apply(((NodePatternState) state).pattern);
+        NodePattern<T> pattern = ((NodePatternState) state).pattern;
+        OUT res = filter.apply(pattern);
         if (res != null) return res;
       }
       if (state.next != null) {
