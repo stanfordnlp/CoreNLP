@@ -101,7 +101,7 @@ import java.util.regex.Pattern;
  *        # Type of the rule
  *        ruleType: "tokens" | "text" | "composite" | "filter",
  *        # Pattern to match against
- *        pattern: ( <TokenSequencePattern> ) | /<TextPattern>/,
+ *        pattern: ( &lt;TokenSequencePattern&gt; ) | /&lt;TextPattern&gt;/,
  *        # Resulting value to go into the resulting annotation
  *        result: ...
  *
@@ -113,41 +113,43 @@ import java.util.regex.Pattern;
  *   {
  *     ruleType: "tokens",
  *     pattern: ( /one/ ),
- *     value: 1
+ *     result: 1
  *   }
  * </pre>
  * </p>
- * Extraction rule fields:
+ * Extraction rule fields (most fields are optional):
  * <table>
  *   <tr><th>Field</th><th>Values</th><th>Example</th><th>Description</th></tr>
  *   <tr><td><code>ruleType</code></td><td><code>"tokens" | "text" | "composite" | "filter" </code></td>
- *      <td><code>tokens</code></td><td>Type of the rule</td></tr>
- *   <tr><td><code>pattern</code></td><td><code>&lt;Token Sequence Pattern&gt;&lt; = (...) | &lt;Text Pattern&gt; = /.../</code></td>
+ *      <td><code>tokens</code></td><td>Type of the rule (required).</td></tr>
+ *   <tr><td><code>pattern</code></td><td><code>&lt;Token Sequence Pattern&gt; = (...) | &lt;Text Pattern&gt; = /.../</code></td>
  *      <td><code>( /winter/ /of/ $YEAR )</code></td><td>Pattern to match against.
  *      See {@link TokenSequencePattern} and {@link Pattern} for
- *      how to specify patterns over tokens and strings</td></tr>
- *   <tr><td><code>action</code></td><td><code>&lt;Action List&gt;&lt; = (...)</code></td>
- *      <td><code></code></td><td>List of actions to apply when the pattern is triggered</td></tr>
- *   <tr><td><code>result</code></td><td><code>...</code></td>
- *      <td><code></code></td><td>Resulting value to go into the resulting annotation</td></tr>
+ *      how to specify patterns over tokens and strings (required).</td></tr>
+ *   <tr><td><code>action</code></td><td><code>&lt;Action List&gt; = (...)</code></td>
+ *      <td><code>( Annotate($0, ner, "DATE") )</code></td><td>List of actions to apply when the pattern is triggered.
+ *      Each action is a {@link Expressions TokensRegex Expression}</td></tr>
+ *   <tr><td><code>result</code></td><td><code>&lt;Expression&gt;</code></td>
+ *      <td><code></code></td><td>Resulting value to go into the resulting annotation.  See {@link Expressions} for how to specify the result.</td></tr>
  *   <tr><td><code>name</code></td><td><code>STRING</code></td>
- *      <td><code></code></td><td>Name to identify the extraction rule/td></tr>
+ *      <td><code></code></td><td>Name to identify the extraction rule.</td></tr>
  *   <tr><td><code>stage</code></td><td><code>INTEGER</code></td>
- *      <td><code></code></td><td>Stage at which the rule is to be applied/td></tr>
+ *      <td><code></code></td><td>Stage at which the rule is to be applied.  Rules are grouped in stages, which are applied from lowest to highest.</td></tr>
  *   <tr><td><code>active</code></td><td><code>Boolean</code></td>
- *      <td><code></code></td><td>Whether this rule is enabled (active) or not</td></tr>
+ *      <td><code></code></td><td>Whether this rule is enabled (active) or not (default true).</td></tr>
  *   <tr><td><code>priority</code></td><td><code>DOUBLE</code></td>
- *      <td><code></code></td><td>Priority of rule</tr>
+ *      <td><code></code></td><td>Priority of rule.  Within a stage, matches from higher priority rules are preferred.</td></tr>
  *   <tr><td><code>weight</code></td><td><code>DOUBLE</code></td>
- *      <td><code></code></td><td>Weight of rule (not currently used)</td></tr>
+ *      <td><code></code></td><td>Weight of rule (not currently used).</td></tr>
  *   <tr><td><code>over</code></td><td><code>CLASS</code></td>
- *      <td><code></code></td><td>Annotation field to check pattern against</td></tr>
+ *      <td><code></code></td><td>Annotation field to check pattern against.</td></tr>
  *   <tr><td><code>matchFindType</code></td><td><code>FIND_NONOVERLAPPING | FIND_ALL</code></td>
- *      <td><code></code></td><td>Whether to find all matched expression or just the nonoverlaping ones</td></tr>
+ *      <td><code></code></td><td>Whether to find all matched expression or just the nonoverlapping ones (default <code>FIND_NONOVERLAPPING</code>).</td></tr>
  *   <tr><td><code>matchWithResults</code></td><td><code>Boolean</code></td>
- *      <td><code></code></td><td>Whether results of the matches should be returned (default false)</td></tr>
+ *      <td><code></code></td><td>Whether results of the matches should be returned (default false).
+ *        Set to true to access captured groups of embedded regular expressions.</td></tr>
  *   <tr><td><code>matchedExpressionGroup</code></td><td><code>Integer</code></td>
- *      <td><code></code></td><td>What group should be treated as the matched expression group (default 0)</td></tr>
+ *      <td><code></code></td><td>What group should be treated as the matched expression group (default 0).</td></tr>
  * </table>
  *
  * @author Angel Chang
