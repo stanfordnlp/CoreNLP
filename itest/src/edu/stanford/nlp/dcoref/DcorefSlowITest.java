@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,7 +65,7 @@ public class DcorefSlowITest extends TestCase {
 
     double finalScore = getFinalScore(returnMsg);
     System.out.println(returnMsg);
-    System.out.println("Final Score: (MUC+B^3+ceafe)/3 = "+finalScore);
+    System.out.println("Final Score: (MUC+B^3+ceafe)/3 = "+(new DecimalFormat("#.##")).format(finalScore));
 
     assertEquals(59.2, finalScore, 1.0);
   }

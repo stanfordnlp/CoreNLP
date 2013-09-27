@@ -11,6 +11,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -233,12 +234,13 @@ public class StringUtils {
     }, start, end);
   }
 
-  public static Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
+  public static final Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
     @Override
     public String apply(Object in) {
       return in.toString();
     }
   };
+
   public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
                                   String glue, int start, int end, final Function<Object,String> toStringFunc) {
     return join(l, glue, new Function<CoreMap, String>() {
@@ -433,7 +435,7 @@ public class StringUtils {
    * "aa bb | bb cc | ccc ddd" would be split into "[aa,bb],[bb,cc],[ccc,ddd]" based on
    * the delimiter "|". This method uses the old StringTokenizer class, which is up to
    * 3x faster than the regex-based "split()" methods.
-   * 
+   *
    * @param delimiter
    * @return
    */
@@ -455,7 +457,7 @@ public class StringUtils {
     }
     return fields;
   }
-  
+
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
    *  like correctly split quoted strings or parenthesized arguments.
@@ -1940,7 +1942,7 @@ public class StringUtils {
         if (flagArgs.isEmpty()) {
           existingArgs.put(key, "true");
         } else {
-          
+
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
             result.putAll(propFileToTreeMap(join(flagArgs," "), existingArgs));
             i++;
@@ -1951,7 +1953,7 @@ public class StringUtils {
       }
     }
     result.putAll(existingArgs);
-    
+
     for (Entry<String, String> o : result.entrySet()) {
       String val = resolveVars(o.getValue(), result);
       result.put(o.getKey(), val);
@@ -1971,7 +1973,7 @@ public class StringUtils {
    *         props file
    */
   public static TreeMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
-    
+
     TreeMap<String, String> result = new TreeMap<String, String>();
     result.putAll(existingArgs);
     for (String l : IOUtils.readLines(filename)) {
@@ -1987,7 +1989,7 @@ public class StringUtils {
     }
     return result;
   }
-  
+
   /**
    * n grams for already splitted string. the ngrams are joined with a single space
    */
@@ -1996,10 +1998,10 @@ public class StringUtils {
     Collection<String> ngrams = new ArrayList<String>();
     for(List<String> n: ng)
       ngrams.add(StringUtils.join(n," "));
-  
+
     return ngrams;
   }
-  
+
   /**
    * n grams for already splitted string. the ngrams are joined with a single space
    */
@@ -2011,14 +2013,33 @@ public class StringUtils {
     Collection<String> ngrams = new ArrayList<String>();
     for(List<String> n: ng)
       ngrams.add(StringUtils.join(n," "));
-  
+
     return ngrams;
   }
-  
+
   /**
    * The string is split on whitespace and the ngrams are joined with a single space
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
+  }
+
+  private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
+  public static String normalize(String s) {
+    // Normalizes string and strips diacritics (map to ascii) by
+    // 1. taking the NFKD (compatibility decomposition -
+    //   in compatibility equivalence, formatting such as subscripting is lost -
+    //   see http://unicode.org/reports/tr15/)
+    // 2. Removing diacriticals
+    // 3. Recombining into NFKC form (compatibility composition)
+    // This process may be slow.
+    //
+    // The main purpose of the function is to remove diacritics for asciis,
+    //  but it may normalize other stuff as well.
+    // A more conservative approach is to do explicit folding just for ascii character
+    //   (see RuleBasedNameMatcher.normalize)
+    String d = Normalizer.normalize(s, Normalizer.Form.NFKD);
+    d = diacriticalMarksPattern.matcher(d).replaceAll("");
+    return Normalizer.normalize(d, Normalizer.Form.NFKC);
   }
 }
