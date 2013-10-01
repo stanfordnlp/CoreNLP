@@ -12,12 +12,13 @@ import java.util.Map.Entry;
 
 /**
  * Utilities for Maps, including inverting, composing, and support for list/set values.
- * <p/>
+ *
  * @author Dan Klein (klein@cs.stanford.edu)
- * Date: Oct 22, 2003
- * Time: 8:56:16 PM
  */
 public class Maps {
+
+  private Maps() {}
+
   /**
    * Adds the value to the HashSet given by map.get(key), creating a new HashMap if needed.
    *
@@ -93,7 +94,7 @@ public class Maps {
   }
 
   /**
-   * Sorts a list of entries.  This menthod is here since the entries might come from a Counter.
+   * Sorts a list of entries.  This method is here since the entries might come from a Counter.
    */
   public static <K extends Comparable<? super K>, V> List<Map.Entry<K, V>> sortedEntries(Collection<Map.Entry<K, V>> entries) {
     List<Entry<K,V>> entriesList = new ArrayList<Map.Entry<K, V>>(entries);
@@ -137,7 +138,7 @@ public class Maps {
     toStringSorted(map, builder);
     return builder.toString();
   }
-  
+
   /**
    * Removes keys from the map
    */
@@ -172,7 +173,7 @@ public class Maps {
       }
     return result;
   }
-  
+
   public static void main(String[] args) {
     Map<String, String> map1 = Generics.newHashMap();
     map1.put("a", "1");
