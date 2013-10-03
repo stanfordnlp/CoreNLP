@@ -1,9 +1,11 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.CoreMap;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
@@ -35,6 +37,37 @@ public class ProtobufAnnotationSerializerITest {
     Annotation ann = new Annotation(prideAndPrejudiceChapters1to5);
     pipeline.annotate(ann);
     return ann;
+  }
+
+  private void sameAsRead(Annotation doc, Annotation readDoc) {
+    // Update some fields in original document
+    for (int i = 0; i < doc.get(CoreAnnotations.SentencesAnnotation.class).size(); ++i) {
+      // Set docid and sentence index
+      CoreMap sentence = doc.get(CoreAnnotations.SentencesAnnotation.class).get(i);
+      for (int k = 0; k < sentence.get(CoreAnnotations.TokensAnnotation.class).size(); ++k) {
+        CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(k);
+        if (doc.containsKey(CoreAnnotations.DocIDAnnotation.class)) { token.setDocID(doc.get(CoreAnnotations.DocIDAnnotation.class)); }
+        token.setSentIndex(i);
+      }
+      // Set normalized named entity for chunked tokens
+      if (sentence.containsKey(CoreAnnotations.NumerizedTokensAnnotation.class)) {
+        for (CoreMap numerizedToken : sentence.get(CoreAnnotations.NumerizedTokensAnnotation.class)) {
+          if (numerizedToken.containsKey(CoreAnnotations.TokensAnnotation.class)) {
+            // The normalized named entity got deleted?
+            numerizedToken.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class,
+                numerizedToken.get(CoreAnnotations.TokensAnnotation.class)
+                    .get(0).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class));
+            // The named entity type got deleted?
+            numerizedToken.set(CoreAnnotations.NamedEntityTagAnnotation.class,
+                numerizedToken.get(CoreAnnotations.TokensAnnotation.class)
+                    .get(0).get(CoreAnnotations.NamedEntityTagAnnotation.class));
+          }
+
+        }
+      }
+    }
+
+    assertEquals("Re-read document is not the same as what was saved", doc, readDoc);
   }
 
   @Test
@@ -69,5 +102,25 @@ public class ProtobufAnnotationSerializerITest {
     // Check size
     assertTrue(compressedProto.length < 225000);
     assertTrue(uncompressedProto.length < 750000);
+  }
+
+  @Test
+  public void testCanWriteRead() {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      StanfordCoreNLP pipe = new StanfordCoreNLP(new Properties());
+      Annotation doc = pipe.process(prideAndPrejudiceFirstBit);
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.save(doc, ks);
+      ks.close();
+
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Annotation readDoc = serializer.load(kis);
+      kis.close();
+
+      sameAsRead(doc, readDoc);
+    } catch (Exception e) { throw new RuntimeException(e); }
   }
 }
