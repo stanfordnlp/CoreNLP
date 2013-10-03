@@ -27,8 +27,9 @@ message Sentence {
   optional uint32          paragraph                           = 10;
   
   // Fields set by other annotators in CoreNLP
-  repeated Entity          entity                              = 101;
-  repeated Relation        relation                            = 102;
+  optional bool            hasRelationAnnotations              = 101;
+  repeated Entity          entity                              = 102;
+  repeated Relation        relation                            = 103;
 }
 
 //
@@ -55,8 +56,10 @@ message Token {
   optional uint32 tokenBeginIndex = 17;   // The begin index of the token
   optional uint32 tokenEndIndex   = 18;   // The end index of the token
   optional Timex  timexValue      = 19;   // The time this word refers to
-  repeated string xmlContext      = 20;   // used by clean xml annotator
-  optional uint32 corefClusterID  = 21;
+  optional bool   hasXmlContext   = 21;   // Used by clean xml annotator
+  repeated string xmlContext      = 22;   // Used by clean xml annotator
+  optional uint32 corefClusterID  = 23;   // The [primary] cluster id for this token
+  optional string answer          = 24;   // A temporary annotation which is occasionally left in
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 101;  // gender annotation (machine reading)
@@ -64,6 +67,7 @@ message Token {
   optional string trueCaseText    = 103;  // true case gloss of token
 
   // Fields in the CoreLabel java class that are moved elsewhere
+  //       string text           @see Document#text + character offsets
   //       uint32 sentenceIndex  @see Sentence#sentenceIndex
   //       string docID          @see Document#docID
   //       uint32 index          @see implicit in Sentence

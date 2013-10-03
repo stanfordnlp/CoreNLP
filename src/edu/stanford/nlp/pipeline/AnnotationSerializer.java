@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.Pair;
 
 public abstract class AnnotationSerializer {
