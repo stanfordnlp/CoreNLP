@@ -3,10 +3,16 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.Dictionaries;
 import edu.stanford.nlp.ie.NumberNormalizer;
+import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
+import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
+import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.*;
+import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
+import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
@@ -15,6 +21,7 @@ import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.*;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.*;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.*;
+import edu.stanford.nlp.time.TimeAnnotations.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,14 +43,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   @Override
   public OutputStream append(Annotation corpus, OutputStream os) throws IOException {
-    CoreMapProtos.Document serialized = toProto(corpus);
+    CoreNLPProtos.Document serialized = toProto(corpus);
     serialized.writeTo(os);
     return os;
   }
 
   @Override
   public Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
-    CoreMapProtos.Document doc = CoreMapProtos.Document.parseFrom(is);
+    CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseFrom(is);
     return Pair.makePair( fromProto(doc), is );
   }
 
@@ -52,8 +59,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param coreLabel The CoreLabel to convert
    * @return A protocol buffer message corresponding to this CoreLabel
    */
-  public static CoreMapProtos.CoreLabel toProto(CoreLabel coreLabel) {
-    CoreMapProtos.CoreLabel.Builder builder = CoreMapProtos.CoreLabel.newBuilder();
+  public static CoreNLPProtos.Token toProto(CoreLabel coreLabel) {
+    CoreNLPProtos.Token.Builder builder = CoreNLPProtos.Token.newBuilder();
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
@@ -74,6 +81,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (coreLabel.containsKey(TokenBeginAnnotation.class)) { builder.setTokenBeginIndex(coreLabel.get(TokenBeginAnnotation.class)); }
     if (coreLabel.containsKey(TokenEndAnnotation.class)) { builder.setTokenEndIndex(coreLabel.get(TokenEndAnnotation.class)); }
     if (coreLabel.get(NormalizedNamedEntityTagAnnotation.class) != null) { builder.setNormalizedNER(coreLabel.get(NormalizedNamedEntityTagAnnotation.class)); }
+    if (coreLabel.containsKey(TimexAnnotation.class)) { builder.setTimexValue(toProto(coreLabel.get(TimexAnnotation.class))); }
+    if (coreLabel.containsKey(XmlContextAnnotation.class)) { builder.addAllXmlContext(coreLabel.get(XmlContextAnnotation.class)); }
+    if (coreLabel.containsKey(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(coreLabel.get(CorefClusterIdAnnotation.class)); }
+    // Non-default annotators
+    if (coreLabel.get(GenderAnnotation.class) != null) { builder.setGender(coreLabel.get(GenderAnnotation.class)); }
+    if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(coreLabel.get(TrueCaseAnnotation.class)); }
+    if (coreLabel.containsKey(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(coreLabel.get(TrueCaseTextAnnotation.class)); }
     // Return
     return builder.build();
   }
@@ -85,10 +99,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A protocol buffer message corresponding to this sentence
    * @throws IllegalArgumentException If the sentence is not a valid sentence (e.g., is a document or a word).
    */
-  public static CoreMapProtos.Sentence toProto(CoreMap sentence) {
+  public static CoreNLPProtos.Sentence toProto(CoreMap sentence) {
     // Error checks
     if (sentence instanceof CoreLabel) { throw new IllegalArgumentException("CoreMap is actually a CoreLabel"); }
-    CoreMapProtos.Sentence.Builder builder = CoreMapProtos.Sentence.newBuilder();
+    CoreNLPProtos.Sentence.Builder builder = CoreNLPProtos.Sentence.newBuilder();
     // Required fields
     builder.setTokenOffsetBegin(sentence.get(TokenBeginAnnotation.class));
     builder.setTokenOffsetEnd(sentence.get(TokenEndAnnotation.class));
@@ -104,6 +118,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         sentence.get(TokensAnnotation.class).get(0).containsKey(ParagraphAnnotation.class)) {
       builder.setParagraph(sentence.get(TokensAnnotation.class).get(0).get(ParagraphAnnotation.class));
     }
+    // Non-default annotators
+    if (sentence.containsKey(EntityMentionsAnnotation.class)) {
+      for (EntityMention entity : sentence.get(EntityMentionsAnnotation.class)) {
+        builder.addEntity(toProto(entity));
+      }
+    }
+    if (sentence.containsKey(RelationMentionsAnnotation.class)) {
+      for (RelationMention relation : sentence.get(RelationMentionsAnnotation.class)) {
+        builder.addRelation(toProto(relation));
+      }
+    }
     // Return
     return builder.build();
   }
@@ -113,8 +138,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param doc The Annotation to convert.
    * @return A protocol buffer message corresponding to this document
    */
-  public static CoreMapProtos.Document toProto(Annotation doc) {
-    CoreMapProtos.Document.Builder builder = CoreMapProtos.Document.newBuilder();
+  public static CoreNLPProtos.Document toProto(Annotation doc) {
+    CoreNLPProtos.Document.Builder builder = CoreNLPProtos.Document.newBuilder();
     // Required fields
     builder.setText(doc.get(TextAnnotation.class));
     // Optional fields
@@ -140,8 +165,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param parseTree The parse tree to convert.
    * @return A protocol buffer message corresponding to this tree.
    */
-  public static CoreMapProtos.ParseTree toProto(Tree parseTree) {
-    CoreMapProtos.ParseTree.Builder builder = CoreMapProtos.ParseTree.newBuilder();
+  public static CoreNLPProtos.ParseTree toProto(Tree parseTree) {
+    CoreNLPProtos.ParseTree.Builder builder = CoreNLPProtos.ParseTree.newBuilder();
     // Required fields
     for (Tree child : parseTree.children()) { builder.addChild(toProto(child)); }
     // Optional fields
@@ -165,15 +190,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param graph The dependency graph to save.
    * @return A protocol buffer message corresponding to this parse.
    */
-  public static CoreMapProtos.DependencyGraph toProto(SemanticGraph graph) {
-    CoreMapProtos.DependencyGraph.Builder builder = CoreMapProtos.DependencyGraph.newBuilder();
+  public static CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
+    CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
     // Roots
     Set<IndexedWord> rootSet = new IdentityHashSet<IndexedWord>(graph.getRoots());
     // Nodes
-    int nodeI = 0;
     for (IndexedWord node : graph.vertexSet()) {
       // Register node
-      CoreMapProtos.DependencyGraph.Node.Builder nodeBuilder = CoreMapProtos.DependencyGraph.Node.newBuilder()
+      CoreNLPProtos.DependencyGraph.Node.Builder nodeBuilder = CoreNLPProtos.DependencyGraph.Node.newBuilder()
           .setSentenceIndex(node.get(SentenceIndexAnnotation.class))
           .setIndex(node.index());
       if (node.containsKey(CopyAnnotation.class)) {
@@ -182,13 +206,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.addNode(nodeBuilder.build());
       // Register root
       if (rootSet.contains(node)) {
-        builder.addRoot(nodeI);
+        builder.addRoot(node.index());
       }
-      nodeI += 1;
     }
     // Edges
     for (SemanticGraphEdge edge : graph.edgeIterable()) {
-      builder.addEdge(CoreMapProtos.DependencyGraph.Edge.newBuilder()
+      builder.addEdge(CoreNLPProtos.DependencyGraph.Edge.newBuilder()
           .setSource(edge.getSource().index())
           .setTarget(edge.getTarget().index())
           .setDep(edge.getRelation().toString())
@@ -202,8 +225,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param chain The coref chain to convert.
    * @return A protocol buffer message corresponding to this chain.
    */
-  public static CoreMapProtos.CorefChain toProto(CorefChain chain) {
-    CoreMapProtos.CorefChain.Builder builder = CoreMapProtos.CorefChain.newBuilder();
+  public static CoreNLPProtos.CorefChain toProto(CorefChain chain) {
+    CoreNLPProtos.CorefChain.Builder builder = CoreNLPProtos.CorefChain.newBuilder();
     // Set ID
     builder.setChainID(chain.getChainID());
     // Set mentions
@@ -211,7 +234,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     for (Map.Entry<IntPair, Set<CorefChain.CorefMention>> entry : chain.getMentionMap().entrySet()) {
       for (CorefChain.CorefMention mention : entry.getValue()) {
         mentionToIndex.put(mention, mentionToIndex.size());
-        builder.addMention(CoreMapProtos.CorefChain.CorefMention.newBuilder()
+        builder.addMention(CoreNLPProtos.CorefChain.CorefMention.newBuilder()
             .setMentionID(mention.mentionID)
             .setMentionType(mention.mentionType.name())
             .setNumber(mention.number.name())
@@ -221,11 +244,70 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
             .setEndIndex(mention.endIndex - 1)
             .setHeadIndex(mention.headIndex - 1)
             .setSentenceIndex(mention.sentNum - 1)
-            .setPosition(mention.position.get(1)));
+            .setPosition(mention.position.get(1)) );
       }
     }
     // Set representative mention
     builder.setRepresentative( mentionToIndex.get(chain.getRepresentativeMention()) );
+    // Return
+    return builder.build();
+  }
+
+  /**
+   * Convert the given Timex object to a protocol buffer.
+   * @param timex The timex to convert.
+   * @return A protocol buffer corresponding to this Timex object.
+   */
+  public static CoreNLPProtos.Timex toProto(Timex timex) {
+    CoreNLPProtos.Timex.Builder builder = CoreNLPProtos.Timex.newBuilder();
+    if (timex.value() != null) { builder.setValue(timex.value()); }
+    if (timex.altVal() != null) { builder.setAltValue(timex.altVal()); }
+    if (timex.text() != null) { builder.setText(timex.text()); }
+    if (timex.timexType() != null) { builder.setType(timex.timexType()); }
+    if (timex.tid() != null) { builder.setTid(timex.tid()); }
+    if (timex.beginPoint() >= 0) { builder.setBeginPoint(timex.beginPoint()); }
+    if (timex.endPoint() >= 0) { builder.setEndPoint(timex.endPoint()); }
+    return builder.build();
+  }
+
+  /**
+   * Serialize the given entity mention to the corresponding protocol buffer.
+   * @param ent The entity mention to serialize.
+   * @return A protocol buffer corresponding to the serialized entity mention.
+   */
+  public static CoreNLPProtos.Entity toProto(EntityMention ent) {
+    CoreNLPProtos.Entity.Builder builder = CoreNLPProtos.Entity.newBuilder();
+    // From ExtractionObject
+    if (ent.getObjectId() != null) { builder.setObjectID(ent.getObjectId()); }
+    if (ent.getExtent() != null) { builder.setExtentStart(ent.getExtent().start()).setExtentEnd(ent.getExtent().end()); }
+    if (ent.getType() != null) { builder.setType(ent.getType()); }
+    if (ent.getSubType() != null) { builder.setSubtype(ent.getSubType()); }
+    // From Entity
+    if (ent.getHead() != null) { builder.setHeadStart(ent.getHead().start()); builder.setHeadEnd(ent.getHead().end()); }
+    if (ent.getMentionType() != null) { builder.setMentionType(ent.getMentionType()); }
+    if (ent.getNormalizedName() != null) { builder.setNormalizedName(ent.getNormalizedName()); }
+    if (ent.getSyntacticHeadTokenPosition() >= 0) { builder.setHeadTokenIndex(ent.getSyntacticHeadTokenPosition()); }
+    if (ent.getCorefID() != null) { builder.setCorefID(ent.getCorefID()); }
+    // Return
+    return builder.build();
+
+  }
+
+  /**
+   * Serialize the given relation mention to the corresponding protocol buffer.
+   * @param rel The relation mention to serialize.
+   * @return A protocol buffer corresponding to the serialized relation mention.
+   */
+  public static CoreNLPProtos.Relation toProto(RelationMention rel) {
+    CoreNLPProtos.Relation.Builder builder = CoreNLPProtos.Relation.newBuilder();
+    // From ExtractionObject
+    if (rel.getObjectId() != null) { builder.setObjectID(rel.getObjectId()); }
+    if (rel.getExtent() != null) { builder.setExtentStart(rel.getExtent().start()).setExtentEnd(rel.getExtent().end()); }
+    if (rel.getType() != null) { builder.setType(rel.getType()); }
+    if (rel.getSubType() != null) { builder.setSubtype(rel.getSubType()); }
+    // From Relation
+    if (rel.getArgNames() != null) { for (String name : rel.getArgNames()) { builder.addArgName(name); } }
+    if (rel.getArgs() != null) { for (ExtractionObject arg : rel.getArgs()) { builder.addArg(toProto((EntityMention) arg)); } }
     // Return
     return builder.build();
   }
@@ -237,7 +319,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protobuf to read the CoreLabel from.
    * @return A CoreLabel, missing the fields that are not stored in the CoreLabel protobuf.
    */
-  private static CoreLabel fromProto(CoreMapProtos.CoreLabel proto) {
+  private static CoreLabel fromProto(CoreNLPProtos.Token proto) {
     CoreLabel word = new CoreLabel();
     // Required fields
     word.setWord(proto.getWord());
@@ -259,6 +341,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasTokenBeginIndex()) { word.set(TokenBeginAnnotation.class, proto.getTokenBeginIndex()); }
     if (proto.hasTokenEndIndex()) { word.set(TokenEndAnnotation.class, proto.getTokenEndIndex()); }
     if (proto.hasNormalizedNER()) { word.set(NormalizedNamedEntityTagAnnotation.class, proto.getNormalizedNER()); }
+    if (proto.hasTimexValue()) { word.set(TimexAnnotation.class, fromProto(proto.getTimexValue())); }
+    if (proto.getXmlContextCount() > 0) { word.set(XmlContextAnnotation.class, proto.getXmlContextList()); }
+    if (proto.hasCorefClusterID()) { word.set(CorefClusterIdAnnotation.class, proto.getCorefClusterID()); }
+    // Non-default annotators
+    if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
+    if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
+    if (proto.hasTrueCaseText()) { word.set(TrueCaseTextAnnotation.class, proto.getTrueCaseText()); }
     // Return
     return word;
   }
@@ -270,7 +359,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protobuf to read the sentence from.
    * @return A CoreMap, representing a sentence as stored in the protocol buffer (and therefore missing some fields)
    */
-  private static CoreMap fromProto(CoreMapProtos.Sentence proto) {
+  private static CoreMap fromProto(CoreNLPProtos.Sentence proto) {
     CoreMap sentence = new ArrayCoreMap();
     // Required fields
     sentence.set(TokenBeginAnnotation.class, proto.getTokenOffsetBegin());
@@ -280,6 +369,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCharacterOffsetBegin()) { sentence.set(CharacterOffsetBeginAnnotation.class, proto.getCharacterOffsetBegin()); }
     if (proto.hasCharacterOffsetEnd()) { sentence.set(CharacterOffsetEndAnnotation.class, proto.getCharacterOffsetEnd()); }
     if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
+    // Non-default fields
+    if (proto.getEntityCount() > 0) {
+      List<EntityMention> entities = new ArrayList<EntityMention>();
+      for (CoreNLPProtos.Entity entity : proto.getEntityList()) { entities.add(fromProto(entity, sentence)); }
+      sentence.set(EntityMentionsAnnotation.class, entities);
+    }
+    if (proto.getRelationCount() > 0) {
+      List<RelationMention> relations = new ArrayList<RelationMention>();
+      for (CoreNLPProtos.Relation relation : proto.getRelationList()) { relations.add(fromProto(relation, sentence)); }
+      sentence.set(RelationMentionsAnnotation.class, relations);
+    }
     // Return
     return sentence;
   }
@@ -293,13 +393,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The protocol buffer to read the document from.
    * @return An Annotation corresponding to the read protobuf.
    */
-  public static Annotation fromProto(CoreMapProtos.Document proto) {
+  public static Annotation fromProto(CoreNLPProtos.Document proto) {
     // Set text
     Annotation ann = new Annotation(proto.getText());
 
     // Add tokens
     List<CoreLabel> tokens = new ArrayList<CoreLabel>(proto.getTokenCount());
-    for (CoreMapProtos.CoreLabel token : proto.getTokenList()) {
+    for (CoreNLPProtos.Token token : proto.getTokenList()) {
       CoreLabel coreLabel = fromProto(token);
       // Set docid
       if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
@@ -310,7 +410,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Add sentences
     List<CoreMap> sentences = new ArrayList<CoreMap>(proto.getSentenceCount());
     for (int sentIndex = 0; sentIndex < proto.getSentenceCount(); ++sentIndex) {
-      CoreMapProtos.Sentence sentence = proto.getSentence(sentIndex);
+      CoreNLPProtos.Sentence sentence = proto.getSentence(sentIndex);
       CoreMap map = fromProto(sentence);
       if (!tokens.isEmpty() && sentence.hasTokenOffsetBegin() && sentence.hasTokenOffsetEnd()) {
         // Set tokens for sentence
@@ -338,7 +438,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
     // Set coref chain
     Map<Integer, CorefChain> corefChains = new HashMap<Integer, CorefChain>();
-    for (CoreMapProtos.CorefChain chainProto : proto.getCorefChainList()) {
+    for (CoreNLPProtos.CorefChain chainProto : proto.getCorefChainList()) {
       CorefChain chain = fromProto(chainProto, ann);
       corefChains.put(chain.getChainID(), chain);
     }
@@ -347,7 +447,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // Set dependency graphs
     // We need to wait until here, since this is the first time we see tokens
     for (int i = 0; i < proto.getSentenceCount(); ++i) {
-      CoreMapProtos.Sentence sentence = proto.getSentenceList().get(i);
+      CoreNLPProtos.Sentence sentence = proto.getSentenceList().get(i);
       CoreMap map = sentences.get(i);
       List<CoreLabel> sentenceTokens = map.get(TokensAnnotation.class);
       if (sentence.hasBasicDependencies()) {
@@ -380,7 +480,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized tree.
    * @return A Tree object corresponding to the saved tree. This will always be a {@link LabeledScoredTreeNode}.
    */
-  public static Tree fromProto(CoreMapProtos.ParseTree proto) {
+  public static Tree fromProto(CoreNLPProtos.ParseTree proto) {
     LabeledScoredTreeNode node = new LabeledScoredTreeNode();
     // Set label
     if (proto.hasValue()) {
@@ -409,7 +509,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /**
    * Voodoo magic to convert a serialized dependency graph into a {@link SemanticGraph}.
    * Taken originally from {@link CustomAnnotationSerializer#convertIntermediateGraph(CustomAnnotationSerializer.IntermediateSemanticGraph, java.util.List)}.
-   * This method is intended to be called only from the {@link ProtobufAnnotationSerializer#fromProto(CoreMapProtos.Document)}
+   * This method is intended to be called only from the {@link ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.Document)}
    * method.
    *
    * @param proto The serialized representation of the graph. This relies heavily on indexing into the original document.
@@ -418,7 +518,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param docid A docid must be supplied, as it is not saved by the serialized representation.
    * @return A semantic graph corresponding to the saved object, on the provided sentence.
    */
-  private static SemanticGraph fromProto(CoreMapProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
+  private static SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
     SemanticGraph graph = new SemanticGraph();
 
     // first construct the actual nodes; keep them indexed by their index
@@ -426,12 +526,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // in datum caching
     int min = Integer.MAX_VALUE;
     int max = Integer.MIN_VALUE;
-    for(CoreMapProtos.DependencyGraph.Node in: proto.getNodeList()){
+    for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
       min = in.getIndex() < min ? in.getIndex() : min;
       max = in.getIndex() > max ? in.getIndex() : max;
     }
     IndexedWord[] nodes = new IndexedWord[max - min >= 0 ? max - min + 1 : 0];
-    for(CoreMapProtos.DependencyGraph.Node in: proto.getNodeList()){
+    for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
       CoreLabel token = sentence.get(in.getIndex() - 1); // index starts at 1!
       IndexedWord word = new IndexedWord(docid, in.getSentenceIndex(), in.getIndex(), token);
       word.set(ValueAnnotation.class, word.get(TextAnnotation.class));
@@ -444,7 +544,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
 
     // add all edges to the actual graph
-    for(CoreMapProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
+    for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
       IndexedWord source = nodes[ie.getSource() - min];
       assert(source != null);
       IndexedWord target = nodes[ie.getTarget() - min];
@@ -460,7 +560,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getRootCount() > 0) {
       Collection<IndexedWord> roots = new ArrayList<IndexedWord>();
       for(int rootI : proto.getRootList()){
-        roots.add(nodes[rootI]);
+        roots.add(nodes[rootI - min]);
       }
       graph.setRoots(roots);
     } else {
@@ -482,21 +582,21 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    *                        order to fill in the mention span strings.
    * @return A coreference chain.
    */
-  private static CorefChain fromProto(CoreMapProtos.CorefChain proto, Annotation partialDocument) {
+  private static CorefChain fromProto(CoreNLPProtos.CorefChain proto, Annotation partialDocument) {
     // Get chain ID
     int cid = proto.getChainID();
     // Get mentions
     Map<IntPair, Set<CorefChain.CorefMention>> mentions = new HashMap<IntPair, Set<CorefChain.CorefMention>>();
     CorefChain.CorefMention representative = null;
     for (int i = 0; i < proto.getMentionCount(); ++i) {
-      CoreMapProtos.CorefChain.CorefMention mentionProto = proto.getMention(i);
+      CoreNLPProtos.CorefChain.CorefMention mentionProto = proto.getMention(i);
       // Create mention
       StringBuilder mentionSpan = new StringBuilder();
       List<CoreLabel> sentenceTokens = partialDocument.get(SentencesAnnotation.class).get(mentionProto.getSentenceIndex()).get(TokensAnnotation.class);
       for (int k = mentionProto.getStartIndex(); k < mentionProto.getEndIndex(); ++k) {
         mentionSpan.append(" ").append(sentenceTokens.get(k).word());
       }
-      sentenceTokens.get(mentionProto.getHeadIndex()).set(CorefClusterIdAnnotation.class, cid);
+      // Set the coref cluster id for the token
       CorefChain.CorefMention mention = new CorefChain.CorefMention(
           Dictionaries.MentionType.valueOf(mentionProto.getMentionType()),
           Dictionaries.Number.valueOf(mentionProto.getNumber()),
@@ -521,6 +621,70 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Return
     return new CorefChain(cid, mentions, representative);
+  }
+
+  /**
+   * Create an internal Timex object from the serialized protocol buffer.
+   * @param proto The serialized protocol buffer to read from.
+   * @return A timex, with as much information filled in as was gleaned from the protocol buffer.
+   */
+  private static Timex fromProto(CoreNLPProtos.Timex proto) {
+    return new Timex(
+        proto.hasType() ? proto.getType() : null,
+        proto.hasValue() ? proto.getValue() : null,
+        proto.hasAltValue() ? proto.getAltValue() : null,
+        proto.hasTid() ? proto.getTid() : null,
+        proto.hasText() ? proto.getText() : null,
+        proto.hasBeginPoint() ? proto.getBeginPoint() : -1,
+        proto.hasEndPoint() ? proto.getEndPoint() : -1);
+  }
+
+  /**
+   * Read a entity mention from its serialized form. Requires the containing sentence to be
+   * passed in along with the protocol buffer.
+   * @param proto The serialized entity mention.
+   * @param sentence The sentence this mention is attached to.
+   * @return The entity mention corresponding to the serialized object.
+   */
+  private static EntityMention fromProto(CoreNLPProtos.Entity proto, CoreMap sentence) {
+    EntityMention rtn = new EntityMention(
+        proto.hasObjectID() ? proto.getObjectID() : null,
+        sentence,
+        proto.hasHeadStart() ? new Span(proto.getHeadStart(), proto.getHeadEnd()) : null,
+        proto.hasHeadEnd() ? new Span(proto.getExtentStart(), proto.getExtentEnd()) : null,
+        proto.hasType() ? proto.getType() : null,
+        proto.hasSubtype() ? proto.getSubtype() : null,
+        proto.hasMentionType() ? proto.getMentionType() : null );
+    if (proto.hasNormalizedName()) { rtn.setNormalizedName(proto.getNormalizedName()); }
+    if (proto.hasHeadTokenIndex()) { rtn.setHeadTokenPosition(proto.getHeadTokenIndex()); }
+    if (proto.hasCorefID()) { rtn.setCorefID(proto.getCorefID()); }
+    return rtn;
+  }
+
+  /**
+   * Read a relation mention from its serialized form. Requires the containing sentence to be
+   * passed in along with the protocol buffer.
+   * @param proto The serialized relation mention.
+   * @param sentence The sentence this mention is attached to.
+   * @return The relation mention corresponding to the serialized object.
+   */
+  private static RelationMention fromProto(CoreNLPProtos.Relation proto, CoreMap sentence) {
+    List<ExtractionObject> args = new ArrayList<ExtractionObject>();
+    for (CoreNLPProtos.Entity arg : proto.getArgList()) {
+      args.add(fromProto(arg, sentence));
+    }
+    RelationMention rtn = new RelationMention(
+        proto.hasObjectID() ? proto.getObjectID() : null,
+        sentence,
+        proto.hasExtentStart() ? new Span(proto.getExtentStart(), proto.getExtentEnd()) : null,
+        proto.hasType() ? proto.getType() : null,
+        proto.hasSubtype() ? proto.getSubtype() : null,
+        args);
+    if (proto.hasSignature()) { rtn.setSignature(proto.getSignature()); }
+    if (proto.getArgNameCount() > 0 || proto.getArgCount() == 0) {
+      rtn.setArgNames(proto.getArgNameList());
+    }
+    return rtn;
   }
 
 }
