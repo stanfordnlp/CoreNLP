@@ -42,7 +42,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   private static final Object globalLock = "I'm a lock :)";
 
   @Override
-  public OutputStream append(Annotation corpus, OutputStream os) throws IOException {
+  public OutputStream write(Annotation corpus, OutputStream os) throws IOException {
     CoreNLPProtos.Document serialized = toProto(corpus);
     serialized.writeTo(os);
     return os;

@@ -8,6 +8,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import org.junit.Test;
 
@@ -206,7 +207,7 @@ public class ProtobufAnnotationSerializerSlowITest {
   @Test
   public void testSave() throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    new ProtobufAnnotationSerializer().save(mkAnnotation(), os);
+    new ProtobufAnnotationSerializer().write(mkAnnotation(), os).close();
     String json = new String(os.toByteArray(), "UTF-8").trim();
     assertNotNull(json);
   }
@@ -214,7 +215,7 @@ public class ProtobufAnnotationSerializerSlowITest {
   @Test
   public void testSaveLarge() throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    new ProtobufAnnotationSerializer().save(mkLargeAnnotation(), os);
+    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), os).close();
     String json = new String(os.toByteArray(), "UTF-8");
     assertNotNull(json);
   }
@@ -225,8 +226,8 @@ public class ProtobufAnnotationSerializerSlowITest {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     ByteArrayOutputStream compressedImpl = new ByteArrayOutputStream();
     GZIPOutputStream compressed = new GZIPOutputStream(compressedImpl);
-    new ProtobufAnnotationSerializer().save(mkLargeAnnotation(), os);
-    new ProtobufAnnotationSerializer().save(mkLargeAnnotation(), compressed);
+    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), os).close();
+    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), compressed).close();
     byte[] uncompressedProto = os.toByteArray();
     byte[] compressedProto = compressedImpl.toByteArray();
     assertNotNull(uncompressedProto);
@@ -245,12 +246,13 @@ public class ProtobufAnnotationSerializerSlowITest {
       StanfordCoreNLP pipe = new StanfordCoreNLP(new Properties());
       Annotation doc = pipe.process(prideAndPrejudiceFirstBit);
       ByteArrayOutputStream ks = new ByteArrayOutputStream();
-      serializer.save(doc, ks);
-      ks.close();
+      serializer.write(doc, ks).close();
 
       // Read
       InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-      Annotation readDoc = serializer.load(kis);
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
       kis.close();
 
       sameAsRead(doc, readDoc);
@@ -267,12 +269,13 @@ public class ProtobufAnnotationSerializerSlowITest {
       StanfordCoreNLP pipe = new StanfordCoreNLP(props);
       Annotation doc = pipe.process(prideAndPrejudiceFirstBit);
       ByteArrayOutputStream ks = new ByteArrayOutputStream();
-      serializer.save(doc, ks);
-      ks.close();
+      serializer.write(doc, ks).close();
 
       // Read
       InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-      Annotation readDoc = serializer.load(kis);
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
       kis.close();
 
       sameAsRead(doc, readDoc);
@@ -290,24 +293,26 @@ public class ProtobufAnnotationSerializerSlowITest {
       Annotation doc = pipe.process(prideAndPrejudiceChapters1to5);
 
       ByteArrayOutputStream ks = new ByteArrayOutputStream();
-      serializer.save(doc, ks);
-      ks.close();
+      serializer.write(doc, ks).close();
 
       // Read
       InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-      Annotation readDoc = serializer.load(kis);
+      Pair<Annotation, InputStream> pair1 = serializer.read(kis);
+      pair1.second.close();
+      Annotation readDoc = pair1.first;
       kis.close();
 
       sameAsRead(doc, readDoc);
 
       // Write 2
       ByteArrayOutputStream ks2 = new ByteArrayOutputStream();
-      serializer.save(readDoc, ks2);
-      ks2.close();
+      serializer.write(readDoc, ks2).close();
 
       // Read 2
       InputStream kis2 = new ByteArrayInputStream(ks2.toByteArray());
-      Annotation readDoc2 = serializer.load(kis2);
+      Pair<Annotation, InputStream> pair = serializer.read(kis2);
+      pair.second.close();
+      Annotation readDoc2 = pair.first;
       kis2.close();
 
       sameAsRead(readDoc, readDoc2);
@@ -372,12 +377,13 @@ public class ProtobufAnnotationSerializerSlowITest {
         // Write
         Annotation doc = pipeline.process(THOROUGH_TEST ? prideAndPrejudiceChapters1to5 : prideAndPrejudiceFirstBit);
         ByteArrayOutputStream ks = new ByteArrayOutputStream();
-        serializer.save(doc, ks);
-        ks.close();
+        serializer.write(doc, ks).close();
 
         // Read
         InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-        Annotation readDoc = serializer.load(kis);
+        Pair<Annotation, InputStream> pair = serializer.read(kis);
+        pair.second.close();
+        Annotation readDoc = pair.first;
         kis.close();
 
         sameAsRead(doc, readDoc);
