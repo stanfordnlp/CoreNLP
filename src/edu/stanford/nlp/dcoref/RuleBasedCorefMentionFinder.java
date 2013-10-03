@@ -1,6 +1,7 @@
 package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -292,6 +294,11 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       return safeHead(exactMatch, endIdx);
     }
 
+    Tree wordMatch = findTreeWithWords(root, tokens.subList(m.startIndex, endIdx));
+    if (wordMatch != null) {
+      return safeHead(wordMatch, endIdx);
+    }
+
     // no exact match found
     // in this case, we parse the actual extent of the mention, embedded in a sentence
     // context, so as to make the parser work better :-)
@@ -456,6 +463,26 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
     // fallback: return top
     return top;
+  }
+
+  static Tree findTreeWithWords(Tree tree, List<CoreLabel> tokens) {
+    List<Tree> leaves = tree.getLeaves();
+    for (int i = 0; i < leaves.size() - tokens.size() + 1; ++i) {
+      boolean found = true;
+      for (int j = 0; j < tokens.size(); ++j) {
+        if (!tokens.get(j).value().equals(leaves.get(i+j).label().value())) {
+          found = false;
+          break;
+        }
+      }
+      if (found) {
+        Tree subtree = Trees.getLowestCommonAncestor(Arrays.asList(leaves.get(i), leaves.get(i + tokens.size() - 1)), tree);
+        // TODO: this ignores that the subtree may encompass more than
+        // just the tokens given.  How much of a problem is that?
+        return subtree;
+      }
+    }
+    return null;
   }
 
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
