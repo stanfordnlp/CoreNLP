@@ -30,17 +30,52 @@ import java.io.OutputStream;
 import java.util.*;
 
 /**
- * A serializer using Google's protobuf format.
+ * A serializer using Google's protocol buffer format.
  * Note that this serializes only a subset of the possible annotations
  * that can be attached to a sentence. Nonetheless, it is guaranteed to be
  * lossless with the default set of named annotators you can create from a
- * {@link StanfordCoreNLP} pipeline.
+ * {@link StanfordCoreNLP} pipeline, with default properties defined for each annotator.
  *
  * @author Gabor Angeli
  */
 public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   private static final Object globalLock = "I'm a lock :)";
+
+  /**
+   * An exception to denote that the serialization would be lossy.
+   * This exception is thrown at serialization time.
+   *
+   * @see ProtobufAnnotationSerializer#enforceLosslessSerialization
+   * @see ProtobufAnnotationSerializer#ProtobufAnnotationSerializer(boolean)
+   */
+  public static class LossySerializationException extends RuntimeException {
+    private LossySerializationException(String msg) { super(msg); }
+  }
+
+  /**
+   * If true, serialization is guaranteed to be lossless or else a runtime exception is thrown
+   * at serialization time.
+   */
+  public final boolean enforceLosslessSerialization;
+
+  /**
+   * Create a new Annotation serializer outputting to a protocol buffer format.
+   * This is guaranteed to either be a lossless compression, or throw an exception at
+   * serialization time.
+   */
+  public ProtobufAnnotationSerializer() { this(true); }
+
+  /**
+   * Create a new Annotation serializer outputting to a protocol buffer format.
+   *
+   * @param enforceLosslessSerialization If set to true, a {@link ProtobufAnnotationSerializer.LossySerializationException}
+   *                                     is thrown at serialization
+   *                                     time if the serialization would be lossy. If set to false,
+   *                                     these exceptions are ignored.
+   *
+   */
+  public ProtobufAnnotationSerializer(boolean enforceLosslessSerialization) { this.enforceLosslessSerialization = enforceLosslessSerialization; }
 
   @Override
   public OutputStream write(Annotation corpus, OutputStream os) throws IOException {
@@ -70,11 +105,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
-   * Create a CoreLabel proto from a CoreLabel instance
+   * Create a CoreLabel proto from a CoreLabel instance.
+   * This is not static, as it optionally throws an exception if the serialization is lossy.
    * @param coreLabel The CoreLabel to convert
    * @return A protocol buffer message corresponding to this CoreLabel
    */
-  public static CoreNLPProtos.Token toProto(CoreLabel coreLabel) {
+  public CoreNLPProtos.Token toProto(CoreLabel coreLabel) {
     CoreNLPProtos.Token.Builder builder = CoreNLPProtos.Token.newBuilder();
     Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(coreLabel.keySet());
     // Remove items serialized elsewhere from the required list
@@ -123,21 +159,22 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (coreLabel.containsKey(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
     // Completeness check
-    if (!keysToSerialize.isEmpty()) {
-      throw new IllegalArgumentException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
+    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
+      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
     }
     // Return
     return builder.build();
   }
 
   /**
-   * Create a Sentence proto from a CoreMap instance
+   * Create a Sentence proto from a CoreMap instance.
+   * This is not static, as it optionally throws an exception if the serialization is lossy.
    * @param sentence The CoreMap to convert. Note that it should not be a CoreLabel or an Annotation,
    *                 and should represent a sentence.
    * @return A protocol buffer message corresponding to this sentence
    * @throws IllegalArgumentException If the sentence is not a valid sentence (e.g., is a document or a word).
    */
-  public static CoreNLPProtos.Sentence toProto(CoreMap sentence) {
+  public CoreNLPProtos.Sentence toProto(CoreMap sentence) {
     // Error checks
     if (sentence instanceof CoreLabel) { throw new IllegalArgumentException("CoreMap is actually a CoreLabel"); }
     CoreNLPProtos.Sentence.Builder builder = CoreNLPProtos.Sentence.newBuilder();
@@ -176,19 +213,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
     // Completeness check
-    if (!keysToSerialize.isEmpty()) {
-      throw new IllegalArgumentException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
+    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
+      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
     }
     // Return
     return builder.build();
   }
 
   /**
-   * Create a Document proto from a CoreMap instance
+   * Create a Document proto from a CoreMap instance.
+   * This is not static, as it optionally throws an exception if the serialization is lossy.
    * @param doc The Annotation to convert.
    * @return A protocol buffer message corresponding to this document
    */
-  public static CoreNLPProtos.Document toProto(Annotation doc) {
+  public CoreNLPProtos.Document toProto(Annotation doc) {
     CoreNLPProtos.Document.Builder builder = CoreNLPProtos.Document.newBuilder();
     Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(doc.keySet());
     // Required fields
@@ -214,8 +252,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       keysToSerialize.remove(CorefChainAnnotation.class);
     }
     // Completeness Check
-    if (!keysToSerialize.isEmpty()) {
-      throw new IllegalArgumentException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
+    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
+      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
     }
     // Return
     return builder.build();
