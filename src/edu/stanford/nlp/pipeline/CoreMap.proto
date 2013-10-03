@@ -5,9 +5,9 @@ option java_outer_classname = "CoreMapProtos";
 
 message Document {
   required string     text        = 1;
-  repeated CoreLabel  tokens      = 2;
-  repeated Sentence   sentences   = 3;
-  repeated CorefChain corefChains = 4;
+  repeated CoreLabel  token       = 2;
+  repeated Sentence   sentence    = 3;
+  repeated CorefChain corefChain  = 4;
   optional string     docID       = 5;
 }
 
@@ -51,7 +51,7 @@ message CoreLabel {
 // A syntactic parse tree, with scores.
 //
 message ParseTree {
-  repeated ParseTree children        = 1;
+  repeated ParseTree child           = 1;
   optional string    value           = 2;
   optional uint32    yieldBeginIndex = 3;
   optional uint32    yieldEndIndex   = 4;
@@ -65,7 +65,7 @@ message DependencyGraph {
   message Node {
     required uint32 sentenceIndex  = 1;
     required uint32 index          = 2;
-    optional bool   copyAnnotation = 3;
+    optional uint32 copyAnnotation = 3;
   }
 
   message Edge {
@@ -75,9 +75,9 @@ message DependencyGraph {
     optional bool   isExtra = 4;
   }
   
-  repeated Node   nodes = 1;
-  repeated Edge   edges = 2;
-  repeated uint32 roots = 3;
+  repeated Node   node = 1;
+  repeated Edge   edge = 2;
+  repeated uint32 root = 3;
 }
 
 //
@@ -85,17 +85,18 @@ message DependencyGraph {
 //
 message CorefChain {
   message CorefMention {
-    optional int32  mentionID   = 1;
-    optional string mentionType = 2;
-    optional string number      = 3;
-    optional string gender      = 4;
-    optional string animacy     = 5;
-    optional uint32 startIndex  = 6;
-    optional uint32 endIndex    = 7;
-    optional uint32 headIndex   = 9;
+    optional int32  mentionID     = 1;
+    optional string mentionType   = 2;
+    optional string number        = 3;
+    optional string gender        = 4;
+    optional string animacy       = 5;
+    optional uint32 startIndex    = 6;
+    optional uint32 endIndex      = 7;
+    optional uint32 headIndex     = 9;
+    optional uint32 sentenceIndex = 10;
   }
 
-  optional int32        chainID        = 1;
-  repeated CorefMention mentions       = 2;
-  optional uint32       representative = 3;
+  required int32        chainID        = 1;
+  repeated CorefMention mention        = 2;
+  required uint32       representative = 3;
 }
