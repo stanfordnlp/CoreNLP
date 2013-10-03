@@ -1382,6 +1382,10 @@ public final class CoreMapProtos {
     boolean hasCollapsedCCProcessedDependencies();
     edu.stanford.nlp.pipeline.CoreMapProtos.DependencyGraph getCollapsedCCProcessedDependencies();
     edu.stanford.nlp.pipeline.CoreMapProtos.DependencyGraphOrBuilder getCollapsedCCProcessedDependenciesOrBuilder();
+    
+    // optional uint32 paragraph = 10;
+    boolean hasParagraph();
+    int getParagraph();
   }
   public static final class Sentence extends
       com.google.protobuf.GeneratedMessage
@@ -1514,6 +1518,16 @@ public final class CoreMapProtos {
       return collapsedCCProcessedDependencies_;
     }
     
+    // optional uint32 paragraph = 10;
+    public static final int PARAGRAPH_FIELD_NUMBER = 10;
+    private int paragraph_;
+    public boolean hasParagraph() {
+      return ((bitField0_ & 0x00000200) == 0x00000200);
+    }
+    public int getParagraph() {
+      return paragraph_;
+    }
+    
     private void initFields() {
       tokenOffsetBegin_ = 0;
       tokenOffsetEnd_ = 0;
@@ -1524,6 +1538,7 @@ public final class CoreMapProtos {
       basicDependencies_ = edu.stanford.nlp.pipeline.CoreMapProtos.DependencyGraph.getDefaultInstance();
       collapsedDependencies_ = edu.stanford.nlp.pipeline.CoreMapProtos.DependencyGraph.getDefaultInstance();
       collapsedCCProcessedDependencies_ = edu.stanford.nlp.pipeline.CoreMapProtos.DependencyGraph.getDefaultInstance();
+      paragraph_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1590,6 +1605,9 @@ public final class CoreMapProtos {
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         output.writeMessage(9, collapsedCCProcessedDependencies_);
       }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        output.writeUInt32(10, paragraph_);
+      }
       getUnknownFields().writeTo(output);
     }
     
@@ -1634,6 +1652,10 @@ public final class CoreMapProtos {
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(9, collapsedCCProcessedDependencies_);
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(10, paragraph_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1797,6 +1819,8 @@ public final class CoreMapProtos {
           collapsedCCProcessedDependenciesBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000100);
+        paragraph_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
       
@@ -1887,6 +1911,10 @@ public final class CoreMapProtos {
         } else {
           result.collapsedCCProcessedDependencies_ = collapsedCCProcessedDependenciesBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+          to_bitField0_ |= 0x00000200;
+        }
+        result.paragraph_ = paragraph_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1929,6 +1957,9 @@ public final class CoreMapProtos {
         }
         if (other.hasCollapsedCCProcessedDependencies()) {
           mergeCollapsedCCProcessedDependencies(other.getCollapsedCCProcessedDependencies());
+        }
+        if (other.hasParagraph()) {
+          setParagraph(other.getParagraph());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -2046,6 +2077,11 @@ public final class CoreMapProtos {
               }
               input.readMessage(subBuilder, extensionRegistry);
               setCollapsedCCProcessedDependencies(subBuilder.buildPartial());
+              break;
+            }
+            case 80: {
+              bitField0_ |= 0x00000200;
+              paragraph_ = input.readUInt32();
               break;
             }
           }
@@ -2519,6 +2555,27 @@ public final class CoreMapProtos {
         return collapsedCCProcessedDependenciesBuilder_;
       }
       
+      // optional uint32 paragraph = 10;
+      private int paragraph_ ;
+      public boolean hasParagraph() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      public int getParagraph() {
+        return paragraph_;
+      }
+      public Builder setParagraph(int value) {
+        bitField0_ |= 0x00000200;
+        paragraph_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearParagraph() {
+        bitField0_ = (bitField0_ & ~0x00000200);
+        paragraph_ = 0;
+        onChanged();
+        return this;
+      }
+      
       // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.Sentence)
     }
     
@@ -2549,37 +2606,61 @@ public final class CoreMapProtos {
     boolean hasCategory();
     String getCategory();
     
-    // optional string before = 6;
+    // optional string before = 5;
     boolean hasBefore();
     String getBefore();
     
-    // optional string after = 7;
+    // optional string after = 6;
     boolean hasAfter();
     String getAfter();
     
-    // optional string originalText = 8;
+    // optional string originalText = 7;
     boolean hasOriginalText();
     String getOriginalText();
     
-    // optional string ner = 10;
+    // optional string ner = 8;
     boolean hasNer();
     String getNer();
     
-    // optional string lemma = 11;
+    // optional string normalizedNER = 9;
+    boolean hasNormalizedNER();
+    String getNormalizedNER();
+    
+    // optional string lemma = 10;
     boolean hasLemma();
     String getLemma();
     
-    // optional uint32 index = 12;
-    boolean hasIndex();
-    int getIndex();
+    // optional uint32 beginChar = 11;
+    boolean hasBeginChar();
+    int getBeginChar();
     
-    // optional uint32 beginPosition = 14;
-    boolean hasBeginPosition();
-    int getBeginPosition();
+    // optional uint32 endChar = 12;
+    boolean hasEndChar();
+    int getEndChar();
     
-    // optional uint32 endPosition = 15;
-    boolean hasEndPosition();
-    int getEndPosition();
+    // optional uint32 utterance = 13;
+    boolean hasUtterance();
+    int getUtterance();
+    
+    // optional string speaker = 14;
+    boolean hasSpeaker();
+    String getSpeaker();
+    
+    // optional uint32 beginIndex = 15;
+    boolean hasBeginIndex();
+    int getBeginIndex();
+    
+    // optional uint32 endIndex = 16;
+    boolean hasEndIndex();
+    int getEndIndex();
+    
+    // optional uint32 tokenBeginIndex = 17;
+    boolean hasTokenBeginIndex();
+    int getTokenBeginIndex();
+    
+    // optional uint32 tokenEndIndex = 18;
+    boolean hasTokenEndIndex();
+    int getTokenEndIndex();
   }
   public static final class CoreLabel extends
       com.google.protobuf.GeneratedMessage
@@ -2738,8 +2819,8 @@ public final class CoreMapProtos {
       }
     }
     
-    // optional string before = 6;
-    public static final int BEFORE_FIELD_NUMBER = 6;
+    // optional string before = 5;
+    public static final int BEFORE_FIELD_NUMBER = 5;
     private java.lang.Object before_;
     public boolean hasBefore() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
@@ -2770,8 +2851,8 @@ public final class CoreMapProtos {
       }
     }
     
-    // optional string after = 7;
-    public static final int AFTER_FIELD_NUMBER = 7;
+    // optional string after = 6;
+    public static final int AFTER_FIELD_NUMBER = 6;
     private java.lang.Object after_;
     public boolean hasAfter() {
       return ((bitField0_ & 0x00000020) == 0x00000020);
@@ -2802,8 +2883,8 @@ public final class CoreMapProtos {
       }
     }
     
-    // optional string originalText = 8;
-    public static final int ORIGINALTEXT_FIELD_NUMBER = 8;
+    // optional string originalText = 7;
+    public static final int ORIGINALTEXT_FIELD_NUMBER = 7;
     private java.lang.Object originalText_;
     public boolean hasOriginalText() {
       return ((bitField0_ & 0x00000040) == 0x00000040);
@@ -2834,8 +2915,8 @@ public final class CoreMapProtos {
       }
     }
     
-    // optional string ner = 10;
-    public static final int NER_FIELD_NUMBER = 10;
+    // optional string ner = 8;
+    public static final int NER_FIELD_NUMBER = 8;
     private java.lang.Object ner_;
     public boolean hasNer() {
       return ((bitField0_ & 0x00000080) == 0x00000080);
@@ -2866,11 +2947,43 @@ public final class CoreMapProtos {
       }
     }
     
-    // optional string lemma = 11;
-    public static final int LEMMA_FIELD_NUMBER = 11;
+    // optional string normalizedNER = 9;
+    public static final int NORMALIZEDNER_FIELD_NUMBER = 9;
+    private java.lang.Object normalizedNER_;
+    public boolean hasNormalizedNER() {
+      return ((bitField0_ & 0x00000100) == 0x00000100);
+    }
+    public String getNormalizedNER() {
+      java.lang.Object ref = normalizedNER_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          normalizedNER_ = s;
+        }
+        return s;
+      }
+    }
+    private com.google.protobuf.ByteString getNormalizedNERBytes() {
+      java.lang.Object ref = normalizedNER_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+        normalizedNER_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    
+    // optional string lemma = 10;
+    public static final int LEMMA_FIELD_NUMBER = 10;
     private java.lang.Object lemma_;
     public boolean hasLemma() {
-      return ((bitField0_ & 0x00000100) == 0x00000100);
+      return ((bitField0_ & 0x00000200) == 0x00000200);
     }
     public String getLemma() {
       java.lang.Object ref = lemma_;
@@ -2898,34 +3011,106 @@ public final class CoreMapProtos {
       }
     }
     
-    // optional uint32 index = 12;
-    public static final int INDEX_FIELD_NUMBER = 12;
-    private int index_;
-    public boolean hasIndex() {
-      return ((bitField0_ & 0x00000200) == 0x00000200);
-    }
-    public int getIndex() {
-      return index_;
-    }
-    
-    // optional uint32 beginPosition = 14;
-    public static final int BEGINPOSITION_FIELD_NUMBER = 14;
-    private int beginPosition_;
-    public boolean hasBeginPosition() {
+    // optional uint32 beginChar = 11;
+    public static final int BEGINCHAR_FIELD_NUMBER = 11;
+    private int beginChar_;
+    public boolean hasBeginChar() {
       return ((bitField0_ & 0x00000400) == 0x00000400);
     }
-    public int getBeginPosition() {
-      return beginPosition_;
+    public int getBeginChar() {
+      return beginChar_;
     }
     
-    // optional uint32 endPosition = 15;
-    public static final int ENDPOSITION_FIELD_NUMBER = 15;
-    private int endPosition_;
-    public boolean hasEndPosition() {
+    // optional uint32 endChar = 12;
+    public static final int ENDCHAR_FIELD_NUMBER = 12;
+    private int endChar_;
+    public boolean hasEndChar() {
       return ((bitField0_ & 0x00000800) == 0x00000800);
     }
-    public int getEndPosition() {
-      return endPosition_;
+    public int getEndChar() {
+      return endChar_;
+    }
+    
+    // optional uint32 utterance = 13;
+    public static final int UTTERANCE_FIELD_NUMBER = 13;
+    private int utterance_;
+    public boolean hasUtterance() {
+      return ((bitField0_ & 0x00001000) == 0x00001000);
+    }
+    public int getUtterance() {
+      return utterance_;
+    }
+    
+    // optional string speaker = 14;
+    public static final int SPEAKER_FIELD_NUMBER = 14;
+    private java.lang.Object speaker_;
+    public boolean hasSpeaker() {
+      return ((bitField0_ & 0x00002000) == 0x00002000);
+    }
+    public String getSpeaker() {
+      java.lang.Object ref = speaker_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+          speaker_ = s;
+        }
+        return s;
+      }
+    }
+    private com.google.protobuf.ByteString getSpeakerBytes() {
+      java.lang.Object ref = speaker_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+        speaker_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    
+    // optional uint32 beginIndex = 15;
+    public static final int BEGININDEX_FIELD_NUMBER = 15;
+    private int beginIndex_;
+    public boolean hasBeginIndex() {
+      return ((bitField0_ & 0x00004000) == 0x00004000);
+    }
+    public int getBeginIndex() {
+      return beginIndex_;
+    }
+    
+    // optional uint32 endIndex = 16;
+    public static final int ENDINDEX_FIELD_NUMBER = 16;
+    private int endIndex_;
+    public boolean hasEndIndex() {
+      return ((bitField0_ & 0x00008000) == 0x00008000);
+    }
+    public int getEndIndex() {
+      return endIndex_;
+    }
+    
+    // optional uint32 tokenBeginIndex = 17;
+    public static final int TOKENBEGININDEX_FIELD_NUMBER = 17;
+    private int tokenBeginIndex_;
+    public boolean hasTokenBeginIndex() {
+      return ((bitField0_ & 0x00010000) == 0x00010000);
+    }
+    public int getTokenBeginIndex() {
+      return tokenBeginIndex_;
+    }
+    
+    // optional uint32 tokenEndIndex = 18;
+    public static final int TOKENENDINDEX_FIELD_NUMBER = 18;
+    private int tokenEndIndex_;
+    public boolean hasTokenEndIndex() {
+      return ((bitField0_ & 0x00020000) == 0x00020000);
+    }
+    public int getTokenEndIndex() {
+      return tokenEndIndex_;
     }
     
     private void initFields() {
@@ -2937,10 +3122,16 @@ public final class CoreMapProtos {
       after_ = "";
       originalText_ = "";
       ner_ = "";
+      normalizedNER_ = "";
       lemma_ = "";
-      index_ = 0;
-      beginPosition_ = 0;
-      endPosition_ = 0;
+      beginChar_ = 0;
+      endChar_ = 0;
+      utterance_ = 0;
+      speaker_ = "";
+      beginIndex_ = 0;
+      endIndex_ = 0;
+      tokenBeginIndex_ = 0;
+      tokenEndIndex_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2971,28 +3162,46 @@ public final class CoreMapProtos {
         output.writeBytes(4, getCategoryBytes());
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBytes(6, getBeforeBytes());
+        output.writeBytes(5, getBeforeBytes());
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeBytes(7, getAfterBytes());
+        output.writeBytes(6, getAfterBytes());
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeBytes(8, getOriginalTextBytes());
+        output.writeBytes(7, getOriginalTextBytes());
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        output.writeBytes(10, getNerBytes());
+        output.writeBytes(8, getNerBytes());
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
-        output.writeBytes(11, getLemmaBytes());
+        output.writeBytes(9, getNormalizedNERBytes());
       }
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
-        output.writeUInt32(12, index_);
+        output.writeBytes(10, getLemmaBytes());
       }
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
-        output.writeUInt32(14, beginPosition_);
+        output.writeUInt32(11, beginChar_);
       }
       if (((bitField0_ & 0x00000800) == 0x00000800)) {
-        output.writeUInt32(15, endPosition_);
+        output.writeUInt32(12, endChar_);
+      }
+      if (((bitField0_ & 0x00001000) == 0x00001000)) {
+        output.writeUInt32(13, utterance_);
+      }
+      if (((bitField0_ & 0x00002000) == 0x00002000)) {
+        output.writeBytes(14, getSpeakerBytes());
+      }
+      if (((bitField0_ & 0x00004000) == 0x00004000)) {
+        output.writeUInt32(15, beginIndex_);
+      }
+      if (((bitField0_ & 0x00008000) == 0x00008000)) {
+        output.writeUInt32(16, endIndex_);
+      }
+      if (((bitField0_ & 0x00010000) == 0x00010000)) {
+        output.writeUInt32(17, tokenBeginIndex_);
+      }
+      if (((bitField0_ & 0x00020000) == 0x00020000)) {
+        output.writeUInt32(18, tokenEndIndex_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -3021,35 +3230,59 @@ public final class CoreMapProtos {
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(6, getBeforeBytes());
+          .computeBytesSize(5, getBeforeBytes());
       }
       if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(7, getAfterBytes());
+          .computeBytesSize(6, getAfterBytes());
       }
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(8, getOriginalTextBytes());
+          .computeBytesSize(7, getOriginalTextBytes());
       }
       if (((bitField0_ & 0x00000080) == 0x00000080)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(10, getNerBytes());
+          .computeBytesSize(8, getNerBytes());
       }
       if (((bitField0_ & 0x00000100) == 0x00000100)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(11, getLemmaBytes());
+          .computeBytesSize(9, getNormalizedNERBytes());
       }
       if (((bitField0_ & 0x00000200) == 0x00000200)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(12, index_);
+          .computeBytesSize(10, getLemmaBytes());
       }
       if (((bitField0_ & 0x00000400) == 0x00000400)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(14, beginPosition_);
+          .computeUInt32Size(11, beginChar_);
       }
       if (((bitField0_ & 0x00000800) == 0x00000800)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(15, endPosition_);
+          .computeUInt32Size(12, endChar_);
+      }
+      if (((bitField0_ & 0x00001000) == 0x00001000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(13, utterance_);
+      }
+      if (((bitField0_ & 0x00002000) == 0x00002000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(14, getSpeakerBytes());
+      }
+      if (((bitField0_ & 0x00004000) == 0x00004000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(15, beginIndex_);
+      }
+      if (((bitField0_ & 0x00008000) == 0x00008000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(16, endIndex_);
+      }
+      if (((bitField0_ & 0x00010000) == 0x00010000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(17, tokenBeginIndex_);
+      }
+      if (((bitField0_ & 0x00020000) == 0x00020000)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(18, tokenEndIndex_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -3191,14 +3424,26 @@ public final class CoreMapProtos {
         bitField0_ = (bitField0_ & ~0x00000040);
         ner_ = "";
         bitField0_ = (bitField0_ & ~0x00000080);
-        lemma_ = "";
+        normalizedNER_ = "";
         bitField0_ = (bitField0_ & ~0x00000100);
-        index_ = 0;
+        lemma_ = "";
         bitField0_ = (bitField0_ & ~0x00000200);
-        beginPosition_ = 0;
+        beginChar_ = 0;
         bitField0_ = (bitField0_ & ~0x00000400);
-        endPosition_ = 0;
+        endChar_ = 0;
         bitField0_ = (bitField0_ & ~0x00000800);
+        utterance_ = 0;
+        bitField0_ = (bitField0_ & ~0x00001000);
+        speaker_ = "";
+        bitField0_ = (bitField0_ & ~0x00002000);
+        beginIndex_ = 0;
+        bitField0_ = (bitField0_ & ~0x00004000);
+        endIndex_ = 0;
+        bitField0_ = (bitField0_ & ~0x00008000);
+        tokenBeginIndex_ = 0;
+        bitField0_ = (bitField0_ & ~0x00010000);
+        tokenEndIndex_ = 0;
+        bitField0_ = (bitField0_ & ~0x00020000);
         return this;
       }
       
@@ -3272,19 +3517,43 @@ public final class CoreMapProtos {
         if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
           to_bitField0_ |= 0x00000100;
         }
-        result.lemma_ = lemma_;
+        result.normalizedNER_ = normalizedNER_;
         if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
           to_bitField0_ |= 0x00000200;
         }
-        result.index_ = index_;
+        result.lemma_ = lemma_;
         if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
           to_bitField0_ |= 0x00000400;
         }
-        result.beginPosition_ = beginPosition_;
+        result.beginChar_ = beginChar_;
         if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
           to_bitField0_ |= 0x00000800;
         }
-        result.endPosition_ = endPosition_;
+        result.endChar_ = endChar_;
+        if (((from_bitField0_ & 0x00001000) == 0x00001000)) {
+          to_bitField0_ |= 0x00001000;
+        }
+        result.utterance_ = utterance_;
+        if (((from_bitField0_ & 0x00002000) == 0x00002000)) {
+          to_bitField0_ |= 0x00002000;
+        }
+        result.speaker_ = speaker_;
+        if (((from_bitField0_ & 0x00004000) == 0x00004000)) {
+          to_bitField0_ |= 0x00004000;
+        }
+        result.beginIndex_ = beginIndex_;
+        if (((from_bitField0_ & 0x00008000) == 0x00008000)) {
+          to_bitField0_ |= 0x00008000;
+        }
+        result.endIndex_ = endIndex_;
+        if (((from_bitField0_ & 0x00010000) == 0x00010000)) {
+          to_bitField0_ |= 0x00010000;
+        }
+        result.tokenBeginIndex_ = tokenBeginIndex_;
+        if (((from_bitField0_ & 0x00020000) == 0x00020000)) {
+          to_bitField0_ |= 0x00020000;
+        }
+        result.tokenEndIndex_ = tokenEndIndex_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -3325,17 +3594,35 @@ public final class CoreMapProtos {
         if (other.hasNer()) {
           setNer(other.getNer());
         }
+        if (other.hasNormalizedNER()) {
+          setNormalizedNER(other.getNormalizedNER());
+        }
         if (other.hasLemma()) {
           setLemma(other.getLemma());
         }
-        if (other.hasIndex()) {
-          setIndex(other.getIndex());
+        if (other.hasBeginChar()) {
+          setBeginChar(other.getBeginChar());
         }
-        if (other.hasBeginPosition()) {
-          setBeginPosition(other.getBeginPosition());
+        if (other.hasEndChar()) {
+          setEndChar(other.getEndChar());
         }
-        if (other.hasEndPosition()) {
-          setEndPosition(other.getEndPosition());
+        if (other.hasUtterance()) {
+          setUtterance(other.getUtterance());
+        }
+        if (other.hasSpeaker()) {
+          setSpeaker(other.getSpeaker());
+        }
+        if (other.hasBeginIndex()) {
+          setBeginIndex(other.getBeginIndex());
+        }
+        if (other.hasEndIndex()) {
+          setEndIndex(other.getEndIndex());
+        }
+        if (other.hasTokenBeginIndex()) {
+          setTokenBeginIndex(other.getTokenBeginIndex());
+        }
+        if (other.hasTokenEndIndex()) {
+          setTokenEndIndex(other.getTokenEndIndex());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -3392,44 +3679,74 @@ public final class CoreMapProtos {
               category_ = input.readBytes();
               break;
             }
-            case 50: {
+            case 42: {
               bitField0_ |= 0x00000010;
               before_ = input.readBytes();
               break;
             }
-            case 58: {
+            case 50: {
               bitField0_ |= 0x00000020;
               after_ = input.readBytes();
               break;
             }
-            case 66: {
+            case 58: {
               bitField0_ |= 0x00000040;
               originalText_ = input.readBytes();
               break;
             }
-            case 82: {
+            case 66: {
               bitField0_ |= 0x00000080;
               ner_ = input.readBytes();
               break;
             }
-            case 90: {
+            case 74: {
               bitField0_ |= 0x00000100;
+              normalizedNER_ = input.readBytes();
+              break;
+            }
+            case 82: {
+              bitField0_ |= 0x00000200;
               lemma_ = input.readBytes();
               break;
             }
-            case 96: {
-              bitField0_ |= 0x00000200;
-              index_ = input.readUInt32();
+            case 88: {
+              bitField0_ |= 0x00000400;
+              beginChar_ = input.readUInt32();
               break;
             }
-            case 112: {
-              bitField0_ |= 0x00000400;
-              beginPosition_ = input.readUInt32();
+            case 96: {
+              bitField0_ |= 0x00000800;
+              endChar_ = input.readUInt32();
+              break;
+            }
+            case 104: {
+              bitField0_ |= 0x00001000;
+              utterance_ = input.readUInt32();
+              break;
+            }
+            case 114: {
+              bitField0_ |= 0x00002000;
+              speaker_ = input.readBytes();
               break;
             }
             case 120: {
-              bitField0_ |= 0x00000800;
-              endPosition_ = input.readUInt32();
+              bitField0_ |= 0x00004000;
+              beginIndex_ = input.readUInt32();
+              break;
+            }
+            case 128: {
+              bitField0_ |= 0x00008000;
+              endIndex_ = input.readUInt32();
+              break;
+            }
+            case 136: {
+              bitField0_ |= 0x00010000;
+              tokenBeginIndex_ = input.readUInt32();
+              break;
+            }
+            case 144: {
+              bitField0_ |= 0x00020000;
+              tokenEndIndex_ = input.readUInt32();
               break;
             }
           }
@@ -3582,7 +3899,7 @@ public final class CoreMapProtos {
         onChanged();
       }
       
-      // optional string before = 6;
+      // optional string before = 5;
       private java.lang.Object before_ = "";
       public boolean hasBefore() {
         return ((bitField0_ & 0x00000010) == 0x00000010);
@@ -3618,7 +3935,7 @@ public final class CoreMapProtos {
         onChanged();
       }
       
-      // optional string after = 7;
+      // optional string after = 6;
       private java.lang.Object after_ = "";
       public boolean hasAfter() {
         return ((bitField0_ & 0x00000020) == 0x00000020);
@@ -3654,7 +3971,7 @@ public final class CoreMapProtos {
         onChanged();
       }
       
-      // optional string originalText = 8;
+      // optional string originalText = 7;
       private java.lang.Object originalText_ = "";
       public boolean hasOriginalText() {
         return ((bitField0_ & 0x00000040) == 0x00000040);
@@ -3690,7 +4007,7 @@ public final class CoreMapProtos {
         onChanged();
       }
       
-      // optional string ner = 10;
+      // optional string ner = 8;
       private java.lang.Object ner_ = "";
       public boolean hasNer() {
         return ((bitField0_ & 0x00000080) == 0x00000080);
@@ -3726,10 +4043,46 @@ public final class CoreMapProtos {
         onChanged();
       }
       
-      // optional string lemma = 11;
+      // optional string normalizedNER = 9;
+      private java.lang.Object normalizedNER_ = "";
+      public boolean hasNormalizedNER() {
+        return ((bitField0_ & 0x00000100) == 0x00000100);
+      }
+      public String getNormalizedNER() {
+        java.lang.Object ref = normalizedNER_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          normalizedNER_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      public Builder setNormalizedNER(String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000100;
+        normalizedNER_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearNormalizedNER() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        normalizedNER_ = getDefaultInstance().getNormalizedNER();
+        onChanged();
+        return this;
+      }
+      void setNormalizedNER(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00000100;
+        normalizedNER_ = value;
+        onChanged();
+      }
+      
+      // optional string lemma = 10;
       private java.lang.Object lemma_ = "";
       public boolean hasLemma() {
-        return ((bitField0_ & 0x00000100) == 0x00000100);
+        return ((bitField0_ & 0x00000200) == 0x00000200);
       }
       public String getLemma() {
         java.lang.Object ref = lemma_;
@@ -3745,82 +4098,202 @@ public final class CoreMapProtos {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000100;
+  bitField0_ |= 0x00000200;
         lemma_ = value;
         onChanged();
         return this;
       }
       public Builder clearLemma() {
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000200);
         lemma_ = getDefaultInstance().getLemma();
         onChanged();
         return this;
       }
       void setLemma(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000100;
+        bitField0_ |= 0x00000200;
         lemma_ = value;
         onChanged();
       }
       
-      // optional uint32 index = 12;
-      private int index_ ;
-      public boolean hasIndex() {
-        return ((bitField0_ & 0x00000200) == 0x00000200);
-      }
-      public int getIndex() {
-        return index_;
-      }
-      public Builder setIndex(int value) {
-        bitField0_ |= 0x00000200;
-        index_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearIndex() {
-        bitField0_ = (bitField0_ & ~0x00000200);
-        index_ = 0;
-        onChanged();
-        return this;
-      }
-      
-      // optional uint32 beginPosition = 14;
-      private int beginPosition_ ;
-      public boolean hasBeginPosition() {
+      // optional uint32 beginChar = 11;
+      private int beginChar_ ;
+      public boolean hasBeginChar() {
         return ((bitField0_ & 0x00000400) == 0x00000400);
       }
-      public int getBeginPosition() {
-        return beginPosition_;
+      public int getBeginChar() {
+        return beginChar_;
       }
-      public Builder setBeginPosition(int value) {
+      public Builder setBeginChar(int value) {
         bitField0_ |= 0x00000400;
-        beginPosition_ = value;
+        beginChar_ = value;
         onChanged();
         return this;
       }
-      public Builder clearBeginPosition() {
+      public Builder clearBeginChar() {
         bitField0_ = (bitField0_ & ~0x00000400);
-        beginPosition_ = 0;
+        beginChar_ = 0;
         onChanged();
         return this;
       }
       
-      // optional uint32 endPosition = 15;
-      private int endPosition_ ;
-      public boolean hasEndPosition() {
+      // optional uint32 endChar = 12;
+      private int endChar_ ;
+      public boolean hasEndChar() {
         return ((bitField0_ & 0x00000800) == 0x00000800);
       }
-      public int getEndPosition() {
-        return endPosition_;
+      public int getEndChar() {
+        return endChar_;
       }
-      public Builder setEndPosition(int value) {
+      public Builder setEndChar(int value) {
         bitField0_ |= 0x00000800;
-        endPosition_ = value;
+        endChar_ = value;
         onChanged();
         return this;
       }
-      public Builder clearEndPosition() {
+      public Builder clearEndChar() {
         bitField0_ = (bitField0_ & ~0x00000800);
-        endPosition_ = 0;
+        endChar_ = 0;
+        onChanged();
+        return this;
+      }
+      
+      // optional uint32 utterance = 13;
+      private int utterance_ ;
+      public boolean hasUtterance() {
+        return ((bitField0_ & 0x00001000) == 0x00001000);
+      }
+      public int getUtterance() {
+        return utterance_;
+      }
+      public Builder setUtterance(int value) {
+        bitField0_ |= 0x00001000;
+        utterance_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearUtterance() {
+        bitField0_ = (bitField0_ & ~0x00001000);
+        utterance_ = 0;
+        onChanged();
+        return this;
+      }
+      
+      // optional string speaker = 14;
+      private java.lang.Object speaker_ = "";
+      public boolean hasSpeaker() {
+        return ((bitField0_ & 0x00002000) == 0x00002000);
+      }
+      public String getSpeaker() {
+        java.lang.Object ref = speaker_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+          speaker_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      public Builder setSpeaker(String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00002000;
+        speaker_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearSpeaker() {
+        bitField0_ = (bitField0_ & ~0x00002000);
+        speaker_ = getDefaultInstance().getSpeaker();
+        onChanged();
+        return this;
+      }
+      void setSpeaker(com.google.protobuf.ByteString value) {
+        bitField0_ |= 0x00002000;
+        speaker_ = value;
+        onChanged();
+      }
+      
+      // optional uint32 beginIndex = 15;
+      private int beginIndex_ ;
+      public boolean hasBeginIndex() {
+        return ((bitField0_ & 0x00004000) == 0x00004000);
+      }
+      public int getBeginIndex() {
+        return beginIndex_;
+      }
+      public Builder setBeginIndex(int value) {
+        bitField0_ |= 0x00004000;
+        beginIndex_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearBeginIndex() {
+        bitField0_ = (bitField0_ & ~0x00004000);
+        beginIndex_ = 0;
+        onChanged();
+        return this;
+      }
+      
+      // optional uint32 endIndex = 16;
+      private int endIndex_ ;
+      public boolean hasEndIndex() {
+        return ((bitField0_ & 0x00008000) == 0x00008000);
+      }
+      public int getEndIndex() {
+        return endIndex_;
+      }
+      public Builder setEndIndex(int value) {
+        bitField0_ |= 0x00008000;
+        endIndex_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearEndIndex() {
+        bitField0_ = (bitField0_ & ~0x00008000);
+        endIndex_ = 0;
+        onChanged();
+        return this;
+      }
+      
+      // optional uint32 tokenBeginIndex = 17;
+      private int tokenBeginIndex_ ;
+      public boolean hasTokenBeginIndex() {
+        return ((bitField0_ & 0x00010000) == 0x00010000);
+      }
+      public int getTokenBeginIndex() {
+        return tokenBeginIndex_;
+      }
+      public Builder setTokenBeginIndex(int value) {
+        bitField0_ |= 0x00010000;
+        tokenBeginIndex_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearTokenBeginIndex() {
+        bitField0_ = (bitField0_ & ~0x00010000);
+        tokenBeginIndex_ = 0;
+        onChanged();
+        return this;
+      }
+      
+      // optional uint32 tokenEndIndex = 18;
+      private int tokenEndIndex_ ;
+      public boolean hasTokenEndIndex() {
+        return ((bitField0_ & 0x00020000) == 0x00020000);
+      }
+      public int getTokenEndIndex() {
+        return tokenEndIndex_;
+      }
+      public Builder setTokenEndIndex(int value) {
+        bitField0_ |= 0x00020000;
+        tokenEndIndex_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearTokenEndIndex() {
+        bitField0_ = (bitField0_ & ~0x00020000);
+        tokenEndIndex_ = 0;
         onChanged();
         return this;
       }
@@ -6728,6 +7201,10 @@ public final class CoreMapProtos {
       // optional uint32 sentenceIndex = 10;
       boolean hasSentenceIndex();
       int getSentenceIndex();
+      
+      // optional uint32 position = 11;
+      boolean hasPosition();
+      int getPosition();
     }
     public static final class CorefMention extends
         com.google.protobuf.GeneratedMessage
@@ -6936,6 +7413,16 @@ public final class CoreMapProtos {
         return sentenceIndex_;
       }
       
+      // optional uint32 position = 11;
+      public static final int POSITION_FIELD_NUMBER = 11;
+      private int position_;
+      public boolean hasPosition() {
+        return ((bitField0_ & 0x00000200) == 0x00000200);
+      }
+      public int getPosition() {
+        return position_;
+      }
+      
       private void initFields() {
         mentionID_ = 0;
         mentionType_ = "";
@@ -6946,6 +7433,7 @@ public final class CoreMapProtos {
         endIndex_ = 0;
         headIndex_ = 0;
         sentenceIndex_ = 0;
+        position_ = 0;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -6985,6 +7473,9 @@ public final class CoreMapProtos {
         }
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
           output.writeUInt32(10, sentenceIndex_);
+        }
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
+          output.writeUInt32(11, position_);
         }
         getUnknownFields().writeTo(output);
       }
@@ -7030,6 +7521,10 @@ public final class CoreMapProtos {
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
           size += com.google.protobuf.CodedOutputStream
             .computeUInt32Size(10, sentenceIndex_);
+        }
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeUInt32Size(11, position_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -7173,6 +7668,8 @@ public final class CoreMapProtos {
           bitField0_ = (bitField0_ & ~0x00000080);
           sentenceIndex_ = 0;
           bitField0_ = (bitField0_ & ~0x00000100);
+          position_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000200);
           return this;
         }
         
@@ -7247,6 +7744,10 @@ public final class CoreMapProtos {
             to_bitField0_ |= 0x00000100;
           }
           result.sentenceIndex_ = sentenceIndex_;
+          if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
+            to_bitField0_ |= 0x00000200;
+          }
+          result.position_ = position_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -7289,6 +7790,9 @@ public final class CoreMapProtos {
           }
           if (other.hasSentenceIndex()) {
             setSentenceIndex(other.getSentenceIndex());
+          }
+          if (other.hasPosition()) {
+            setPosition(other.getPosition());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
@@ -7364,6 +7868,11 @@ public final class CoreMapProtos {
               case 80: {
                 bitField0_ |= 0x00000100;
                 sentenceIndex_ = input.readUInt32();
+                break;
+              }
+              case 88: {
+                bitField0_ |= 0x00000200;
+                position_ = input.readUInt32();
                 break;
               }
             }
@@ -7617,6 +8126,27 @@ public final class CoreMapProtos {
         public Builder clearSentenceIndex() {
           bitField0_ = (bitField0_ & ~0x00000100);
           sentenceIndex_ = 0;
+          onChanged();
+          return this;
+        }
+        
+        // optional uint32 position = 11;
+        private int position_ ;
+        public boolean hasPosition() {
+          return ((bitField0_ & 0x00000200) == 0x00000200);
+        }
+        public int getPosition() {
+          return position_;
+        }
+        public Builder setPosition(int value) {
+          bitField0_ |= 0x00000200;
+          position_ = value;
+          onChanged();
+          return this;
+        }
+        public Builder clearPosition() {
+          bitField0_ = (bitField0_ & ~0x00000200);
+          position_ = 0;
           onChanged();
           return this;
         }
@@ -8327,7 +8857,7 @@ public final class CoreMapProtos {
       "nford.nlp.pipeline.CoreLabel\0225\n\010sentence" +
       "\030\003 \003(\0132#.edu.stanford.nlp.pipeline.Sente" +
       "nce\0229\n\ncorefChain\030\004 \003(\0132%.edu.stanford.n" +
-      "lp.pipeline.CorefChain\022\r\n\005docID\030\005 \001(\t\"\256\003" +
+      "lp.pipeline.CorefChain\022\r\n\005docID\030\005 \001(\t\"\301\003" +
       "\n\010Sentence\022\030\n\020tokenOffsetBegin\030\001 \002(\r\022\026\n\016" +
       "tokenOffsetEnd\030\002 \002(\r\022\025\n\rsentenceIndex\030\003 " +
       "\001(\r\022\034\n\024characterOffsetBegin\030\004 \001(\r\022\032\n\022cha",
@@ -8338,33 +8868,37 @@ public final class CoreMapProtos {
       "edDependencies\030\010 \001(\0132*.edu.stanford.nlp." +
       "pipeline.DependencyGraph\022T\n collapsedCCP" +
       "rocessedDependencies\030\t \001(\0132*.edu.stanfor" +
-      "d.nlp.pipeline.DependencyGraph\"\323\001\n\tCoreL" +
-      "abel\022\014\n\004word\030\001 \002(\t\022\013\n\003pos\030\002 \001(\t\022\r\n\005value" +
-      "\030\003 \001(\t\022\020\n\010category\030\004 \001(\t\022\016\n\006before\030\006 \001(\t",
-      "\022\r\n\005after\030\007 \001(\t\022\024\n\014originalText\030\010 \001(\t\022\013\n" +
-      "\003ner\030\n \001(\t\022\r\n\005lemma\030\013 \001(\t\022\r\n\005index\030\014 \001(\r" +
-      "\022\025\n\rbeginPosition\030\016 \001(\r\022\023\n\013endPosition\030\017" +
-      " \001(\r\"\216\001\n\tParseTree\0223\n\005child\030\001 \003(\0132$.edu." +
-      "stanford.nlp.pipeline.ParseTree\022\r\n\005value" +
-      "\030\002 \001(\t\022\027\n\017yieldBeginIndex\030\003 \001(\r\022\025\n\ryield" +
-      "EndIndex\030\004 \001(\r\022\r\n\005score\030\005 \001(\001\"\251\002\n\017Depend" +
-      "encyGraph\022=\n\004node\030\001 \003(\0132/.edu.stanford.n" +
-      "lp.pipeline.DependencyGraph.Node\022=\n\004edge" +
-      "\030\002 \003(\0132/.edu.stanford.nlp.pipeline.Depen",
-      "dencyGraph.Edge\022\014\n\004root\030\003 \003(\r\032D\n\004Node\022\025\n" +
-      "\rsentenceIndex\030\001 \002(\r\022\r\n\005index\030\002 \002(\r\022\026\n\016c" +
-      "opyAnnotation\030\003 \001(\r\032D\n\004Edge\022\016\n\006source\030\001 " +
-      "\002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003dep\030\003 \001(\t\022\017\n\007isEx" +
-      "tra\030\004 \001(\010\"\264\002\n\nCorefChain\022\017\n\007chainID\030\001 \002(" +
-      "\005\022C\n\007mention\030\002 \003(\01322.edu.stanford.nlp.pi" +
-      "peline.CorefChain.CorefMention\022\026\n\016repres" +
-      "entative\030\003 \002(\r\032\267\001\n\014CorefMention\022\021\n\tmenti" +
-      "onID\030\001 \001(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006numbe" +
-      "r\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t",
-      "\022\022\n\nstartIndex\030\006 \001(\r\022\020\n\010endIndex\030\007 \001(\r\022\021" +
-      "\n\theadIndex\030\t \001(\r\022\025\n\rsentenceIndex\030\n \001(\r" +
-      "B*\n\031edu.stanford.nlp.pipelineB\rCoreMapPr" +
-      "otos"
+      "d.nlp.pipeline.DependencyGraph\022\021\n\tparagr" +
+      "aph\030\n \001(\r\"\315\002\n\tCoreLabel\022\014\n\004word\030\001 \002(\t\022\013\n" +
+      "\003pos\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022\020\n\010category\030\004 ",
+      "\001(\t\022\016\n\006before\030\005 \001(\t\022\r\n\005after\030\006 \001(\t\022\024\n\014or" +
+      "iginalText\030\007 \001(\t\022\013\n\003ner\030\010 \001(\t\022\025\n\rnormali" +
+      "zedNER\030\t \001(\t\022\r\n\005lemma\030\n \001(\t\022\021\n\tbeginChar" +
+      "\030\013 \001(\r\022\017\n\007endChar\030\014 \001(\r\022\021\n\tutterance\030\r \001" +
+      "(\r\022\017\n\007speaker\030\016 \001(\t\022\022\n\nbeginIndex\030\017 \001(\r\022" +
+      "\020\n\010endIndex\030\020 \001(\r\022\027\n\017tokenBeginIndex\030\021 \001" +
+      "(\r\022\025\n\rtokenEndIndex\030\022 \001(\r\"\216\001\n\tParseTree\022" +
+      "3\n\005child\030\001 \003(\0132$.edu.stanford.nlp.pipeli" +
+      "ne.ParseTree\022\r\n\005value\030\002 \001(\t\022\027\n\017yieldBegi" +
+      "nIndex\030\003 \001(\r\022\025\n\ryieldEndIndex\030\004 \001(\r\022\r\n\005s",
+      "core\030\005 \001(\001\"\251\002\n\017DependencyGraph\022=\n\004node\030\001" +
+      " \003(\0132/.edu.stanford.nlp.pipeline.Depende" +
+      "ncyGraph.Node\022=\n\004edge\030\002 \003(\0132/.edu.stanfo" +
+      "rd.nlp.pipeline.DependencyGraph.Edge\022\014\n\004" +
+      "root\030\003 \003(\r\032D\n\004Node\022\025\n\rsentenceIndex\030\001 \002(" +
+      "\r\022\r\n\005index\030\002 \002(\r\022\026\n\016copyAnnotation\030\003 \001(\r" +
+      "\032D\n\004Edge\022\016\n\006source\030\001 \002(\r\022\016\n\006target\030\002 \002(\r" +
+      "\022\013\n\003dep\030\003 \001(\t\022\017\n\007isExtra\030\004 \001(\010\"\306\002\n\nCoref" +
+      "Chain\022\017\n\007chainID\030\001 \002(\005\022C\n\007mention\030\002 \003(\0132" +
+      "2.edu.stanford.nlp.pipeline.CorefChain.C",
+      "orefMention\022\026\n\016representative\030\003 \002(\r\032\311\001\n\014" +
+      "CorefMention\022\021\n\tmentionID\030\001 \001(\005\022\023\n\013menti" +
+      "onType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022\016\n\006gender\030\004" +
+      " \001(\t\022\017\n\007animacy\030\005 \001(\t\022\022\n\nstartIndex\030\006 \001(" +
+      "\r\022\020\n\010endIndex\030\007 \001(\r\022\021\n\theadIndex\030\t \001(\r\022\025" +
+      "\n\rsentenceIndex\030\n \001(\r\022\020\n\010position\030\013 \001(\rB" +
+      "*\n\031edu.stanford.nlp.pipelineB\rCoreMapPro" +
+      "tos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -8384,7 +8918,7 @@ public final class CoreMapProtos {
           internal_static_edu_stanford_nlp_pipeline_Sentence_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_Sentence_descriptor,
-              new java.lang.String[] { "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", },
+              new java.lang.String[] { "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", "Paragraph", },
               edu.stanford.nlp.pipeline.CoreMapProtos.Sentence.class,
               edu.stanford.nlp.pipeline.CoreMapProtos.Sentence.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_CoreLabel_descriptor =
@@ -8392,7 +8926,7 @@ public final class CoreMapProtos {
           internal_static_edu_stanford_nlp_pipeline_CoreLabel_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_CoreLabel_descriptor,
-              new java.lang.String[] { "Word", "Pos", "Value", "Category", "Before", "After", "OriginalText", "Ner", "Lemma", "Index", "BeginPosition", "EndPosition", },
+              new java.lang.String[] { "Word", "Pos", "Value", "Category", "Before", "After", "OriginalText", "Ner", "NormalizedNER", "Lemma", "BeginChar", "EndChar", "Utterance", "Speaker", "BeginIndex", "EndIndex", "TokenBeginIndex", "TokenEndIndex", },
               edu.stanford.nlp.pipeline.CoreMapProtos.CoreLabel.class,
               edu.stanford.nlp.pipeline.CoreMapProtos.CoreLabel.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_ParseTree_descriptor =
@@ -8440,7 +8974,7 @@ public final class CoreMapProtos {
           internal_static_edu_stanford_nlp_pipeline_CorefChain_CorefMention_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_CorefChain_CorefMention_descriptor,
-              new java.lang.String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "StartIndex", "EndIndex", "HeadIndex", "SentenceIndex", },
+              new java.lang.String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "StartIndex", "EndIndex", "HeadIndex", "SentenceIndex", "Position", },
               edu.stanford.nlp.pipeline.CoreMapProtos.CorefChain.CorefMention.class,
               edu.stanford.nlp.pipeline.CoreMapProtos.CorefChain.CorefMention.Builder.class);
           return null;

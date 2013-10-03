@@ -24,27 +24,38 @@ message Sentence {
   optional DependencyGraph basicDependencies                   = 7;
   optional DependencyGraph collapsedDependencies               = 8;
   optional DependencyGraph collapsedCCProcessedDependencies    = 9;
+  optional uint32          paragraph                           = 10;
 }
 
 //
 // The serialized version of a CoreLabel (a single word).
 //
 message CoreLabel {
-  required string word            = 1;
-  optional string pos             = 2;
-  optional string value           = 3;
-  optional string category        = 4;
-  optional string before          = 6;
-  optional string after           = 7;
-  optional string originalText    = 8;
-  optional string ner             = 10;
-  optional string lemma           = 11;
-  optional uint32 index           = 12;
-  optional uint32 beginPosition   = 14;
-  optional uint32 endPosition     = 15;
+  required string word            = 1;   // the word's gloss (post-tokenization)
+  optional string pos             = 2;   // The word's part of speech tag
+  optional string value           = 3;   // The word's 'value', (e.g., parse tree node)
+  optional string category        = 4;   // The word's 'category' (e.g., parse tree node)
+  optional string before          = 5;   // The gloss of the word before this
+  optional string after           = 6;   // The gloss of the word after this
+  optional string originalText    = 7;   // The original text for this token
+  optional string ner             = 8;   // The word's NER tag
+  optional string normalizedNER   = 9;   // The word's normalized NER tag
+  optional string lemma           = 10;  // The word's lemma
+  optional uint32 beginChar       = 11;  // The character offset begin
+  optional uint32 endChar         = 12;  // The character offset end
+  optional uint32 utterance       = 13;  // The utterance tag used in dcoref
+  optional string speaker         = 14;  // The speaker speaking this word
+  optional uint32 beginIndex      = 15;  // The begin index of, e.g., a span
+  optional uint32 endIndex        = 16;  // The begin index of, e.g., a span
+  optional uint32 tokenBeginIndex = 17;  // ??? so many indices!
+  optional uint32 tokenEndIndex   = 18;  // ??? so many indices!
+
   // Fields in the CoreLabel java class that are moved elsewhere
   //       uint32 sentenceIndex  @see Sentence#sentenceIndex
   //       string docID          @see Document#docID
+  //       uint32 index          @see implicit in Sentence
+  //       uint32 paragraph      @see Sentence#paragraph
+  //       uint32 corefClusterId @see implicit in Document
 }
 
 //
@@ -85,15 +96,16 @@ message DependencyGraph {
 //
 message CorefChain {
   message CorefMention {
-    optional int32  mentionID     = 1;
-    optional string mentionType   = 2;
-    optional string number        = 3;
-    optional string gender        = 4;
-    optional string animacy       = 5;
-    optional uint32 startIndex    = 6;
-    optional uint32 endIndex      = 7;
-    optional uint32 headIndex     = 9;
-    optional uint32 sentenceIndex = 10;
+    optional int32  mentionID          = 1;
+    optional string mentionType        = 2;
+    optional string number             = 3;
+    optional string gender             = 4;
+    optional string animacy            = 5;
+    optional uint32 startIndex         = 6;
+    optional uint32 endIndex           = 7;
+    optional uint32 headIndex          = 9;
+    optional uint32 sentenceIndex      = 10;
+    optional uint32 position           = 11;  // the second element of position
   }
 
   required int32        chainID        = 1;
