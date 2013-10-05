@@ -359,8 +359,15 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
 
     // If that didn't work, guess that it's the last word
+
+    int lastNounIdx = endIdx-1;
+    for(int i=m.startIndex ; i < m.endIndex ; i++) {
+      if(tokens.get(i).tag().startsWith("N")) lastNounIdx = i;
+      else if(tokens.get(i).tag().startsWith("W")) break;
+    }
+    
     List<Tree> leaves = root.getLeaves();
-    Tree endLeaf = leaves.get(endIdx - 1);
+    Tree endLeaf = leaves.get(lastNounIdx);
     return endLeaf;
   }
 
