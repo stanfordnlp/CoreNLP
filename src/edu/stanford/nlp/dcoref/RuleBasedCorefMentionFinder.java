@@ -294,9 +294,12 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       return safeHead(exactMatch, endIdx);
     }
 
-    Tree wordMatch = findTreeWithWords(root, tokens.subList(m.startIndex, endIdx));
+    Tree wordMatch = findTreeWithSmallestSpan(root, m.startIndex, endIdx);
     if (wordMatch != null) {
-      return safeHead(wordMatch, endIdx);
+      Tree head = safeHead(wordMatch, endIdx);
+      if (head != null) {
+        return head;
+      }
     }
 
     // no exact match found
@@ -465,24 +468,11 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     return top;
   }
 
-  static Tree findTreeWithWords(Tree tree, List<CoreLabel> tokens) {
+  static Tree findTreeWithSmallestSpan(Tree tree, int start, int end) {
     List<Tree> leaves = tree.getLeaves();
-    for (int i = 0; i < leaves.size() - tokens.size() + 1; ++i) {
-      boolean found = true;
-      for (int j = 0; j < tokens.size(); ++j) {
-        if (!tokens.get(j).value().equals(leaves.get(i+j).label().value())) {
-          found = false;
-          break;
-        }
-      }
-      if (found) {
-        Tree subtree = Trees.getLowestCommonAncestor(Arrays.asList(leaves.get(i), leaves.get(i + tokens.size() - 1)), tree);
-        // TODO: this ignores that the subtree may encompass more than
-        // just the tokens given.  How much of a problem is that?
-        return subtree;
-      }
-    }
-    return null;
+    Tree startLeaf = leaves.get(start);
+    Tree endLeaf = leaves.get(end - 1);
+    return Trees.getLowestCommonAncestor(Arrays.asList(startLeaf, endLeaf), tree);
   }
 
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {

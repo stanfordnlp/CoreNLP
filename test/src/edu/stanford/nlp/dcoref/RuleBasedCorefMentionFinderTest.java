@@ -14,16 +14,13 @@ import edu.stanford.nlp.trees.Tree;
  * @author John Bauer
  */
 public class RuleBasedCorefMentionFinderTest extends TestCase {
-  public void testFindTreeWithWords() {
+  public void testFindTreeWithSmallestSpan() {
     Tree tree = Tree.valueOf("(ROOT (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))");
+    tree.indexSpans();
+    Tree subtree = RuleBasedCorefMentionFinder.findTreeWithSmallestSpan(tree, 0, 2);
+    assertEquals("(NP (PRP$ My) (NN dog))", subtree.toString());
 
-    List<CoreLabel> words = Sentence.toCoreLabelList("eating", "sausage");
-    Tree subtree = RuleBasedCorefMentionFinder.findTreeWithWords(tree, words);    
-    assertEquals("(VP (VBG eating) (NP (NN sausage)))", subtree.toString());
-
-    // test that not finding the phrase doesn't cause us to blow up
-    words = Sentence.toCoreLabelList("Restoration", "Angel");
-    subtree = RuleBasedCorefMentionFinder.findTreeWithWords(tree, words);
-    assertEquals(null, subtree);
-  }
+    subtree = RuleBasedCorefMentionFinder.findTreeWithSmallestSpan(tree, 0, 1);
+    assertEquals("My", subtree.toString());
+  }  
 }
