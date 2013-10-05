@@ -67,7 +67,11 @@ public class Constants {
   public static final String DEMONYM_PROP = "dcoref.demonym";
   public static final String ANIMATE_PROP = "dcoref.animate";
   public static final String INANIMATE_PROP = "dcoref.inanimate";
+  public static final String MALE_PROP = "dcoref.male";
   public static final String NEUTRAL_PROP = "dcoref.neutral";
+  public static final String FEMALE_PROP = "dcoref.female";
+  public static final String PLURAL_PROP = "dcoref.plural";
+  public static final String SINGULAR_PROP = "dcoref.singular";
   public static final String SIEVES_PROP = "dcoref.sievePasses";
   public static final String MENTION_FINDER_PROP = "dcoref.mentionFinder";
   public static final String MENTION_FINDER_PROPFILE_PROP = "dcoref.mentionFinder.props";
