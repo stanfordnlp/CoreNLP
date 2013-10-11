@@ -276,27 +276,25 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------
 javax.servlet.jar
-ORIGINAL JAR NAME: servlet-api.jar
-VERSION: 3.0
-RELEASE DATE: ?
-SOURCE AVAILABLE: Yes. In: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
-DESCRIPTION: Used by Tomcat and servlets.  Originally part of Java EE 6.
-URL: ?
-USED BY: Our servlets
-LAST UPDATE: 2013
-LAST UPDATE BY: Spence Green
 
------------------------------------------------------------------
-protobuf.jar
-ORIGINAL JAR NAME: <compiled from source>
-VERSION: 4.1
-RELEASE DATE: April 2011
-SOURCE AVAILABLE: yes
-DESCRIPTION: Google's protocol buffer library
-URL: https://code.google.com/p/protobuf/
-USED BY: CoreMapProtos (and associated serializers)
-LAST UPDATE: 2013-09-24
-LAST UPDATE BY: Gabor Angeli
+ORIGINAL JAR NAME: ?
+
+VERSION: ?
+
+RELEASE DATE: ?
+
+SOURCE AVAILABLE: ?
+
+DESCRIPTION: Used by Tomcat and servlets.  Originally part of Java EE.
+
+URL: ?
+
+USED BY: Our servlets
+
+LAST UPDATE: ? 
+
+LAST UPDATE BY: ?
+
 -----------------------------------------------------------------
 foo.jar
 
