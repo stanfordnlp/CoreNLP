@@ -1235,7 +1235,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 if (inputSerializerClass != null) {
                   AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
                   InputStream is = new BufferedInputStream(new FileInputStream(file));
-                  annotation = inputSerializer.load(is);
+                  Pair<Annotation, InputStream> pair = inputSerializer.read(is);
+                  pair.second.close();
+                  annotation = pair.first;
                   IOUtils.closeIgnoringExceptions(is);
                 } else {
                   annotation = IOUtils.readObjectFromFile(file);
@@ -1298,8 +1300,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 if (outputSerializerClass != null) {
                   AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
                   OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-                  outputSerializer.save(annotation, fos);
-                  fos.close();
+                  outputSerializer.write(annotation, fos).close();
                 } else {
                   IOUtils.writeObjectToFile(annotation, finalOutputFilename);
                 }
