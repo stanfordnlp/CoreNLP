@@ -129,7 +129,7 @@ public class RegexNERAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return StanfordCoreNLP.TOKENIZE_AND_SSPLIT;
+    return StanfordCoreNLP.TOKENIZE_SSPLIT_POS;
   }
 
   @Override
