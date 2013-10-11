@@ -22,7 +22,7 @@ public class LabelDictionary implements Serializable {
 
   private static final long serialVersionUID = 6790400453922524056L;
 
-  private final boolean DEBUG = true;
+  private final boolean DEBUG = false;
 
   private final int DEFAULT_CAPACITY = 30000;
 
