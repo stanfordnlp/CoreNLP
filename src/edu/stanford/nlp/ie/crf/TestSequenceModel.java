@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ie.crf;
 
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.SequenceModel;
@@ -20,7 +19,7 @@ public class TestSequenceModel implements SequenceModel {
   private final CRFCliqueTree cliqueTree;
   private final int[] backgroundTag;
 
-  private int[] allTags;
+  private final int[] allTags;
   private int[][] allowedTagsAtPosition;
   
   public TestSequenceModel(CRFCliqueTree cliqueTree) {
@@ -47,16 +46,8 @@ public class TestSequenceModel implements SequenceModel {
       for (int i = 0; i < allowedTagsAtPosition.length; ++i) {
         CoreMap token  = document.get(i);
         String observation = token.get(CoreAnnotations.TextAnnotation.class);
-        if (labelDictionary.isConstrained(observation)) {
-          Set<Integer> allowedLabels = labelDictionary.getConstrainedSet(observation);
-          allowedTagsAtPosition[i] = new int[allowedLabels.size()];
-          int j = 0;
-          for (int labelIdx : allowedLabels) {
-            allowedTagsAtPosition[i][j++] = labelIdx;
-          }
-        } else {
-          allowedTagsAtPosition[i] = allTags;
-        }
+        allowedTagsAtPosition[i] = labelDictionary.isConstrained(observation) ?
+            labelDictionary.getConstrainedSet(observation) : allTags;
       }
     }
   }
