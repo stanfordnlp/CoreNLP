@@ -24,6 +24,9 @@ public class LabelDictionary implements Serializable {
 
   private final boolean DEBUG = false;
 
+  /**
+   * Initial capacity of the bookkeeping data structures.
+   */
   private final int DEFAULT_CAPACITY = 30000;
 
   // Bookkeeping
@@ -88,10 +91,8 @@ public class LabelDictionary implements Serializable {
    */
   public void lock(int threshold, Index<String> labelIndex) {
     if (labelDictionary != null) throw new RuntimeException("Label dictionary is already locked");
-    if (DEBUG) {
-      System.err.println("Label Dictionary Status:");
-      System.err.printf("# Observations: %d%n", (int) observationCounts.totalCount());
-    }
+    System.err.println("Label dictionary enabled");
+    System.err.printf("#observations: %d%n", (int) observationCounts.totalCount());
     Counters.retainAbove(observationCounts, threshold);
     Set<String> constrainedObservations = observationCounts.keySet();
     labelDictionary = new int[constrainedObservations.size()][];
@@ -110,9 +111,8 @@ public class LabelDictionary implements Serializable {
       }
     }
     observationIndex.lock();
-    if (DEBUG) {
-      System.err.printf("#constraints: %d%n", labelDictionary.length);
-    }
+    System.err.printf("#constraints: %d%n", labelDictionary.length);
+    
     // Free bookkeeping data structures
     observationCounts = null;
     observedLabels = null;
