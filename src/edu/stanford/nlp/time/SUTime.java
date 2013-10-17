@@ -574,8 +574,12 @@ public class SUTime {
     }
     private static final long serialVersionUID = 1;
   };
-  // public static final Duration QUARTER = new
-  // InexactDuration(Period.months(3));
+  public static final Duration HALFYEAR = new DurationWithFields(Period.months(6)) {
+    public DateTimeFieldType[] getDateTimeFields() {
+      return new DateTimeFieldType[] { JodaTimeUtils.HalfYearOfYear };
+    }
+    private static final long serialVersionUID = 1;
+  };
   public static final Duration MILLIS = new DurationWithFields(Period.millis(1)) {
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.millisOfSecond(), DateTimeFieldType.millisOfDay() };
@@ -726,8 +730,10 @@ public class SUTime {
 
   public static enum TimeUnit {
     // Basic time units
-    MILLIS(SUTime.MILLIS), SECOND(SUTime.SECOND), MINUTE(SUTime.MINUTE), HOUR(SUTime.HOUR), DAY(SUTime.DAY), WEEK(SUTime.WEEK), MONTH(SUTime.MONTH), QUARTER(SUTime.QUARTER), YEAR(
-            SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENNIUM(SUTime.MILLENNIUM), UNKNOWN(SUTime.DURATION_UNKNOWN);
+    MILLIS(SUTime.MILLIS), SECOND(SUTime.SECOND), MINUTE(SUTime.MINUTE), HOUR(SUTime.HOUR),
+    DAY(SUTime.DAY), WEEK(SUTime.WEEK), MONTH(SUTime.MONTH), QUARTER(SUTime.QUARTER), HALFYEAR(SUTime.HALFYEAR),
+    YEAR(SUTime.YEAR), DECADE(SUTime.DECADE), CENTURY(SUTime.CENTURY), MILLENNIUM(SUTime.MILLENNIUM),
+    UNKNOWN(SUTime.DURATION_UNKNOWN);
 
     protected Duration duration;
 
@@ -805,6 +811,12 @@ public class SUTime {
     QUARTER_OF_YEAR(TimexType.DATE, TimeUnit.QUARTER, SUTime.YEAR) {
       protected Time _createTemporal(int n) {
         return new PartialTime(new Partial(JodaTimeUtils.QuarterOfYear, n));
+      }
+    },
+
+    HALF_OF_YEAR(TimexType.DATE, TimeUnit.HALFYEAR, SUTime.YEAR) {
+      protected Time _createTemporal(int n) {
+        return new PartialTime(new Partial(JodaTimeUtils.HalfYearOfYear, n));
       }
     };
 
@@ -2479,7 +2491,8 @@ public class SUTime {
         builder.appendLiteral(PAD_FIELD_UNKNOWN4);
         hasDate = false;
       }
-      // Decide whether to include QUARTER, MONTH/DAY, or WEEK/WEEKDAY
+      // Decide whether to include HALF, QUARTER, MONTH/DAY, or WEEK/WEEKDAY
+      boolean appendHalf = false;
       boolean appendQuarter = false;
       boolean appendMonthDay = false;
       boolean appendWeekDay = false;
@@ -2491,15 +2504,23 @@ public class SUTime {
         } else if (JodaTimeUtils.hasField(base, DateTimeFieldType.monthOfYear()) || JodaTimeUtils.hasField(base, DateTimeFieldType.dayOfMonth())) {
           appendMonthDay = true;
         } else if (JodaTimeUtils.hasField(base, JodaTimeUtils.QuarterOfYear)) {
-          appendQuarter = true;
+          if (!isISO) appendQuarter = true;
+        } else if (JodaTimeUtils.hasField(base, JodaTimeUtils.HalfYearOfYear)) {
+          if (!isISO) appendHalf = true;
         }
       } else {
+        appendHalf = true;
         appendQuarter = true;
         appendMonthDay = true;
         appendWeekDay = true;
       }
 
-      // Quarter
+      // Half - Not ISO standard
+      if (appendHalf && JodaTimeUtils.hasField(base, JodaTimeUtils.HalfYearOfYear)) {
+        builder.appendLiteral("-H");
+        builder.appendDecimal(JodaTimeUtils.HalfYearOfYear, 1, 1);
+      }
+      // Quarter  - Not ISO standard
       if (appendQuarter && JodaTimeUtils.hasField(base, JodaTimeUtils.QuarterOfYear)) {
         builder.appendLiteral("-Q");
         builder.appendDecimal(JodaTimeUtils.QuarterOfYear, 1, 1);
@@ -2710,7 +2731,7 @@ public class SUTime {
       if (partialRef == null) {
         throw new UnsupportedOperationException("Cannot resolve if reftime is of class: " + ref.getClass());
       }
-      // D
+      
       Partial p = (base != null) ? JodaTimeUtils.combineMoreGeneralFields(base, partialRef) : partialRef;
       p = JodaTimeUtils.resolveDowToDay(p, partialRef);
 
@@ -2923,6 +2944,11 @@ public class SUTime {
         } else {
           if (JodaTimeUtils.hasField(unsupported, DurationFieldType.months()) && unsupported.getMonths() % 3 == 0 && JodaTimeUtils.hasField(p.base, JodaTimeUtils.QuarterOfYear)) {
             Partial p2 = p.base.withFieldAddWrapped(JodaTimeUtils.Quarters, unsupported.getMonths() / 3);
+            p = new PartialTime(p, p2);
+            unsupported = unsupported.withMonths(0);
+          }
+          if (JodaTimeUtils.hasField(unsupported, DurationFieldType.months()) && unsupported.getMonths() % 6 == 0 && JodaTimeUtils.hasField(p.base, JodaTimeUtils.HalfYearOfYear)) {
+            Partial p2 = p.base.withFieldAddWrapped(JodaTimeUtils.HalfYears, unsupported.getMonths() / 6);
             p = new PartialTime(p, p2);
             unsupported = unsupported.withMonths(0);
           }
