@@ -443,8 +443,8 @@ public class SUTimeITest extends TestCase {
             "The accident was Saturday last week.\n" +
             "He went to Japan August last year.\n" +
             "He died in 567 bc.\n" +
-            "The temple was built in the late 5th century B.C. and collapsed in the 3rd century A.D.\n" +
-            "I think 1000 BC was a long time ago\n";
+            "The temple was built in the late 5th century B.C. and collapsed in the 3rd century A.D.\n";
+//            "I think 1000 BC was a long time ago\n";
 
     Iterator<Timex> expectedTimexes =
       Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" alt_value=\"P1W-#3 INTERSECT XXXX-04\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf0\" anchorTimeID=\"t2\">The third week of april</TIMEX3>"),
@@ -462,8 +462,8 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t18\" alt_value=\"THIS P1Y OFFSET P-1Y INTERSECT XXXX-08\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf5\" anchorTimeID=\"t19\">August last year</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t20\" value=\"-0566\" type=\"DATE\">567 bc</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t21\" value=\"-04XX\" type=\"DATE\" mod=\"LATE\">the late 5th century B.C.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t22\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t23\" value=\"-0999\" type=\"DATE\">1000 BC</TIMEX3>")
+                    Timex.fromXml("<TIMEX3 tid=\"t22\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>")
+//                    Timex.fromXml("<TIMEX3 tid=\"t23\" value=\"-0999\" type=\"DATE\">1000 BC</TIMEX3>")
               ).iterator();
 
     Iterator<Timex> expectedTimexesResolved =
@@ -483,8 +483,8 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t14\" value=\"1998-08\" type=\"DATE\">August last year</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t15\" value=\"-0566\" type=\"DATE\">567 bc</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t16\" value=\"-04XX\" type=\"DATE\" mod=\"LATE\">the late 5th century B.C.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t17\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t18\" value=\"-0999\" type=\"DATE\">1000 BC</TIMEX3>")
+                    Timex.fromXml("<TIMEX3 tid=\"t17\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>")
+//                    Timex.fromXml("<TIMEX3 tid=\"t18\" value=\"-0999\" type=\"DATE\">1000 BC</TIMEX3>")
       ).iterator();
 
     // create document
