@@ -598,10 +598,8 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"1998-04-11T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"1998-04-18T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"1998-04-14T11:00\" type=\"TIME\">eleven in the morning on Tuesday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P1D INTERSECT T09:00\" anchorTimeID=\"t7\" temporalFunction=\"true\" tid=\"t6\" type=\"DATE\" valueFromFunction=\"tf0\">9 a.m. tomorrow</TIMEX3>"),    // TODO: Fix me
-//        Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"1998-04-18T09:00\" type=\"TIME\">9 a.m. tomorrow</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P-1D INTERSECT T06:15\" anchorTimeID=\"t9\" temporalFunction=\"true\" tid=\"t8\" type=\"DATE\" valueFromFunction=\"tf1\">a quarter past 6 yesterday</TIMEX3>")).iterator();
-//      Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"1998-04-16T06:15\" type=\"TIME\">a quarter past 6 yesterday</TIMEX3>")).iterator();
+        Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"1998-04-18T09:00\" type=\"TIME\">9 a.m. tomorrow</TIMEX3>"),
+        Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"1998-04-16T06:15\" type=\"TIME\">a quarter past 6 yesterday</TIMEX3>")).iterator();
 
     Iterator<Timex> expectedTimexesResolved3 =
       Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"1998-04T02:50\" type=\"TIME\">ten minutes to three</TIMEX3>"),
@@ -610,8 +608,10 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"1998-WXX-6T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),   // TODO: The month is lost
         Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"1998-WXX-6T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),   // TODO: The month is lost
         Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"1998-WXX-2T11:00\" type=\"TIME\">eleven in the morning on Tuesday</TIMEX3>"),  // TODO: The month is lost
-        Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"1998-04T09:00\" type=\"TIME\">9 a.m. tomorrow</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"1998-04T06:15\" type=\"TIME\">a quarter past 6 yesterday</TIMEX3>")).iterator();
+        Timex.fromXml("<TIMEX3 alt_value=\"1998-04 OFFSET P1D INTERSECT T09:00\" anchorTimeID=\"t7\" temporalFunction=\"true\" tid=\"t6\" type=\"DATE\" valueFromFunction=\"tf0\">9 a.m. tomorrow</TIMEX3>"),
+        Timex.fromXml("<TIMEX3 alt_value=\"1998-04 OFFSET P-1D INTERSECT T06:15\" anchorTimeID=\"t9\" temporalFunction=\"true\" tid=\"t8\" type=\"DATE\" valueFromFunction=\"tf1\">a quarter past 6 yesterday</TIMEX3>")).iterator();
+//        Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"1998-04T09:00\" type=\"TIME\">9 a.m. tomorrow</TIMEX3>"),
+//        Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"1998-04T06:15\" type=\"TIME\">a quarter past 6 yesterday</TIMEX3>")).iterator();
 
     // create document
     Annotation document = createDocument(testText);
@@ -1466,7 +1466,7 @@ public class SUTimeITest extends TestCase {
       { /* 2011-06-03 */
         { "2011-W23", "2011-W23-WE", "2011-06-03/2011-06-17",
           "2011-07", "2011-Q3", "2012", "202X", "21XX",
-          "2012-SP", "2011-SU", "2011-FA", "2011-FA", "2012-WI",              // TODO: Should be 2011-WI
+          "2012-SP", "2011-SU", "2011-FA", "2011-FA", "2011-WI",
           "2011-06-06", "2011-06-07", "2011-06-08", "2011-06-09", "2011-06-10", "2011-06-04", "2011-06-05",// "2011-06-WE?",
           "2012-01", "2012-02", "2012-03", "2012-04", "2012-05", "2012-06",
           "2011-07", "2011-08", "2011-09", "2011-10", "2011-11", "2011-12"
@@ -1474,7 +1474,7 @@ public class SUTimeITest extends TestCase {
         /* 2010-11-23 */
         { "2010-W48", "2010-W48-WE", "2010-11-23/2010-12-07",
           "2010-12", "2011-Q1", "2011", "202X", "21XX",
-          "2011-SP", "2011-SU", "2011-FA", "2011-FA", "2011-WI",     // TODO: Should be 2010-WI
+          "2011-SP", "2011-SU", "2011-FA", "2011-FA", "2010-WI",
           "2010-11-29", "2010-11-30", "2010-11-24", "2010-11-25", "2010-11-26", "2010-11-27", "2010-11-28",// "2010-11-23",
           "2011-01", "2011-02", "2011-03", "2011-04", "2011-05", "2011-06",
           "2011-07", "2011-08", "2011-09", "2011-10", "2011-11", "2010-12"
@@ -1482,7 +1482,7 @@ public class SUTimeITest extends TestCase {
         /* 1988-01-16 */
         { "1988-W03", "1988-W03-WE", "1988-01-16/1988-01-30",
           "1988-02", "1988-Q2", "1989", "199X", "20XX",
-          "1988-SP", "1988-SU", "1988-FA", "1988-FA", "1989-WI",               // TODO: Should be 1988-WI or 1989-WI?
+          "1988-SP", "1988-SU", "1988-FA", "1988-FA", "1988-WI",               // TODO: Should be 1988-WI or 1989-WI?
           "1988-01-18", "1988-01-19", "1988-01-20", "1988-01-21", "1988-01-22", "1988-01-23", "1988-01-17",// "2010-11-23",
           "1989-01", "1988-02", "1988-03", "1988-04", "1988-05", "1988-06",
           "1988-07", "1988-08", "1988-09", "1988-10", "1988-11", "1988-12"

@@ -212,7 +212,7 @@ public class JollyDayHolidays implements Env.Binder {
 
     @Override
     public SUTime.Time add(SUTime.Duration offset) {
-      return new SUTime.RelativeTime(this, SUTime.TemporalOp.OFFSET, offset);
+      return new SUTime.RelativeTime(this, SUTime.TemporalOp.OFFSET_EXACT, offset);
     }
   }
 
