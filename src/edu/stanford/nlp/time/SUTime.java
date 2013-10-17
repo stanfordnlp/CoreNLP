@@ -2648,6 +2648,7 @@ public class SUTime {
       if (partialRef == null) {
         throw new UnsupportedOperationException("Cannot resolve if reftime is of class: " + ref.getClass());
       }
+      // D
       Partial p = (base != null) ? JodaTimeUtils.combineMoreGeneralFields(base, partialRef) : partialRef;
       p = JodaTimeUtils.resolveDowToDay(p, partialRef);
 
@@ -3156,6 +3157,7 @@ public class SUTime {
   private static final Pattern PATTERN_ISO_TIME = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
   private static final Pattern PATTERN_ISO_DATE_1 = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
   private static final Pattern PATTERN_ISO_DATE_2 = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
+  private static final Pattern PATTERN_ISO_DATE_PARTIAL = Pattern.compile("([0-9X]{4})[-]?([0-9X][0-9X])[-]?([0-9X][0-9X])");
 
   // Ambiguous pattern - interpret as MM/DD/YY(YY)
   private static final Pattern PATTERN_ISO_AMBIGUOUS_1 = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
@@ -3174,8 +3176,9 @@ public class SUTime {
    *   YYYYMMDDThhmmss
    *
    * @param dateStr
+   * @param allowPartial (allow partial ISO)
    */
-  public static SUTime.Time parseDateTime(String dateStr)
+  public static SUTime.Time parseDateTime(String dateStr, boolean allowPartial)
   {
     if (dateStr == null) return null;
 
@@ -3219,6 +3222,15 @@ public class SUTime {
       }
     }
 
+    if (allowPartial) {
+      m = PATTERN_ISO_DATE_PARTIAL.matcher(dateStr);
+      if (m.matches()) {
+        if (!(m.group(1).equals("XXXX") && m.group(2).equals("XX") && m.group(3).equals("XX"))) {
+          isoDate = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
+        }
+      }
+    }
+
     if (isoDate == null) {
       m = PATTERN_ISO_AMBIGUOUS_1.matcher(dateStr);
 
@@ -3258,6 +3270,10 @@ public class SUTime {
     } else {
       return isoTime;
     }
+  }
+
+  public static SUTime.Time parseDateTime(String dateStr) {
+    return parseDateTime(dateStr, false);
   }
 
   public static class GroundedTime extends Time {

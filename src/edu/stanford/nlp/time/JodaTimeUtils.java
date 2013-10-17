@@ -595,6 +595,8 @@ public class JodaTimeUtils {
   // Uses p2 to resolve dow for p1
   public static Partial resolveDowToDay(Partial p1, Partial p2)
   {
+    // Discard anything that's more specific than dayOfMonth for p2
+    p2 = JodaTimeUtils.discardMoreSpecificFields(p2, DateTimeFieldType.dayOfMonth());
     if (isCompatible(p1,p2)) {
       if (p1.isSupported(DateTimeFieldType.dayOfWeek())) {
         if (!p1.isSupported(DateTimeFieldType.dayOfMonth())) {
