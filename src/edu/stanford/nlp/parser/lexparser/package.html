@@ -33,13 +33,13 @@ For English, for most purposes, we now recommend just using the unlexicalized PC
 The factored parser and the unlexicalized PCFG parser are described in:
 <ul>
 <li>Dan Klein and Christopher D. Manning. 2002. Fast Exact Inference with a
-      Factored Model for Natural Language Parsing. <i>Advances
-      in Neural Information Processing Systems 15 (NIPS 2002)</i>.
+      Factored Model for Natural Language Parsing. <em>Advances
+      in Neural Information Processing Systems 15 (NIPS 2002)</em>.
 [<a href="http://nlp.stanford.edu/~manning/papers/lex-parser.pdf">pdf</a>]</li>
 
 <li>Dan Klein and Christopher D. Manning. 2003. Accurate
-Unlexicalized Parsing. <i>Proceedings of the Association for
-	  Computational Linguistics</i>, 2003.
+Unlexicalized Parsing. <em>Proceedings of the Association for
+	  Computational Linguistics</em>, 2003.
 [<a href="http://nlp.stanford.edu/~manning/papers/unlexicalized-parsing.pdf">pdf</a>]</li>
 </ul>
 <p>
@@ -69,10 +69,10 @@ Chinese parser.  The German parser was developed for and used in the
 second paper (but the paper contains very little detail on it).</p>
 <ul>
 <li>Roger Levy and Christopher D. Manning. 2003. Is it harder to
-parse Chinese, or the Chinese Treebank?  <i>ACL 2003</i>, pp. 439-446.</li>
+parse Chinese, or the Chinese Treebank?  <em>ACL 2003</em>, pp. 439-446.</li>
 <li>Roger Levy and Christopher D. Manning. 2004. Deep dependencies from
 context-free statistical parsers: correcting the surface dependency
-approximation. <i>ACL 2004</i>, pp. 328-335.</li>
+approximation. <em>ACL 2004</em>, pp. 328-335.</li>
 </ul>
 <p>
 The grammatical relations output of the parser is presented in:
@@ -80,7 +80,7 @@ The grammatical relations output of the parser is presented in:
 <ul>
 <li>Marie-Catherine de Marneffe, Bill MacCartney and Christopher
 D. Manning. 2006. Generating Typed Dependency Parses from Phrase Structure
-Parses.  <i>LREC 2006</i>.</li>
+Parses.  <em>LREC 2006</em>.</li>
 </ul>
 
 <h3>End user usage</h3>
@@ -95,10 +95,10 @@ You need a machine with a fair amount of memory.  Required memory
       depends on the choice of parser, the size of the grammar, and
       other factors like the presence of numerous unknown words
       To run the PCFG parser
-      on sentences of up to 40 words you need 100 Mb of memory.  To be
+      on sentences of up to 40 words you need 100 MB of memory.  To be
       able to handle longer sentences, you need more (to parse sentences
-      up to 100 words, you need 400 Mb).  For running the
-      Factored Parser, 600 Mb is needed for dealing with sentences
+      up to 100 words, you need 400 MB).  For running the
+      Factored Parser, 600 MB is needed for dealing with sentences
       up to 40 words.  Factored parsing of sentences up to 200 words
       requires around 3GB of memory.
       Training a new lexicalized parser requires about 1500m of memory;
@@ -109,22 +109,26 @@ You need a machine with a fair amount of memory.  Required memory
 For just parsing text, you need a saved parser model (grammars, lexicon,
       etc.), which can be
       represented either as a text file or as a binary (Java serialized
-      object) representation, and which can be gzip compressed.  A number are
-provided (in <code>/u/nlp/data/lexparser</code> for local
-      users, or in the root directory
-      of the distributed version).
-For instance, there is <code>englishFactored.ser.gz</code>
-and <code>englishPCFG.ser.gz</code> for English, and
-<code>chineseFactored.ser.gz</code> and
-<code>chinesePCFG.ser.gz</code> for Chinese.
+      object) representation, and which can be gzip compressed.
+    A number are provided contained in the supplied
+    stanford-parser-$VERSION-models.jar file in the distributed version,
+    and can be accessed from there by having this jar file on your
+    CLASSPATH and specifying them via a classpath entry such as:
+    <code>edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz</code>.
+    (Stanford NLP people can also find the grammars in the directory
+    <code>/u/nlp/data/lexparser</code>.)  Other available grammars include
+    <code>englishFactored.ser.gz</code> for English, and
+    <code>chineseFactored.ser.gz</code> for Chinese.
 </p>
 <p>
-You need the parser code
-      accessible.  This can be done by having the supplied
-      <code>stanford-parser.jar</code> in your CLASSPATH.
-Then if you have some sentences in <code>testsent.txt</code> (as plain
-      text), the following
-      commands should work.
+    You need the parser code and grammars
+          accessible.  This can be done by having the supplied jar files on
+         your CLASSPATH.  The examples below assume you are in the parser
+        distribution home directory. From there you can set up the classpath with the
+        command-line argument <code> -cp "*"</code> (or perhaps <code> -cp "*;"</code>
+        on certain versions of Windows).
+    Then if you have some sentences in <code>testsent.txt</code> (as plain
+      text), the following commands should work.
 </p>
 
 
@@ -132,15 +136,15 @@ Then if you have some sentences in <code>testsent.txt</code> (as plain
 
 <p>Parsing a local text file:</p>
 <blockquote>
-<code>java -mx100m edu.stanford.nlp.parser.lexparser.LexicalizedParser
-englishPCFG.ser.gz testsent.txt
+<code>java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
+    edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz testsent.txt
 </code>
 </blockquote>
 
 <p>Parsing a document over the web:</p>
 <blockquote>
-<code>java -mx100m edu.stanford.nlp.parser.lexparser.LexicalizedParser
--maxLength 40 englishPCFG.ser.gz http://nlp.stanford.edu/software/lex-parser.shtml</code></blockquote>
+<code>java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser
+-maxLength 40 edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz http://nlp.stanford.edu/software/lex-parser.shtml</code></blockquote>
 <p>Note the <code>-maxLength</code> flag: this will set a maximum length
 sentence to parse.  If you do not set one, the parser will try to parse
 sentences up to any length, but will usually run out of memory when
@@ -164,17 +168,16 @@ standard way.</p>
 Chinese of GB18030
   - note you'll need the right fonts to see the output correctly):</p>
 <blockquote><code>
-java -mx100m edu.stanford.nlp.parser.lexparser.LexicalizedParser -tLPP
+java -mx100m -cp "*" edu.stanford.nlp.parser.lexparser.LexicalizedParser -tLPP
 edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams
-chinesePCFG.ser.gz chinese-onesent
+    edu/stanford/nlp/models/lexparser/chinesePCFG.ser.gz chinese-onesent
 </code></blockquote>
 <p>or for Unicode (UTF-8) format files:</p>
 <blockquote><code>
-java -mx100m edu.stanford.nlp.parser.lexparser.LexicalizedParser -tLPP
+java -mx100m -cp "*"edu.stanford.nlp.parser.lexparser.LexicalizedParser -tLPP
 edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams
--encoding UTF-8 chinesePCFG.ser.gz chinese-onesent-utf
+-encoding UTF-8 edu/stanford/nlp/models/lexparser/chinesePCFG.ser.gz chinese-onesent-utf
 </code></blockquote>
-
 
 <p>
 For Chinese, the package includes two simple word segmenters.  One is a
@@ -192,11 +195,16 @@ To do word segmentation within the parser, give one of the options
 <code>-segmentMarkov</code> or <code>-segmentMaxMatch</code>.
 </p>
 
+<h4>Other languages</h4>
+
+<p>
+The parser also supports other languages including German and French.
+</p>
+
 <h4>Command-line options</h4>
 
-
 <p>The program has many options.  The most useful end-user option is
-      <code>-maxLength&nbsp<i>n</i></code> which determines the maximum
+      <code>-maxLength&nbsp<em>n</em></code> which determines the maximum
 length sentence that the parser will parser.  Longer sentences are
       skipped, with a message printed to <code>stderr</code>.</p>
 
@@ -242,7 +250,7 @@ separating character such as '/' or '_'. You give the option
 <code>-tagSeparator tagSeparator</code> to specify tagged text with a
 tag separator. You also need to tell the parser to use a different
 tokenizer, using the flags
-<code>-tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer 
+<code>-tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer
       -tokenizerMethod newCoreLabelTokenizerFactory</code>
 </p>
 
@@ -250,38 +258,39 @@ tokenizer, using the flags
 <code>test</code> directory. As an example, you can parse the example file with partial POS-tagging
 with this command:</p>
 <blockquote><code>
-java edu.stanford.nlp.parser.lexparser.LexicalizedParser -maxLength 20 -sentences newline -tokenized -tagSeparator / -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer -tokenizerMethod newCoreLabelTokenizerFactory englishPCFG.ser.gz pos-sentences.txt 
+java edu.stanford.nlp.parser.lexparser.LexicalizedParser -maxLength 20 -sentences newline -tokenized -tagSeparator / -tokenizerFactory edu.stanford.nlp.process.WhitespaceTokenizer -tokenizerMethod newCoreLabelTokenizerFactory englishPCFG.ser.gz pos-sentences.txt
 </code></blockquote>
+
 <p>There are some restrictions on the interpretation of POS-tagged input:</p>
-<UL>
-<LI>The tagset must match the parser POS set.  If you are using our
+<ul>
+<li>The tagset must match the parser POS set.  If you are using our
 supplied parser data files, that means you must be using Penn Treebank
 POS tags.
-<LI>An indicated tagging will determine which of the taggings allowed by
+<li>An indicated tagging will determine which of the taggings allowed by
 the lexicon
 will be used, but the parser will not accept tags not allowed by its
 lexicon.  This is usually not problematic, since rare or unknown words
 are allowed to have many POS tags, but would be if you were trying to
-persuade it that <i>are</i> should be tagged as a noun in the sentence <i>"100
-are make up one hectare."</i> since it will only allow <i>are</i> to
+persuade it that <em>are</em> should be tagged as a noun in the sentence <em>"100
+are make up one hectare."</em> since it will only allow <em>are</em> to
 	have a verbal tagging.
-</UL>
+</ul>
 
 <p>
 For the examples in <code>pos-sentences.txt</code>:</p>
-<OL>
-<LI> This sentence is parsed correctly with no tags given.
-<LI> So it is also parsed correctly telling the parser <i>butter</i> is a verb.
-<LI> You get a different worse parse telling it <i>butter</i> is a noun.
-<LI> You get the same parse as 1. with all tags correctly supplied.
-<LI> It won't accept <i>can</i> as a VB, but does accept <i>butter</i>
+<ol>
+<li> This sentence is parsed correctly with no tags given.
+<li> So it is also parsed correctly telling the parser <em>butter</em> is a verb.
+<li> You get a different worse parse telling it <em>butter</em> is a noun.
+<li> You get the same parse as 1. with all tags correctly supplied.
+<li> It won't accept <em>can</em> as a VB, but does accept <em>butter</em>
 	as a noun, so you get the same parse as 3.
-<LI> <i>People can butter</i> can be an NP.
-<LI> Most words can be NN, but not common function words like <i>their,
-	  with, a</i>.
-</OL>
+<li> <em>People can butter</em> can be an NP.
+<LI> Most words can be NN, but not common function words like <em>their,
+	  with, a</em>.
+</ol>
 <p>
-Note that if the program is reading tags correctly, they <i>aren't</i>
+Note that if the program is reading tags correctly, they <em>aren't</em>
     printed in the
 sentence it says it is parsing.  Only the words are printed there.
 </p>
@@ -322,16 +331,18 @@ The following simple class shows typical usage:</p>
 
 <blockquote><pre>
 import java.util.*;
+import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 
 class ParserDemo {
   public static void main(String[] args) {
-    LexicalizedParser lp = LexicalizedParser.loadModel("englishPCFG.ser.gz"); //<--TODO path to grammar goes here
+    LexicalizedParser lp = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
     lp.setOptionFlags(new String[]{"-maxLength", "80", "-retainTmpSubcategories"});
 
     String[] sent = { "This", "is", "an", "easy", "sentence", "." };
-    Tree parse = (Tree) lp.apply(Arrays.asList(sent));
+    List&lt;CoreLabel&gt; rawWords = Sentence.toCoreLabelList(sent);
+    Tree parse = lp.apply(rawWords);
     parse.pennPrint();
     System.out.println();
 
@@ -345,7 +356,6 @@ class ParserDemo {
     TreePrint tp = new TreePrint("penn,typedDependenciesCollapsed");
     tp.printTree(parse);
   }
-
 }
 </pre></blockquote>
 
@@ -403,11 +413,11 @@ java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser
 <p>The text data format is human readable and modifiable, and consists of
 four sections, appearing in the following order:</p>
 <ul>
-<li><b>Options</b> - consists of variable-value pairs, one per line, which must remain constant across training and parsing.</li>
-<li><b>Lexicon</b> - consists of lexical entries, one per line, each of which is preceded by the keyword SEEN or UNSEEN, and followed by a raw count.</li>
-<li><b>Unary Grammar</b> - consists of unary rewrite rules, one per line, each of which is of the form A -> B, followed by the normalized log probability.</li>
-<li><b>Binary Grammar</b> - consists of binary rewrite rules, one per line, each of which is of the form A -> B C, followed by the normalized log probability.</li>
-<li><b>Dependency Grammar</b></li>
+<li>Options - consists of variable-value pairs, one per line, which must remain constant across training and parsing.</li>
+<li>Lexicon - consists of lexical entries, one per line, each of which is preceded by the keyword SEEN or UNSEEN, and followed by a raw count.</li>
+<li>Unary Grammar - consists of unary rewrite rules, one per line, each of which is of the form A -> B, followed by the normalized log probability.</li>
+<li>Binary Grammar - consists of binary rewrite rules, one per line, each of which is of the form A -> B C, followed by the normalized log probability.</li>
+<li>Dependency Grammar</li>
 </ul>
 <p>Each section is headed by a line consisting of multiple asterisks (*) and the name
 of the section. Note that the file format does not support rules of arbitrary arity,
@@ -437,9 +447,9 @@ and unknown words:</p>
     with d, and other characters are unchanged. Then, consecutive
     duplicates are eliminated. For example, Formula-1 would become
     Xx-1. The probability of tags given signatures is estimated on words
-    occuring in only the second half of the training data, then
+    occurring in only the second half of the training data, then
     inverted. However, in the current release of the parser, this is all
-    done programatically, and so the text lexicon contains only a single
+    done programmatically, and so the text lexicon contains only a single
     UNK token. To duplicate our behavior, one would be best off building
     one's own lexicon with the above behavior.</li>
 <li>Rare Words: all words with frequency less than a cut-off (of 100)
