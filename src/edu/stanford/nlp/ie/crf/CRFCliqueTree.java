@@ -60,7 +60,7 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
     return this.factorTables;
   }
 
-  public Index classIndex() {
+  public Index<E> classIndex() {
     return classIndex;
   }
 
