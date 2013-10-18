@@ -100,10 +100,10 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       setBarePlural(mentions);
       removeSpuriousMentions(s, mentions, dict);
     }
-
+    
     // assign mention IDs
     if(assignIds) assignMentionIDs(predictedMentions, maxID);
-
+    
     return predictedMentions;
   }
 
@@ -365,7 +365,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       if(tokens.get(i).tag().startsWith("N")) lastNounIdx = i;
       else if(tokens.get(i).tag().startsWith("W")) break;
     }
-
+    
     List<Tree> leaves = root.getLeaves();
     Tree endLeaf = leaves.get(lastNounIdx);
     return endLeaf;
@@ -608,7 +608,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     if ( ! m.spanToString().equalsIgnoreCase("it")) return false;
     for (TregexPattern p : pleonasticPatterns) {
       if (checkPleonastic(m, tree, p)) {
-        // SieveCoreferenceSystem.logger.fine("RuleBasedCorefMentionFinder: matched pleonastic pattern '" + p + "' for " + tree);
+        SieveCoreferenceSystem.logger.fine("RuleBasedCorefMentionFinder: matched pleonastic pattern '" + p + "' for " + tree);
         return true;
       }
     }
