@@ -309,7 +309,7 @@ public class DependencyScoring {
     return new Score(parserCnt, goldCnt, parserUnlabeledCnt, goldUnlabeledCnt, correctAttachment, correctUnlabeledAttachment, labelCnt, labelCorrect, labeledErrorCounts, unlabeledErrorCounts);
   }
 
-  public static class Score {
+  public class Score {
     final int parserCnt;
     final int goldCnt;
     final int parserUnlabeledCnt;
@@ -410,9 +410,7 @@ public class DependencyScoring {
       }
       return sbuild.toString();
     }
-
-  } // end static class Score
-
+  }
 
   public static void main(String[] args) throws IOException {
     Properties props = StringUtils.argsToProperties(args);
