@@ -45,6 +45,10 @@ public class SimpleTensor implements Serializable {
     return numSlices;
   }
 
+  public int getNumElements() {
+    return numRows * numCols * numSlices;
+  }
+
   public SimpleTensor scale(double scaling) {
     SimpleTensor result = new SimpleTensor(numRows, numCols, numSlices);
     for (int slice = 0; slice < numSlices; ++slice) {
