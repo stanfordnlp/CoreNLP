@@ -837,6 +837,19 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
       }
     });
+
+    pool.register(STANFORD_SENTIMENT, new AnnotatorFactory(inputProps) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return new SentimentAnnotator(STANFORD_SENTIMENT, properties);
+      }
+
+      @Override
+      public String signature() {
+        return "model=" + inputProps.get("model");
+      }
+    });
     
     //
     // add more annotators here!
