@@ -2,7 +2,7 @@ package edu.stanford.nlp.sentiment;
 
 import java.io.Serializable;
 
-public class TrainOptions implements Serializable {
+public class RNNTrainOptions implements Serializable {
   public int batchSize;
 
   public int iterations;

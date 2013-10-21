@@ -78,9 +78,9 @@ public class SentimentModel implements Serializable {
   /**
    * Will store various options specific to this model
    */
-  final Options op;
+  final RNNOptions op;
   
-  public SentimentModel(Options op, TwoDimensionalSet<String, String> binaryProductions, Set<String> unaryProductions) {
+  public SentimentModel(RNNOptions op, TwoDimensionalSet<String, String> binaryProductions, Set<String> unaryProductions) {
     this.op = op;
     rand = (op.randomSeed != 0) ? new Random(op.randomSeed) : new Random(); 
 

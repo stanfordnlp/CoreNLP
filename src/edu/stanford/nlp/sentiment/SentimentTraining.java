@@ -34,7 +34,6 @@ public class SentimentTraining {
   }
 
   public static void train(SentimentModel model, List<Tree> trainingTrees, List<Tree> devTrees) {
-    final Options op = model.op;
     Timing timing = new Timing();
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
     long nextDebugCycle = model.op.trainOptions.debugOutputSeconds * 1000;
@@ -45,10 +44,10 @@ public class SentimentTraining {
     double[] sumGradSquare = new double[model.totalParamSize()];
     Arrays.fill(sumGradSquare, 1.0);
     
-    int numBatches = trainingTrees.size() / op.trainOptions.batchSize + 1;
+    int numBatches = trainingTrees.size() / model.op.trainOptions.batchSize + 1;
     System.err.println("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
-    System.err.println("Times through each training batch: " + op.trainOptions.iterations);
-    for (int iter = 0; iter < op.trainOptions.iterations; ++iter) {
+    System.err.println("Times through each training batch: " + model.op.trainOptions.iterations);
+    for (int iter = 0; iter < model.op.trainOptions.iterations; ++iter) {
       List<Tree> shuffledSentences = Generics.newArrayList(trainingTrees);
       Collections.shuffle(shuffledSentences, model.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
@@ -58,9 +57,9 @@ public class SentimentTraining {
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
         // the list
-        int startTree = batch * op.trainOptions.batchSize;
-        int endTree = (batch + 1) * op.trainOptions.batchSize;
-        if (endTree + op.trainOptions.batchSize > shuffledSentences.size()) {
+        int startTree = batch * model.op.trainOptions.batchSize;
+        int endTree = (batch + 1) * model.op.trainOptions.batchSize;
+        if (endTree + model.op.trainOptions.batchSize > shuffledSentences.size()) {
           endTree = shuffledSentences.size();
         }
         
@@ -82,7 +81,7 @@ public class SentimentTraining {
           // output a summary of what's happened so far
 
           ++debugCycle;
-          nextDebugCycle = timing.report() + op.trainOptions.debugOutputSeconds * 1000;
+          nextDebugCycle = timing.report() + model.op.trainOptions.debugOutputSeconds * 1000;
         }
       }
       long totalElapsed = timing.report();
@@ -102,7 +101,7 @@ public class SentimentTraining {
 
   public static void main(String[] args) {
     // TODO: here we process the arguments
-    Options op = new Options();
+    RNNOptions op = new RNNOptions();
 
     boolean runGradientCheck = false;
     boolean runTraining = false;
