@@ -165,7 +165,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     int goldClass = RNNCoreAnnotations.getGoldClass(tree);
     goldLabel.set(goldClass, 1.0);
 
-    double nodeWeight = model.op.getClassWeight(goldClass);
+    double nodeWeight = model.op.trainOptions.getClassWeight(goldClass);
 
     SimpleMatrix predictions = RNNCoreAnnotations.getPredictions(tree);
 
