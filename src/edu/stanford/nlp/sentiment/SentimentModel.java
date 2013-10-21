@@ -161,12 +161,12 @@ public class SentimentModel implements Serializable {
     numUnaryMatrices = unaryClassification.size();
     unaryClassificationSize = numClasses * (numHid + 1);
 
-    System.err.println("Binary transform matrices:");
-    System.err.println(binaryTransform);
-    System.err.println("Binary classification matrices:");
-    System.err.println(binaryClassification);
-    System.err.println("Unary classification matrices:");
-    System.err.println(unaryClassification);
+    // System.err.println("Binary transform matrices:");
+    // System.err.println(binaryTransform);
+    // System.err.println("Binary classification matrices:");
+    // System.err.println(binaryClassification);
+    // System.err.println("Unary classification matrices:");
+    // System.err.println(unaryClassification);
   }
   
   SimpleMatrix randomTransformMatrix() {
