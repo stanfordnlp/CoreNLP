@@ -18,6 +18,12 @@ public class RNNOptions implements Serializable {
   public String unkWord;
 
   /**
+   * By default, initialize random word vectors instead of reading
+   * from a file
+   */
+  public boolean randomWordVectors = true;
+
+  /**
    * Size of vectors to use.  Must be at most the size of the vectors
    * in the word vector file.  If a smaller size is specified, vectors
    * will be truncated.
@@ -37,7 +43,7 @@ public class RNNOptions implements Serializable {
    * No symantic untying - use the same category for all categories.
    * This results in all nodes getting the same matrix.
    */
-  public boolean simplifiedModel;
+  public boolean simplifiedModel = true;
 
   public RNNTrainOptions trainOptions = new RNNTrainOptions();
 
@@ -62,6 +68,12 @@ public class RNNOptions implements Serializable {
       return argIndex + 1;
     } else if (args[argIndex].equalsIgnoreCase("-nolowercaseWordVectors")) {
       lowercaseWordVectors = false;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-randomWordVectors")) {
+      randomWordVectors = true;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-norandomWordVectors")) {
+      randomWordVectors = false;
       return argIndex + 1;
     } else if (args[argIndex].equalsIgnoreCase("-simplifiedModel")) {
       simplifiedModel = true;

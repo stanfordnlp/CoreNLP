@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
@@ -140,23 +141,26 @@ public class SentimentTraining {
 
     // TODO
     // read in the trees
-    List<Tree> trainingTrees = null;
+    // TODO: this is ugly, make it an option instead
+    List<Tree> trainingTrees = Generics.newArrayList();
+    MemoryTreebank treebank = new MemoryTreebank();
+    treebank.loadPath("sentimentTreesDebug.txt", null);
+    for (Tree tree : treebank) {
+      trainingTrees.add(tree);
+    }
+
     List<Tree> devTrees = null;
+    List<Tree> testTrees = null;
 
     // TODO: binarize the trees, then collapse the unary chains.
     // Collapsed unary chains always have the label of the top node in
     // the chain
-
-    // TODO
-    // figure out what binary productions we have in these trees
-    TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
-
-    // TODO
-    // figure out what unary productions we have in these trees (preterminals only, after the collapsing)
-    Set<String> unaryRules = Generics.newHashSet();
+    // Note: the sentiment training data already has this done.
+    // However, when we handle trees given to us from the Stanford Parser,
+    // we will have to perform this step
 
     // build an unitialized SentimentModel from the binary productions
-    SentimentModel model = new SentimentModel(op, binaryRules, unaryRules);
+    SentimentModel model = new SentimentModel(op, trainingTrees);
 
     // TODO: need to handle unk rules somehow... at test time the tree
     // structures might have something that we never saw at training
