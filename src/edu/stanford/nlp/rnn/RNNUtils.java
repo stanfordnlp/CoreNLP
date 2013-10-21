@@ -31,6 +31,12 @@ public class RNNUtils {
     }
   }
 
+  /**
+   * Given a sequence of iterators over the matrices, builds a vector
+   * out of those matrices in the order given.  Asks for an expected
+   * total size as a time savings.  AssertionError thrown if the
+   * vector sizes do not exactly match.
+   */
   public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
@@ -51,6 +57,13 @@ public class RNNUtils {
     return theta;
   }
 
+  /**
+   * Given a sequence of iterators over the matrices, builds a vector
+   * out of those matrices in the order given.  The vector is scaled
+   * according to the <code>scale</code> parameter.  Asks for an
+   * expected total size as a time savings.  AssertionError thrown if
+   * the vector sizes do not exactly match.
+   */
   public static double[] paramsToVector(double scale, int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
@@ -70,6 +83,15 @@ public class RNNUtils {
     return theta;
   }
 
+  /**
+   * This method reads a file of raw word vectors, with a given expected size, and returns a map of word to vector.
+   * <br>
+   * The file should be in the format <br>
+   * <code>WORD X1 X2 X3 ...</code> <br>
+   * If vectors in the file are smaller than expectedSize, an
+   * exception is thrown.  If vectors are larger, the vectors are
+   * trunccated and a warning is printed.
+   */
   public static Map<String, SimpleMatrix> readRawWordVectors(String filename, int expectedSize) {
     Map<String, SimpleMatrix> wordVectors = Generics.newHashMap();
 
