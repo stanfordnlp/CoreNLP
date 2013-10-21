@@ -33,7 +33,7 @@ public class RNNOptions implements Serializable {
    * in the word vector file.  If a smaller size is specified, vectors
    * will be truncated.
    */
-  public int numHid = 30;
+  public int numHid = 25;
 
   /**
    * Number of classes to build the RNN for
@@ -55,8 +55,25 @@ public class RNNOptions implements Serializable {
 
   public RNNTrainOptions trainOptions = new RNNTrainOptions();
 
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder();
+    result.append("GENERAL OPTIONS\n");
+    result.append("randomSeed=" + randomSeed + "\n");
+    result.append("wordVectors=" + wordVectors + "\n");
+    result.append("unkWord=" + unkWord + "\n");
+    result.append("randomWordVectors=" + randomWordVectors + "\n");
+    result.append("numHid=" + numHid + "\n");
+    result.append("numClasses=" + numClasses + "\n");
+    result.append("lowercaseWordVectors=" + lowercaseWordVectors + "\n");
+    result.append("useTensors=" + useTensors + "\n");
+    result.append("simplifiedModel=" + simplifiedModel + "\n");
+    result.append(trainOptions.toString());
+    return result.toString();
+  }
+
   public int setOption(String[] args, int argIndex) {
-    if (args[argIndex].equalsIgnoreCase("-seed")) {
+    if (args[argIndex].equalsIgnoreCase("-randomSeed")) {
       randomSeed = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-wordVectors")) {

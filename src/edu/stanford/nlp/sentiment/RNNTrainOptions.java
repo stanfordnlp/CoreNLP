@@ -3,7 +3,7 @@ package edu.stanford.nlp.sentiment;
 import java.io.Serializable;
 
 public class RNNTrainOptions implements Serializable {
-  public int batchSize = 20;
+  public int batchSize = 27;
 
   /** Number of times through all the trees */
   public int epochs = 1000;
@@ -33,13 +33,39 @@ public class RNNTrainOptions implements Serializable {
   }
 
   /** Regularization cost for the transform matrices and tensors */
-  public double regTransform = 0.001;
+  public double regTransform = 0.15;
   
   /** Regularization cost for the classification matrices */
   public double regClassification = 0.0001;
 
   /** Regularization cost for the word vectors */
-  public double regWordVector = 0.0001;
+  public double regWordVector = 0.1;
+
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder();
+    result.append("TRAIN OPTIONS\n");
+    result.append("batchSize=" + batchSize + "\n");
+    result.append("epochs=" + epochs + "\n");
+    result.append("debugOutputSeconds=" + debugOutputSeconds + "\n");
+    result.append("maxTrainTimeSeconds=" + maxTrainTimeSeconds + "\n");
+    result.append("learningRate=" + learningRate + "\n");
+    result.append("scalingForInit=" + scalingForInit + "\n");
+    if (classWeights == null) {
+      result.append("classWeights=null\n");
+    } else {
+      result.append("classWeights=");
+      result.append(classWeights[0]);
+      for (int i = 1; i < classWeights.length; ++i) {
+        result.append("," + classWeights[i]);
+      }
+      result.append("\n");
+    }
+    result.append("regTransform=" + regTransform + "\n");
+    result.append("regClassification=" + regClassification + "\n");
+    result.append("regWordVector=" + regWordVector + "\n");
+    return result.toString();
+  }
 
   public int setOption(String[] args, int argIndex) {
     if (args[argIndex].equalsIgnoreCase("-batchSize")) {

@@ -83,7 +83,7 @@ public class SentimentTraining {
           Evaluate eval = new Evaluate(model);
           eval.eval(devTrees);
           eval.printSummary();
-          double score = eval.exactNodeAccuracy();
+          double score = eval.exactNodeAccuracy() * 100.0;
 
           // output an intermediate model
           if (modelPath != null) {
@@ -167,7 +167,7 @@ public class SentimentTraining {
     // we will have to perform this step
 
     // build an unitialized SentimentModel from the binary productions
-    System.err.println("Random seed for model: " + op.randomSeed);
+    System.err.println("Sentiment model options:\n" + op);
     SentimentModel model = new SentimentModel(op, trainingTrees);
 
     // TODO: need to handle unk rules somehow... at test time the tree
