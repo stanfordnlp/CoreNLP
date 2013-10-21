@@ -311,7 +311,16 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return Wt_df;
   }
 
-  void forwardPropagateTree(Tree tree) {
+  /**
+   * This is the method to call for assigning labels and node vectors
+   * to the Tree.  After calling this, each of the non-leaf nodes will
+   * have the node vector and the predictions of their classes
+   * assigned to that subtree's node.  The annotations filled in are
+   * the RNNCoreAnnotations.NodeVector, Predictions, and
+   * PredictedClass.  In general, PredictedClass will be the most
+   * useful annotation except when training.
+   */
+  public void forwardPropagateTree(Tree tree) {
     SimpleMatrix nodeVector = null;
     SimpleMatrix classification = null;
 
