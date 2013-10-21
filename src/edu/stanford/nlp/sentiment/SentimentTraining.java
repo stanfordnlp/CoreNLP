@@ -3,6 +3,7 @@ package edu.stanford.nlp.sentiment;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
@@ -35,9 +36,6 @@ public class SentimentTraining {
   public static void train(SentimentModel model, List<Tree> trainingTrees, List<Tree> devTrees) {
     final Options op = model.op;
     Timing timing = new Timing();
-    // TODO: these training-specific options might be better served in
-    // a smaller section of the Options
-    // maxTrainTimeSeconds, debugOutputSeconds, iterations, batchSize
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
     long nextDebugCycle = model.op.trainOptions.debugOutputSeconds * 1000;
     int debugCycle = 0;
@@ -128,8 +126,11 @@ public class SentimentTraining {
     // figure out what binary productions we have in these trees
     TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
 
+    // TODO
+    Set<String> unaryRules = Generics.newHashSet();
+
     // build an unitialized SentimentModel from the binary productions
-    SentimentModel model = new SentimentModel(op, binaryRules);
+    SentimentModel model = new SentimentModel(op, binaryRules, unaryRules);
 
     // TODO: train the model
     

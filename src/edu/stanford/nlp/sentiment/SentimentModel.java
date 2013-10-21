@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -25,6 +26,11 @@ public class SentimentModel implements Serializable {
    */
   public TwoDimensionalMap<String, String, SimpleMatrix> binaryClassification;
 
+  /**
+   * CxN+1, where N = size of word vectors, C is the number of classes
+   */
+  public Map<String, SimpleMatrix> unaryClassification;
+
   public Map<String, SimpleMatrix> wordVectors;
 
   /**
@@ -43,8 +49,19 @@ public class SentimentModel implements Serializable {
    */
   public final int numBinaryMatrices;
 
+  /** How big a transformation matrix is */
   public final int binaryTransformSize;
+  /** How big a classification matrix is */
   public final int binaryClassificationSize;
+
+  /**
+   * Cached here for easy calculation of the model size;
+   * TwoDimensionalMap does not return that in O(1) time
+   */
+  public final int numUnaryMatrices;
+
+  /** How big a classification matrix is */
+  public final int unaryClassificationSize;
 
   /**
    * we just keep this here for convenience
@@ -63,7 +80,7 @@ public class SentimentModel implements Serializable {
    */
   final Options op;
   
-  public SentimentModel(Options op, TwoDimensionalSet<String, String> binaryProductions) {
+  public SentimentModel(Options op, TwoDimensionalSet<String, String> binaryProductions, Set<String> unaryProductions) {
     this.op = op;
     rand = (op.randomSeed != 0) ? new Random(op.randomSeed) : new Random(); 
 
@@ -89,7 +106,7 @@ public class SentimentModel implements Serializable {
     for (Pair<String, String> binary : binaryProductions) {
       String left = basicCategory(binary.first);
       String right = basicCategory(binary.second);
-      if (binaryTransform.get(left, right) == null) {
+      if (binaryTransform.contains(left, right)) {
         continue;
       }
       binaryTransform.put(left, right, randomTransformMatrix());
@@ -98,6 +115,21 @@ public class SentimentModel implements Serializable {
     numBinaryMatrices = binaryTransform.size();
     binaryTransformSize = numHid * (2 * numHid + 1);
     binaryClassificationSize = numClasses * (numHid + 1);
+
+    unaryClassification = Generics.newTreeMap();
+    
+    // When making a flat model (no symantic untying) the
+    // basicCategory function will return the same basic category for
+    // all labels, so all entries will map to the same matrix
+    for (String unary : unaryProductions) {
+      unary = basicCategory(unary);
+      if (unaryClassification.containsKey(unary)) {
+        continue;
+      }
+      unaryClassification.put(unary, randomClassificationMatrix());
+    }
+    numUnaryMatrices = unaryClassification.size();
+    unaryClassificationSize = numClasses * (numHid + 1);
   }
   
   SimpleMatrix randomTransformMatrix() {
@@ -112,6 +144,9 @@ public class SentimentModel implements Serializable {
     return SimpleMatrix.random(numHid,numHid,-1.0/Math.sqrt((double)numHid * 100.0),1.0/Math.sqrt((double)numHid * 100.0),rand).plus(identity);
   }
 
+  /**
+   * Returns matrices of the right size for either binary or unary (terminal) classification
+   */
   SimpleMatrix randomClassificationMatrix() {
     SimpleMatrix score = new SimpleMatrix(numClasses, numHid + 1);
     // Leave the bias column with 0 values
@@ -139,17 +174,18 @@ public class SentimentModel implements Serializable {
   public int totalParamSize() {
     int totalSize = 0;
     totalSize = numBinaryMatrices * (binaryTransformSize + binaryClassificationSize);
+    totalSize += numUnaryMatrices * unaryClassificationSize;
     totalSize += wordVectors.size() * numHid;
     return totalSize;
   }
   
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
-    return RNNUtils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), wordVectors.values().iterator());
+    return RNNUtils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), unaryClassification.values().iterator(), wordVectors.values().iterator());
   }
 
   public void vectorToParams(double[] theta) {
-    RNNUtils.vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), wordVectors.values().iterator());
+    RNNUtils.vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), unaryClassification.values().iterator(), wordVectors.values().iterator());
   }
 
   // TODO: combine this and getClassWForNode?
@@ -161,7 +197,7 @@ public class SentimentModel implements Serializable {
       String rightBasic = basicCategory(rightLabel);
       return binaryTransform.get(leftBasic, rightBasic);      
     } else if (node.children().length == 1) {
-      throw new AssertionError("Unary nodes should have been skipped");
+      throw new AssertionError("No unary transform matrices, only unary classification");
     } else {
       throw new AssertionError("Unexpected tree children size of " + node.children().length);
     }
@@ -175,7 +211,9 @@ public class SentimentModel implements Serializable {
       String rightBasic = basicCategory(rightLabel);
       return binaryClassification.get(leftBasic, rightBasic);      
     } else if (node.children().length == 1) {
-      throw new AssertionError("Unary nodes should have been skipped");
+      String unaryLabel = node.children()[0].value();
+      String unaryBasic = basicCategory(unaryLabel);
+      return unaryClassification.get(unaryBasic);
     } else {
       throw new AssertionError("Unexpected tree children size of " + node.children().length);
     }
