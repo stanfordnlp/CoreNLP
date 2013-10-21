@@ -145,7 +145,6 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     backpropDerivativesAndError(tree, binaryTD, binaryCD, binaryTensorTD, unaryCD, wordVectorD, delta);
   }
 
-  // TODO: backprop the tensors
   private void backpropDerivativesAndError(Tree tree, 
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
