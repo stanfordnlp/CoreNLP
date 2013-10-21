@@ -10,7 +10,7 @@ public class RNNTrainOptions implements Serializable {
 
   public int debugOutputSeconds = 60 * 20;
 
-  public int maxTrainTimeSeconds = 60 * 60 * 5;
+  public int maxTrainTimeSeconds = 60 * 60 * 24;
 
   public double learningRate = 0.01;
 
