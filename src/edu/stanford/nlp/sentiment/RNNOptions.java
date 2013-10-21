@@ -39,5 +39,38 @@ public class RNNOptions implements Serializable {
    */
   public boolean simplifiedModel;
 
-  public RNNTrainOptions trainOptions;
+  public RNNTrainOptions trainOptions = new RNNTrainOptions();
+
+  public int setOption(String[] args, int argIndex) {
+    if (args[argIndex].equalsIgnoreCase("-seed")) {
+      randomSeed = Integer.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-wordVectors")) {
+      wordVectors = args[argIndex + 1];
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-unkWord")) {
+      unkWord = args[argIndex] + 1;
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-numHid")) {
+      numHid = Integer.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-numClasses")) {
+      numClasses = Integer.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-lowercaseWordVectors")) {
+      lowercaseWordVectors = true;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-nolowercaseWordVectors")) {
+      lowercaseWordVectors = false;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-simplifiedModel")) {
+      simplifiedModel = true;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-nosimplifiedModel")) {
+      simplifiedModel = false;
+      return argIndex + 1;
+    } else {
+      return trainOptions.setOption(args, argIndex);
+    }
+  }
 }

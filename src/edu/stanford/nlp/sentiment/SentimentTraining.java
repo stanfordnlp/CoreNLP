@@ -100,7 +100,6 @@ public class SentimentTraining {
   }
 
   public static void main(String[] args) {
-    // TODO: here we process the arguments
     RNNOptions op = new RNNOptions();
 
     boolean runGradientCheck = false;
@@ -113,6 +112,12 @@ public class SentimentTraining {
       } else if (args[argIndex].equalsIgnoreCase("-gradientcheck")) {
         runGradientCheck = true;
         argIndex++;
+      } else {
+        int newArgIndex = op.setOption(args, argIndex);
+        if (newArgIndex == argIndex) {
+          throw new IllegalArgumentException("Unknown argument " + args[argIndex]);
+        }
+        argIndex = newArgIndex;
       }
     }
 
@@ -130,14 +135,12 @@ public class SentimentTraining {
     TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
 
     // TODO
-    // figure out what unary productions we have in these trees
+    // figure out what unary productions we have in these trees (preterminals only, after the collapsing)
     Set<String> unaryRules = Generics.newHashSet();
 
     // build an unitialized SentimentModel from the binary productions
     SentimentModel model = new SentimentModel(op, binaryRules, unaryRules);
 
-    // TODO: train the model
-    
     // TODO: need to handle unk rules somehow... at test time the tree
     // structures might have something that we never saw at training
     // time.  for example, we could put a threshold on all of the
