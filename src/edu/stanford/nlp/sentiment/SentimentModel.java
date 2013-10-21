@@ -91,7 +91,74 @@ public class SentimentModel implements Serializable {
    * Will store various options specific to this model
    */
   final RNNOptions op;
-  
+
+  /**
+   * Given single matrices and sets of options, create the
+   * corresponding SentimentModel.  Useful for creating a Java version
+   * of a model trained in some other manner, such as using the
+   * original Matlab code.
+   */
+  static SentimentModel modelFromMatrices(SimpleMatrix W, SimpleMatrix Wcat, SimpleTensor Wt, Map<String, SimpleMatrix> wordVectors, RNNOptions op) {
+    if (!op.combineClassification || !op.simplifiedModel) {
+      throw new IllegalArgumentException("Can only create a model using this method if combineClassification and simplifiedModel are turned on");
+    }
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform = TwoDimensionalMap.treeMap();
+    binaryTransform.put("", "", W);
+
+    TwoDimensionalMap<String, String, SimpleTensor> binaryTensors = TwoDimensionalMap.treeMap();
+    binaryTensors.put("", "", Wt);
+
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryClassification = TwoDimensionalMap.treeMap();
+
+    Map<String, SimpleMatrix> unaryClassification = Generics.newTreeMap();
+    unaryClassification.put("", Wcat);
+
+    return new SentimentModel(binaryTransform, binaryTensors, binaryClassification, unaryClassification, wordVectors, op);
+  }
+
+  private SentimentModel(TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform,
+                         TwoDimensionalMap<String, String, SimpleTensor> binaryTensors,
+                         TwoDimensionalMap<String, String, SimpleMatrix> binaryClassification,
+                         Map<String, SimpleMatrix> unaryClassification,
+                         Map<String, SimpleMatrix> wordVectors,
+                         RNNOptions op) {
+    this.op = op;
+
+    this.binaryTransform = binaryTransform;
+    this.binaryTensors = binaryTensors;
+    this.binaryClassification = binaryClassification;
+    this.unaryClassification = unaryClassification;
+    this.wordVectors = wordVectors;
+    this.numClasses = op.numClasses;
+    if (op.numHid <= 0) {
+      int nh = 0;
+      for (SimpleMatrix wv : wordVectors.values()) {
+        nh = wv.getNumElements();
+      }
+      this.numHid = nh;
+    } else {
+      this.numHid = op.numHid;
+    }
+    this.numBinaryMatrices = binaryTransform.size();
+    binaryTransformSize = numHid * (2 * numHid + 1);
+    if (op.useTensors) {
+      binaryTensorSize = numHid * numHid * numHid * 4;
+    } else {
+      binaryTensorSize = 0;
+    }
+    binaryClassificationSize = (op.combineClassification) ? 0 : numClasses * (numHid + 1);
+
+    numUnaryMatrices = unaryClassification.size();
+    unaryClassificationSize = numClasses * (numHid + 1);
+    
+    rand = new Random(op.randomSeed);
+
+    identity = SimpleMatrix.identity(numHid);
+  }
+
+  /**
+   * The traditional way of initializing an empty model suitable for training.
+   */
   public SentimentModel(RNNOptions op, List<Tree> trainingTrees) {
     this.op = op;
     rand = new Random(op.randomSeed);
