@@ -132,6 +132,8 @@ public class SentimentTraining {
   public static void main(String[] args) {
     RNNOptions op = new RNNOptions();
 
+    String trainPath = "sentimentTreesDebug.txt";
+
     boolean runGradientCheck = false;
     boolean runTraining = false;
 
@@ -144,6 +146,9 @@ public class SentimentTraining {
       } else if (args[argIndex].equalsIgnoreCase("-gradientcheck")) {
         runGradientCheck = true;
         argIndex++;
+      } else if (args[argIndex].equalsIgnoreCase("-trainpath")) {
+        trainPath = args[argIndex + 1];
+        argIndex += 2;
       } else {
         int newArgIndex = op.setOption(args, argIndex);
         if (newArgIndex == argIndex) {
@@ -155,11 +160,10 @@ public class SentimentTraining {
 
     // TODO
     // read in the trees
-    // TODO: this is ugly, make it an option instead
     List<Tree> trainingTrees = Generics.newArrayList();
 
     MemoryTreebank treebank = new MemoryTreebank();
-    treebank.loadPath("sentimentTreesDebug.txt", null);
+    treebank.loadPath(trainPath, null);
     for (Tree tree : treebank) {
       attachGoldLabels(tree);
       trainingTrees.add(tree);
