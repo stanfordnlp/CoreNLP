@@ -189,7 +189,7 @@ public class SentimentModel implements Serializable {
       throw new RuntimeException("Cannot create random word vectors for an unknown numHid");
     }
     Set<String> words = Generics.newHashSet();
-    words.add(op.unkWord);
+    words.add(UNKNOWN_WORD);
     for (Tree tree : trainingTrees) {
       List<Tree> leaves = tree.getLeaves();
       for (Tree leaf : leaves) {
@@ -203,7 +203,8 @@ public class SentimentModel implements Serializable {
     this.wordVectors = Generics.newTreeMap();
     for (String word : words) {
       // TODO: how do we initialize this?
-      SimpleMatrix vector = SimpleMatrix.random(op.numHid, 1, -1.0/Math.sqrt((double)op.numHid),1.0/Math.sqrt((double)op.numHid),rand);
+      //SimpleMatrix vector = SimpleMatrix.random(op.numHid, 1, -1.0/Math.sqrt((double)op.numHid),1.0/Math.sqrt((double)op.numHid),rand);
+      SimpleMatrix vector = SimpleMatrix.random(op.numHid, 1, -0.001,0.001,rand);
       wordVectors.put(word, vector);
     }
   }
