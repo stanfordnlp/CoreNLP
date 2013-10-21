@@ -202,7 +202,7 @@ public class SentimentModel implements Serializable {
     this.wordVectors = Generics.newTreeMap();
     for (String word : words) {
       // TODO: how do we initialize this?
-      SimpleMatrix vector = SimpleMatrix.random(1, numHid, -1.0/Math.sqrt((double)numHid),1.0/Math.sqrt((double)numHid),rand);
+      SimpleMatrix vector = SimpleMatrix.random(numHid, 1, -1.0/Math.sqrt((double)numHid),1.0/Math.sqrt((double)numHid),rand);
       wordVectors.put(word, vector);
     }
   }
