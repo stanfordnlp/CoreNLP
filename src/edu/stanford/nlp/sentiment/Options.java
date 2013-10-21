@@ -11,6 +11,16 @@ public class Options implements Serializable {
 
   public String wordVectors;
 
+  /**
+   * In the wordVectors file, what word represents unknown?
+   */
+  public String unkWord;
+
+  /**
+   * Size of vectors to use.  Must be at most the size of the vectors
+   * in the word vector file.  If a smaller size is specified, vectors
+   * will be truncated.
+   */
   public int numHid;
 
   public boolean lowercaseWordVectors;

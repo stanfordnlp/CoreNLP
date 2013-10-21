@@ -54,23 +54,30 @@ public class SentimentModel implements Serializable {
   /** 
    * A random number generator - keeping it here lets us reproduce results
    */
-  Random rand;
+  final Random rand;
 
+  static final String UNKNOWN_WORD = "*UNK*";
 
   /**
    * Will store various options specific to this model
    */
-  Options op;
-  
-  static final String UNKNOWN_WORD = "*UNK*";
+  final Options op;
   
   public SentimentModel(Options op, TwoDimensionalSet<String, String> binaryProductions) {
     this.op = op;
     rand = (op.randomSeed != 0) ? new Random(op.randomSeed) : new Random(); 
 
-    // TODO: extract this from the word vector file
-    this.numHid = op.numHid;
     readWordVectors();
+    if (op.numHid > 0) {
+      this.numHid = op.numHid;
+    } else {
+      int size = 0;
+      for (SimpleMatrix vector : wordVectors.values()) {
+        size = vector.getNumElements();
+        break;
+      }
+      this.numHid = size;
+    }
     identity = SimpleMatrix.identity(numHid);
 
     binaryTransform = TwoDimensionalMap.treeMap();
@@ -113,7 +120,20 @@ public class SentimentModel implements Serializable {
   }
 
   void readWordVectors() {
-    // TODO: this needs to be factored out from DVModel
+    this.wordVectors = Generics.newTreeMap();
+    Map<String, SimpleMatrix> rawWordVectors = RNNUtils.readRawWordVectors(op.wordVectors, op.numHid);
+    for (String word : rawWordVectors.keySet()) {
+      // TODO: factor out unknown word vector code from DVParser
+      wordVectors.put(word, rawWordVectors.get(word));
+    }
+
+    String unkWord = op.unkWord;
+    SimpleMatrix unknownWordVector = wordVectors.get(unkWord);
+    wordVectors.put(UNKNOWN_WORD, unknownWordVector);
+    if (unknownWordVector == null) {
+      throw new RuntimeException("Unknown word vector not specified in the word vector file");
+    }
+
   }
 
   public int totalParamSize() {
@@ -173,7 +193,7 @@ public class SentimentModel implements Serializable {
       return word;
     }
     // TODO: go through unknown words here
-    return null;
+    return UNKNOWN_WORD;
   }
 
   public String basicCategory(String category) {
