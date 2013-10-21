@@ -9,6 +9,9 @@ public class Options implements Serializable {
 
   public int randomSeed;
 
+  /**
+   * Filename for the word vectors
+   */
   public String wordVectors;
 
   /**
@@ -32,4 +35,6 @@ public class Options implements Serializable {
    * This results in all nodes getting the same matrix.
    */
   public boolean simplifiedModel;
+
+  public TrainOptions trainOptions;
 }
