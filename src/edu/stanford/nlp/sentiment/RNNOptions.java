@@ -2,6 +2,7 @@ package edu.stanford.nlp.sentiment;
 
 import java.io.Serializable;
 
+import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 
 public class RNNOptions implements Serializable {
@@ -35,9 +36,10 @@ public class RNNOptions implements Serializable {
    */
   public int numClasses = 5;
 
-  public boolean lowercaseWordVectors;
+  public boolean lowercaseWordVectors = true;
 
-  public TreebankLanguagePack langpack;
+  // TODO: add an option to set this to some other language pack
+  public TreebankLanguagePack langpack = new PennTreebankLanguagePack();
 
   /**
    * No symantic untying - use the same category for all categories.
