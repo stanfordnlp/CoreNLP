@@ -127,4 +127,78 @@ public class RNNUtils {
                                                                            
     return wordVectors;
   }
+
+
+
+  /**
+   * Returns a sigmoid applied to the input <code>x</code>.
+   */
+  public static double sigmoid(double x) {
+    return 1.0 / (1.0 + Math.exp(-x));
+  }
+
+  /**
+   * Applies tanh to each of the entries in the matrix.
+   */
+  public static SimpleMatrix elementwiseApplyTanh(SimpleMatrix input) {
+    SimpleMatrix output = new SimpleMatrix(input);
+    for (int i = 0; i < output.numRows(); ++i) {
+      for (int j = 0; j < output.numCols(); ++j) {
+        output.set(i, j, Math.tanh(output.get(i, j)));
+      }
+    }
+    return output;
+  }
+
+  /**
+   * Applies the derivative of tanh to each of the elements in the vector.
+   */
+  public static SimpleMatrix elementwiseApplyTanhDerivative(SimpleMatrix input) {
+    SimpleMatrix output = new SimpleMatrix(input.numRows(), input.numCols());
+    output.set(1.0);
+    output = output.minus(input.elementMult(input));
+    return output;
+  }
+
+  /**
+   * Concatenates several column vectors into one large column
+   * vector, adds a 1.0 at the end as a bias term
+   */
+  public static SimpleMatrix concatenateWithBias(SimpleMatrix ... vectors) {
+    int size = 0;
+    for (SimpleMatrix vector : vectors) {
+      size += vector.numRows();
+    }
+    // one extra for the bias
+    size++;
+
+    SimpleMatrix result = new SimpleMatrix(size, 1);
+    int index = 0;
+    for (SimpleMatrix vector : vectors) {
+      result.insertIntoThis(index, 0, vector);
+      index += vector.numRows();
+    }
+    result.set(index, 0, 1.0);
+    return result;
+  }
+
+  /**
+   * Concatenates several column vectors into one large column vector
+   */
+  public static SimpleMatrix concatenate(SimpleMatrix ... vectors) {
+    int size = 0;
+    for (SimpleMatrix vector : vectors) {
+      size += vector.numRows();
+    }
+
+    SimpleMatrix result = new SimpleMatrix(size, 1);
+    int index = 0;
+    for (SimpleMatrix vector : vectors) {
+      result.insertIntoThis(index, 0, vector);
+      index += vector.numRows();
+    }
+    return result;
+  }
+
+
 }
