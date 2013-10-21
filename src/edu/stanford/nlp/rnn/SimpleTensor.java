@@ -25,6 +25,20 @@ public class SimpleTensor implements Serializable {
     this.numSlices = numSlices;
   }
 
+  public SimpleTensor(SimpleMatrix[] slices) {
+    this.numRows = slices[0].numRows();
+    this.numCols = slices[0].numCols();
+    this.numSlices = slices.length;
+    this.slices = new SimpleMatrix[slices.length];
+    for (int i = 0; i < numSlices; ++i) {
+      if (slices[i].numRows() != numRows || slices[i].numCols() != numCols) {
+        throw new IllegalArgumentException("Slice " + i + " has matrix dimensions " + slices[i].numRows() + "," + slices[i].numCols() + ", expected " + numRows + "," + numCols);
+      }
+      slices[i] = new SimpleMatrix(slices[i]);
+    }
+    
+  }
+
   public static SimpleTensor random(int numRows, int numCols, int numSlices, double minValue, double maxValue, java.util.Random rand) {
     SimpleTensor tensor = new SimpleTensor(numRows, numCols, numSlices);
     for (int i = 0; i < numSlices; ++i) {
