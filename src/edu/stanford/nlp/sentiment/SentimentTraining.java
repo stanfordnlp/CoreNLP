@@ -137,7 +137,7 @@ public class SentimentTraining {
     boolean runGradientCheck = false;
     boolean runTraining = false;
 
-    String modelPath = null;  // TODO: fill this in
+    String modelPath = null;
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-train")) {
@@ -149,6 +149,9 @@ public class SentimentTraining {
       } else if (args[argIndex].equalsIgnoreCase("-trainpath")) {
         trainPath = args[argIndex + 1];
         argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-model")) {
+        modelPath = args[argIndex + 1];
+        argIndex += 2;
       } else {
         int newArgIndex = op.setOption(args, argIndex);
         if (newArgIndex == argIndex) {
@@ -158,10 +161,10 @@ public class SentimentTraining {
       }
     }
 
-    // TODO
     // read in the trees
     List<Tree> trainingTrees = Generics.newArrayList();
 
+    // TODO: factor this out
     MemoryTreebank treebank = new MemoryTreebank();
     treebank.loadPath(trainPath, null);
     for (Tree tree : treebank) {
@@ -197,7 +200,8 @@ public class SentimentTraining {
     }
 
     if (runTraining) {
-      train(model, modelPath, trainingTrees, devTrees); // TODO: add parameters for places to store intermediate models
+      train(model, modelPath, trainingTrees, devTrees);
+      model.saveSerialized(modelPath);
     }
   }
 }
