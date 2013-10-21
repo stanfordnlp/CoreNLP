@@ -34,7 +34,7 @@ public class SimpleTensor implements Serializable {
       if (slices[i].numRows() != numRows || slices[i].numCols() != numCols) {
         throw new IllegalArgumentException("Slice " + i + " has matrix dimensions " + slices[i].numRows() + "," + slices[i].numCols() + ", expected " + numRows + "," + numCols);
       }
-      slices[i] = new SimpleMatrix(slices[i]);
+      this.slices[i] = new SimpleMatrix(slices[i]);
     }
     
   }
