@@ -25,10 +25,9 @@ public class RNNCoreAnnotations {
     if (!(label instanceof CoreLabel)) {
       throw new IllegalArgumentException("CoreLabels required to get the attached node vector");
     }
-
     return ((CoreLabel) label).get(NodeVector.class);
   }
-  
+
   /**
    * Used to denote a vector of predictions at a particular node
    */
@@ -38,6 +37,14 @@ public class RNNCoreAnnotations {
     }
   }
   
+  public static SimpleMatrix getPredictions(Tree tree) {
+    Label label = tree.label();
+    if (!(label instanceof CoreLabel)) {
+      throw new IllegalArgumentException("CoreLabels required to get the attached predictions");
+    }
+    return ((CoreLabel) label).get(Predictions.class);
+  }
+
   /**
    * argmax of the Predictions
    */
@@ -45,5 +52,44 @@ public class RNNCoreAnnotations {
     public Class<Integer> getType() {
       return Integer.class;
     }
+  }
+
+  /**
+   * The index of the correct class
+   */
+  public static class GoldClass implements CoreAnnotation<Integer> {
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  public static int getGoldClass(Tree tree) {
+    Label label = tree.label();
+    if (!(label instanceof CoreLabel)) {
+      throw new IllegalArgumentException("CoreLabels required to get the attached gold class");
+    }
+    return ((CoreLabel) label).get(GoldClass.class);
+  }
+
+  public static class PredictionError implements CoreAnnotation<Double> {
+    public Class<Double> getType() {
+      return Double.class;
+    }
+  }
+
+  public static double getPredictionError(Tree tree) {
+    Label label = tree.label();
+    if (!(label instanceof CoreLabel)) {
+      throw new IllegalArgumentException("CoreLabels required to get the attached prediction error");
+    }
+    return ((CoreLabel) label).get(PredictionError.class);
+  }
+
+  public static double setPredictionError(Tree tree, double error) {
+    Label label = tree.label();
+    if (!(label instanceof CoreLabel)) {
+      throw new IllegalArgumentException("CoreLabels required to set the attached prediction error");
+    }
+    return ((CoreLabel) label).set(PredictionError.class, error);
   }
 }

@@ -29,9 +29,18 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return model.totalParamSize();
   }
 
-  public double calculateError() {
-    // TODO
-    return 0.0;
+  public double sumError(Tree tree) {
+    if (tree.isLeaf()) {
+      return 0.0;
+    } else if (tree.isPreTerminal()) {
+      return RNNCoreAnnotations.getPredictionError(tree);
+    } else {
+      double error = 0.0;
+      for (Tree child : tree.children()) {
+        error += sumError(child);
+      }
+      return RNNCoreAnnotations.getPredictionError(tree) + error;
+    }
   }
 
   /**
@@ -54,12 +63,15 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     double localValue = 0.0;
     double[] localDerivative = new double[theta.length];
 
-    // stands for Transform Derivatives (see the SentimentModel)
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryTD;
-    binaryTD = TwoDimensionalMap.treeMap();
-    // stands for Classification Derivatives
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryCD;
-    binaryCD = TwoDimensionalMap.treeMap();
+    // We use TreeMap for each of these so that they stay in a
+    // canonical sorted order
+    // binaryTD stands for Transform Derivatives (see the SentimentModel)
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryTD = TwoDimensionalMap.treeMap();
+    // binaryCD stands for Classification Derivatives
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryCD = TwoDimensionalMap.treeMap();
+
+    // unaryCD stands for Classification Derivatives
+    Map<String, SimpleMatrix> unaryCD = Generics.newTreeMap();
 
     // word vector derivatives
     Map<String, SimpleMatrix> wordVectorD = Generics.newTreeMap();
@@ -73,6 +85,11 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       // of columns in the derivative matrix is the same as the number
       // of rows in the original transform matrix
       binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(model.numClasses, numRows));
+    }
+    for (Map.Entry<String, SimpleMatrix> entry : model.unaryClassification.entrySet()) {
+      int numRows = entry.getValue().numRows();
+      int numCols = entry.getValue().numCols();
+      unaryCD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
     }
     for (Map.Entry<String, SimpleMatrix> entry : model.wordVectors.entrySet()) {
       int numRows = entry.getValue().numRows();
@@ -90,8 +107,88 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       forwardPropTrees.add(trainingTree);
     }
 
-    // TODO: left off where we are about to backprop in DVParserCostAndGradient
+    // TODO: we may find a big speedup by separating the derivatives and then summing
+    double error = 0.0;
+    for (Tree tree : forwardPropTrees) {
+      backpropDerivativesAndError(tree, binaryTD, binaryCD, unaryCD, wordVectorD);
+      error += sumError(tree);
+    }
+
+    value = error;
+    derivative = RNNUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), unaryCD.values().iterator(), wordVectorD.values().iterator());
   }
+
+  private void backpropDerivativesAndError(Tree tree, 
+                                           TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
+                                           TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
+                                           Map<String, SimpleMatrix> unaryCD,
+                                           Map<String, SimpleMatrix> wordVectorD) {
+    SimpleMatrix delta = new SimpleMatrix(model.op.numHid, 1);
+    backpropDerivativesAndError(tree, binaryTD, binaryCD, unaryCD, wordVectorD, delta);
+  }
+
+  private void backpropDerivativesAndError(Tree tree, 
+                                           TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
+                                           TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
+                                           Map<String, SimpleMatrix> unaryCD,
+                                           Map<String, SimpleMatrix> wordVectorD,
+                                           SimpleMatrix deltaUp) {
+    if (tree.isLeaf()) {
+      return;
+    }
+
+    SimpleMatrix currentVector = RNNCoreAnnotations.getNodeVector(tree);
+    String category = tree.label().value();
+    category = model.basicCategory(category);
+
+    // TODO: factor this out somewhere?
+    SimpleMatrix goldLabel = new SimpleMatrix(model.numClasses, 1);
+    goldLabel.set(RNNCoreAnnotations.getGoldClass(tree), 1.0);
+
+    SimpleMatrix predictions = RNNCoreAnnotations.getPredictions(tree);
+
+    SimpleMatrix deltaClass = predictions.minus(goldLabel);
+    SimpleMatrix localCD = deltaClass.mult(RNNUtils.concatenateWithBias(currentVector.transpose()));
+
+    double error = -(RNNUtils.elementwiseApplyLog(predictions).elementMult(goldLabel).elementSum());
+    RNNCoreAnnotations.setPredictionError(tree, error);
+
+    if (tree.isPreTerminal()) { // below us is a word vector
+      unaryCD.put(category, unaryCD.get(category).plus(localCD));
+
+      String word = tree.children()[0].label().value();
+      word = model.getVocabWord(word);
+
+      SimpleMatrix deltaFromClass = model.getUnaryClassification(category).transpose().mult(deltaClass);
+      SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
+
+      SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
+      SimpleMatrix wordDerivative = deltaFull.elementMult(currentVectorDerivative);
+      wordVectorD.put(word, wordVectorD.get(word).plus(wordDerivative));
+    } else {
+      // Otherwise, this must be a binary node
+      String leftCategory = model.basicCategory(tree.children()[0].label().value());
+      String rightCategory = model.basicCategory(tree.children()[1].label().value());
+      binaryCD.put(leftCategory, rightCategory, binaryCD.get(leftCategory, rightCategory).plus(localCD));
+      
+      SimpleMatrix deltaFromClass = model.getBinaryClassification(leftCategory, rightCategory).transpose().mult(deltaClass);
+      SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
+      
+      SimpleMatrix leftVector = RNNCoreAnnotations.getNodeVector(tree.children()[0]);
+      SimpleMatrix rightVector = RNNCoreAnnotations.getNodeVector(tree.children()[1]);
+      SimpleMatrix childrenVector = RNNUtils.concatenateWithBias(leftVector, rightVector);
+      SimpleMatrix W_df = deltaFull.mult(childrenVector.transpose());
+      binaryTD.put(leftCategory, rightCategory, binaryTD.get(leftCategory, rightCategory).plus(W_df));
+      
+      SimpleMatrix leftDerivative = RNNUtils.elementwiseApplyTanhDerivative(leftVector);
+      SimpleMatrix rightDerivative = RNNUtils.elementwiseApplyTanhDerivative(rightVector);
+      SimpleMatrix leftWTDelta = deltaFromClass.extractMatrix(0, deltaFull.numRows(), 0, 1);  // TODO: is this correct? both use of deltaFromClass and deltaFull
+      SimpleMatrix rightWTDelta = deltaFromClass.extractMatrix(deltaFull.numRows(), deltaFull.numRows() * 2, 0, 1);
+      backpropDerivativesAndError(tree.children()[0], binaryTD, binaryCD, unaryCD, wordVectorD, leftDerivative.elementMult(leftWTDelta));
+      backpropDerivativesAndError(tree.children()[1], binaryTD, binaryCD, unaryCD, wordVectorD, rightDerivative.elementMult(rightWTDelta));
+    }
+  }
+
 
   private void forwardPropagateTree(Tree tree) {
     SimpleMatrix nodeVector = null;
