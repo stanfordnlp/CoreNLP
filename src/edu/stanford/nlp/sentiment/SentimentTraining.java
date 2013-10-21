@@ -1,5 +1,7 @@
 package edu.stanford.nlp.sentiment;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,6 +13,8 @@ import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.TwoDimensionalSet;
 
 public class SentimentTraining {
+
+  private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
   public static void executeOneTrainingBatch(SentimentModel model, List<Tree> trainingBatch, double[] sumGradSquare) {
     SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trainingBatch);
@@ -33,7 +37,7 @@ public class SentimentTraining {
     
   }
 
-  public static void train(SentimentModel model, List<Tree> trainingTrees, List<Tree> devTrees) {
+  public static void train(SentimentModel model, String modelPath, List<Tree> trainingTrees, List<Tree> devTrees) {
     Timing timing = new Timing();
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
     long nextDebugCycle = model.op.trainOptions.debugOutputSeconds * 1000;
@@ -77,6 +81,17 @@ public class SentimentTraining {
 
           // TODO:
           // evaluate the test set on our current model
+
+          if (modelPath != null) {
+            String tempPath = modelPath;
+            if (modelPath.endsWith(".ser.gz")) {
+              tempPath = modelPath.substring(0, modelPath.length() - 7) + "-" + FILENAME.format(debugCycle) + ".ser.gz";
+            } else if (modelPath.endsWith(".gz")) {
+              tempPath = modelPath.substring(0, modelPath.length() - 3) + "-" + FILENAME.format(debugCycle) + ".ser.gz";
+            }
+            model.saveSerialized(tempPath);
+          }
+
           // output an intermediate model
           // output a summary of what's happened so far
 
@@ -104,6 +119,8 @@ public class SentimentTraining {
 
     boolean runGradientCheck = false;
     boolean runTraining = false;
+
+    String modelPath = null;  // TODO: fill this in
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-train")) {
@@ -155,7 +172,7 @@ public class SentimentTraining {
     }
 
     if (runTraining) {
-      train(model, trainingTrees, devTrees); // TODO: add parameters for places to store intermediate models
+      train(model, modelPath, trainingTrees, devTrees); // TODO: add parameters for places to store intermediate models
     }
   }
 }

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sentiment;
 
 import java.io.Serializable;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
@@ -8,6 +9,8 @@ import java.util.Set;
 
 import org.ejml.simple.SimpleMatrix;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.rnn.RNNUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
@@ -263,6 +266,14 @@ public class SentimentModel implements Serializable {
     left = basicCategory(left);
     right = basicCategory(right);
     return binaryTransform.get(left, right);
+  }
+
+  public void saveSerialized(String path) {
+    try {
+      IOUtils.writeObjectToFile(this, path);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   private static final long serialVersionUID = 1;
