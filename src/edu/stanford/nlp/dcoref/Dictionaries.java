@@ -186,7 +186,7 @@ public class Dictionaries {
   public final Map<String, String> statesAbbreviation = Generics.newHashMap();
   private final Map<String, Set<String>> demonyms = Generics.newHashMap();
   public final Set<String> demonymSet = Generics.newHashSet();
-  public final Set<String> adjectiveNation = Generics.newHashSet();
+  private final Set<String> adjectiveNation = Generics.newHashSet();
 
   public final Set<String> countries = Generics.newHashSet();
   public final Set<String> statesAndProvinces = Generics.newHashSet();
@@ -255,7 +255,7 @@ public class Dictionaries {
   /** The format of the demonyms file is
    *     countryCityOrState ( TAB demonym )*
    *  Lines starting with # are ignored
-   *  The file is cased but checked uncased.
+   *  The file is cased but stored in in-memory data structures uncased.
    *  The results are:
    *  demonyms is a has from each country (etc.) to a set of demonymic Strings;
    *  adjectiveNation is a set of demonymic Strings;
@@ -297,6 +297,15 @@ public class Dictionaries {
       result = Collections.emptySet();
     }
     return result;
+  }
+
+  /** Returns whether this mention (possibly multi-word) is the 
+   *  adjectival form of a demonym, like "African" or "Iraqi".
+   *  True if it is an adjectival form, even if also a name for a 
+   *  person of that country (such as "Iraqi").
+   */
+  public boolean isAdjectivalDemonym(String token) {
+    return adjectiveNation.contains(token.toLowerCase(Locale.ENGLISH));
   }
 
   private static void getWordsFromFile(String filename, Set<String> resultSet, boolean lowercase) throws IOException {
