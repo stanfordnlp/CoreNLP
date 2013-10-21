@@ -41,6 +41,8 @@ public class RNNOptions implements Serializable {
 
   public boolean lowercaseWordVectors = true;
 
+  public boolean useTensors = true;
+
   // TODO: add an option to set this to some other language pack
   public TreebankLanguagePack langpack = new PennTreebankLanguagePack();
 
@@ -85,6 +87,12 @@ public class RNNOptions implements Serializable {
       return argIndex + 1;
     } else if (args[argIndex].equalsIgnoreCase("-nosimplifiedModel")) {
       simplifiedModel = false;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-useTensors")) {
+      useTensors = true;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-nouseTensors")) {
+      useTensors = false;
       return argIndex + 1;
     } else {
       return trainOptions.setOption(args, argIndex);
