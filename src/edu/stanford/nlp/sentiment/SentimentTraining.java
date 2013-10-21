@@ -113,7 +113,7 @@ public class SentimentTraining {
 
   public static boolean runGradientCheck(SentimentModel model, List<Tree> trees) {
     SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trees);
-    return gcFunc.gradientCheck(1000, 50, model.paramsToVector());    
+    return gcFunc.gradientCheck(model.totalParamSize(), 50, model.paramsToVector());    
   }
 
   public static void attachGoldLabels(Tree tree) {
@@ -180,6 +180,7 @@ public class SentimentTraining {
     // we will have to perform this step
 
     // build an unitialized SentimentModel from the binary productions
+    System.err.println("Random seed for model: " + op.randomSeed);
     SentimentModel model = new SentimentModel(op, trainingTrees);
 
     // TODO: need to handle unk rules somehow... at test time the tree
