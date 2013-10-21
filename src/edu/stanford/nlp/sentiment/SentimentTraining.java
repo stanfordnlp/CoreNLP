@@ -122,11 +122,16 @@ public class SentimentTraining {
     List<Tree> trainingTrees = null;
     List<Tree> devTrees = null;
 
+    // TODO: binarize the trees, then collapse the unary chains.
+    // Collapsed unary chains always have the label of the top node in
+    // the chain
+
     // TODO
     // figure out what binary productions we have in these trees
     TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
 
     // TODO
+    // figure out what unary productions we have in these trees
     Set<String> unaryRules = Generics.newHashSet();
 
     // build an unitialized SentimentModel from the binary productions
