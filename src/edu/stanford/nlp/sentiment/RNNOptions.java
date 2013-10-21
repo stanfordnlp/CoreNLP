@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 
-public class Options implements Serializable {
+public class RNNOptions implements Serializable {
   public int randomSeed;
 
   /**
@@ -39,5 +39,5 @@ public class Options implements Serializable {
    */
   public boolean simplifiedModel;
 
-  public TrainOptions trainOptions;
+  public RNNTrainOptions trainOptions;
 }
