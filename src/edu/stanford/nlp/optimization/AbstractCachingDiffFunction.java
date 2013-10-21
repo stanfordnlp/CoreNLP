@@ -1,7 +1,9 @@
 package edu.stanford.nlp.optimization;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeSet;
 import java.util.Random;
 import java.util.Set;
 
@@ -34,7 +36,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     double[] savedDeriv = new double[xLen];
     System.arraycopy(derivative, 0, savedDeriv, 0, derivative.length);
     int interval = Math.max(1, x.length / numOfChecks);
-    Set<Integer> indicesToCheck = new HashSet<Integer>();
+    Set<Integer> indicesToCheck = new TreeSet<Integer>();
     for (int paramIndex = 0; paramIndex < xLen; paramIndex+=interval) {
       indicesToCheck.add(paramIndex);
     }
@@ -48,6 +50,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
       indicesToCheck.add(generator.nextInt(xLen));
     }
     boolean returnVal = true;
+    List<Integer> badIndices = new ArrayList<Integer>();
     for (int paramIndex: indicesToCheck) {
       double oldX = x[paramIndex];
       x[paramIndex] = oldX + epsilon;
@@ -62,6 +65,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
       double pct = diff / Math.min(Math.abs(appDeriv), Math.abs(calcDeriv));
       if (diff > diffThreshold && pct > diffPctThreshold) {
         System.err.printf("Grad fail at %2d, appGrad=%9.7f, calcGrad=%9.7f, diff=%9.7f, pct=%9.7f\n", paramIndex,appDeriv,calcDeriv,diff,pct);
+        badIndices.add(paramIndex);
         returnVal= false;
       } else {
         System.err.printf("Grad good at %2d, appGrad=%9.7f, calcGrad=%9.7f, diff=%9.7f, pct=%9.7f\n", paramIndex,appDeriv,calcDeriv,diff,pct);
@@ -70,7 +74,15 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     }
     if (returnVal){
       System.err.printf("ALL gradients passed. Yay!\n");
-
+    } else {
+      System.err.print("Bad indices: ");
+      for (int i = 0; i < badIndices.size() && i < 10; ++i) {
+        System.err.print(" " + badIndices.get(i));
+      }
+      if (badIndices.size() >= 10) {
+        System.err.print(" (...)");
+      }
+      System.err.println();
     }
     return returnVal;
   }
