@@ -5,8 +5,6 @@ import java.io.Serializable;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 
 public class Options implements Serializable {
-  public double scalingForInit;
-
   public int randomSeed;
 
   /**
@@ -24,7 +22,12 @@ public class Options implements Serializable {
    * in the word vector file.  If a smaller size is specified, vectors
    * will be truncated.
    */
-  public int numHid;
+  public int numHid = 25;
+
+  /**
+   * Number of classes to build the RNN for
+   */
+  public int numClasses = 5;
 
   public boolean lowercaseWordVectors;
 

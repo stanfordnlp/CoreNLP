@@ -34,9 +34,9 @@ public class SentimentModel implements Serializable {
   public Map<String, SimpleMatrix> wordVectors;
 
   /**
-   * TODO: obviously this will depend on the data set, not always be 5
+   * How many classes the RNN is built to test against
    */
-  public final int numClasses = 5;
+  public final int numClasses;
 
   /**
    * Dimension of hidden layers, size of word vectors, etc
@@ -95,6 +95,9 @@ public class SentimentModel implements Serializable {
       }
       this.numHid = size;
     }
+
+    this.numClasses = op.numClasses;
+
     identity = SimpleMatrix.identity(numHid);
 
     binaryTransform = TwoDimensionalMap.treeMap();
@@ -137,7 +140,7 @@ public class SentimentModel implements Serializable {
     // bias column values are initialized zero
     binary.insertIntoThis(0, 0, randomTransformBlock());
     binary.insertIntoThis(0, numHid, randomTransformBlock());
-    return binary.scale(op.scalingForInit);
+    return binary.scale(op.trainOptions.scalingForInit);
   }
 
   SimpleMatrix randomTransformBlock() {
@@ -151,7 +154,7 @@ public class SentimentModel implements Serializable {
     SimpleMatrix score = new SimpleMatrix(numClasses, numHid + 1);
     // Leave the bias column with 0 values
     score.insertIntoThis(0, 0, SimpleMatrix.random(numClasses, numHid, -1.0/Math.sqrt((double)numHid),1.0/Math.sqrt((double)numHid),rand));
-    return score.scale(op.scalingForInit);
+    return score.scale(op.trainOptions.scalingForInit);
   }
 
   void readWordVectors() {
