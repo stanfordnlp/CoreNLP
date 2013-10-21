@@ -99,7 +99,7 @@ public class RNNUtils {
     int dimOfWords = 0;
     boolean warned = false;
     for (String line : IOUtils.readLines(filename, "utf-8")) {
-      String[]  lineSplit = line.split("\\s+");
+      String[] lineSplit = line.split("\\s+");
       String word = lineSplit[0];
       dimOfWords = lineSplit.length - 1;
       if (expectedSize <= 0) {
@@ -124,7 +124,7 @@ public class RNNUtils {
       SimpleMatrix vector = new SimpleMatrix(vec);
       wordVectors.put(word, vector);
     }
-                                                                           
+ 
     return wordVectors;
   }
 
