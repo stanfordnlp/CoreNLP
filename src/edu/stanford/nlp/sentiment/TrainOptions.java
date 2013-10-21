@@ -3,13 +3,15 @@ package edu.stanford.nlp.sentiment;
 import java.io.Serializable;
 
 public class TrainOptions implements Serializable {
-  int batchSize;
+  public int batchSize;
 
-  int iterations;
+  public int iterations;
 
-  int debugOutputSeconds;
+  public int debugOutputSeconds;
 
-  int maxTrainTimeSeconds;
+  public int maxTrainTimeSeconds;
 
-  double learningRate;
+  public double learningRate;
+
+  public double scalingForInit;
 }
