@@ -87,11 +87,13 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       binaryTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
     }
 
-    for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryClassification) {
-      int numRows = entry.getValue().numRows();
-      int numCols = entry.getValue().numCols();
-
-      binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
+    if (!model.op.combineClassification) {
+      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryClassification) {
+        int numRows = entry.getValue().numRows();
+        int numCols = entry.getValue().numCols();
+        
+        binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
+      }
     }
 
     if (model.op.useTensors) {
@@ -250,7 +252,11 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       // Otherwise, this must be a binary node
       String leftCategory = model.basicCategory(tree.children()[0].label().value());
       String rightCategory = model.basicCategory(tree.children()[1].label().value());
-      binaryCD.put(leftCategory, rightCategory, binaryCD.get(leftCategory, rightCategory).plus(localCD));
+      if (model.op.combineClassification) {
+        unaryCD.put("", unaryCD.get("").plus(localCD));
+      } else {
+        binaryCD.put(leftCategory, rightCategory, binaryCD.get(leftCategory, rightCategory).plus(localCD));
+      }
       
       SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
       SimpleMatrix deltaFromClass = model.getBinaryClassification(leftCategory, rightCategory).transpose().mult(deltaClass);
