@@ -381,5 +381,55 @@ public class SentimentModel implements Serializable {
     }
   }
 
+  public void printParamInformation(int index) {
+    int curIndex = 0;
+    for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : binaryTransform) {
+      if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
+        System.err.println("Index " + index + " is element " + (index - curIndex) + " of binaryTransform \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
+        return;
+      } else {
+        curIndex += entry.getValue().getNumElements();
+      }
+    }
+
+    for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : binaryClassification) {
+      if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
+        System.err.println("Index " + index + " is element " + (index - curIndex) + " of binaryClassification \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
+        return;
+      } else {
+        curIndex += entry.getValue().getNumElements();
+      }
+    }
+
+    for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : binaryTensors) {
+      if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
+        System.err.println("Index " + index + " is element " + (index - curIndex) + " of binaryTensor \"" + entry.getFirstKey() + "," + entry.getSecondKey() + "\"");
+        return;
+      } else {
+        curIndex += entry.getValue().getNumElements();
+      }
+    }
+
+    for (Map.Entry<String, SimpleMatrix> entry : unaryClassification.entrySet()) {
+      if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
+        System.err.println("Index " + index + " is element " + (index - curIndex) + " of unaryClassification \"" + entry.getKey() + "\"");
+        return;
+      } else {
+        curIndex += entry.getValue().getNumElements();
+      }
+    }
+
+    for (Map.Entry<String, SimpleMatrix> entry : wordVectors.entrySet()) {
+      if (curIndex <= index && curIndex + entry.getValue().getNumElements() > index) {
+        System.err.println("Index " + index + " is element " + (index - curIndex) + " of wordVector \"" + entry.getKey() + "\"");
+        return;
+      } else {
+        curIndex += entry.getValue().getNumElements();
+      }
+    }
+
+    System.err.println("Index " + index + " is beyond the length of the parameters; total parameter space was " + totalParamSize());
+  }
+
   private static final long serialVersionUID = 1;
 }
