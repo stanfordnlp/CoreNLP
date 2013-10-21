@@ -47,12 +47,20 @@ public class SentimentTraining {
 
     // train using AdaGrad (seemed to work best during the dvparser project)
     double[] sumGradSquare = new double[model.totalParamSize()];
-    Arrays.fill(sumGradSquare, 1.0);
+    Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
     
     int numBatches = trainingTrees.size() / model.op.trainOptions.batchSize + 1;
     System.err.println("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
     System.err.println("Times through each training batch: " + model.op.trainOptions.epochs);
     for (int epoch = 0; epoch < model.op.trainOptions.epochs; ++epoch) {
+      System.err.println("======================================");
+      System.err.println("Starting epoch " + epoch);
+      if (epoch > 0 && model.op.trainOptions.adagradResetFrequency > 0 && 
+          (epoch % model.op.trainOptions.adagradResetFrequency == 0)) {
+        System.err.println("Resetting adagrad weights to " + model.op.trainOptions.initialAdagradWeight);
+        Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
+      }
+
       List<Tree> shuffledSentences = Generics.newArrayList(trainingTrees);
       Collections.shuffle(shuffledSentences, model.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
