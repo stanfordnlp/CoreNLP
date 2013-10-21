@@ -52,13 +52,9 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   VERBOSE = "false",
   VERBOSE_RESULTS = "true",
   SGML = "false",
-  INIT_FROM_TREES = "false",
   LANG = "",
   TOKENIZER_FACTORY = "",
   XML_INPUT = "",
-  TREE_TRANSFORMER = "",
-  TREE_NORMALIZER = "",
-  TREE_RANGE = "",
   TAG_INSIDE = "",
   APPROXIMATE = "-1.0",
   TOKENIZER_OPTIONS = "",
@@ -271,8 +267,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
 
 
   public String getModel() { return getProperty("model"); }
-
-  public String getJarModel() { return getProperty("jarModel"); }
 
   public String getFile() { return getProperty("file"); }
 
