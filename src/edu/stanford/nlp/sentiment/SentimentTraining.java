@@ -51,13 +51,13 @@ public class SentimentTraining {
     
     int numBatches = trainingTrees.size() / model.op.trainOptions.batchSize + 1;
     System.err.println("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
-    System.err.println("Times through each training batch: " + model.op.trainOptions.iterations);
-    for (int iter = 0; iter < model.op.trainOptions.iterations; ++iter) {
+    System.err.println("Times through each training batch: " + model.op.trainOptions.epochs);
+    for (int epoch = 0; epoch < model.op.trainOptions.epochs; ++epoch) {
       List<Tree> shuffledSentences = Generics.newArrayList(trainingTrees);
       Collections.shuffle(shuffledSentences, model.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
         System.err.println("======================================");
-        System.err.println("Iteration " + iter + " batch " + batch);
+        System.err.println("Epoch " + epoch + " batch " + batch);
       
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
@@ -71,7 +71,7 @@ public class SentimentTraining {
         executeOneTrainingBatch(model, shuffledSentences.subList(startTree, endTree), sumGradSquare);
 
         long totalElapsed = timing.report();
-        System.err.println("Finished iteration " + iter + " batch " + batch + "; total training time " + totalElapsed + " ms");
+        System.err.println("Finished epoch " + epoch + " batch " + batch + "; total training time " + totalElapsed + " ms");
 
         if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
           // no need to debug output, we're done now
