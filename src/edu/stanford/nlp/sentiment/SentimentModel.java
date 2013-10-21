@@ -189,6 +189,7 @@ public class SentimentModel implements Serializable {
       throw new RuntimeException("Cannot create random word vectors for an unknown numHid");
     }
     Set<String> words = Generics.newHashSet();
+    words.add(op.unkWord);
     for (Tree tree : trainingTrees) {
       List<Tree> leaves = tree.getLeaves();
       for (Tree leaf : leaves) {
