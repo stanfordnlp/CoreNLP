@@ -54,6 +54,14 @@ public class RNNCoreAnnotations {
     }
   }
 
+  public static int getPredictedClass(Tree tree) {
+    Label label = tree.label();
+    if (!(label instanceof CoreLabel)) {
+      throw new IllegalArgumentException("CoreLabels required to get the attached gold class");
+    }
+    return ((CoreLabel) label).get(PredictedClass.class);
+  }
+
   /**
    * The index of the correct class
    */

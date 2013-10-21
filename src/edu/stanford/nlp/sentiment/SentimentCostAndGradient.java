@@ -305,7 +305,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return Wt_df;
   }
 
-  private void forwardPropagateTree(Tree tree) {
+  void forwardPropagateTree(Tree tree) {
     SimpleMatrix nodeVector = null;
     SimpleMatrix classification = null;
 
