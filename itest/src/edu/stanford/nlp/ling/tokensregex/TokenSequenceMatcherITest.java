@@ -988,6 +988,33 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("Mellitus", m.group(1));
     assertEquals("Bishop", m.group(2));
     assertEquals("London", m.group(3));
+
+
+    // Same as above but without extra "{}"
+    nnpPattern = TokenSequencePattern.compile( " ( [ tag:\"NNP\" ] )" );
+    env.bind("$NNP", nnpPattern);
+    p = TokenSequencePattern.compile(env, " $NNP /is|was/ []*? $NNP+ \"of\" $NNP+ ");
+    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    match = m.find();
+    assertTrue(match);
+    assertEquals(3, m.groupCount());
+    assertEquals("Mellitus was the first Bishop of London", m.group());
+    assertEquals("Mellitus", m.group(1));
+    assertEquals("Bishop", m.group(2));
+    assertEquals("London", m.group(3));
+
+    // Same as above but using "pos"
+    nnpPattern = TokenSequencePattern.compile( " ( [ pos:\"NNP\" ] )" );
+    env.bind("$NNP", nnpPattern);
+    p = TokenSequencePattern.compile(env, " $NNP /is|was/ []*? $NNP+ \"of\" $NNP+ ");
+    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    match = m.find();
+    assertTrue(match);
+    assertEquals(3, m.groupCount());
+    assertEquals("Mellitus was the first Bishop of London", m.group());
+    assertEquals("Mellitus", m.group(1));
+    assertEquals("Bishop", m.group(2));
+    assertEquals("London", m.group(3));
   }
 
   public void testTokenSequenceMatcherNumber() throws IOException {
