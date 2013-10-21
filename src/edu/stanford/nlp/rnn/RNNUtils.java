@@ -138,6 +138,23 @@ public class RNNUtils {
   }
 
   /**
+   * Applies softmax to all of the elements of the matrix.  The return
+   * matrix will have all of its elements sum to 1.  If your matrix is
+   * not already a vector, be sure this is what you actually want.
+   */
+  public static SimpleMatrix softmax(SimpleMatrix input) {
+    SimpleMatrix output = new SimpleMatrix(input);
+    for (int i = 0; i < output.numRows(); ++i) {
+      for (int j = 0; j < output.numCols(); ++j) {
+        output.set(i, j, Math.exp(output.get(i, j)));
+      }
+    }
+    double sum = output.elementSum();
+    // will be safe, since exp should never return 0
+    return output.scale(1.0 / sum); 
+  }
+
+  /**
    * Applies tanh to each of the entries in the matrix.
    */
   public static SimpleMatrix elementwiseApplyTanh(SimpleMatrix input) {

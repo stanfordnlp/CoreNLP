@@ -245,5 +245,22 @@ public class SentimentModel implements Serializable {
     return basic;
   }
 
+  public SimpleMatrix getUnaryClassification(String category) {
+    category = basicCategory(category);
+    return unaryClassification.get(category);
+  }
+
+  public SimpleMatrix getBinaryClassification(String left, String right) {
+    left = basicCategory(left);
+    right = basicCategory(right);
+    return binaryClassification.get(left, right);
+  }
+
+  public SimpleMatrix getBinaryTransform(String left, String right) {
+    left = basicCategory(left);
+    right = basicCategory(right);
+    return binaryTransform.get(left, right);
+  }
+
   private static final long serialVersionUID = 1;
 }
