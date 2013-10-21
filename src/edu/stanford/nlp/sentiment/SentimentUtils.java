@@ -7,7 +7,18 @@ import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
+/**
+ * In the Sentiment dataset converted to tree form, the labels on the
+ * intermediate nodes are the sentiment scores and the leaves are the
+ * text of the sentence.  This class provides routines to read a file
+ * of those trees and attach the sentiment score as the GoldLabel
+ * annotation.
+ *
+ * @author John Bauer
+ */
 public class SentimentUtils {
+  private SentimentUtils() {} // static methods only
+
   public static void attachGoldLabels(Tree tree) {
     if (tree.isLeaf()) {
       return;
@@ -21,6 +32,9 @@ public class SentimentUtils {
     RNNCoreAnnotations.setGoldClass(tree, Integer.valueOf(tree.label().value()));
   }
 
+  /**
+   * Given a file name, reads in those trees and returns them as a List
+   */
   public static List<Tree> readTreesWithGoldLabels(String path) {
     List<Tree> trees = Generics.newArrayList();
     MemoryTreebank treebank = new MemoryTreebank();

@@ -9,12 +9,24 @@ import org.ejml.simple.SimpleMatrix;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
 
+/**
+ * Includes a bunch of utility methods usable by projects which use
+ * RNN, such as the parser and sentiment models.  Some methods convert
+ * iterators of SimpleMatrix objects to and from a vector.  Others are
+ * general utility methods on SimpleMatrix objects.
+ *
+ * @author John Bauer
+ * @author Richard Socher
+ */
 public class RNNUtils {
+  private RNNUtils() {} // static methods only
+
   /**
    * Given a sequence of Iterators over SimpleMatrix, fill in all of
    * the matrices with the entries in the theta vector.  Errors are
    * thrown if the theta vector does not exactly fill the matrices.
    */
+  @SafeVarargs
   public static void vectorToParams(double[] theta, Iterator<SimpleMatrix> ... matrices) {
     int index = 0;
     for (Iterator<SimpleMatrix> matrixIterator : matrices) {
@@ -38,6 +50,7 @@ public class RNNUtils {
    * total size as a time savings.  AssertionError thrown if the
    * vector sizes do not exactly match.
    */
+  @SafeVarargs
   public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
@@ -65,6 +78,7 @@ public class RNNUtils {
    * expected total size as a time savings.  AssertionError thrown if
    * the vector sizes do not exactly match.
    */
+  @SafeVarargs
   public static double[] paramsToVector(double scale, int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
