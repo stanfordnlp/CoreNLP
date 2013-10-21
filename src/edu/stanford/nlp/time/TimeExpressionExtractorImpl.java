@@ -97,7 +97,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       try {
         // TODO: have more robust parsing of document date?  docDate may not have century....
         // TODO: if docDate didn't change, we can cache the parsing of the docDate and not repeat it for every sentence
-        timeIndex.docDate = SUTime.parseDateTime(docDate,true);
+        timeIndex.docDate = SUTime.parseDateTime(docDate);
       } catch (Exception e) {
         throw new RuntimeException("Could not parse date string: [" + docDate + "]", e);
       }
@@ -173,7 +173,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       try {
         // TODO: have more robust parsing of document date?  docDate may not have century....
         // TODO: if docDate didn't change, we can cache the parsing of the docDate and not repeat it for every sentence
-        refDate = SUTime.parseDateTime(refDateStr,true);
+        refDate = SUTime.parseDateTime(refDateStr);
       } catch (Exception e) {
         throw new RuntimeException("Could not parse date string: [" + refDateStr + "]", e);
       }
@@ -189,14 +189,10 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     List<? extends MatchedExpression> matchedExpressions = expressionExtractor.extractExpressions(annotation);
     List<TimeExpression> timeExpressions = new ArrayList<TimeExpression>(matchedExpressions.size());
     for (MatchedExpression expr : matchedExpressions) {
-      // Make sure we have the correct type (instead of just MatchedExpression)
-      //timeExpressions.add(TimeExpression.TimeExpressionConverter.apply(expr));
-
-      // TODO: Fix the extraction pipeline so it creates TimeExpression instead of MatchedExpressions
-      // For now, grab the time expression from the annotation (this is good, so we don't have duplicate copies)
-      TimeExpression annoTe = expr.getAnnotation().get( TimeExpression.Annotation.class );
-      if (annoTe != null) {
-        timeExpressions.add(annoTe);
+      if (expr instanceof TimeExpression) {
+        timeExpressions.add((TimeExpression) expr);
+      } else {
+        timeExpressions.add(new TimeExpression(expr));
       }
     }
     // We cache the document date in the timeIndex
