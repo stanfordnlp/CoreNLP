@@ -155,7 +155,20 @@ public class RNNUtils {
   }
 
   /**
-   * Applies tanh to each of the entries in the matrix.
+   * Applies log to each of the entries in the matrix.  Returns a new matrix.
+   */
+  public static SimpleMatrix elementwiseApplyLog(SimpleMatrix input) {
+    SimpleMatrix output = new SimpleMatrix(input);
+    for (int i = 0; i < output.numRows(); ++i) {
+      for (int j = 0; j < output.numCols(); ++j) {
+        output.set(i, j, Math.log(output.get(i, j)));
+      }
+    }
+    return output;
+  }
+
+  /**
+   * Applies tanh to each of the entries in the matrix.  Returns a new matrix.
    */
   public static SimpleMatrix elementwiseApplyTanh(SimpleMatrix input) {
     SimpleMatrix output = new SimpleMatrix(input);
@@ -168,7 +181,7 @@ public class RNNUtils {
   }
 
   /**
-   * Applies the derivative of tanh to each of the elements in the vector.
+   * Applies the derivative of tanh to each of the elements in the vector.  Returns a new matrix.
    */
   public static SimpleMatrix elementwiseApplyTanhDerivative(SimpleMatrix input) {
     SimpleMatrix output = new SimpleMatrix(input.numRows(), input.numCols());
