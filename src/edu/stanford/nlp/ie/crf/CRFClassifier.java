@@ -161,6 +161,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   Index<String> templateGroupIndex;
   Map<Integer, Integer> featureIndexToTemplateIndex;
 
+  // Label dictionary for fast decoding
+  LabelDictionary labelDictionary;
+  
   // List selftraindatums = new ArrayList();
 
   protected CRFClassifier() {
@@ -727,6 +730,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     seenBackgroundFeatures[1] = Generics.newHashSet();
 
     int wordCount = 0;
+    
+    if (flags.labelDictionaryCutoff > 0) {
+      this.labelDictionary = new LabelDictionary();
+    }
 
     for (List<IN> doc : ob) {
       if (flags.useReverse) {
@@ -742,8 +749,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           throw new IllegalArgumentException("Word " + wordCount + " (\"" + token.get(CoreAnnotations.TextAnnotation.class) + "\") has a blank answer");
         }
         classIndex.add(ans);
+        if (labelDictionary != null) {
+          String observation = token.get(CoreAnnotations.TextAnnotation.class);
+          labelDictionary.increment(observation, ans);
+        }
       }
-
+      
       for (int j = 0, docSize = doc.size(); j < docSize; j++) {
         CRFDatum<List<String>, CRFLabel> d = makeDatum(doc, j, featureFactory);
         labelIndex.add(d.label());
@@ -901,6 +912,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (int i = 0, fiSize = featureIndex.size(); i < fiSize; i++) {
         System.out.println(i + ": " + featureIndex.get(i));
       }
+    }
+    if (labelDictionary != null) {
+      labelDictionary.lock(flags.labelDictionaryCutoff, classIndex);
     }
   }
 
@@ -1082,87 +1096,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return featureValArr;
   }
 
-  public static class TestSequenceModel implements SequenceModel {
-
-    private final int window;
-    private final int numClasses;
-    private final CRFCliqueTree cliqueTree;
-    private final int[] tags;
-    private final int[] backgroundTag;
-
-    public TestSequenceModel(CRFCliqueTree cliqueTree) {
-      // this.factorTables = factorTables;
-      this.cliqueTree = cliqueTree;
-      // this.window = factorTables[0].windowSize();
-      this.window = cliqueTree.window();
-      // this.numClasses = factorTables[0].numClasses();
-      this.numClasses = cliqueTree.getNumClasses();
-      tags = new int[numClasses];
-      for (int i = 0; i < tags.length; i++) {
-        tags[i] = i;
-      }
-      backgroundTag = new int[] { cliqueTree.backgroundIndex() };
-    }
-
-    @Override
-    public int length() {
-      return cliqueTree.length();
-    }
-
-    @Override
-    public int leftWindow() {
-      return window - 1;
-    }
-
-    @Override
-    public int rightWindow() {
-      return 0;
-    }
-
-    @Override
-    public int[] getPossibleValues(int pos) {
-      if (pos < window - 1) {
-        return backgroundTag;
-      }
-      return tags;
-    }
-
-    /**
-     * Return the score of the proposed tags for position given.
-     * @param tags is an array indicating the assignment of labels to score.
-     * @param pos is the position to return a score for.
-     */
-    @Override
-    public double scoreOf(int[] tags, int pos) {
-      int[] previous = new int[window - 1];
-      int realPos = pos - window + 1;
-      for (int i = 0; i < window - 1; i++) {
-        previous[i] = tags[realPos + i];
-      }
-      return cliqueTree.condLogProbGivenPrevious(realPos, tags[pos], previous);
-    }
-
-    @Override
-    public double[] scoresOf(int[] tags, int pos) {
-      int realPos = pos - window + 1;
-      double[] scores = new double[numClasses];
-      int[] previous = new int[window - 1];
-      for (int i = 0; i < window - 1; i++) {
-        previous[i] = tags[realPos + i];
-      }
-      for (int i = 0; i < numClasses; i++) {
-        scores[i] = cliqueTree.condLogProbGivenPrevious(realPos, i, previous);
-      }
-      return scores;
-    }
-
-    @Override
-    public double scoreOf(int[] sequence) {
-      throw new UnsupportedOperationException();
-    }
-
-  } // end class TestSequenceModel
-
   @Override
   public List<IN> classify(List<IN> document) {
     if (flags.doGibbs) {
@@ -1234,11 +1167,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   @Override
   public SequenceModel getSequenceModel(List<IN> doc) {
     Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(doc);
-    return getSequenceModel(p);
+    return getSequenceModel(p, doc);
   }
 
-  private SequenceModel getSequenceModel(Triple<int[][][], int[], double[][][]> documentDataAndLabels) {
-    return new TestSequenceModel(getCliqueTree(documentDataAndLabels));
+  private SequenceModel getSequenceModel(Triple<int[][][], int[], double[][][]> documentDataAndLabels, List<IN> document) {
+    return labelDictionary == null ? new TestSequenceModel(getCliqueTree(documentDataAndLabels)) :
+      new TestSequenceModel(getCliqueTree(documentDataAndLabels), labelDictionary, document);
   }
 
   protected CliquePotentialFunction getCliquePotentialFunction() {
@@ -1273,7 +1207,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (document.isEmpty()) {
       return document;
     }
-    SequenceModel model = getSequenceModel(documentDataAndLabels);
+    SequenceModel model = getSequenceModel(documentDataAndLabels, document);
     return classifyMaxEnt(document, model);
   }
 
@@ -2646,6 +2580,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
 
       oos.writeObject(knownLCWords);
+      if (labelDictionary != null) {
+        oos.writeObject(labelDictionary);
+      }
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -2696,6 +2633,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // WordShapeClassifier.setKnownLowerCaseWords((Set) ois.readObject());
     knownLCWords = (Set<String>) ois.readObject();
 
+    if (flags.labelDictionaryCutoff > 0) {
+      labelDictionary = (LabelDictionary) ois.readObject();
+    }
+    
     if (VERBOSE) {
       System.err.println("windowSize=" + windowSize);
       System.err.println("flags=\n" + flags);
