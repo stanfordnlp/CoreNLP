@@ -49,9 +49,19 @@ public class RNNOptions implements Serializable {
 
   /**
    * No symantic untying - use the same category for all categories.
-   * This results in all nodes getting the same matrix.
+   * This results in all nodes getting the same matrix (and tensor,
+   * where applicable)
    */
   public boolean simplifiedModel = true;
+
+  /**
+   * If this option is true, then the binary and unary classification
+   * matrices are combined.  Only makes sense if simplifiedModel is true.
+   * If combineClassification is set to true, simplifiedModel will
+   * also be set to true.  If simplifiedModel is set to false, this
+   * will be set to false.
+   */
+  public boolean combineClassification = true;
 
   public RNNTrainOptions trainOptions = new RNNTrainOptions();
 
@@ -68,6 +78,7 @@ public class RNNOptions implements Serializable {
     result.append("lowercaseWordVectors=" + lowercaseWordVectors + "\n");
     result.append("useTensors=" + useTensors + "\n");
     result.append("simplifiedModel=" + simplifiedModel + "\n");
+    result.append("combineClassification=" + combineClassification + "\n");
     result.append(trainOptions.toString());
     return result.toString();
   }
@@ -105,6 +116,14 @@ public class RNNOptions implements Serializable {
       return argIndex + 1;
     } else if (args[argIndex].equalsIgnoreCase("-nosimplifiedModel")) {
       simplifiedModel = false;
+      combineClassification = false;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-combineClassification")) {
+      combineClassification = true;
+      simplifiedModel = true;
+      return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-nocombineClassification")) {
+      combineClassification = false;
       return argIndex + 1;
     } else if (args[argIndex].equalsIgnoreCase("-useTensors")) {
       useTensors = true;

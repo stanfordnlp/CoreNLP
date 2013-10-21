@@ -94,8 +94,7 @@ public class SentimentModel implements Serializable {
   
   public SentimentModel(RNNOptions op, List<Tree> trainingTrees) {
     this.op = op;
-    // TODO: record for posterity the random seed if it was set to 0
-    rand = (op.randomSeed != 0) ? new Random(op.randomSeed) : new Random(); 
+    rand = new Random(op.randomSeed);
 
     if (op.randomWordVectors) {
       initRandomWordVectors(trainingTrees);
@@ -152,7 +151,9 @@ public class SentimentModel implements Serializable {
       if (op.useTensors) {
         binaryTensors.put(left, right, randomBinaryTensor());
       }
-      binaryClassification.put(left, right, randomClassificationMatrix());
+      if (!op.combineClassification) {
+        binaryClassification.put(left, right, randomClassificationMatrix());
+      }
     }
     numBinaryMatrices = binaryTransform.size();
     binaryTransformSize = numHid * (2 * numHid + 1);
@@ -161,7 +162,7 @@ public class SentimentModel implements Serializable {
     } else {
       binaryTensorSize = 0;
     }
-    binaryClassificationSize = numClasses * (numHid + 1);
+    binaryClassificationSize = (op.combineClassification) ? 0 : numClasses * (numHid + 1);
 
     unaryClassification = Generics.newTreeMap();
     
@@ -309,7 +310,9 @@ public class SentimentModel implements Serializable {
   }
 
   public SimpleMatrix getClassWForNode(Tree node) {
-    if (node.children().length == 2) {
+    if (op.combineClassification) {
+      return unaryClassification.get("");
+    } else if (node.children().length == 2) {
       String leftLabel = node.children()[0].value();
       String leftBasic = basicCategory(leftLabel);
       String rightLabel = node.children()[1].value();
@@ -356,9 +359,13 @@ public class SentimentModel implements Serializable {
   }
 
   public SimpleMatrix getBinaryClassification(String left, String right) {
-    left = basicCategory(left);
-    right = basicCategory(right);
-    return binaryClassification.get(left, right);
+    if (op.combineClassification) {
+      return unaryClassification.get("");
+    } else {
+      left = basicCategory(left);
+      right = basicCategory(right);
+      return binaryClassification.get(left, right);
+    }
   }
 
   public SimpleMatrix getBinaryTransform(String left, String right) {
