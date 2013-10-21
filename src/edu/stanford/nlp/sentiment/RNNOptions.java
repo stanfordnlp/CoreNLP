@@ -40,7 +40,7 @@ public class RNNOptions implements Serializable {
    */
   public int numClasses = 5;
 
-  public boolean lowercaseWordVectors = true;
+  public boolean lowercaseWordVectors = false;
 
   public boolean useTensors = true;
 
