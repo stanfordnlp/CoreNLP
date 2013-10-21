@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import edu.stanford.nlp.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
@@ -115,6 +116,19 @@ public class SentimentTraining {
     return gcFunc.gradientCheck(1000, 50, model.paramsToVector());    
   }
 
+  public static void attachGoldLabels(Tree tree) {
+    if (tree.isLeaf()) {
+      return;
+    }
+    for (Tree child : tree.children()) {
+      attachGoldLabels(child);
+    }
+
+    // In the sentiment data set, the node labels are simply the gold
+    // class labels.  There are no categories encoded.
+    RNNCoreAnnotations.setGoldClass(tree, Integer.valueOf(tree.label().value()));
+  }
+
   public static void main(String[] args) {
     RNNOptions op = new RNNOptions();
 
@@ -143,9 +157,11 @@ public class SentimentTraining {
     // read in the trees
     // TODO: this is ugly, make it an option instead
     List<Tree> trainingTrees = Generics.newArrayList();
+
     MemoryTreebank treebank = new MemoryTreebank();
     treebank.loadPath("sentimentTreesDebug.txt", null);
     for (Tree tree : treebank) {
+      attachGoldLabels(tree);
       trainingTrees.add(tree);
     }
 
