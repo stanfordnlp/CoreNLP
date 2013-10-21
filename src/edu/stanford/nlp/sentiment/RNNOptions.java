@@ -16,7 +16,7 @@ public class RNNOptions implements Serializable {
   /**
    * In the wordVectors file, what word represents unknown?
    */
-  public String unkWord;
+  public String unkWord = "UNK";
 
   /**
    * By default, initialize random word vectors instead of reading
