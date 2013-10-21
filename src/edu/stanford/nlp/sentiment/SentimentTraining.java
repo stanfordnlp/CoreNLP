@@ -123,6 +123,7 @@ public class SentimentTraining {
     RNNOptions op = new RNNOptions();
 
     String trainPath = "sentimentTreesDebug.txt";
+    String devPath = null;
 
     boolean runGradientCheck = false;
     boolean runTraining = false;
@@ -139,6 +140,9 @@ public class SentimentTraining {
       } else if (args[argIndex].equalsIgnoreCase("-trainpath")) {
         trainPath = args[argIndex + 1];
         argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-devpath")) {
+        devPath = args[argIndex + 1];
+        argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];
         argIndex += 2;
@@ -153,9 +157,7 @@ public class SentimentTraining {
 
     // read in the trees
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(trainPath);
-
-    List<Tree> devTrees = null;
-    List<Tree> testTrees = null;
+    List<Tree> devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
 
     // TODO: binarize the trees, then collapse the unary chains.
     // Collapsed unary chains always have the label of the top node in
