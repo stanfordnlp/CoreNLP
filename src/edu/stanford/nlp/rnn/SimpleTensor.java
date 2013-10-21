@@ -68,6 +68,25 @@ public class SimpleTensor implements Serializable {
     return result;
   }
 
+  public SimpleTensor elementMult(SimpleTensor other) {
+    if (other.numRows != numRows || other.numCols != numCols || other.numSlices != numSlices) {
+      throw new IllegalArgumentException("Sizes of tensors do not match.  Our size: " + numRows + "," + numCols + "," + numSlices + "; other size " + other.numRows + "," + other.numCols + "," + other.numSlices);
+    }
+    SimpleTensor result = new SimpleTensor(numRows, numCols, numSlices);
+    for (int i = 0; i < numSlices; ++i) {
+      result.slices[i] = slices[i].elementMult(other.slices[i]);
+    }
+    return result;
+  }
+
+  public double elementSum() {
+    double sum = 0.0;
+    for (SimpleMatrix slice : slices) {
+      sum += slice.elementSum();
+    }
+    return sum;
+  }
+
   public void setSlice(int slice, SimpleMatrix matrix) {
     if (slice < 0 || slice >= numSlices) {
       throw new IllegalArgumentException("Unexpected slice number " + slice + " for tensor with " + numSlices + " slices");
