@@ -26,7 +26,6 @@ public class RNNUtils {
    * the matrices with the entries in the theta vector.  Errors are
    * thrown if the theta vector does not exactly fill the matrices.
    */
-  @SafeVarargs
   public static void vectorToParams(double[] theta, Iterator<SimpleMatrix> ... matrices) {
     int index = 0;
     for (Iterator<SimpleMatrix> matrixIterator : matrices) {
@@ -50,7 +49,6 @@ public class RNNUtils {
    * total size as a time savings.  AssertionError thrown if the
    * vector sizes do not exactly match.
    */
-  @SafeVarargs
   public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
@@ -78,7 +76,6 @@ public class RNNUtils {
    * expected total size as a time savings.  AssertionError thrown if
    * the vector sizes do not exactly match.
    */
-  @SafeVarargs
   public static double[] paramsToVector(double scale, int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
