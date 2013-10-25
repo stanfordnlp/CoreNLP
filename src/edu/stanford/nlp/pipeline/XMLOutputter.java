@@ -16,6 +16,7 @@ import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
@@ -26,6 +27,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -121,6 +123,9 @@ public class XMLOutputter {
     //
     if(annotation.get(CoreAnnotations.SentencesAnnotation.class) != null){
       int sentCount = 1;
+      int totalSentiment = 0;
+      // keep track separately to accommodate the chance that a sentence doesn't have sentiment.
+      int sentimentSentCount = 0;
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         Element sentElem = new Element("sentence", NAMESPACE_URI);
         sentElem.addAttribute(new Attribute("id", Integer.toString(sentCount)));
@@ -183,12 +188,31 @@ public class XMLOutputter {
 
           sentElem.appendChild(mrElem);
         }
+        
+        /**
+         * Adds sentiment as an attribute of this sentence.
+         */
+        Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
+        if(sentimentTree != null){
+        	int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
+        	totalSentiment += sentiment;
+        	sentimentSentCount++;
+        	sentElem.addAttribute(new Attribute("sentiment", Integer.toString(sentiment)));
+        }
 
         // add the sentence to the root
         sentencesElem.appendChild(sentElem);
       }
+      /**
+       * Provides an average sentiment value for the document as a whole.
+       */
+      if(sentimentSentCount > 0){
+    	  // shift the scale from 0-4 to 1-5 to avoid dividing by zero, and then shift it back
+    	  // note that we're only computing against sentences that presented with sentiment
+    	  double averageSentiment = (((double) totalSentiment + sentimentSentCount) / ((double) sentimentSentCount)) - 1.0;
+    	  sentencesElem.addAttribute(new Attribute("averageSentiment", Double.toString(averageSentiment)));
+      }
     }
-
     //
     // add the coref graph
     //
