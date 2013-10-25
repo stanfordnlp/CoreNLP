@@ -19,7 +19,7 @@ public class PennTreeReaderTest extends TestCase {
 
     String[] expected = { "(1 (2 This))",
                           "(3 (4 is) (5 a))",
-                          "(6 (\\* small) (7 \\/test))" };
+                          "(6 (* small) (7 /test))" };
 
     for (int i = 0; i < expected.length; ++i) {
       Tree tree = treeReader.readTree();
