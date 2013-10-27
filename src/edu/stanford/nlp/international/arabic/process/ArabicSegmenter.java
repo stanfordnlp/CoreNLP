@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -57,19 +56,19 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   // passed to the constructor).
 
   // The input already been tokenized. Do not run the Arabic tokenizer.
-  private static final String optTokenized = "tokenized";
+  private final String optTokenized = "tokenized";
 
   // Tokenizer options
-  private static final String optTokenizer = "orthoOptions";
+  private final String optTokenizer = "orthoOptions";
 
   // Mark segmented prefixes with this String
-  private static final String optPrefix = "prefixMarker";
+  private final String optPrefix = "prefixMarker";
 
   // Mark segmented suffixes with this String
-  private static final String optSuffix = "suffixMarker";
+  private final String optSuffix = "suffixMarker";
 
   // Number of decoding threads
-  private static final String optThreads = "nthreads";
+  private final String optThreads = "nthreads";
 
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
@@ -385,16 +384,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
     // Decode either an evaluation file or raw text
     try {
-      PrintWriter pwOut;
-      if (segmenter.flags.outputEncoding != null) {
-        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.outputEncoding);
-        pwOut = new PrintWriter(out, true);
-      } else if (segmenter.flags.inputEncoding != null) {
-        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.inputEncoding);
-        pwOut = new PrintWriter(out, true);
-      } else {
-        pwOut = new PrintWriter(System.out, true);
-      }
+      PrintWriter pwOut = new PrintWriter(System.out, true);
       if (segmenter.flags.testFile != null) {
         if (segmenter.flags.answerFile == null) {
           segmenter.evaluate(pwOut);
@@ -491,5 +481,4 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     }
     return segmenter;
   }
-
 }
