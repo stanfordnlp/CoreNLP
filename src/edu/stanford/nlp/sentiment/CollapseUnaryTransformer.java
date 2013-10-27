@@ -3,7 +3,7 @@ package edu.stanford.nlp.sentiment;
 import java.util.List;
 
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.trees.Tree;;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Generics;
 
