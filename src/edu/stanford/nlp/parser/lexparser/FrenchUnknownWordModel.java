@@ -1,32 +1,24 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
-import edu.stanford.nlp.ling.LabeledWord;
-import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Index;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 
 public class FrenchUnknownWordModel extends BaseUnknownWordModel {
 
   private static final long serialVersionUID = -776564693549194424L;
 
-  protected boolean smartMutation = false;
+  protected final boolean smartMutation;
 
-  protected int unknownSuffixSize = 0;
-  protected int unknownPrefixSize = 0;
+  protected final int unknownSuffixSize;
+  protected final int unknownPrefixSize;
 
-  public FrenchUnknownWordModel(Options op, Lexicon lex, 
-                                Index<String> wordIndex, 
-                                Index<String> tagIndex, 
+  public FrenchUnknownWordModel(Options op, Lexicon lex,
+                                Index<String> wordIndex,
+                                Index<String> tagIndex,
                                 ClassicCounter<IntTaggedWord> unSeenCounter) {
     super(op, lex, wordIndex, tagIndex, unSeenCounter, null, null, null);
-    unknownLevel = op.lexOptions.useUnknownWordSignatures;
     this.smartMutation = op.lexOptions.smartMutation;
     this.unknownSuffixSize = op.lexOptions.unknownSuffixSize;
     this.unknownPrefixSize = op.lexOptions.unknownPrefixSize;
@@ -38,7 +30,7 @@ public class FrenchUnknownWordModel extends BaseUnknownWordModel {
    * lines containing the data.
    */
   public FrenchUnknownWordModel(Options op, Lexicon lex,
-                                Index<String> wordIndex, 
+                                Index<String> wordIndex,
                                 Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
   }
