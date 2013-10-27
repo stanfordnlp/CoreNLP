@@ -109,6 +109,17 @@ public class FactorTable {
     return indices;
   }
 
+  /* e.g., numClasses = 4
+    [2,3] -> 11
+     0 1 2 3
+     4 5 6 7
+     8 9 10 11
+    [0,2] -> 2
+
+    summary:
+    index % numClasses -> curr timestamp index
+    index / numClasses -> prev timestamp index
+  */
   private int indexOf(int[] entry) {
     int index = 0;
     for (int i = 0; i < entry.length; i++) {
