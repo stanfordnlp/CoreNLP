@@ -27,7 +27,7 @@ public final class ExactMatchCost<K,V> implements MatchCostFunction<K,V> {
   }
 
   @Override
-  public double cost(K k1, K k2, int n) {
+  public double cost(K k1, K k2) {
     if (k1 != null) {
       if (k2 == null) return delCost;
       return (k1.equals(k2))? 0:mismatchCost;
@@ -37,7 +37,7 @@ public final class ExactMatchCost<K,V> implements MatchCostFunction<K,V> {
   }
 
   @Override
-  public double multiMatchDeltaCost(List<K> ks, V v, List<Match<K,V>> prevMatched, List<Match<K,V>> curMatched) {
+  public double multiMatchDeltaCost(List<K> ks, V v, int n) {
     return 0;
   }
 }
