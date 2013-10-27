@@ -217,9 +217,9 @@ public class PTBTokenizerTest extends TestCase {
   };
 
   private String[][] sgmlGold = {
-    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium\\/olodaterol",
-            "5\\/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5\\/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
-            ",", "and", "5\\/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
+    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium/olodaterol",
+            "5/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
+            ",", "and", "5/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
             "-LSB-", "51", "-RSB-", "." },
     { "Panasonic", "brand", "products", "are", "produced", "by", "Samsung", "Electronics", "Co.", "Ltd.", ".",
             "Sanyo", "products", "are", "n't", ".", },
