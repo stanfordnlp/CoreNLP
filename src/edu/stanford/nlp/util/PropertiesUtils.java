@@ -6,7 +6,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -82,7 +81,7 @@ public class PropertiesUtils {
   }
   
   /**
-   * Tired of Properties not behaving like Map<String,String>s?  This method will solve that problem for you.
+   * Tired of Properties not behaving like {@code Map<String,String>}s?  This method will solve that problem for you.
    */
   public static Map<String, String> asMap(Properties properties) {
     Map<String, String> map = Generics.newHashMap();
@@ -99,7 +98,8 @@ public class PropertiesUtils {
   /**
    * Checks to make sure that all properties specified in <code>properties</code>
    * are known to the program by checking that each simply overrides
-   * a default value
+   * a default value.
+   *
    * @param properties Current properties
    * @param defaults Default properties which lists all known keys
    */
@@ -249,4 +249,29 @@ public class PropertiesUtils {
     }
     return results;
   }
+
+  public static class Property {
+    public String name;
+    public String defaultValue;
+    public String description;
+
+    public Property(String name, String defaultValue, String description) {
+      this.name = name;
+      this.defaultValue = defaultValue;
+      this.description = description;
+    }
+  }
+
+  public static String getSignature(String name, Properties properties, Property[] supportedProperties) {
+    String prefix = (name != null && !name.isEmpty())? name + ".":"";
+    // keep track of all relevant properties for this annotator here!
+    StringBuilder sb = new StringBuilder();
+    for (Property p:supportedProperties) {
+      String pname = prefix + p.name;
+      String pvalue = properties.getProperty(pname, p.defaultValue);
+      sb.append(pname).append(":").append(pvalue);
+    }
+    return sb.toString();
+  }
+
 }
