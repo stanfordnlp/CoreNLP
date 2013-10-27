@@ -42,7 +42,6 @@ public class CoordinationTransformer implements TreeTransformer {
    * @param t a tree to be transformed
    * @return t transformed
    */
-  @Override
   public Tree transformTree(Tree t) {
     if (VERBOSE) {
       System.err.println("Input to CoordinationTransformer: " + t);
@@ -232,7 +231,7 @@ public class CoordinationTransformer implements TreeTransformer {
           if (VERBOSE) {
             System.out.println("print t");
             t.pennPrint();
-
+            
             System.out.println("print tree");
             tree.pennPrint();
             System.out.println();

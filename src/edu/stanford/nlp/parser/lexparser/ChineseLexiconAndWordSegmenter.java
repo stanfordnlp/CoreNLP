@@ -10,6 +10,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
@@ -379,7 +380,7 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
     String textOutputFileOrUrl = null;
     String treebankPath = null;
     Treebank testTreebank = null;
-    // Treebank tuneTreebank = null;
+    Treebank tuneTreebank = null;
     String testPath = null;
     FileFilter testFilter = null;
     FileFilter trainFilter = null;
@@ -390,14 +391,14 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 //    DocumentPreprocessor documentPreprocessor = new DocumentPreprocessor();
     boolean tokenized = false; // whether or not the input file has already been tokenized
     Function<List<HasWord>, List<HasWord>> escaper = new ChineseEscaper();
-    // int tagDelimiter = -1;
-    // String sentenceDelimiter = "\n";
-    // boolean fromXML = false;
+    int tagDelimiter = -1;
+    String sentenceDelimiter = "\n";
+    boolean fromXML = false;
     int argIndex = 0;
     if (args.length < 1) {
       System.err.println("usage: java edu.stanford.nlp.parser.lexparser." +
                          "LexicalizedParser parserFileOrUrl filename*");
-      return;
+      System.exit(1);
     }
 
     Options op = new Options();
