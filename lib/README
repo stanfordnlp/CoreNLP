@@ -249,16 +249,16 @@ LAST UPDATE: 2012-11-05
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-ejml-0.19-nogui.jar
-ORIGINAL JAR NAME: ejml-0.19.jar
-VERSION: 0.19
-RELEASE DATE: 2012-03-23
+ejml-0.23.jar
+ORIGINAL JAR NAME: ejml-0.23.jar
+VERSION: 0.23
+RELEASE DATE: 2013-06-21
 SOURCE AVAILABLE: yes
-DESCRIPTION: Another matrix library for Java (perhaps fastest for medium
+DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
 URL: http://code.google.com/p/efficient-java-matrix-library/
-USED BY: Used in deep learning, especially RNN parser
-LAST UPDATE: 2012-07-17
+USED BY: Used in deep learning, especially RNN parser and sentiment
+LAST UPDATE: 2013-10-14
 LAST UPDATE BY: Christopher Manning
 
 -----------------------------------------------------------------------
@@ -276,24 +276,15 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------
 javax.servlet.jar
-
-ORIGINAL JAR NAME: ?
-
-VERSION: ?
-
+ORIGINAL JAR NAME: servlet-api.jar
+VERSION: 3.0
 RELEASE DATE: ?
-
-SOURCE AVAILABLE: ?
-
-DESCRIPTION: Used by Tomcat and servlets.  Originally part of Java EE.
-
+SOURCE AVAILABLE: Yes. In: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
+DESCRIPTION: Used by Tomcat and servlets.  Originally part of Java EE 6.
 URL: ?
-
 USED BY: Our servlets
-
-LAST UPDATE: ? 
-
-LAST UPDATE BY: ?
+LAST UPDATE: 2013
+LAST UPDATE BY: Spence Green
 
 -----------------------------------------------------------------
 protobuf.jar
