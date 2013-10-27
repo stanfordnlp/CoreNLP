@@ -39,7 +39,7 @@ public class WhitespaceTokenizerAnnotator extends TokenizerAnnotator {
   }
 
   @Override
-  public Tokenizer<CoreLabel> getTokenizer(Reader r) {
+  Tokenizer<CoreLabel> getTokenizer(Reader r) {
     return factory.getTokenizer(r);
   }
 }

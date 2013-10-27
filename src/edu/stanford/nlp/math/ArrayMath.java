@@ -434,20 +434,6 @@ public class ArrayMath {
     }
   }
 
-  /**
-   * Divide the first array by the second elementwise,
-   * and store results in place. Assume arrays have
-   * the same length
-   */
-  public static void pairwiseDivideInPlace(double[] a, double[] b) {
-    if (a.length != b.length) {
-      throw new RuntimeException();
-    }
-    for (int i = 0; i < a.length; i++) {
-      a[i] = a[i] / b[i];
-    }
-  }
-
   // ERROR CHECKING
 
   public static boolean hasNaN(double[] a) {
@@ -1461,15 +1447,8 @@ public class ArrayMath {
     shuffle(a, rand);
   }
 
-  /* Shuffle the integers in an array using a source of randomness.
-   * Uses the Fisher-Yates shuffle. Makes all orderings equally likely, iff
-   * the randomizer is good.
-   *
-   * @param a The array to shuffle
-   * @param rand The source of randomness
-   */
   public static void shuffle(int[] a, Random rand) {
-    for (int i = a.length - 1; i > 0; i--) {
+    for (int i=a.length-1; i>=1; i--) {
       int j = rand.nextInt(i+1); // a random index from 0 to i inclusive, may shuffle with itself
       int tmp = a[i];
       a[i] = a[j];
@@ -2032,21 +2011,11 @@ public class ArrayMath {
    * @param newSize
    */
   public static double[] copyOf(double[] original, int newSize) {
-    double[] a = new double[newSize];
-    System.arraycopy(original, 0, a, 0, original.length);
-    return a;
+     double[] a = new double[newSize];
+     System.arraycopy(original, 0, a, 0, original.length);
+     return a;
   }
 
-  public static double entropy(double[] probs) {
-    double e = 0;
-    double p = 0;
-    for (int i = 0; i < probs.length; i++) {
-      p = probs[i];
-      if (p != 0.0)
-        e -= p * Math.log(p);
-    }
-    return e;
-  }
 
   public static void assertFinite(double[] vector, String vectorName) throws InvalidElementException {
     for(int i=0; i<vector.length; i++){
@@ -2057,6 +2026,7 @@ public class ArrayMath {
       }
     }
   }
+
 
   public static class InvalidElementException extends RuntimeException {
 
