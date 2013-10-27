@@ -75,7 +75,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   }
 
   private static final Pattern sgml = Pattern.compile("<[^>]*>");
-  private final WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>();
+  private final WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
 
   private SeqClassifierFlags flags; // = null;
   private TokenizerFactory<IN> tokenizerFactory;
