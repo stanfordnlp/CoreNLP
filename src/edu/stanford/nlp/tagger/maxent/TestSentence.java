@@ -42,7 +42,7 @@ public class TestSentence implements SequenceModel {
 
   protected final boolean VERBOSE;
   protected static final String naTag = "NA";
-  protected static final String[] naTagArr = { naTag };
+  private static final String[] naTagArr = { naTag };
   protected static final boolean DBG = false;
   protected static final int kBestSize = 1;
 
@@ -418,7 +418,7 @@ public class TestSentence implements SequenceModel {
 
   private double[] getExactHistories(History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
     double[] scores = new double[maxentTagger.ySize];
-    int szCommon = maxentTagger.extractors.getSize();
+    int szCommon = maxentTagger.extractors.size();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
@@ -457,7 +457,7 @@ public class TestSentence implements SequenceModel {
   private double[] getApproximateHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
 
     double[] scores = new double[tags.length];
-    int szCommon = maxentTagger.extractors.getSize();
+    int szCommon = maxentTagger.extractors.size();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
