@@ -20,7 +20,14 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Filters;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.MutableInteger;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Scored;
+import edu.stanford.nlp.util.XMLUtils;
 
 /**
  * The abstract class <code>Tree</code> is used to collect all of the
@@ -422,8 +429,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return an IntPair: the SpanAnnotation of this node.
    */
   public IntPair getSpan() {
-    if(label() instanceof CoreMap && ((CoreMap) label()).has(CoreAnnotations.SpanAnnotation.class))
-      return ((CoreMap) label()).get(CoreAnnotations.SpanAnnotation.class);
+    if(label() instanceof CoreLabel && ((CoreLabel) label()).has(CoreAnnotations.SpanAnnotation.class))
+      return ((CoreLabel) label()).get(CoreAnnotations.SpanAnnotation.class);
     return null;
   }
 
@@ -2306,8 +2313,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * t.dominates(t) returns false.
    */
   public boolean dominates(Tree t) {
-    List<Tree> dominationPath = dominationPath(t);
-    return dominationPath != null && dominationPath.size() > 1;
+    return !(dominationPath(t) == null);
   }
 
   /**
@@ -2680,25 +2686,14 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    */
   private int indexLeaves(int startIndex, boolean overWrite) {
     if (isLeaf()) {
-
-      /*CoreLabel afl = (CoreLabel) label();
+      CoreLabel afl = (CoreLabel) label();
       Integer oldIndex = afl.get(CoreAnnotations.IndexAnnotation.class);
       if (!overWrite && oldIndex != null && oldIndex >= 0) {
         startIndex = oldIndex;
       } else {
         afl.set(CoreAnnotations.IndexAnnotation.class, startIndex);
-      }*/
-
-      if(label() instanceof HasIndex) {
-        HasIndex hi = (HasIndex) label();
-        int oldIndex = hi.index();
-        if (!overWrite && oldIndex >= 0) {
-          startIndex = oldIndex;
-        } else {
-          hi.setIndex(startIndex);
-        }
-        startIndex++;
-      } 
+      }
+      startIndex++;
     } else {
       for (Tree kid : children()) {
         startIndex = kid.indexLeaves(startIndex, overWrite);
@@ -2772,12 +2767,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
     }
 
-    Label label = label();
-    if (label instanceof CoreMap) {
-    CoreMap afl = (CoreMap) label();
-      afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
-      afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
-    }
+    CoreLabel afl = (CoreLabel) label();
+    afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
+    afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
     return new Pair<Integer, Integer>(start, end);
   }
 
