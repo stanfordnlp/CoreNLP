@@ -57,11 +57,11 @@ public class Redwood {
   /**
    * The real System.out stream
    */
-  private static final PrintStream realSysOut = System.out;
+  protected static final PrintStream realSysOut = System.out;
   /**
    * The real System.err stream
    */
-  private static final PrintStream realSysErr = System.err;
+  protected static final PrintStream realSysErr = System.err;
 
   // -- BASIC LOGGING --
   /**
@@ -241,9 +241,13 @@ public class Redwood {
   protected static void captureSystemStreams(boolean captureOut, boolean captureErr){
     if(captureOut){
       System.setOut(new RedwoodPrintStream(STDOUT, realSysOut));
+    } else {
+      System.setOut(realSysOut);
     }
     if(captureErr){
       System.setErr(new RedwoodPrintStream(STDERR, realSysErr));
+    } else {
+      System.setErr(realSysErr);
     }
   }
 
