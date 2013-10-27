@@ -40,11 +40,13 @@ public class Rules {
     for (Mention m : mentionCluster.corefMentions) {
       if (m.mentionType==MentionType.PROPER) {
         mentionClusterHaveProper = true;
+        break;
       }
     }
     for (Mention a : potentialAntecedent.corefMentions) {
       if (a.mentionType==MentionType.PROPER) {
         potentialAntecedentHaveProper = true;
+        break;
       }
     }
     return (mentionClusterHaveProper && potentialAntecedentHaveProper);
@@ -87,7 +89,8 @@ public class Rules {
     for(Mention m : mentionCluster.getCorefMentions()) {
       for(Mention ant : potentialAntecedent.getCorefMentions()) {
         if(entityPersonDisagree(document, m, ant, dict)) {
-          disagree = true;        
+          disagree = true;
+          break;
         }
       }
     }
@@ -123,16 +126,19 @@ public class Rules {
       return m1.isRelativePronoun(m2) || m2.isRelativePronoun(m1);
   }
 
-  public static boolean entityIsAcronym(CorefCluster mentionCluster, CorefCluster potentialAntecedent) {
-    for(Mention m : mentionCluster.corefMentions){
-      if(m.isPronominal()) continue;
-      for(Mention ant : potentialAntecedent.corefMentions){
-        if (isAcronym(m.originalSpan, ant.originalSpan)) {
-          return true;
+  public static boolean entityIsAcronym(Document document, CorefCluster mentionCluster, CorefCluster potentialAntecedent) {
+    Pair<Integer, Integer> idPair = Pair.makePair(Math.min(mentionCluster.clusterID, potentialAntecedent.clusterID), Math.max(mentionCluster.clusterID, potentialAntecedent.clusterID));
+    if(!document.acronymCache.containsKey(idPair)) {
+      boolean isAcronym = false;
+      for(Mention m : mentionCluster.corefMentions){
+        if(m.isPronominal()) continue;
+        for(Mention ant : potentialAntecedent.corefMentions){
+          if(isAcronym(m.originalSpan, ant.originalSpan)) isAcronym = true;
         }
       }
+      document.acronymCache.put(idPair, isAcronym);
     }
-    return false;
+    return document.acronymCache.get(idPair);
   }
 
   public static boolean isAcronym(List<CoreLabel> first, List<CoreLabel> second) {
@@ -218,12 +224,18 @@ public class Rules {
     // number
     if(!mentionCluster.numbers.contains(Number.UNKNOWN)){
       for(Number n : potentialAntecedent.numbers){
-        if(n!=Number.UNKNOWN && !mentionCluster.numbers.contains(n)) hasExtraAnt = true;
+        if(n!=Number.UNKNOWN && !mentionCluster.numbers.contains(n)) {
+          hasExtraAnt = true;
+          break;
+        }
       }
     }
     if(!potentialAntecedent.numbers.contains(Number.UNKNOWN)){
       for(Number n : mentionCluster.numbers){
-        if(n!=Number.UNKNOWN && !potentialAntecedent.numbers.contains(n)) hasExtraThis = true;
+        if(n!=Number.UNKNOWN && !potentialAntecedent.numbers.contains(n)) {
+          hasExtraThis = true;
+          break;
+        }
       }
     }
 
@@ -236,12 +248,18 @@ public class Rules {
     if (!ignoreGender) {
       if(!mentionCluster.genders.contains(Gender.UNKNOWN)){
         for(Gender g : potentialAntecedent.genders){
-          if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) hasExtraAnt = true;
+          if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) {
+            hasExtraAnt = true;
+            break;
+          }
         }
       }
       if(!potentialAntecedent.genders.contains(Gender.UNKNOWN)){
         for(Gender g : mentionCluster.genders){
-          if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) hasExtraThis = true;
+          if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) {
+            hasExtraThis = true;
+            break;
+          }
         }
       }
     }
@@ -253,12 +271,18 @@ public class Rules {
 
     if(!mentionCluster.animacies.contains(Animacy.UNKNOWN)){
       for(Animacy a : potentialAntecedent.animacies){
-        if(a!=Animacy.UNKNOWN && !mentionCluster.animacies.contains(a)) hasExtraAnt = true;
+        if(a!=Animacy.UNKNOWN && !mentionCluster.animacies.contains(a)) {
+          hasExtraAnt = true;
+          break;
+        }
       }
     }
     if(!potentialAntecedent.animacies.contains(Animacy.UNKNOWN)){
       for(Animacy a : mentionCluster.animacies){
-        if(a!=Animacy.UNKNOWN && !potentialAntecedent.animacies.contains(a)) hasExtraThis = true;
+        if(a!=Animacy.UNKNOWN && !potentialAntecedent.animacies.contains(a)) {
+          hasExtraThis = true;
+          break;
+        }
       }
     }
     if(hasExtraAnt && hasExtraThis) return false;
@@ -269,12 +293,18 @@ public class Rules {
 
     if(!mentionCluster.nerStrings.contains("O") && !mentionCluster.nerStrings.contains("MISC")){
       for(String ne : potentialAntecedent.nerStrings){
-        if(!ne.equals("O") && !ne.equals("MISC") && !mentionCluster.nerStrings.contains(ne)) hasExtraAnt = true;
+        if(!ne.equals("O") && !ne.equals("MISC") && !mentionCluster.nerStrings.contains(ne)) {
+          hasExtraAnt = true;
+          break;
+        }
       }
     }
     if(!potentialAntecedent.nerStrings.contains("O") && !potentialAntecedent.nerStrings.contains("MISC")){
       for(String ne : mentionCluster.nerStrings){
-        if(!ne.equals("O") && !ne.equals("MISC") && !potentialAntecedent.nerStrings.contains(ne)) hasExtraThis = true;
+        if(!ne.equals("O") && !ne.equals("MISC") && !potentialAntecedent.nerStrings.contains(ne)) {
+          hasExtraThis = true;
+          break;
+        }
       }
     }
     return ! (hasExtraAnt && hasExtraThis);
@@ -387,12 +417,16 @@ public class Rules {
       antWordSet.add(w2);
     }
     for (String w : thisWordSet){
-      if(!antWordSet.contains(w)) thisHasExtra = true;
+      if(!antWordSet.contains(w)) {
+        thisHasExtra = true;
+        break;
+      }
     }
     boolean hasLocationModifier = false;
     for(String l : locationModifier){
       if(antWordSet.contains(l) && !thisWordSet.contains(l)) {
         hasLocationModifier = true;
+        break;
       }
     }
     return (thisHasExtra || hasLocationModifier);
@@ -437,10 +471,16 @@ public class Rules {
     boolean mHasExtra = false;
     boolean aHasExtra = false;
     for (String s : locationM) {
-      if (!aString.contains(s)) mHasExtra = true;
+      if (!aString.contains(s)) {
+        mHasExtra = true;
+        break;
+      }
     }
     for (String s : locationA) {
-      if (!mString.contains(s)) aHasExtra = true;
+      if (!mString.contains(s)) {
+        aHasExtra = true;
+        break;
+      }
     }
     if(mHasExtra && aHasExtra) {
       return true;
@@ -474,10 +514,16 @@ public class Rules {
     boolean mHasExtra = false;
     boolean aHasExtra = false;
     for (String s : mProperNouns) {
-      if (!aProperNouns.contains(s)) mHasExtra = true;
+      if (!aProperNouns.contains(s)) {
+        mHasExtra = true;
+        break;
+      }
     }
     for (String s : aProperNouns) {
-      if (!mProperNouns.contains(s)) aHasExtra = true;
+      if (!mProperNouns.contains(s)) {
+        aHasExtra = true;
+        break;
+      }
     }
     if(mHasExtra && aHasExtra) return false;
     return true;
@@ -525,10 +571,16 @@ public class Rules {
 
 
     for (String s : mProper) {
-      if (!aString.contains(s) && !exceptWords.contains(s.toLowerCase())) mHasExtra = true;
+      if (!aString.contains(s) && !exceptWords.contains(s.toLowerCase())) {
+        mHasExtra = true;
+        break;
+      }
     }
     for (String s : aProper) {
-      if (!mString.contains(s) && !exceptWords.contains(s.toLowerCase())) aHasExtra = true;
+      if (!mString.contains(s) && !exceptWords.contains(s.toLowerCase())) {
+        aHasExtra = true;
+        break;
+      }
     }
 
     if(mHasExtra && aHasExtra) {
@@ -638,7 +690,8 @@ public class Rules {
         if(ant.person==Person.I || ant.person==Person.WE || ant.person==Person.YOU) return true;
       }
     }
-    if(m.person==Person.YOU && ant.appearEarlierThan(m)) {
+    if(m.person==Person.YOU && m != ant && ant.appearEarlierThan(m)) {
+      assert !m.appearEarlierThan(ant);
       int mUtter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(mUtter - 1)) {
         String previousSpeaker = document.speakers.get(mUtter - 1);
@@ -652,7 +705,8 @@ public class Rules {
       } else {
         return true;
       }
-    } else if (ant.person==Person.YOU && m.appearEarlierThan(ant)) {
+    } else if (ant.person==Person.YOU && m != ant && m.appearEarlierThan(ant)) {
+      assert !(ant.appearEarlierThan(m));
       int aUtter = ant.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(aUtter - 1)) {
         String previousSpeaker = document.speakers.get(aUtter - 1);

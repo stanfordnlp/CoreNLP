@@ -60,6 +60,7 @@ public class AnnotationLookup {
     MORPHO_CASE_KEY(CoreAnnotations.MorphoCaseAnnotation.class,"case"),
     WORDNET_SYN_KEY(CoreAnnotations.WordnetSynAnnotation.class,"wordnetsyn"),
     PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto"),
+    DOCTITLE_KEY(CoreAnnotations.DocTitleAnnotation.class,"doctitle"),
     DOCTYPE_KEY(CoreAnnotations.DocTypeAnnotation.class,"doctype"),
     DOCDATE_KEY(CoreAnnotations.DocDateAnnotation.class,"docdate"),
     DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype"),
@@ -68,7 +69,21 @@ public class AnnotationLookup {
     AUTHOR_KEY(CoreAnnotations.AuthorAnnotation.class,"author"),
     SECTION_KEY(CoreAnnotations.SectionAnnotation.class,"section"),
     SECTIONID_KEY(CoreAnnotations.SectionIDAnnotation.class,"sectionID"),
-    SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate");
+    SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate"),
+
+    // Thang Sep13: for Genia NER
+    HEAD_KEY(CoreAnnotations.HeadWordStringAnnotation.class, "head"),
+    GOVERNOR_KEY(CoreAnnotations.GovernorAnnotation.class, "governor"),
+    GAZ_KEY(CoreAnnotations.GazAnnotation.class, "gaz"),
+    ABBR_KEY(CoreAnnotations.AbbrAnnotation.class, "abbr"),
+    ABSTR_KEY(CoreAnnotations.AbstrAnnotation.class, "abstr"),
+    FREQ_KEY(CoreAnnotations.FreqAnnotation.class, "freq"),
+    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web"),
+
+    // Also have "pos" for PartOfTag (POS is also the TAG_KEY - "tag", but "pos" makes more sense)
+    // Still keep "tag" for POS tag so we don't break anything
+    POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos");
+
 
     public final Class coreKey;
     public final String oldKey;

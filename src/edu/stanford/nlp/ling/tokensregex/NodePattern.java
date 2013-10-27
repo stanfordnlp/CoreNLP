@@ -12,6 +12,10 @@ import java.util.List;
 public abstract class NodePattern<T> {
   public final static NodePattern ANY_NODE = new AnyNodePattern();
 
+  // Flags for string annotations
+  public static final int CASE_INSENSITIVE = 0x02;
+  public static final int NORMALiZE = 0x04;
+
   /**
    * Returns true if the input node matches this pattern
    * @param node - node to match

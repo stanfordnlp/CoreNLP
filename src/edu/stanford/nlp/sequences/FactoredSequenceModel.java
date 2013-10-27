@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.ie.BisequenceEmpiricalNERPrior;
 
 import java.util.Arrays;
 
@@ -28,33 +27,9 @@ public class FactoredSequenceModel implements SequenceModel {
   public double[] scoresOf(int[] sequence, int pos) {
     if(models != null){
       double[] dist = ArrayMath.multiply(models[0].scoresOf(sequence, pos),wts[0]);
-      if (BisequenceEmpiricalNERPrior.DEBUG) {
-        if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) {
-          double[] distDebug = Arrays.copyOf(dist, dist.length);
-          ArrayMath.logNormalize(distDebug);
-          ArrayMath.expInPlace(distDebug);
-          System.err.println("pos: " + pos);
-          System.err.println("model 0:");
-          for (int j = 0; j < distDebug.length; j++)
-            System.err.println("\t" + distDebug[j]);
-          System.err.println();
-        }
-      }
       for(int i = 1; i < models.length; i++){
         double[] dist_i = models[i].scoresOf(sequence, pos);
         ArrayMath.addMultInPlace(dist,dist_i,wts[i]);
-
-        if (BisequenceEmpiricalNERPrior.DEBUG) {
-          if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) {
-            System.err.println("model " + i + ":");
-            double[] distDebug = Arrays.copyOf(dist_i, dist.length);
-            ArrayMath.logNormalize(distDebug);
-            ArrayMath.expInPlace(distDebug);
-            for (int j = 0; j < distDebug.length; j++)
-              System.err.println("\t" + distDebug[j]);
-            System.err.println();
-          }
-        }
       }
       return dist;
     }

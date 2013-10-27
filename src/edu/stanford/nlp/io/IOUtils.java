@@ -139,8 +139,7 @@ public class IOUtils {
     return os;
   }
 
-  //++ todo [cdm, Aug 2012]: None of the methods below in this block are used. Delete them all?
-  //++ They're also kind of weird in unnecessarily bypassing using a Writer.
+  //++ todo [cdm, Aug 2012]: Do we need the below methods? They're kind of weird in unnecessarily bypassing using a Writer.
 
   /**
    * Writes a string to a file.
@@ -256,9 +255,10 @@ public class IOUtils {
     writeStringToTempFileNoExceptions(contents, path, "UTF-8");
   }
 
-  //-- todo [cdm, Aug 2012]: None of the methods above in the block are used. Delete them all?
+  //-- todo [cdm, Aug 2012]: Do we need the below methods? They're kind of weird in unnecessarily bypassing using a Writer.
 
 
+  // todo [cdm, Sep 2013]: Can we remove this next method and its friends? (Weird in silently gzipping, overlaps other functionality.)
   /**
    * Read an object from a stored file. It is silently ungzipped, regardless of name.
    *
@@ -340,8 +340,8 @@ public class IOUtils {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static int lineCount(File textFile) throws IOException {
-    BufferedReader r = new BufferedReader(new FileReader(textFile));
+  public static int lineCount(String textFileOrUrl) throws IOException {
+    BufferedReader r = readerFromString(textFileOrUrl);
     int numLines = 0;
     while (r.readLine() != null) {
       numLines++;
@@ -435,6 +435,46 @@ public class IOUtils {
   }
 
   /**
+   * Quietly opens a File. If the file ends with a ".gz" extension,
+   * automatically opens a GZIPInputStream to wrap the constructed
+   * FileInputStream.
+   */
+  public static InputStream inputStreamFromFile(File file) throws RuntimeIOException {
+    try {
+      InputStream is = new BufferedInputStream(new FileInputStream(file));
+      if (file.getName().endsWith(".gz")) {
+        is = new GZIPInputStream(is);
+      }
+      return is;
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
+  /**
+   * Open a BufferedReader to a File. If the file's getName() ends in .gz,
+   * it is interpreted as a gzipped file (and uncompressed). The file is then
+   * interpreted as a utf-8 text file.
+   *
+   * @param file What to read from
+   * @return The BufferedReader
+   * @throws RuntimeIOException If there is an I/O problem
+   */
+  public static BufferedReader readerFromFile(File file) {
+    InputStream is = null;
+    try {
+      is = inputStreamFromFile(file);
+      return new BufferedReader(new InputStreamReader(is, "UTF-8"));
+    } catch (IOException ioe) {
+      throw new RuntimeIOException(ioe);
+    } finally {
+      IOUtils.closeIgnoringExceptions(is);
+    }
+  }
+
+
+
+  /**
    * Open a BufferedReader on stdin. Use the user's default encoding.
    */
   public static BufferedReader readerFromStdin() throws IOException {
@@ -492,8 +532,7 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path) {
-    if(path.endsWith(".gz")) return readLines(new File(path), GZIPInputStream.class);
-    return readLines(new File(path));
+    return readLines(path, null);
   }
 
   /**
@@ -507,7 +546,7 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path, String encoding) {
-    return readLines(new File(path), null, encoding);
+    return new GetLinesIterable(path, null, encoding);
   }
 
   /**
@@ -555,72 +594,109 @@ public class IOUtils {
   public static Iterable<String> readLines(final File file,
                                            final Class<? extends InputStream> fileInputStreamWrapper,
                                            final String encoding) {
+    return new GetLinesIterable(file, fileInputStreamWrapper, encoding);
+  }
 
-    return new Iterable<String>() {
-      public Iterator<String> iterator() {
-        return new Iterator<String>() {
+  static class GetLinesIterable implements Iterable<String> {
+    final File file;
+    final String path;
+    final Class<? extends InputStream> fileInputStreamWrapper;
+    final String encoding;
 
-          protected BufferedReader reader = this.getReader();
-          protected String line = this.getLine();
+    // TODO: better programming style would be to make this two
+    // separate classes, but we don't expect to make more versions of
+    // this class anyway
+    GetLinesIterable(final File file,
+                     final Class<? extends InputStream> fileInputStreamWrapper,
+                     final String encoding) {
+      this.file = file;
+      this.path = null;
+      this.fileInputStreamWrapper = fileInputStreamWrapper;
+      this.encoding = encoding;
+    }
 
-          public boolean hasNext() {
-            return this.line != null;
-          }
+    GetLinesIterable(final String path,
+                     final Class<? extends InputStream> fileInputStreamWrapper,
+                     final String encoding) {
+      this.file = null;
+      this.path = path;
+      this.fileInputStreamWrapper = fileInputStreamWrapper;
+      this.encoding = encoding;
+    }
 
-          public String next() {
-            String nextLine = this.line;
-            if (nextLine == null) {
-              throw new NoSuchElementException();
-            }
-            line = getLine();
-            return nextLine;
-          }
-
-          protected String getLine() {
-            try {
-              String result = this.reader.readLine();
-              if (result == null) {
-                this.reader.close();
-              }
-              return result;
-            } catch (IOException e) {
-              throw new RuntimeIOException(e);
-            }
-          }
-
-          protected BufferedReader getReader() {
-            try {
-              InputStream stream = new FileInputStream(file);
-              if (fileInputStreamWrapper != null) {
-                stream = fileInputStreamWrapper.getConstructor(
-                        InputStream.class).newInstance(stream);
-              }
-              if (encoding == null) {
-                return new BufferedReader(new InputStreamReader(stream));
-              } else {
-                return new BufferedReader(new InputStreamReader(stream, encoding));
-              }
-            } catch (Exception e) {
-              throw new RuntimeIOException(e);
-            }
-          }
-
-          @Override
-          public void remove() {
-            throw new UnsupportedOperationException();
-          }
-        };
+    private InputStream getStream() throws IOException {
+      if (file != null) {
+        return new FileInputStream(file);
+      } else if (path != null) {
+        return getInputStreamFromURLOrClasspathOrFileSystem(path);
+      } else {
+        throw new AssertionError("No known path to read");
       }
-    };
+    }
+
+    public Iterator<String> iterator() {
+      return new Iterator<String>() {
+
+        protected BufferedReader reader = this.getReader();
+        protected String line = this.getLine();
+
+        public boolean hasNext() {
+          return this.line != null;
+        }
+
+        public String next() {
+          String nextLine = this.line;
+          if (nextLine == null) {
+            throw new NoSuchElementException();
+          }
+          line = getLine();
+          return nextLine;
+        }
+
+        protected String getLine() {
+          try {
+            String result = this.reader.readLine();
+            if (result == null) {
+              this.reader.close();
+            }
+            return result;
+          } catch (IOException e) {
+            throw new RuntimeIOException(e);
+          }
+        }
+
+        protected BufferedReader getReader() {
+          try {
+            InputStream stream = getStream();
+            if (fileInputStreamWrapper != null) {
+              stream = fileInputStreamWrapper.getConstructor(InputStream.class).newInstance(stream);
+            }
+            if (encoding == null) {
+              return new BufferedReader(new InputStreamReader(stream));
+            } else {
+              return new BufferedReader(new InputStreamReader(stream, encoding));
+            }
+          } catch (Exception e) {
+            throw new RuntimeIOException(e);
+          }
+        }
+
+        @Override
+          public void remove() {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
   }
 
   /**
-   * Given a reader, returns the lines from the reader as a iterable
+   * Given a reader, returns the lines from the reader as an Iterable.
+   *
    * @param r  input reader
    * @param includeEol whether to keep eol-characters in the returned strings
    * @return iterable of lines (as strings)
    */
-  public static final Iterable<String> getLineIterable( Reader r, boolean includeEol) {
+  public static Iterable<String> getLineIterable( Reader r, boolean includeEol) {
     if (includeEol) {
       return new EolPreservingLineReaderIterable(r);
     } else {
@@ -628,7 +704,7 @@ public class IOUtils {
     }
   }
 
-  public static final Iterable<String> getLineIterable( Reader r, int bufferSize, boolean includeEol) {
+  public static Iterable<String> getLineIterable( Reader r, int bufferSize, boolean includeEol) {
     if (includeEol) {
       return new EolPreservingLineReaderIterable(r, bufferSize);
     } else {
@@ -815,23 +891,6 @@ public class IOUtils {
   }
 
   /**
-   * Quietly opens a File. If the file ends with a ".gz" extension,
-   * automatically opens a GZIPInputStream to wrap the constructed
-   * FileInputStream.
-   */
-  public static InputStream openFile(File file) throws RuntimeIOException {
-    try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file));
-      if (file.getName().endsWith(".gz")) {
-        is = new GZIPInputStream(is);
-      }
-      return is;
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
    * Provides an implementation of closing a file for use in a finally block so
    * you can correctly close a file without even more exception handling stuff.
    * From a suggestion in a talk by Josh Bloch.
@@ -931,8 +990,7 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpFile(File file) throws IOException {
-    Reader r = new FileReader(file);
-    return IOUtils.slurpReader(r);
+    return slurpFile(file, null);
   }
 
   /**
@@ -951,8 +1009,8 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpGZippedFile(String filename) throws IOException {
-    Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(
-            filename)));
+    Reader r = encodedInputStreamReader(new GZIPInputStream(new FileInputStream(
+            filename)), null);
     return IOUtils.slurpReader(r);
   }
 
@@ -960,13 +1018,9 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpGZippedFile(File file) throws IOException {
-    Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(
-            file)));
+    Reader r = encodedInputStreamReader(new GZIPInputStream(new FileInputStream(
+            file)), null);
     return IOUtils.slurpReader(r);
-  }
-
-  public static String slurpGBFileNoExceptions(String filename) {
-    return IOUtils.slurpFileNoExceptions(filename, "GB18030");
   }
 
   /**
@@ -993,10 +1047,6 @@ public class IOUtils {
     }
   }
 
-  public static String slurpGBFile(String filename) throws IOException {
-    return slurpFile(filename, "GB18030");
-  }
-
   /**
    * Returns all the text in the given file
    *
@@ -1011,18 +1061,6 @@ public class IOUtils {
    */
   public static String slurpGBURL(URL u) throws IOException {
     return IOUtils.slurpURL(u, "GB18030");
-  }
-
-  /**
-   * Returns all the text at the given URL.
-   */
-  public static String slurpGBURLNoExceptions(URL u) {
-    try {
-      return slurpGBURL(u);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
-    }
   }
 
   /**
@@ -1063,14 +1101,30 @@ public class IOUtils {
     return buff.toString();
   }
 
+  public static String getUrlEncoding(URLConnection connection) {
+    String contentType = connection.getContentType();
+    String[] values = contentType.split(";");
+    String charset = defaultEncoding;  // might or might not be right....
+
+    for (String value : values) {
+      value = value.trim();
+      if (value.toLowerCase(Locale.ENGLISH).startsWith("charset=")) {
+        charset = value.substring("charset=".length());
+      }
+    }
+    return charset;
+  }
+
+
   /**
    * Returns all the text at the given URL.
    */
   public static String slurpURL(URL u) throws IOException {
     String lineSeparator = System.getProperty("line.separator");
     URLConnection uc = u.openConnection();
+    String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
-    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     String temp;
     StringBuilder buff = new StringBuilder(16000); // make biggish
     while ((temp = br.readLine()) != null) {
@@ -1123,7 +1177,7 @@ public class IOUtils {
    */
   public static String slurpFileNoExceptions(File file) {
     try {
-      return IOUtils.slurpReader(new FileReader(file));
+      return IOUtils.slurpReader(encodedInputStreamReader(new FileInputStream(file), null));
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -1344,8 +1398,15 @@ public class IOUtils {
   }
 
   public static PrintWriter getPrintWriter(File textFile) throws IOException {
+    return getPrintWriter(textFile, null);
+  }
+
+  public static PrintWriter getPrintWriter(File textFile, String encoding) throws IOException {
     File f = textFile.getAbsoluteFile();
-    return new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f))), true);
+    if (encoding == null) {
+      encoding = defaultEncoding;
+    }
+    return new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), encoding)), true);
   }
 
   public static PrintWriter getPrintWriter(String filename) throws IOException {
