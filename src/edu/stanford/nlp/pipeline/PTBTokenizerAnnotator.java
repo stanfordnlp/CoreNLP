@@ -38,7 +38,7 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
   }
 
   @Override
-  Tokenizer<CoreLabel> getTokenizer(Reader r) {
+  public Tokenizer<CoreLabel> getTokenizer(Reader r) {
     return factory.getTokenizer(r);
   }
 

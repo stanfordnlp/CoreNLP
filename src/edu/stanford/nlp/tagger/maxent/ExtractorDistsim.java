@@ -5,7 +5,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

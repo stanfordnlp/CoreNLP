@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
+  <component name="DBNavigator.Module.ConnectionManager">
+    <connections />
+  </component>
   <component name="EclipseModuleManager">
     <libelement value="jar://$MODULE_DIR$/lib/ant-contrib-1.0b3.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/tomcat/el-api.jar!/" />
@@ -61,17 +64,6 @@
       <library name="jasper.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/tomcat/jasper.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library name="servlet-api.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/tomcat/servlet-api.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
@@ -219,7 +211,7 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" exported="">
       <library name="ejml-0.19-nogui.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/ejml-0.19-nogui.jar!/" />
@@ -237,6 +229,24 @@
         <SOURCES>
           <root url="jar://$MODULE_DIR$/libsrc/commons-lang3-3.1-sources.jar!/" />
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/javacc.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/protobuf.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
       </library>
     </orderEntry>
   </component>
