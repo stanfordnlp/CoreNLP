@@ -18,6 +18,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Execution.Option;
 
 public class BasicRelationExtractor implements Extractor {
 
@@ -27,6 +28,21 @@ public class BasicRelationExtractor implements Extractor {
 
   private LinearClassifier<String, String> classifier;
 
+  @Option(name="featureCountThreshold", gloss="feature count threshold to apply to dataset")
+  public int featureCountThreshold = 2;
+
+  @Option(name="featureFactory", gloss="Feature factory for the relation extractor")
+  public RelationFeatureFactory featureFactory;
+  /**
+   * strength of the prior on the linear classifier (passed to LinearClassifierFactory) or the C constant if relationExtractorClassifierType=svm
+   */
+  @Option(name="sigma", gloss="strength of the prior on the linear classifier (passed to LinearClassifierFactory) or the C constant if relationExtractorClassifierType=svm")
+  public double sigma = 1.0;
+
+  /**
+   * which classifier to use (can be 'linear' or 'svm')
+   */
+  public String relationExtractorClassifierType = "linear";
   
 
   /**
@@ -41,12 +57,12 @@ public class BasicRelationExtractor implements Extractor {
   private RelationMentionFactory relationMentionFactory;
 
   public void setValidator(LabelValidator lv) { validator = lv; }
-  public void setRelationExtractorClassifierType(String s) { RelationExtractorProps.relationExtractorClassifierType = s; }
-  public void setFeatureCountThreshold(int i) { RelationExtractorProps.featureCountThreshold = i; }
-  public void setSigma(double d) { RelationExtractorProps.sigma = d; }
+  public void setRelationExtractorClassifierType(String s) { relationExtractorClassifierType = s; }
+  public void setFeatureCountThreshold(int i) {featureCountThreshold = i; }
+  public void setSigma(double d) { sigma = d; }
 
-  public BasicRelationExtractor(RelationFeatureFactory featureFactory, boolean createUnrelatedRelations, RelationMentionFactory factory) {
-    RelationExtractorProps.featureFactory = featureFactory;
+  public BasicRelationExtractor(RelationFeatureFactory featureFac, boolean createUnrelatedRelations, RelationMentionFactory factory) {
+    featureFactory = featureFac;
     this.createUnrelatedRelations = createUnrelatedRelations;
     this.relationMentionFactory = factory;
     logger.setLevel(Level.INFO);
@@ -89,20 +105,20 @@ public class BasicRelationExtractor implements Extractor {
   }
 
   public void trainMulticlass(GeneralDataset<String, String> trainSet) {
-    if (RelationExtractorProps.relationExtractorClassifierType.equalsIgnoreCase("linear")) {
-      LinearClassifierFactory<String, String> lcFactory = new LinearClassifierFactory<String, String>(1e-4,false, RelationExtractorProps.sigma);
+    if (relationExtractorClassifierType.equalsIgnoreCase("linear")) {
+      LinearClassifierFactory<String, String> lcFactory = new LinearClassifierFactory<String, String>(1e-4,false, sigma);
       lcFactory.setVerbose(false);
       // use in-place SGD instead of QN. this is faster but much worse!
       // lcFactory.useInPlaceStochasticGradientDescent(-1, -1, 1.0);
       // use a hybrid minimizer: start with in-place SGD, continue with QN
       // lcFactory.useHybridMinimizerWithInPlaceSGD(50, -1, sigma);
       classifier = lcFactory.trainClassifier(trainSet);
-    } else if (RelationExtractorProps.relationExtractorClassifierType.equalsIgnoreCase("svm")) {
+    } else if (relationExtractorClassifierType.equalsIgnoreCase("svm")) {
       SVMLightClassifierFactory<String, String> svmFactory = new SVMLightClassifierFactory<String, String>();
-      svmFactory.setC(RelationExtractorProps.sigma);
+      svmFactory.setC(sigma);
       classifier = svmFactory.trainClassifier(trainSet);
     } else {
-      throw new RuntimeException("Invalid classifier type: " + RelationExtractorProps.relationExtractorClassifierType);
+      throw new RuntimeException("Invalid classifier type: " + relationExtractorClassifierType);
     }
     if (logger.isLoggable(Level.FINE)) {
       reportWeights(classifier, null);
@@ -274,18 +290,18 @@ public class BasicRelationExtractor implements Extractor {
       }
     }
 
-    dataset.applyFeatureCountThreshold(RelationExtractorProps.featureCountThreshold);
+    dataset.applyFeatureCountThreshold(featureCountThreshold);
     return dataset;
   }
 
   protected Datum<String, String> createDatum(RelationMention rel) {
-    assert(RelationExtractorProps.featureFactory != null);
-    return RelationExtractorProps.featureFactory.createDatum(rel);
+    assert(featureFactory != null);
+    return featureFactory.createDatum(rel);
   }
 
   protected Datum<String, String> createDatum(RelationMention rel, String label) {
-    assert(RelationExtractorProps.featureFactory != null);
-    Datum<String, String> datum = RelationExtractorProps.featureFactory.createDatum(rel, label);
+    assert(featureFactory != null);
+    Datum<String, String> datum = featureFactory.createDatum(rel, label);
     return datum;
   }
 
