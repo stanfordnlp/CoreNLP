@@ -75,7 +75,7 @@ LAST UPDATE: 2010/06/28
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-lib/tomcat/jasper.jar, el-api.jar, servlet-api.jar, tomcat-juli.jar
+lib/tomcat/jasper.jar, el-api.jar, tomcat-juli.jar
            jasper-el.jar, jsp-api.jar, tomcat-api.jar
 
 ORIGINAL JAR NAME: the same...
@@ -97,29 +97,17 @@ LAST UPDATE: 2011-11-21
 
 LAST UPDATE BY: John Bauer
 
-
 -----------------------------------------------------------------------
-jasper-compiler-jdt.jar
-
-ORIGINAL JAR NAME: jasper-compiler-jdt.jar
-
-VERSION: Tomcat 5.5.29
-
-RELEASE DATE: 2009-06-19 (?)
-
-SOURCE AVAILABLE: No (not found)
-
-DESCRIPTION: Various parts of tomcat needed to build .jsp files
-
-URL: http://tomcat.apache.org/download-55.cgi
-
-USED BY:
-used to build .jsps
-
-LAST UPDATE: 2010/06/28
-
-LAST UPDATE BY: John Bauer
-
+commons-lang3-3.1.jar
+ORIGINAL JAR NAME: commons-lang3-3.1.jar
+VERSION: 
+RELEASE DATE: 11-14-2011
+SOURCE AVAILABLE: yes
+DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff; changes from 2.5 - no escapeHtml function.
+URL: http://commons.apache.org/lang/
+USED BY: edu.stanford.nlp.kbp and web servlets
+LAST UPDATE: 2013-06-05
+LAST UPDATE BY: Sonal Gupta
 
 -----------------------------------------------------------------------
 commons-logging.jar
@@ -132,61 +120,9 @@ DESCRIPTION: "The Logging package is an ultri-thin bridge between different
 logging implementations.  A library that uses the commons-logging API can be
 used with any logging implementation at runtime.
 URL: http://jakarta.apache.org/commons/logging
-USED BY: org.mortbay.jetty.jar, jsp compiler
+USED BY: el-api.jar, jwnl, hadoop, etc. (Only by various external libraries.)
 LAST UPDATE: 2006/02/06
 LAST UPDATE BY: Jeff Michels
-
-
------------------------------------------------------------------------
-jdbm.jar
-
-ORIGINAL JAR NAME:
-
-VERSION: 1.0
-
-RELEASE DATE: 2005/08/11
-
-SOURCE AVAILABLE: yes
-
-DESCRIPTION: "JDBM is a transactional persistence engine for Java. It
-aims to be for Java what GDBM is for other languages (C/C++, Python,
-Perl, etc.): a fast, simple persistence engine. You can use it to
-store a mix of objects and BLOBs, and all updates are done in a
-transactionally safe manner. JDBM also provides scalable data
-structures, such as HTree and B+Tree, to support persistence of large
-object collections."
-
-URL: http://jdbm.sourceforge.net/
-
-USED BY: src.edu.stanford.nlp.database.SLJDB.java
-
-LAST UPDATE:
-
-LAST UPDATE BY:
-
-
------------------------------------------------------------------------
-jgraph.jar
-
-ORIGINAL JAR NAME: jgraph.jar
-
-VERSION: 5.12.1.1
-
-RELEASE DATE: 2008/05/20
-
-SOURCE AVAILABLE: yes
-
-DESCRIPTION: Graph drawing / visualization package used by jgrapht.
-  "JGraph is the most powerful, easy-to-use, feature-rich and
-  standards-compliant open source graph component available for Java. "
-
-URL: http://www.jgraph.com/
-
-USED BY: jgrapht.jar
-
-LAST UPDATE: 2008/05/23
-
-LAST UPDATE BY: Daniel Ramage
 
 
 -----------------------------------------------------------------------
@@ -209,55 +145,6 @@ USED BY:
 LAST UPDATE: 2008/08/24
 
 LAST UPDATE BY: Ilya Sherman
-
-
-
------------------------------------------------------------------------
-uima-core.jar
-
-ORIGINAL JAR NAME: uima-core.jar
-
-VERSION: 1.0.1
-
-RELEASE DATE: 2004/12/16 (?)
-
-SOURCE AVAILABLE:
-
-DESCRIPTION: Core classes for IBM's Unstructured Information
-Management Architecture. The entire UIMA package is installed in
-/u/nlp/src/uima-1.0.1/.
-
-URL: http://www.alphaworks.ibm.com/tech/uima
-
-USED BY: edu.stanford.nlp.uima
-
-LAST UPDATE: 2005/04/26
-
-LAST UPDATE BY:
-
-NOTE: version 1.3.1 is out, release date 1/23/06 -- get it
-
-
------------------------------------------------------------------------
-wn.jar
-
-ORIGINAL JAR NAME: wn.jar
-
-VERSION: ?
-
-RELEASE DATE: ?
-
-SOURCE AVAILABLE: yes
-
-DESCRIPTION: Some stuff by Dan Bikel to interface with WordNet.
-
-URL: http://www.cis.upenn.edu/~dbikel/software.html#wn
-
-USED BY:
-
-LAST UPDATE: 2004/10/22
-
-LAST UPDATE BY:
 
 ----------------------------------------------------------------------
 AppleJavaExtensions.jar
@@ -326,18 +213,6 @@ LAST UPDATE: 2011-03-19
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-commons-lang3-3.1.jar
-ORIGINAL JAR NAME: commons-lang3-3.1.jar
-VERSION: 
-RELEASE DATE: 11-14-2011
-SOURCE AVAILABLE: yes
-DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff; changes from 2.5 - no escapeHtml function.
-URL: http://commons.apache.org/lang/
-USED BY: edu.stanford.nlp.kbp and web servelets
-LAST UPDATE: 2013-06-05
-LAST UPDATE BY: Sonal Gupta
-
------------------------------------------------------------------------
 log4j-1.2.16.jar
 ORIGINAL JAR NAME: log4j-1.2.16.jar 
 VERSION: 1.2.16
@@ -372,6 +247,7 @@ URL: http://jollyday.sourceforge.net
 USED BY: edu.stanford.nlp.time
 LAST UPDATE: 2012-11-05
 LAST UPDATE BY: John Bauer
+
 -----------------------------------------------------------------------
 ejml-0.19-nogui.jar
 ORIGINAL JAR NAME: ejml-0.19.jar
@@ -384,6 +260,7 @@ URL: http://code.google.com/p/efficient-java-matrix-library/
 USED BY: Used in deep learning, especially RNN parser
 LAST UPDATE: 2012-07-17
 LAST UPDATE BY: Christopher Manning
+
 -----------------------------------------------------------------------
 javacc.jar
 ORIGINAL JAR NAME: javacc.jar
@@ -396,6 +273,39 @@ URL: https://java.net/projects/javacc
 USED BY: tregex, tsurgeon, semgrex
 LAST UPDATE: 2013-08-28
 LAST UPDATE BY: John Bauer
+
+-----------------------------------------------------------------
+javax.servlet.jar
+
+ORIGINAL JAR NAME: ?
+
+VERSION: ?
+
+RELEASE DATE: ?
+
+SOURCE AVAILABLE: ?
+
+DESCRIPTION: Used by Tomcat and servlets.  Originally part of Java EE.
+
+URL: ?
+
+USED BY: Our servlets
+
+LAST UPDATE: ? 
+
+LAST UPDATE BY: ?
+
+-----------------------------------------------------------------
+protobuf.jar
+ORIGINAL JAR NAME: <compiled from source>
+VERSION: 4.1
+RELEASE DATE: April 2011
+SOURCE AVAILABLE: yes
+DESCRIPTION: Google's protocol buffer library
+URL: https://code.google.com/p/protobuf/
+USED BY: CoreMapProtos (and associated serializers)
+LAST UPDATE: 2013-09-24
+LAST UPDATE BY: Gabor Angeli
 -----------------------------------------------------------------
 foo.jar
 
