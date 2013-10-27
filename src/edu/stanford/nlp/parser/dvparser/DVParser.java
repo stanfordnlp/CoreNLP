@@ -571,18 +571,27 @@ public class DVParser {
       TreeTransformer transformer = buildTrainTransformer(dvparser.getOp());
 
       Treebank treebank = dvparser.getOp().tlpParams.memoryTreebank();;
+      if (trainTreebankPath == null) {
+        if (System.getProperty("os.name").startsWith("Windows")){
+          trainTreebankPath = "D:\\projects\\deepSyn\\data\\trees\\wsj\\00\\wsj_0001.mrg";
+          //treebank.loadPath("foo.tree");
+        } else {
+          trainTreebankPath = "/afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/00/wsj_0001.mrg";
+        }
+      }
       treebank.loadPath(trainTreebankPath, trainTreebankFilter);
       treebank = treebank.transform(transformer);
       System.err.println("Read in " + treebank.size() + " trees from " + trainTreebankPath);
 
-      CacheParseHypotheses cacher = new CacheParseHypotheses(dvparser.parser);
-      CacheParseHypotheses.CacheProcessor processor = new CacheParseHypotheses.CacheProcessor(cacher, lexparser, dvparser.op.trainOptions.dvKBest, transformer);
       for (Tree tree : treebank) {
         trainSentences.add(tree);
-        trainCompressedParses.put(tree, processor.process(tree).second);
         //System.out.println(tree);
       }
 
+      // TODO: don't get all the parses at once
+      IdentityHashMap<Tree, List<Tree>> trainParses = dvparser.getTopParses(trainSentences, transformer);
+      CacheParseHypotheses cacher = new CacheParseHypotheses(dvparser.parser);
+      trainCompressedParses.putAll(cacher.convertToBytes(trainParses));
       System.err.println("Finished parsing " + treebank.size() + " trees, getting " + dvparser.op.trainOptions.dvKBest + " hypotheses each");
     }
 

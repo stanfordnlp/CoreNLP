@@ -70,8 +70,8 @@ public class TaggerExperiments extends Experiments {
   TaggerExperiments(MaxentTagger maxentTagger) {
     this.maxentTagger = maxentTagger;
     this.tFeature = new TemplateHash(maxentTagger);
-    numFeatsGeneral = maxentTagger.extractors.size();
-    numFeatsAll = numFeatsGeneral + maxentTagger.extractorsRare.size();
+    numFeatsGeneral = maxentTagger.extractors.getSize();
+    numFeatsAll = numFeatsGeneral + maxentTagger.extractorsRare.getSize();
     feats = new TaggerFeatures(this);
   }
 
@@ -316,8 +316,8 @@ public class TaggerExperiments extends Experiments {
 
 
   private void hashHistories() {
-    int fAll = maxentTagger.extractors.size() + maxentTagger.extractorsRare.size();
-    int fGeneral = maxentTagger.extractors.size();
+    int fAll = maxentTagger.extractors.getSize() + maxentTagger.extractorsRare.getSize();
+    int fGeneral = maxentTagger.extractors.getSize();
     System.err.println("Hashing histories ...");
     for (int x = 0; x < xSize; x++) {
       History h = tHistories.getHistory(x);
@@ -358,7 +358,7 @@ public class TaggerExperiments extends Experiments {
     // Feature number 0 is hard-coded as the current word feature, which has a special threshold
     if (fNo == 0) {
       return (size > maxentTagger.curWordMinFeatureThresh);
-    } else if (fNo < maxentTagger.extractors.size()) {
+    } else if (fNo < maxentTagger.extractors.getSize()) {
       return (size > maxentTagger.minFeatureThresh);
     } else {
       return (size > maxentTagger.rareWordMinFeatureThresh);
