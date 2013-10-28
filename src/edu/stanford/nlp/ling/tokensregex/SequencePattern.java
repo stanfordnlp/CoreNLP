@@ -30,8 +30,8 @@ import java.util.*;
  *        for optimzing matches across multiple patterns</li>
  *   <li>Optionally implement a {@link NodesMatchChecker} to support backreferences</li>
  * </ul>
- * See {@link TokenSequencePattern} for example of how this class can be extended
- * to support a specific type <code>T</code>.
+ * See {@link TokenSequencePattern} for an example of how this class can be extended
+ * to support a specific type {@code T}.
  * <p>
  * To use
  * <pre><code>
@@ -43,9 +43,9 @@ import java.util.*;
  *
  *
  * <p>
- * To support a new type <code>T</code>:
+ * To support a new type {@code T}:
  * <ol>
- * <li> For a type <code>T</code> to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
+ * <li> For a type {@code T} to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
  *    whether a node is matched or not  (see <code>CoreMapNodePattern</code> for example)</li>
  * <li> To compile a string into corresponding pattern, will need to create a parser
  *    (see inner class <code>Parser</code>, <code>TokenSequencePattern</code> and <code>TokenSequenceParser.jj</code>)</li>
@@ -153,6 +153,10 @@ public class SequencePattern<T> {
     this.action = action;
   }
 
+  public int getTotalGroups() {
+    return totalGroups;
+  }
+
   // Compiles string (regex) to NFA for doing pattern simulation
   public static <T> SequencePattern<T> compile(Env env, String string)
   {
@@ -182,7 +186,8 @@ public class SequencePattern<T> {
     while (!todo.isEmpty()) {
       State state = todo.poll();
       if (state instanceof NodePatternState) {
-        OUT res = filter.apply(((NodePatternState) state).pattern);
+        NodePattern<T> pattern = ((NodePatternState) state).pattern;
+        OUT res = filter.apply(pattern);
         if (res != null) return res;
       }
       if (state.next != null) {
@@ -839,7 +844,7 @@ public class SequencePattern<T> {
         if (opt instanceof NodePatternExpr) {
           Pair<Class, CoreMapNodePattern.StringAnnotationPattern> pair = _getStringAnnotation_(opt);
           if (pair != null) {
-            Boolean ignoreCase = pair.second.ignoreCase;
+            Boolean ignoreCase = pair.second.ignoreCase();
             String target = pair.second.target;
             Pair<Class,Boolean> key = Pair.makePair(pair.first, ignoreCase);
             Pair<Collection<PatternExpr>, Set<String>> saved = stringPatterns.get(key);
@@ -862,14 +867,14 @@ public class SequencePattern<T> {
               if (pair != null) {
                 if (key != null) {
                   // check key
-                  if (key.first.equals(pair.first) && key.second.equals(pair.second.ignoreCase)) {
+                  if (key.first.equals(pair.first) && key.second.equals(pair.second.ignoreCase())) {
                     // okay
                   } else {
                     isStringSeq = false;
                     break;
                   }
                 } else {
-                  key = Pair.makePair(pair.first, pair.second.ignoreCase);
+                  key = Pair.makePair(pair.first, pair.second.ignoreCase());
                   strings = new ArrayList<String>();
                 }
                 strings.add(pair.second.target);
@@ -899,9 +904,10 @@ public class SequencePattern<T> {
       for (Pair<Class,Boolean> key:stringPatterns.keySet()) {
         Pair<Collection<PatternExpr>, Set<String>> saved = stringPatterns.get(key);
         Set<String> set = saved.second;
+        int flags = (key.second)? NodePattern.CASE_INSENSITIVE:0;
         if (set.size() > OPTIMIZE_MIN_SIZE) {
           PatternExpr optimized = new NodePatternExpr(
-                  new CoreMapNodePattern(key.first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, key.second)));
+                  new CoreMapNodePattern(key.first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, flags)));
           finalOptimizedPatterns.add(optimized);
           for (PatternExpr p:saved.first) {
             alreadyOptimized.put(p, true);

@@ -497,7 +497,7 @@ public class PhraseTable implements Serializable
   private String createNormalizedForm(String word)
   {
     if (normalize) {
-      word = Normalizer.normalize(word, Normalizer.Form.NFKD);
+      word = StringUtils.normalize(word);
     }
     if (caseInsensitive) {
       word = word.toLowerCase();
