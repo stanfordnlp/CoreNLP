@@ -356,7 +356,7 @@ public class CountersTest extends TestCase {
     c1 = Counters.transformWithValuesAdd(c1, new Function<String, String>() {
       @Override
       public String apply(String in) {
-        return ((String) in).toLowerCase();
+        return in.toLowerCase();
       }
     });
     System.out.println(c1);
