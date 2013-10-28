@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -21,16 +19,7 @@ import edu.stanford.nlp.util.Pair;
 
 public class Dictionaries {
 
-  public enum MentionType {
-    PRONOMINAL(1), NOMINAL(3), PROPER(4), LIST(2);
-
-    /**
-     * A higher representativeness means that this type of mention is more preferred for choosing
-     * the representative mention. See {@link Mention#moreRepresentativeThan(Mention)}.
-     */
-    public final int representativeness;
-    MentionType(int representativeness) { this.representativeness = representativeness; }
-  }
+  public enum MentionType { PRONOMINAL, NOMINAL, PROPER, LIST }
 
   public enum Gender { MALE, FEMALE, NEUTRAL, UNKNOWN }
 
@@ -184,9 +173,9 @@ public class Dictionaries {
   public final Set<String> allPronouns = Generics.newHashSet();
 
   public final Map<String, String> statesAbbreviation = Generics.newHashMap();
-  private final Map<String, Set<String>> demonyms = Generics.newHashMap();
+  public final Map<String, Set<String>> demonyms = Generics.newHashMap();
   public final Set<String> demonymSet = Generics.newHashSet();
-  private final Set<String> adjectiveNation = Generics.newHashSet();
+  public final Set<String> adjectiveNation = Generics.newHashSet();
 
   public final Set<String> countries = Generics.newHashSet();
   public final Set<String> statesAndProvinces = Generics.newHashSet();
@@ -220,98 +209,46 @@ public class Dictionaries {
     stopWords.addAll(allPronouns);
   }
 
-  /** The format of each line of this file is
-   *     fullStateName ( TAB  abbrev )*
-   *  The file is cased and checked cased.
-   *  The result is: statesAbbreviation is a hash from each abbrev to the fullStateName.
-   */
   public void loadStateAbbreviation(String statesFile) {
     BufferedReader reader = null;
     try {
       reader = IOUtils.readerFromString(statesFile);
-      for (String line; (line = reader.readLine()) != null; ) {
-        String[] tokens = line.split("\t");
-        for (String token : tokens) {
-          statesAbbreviation.put(token, tokens[0]);
-        }
+      while(reader.ready()){
+        String[] tokens = reader.readLine().split("\t");
+        statesAbbreviation.put(tokens[1], tokens[0]);
+        statesAbbreviation.put(tokens[2], tokens[0]);
       }
-    } catch (IOException e) {
+    } catch (IOException e){
       throw new RuntimeIOException(e);
     } finally {
       IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
-  /** If the input string is an abbreviation of a U.S. state name
-   *  or the canonical name, the canonical name is returned.
-   *  Otherwise, null is returned.
-   *
-   *  @param name Is treated as a cased string. ME != me
-   */ 
-  public String lookupCanonicalAmericanStateName(String name) {
-    return statesAbbreviation.get(name);
-  }
-
-  /** The format of the demonyms file is
-   *     countryCityOrState ( TAB demonym )*
-   *  Lines starting with # are ignored
-   *  The file is cased but stored in in-memory data structures uncased.
-   *  The results are:
-   *  demonyms is a has from each country (etc.) to a set of demonymic Strings;
-   *  adjectiveNation is a set of demonymic Strings;
-   *  demonymSet has all country (etc.) names and all demonymic Strings.
-   */
   private void loadDemonymLists(String demonymFile) {
     BufferedReader reader = null;
     try {
       reader = IOUtils.readerFromString(demonymFile);
-      for (String line; (line = reader.readLine()) != null; ) {
-        line = line.toLowerCase(Locale.ENGLISH);
-        String[] tokens = line.split("\t");
-        if (tokens[0].startsWith("#")) continue;
+      while(reader.ready()){
+        String[] line = reader.readLine().split("\t");
+        if(line[0].startsWith("#")) continue;
         Set<String> set = Generics.newHashSet();
-        for (String s : tokens) {
-          set.add(s);
-          demonymSet.add(s);
+        for(String s : line){
+          set.add(s.toLowerCase());
+          demonymSet.add(s.toLowerCase());
         }
-        demonyms.put(tokens[0], set);
+        demonyms.put(line[0].toLowerCase(), set);
       }
       adjectiveNation.addAll(demonymSet);
       adjectiveNation.removeAll(demonyms.keySet());
-    } catch (IOException e) {
+    } catch (IOException e){
       throw new RuntimeIOException(e);
     } finally {
       IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
-  /** Returns a set of demonyms for a country (or city or region).
-   *  @param name Some string perhaps a country name like "Australia"
-   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }. 
-   *     If none are known (including if the argument isn't a country/region name,
-   *     then the empty set will be returned.
-   */
-  public Set<String> getDemonyms(String name) {
-    Set<String> result = demonyms.get(name);
-    if (result == null) {
-      result = Collections.emptySet();
-    }
-    return result;
-  }
-
-  /** Returns whether this mention (possibly multi-word) is the 
-   *  adjectival form of a demonym, like "African" or "Iraqi".
-   *  True if it is an adjectival form, even if also a name for a 
-   *  person of that country (such as "Iraqi").
-   */
-  public boolean isAdjectivalDemonym(String token) {
-    return adjectiveNation.contains(token.toLowerCase(Locale.ENGLISH));
-  }
-
   private static void getWordsFromFile(String filename, Set<String> resultSet, boolean lowercase) throws IOException {
-    if(filename==null) {
-      return ;
-    }
     BufferedReader reader = IOUtils.readerFromString(filename);
     while(reader.ready()) {
       if(lowercase) resultSet.add(reader.readLine().toLowerCase());
@@ -368,12 +305,8 @@ public class Dictionaries {
     }
   }
 
-  /** 
-   * load Bergsma and Lin (2006) gender and number list
-   * */
-  private void loadGenderNumber(String file, String neutralWordsFile){
+  private void loadGenderNumber(String file){
     try {
-      getWordsFromFile(neutralWordsFile, neutralWords, false);
       BufferedReader reader = IOUtils.readerFromString(file);
       String line;
       while ((line = reader.readLine())!=null){
@@ -391,6 +324,21 @@ public class Dictionaries {
       reader.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
+    }
+  }
+  private void loadExtraGender(String file){
+    BufferedReader reader = null;
+    try {
+      reader = IOUtils.readerFromString(file);
+      while(reader.ready()) {
+        String[] split = reader.readLine().split("\t");
+        if(split[1].equals("MALE")) maleWords.add(split[0]);
+        else if(split[1].equals("FEMALE")) femaleWords.add(split[0]);
+      }
+    } catch (IOException e){
+      throw new RuntimeIOException(e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
@@ -463,15 +411,18 @@ public class Dictionaries {
     this(props.getProperty(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM),
         props.getProperty(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE),
         props.getProperty(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE),
-        props.getProperty(Constants.MALE_PROP),
-        props.getProperty(Constants.NEUTRAL_PROP),
-        props.getProperty(Constants.FEMALE_PROP),
-        props.getProperty(Constants.PLURAL_PROP),
-        props.getProperty(Constants.SINGULAR_PROP),
+        props.getProperty(Constants.MALE_PROP, DefaultPaths.DEFAULT_DCOREF_MALE),
+        props.getProperty(Constants.NEUTRAL_PROP, DefaultPaths.DEFAULT_DCOREF_NEUTRAL),
+        props.getProperty(Constants.FEMALE_PROP, DefaultPaths.DEFAULT_DCOREF_FEMALE),
+        props.getProperty(Constants.PLURAL_PROP, DefaultPaths.DEFAULT_DCOREF_PLURAL),
+        props.getProperty(Constants.SINGULAR_PROP, DefaultPaths.DEFAULT_DCOREF_SINGULAR),
         props.getProperty(Constants.STATES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES),
         props.getProperty(Constants.GENDER_NUMBER_PROP, DefaultPaths.DEFAULT_DCOREF_GENDER_NUMBER),
         props.getProperty(Constants.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
         props.getProperty(Constants.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
+        props.getProperty(Constants.EXTRA_GENDER_PROP, DefaultPaths.DEFAULT_DCOREF_EXTRA_GENDER),
+        Boolean.parseBoolean(props.getProperty(Constants.BIG_GENDER_NUMBER_PROP, "false")) ||
+        Boolean.parseBoolean(props.getProperty(Constants.REPLICATECONLL_PROP, "false")),
         props.getProperty(Constants.SIEVES_PROP, Constants.SIEVEPASSES).contains("CorefDictionaryMatch"),
         new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
           DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4},
@@ -490,26 +441,21 @@ public class Dictionaries {
     os.append(Constants.INANIMATE_PROP + ":" +
             props.getProperty(Constants.INANIMATE_PROP,
                     DefaultPaths.DEFAULT_DCOREF_INANIMATE));
-    if(props.containsKey(Constants.MALE_PROP)) {
-      os.append(Constants.MALE_PROP + ":" +
-            props.getProperty(Constants.MALE_PROP));
-    }
-    if(props.containsKey(Constants.NEUTRAL_PROP)) {
-      os.append(Constants.NEUTRAL_PROP + ":" +
-            props.getProperty(Constants.NEUTRAL_PROP));
-    }
-    if(props.containsKey(Constants.FEMALE_PROP)) {
-      os.append(Constants.FEMALE_PROP + ":" +
-            props.getProperty(Constants.FEMALE_PROP));
-    }
-    if(props.containsKey(Constants.PLURAL_PROP)) {
-      os.append(Constants.PLURAL_PROP + ":" +
-            props.getProperty(Constants.PLURAL_PROP));
-    }
-    if(props.containsKey(Constants.SINGULAR_PROP)) {
-      os.append(Constants.SINGULAR_PROP + ":" +
-            props.getProperty(Constants.SINGULAR_PROP));
-    }
+    os.append(Constants.MALE_PROP + ":" +
+            props.getProperty(Constants.MALE_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_MALE));
+    os.append(Constants.NEUTRAL_PROP + ":" +
+            props.getProperty(Constants.NEUTRAL_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_NEUTRAL));
+    os.append(Constants.FEMALE_PROP + ":" +
+            props.getProperty(Constants.FEMALE_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_FEMALE));
+    os.append(Constants.PLURAL_PROP + ":" +
+            props.getProperty(Constants.PLURAL_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_PLURAL));
+    os.append(Constants.SINGULAR_PROP + ":" +
+            props.getProperty(Constants.SINGULAR_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_SINGULAR));
     os.append(Constants.STATES_PROP + ":" +
             props.getProperty(Constants.STATES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_STATES));
@@ -522,6 +468,12 @@ public class Dictionaries {
     os.append(Constants.STATES_PROVINCES_PROP + ":" +
             props.getProperty(Constants.STATES_PROVINCES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES));
+    os.append(Constants.EXTRA_GENDER_PROP + ":" +
+            props.getProperty(Constants.EXTRA_GENDER_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_EXTRA_GENDER));
+    os.append(Constants.BIG_GENDER_NUMBER_PROP + ":" +
+            props.getProperty(Constants.BIG_GENDER_NUMBER_PROP,
+                    "false"));
     os.append(Constants.REPLICATECONLL_PROP + ":" +
             props.getProperty(Constants.REPLICATECONLL_PROP,
                     "false"));
@@ -541,6 +493,8 @@ public class Dictionaries {
       String genderNumber,
       String countries,
       String states,
+      String extraGender,
+      boolean loadBigGenderNumber,
       boolean loadCorefDict,
       String[] corefDictFiles,
       String corefDictPMIFile,
@@ -548,11 +502,12 @@ public class Dictionaries {
     loadDemonymLists(demonymWords);
     loadStateAbbreviation(statesWords);
     if(Constants.USE_ANIMACY_LIST) loadAnimacyLists(animateWords, inanimateWords);
-    loadGenderLists(maleWords, neutralWords, femaleWords);
-    loadNumberLists(pluralWords, singularWords);
-    loadGenderNumber(genderNumber, neutralWords);
+    if(Constants.USE_GENDER_LIST) loadGenderLists(maleWords, neutralWords, femaleWords);
+    if(Constants.USE_NUMBER_LIST) loadNumberLists(pluralWords, singularWords);
+    if(loadBigGenderNumber) loadGenderNumber(genderNumber);
     loadCountriesLists(countries);
     loadStatesLists(states);
+    loadExtraGender(extraGender);
     setPronouns();
     if(loadCorefDict){
       loadCorefDict(corefDictFiles, corefDict);
