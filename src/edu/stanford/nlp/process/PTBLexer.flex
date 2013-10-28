@@ -156,7 +156,6 @@ import edu.stanford.nlp.util.StringUtils;
       } else if ("tokenizeNLs".equals(key)) {
         tokenizeNLs = val;
       } else if ("ptb3Escaping".equals(key)) {
-        americanize = val;
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
         normalizeCurrency = val;
@@ -256,7 +255,7 @@ import edu.stanford.nlp.util.StringUtils;
   /* Flags begin with historical ptb3Escaping behavior */
   private boolean invertible;
   private boolean tokenizeNLs;
-  private boolean americanize = true;
+  private boolean americanize = false;
   private boolean normalizeSpace = true;
   private boolean normalizeAmpersandEntity = true;
   private boolean normalizeCurrency = true;
