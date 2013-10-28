@@ -573,15 +573,6 @@ public abstract class TregexPattern implements Serializable {
     String encoding = "UTF-8";
     String macroOption = "-macros";
     String macroFilename = "";
-    String yieldOnly = "-t";
-    String printAllTrees = "-T";
-    String quietMode = "-C";
-    String wholeTreeMode = "-w";
-    String filenameOption = "-f";
-    String oneMatchPerRootNodeMode = "-o";
-    String reportTreeNumbers = "-n";
-    String rootLabelOnly = "-u";
-    String oneLine = "-s";
     Map<String,Integer> flagMap = Generics.newHashMap();
     flagMap.put(extractSubtreesOption,2);
     flagMap.put(extractSubtreesFileOption,2);
@@ -595,15 +586,6 @@ public abstract class TregexPattern implements Serializable {
     flagMap.put(headFinderArgOption,1);
     flagMap.put(trfOption,1);
     flagMap.put(macroOption, 1);
-    flagMap.put(yieldOnly, 0);
-    flagMap.put(quietMode, 0);
-    flagMap.put(wholeTreeMode, 0);
-    flagMap.put(printAllTrees, 0);
-    flagMap.put(filenameOption, 0);
-    flagMap.put(oneMatchPerRootNodeMode, 0);
-    flagMap.put(reportTreeNumbers, 0);
-    flagMap.put(rootLabelOnly, 0);
-    flagMap.put(oneLine, 0);
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
     args = argsMap.get(null);
 
@@ -644,7 +626,7 @@ public abstract class TregexPattern implements Serializable {
       treeReaderFactoryClassName = argsMap.get(trfOption)[0];
       errPW.println("Using tree reader factory " + treeReaderFactoryClassName + "...");
     }
-    if (argsMap.containsKey(printAllTrees)) {
+    if (argsMap.containsKey("-T")) {
       TRegexTreeVisitor.printTree = true;
     }
     if (argsMap.containsKey(inputFileOption)) {
@@ -654,33 +636,33 @@ public abstract class TregexPattern implements Serializable {
       System.arraycopy(args,0,newArgs,1,args.length);
       args = newArgs;
     }
-    if (argsMap.containsKey(quietMode)) {
+    if (argsMap.containsKey("-C")) {
       TRegexTreeVisitor.printMatches = false;
       TRegexTreeVisitor.printNumMatchesToStdOut = true ;
 
     }
-    if (argsMap.containsKey(printNonMatchingTreesOption)) {
+    if (argsMap.containsKey("-v")) {
       TRegexTreeVisitor.printNonMatchingTrees = true;
     }
-    if (argsMap.containsKey(subtreeCodeOption)) {
+    if (argsMap.containsKey("-x")) {
       TRegexTreeVisitor.printSubtreeCode = true;
       TRegexTreeVisitor.printMatches = false;
     }
-    if (argsMap.containsKey(wholeTreeMode)) {
+    if (argsMap.containsKey("-w")) {
       TRegexTreeVisitor.printWholeTree = true;
     }
-    if (argsMap.containsKey(filenameOption)) {
+    if (argsMap.containsKey("-f")) {
       TRegexTreeVisitor.printFilename = true;
     }
-    if(argsMap.containsKey(oneMatchPerRootNodeMode))
+    if(argsMap.containsKey("-o"))
       TRegexTreeVisitor.oneMatchPerRootNode = true;
-    if(argsMap.containsKey(reportTreeNumbers))
+    if(argsMap.containsKey("-n"))
       TRegexTreeVisitor.reportTreeNumbers = true;
-    if (argsMap.containsKey(rootLabelOnly)) {
+    if (argsMap.containsKey("-u")) {
       treePrintFormats.append(TreePrint.rootLabelOnlyFormat).append(',');
-    } else if (argsMap.containsKey(oneLine)) { // display short form
+    } else if (argsMap.containsKey("-s")) { // display short form
       treePrintFormats.append("oneline,");
-    } else if (argsMap.containsKey(yieldOnly)) {
+    } else if (argsMap.containsKey("-t")) {
       treePrintFormats.append("words,");
     } else {
       treePrintFormats.append("penn,");

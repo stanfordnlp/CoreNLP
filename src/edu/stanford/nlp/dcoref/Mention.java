@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
@@ -517,22 +516,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private void setGender(Dictionaries dict, int[] genderNumberCount) {
     gender = Gender.UNKNOWN;
-    if(genderNumberCount!=null && this.number!=Number.PLURAL){
-      double male = genderNumberCount[0];
-      double female = genderNumberCount[1];
-      double neutral = genderNumberCount[2];
-
-      if (male * 0.5 > female + neutral && male > 2) {
-        this.gender = Gender.MALE;
-        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
-      } else if (female * 0.5 > male + neutral && female > 2) {
-        this.gender = Gender.FEMALE;
-        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
-      } else if (neutral * 0.5 > male + female && neutral > 2) {
-        this.gender = Gender.NEUTRAL;
-        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
-      }
-    }
     if (mentionType == MentionType.PRONOMINAL) {
       if (dict.malePronouns.contains(headString)) {
         gender = Gender.MALE;
@@ -540,38 +523,56 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         gender = Gender.FEMALE;
       }
     } else {
-      // Bergsma or user provided list
-      if(gender == Gender.UNKNOWN)  {
-        if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
-          // Try to get gender of the named entity
-          // Start with first name until we get gender...
-          List<CoreLabel> nerToks = nerTokens();
-          for (CoreLabel t:nerToks) {
-            String name = t.word().toLowerCase();
-            if(dict.maleWords.contains(name)) {
+      if(Constants.USE_GENDER_LIST){
+        // Bergsma list
+        if(gender == Gender.UNKNOWN)  {
+          if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
+            // Try to get gender of the named entity
+            // Start with first name until we get gender...
+            List<CoreLabel> nerToks = nerTokens();
+            for (CoreLabel t:nerToks) {
+              String name = t.word().toLowerCase();
+              if(dict.maleWords.contains(name)) {
+                gender = Gender.MALE;
+                SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  name + "\tspan:" + spanToString());
+                break;
+              }
+              else if(dict.femaleWords.contains(name))  {
+                gender = Gender.FEMALE;
+                SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  name + "\tspan:" + spanToString());
+                break;
+              }
+            }
+          } else {
+            if(dict.maleWords.contains(headString)) {
               gender = Gender.MALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  name + "\tspan:" + spanToString());
-              break;
+              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
             }
-            else if(dict.femaleWords.contains(name))  {
+            else if(dict.femaleWords.contains(headString))  {
               gender = Gender.FEMALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  name + "\tspan:" + spanToString());
-              break;
+              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
+            }
+            else if(dict.neutralWords.contains(headString))   {
+              gender = Gender.NEUTRAL;
+              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
             }
           }
-        } else {
-          if(dict.maleWords.contains(headString)) {
-            gender = Gender.MALE;
-            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
-          }
-          else if(dict.femaleWords.contains(headString))  {
-            gender = Gender.FEMALE;
-            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
-          }
-          else if(dict.neutralWords.contains(headString))   {
-            gender = Gender.NEUTRAL;
-            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
-          }
+        }
+      }
+      if(genderNumberCount!=null && this.number!=Number.PLURAL){
+        double male = genderNumberCount[0];
+        double female = genderNumberCount[1];
+        double neutral = genderNumberCount[2];
+
+        if (male * 0.5 > female + neutral && male > 2) {
+          this.gender = Gender.MALE;
+          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
+        } else if (female * 0.5 > male + neutral && female > 2) {
+          this.gender = Gender.FEMALE;
+          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
+        } else if (neutral * 0.5 > male + female && neutral > 2) {
+          this.gender = Gender.NEUTRAL;
+          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
         }
       }
     }
@@ -608,14 +609,16 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
 
     if(mentionType != MentionType.PRONOMINAL) {
-      if(number == Number.UNKNOWN){
-        if(dict.singularWords.contains(headString)) {
-          number = Number.SINGULAR;
-          SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tSINGULAR:\t" + headString);
-        }
-        else if(dict.pluralWords.contains(headString))  {
-          number = Number.PLURAL;
-          SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tPLURAL:\t" + headString);
+      if(Constants.USE_NUMBER_LIST){
+        if(number == Number.UNKNOWN){
+          if(dict.singularWords.contains(headString)) {
+            number = Number.SINGULAR;
+            SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tSINGULAR:\t" + headString);
+          }
+          else if(dict.pluralWords.contains(headString))  {
+            number = Number.PLURAL;
+            SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tPLURAL:\t" + headString);
+          }
         }
       }
 
@@ -929,17 +932,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       } else {
         if (this.endIndex > m.endIndex) {
           return true;
-        } else if (this.endIndex < m.endIndex) {
-          return false;
-        } else if (this.headIndex != m.headIndex) {
-          // Meaningless, but an arbitrary tiebreaker
-          return this.headIndex < m.headIndex;
-        } else if (this.mentionType != m.mentionType) {
-          // Meaningless, but an arbitrary tiebreaker
-          return this.mentionType.representativeness > m.mentionType.representativeness;
         } else {
-          // Meaningless, but an arbitrary tiebreaker
-          return this.hashCode() < m.hashCode();
+          return false;
         }
       }
     }
@@ -1113,37 +1107,29 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public boolean moreRepresentativeThan(Mention m){
     if(m==null) return true;
-    if (mentionType.representativeness > m.mentionType.representativeness) { return true; }
-    else if (m.mentionType.representativeness > mentionType.representativeness) { return false; }
-    else {
-      // pick mention with better NER
-      if (nerString != null && m.nerString == null) return true;
-      if (nerString == null && m.nerString != null) return false;
-      if (nerString != null && !nerString.equals(m.nerString)) {
-        if ("O".equals(m.nerString)) return true;
-        if ("O".equals(nerString)) return false;
-        if ("MISC".equals(m.nerString)) return true;
-        if ("MISC".equals(nerString)) return false;
+    if(mentionType!=m.mentionType) {
+      if ((mentionType == MentionType.PROPER && m.mentionType != MentionType.PROPER)
+           || (mentionType == MentionType.NOMINAL && m.mentionType == MentionType.PRONOMINAL)) {
+        return true;
+      } else {
+        return false;
       }
-      // Ensure that both NER tags are neither MISC nor O, or are both not existent
-      assert nerString == null || nerString.equals(m.nerString) || (!nerString.equals("O") && !nerString.equals("MISC") && !m.nerString.equals("O") && !m.nerString.equals("MISC"));
-      // Return larger headIndex - startIndex
-      if (headIndex - startIndex > m.headIndex - m.startIndex) { return true; }
-      else if (headIndex - startIndex < m.headIndex - m.startIndex) { return false; }
-      // Return earlier sentence number
-      else if (sentNum < m.sentNum) { return true; }
-      else if (sentNum > m.sentNum) { return false; }
-      // Return earlier head index
-      else if (headIndex < m.headIndex) { return true; }
-      else if (headIndex > m.headIndex) { return false; }
-      // If the mentions are short, take the longer one
-      else if (originalSpan.size() <= 5 && originalSpan.size() > m.originalSpan.size()) { return true; }
-      else if (originalSpan.size() <= 5 && originalSpan.size() < m.originalSpan.size()) { return false; }
-      // If the mentions are long, take the shorter one (we're getting into the realm of nonsense by here)
-      else if (originalSpan.size() < m.originalSpan.size()) { return true; }
-      else if (originalSpan.size() > m.originalSpan.size()) { return false; }
-      else {
-        throw new IllegalStateException("Comparing a mention with itself for representativeness");
+    } else {
+      // pick mention with better NER
+      if (nerString == null && m.nerString != null) return false;
+      if (nerString != null && m.nerString == null) return true;
+      if (!nerString.equals(m.nerString)) {
+        if ("O".equals(nerString)) return false;
+        if ("O".equals(m.nerString)) return true;
+        if ("MISC".equals(nerString)) return false;
+        if ("MISC".equals(m.nerString)) return true;
+      }
+      if (headIndex - startIndex > m.headIndex - m.startIndex) {
+        return true;
+      } else if (sentNum < m.sentNum || (sentNum == m.sentNum && headIndex < m.headIndex)) {
+        return true;
+      } else {
+        return false;
       }
     }
   }
@@ -1345,31 +1331,23 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return true;
   }
 
-  public boolean isDemonym(Mention m, Dictionaries dict) {
-    String thisCasedString = this.spanToString();
-    String antCasedString = m.spanToString();
-
-    // The US state matching part (only) is done cased
-    String thisNormed = dict.lookupCanonicalAmericanStateName(thisCasedString);
-    String antNormed = dict.lookupCanonicalAmericanStateName(antCasedString);
-    if (thisNormed != null && thisNormed.equals(antNormed)) {
-      return true;
-    }
-
-    // The rest is done uncased
-    String thisString = thisCasedString.toLowerCase(Locale.ENGLISH);
-    String antString = antCasedString.toLowerCase(Locale.ENGLISH);
-    if (thisString.startsWith("the ")) {
+  public boolean isDemonym(Mention m, Dictionaries dict){
+    String thisString = this.spanToString().toLowerCase();
+    String antString = m.spanToString().toLowerCase();
+    if(thisString.startsWith("the ") || thisString.startsWith("The ")) {
       thisString = thisString.substring(4);
     }
-    if (antString.startsWith("the ")) {
-      antString = antString.substring(4);
+    if(antString.startsWith("the ") || antString.startsWith("The ")) antString = antString.substring(4);
+
+    if (dict.statesAbbreviation.containsKey(m.spanToString()) && dict.statesAbbreviation.get(m.spanToString()).equals(this.spanToString())
+         || dict.statesAbbreviation.containsKey(this.spanToString()) && dict.statesAbbreviation.get(this.spanToString()).equals(m.spanToString())) {
+      return true;
     }
 
-    Set<String> thisDemonyms = dict.getDemonyms(thisString);
-    Set<String> antDemonyms = dict.getDemonyms(antString);
-    if (thisDemonyms.contains(antString) || antDemonyms.contains(thisString)) {
-      return true;
+    if(dict.demonyms.get(thisString)!=null){
+      if(dict.demonyms.get(thisString).contains(antString)) return true;
+    } else if(dict.demonyms.get(antString)!=null){
+      if(dict.demonyms.get(antString).contains(thisString)) return true;
     }
     return false;
   }

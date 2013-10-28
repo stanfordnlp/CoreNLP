@@ -60,7 +60,6 @@ public class AnnotationLookup {
     MORPHO_CASE_KEY(CoreAnnotations.MorphoCaseAnnotation.class,"case"),
     WORDNET_SYN_KEY(CoreAnnotations.WordnetSynAnnotation.class,"wordnetsyn"),
     PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto"),
-    DOCTITLE_KEY(CoreAnnotations.DocTitleAnnotation.class,"doctitle"),
     DOCTYPE_KEY(CoreAnnotations.DocTypeAnnotation.class,"doctype"),
     DOCDATE_KEY(CoreAnnotations.DocDateAnnotation.class,"docdate"),
     DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype"),
@@ -78,12 +77,8 @@ public class AnnotationLookup {
     ABBR_KEY(CoreAnnotations.AbbrAnnotation.class, "abbr"),
     ABSTR_KEY(CoreAnnotations.AbstrAnnotation.class, "abstr"),
     FREQ_KEY(CoreAnnotations.FreqAnnotation.class, "freq"),
-    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web"),
-
-    // Also have "pos" for PartOfTag (POS is also the TAG_KEY - "tag", but "pos" makes more sense)
-    // Still keep "tag" for POS tag so we don't break anything
-    POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos");
-
+    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web");
+    
 
     public final Class coreKey;
     public final String oldKey;
