@@ -103,6 +103,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     }
   }
 
+  /*
   CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, int multiThreadGrad) {
     this(data, labels, window, classIndex, labelIndices, map, "QUADRATIC", backgroundSymbol, multiThreadGrad);
   }
@@ -114,8 +115,13 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, double sigma, double[][][][] featureVal, int multiThreadGrad) {
     this(data, labels, window, classIndex, labelIndices, map, "QUADRATIC", backgroundSymbol, sigma, featureVal, multiThreadGrad);
   }
+  */
 
   CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal, int multiThreadGrad) {
+    this(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal, multiThreadGrad, true);
+  }
+
+  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal, int multiThreadGrad, boolean calcEmpirical) {
     this.window = window;
     this.classIndex = classIndex;
     this.numClasses = classIndex.size();
@@ -135,7 +141,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     for (int i=0; i<multiThreadGrad; i++)
       parallelE[i] = empty2D();
     weights = empty2D();
-    empiricalCounts(Ehat);
+    if (calcEmpirical)
+      empiricalCounts(Ehat);
     int myDomainDimension = 0;
     for (int dim : map) {
       myDomainDimension += labelIndices.get(dim).size();
@@ -187,7 +194,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   @Override
   public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
-    // double[][] weights = to2D(x);
     to2D(x, weights);
     return new LinearCliquePotentialFunction(weights);
   }
@@ -200,11 +206,11 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return expectedCountsAndValueForADoc(E, docIndex, true, true);
   }
 
-  private double expectedCountsForADoc(double[][] E, int docIndex) {
+  protected double expectedCountsForADoc(double[][] E, int docIndex) {
     return expectedCountsAndValueForADoc(E, docIndex, true, false);
   }
 
-  private double expectedCountsAndValueForADoc(double[][] E, int docIndex, boolean doExpectedCountCalc, boolean doValueCalc) {
+  protected double expectedCountsAndValueForADoc(double[][] E, int docIndex, boolean doExpectedCountCalc, boolean doValueCalc) {
     int[][][] docData = data[docIndex];
     double[][][] featureVal3DArr = null;
     if (featureVal != null) {
@@ -226,7 +232,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   }
 
   /** Compute the expected counts for this document, which we will need to compute the derivative. */
-  private void documentExpectedCounts(double[][] E, int[][][] docData, double[][][] featureVal3DArr, CRFCliqueTree cliqueTree) {
+  protected void documentExpectedCounts(double[][] E, int[][][] docData, double[][][] featureVal3DArr, CRFCliqueTree cliqueTree) {
     // iterate over the positions in this document
     for (int i = 0; i < docData.length; i++) {
       // for each possible clique at this position
@@ -914,5 +920,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return d;
   }
 
-
+  public int[][] getLabels() {
+    return labels;
+  }
 }
