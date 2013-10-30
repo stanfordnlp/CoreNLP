@@ -8,8 +8,9 @@ import java.text.NumberFormat;
 import java.util.*;
 
 /**
- * Stochastic Gradient Descent With AdaGrad and FOBOS.
- * NOTE: similar to Stochastic Inplace Minimizer, regularization is done in the minimizer, not the objective function.
+ * Stochastic Gradient Descent With AdaGrad and FOBOS in batch mode.
+ * Similar to Stochastic Inplace Minimizer, regularization is done in the minimizer, not in the objective function.
+ * This version only does batch optimization. For online variant, see SparseAdaGradMinimizer.java
  *
  * @author Mengqiu Wang
  */
