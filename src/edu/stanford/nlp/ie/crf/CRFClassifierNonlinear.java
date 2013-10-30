@@ -111,7 +111,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
   }
 
   @Override
-  protected CliquePotentialFunction getCliquePotentialFunction() {
+  protected CliquePotentialFunction getCliquePotentialFunctionForTest() {
     if (cliquePotentialFunction == null) {
       if (flags.secondOrderNonLinear)
         cliquePotentialFunction = new NonLinearSecondOrderCliquePotentialFunction(inputLayerWeights4Edge, outputLayerWeights4Edge, inputLayerWeights, outputLayerWeights, flags);
