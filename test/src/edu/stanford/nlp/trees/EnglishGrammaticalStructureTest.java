@@ -651,7 +651,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
     String[] testTrees = {
       "(ROOT (S (NP (NNP Sue)) (VP (VBZ is) (VP (VBG speaking))) (. .)))",
       "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBZ is)  (VP (VBG speaking))) (. ?)))",
-      "(ROOT (S (VP (VB Be) (VP (VBG caring))) (. !)))",
+      "(ROOT (S (VP (VB Be) (ADJP (JJ honest))) (. .)))",
       "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBZ is) (NP (PRP he) ) (VP (VBG doing)))))",
       "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBP am) (NP (PRP I) ) (VP (VBG doing) (PP (IN in) (NP (NNP Jackson) (NNP Hole) )))) (. ?) ))",
       "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBP am) (NP (PRP I)) (S (VP (TO to) (VP (VB judge))))) (. ?)))",
@@ -671,8 +671,8 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "nsubj(speaking-3, Who-1)\n" +
                 "aux(speaking-3, is-2)\n" +
                 "root(ROOT-0, speaking-3)\n",
-        "aux(caring-2, Be-1)\n" +
-                "root(ROOT-0, caring-2)\n",
+        "cop(honest-2, Be-1)\n" +
+                "root(ROOT-0, honest-2)\n",
         
         "dobj(doing-4, What-1)\n" +
                 "aux(doing-4, is-2)\n" +
