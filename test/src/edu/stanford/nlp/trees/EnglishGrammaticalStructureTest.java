@@ -660,7 +660,8 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       "(ROOT (S (NP (NN Hand-holding) ) (VP (VBZ is) (VP (VBG becoming) (NP (DT an) (NN investment-banking) (NN job) (NN requirement) ))) (. .) ))",
       "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (ADJP (JJ wrong) (PP (IN with) (S (VP (VBG expecting) (NP (NN pizza))))))) (. ?)))",
       "(ROOT (SBARQ (WHNP (WP Who) ) (SQ (VBZ is) (VP (VBG going) (S (VP (TO to) (VP (VB carry) (NP (DT the) (NN water) )))))) (. ?)))",
-      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBP am) (NP (PRP I)) (VP (VBG doing) (S (VP (VBG dating) (NP (PRP her)))))) (. ?)))"
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBP am) (NP (PRP I)) (VP (VBG doing) (S (VP (VBG dating) (NP (PRP her)))))) (. ?)))",
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT that))) (. ?)))"
     };
 
     // the expected dependency answers (basic)
@@ -734,7 +735,11 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(doing-4, I-3)\n" +
                 "root(ROOT-0, doing-4)\n" +
                 "xcomp(doing-4, dating-5)\n" +
-                "dobj(dating-5, her-6)\n"
+                "dobj(dating-5, her-6)\n",
+
+        "attr(is-2, What-1)\n" +
+                "root(ROOT-0, is-2)\n" +
+                "nsubj(is-2, that-3)\n"
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
