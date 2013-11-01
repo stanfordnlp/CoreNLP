@@ -178,7 +178,8 @@ public class PTBTokenizerTest extends TestCase {
     // note: after(x) and before(x+1) are the same
     assertEquals("     ", tokens.get(0).get(CoreAnnotations.AfterAnnotation.class));
     assertEquals("     ", tokens.get(1).get(CoreAnnotations.BeforeAnnotation.class));
-    assertEquals("colorful", tokens.get(3).get(CoreAnnotations.TextAnnotation.class));
+    // americanize is now off by default
+    assertEquals("colourful", tokens.get(3).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("colourful", tokens.get(3).get(CoreAnnotations.OriginalTextAnnotation.class));
     assertEquals("", tokens.get(4).after());
     assertEquals("", tokens.get(5).before());
