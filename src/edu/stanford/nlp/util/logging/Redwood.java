@@ -1199,12 +1199,6 @@ public class Redwood {
   // TODO(gabor) update this with the new RedwoodConfiguration
   public static void main(String[] args){
 
-    Redwood.log(Redwood.DBG, "hello world!");
-    Redwood.hideChannelsEverywhere(Redwood.DBG);
-    Redwood.log(Redwood.DBG, "hello debug!");
-
-    System.exit(1);
-
     // -- STRESS TEST THREADS --
     LinkedList<Runnable> tasks = new LinkedList<Runnable>();
     for(int i=0; i<1000; i++){
