@@ -78,8 +78,7 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
   }
 
   @Override
-  public double computeCliquePotential(int cliqueSize, int labelIndex,
-      int[] cliqueFeatures, double[] featureVal, int posInSent) {
+  public double computeCliquePotential(int cliqueSize, int labelIndex, int[] cliqueFeatures, double[] featureVal) {
     double output = 0.0;
     double[][] inputWeights, outputWeights = null;
     if (cliqueSize > 1) {
