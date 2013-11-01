@@ -82,7 +82,7 @@ public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator {
 
   public void setValues(double[] x)
   {
-    classifier.updateWeightsForTest(x);
+    classifier.updateWeights(x);
   }
 
   public String[] getCmd()
