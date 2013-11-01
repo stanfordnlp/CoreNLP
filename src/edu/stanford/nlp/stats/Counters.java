@@ -639,6 +639,34 @@ public class Counters {
     }
     return removed;
   }
+  
+  /**
+   * Removes all entries with counts below the given threshold, returning the
+   * set of removed entries.
+   * 
+   * @param counter
+   *          The counter.
+   * @param countThreshold
+   *          The minimum count for an entry to be kept. Entries (strictly) less
+   *          than this threshold are discarded.
+   * @return The set of discarded entries.
+   */
+  public static <E1, E2> Set<Pair<E1, E2>> retainAbove(
+      TwoDimensionalCounter<E1, E2> counter, double countThreshold) {
+
+    Set<Pair<E1, E2>> removed = new HashSet<Pair<E1, E2>>();
+    for (Entry<E1, ClassicCounter<E2>> en : counter.entrySet()) {
+      for (Entry<E2, Double> en2 : en.getValue().entrySet()) {
+        if (counter.getCount(en.getKey(), en2.getKey()) < countThreshold) {
+          removed.add(new Pair<E1, E2>(en.getKey(), en2.getKey()));
+        }
+      }
+    }
+    for (Pair<E1, E2> key : removed) {
+      counter.remove(key.first(), key.second());
+    }
+    return removed;
+  }
 
   /**
    * Removes all entries with counts above the given threshold, returning the
@@ -1192,6 +1220,9 @@ public class Counters {
     return result;
   }
 
+  /**
+   * increments every key in the counter by value
+   */
   public static <E> Counter<E> add(Counter<E> c1, double value) {
     Counter<E> result = c1.getFactory().create();
     for (E key : c1.keySet()) {
@@ -2923,5 +2954,11 @@ public class Counters {
       fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
     }
     return fscores;
+  }
+  
+  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
+    for(E key: counter.keySet()){
+      counter.setCount(key, func.apply(counter.getCount(key)));
+    }
   }
 }
