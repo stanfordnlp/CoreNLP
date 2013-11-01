@@ -392,7 +392,7 @@ public class RedwoodConfiguration {
    */
   public static RedwoodConfiguration standard(){
     return new RedwoodConfiguration().clear().handlers(
-        Handlers.stdout
+        Handlers.chain(Handlers.hideChannels(), Handlers.stdout)
     );
   }
 
