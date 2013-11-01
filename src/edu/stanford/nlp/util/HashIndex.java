@@ -480,20 +480,4 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     }
     return index;
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof HashIndex)) return false;
-    HashIndex hashIndex = (HashIndex) o;
-    return indexes.equals(hashIndex.indexes) && objects.equals(hashIndex.objects);
-
-  }
-
-  @Override
-  public int hashCode() {
-    int result = objects.hashCode();
-    result = 31 * result + indexes.hashCode();
-    return result;
-  }
 }
