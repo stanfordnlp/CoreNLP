@@ -881,21 +881,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   /**
-   * Determines whether the parser annotator should default to
-   * producing binary trees.  Currently there is only one condition
-   * under which this is true: the sentiment annotator is used.
-   */
-  public static boolean usesBinaryTrees(Properties props) {
-    String annotators = props.getProperty("annotators");
-    Set<String> annoNames = Generics.newHashSet(Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+")));
-    if (annoNames.contains(STANFORD_SENTIMENT)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
    * Runs the entire pipeline on the content of the given text passed in.
    * @param text The text to process
    * @return An Annotation object containing the output of all annotators

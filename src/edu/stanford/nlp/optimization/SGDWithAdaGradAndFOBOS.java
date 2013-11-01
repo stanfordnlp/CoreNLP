@@ -8,9 +8,8 @@ import java.text.NumberFormat;
 import java.util.*;
 
 /**
- * Stochastic Gradient Descent With AdaGrad and FOBOS in batch mode.
- * Similar to Stochastic Inplace Minimizer, regularization is done in the minimizer, not in the objective function.
- * This version only does batch optimization. For online variant, see SparseAdaGradMinimizer.java
+ * Stochastic Gradient Descent With AdaGrad and FOBOS.
+ * NOTE: similar to Stochastic Inplace Minimizer, regularization is done in the minimizer, not the objective function.
  *
  * @author Mengqiu Wang
  */
@@ -195,11 +194,6 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
       if (bSize > totalSamples) {
         System.err.println("WARNING: Total number of samples=" + totalSamples +
                 " is smaller than requested batch size=" + bSize + "!!!");
-        bSize = totalSamples;
-        sayln("Using batch size=" + bSize);
-      }
-      if (bSize <= 0) {
-        System.err.println("WARNING: Requested batch size=" + bSize + " <= 0 !!!");
         bSize = totalSamples;
         sayln("Using batch size=" + bSize);
       }

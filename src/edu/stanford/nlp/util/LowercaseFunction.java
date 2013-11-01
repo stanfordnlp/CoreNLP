@@ -1,8 +1,6 @@
-package edu.stanford.nlp.process;
+package edu.stanford.nlp.util;
 
 import java.io.Serializable;
-
-import edu.stanford.nlp.util.Function;
 
 public class LowercaseFunction implements Function<String, String>, Serializable {
   public String apply(String input) {
