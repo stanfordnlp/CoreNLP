@@ -68,9 +68,8 @@ public abstract class AbstractStochasticCachingDiffUpdateFunction
   }
 
   /**
-   * Performs stochastic gradient calculation based
+   * Performs stochastic gradient updates based
    * on samples indexed by batch and do not apply regularization.
-   * does not update the parameter values
    *
    * @param x unscaled weights
    * @param batch indices of which samples to compute function over
