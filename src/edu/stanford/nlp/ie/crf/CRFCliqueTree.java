@@ -558,7 +558,7 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
       double[][] featureValByCliqueSize = null;
       if (featureVals != null)
         featureValByCliqueSize = featureVals[i];
-      factorTables[i] = getFactorTable(data[i], labelIndices, numClasses, cliquePotentialFunc, featureValByCliqueSize);
+      factorTables[i] = getFactorTable(data[i], labelIndices, numClasses, cliquePotentialFunc, featureValByCliqueSize, i);
 
       // System.err.println("before calibration,FT["+i+"] = " + factorTables[i].toProbString());
 
@@ -582,6 +582,7 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
   }
 
   /**
+   * This function assumes a LinearCliquePotentialFunction is used for wrapping the weights
    * @return a new CRFCliqueTree for the weights on the data
    */
   public static <E> CRFCliqueTree<E> getCalibratedCliqueTree(double[] weights, double wscale, int[][] weightIndices,
@@ -648,12 +649,13 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
     return factorTable;
   }
 
-  static FactorTable getFactorTable(double[][] weights, int[][] data, List<Index<CRFLabel>> labelIndices, int numClasses) {
-    CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
-    return getFactorTable(data, labelIndices, numClasses, cliquePotentialFunc, null);
-  }
+  // static FactorTable getFactorTable(double[][] weights, int[][] data, List<Index<CRFLabel>> labelIndices, int numClasses, int posInSent) {
+  //   CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
+  //   return getFactorTable(data, labelIndices, numClasses, cliquePotentialFunc, null, posInSent);
+  // }
 
-  private static FactorTable getFactorTable(int[][] data, List<Index<CRFLabel>> labelIndices, int numClasses, CliquePotentialFunction cliquePotentialFunc, double[][] featureValByCliqueSize) {
+  static FactorTable getFactorTable(int[][] data, List<Index<CRFLabel>> labelIndices, int numClasses,
+      CliquePotentialFunction cliquePotentialFunc, double[][] featureValByCliqueSize, int posInSent) {
     FactorTable factorTable = null;
 
     for (int j = 0, sz = labelIndices.size(); j < sz; j++) {
@@ -666,7 +668,7 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
       // ... and each possible labeling for that clique
       for (int k = 0, liSize = labelIndex.size(); k < liSize; k++) {
         int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
-        double cliquePotential = cliquePotentialFunc.computeCliquePotential(j+1, k, data[j], featureVal);
+        double cliquePotential = cliquePotentialFunc.computeCliquePotential(j+1, k, data[j], featureVal, posInSent);
         // for (int m = 0; m < data[j].length; m++) {
         //   weight += weights[data[j][m]][k];
         // }
