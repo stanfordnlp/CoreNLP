@@ -489,6 +489,19 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     }
   }
 
+  /**
+   * Cast this multi-graph as a map from vertices, to the outgoing data along edges out of those vertices.
+   *
+   * @return A map representation of the graph.
+   */
+  public Map<V, List<E>> toMap() {
+    Map<V, List<E>> map = new HashMap<V, List<E>>();
+    for (V vertex : getAllVertices()) {
+      map.put(vertex, getOutgoingEdges(vertex));
+    }
+    return map;
+  }
+
   @Override
   public String toString() {
     StringBuilder s = new StringBuilder();
