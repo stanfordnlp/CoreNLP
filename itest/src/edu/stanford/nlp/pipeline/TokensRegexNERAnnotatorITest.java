@@ -97,7 +97,7 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     };
     Annotator annotatorCased = getTokensRegexNerAnnotator(regexes, false);
 
-    String str = "University of Alaska is located in Alaska.";
+    String str = "University of California is located in California.";
     Annotation document = createDocument(str);
     annotatorCased.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
@@ -115,17 +115,17 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
     // Try lowercase
     Annotator annotatorCaseless = getTokensRegexNerAnnotator(regexes, true);
 
-    str = "university of alaska is located in alaska.";
+    str = "university of california is located in california.";
     document = createDocument(str);
     tokens = document.get(CoreAnnotations.TokensAnnotation.class);
     checkTags(tokens,
-              "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
+            "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
     annotatorCased.annotate(document);
     checkTags(tokens,
-              "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
+            "O", "O", "LOCATION", "O", "O", "O", "LOCATION", "O");
     annotatorCaseless.annotate(document);
     checkTags(tokens,
-              "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
+            "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
   }
 
   // Basic tests from RegexNERAnnotatorITest

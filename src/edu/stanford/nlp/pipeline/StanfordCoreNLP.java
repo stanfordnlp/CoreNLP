@@ -837,19 +837,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
       }
     });
-
-    pool.register(STANFORD_SENTIMENT, new AnnotatorFactory(inputProps) {
-      private static final long serialVersionUID = 1L;
-      @Override
-      public Annotator create() {
-        return new SentimentAnnotator(STANFORD_SENTIMENT, properties);
-      }
-
-      @Override
-      public String signature() {
-        return "model=" + inputProps.get("model");
-      }
-    });
     
     //
     // add more annotators here!
@@ -877,21 +864,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     List<CoreLabel> words = annotation.get(CoreAnnotations.TokensAnnotation.class);
     if (words != null) {
       numWords += words.size();
-    }
-  }
-
-  /**
-   * Determines whether the parser annotator should default to
-   * producing binary trees.  Currently there is only one condition
-   * under which this is true: the sentiment annotator is used.
-   */
-  public static boolean usesBinaryTrees(Properties props) {
-    String annotators = props.getProperty("annotators");
-    Set<String> annoNames = Generics.newHashSet(Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+")));
-    if (annoNames.contains(STANFORD_SENTIMENT)) {
-      return true;
-    } else {
-      return false;
     }
   }
 
