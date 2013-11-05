@@ -8,8 +8,9 @@ import java.text.NumberFormat;
 import java.util.*;
 
 /**
- * Stochastic Gradient Descent With AdaGrad and FOBOS.
- * NOTE: similar to Stochastic Inplace Minimizer, regularization is done in the minimizer, not the objective function.
+ * Stochastic Gradient Descent With AdaGrad and FOBOS in batch mode.
+ * Similar to SGDMinimizer, regularization is done in the minimizer, not in the objective function.
+ * This version only does batch optimization. For online variant, see SparseAdaGradMinimizer.java
  *
  * @author Mengqiu Wang
  */
@@ -40,7 +41,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
   private boolean useEvalImprovement = false;
   private boolean suppressTestPrompt = false;
   private int terminateOnEvalImprovementNumOfEpoch = 1;
-  private double bestEvalSoFar = Double.NEGATIVE_INFINITY; 
+  private double bestEvalSoFar = Double.NEGATIVE_INFINITY;
   private double[] xBest;
   private int noImproveItrCount = 0;
 
@@ -72,10 +73,10 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
   }
 
   public enum Prior {
-    LASSO, RIDGE, aeLASSO, gLASSO, sgLASSO; 
+    LASSO, RIDGE, aeLASSO, gLASSO, sgLASSO
   }
 
-  private Prior getPrior(String priorType) {
+  private static Prior getPrior(String priorType) {
     if (priorType.equals("lasso"))
       return Prior.LASSO;
     else if (priorType.equals("ridge"))
@@ -87,12 +88,11 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
     else if (priorType.equals("sg-lasso"))
       return Prior.sgLASSO;
     else
-      throw new IllegalArgumentException("prior type " + priorType + " not recognized; supported prior "+
-       "are:lasso, ridge, ae-lasso, g-lasso");
+      throw new IllegalArgumentException("prior type " + priorType + " not recognized; supported priors "+
+       "are: lasso, ridge, ae-lasso, g-lasso, and sg-lasso");
   }
 
-  public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses)
-  {
+  public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses) {
     this(initRate, lambda, numPasses, -1);
   }
 
@@ -103,7 +103,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
   public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses, int tuningSamples, int batchSize) {
     this(initRate, lambda, numPasses, tuningSamples, batchSize, "lasso", 1.0);
   }
-  
+
 
   public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses, int tuningSamples, int batchSize, String priorType, double alpha)
   {
@@ -167,7 +167,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
     return score;
   }
 
-  private double pospart(double number) {
+  private static double pospart(double number) {
     return number > 0.0 ? number : 0.0;
   }
 
@@ -197,6 +197,11 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
         bSize = totalSamples;
         sayln("Using batch size=" + bSize);
       }
+      if (bSize <= 0) {
+        System.err.println("WARNING: Requested batch size=" + bSize + " <= 0 !!!");
+        bSize = totalSamples;
+        sayln("Using batch size=" + bSize);
+      }
     }
 
     x = new double[initial.length];
@@ -206,7 +211,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
     if (prior != Prior.LASSO) {
       testUpdateCache = new double[initial.length];
       currentRateCache = new double[initial.length];
-    } 
+    }
     if (prior != Prior.LASSO && prior != Prior.RIDGE) {
       if (!(f instanceof HasFeatureGrouping)) {
         throw new UnsupportedOperationException("prior is specified to be ae-lasso or g-lasso, but function does not support feature grouping");
@@ -223,7 +228,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
     int numBatches =  1;
     if (f instanceof AbstractStochasticCachingDiffUpdateFunction) {
       numBatches = totalSamples/ bSize;
-    } 
+    }
 
     boolean have_max = (maxIterations > 0 || numPasses > 0);
 
@@ -325,12 +330,12 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
               if (realUpdate != 0)
                 numOfNonZero++;
             }
-          } 
+          }
         } else {
           // System.err.println("featureGroup.length: " + featureGrouping.length);
           for (int gIndex = 0; gIndex < featureGrouping.length; gIndex++) {
             int[] gFeatureIndices = featureGrouping[gIndex];
-            // if (gIndex % 100 == 0) System.err.print(gIndex+" "); 
+            // if (gIndex % 100 == 0) System.err.print(gIndex+" ");
             double testUpdateSquaredSum = 0;
             double testUpdateAbsSum = 0;
             double M = gFeatureIndices.length;
@@ -358,7 +363,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
                 if (realUpdate != 0) {
                   numOfNonZero++;
                   groupHasNonZero = true;
-                }  
+                }
               }
               if (groupHasNonZero)
                 numOfNonZeroGroup++;
@@ -381,7 +386,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
             } else if (prior == Prior.sgLASSO) {
               double bSquaredSum = 0, b = 0;
               for (int index : gFeatureIndices) {
-                b = Math.signum(testUpdateCache[index]) * pospart(Math.abs(testUpdateCache[index]) - 
+                b = Math.signum(testUpdateCache[index]) * pospart(Math.abs(testUpdateCache[index]) -
                   currentRateCache[index] * alpha * lambda);
                 bCache[index] = b;
                 bSquaredSum += b * b;
@@ -396,7 +401,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
                   numOfNonZero++;
                   nonZeroCount++;
                   groupHasNonZero = true;
-                }  
+                }
               }
               if (groupHasNonZero) {
                 numOfNonZeroGroup++;
@@ -415,7 +420,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
         for(int i=0;i<x.length;i++){ x[i]=Double.NaN; }
         break;
       }
-      sayln(String.valueOf(numBatches)+", n0-fCount:" + numOfNonZero + ((prior != Prior.LASSO && prior != Prior.RIDGE)? ", n0-gCount:"+numOfNonZeroGroup : "")  + ((evalScore != Double.NEGATIVE_INFINITY) ? ", evalScore:"+evalScore : "")); 
+      sayln(String.valueOf(numBatches)+", n0-fCount:" + numOfNonZero + ((prior != Prior.LASSO && prior != Prior.RIDGE)? ", n0-gCount:"+numOfNonZeroGroup : "")  + ((evalScore != Double.NEGATIVE_INFINITY) ? ", evalScore:"+evalScore : ""));
          // + ((prior == Prior.aeLASSO || prior == Prior.sgLASSO)? ", gSize: "+ gSizeStr : "") );
 
       if (iters >= maxIterations) {
