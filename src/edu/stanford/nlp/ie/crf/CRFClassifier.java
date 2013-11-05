@@ -163,7 +163,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   // Label dictionary for fast decoding
   LabelDictionary labelDictionary;
-  
+
   // List selftraindatums = new ArrayList();
 
   protected CRFClassifier() {
@@ -572,8 +572,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           }
         }
         // lines.add(Collections.<String>emptyList());
-        System.out.println(StringUtils.makeAsciiTable(lines.toArray(new String[lines.size()][0]), rowHeaders
-            .toArray(new String[rowHeaders.size()]), columnHeaders, 0, 1, true));
+        System.out.println(StringUtils.makeTextTable(lines.toArray(new String[lines.size()][0]), rowHeaders
+                .toArray(new String[rowHeaders.size()]), columnHeaders, 0, 1, true));
         System.out.println();
       }
       // System.err.println(edu.stanford.nlp.util.StringUtils.join(lines,"\n"));
@@ -730,7 +730,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     seenBackgroundFeatures[1] = Generics.newHashSet();
 
     int wordCount = 0;
-    
+
     if (flags.labelDictionaryCutoff > 0) {
       this.labelDictionary = new LabelDictionary();
     }
@@ -754,7 +754,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           labelDictionary.increment(observation, ans);
         }
       }
-      
+
       for (int j = 0, docSize = doc.size(); j < docSize; j++) {
         CRFDatum<List<String>, CRFLabel> d = makeDatum(doc, j, featureFactory);
         labelIndex.add(d.label());
@@ -1722,7 +1722,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // } else {
       //   oneDimWeights = trainWeightsUsingDoubleCRF(data, labels, evaluators, i, featureVals);
       // }
-      
+
       // save feature index to disk and read in later
       if (flags.saveFeatureIndexToDisk) {
         try {
@@ -1870,7 +1870,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       func.setFeatureGrouping(fg);
     }
 
-    Minimizer minimizer = getMinimizer(pruneFeatureItr, evaluators);
+    Minimizer<DiffFunction> minimizer = getMinimizer(pruneFeatureItr, evaluators);
 
     double[] initialWeights;
     if (flags.initialWeights == null) {
@@ -1909,11 +1909,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return minimizer.minimize(func, flags.tolerance, initialWeights);
   }
 
-  public Minimizer getMinimizer() {
+  public Minimizer<DiffFunction> getMinimizer() {
     return getMinimizer(0, null);
   }
 
-  public Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
+  public Minimizer<DiffFunction> getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
     Minimizer<DiffFunction> minimizer = null;
     if (flags.useQN) {
       int QNmem;
@@ -2636,7 +2636,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (flags.labelDictionaryCutoff > 0) {
       labelDictionary = (LabelDictionary) ois.readObject();
     }
-    
+
     if (VERBOSE) {
       System.err.println("windowSize=" + windowSize);
       System.err.println("flags=\n" + flags);
@@ -2857,7 +2857,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     Properties props = StringUtils.argsToProperties(args);
     SeqClassifierFlags flags = new SeqClassifierFlags(props);
-    CRFClassifier<CoreLabel> crf = chooseCRFClassifier(flags); 
+    CRFClassifier<CoreLabel> crf = chooseCRFClassifier(flags);
     String testFile = flags.testFile;
     String testFiles = flags.testFiles;
     String textFile = flags.textFile;

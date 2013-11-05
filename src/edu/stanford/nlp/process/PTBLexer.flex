@@ -156,7 +156,6 @@ import edu.stanford.nlp.util.StringUtils;
       } else if ("tokenizeNLs".equals(key)) {
         tokenizeNLs = val;
       } else if ("ptb3Escaping".equals(key)) {
-        americanize = val;
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
         normalizeCurrency = val;
@@ -169,7 +168,6 @@ import edu.stanford.nlp.util.StringUtils;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
-        escapeForwardSlashAsterisk = val;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
@@ -257,7 +255,7 @@ import edu.stanford.nlp.util.StringUtils;
   /* Flags begin with historical ptb3Escaping behavior */
   private boolean invertible;
   private boolean tokenizeNLs;
-  private boolean americanize = true;
+  private boolean americanize = false;
   private boolean normalizeSpace = true;
   private boolean normalizeAmpersandEntity = true;
   private boolean normalizeCurrency = true;
@@ -270,7 +268,7 @@ import edu.stanford.nlp.util.StringUtils;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
   private boolean ptb3Dashes = true;
-  private boolean escapeForwardSlashAsterisk = true;
+  private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
 
@@ -624,7 +622,7 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 /* Ma. or Me. isn't included as too many errors, and most sources use Mass. etc. */
 /* Fed. is tricky.  Usually sentence end, but not before "Governor" or "Natl. Mtg. Assn." */
 /* Make some states case sensitive, since they're also reasonably common words */
-ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
+ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
 /* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
 ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
