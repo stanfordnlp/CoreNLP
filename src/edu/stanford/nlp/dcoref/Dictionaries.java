@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -23,7 +21,6 @@ public class Dictionaries {
 
   public enum MentionType {
     PRONOMINAL(1), NOMINAL(3), PROPER(4), LIST(2);
-
     /**
      * A higher representativeness means that this type of mention is more preferred for choosing
      * the representative mention. See {@link Mention#moreRepresentativeThan(Mention)}.
@@ -184,9 +181,9 @@ public class Dictionaries {
   public final Set<String> allPronouns = Generics.newHashSet();
 
   public final Map<String, String> statesAbbreviation = Generics.newHashMap();
-  private final Map<String, Set<String>> demonyms = Generics.newHashMap();
+  public final Map<String, Set<String>> demonyms = Generics.newHashMap();
   public final Set<String> demonymSet = Generics.newHashSet();
-  private final Set<String> adjectiveNation = Generics.newHashSet();
+  public final Set<String> adjectiveNation = Generics.newHashSet();
 
   public final Set<String> countries = Generics.newHashSet();
   public final Set<String> statesAndProvinces = Generics.newHashSet();
@@ -220,92 +217,43 @@ public class Dictionaries {
     stopWords.addAll(allPronouns);
   }
 
-  /** The format of each line of this file is
-   *     fullStateName ( TAB  abbrev )*
-   *  The file is cased and checked cased.
-   *  The result is: statesAbbreviation is a hash from each abbrev to the fullStateName.
-   */
   public void loadStateAbbreviation(String statesFile) {
     BufferedReader reader = null;
     try {
       reader = IOUtils.readerFromString(statesFile);
-      for (String line; (line = reader.readLine()) != null; ) {
-        String[] tokens = line.split("\t");
-        for (String token : tokens) {
-          statesAbbreviation.put(token, tokens[0]);
-        }
+      while(reader.ready()){
+        String[] tokens = reader.readLine().split("\t");
+        statesAbbreviation.put(tokens[1], tokens[0]);
+        statesAbbreviation.put(tokens[2], tokens[0]);
       }
-    } catch (IOException e) {
+    } catch (IOException e){
       throw new RuntimeIOException(e);
     } finally {
       IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
-  /** If the input string is an abbreviation of a U.S. state name
-   *  or the canonical name, the canonical name is returned.
-   *  Otherwise, null is returned.
-   *
-   *  @param name Is treated as a cased string. ME != me
-   */ 
-  public String lookupCanonicalAmericanStateName(String name) {
-    return statesAbbreviation.get(name);
-  }
-
-  /** The format of the demonyms file is
-   *     countryCityOrState ( TAB demonym )*
-   *  Lines starting with # are ignored
-   *  The file is cased but stored in in-memory data structures uncased.
-   *  The results are:
-   *  demonyms is a has from each country (etc.) to a set of demonymic Strings;
-   *  adjectiveNation is a set of demonymic Strings;
-   *  demonymSet has all country (etc.) names and all demonymic Strings.
-   */
   private void loadDemonymLists(String demonymFile) {
     BufferedReader reader = null;
     try {
       reader = IOUtils.readerFromString(demonymFile);
-      for (String line; (line = reader.readLine()) != null; ) {
-        line = line.toLowerCase(Locale.ENGLISH);
-        String[] tokens = line.split("\t");
-        if (tokens[0].startsWith("#")) continue;
+      while(reader.ready()){
+        String[] line = reader.readLine().split("\t");
+        if(line[0].startsWith("#")) continue;
         Set<String> set = Generics.newHashSet();
-        for (String s : tokens) {
-          set.add(s);
-          demonymSet.add(s);
+        for(String s : line){
+          set.add(s.toLowerCase());
+          demonymSet.add(s.toLowerCase());
         }
-        demonyms.put(tokens[0], set);
+        demonyms.put(line[0].toLowerCase(), set);
       }
       adjectiveNation.addAll(demonymSet);
       adjectiveNation.removeAll(demonyms.keySet());
-    } catch (IOException e) {
+    } catch (IOException e){
       throw new RuntimeIOException(e);
     } finally {
       IOUtils.closeIgnoringExceptions(reader);
     }
-  }
-
-  /** Returns a set of demonyms for a country (or city or region).
-   *  @param name Some string perhaps a country name like "Australia"
-   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }. 
-   *     If none are known (including if the argument isn't a country/region name,
-   *     then the empty set will be returned.
-   */
-  public Set<String> getDemonyms(String name) {
-    Set<String> result = demonyms.get(name);
-    if (result == null) {
-      result = Collections.emptySet();
-    }
-    return result;
-  }
-
-  /** Returns whether this mention (possibly multi-word) is the 
-   *  adjectival form of a demonym, like "African" or "Iraqi".
-   *  True if it is an adjectival form, even if also a name for a 
-   *  person of that country (such as "Iraqi").
-   */
-  public boolean isAdjectivalDemonym(String token) {
-    return adjectiveNation.contains(token.toLowerCase(Locale.ENGLISH));
   }
 
   private static void getWordsFromFile(String filename, Set<String> resultSet, boolean lowercase) throws IOException {

@@ -163,7 +163,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   // Label dictionary for fast decoding
   LabelDictionary labelDictionary;
-
+  
   // List selftraindatums = new ArrayList();
 
   protected CRFClassifier() {
@@ -572,8 +572,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           }
         }
         // lines.add(Collections.<String>emptyList());
-        System.out.println(StringUtils.makeTextTable(lines.toArray(new String[lines.size()][0]), rowHeaders
-                .toArray(new String[rowHeaders.size()]), columnHeaders, 0, 1, true));
+        System.out.println(StringUtils.makeAsciiTable(lines.toArray(new String[lines.size()][0]), rowHeaders
+            .toArray(new String[rowHeaders.size()]), columnHeaders, 0, 1, true));
         System.out.println();
       }
       // System.err.println(edu.stanford.nlp.util.StringUtils.join(lines,"\n"));
@@ -730,7 +730,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     seenBackgroundFeatures[1] = Generics.newHashSet();
 
     int wordCount = 0;
-
+    
     if (flags.labelDictionaryCutoff > 0) {
       this.labelDictionary = new LabelDictionary();
     }
@@ -754,7 +754,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           labelDictionary.increment(observation, ans);
         }
       }
-
+      
       for (int j = 0, docSize = doc.size(); j < docSize; j++) {
         CRFDatum<List<String>, CRFLabel> d = makeDatum(doc, j, featureFactory);
         labelIndex.add(d.label());
@@ -1175,14 +1175,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       new TestSequenceModel(getCliqueTree(documentDataAndLabels), labelDictionary, document);
   }
 
-  protected CliquePotentialFunction getCliquePotentialFunctionForTest() {
+  protected CliquePotentialFunction getCliquePotentialFunction() {
     if (cliquePotentialFunction == null) {
       cliquePotentialFunction = new LinearCliquePotentialFunction(weights);
     }
     return cliquePotentialFunction;
   }
 
-  public void updateWeightsForTest(double[] x) {
+  public void updateWeights(double[] x) {
     cliquePotentialFunction = cliquePotentialFunctionHelper.getCliquePotentialFunction(x);
   }
 
@@ -1463,7 +1463,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     double[][][] featureVal = p.third();
 
     return CRFCliqueTree.getCalibratedCliqueTree(data, labelIndices, classIndex.size(), classIndex,
-        flags.backgroundSymbol, getCliquePotentialFunctionForTest(), featureVal);
+        flags.backgroundSymbol, getCliquePotentialFunction(), featureVal);
   }
 
   public CRFCliqueTree<String> getCliqueTree(List<IN> document) {
@@ -1722,7 +1722,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // } else {
       //   oneDimWeights = trainWeightsUsingDoubleCRF(data, labels, evaluators, i, featureVals);
       // }
-
+      
       // save feature index to disk and read in later
       if (flags.saveFeatureIndexToDisk) {
         try {
@@ -1789,8 +1789,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected CRFLogConditionalObjectiveFunction getObjectiveFunction(int[][][][] data, int[][] labels) {
-    return new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
       labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
+    return func;
   }
 
   protected double[] trainWeights(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr, double[][][][] featureVals) {
@@ -1869,7 +1870,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       func.setFeatureGrouping(fg);
     }
 
-    Minimizer<DiffFunction> minimizer = getMinimizer(pruneFeatureItr, evaluators);
+    Minimizer minimizer = getMinimizer(pruneFeatureItr, evaluators);
 
     double[] initialWeights;
     if (flags.initialWeights == null) {
@@ -1908,11 +1909,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return minimizer.minimize(func, flags.tolerance, initialWeights);
   }
 
-  public Minimizer<DiffFunction> getMinimizer() {
+  public Minimizer getMinimizer() {
     return getMinimizer(0, null);
   }
 
-  public Minimizer<DiffFunction> getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
+  public Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
     Minimizer<DiffFunction> minimizer = null;
     if (flags.useQN) {
       int QNmem;
@@ -2635,7 +2636,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (flags.labelDictionaryCutoff > 0) {
       labelDictionary = (LabelDictionary) ois.readObject();
     }
-
+    
     if (VERBOSE) {
       System.err.println("windowSize=" + windowSize);
       System.err.println("flags=\n" + flags);
@@ -2652,82 +2653,65 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   public void loadTagIndex() {
-    if (tagIndex == null) {
-      tagIndex = new HashIndex<String>();
-      for (String tag: classIndex.objectsList()) {
-        String[] parts = tag.split("-");
-        // if (parts.length > 1)
-        tagIndex.add(parts[parts.length-1]);
-      }
-      tagIndex.add(flags.backgroundSymbol);
-    }
     if (flags.useNERPriorBIO) {
+      if (tagIndex == null) {
+        tagIndex = new HashIndex<String>();
+        for (String tag: classIndex.objectsList()) {
+          String[] parts = tag.split("-");
+          if (parts.length > 1)
+            tagIndex.add(parts[parts.length-1]);
+        }
+        tagIndex.add(flags.backgroundSymbol);
+      }
       if (entityMatrices == null)
         entityMatrices = readEntityMatrices(flags.entityMatrix, tagIndex);
     }
   }
 
-  /**
-   * @return a matrix where each entry m[i][j] is logP(j|i)
-   * in other words, each row vector is normalized log conditional likelihood
-   */
-   static double[][] parseMatrix(String[] lines, Index<String> tagIndex, int matrixSize, boolean smooth) {
-    double[][] matrix = new double[matrixSize][matrixSize];
-    for (int i = 0; i < matrix.length; i++)
-      matrix[i] = new double[matrixSize];
-    for (String line: lines) {
-      String[] parts = line.split("\t");
-      for (String part: parts) {
-        String[] subparts = part.split(" ");
-        String[] subsubparts = subparts[0].split(":");
-        double counts = Double.parseDouble(subparts[1]);
-        if (counts == 0.0 && smooth) // smoothing
-          counts = 1.0;
-        int tagIndex1 = tagIndex.indexOf(subsubparts[0]);
-        int tagIndex2 = tagIndex.indexOf(subsubparts[1]);
-        matrix[tagIndex1][tagIndex2] = counts;
-      }
-    }
-    for (int i = 0; i < matrix.length; i++) {
-      double sum = ArrayMath.sum(matrix[i]);
-      for (int j = 0; j < matrix[i].length; j++) {
-        // log conditional probability  
-        matrix[i][j] = Math.log(matrix[i][j] / sum);
-      }
-    }
-    return matrix;
-  }
-
-  static Pair<double[][], double[][]> readEntityMatrices(String fileName, Index<String> tagIndex) {
+  public static Pair<double[][], double[][]> readEntityMatrices(String fileName, Index<String> tagIndex) {
     int numTags = tagIndex.size();
-    int matrixSize = numTags-1;
+    double[][] matrix = new double[numTags-1][numTags-1];
+    for (int i = 0; i < numTags-1; i++)
+      matrix[i] = new double[numTags-1];
+    double[][] subMatrix = new double[numTags-1][numTags-1];
+    for (int i = 0; i < numTags-1; i++)
+      subMatrix[i] = new double[numTags-1];
 
-    String[] matrixLines = new String[matrixSize];
-    String[] subMatrixLines = new String[matrixSize];
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileName))));
       String line = null;
       int lineCount = 0;
       while ((line = br.readLine()) != null) {
         line = line.trim();
-        if (lineCount < matrixSize)
-          matrixLines[lineCount] = line;
-        else
-          subMatrixLines[lineCount-matrixSize] = line;
+        String[] parts = line.split("\t");
+        for (String part: parts) {
+          String[] subparts = part.split(" ");
+          String[] subsubparts = subparts[0].split(":");
+          double counts = Double.parseDouble(subparts[1]);
+          if (counts == 0.0) // smoothing
+            counts = 1.0;
+          int tagIndex1 = tagIndex.indexOf(subsubparts[0]);
+          int tagIndex2 = tagIndex.indexOf(subsubparts[1]);
+          if (lineCount < numTags-1)
+            matrix[tagIndex1][tagIndex2] = counts;
+          else
+            subMatrix[tagIndex1][tagIndex2] = counts;
+        }
         lineCount++;
       }
     } catch (Exception ex) {
       ex.printStackTrace();
       System.exit(-1);
     }
-
-    double[][] matrix = parseMatrix(matrixLines, tagIndex, matrixSize, true);
-    double[][] subMatrix = parseMatrix(subMatrixLines, tagIndex, matrixSize, true);
-
-    // In Jenny's paper, use the square root of non-log prob for matrix, but not for subMatrix
     for (int i = 0; i < matrix.length; i++) {
+      double sum = ArrayMath.sum(matrix[i]);
       for (int j = 0; j < matrix[i].length; j++)
-        matrix[i][j] = matrix[i][j] / 2;
+        matrix[i][j] = Math.log(matrix[i][j] / sum) / 2;
+    }
+    for (int i = 0; i < subMatrix.length; i++) {
+      double sum = ArrayMath.sum(subMatrix[i]);
+      for (int j = 0; j < subMatrix[i].length; j++)
+        subMatrix[i][j] = Math.log(subMatrix[i][j] / sum);
     }
 
     System.err.println("Matrix: ");
@@ -2861,8 +2845,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       crf = new CRFClassifierWithLOP<CoreLabel>(flags);
     } else if (flags.priorType.equals("DROPOUT")) {
       crf = new CRFClassifierWithDropout<CoreLabel>(flags);
-    } else if (flags.useNoisyLabel) {
-      crf = new CRFClassifierNoisyLabel<CoreLabel>(flags);
     } else {
       crf = new CRFClassifier<CoreLabel>(flags);
     }
@@ -2875,7 +2857,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     Properties props = StringUtils.argsToProperties(args);
     SeqClassifierFlags flags = new SeqClassifierFlags(props);
-    CRFClassifier<CoreLabel> crf = chooseCRFClassifier(flags);
+    CRFClassifier<CoreLabel> crf = chooseCRFClassifier(flags); 
     String testFile = flags.testFile;
     String testFiles = flags.testFiles;
     String textFile = flags.textFile;
