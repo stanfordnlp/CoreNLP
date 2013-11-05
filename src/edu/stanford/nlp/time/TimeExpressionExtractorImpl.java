@@ -97,7 +97,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       try {
         // TODO: have more robust parsing of document date?  docDate may not have century....
         // TODO: if docDate didn't change, we can cache the parsing of the docDate and not repeat it for every sentence
-        timeIndex.docDate = SUTime.parseDateTime(docDate);
+        timeIndex.docDate = SUTime.parseDateTime(docDate,true);
       } catch (Exception e) {
         throw new RuntimeException("Could not parse date string: [" + docDate + "]", e);
       }
@@ -173,7 +173,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       try {
         // TODO: have more robust parsing of document date?  docDate may not have century....
         // TODO: if docDate didn't change, we can cache the parsing of the docDate and not repeat it for every sentence
-        refDate = SUTime.parseDateTime(refDateStr);
+        refDate = SUTime.parseDateTime(refDateStr,true);
       } catch (Exception e) {
         throw new RuntimeException("Could not parse date string: [" + refDateStr + "]", e);
       }
