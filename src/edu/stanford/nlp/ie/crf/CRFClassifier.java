@@ -1959,7 +1959,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     } else if (flags.useAdaGradFOBOS) {
       minimizer = new SGDWithAdaGradAndFOBOS(
-        flags.initRate, flags.priorLambda, flags.SGDPasses, flags.stochasticBatchSize,
+        flags.initRate, flags.priorLambda, flags.SGDPasses, flags.tuneSampleSize, flags.stochasticBatchSize,
         flags.priorType, flags.priorAlpha);
       ((SGDWithAdaGradAndFOBOS) minimizer).terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
       ((SGDWithAdaGradAndFOBOS) minimizer).setTerminateOnEvalImprovementNumOfEpoch(flags.terminateOnEvalImprovementNumOfEpoch);
