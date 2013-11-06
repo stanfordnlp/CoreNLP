@@ -47,20 +47,9 @@ public class RedwoodConfiguration {
    */
   public RedwoodConfiguration capture(final OutputStream stream) {
     if (stream == System.out) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err); } });
+      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(true, false); } });
     } else if (stream == System.err) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(Redwood.realSysOut == System.out, true); } });
-    } else {
-      throw new IllegalArgumentException("Must capture one of stderr or stdout");
-    }
-    return this;
-  }
-
-  public RedwoodConfiguration restore(final OutputStream stream) {
-    if (stream == System.out) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(false, Redwood.realSysErr == System.err); } });
-    } else if (stream == System.err) {
-      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(Redwood.realSysOut == System.out, false); } });
+      tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(true, true); } });
     } else {
       throw new IllegalArgumentException("Must capture one of stderr or stdout");
     }
@@ -392,7 +381,7 @@ public class RedwoodConfiguration {
    */
   public static RedwoodConfiguration standard(){
     return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideChannels(), Handlers.stdout)
+        Handlers.stdout
     );
   }
 
