@@ -120,7 +120,7 @@ public interface Lexicon extends Serializable {
 
   /**
    * If training on a per-word basis instead of on a per-tree basis,
-   * we will want to increment the tree count as this happens
+   * we will want to increment the tree count as this happens.
    */
   void incrementTreesRead(double weight);
 
@@ -178,6 +178,7 @@ public interface Lexicon extends Serializable {
 
   public UnknownWordModel getUnknownWordModel();
 
+  // todo [cdm Sep 2013]: It seems like we could easily remove this from the interface
   public void setUnknownWordModel(UnknownWordModel uwm);
 
 }

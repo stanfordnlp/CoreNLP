@@ -284,6 +284,14 @@ public class SentimentModel implements Serializable {
     return score.scale(op.trainOptions.scalingForInit);
   }
 
+  SimpleMatrix randomWordVector() {
+    return randomWordVector(op.numHid, rand);
+  }
+
+  static SimpleMatrix randomWordVector(int size, Random rand) {
+    return RNNUtils.randomGaussian(size, 1, rand);
+  }
+
   void initRandomWordVectors(List<Tree> trainingTrees) {
     if (op.numHid == 0) {
       throw new RuntimeException("Cannot create random word vectors for an unknown numHid");
@@ -302,7 +310,7 @@ public class SentimentModel implements Serializable {
     }
     this.wordVectors = Generics.newTreeMap();
     for (String word : words) {
-      SimpleMatrix vector = RNNUtils.randomGaussian(op.numHid, 1, rand);
+      SimpleMatrix vector = randomWordVector();
       wordVectors.put(word, vector);
     }
   }
