@@ -138,7 +138,6 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
     return terminalLabel;
   }
 
-  @Override
   public double oScore(Edge edge) {
     double oS = oScore[edge.start][edge.end][edge.state];
     if (op.testOptions.pcfgThreshold) {
@@ -1487,7 +1486,6 @@ oScore[split][end][br.rightChild] = totR;
   } // end initializeChart(List sentence)
 
 
-  @Override
   public boolean hasParse() {
     return getBestScore() > Double.NEGATIVE_INFINITY;
   }
@@ -1500,7 +1498,6 @@ oScore[split][end][br.rightChild] = totR;
   }
 
 
-  @Override
   public double getBestScore() {
     return getBestScore(goalStr);
   }
@@ -1513,14 +1510,10 @@ oScore[split][end][br.rightChild] = totR;
       return Double.NEGATIVE_INFINITY;
     }
     int goal = stateIndex.indexOf(stateName);
-    if (iScore == null || iScore.length == 0 || iScore[0].length <= length || iScore[0][length].length <= goal) {
-      return Double.NEGATIVE_INFINITY;
-    }
     return iScore[0][length][goal];
   }
 
 
-  @Override
   public Tree getBestParse() {
     Tree internalTree = extractBestParse(goalStr, 0, length);
     //System.out.println("Got internal best parse...");
@@ -1783,7 +1776,6 @@ oScore[split][end][br.rightChild] = totR;
    *  @return A list of k good parses for the sentence, with
    *         each accompanied by its score
    */
-  @Override
   public List<ScoredObject<Tree>> getKGoodParses(int k) {
     return getKBestParses(k);
   }
@@ -1795,7 +1787,6 @@ oScore[split][end][br.rightChild] = totR;
    *  @return A list of k parse samples for the sentence, with
    *         each accompanied by its score
    */
-  @Override
   public List<ScoredObject<Tree>> getKSampledParses(int k) {
     throw new UnsupportedOperationException("ExhaustivePCFGParser doesn't sample.");
   }
@@ -1814,7 +1805,6 @@ oScore[split][end][br.rightChild] = totR;
    *         each accompanied by its score (typically a
    *         negative log probability).
    */
-  @Override
   public List<ScoredObject<Tree>> getKBestParses(int k) {
 
     cand = Generics.newHashMap();
