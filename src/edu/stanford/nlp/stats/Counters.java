@@ -1062,17 +1062,26 @@ public class Counters {
     }
     // descending order
     Collections.sort(l, new Comparator<Pair<E, Double>>() {
-      @SuppressWarnings("unchecked")
       public int compare(Pair<E, Double> a, Pair<E, Double> b) {
-        int candidate = Double.compare(a.second, b.second);
-        if (candidate == 0.0 && a.first instanceof  Comparable && b.first instanceof Comparable) {
-          // Try to create a stable ordering, breaking ties with the key's natural order
-          return ((Comparable) a.first).compareTo(b.first);
-        } else {
-          return candidate;
-        }
+        return Double.compare(b.second, a.second);
       }
     });
+    return l;
+  }
+
+  /**
+   * A List of the keys in c, sorted by the given comparator, paired with
+   * counts.
+   *
+   * @return A List of the keys in c, sorted from highest count to lowest.
+   */
+  public static <E> List<Pair<E, Double>> toSortedListWithCounts(Counter<E> c, Comparator<Pair<E,Double>> comparator) {
+    List<Pair<E, Double>> l = new ArrayList<Pair<E, Double>>(c.size());
+    for (E e : c.keySet()) {
+      l.add(new Pair<E, Double>(e, c.getCount(e)));
+    }
+    // descending order
+    Collections.sort(l, comparator);
     return l;
   }
 
@@ -2319,11 +2328,18 @@ public class Counters {
    * alternative implementations.
    */
   public static <E> boolean equals(Counter<E> o1, Counter<E> o2) {
+    return equals(o1, o2, 0.0);
+  }
+
+  /**
+   * Equality comparison between two counters, allowing for a tolerance fudge factor.
+   */
+  public static <E> boolean equals(Counter<E> o1, Counter<E> o2, double tolerance) {
     if (o1 == o2) {
       return true;
     }
 
-    if (o1.totalCount() != o2.totalCount()) {
+    if (Math.abs(o1.totalCount() - o2.totalCount()) > tolerance) {
       return false;
     }
 
@@ -2332,12 +2348,13 @@ public class Counters {
     }
 
     for (E key : o1.keySet()) {
-      if (o1.getCount(key) != o2.getCount(key)) {
+      if (Math.abs(o1.getCount(key) - o2.getCount(key)) > tolerance) {
         return false;
       }
     }
 
     return true;
+
   }
 
   /**
