@@ -1062,8 +1062,15 @@ public class Counters {
     }
     // descending order
     Collections.sort(l, new Comparator<Pair<E, Double>>() {
+      @SuppressWarnings("unchecked")
       public int compare(Pair<E, Double> a, Pair<E, Double> b) {
-        return Double.compare(b.second, a.second);
+        int candidate = Double.compare(a.second, b.second);
+        if (candidate == 0.0 && a.first instanceof  Comparable && b.first instanceof Comparable) {
+          // Try to create a stable ordering, breaking ties with the key's natural order
+          return ((Comparable) a.first).compareTo(b.first);
+        } else {
+          return candidate;
+        }
       }
     });
     return l;
