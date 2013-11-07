@@ -1070,6 +1070,22 @@ public class Counters {
   }
 
   /**
+   * A List of the keys in c, sorted by the given comparator, paired with
+   * counts.
+   *
+   * @return A List of the keys in c, sorted from highest count to lowest.
+   */
+  public static <E> List<Pair<E, Double>> toSortedListWithCounts(Counter<E> c, Comparator<Pair<E,Double>> comparator) {
+    List<Pair<E, Double>> l = new ArrayList<Pair<E, Double>>(c.size());
+    for (E e : c.keySet()) {
+      l.add(new Pair<E, Double>(e, c.getCount(e)));
+    }
+    // descending order
+    Collections.sort(l, comparator);
+    return l;
+  }
+
+  /**
    * Returns a {@link edu.stanford.nlp.util.PriorityQueue} whose elements are
    * the keys of Counter c, and the score of each key in c becomes its priority.
    *
@@ -2312,11 +2328,18 @@ public class Counters {
    * alternative implementations.
    */
   public static <E> boolean equals(Counter<E> o1, Counter<E> o2) {
+    return equals(o1, o2, 0.0);
+  }
+
+  /**
+   * Equality comparison between two counters, allowing for a tolerance fudge factor.
+   */
+  public static <E> boolean equals(Counter<E> o1, Counter<E> o2, double tolerance) {
     if (o1 == o2) {
       return true;
     }
 
-    if (o1.totalCount() != o2.totalCount()) {
+    if (Math.abs(o1.totalCount() - o2.totalCount()) > tolerance) {
       return false;
     }
 
@@ -2325,12 +2348,13 @@ public class Counters {
     }
 
     for (E key : o1.keySet()) {
-      if (o1.getCount(key) != o2.getCount(key)) {
+      if (Math.abs(o1.getCount(key) - o2.getCount(key)) > tolerance) {
         return false;
       }
     }
 
     return true;
+
   }
 
   /**
