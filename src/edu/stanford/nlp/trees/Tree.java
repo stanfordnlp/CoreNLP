@@ -482,7 +482,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return The index of the right frontier of the constituent
    */
   private int constituentsNodes(int left) {
-    if (isLeaf()) {
+    if (isPreTerminal()) {
       if (label() instanceof CoreLabel) {
         ((CoreLabel) label()).set(CoreAnnotations.SpanAnnotation.class, new IntPair(left, left));
       } else {
