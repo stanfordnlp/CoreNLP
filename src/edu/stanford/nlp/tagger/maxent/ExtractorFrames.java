@@ -74,12 +74,11 @@ import java.util.*;
  * <tr><td>allwordshapes</td><td>left, right</td>
  *     <td>Word shape features, eg transform Foo5 into Xxx#
  *         (not exactly like that, but that general idea).
- *         Creates individual features for each word left ... right.
+ *         Creates individual features for each word left ... right
  *         Compare with the feature "wordshapes" in ExtractorFramesRare,
- *         which is only applied to rare words. Fairly English-specific.
- *         Slightly increases accuracy.</td></tr>
+ *         which is only applied to rare words.</td></tr>
  * <tr><td>allunicodeshapes</td><td>left, right</td>
- *     <td>Same thing, but works for unicode characters more generally.</td></tr>
+ *     <td>Same thing, but works for some unicode characters, too.</td></tr>
  * <tr><td>allunicodeshapeconjunction</td><td>left, right</td>
  *     <td>Instead of individual word shape features, combines several
  *         word shapes into one feature.</td></tr>
@@ -104,7 +103,8 @@ import java.util.*;
  * accurate, than the bidirectional architectures.
  * 'naacl2003unknowns' was our traditional set of unknown word
  * features, but you can now specify features more flexibility via the
- * various other supported keywords.
+ * various other supported keywords. The 'shapes' options map words to
+ * equivalence classes, which slightly increase accuracy.
  * <br>
  * @author Kristina Toutanova
  * @author Michel Galley
