@@ -597,7 +597,7 @@ public class Execution {
       log(FORCE, t);
       exitCode = 1;
     }
-    endTracksTo("main");  // end main
+    endTrack("main"); //ends main
     if (exit) {
       System.exit(exitCode);
     }

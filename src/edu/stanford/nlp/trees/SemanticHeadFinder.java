@@ -4,6 +4,8 @@ import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
@@ -108,8 +110,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
-
-
   }
 
   //makes modifications of Collins' rules to better fit with semantic notions of heads
@@ -218,6 +218,18 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     return headIdx;
   }
 
+  // Note: so far, both of these patterns only work when the SQ
+  // structure has already been removed in CoordinationTransformer.
+  static final TregexPattern[] headOfCopulaTregex = {
+    // Matches phrases such as "what is wrong"
+    TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $++ ADJP=head))"),
+
+    // matches WHNP $+ VB<copula $+ NP
+    // for example, "Who am I to judge?"
+    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " !$++ ADJP))"),
+  };
+
+
   /**
    * Determine which daughter of the current parse tree is the
    * head.  It assumes that the daughters already have had their
@@ -233,6 +245,19 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     if (DEBUG) {
       System.err.println("At " + motherCat + ", my parent is " + parent);
+    }
+
+    if (motherCat.equals("SBARQ")) { 
+      // TODO: if we have it set to keep copula as the head, should we
+      // forget about these relations and just return the copula?
+      for (TregexPattern pattern : headOfCopulaTregex) {
+        TregexMatcher matcher = pattern.matcher(t);
+        if (matcher.matchesAt(t)) {
+          return matcher.getNode("head");
+        }
+      }
+
+      // if none of the above patterns match, use the standard method
     }
 
     // do VPs with auxiliary as special case
