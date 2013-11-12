@@ -78,7 +78,12 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     // its nodes
     // TODO: make the node vectors part of the tree itself?
     IdentityHashMap<Tree, Double> scores = new IdentityHashMap<Tree, Double>();
-    forwardPropagateTree(tree, words, nodeVectors, scores);
+    try {
+      forwardPropagateTree(tree, words, nodeVectors, scores);
+    } catch (AssertionError e) {
+      System.err.println("Failed to correctly process tree " + tree);
+      throw e;
+    }
 
     double score = 0.0;
     for (Tree node : scores.keySet()) {
