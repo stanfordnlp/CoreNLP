@@ -232,8 +232,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     // matches WHNP $+ VB<copula $+ NP
     // for example, "Who am I to judge?"
-    // TODO: fix this so it occurs when only an NP that comes next
-    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " !$++ ADJP))"),
+    // !$++ ADJP matches against "Why is the dog pink?"
+    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ NP !$++ ADJP))"),
   };
 
 
