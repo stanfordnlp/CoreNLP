@@ -73,6 +73,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   private final Set<String> verbalTags;
   private final Set<String> unambiguousAuxiliaryTags;
 
+  private final boolean makeCopulaHead;
+
 
   public SemanticHeadFinder() {
     this(new PennTreebankLanguagePack(), true);
@@ -87,12 +89,13 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    *
    * @param tlp The TreebankLanguagePack, used by the superclass to get basic
    *     category of constituents.
-   * @param cop If true, a copular verb (be, seem, appear, stay, remain, resemble, become)
+   * @param noCopulaHead If true, a copular verb 
+   *     (be, seem, appear, stay, remain, resemble, become)
    *     is not treated as head when it has an AdjP or NP complement.  If false,
    *     a copula verb is still always treated as a head.  But it will still
    *     be treated as an auxiliary in periphrastic tenses with a VP complement.
    */
-  public SemanticHeadFinder(TreebankLanguagePack tlp, boolean cop) {
+  public SemanticHeadFinder(TreebankLanguagePack tlp, boolean noCopulaHead) {
     super(tlp);
     ruleChanges();
 
@@ -104,9 +107,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     //copula verbs having an NP complement
     copulars = Generics.newHashSet();
-    if (cop) {
+    if (noCopulaHead) {
       copulars.addAll(Arrays.asList(copulaVerbs));
     }
+
+    // TODO: reverse the polarity of noCopulaHead
+    this.makeCopulaHead = !noCopulaHead;
 
     verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
@@ -248,12 +254,14 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     }
 
     if (motherCat.equals("SBARQ")) { 
-      // TODO: if we have it set to keep copula as the head, should we
-      // forget about these relations and just return the copula?
-      for (TregexPattern pattern : headOfCopulaTregex) {
-        TregexMatcher matcher = pattern.matcher(t);
-        if (matcher.matchesAt(t)) {
-          return matcher.getNode("head");
+      // TODO: if makeCopulaHead is true, we should skip these
+      // patterns, right?
+      if (!makeCopulaHead) {
+        for (TregexPattern pattern : headOfCopulaTregex) {
+          TregexMatcher matcher = pattern.matcher(t);
+          if (matcher.matchesAt(t)) {
+            return matcher.getNode("head");
+          }
         }
       }
 
