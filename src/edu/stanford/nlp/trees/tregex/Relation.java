@@ -1130,7 +1130,9 @@ abstract class Relation implements Serializable {
       } else if (t2.isPreTerminal()) {
         return (t2.firstChild() == t1);
       } else {
-        Tree head = hf.determineHead(t2);
+        HeadFinder headFinder = matcher.getHeadFinder();
+        if (headFinder == null) headFinder = this.hf;
+        Tree head = headFinder.determineHead(t2);
         if (head == t1) {
           return true;
         } else {
@@ -1151,9 +1153,12 @@ abstract class Relation implements Serializable {
 
         @Override
         public void advance() {
+          HeadFinder headFinder = matcher.getHeadFinder();
+          if (headFinder == null) headFinder = hf;
+
           Tree last = next;
           next = matcher.getParent(next);
-          if (next != null && hf.determineHead(next) != last) {
+          if (next != null && headFinder.determineHead(next) != last) {
             next = null;
           }
         }
@@ -1221,7 +1226,11 @@ abstract class Relation implements Serializable {
           if (next.isLeaf()) {
             next = null;
           } else {
-            next = heads.hf.determineHead(next);
+            if (matcher.getHeadFinder() != null) {
+              next = matcher.getHeadFinder().determineHead(next);
+            } else {
+              next = heads.hf.determineHead(next);
+            }
           }
         }
       };
@@ -1272,7 +1281,11 @@ abstract class Relation implements Serializable {
 
     @Override
     boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
-      return hf.determineHead(t2) == t1;
+      if (matcher.getHeadFinder() != null) {
+        return matcher.getHeadFinder().determineHead(t2) == t1;
+      } else {
+        return hf.determineHead(t2) == t1;
+      }
     }
 
     @Override
@@ -1283,7 +1296,8 @@ abstract class Relation implements Serializable {
         void initialize() {
           if (t != matcher.getRoot()) {
             next = matcher.getParent(t);
-            if (hf.determineHead(next) != t) {
+            HeadFinder headFinder = matcher.getHeadFinder() == null ? hf : matcher.getHeadFinder();
+            if (headFinder.determineHead(next) != t) {
               next = null;
             }
           }
@@ -1305,7 +1319,7 @@ abstract class Relation implements Serializable {
 
       final ImmediatelyHeads immediatelyHeads = (ImmediatelyHeads) o;
 
-      if (!hf.equals(immediatelyHeads.hf)) {
+      if (hf != null ? !hf.equals(immediatelyHeads.hf) : immediatelyHeads.hf != null) {
         return false;
       }
 
@@ -1315,7 +1329,7 @@ abstract class Relation implements Serializable {
     @Override
     public int hashCode() {
       int result = super.hashCode();
-      result = 29 * result + hf.hashCode();
+      result = 29 * result + (hf != null ? hf.hashCode() : 0);
       return result;
     }
   }
@@ -1345,7 +1359,11 @@ abstract class Relation implements Serializable {
         @Override
         void initialize() {
           if (!t.isLeaf()) {
-            next = immediatelyHeads.hf.determineHead(t);
+            if (matcher.getHeadFinder() != null) {
+              next = matcher.getHeadFinder().determineHead(t);
+            } else {
+              next = immediatelyHeads.hf.determineHead(t);
+            }
           }
         }
       };
