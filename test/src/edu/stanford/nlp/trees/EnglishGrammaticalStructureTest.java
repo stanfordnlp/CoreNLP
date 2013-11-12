@@ -688,7 +688,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
     };
 
     // the expected dependency answers (basic)
-    String[] testAnswers = {
+    String[] basicAnswers = {
         "nsubj(speaking-3, Sue-1)\n" +
                 "aux(speaking-3, is-2)\n" +
                 "root(ROOT-0, speaking-3)\n",
@@ -844,12 +844,172 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "pobj(in-3, garden-5)\n",
     };
 
-    assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
+    // the expected dependency answers (noncollapsed)
+    String[] noncollapsedAnswers = {
+        "nsubj(speaking-3, Sue-1)\n" +
+                "aux(speaking-3, is-2)\n" +
+                "root(ROOT-0, speaking-3)\n",
+        "nsubj(speaking-3, Who-1)\n" +
+                "aux(speaking-3, is-2)\n" +
+                "root(ROOT-0, speaking-3)\n",
+        "cop(honest-2, Be-1)\n" +
+                "root(ROOT-0, honest-2)\n",
+        
+        "dobj(doing-4, What-1)\n" +
+                "aux(doing-4, is-2)\n" +
+                "nsubj(doing-4, he-3)\n" +
+                "root(ROOT-0, doing-4)\n",
+
+        "dobj(doing-4, What-1)\n" +
+                "aux(doing-4, am-2)\n" +
+                "nsubj(doing-4, I-3)\n" +
+                "root(ROOT-0, doing-4)\n" +
+                "prep(doing-4, in-5)\n" +
+                "nn(Hole-7, Jackson-6)\n" +
+                "pobj(in-5, Hole-7)\n",
+
+        "root(ROOT-0, Who-1)\n" +
+                "cop(Who-1, am-2)\n" +
+                "nsubj(Who-1, I-3)\n" +
+                "aux(judge-5, to-4)\n" +
+                "infmod(Who-1, judge-5)\n",
+
+        "nsubj(man-5, Bill-1)\n" +
+                "cop(man-5, is-2)\n" +
+                "det(man-5, an-3)\n" +
+                "amod(man-5, honest-4)\n" +
+                "root(ROOT-0, man-5)\n",
+
+        "det(dignity-2, What-1)\n" +
+                "nsubj(is-3, dignity-2)\n" +
+                "root(ROOT-0, is-3)\n" +
+                "expl(is-3, there-4)\n" +
+                "prep(is-3, in-5)\n" +
+                "pobj(in-5, that-6)\n",
+
+        "nsubj(becoming-3, Hand-holding-1)\n" +
+                "aux(becoming-3, is-2)\n" +
+                "root(ROOT-0, becoming-3)\n" +
+                "det(requirement-7, an-4)\n" +
+                "nn(requirement-7, investment-banking-5)\n" +
+                "nn(requirement-7, job-6)\n" +
+                "xcomp(becoming-3, requirement-7)\n",
+
+        "nsubj(wrong-3, What-1)\n" +
+                "cop(wrong-3, is-2)\n" +
+                "root(ROOT-0, wrong-3)\n" +
+                "prep(wrong-3, with-4)\n" +
+                "pcomp(with-4, expecting-5)\n" +
+                "dobj(expecting-5, pizza-6)\n",
+
+        "nsubj(going-3, Who-1)\n" +
+                "xsubj(carry-5, Who-1)\n" +
+                "aux(going-3, is-2)\n" +
+                "root(ROOT-0, going-3)\n" +
+                "aux(carry-5, to-4)\n" +
+                "xcomp(going-3, carry-5)\n" +
+                "det(water-7, the-6)\n" +
+                "dobj(carry-5, water-7)\n",
+
+        "dobj(doing-4, What-1)\n" +
+                "aux(doing-4, am-2)\n" +
+                "nsubj(doing-4, I-3)\n" +
+                "root(ROOT-0, doing-4)\n" +
+                "partmod(doing-4, dating-5)\n" +
+                "dobj(dating-5, her-6)\n",
+
+        "root(ROOT-0, What-1)\n" +
+                "cop(What-1, is-2)\n" +
+                "nsubj(What-1, that-3)\n",
+
+        "root(ROOT-0, Who-1)\n" +
+                "cop(Who-1, is-2)\n" +
+                "nsubj(Who-1, John-3)\n",
+
+        "det(dog-2, What-1)\n" +
+                "nsubj(barking-4, dog-2)\n" +
+                "aux(barking-4, is-3)\n" +
+                "root(ROOT-0, barking-4)\n" +
+                "advmod(loudly-6, so-5)\n" +
+                "advmod(barking-4, loudly-6)\n",
+
+
+        "nsubj(barking-3, Who-1)\n" +
+                "aux(barking-3, is-2)\n" +
+                "root(ROOT-0, barking-3)\n" +
+                "advmod(much-5, so-4)\n" +
+                "advmod(barking-3, much-5)\n",
+
+        "advmod(becoming-4, Why-1)\n" +
+                "aux(becoming-4, is-2)\n" +
+                "nsubj(becoming-4, Dave-3)\n" +
+                "root(ROOT-0, becoming-4)\n" +
+                "det(problem-6, a-5)\n" +
+                "xcomp(becoming-4, problem-6)\n",
+
+
+        "dobj(worth-5, What-1)\n" +
+                "cop(worth-5, is-2)\n" +
+                "nn(stock-4, UAL-3)\n" +
+                "nsubj(worth-5, stock-4)\n" + 
+                "root(ROOT-0, worth-5)\n",
+        
+        "root(ROOT-0, Who-1)\n" +
+                "cop(Who-1, am-2)\n" +
+                "nsubj(Who-1, I-3)\n",
+
+        "nsubj(told-2, Who-1)\n" +
+                "root(ROOT-0, told-2)\n" +
+                "dobj(told-2, him-3)\n",
+        
+        "nsubj(lawyer-4, Sue-1)\n" +
+                "cop(lawyer-4, is-2)\n" +
+                "det(lawyer-4, a-3)\n" +
+                "root(ROOT-0, lawyer-4)\n",
+
+        "nsubj(intelligent-3, Sue-1)\n" +
+                "cop(intelligent-3, is-2)\n" +
+                "root(ROOT-0, intelligent-3)\n",
+
+        "nsubj(nervous-3, Who-1)\n" +
+                "cop(nervous-3, is-2)\n" +
+                "root(ROOT-0, nervous-3)\n",
+
+        "expl(is-2, There-1)\n" +
+                "root(ROOT-0, is-2)\n" +
+                "det(cow-4, a-3)\n" +
+                "nsubj(is-2, cow-4)\n" +
+                "prep(is-2, in-5)\n" +
+                "det(field-7, the-6)\n" +
+                "pobj(in-5, field-7)\n",
+
+        "nsubj(is-2, What-1)\n" +
+                "root(ROOT-0, is-2)\n" +
+                "expl(is-2, there-3)\n" +
+                "prep(is-2, in-4)\n" +
+                "det(field-6, the-5)\n" +
+                "pobj(in-4, field-6)\n",
+
+        "advmod(are-2, Here-1)\n" +
+                "root(ROOT-0, are-2)\n" +
+                "det(bags-4, some-3)\n" +
+                "nsubj(are-2, bags-4)\n",
+
+        "nsubj(is-2, He-1)\n" +
+                "root(ROOT-0, is-2)\n" +
+                "prep(is-2, in-3)\n" +
+                "det(garden-5, the-4)\n" +
+                "pobj(in-3, garden-5)\n",
+    };
+
+    assertEquals("Test array and basic answer array lengths mismatch!", testTrees.length, basicAnswers.length);
+    assertEquals("Test array and noncollapsed answer array lengths mismatch!", testTrees.length, noncollapsedAnswers.length);
     // TreeReaderFactory trf = new PennTreeReaderFactory();
     TreeReaderFactory trf = new NPTmpRetainingTreeNormalizer.NPTmpAdvRetainingTreeReaderFactory();
     for (int i = 0; i < testTrees.length; i++) {
       String testTree = testTrees[i];
-      String testAnswer = testAnswers[i];
+      String basicAnswer = basicAnswers[i];
+      String noncollapsedAnswer = noncollapsedAnswers[i];
 
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
@@ -857,7 +1017,9 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
+          basicAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
+      assertEquals("Unexpected noncollapsed dependencies for tree " + testTree,
+          noncollapsedAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(true), tree, false, false));
     }
 
   }
