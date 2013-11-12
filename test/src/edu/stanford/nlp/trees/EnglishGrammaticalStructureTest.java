@@ -683,6 +683,9 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       "(ROOT (SINV (ADVP (RB Here)) (VP (VBP are)) (NP (DT some) (NNS bags))))",
       "(ROOT (S (NP (PRP He)) (VP (VBZ is) (PP (IN in) (NP (DT the) (NN garden))))))",
       "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ 's) (PP (IN on) (NP (DT the) (NN test)))) (. ?)))",
+      "(ROOT (SBARQ (WHADVP (WRB Why)) (SQ (VBZ is) (NP (DT the) (NN dog)) (ADJP (JJ pink))) (. ?)))",
+      "(ROOT (S (NP (DT The) (NN dog)) (VP (VBZ is) (ADJP (JJ pink))) (. .)))",
+
       // TODO: add an example for "it is raining" once that is correct... needs expl(raining, It)
       // TODO: add an example for "It is clear that Sue is smart" once that is correct... needs expl(clear, It)
 
@@ -850,6 +853,18 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "det(test-5, the-4)\n" +
                 "pobj(on-3, test-5)\n",
 
+        "advmod(pink-5, Why-1)\n" +
+                "cop(pink-5, is-2)\n" +
+                "det(dog-4, the-3)\n" +
+                "nsubj(pink-5, dog-4)\n" +
+                "root(ROOT-0, pink-5)\n",
+
+
+        "det(dog-2, The-1)\n" +
+                "nsubj(pink-4, dog-2)\n" +
+                "cop(pink-4, is-3)\n" +
+                "root(ROOT-0, pink-4)\n",
+
     };
 
     // the expected dependency answers (noncollapsed)
@@ -1014,6 +1029,19 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "prep('s-2, on-3)\n" +
                 "det(test-5, the-4)\n" +
                 "pobj(on-3, test-5)\n",
+
+        "advmod(pink-5, Why-1)\n" +
+                "cop(pink-5, is-2)\n" +
+                "det(dog-4, the-3)\n" +
+                "nsubj(pink-5, dog-4)\n" +
+                "root(ROOT-0, pink-5)\n",
+
+
+        "det(dog-2, The-1)\n" +
+                "nsubj(pink-4, dog-2)\n" +
+                "cop(pink-4, is-3)\n" +
+                "root(ROOT-0, pink-4)\n",
+
     };
 
     assertEquals("Test array and basic answer array lengths mismatch!", testTrees.length, basicAnswers.length);
