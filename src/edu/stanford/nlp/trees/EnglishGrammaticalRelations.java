@@ -92,7 +92,7 @@ public class EnglishGrammaticalRelations {
   static final String copularWordRegex =
     "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|stay|stays|stayed|remain|remains|remained|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
   static final String clausalComplementRegex =
-    "/^(?i:seem|seems|seemed|seeming|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
+    "/^(?i:seem|seems|seemed|seeming|become|becomes|became|becoming)$/";
   private static final String passiveAuxWordRegex =
     "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
   private static final String beAuxiliaryRegex =
@@ -657,6 +657,7 @@ public class EnglishGrammaticalRelations {
           "VP < (SBAR=target < (SBAR < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/)) < CC|CONJP)",
           "VP < (SBAR=target < (S < VP) !$-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
           "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)))",
+          "VP < @SBARQ=target",  // Direct question: She asked "Who is in trouble"
           "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
           // to find "...", he said or "...?" he asked.
           // We eliminate conflicts with conj by looking for CC
@@ -1553,6 +1554,7 @@ public class EnglishGrammaticalRelations {
           "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
           // two juxtaposed sentences; common in web materials (but this also matches quite a few wsj things)
           "@S < (@S $.. @S=target) !< @CC|CONJP",
+          "@S|VP < (/^:$/ $-- /^V/ $+ @NP=target) !< @CONJP|CC", // sometimes CC cases are right node raising, etc.
         });
   public static class ParataxisGRAnnotation extends GrammaticalRelationAnnotation { }
 
