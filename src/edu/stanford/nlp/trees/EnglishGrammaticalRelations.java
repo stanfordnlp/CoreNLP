@@ -317,10 +317,16 @@ public class EnglishGrammaticalRelations {
           "S < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP)",
           "S < ( NP=target <# (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
           "SQ|PRN < (NP=target !< EX $++ VP)",
-          "SQ < ((NP=target !< EX) $- /^(?:VB|AUX)/ !$++ VP)",
+          "SQ < (NP=target !< EX $- (/^(?:VB|AUX)/ < " + copularWordRegex + ") !$++ VP)",
+          // Allows us to match "Does it?" without matching "Who does it?"
+          "SQ < (NP=target !< EX $- /^(?:VB|AUX)/ !$++ VP) !$-- NP|WHNP",
           "SQ < ((NP=target !< EX) $- (RB $- /^(?:VB|AUX)/) ![$++ VP])",
-          "SBARQ < WHNP=target < (SQ < (VP ![$-- NP]))",
-          "SBARQ < (SQ=target < /^(?:VB|AUX)/ !< VP)",
+          "SBARQ < WHNP=target < (SQ < (VP !$-- NP))",
+          // This will capture incorrectly parsed trees in sentences
+          // such as "What disease causes cancer" without capturing
+          // correctly parsed trees such as "What do elephants eat?"
+          "SBARQ < WHNP=target < (SQ < ((/^(?:VB)/ !< " + copularWordRegex + ") !$-- NP !$++ VP))",
+          "SBARQ < (SQ=target < (/^(?:VB|AUX)/ < " + copularWordRegex + ") !< VP)",
           // matches subj in SINV
           "SINV < (NP|WHNP=target [ $- VP|VBZ|VBD|VBP|VB|MD|AUX | $- (@RB|ADVP $- VP|VBZ|VBD|VBP|VB|MD|AUX) | !$- __ !$ @NP] )",
           //matches subj in xcomp like "He considered him a friend"
@@ -452,15 +458,21 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
     new GrammaticalRelation(Language.English, "dobj", "direct object",
-        DirectObjectGRAnnotation.class, OBJECT, "VP|SBARQ?", tregexCompiler,
+        DirectObjectGRAnnotation.class, OBJECT, "VP|SQ|SBARQ?", tregexCompiler,
         new String[] {
           // basic direct object cases: last non-temporal NP of (non-copula) clause.  This case is good.
           // You can't exclude "lot" in this case since people can "sell a lot" though it sometimes wrongly matches what should be an advmod like "He's done a lot" (even for the second instance, the one case admitted on PTB3 WSJ is good).
           "VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] )",
 
+          // This matches rare cases of misparses, such as "What
+          // disease causes cancer?" where the "causes" does not get a
+          // surrounding VP.  Hopefully it does so without overlapping
+          // any other dependencies.
+          "SQ < (/^(?:VB)/=verb !< " + copularWordRegex + ") $-- WHNP !< VP !< (/^(?:VB)/ ! == =verb) < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] )",
+
           // The rule for Wh-questions
           // cdm Jul 2010: No longer require WHNP as first child of SBARQ below: often not because of adverbials, quotes, etc., and removing restriction does no harm
-          // this next pattern used to assume no empty NPs. Corrected.  If you adjust this pattern, also adjust the corresponding one for attr!
+          // this next pattern used to assume no empty NPs. Corrected.
           // One could require the VP at the end of the <+ to also be !< (/^(?:VB|AUX)/ $. SBAR) . This would be right for complement SBAR, but often avoids good matches for adverbial SBAR.  Adding it kills 4 good matches for avoiding 2 wrong matches on sum of TB3-train and EWT
           "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !< (PP <: IN|TO) $-- (NP !< /^-NONE-$/))",
 
