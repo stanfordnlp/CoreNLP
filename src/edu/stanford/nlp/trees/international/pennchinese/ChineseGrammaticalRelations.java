@@ -100,7 +100,7 @@ public class ChineseGrammaticalRelations {
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.Chinese,
       "conj", "conjunct",
-      PreconjunctGRAnnotation.class, DEPENDENT, "FRAG|INC|IP|VP|NP|ADJP|PP|ADVP|UCP", tregexCompiler,
+      PreconjunctGRAnnotation.class, DEPENDENT, "VP|NP|ADJP|PP|ADVP|UCP", tregexCompiler,
       new String[]{
         "NP|ADJP|PP|ADVP|UCP < (!PU=target $+ CC)",
         // Split the first rule to the second rule to avoid the duplication:
@@ -136,10 +136,7 @@ public class ChineseGrammaticalRelations {
         "NP <( NP=target $+ ((PU < 、) $+ NP) )",
         "NP <( NN|NR|NT|PN=target $+ ((PU < ，|、) $+ NN|NR|NT|PN) )",
         "VP < (CC $+ VV=target)",
-        // Original version of this did not have the outer layer of
-        // the FRAG|INC|IP|VP.  This caused a bug where the basic
-        // dependencies could have cycles.
-        "FRAG|INC|IP|VP < (VP  < VV|VC|VRD|VCD|VE|VA < NP|QP|LCP  $ IP|VP|VRD|VCD|VE|VC|VA=target)  ",
+        "  VP  < VV|VC|VRD|VCD|VE|VA < NP|QP|LCP  $ IP|VP|VRD|VCD|VE|VC|VA=target  ",
          "IP|VP < ( IP|VP < NP|QP|LCP $ IP|VP=target )",
       });
   public static class PreconjunctGRAnnotation
