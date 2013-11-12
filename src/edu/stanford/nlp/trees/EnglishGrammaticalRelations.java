@@ -705,6 +705,10 @@ public class EnglishGrammaticalRelations {
           // Detects xcomp(becoming, requirement) in "Hand-holding is becoming an investment banking job requirement"
           // Also, xcomp(becoming, problem) in "Why is Dave becoming a problem?"
           "(VP $-- (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (/^VB/ < " + clausalComplementRegex + ") < NP=target)",
+
+          // The old attr relation, used here to recover xcomp relations instead.
+          "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
+
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 

@@ -1036,9 +1036,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
     String[] testTrees = {
          "(ROOT (S (NP (NNP Reagan)) (VP (VBZ has) (VP (VBN died))) (. .)))",
          "(ROOT (S (NP (NNP Kennedy)) (VP (VBZ has) (VP (VBN been) (VP (VBN killed)))) (. .)))",
-         // FIXME: the copula relations that used to be here for attr
-         // are now all dep.  This needs to be fixed.
-         //"(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (NP (DT an) (JJ honest) (NN man))) (. .)))",
+         "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (NP (DT an) (JJ honest) (NN man))) (. .)))",
          "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (ADJP (JJ big) (CC and) (JJ honest))) (. .)))",
          "(ROOT (S (NP (NNP Clinton)) (VP (VBD defeated) (NP (NNP Dole))) (. .)))",
          "(ROOT (S (SBAR (WHNP (WP What)) (S (NP (PRP she)) (VP (VBD said)))) (VP (VBZ is) (ADJP (JJ untrue))) (. .)))",
@@ -1059,7 +1057,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
     String[] testAnswers = {
         "nsubj(died-3, Reagan-1)\n" + "aux(died-3, has-2)\n" + "root(ROOT-0, died-3)\n",
         "nsubjpass(killed-4, Kennedy-1)\n" + "aux(killed-4, has-2)\n" + "auxpass(killed-4, been-3)\n" + "root(ROOT-0, killed-4)\n",
-        //"nsubj(is-2, Bill-1)\n" + "root(ROOT-0, is-2)\n" + "det(man-5, an-3)\n" + "amod(man-5, honest-4)\n" + "xcomp(is-2, man-5)\n",
+        "nsubj(is-2, Bill-1)\n" + "root(ROOT-0, is-2)\n" + "det(man-5, an-3)\n" + "amod(man-5, honest-4)\n" + "xcomp(is-2, man-5)\n",
         "nsubj(is-2, Bill-1)\n" + "root(ROOT-0, is-2)\n" + "acomp(is-2, big-3)\n" + "cc(big-3, and-4)\n" + "conj(big-3, honest-5)\n",
         "nsubj(defeated-2, Clinton-1)\n" + "root(ROOT-0, defeated-2)\n" + "dobj(defeated-2, Dole-3)\n",
         "dobj(said-3, What-1)\n" + "nsubj(said-3, she-2)\n" + "csubj(is-4, said-3)\n" + "root(ROOT-0, is-4)\n" + "acomp(is-4, untrue-5)\n",
