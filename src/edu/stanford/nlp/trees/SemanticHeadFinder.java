@@ -232,6 +232,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     // matches WHNP $+ VB<copula $+ NP
     // for example, "Who am I to judge?"
+    // TODO: fix this so it occurs when only an NP that comes next
     TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " !$++ ADJP))"),
   };
 
@@ -254,8 +255,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     }
 
     if (motherCat.equals("SBARQ")) { 
-      // TODO: if makeCopulaHead is true, we should skip these
-      // patterns, right?
       if (!makeCopulaHead) {
         for (TregexPattern pattern : headOfCopulaTregex) {
           TregexMatcher matcher = pattern.matcher(t);
