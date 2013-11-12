@@ -682,6 +682,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (EX there)) (PP (IN in) (NP (DT the) (NN field)))) (. ?)))",
       "(ROOT (SINV (ADVP (RB Here)) (VP (VBP are)) (NP (DT some) (NNS bags))))",
       "(ROOT (S (NP (PRP He)) (VP (VBZ is) (PP (IN in) (NP (DT the) (NN garden))))))",
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ 's) (PP (IN on) (NP (DT the) (NN test)))) (. ?)))",
       // TODO: add an example for "it is raining" once that is correct... needs expl(raining, It)
       // TODO: add an example for "It is clear that Sue is smart" once that is correct... needs expl(clear, It)
 
@@ -842,6 +843,13 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "prep(is-2, in-3)\n" +
                 "det(garden-5, the-4)\n" +
                 "pobj(in-3, garden-5)\n",
+
+        "nsubj('s-2, What-1)\n" +
+                "root(ROOT-0, 's-2)\n" +
+                "prep('s-2, on-3)\n" +
+                "det(test-5, the-4)\n" +
+                "pobj(on-3, test-5)\n",
+
     };
 
     // the expected dependency answers (noncollapsed)
@@ -1000,6 +1008,12 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "prep(is-2, in-3)\n" +
                 "det(garden-5, the-4)\n" +
                 "pobj(in-3, garden-5)\n",
+
+        "nsubj('s-2, What-1)\n" +
+                "root(ROOT-0, 's-2)\n" +
+                "prep('s-2, on-3)\n" +
+                "det(test-5, the-4)\n" +
+                "pobj(on-3, test-5)\n",
     };
 
     assertEquals("Test array and basic answer array lengths mismatch!", testTrees.length, basicAnswers.length);

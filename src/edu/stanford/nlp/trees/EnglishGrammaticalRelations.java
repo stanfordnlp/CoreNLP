@@ -348,8 +348,9 @@ public class EnglishGrammaticalRelations {
           // note that in that case "wrong" is taken as the head thanks to SemanticHeadFinder hackery
           // The !$++ matches against (what, worth) in What is UAL stock worth?
           "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ ADJP=adj !$++ (NP $++ =adj)))",
-          // matches (is, WHNP) in phrases such as "what dignity is there in ..."
-          "SBARQ <1 WHNP=target < (SQ < (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP < EX))"
+          // the (NP < EX) matches (is, WHNP) in "what dignity is there in ..."
+          // the PP matches (is, WHNP) in "what is on the test"
+          "SBARQ <1 WHNP=target < (SQ < (/^(?:VB|AUX)/ < " + copularWordRegex + ") [< (NP < EX) | < PP])"
         });
   public static class NominalSubjectGRAnnotation extends GrammaticalRelationAnnotation { }
 
