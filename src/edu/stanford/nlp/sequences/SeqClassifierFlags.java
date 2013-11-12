@@ -874,6 +874,7 @@ public class SeqClassifierFlags implements Serializable {
   public String embeddingWords = null;
   public String embeddingVectors = null;
   public boolean transitionEdgeOnly = false;
+  // L1-prior used in OWLQN
   public double priorLambda = 0;
   public boolean addCapitalFeatures = false;
   public int arbitraryInputLayerSize = -1;
