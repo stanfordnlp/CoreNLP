@@ -685,6 +685,11 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ 's) (PP (IN on) (NP (DT the) (NN test)))) (. ?)))",
       "(ROOT (SBARQ (WHADVP (WRB Why)) (SQ (VBZ is) (NP (DT the) (NN dog)) (ADJP (JJ pink))) (. ?)))",
       "(ROOT (S (NP (DT The) (NN dog)) (VP (VBZ is) (ADJP (JJ pink))) (. .)))",
+      "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VP (VBZ causes) (NP (NN pain)))) (. ?)))",
+      // This tree is incorrect, but we added a rule to cover it so
+      // parsers which get this incorrect result don't get bad
+      // dependencies
+      "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VBZ causes) (NP (NN pain))) (. ?)))",
 
       // TODO: add an example for "it is raining" once that is correct... needs expl(raining, It)
       // TODO: add an example for "It is clear that Sue is smart" once that is correct... needs expl(clear, It)
@@ -865,6 +870,16 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "cop(pink-4, is-3)\n" +
                 "root(ROOT-0, pink-4)\n",
 
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
+
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
+
     };
 
     // the expected dependency answers (noncollapsed)
@@ -1041,6 +1056,16 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(pink-4, dog-2)\n" +
                 "cop(pink-4, is-3)\n" +
                 "root(ROOT-0, pink-4)\n",
+
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
+
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
 
     };
 
