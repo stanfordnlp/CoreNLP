@@ -62,7 +62,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     if (options.grammarFilename != null) {
       timexPatterns = new GenericTimeExpressionPatterns(options);
     } else {
-      timexPatterns = new EnglishTimeExpressionPatterns(options);
+      throw new IllegalArgumentException("Time rules file is not specified");
     }
     this.expressionExtractor = timexPatterns.createExtractor();
     this.expressionExtractor.setLogger(logger);
