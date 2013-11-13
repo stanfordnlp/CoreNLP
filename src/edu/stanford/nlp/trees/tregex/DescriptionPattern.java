@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees.tregex;
 
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.ArrayStringFilter;
 import edu.stanford.nlp.util.Pair;
@@ -176,10 +175,9 @@ class DescriptionPattern extends TregexPattern {
   public TregexMatcher matcher(Tree root, Tree tree,
                                IdentityHashMap<Tree, Tree> nodesToParents,
                                Map<String, Tree> namesToNodes,
-                               VariableStrings variableStrings,
-                               HeadFinder headFinder) {
+                               VariableStrings variableStrings) {
     return new DescriptionMatcher(this, root, tree, nodesToParents,
-                                  namesToNodes, variableStrings, headFinder);
+                                  namesToNodes, variableStrings);
   }
 
   // TODO: Why is this a static class with a pointer to the containing
@@ -205,9 +203,8 @@ class DescriptionPattern extends TregexPattern {
     public DescriptionMatcher(DescriptionPattern n, Tree root, Tree tree,
                               IdentityHashMap<Tree, Tree> nodesToParents,
                               Map<String, Tree> namesToNodes,
-                              VariableStrings variableStrings,
-                              HeadFinder headFinder) {
-      super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
+                              VariableStrings variableStrings) {
+      super(root, tree, nodesToParents, namesToNodes, variableStrings);
       myNode = n;
       resetChildIter();
     }
@@ -390,7 +387,7 @@ class DescriptionPattern extends TregexPattern {
       }
       // lazy initialization of the child matcher
       if (childMatcher == null && myNode.child != null) {
-        childMatcher = myNode.child.matcher(root, nextTreeNodeMatchCandidate, nodesToParents, namesToNodes, variableStrings, headFinder);
+        childMatcher = myNode.child.matcher(root, nextTreeNodeMatchCandidate, nodesToParents, namesToNodes, variableStrings);
         //childMatcher.resetChildIter();
       }
       if (childMatcher == null) {
