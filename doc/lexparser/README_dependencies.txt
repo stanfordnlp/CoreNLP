@@ -1,4 +1,4 @@
-STANFORD DEPENDENCIES.  Stanford Parser v3.2.0 - 2013-06-19
+STANFORD DEPENDENCIES.  Stanford Parser v3.3.0 - 2013-11-12
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
