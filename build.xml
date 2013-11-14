@@ -280,15 +280,15 @@
       </lib>
       <lib dir="${basedir}/lib">
         <include name="commons-lang3-3.1.jar"/>
-        <include name="xom-1.2.7.jar"/>
+        <include name="xom-1.2.10.jar"/>
         <include name="joda-time.jar"/>
-        <include name="jollyday.jar"/>
+        <include name="jollyday-0.4.7.jar"/>
       </lib>
       <zipfileset prefix="WEB-INF/data"
-                  file="/u/nlp/data/pos-tagger/english/english-left3words-distsim.tagger"/>
+                  file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger"/>
       <zipfileset prefix="WEB-INF/data/rules"
                   file="${source.path}/edu/stanford/nlp/time/rules/*"/>
-      <zipfileset prefix="WEB-INF/classes/holidays"
+      <zipfileset prefix="WEB-INF/data/holidays"
                     file="${source.path}/edu/stanford/nlp/time/holidays/*"/>
       <zipfileset file="${data.path}/webapps/favicon.ico"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/header.jsp"/>
