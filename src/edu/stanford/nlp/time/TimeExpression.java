@@ -100,7 +100,7 @@ public class TimeExpression extends MatchedExpression {
     SUTime.Temporal t = getTemporal();
     if (t != null) {
       if (t != SUTime.TIME_NONE_OK) {
-        setTemporal(t);
+        setTemporal(EnglishTimeExpressionPatterns.addMod(text, t));
         return true;
       } else {
         return false;
