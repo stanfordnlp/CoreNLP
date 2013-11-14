@@ -109,7 +109,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="classpath,compile"
+  <target name="test" depends="classpath"
           description="Run core unit tests">
     <echo message="${ant.project.name}" />
     <junit fork="true" maxmemory="1g" printsummary="off" outputtoformatters="false" forkmode="perBatch" haltonfailure="true">
@@ -126,7 +126,7 @@
     </junit>
   </target>
 
-  <target name="itest" depends="classpath,compile"
+  <target name="itest" depends="classpath"
           description="Run core integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
@@ -144,7 +144,7 @@
     </junit>
   </target>
 
-  <target name="slowitest" depends="classpath,compile"
+  <target name="slowitest" depends="classpath"
           description="Run really slow integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
