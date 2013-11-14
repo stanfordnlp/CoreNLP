@@ -395,7 +395,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
       }
       done = !extracted;
       iters++;
-      if (iters >= maxIters) {
+      if (maxIters > 0 && iters >= maxIters) {
         logger.warning("Aborting application of composite rules: Maximum iteration " + maxIters + " reached");
         break;
       }
