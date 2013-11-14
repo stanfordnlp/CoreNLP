@@ -463,10 +463,13 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   }
 
   /**
-   * Train a new segmenter or load an trained model from file.
+   * Train a new segmenter or load an trained model from file.  First
+   * checks to see if there is a "model" or "loadClassifier" flag to
+   * load from, and if not tries to run training using the given
+   * options.
    *
    * @param options
-   * @return
+   * @return the trained or loaded model
    */
   private static ArabicSegmenter getSegmenter(Properties options) {
     ArabicSegmenter segmenter = new ArabicSegmenter(options);
