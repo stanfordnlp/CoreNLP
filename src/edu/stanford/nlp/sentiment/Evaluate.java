@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.IntCounter;
