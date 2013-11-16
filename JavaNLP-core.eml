@@ -62,10 +62,9 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jflex-1.4.3-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/JFlex.jar!/"/>
 	</lib>
-	<lib name="xom-1.2.8.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/xom-src-1.2.8.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/xom-src-1.2.8.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xom-1.2.8.jar!/"/>
+	<lib name="xom-1.2.10.jar" scope="COMPILE">
+		<srcroot url="file://libsrc/xom-1.2.10-src.zip"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xom-1.2.10.jar!/"/>
 	</lib>
 	<lib name="joda-time.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/joda-time-2.1-sources.jar!/"/>
