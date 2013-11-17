@@ -191,6 +191,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       boolean foundPrep = false;
       for (TypedDependency prep : list) {
+
+        // todo: It would also be good to add a rule here to prefer ccomp nsbubj over dobj if there is a ccomp with no subj
+        // then we could get right: Which eco-friendly options do you think there will be on the new Lexus?
+
         if (prep.reln() != PREPOSITIONAL_MODIFIER) {
           continue;
         }
