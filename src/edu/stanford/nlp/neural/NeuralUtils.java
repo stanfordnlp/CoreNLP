@@ -15,8 +15,8 @@ import org.ejml.simple.SimpleMatrix;
  * @author Richard Socher
  * @author Thang Luong
  */
-public class Utils {
-  private Utils() {} // static methods only
+public class NeuralUtils {
+  private NeuralUtils() {} // static methods only
 
   /**
    * Compute cosine distance between two column vectors.
