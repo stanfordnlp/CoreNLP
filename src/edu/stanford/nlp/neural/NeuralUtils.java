@@ -26,20 +26,14 @@ public class NeuralUtils {
   }
   
   /**
-   * Compute dot product between two vectors.
+   * Compute dot product between two column vectors.
    */
   public static double dot(SimpleMatrix vector1, SimpleMatrix vector2){
-    double score = Double.NaN;
     if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too 
-      score = vector1.mult(vector2.transpose()).get(0); 
-    } else if (vector1.numCols()==1){ // vector1: col vector, assume that vector2 is also a column vector.
-      score = vector1.transpose().mult(vector2).get(0);
-    } else {
-      System.err.println("! Error in neural.Utils.dot: vector1 is a matrix " + vector1.numRows() + " x " + vector1.numCols());
-      System.exit(1);
+      return vector1.mult(vector2.transpose()).get(0); 
+    } else { // vector1: col vector, assume that vector2 is also a column vector.
+      return vector1.transpose().mult(vector2).get(0);
     }
-
-    return score;
   }
   
   /**
