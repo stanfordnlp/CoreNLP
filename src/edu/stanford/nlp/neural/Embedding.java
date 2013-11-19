@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -51,7 +50,7 @@ public class Embedding {
   
   public Embedding(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
-    this.embeddingSize = getEmbeddingSize(wordVectors);
+    this.embeddingSize = getEmbedingSize(wordVectors);
   }
   
   public Embedding(String wordVectorFile) {
@@ -88,7 +87,6 @@ public class Embedding {
     int dimOfWords = 0;
     boolean warned = false;
     
-    int numWords = 0;
     for (String line : IOUtils.readLines(wordVectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
       String word = lineSplit[0];
@@ -128,10 +126,7 @@ public class Embedding {
       }
       SimpleMatrix vector = new SimpleMatrix(vec);
       wordVectors.put(word, vector);
-
-      numWords++;
     }
-    System.err.println("  num words = " + numWords);
   }
 
   /**
@@ -148,8 +143,7 @@ public class Embedding {
     System.err.println("# Loading embedding ...\n  word file = " + wordFile + "\n  vector file = " + vectorFile);
     int dimOfWords = 0;
     boolean warned = false;
-   
-    int numWords = 0;
+    
     Iterator<String> wordIterator = IOUtils.readLines(wordFile, "utf-8").iterator();
     for (String line : IOUtils.readLines(vectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
@@ -192,197 +186,10 @@ public class Embedding {
       }
       SimpleMatrix vector = new SimpleMatrix(vec);
       wordVectors.put(word, vector);
-      numWords++;
     }
-    
-    System.err.println("  num words = " + numWords);
   }
   
   
-  // refactor from DVModel.readWordVectors()
-  public void postProcessWordVectors(Options op) {
-    SimpleMatrix unknownNumberVector = null;
-    SimpleMatrix unknownCapsVector = null;
-    SimpleMatrix unknownChineseYearVector = null;
-    SimpleMatrix unknownChineseNumberVector = null;
-    SimpleMatrix unknownChinesePercentVector = null;
-
-    Random rand = new Random(op.trainOptions.dvSeed);
-    wordVectors = Generics.newTreeMap();
-    int numberCount = 0;
-    int capsCount = 0;
-    int chineseYearCount = 0;
-    int chineseNumberCount = 0;
-    int chinesePercentCount = 0;
-
-    for (String word : wordVectors.keySet()) {
-      SimpleMatrix vector = wordVectors.get(word);
-
-      if (op.wordFunction != null) {
-        word = op.wordFunction.apply(word);
-      }
-
-      wordVectors.put(word, vector);
-
-      if (op.lexOptions.numHid <= 0) {
-        op.lexOptions.numHid = vector.getNumElements();
-      }
-
-      // TODO: factor out all of these identical blobs
-      if (op.trainOptions.unknownNumberVector &&
-          (NUMBER_PATTERN.matcher(word).matches() || DG_PATTERN.matcher(word).matches())) {
-        ++numberCount;
-        if (unknownNumberVector == null) {
-          unknownNumberVector = new SimpleMatrix(vector);
-        } else {
-          unknownNumberVector = unknownNumberVector.plus(vector);
-        }
-      }
-
-      if (op.trainOptions.unknownCapsVector && CAPS_PATTERN.matcher(word).matches()) {
-        ++capsCount;
-        if (unknownCapsVector == null) {
-          unknownCapsVector = new SimpleMatrix(vector);
-        } else {
-          unknownCapsVector = unknownCapsVector.plus(vector);
-        }
-      }
-
-      if (op.trainOptions.unknownChineseYearVector && CHINESE_YEAR_PATTERN.matcher(word).matches()) {
-        ++chineseYearCount;
-        if (unknownChineseYearVector == null) {
-          unknownChineseYearVector = new SimpleMatrix(vector);
-        } else {
-          unknownChineseYearVector = unknownChineseYearVector.plus(vector);
-        }
-      }
-
-      if (op.trainOptions.unknownChineseNumberVector &&
-          (CHINESE_NUMBER_PATTERN.matcher(word).matches() || DG_PATTERN.matcher(word).matches())) {
-        ++chineseNumberCount;
-        if (unknownChineseNumberVector == null) {
-          unknownChineseNumberVector = new SimpleMatrix(vector);
-        } else {
-          unknownChineseNumberVector = unknownChineseNumberVector.plus(vector);
-        }
-      }
-
-      if (op.trainOptions.unknownChinesePercentVector && CHINESE_PERCENT_PATTERN.matcher(word).matches()) {
-        ++chinesePercentCount;
-        if (unknownChinesePercentVector == null) {
-          unknownChinesePercentVector = new SimpleMatrix(vector);
-        } else {
-          unknownChinesePercentVector = unknownChinesePercentVector.plus(vector);
-        }
-      }
-    }
-
-    String unkWord = op.trainOptions.unkWord;
-    if (op.wordFunction != null) {
-      unkWord = op.wordFunction.apply(unkWord);
-    }
-    SimpleMatrix unknownWordVector = wordVectors.get(unkWord);
-    wordVectors.put(UNKNOWN_WORD, unknownWordVector);
-    if (unknownWordVector == null) {
-      throw new RuntimeException("Unknown word vector not specified in the word vector file");
-    }
-
-    if (op.trainOptions.unknownNumberVector) {
-      if (numberCount > 0) {
-        unknownNumberVector = unknownNumberVector.divide(numberCount);
-      } else {
-        unknownNumberVector = new SimpleMatrix(unknownWordVector);
-      }
-      wordVectors.put(UNKNOWN_NUMBER, unknownNumberVector);
-    }
-
-    if (op.trainOptions.unknownCapsVector) {
-      if (capsCount > 0) {
-        unknownCapsVector = unknownCapsVector.divide(capsCount);
-      } else {
-        unknownCapsVector = new SimpleMatrix(unknownWordVector);
-      }
-      wordVectors.put(UNKNOWN_CAPS, unknownCapsVector);
-    }
-
-    if (op.trainOptions.unknownChineseYearVector) {
-      System.err.println("Matched " + chineseYearCount + " chinese year vectors");
-      if (chineseYearCount > 0) {
-        unknownChineseYearVector = unknownChineseYearVector.divide(chineseYearCount);
-      } else {
-        unknownChineseYearVector = new SimpleMatrix(unknownWordVector);
-      }
-      wordVectors.put(UNKNOWN_CHINESE_YEAR, unknownChineseYearVector);
-    }
-
-    if (op.trainOptions.unknownChineseNumberVector) {
-      System.err.println("Matched " + chineseNumberCount + " chinese number vectors");
-      if (chineseNumberCount > 0) {
-        unknownChineseNumberVector = unknownChineseNumberVector.divide(chineseNumberCount);
-      } else {
-        unknownChineseNumberVector = new SimpleMatrix(unknownWordVector);
-      }
-      wordVectors.put(UNKNOWN_CHINESE_NUMBER, unknownChineseNumberVector);
-    }
-
-    if (op.trainOptions.unknownChinesePercentVector) {
-      System.err.println("Matched " + chinesePercentCount + " chinese percent vectors");
-      if (chinesePercentCount > 0) {
-        unknownChinesePercentVector = unknownChinesePercentVector.divide(chinesePercentCount);
-      } else {
-        unknownChinesePercentVector = new SimpleMatrix(unknownWordVector);
-      }
-      wordVectors.put(UNKNOWN_CHINESE_PERCENT, unknownChinesePercentVector);
-    }
-
-    if (op.trainOptions.useContextWords) {
-      SimpleMatrix start = SimpleMatrix.random(op.lexOptions.numHid, 1, -0.5, 0.5, rand);
-      SimpleMatrix end = SimpleMatrix.random(op.lexOptions.numHid, 1, -0.5, 0.5, rand);
-      wordVectors.put(START_WORD, start);
-      wordVectors.put(END_WORD, end);
-    }
-  }
-
-  // refactor from DVModel.getVocabWord()
-  public String getPostProcessedWord(String word, Options op) {
-    if (op.wordFunction != null) {
-      word = op.wordFunction.apply(word);
-    }
-    if (op.trainOptions.lowercaseWordVectors) {
-      word = word.toLowerCase();
-    }
-    if (wordVectors.containsKey(word)) {
-      return word;
-    }
-    //System.err.println("Unknown word: [" + word + "]");
-    if (op.trainOptions.unknownNumberVector && NUMBER_PATTERN.matcher(word).matches()) {
-      return UNKNOWN_NUMBER;
-    }
-    if (op.trainOptions.unknownCapsVector && CAPS_PATTERN.matcher(word).matches()) {
-      return UNKNOWN_CAPS;
-    }
-    if (op.trainOptions.unknownChineseYearVector && CHINESE_YEAR_PATTERN.matcher(word).matches()) {
-      return UNKNOWN_CHINESE_YEAR;
-    }
-    if (op.trainOptions.unknownChineseNumberVector && CHINESE_NUMBER_PATTERN.matcher(word).matches()) {
-      return UNKNOWN_CHINESE_NUMBER;
-    }
-    if (op.trainOptions.unknownChinesePercentVector && CHINESE_PERCENT_PATTERN.matcher(word).matches()) {
-      return UNKNOWN_CHINESE_PERCENT;
-    }
-    if (op.trainOptions.unknownDashedWordVectors) {
-      int index = word.lastIndexOf('-');
-      if (index >= 0 && index < word.length()) {
-        String lastPiece = word.substring(index + 1);
-        String wv = getPostProcessedWord(lastPiece, op);
-        if (wv != null) {
-          return wv;
-        }
-      }
-    }
-    return UNKNOWN_WORD;
-  }
-
   /*** Getters & Setters ***/
   public int size(){
     return wordVectors.size();
@@ -431,26 +238,14 @@ public class Embedding {
  
   public void setWordVectors(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
-    this.embeddingSize = getEmbeddingSize(wordVectors);
+    this.embeddingSize = getEmbedingSize(wordVectors);
   }
   
-  private int getEmbeddingSize(Map<String, SimpleMatrix> wordVectors){
+  private int getEmbedingSize(Map<String, SimpleMatrix> wordVectors){
     if (!wordVectors.containsKey(UNKNOWN_WORD)){
-      // find if there's any other unk string
-      String unkStr = "";
-      if (wordVectors.containsKey("UNK")) { unkStr = "UNK"; }
-      if (wordVectors.containsKey("UUUNKKK")) { unkStr = "UUUNKKK"; }
-      if (wordVectors.containsKey("UNKNOWN")) { unkStr = "UNKNOWN"; }
-      
-      // set UNKNOWN_WORD
-      if (!unkStr.equals("")){
-        wordVectors.put(UNKNOWN_WORD, wordVectors.get(unkStr));
-      } else {
-        System.err.println("! wordVectors used to initialize Embedding doesn't contain " + UNKNOWN_WORD);
-        System.exit(1);
-      }
-    }  
-    
+      System.err.println("! wordVectors used to initialize Embedding doesn't contain " + UNKNOWN_WORD);
+      System.exit(1);
+    }
     return wordVectors.get(UNKNOWN_WORD).getNumElements();
   }
 }
