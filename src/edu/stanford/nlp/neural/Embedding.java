@@ -261,8 +261,7 @@ public class Embedding {
       if (!unkStr.equals("")){
         wordVectors.put(UNKNOWN_WORD, wordVectors.get(unkStr));
       } else {
-        System.err.println("! wordVectors used to initialize Embedding doesn't contain " + UNKNOWN_WORD);
-        System.exit(1);
+        throw new RuntimeException("! wordVectors used to initialize Embedding doesn't contain any recognized form of " + UNKNOWN_WORD);
       }
     }  
     
