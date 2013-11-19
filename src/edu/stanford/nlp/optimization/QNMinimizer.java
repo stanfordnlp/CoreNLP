@@ -448,7 +448,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       int size = values.size();
       double newestVal = values.get(size - 1);
       double previousVal = (size >= 10 ? values.get(size - 10) : values.get(0));
-      double averageImprovement = (previousVal - newestVal) / (size >= 10 ? 10 : size);
+      double averageImprovement = (previousVal - newestVal) / size;
       int evalsSize = evals.size();
 
       if (useMaxItr && its >= maxItr)

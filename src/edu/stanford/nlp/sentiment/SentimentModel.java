@@ -13,7 +13,7 @@ import org.ejml.simple.SimpleMatrix;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.neural.Embedding;
-import edu.stanford.nlp.neural.NeuralUtils;
+import edu.stanford.nlp.neural.Utils;
 import edu.stanford.nlp.neural.SimpleTensor;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
@@ -290,7 +290,7 @@ public class SentimentModel implements Serializable {
   }
 
   static SimpleMatrix randomWordVector(int size, Random rand) {
-    return NeuralUtils.randomGaussian(size, 1, rand);
+    return Utils.randomGaussian(size, 1, rand);
   }
 
   void initRandomWordVectors(List<Tree> trainingTrees) {
@@ -319,7 +319,7 @@ public class SentimentModel implements Serializable {
   void readWordVectors() {
     Embedding embedding = new Embedding(op.wordVectors, op.numHid);
     this.wordVectors = Generics.newTreeMap();
-//    Map<String, SimpleMatrix> rawWordVectors = NeuralUtils.readRawWordVectors(op.wordVectors, op.numHid);
+//    Map<String, SimpleMatrix> rawWordVectors = RNNUtils.readRawWordVectors(op.wordVectors, op.numHid);
 //    for (String word : rawWordVectors.keySet()) {
     for (String word : embedding.keySet()) {
       // TODO: factor out unknown word vector code from DVParser
@@ -346,11 +346,11 @@ public class SentimentModel implements Serializable {
   
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
-    return NeuralUtils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
+    return Utils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
   }
 
   public void vectorToParams(double[] theta) {
-    NeuralUtils.vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
+    Utils.vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
   }
 
   // TODO: combine this and getClassWForNode?
