@@ -718,10 +718,11 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VBZ causes) (NP (NN pain))) (. ?)))",
       "(ROOT (S (VP (VB Be) (VP (VBG waiting) (PP (IN in) (NP (NN line))) (PP-TMP (IN at) (NP (CD 3) (NN p.m.))))) (. !)))",
       "(ROOT (S (VP (VB Be) (NP (DT a) (NN man))) (. !)))",
-
+      "(ROOT (SBARQ (RB So) (WHNP (WP what)) (SQ (VBZ is) (NP (NNP Santa) (NNP Fe) ) (ADJP (IN worth) )) (. ?) ))",
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (NP (PRP$ your) (NN sister) (POS 's)) (NN name))) (. ?)))",
       // TODO: add an example for "it is raining" once that is correct... needs expl(raining, It)
       // TODO: add an example for "It is clear that Sue is smart" once that is correct... needs expl(clear, It)
-
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (NP (DT the) (NN fear)) (PP (IN of) (NP (NNS cockroaches)))) (VP (VBN called))) (. ?)))",
     };
 
     // the expected dependency answers (basic)
@@ -915,9 +916,30 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "pobj(at-5, p.m.-7)\n",
 
         "cop(man-3, Be-1)\n" +
-                 "det(man-3, a-2)\n" +
-                 "root(ROOT-0, man-3)\n",
+                "det(man-3, a-2)\n" +
+                "root(ROOT-0, man-3)\n",
 
+        "advmod(worth-6, So-1)\n" +
+                "dobj(worth-6, what-2)\n" +
+                "cop(worth-6, is-3)\n" +
+                "nn(Fe-5, Santa-4)\n" +
+                "nsubj(worth-6, Fe-5)\n" +
+                "root(ROOT-0, worth-6)\n",
+
+        "root(ROOT-0, What-1)\n" +
+                "cop(What-1, is-2)\n" +
+                "poss(sister-4, your-3)\n" +
+                "poss(name-6, sister-4)\n" +
+                "possessive(sister-4, 's-5)\n" +
+                "nsubj(What-1, name-6)\n",
+
+        "dobj(called-7, What-1)\n" +
+                "auxpass(called-7, is-2)\n" +
+                "det(fear-4, the-3)\n" +
+                "nsubjpass(called-7, fear-4)\n" +
+                "prep(fear-4, of-5)\n" +
+                "pobj(of-5, cockroaches-6)\n" +
+                "root(ROOT-0, called-7)\n",
 
     };
 
@@ -1115,6 +1137,27 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                      "det(man-3, a-2)\n" +
                      "root(ROOT-0, man-3)\n",
 
+        "advmod(worth-6, So-1)\n" +
+                "dobj(worth-6, what-2)\n" +
+                "cop(worth-6, is-3)\n" +
+                "nn(Fe-5, Santa-4)\n" +
+                "nsubj(worth-6, Fe-5)\n" +
+                "root(ROOT-0, worth-6)\n",
+
+        "root(ROOT-0, What-1)\n" +
+                "cop(What-1, is-2)\n" +
+                "poss(sister-4, your-3)\n" +
+                "poss(name-6, sister-4)\n" +
+                "possessive(sister-4, 's-5)\n" +
+                "nsubj(What-1, name-6)\n",
+
+        "dobj(called-7, What-1)\n" +
+                "auxpass(called-7, is-2)\n" +
+                "det(fear-4, the-3)\n" +
+                "nsubjpass(called-7, fear-4)\n" +
+                "prep(fear-4, of-5)\n" +
+                "pobj(of-5, cockroaches-6)\n" +
+                "root(ROOT-0, called-7)\n",
     };
 
     assertEquals("Test array and basic answer array lengths mismatch!", testTrees.length, basicAnswers.length);
