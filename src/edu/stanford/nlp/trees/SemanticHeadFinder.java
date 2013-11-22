@@ -118,6 +118,11 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
   }
 
+  @Override
+  public boolean makesCopulaHead() {
+    return makeCopulaHead;
+  }
+
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
