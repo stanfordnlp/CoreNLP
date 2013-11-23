@@ -1,9 +1,7 @@
 package edu.stanford.nlp.trees.tregex;
 
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.util.ArrayMap;
-import edu.stanford.nlp.util.MapFactory;
-import edu.stanford.nlp.util.MutableInteger;
+import edu.stanford.nlp.util.Generics;
 
 import java.util.Map;
 
@@ -17,8 +15,8 @@ class VariableStrings {
   private final IntCounter<String> numVarsSet;
 
   public VariableStrings() {
-    varsToStrings = ArrayMap.newArrayMap();
-    numVarsSet = new IntCounter<String>(MapFactory.<String, MutableInteger>arrayMapFactory());
+    varsToStrings = Generics.newHashMap();
+    numVarsSet = new IntCounter<String>();
   }
 
   public boolean isSet(String o) {
