@@ -671,7 +671,7 @@ public class EnglishGrammaticalRelations {
           // That ... he know
           "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
           // JJ catches a couple of funny NPs with heads like "enough"
-          // Note that we eliminate SBAR which also match an infmod pattern
+          // Note that we eliminate SBAR which also match an vmod pattern
           "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )"
         });
   public static class ClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
@@ -704,7 +704,7 @@ public class EnglishGrammaticalRelations {
           "VP < (SBAR=target < (S !$- (NN < order) < (VP < TO))) !> (VP < (VB|AUX < be)) ",
           "VP < (S=target !$- (NN < order) <: NP) > VP",
           // stop eating
-          // note that we eliminate parentheticals and clauses that could match a partmod
+          // note that we eliminate parentheticals and clauses that could match a vmod
           // the clause !$-- VBG eliminates matches such as "What are you wearing dancing tonight"
           "(VP < (S=target < (VP < VBG ) !< NP !$- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)]) !$-- /^:$/ !$-- VBG))",
           // Detects xcomp(becoming, requirement) in "Hand-holding is becoming an investment banking job requirement"
@@ -1129,19 +1129,23 @@ public class EnglishGrammaticalRelations {
 
 
   /**
-   * The "participial modifier" grammatical relation.  A participial
-   * modifier of an NP, VP, or S is a VP[part] that serves to modify
-   * the meaning of the NP or VP.<p>
+   * The "verb modifier" grammatical relation.  A verb
+   * modifier of an NP, VP, or S is a S/VP[part] that serves to modify
+   * the meaning of the NP or VP.
    * <p/>
    * Examples: <br/>
    * "truffles picked during the spring are tasty" &rarr;
-   * <code>partmod</code>(truffles, picked) <br/>
+   * <code>vmod</code>(truffles, picked) <br>
    * "Bill picked Fred for the team demonstrating his incompetence" &rarr;
-   * <code>partmod</code>(picked, demonstrating)
+   * <code>vmod</code>(picked, demonstrating) <br>
+   * "points to establish are ..." &rarr;
+   * <code>vmod</code>(points, establish) <br>
+   * "who am i to judge" &rarr;
+   * <code>vmod</code>(who, judge) <br>
    */
-  public static final GrammaticalRelation PARTICIPIAL_MODIFIER =
-    new GrammaticalRelation(Language.English, "partmod", "participial modifier",
-        ParticipialModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|VP|S|SINV", tregexCompiler,
+  public static final GrammaticalRelation VERBAL_MODIFIER =
+    new GrammaticalRelation(Language.English, "vmod", "verb modifier",
+        VerbalModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|VP|S|SINV|SBARQ", tregexCompiler,
         new String[] {
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (VP=target < VBG|VBN|VBD $-- @NP|NML|NX)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
           // to get "MBUSA, headquartered ..."
@@ -1154,30 +1158,12 @@ public class EnglishGrammaticalRelations {
           "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
-        });
-  public static class ParticipialModifierGRAnnotation extends GrammaticalRelationAnnotation { }
-
-
-  /**
-   * The "infinitival modifier" grammatical relation.  An infinitival
-   * modifier of an NP is an S/VP that serves to modify
-   * the meaning of the NP.<p>
-   * <p/>
-   * Example: <br/>
-   * "points to establish are ..." &rarr;
-   * <code>infmod</code>(points, establish) <br>
-   * "who am i to judge" &rarr;
-   * <code>infmod</code>(who, judge)
-   */
-  public static final GrammaticalRelation INFINITIVAL_MODIFIER =
-    new GrammaticalRelation(Language.English, "infmod", "infinitival modifier",
-        InfinitivalModifierGRAnnotation.class, MODIFIER, "SBARQ|NP(?:-TMP|-ADV)?", tregexCompiler,
-        new String[] {
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
           "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
           "SBARQ < WHNP < (S=target < (VP <1 TO))",
         });
-  public static class InfinitivalModifierGRAnnotation extends GrammaticalRelationAnnotation { }
+  public static class VerbalModifierGRAnnotation extends GrammaticalRelationAnnotation { }
+
 
   // match "not", "n't", "nt" (for informal writing), or "never" as _complete_ string
   private static final String NOT_PAT = "/^(?i:n[o']?t|never)$/";
@@ -1670,8 +1656,7 @@ public class EnglishGrammaticalRelations {
       ADJECTIVAL_MODIFIER,
       NOUN_COMPOUND_MODIFIER,
       APPOSITIONAL_MODIFIER,
-      PARTICIPIAL_MODIFIER,
-      INFINITIVAL_MODIFIER,
+      VERBAL_MODIFIER,
       ADVERBIAL_MODIFIER,
       NEGATION_MODIFIER,
       MULTI_WORD_EXPRESSION,
