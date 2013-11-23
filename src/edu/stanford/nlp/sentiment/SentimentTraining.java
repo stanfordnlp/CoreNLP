@@ -7,10 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.TwoDimensionalSet;
@@ -139,8 +136,6 @@ public class SentimentTraining {
     boolean runGradientCheck = false;
     boolean runTraining = false;
 
-    boolean filterNeutral = false;
-
     String modelPath = null;
 
     for (int argIndex = 0; argIndex < args.length; ) {
@@ -159,9 +154,6 @@ public class SentimentTraining {
       } else if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-filterNeutral")) {
-        filterNeutral = true;
-        argIndex++;
       } else {
         int newArgIndex = op.setOption(args, argIndex);
         if (newArgIndex == argIndex) {
@@ -173,22 +165,7 @@ public class SentimentTraining {
 
     // read in the trees
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(trainPath);
-    System.err.println("Read in " + trainingTrees.size() + " training trees");
     List<Tree> devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
-    System.err.println("Read in " + devTrees.size() + " dev trees");
-
-    if (filterNeutral) {
-      Filter<Tree> neutralFilter = new Filter<Tree>() {
-        public boolean accept(Tree tree) {
-          int gold = RNNCoreAnnotations.getGoldClass(tree);
-          return gold != 2;
-        }
-      };
-      trainingTrees = CollectionUtils.filterAsList(trainingTrees, neutralFilter);
-      devTrees = CollectionUtils.filterAsList(devTrees, neutralFilter);
-      System.err.println("Filtered training trees: " + trainingTrees.size());
-      System.err.println("Filtered dev trees: " + devTrees.size());
-    }
 
     // TODO: binarize the trees, then collapse the unary chains.
     // Collapsed unary chains always have the label of the top node in
