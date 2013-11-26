@@ -30,7 +30,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return model.totalParamSize();
   }
 
-  private static double sumError(Tree tree) {
+  public double sumError(Tree tree) {
     if (tree.isLeaf()) {
       return 0.0;
     } else if (tree.isPreTerminal()) {
@@ -91,7 +91,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryClassification) {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
-
+        
         binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
       }
     }
@@ -101,7 +101,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
         int numSlices = entry.getValue().numSlices();
-
+        
         binaryTensorTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleTensor(numRows, numCols, numSlices));
       }
     }
@@ -116,7 +116,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       int numCols = entry.getValue().numCols();
       wordVectorD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
     }
-
+    
     // TODO: This part can easily be parallelized
     List<Tree> forwardPropTrees = Generics.newArrayList();
     for (Tree tree : trainingBatch) {
@@ -190,7 +190,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return cost;
   }
 
-  private void backpropDerivativesAndError(Tree tree,
+  private void backpropDerivativesAndError(Tree tree, 
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
                                            TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD,
@@ -200,7 +200,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     backpropDerivativesAndError(tree, binaryTD, binaryCD, binaryTensorTD, unaryCD, wordVectorD, delta);
   }
 
-  private void backpropDerivativesAndError(Tree tree,
+  private void backpropDerivativesAndError(Tree tree, 
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
                                            TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD,
@@ -257,12 +257,12 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       } else {
         binaryCD.put(leftCategory, rightCategory, binaryCD.get(leftCategory, rightCategory).plus(localCD));
       }
-
+      
       SimpleMatrix currentVectorDerivative = NeuralUtils.elementwiseApplyTanhDerivative(currentVector);
       SimpleMatrix deltaFromClass = model.getBinaryClassification(leftCategory, rightCategory).transpose().mult(deltaClass);
       deltaFromClass = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).elementMult(currentVectorDerivative);
       SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
-
+      
       SimpleMatrix leftVector = RNNCoreAnnotations.getNodeVector(tree.children()[0]);
       SimpleMatrix rightVector = RNNCoreAnnotations.getNodeVector(tree.children()[1]);
       SimpleMatrix childrenVector = NeuralUtils.concatenateWithBias(leftVector, rightVector);
@@ -352,7 +352,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       if (model.op.useTensors) {
         SimpleTensor tensor = model.getBinaryTensor(leftCategory, rightCategory);
         SimpleMatrix tensorIn = NeuralUtils.concatenate(leftVector, rightVector);
-        SimpleMatrix tensorOut = tensor.bilinearProducts(tensorIn);
+        SimpleMatrix tensorOut = tensor.bilinearProducts(tensorIn);        
         nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector).plus(tensorOut));
       } else {
         nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector));
