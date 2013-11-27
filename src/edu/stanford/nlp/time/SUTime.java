@@ -1935,10 +1935,11 @@ public class SUTime {
       if (base instanceof PartialTime && t instanceof PartialTime) {
         return new OrdinalTime(base.intersect(t), n);
       } else {
-        return new RelativeTime(this, TemporalOp.INTERSECT, t);
+        return new RelativeTime(t, TemporalOp.INTERSECT, this);
       }
     }
     public Temporal resolve(Time t, int flags) {
+      if (t == null) return this; // No resolving to be done?
       if (base instanceof PartialTime) {
         PartialTime pt = (PartialTime) base.resolve(t,flags);
         List<Temporal> list = pt.toList();
@@ -1946,8 +1947,9 @@ public class SUTime {
           return list.get(n-1);
         }
       } else if (base instanceof Duration) {
-        Duration d = ((Duration) base).multiplyBy(n);
-//        return t.offset(d,RELATIVE_OFFSET_INEXACT);
+        Duration d = ((Duration) base).multiplyBy(n-1);
+        Time temp = t.getRange().begin();
+        return temp.offset(d,RELATIVE_OFFSET_INEXACT).reduceGranularityTo(d.getDuration());
       }
       return this;
     }
@@ -2925,6 +2927,8 @@ public class SUTime {
         PartialTime res = new PartialTime(p);
         if (dtz != null) return res.setTimeZone(dtz);
         else return res;
+      } else if (t instanceof OrdinalTime) {
+        return (Time) t.resolve(this);
       } else if (t instanceof GroundedTime) {
         return t.intersect(this);
       } else if (t instanceof RelativeTime) {
@@ -4274,7 +4278,6 @@ public class SUTime {
       if (begin != null) {
         Range r = begin.getRange();
         if (r != null && !begin.equals(r.begin)) {
-          // return r.beginTime();
           return r.begin;
         }
       }
