@@ -62,6 +62,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       }
     }
 
+    private String parseQuotedString(String str) {
+      // Trim start/end quote and unescape \"
+      return str.substring(1,str.length()-1).replaceAll("\u005c\u005c\u005c\u005c\u005c"", "\u005c"");
+    }
+
   final public List<SequenceMatchRules.Rule> RuleList(Env env) throws ParseException {
   List<SequenceMatchRules.Rule> rules = new ArrayList<SequenceMatchRules.Rule>();
   SequenceMatchRules.Rule rule;
@@ -333,7 +338,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       break;
     case STR:
       tok = jj_consume_token(STR);
-                      {if (true) return new Expressions.PrimitiveValue<String>("STRING", tok.image.substring(1,tok.image.length()-1) );}
+                      {if (true) return new Expressions.PrimitiveValue<String>("STRING", parseQuotedString(tok.image) );}
       break;
     case NONNEGINT:
     case INT:
@@ -750,7 +755,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STR:
       tok = jj_consume_token(STR);
-                      {if (true) return tok.image.substring(1,tok.image.length()-1);}
+                      {if (true) return parseQuotedString(tok.image);}
       break;
     case NONNEGINT:
     case INT:
@@ -1771,7 +1776,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case STR:
       value = jj_consume_token(STR);
-                  {if (true) return value.image.substring(1,value.image.length()-1);}
+                  {if (true) return parseQuotedString(value.image);}
       break;
     case IDENTIFIER:
       value = jj_consume_token(IDENTIFIER);
@@ -1794,12 +1799,12 @@ String VarName() : {
   | ( value = <REGEXVAR> )
     { return value.image; }
   | ( value = <STR> )
-    { return value.image.substring(1,value.image.length()-1); }
+    { return parseQuotedString(value.image); }
 } */
   final public String RelaxedStringNoIdentifier() throws ParseException {
    Token value = null;
     value = jj_consume_token(STR);
-                  {if (true) return value.image.substring(1,value.image.length()-1);}
+                  {if (true) return parseQuotedString(value.image);}
     throw new Error("Missing return statement in function");
   }
 
