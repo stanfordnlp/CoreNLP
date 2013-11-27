@@ -11,11 +11,11 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.metrics.TreeSpanScoring;
+import edu.stanford.nlp.rnn.RNNUtils;
 import edu.stanford.nlp.trees.DeepTree;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
@@ -61,7 +61,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     // TODO: factor out getting the words
     SimpleMatrix left = (span.getSource() < 0) ? dvModel.getStartWordVector() : dvModel.getWordVector(words.get(span.getSource()));
     SimpleMatrix right = (span.getTarget() >= words.size()) ? dvModel.getEndWordVector() : dvModel.getWordVector(words.get(span.getTarget()));
-    return NeuralUtils.concatenate(childVec, left, right);
+    return RNNUtils.concatenate(childVec, left, right);
   }
 
   public static void outputSpans(Tree tree) {
@@ -104,7 +104,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       Tree wordNode = tree.children()[0];
       String word = wordNode.label().value();
       SimpleMatrix wordVector = dvModel.getWordVector(word);
-      wordVector = NeuralUtils.elementwiseApplyTanh(wordVector);
+      wordVector = RNNUtils.elementwiseApplyTanh(wordVector);
       nodeVectors.put(tree, wordVector);
       return;
     }
@@ -118,9 +118,9 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
 
     SimpleMatrix childVec;
     if (tree.children().length == 2) {
-      childVec = NeuralUtils.concatenateWithBias(nodeVectors.get(tree.children()[0]), nodeVectors.get(tree.children()[1]));
+      childVec = RNNUtils.concatenateWithBias(nodeVectors.get(tree.children()[0]), nodeVectors.get(tree.children()[1]));
     } else {
-      childVec = NeuralUtils.concatenateWithBias(nodeVectors.get(tree.children()[0]));
+      childVec = RNNUtils.concatenateWithBias(nodeVectors.get(tree.children()[0]));
     }
     if (op.trainOptions.useContextWords) {
       childVec = concatenateContextWords(childVec, tree.getSpan(), words);
@@ -135,7 +135,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       throw new NoSuchParseException(error);
     }
     SimpleMatrix currentVector = W.mult(childVec);
-    currentVector = NeuralUtils.elementwiseApplyTanh(currentVector);
+    currentVector = RNNUtils.elementwiseApplyTanh(currentVector);
     nodeVectors.put(tree, currentVector);
 
     SimpleMatrix scoreW = dvModel.getScoreWForNode(tree);
@@ -147,7 +147,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       throw new NoSuchParseException(error);
     }
     double score = scoreW.dot(currentVector);
-    //score = NeuralUtils.sigmoid(score);
+    //score = RNNUtils.sigmoid(score);
     scores.put(tree, score);
     //System.err.print(Double.toString(score)+" ");
   }
@@ -320,27 +320,27 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     double[] localDerivativeGood;
     double[] localDerivativeB;
     if (DVModel.TRAIN_WORD_VECTORS) {
-      localDerivativeGood = NeuralUtils.paramsToVector(theta.length,
-                                                       binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
-                                                       binaryScoreDerivativesG.valueIterator(),
-                                                       unaryScoreDerivativesG.values().iterator(),
-                                                       wordVectorDerivativesG.values().iterator());
+      localDerivativeGood = RNNUtils.paramsToVector(theta.length,
+                                                    binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
+                                                    binaryScoreDerivativesG.valueIterator(),
+                                                    unaryScoreDerivativesG.values().iterator(),
+                                                    wordVectorDerivativesG.values().iterator());
 
-      localDerivativeB = NeuralUtils.paramsToVector(theta.length,
-                                                    binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
-                                                    binaryScoreDerivativesB.valueIterator(),
-                                                    unaryScoreDerivativesB.values().iterator(),
-                                                    wordVectorDerivativesB.values().iterator());
+      localDerivativeB = RNNUtils.paramsToVector(theta.length,
+                                                 binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
+                                                 binaryScoreDerivativesB.valueIterator(),
+                                                 unaryScoreDerivativesB.values().iterator(),
+                                                 wordVectorDerivativesB.values().iterator());
     } else {
-      localDerivativeGood = NeuralUtils.paramsToVector(theta.length,
-                                                       binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
-                                                       binaryScoreDerivativesG.valueIterator(),
-                                                       unaryScoreDerivativesG.values().iterator());
+      localDerivativeGood = RNNUtils.paramsToVector(theta.length,
+                                                    binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
+                                                    binaryScoreDerivativesG.valueIterator(),
+                                                    unaryScoreDerivativesG.values().iterator());
 
-      localDerivativeB = NeuralUtils.paramsToVector(theta.length,
-                                                    binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
-                                                    binaryScoreDerivativesB.valueIterator(),
-                                                    unaryScoreDerivativesB.values().iterator());
+      localDerivativeB = RNNUtils.paramsToVector(theta.length,
+                                                 binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
+                                                 binaryScoreDerivativesB.valueIterator(),
+                                                 unaryScoreDerivativesB.values().iterator());
     }
 
     // correct - highest
@@ -413,7 +413,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       return;
     }
     SimpleMatrix currentVector = nodeVectors.get(tree);
-    SimpleMatrix currentVectorDerivative = NeuralUtils.elementwiseApplyTanhDerivative(currentVector);
+    SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
 
     SimpleMatrix scoreW = dvModel.getScoreWForNode(tree);
     currentVectorDerivative = currentVectorDerivative.elementMult(scoreW.transpose());
@@ -434,7 +434,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
 
       SimpleMatrix leftVector = nodeVectors.get(tree.children()[0]);
       SimpleMatrix rightVector = nodeVectors.get(tree.children()[1]);
-      SimpleMatrix childrenVector = NeuralUtils.concatenateWithBias(leftVector, rightVector);
+      SimpleMatrix childrenVector = RNNUtils.concatenateWithBias(leftVector, rightVector);
       if (op.trainOptions.useContextWords) {
         childrenVector = concatenateContextWords(childrenVector, tree.getSpan(), words);
       }
@@ -442,8 +442,8 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       binaryW_dfs.put(leftLabel, rightLabel, binaryW_dfs.get(leftLabel, rightLabel).plus(W_df));
 
       // and then recurse
-      SimpleMatrix leftDerivative = NeuralUtils.elementwiseApplyTanhDerivative(leftVector);
-      SimpleMatrix rightDerivative = NeuralUtils.elementwiseApplyTanhDerivative(rightVector);
+      SimpleMatrix leftDerivative = RNNUtils.elementwiseApplyTanhDerivative(leftVector);
+      SimpleMatrix rightDerivative = RNNUtils.elementwiseApplyTanhDerivative(rightVector);
       SimpleMatrix leftWTDelta = WTdelta.extractMatrix(0, deltaCurrent.numRows(), 0, 1);
       SimpleMatrix rightWTDelta = WTdelta.extractMatrix(deltaCurrent.numRows(), deltaCurrent.numRows() * 2, 0, 1);
       backpropDerivative(tree.children()[0], words, nodeVectors,
@@ -460,7 +460,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       unaryScoreDerivatives.put(childLabel,unaryScoreDerivatives.get(childLabel).plus(currentVector.transpose()));
 
       SimpleMatrix childVector = nodeVectors.get(tree.children()[0]);
-      SimpleMatrix childVectorWithBias = NeuralUtils.concatenateWithBias(childVector);
+      SimpleMatrix childVectorWithBias = RNNUtils.concatenateWithBias(childVector);
       if (op.trainOptions.useContextWords) {
         childVectorWithBias = concatenateContextWords(childVectorWithBias, tree.getSpan(), words);
       }
@@ -474,7 +474,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       unaryW_dfs.put(childLabel,unaryW_dfs.get(childLabel).plus(W_df));
 
       // and then recurse
-      SimpleMatrix childDerivative = NeuralUtils.elementwiseApplyTanhDerivative(childVector);
+      SimpleMatrix childDerivative = RNNUtils.elementwiseApplyTanhDerivative(childVector);
       //SimpleMatrix childDerivative = childVector;
       SimpleMatrix childWTDelta = WTdelta.extractMatrix(0, deltaCurrent.numRows(), 0, 1);
       backpropDerivative(tree.children()[0], words, nodeVectors,
