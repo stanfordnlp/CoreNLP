@@ -1949,7 +1949,7 @@ public class SUTime {
       } else if (base instanceof Duration) {
         Duration d = ((Duration) base).multiplyBy(n-1);
         Time temp = t.getRange().begin();
-        return temp.offset(d,RELATIVE_OFFSET_INEXACT).reduceGranularityTo(d.getDuration());
+        return temp.offset(d,0).reduceGranularityTo(d.getDuration());
       }
       return this;
     }
@@ -2708,7 +2708,15 @@ public class SUTime {
     }
 
     public PartialTime reduceGranularityTo(Duration granularity) {
-      Partial p = JodaTimeUtils.discardMoreSpecificFields( base,
+      Partial pbase = base;
+      if (JodaTimeUtils.hasField(granularity.getJodaTimePeriod(), DurationFieldType.weeks())) {
+        // Make sure the partial time has weeks in it
+        if (!JodaTimeUtils.hasField(pbase, DateTimeFieldType.weekOfWeekyear())) {
+          // Add week year to it
+          pbase = JodaTimeUtils.resolveWeek(pbase);
+        }
+      }
+      Partial p = JodaTimeUtils.discardMoreSpecificFields( pbase,
         JodaTimeUtils.getMostSpecific(granularity.getJodaTimePeriod()) );
       return new PartialTime(this,p);
     }
@@ -2928,7 +2936,9 @@ public class SUTime {
         if (dtz != null) return res.setTimeZone(dtz);
         else return res;
       } else if (t instanceof OrdinalTime) {
-        return (Time) t.resolve(this);
+        Temporal temp = t.resolve(this);
+        if (temp instanceof PartialTime) return (Time) temp;
+        else return t.intersect(this);
       } else if (t instanceof GroundedTime) {
         return t.intersect(this);
       } else if (t instanceof RelativeTime) {
@@ -3006,15 +3016,15 @@ public class SUTime {
             p = new PartialTime(p, p2);
             unsupported = unsupported.withYears(0);
           }
-          if (unsupported.getDays() != 0 && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfYear()) && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfMonth())
-              && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfWeek()) && JodaTimeUtils.hasField(p.base, DateTimeFieldType.monthOfYear())) {
-            if (p.getGranularity().compareTo(DAY) <= 0) {
-              // We are granular enough for this
-              Partial p2 = p.base.with(DateTimeFieldType.dayOfMonth(), unsupported.getDays());
-              p = new PartialTime(p, p2);
-              unsupported = unsupported.withDays(0);
-            }
-          }
+//          if (unsupported.getDays() != 0 && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfYear()) && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfMonth())
+//              && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfWeek()) && JodaTimeUtils.hasField(p.base, DateTimeFieldType.monthOfYear())) {
+//            if (p.getGranularity().compareTo(DAY) <= 0) {
+//              // We are granular enough for this
+//              Partial p2 = p.base.with(DateTimeFieldType.dayOfMonth(), unsupported.getDays());
+//              p = new PartialTime(p, p2);
+//              unsupported = unsupported.withDays(0);
+//            }
+//          }
           if (!unsupported.equals(Period.ZERO)) {
             t = new RelativeTime(p, new DurationWithFields(unsupported));
             t.approx = this.approx;

@@ -607,16 +607,16 @@ public class TimeFormatter {
     }
 
     private void updateTimeZoneNames(Locale locale) {
-      long hymillis = 182*24*60*60*1000;
+      long time1 = new SUTime.IsoDate(2013,1,1).getJodaTimeInstant().getMillis();
+      long time2 = new SUTime.IsoDate(2013,6,1).getJodaTimeInstant().getMillis();
       CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<String, DateTimeZone>();
       for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
-        long time = System.currentTimeMillis();
-        tzMap.add(dtz.getShortName(time, locale).toLowerCase(), dtz);
-        tzMap.add(dtz.getName(time, locale).toLowerCase(), dtz);
+        // standard timezones
+        tzMap.add(dtz.getShortName(time1, locale).toLowerCase(), dtz);
+        tzMap.add(dtz.getName(time1, locale).toLowerCase(), dtz);
         // Add about half a year to get day light savings timezones...
-        time += hymillis;
-        tzMap.add(dtz.getShortName(time, locale).toLowerCase(), dtz);
-        tzMap.add(dtz.getName(time, locale).toLowerCase(), dtz);
+        tzMap.add(dtz.getShortName(time2, locale).toLowerCase(), dtz);
+        tzMap.add(dtz.getName(time2, locale).toLowerCase(), dtz);
 //      tzMap.add(dtz.getNameKey(time).toLowerCase(), dtz);
 //      tzMap.add(dtz.getID().toLowerCase(), dtz);
       }
