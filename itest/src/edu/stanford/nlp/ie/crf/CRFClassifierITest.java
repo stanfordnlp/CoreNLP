@@ -3,9 +3,6 @@ package edu.stanford.nlp.ie.crf;
 import java.util.*;
 
 import junit.framework.TestCase;
-
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.Triple;
 
 
@@ -16,6 +13,8 @@ import edu.stanford.nlp.util.Triple;
 public class CRFClassifierITest extends TestCase {
 
   private static final String nerPath = "/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
+
+  private static final String nerJarPath = "/edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
 
   /* The extra spaces and tab (after fate) are there to test space preservation.
    * Each item of the top level array is an array of 7 Strings:
@@ -263,23 +262,21 @@ public class CRFClassifierITest extends TestCase {
                   },
           };
 
-  private static final int[][] offsets = { { 2, 3}, { 3, 14 } , { 16, 21}, {22, 24}, {24, 25} };
-
   /** I made this all one test or else you get problems in memory use if the
    *  JUnit stuff tries to run tests in parallel....
    */
   public void testCRF() {
-    CRFClassifier<CoreLabel> crf = CRFClassifier.getClassifierNoExceptions(
+    CRFClassifier crf = CRFClassifier.getClassifierNoExceptions(
         System.getProperty("ner.model", nerPath));
     runCRFTest(crf);
 
-    crf = CRFClassifier.getDefaultClassifier();
+    crf = CRFClassifier.getJarClassifier(nerJarPath, null);
     runCRFTest(crf);
   }
 
 
   @SuppressWarnings({"AssertEqualsBetweenInconvertibleTypes"})
-  public static void runCRFTest(CRFClassifier<CoreLabel> crf) {
+  public void runCRFTest(CRFClassifier crf) {
     for (int i = 0; i < testTexts.length; i++) {
       String[] testText = testTexts[i];
 
@@ -310,28 +307,13 @@ public class CRFClassifierITest extends TestCase {
       List<Triple<String,Integer,Integer>> trip = crf.classifyToCharacterOffsets(testText[0]);
       // I couldn't work out how to avoid a type warning in the next line, sigh [cdm 2009]
       assertEquals("CRF buggy on classifyToCharacterOffsets", Arrays.asList(testTrip[i]), trip);
-
       if (i == 0) {
-        // cdm 2013: I forget exactly what this was but something about the reduplicated period at the end of Jr.?
         Triple<String,Integer,Integer> x = trip.get(trip.size() - 1);
         assertEquals("CRF buggy on classifyToCharacterOffsets abbreviation period",
                 'r', testText[0].charAt(x.third() - 1));
       }
-
-      if (i == 3) {
-        // check that tokens have okay offsets
-        List<List<CoreLabel>> doc = crf.classify(testText[0]);
-        assertEquals("Wrong number of sentences", 1, doc.size());
-        List<CoreLabel> tokens = doc.get(0);
-        assertEquals("Wrong number of tokens", offsets.length, tokens.size());
-
-        for (int j = 0, sz = tokens.size(); j < sz; j++) {
-          CoreLabel token = tokens.get(j);
-          assertEquals("Wrong begin offset", offsets[j][0], (int) token.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));
-          assertEquals("Wrong end offset", offsets[j][1], (int) token.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-        }
-      }
     }
+
   }
 
 }
