@@ -69,11 +69,6 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         return Long.valueOf(str);
       }
     }
-
-    private String parseQuotedString(String str) {
-      // Trim start/end quote and unescape \"
-      return str.substring(1,str.length()-1).replaceAll("\\\\\"", "\"");
-    }
 }
 
 PARSER_END(TokenSequenceParser)
@@ -265,7 +260,7 @@ Value BasicValue(Env env) : {
 }   {
         tok = <REGEX> { return new Expressions.RegexValue(/*"REGEX",*/ tok.image.substring(1,tok.image.length()-1)); }
         |
-        tok = <STR> { return new Expressions.PrimitiveValue<String>("STRING", parseQuotedString(tok.image) ); }
+        tok = <STR> { return new Expressions.PrimitiveValue<String>("STRING", tok.image.substring(1,tok.image.length()-1) ); }
         |
         tok = IntegerToken() { return new Expressions.PrimitiveValue<Number>("INTEGER", parseInteger(tok.image)); }
         |
@@ -502,7 +497,7 @@ SequencePattern.PatternExpr SeqRegex(Env env) : {
 Object StringNumberValue(Env env) : {
 	Token tok = null;
 }   {
-        tok = <STR> { return parseQuotedString(tok.image); }
+        tok = <STR> { return tok.image.substring(1,tok.image.length()-1); }
         |
         tok = IntegerToken() { return parseInteger(tok.image); }
         |
@@ -1025,7 +1020,7 @@ Token RelaxedStringToken() : {
 String RelaxedString() : {
    Token value = null;
 } {
-  value = <STR> { return parseQuotedString(value.image); }
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
   | ( value = <IDENTIFIER> )
     { return value.image; }
 }
@@ -1039,11 +1034,11 @@ String VarName() : {
   | ( value = <REGEXVAR> )
     { return value.image; }
   | ( value = <STR> )
-    { return parseQuotedString(value.image); }
+    { return value.image.substring(1,value.image.length()-1); }
 } */
 
 String RelaxedStringNoIdentifier() : {
    Token value = null;
 } {
-  value = <STR> { return parseQuotedString(value.image); }
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
 }
