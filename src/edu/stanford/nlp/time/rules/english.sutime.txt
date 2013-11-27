@@ -539,6 +539,8 @@
   # Compositional date rules
 
   ENV.defaults["priority"] = 0
+  { ( /the/? ($NUM_ORD) ([ { temporal::IS_TIME_UNIT } ]) ) => OrdinalTime($2[0].temporal.value, $1[0].numcompvalue) }
+  { ( /the/? ($NUM_ORD) ([ { temporal::DAYOFWEEK } ]) ) => OrdinalTime($2[0].temporal.value, $1[0].numcompvalue) }
 
   { name: "composite-date-expression-1a",
 	priority: 1,
