@@ -1903,6 +1903,11 @@ public class SUTime {
       this.n = n;
     }
 
+    public OrdinalTime(Temporal base, long n) {
+      this.base = base;
+      this.n = (int) n;
+    }
+
     public Time add(Duration offset) {
       return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
     }
@@ -1926,14 +1931,6 @@ public class SUTime {
       return null;
     }
 
-/*    public Temporal intersect(Temporal t) {
-      if (base instanceof PartialTime && t instanceof PartialTime) {
-        return new OrdinalTime(base.intersect(t), n);
-      } else {
-        return new RelativeTime(this, TemporalOp.INTERSECT, t);
-      }
-    }  */
-
     public Time intersect(Time t) {
       if (base instanceof PartialTime && t instanceof PartialTime) {
         return new OrdinalTime(base.intersect(t), n);
@@ -1943,11 +1940,14 @@ public class SUTime {
     }
     public Temporal resolve(Time t, int flags) {
       if (base instanceof PartialTime) {
-        PartialTime pt = (PartialTime) base;
+        PartialTime pt = (PartialTime) base.resolve(t,flags);
         List<Temporal> list = pt.toList();
         if (list != null && list.size() >= n) {
           return list.get(n-1);
         }
+      } else if (base instanceof Duration) {
+        Duration d = ((Duration) base).multiplyBy(n);
+//        return t.offset(d,RELATIVE_OFFSET_INEXACT);
       }
       return this;
     }
@@ -2889,11 +2889,13 @@ public class SUTime {
             return null;
           }
         }
-        while (candidate.get(DateTimeFieldType.monthOfYear()) == base.get(DateTimeFieldType.monthOfYear())) {
-          list.add(new PartialTime(this, candidate));
-          pt = JodaTimeUtils.setField(pt, DateTimeFieldType.dayOfMonth(), pt.get(DateTimeFieldType.dayOfMonth()) + 7);
-          candidate = JodaTimeUtils.resolveDowToDay(base, pt);
-        }
+        try {
+          while (candidate.get(DateTimeFieldType.monthOfYear()) == base.get(DateTimeFieldType.monthOfYear())) {
+            list.add(new PartialTime(this, candidate));
+            pt = JodaTimeUtils.setField(pt, DateTimeFieldType.dayOfMonth(), pt.get(DateTimeFieldType.dayOfMonth()) + 7);
+            candidate = JodaTimeUtils.resolveDowToDay(base, pt);
+          }
+        } catch (IllegalFieldValueException ex) {}
         return list;
       } else {
         return null;
