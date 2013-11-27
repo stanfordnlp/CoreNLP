@@ -642,6 +642,16 @@ public class JodaTimeUtils {
     }
     return p1;
   }
+  public static Partial resolveWeek(Partial p)
+  {
+    // Figure out week
+    if (p.isSupported(DateTimeFieldType.dayOfMonth()) && p.isSupported(DateTimeFieldType.monthOfYear()) && p.isSupported(DateTimeFieldType.year())) {
+      Instant t = getInstant(p);
+//      return getPartial(t.toInstant(), p.without(DateTimeFieldType.dayOfMonth()).without(DateTimeFieldType.monthOfYear()).with(DateTimeFieldType.weekOfWeekyear(), 1));
+      return getPartial(t.toInstant(), p.with(DateTimeFieldType.weekOfWeekyear(), 1));
+    } else return p;
+  }
+
   public static Instant getInstant(Partial p)
   {
     if (p == null) return null;
