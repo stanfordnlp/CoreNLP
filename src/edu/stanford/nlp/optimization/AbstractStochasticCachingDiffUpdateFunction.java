@@ -79,6 +79,7 @@ public abstract class AbstractStochasticCachingDiffUpdateFunction
    *
    * @param x unscaled weights
    * @param batch indices of which samples to compute function over
+   * @return value of function at specified x (not scaled) for samples
    */
   public abstract void calculateStochasticGradient(double[] x, int[] batch);
 
