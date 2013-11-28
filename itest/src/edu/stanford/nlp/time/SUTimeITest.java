@@ -345,7 +345,8 @@ public class SUTimeITest extends TestCase {
         "It is 8:43 PST on 6/12/2008.\n" +
         "It is 6:53:32 PDT on 7-16-2010.\n" +
         "ISO partial datetime 2008-05-16T09 Beijing Time.\n" +
-        "It is 2:14:12 MSK\n";
+        "It is 2:14:12 MSK\n" +
+        "The time is 1400D\n";
 
     // set up expected results
     Iterator<Timex> expectedTimexes =
@@ -358,7 +359,9 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"2008-06-12T08:43-0800\" type=\"TIME\">8:43 PST on 6/12/2008</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"2010-07-16T06:53:32-0800\" type=\"TIME\">6:53:32 PDT on 7-16-2010</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t8\" value=\"2008-05-16T09\" type=\"TIME\">2008-05-16T09</TIMEX3>"),  // TODO: Beijing Time
-        Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"T02:14:12+0300\" type=\"TIME\">2:14:12 MSK</TIMEX3>")).iterator();
+        Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"T02:14:12+0300\" type=\"TIME\">2:14:12 MSK</TIMEX3>"),
+        Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"T14:00+0400\" type=\"TIME\">1400D</TIMEX3>")
+      ).iterator();
 
     Iterator<Timex> expectedTimexesResolved =
       Arrays.asList(
@@ -366,11 +369,13 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"2004-03-04T18:32:56-0500\" type=\"TIME\">2004-03-04T18:32:56 Eastern Standard Time</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"2010-02-17T16:30\" type=\"TIME\">4:30pm</TIMEX3>"), // TODO: Mountain Time
         Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"2010-02-17T09:30\" type=\"TIME\">9:30 am</TIMEX3>"),// TODO:  Pacific Time
-        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"2010-02-17T13:23:42\" type=\"TIME\">T13:23:42 MDT</TIMEX3>"), // TODO: timezone was incompatible with date
+        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"2010-02-17T13:23:42-0700\" type=\"TIME\">T13:23:42 MDT</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"2008-06-12T08:43-0800\" type=\"TIME\">8:43 PST on 6/12/2008</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"2010-07-16T06:53:32-0800\" type=\"TIME\">6:53:32 PDT on 7-16-2010</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t8\" value=\"2008-05-16T09\" type=\"TIME\">2008-05-16T09</TIMEX3>"),  // TODO: Beijing Time
-        Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"2010-02-17T02:14:12\" type=\"TIME\">2:14:12 MSK</TIMEX3>")).iterator(); // TODO: timezone was incompatible with date
+        Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"2010-02-17T02:14:12+0300\" type=\"TIME\">2:14:12 MSK</TIMEX3>"),
+        Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"2010-02-17T14:00+0400\" type=\"TIME\">1400D</TIMEX3>")
+      ).iterator();
 
 
     Annotation document = createDocument(testText);
