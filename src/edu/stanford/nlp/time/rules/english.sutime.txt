@@ -319,40 +319,6 @@
   ENV.defaults["priority"] = 0
   ENV.defaults["locale"] = "en"
 
-  // Military times with time zones from http://www.timeanddate.com/library/abbreviations/timezones/military/
-   MILITARY_TIME_ZONE_MAP = {
-      "A": 1,
-      "B": 2,
-      "C": 3,
-      "D": 4,
-      "E": 5,
-      "F": 6,
-      "G": 7,
-      "H": 8,
-      "I": 9,
-      "K": 10,
-      "L": 11,
-      "M": 12,
-      "N": -1,
-      "O": -2,
-      "P": -3,
-      "Q": -4,
-      "R": -5,
-      "S": -6,
-      "T": -7,
-      "U": -8,
-      "V": -9,
-      "W": -10,
-      "X": -11,
-      "Y": -12,
-      "Z": 0
-   }
-
-   {
-     ruleType: "text", pattern: /(\d\d)(\d\d)([A-Z])/,
-     result: { type: "Temporal", value: IsoTime($1, $2, NIL).setTimeZone( MILITARY_TIME_ZONE_MAP[$3] ) }
-   }
-
   # ISO date/times
   # TODO: Support other timezone formats
   { ruleType: "time", pattern: /yyyy-?MM-?dd-?'T'HH(:?mm(:?ss([.,]S{1,3})?)?)?(Z)?/ }
