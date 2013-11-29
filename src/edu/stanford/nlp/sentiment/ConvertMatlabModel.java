@@ -62,7 +62,7 @@ public class ConvertMatlabModel {
     RNNOptions op = new RNNOptions();
     op.lowercaseWordVectors = false;
 
-    wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(25, 1, -0.00001, 0.00001, new Random()));
+    wordVectors.put(SentimentModel.UNKNOWN_WORD, SentimentModel.randomWordVector(25, new Random()));
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);
     model.saveSerialized("matlab.ser.gz");
