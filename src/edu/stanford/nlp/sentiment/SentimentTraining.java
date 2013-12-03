@@ -88,8 +88,7 @@ public class SentimentTraining {
           break;
         }
 
-        if (epoch > 0 && epoch % model.op.trainOptions.debugOutputEpochs == 0) {
-
+        if (batch == 0 && epoch > 0 && epoch % model.op.trainOptions.debugOutputEpochs == 0) {
           double score = 0.0;
           if (devTrees != null) {
             Evaluate eval = new Evaluate(model);
@@ -117,7 +116,6 @@ public class SentimentTraining {
       long totalElapsed = timing.report();
       
       if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
-        // no need to debug output, we're done now
         System.err.println("Max training time exceeded, exiting");
         break;
       }
