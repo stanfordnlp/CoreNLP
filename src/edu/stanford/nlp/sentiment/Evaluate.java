@@ -81,10 +81,12 @@ public class Evaluate {
         length += countLengthAccuracy(child);
       }
     }
-    if (gold.equals(predicted)) {
-      lengthLabelsCorrect.incrementCount(length);
-    } else {
-      lengthLabelsIncorrect.incrementCount(length);
+    if (gold >= 0) {
+      if (gold.equals(predicted)) {
+        lengthLabelsCorrect.incrementCount(length);
+      } else {
+        lengthLabelsIncorrect.incrementCount(length);
+      }
     }
     return length;
   }
@@ -98,23 +100,27 @@ public class Evaluate {
     }
     Integer gold = RNNCoreAnnotations.getGoldClass(tree);
     Integer predicted = RNNCoreAnnotations.getPredictedClass(tree);
-    if (gold.equals(predicted)) {
-      labelsCorrect++;
-    } else {
-      labelsIncorrect++;
+    if (gold >= 0) {
+      if (gold.equals(predicted)) {
+        labelsCorrect++;
+      } else {
+        labelsIncorrect++;
+      }
+      labelConfusion[gold][predicted]++;
     }
-    labelConfusion[gold][predicted]++;
   }
 
   private void countRoot(Tree tree) {
     Integer gold = RNNCoreAnnotations.getGoldClass(tree);
     Integer predicted = RNNCoreAnnotations.getPredictedClass(tree);
-    if (gold.equals(predicted)) {
-      rootLabelsCorrect++;
-    } else {
-      rootLabelsIncorrect++;
+    if (gold >= 0) {
+      if (gold.equals(predicted)) {
+        rootLabelsCorrect++;
+      } else {
+        rootLabelsIncorrect++;
+      }
+      rootLabelConfusion[gold][predicted]++;
     }
-    rootLabelConfusion[gold][predicted]++;
   }
 
   public double exactNodeAccuracy() {
