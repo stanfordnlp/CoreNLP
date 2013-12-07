@@ -60,7 +60,6 @@ import static edu.stanford.nlp.time.SUTimeMain.InputType.TIMEBANK_CSV;
  * -i &lt;directory with english data&gt;
  * -o &lt;output directory&gt;
  * -eval &lt;evaluation script&gt;
- * -tempeval2.dct dct file (with document creation times)
  *
  * TEMPEVAL2 (download from http://timeml.org/site/timebank/timebank.html)
  * Evaluation is token based.
@@ -151,7 +150,6 @@ import static edu.stanford.nlp.time.SUTimeMain.InputType.TIMEBANK_CSV;
  * @author Angel Chang
  */
 public class SUTimeMain {
-  protected static String PYTHON = null;
 
   private SUTimeMain() {} // static class
 
@@ -796,17 +794,10 @@ public class SUTimeMain {
     }
     processTempEval2Tab(pipeline, in, out, docDates);
     if (eval != null) {
-      List<String> command = new ArrayList<String>();
-      if (PYTHON != null) {
-        command.add(PYTHON);
-      }
-      command.add(eval);
-      command.add(in + "/base-segmentation.tab");
-      command.add(in + "/timex-extents.tab");
-      command.add(out + "/timex-extents.res.tab");
-      command.add(in + "/timex-attributes.tab");
-      command.add(out + "/timex-attrs.res.tab");
-      ProcessBuilder pb = new ProcessBuilder(command);
+      ProcessBuilder pb = new ProcessBuilder( "c:\\tools\\Python27\\python",
+              eval, in + "/base-segmentation.tab",
+              in + "/timex-extents.tab", out + "/timex-extents.res.tab",
+              in + "/timex-attributes.tab", out + "/timex-attrs.res.tab");
       FileOutputStream evalFileOutput = new FileOutputStream(out + "/scores.txt");
       Writer output = new OutputStreamWriter(
               new TeeStream(System.out, evalFileOutput));
@@ -1054,9 +1045,8 @@ public class SUTimeMain {
     String date = props.getProperty("date");
     String dct = props.getProperty("tempeval2.dct");
     String out = props.getProperty("o");
-    String inputTypeStr = props.getProperty("in.type", InputType.TEXT.name());
+    String inputTypeStr = props.getProperty("in.type", TIMEBANK_CSV.name());
     String eval = props.getProperty("eval");
-    PYTHON = props.getProperty("python", PYTHON);
     InputType inputType = InputType.valueOf(inputTypeStr);
     AnnotationPipeline pipeline;
     switch (inputType) {

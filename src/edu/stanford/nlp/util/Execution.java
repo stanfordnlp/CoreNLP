@@ -347,17 +347,13 @@ public class Execution {
         continue;
       }
 
-      boolean someOptionFilled = false;
-      boolean someOptionFound = false;
       for (Field f : fields) {
         Option o = f.getAnnotation(Option.class);
         if (o != null) {
-          someOptionFound = true;
           //(check if field is static)
           if ((f.getModifiers() & Modifier.STATIC) == 0 && instances == null) {
-            continue;
+            fatal("An instance object must be provided if an option is applied to a non-static field: " + c + "." + f);
           }
-          someOptionFilled = true;
           //(required marker)
           Pair<Boolean, Boolean> mark = Pair.makePair(false, false);
           if (o.required()) {
@@ -392,10 +388,6 @@ public class Execution {
             }
           }
         }
-      }
-      //(check to ensure that something got filled, if any @Option annotation was found)
-      if (someOptionFound && !someOptionFilled) {
-        warn("found @Option annotations in class, but didn't set any of them (all options were instance variables and no instance given?)");
       }
     }
 
