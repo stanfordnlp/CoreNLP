@@ -1,4 +1,4 @@
-Stanford NER - v3.2.0 - 2013-06-19
+Stanford NER - v3.3.0 - 2013-11-12
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -164,6 +164,10 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2013-11-12    3.3.0     Update for compatibility 
+
+2013-11-12    3.3.0     Update for compatibility 
 
 2013-06-19    3.2.0     Improve handling of line-by-line input 
 

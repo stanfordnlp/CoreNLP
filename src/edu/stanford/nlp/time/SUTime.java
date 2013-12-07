@@ -454,6 +454,10 @@ public class SUTime {
       return this;
     }
 
+    public Temporal setTimeZone(int offsetHours) {
+      return setTimeZone(DateTimeZone.forOffsetHours(offsetHours));
+    }
+
     // public abstract Temporal add(Duration offset);
     public Temporal next() {
       Duration per = getPeriod();
@@ -1884,7 +1888,8 @@ public class SUTime {
     }
 
     public TimexType getTimexType() {
-      return (hasTime() || tod != null) ? TimexType.TIME : TimexType.DATE;
+      if (tod != null) return TimexType.TIME;
+      return super.getTimexType();
     }
 
     private static final long serialVersionUID = 1;
@@ -1900,6 +1905,11 @@ public class SUTime {
     public OrdinalTime(Temporal base, int n) {
       this.base = base;
       this.n = n;
+    }
+
+    public OrdinalTime(Temporal base, long n) {
+      this.base = base;
+      this.n = (int) n;
     }
 
     public Time add(Duration offset) {
@@ -1925,28 +1935,25 @@ public class SUTime {
       return null;
     }
 
-/*    public Temporal intersect(Temporal t) {
-      if (base instanceof PartialTime && t instanceof PartialTime) {
-        return new OrdinalTime(base.intersect(t), n);
-      } else {
-        return new RelativeTime(this, TemporalOp.INTERSECT, t);
-      }
-    }  */
-
     public Time intersect(Time t) {
       if (base instanceof PartialTime && t instanceof PartialTime) {
         return new OrdinalTime(base.intersect(t), n);
       } else {
-        return new RelativeTime(this, TemporalOp.INTERSECT, t);
+        return new RelativeTime(t, TemporalOp.INTERSECT, this);
       }
     }
     public Temporal resolve(Time t, int flags) {
+      if (t == null) return this; // No resolving to be done?
       if (base instanceof PartialTime) {
-        PartialTime pt = (PartialTime) base;
+        PartialTime pt = (PartialTime) base.resolve(t,flags);
         List<Temporal> list = pt.toList();
         if (list != null && list.size() >= n) {
           return list.get(n-1);
         }
+      } else if (base instanceof Duration) {
+        Duration d = ((Duration) base).multiplyBy(n-1);
+        Time temp = t.getRange().begin();
+        return temp.offset(d,0).reduceGranularityTo(d.getDuration());
       }
       return this;
     }
@@ -2240,6 +2247,7 @@ public class SUTime {
     }
 
     public RelativeTime(Time base) {
+      super(base);
       this.base = base;
     }
 
@@ -2389,6 +2397,16 @@ public class SUTime {
       return new RelativeTime(this, TemporalOp.INTERSECT, t);
     }
 
+    public Time intersect(Time t) {
+      if (base == TIME_REF || base == null) {
+        if (t instanceof PartialTime && tempOp == TemporalOp.OFFSET) {
+          RelativeTime rt = new RelativeTime(this, tempOp, tempArg);
+          rt.base = t;
+          return rt;
+        }
+      }
+      return new RelativeTime(this, TemporalOp.INTERSECT, t);
+    }
     private static final long serialVersionUID = 1;
   }
 
@@ -2413,11 +2431,15 @@ public class SUTime {
 
     public PartialTime(Time t, Partial p) {
       super(t);
+      if (t instanceof PartialTime) {
+        this.dateTimeZone = ((PartialTime) t).dateTimeZone;
+      }
       this.base = p;
     }
 
     public PartialTime(PartialTime pt) {
       super(pt);
+      this.dateTimeZone = pt.dateTimeZone;
       this.base = pt.base;
     }
 
@@ -2458,6 +2480,11 @@ public class SUTime {
       } else {
         return false;
       }
+    }
+
+    public TimexType getTimexType() {
+      if (base == null) return null;
+      return super.getTimexType();
     }
 
     protected boolean appendDateFormats(DateTimeFormatterBuilder builder, int flags) {
@@ -2689,7 +2716,15 @@ public class SUTime {
     }
 
     public PartialTime reduceGranularityTo(Duration granularity) {
-      Partial p = JodaTimeUtils.discardMoreSpecificFields( base,
+      Partial pbase = base;
+      if (JodaTimeUtils.hasField(granularity.getJodaTimePeriod(), DurationFieldType.weeks())) {
+        // Make sure the partial time has weeks in it
+        if (!JodaTimeUtils.hasField(pbase, DateTimeFieldType.weekOfWeekyear())) {
+          // Add week year to it
+          pbase = JodaTimeUtils.resolveWeek(pbase);
+        }
+      }
+      Partial p = JodaTimeUtils.discardMoreSpecificFields( pbase,
         JodaTimeUtils.getMostSpecific(granularity.getJodaTimePeriod()) );
       return new PartialTime(this,p);
     }
@@ -2797,6 +2832,10 @@ public class SUTime {
     }
 
     public static Pair<PartialTime, PartialTime> getCompatible(PartialTime t1, PartialTime t2) {
+      // Incompatible timezones
+      if (t1.dateTimeZone != null && t2.dateTimeZone != null &&
+          !t1.dateTimeZone.equals(t2.dateTimeZone))
+        return null;
       if (t1.isCompatible(t2)) return Pair.makePair(t1,t2);
       if (t1.uncertaintyGranularity != null && t2.uncertaintyGranularity == null) {
         if (t1.uncertaintyGranularity.compareTo(t2.getDuration()) > 0) {
@@ -2868,11 +2907,13 @@ public class SUTime {
             return null;
           }
         }
-        while (candidate.get(DateTimeFieldType.monthOfYear()) == base.get(DateTimeFieldType.monthOfYear())) {
-          list.add(new PartialTime(this, candidate));
-          pt = JodaTimeUtils.setField(pt, DateTimeFieldType.dayOfMonth(), pt.get(DateTimeFieldType.dayOfMonth()) + 7);
-          candidate = JodaTimeUtils.resolveDowToDay(base, pt);
-        }
+        try {
+          while (candidate.get(DateTimeFieldType.monthOfYear()) == base.get(DateTimeFieldType.monthOfYear())) {
+            list.add(new PartialTime(this, candidate));
+            pt = JodaTimeUtils.setField(pt, DateTimeFieldType.dayOfMonth(), pt.get(DateTimeFieldType.dayOfMonth()) + 7);
+            candidate = JodaTimeUtils.resolveDowToDay(base, pt);
+          }
+        } catch (IllegalFieldValueException ex) {}
         return list;
       } else {
         return null;
@@ -2882,8 +2923,13 @@ public class SUTime {
     public Time intersect(Time t) {
       if (t == null || t == TIME_UNKNOWN)
         return this;
-      if (base == null)
-        return t;
+      if (base == null) {
+        if (dateTimeZone != null) {
+          return (Time) t.setTimeZone(dateTimeZone);
+        } else {
+          return t;
+        }
+      }
       if (t instanceof CompositePartialTime) {
         return t.intersect(this);
       } else if (t instanceof PartialTime) {
@@ -2892,7 +2938,15 @@ public class SUTime {
           return null;
         }
         Partial p = JodaTimeUtils.combine(compatible.first.base, compatible.second.base);
-        return new PartialTime(p);
+        // Take timezone if there is one
+        DateTimeZone dtz = (dateTimeZone != null)? dateTimeZone: ((PartialTime) t).dateTimeZone;
+        PartialTime res = new PartialTime(p);
+        if (dtz != null) return res.setTimeZone(dtz);
+        else return res;
+      } else if (t instanceof OrdinalTime) {
+        Temporal temp = t.resolve(this);
+        if (temp instanceof PartialTime) return (Time) temp;
+        else return t.intersect(this);
       } else if (t instanceof GroundedTime) {
         return t.intersect(this);
       } else if (t instanceof RelativeTime) {
@@ -2970,15 +3024,15 @@ public class SUTime {
             p = new PartialTime(p, p2);
             unsupported = unsupported.withYears(0);
           }
-          if (unsupported.getDays() != 0 && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfYear()) && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfMonth())
-              && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfWeek()) && JodaTimeUtils.hasField(p.base, DateTimeFieldType.monthOfYear())) {
-            if (p.getGranularity().compareTo(DAY) <= 0) {
-              // We are granular enough for this
-              Partial p2 = p.base.with(DateTimeFieldType.dayOfMonth(), unsupported.getDays());
-              p = new PartialTime(p, p2);
-              unsupported = unsupported.withDays(0);
-            }
-          }
+//          if (unsupported.getDays() != 0 && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfYear()) && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfMonth())
+//              && !JodaTimeUtils.hasField(p.base, DateTimeFieldType.dayOfWeek()) && JodaTimeUtils.hasField(p.base, DateTimeFieldType.monthOfYear())) {
+//            if (p.getGranularity().compareTo(DAY) <= 0) {
+//              // We are granular enough for this
+//              Partial p2 = p.base.with(DateTimeFieldType.dayOfMonth(), unsupported.getDays());
+//              p = new PartialTime(p, p2);
+//              unsupported = unsupported.withDays(0);
+//            }
+//          }
           if (!unsupported.equals(Period.ZERO)) {
             t = new RelativeTime(p, new DurationWithFields(unsupported));
             t.approx = this.approx;
@@ -4242,7 +4296,6 @@ public class SUTime {
       if (begin != null) {
         Range r = begin.getRange();
         if (r != null && !begin.equals(r.begin)) {
-          // return r.beginTime();
           return r.begin;
         }
       }

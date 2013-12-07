@@ -1008,6 +1008,13 @@ public class SeqClassifierFlags implements Serializable {
   // Inference label dictionary cutoff
   public int labelDictionaryCutoff = -1;
 
+  public boolean useAdaDelta = false;
+  public boolean useAdaDiff = false;
+  public double adaGradEps = 1e-3;
+  public double adaDeltaRho = 0.95;
+
+  public boolean useRandomSeed = false;
+  public boolean terminateOnAvgImprovement = false;
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -2499,6 +2506,18 @@ public class SeqClassifierFlags implements Serializable {
         printTrainLabels = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
         labelDictionaryCutoff = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("useAdaDelta")){
+        useAdaDelta = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAdaDiff")){
+        useAdaDiff = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("adaGradEps")){
+        adaGradEps = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("adaDeltaRho")){
+        adaDeltaRho = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("useRandomSeed")){
+        useRandomSeed = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("terminateOnAvgImprovement")){
+        terminateOnAvgImprovement = Boolean.parseBoolean(val);
 
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
