@@ -8,7 +8,7 @@ import java.util.Random;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.rnn.SimpleTensor;
+import edu.stanford.nlp.neural.SimpleTensor;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -20,10 +20,32 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ConvertMatlabModel {
+  public static void copyWordVector(Map<String, SimpleMatrix> wordVectors, String source, String target) {
+    if (wordVectors.containsKey(target)) {
+      return;
+    }
+    wordVectors.put(target, new SimpleMatrix(wordVectors.get(source)));
+  }
+
   public static void main(String[] args) throws IOException {
     String basePath = "/user/socherr/scr/projects/semComp/RNTN/src/params/";
-    SimpleMatrix[] slices = new SimpleMatrix[25];
-    for (int i = 0; i < 25; ++i) {
+    int numSlices = 25;
+
+    for (int argIndex = 0; argIndex < args.length; ) {
+      if (args[argIndex].equalsIgnoreCase("-slices")) {
+        numSlices = Integer.valueOf(args[argIndex + 1]);
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-path")) {
+        basePath = args[argIndex + 1];
+        argIndex += 2;
+      } else {
+        System.err.println("Unknown argument " + args[argIndex]);
+        System.exit(2);
+      }
+    }
+
+    SimpleMatrix[] slices = new SimpleMatrix[numSlices];
+    for (int i = 0; i < numSlices; ++i) {
       String filename = basePath + "bin/Wt_" + (i + 1) + ".bin";
       SimpleMatrix slice = SimpleMatrix.loadBinary(filename);
       slices[i] = slice;
@@ -52,17 +74,17 @@ public class ConvertMatlabModel {
       if (pieces.length > 1) {
         continue;
       }
-      wordVectors.put(pieces[0], combinedWV.extractMatrix(0, 25, i, i+1));
+      wordVectors.put(pieces[0], combinedWV.extractMatrix(0, numSlices, i, i+1));
     }
 
-    wordVectors.put(",", new SimpleMatrix(wordVectors.get(".")));
-    wordVectors.put(";", new SimpleMatrix(wordVectors.get(".")));
-    wordVectors.put("``", new SimpleMatrix(wordVectors.get("''")));
+    copyWordVector(wordVectors, ".", ",");
+    copyWordVector(wordVectors, ".", ";");
+    copyWordVector(wordVectors, "''", "``");
 
     RNNOptions op = new RNNOptions();
     op.lowercaseWordVectors = false;
 
-    wordVectors.put(SentimentModel.UNKNOWN_WORD, SentimentModel.randomWordVector(25, new Random()));
+    wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);
     model.saveSerialized("matlab.ser.gz");
