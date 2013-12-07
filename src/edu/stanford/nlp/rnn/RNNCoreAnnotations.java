@@ -1,4 +1,4 @@
-package edu.stanford.nlp.neural.rnn;
+package edu.stanford.nlp.rnn;
 
 import org.ejml.simple.SimpleMatrix;
 

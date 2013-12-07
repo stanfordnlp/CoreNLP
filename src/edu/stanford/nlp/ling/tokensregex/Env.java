@@ -351,30 +351,4 @@ public class Env {
       return variables.get(name);
   }
 
-  public void push(String name, Object value) {
-    Stack<Object> stack = (Stack<Object>) variables.get(name);
-    if (stack == null) {
-      variables.put(name, stack = new Stack<Object>());
-    }
-    stack.push(value);
-  }
-
-  public Object pop(String name) {
-    Stack<Object> stack = (Stack<Object>) variables.get(name);
-    if (stack == null || stack.isEmpty()) {
-      return null;
-    } else {
-      return stack.pop();
-    }
-  }
-
-  public Object peek(String name) {
-    Stack<Object> stack = (Stack<Object>) variables.get(name);
-    if (stack == null || stack.isEmpty()) {
-      return null;
-    } else {
-      return stack.peek();
-    }
-  }
-
 }

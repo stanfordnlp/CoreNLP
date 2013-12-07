@@ -63,7 +63,7 @@ public class CollocationFinder {
    * @param threadSafe whether to include synchronization, etc.
    */
   public CollocationFinder(Tree t, WordNetConnection w, HeadFinder hf, boolean threadSafe) {
-    CoordinationTransformer transformer = new CoordinationTransformer(hf);
+    CoordinationTransformer transformer = new CoordinationTransformer();
     this.wnConnect = w;
     this.qTree = transformer.transformTree(t);
     this.collocationCollector = Generics.newArrayList();

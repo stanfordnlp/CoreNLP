@@ -6,9 +6,9 @@ public class RNNTrainOptions implements Serializable {
   public int batchSize = 27;
 
   /** Number of times through all the trees */
-  public int epochs = 400;
+  public int epochs = 1000;
 
-  public int debugOutputEpochs = 8;
+  public int debugOutputSeconds = 60 * 20;
 
   public int maxTrainTimeSeconds = 60 * 60 * 24;
 
@@ -58,7 +58,7 @@ public class RNNTrainOptions implements Serializable {
     result.append("TRAIN OPTIONS\n");
     result.append("batchSize=" + batchSize + "\n");
     result.append("epochs=" + epochs + "\n");
-    result.append("debugOutputEpochs=" + debugOutputEpochs + "\n");
+    result.append("debugOutputSeconds=" + debugOutputSeconds + "\n");
     result.append("maxTrainTimeSeconds=" + maxTrainTimeSeconds + "\n");
     result.append("learningRate=" + learningRate + "\n");
     result.append("scalingForInit=" + scalingForInit + "\n");
@@ -87,8 +87,8 @@ public class RNNTrainOptions implements Serializable {
     } else if (args[argIndex].equalsIgnoreCase("-epochs")) {
       epochs = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
-    } else if (args[argIndex].equalsIgnoreCase("-debugOutputEpochs")) {
-      debugOutputEpochs = Integer.valueOf(args[argIndex + 1]);
+    } else if (args[argIndex].equalsIgnoreCase("-debugOutputSeconds")) {
+      debugOutputSeconds = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-maxTrainTimeSeconds")) {
       maxTrainTimeSeconds = Integer.valueOf(args[argIndex + 1]);
