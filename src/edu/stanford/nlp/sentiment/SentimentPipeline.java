@@ -37,7 +37,7 @@ public class SentimentPipeline {
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
   static enum Output {
-    PENNTREES, VECTORS, ROOT
+    PENNTREES, VECTORS, ROOT, PROBABILITIES
   }
 
   /**
@@ -83,20 +83,42 @@ public class SentimentPipeline {
    * Outputs the vectors from the tree.  Counts the tree nodes the
    * same as setIndexLabels.
    */
-  static int outputTreeVectors(Tree tree, int index) {
+  static int outputTreeVectors(PrintStream out, Tree tree, int index) {
     if (tree.isLeaf()) {
       return index;
     }
 
-    System.out.print("  " + index + ":");
+    out.print("  " + index + ":");
     SimpleMatrix vector = RNNCoreAnnotations.getNodeVector(tree);
     for (int i = 0; i < vector.getNumElements(); ++i) {
-      System.out.print("  " + NF.format(vector.get(i)));
+      out.print("  " + NF.format(vector.get(i)));
     }
-    System.out.println();
+    out.println();
     index++;
     for (Tree child : tree.children()) {
-      index = outputTreeVectors(child, index);
+      index = outputTreeVectors(out, child, index);
+    }
+    return index;
+  }
+
+  /**
+   * Outputs the scores from the tree.  Counts the tree nodes the
+   * same as setIndexLabels.
+   */
+  static int outputTreeScores(PrintStream out, Tree tree, int index) {
+    if (tree.isLeaf()) {
+      return index;
+    }
+
+    out.print("  " + index + ":");
+    SimpleMatrix vector = RNNCoreAnnotations.getPredictions(tree);
+    for (int i = 0; i < vector.getNumElements(); ++i) {
+      out.print("  " + NF.format(vector.get(i)));
+    }
+    out.println();
+    index++;
+    for (Tree child : tree.children()) {
+      index = outputTreeScores(out, child, index);
     }
     return index;
   }
@@ -116,13 +138,21 @@ public class SentimentPipeline {
       Tree copy = tree.deepCopy();
       setIndexLabels(copy, 0);
       out.println(copy);
-      outputTreeVectors(tree, 0);
+      outputTreeVectors(out, tree, 0);
       break;
     }
-    case ROOT:
+    case ROOT: {
       int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
       out.println("  " + SentimentUtils.sentimentString(sentiment));
       break;
+    }
+    case PROBABILITIES: {
+      Tree copy = tree.deepCopy();
+      setIndexLabels(copy, 0);
+      out.println(copy);
+      outputTreeScores(out, tree, 0);
+      break;
+    }
     default:
       throw new IllegalArgumentException("Unknown output format " + output);
     }
