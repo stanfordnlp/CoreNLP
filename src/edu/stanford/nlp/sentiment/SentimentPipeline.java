@@ -6,6 +6,9 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.ejml.simple.SimpleMatrix;
@@ -126,35 +129,37 @@ public class SentimentPipeline {
   /**
    * Outputs a tree using the output style requested
    */
-  static void outputTree(PrintStream out, Tree tree, Output output) {
-    switch (output) {
-    case PENNTREES: {
-      Tree copy = tree.deepCopy();
-      setSentimentLabels(copy);
-      out.println(copy);
-      break;
-    }
-    case VECTORS: {
-      Tree copy = tree.deepCopy();
-      setIndexLabels(copy, 0);
-      out.println(copy);
-      outputTreeVectors(out, tree, 0);
-      break;
-    }
-    case ROOT: {
-      int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
-      out.println("  " + SentimentUtils.sentimentString(sentiment));
-      break;
-    }
-    case PROBABILITIES: {
-      Tree copy = tree.deepCopy();
-      setIndexLabels(copy, 0);
-      out.println(copy);
-      outputTreeScores(out, tree, 0);
-      break;
-    }
-    default:
-      throw new IllegalArgumentException("Unknown output format " + output);
+  static void outputTree(PrintStream out, Tree tree, List<Output> outputFormats) {
+    for (Output output : outputFormats) {
+      switch (output) {
+      case PENNTREES: {
+        Tree copy = tree.deepCopy();
+        setSentimentLabels(copy);
+        out.println(copy);
+        break;
+      }
+      case VECTORS: {
+        Tree copy = tree.deepCopy();
+        setIndexLabels(copy, 0);
+        out.println(copy);
+        outputTreeVectors(out, tree, 0);
+        break;
+      }
+      case ROOT: {
+        int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
+        out.println("  " + SentimentUtils.sentimentString(sentiment));
+        break;
+      }
+      case PROBABILITIES: {
+        Tree copy = tree.deepCopy();
+        setIndexLabels(copy, 0);
+        out.println(copy);
+        outputTreeScores(out, tree, 0);
+        break;
+      }
+      default:
+        throw new IllegalArgumentException("Unknown output format " + output);
+      }
     }
   }
 
@@ -176,7 +181,7 @@ public class SentimentPipeline {
     String fileList = null;
     boolean stdin = false;
 
-    Output output = Output.ROOT;
+    List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
@@ -195,8 +200,11 @@ public class SentimentPipeline {
         stdin = true;
         argIndex++;
       } else if (args[argIndex].equalsIgnoreCase("-output")) {
-        String format = args[argIndex + 1];
-        output = Output.valueOf(format.toUpperCase());
+        String[] formats = args[argIndex + 1].split(",");
+        outputFormats = new ArrayList<Output>();
+        for (String format : formats) {
+          outputFormats.add(Output.valueOf(format.toUpperCase()));
+        }
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-help")) {
         help();
@@ -243,7 +251,7 @@ public class SentimentPipeline {
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
         System.out.println(sentence);
-        outputTree(System.out, tree, output);
+        outputTree(System.out, tree, outputFormats);
       }
     } else if (fileList != null) {
       // Process multiple files.  The pipeline will do tokenization,
@@ -260,7 +268,7 @@ public class SentimentPipeline {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
           pout.println(sentence);
-          outputTree(pout, tree, output);
+          outputTree(pout, tree, outputFormats);
         }
         pout.flush();
         fout.close();
@@ -281,7 +289,7 @@ public class SentimentPipeline {
           Annotation annotation = pipeline.process(line);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
-            outputTree(System.out, tree, output);
+            outputTree(System.out, tree, outputFormats);
           }
         } else {
           // Output blank lines for blank lines so the tool can be
