@@ -1340,41 +1340,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       }
     } // end while loop through arguments
 
-    // set up tokenizerFactory with options if provided
-    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
-      try {
-        if (tokenizerFactoryClass != null) {
-          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
-          Method factoryMethod;
-          if (tokenizerOptions != null) {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
-          } else {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
-          }
-        } else {
-          // have options but no tokenizer factory; default to PTB
-          // todo [cdm 2013]: Really this is broken: if we're parsing non-English, we should be
-          // able to get the TokenizerFactory from the model and then just add options to it.
-          // todo [cdm 2013]: Also, we should change the static factory method so it isn't tied to returning Word tokens.
-          tokenizerFactory = PTBTokenizer.PTBTokenizerFactory.newWordTokenizerFactory(tokenizerOptions);
-        }
-      } catch (IllegalAccessException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (NoSuchMethodException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (ClassNotFoundException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      }
-    }
-
     // all other arguments are order dependent and
     // are processed in order below
 
@@ -1447,6 +1412,41 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
         throw e;
       }
     }
+
+    // set up tokenizerFactory with options if provided
+    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
+      try {
+        if (tokenizerFactoryClass != null) {
+          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
+          Method factoryMethod;
+          if (tokenizerOptions != null) {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
+          } else {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
+          }
+        } else {
+          // have options but no tokenizer factory.  use the parser
+          // langpack's factory and set its options
+          tokenizerFactory = lp.op.langpack().getTokenizerFactory();
+          tokenizerFactory.setOptions(tokenizerOptions);
+        }
+      } catch (IllegalAccessException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      }
+    }
+
 
     // the following has to go after reading parser to make sure
     // op and tlpParams are the same for train and test
