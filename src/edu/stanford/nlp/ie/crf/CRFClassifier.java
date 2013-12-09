@@ -2940,8 +2940,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         crf.printFactorTable(testFile, readerAndWriter);
       } else if (crf.flags.printProbs) {
         crf.printProbs(testFile, readerAndWriter);
-      } else if (crf.flags.printProbs) {
-        crf.printProbs(testFile, readerAndWriter);
       } else if (crf.flags.useKBest) {
         int k = crf.flags.kBest;
         crf.classifyAndWriteAnswersKBest(testFile, k, readerAndWriter);

@@ -63,7 +63,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    */
   public ClassifierCombiner(Properties p) throws FileNotFoundException {
     super(p);
-    this.combinationMode = extractCombinationModeSafe(p);
+    this.combinationMode = extractCombinationMode(p);
     String loadPath1, loadPath2;
     List<String> paths = new ArrayList<String>();
 
@@ -146,24 +146,6 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       return DEFAULT_COMBINATION_MODE;
     } else {
       return CombinationMode.valueOf(mode.toUpperCase());
-    }
-  }
-
-  /**
-   * Either finds COMBINATION_MODE_PROPERTY or returns a default
-   * value.  If the value is not a legal value, a warning is printed.
-   */
-  public static CombinationMode extractCombinationModeSafe(Properties p) {
-    try {
-      return extractCombinationMode(p);
-    } catch (IllegalArgumentException e) {
-      System.err.print("Illegal value of " + COMBINATION_MODE_PROPERTY + ": " + p.getProperty(COMBINATION_MODE_PROPERTY));
-      System.err.print("  Legal values:");
-      for (CombinationMode mode : CombinationMode.values()) {
-        System.err.print("  " + mode);
-      }
-      System.err.println();
-      return CombinationMode.NORMAL;
     }
   }
 
