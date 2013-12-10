@@ -542,6 +542,9 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     /**
      * Constructs a new PTBTokenizer that returns Word objects and
      * uses the options passed in.
+     * THIS METHOD IS INVOKED BY REFLECTION BY SOME OF THE JAVANLP
+     * CODE TO LOAD A TOKENIZER FACTORY.  IT SHOULD BE PRESENT IN A
+     * TokenizerFactory.
      *
      * @param options A String of options
      * @return A TokenizerFactory that returns Word objects
