@@ -355,10 +355,12 @@ public class TreeGraphNode extends Tree implements HasParent {
     if (!treeGraph().equals(node.treeGraph())) {
       System.err.println("Warning: you are trying to add an arc from node " + this + " to node " + node + ", but they do not belong to the same TreeGraph!");
     }
-    if (!label.containsKey(arcLabel)) {
-      label.set(arcLabel, Generics.<TreeGraphNode>newHashSet());
+    Set<TreeGraphNode> collection = label.get(arcLabel);
+    if (collection == null) {
+      collection = Generics.<TreeGraphNode>newHashSet();
+      label.set(arcLabel, collection);
     }
-    return ((Collection) label.get(arcLabel)).add(node);
+    return collection.add(node);
   }
 
   /**
