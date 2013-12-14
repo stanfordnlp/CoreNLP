@@ -49,7 +49,8 @@ class DescriptionPattern extends TregexPattern {
   private final Function<String, String> basicCatFunction;
 
   /** Used to detect regex expressions which can be simplified to exact matches */
-  private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/|/\\^\\[(.)\\]\\$/");
+  private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/" + "|" + // for example, /^:$/
+                                                                     "/\\^\\[(.)\\]\\$/"); // for example, /^[$]$/
 
   public DescriptionPattern(Relation rel, boolean negDesc, String desc,
                             String name, boolean useBasicCat,
