@@ -50,7 +50,12 @@ class DescriptionPattern extends TregexPattern {
 
   /** Used to detect regex expressions which can be simplified to exact matches */
   private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/" + "|" + // for example, /^:$/
-                                                                     "/\\^\\[(.)\\]\\$/"); // for example, /^[$]$/
+                                                                     "/\\^\\[(.)\\]\\$/" + "|" + // for example, /^[$]$/
+                                                                     "/\\^([-a-zA-Z]+)\\$/"); // for example, /^-NONE-$/
+
+  /** Used to detect regex expressions which can be simplified to exact matches */
+  private static final Pattern PREFIX_PATTERN = Pattern.compile("/\\^([-a-zA-Z|]+)\\/" + "|" + // for example, /^JJ/
+                                                                "/\\^\\(\\?\\:([-a-zA-Z|]+)\\)\\/");
 
   public DescriptionPattern(Relation rel, boolean negDesc, String desc,
                             String name, boolean useBasicCat,
@@ -86,6 +91,22 @@ class DescriptionPattern extends TregexPattern {
         exactMatch = matchedGroup;
         stringFilter = null;
         //System.err.println("DescriptionPattern: converting " + desc + " to " + exactMatch);
+      } else if (PREFIX_PATTERN.matcher(desc).matches()) {
+        descriptionMode = DescriptionMode.STRINGS;
+        descPattern = null;
+        exactMatch = null;
+        Matcher matcher = PREFIX_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        // TODO: if this is too long, just use the regular expression
+        stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.PREFIX, matchedGroup.split("[|]")); 
+        //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
       } else if (desc.matches("/.*/")) {
         descriptionMode = DescriptionMode.PATTERN;
         descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
@@ -101,7 +122,7 @@ class DescriptionPattern extends TregexPattern {
           descriptionMode = DescriptionMode.STRINGS;
           descPattern = null;
           exactMatch = null;
-          stringFilter = new ArrayStringFilter(words);
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, words);
         } else {
           descriptionMode = DescriptionMode.PATTERN;
           descPattern = Pattern.compile("^(?:" + desc + ")$");
