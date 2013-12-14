@@ -471,7 +471,7 @@ public class EnglishGrammaticalRelations {
         new String[] {
           // basic direct object cases: last non-temporal NP of (non-copula) clause.  This case is good.
           // You can't exclude "lot" in this case since people can "sell a lot" though it sometimes wrongly matches what should be an advmod like "He's done a lot" (even for the second instance, the one case admitted on PTB3 WSJ is good).
-          "VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " + 
+          "VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
               // The next qualification eliminates parentheticals that
               // come after the actual dobj
               " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
@@ -496,7 +496,7 @@ public class EnglishGrammaticalRelations {
 
           // If there was an NP between the WHNP and the ADJP, we want
           // that NP to have the nsubj relation, and the WHNP is either
-          // a dobj or a pobj instead.  For example, dobj(What, worth) 
+          // a dobj or a pobj instead.  For example, dobj(What, worth)
           // in "What is UAL stock worth?"
           "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj !< (PP !< NP)) $++ (NP $++ =adj)))",
 
@@ -578,6 +578,7 @@ public class EnglishGrammaticalRelations {
           "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
           "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
           //"PP < (CC < less) < NP",
+          "@PP < CC  < @NP=target !< @IN|TO|VBG|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
           // to handle "in and out of government"
           "@WHPP|PP < (@WHPP|PP $++ (CC|CONJP $++ (@WHPP|PP $+ (NP=target !$+ __))))",
           // to handle "What weapon is Apollo most proficient with?"
@@ -1102,7 +1103,7 @@ public class EnglishGrammaticalRelations {
           // for biomedical English, the former NNP heuristic really doesn't work, because they use NN for all chemical entities
           // while not unfoolable, this version produces less false positives and more true positives.
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )",
-          // Handles cases such as "(NP (Her daughter) Jordan)" 
+          // Handles cases such as "(NP (Her daughter) Jordan)"
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target <: NNP $- (/^(?:WH)?NP/ !< POS) !$ CC|CONJP)"
 
         });
