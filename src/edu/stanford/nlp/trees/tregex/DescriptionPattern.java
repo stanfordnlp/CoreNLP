@@ -259,8 +259,9 @@ class DescriptionPattern extends TregexPattern {
     void resetChildIter() {
       decommitVariableGroups();
       removeNamedNodes();
-      treeNodeMatchCandidateIterator =
-        myNode.rel.searchNodeIterator(tree, this);
+      // lazy initialization saves quite a bit of time in use cases
+      // where we call something other than matches()
+      treeNodeMatchCandidateIterator = null;
       finished = false;
       nextTreeNodeMatchCandidate = null;
       if (childMatcher != null) {
@@ -293,6 +294,9 @@ class DescriptionPattern extends TregexPattern {
       finished = true;
       Matcher m = null;
       String value = null;
+      if (treeNodeMatchCandidateIterator == null) {
+        treeNodeMatchCandidateIterator = myNode.rel.searchNodeIterator(tree, this);
+      }
       while (treeNodeMatchCandidateIterator.hasNext()) {
         nextTreeNodeMatchCandidate = treeNodeMatchCandidateIterator.next();
         if (myNode.descriptionMode == null) {
