@@ -775,13 +775,12 @@ public class ChineseGrammaticalRelations {
     new GrammaticalRelation(Language.Chinese, "rcmod", "relative clause modifier",
                             RelativeClauseModifierGRAnnotation.class,
                             MODIFIER, "NP", tregexCompiler,
-                            new String[]{
+                            new String[] {
+                              // TODO: we should figure out various
+                              // ways to improve this pattern to
+                              // improve both its precision and recall
                               "NP  $++ (CP=target ) > NP ",
-                              // don't match this rule for an NP if
-                              // there is another, more specific NP
-                              // which will also match the same rule
-                              // TODO: can we just get rid of the <<
-                              " NP  << ( CP=target $++ NP  ) !<< (NP << =target)"
+                              " NP  < ( CP=target $++ NP  )"
                             });
   public static class RelativeClauseModifierGRAnnotation
     extends GrammaticalRelationAnnotation { }
