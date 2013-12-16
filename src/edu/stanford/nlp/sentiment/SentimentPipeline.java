@@ -198,7 +198,6 @@ public class SentimentPipeline {
           result.append(Sentence.listToString(tree.yield()));
           result.append("\n");
         }
-        System.err.println(result.toString());
         return result.toString();
       } catch (IOException e) {
         throw new RuntimeIOException(e);
