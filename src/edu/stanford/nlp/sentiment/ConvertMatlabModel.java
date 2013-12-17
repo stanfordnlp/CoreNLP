@@ -105,6 +105,10 @@ public class ConvertMatlabModel {
     op.numHid = numSlices;
     op.lowercaseWordVectors = false;
 
+    if (Wcat.numRows() == 2) {
+      op.classNames = new String[] { "Negative", "Positive" };
+    }
+
     wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);

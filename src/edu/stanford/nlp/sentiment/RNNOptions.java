@@ -5,6 +5,7 @@ import java.util.Random;
 
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.StringUtils;
 
 public class RNNOptions implements Serializable {
   /**
@@ -65,6 +66,9 @@ public class RNNOptions implements Serializable {
 
   public RNNTrainOptions trainOptions = new RNNTrainOptions();
 
+  public static final String[] DEFAULT_CLASS_NAMES = { "Very negative", "Negative", "Neutral", "Positive", "Very positive" };
+  public String[] classNames = DEFAULT_CLASS_NAMES;
+
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
@@ -80,6 +84,7 @@ public class RNNOptions implements Serializable {
     result.append("simplifiedModel=" + simplifiedModel + "\n");
     result.append("combineClassification=" + combineClassification + "\n");
     result.append(trainOptions.toString());
+    result.append("classNames=" + StringUtils.join(classNames, ","));
     return result.toString();
   }
 
@@ -131,6 +136,9 @@ public class RNNOptions implements Serializable {
     } else if (args[argIndex].equalsIgnoreCase("-nouseTensors")) {
       useTensors = false;
       return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-classNames")) {
+      classNames = args[argIndex].split(",");
+      return argIndex + 2;
     } else {
       return trainOptions.setOption(args, argIndex);
     }

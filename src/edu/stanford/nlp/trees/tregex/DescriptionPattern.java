@@ -51,7 +51,9 @@ class DescriptionPattern extends TregexPattern {
   /** Used to detect regex expressions which can be simplified to exact matches */
   private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/" + "|" + // for example, /^:$/
                                                                      "/\\^\\[(.)\\]\\$/" + "|" + // for example, /^[$]$/
-                                                                     "/\\^([-a-zA-Z]+)\\$/"); // for example, /^-NONE-$/
+                                                                     "/\\^([-a-zA-Z']+)\\$/"); // for example, /^-NONE-$/
+
+  private static final Pattern MULTI_WORD_PATTERN = Pattern.compile("/\\^\\(\\?\\:((?:[-a-zA-Z|]|\\\\\\$)+)\\)\\$\\/");
 
   /** Used to detect regex expressions which can be simplified to exact matches */
   private static final Pattern PREFIX_PATTERN = Pattern.compile("/\\^([-a-zA-Z|]+)\\/" + "|" + // for example, /^JJ/
@@ -68,6 +70,7 @@ class DescriptionPattern extends TregexPattern {
     this.linkedName = linkedName;
     if (desc != null) {
       stringDesc = desc;
+      // TODO: factor out some of these blocks of code
       if (desc.equals("__") || desc.equals("/.*/") || desc.equals("/^.*$/")) {
         descriptionMode = DescriptionMode.ANYTHING;
         descPattern = null;
@@ -91,6 +94,23 @@ class DescriptionPattern extends TregexPattern {
         exactMatch = matchedGroup;
         stringFilter = null;
         //System.err.println("DescriptionPattern: converting " + desc + " to " + exactMatch);
+      } else if (MULTI_WORD_PATTERN.matcher(desc).matches()) {
+        descriptionMode = DescriptionMode.STRINGS;
+        descPattern = null;
+        exactMatch = null;
+        Matcher matcher = MULTI_WORD_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        matchedGroup = matchedGroup.replaceAll("\\\\", "");
+        // TODO: if this is too long, just use the regular expression
+        stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, matchedGroup.split("[|]")); 
+        //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
       } else if (PREFIX_PATTERN.matcher(desc).matches()) {
         descriptionMode = DescriptionMode.STRINGS;
         descPattern = null;
