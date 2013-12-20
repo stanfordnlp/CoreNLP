@@ -911,21 +911,20 @@ public class TreePrint {
       for (TypedDependency td : dependencies) {
         if (td.extra()) {
           extraDeps.add(td);
-        }
-        else {
-          buf.append(td.toString()).append('\n');
+        } else {
+          buf.append(td.toString("value-tag-index")).append('\n');
         }
       }
       // now we print the separator for extra dependencies, and print these if there are some
       if (!extraDeps.isEmpty()) {
         buf.append("======\n");
         for (TypedDependency td : extraDeps) {
-          buf.append(td.toString()).append('\n');
+          buf.append(td.toString("value-tag-index")).append('\n');
         }
       }
     } else {
       for (TypedDependency td : dependencies) {
-        buf.append(td.toString()).append('\n');
+        buf.append(td.toString("value-tag-index")).append('\n');
       }
     }
     return buf.toString();
