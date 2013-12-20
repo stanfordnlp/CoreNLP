@@ -542,7 +542,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    */
   public static final String TAG_SEPARATOR = "/";
 
-  public static final String DEFAULT_FORMAT = "value-tag-index";
+  public static final String DEFAULT_FORMAT = "value-index";
 
   @Override
   public String toString() {
