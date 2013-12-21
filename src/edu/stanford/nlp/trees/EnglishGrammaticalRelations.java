@@ -904,7 +904,7 @@ public class EnglishGrammaticalRelations {
           // useful dependencies rather than introduce some wrong
           // dependencies.
           "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML > @NP|WHNP",
-          "@NP|WHNP|NML $++ (SBAR=target <: (S !<, (VP <, TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
+          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
           // this next pattern is restricted to where and why because
           // "when" is usually incorrectly parsed: temporal clauses
           // are put inside the NP; 2nd is for case of relative
