@@ -27,9 +27,12 @@ import edu.stanford.nlp.util.Generics;
 public class ConvertMatlabModel {
   /** Will not overwrite an existing word vector if it is already there */
   public static void copyWordVector(Map<String, SimpleMatrix> wordVectors, String source, String target) {
-    if (wordVectors.containsKey(target)) {
+    if (wordVectors.containsKey(target) || !wordVectors.containsKey(source)) {
       return;
     }
+
+    System.err.println("Using wordVector " + source + " for " + target);
+
     wordVectors.put(target, new SimpleMatrix(wordVectors.get(source)));
   }
 
@@ -112,8 +115,14 @@ public class ConvertMatlabModel {
       wordVectors.put(pieces[0], combinedWV.extractMatrix(0, numSlices, i, i+1));
     }
 
+    // If there is no ",", we first try to look for an HTML escaping,
+    // then fall back to "." as better than just a random word vector.
+    // Same for "``" and ";"
+    copyWordVector(wordVectors, "&#44", ",");
     copyWordVector(wordVectors, ".", ",");
+    copyWordVector(wordVectors, "&#59", ";");
     copyWordVector(wordVectors, ".", ";");
+    copyWordVector(wordVectors, "&#96&#96", "``");
     copyWordVector(wordVectors, "''", "``");
 
     if (useEscapedParens) {
