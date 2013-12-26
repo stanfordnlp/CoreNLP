@@ -68,9 +68,11 @@ public class RNNOptions implements Serializable {
 
   // TODO: most of the existing sentiment models are missing classNames and equivalenceClasses
   public static final String[] DEFAULT_CLASS_NAMES = { "Very negative", "Negative", "Neutral", "Positive", "Very positive" };
+  public static final String[] BINARY_DEFAULT_CLASS_NAMES = { "Negative", "Positive" };
   public String[] classNames = DEFAULT_CLASS_NAMES;
 
   public static final int[][] APPROXIMATE_EQUIVALENCE_CLASSES = { {0, 1}, {3, 4} };
+  public static final int[][] BINARY_APPROXIMATE_EQUIVALENCE_CLASSES = { {0}, {1} }; // almost an owl
   /**
    * The following option represents classes which can be treated as
    * equivalent when scoring.  There will be two separate scorings,
@@ -111,7 +113,7 @@ public class RNNOptions implements Serializable {
     result.append("\n");
     result.append("equivalenceClassNames=");
     if (equivalenceClassNames != null) {
-      result.append(StringUtils.join(equivalenceClassNames));
+      result.append(StringUtils.join(equivalenceClassNames, ","));
     }
     result.append("\n");
     return result.toString();
@@ -192,6 +194,13 @@ public class RNNOptions implements Serializable {
         equivalenceClassNames = null;
       }
       return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-binaryModel")) { // macro option
+      numClasses = 2;
+      classNames = BINARY_DEFAULT_CLASS_NAMES;
+      // TODO: should we just make this null?
+      equivalenceClasses = BINARY_APPROXIMATE_EQUIVALENCE_CLASSES;
+      trainOptions.setOption(args, argIndex); // in case the trainOptions use binaryModel as well
+      return argIndex + 1;
     } else {
       return trainOptions.setOption(args, argIndex);
     }
