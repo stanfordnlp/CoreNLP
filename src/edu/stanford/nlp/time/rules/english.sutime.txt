@@ -349,8 +349,14 @@
    }
 
    {
-     ruleType: "text", pattern: /(\d\d)(\d\d)([A-Z])/,
-     result: { type: "Temporal", value: IsoTime($1, $2, NIL).setTimeZone( MILITARY_TIME_ZONE_MAP[$3] ) }
+     ruleType: "tokens",
+     pattern: ( (/(\d\d)(\d\d)([A-Z])/) ),
+     matchWithResults: TRUE,
+     result: { type: "Temporal",
+               value: IsoTime($$1.matchResults[0].word.group(1), $$1.matchResults[0].word.group(2), NIL).setTimeZone(
+                  MILITARY_TIME_ZONE_MAP[$$1.matchResults[0].word.group(3)] ) },
+     // Change to TRUE to support military time zones
+     active: FALSE
    }
 
   # ISO date/times
