@@ -21,18 +21,29 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>>
 
   public boolean isEmpty() { return value == null; }
 
-  public void addAll(Collection<T> c) {
-    for (T t:c) {
-      add(t);
-    }
+  public void clear() {
+    value = null;
+    maxEnd = null;
+    size = 0;
+    left = null;
+    right = null;
   }
 
-  public void add(T target) {
-    if (target == null) return;
+  public boolean addAll(Collection<? extends T> c) {
+    boolean added = false;
+    for (T t:c) {
+      if (add(t)) { added = true; }
+    }
+    return added;
+  }
+
+  public boolean add(T target) {
+    if (target == null) return false;
     if (value == null) {
       this.value = target;
       this.maxEnd = target.getInterval().getEnd();
       this.size = 1;
+      return true;
     } else {
       this.maxEnd = Interval.max(maxEnd, target.getInterval().getEnd());
       this.size++;
@@ -41,13 +52,13 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>>
         if (left == null) {
           left = new IntervalTree<E,T>();
         }
-        left.add(target);
+        return left.add(target);
       } else {
         // Should go on right
         if (right == null) {
           right = new IntervalTree<E,T>();
         }
-        right.add(target);
+        return right.add(target);
       }
     }
   }
@@ -181,67 +192,75 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>>
     getOverlapping(n, Interval.toInterval(p,p), result);
   }
 
-  public static <E extends Comparable<E>, T extends HasInterval<E>> void getOverlapping(IntervalTree<E,T> n, Interval<E> target, List<T> result) {
-    // Don't search nodes that don't exist
-    if (n == null || n.isEmpty())
-        return;
+  public static <E extends Comparable<E>, T extends HasInterval<E>> void getOverlapping(IntervalTree<E,T> node, Interval<E> target, List<T> result) {
+    Queue<IntervalTree<E,T>> todo = new LinkedList<IntervalTree<E, T>>();
+    todo.add(node);
+    while (!todo.isEmpty()) {
+      IntervalTree<E,T> n = todo.poll();
+      // Don't search nodes that don't exist
+      if (n == null || n.isEmpty())
+        continue;
 
-    // If target is to the right of the rightmost point of any interval
-    // in this node and all children, there won't be any matches.
-    if (target.first.compareTo(n.maxEnd) > 0)
-        return;
+      // If target is to the right of the rightmost point of any interval
+      // in this node and all children, there won't be any matches.
+      if (target.first.compareTo(n.maxEnd) > 0)
+        continue;
 
-    // Search left children
-    if (n.left != null) {
-        getOverlapping(n.left, target, result);
-    }
+      // Search left children
+      if (n.left != null) {
+          todo.add(n.left);
+      }
 
-    // Check this node
-    if (n.value.getInterval().overlaps(target)) {
-        result.add(n.value);
-    }
+      // Check this node
+      if (n.value.getInterval().overlaps(target)) {
+          result.add(n.value);
+      }
 
-    // If target is to the left of the start of this interval,
-    // then it can't be in any child to the right.
-    if (target.second.compareTo(n.value.getInterval().first()) < 0)  {
-        return;
-    }
+      // If target is to the left of the start of this interval,
+      // then it can't be in any child to the right.
+      if (target.second.compareTo(n.value.getInterval().first()) < 0)  {
+        continue;
+      }
 
-    // Otherwise, search right children
-    if (n.right != null)  {
-        getOverlapping(n.right, target, result);
+      // Otherwise, search right children
+      if (n.right != null)  {
+        todo.add(n.right);
+      }
     }
   }
+
   public static <E extends Comparable<E>, T extends HasInterval<E>> boolean overlaps(IntervalTree<E,T> n, E p) {
     return overlaps(n, Interval.toInterval(p,p));
   }
-  public static <E extends Comparable<E>, T extends HasInterval<E>> boolean overlaps(IntervalTree<E,T> n, Interval<E> target) {
+  public static <E extends Comparable<E>, T extends HasInterval<E>> boolean overlaps(IntervalTree<E,T> node, Interval<E> target) {
+    IntervalTree<E,T> n = node;
+
     // Don't search nodes that don't exist
-    if (n == null || n.isEmpty())
-        return false;
+    while (n != null && !n.isEmpty()) {
+      IntervalTree<E,T> next = null;
+      // If target is to the right of the rightmost point of any interval
+      // in this node and all children, there won't be any matches.
+      if (target.first.compareTo(n.maxEnd) > 0)
+          return false;
 
-    // If target is to the right of the rightmost point of any interval
-    // in this node and all children, there won't be any matches.
-    if (target.first.compareTo(n.maxEnd) > 0)
-        return false;
-
-    // Check this node
-    if (n.value.getInterval().overlaps(target)) {
-        return true;
-    }
-
-    // If target is to the left of the start of this interval, then search left
-    if (target.second.compareTo(n.value.getInterval().first()) <= 0)  {
-       // Search left children
-      if (n.left != null) {
-        return overlaps(n.left, target);
+      // Check this node
+      if (n.value.getInterval().overlaps(target)) {
+          return true;
       }
-    } else {
-       if (n.right != null)  {
-           return overlaps(n.right, target);
-       }
-    }
 
+      // If target is to the left of the start of this interval, then search left
+      if (target.second.compareTo(n.value.getInterval().first()) <= 0)  {
+         // Search left children
+        if (n.left != null) {
+          next = n.left;
+        }
+      } else {
+         if (n.right != null)  {
+             next = n.right;
+         }
+      }
+      n = next;
+    }
     return false;
   }
 
@@ -253,33 +272,36 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>>
     return contains(n, Interval.toInterval(p, p));
   }
 
-  public static <E extends Comparable<E>, T extends HasInterval<E>> boolean contains(IntervalTree<E,T> n, Interval<E> target) {
+  public static <E extends Comparable<E>, T extends HasInterval<E>> boolean contains(IntervalTree<E,T> node, Interval<E> target) {
+    IntervalTree<E,T> n = node;
+
     // Don't search nodes that don't exist
-    if (n == null || n.isEmpty())
-      return false;
+    while (n != null && !n.isEmpty()) {
+      IntervalTree<E,T> next = null;
 
-    // If target is to the right of the rightmost point of any interval
-    // in this node and all children, there won't be any matches.
-    if (target.first.compareTo(n.maxEnd) > 0)
-      return false;
+      // If target is to the right of the rightmost point of any interval
+      // in this node and all children, there won't be any matches.
+      if (target.first.compareTo(n.maxEnd) > 0)
+        return false;
 
-    // Check this node
-    if (n.value.getInterval().contains(target)) {
-      return true;
-    }
-
-    // If target is to the left of the start of this interval, then search left
-    if (target.second.compareTo(n.value.getInterval().first()) <= 0)  {
-      // Search left children
-      if (n.left != null) {
-        return contains(n.left, target);
+      // Check this node
+      if (n.value.getInterval().contains(target)) {
+        return true;
       }
-    } else {
-      if (n.right != null)  {
-        return contains(n.right, target);
-      }
-    }
 
+      // If target is to the left of the start of this interval, then search left
+      if (target.second.compareTo(n.value.getInterval().first()) <= 0)  {
+        // Search left children
+        if (n.left != null) {
+          next = n.left;
+        }
+      } else {
+        if (n.right != null)  {
+          next = n.right;
+        }
+      }
+      n = next;
+    }
     return false;
   }
 
