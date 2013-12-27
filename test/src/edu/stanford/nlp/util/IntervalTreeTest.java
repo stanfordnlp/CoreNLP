@@ -2,10 +2,7 @@ package edu.stanford.nlp.util;
 
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Test for the interval tree
@@ -69,11 +66,19 @@ public class IntervalTreeTest extends TestCase {
     assertTrue(overlapping3.isEmpty());
 
     // Try balancing the tree
-    //System.out.println("Height is " + tree.height());
+//    System.out.println("Height is " + tree.height());
     tree.check();
     tree.balance();
-    assertEquals(15, tree.height());
+    int height = tree.height();
+    assertTrue(height < 20);
     tree.check();
+
+    overlapping1 = tree.getOverlapping(before);
+    assertTrue(overlapping1.isEmpty());
+    overlapping2 = tree.getOverlapping(included);
+    assertTrue(overlapping2.size() == 1);
+    overlapping3 = tree.getOverlapping(after);
+    assertTrue(overlapping3.isEmpty());
 
     // Clear tree
     tree.clear();
@@ -104,4 +109,56 @@ public class IntervalTreeTest extends TestCase {
     checkOverlapping(list, overlapping3, after);
   }
 
+  public void testIteratorRandom() throws Exception
+  {
+    int n = 1000;
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
+
+    Random rand = new Random();
+    List<Interval<Integer>> list = new ArrayList<Interval<Integer>>(n+1);
+    for (int i = 0; i < n; i++) {
+      int x = rand.nextInt();
+      int y = rand.nextInt();
+      Interval<Integer> interval = Interval.toValidInterval(x,y);
+      tree.add(interval);
+      list.add(interval);
+    }
+
+    Collections.sort(list);
+
+    Interval<Integer> next = null;
+    Iterator<Interval<Integer>> iterator = tree.iterator();
+    for (int i = 0; i < list.size(); i++) {
+      assertTrue("HasItem " + i, iterator.hasNext());
+      next = iterator.next();
+      assertEquals("Item " + i, list.get(i), next);
+    }
+    assertFalse("No more items", iterator.hasNext());
+  }
+
+  public void testIteratorOrdered() throws Exception
+  {
+    int n = 1000;
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
+
+    List<Interval<Integer>> list = new ArrayList<Interval<Integer>>(n+1);
+    for (int i = 0; i < n; i++) {
+      int x = i;
+      int y = i+1;
+      Interval<Integer> interval = Interval.toValidInterval(x,y);
+      tree.add(interval);
+      list.add(interval);
+    }
+
+    Collections.sort(list);
+
+    Interval<Integer> next = null;
+    Iterator<Interval<Integer>> iterator = tree.iterator();
+    for (int i = 0; i < list.size(); i++) {
+      assertTrue("HasItem " + i, iterator.hasNext());
+      next = iterator.next();
+      assertEquals("Item " + i, list.get(i), next);
+    }
+    assertFalse("No more items", iterator.hasNext());
+  }
 }
