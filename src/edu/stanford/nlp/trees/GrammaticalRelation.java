@@ -89,7 +89,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   private static final long serialVersionUID = 892618003417550128L;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = System.getProperty("GrammaticalRelation", null) != null;
 
   public abstract static class GrammaticalRelationAnnotation implements CoreAnnotation<Set<TreeGraphNode>> {
     @SuppressWarnings({"unchecked", "RedundantCast"})

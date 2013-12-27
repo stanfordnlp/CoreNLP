@@ -25,7 +25,7 @@ import java.util.Properties;
  */
 public class CoordinationTransformer implements TreeTransformer {
 
-  private static final boolean VERBOSE = false;
+  private static final boolean VERBOSE = System.getProperty("CoordinationTransformer", null) != null;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
   private final TreeTransformer qp = new QPTreeTransformer();         //to restructure the QP constituents
   private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns

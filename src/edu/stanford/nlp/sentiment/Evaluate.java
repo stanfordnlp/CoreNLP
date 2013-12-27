@@ -39,8 +39,8 @@ public class Evaluate {
   public Evaluate(SentimentModel model) {
     this.model = model;
     this.cag = new SentimentCostAndGradient(model, null);
-    this.equivalenceClasses = model.op.equivalenceClasses;
-    this.equivalenceClassNames = model.op.equivalenceClassNames;
+    this.equivalenceClasses = (model.op.equivalenceClasses == null) ? RNNOptions.APPROXIMATE_EQUIVALENCE_CLASSES : model.op.equivalenceClasses;
+    this.equivalenceClassNames = (model.op.equivalenceClassNames == null) ? RNNOptions.DEFAULT_EQUIVALENCE_CLASS_NAMES : model.op.equivalenceClassNames;
 
     reset();
   }
@@ -231,19 +231,17 @@ public class Evaluate {
     printConfusionMatrix("Label", labelConfusion);
     printConfusionMatrix("Root label", rootLabelConfusion);
 
-    if (equivalenceClasses != null && equivalenceClassNames != null) {
-      double[] approxLabelAccuracy = approxAccuracy(labelConfusion, equivalenceClasses);
-      for (int i = 0; i < equivalenceClassNames.length; ++i) {
-        System.err.println("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
-      }
-      System.err.println("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
-      
-      double[] approxRootLabelAccuracy = approxAccuracy(rootLabelConfusion, equivalenceClasses);
-      for (int i = 0; i < equivalenceClassNames.length; ++i) {
-        System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
-      }
-      System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
+    double[] approxLabelAccuracy = approxAccuracy(labelConfusion, equivalenceClasses);
+    for (int i = 0; i < equivalenceClassNames.length; ++i) {
+      System.err.println("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
     }
+    System.err.println("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
+
+    double[] approxRootLabelAccuracy = approxAccuracy(rootLabelConfusion, equivalenceClasses);
+    for (int i = 0; i < equivalenceClassNames.length; ++i) {
+      System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
+    }
+    System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
 
     //printLengthAccuracies();
   }
