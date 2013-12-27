@@ -61,10 +61,6 @@ public class SentimentUtils {
 
   public static String sentimentString(SentimentModel model, int sentiment) {
     String[] classNames = model.op.classNames;
-    if (classNames == null) {
-      // TODO: remove if we reserialize all existing models with the default
-      classNames = RNNOptions.DEFAULT_CLASS_NAMES;
-    }
     if (sentiment < 0 || sentiment > classNames.length) {
       return "Unknown sentiment label " + sentiment;
     }
