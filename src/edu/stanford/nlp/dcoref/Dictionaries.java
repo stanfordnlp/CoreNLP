@@ -248,7 +248,7 @@ public class Dictionaries {
    *  Otherwise, null is returned.
    *
    *  @param name Is treated as a cased string. ME != me
-   */
+   */ 
   public String lookupCanonicalAmericanStateName(String name) {
     return statesAbbreviation.get(name);
   }
@@ -288,7 +288,7 @@ public class Dictionaries {
 
   /** Returns a set of demonyms for a country (or city or region).
    *  @param name Some string perhaps a country name like "Australia"
-   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }.
+   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }. 
    *     If none are known (including if the argument isn't a country/region name,
    *     then the empty set will be returned.
    */
@@ -300,9 +300,9 @@ public class Dictionaries {
     return result;
   }
 
-  /** Returns whether this mention (possibly multi-word) is the
+  /** Returns whether this mention (possibly multi-word) is the 
    *  adjectival form of a demonym, like "African" or "Iraqi".
-   *  True if it is an adjectival form, even if also a name for a
+   *  True if it is an adjectival form, even if also a name for a 
    *  person of that country (such as "Iraqi").
    */
   public boolean isAdjectivalDemonym(String token) {
@@ -359,7 +359,8 @@ public class Dictionaries {
   private void loadCountriesLists(String file) {
     try{
       BufferedReader reader = IOUtils.readerFromString(file);
-      for (String line; (line = reader.readLine()) != null; ) {
+      while(reader.ready()) {
+        String line = reader.readLine();
         countries.add(line.split("\t")[1].toLowerCase());
       }
       reader.close();
@@ -368,16 +369,15 @@ public class Dictionaries {
     }
   }
 
-  /**
-   * Load Bergsma and Lin (2006) gender and number list.
-   *
-   */
-  // todo: This is a complete memory hog. It takes at least 600MB and probably does pretty little. Either store more efficiently or just eliminate?
-  private void loadGenderNumber(String file, String neutralWordsFile) {
+  /** 
+   * load Bergsma and Lin (2006) gender and number list
+   * */
+  private void loadGenderNumber(String file, String neutralWordsFile){
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
       BufferedReader reader = IOUtils.readerFromString(file);
-      for (String line; (line = reader.readLine()) != null; ) {
+      String line;
+      while ((line = reader.readLine())!=null){
         String[] split = line.split("\t");
         List<String> tokens = new ArrayList<String>(Arrays.asList(split[0].split(" ")));
         String[] countStr = split[1].split(" ");

@@ -1513,7 +1513,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
     for (String[] mwp : MULTIWORD_PREPS) {
-      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1622,7 +1621,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
     // first, loop over the prepositions for NP annotation
     for (String[] mwp : THREEWORD_PREPS) {
-      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1722,7 +1720,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
     // second, loop again looking at flat annotation
     for (String[] mwp : THREEWORD_PREPS) {
-      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1863,7 +1860,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
     for (String[] mwp : MULTIWORD_PREPS) {
-      newTypedDeps.clear();
 
       TreeGraphNode mwp1 = null;
       TreeGraphNode governor = null;
@@ -1882,8 +1878,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       // now search for prep(gov, mwp1)
       for (TypedDependency td1 : list) {
-        if (td1.dep() == mwp1 && td1.reln() == PREPOSITIONAL_MODIFIER) {
-          // we found prep(gov, mwp1)
+        if (td1.dep() == mwp1 && td1.reln() == PREPOSITIONAL_MODIFIER) {// we
+          // found
+          // prep(gov,
+          // mwp1)
           prep = td1;
           governor = prep.gov();
         }
