@@ -17,7 +17,7 @@ public class ArrayStringFilter implements Filter<String> {
   private final Mode mode;
 
   public enum Mode {
-    EXACT, PREFIX
+    EXACT, PREFIX, CASE_INSENSITIVE
   }
 
   public ArrayStringFilter(Mode mode, String ... words) {
@@ -48,6 +48,13 @@ public class ArrayStringFilter implements Filter<String> {
         }
       }
       return false;
+    case CASE_INSENSITIVE:
+      for (int i = 0; i < length; ++i) {
+        if (words[i].equalsIgnoreCase(input)) {
+          return true;
+        }
+      }
+      return false;      
     default:
       throw new IllegalArgumentException("Unknown mode " + mode);
     }
