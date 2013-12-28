@@ -73,6 +73,16 @@ public class TsurgeonTest extends TestCase {
     } catch (TsurgeonParseException e) {
       // yay
     }
+
+    // Verify that it fails when the parents are different
+    tsurgeon = Tsurgeon.parseOperation("createSubtree FOO left right");
+    tregex = TregexPattern.compile("A << B=left << C=right");
+    try {
+      runTest(tregex, tsurgeon, "(A (B 1) (D (C 2)))", "(A (B 1) (D (C 2)))");
+      throw new AssertionError("Expected a runtime failure");
+    } catch (TsurgeonRuntimeException e) {
+      // yay
+    }
   }
 
   public void testDelete() {
