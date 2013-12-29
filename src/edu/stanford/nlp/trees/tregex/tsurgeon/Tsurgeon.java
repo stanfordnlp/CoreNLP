@@ -202,11 +202,11 @@ public class Tsurgeon {
    * <p>
    *      <code>$+ &#60;name&#62;</code>     the left sister of the named node<br>
    *      <code>$- &#60;name&#62;</code>     the right sister of the named node<br>
-   *      <code>&gt;i</code> the i_th daughter of the named node<br>
-   *      <code>&gt;-i</code> the i_th daughter, counting from the right, of the named node.
+   *      <code>&gt;i &#60;name&#62;</code> the i_th daughter of the named node<br>
+   *      <code>&gt;-i &#60;name&#62;</code> the i_th daughter, counting from the right, of the named node.
    * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code> or <code>replace &#60;name1&#62; &#60;tree&#62;</code>
    *     deletes name1 and inserts tree or a copy of name2 in its place.
-   * <li><code>createSubtree &#60;new-label&#62; &#60;name1&#62; [&#60;name1&#62;]</code> 
+   * <li><code>createSubtree &#60;new-label&#62; &#60;name1&#62; [&#60;name2&#62;]</code> 
    *     Create a subtree out of all the nodes from
    *     <code>&#60;name1&#62;</code> through
    *     <code>&#60;name2&#62;</code> and puts the new subtree where
