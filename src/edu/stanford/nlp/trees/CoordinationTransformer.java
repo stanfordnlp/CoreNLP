@@ -92,9 +92,9 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern findFlatConjpTregex =
-    // TODO: add and yet, and so, but then again, etc
-    TregexPattern.compile("/^S/ < (/^S/ $++ (CC=start $+ (RB $+ /^S/) " + 
-                          "(< but $+ (RB=end < then)) ))"); // TODO: what should be the head of "but then"?
+    // TODO: add "and so", "then again", etc
+    TregexPattern.compile("/^S|PP|VP/ < (/^S|PP|VP/ $++ (CC=start $+ (RB $+ /^S|PP|VP/) " + 
+                          "(< and $+ (RB=end < yet)) ))"); // TODO: what should be the head of "and yet"?
 
   private static TsurgeonPattern addConjpTsurgeon =
     Tsurgeon.parseOperation("createSubtree CONJP start end");
@@ -107,7 +107,7 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern moveRBTregex = 
-    TregexPattern.compile("/^S|PP/ < (/^S|PP/ $++ (/^[,]|CC|CONJP$/ $+ (RB=adv $+ /^S|PP/=dest < not ))) ");
+    TregexPattern.compile("/^S|PP|VP/ < (/^S|PP|VP/ $++ (/^[,]|CC|CONJP$/ $+ (RB=adv $+ /^S|PP|VP/=dest [ < not | < then ] ))) ");
 
   private static TsurgeonPattern moveRBTsurgeon =
     Tsurgeon.parseOperation("move adv >0 dest");
