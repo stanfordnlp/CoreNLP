@@ -84,7 +84,11 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After combineConjp:               " + conjp);
     }
-    return conjp;
+    Tree movedRB = moveRB(conjp);
+    if (VERBOSE) {
+      System.err.println("After moveRB:                     " + movedRB);
+    }
+    return movedRB;
   }
 
   private static TregexPattern findFlatConjpTregex =
@@ -100,6 +104,19 @@ public class CoordinationTransformer implements TreeTransformer {
       return null;
     }
     return Tsurgeon.processPattern(findFlatConjpTregex, addConjpTsurgeon, t);
+  }
+
+  private static TregexPattern moveRBTregex = 
+    TregexPattern.compile("/^S|PP/ < (/^S|PP/ $++ (/^[,]|CC|CONJP$/ $+ (RB=adv $+ /^S|PP/=dest < not ))) ");
+
+  private static TsurgeonPattern moveRBTsurgeon =
+    Tsurgeon.parseOperation("move adv >0 dest");
+
+  public Tree moveRB(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(moveRBTregex, moveRBTsurgeon, t);
   }
 
   // Matches to be questions if the question starts with WHNP, such as
