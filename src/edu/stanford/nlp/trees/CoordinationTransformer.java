@@ -92,9 +92,11 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern findFlatConjpTregex =
-    // TODO: add "and so", "then again", etc
-    TregexPattern.compile("/^S|PP|VP/ < (/^S|PP|VP/ $++ (CC=start $+ (RB $+ /^S|PP|VP/) " + 
-                          "(< and $+ (RB=end < yet)) ))"); // TODO: what should be the head of "and yet"?
+    // TODO: add more patterns, perhaps ignore case
+    TregexPattern.compile("/^S|PP|VP/ < (/^S|PP|VP/ $++ (CC=start $+ (RB|ADVP $+ /^S|PP|VP/) " + 
+                          "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
+                          "  (< and $+ (RB=end < so)) | " + 
+                          "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
 
   private static TsurgeonPattern addConjpTsurgeon =
     Tsurgeon.parseOperation("createSubtree CONJP start end");
