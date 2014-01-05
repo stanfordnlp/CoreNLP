@@ -94,11 +94,11 @@ public class ConfusionMatrix<U> {
     }
     
     public String toString() {
-      return mkString(Arrays.asList("prec=" + (((tp + fp) > 0) ? d.format(prec) : "n/a"),
-                                    "recall=" + (((tp + fn) > 0) ? d.format(recall) : "n/a"),
-                                    "spec=" + (((fp + tn) > 0) ? d.format(spec) : "n/a"), "f1="
-                                    + (((prec + recall) > 0) ? d.format(f1) : "n/a")),
-                      ", ");
+      return StringUtils.join(Arrays.asList("prec=" + (((tp + fp) > 0) ? d.format(prec) : "n/a"),
+                                            "recall=" + (((tp + fn) > 0) ? d.format(recall) : "n/a"),
+                                            "spec=" + (((fp + tn) > 0) ? d.format(spec) : "n/a"), "f1="
+                                            + (((prec + recall) > 0) ? d.format(f1) : "n/a")),
+                              ", ");
     }
     
   }
@@ -253,11 +253,11 @@ public class ConfusionMatrix<U> {
     StringWriter ret = new StringWriter();
     
     // header row (top)
-    ret.write(padLeft("Guess/Gold", leftPadSize));
+    ret.write(StringUtils.padLeft("Guess/Gold", leftPadSize));
     for (int i = 0; i < sortedLabels.size(); i++) {
       String placeHolder = CLASS_PREFIX + (i + 1); // class name
       // placeholder
-      ret.write(padLeft(placeHolder, delimPadSize));
+      ret.write(StringUtils.padLeft(placeHolder, delimPadSize));
     }
     ret.write("    Marg. (Guess)");
     ret.write("\n");
@@ -265,22 +265,22 @@ public class ConfusionMatrix<U> {
     // Write out contents
     for (int guessI = 0; guessI < sortedLabels.size(); guessI++) {
       String placeHolder = CLASS_PREFIX + (guessI + 1);
-      ret.write(padLeft(placeHolder, leftPadSize));
+      ret.write(StringUtils.padLeft(placeHolder, leftPadSize));
       U guess = sortedLabels.get(guessI);
       for (int goldI = 0; goldI < sortedLabels.size(); goldI++) {
         U gold = sortedLabels.get(goldI);
         Integer value = get(guess, gold);
-        ret.write(padLeft(value.toString(), delimPadSize));
+        ret.write(StringUtils.padLeft(value.toString(), delimPadSize));
       }
-      ret.write(padLeft(guessMarginal(guess).toString(), delimPadSize));
+      ret.write(StringUtils.padLeft(guessMarginal(guess).toString(), delimPadSize));
       ret.write("\n");
     }
     
     // Bottom row, write out marginals over golds
-    ret.write(padLeft("Marg. (Gold)", leftPadSize));
+    ret.write(StringUtils.padLeft("Marg. (Gold)", leftPadSize));
     for (int goldI = 0; goldI < sortedLabels.size(); goldI++) {
       U gold = sortedLabels.get(goldI);
-      ret.write(padLeft(goldMarginal(gold).toString(), delimPadSize));
+      ret.write(StringUtils.padLeft(goldMarginal(gold).toString(), delimPadSize));
     }
     
     // Print out key, along with contingencies
@@ -288,36 +288,15 @@ public class ConfusionMatrix<U> {
     for (int labelI = 0; labelI < sortedLabels.size(); labelI++) {
       String placeHolder = CLASS_PREFIX + (labelI + 1);
       U classLabel = sortedLabels.get(labelI);
-      ret.write(padLeft(placeHolder, leftPadSize));
+      ret.write(StringUtils.padLeft(placeHolder, leftPadSize));
       ret.write(" = ");
       ret.write(classLabel.toString());
-      ret.write(padLeft("", delimPadSize));
+      ret.write(StringUtils.padLeft("", delimPadSize));
       Contingency contingency = getContingency(classLabel);
       ret.write(contingency.toString());
       ret.write("\n");
     }
     
-    return ret.toString();
-  }
-  
-  //
-  // Uility routines
-  //
-  
-  private String padLeft(String str, int numChars) {
-    return String.format("%1$" + numChars + "s", str);
-  }
-  
-  private static String mkString(List<String> datums, String delim) {
-    StringWriter ret = new StringWriter();
-    Iterator<String> it = datums.iterator();
-    if (it.hasNext()) {
-      ret.write(it.next().toString());
-      while (it.hasNext()) {
-        ret.write(delim);
-        ret.write(it.next().toString());
-      }
-    }
     return ret.toString();
   }
 }
