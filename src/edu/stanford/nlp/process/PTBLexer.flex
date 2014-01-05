@@ -1002,7 +1002,9 @@ gonna|gotta|lemme|gimme|wanna
 '/[A-Za-z][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
                   return handleQuotes(yytext(), true);
                 }
-/* {REDAUX}        { return handleQuotes(yytext(), false); } */
+/* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
+{REDAUX}        { return handleQuotes(yytext(), false); }
+{SREDAUX}       { return handleQuotes(yytext(), false); }
 {QUOTES}        { return handleQuotes(yytext(), false); }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
