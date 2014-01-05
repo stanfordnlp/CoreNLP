@@ -10,6 +10,6 @@ METRIC blanc:Coreference links: Recall: (25257 / 54427) 46.4% Precision: (25257 
 Non-coreference links: Recall: (922975 / 938262) 98.37%	Precision: (922975 / 952145) 96.93%	F1: 97.64%
 BLANC: Recall: (0.72 / 1) 72.38%	Precision: (0.8 / 1) 79.61%	F1: 75.41%
 
-INFO: Final conll score ((muc+bcub+ceafe)/3) = 59.75
+Final conll score ((muc+bcub+ceafe)/3) = 59.75
 Final score (pairwise) Precision = 0.57
 done
