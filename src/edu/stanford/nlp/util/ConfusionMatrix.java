@@ -63,38 +63,6 @@ public class ConfusionMatrix<U> {
     this.delimPadSize = newPadSize;
   }
 
-  public static class Pair<U> {
-    private U left = null;
-    private U right = null;
-    
-    public Pair(U left, U right) {
-      this.left = left;
-      this.right = right;
-    }
-    
-    public U getLeft() {
-      return left;
-    }
-    
-    public U getRight() {
-      return right;
-    }
-    
-    public String toString() {
-      return "(" + left.toString() + "," + right.toString() + ")";
-    }
-    
-    @Override
-      public int hashCode() {
-      int hashval = toString().hashCode();
-      return hashval;
-    }
-    
-    public boolean equals(Object obj) {
-      return obj.hashCode() == this.hashCode();
-    }
-  }
-  
   /**
    * Contingency table, listing precision ,recall, specificity, and f1 given
    * the number of true and false positives, true and false negatives.
@@ -135,7 +103,7 @@ public class ConfusionMatrix<U> {
     
   }
   
-  private ConcurrentHashMap<Pair<U>, Integer> confTable = new ConcurrentHashMap<Pair<U>, Integer>();
+  private ConcurrentHashMap<Pair<U, U>, Integer> confTable = new ConcurrentHashMap<Pair<U, U>, Integer>();
   
   /**
    * Increments the entry for this guess and gold by 1.
@@ -153,7 +121,7 @@ public class ConfusionMatrix<U> {
    * @param increment
    */
   public synchronized void add(U guess, U gold, int increment) {
-      Pair<U> pair = new Pair<U>(guess, gold);
+      Pair<U, U> pair = new Pair<U, U>(guess, gold);
       if (confTable.containsKey(pair)) {
         confTable.put(pair, confTable.get(pair) + increment);
       } else {
@@ -168,7 +136,7 @@ public class ConfusionMatrix<U> {
    * @return
    */
   public Integer get(U guess, U gold) {
-    Pair<U> pair = new Pair<U>(guess, gold);
+    Pair<U, U> pair = new Pair<U, U>(guess, gold);
     if (confTable.containsKey(pair)) {
       return confTable.get(pair);
     } else {
@@ -183,9 +151,9 @@ public class ConfusionMatrix<U> {
    */
   public Set<U> uniqueLabels() {
     HashSet<U> ret = new HashSet<U>();
-    for (Pair<U> pair : confTable.keySet()) {
-      ret.add(pair.getLeft());
-      ret.add(pair.getRight());
+    for (Pair<U, U> pair : confTable.keySet()) {
+      ret.add(pair.first());
+      ret.add(pair.second());
     }
     return ret;
   }
@@ -201,10 +169,10 @@ public class ConfusionMatrix<U> {
     int fp = 0;
     int tn = 0;
     int fn = 0;
-    for (Pair<U> pair : confTable.keySet()) {
+    for (Pair<U, U> pair : confTable.keySet()) {
       int count = confTable.get(pair);
-      U guess = pair.getLeft();
-      U gold = pair.getRight();
+      U guess = pair.first();
+      U gold = pair.second();
       boolean guessP = guess.equals(positiveLabel);
       boolean goldP = gold.equals(positiveLabel);
       if (guessP && goldP) {
