@@ -2,11 +2,11 @@ package edu.stanford.nlp.util;
 
 import java.io.StringWriter;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -198,21 +198,39 @@ public class ConfusionMatrix<U> {
    * 
    * @return
    */
-  private List<U> sortByName() {
-    LinkedList<String> names = new LinkedList<String>();
-    HashMap<String, U> lookup = new HashMap<String, U>();
+  private List<U> sortKeys() {
     Set<U> labels = uniqueLabels();
-    for (U label : labels) {
-      names.add(label.toString());
-      lookup.put(label.toString(), label);
+    if (labels.size() == 0) {
+      return Collections.emptyList();
     }
-    Collections.sort(names);
+
+    boolean comparable = (labels.iterator().next() instanceof Comparable);
+    if (comparable) {
+      List<Comparable<Object>> sorted = Generics.newArrayList();
+      for (U label : labels) {
+        sorted.add(ErasureUtils.<Comparable<Object>>uncheckedCast(label));
+      }
+      Collections.sort(sorted);
+      List<U> ret = Generics.newArrayList();
+      for (Object o : sorted) {
+        ret.add(ErasureUtils.<U>uncheckedCast(o));
+      }
+      return ret;
+    } else {
+      ArrayList<String> names = new ArrayList<String>();
+      HashMap<String, U> lookup = new HashMap<String, U>();
+      for (U label : labels) {
+        names.add(label.toString());
+        lookup.put(label.toString(), label);
+      }
+      Collections.sort(names);
     
-    LinkedList<U> ret = new LinkedList<U>();
-    for (String name : names) {
-      ret.add(lookup.get(name));
+      ArrayList<U> ret = new ArrayList<U>();
+      for (String name : names) {
+        ret.add(lookup.get(name));
+      }
+      return ret;
     }
-    return ret;
   }
   
   /**
@@ -259,7 +277,7 @@ public class ConfusionMatrix<U> {
    * @return
    */
   public String printTable() {
-    List<U> sortedLabels = sortByName();
+    List<U> sortedLabels = sortKeys();
     if (confTable.size() == 0) {
       return "Empty table!";
     }

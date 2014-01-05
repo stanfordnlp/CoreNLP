@@ -87,6 +87,60 @@ public class ConfusionMatrixTest extends TestCase {
     }
   }
   
+  private static class BackwardsInteger implements Comparable<BackwardsInteger> {
+    private final int value;
+
+    public BackwardsInteger(int value) {
+      this.value = value;
+    }
+
+    public int compareTo(BackwardsInteger other) {
+      return other.value - this.value; // backwards
+    }
+
+    @Override
+    public int hashCode() {
+      return value;
+    }
+
+    public boolean equals(Object o) {
+      if (o == null || (!(o instanceof BackwardsInteger))) {
+        return false;
+      }
+      return (((BackwardsInteger) o).value == value);
+    }
+
+    @Override
+    public String toString() {
+      return Integer.toString(value);
+    }
+  }
+
+  public void testValueSort() {
+    String expected = "      Guess/Gold       2       1    Marg. (Guess)\n" +
+                      "               2       3       2       5\n" +
+                      "               1       5      10      15\n" +
+                      "    Marg. (Gold)       8      12\n\n" +
+                      "               2        prec=0.6, recall=0.375, spec=0.83333, f1=0.46154\n" + 
+                      "               1        prec=0.66667, recall=0.83333, spec=0.375, f1=0.74074\n";
+
+    BackwardsInteger one = new BackwardsInteger(1);
+    BackwardsInteger two = new BackwardsInteger(2);
+
+    ConfusionMatrix<BackwardsInteger> conf = new ConfusionMatrix<BackwardsInteger>();
+    conf.setUseRealLabels(true);
+    conf.add(one, one, 10);
+    conf.add(one, two, 5);
+    conf.add(two, one, 2);
+    conf.add(two, two, 3);
+    String result = conf.printTable();
+    if (echo) {
+      System.err.println(result);
+    } else {
+      assertEquals(expected, result);
+    }
+  }
+  
   public static void main(String[] args) {
     ConfusionMatrixTest tester = new ConfusionMatrixTest(true);
     System.out.println("Test 1");
@@ -95,6 +149,8 @@ public class ConfusionMatrixTest extends TestCase {
     tester.testRealLabels();
     System.out.println("\nTest 3");
     tester.testBulkAdd();
+    System.out.println("\nTest 4");
+    tester.testValueSort();
   }
 
 }
