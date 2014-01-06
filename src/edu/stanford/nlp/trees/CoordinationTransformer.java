@@ -93,7 +93,7 @@ public class CoordinationTransformer implements TreeTransformer {
 
   private static TregexPattern findFlatConjpTregex =
     // TODO: add more patterns, perhaps ignore case
-    TregexPattern.compile("/^S|PP|VP/ < (/^S|PP|VP/ $++ (CC=start $+ (RB|ADVP $+ /^S|PP|VP/) " + 
+    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " + 
                           "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
                           "  (< and $+ (RB=end < so)) | " + 
                           "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
@@ -109,7 +109,7 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern moveRBTregex = 
-    TregexPattern.compile("/^S|PP|VP/ < (/^S|PP|VP/ $++ (/^[,]|CC|CONJP$/ $+ (RB=adv $+ /^S|PP|VP/=dest [ < not | < then ] ))) ");
+    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^([,]|CC|CONJP)$/ $+ (RB=adv $+ /^(S|PP|VP)/=dest [ < not | < then ] ))) ");
 
   private static TsurgeonPattern moveRBTsurgeon =
     Tsurgeon.parseOperation("move adv >0 dest");
