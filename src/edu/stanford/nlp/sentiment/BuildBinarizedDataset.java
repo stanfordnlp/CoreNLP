@@ -18,24 +18,7 @@ import edu.stanford.nlp.util.Pair;
 
 public class BuildBinarizedDataset {
   /**
-   * Sets all of the labels on a tree to -1, representing that they
-   * are the unknown class.
-   */
-  public static void setUnknownLabels(Tree tree) {
-    if (tree.isLeaf()) {
-      return;
-    }
-
-    for (Tree child : tree.children()) {
-      setUnknownLabels(child);
-    }
-
-    tree.label().setValue("-1");
-  }
-
-  /**
-   * Sets all of the labels on a tree to -1, representing that they
-   * are the unknown class.
+   * Sets all of the labels on a tree to the given default value.
    */
   public static void setUnknownLabels(Tree tree, Integer defaultLabel) {
     if (tree.isLeaf()) {
@@ -177,7 +160,7 @@ public class BuildBinarizedDataset {
 
       Tree tree = parser.apply(tokens);
       Tree binarized = binarizer.transformTree(tree);
-      setUnknownLabels(binarized,mainLabel);
+      setUnknownLabels(binarized, mainLabel);
       Tree collapsedUnary = transformer.transformTree(binarized);
 
       Trees.convertToCoreLabels(collapsedUnary);
