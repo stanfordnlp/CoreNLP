@@ -182,7 +182,7 @@ public class Evaluate {
           correct[i] += confusion[classes[i][j]][classes[i][k]];
         }
         for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
-          total[i] += confusion[k][classes[i][j]];
+          total[i] += confusion[classes[i][j]][k];
         }
       }
       results[i] = ((double) correct[i]) / ((double) (total[i]));
@@ -199,7 +199,7 @@ public class Evaluate {
           correct += confusion[classes[i][j]][classes[i][k]];
         }
         for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
-          total += confusion[k][classes[i][j]];          
+          total += confusion[classes[i][j]][k];
         }
       }
     }
