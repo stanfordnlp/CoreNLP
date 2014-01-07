@@ -65,7 +65,11 @@ public class Evaluate {
     lengthLabelsCorrect = new IntCounter<Integer>();
     lengthLabelsIncorrect = new IntCounter<Integer>();
 
-    ngrams = new TopNGramRecord(model.op.numClasses, NUM_NGRAMS);
+    if (model.op.testOptions.ngramRecordSize > 0) {
+      ngrams = new TopNGramRecord(model.op.numClasses, model.op.testOptions.ngramRecordSize);
+    } else {
+      ngrams = null;
+    }
   }
 
   public void eval(List<Tree> trees) {
@@ -80,7 +84,9 @@ public class Evaluate {
     countTree(tree);
     countRoot(tree);
     countLengthAccuracy(tree);
-    ngrams.countTree(tree);
+    if (ngrams != null) {
+      ngrams.countTree(tree);
+    }
   }
 
   private int countLengthAccuracy(Tree tree) {
@@ -246,10 +252,13 @@ public class Evaluate {
       System.err.println();
     }
 
-    System.err.println(ngrams);
+    if (model.op.testOptions.ngramRecordSize > 0) {
+      System.err.println(ngrams);
+    }
 
-    // TODO: make this an option
-    //printLengthAccuracies();
+    if (model.op.testOptions.printLengthAccuracies) {
+      printLengthAccuracies();
+    }
   }
 
   /**
