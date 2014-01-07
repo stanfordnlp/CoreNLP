@@ -3,8 +3,10 @@ package edu.stanford.nlp.sentiment;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.neural.rnn.TopNGramRecord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -35,6 +37,11 @@ public class Evaluate {
   IntCounter<Integer> lengthLabelsCorrect;
   IntCounter<Integer> lengthLabelsIncorrect;
 
+  TopNGramRecord ngrams;
+
+  // TODO: make this an option
+  static final int NUM_NGRAMS = 5;
+
   private static final NumberFormat NF = new DecimalFormat("0.000000");
 
   public Evaluate(SentimentModel model) {
@@ -57,6 +64,8 @@ public class Evaluate {
 
     lengthLabelsCorrect = new IntCounter<Integer>();
     lengthLabelsIncorrect = new IntCounter<Integer>();
+
+    ngrams = new TopNGramRecord(model.op.numClasses, NUM_NGRAMS);
   }
 
   public void eval(List<Tree> trees) {
@@ -71,6 +80,7 @@ public class Evaluate {
     countTree(tree);
     countRoot(tree);
     countLengthAccuracy(tree);
+    ngrams.countTree(tree);
   }
 
   private int countLengthAccuracy(Tree tree) {
@@ -233,8 +243,12 @@ public class Evaluate {
         System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
       }
       System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
+      System.err.println();
     }
 
+    System.err.println(ngrams);
+
+    // TODO: make this an option
     //printLengthAccuracies();
   }
 
