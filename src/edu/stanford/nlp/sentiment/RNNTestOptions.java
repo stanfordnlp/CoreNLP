@@ -10,6 +10,8 @@ import java.io.Serializable;
 public class RNNTestOptions implements Serializable {
   public int ngramRecordSize = 0;
 
+  public int ngramRecordMaximumLength = 0;
+
   public boolean printLengthAccuracies = false;
 
   @Override
@@ -17,6 +19,7 @@ public class RNNTestOptions implements Serializable {
     StringBuilder result = new StringBuilder();
     result.append("TEST OPTIONS\n");
     result.append("ngramRecordSize=" + ngramRecordSize + "\n");
+    result.append("ngramRecordMaximumLength=" + ngramRecordMaximumLength + "\n");
     result.append("printLengthAccuracies=" + printLengthAccuracies + "\n");
     return result.toString();
   }
@@ -24,6 +27,9 @@ public class RNNTestOptions implements Serializable {
   public int setOption(String[] args, int argIndex) {
     if (args[argIndex].equalsIgnoreCase("-ngramRecordSize")) {
       ngramRecordSize = Integer.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-ngramRecordMaximumLength")) {
+      ngramRecordMaximumLength = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-printLengthAccuracies")) {
       printLengthAccuracies = true;

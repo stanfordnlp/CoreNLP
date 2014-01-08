@@ -31,11 +31,15 @@ public class TopNGramRecord {
   /** How many classes we are storing */
   final private int numClasses;
 
+  /** Longest ngram to keep */
+  final private int maximumLength;
+
   Map<Integer, Map<Integer, PriorityQueue<Tree>>> classToNGrams = Generics.newHashMap();
 
-  public TopNGramRecord(int numClasses, int ngramCount) {
+  public TopNGramRecord(int numClasses, int ngramCount, int maximumLength) {
     this.numClasses = numClasses;
     this.ngramCount = ngramCount;
+    this.maximumLength = maximumLength;
     for (int i = 0; i < numClasses; ++i) {
       Map<Integer, PriorityQueue<Tree>> innerMap = Generics.newHashMap();
       classToNGrams.put(i, innerMap);
@@ -59,6 +63,9 @@ public class TopNGramRecord {
     int treeSize = 0;
     for (Tree child : tree.children()) {
       treeSize += countTreeHelper(child, prediction, ngrams);
+    }
+    if (maximumLength > 0 && treeSize > maximumLength) {
+      return treeSize;
     }
     PriorityQueue<Tree> queue = getPriorityQueue(treeSize, prediction, ngrams);
     // TODO: should we allow classes which aren't the best possible

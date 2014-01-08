@@ -66,7 +66,7 @@ public class Evaluate {
     lengthLabelsIncorrect = new IntCounter<Integer>();
 
     if (model.op.testOptions.ngramRecordSize > 0) {
-      ngrams = new TopNGramRecord(model.op.numClasses, model.op.testOptions.ngramRecordSize);
+      ngrams = new TopNGramRecord(model.op.numClasses, model.op.testOptions.ngramRecordSize, model.op.testOptions.ngramRecordMaximumLength);
     } else {
       ngrams = null;
     }
