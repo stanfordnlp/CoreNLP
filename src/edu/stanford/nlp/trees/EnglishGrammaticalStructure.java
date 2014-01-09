@@ -247,7 +247,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Alters a list in place by removing all the KILL relations
    */
-  private static void filterKill(List<TypedDependency> deps) {
+  private static void filterKill(Collection<TypedDependency> deps) {
     List<TypedDependency> filtered = Generics.newArrayList();
     for (TypedDependency dep : deps) {
       if (dep.reln() != KILL) {
@@ -1953,16 +1953,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-    // now remove typed dependencies with reln "kill"
-    for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {
-      TypedDependency td = iter.next();
-      if (td.reln() == KILL) {
-        if (DEBUG) {
-          System.err.println("Removing rest of multiword conj: " + td);
-        }
-        iter.remove();
-      }
-    }
+    filterKill(list);
   }
 
   /**
