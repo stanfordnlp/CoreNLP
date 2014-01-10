@@ -1951,8 +1951,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
                   td2.reln() == ADVERBIAL_MODIFIER || td2.reln() == NEGATION_MODIFIER || td2.reln() == AUX_MODIFIER)) {
             if ((td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("also")) ||
                 (td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("not")) ||
-                (td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("rather"))) {
-              newDeps.add(new TypedDependency(COORDINATION, td1.gov(), td2.dep()));
+                (td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("rather")) ||
+                (td1.dep().value().equalsIgnoreCase("and") && td2.dep().value().equalsIgnoreCase("yet"))) {
+              TypedDependency newDep = new TypedDependency(COORDINATION, td1.gov(), td2.dep());
+              newDeps.add(newDep);
               td1.setReln(KILL);
               td2.setReln(KILL);
             } else {
