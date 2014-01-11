@@ -240,8 +240,8 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                     "neg(only-4, not-3)\n" +
                     "preconj(cats-5, only-4)\n" +
                     "dobj(like-2, cats-5)\n" +
-                    "cc(cats-5, but-6)\n" +
-                    "advmod(but-6, also-7)\n" +
+                    "cc(also-7, but-6)\n" +
+                    "cc(cats-5, also-7)\n" +
                     "conj(cats-5, dogs-8)\n",
         "nsubj(knows-2, He-1)\n" + "root(ROOT-0, knows-2)\n" +
                 "det(industry-6, the-3)\n" +
