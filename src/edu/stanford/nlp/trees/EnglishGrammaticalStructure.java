@@ -1939,8 +1939,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list List of words to get rid of multiword conjunctions from
    */
   private static void eraseMultiConj(Collection<TypedDependency> list) {
-    List<TypedDependency> newDeps = Generics.newArrayList();
-
     // find typed deps of form cc(gov, x)
     for (TypedDependency td1 : list) {
       if (td1.reln() == COORDINATION) {
@@ -1949,28 +1947,13 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         for (TypedDependency td2 : list) {
           if (td2.gov().equals(x) && (td2.reln() == DEPENDENT || td2.reln() == MULTI_WORD_EXPRESSION || td2.reln() == COORDINATION ||
                   td2.reln() == ADVERBIAL_MODIFIER || td2.reln() == NEGATION_MODIFIER || td2.reln() == AUX_MODIFIER)) {
-            if ((td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("also")) ||
-                (td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("not")) ||
-                (td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("rather")) ||
-                (td1.dep().value().equalsIgnoreCase("and") && td2.dep().value().equalsIgnoreCase("yet"))) {
-              TypedDependency newDep = new TypedDependency(COORDINATION, td1.gov(), td2.dep());
-              newDeps.add(newDep);
-              td1.setReln(KILL);
-              td2.setReln(KILL);
-            } else {
-              td2.setReln(KILL);
-            }
+            td2.setReln(KILL);
           }
         }
       }
     }
 
     filterKill(list);
-    for (TypedDependency dep : newDeps) {
-      if (!list.contains(dep)) {
-        list.add(dep);
-      }
-    }
   }
 
   /**

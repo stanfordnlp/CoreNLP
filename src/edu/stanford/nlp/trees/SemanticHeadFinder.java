@@ -243,7 +243,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ NP !$++ ADJP))"),
   };
 
-
+  static final TregexPattern[] headOfConjpTregex = {
+    TregexPattern.compile("CONJP < (CC <: /^(?i:but|and)$/ $+ (RB=head <: /^(?i:not)$/))"),
+    TregexPattern.compile("CONJP < (CC <: /^(?i:but)$/ [ ($+ (RB=head <: /^(?i:also|rather)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:also|rather)$/))) ])"),
+    TregexPattern.compile("CONJP < (CC <: /^(?i:and)$/ [ ($+ (RB=head <: /^(?i:yet)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:yet)$/))) ])"),
+  };
+    
   /**
    * Determine which daughter of the current parse tree is the
    * head.  It assumes that the daughters already have had their
@@ -261,6 +266,20 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       System.err.println("At " + motherCat + ", my parent is " + parent);
     }
 
+    // Some conj expressions seem to make more sense with the "not" or
+    // other key words as the head.  For example, "and not" means
+    // something completely different than "and".  Furthermore,
+    // downstream code was written assuming "not" would be the head...
+    if (motherCat.equals("CONJP")) {
+      for (TregexPattern pattern : headOfConjpTregex) {
+        TregexMatcher matcher = pattern.matcher(t);
+        if (matcher.matchesAt(t)) {
+          return matcher.getNode("head");
+        }
+      }
+      // if none of the above patterns match, use the standard method
+    }
+
     if (motherCat.equals("SBARQ")) { 
       if (!makeCopulaHead) {
         for (TregexPattern pattern : headOfCopulaTregex) {
@@ -270,7 +289,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
           }
         }
       }
-
       // if none of the above patterns match, use the standard method
     }
 
