@@ -1,4 +1,4 @@
-package edu.stanford.nlp.stats;
+package edu.stanford.nlp.util.concurrent;
 
 import java.io.Serializable;
 import java.util.AbstractSet;
@@ -12,8 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import edu.stanford.nlp.math.SloppyMath;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Factory;
-import edu.stanford.nlp.util.concurrent.AtomicDouble;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -25,22 +27,22 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
  *
  * @param <E>
  */
-public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<E> {
+public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Iterable<E> {
 
   private static final long serialVersionUID = -8077192206562696111L;
 
   private static final int DEFAULT_CAPACITY = 100;
   
-  private final ConcurrentMap<E,Double> map;
+  private final ConcurrentMap<E,AtomicDouble> map;
   private final AtomicDouble totalCount;
   private double defaultReturnValue = 0.0;
   
-  public ThreadsafeCounter() {
+  public ConcurrentHashCounter() {
     this(DEFAULT_CAPACITY);
   }
   
-  public ThreadsafeCounter(int initialCapacity) {
-    map = new ConcurrentHashMap<E,Double>(initialCapacity);
+  public ConcurrentHashCounter(int initialCapacity) {
+    map = new ConcurrentHashMap<E,AtomicDouble>(initialCapacity);
     totalCount = new AtomicDouble();
   }
 
@@ -55,7 +57,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
       private static final long serialVersionUID = 6076144467752914760L;
       @Override
       public Counter<E> create() {
-        return new ThreadsafeCounter<E>();
+        return new ConcurrentHashCounter<E>();
       }
     };
   }
@@ -72,24 +74,30 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public double getCount(Object key) {
-    Double v = map.get(key);
-    return v == null ? defaultReturnValue : (double) v;
+    AtomicDouble v = map.get(key);
+    return v == null ? defaultReturnValue : v.get();
   }
 
   @Override
   public void setCount(E key, double value) {
-    Double oldV = map.put(key, value);
-    totalCount.addAndGet(value - (oldV == null ? 0.0 : (double) oldV));
+    AtomicDouble oldV = map.putIfAbsent(key, new AtomicDouble(value));
+    if (oldV == null) {
+      totalCount.addAndGet(value);
+    } else {
+      // This isn't right; see Guava.AtomicLongMap for an example of why
+      for (;;) {
+        // Do something
+//        double v = map.pu
+      }
+//      double oldV = map.putIfAbsent(key, new AtomicDouble()).getAndSet(value);
+//      totalCount.addAndGet(value - oldV);
+    }
   }
 
   @Override
   public double incrementCount(E key, double value) {
-    double newV;
-    synchronized(map) {
-      Double v = map.get(key);
-      newV = value + (v == null ? 0.0 : (double) v);
-      map.put(key, newV);
-    }
+    // Incorrect. See AtomicLongMap for an example of why
+    double newV = map.putIfAbsent(key, new AtomicDouble()).addAndGet(value);
     totalCount.addAndGet(value);
     return newV;
   }
@@ -111,13 +119,14 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public double logIncrementCount(E key, double value) {
+    // TODO: This isn't right.
     double oldV;
     double newV;
     synchronized(map) {
-      Double v = map.get(key);
-      oldV = v == null ? 0.0 : (double) v;
+      AtomicDouble v = map.putIfAbsent(key, new AtomicDouble());
+      oldV = v.get();
       newV = SloppyMath.logAdd(value, oldV);
-      map.put(key, newV);
+      map.get(key).set(newV);
     }
     totalCount.addAndGet(newV - oldV);
     return newV;
@@ -130,12 +139,14 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public double remove(E key) {
-    Double oldV;
-    synchronized(map) {
-      oldV = map.remove(key);
-      totalCount.addAndGet( -1.0 * (oldV == null ? 0.0 : (double) oldV));
+    // TODO: This isn't right.
+    AtomicDouble oldV = map.remove(key);
+    if (oldV != null) {
+      double v = oldV.get();
+      totalCount.addAndGet(-1.0 * v);
+      return v;
     }
-    return oldV == null ? defaultReturnValue : (double) oldV;
+    return defaultReturnValue;
   }
 
   @Override
@@ -150,7 +161,71 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public Collection<Double> values() {
-    return Collections.unmodifiableCollection(map.values());
+    return new Collection<Double>() {
+      @Override
+      public int size() {
+        return map.size();
+      }
+      @Override
+      public boolean isEmpty() {
+        return map.size() == 0;
+      }
+      @Override
+      public boolean contains(Object o) {
+        if (o instanceof Double) {
+          return map.values().contains(new AtomicDouble((Double) o));
+        }
+        return false;
+      }
+
+      @Override
+      public Iterator<Double> iterator() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public Object[] toArray() {
+        return null;
+      }
+
+      @Override
+      public <T> T[] toArray(T[] a) {
+        return null;
+      }
+
+      @Override
+      public boolean add(Double e) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public boolean remove(Object o) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public boolean containsAll(Collection<?> c) {
+        // TODO Auto-generated method stub
+        return false;
+      }
+      @Override
+      public boolean addAll(Collection<? extends Double> c) {
+        throw new UnsupportedOperationException();
+      }
+      @Override
+      public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+      }
+      @Override
+      public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+      }
+      @Override
+      public void clear() {
+        throw new UnsupportedOperationException();
+      }
+    };
   }
 
   @Override
@@ -159,7 +234,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
       @Override
       public Iterator<Entry<E, Double>> iterator() {
         return new Iterator<Entry<E,Double>>() {
-          final Iterator<Entry<E,Double>> inner = map.entrySet().iterator();
+          final Iterator<Entry<E,AtomicDouble>> inner = map.entrySet().iterator();
 
           @Override
           public boolean hasNext() {
@@ -169,7 +244,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
           @Override
           public Entry<E, Double> next() {
             return new Entry<E,Double>() {
-              final Entry<E,Double> e = inner.next();
+              final Entry<E,AtomicDouble> e = inner.next();
 
               @Override
               public E getKey() {
@@ -178,14 +253,14 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
               @Override
               public Double getValue() {
-                return e.getValue();
+                return e.getValue().get();
               }
 
               @Override
               public Double setValue(Double value) {
-                final double old = e.getValue();
+                final double old = e.getValue().get();
                 setCount(e.getKey(), value);
-                e.setValue(value);
+                e.getValue().set(value);
                 return old;
               }
             };
@@ -215,7 +290,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public int size() {
-    return map.keySet().size();
+    return map.size();
   }
 
   @Override
@@ -228,17 +303,11 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
   public boolean equals(Object o) {
     if (this == o) {
       return true;
-    } else if ( ! (o instanceof ThreadsafeCounter)) {
+    } else if ( ! (o instanceof ConcurrentHashCounter)) {
       return false;
     } else {
-      final ThreadsafeCounter<E> other = (ThreadsafeCounter<E>) o;
-      // Careful! Don't want a race condition between the first term of
-      // the conjunction and the second.
-      synchronized(map) {
-        synchronized(other.map) {
-          return totalCount.get() == other.totalCount.get() && map.equals(other.map);
-        }
-      }
+      final ConcurrentHashCounter<E> other = (ConcurrentHashCounter<E>) o;
+      return totalCount.get() == other.totalCount.get() && map.equals(other.map);
     }
   }
 
