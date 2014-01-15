@@ -15,7 +15,6 @@ import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Factory;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -80,26 +79,69 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
 
   @Override
   public void setCount(E key, double value) {
-    AtomicDouble oldV = map.putIfAbsent(key, new AtomicDouble(value));
-    if (oldV == null) {
-      totalCount.addAndGet(value);
-    } else {
-      // This isn't right; see Guava.AtomicLongMap for an example of why
-      for (;;) {
-        // Do something
-//        double v = map.pu
+    // TODO Inspired by Guava.AtomicLongMap
+    // Modify for our use?
+    outer: for (;;) {
+      AtomicDouble atomic = map.get(key);
+      if (atomic == null) {
+        atomic = map.putIfAbsent(key, new AtomicDouble(value));
+        if (atomic == null) {
+          totalCount.addAndGet(value);
+          return;
+        }
       }
-//      double oldV = map.putIfAbsent(key, new AtomicDouble()).getAndSet(value);
-//      totalCount.addAndGet(value - oldV);
+
+      for (;;) {
+        double oldValue = atomic.get();
+        if (oldValue == 0.0) {
+          // don't compareAndSet a zero
+          if (map.replace(key, atomic, new AtomicDouble(value))) {
+            totalCount.addAndGet(value);
+            return;
+          }
+          continue outer;
+        }
+
+        if (atomic.compareAndSet(oldValue, value)) {
+          totalCount.addAndGet(value - oldValue);
+          return;
+        }
+      }
     }
   }
 
   @Override
   public double incrementCount(E key, double value) {
-    // Incorrect. See AtomicLongMap for an example of why
-    double newV = map.putIfAbsent(key, new AtomicDouble()).addAndGet(value);
-    totalCount.addAndGet(value);
-    return newV;
+    // TODO Inspired by Guava.AtomicLongMap
+    // Modify for our use?
+    outer: for (;;) {
+      AtomicDouble atomic = map.get(key);
+      if (atomic == null) {
+        atomic = map.putIfAbsent(key, new AtomicDouble(value));
+        if (atomic == null) {
+          totalCount.addAndGet(value);
+          return value;
+        }
+      }
+
+      for (;;) {
+        double oldValue = atomic.get();
+        if (oldValue == 0.0) {
+          // don't compareAndSet a zero
+          if (map.replace(key, atomic, new AtomicDouble(value))) {
+            totalCount.addAndGet(value);
+            return value;
+          }
+          continue outer;
+        }
+
+        double newValue = oldValue + value;
+        if (atomic.compareAndSet(oldValue, newValue)) {
+          totalCount.addAndGet(value);
+          return newValue;
+        }
+      }
+    }
   }
 
   @Override
@@ -119,17 +161,36 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
 
   @Override
   public double logIncrementCount(E key, double value) {
-    // TODO: This isn't right.
-    double oldV;
-    double newV;
-    synchronized(map) {
-      AtomicDouble v = map.putIfAbsent(key, new AtomicDouble());
-      oldV = v.get();
-      newV = SloppyMath.logAdd(value, oldV);
-      map.get(key).set(newV);
+    // TODO Inspired by Guava.AtomicLongMap
+    // Modify for our use?
+    outer: for (;;) {
+      AtomicDouble atomic = map.get(key);
+      if (atomic == null) {
+        atomic = map.putIfAbsent(key, new AtomicDouble(value));
+        if (atomic == null) {
+          totalCount.addAndGet(value);
+          return value;
+        }
+      }
+
+      for (;;) {
+        double oldValue = atomic.get();
+        if (oldValue == 0.0) {
+          // don't compareAndSet a zero
+          if (map.replace(key, atomic, new AtomicDouble(value))) {
+            totalCount.addAndGet(value);
+            return value;
+          }
+          continue outer;
+        }
+
+        double newValue = SloppyMath.logAdd(oldValue, value);
+        if (atomic.compareAndSet(oldValue, newValue)) {
+          totalCount.addAndGet(value);
+          return newValue;
+        }
+      }
     }
-    totalCount.addAndGet(newV - oldV);
-    return newV;
   }
 
   @Override
@@ -139,14 +200,21 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
 
   @Override
   public double remove(E key) {
-    // TODO: This isn't right.
-    AtomicDouble oldV = map.remove(key);
-    if (oldV != null) {
-      double v = oldV.get();
-      totalCount.addAndGet(-1.0 * v);
-      return v;
+    AtomicDouble atomic = map.get(key);
+    if (atomic == null) {
+      return defaultReturnValue;
     }
-    return defaultReturnValue;
+
+    for (;;) {
+      double oldValue = atomic.get();
+      if (oldValue == 0.0 || atomic.compareAndSet(oldValue, 0.0)) {
+        // only remove after setting to zero, to avoid concurrent updates
+        map.remove(key, atomic);
+        // succeed even if the remove fails, since the value was already adjusted
+        totalCount.addAndGet(-1.0 * oldValue);
+        return oldValue;
+      }
+    }
   }
 
   @Override
@@ -173,41 +241,52 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
       @Override
       public boolean contains(Object o) {
         if (o instanceof Double) {
-          return map.values().contains(new AtomicDouble((Double) o));
+          double value = (Double) o;
+          for (AtomicDouble atomic : map.values()) {
+            if (atomic.get() == value) {
+              return true;
+            }
+          }
         }
         return false;
       }
-
       @Override
       public Iterator<Double> iterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Iterator<Double>() {
+          Iterator<AtomicDouble> iterator = map.values().iterator();
+          @Override
+          public boolean hasNext() {
+            return iterator.hasNext();
+          }
+          @Override
+          public Double next() {
+            return iterator.next().get();
+          }
+          @Override
+          public void remove() {
+            iterator.remove();
+          }
+        };
       }
-
       @Override
       public Object[] toArray() {
-        return null;
+        return map.values().toArray();
       }
-
       @Override
       public <T> T[] toArray(T[] a) {
-        return null;
+        return map.values().toArray(a);
       }
-
       @Override
       public boolean add(Double e) {
         throw new UnsupportedOperationException();
       }
-
       @Override
       public boolean remove(Object o) {
         throw new UnsupportedOperationException();
       }
-
       @Override
       public boolean containsAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        return false;
+        throw new UnsupportedOperationException();
       }
       @Override
       public boolean addAll(Collection<? extends Double> c) {
@@ -282,9 +361,12 @@ public class ConcurrentHashCounter<E> implements Serializable, Counter<E>, Itera
 
   @Override
   public void clear() {
-    synchronized(map) {
-      map.clear();
-      totalCount.set(0);
+    for(;;) {
+      totalCount.set(0.0);
+      if (totalCount.get() == 0.0) {
+        map.clear();
+        return;
+      }
     }
   }
 
