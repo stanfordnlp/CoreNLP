@@ -153,6 +153,7 @@ public class Evaluate {
     }
   }
 
+  // TODO: this should stored in the model rather than hard coded here
   private static final int[] NEG_CLASSES = {0, 1};
   private static final int[] POS_CLASSES = {3, 4};
 

@@ -46,22 +46,15 @@ public class SentimentUtils {
     return trees;
   }
 
-  public static String sentimentString(int sentiment) {
-    switch(sentiment) {
-    case 0:
-      return "Very negative";
-    case 1:
-      return "Negative";
-    case 2:
-      return "Neutral";
-    case 3:
-      return "Positive";
-    case 4:
-      return "Very positive";
-    default:
+  public static String sentimentString(SentimentModel model, int sentiment) {
+    String[] classNames = model.op.classNames;
+    if (classNames == null) {
+      // TODO: remove if we reserialize all existing models with the default
+      classNames = RNNOptions.DEFAULT_CLASS_NAMES;
+    }
+    if (sentiment < 0 || sentiment > classNames.length) {
       return "Unknown sentiment label " + sentiment;
     }
+    return classNames[sentiment];
   }
-
-
 }
