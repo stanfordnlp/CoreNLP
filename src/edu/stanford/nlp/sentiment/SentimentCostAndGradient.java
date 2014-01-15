@@ -139,9 +139,9 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     double scale = (1.0 / trainingBatch.size());
     value = error * scale;
 
-    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix);
+    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransform);
     value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification);
-    value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
+    value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransform);
     value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification);
     value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector);
 
@@ -218,19 +218,13 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     // Build a vector that looks like 0,0,1,0,0 with an indicator for the correct class
     SimpleMatrix goldLabel = new SimpleMatrix(model.numClasses, 1);
     int goldClass = RNNCoreAnnotations.getGoldClass(tree);
-    if (goldClass >= 0) {
-      goldLabel.set(goldClass, 1.0);
-    }
+    goldLabel.set(goldClass, 1.0);
 
     double nodeWeight = model.op.trainOptions.getClassWeight(goldClass);
 
     SimpleMatrix predictions = RNNCoreAnnotations.getPredictions(tree);
 
-    // If this is an unlabeled class, set deltaClass to 0.  We could
-    // make this more efficient by eliminating various of the below
-    // calculations, but this would be the easiest way to handle the
-    // unlabeled class
-    SimpleMatrix deltaClass = goldClass >= 0 ? predictions.minus(goldLabel).scale(nodeWeight) : new SimpleMatrix(predictions.numRows(), predictions.numCols());
+    SimpleMatrix deltaClass = predictions.minus(goldLabel).scale(nodeWeight);
     SimpleMatrix localCD = deltaClass.mult(NeuralUtils.concatenateWithBias(currentVector).transpose());
 
     double error = -(NeuralUtils.elementwiseApplyLog(predictions).elementMult(goldLabel).elementSum());
