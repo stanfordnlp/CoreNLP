@@ -32,7 +32,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
   private static final int DEFAULT_CAPACITY = 100;
   
   private final ConcurrentMap<E,Double> map;
-  private AtomicDouble totalCount;
+  private final AtomicDouble totalCount;
   private double defaultReturnValue = 0.0;
   
   public ThreadsafeCounter() {
