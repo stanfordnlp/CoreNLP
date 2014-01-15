@@ -28,9 +28,11 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   private static final long serialVersionUID = 6465313844985269109L;
 
-  private final ConcurrentHashMap<E,Integer> item2Index = new ConcurrentHashMap<E,Integer>();
-  private final ConcurrentHashMap<Integer,E> index2Item = new ConcurrentHashMap<Integer,E>();
-  private final AtomicInteger index = new AtomicInteger();
+  private static final int UNKNOWN_ID = -1;
+
+  private ConcurrentHashMap<E,Integer> item2Index = new ConcurrentHashMap<E,Integer>();
+  private ConcurrentHashMap<Integer,E> index2Item = new ConcurrentHashMap<Integer,E>();
+  private AtomicInteger index = new AtomicInteger();
 
   @Override
   public E get(int i) {
@@ -40,7 +42,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public int indexOf(E o) {
     Integer id = item2Index.get(o);
-    return id == null ? -1 : id;
+    return id == null ? UNKNOWN_ID : id;
   }
 
   @Override
@@ -57,18 +59,18 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
           return item2Index.get(o);
         }
       } else {
-        return -1;
+        return UNKNOWN_ID;
       }
     } else {
       return atomic;
     }
   }
-  
+
   @Override
   public boolean add(E o) {
-    return indexOf(o, true) != -1;
+    return indexOf(o, true) != UNKNOWN_ID;
   }
-  
+
   @Override
   public boolean addAll(Collection<? extends E> c) {
     boolean changed = false;
@@ -182,5 +184,20 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
     if (i < size()) buff.append("...");
     buff.append(']');
     return buff.toString();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public boolean contains(Object o) {
+    return indexOf((E) o) != UNKNOWN_ID;
+  }
+
+  @Override
+  public void clear() {
+    synchronized(this) {
+      item2Index = new ConcurrentHashMap<E,Integer>();
+      index2Item = new ConcurrentHashMap<Integer,E>();
+      index = new AtomicInteger();
+    }
   }
 }
