@@ -1752,15 +1752,14 @@ public class SemanticGraph implements Serializable {
         addVertex(govVertex);
         addVertex(depVertex);
         addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
-      }
-
-      else { //it's the root and we add it
+      } else { //it's the root and we add it
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
         depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
           depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
 
+        addVertex(depVertex);
         roots.add(depVertex);
       }
     }

@@ -396,7 +396,7 @@ public class TrainOptions implements Serializable {
 
   public int maxTrainTimeSeconds = 0;
 
-  public static final String DEFAULT_UNK_WORD = "UNK";
+  public static final String DEFAULT_UNK_WORD = "*UNK*";
   /**
    * Some models will use external data sources which contain
    * information about unknown words.  This variable is a way to

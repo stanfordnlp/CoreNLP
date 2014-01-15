@@ -61,6 +61,8 @@ public class TreePrint {
   private final boolean CCPropagatedDependencies;
   private final boolean treeDependencies;
 
+  private final boolean includeTags;
+
   private final HeadFinder hf;
   private final TreebankLanguagePack tlp;
   private final WordStemmer stemmer;
@@ -130,7 +132,7 @@ public class TreePrint {
    *                xml, removeTopBracket, transChinese,
    *                includePunctuationDependencies, basicDependencies, treeDependencies,
    *                CCPropagatedDependencies, collapsedDependencies, nonCollapsedDependencies,
-   *                nonCollapsedDependenciesSeparated
+   *                nonCollapsedDependenciesSeparated, includeTags
    *                </code>.
    * @param tlp     The TreebankLanguagePack used to do things like delete
    *                or ignore punctuation in output
@@ -185,6 +187,8 @@ public class TreePrint {
     nonCollapsedDependencies = propertyToBoolean(this.options, "nonCollapsedDependencies");
     nonCollapsedDependenciesSeparated = propertyToBoolean(this.options, "nonCollapsedDependenciesSeparated");
     treeDependencies = propertyToBoolean(this.options, "treeDependencies");
+
+    includeTags = propertyToBoolean(this.options, "includeTags");
 
     // if no option format for the dependencies is specified, CCPropagated is the default
     if ( ! basicDependencies && ! collapsedDependencies && ! nonCollapsedDependencies && ! nonCollapsedDependenciesSeparated && ! treeDependencies) {
@@ -478,24 +482,24 @@ public class TreePrint {
       if (formats.containsKey("typedDependencies")) {
         GrammaticalStructure gs = gsf.newGrammaticalStructure(outputTree);
         if (basicDependencies) {
-          print(gs.typedDependencies(), "xml", pw);
+          print(gs.typedDependencies(), "xml", includeTags, pw);
         }
         if (nonCollapsedDependencies || nonCollapsedDependenciesSeparated) {
-          print(gs.allTypedDependencies(), "xml", pw);
+          print(gs.allTypedDependencies(), "xml", includeTags, pw);
         }
         if (collapsedDependencies) {
-          print(gs.typedDependenciesCollapsed(true), "xml", pw);
+          print(gs.typedDependenciesCollapsed(true), "xml", includeTags, pw);
         }
         if (CCPropagatedDependencies) {
-          print(gs.typedDependenciesCCprocessed(), "xml", pw);
+          print(gs.typedDependenciesCCprocessed(), "xml", includeTags, pw);
         }
         if(treeDependencies) {
-          print(gs.typedDependenciesCollapsedTree(), "xml", pw);
+          print(gs.typedDependenciesCollapsedTree(), "xml", includeTags, pw);
         }
       }
       if (formats.containsKey("typedDependenciesCollapsed")) {
         GrammaticalStructure gs = gsf.newGrammaticalStructure(outputTree);
-        print(gs.typedDependenciesCCprocessed(), "xml", pw);
+        print(gs.typedDependenciesCCprocessed(), "xml", includeTags, pw);
       }
 
       // This makes parser require jgrapht.  Bad.
@@ -635,27 +639,27 @@ public class TreePrint {
       if (formats.containsKey("typedDependencies")) {
         GrammaticalStructure gs = gsf.newGrammaticalStructure(outputTree);
         if (basicDependencies) {
-          print(gs.typedDependencies(), pw);
+          print(gs.typedDependencies(), includeTags, pw);
         }
         if (nonCollapsedDependencies) {
-          print(gs.allTypedDependencies(), pw);
+          print(gs.allTypedDependencies(), includeTags, pw);
         }
         if (nonCollapsedDependenciesSeparated) {
-          print(gs.allTypedDependencies(), "separator", pw);
+          print(gs.allTypedDependencies(), "separator", includeTags, pw);
         }
         if (collapsedDependencies) {
-          print(gs.typedDependenciesCollapsed(true), pw);
+          print(gs.typedDependenciesCollapsed(true), includeTags, pw);
         }
         if (CCPropagatedDependencies) {
-          print(gs.typedDependenciesCCprocessed(), pw);
+          print(gs.typedDependenciesCCprocessed(), includeTags, pw);
         }
         if (treeDependencies) {
-          print(gs.typedDependenciesCollapsedTree(), pw);
+          print(gs.typedDependenciesCollapsedTree(), includeTags, pw);
         }
       }
       if (formats.containsKey("typedDependenciesCollapsed")) {
         GrammaticalStructure gs = gsf.newGrammaticalStructure(outputTree);
-        print(gs.typedDependenciesCCprocessed(), pw);
+        print(gs.typedDependenciesCCprocessed(), includeTags, pw);
       }
       // This makes parser require jgrapht.  Bad
       // if (formats.containsKey("semanticGraph")) {
@@ -878,15 +882,15 @@ public class TreePrint {
    * @return a <code>String</code> representation of the typed
    *         dependencies in this <code>GrammaticalStructure</code>
    */
-  private static String toString(Collection<TypedDependency> dependencies, String format) {
+  private static String toString(Collection<TypedDependency> dependencies, String format, boolean includeTags) {
     if (format != null && format.equals("xml")) {
-      return toXMLString(dependencies);
+      return toXMLString(dependencies, includeTags);
     } else if (format != null && format.equals("readable")) {
       return toReadableString(dependencies);
     } else if (format != null && format.equals("separator")) {
-        return toString(dependencies, true);
+      return toString(dependencies, true, includeTags);
     } else {
-      return toString(dependencies, false);
+      return toString(dependencies, false, includeTags);
     }
   }
 
@@ -904,28 +908,28 @@ public class TreePrint {
    * @return a <code>String</code> representation of this set of
    *         typed dependencies
    */
-  private static String toString(Collection<TypedDependency> dependencies, boolean extraSep) {
+  private static String toString(Collection<TypedDependency> dependencies, boolean extraSep, boolean includeTags) {
+    String labelFormat = (includeTags) ? "value-tag-index" : "value-index";
     StringBuilder buf = new StringBuilder();
     if (extraSep) {
       List<TypedDependency> extraDeps =  new ArrayList<TypedDependency>();
       for (TypedDependency td : dependencies) {
         if (td.extra()) {
           extraDeps.add(td);
-        }
-        else {
-          buf.append(td.toString()).append('\n');
+        } else {
+          buf.append(td.toString(labelFormat)).append('\n');
         }
       }
       // now we print the separator for extra dependencies, and print these if there are some
       if (!extraDeps.isEmpty()) {
         buf.append("======\n");
         for (TypedDependency td : extraDeps) {
-          buf.append(td.toString()).append('\n');
+          buf.append(td.toString(labelFormat)).append('\n');
         }
       }
     } else {
       for (TypedDependency td : dependencies) {
-        buf.append(td.toString()).append('\n');
+        buf.append(td.toString(labelFormat)).append('\n');
       }
     }
     return buf.toString();
@@ -943,13 +947,15 @@ public class TreePrint {
   }
 
   // NO OUTSIDE USE
-  private static String toXMLString(Collection<TypedDependency> dependencies) {
+  private static String toXMLString(Collection<TypedDependency> dependencies, boolean includeTags) {
     StringBuilder buf = new StringBuilder("<dependencies style=\"typed\">\n");
     for (TypedDependency td : dependencies) {
       String reln = td.reln().toString();
       String gov = td.gov().value();
+      String govTag = td.gov().label().tag();
       int govIdx = td.gov().index();
       String dep = td.dep().value();
+      String depTag = td.dep().label().tag();
       int depIdx = td.dep().index();
       boolean extra = td.extra();
       // add an attribute if the node is a copy
@@ -964,14 +970,16 @@ public class TreePrint {
       if (copyDep != null) {
         depCopy = " copy=\"" + copyDep + '\"';
       }
+      String govTagAttribute = (includeTags && govTag != null) ? " tag=\"" + govTag + "\"" : "";
+      String depTagAttribute = (includeTags && depTag != null) ? " tag=\"" + depTag + "\"" : "";
       // add an attribute if the typed dependency is an extra relation (do not preserve the tree structure)
       String extraAttr = "";
       if (extra) {
         extraAttr = " extra=\"yes\"";
       }
       buf.append("  <dep type=\"").append(XMLUtils.escapeXML(reln)).append('\"').append(extraAttr).append(">\n");
-      buf.append("    <governor idx=\"").append(govIdx).append('\"').append(govCopy).append('>').append(XMLUtils.escapeXML(gov)).append("</governor>\n");
-      buf.append("    <dependent idx=\"").append(depIdx).append('\"').append(depCopy).append('>').append(XMLUtils.escapeXML(dep)).append("</dependent>\n");
+      buf.append("    <governor idx=\"").append(govIdx).append('\"').append(govCopy).append(govTagAttribute).append('>').append(XMLUtils.escapeXML(gov)).append("</governor>\n");
+      buf.append("    <dependent idx=\"").append(depIdx).append('\"').append(depCopy).append(depTagAttribute).append('>').append(XMLUtils.escapeXML(dep)).append("</dependent>\n");
       buf.append("  </dep>\n");
     }
     buf.append("</dependencies>");
@@ -985,8 +993,8 @@ public class TreePrint {
    * @param dependencies The collection of TypedDependency to print
    * @param pw Where to print them
    */
-  public static void print(Collection<TypedDependency> dependencies, PrintWriter pw) {
-    pw.println(toString(dependencies, false));
+  public static void print(Collection<TypedDependency> dependencies, boolean includeTags, PrintWriter pw) {
+    pw.println(toString(dependencies, false, includeTags));
   }
 
   /**
@@ -997,8 +1005,8 @@ public class TreePrint {
    * @param format "xml" or "readable" or other
    * @param pw Where to print them
    */
-  public static void print(Collection<TypedDependency> dependencies, String format, PrintWriter pw) {
-    pw.println(toString(dependencies, format));
+  public static void print(Collection<TypedDependency> dependencies, String format, boolean includeTags, PrintWriter pw) {
+    pw.println(toString(dependencies, format, includeTags));
   }
 
 }

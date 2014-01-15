@@ -3,13 +3,16 @@ package edu.stanford.nlp.sentiment;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.neural.rnn.TopNGramRecord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -17,6 +20,9 @@ public class Evaluate {
   final SentimentCostAndGradient cag;
   final SentimentModel model;
 
+  final int[][] equivalenceClasses;
+  final String[] equivalenceClassNames;
+  
   int labelsCorrect;
   int labelsIncorrect;
 
@@ -31,11 +37,19 @@ public class Evaluate {
   IntCounter<Integer> lengthLabelsCorrect;
   IntCounter<Integer> lengthLabelsIncorrect;
 
+  TopNGramRecord ngrams;
+
+  // TODO: make this an option
+  static final int NUM_NGRAMS = 5;
+
   private static final NumberFormat NF = new DecimalFormat("0.000000");
 
   public Evaluate(SentimentModel model) {
     this.model = model;
     this.cag = new SentimentCostAndGradient(model, null);
+    this.equivalenceClasses = model.op.equivalenceClasses;
+    this.equivalenceClassNames = model.op.equivalenceClassNames;
+
     reset();
   }
 
@@ -50,6 +64,12 @@ public class Evaluate {
 
     lengthLabelsCorrect = new IntCounter<Integer>();
     lengthLabelsIncorrect = new IntCounter<Integer>();
+
+    if (model.op.testOptions.ngramRecordSize > 0) {
+      ngrams = new TopNGramRecord(model.op.numClasses, model.op.testOptions.ngramRecordSize, model.op.testOptions.ngramRecordMaximumLength);
+    } else {
+      ngrams = null;
+    }
   }
 
   public void eval(List<Tree> trees) {
@@ -64,6 +84,9 @@ public class Evaluate {
     countTree(tree);
     countRoot(tree);
     countLengthAccuracy(tree);
+    if (ngrams != null) {
+      ngrams.countTree(tree);
+    }
   }
 
   private int countLengthAccuracy(Tree tree) {
@@ -153,82 +176,51 @@ public class Evaluate {
     }
   }
 
-  // TODO: this should stored in the model rather than hard coded here
-  private static final int[] NEG_CLASSES = {0, 1};
-  private static final int[] POS_CLASSES = {3, 4};
-
-  public double[] approxNegPosAccuracy() {
-    return approxAccuracy(labelConfusion, NEG_CLASSES, POS_CLASSES);
-  }
-
-  public double approxNegPosCombinedAccuracy() {
-    return approxCombinedAccuracy(labelConfusion, NEG_CLASSES, POS_CLASSES);
-  }
-
-  public double[] approxRootNegPosAccuracy() {
-    return approxAccuracy(rootLabelConfusion, NEG_CLASSES, POS_CLASSES);
-  }
-
-  public double approxRootNegPosCombinedAccuracy() {
-    return approxCombinedAccuracy(rootLabelConfusion, NEG_CLASSES, POS_CLASSES);
-  }
-
   private static void printConfusionMatrix(String name, int[][] confusion) {
-    System.err.println(name + " confusion matrix: rows are gold label, columns predicted label");
+    System.err.println(name + " confusion matrix");
+    ConfusionMatrix<Integer> confusionMatrix = new ConfusionMatrix<Integer>();
+    confusionMatrix.setUseRealLabels(true);
     for (int i = 0; i < confusion.length; ++i) {
       for (int j = 0; j < confusion[i].length; ++j) {
-        System.err.print(StringUtils.padLeft(confusion[i][j], 10));
+        confusionMatrix.add(j, i, confusion[i][j]);
       }
-      System.err.println();
     }
+    System.err.println(confusionMatrix);
   }
 
-  private static double[] approxAccuracy(int[][] confusion, int[] ... classes) {
+  private static double[] approxAccuracy(int[][] confusion, int[][] classes) {
     int[] correct = new int[classes.length];
-    int[] incorrect = new int[classes.length];
+    int[] total = new int[classes.length];
     double[] results = new double[classes.length];
     for (int i = 0; i < classes.length; ++i) {
       for (int j = 0; j < classes[i].length; ++j) {
         for (int k = 0; k < classes[i].length; ++k) {
           correct[i] += confusion[classes[i][j]][classes[i][k]];
         }
-      }
-      for (int other = 0; other < classes.length; ++other) {
-        if (other == i) {
-          continue;
-        }
-        for (int j = 0; j < classes[i].length; ++j) {
-          for (int k = 0; k < classes[other].length; ++k) {
-            incorrect[i] += confusion[classes[i][j]][classes[other][k]];
-          }
+        for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
+          total[i] += confusion[classes[i][j]][k];
         }
       }
-      results[i] = ((double) correct[i]) / ((double) (correct[i] + incorrect[i]));
+      results[i] = ((double) correct[i]) / ((double) (total[i]));
     }
     return results;
   }
 
-  private static double approxCombinedAccuracy(int[][] confusion, int[] ... classes) {
+  private static double approxCombinedAccuracy(int[][] confusion, int[][] classes) {
     int correct = 0;
-    int incorrect = 0;
+    int total = 0;
     for (int i = 0; i < classes.length; ++i) {
       for (int j = 0; j < classes[i].length; ++j) {
         for (int k = 0; k < classes[i].length; ++k) {
           correct += confusion[classes[i][j]][classes[i][k]];
         }
-      }
-      for (int other = 0; other < classes.length; ++other) {
-        if (other == i) {
-          continue;
-        }
-        for (int j = 0; j < classes[i].length; ++j) {
-          for (int k = 0; k < classes[other].length; ++k) {
-            incorrect += confusion[classes[i][j]][classes[other][k]];
-          }
+        for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
+          total += confusion[classes[i][j]][k];
         }
       }
     }
-    return ((double) correct) / ((double) (correct + incorrect));
+
+    return ((double) correct) / ((double) (total));
   }
 
   public void printSummary() {
@@ -245,21 +237,32 @@ public class Evaluate {
     printConfusionMatrix("Label", labelConfusion);
     printConfusionMatrix("Root label", rootLabelConfusion);
 
-    double[] approxLabelAccuracy = approxNegPosAccuracy();
-    System.err.println("Approximate negative label accuracy: " + NF.format(approxLabelAccuracy[0]));
-    System.err.println("Approximate positive label accuracy: " + NF.format(approxLabelAccuracy[1]));
-    System.err.println("Combined approximate label accuracy: " + NF.format(approxNegPosCombinedAccuracy()));
+    if (equivalenceClasses != null && equivalenceClassNames != null) {
+      double[] approxLabelAccuracy = approxAccuracy(labelConfusion, equivalenceClasses);
+      for (int i = 0; i < equivalenceClassNames.length; ++i) {
+        System.err.println("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
+      }
+      System.err.println("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
+      
+      double[] approxRootLabelAccuracy = approxAccuracy(rootLabelConfusion, equivalenceClasses);
+      for (int i = 0; i < equivalenceClassNames.length; ++i) {
+        System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
+      }
+      System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
+      System.err.println();
+    }
 
-    double[] approxRootLabelAccuracy = approxRootNegPosAccuracy();
-    System.err.println("Approximate negative root label accuracy: " + NF.format(approxRootLabelAccuracy[0]));
-    System.err.println("Approximate positive root label accuracy: " + NF.format(approxRootLabelAccuracy[1]));
-    System.err.println("Combined approximate root label accuracy: " + NF.format(approxRootNegPosCombinedAccuracy()));
+    if (model.op.testOptions.ngramRecordSize > 0) {
+      System.err.println(ngrams);
+    }
 
-    //printLengthAccuracies();
+    if (model.op.testOptions.printLengthAccuracies) {
+      printLengthAccuracies();
+    }
   }
 
   /**
-   * Expected arguments are <code> model treebank </code> <br>
+   * Expected arguments are <code> -model model -treebank treebank </code> <br>
    *
    * For example <br>
    * <code> 
@@ -269,11 +272,45 @@ public class Evaluate {
    * </code>
    */
   public static void main(String[] args) {
-    String modelPath = args[0];
-    String treePath = args[1];
+    String modelPath = null;
+    String treePath = null;
+    boolean filterUnknown = false;
+
+    List<String> remainingArgs = Generics.newArrayList();
+
+    for (int argIndex = 0; argIndex < args.length; ) {
+      if (args[argIndex].equalsIgnoreCase("-model")) {
+        modelPath = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-treebank")) {
+        treePath = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {
+        filterUnknown = true;
+        argIndex++;
+      } else {
+        remainingArgs.add(args[argIndex]);
+        argIndex++;
+      }
+    }
+
+    String[] newArgs = new String[remainingArgs.size()];
+    remainingArgs.toArray(newArgs);
+
+    SentimentModel model = SentimentModel.loadSerialized(modelPath);
+    for (int argIndex = 0; argIndex < newArgs.length; ) {
+      int newIndex = model.op.setOption(newArgs, argIndex);
+      if (argIndex == newIndex) {
+        System.err.println("Unknown argument " + newArgs[argIndex]);
+        throw new IllegalArgumentException("Unknown argument " + newArgs[argIndex]);
+      }
+      argIndex = newIndex;
+    }
 
     List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(treePath);
-    SentimentModel model = SentimentModel.loadSerialized(modelPath);
+    if (filterUnknown) {
+      trees = SentimentUtils.filterUnknownRoots(trees);
+    }
 
     Evaluate eval = new Evaluate(model);
     eval.eval(trees);
