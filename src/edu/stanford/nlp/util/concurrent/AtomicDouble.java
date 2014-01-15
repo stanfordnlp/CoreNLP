@@ -12,6 +12,8 @@ package edu.stanford.nlp.util.concurrent;
 import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
 
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+
 /**
  * A {@code double} value that may be updated atomically.  See the
  * {@link java.util.concurrent.atomic} package specification for
@@ -42,6 +44,9 @@ import static java.lang.Double.longBitsToDouble;
 public class AtomicDouble extends Number implements java.io.Serializable {
     private static final long serialVersionUID = -8405198993435143622L;
 
+    private static final AtomicLongFieldUpdater<AtomicDouble> updater =
+        AtomicLongFieldUpdater.newUpdater(AtomicDouble.class, "value");
+    
     private transient volatile long value;
 
     /**
@@ -85,8 +90,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
      * @param newValue the new value
      */
     public final void lazySet(double newValue) {
-        long next = doubleToRawLongBits(newValue);
-        unsafe.putOrderedLong(this, valueOffset, next);
+      set(newValue);
     }
 
     /**
@@ -97,11 +101,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
      */
     public final double getAndSet(double newValue) {
         long next = doubleToRawLongBits(newValue);
-        while (true) {
-            long current = value;
-            if (unsafe.compareAndSwapLong(this, valueOffset, current, next))
-                return longBitsToDouble(current);
-        }
+        return longBitsToDouble(updater.getAndSet(this, next));
     }
 
     /**
@@ -115,9 +115,9 @@ public class AtomicDouble extends Number implements java.io.Serializable {
      * the actual value was not bitwise equal to the expected value.
      */
     public final boolean compareAndSet(double expect, double update) {
-        return unsafe.compareAndSwapLong(this, valueOffset,
-                                         doubleToRawLongBits(expect),
-                                         doubleToRawLongBits(update));
+        return updater.compareAndSet(this,
+            doubleToRawLongBits(expect),
+            doubleToRawLongBits(update));
     }
 
     /**
@@ -150,7 +150,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
             double currentVal = longBitsToDouble(current);
             double nextVal = currentVal + delta;
             long next = doubleToRawLongBits(nextVal);
-            if (unsafe.compareAndSwapLong(this, valueOffset, current, next))
+            if (updater.compareAndSet(this, current, next))
                 return currentVal;
         }
     }
@@ -167,7 +167,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
             double currentVal = longBitsToDouble(current);
             double nextVal = currentVal + delta;
             long next = doubleToRawLongBits(nextVal);
-            if (unsafe.compareAndSwapLong(this, valueOffset, current, next))
+            if (updater.compareAndSet(this, current, next))
                 return nextVal;
         }
     }
@@ -237,46 +237,5 @@ public class AtomicDouble extends Number implements java.io.Serializable {
         s.defaultReadObject();
 
         set(s.readDouble());
-    }
-
-    // Unsafe mechanics
-    private static final sun.misc.Unsafe unsafe = getUnsafe();
-    private static final long valueOffset;
-
-    static {
-        try {
-            valueOffset = unsafe.objectFieldOffset
-                (AtomicDouble.class.getDeclaredField("value"));
-        } catch (Exception ex) { throw new Error(ex); }
-    }
-
-    /**
-     * Returns a sun.misc.Unsafe.  Suitable for use in a 3rd party package.
-     * Replace with a simple call to Unsafe.getUnsafe when integrating
-     * into a jdk.
-     *
-     * @return a sun.misc.Unsafe
-     */
-    private static sun.misc.Unsafe getUnsafe() {
-        try {
-            return sun.misc.Unsafe.getUnsafe();
-        } catch (SecurityException tryReflectionInstead) {}
-        try {
-            return java.security.AccessController.doPrivileged
-            (new java.security.PrivilegedExceptionAction<sun.misc.Unsafe>() {
-                public sun.misc.Unsafe run() throws Exception {
-                    Class<sun.misc.Unsafe> k = sun.misc.Unsafe.class;
-                    for (java.lang.reflect.Field f : k.getDeclaredFields()) {
-                        f.setAccessible(true);
-                        Object x = f.get(null);
-                        if (k.isInstance(x))
-                            return k.cast(x);
-                    }
-                    throw new NoSuchFieldError("the Unsafe");
-                }});
-        } catch (java.security.PrivilegedActionException e) {
-            throw new RuntimeException("Could not initialize intrinsics",
-                                       e.getCause());
-        }
     }
 }
