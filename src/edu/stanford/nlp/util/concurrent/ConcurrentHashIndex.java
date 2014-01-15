@@ -46,17 +46,21 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public int indexOf(E o, boolean add) {
     Integer atomic = item2Index.get(o);
-    if (atomic == null && add) {
-      final int newIndex = index.getAndIncrement();
-      atomic = item2Index.putIfAbsent(o, newIndex);
-      if (atomic == null) {
-        index2Item.put(newIndex, o);
-        return newIndex;
+    if (atomic == null) {
+      if (add) {
+        final int newIndex = index.getAndIncrement();
+        atomic = item2Index.putIfAbsent(o, newIndex);
+        if (atomic == null) {
+          index2Item.put(newIndex, o);
+          return newIndex;
+        } else {
+          return item2Index.get(o);
+        }
       } else {
-        return item2Index.get(o);
+        return -1;
       }
     } else {
-      return -1;
+      return atomic;
     }
   }
   
