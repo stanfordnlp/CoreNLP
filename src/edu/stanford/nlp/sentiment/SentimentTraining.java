@@ -9,6 +9,8 @@ import java.util.Set;
 
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.TwoDimensionalSet;
@@ -35,7 +37,8 @@ public class SentimentTraining {
       theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
     } 
 
-    model.vectorToParams(theta);    
+    model.vectorToParams(theta);
+    
   }
 
   public static void train(SentimentModel model, String modelPath, List<Tree> trainingTrees, List<Tree> devTrees) {
@@ -124,6 +127,13 @@ public class SentimentTraining {
     return gcFunc.gradientCheck(model.totalParamSize(), 50, model.paramsToVector());    
   }
 
+  static final Filter<Tree> NEUTRAL_FILTER = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      int gold = RNNCoreAnnotations.getGoldClass(tree);
+      return gold != 2;
+    }
+  };
+
   public static void main(String[] args) {
     RNNOptions op = new RNNOptions();
 
@@ -133,7 +143,7 @@ public class SentimentTraining {
     boolean runGradientCheck = false;
     boolean runTraining = false;
 
-    boolean filterUnknown = false;
+    boolean filterNeutral = false;
 
     String modelPath = null;
 
@@ -153,8 +163,8 @@ public class SentimentTraining {
       } else if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {
-        filterUnknown = true;
+      } else if (args[argIndex].equalsIgnoreCase("-filterNeutral")) {
+        filterNeutral = true;
         argIndex++;
       } else {
         int newArgIndex = op.setOption(args, argIndex);
@@ -168,8 +178,8 @@ public class SentimentTraining {
     // read in the trees
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(trainPath);
     System.err.println("Read in " + trainingTrees.size() + " training trees");
-    if (filterUnknown) {
-      trainingTrees = SentimentUtils.filterUnknownRoots(trainingTrees);
+    if (filterNeutral) {
+      trainingTrees = CollectionUtils.filterAsList(trainingTrees, NEUTRAL_FILTER);
       System.err.println("Filtered training trees: " + trainingTrees.size());
     }
 
@@ -177,8 +187,8 @@ public class SentimentTraining {
     if (devPath != null) {
       devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
       System.err.println("Read in " + devTrees.size() + " dev trees");
-      if (filterUnknown) {
-        devTrees = SentimentUtils.filterUnknownRoots(devTrees);
+      if (filterNeutral) {
+        devTrees = CollectionUtils.filterAsList(devTrees, NEUTRAL_FILTER);
         System.err.println("Filtered dev trees: " + devTrees.size());
       }
     }

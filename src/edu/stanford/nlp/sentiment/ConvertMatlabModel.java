@@ -25,23 +25,10 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ConvertMatlabModel {
-  /** Will not overwrite an existing word vector if it is already there */
   public static void copyWordVector(Map<String, SimpleMatrix> wordVectors, String source, String target) {
-    if (wordVectors.containsKey(target) || !wordVectors.containsKey(source)) {
+    if (wordVectors.containsKey(target)) {
       return;
     }
-
-    System.err.println("Using wordVector " + source + " for " + target);
-
-    wordVectors.put(target, new SimpleMatrix(wordVectors.get(source)));
-  }
-
-  /** <br>Will</br> overwrite an existing word vector */
-  public static void replaceWordVector(Map<String, SimpleMatrix> wordVectors, String source, String target) {
-    if (!wordVectors.containsKey(source)) {
-      return;
-    }
-
     wordVectors.put(target, new SimpleMatrix(wordVectors.get(source)));
   }
 
@@ -63,8 +50,6 @@ public class ConvertMatlabModel {
     String basePath = "/user/socherr/scr/projects/semComp/RNTN/src/params/";
     int numSlices = 25;
 
-    boolean useEscapedParens = false;
-
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-slices")) {
         numSlices = Integer.valueOf(args[argIndex + 1]);
@@ -72,9 +57,6 @@ public class ConvertMatlabModel {
       } else if (args[argIndex].equalsIgnoreCase("-path")) {
         basePath = args[argIndex + 1];
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-useEscapedParens")) {
-        useEscapedParens = true;
-        argIndex += 1;
       } else {
         System.err.println("Unknown argument " + args[argIndex]);
         System.exit(2);
@@ -115,20 +97,9 @@ public class ConvertMatlabModel {
       wordVectors.put(pieces[0], combinedWV.extractMatrix(0, numSlices, i, i+1));
     }
 
-    // If there is no ",", we first try to look for an HTML escaping,
-    // then fall back to "." as better than just a random word vector.
-    // Same for "``" and ";"
-    copyWordVector(wordVectors, "&#44", ",");
     copyWordVector(wordVectors, ".", ",");
-    copyWordVector(wordVectors, "&#59", ";");
     copyWordVector(wordVectors, ".", ";");
-    copyWordVector(wordVectors, "&#96&#96", "``");
     copyWordVector(wordVectors, "''", "``");
-
-    if (useEscapedParens) {
-      replaceWordVector(wordVectors, "(", "-LRB-");
-      replaceWordVector(wordVectors, ")", "-RRB-");
-    }
 
     RNNOptions op = new RNNOptions();
     op.numHid = numSlices;
@@ -136,8 +107,6 @@ public class ConvertMatlabModel {
 
     if (Wcat.numRows() == 2) {
       op.classNames = new String[] { "Negative", "Positive" };
-      op.equivalenceClasses = new int[][] { { 0 }, { 1 } }; // TODO: set to null once old models are updated
-      op.numClasses = 2;
     }
 
     wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));

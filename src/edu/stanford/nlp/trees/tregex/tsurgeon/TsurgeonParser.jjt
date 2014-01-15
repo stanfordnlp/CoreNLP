@@ -55,7 +55,6 @@ TOKEN:
 | < INSERT: "insert" >
 | < MOVE: "move" >
 | < REPLACE: "replace" > 
-| < CREATE_SUBTREE: "createSubtree" >
 | < ADJOIN: "adjoin" >
 | < ADJOIN_TO_HEAD: "adjoinH" >
 | < ADJOIN_TO_FOOT: "adjoinF" >
@@ -126,15 +125,6 @@ TsurgeonPattern Operation() :
 | LOOKAHEAD(3)
   operator = <INSERT> tree = TreeRoot(false) loc = Location()
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> newLabel = <IDENTIFIER> nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
-    { if (nodeSelections.size() == 1) {
-        return new CreateSubtreeNode(nodeSelections.get(0), newLabel.image);
-      } else if (nodeSelections.size() == 2) {
-        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), newLabel.image);
-      } else {
-        throw new ParseException("Illegal number of nodes given to createSubtree (" + nodeSelections.size() + ")");
-      }
-    }
 | operator = <ADJOIN> tree = TreeRoot(true) child1 = NodeSelection()
     { return new AdjoinNode(tree, child1); }
 | operator = <ADJOIN_TO_HEAD> tree = TreeRoot(true) child1 = NodeSelection()
