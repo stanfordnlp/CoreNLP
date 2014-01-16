@@ -1,6 +1,9 @@
 package edu.stanford.nlp.parser.tools;
 
+import java.util.List;
+
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A simple tool to change the default baseParserWeight flag embedded
@@ -19,7 +22,8 @@ public class ChangeBaseParserWeight {
   public static void main(String[] args) {
     String input = null;
     String output = null;
-    double weight = -1.0;
+
+    List<String> extraArgs = Generics.newArrayList();
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-input")) {
@@ -28,21 +32,12 @@ public class ChangeBaseParserWeight {
       } else if (args[argIndex].equalsIgnoreCase("-output")) {
         output = args[argIndex + 1];
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-baseParserWeight")) {
-        weight = Double.valueOf(args[argIndex + 1]);
-        argIndex += 2;
       } else {
-        throw new IllegalArgumentException("Unknown argument " + args[argIndex]);
+        extraArgs.add(args[argIndex++]);
       }
     }
 
-    if (weight < 0) {
-      String error = "Must specify weight >= 0 with -baseParserWeight";
-      System.err.println(error);
-      throw new IllegalArgumentException(error);
-    }
-    LexicalizedParser parser = LexicalizedParser.loadModel(input);
-    parser.getOp().baseParserWeight = weight;
+    LexicalizedParser parser = LexicalizedParser.loadModel(input, extraArgs);
     parser.saveParserToSerialized(output);
   }
 }
