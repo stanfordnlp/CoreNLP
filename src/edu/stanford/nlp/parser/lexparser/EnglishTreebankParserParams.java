@@ -141,7 +141,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    return new SemanticHeadFinder(!englishTest.makeCopulaHead);
+    return new SemanticHeadFinder(treebankLanguagePack(), !englishTest.makeCopulaHead);
   }
 
 
