@@ -25,6 +25,14 @@ public class TregexTest extends TestCase {
     }
   }
 
+  public static Tree[] treesFromString(String ... s) {
+    Tree[] trees = new Tree[s.length];
+    for (int i = 0; i < s.length; ++i) {
+      trees[i] = treeFromString(s[i]);
+    }
+    return trees;
+  }
+
   public void testNoResults() {
     final TregexPattern pMWE = TregexPattern.compile("/^MW/");
     Tree tree = treeFromString("(Foo)");
@@ -783,6 +791,9 @@ public class TregexTest extends TestCase {
 
     runTest("(NP < NN | < NNS)", "((NP NN) (NP foo) (NP NNS))",
             "(NP NN)", "(NP NNS)");
+    runTest("(NP (< NN | < NNS) & > S)",
+            "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
+            "(NP NN)", "(NP NNS)");
     runTest("(NP [< NN | < NNS] & > S)",
             "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
             "(NP NN)", "(NP NNS)");
@@ -1241,6 +1252,94 @@ public class TregexTest extends TestCase {
     // characters of the node get matched regardless of what "blah"
     // and "name" are, resulting in the groups not matching.
   }
+
+
+  public void testParenthesizedExpressions() {
+    String[] treeStrings = { "( (S (S (PP (IN In) (NP (CD 1941) )) (, ,) (NP (NP (NNP Raeder) ) (CC and) (NP (DT the) (JJ German) (NN navy) )) (VP (VBD threatened) (S (VP (TO to) (VP (VB attack) (NP (DT the) (NNP Panama) (NNP Canal) )))))) (, ,) (RB so) (S (NP (PRP we) ) (VP (VBD created) (NP (NP (DT the) (NNP Southern) (NNP Command) ) (PP-LOC (IN in) (NP (NNP Panama) ))))) (. .) ))",
+                             "(S (S (NP-SBJ (NNP Japan) ) (VP (MD can) (VP (VP (VB grow) ) (CC and) (VP (RB not) (VB cut) (PRT (RB back) ))))) (, ,) (CC and) (RB so) (S (ADVP (RB too) ) (, ,) (NP (NP (NNP New) (NNP Zealand) )) ))))",
+                             "( (S (S (NP-SBJ (PRP You) ) (VP (VBP make) (NP (DT a) (NN forecast) ))) (, ,) (CC and) (RB then) (S (NP-SBJ (PRP you) ) (VP (VBP become) (NP-PRD (PRP$ its) (NN prisoner) ))) (. .)))" };
+
+    Tree[] trees = treesFromString(treeStrings);
+
+    // First pattern: no parenthesized expressions.  All three trees should match once.
+    TregexPattern pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ $+ (RB=adv $+ /^S/)))");
+    TregexMatcher matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+    
+    matcher = pattern.matcher(trees[2]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+    
+    // Second pattern: single relation in parentheses.  First tree should not match.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+    
+    matcher = pattern.matcher(trees[2]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+    
+    // Third pattern: single relation in parentheses and negated.  Only first tree should match.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertFalse(matcher.find());
+    
+    matcher = pattern.matcher(trees[2]);
+    assertFalse(matcher.find());
+    
+    // Fourth pattern: double relation in parentheses, no negation.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and $+ RB) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+    
+    matcher = pattern.matcher(trees[2]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+    
+    // Fifth pattern: double relation in parentheses, negated.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and $+ RB) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertFalse(matcher.find());
+    
+    matcher = pattern.matcher(trees[2]);
+    assertFalse(matcher.find());
+
+    // Six pattern: double relation in parentheses, negated.  The only
+    // tree with "and then" is the third one, so that is the one tree
+    // that should not match.
+    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and $+ (RB < then)) $+ (RB=adv $+ /^S/)))");
+    matcher = pattern.matcher(trees[0]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+
+    matcher = pattern.matcher(trees[1]);
+    assertTrue(matcher.find());
+    assertFalse(matcher.find());
+    
+    matcher = pattern.matcher(trees[2]);
+    assertFalse(matcher.find());
+ }
 
 
   /**
