@@ -2,7 +2,9 @@ package edu.stanford.nlp.sentiment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -22,6 +24,7 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
@@ -156,6 +159,7 @@ public class SentimentPipeline {
         break;
       }
       case ROOT: {
+        int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
         out.println("  " + sentence.get(SentimentCoreAnnotations.ClassName.class));
         break;
       }
@@ -180,36 +184,40 @@ public class SentimentPipeline {
     System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
     System.err.println("  -stdin: Process stdin instead of a file");
     System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  Trees need to be binarized");
-    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
-    System.err.println("  -filterUnknown: remove neutral and unknown trees from the input.  Only applies to TREES input");
+    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, PROBABILITIES, or ROOT");
   }
 
   /**
    * Reads an annotation from the given filename using the requested input.
    */
-  public static Annotation getAnnotation(Input inputFormat, String filename, boolean filterUnknown) {
+  public static Annotation getAnnotation(Input inputFormat, String filename) {
     switch (inputFormat) {
     case TEXT: {
       String text = IOUtils.slurpFileNoExceptions(filename);
       Annotation annotation = new Annotation(text);
       return annotation;
     }
-    case TREES: {
-      List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(filename);
-      if (filterUnknown) {
-        trees = SentimentUtils.filterUnknownRoots(trees);
+    case TREES:
+      try {
+        StringBuilder result = new StringBuilder();
+        FileInputStream fin = new FileInputStream(filename);
+        InputStreamReader isr = new InputStreamReader(fin, "utf-8");
+        PennTreeReader reader = new PennTreeReader(isr);
+        
+        List<CoreMap> sentences = Generics.newArrayList();
+
+        Tree tree;
+        while ((tree = reader.readTree()) != null) {
+          CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
+          sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, tree);
+          sentences.add(sentence);
+        }
+        Annotation annotation = new Annotation("");
+        annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+        return annotation;
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
       }
-      List<CoreMap> sentences = Generics.newArrayList();
-      
-      for (Tree tree : trees) {
-        CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
-        sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, tree);
-        sentences.add(sentence);
-      }
-      Annotation annotation = new Annotation("");
-      annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
-      return annotation;
-    }
     default:
       throw new IllegalArgumentException("Unknown format " + inputFormat);
     }
@@ -222,8 +230,6 @@ public class SentimentPipeline {
     String filename = null;
     String fileList = null;
     boolean stdin = false;
-
-    boolean filterUnknown = false;
 
     List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
     Input inputFormat = Input.TEXT;
@@ -254,9 +260,6 @@ public class SentimentPipeline {
           outputFormats.add(Output.valueOf(format.toUpperCase()));
         }
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {
-        filterUnknown = true;
-        argIndex++;
       } else if (args[argIndex].equalsIgnoreCase("-help")) {
         help();
         System.exit(0);
@@ -300,7 +303,7 @@ public class SentimentPipeline {
       // Process a file.  The pipeline will do tokenization, which
       // means it will split it into sentences as best as possible
       // with the tokenizer.
-      Annotation annotation = getAnnotation(inputFormat, filename, filterUnknown);
+      Annotation annotation = getAnnotation(inputFormat, filename);
       pipeline.annotate(annotation);
 
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -313,7 +316,7 @@ public class SentimentPipeline {
       // possible with the tokenizer.  Output will go to filename.out
       // for each file.
       for (String file : fileList.split(",")) {
-        Annotation annotation = getAnnotation(inputFormat, file, filterUnknown);
+        Annotation annotation = getAnnotation(inputFormat, file);
         pipeline.annotate(annotation);
 
         FileOutputStream fout = new FileOutputStream(file + ".out");

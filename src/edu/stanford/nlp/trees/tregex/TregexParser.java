@@ -92,7 +92,6 @@ class TregexParser implements TregexParserConstants {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case REL_W_STR_ARG:
-      case 12:
       case 14:
       case 22:
       case 23:{
@@ -123,7 +122,6 @@ if(child != null) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case REL_W_STR_ARG:
-      case 12:
       case 14:
       case 22:
       case 23:{
@@ -332,7 +330,6 @@ children.add(child);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case REL_W_STR_ARG:
-      case 12:
       case 14:
       case 21:
       case 22:
@@ -368,7 +365,6 @@ if (children.size() == 1)
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case RELATION:
     case REL_W_STR_ARG:
-    case 12:
     case 23:{
       child = Child();
       break;
@@ -377,7 +373,7 @@ if (children.size() == 1)
       jj_consume_token(14);
 startUnderNeg = underNegation;
           underNegation = true;
-      child = ModChild();
+      child = Child();
 underNegation = startUnderNeg;
 child.negate();
       break;
@@ -403,12 +399,6 @@ child.makeOptional();
       jj_consume_token(23);
       child = ChildrenDisj();
       jj_consume_token(24);
-      break;
-      }
-    case 12:{
-      jj_consume_token(12);
-      child = ChildrenDisj();
-      jj_consume_token(13);
       break;
       }
     case RELATION:
@@ -488,8 +478,8 @@ child.makeOptional();
         jj_consume_token(13);
         break;
         }
-      case 23:{
-        jj_consume_token(23);
+      case REGEX:
+      case 14:{
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case 14:{
           negation = jj_consume_token(14);
@@ -499,59 +489,18 @@ child.makeOptional();
           jj_la1[20] = jj_gen;
           ;
         }
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case 15:{
-          cat = jj_consume_token(15);
-          break;
-          }
-        default:
-          jj_la1[21] = jj_gen;
-          ;
-        }
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case REGEX:{
-          strArg = jj_consume_token(REGEX);
-          break;
-          }
-        case IDENTIFIER:{
-          strArg = jj_consume_token(IDENTIFIER);
-          break;
-          }
-        case BLANK:{
-          strArg = jj_consume_token(BLANK);
-          break;
-          }
-        default:
-          jj_la1[22] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-        jj_consume_token(24);
-        break;
-        }
-      case REGEX:
-      case 14:{
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case 14:{
-          negation = jj_consume_token(14);
-          break;
-          }
-        default:
-          jj_la1[23] = jj_gen;
-          ;
-        }
         strArg = jj_consume_token(REGEX);
         break;
         }
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[21] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
       }
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[22] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -584,13 +533,13 @@ if (strArg != null) {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[26];
+  final private int[] jj_la1 = new int[23];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0xcd380,0xc05030,0xc05030,0xcd380,0x4000,0x8000,0x380,0x10000,0x40000,0x40000,0xc0380,0x100000,0xe05030,0x200000,0xc05030,0x801030,0x40,0x4000,0x8000,0x380,0x4000,0x8000,0x380,0x4000,0x805200,0x30,};
+      jj_la1_0 = new int[] {0xcd380,0xc04030,0xc04030,0xcd380,0x4000,0x8000,0x380,0x10000,0x40000,0x40000,0xc0380,0x100000,0xe04030,0x200000,0xc04030,0x800030,0x40,0x4000,0x8000,0x380,0x4000,0x5200,0x30,};
    }
 
   /** Constructor with InputStream. */
@@ -604,7 +553,7 @@ if (strArg != null) {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -618,7 +567,7 @@ if (strArg != null) {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -628,7 +577,7 @@ if (strArg != null) {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -638,7 +587,7 @@ if (strArg != null) {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -647,7 +596,7 @@ if (strArg != null) {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -656,7 +605,7 @@ if (strArg != null) {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 26; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 23; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -712,7 +661,7 @@ if (strArg != null) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 26; i++) {
+    for (int i = 0; i < 23; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
