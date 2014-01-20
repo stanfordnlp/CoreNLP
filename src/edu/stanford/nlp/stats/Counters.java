@@ -50,6 +50,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -850,7 +851,8 @@ public class Counters {
    */
   public static <E> Comparator<E> toComparator(final Counter<E> counter) {
     return new Comparator<E>() {
-      public int compare(E o1, E o2) {
+      @Override
+    public int compare(E o1, E o2) {
         return Double.compare(counter.getCount(o1), counter.getCount(o2));
       }
     };
@@ -869,7 +871,8 @@ public class Counters {
    */
   public static <E extends Comparable<E>> Comparator<E> toComparatorWithKeys(final Counter<E> counter) {
     return new Comparator<E>() {
-      public int compare(E o1, E o2) {
+      @Override
+    public int compare(E o1, E o2) {
         int res = Double.compare(counter.getCount(o1), counter.getCount(o2));
         if (res == 0) {
           return o1.compareTo(o2);
@@ -893,7 +896,8 @@ public class Counters {
    */
   public static <E> Comparator<E> toComparatorDescending(final Counter<E> counter) {
     return new Comparator<E>() {
-      public int compare(E o1, E o2) {
+      @Override
+    public int compare(E o1, E o2) {
         return Double.compare(counter.getCount(o2), counter.getCount(o1));
       }
     };
@@ -918,7 +922,8 @@ public class Counters {
    */
   public static <E> Comparator<E> toComparator(final Counter<E> counter, final boolean ascending, final boolean useMagnitude) {
     return new Comparator<E>() {
-      public int compare(E o1, E o2) {
+      @Override
+    public int compare(E o1, E o2) {
         if (ascending) {
           if (useMagnitude) {
             return Double.compare(Math.abs(counter.getCount(o1)), Math.abs(counter.getCount(o2)));
@@ -1062,7 +1067,8 @@ public class Counters {
     }
     // descending order
     Collections.sort(l, new Comparator<Pair<E, Double>>() {
-      public int compare(Pair<E, Double> a, Pair<E, Double> b) {
+      @Override
+    public int compare(Pair<E, Double> a, Pair<E, Double> b) {
         return Double.compare(b.second, a.second);
       }
     });
@@ -1939,9 +1945,9 @@ public class Counters {
     for (int rank = 0; rank < k && !queue.isEmpty(); ++rank) {
       T key = queue.removeFirst();
       double value = counter.getCount(key);
-      strings.add(String.format(itemFormat, key, value));
+      strings.add(String.format(Locale.US, itemFormat, key, value));
     }
-    return String.format(wrapperFormat, StringUtils.join(strings, joiner));
+    return String.format(Locale.US, wrapperFormat, StringUtils.join(strings, joiner));
   }
 
   /**
@@ -1985,9 +1991,9 @@ public class Counters {
   public static <T extends Comparable<T>> String toSortedByKeysString(Counter<T> counter, String itemFormat, String joiner, String wrapperFormat) {
     List<String> strings = new ArrayList<String>();
     for (T key : CollectionUtils.sorted(counter.keySet())) {
-      strings.add(String.format(itemFormat, key, counter.getCount(key)));
+      strings.add(String.format(Locale.US, itemFormat, key, counter.getCount(key)));
     }
-    return String.format(wrapperFormat, StringUtils.join(strings, joiner));
+    return String.format(Locale.US, wrapperFormat, StringUtils.join(strings, joiner));
   }
 
   /**
@@ -2120,9 +2126,9 @@ public class Counters {
       E key = keyI.next();
       double val = q.getPriority(key);
       if (swap) {
-        sb.append(String.format(fmt, key, val));
+        sb.append(String.format(Locale.US, fmt, key, val));
       } else {
-        sb.append(String.format(fmt, val, key));
+        sb.append(String.format(Locale.US, fmt, val, key));
       }
       if (keyI.hasNext()) {
         sb.append('\n');
@@ -2369,27 +2375,33 @@ public class Counters {
 
     return new AbstractCounter<T>() {
 
-      public void clear() {
+      @Override
+    public void clear() {
         throw new UnsupportedOperationException();
       }
 
-      public boolean containsKey(T key) {
+      @Override
+    public boolean containsKey(T key) {
         return counter.containsKey(key);
       }
 
-      public double getCount(Object key) {
+      @Override
+    public double getCount(Object key) {
         return counter.getCount(key);
       }
 
-      public Factory<Counter<T>> getFactory() {
+      @Override
+    public Factory<Counter<T>> getFactory() {
         return counter.getFactory();
       }
 
-      public double remove(T key) {
+      @Override
+    public double remove(T key) {
         throw new UnsupportedOperationException();
       }
 
-      public void setCount(T key, double value) {
+      @Override
+    public void setCount(T key, double value) {
         throw new UnsupportedOperationException();
       }
 
@@ -2408,34 +2420,41 @@ public class Counters {
         throw new UnsupportedOperationException();
       }
 
-      public int size() {
+      @Override
+    public int size() {
         return counter.size();
       }
 
-      public double totalCount() {
+      @Override
+    public double totalCount() {
         return counter.totalCount();
       }
 
-      public Collection<Double> values() {
+      @Override
+    public Collection<Double> values() {
         return counter.values();
       }
 
-      public Set<T> keySet() {
+      @Override
+    public Set<T> keySet() {
         return Collections.unmodifiableSet(counter.keySet());
       }
 
-      public Set<Entry<T, Double>> entrySet() {
+      @Override
+    public Set<Entry<T, Double>> entrySet() {
         return Collections.unmodifiableSet(new AbstractSet<Map.Entry<T, Double>>() {
           @Override
           public Iterator<Entry<T, Double>> iterator() {
             return new Iterator<Entry<T, Double>>() {
               final Iterator<Entry<T, Double>> inner = counter.entrySet().iterator();
 
-              public boolean hasNext() {
+              @Override
+            public boolean hasNext() {
                 return inner.hasNext();
               }
 
-              public Entry<T, Double> next() {
+              @Override
+            public Entry<T, Double> next() {
                 return new Map.Entry<T, Double>() {
                   final Entry<T, Double> e = inner.next();
 
@@ -2484,7 +2503,8 @@ public class Counters {
       /**
        * {@inheritDoc}
        */
-      public void prettyLog(RedwoodChannels channels, String description) {
+      @Override
+    public void prettyLog(RedwoodChannels channels, String description) {
         PrettyLogger.log(channels, description, asMap(this));
       }
     };
@@ -2577,7 +2597,8 @@ public class Counters {
         return map.hashCode();
       }
 
-      public Set<Entry<E, Double>> entrySet() {
+      @Override
+    public Set<Entry<E, Double>> entrySet() {
         return new AbstractSet<Entry<E, Double>>() {
           Set<Entry<E, N>> entries = map.entrySet();
 
@@ -2587,24 +2608,29 @@ public class Counters {
               Iterator<Entry<E, N>> it = entries.iterator();
               Entry<E, N> lastEntry; // = null;
 
-              public boolean hasNext() {
+              @Override
+            public boolean hasNext() {
                 return it.hasNext();
               }
 
-              public Entry<E, Double> next() {
+              @Override
+            public Entry<E, Double> next() {
                 final Entry<E, N> entry = it.next();
                 lastEntry = entry;
 
                 return new Entry<E, Double>() {
-                  public E getKey() {
+                  @Override
+                public E getKey() {
                     return entry.getKey();
                   }
 
-                  public Double getValue() {
+                  @Override
+                public Double getValue() {
                     return entry.getValue().doubleValue();
                   }
 
-                  public Double setValue(Double value) {
+                  @Override
+                public Double setValue(Double value) {
                     final double lastValue = entry.getValue().doubleValue();
                     double rv;
 
@@ -2631,7 +2657,8 @@ public class Counters {
                 };
               }
 
-              public void remove() {
+              @Override
+            public void remove() {
                 total -= lastEntry.getValue().doubleValue();
                 it.remove();
               }
@@ -2645,17 +2672,20 @@ public class Counters {
         };
       }
 
-      public double getCount(Object key) {
+      @Override
+    public double getCount(Object key) {
         final Number value = map.get(key);
         return value != null ? value.doubleValue() : defRV;
       }
 
-      public Factory<Counter<E>> getFactory() {
+      @Override
+    public Factory<Counter<E>> getFactory() {
         return new Factory<Counter<E>>() {
 
           private static final long serialVersionUID = -4063129407369590522L;
 
-          public Counter<E> create() {
+          @Override
+        public Counter<E> create() {
             // return a HashMap backed by the same numeric type to
             // keep the precision of the returned counter consistent with
             // this one's precision
@@ -2664,22 +2694,26 @@ public class Counters {
         };
       }
 
-      public Set<E> keySet() {
+      @Override
+    public Set<E> keySet() {
         return new AbstractSet<E>() {
           @Override
           public Iterator<E> iterator() {
             return new Iterator<E>() {
               Iterator<E> it = map.keySet().iterator();
 
-              public boolean hasNext() {
+              @Override
+            public boolean hasNext() {
                 return it.hasNext();
               }
 
-              public E next() {
+              @Override
+            public E next() {
                 return it.next();
               }
 
-              public void remove() {
+              @Override
+            public void remove() {
                 throw new UnsupportedOperationException("Cannot remove from key set");
               }
             };
@@ -2692,7 +2726,8 @@ public class Counters {
         };
       }
 
-      public double remove(E key) {
+      @Override
+    public double remove(E key) {
         final Number removed = map.remove(key);
         if (removed != null) {
           final double rv = removed.doubleValue();
@@ -2702,7 +2737,8 @@ public class Counters {
         return defRV;
       }
 
-      public void setCount(E key, double value) {
+      @Override
+    public void setCount(E key, double value) {
         final Double lastValue;
         double newValue;
 
@@ -2734,30 +2770,36 @@ public class Counters {
         total += newValue - (lastValue != null ? lastValue : 0);
       }
 
-      public int size() {
+      @Override
+    public int size() {
         return map.size();
       }
 
-      public double totalCount() {
+      @Override
+    public double totalCount() {
         return total;
       }
 
-      public Collection<Double> values() {
+      @Override
+    public Collection<Double> values() {
         return new AbstractCollection<Double>() {
           @Override
           public Iterator<Double> iterator() {
             return new Iterator<Double>() {
               final Iterator<N> it = map.values().iterator();
 
-              public boolean hasNext() {
+              @Override
+            public boolean hasNext() {
                 return it.hasNext();
               }
 
-              public Double next() {
+              @Override
+            public Double next() {
                 return it.next().doubleValue();
               }
 
-              public void remove() {
+              @Override
+            public void remove() {
                 throw new UnsupportedOperationException("Cannot remove from values collection");
               }
             };
@@ -2773,7 +2815,8 @@ public class Counters {
       /**
        * {@inheritDoc}
        */
-      public void prettyLog(RedwoodChannels channels, String description) {
+      @Override
+    public void prettyLog(RedwoodChannels channels, String description) {
         PrettyLogger.log(channels, description, map);
       }
     };
@@ -2873,6 +2916,7 @@ public class Counters {
       return "NaturalComparator";
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public int compare(E o1, E o2) {
       if (o1 instanceof Comparable) {
