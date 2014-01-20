@@ -2,14 +2,15 @@ package edu.stanford.nlp.util;
 
 import java.io.StringWriter;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -38,7 +39,7 @@ public class ConfusionMatrix<U> {
   // classification placeholder prefix when drawing in table
   private static final String CLASS_PREFIX = "C"; 
   
-  protected static DecimalFormat d = new DecimalFormat("#.#####");
+  protected static DecimalFormat d = new DecimalFormat("#.#####", new DecimalFormatSymbols(Locale.US));
   private int leftPadSize = 16;
   private int delimPadSize = 8;
   private boolean useRealLabels = false;
