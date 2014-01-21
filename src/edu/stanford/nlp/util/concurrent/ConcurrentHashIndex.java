@@ -20,6 +20,9 @@ import edu.stanford.nlp.util.Index;
 /**
  * A fast threadsafe index.
  * 
+ * NOTE: Unlike <code>HashIndex</code>, this index does not guarantee contiguous
+ * indices.
+ * 
  * @author Spence Green
  *
  * @param <E>
@@ -28,11 +31,29 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   private static final long serialVersionUID = 6465313844985269109L;
 
-  private static final int UNKNOWN_ID = -1;
+  public static final int UNKNOWN_ID = -1;
+  private static final int DEFAULT_INITIAL_CAPACITY = 100;
 
-  private ConcurrentHashMap<E,Integer> item2Index = new ConcurrentHashMap<E,Integer>();
-  private ConcurrentHashMap<Integer,E> index2Item = new ConcurrentHashMap<Integer,E>();
-  private AtomicInteger index = new AtomicInteger();
+  private final ConcurrentHashMap<E,Integer> item2Index;
+  private final ConcurrentHashMap<Integer,E> index2Item;
+  private AtomicInteger indexCounter = new AtomicInteger();
+
+  /**
+   * Constructor.
+   */
+  public ConcurrentHashIndex() {
+    this(DEFAULT_INITIAL_CAPACITY);
+  }
+  
+  /**
+   * Constructor.
+   * 
+   * @param initialCapacity
+   */
+  public ConcurrentHashIndex(int initialCapacity) {
+    this.item2Index = new ConcurrentHashMap<E,Integer>(initialCapacity);
+    this.index2Item = new ConcurrentHashMap<Integer,E>(initialCapacity);
+  }
 
   @Override
   public E get(int i) {
@@ -50,7 +71,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
     Integer atomic = item2Index.get(o);
     if (atomic == null) {
       if (add) {
-        final int newIndex = index.getAndIncrement();
+        final int newIndex = indexCounter.getAndIncrement();
         atomic = item2Index.putIfAbsent(o, newIndex);
         if (atomic == null) {
           index2Item.put(newIndex, o);
@@ -90,7 +111,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
     return new AbstractList<E>() {
       @Override
       public E get(int index) {
-        return get(indices[index]);
+        return ConcurrentHashIndex.this.get(indices[index]);
       }
 
       @Override
@@ -166,7 +187,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public int size() {
-    return index.get();
+    return index2Item.size();
   }
 
   @Override
@@ -195,9 +216,9 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public void clear() {
     synchronized(this) {
-      item2Index = new ConcurrentHashMap<E,Integer>();
-      index2Item = new ConcurrentHashMap<Integer,E>();
-      index = new AtomicInteger();
+      item2Index.clear();
+      index2Item.clear();
+      indexCounter = new AtomicInteger();
     }
   }
 }
