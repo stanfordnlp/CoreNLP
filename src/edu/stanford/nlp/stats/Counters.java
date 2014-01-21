@@ -50,6 +50,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -1939,9 +1940,9 @@ public class Counters {
     for (int rank = 0; rank < k && !queue.isEmpty(); ++rank) {
       T key = queue.removeFirst();
       double value = counter.getCount(key);
-      strings.add(String.format(itemFormat, key, value));
+      strings.add(String.format(Locale.US, itemFormat, key, value));
     }
-    return String.format(wrapperFormat, StringUtils.join(strings, joiner));
+    return String.format(Locale.US, wrapperFormat, StringUtils.join(strings, joiner));
   }
 
   /**
@@ -1985,9 +1986,9 @@ public class Counters {
   public static <T extends Comparable<T>> String toSortedByKeysString(Counter<T> counter, String itemFormat, String joiner, String wrapperFormat) {
     List<String> strings = new ArrayList<String>();
     for (T key : CollectionUtils.sorted(counter.keySet())) {
-      strings.add(String.format(itemFormat, key, counter.getCount(key)));
+      strings.add(String.format(Locale.US, itemFormat, key, counter.getCount(key)));
     }
-    return String.format(wrapperFormat, StringUtils.join(strings, joiner));
+    return String.format(Locale.US, wrapperFormat, StringUtils.join(strings, joiner));
   }
 
   /**
@@ -2120,9 +2121,9 @@ public class Counters {
       E key = keyI.next();
       double val = q.getPriority(key);
       if (swap) {
-        sb.append(String.format(fmt, key, val));
+        sb.append(String.format(Locale.US, fmt, key, val));
       } else {
-        sb.append(String.format(fmt, val, key));
+        sb.append(String.format(Locale.US, fmt, val, key));
       }
       if (keyI.hasNext()) {
         sb.append('\n');
