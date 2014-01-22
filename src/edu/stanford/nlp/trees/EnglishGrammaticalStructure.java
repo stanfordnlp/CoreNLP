@@ -6,6 +6,10 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.*;
 
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
@@ -173,6 +177,44 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After adding xsubj:", list);
     }
+
+    addStrandedPobj(list);
+    if (DEBUG) {
+      printListSorted("After adding stranded pobj:", list);
+    }    
+  }
+
+  static SemgrexPattern STRANDED_POBJ_SEMGREX = SemgrexPattern.compile("{}=head [ >rcmod {}=pivot | >rcmod ({} >xcomp {}=pivot) | >rcmod ({} >conj {}=pivot) ] : {}=pivot >prep ({}=prep !>pcomp {} !>pobj {})");
+
+  // Deal with preposition stranding in relative clauses.
+  // For example, "the only thing I'm rooting for"
+  // This method will add pobj(for, thing) by connecting using the rcmod and prep
+  private static void addStrandedPobj(List<TypedDependency> list) {
+    SemanticGraph graph = new SemanticGraph(list);
+    SemgrexMatcher matcher = STRANDED_POBJ_SEMGREX.matcher(graph);
+    Map<Integer, TreeGraphNode> idToNodes = null;
+    while (matcher.find()) {
+      if (idToNodes == null) {
+        idToNodes = mapIdsToNodes(list);
+      }
+      TreeGraphNode head = idToNodes.get(matcher.getNode("head").index());
+      TreeGraphNode prep = idToNodes.get(matcher.getNode("prep").index());
+      TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, prep, head);
+      list.add(newDep);
+    }
+  }
+
+  /**
+   * Produces a map of ids to the original nodes.  Useful if you
+   * convert to a SemanticGraph and then conert back to dependencies
+   */
+  private static Map<Integer, TreeGraphNode> mapIdsToNodes(List<TypedDependency> list) {
+    Map<Integer, TreeGraphNode> idToNodes = Generics.newHashMap();
+    for (TypedDependency dep : list) {
+      idToNodes.put(dep.gov().index(), dep.gov());
+      idToNodes.put(dep.dep().index(), dep.dep());
+    }
+    return idToNodes;
   }
 
   /**
