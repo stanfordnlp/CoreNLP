@@ -166,7 +166,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public int size() {
-    return index.get();
+    return index2Item.size();
   }
 
   @Override
