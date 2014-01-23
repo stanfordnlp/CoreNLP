@@ -13,7 +13,7 @@ import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
  * <br>
  * becomes
  * <br>
- * (NP (NNP Month) (CD Day) (, ,) (CD Year) )
+ * (NP (NP (NNP Month) (CD Day) (, ,) (CD Year) ))
  * <br>
  * (NP (NP (NNP Month) )
  * (NP (CD Year) ))

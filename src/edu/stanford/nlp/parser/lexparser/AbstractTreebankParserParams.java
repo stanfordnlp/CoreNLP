@@ -683,14 +683,4 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   public boolean supportsBasicDependencies() {
     return false;
   }
-
-
-  /**
-   * In general, we don't actually do any category combining for
-   * DVModels.  Only English for now
-   */
-  @Override
-  public String combineCategory(String basic) {
-    return basic;
-  }
 }

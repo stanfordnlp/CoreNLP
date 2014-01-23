@@ -1524,7 +1524,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
          "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NN brandy)) (CONJP (RB not) (TO to) (VB mention)) (NP (NN cognac)))) (. .)))",
          "( (S (NP (PRP I)) (VP (VBP like) (NP (CONJP (RB not) (RB only)) (NP (NNS cats)) (CONJP (CC but) (RB also)) (NP (NN dogs)))) (. .)))",
-         "((S (NP (NNP Fred)) (VP (VBD flew) (PP (CONJP (RB not) (JJ only)) (PP (TO to) (NP (NNP Greece))) (CONJP (CC but) (RB also)) (PP (TO to) (NP (NNP Serbia))))) (. .)))",
          "( (SINV (ADVP-TMP (RB Only) (RB recently)) (SINV (VBZ has) (NP (PRP it)) (VP (VBN been) (VP (ADVP-MNR (RB attractively)) (VBN redesigned)))) (CC and) (SINV (NP (PRP$ its) (JJ editorial) (NN product)) (VP (VBN improved))) (. .)))",
          "( (S (NP-SBJ (JJP (JJ Political) (CC and) (NN currency)) (NNS gyrations)) (VP (MD can) (VP (VB whipsaw) (NP (DT the) (NNS funds)))) (. .)))",
          "(NP-SBJ (NNS Managers) (CC and) (NNS presenters))",
@@ -1534,7 +1533,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "(NP (NNP Digital) (, ,) (NNP Hewlett) (, ,) (CC and) (NNP Sun))",
          "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (, ,) (CC and) (NP (NNP Coke) ) )",
          "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (CC and)  (NP (NNP Coke) ) )",
-         "(S (NP (NP (NN Activation)) (PP (IN of) (NP (NP (NN Akt)) (, ,) (NP (NN NFkappaB)) (, ,) (CC and) (NP (NN Stat3)) (CONJP (CC but) (RB not)) (NP (NN MAPK) (NNS pathways))))) (VP (VBP are) (NP (NP (NNS characteristics)) (VP (VBN associated) (PP (IN with) (NP (NP (JJ malignant) (NN transformation)) ))))))", // test but not -> negcc
     };
 
 
@@ -1670,14 +1668,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "dobj(like-2, cats-5)\n" +
                 "dobj(like-2, dogs-8)\n" +
                 "conj_and(cats-5, dogs-8)\n",
-        "nsubj(flew-2, Fred-1)\n" +
-                "root(ROOT-0, flew-2)\n" +
-                "neg(only-4, not-3)\n" +
-                "preconj(flew-2, only-4)\n" +
-                "prep_to(flew-2, Greece-6)\n" +
-                "prep_to(flew-2, Serbia-10)\n" +
-                "conj_and(Greece-6, Serbia-10)\n",
-
         "advmod(recently-2, Only-1)\n" +
                 "advmod(redesigned-7, recently-2)\n" +
                 "aux(redesigned-7, has-3)\n" +
@@ -1719,20 +1709,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, Depot-2)\n" +
                 "conj_and(Depot-2, Sun-4)\n" +
                 "conj_and(Depot-2, Coke-6)\n",
-        "nsubj(characteristics-14, Activation-1)\n" +
-                "prep_of(Activation-1, Akt-3)\n" +
-                "prep_of(Activation-1, NFkappaB-5)\n" +
-                "conj_and(Akt-3, NFkappaB-5)\n" +
-                "prep_of(Activation-1, Stat3-8)\n" +
-                "conj_and(Akt-3, Stat3-8)\n" +
-                "nn(pathways-12, MAPK-11)\n" +
-                "prep_of(Activation-1, pathways-12)\n" +
-                "conj_negcc(Akt-3, pathways-12)\n" +
-                "cop(characteristics-14, are-13)\n" +
-                "root(ROOT-0, characteristics-14)\n" +
-                "vmod(characteristics-14, associated-15)\n" +
-                "amod(transformation-18, malignant-17)\n" +
-                "prep_with(associated-15, transformation-18)\n",
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
