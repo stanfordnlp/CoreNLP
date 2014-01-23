@@ -27,7 +27,7 @@ class DescriptionPattern extends TregexPattern {
 
   // what size string matchers to use before switching to regex for
   // disjunction matches
-  private static final int MAX_STRING_MATCHER_SIZE = 6;
+  private static final int MAX_STRING_MATCHER_SIZE = 8;
 
   private final String stringDesc;
   /** The name to give the matched node */
@@ -54,6 +54,8 @@ class DescriptionPattern extends TregexPattern {
                                                                      "/\\^([-a-zA-Z']+)\\$/"); // for example, /^-NONE-$/
 
   private static final Pattern MULTI_WORD_PATTERN = Pattern.compile("/\\^\\(\\?\\:((?:[-a-zA-Z|]|\\\\\\$)+)\\)\\$\\/");
+
+  private static final Pattern CASE_INSENSITIVE_PATTERN = Pattern.compile("/\\^\\(\\?i\\:((?:[-a-zA-Z|]|\\\\\\$)+)\\)\\$\\/");
 
   /** Used to detect regex expressions which can be simplified to exact matches */
   private static final Pattern PREFIX_PATTERN = Pattern.compile("/\\^([-a-zA-Z|]+)\\/" + "|" + // for example, /^JJ/
@@ -95,9 +97,6 @@ class DescriptionPattern extends TregexPattern {
         stringFilter = null;
         //System.err.println("DescriptionPattern: converting " + desc + " to " + exactMatch);
       } else if (MULTI_WORD_PATTERN.matcher(desc).matches()) {
-        descriptionMode = DescriptionMode.STRINGS;
-        descPattern = null;
-        exactMatch = null;
         Matcher matcher = MULTI_WORD_PATTERN.matcher(desc);
         matcher.matches();
         String matchedGroup = null;
@@ -108,13 +107,44 @@ class DescriptionPattern extends TregexPattern {
           }
         }
         matchedGroup = matchedGroup.replaceAll("\\\\", "");
-        // TODO: if this is too long, just use the regular expression
-        stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, matchedGroup.split("[|]")); 
-        //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        if (matchedGroup.split("[|]").length > MAX_STRING_MATCHER_SIZE) {
+          descriptionMode = DescriptionMode.PATTERN;
+          descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
+          exactMatch = null;
+          stringFilter = null;
+          //System.err.println("DescriptionPattern: not converting " + desc);
+        } else {
+          descriptionMode = DescriptionMode.STRINGS;
+          descPattern = null;
+          exactMatch = null;
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, matchedGroup.split("[|]")); 
+          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        }
+      } else if (CASE_INSENSITIVE_PATTERN.matcher(desc).matches()) {
+        Matcher matcher = CASE_INSENSITIVE_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        matchedGroup = matchedGroup.replaceAll("\\\\", "");
+        if (matchedGroup.split("[|]").length > MAX_STRING_MATCHER_SIZE) {
+          descriptionMode = DescriptionMode.PATTERN;
+          descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
+          exactMatch = null;
+          stringFilter = null;
+          //System.err.println("DescriptionPattern: not converting " + desc);
+        } else {
+          descriptionMode = DescriptionMode.STRINGS;
+          descPattern = null;
+          exactMatch = null;
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.CASE_INSENSITIVE, matchedGroup.split("[|]")); 
+          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        }
       } else if (PREFIX_PATTERN.matcher(desc).matches()) {
-        descriptionMode = DescriptionMode.STRINGS;
-        descPattern = null;
-        exactMatch = null;
         Matcher matcher = PREFIX_PATTERN.matcher(desc);
         matcher.matches();
         String matchedGroup = null;
@@ -124,9 +154,19 @@ class DescriptionPattern extends TregexPattern {
             break;
           }
         }
-        // TODO: if this is too long, just use the regular expression
-        stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.PREFIX, matchedGroup.split("[|]")); 
-        //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        if (matchedGroup.split("\\|").length > MAX_STRING_MATCHER_SIZE) {
+          descriptionMode = DescriptionMode.PATTERN;
+          descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
+          exactMatch = null;
+          stringFilter = null;
+          //System.err.println("DescriptionPattern: not converting " + desc);
+        } else {
+          descriptionMode = DescriptionMode.STRINGS;
+          descPattern = null;
+          exactMatch = null;
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.PREFIX, matchedGroup.split("[|]")); 
+          //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+        }
       } else if (desc.matches("/.*/")) {
         descriptionMode = DescriptionMode.PATTERN;
         descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));

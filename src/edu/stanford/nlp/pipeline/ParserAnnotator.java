@@ -90,7 +90,7 @@ public class ParserAnnotator implements Annotator {
     this.maxParseTime = 0;
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
-      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), tlp.typedDependencyHeadFinder());
+      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     } else {
       this.gsf = null;
     }
@@ -134,7 +134,7 @@ public class ParserAnnotator implements Annotator {
 
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
-      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), tlp.typedDependencyHeadFinder());
+      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     } else {
       this.gsf = null;
     }

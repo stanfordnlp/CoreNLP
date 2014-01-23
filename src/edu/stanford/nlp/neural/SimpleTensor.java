@@ -97,6 +97,12 @@ public class SimpleTensor implements Serializable {
     return numRows * numCols * numSlices;
   }
 
+  public void set(double value) {
+    for (int slice = 0; slice < numSlices; ++slice) {
+      slices[slice].set(value);
+    }
+  }
+
   /**
    * Returns a new tensor which has the values of the original tensor
    * scaled by <code>scaling</code>.  The original object is

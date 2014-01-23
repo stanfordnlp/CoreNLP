@@ -507,7 +507,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    *           be marked with their heads.
    * @return Set of dependencies (each a <code>Dependency</code>)
    */
-  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf) {
+  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> filter, HeadFinder hf) {
     Set<Dependency<Label, Label, Object>> deps = Generics.newHashSet();
     for (Tree t : this) {
 
@@ -545,7 +545,7 @@ public class TreeGraphNode extends Tree implements HasParent {
               new UnnamedDependency(headWordNode, kidHeadWordNode) :
               new UnnamedConcreteDependency(headWordNode, headWordNodeIndex, kidHeadWordNode, kidHeadWordNodeIndex);
 
-          if (f.accept(d)) {
+          if (filter.accept(d)) {
             deps.add(d);
           }
         }

@@ -247,7 +247,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Alters a list in place by removing all the KILL relations
    */
-  private static void filterKill(List<TypedDependency> deps) {
+  private static void filterKill(Collection<TypedDependency> deps) {
     List<TypedDependency> filtered = Generics.newArrayList();
     for (TypedDependency dep : deps) {
       if (dep.reln() != KILL) {
@@ -377,14 +377,14 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * Does some hard coding to deal with relation in CONJP. For now we deal with:
-   * but not, if not, instead of, rather than, but rather GO TO negcc as well as, not to
-   * mention, but also, & GO TO and.
+   * but not, if not, instead of, rather than, but rather GO TO negcc <br>
+   * as well as, not to mention, but also, & GO TO and.
    *
    * @param conj The head dependency of the conjunction marker
    * @return A GrammaticalRelation made from a normalized form of that
    *         conjunction.
    */
-  protected static GrammaticalRelation conjValue(String conj) {
+  private static GrammaticalRelation conjValue(String conj) {
     String newConj = conj.toLowerCase();
     if (newConj.equals("not") || newConj.equals("instead") || newConj.equals("rather")) {
       newConj = "negcc";
@@ -1513,6 +1513,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
     for (String[] mwp : MULTIWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1621,6 +1622,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
     // first, loop over the prepositions for NP annotation
     for (String[] mwp : THREEWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1720,6 +1722,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
     // second, loop again looking at flat annotation
     for (String[] mwp : THREEWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1860,6 +1863,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
     for (String[] mwp : MULTIWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp1 = null;
       TreeGraphNode governor = null;
@@ -1878,10 +1882,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       // now search for prep(gov, mwp1)
       for (TypedDependency td1 : list) {
-        if (td1.dep() == mwp1 && td1.reln() == PREPOSITIONAL_MODIFIER) {// we
-          // found
-          // prep(gov,
-          // mwp1)
+        if (td1.dep() == mwp1 && td1.reln() == PREPOSITIONAL_MODIFIER) {
+          // we found prep(gov, mwp1)
           prep = td1;
           governor = prep.gov();
         }
@@ -1951,16 +1953,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-    // now remove typed dependencies with reln "kill"
-    for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {
-      TypedDependency td = iter.next();
-      if (td.reln() == KILL) {
-        if (DEBUG) {
-          System.err.println("Removing rest of multiword conj: " + td);
-        }
-        iter.remove();
-      }
-    }
+    filterKill(list);
   }
 
   /**
