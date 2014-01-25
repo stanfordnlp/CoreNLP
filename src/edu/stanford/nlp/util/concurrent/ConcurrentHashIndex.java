@@ -5,11 +5,10 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.RandomAccess;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,8 +30,11 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   public static final int UNKNOWN_ID = -1;
   private static final int DEFAULT_INITIAL_CAPACITY = 100;
 
-  private final ConcurrentHashMap<E,Integer> item2Index;
-  private final List<E> index2Item;
+  private final Map<E,Integer> item2Index;
+  
+  // You'd think that this could be a synchronized list. Don't try it. It doesn't scale
+  // up to e.g. 8+ threads with heavy read/write loads.
+  private final Map<Integer,E> index2Item;
 
   /**
    * Constructor.
@@ -48,7 +50,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
    */
   public ConcurrentHashIndex(int initialCapacity) {
     this.item2Index = new ConcurrentHashMap<E,Integer>(initialCapacity);
-    this.index2Item = Collections.synchronizedList(new ArrayList<E>(initialCapacity));
+    this.index2Item = new ConcurrentHashMap<Integer,E>(initialCapacity);
   }
 
   @Override
@@ -70,8 +72,9 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
       // a lock (e.g., by using AtomicInteger) but couldn't make it work.
       synchronized(this) {
         if ( ! item2Index.containsKey(o)) {
-          item2Index.put(o, index2Item.size());
-          index2Item.add(o);
+          int newIndex = index2Item.size();
+          item2Index.put(o, newIndex);
+          index2Item.put(newIndex, o);
         }
       }
       return item2Index.get(o);
