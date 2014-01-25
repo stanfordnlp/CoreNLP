@@ -33,7 +33,6 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   private final ConcurrentHashMap<E,Integer> item2Index;
   private final List<E> index2Item;
-  private int indexCounter = 0;
 
   /**
    * Constructor.
@@ -71,9 +70,8 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
       // a lock (e.g., by using AtomicInteger) but couldn't make it work.
       synchronized(this) {
         if ( ! item2Index.containsKey(o)) {
-          item2Index.put(o, indexCounter++);
+          item2Index.put(o, index2Item.size());
           index2Item.add(o);
-          assert index2Item.size() == indexCounter;
         }
       }
       return item2Index.get(o);
@@ -212,7 +210,6 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
     synchronized(this) {
       item2Index.clear();
       index2Item.clear();
-      indexCounter = 0;
     }
   }
 }
