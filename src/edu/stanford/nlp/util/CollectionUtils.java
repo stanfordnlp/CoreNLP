@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -49,8 +48,8 @@ public class CollectionUtils {
 
   public static List<Double> asList(double[] a) {
     List<Double> result = new ArrayList<Double>(a.length);
-    for (int i = 0; i < a.length; i++) {
-      result.add(new Double(a[i]));
+    for (double v : a) {
+      result.add(new Double(v));
     }
     return result;
   }
@@ -138,7 +137,7 @@ public class CollectionUtils {
     }
     return diff;
   }
-  
+
   /**
    * Returns all objects in list1 that are not in list2
    *
@@ -905,7 +904,7 @@ public class CollectionUtils {
     }
     return transformed;
   }
-  
+
   /**
    * get all values corresponding to the indices (if they exist in the map)
    * @param map
@@ -920,9 +919,9 @@ public class CollectionUtils {
       }
     return result;
   }
-  
+
   public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
-   T max = null;;
+   T max = null;
    int i = 0;
    int maxindex = -1;
    for(T t: list)
@@ -936,4 +935,5 @@ public class CollectionUtils {
    }
    return maxindex;
   }
+
 }
