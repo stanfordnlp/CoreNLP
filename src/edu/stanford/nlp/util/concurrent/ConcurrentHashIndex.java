@@ -5,20 +5,23 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.RandomAccess;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 /**
- * A fast threadsafe index that supports constant-time lookup in both directions.
+ * A fast threadsafe index.
+ * 
+ * NOTE: Unlike <code>HashIndex</code>, this index does not guarantee contiguous
+ * indices.
  * 
  * @author Spence Green
  *
@@ -32,8 +35,8 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   private static final int DEFAULT_INITIAL_CAPACITY = 100;
 
   private final ConcurrentHashMap<E,Integer> item2Index;
-  private final List<E> index2Item;
-  private int indexCounter = 0;
+  private final ConcurrentHashMap<Integer,E> index2Item;
+  private AtomicInteger indexCounter = new AtomicInteger();
 
   /**
    * Constructor.
@@ -49,7 +52,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
    */
   public ConcurrentHashIndex(int initialCapacity) {
     this.item2Index = new ConcurrentHashMap<E,Integer>(initialCapacity);
-    this.index2Item = Collections.synchronizedList(new ArrayList<E>(initialCapacity));
+    this.index2Item = new ConcurrentHashMap<Integer,E>(initialCapacity);
   }
 
   @Override
@@ -65,21 +68,22 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public int indexOf(E o, boolean add) {
-    if (add) {
-      // TODO(spenceg) The Index interface contract states that indices must be
-      // non-negative and continuous. We tried to satisfy this requirement without
-      // a lock (e.g., by using AtomicInteger) but couldn't make it work.
-      synchronized(this) {
-        if ( ! item2Index.containsKey(o)) {
-          item2Index.put(o, indexCounter++);
-          index2Item.add(o);
-          assert index2Item.size() == indexCounter;
+    Integer atomic = item2Index.get(o);
+    if (atomic == null) {
+      if (add) {
+        final int newIndex = indexCounter.getAndIncrement();
+        atomic = item2Index.putIfAbsent(o, newIndex);
+        if (atomic == null) {
+          index2Item.put(newIndex, o);
+          return newIndex;
+        } else {
+          return item2Index.get(o);
         }
+      } else {
+        return UNKNOWN_ID;
       }
-      return item2Index.get(o);
-
     } else {
-      return indexOf(o);
+      return atomic;
     }
   }
 
@@ -109,6 +113,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
       public E get(int index) {
         return ConcurrentHashIndex.this.get(indices[index]);
       }
+
       @Override
       public int size() {
         return indices.length;
@@ -163,10 +168,11 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public Iterator<E> iterator() {
     return new Iterator<E>() {
+      private final List<Integer> sortedKeys = Generics.newArrayList(new TreeSet<Integer>(index2Item.keySet()));
       private int index = 0;
       @Override
       public boolean hasNext() {
-        return index < index2Item.size();
+        return index < sortedKeys.size();
       }
       @Override
       public E next() {
@@ -212,7 +218,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
     synchronized(this) {
       item2Index.clear();
       index2Item.clear();
-      indexCounter = 0;
+      indexCounter = new AtomicInteger();
     }
   }
 }
