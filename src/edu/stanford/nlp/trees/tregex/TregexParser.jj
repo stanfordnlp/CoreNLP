@@ -76,29 +76,15 @@ TOKEN:
 // first expr is return val- passed up the tree after a production
 TregexPattern Root() : {
   TregexPattern node;
-  List<TregexPattern> nodes = Generics.newArrayList();
   // a local variable
 } {
+  ( node = SubNode(Relation.ROOT) "\n" )
   // RHS can be preceded with local variable "=" which means
   // this lv gets the return val of the production
-  ( ( node = SubNode(Relation.ROOT) ) 
-    // a code block can be placed after any bracketed expression
-    // it will be executed after that expression is matched
-    // that's where we have to return something if the production isn't void
-    {
-      nodes.add(node);
-    }
-    ( LOOKAHEAD(2) "|" node = SubNode(Relation.ROOT) {
-      nodes.add(node);
-    } )* )
-  ( "\n" )
-  { 
-    if (nodes.size() == 1) {
-      return nodes.get(0);
-    } else {
-      return new CoordinationPattern(nodes, false);
-    }
-  }
+  { return node; }
+  // a code block can be placed after any bracketed expression
+  // it will be executed after that expression is matched
+  // that's where we have to return something if the production isn't void
 }
 
 // passing arguments down the tree - in this case the relation that
@@ -211,7 +197,7 @@ TregexPattern ChildrenDisj() : {
   ( ( child = ChildrenConj() ) {
       children.add(child);
       allKnownVariables.addAll(knownVariables); }
-    ( LOOKAHEAD(2) { knownVariables = Generics.newHashSet(originalKnownVariables); }
+    ( { knownVariables = Generics.newHashSet(originalKnownVariables); }
       ( "|" child = ChildrenConj() ) {
       children.add(child);
       allKnownVariables.addAll(knownVariables); } )* )
