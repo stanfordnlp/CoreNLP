@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
@@ -31,10 +32,8 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   private static final int DEFAULT_INITIAL_CAPACITY = 100;
 
   private final Map<E,Integer> item2Index;
-  
-  // You'd think that this could be a synchronized list. Don't try it. It doesn't scale
-  // up to e.g. 8+ threads with heavy read/write loads.
-  private final Map<Integer,E> index2Item;
+  private final List<E> index2Item;
+  private final ReentrantReadWriteLock lock;
 
   /**
    * Constructor.
@@ -50,12 +49,16 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
    */
   public ConcurrentHashIndex(int initialCapacity) {
     this.item2Index = new ConcurrentHashMap<E,Integer>(initialCapacity);
-    this.index2Item = new ConcurrentHashMap<Integer,E>(initialCapacity);
+    this.index2Item = Generics.newArrayList(initialCapacity);
+    lock = new ReentrantReadWriteLock();
   }
 
   @Override
   public E get(int i) {
-    return index2Item.get(i);
+    lock.readLock().lock();
+    E item = index2Item.get(i);
+    lock.readLock().unlock();
+    return item;
   }
 
   @Override
@@ -67,16 +70,13 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public int indexOf(E o, boolean add) {
     if (add) {
-      // TODO(spenceg) The Index interface contract states that indices must be
-      // non-negative and continuous. We tried to satisfy this requirement without
-      // a lock (e.g., by using AtomicInteger) but couldn't make it work.
-      synchronized(this) {
-        if ( ! item2Index.containsKey(o)) {
-          int newIndex = index2Item.size();
-          item2Index.put(o, newIndex);
-          index2Item.put(newIndex, o);
-        }
+      lock.writeLock().lock();
+      if ( ! item2Index.containsKey(o)) {
+        int newIndex = index2Item.size();
+        item2Index.put(o, newIndex);
+        index2Item.add(o);
       }
+      lock.writeLock().unlock();
       return item2Index.get(o);
 
     } else {
@@ -210,9 +210,9 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public void clear() {
-    synchronized(this) {
-      item2Index.clear();
-      index2Item.clear();
-    }
+    lock.writeLock().lock();
+    item2Index.clear();
+    index2Item.clear();
+    lock.writeLock().unlock();
   }
 }
