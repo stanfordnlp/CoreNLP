@@ -95,6 +95,7 @@ public class ConvertMatlabModel {
     System.err.println("W cat size: " + Wcat.numRows() + "x" + Wcat.numCols());
 
     SimpleMatrix combinedWV = loadMatrix(basePath + "bin/Wv.bin", basePath + "Wv.txt");
+    System.err.println("Word matrix size: " + combinedWV.numRows() + "x" + combinedWV.numCols());
 
     File vocabFile = new File(basePath + "vocab_1.txt");
     if (!vocabFile.exists()) {
@@ -105,11 +106,13 @@ public class ConvertMatlabModel {
       lines.add(line.trim());
     }
 
+    System.err.println("Lines in vocab file: " + lines.size());
+
     Map<String, SimpleMatrix> wordVectors = Generics.newTreeMap();
 
     for (int i = 0; i < lines.size() - 1; ++i) { // leave out UNK
       String[] pieces = lines.get(i).split(" +");
-      if (pieces.length > 1) {
+      if (pieces.length == 0 || pieces.length > 1) {
         continue;
       }
       wordVectors.put(pieces[0], combinedWV.extractMatrix(0, numSlices, i, i+1));
