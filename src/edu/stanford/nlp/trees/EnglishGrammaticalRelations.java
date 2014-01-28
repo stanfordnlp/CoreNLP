@@ -934,7 +934,7 @@ public class EnglishGrammaticalRelations {
           // (it doesn't distinguish whether actually gapped).
           "@NP|WHNP < RRC=target <# NP|WHNP|NML|DT|S",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
-          "NP < (NP $++ (SBAR=target !< (IN < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))"
+          "NP < (NP $++ (SBAR=target !< (IN < /^(?i:than|that|whether)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))"
         });
   public static class RelativeClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
