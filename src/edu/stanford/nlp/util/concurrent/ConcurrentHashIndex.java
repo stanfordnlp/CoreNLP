@@ -8,9 +8,10 @@ import java.util.AbstractList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.RandomAccess;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
@@ -31,10 +32,10 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   public static final int UNKNOWN_ID = -1;
   private static final int DEFAULT_INITIAL_CAPACITY = 100;
 
-  private final Map<E,Integer> item2Index;
-  private final List<E> index2Item;
-  private final ReentrantReadWriteLock lock;
-
+  private final ConcurrentHashMap<E,Integer> item2Index;
+  private final ReentrantLock lock;
+  private final AtomicReference<Object[]> index2Item;
+  
   /**
    * Constructor.
    */
@@ -48,57 +49,63 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
    * @param initialCapacity
    */
   public ConcurrentHashIndex(int initialCapacity) {
-    this.item2Index = Generics.newHashMap(initialCapacity);
-    this.index2Item = Generics.newArrayList(initialCapacity);
-    lock = new ReentrantReadWriteLock();
+    item2Index = new ConcurrentHashMap<E,Integer>(initialCapacity);
+    lock = new ReentrantLock();
+    Object[] arr = new Object[initialCapacity];
+    index2Item = new AtomicReference<Object[]>(arr);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public E get(int i) {
-    lock.readLock().lock();
-    try {
-      return index2Item.get(i);
-    } finally {
-      lock.readLock().unlock();
+    Object[] arr = index2Item.get();
+    if (i < size()) {
+      return (E) arr[i];
     }
+    throw new ArrayIndexOutOfBoundsException(String.format("Out of bounds: %d >= %d", i, arr.length));
   }
 
   @Override
   public int indexOf(E o) {
-    lock.readLock().lock();
-    try {
-      Integer id = item2Index.get(o);
-      return id == null ? UNKNOWN_ID : id;
-    } finally {
-      lock.readLock().unlock();
-    }
+    Integer id = item2Index.get(o);
+    return id == null ? UNKNOWN_ID : id;
   }
 
   @Override
   public int indexOf(E o, boolean add) {
-    lock.readLock().lock();
-    if ( ! item2Index.containsKey(o) && add) {
-      lock.readLock().unlock();
-      lock.writeLock().lock();
-      try {
-        // Recheck state because another thread might have already performed
-        // the update
-        if ( ! item2Index.containsKey(o)) {
-          item2Index.put(o, index2Item.size());
-          index2Item.add(o);
-        }
-        // Downgrade by acquiring read lock before releasing write lock
-        lock.readLock().lock();
-      } finally {
-        lock.writeLock().unlock(); // Unlock write, still hold read
-      }
+    Integer index = item2Index.get(o);
+    if (index != null) {
+      return index;
     }
     
-    try {
-      Integer id = item2Index.get(o);
-      return id == null ? UNKNOWN_ID : id;
-    } finally {
-      lock.readLock().unlock();
+    if (add) {
+      lock.lock();
+      try {
+        // Recheck state
+        if (item2Index.containsKey(o)) {
+          return item2Index.get(o);
+        
+        } else {
+          final int newIndex = item2Index.size();
+          Object[] arr = index2Item.get();
+          assert newIndex <= arr.length;
+          if (newIndex == arr.length) {
+            // Increase size of array if necessary
+            Object[] newArr = new Object[2*newIndex];
+            System.arraycopy(arr, 0, newArr, 0, arr.length);
+            arr = newArr;
+          }
+          arr[newIndex] = o;
+          index2Item.set(arr);
+          item2Index.put(o, newIndex);
+          return newIndex;
+        }
+      } finally {
+        lock.unlock();
+      }
+    
+    } else {
+      return UNKNOWN_ID;
     }
   }
 
@@ -118,12 +125,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public List<E> objectsList() {
-    lock.readLock().lock();
-    try {
-      return Generics.newArrayList(item2Index.keySet());
-    } finally {
-      lock.readLock().unlock();
-    }
+    return Generics.newArrayList(item2Index.keySet());
   }
 
   @Override
@@ -205,12 +207,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public int size() {
-    lock.readLock().lock();
-    try {
-      return index2Item.size();
-    } finally {
-      lock.readLock().unlock();
-    }
+    return item2Index.size();
   }
 
   @Override
@@ -238,12 +235,14 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public void clear() {
-    lock.writeLock().lock();
+    lock.lock();
     try {
+      int size = item2Index.size();
       item2Index.clear();
-      index2Item.clear();
+      Object[] arr = new Object[size];
+      index2Item.set(arr);
     } finally {
-      lock.writeLock().unlock();
+      lock.unlock();
     }
   }
 }
