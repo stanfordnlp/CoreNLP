@@ -1067,6 +1067,42 @@ abstract class Relation implements Serializable {
     }
   };
 
+  private static final Relation PARENT_EQUALS = new Relation("<=") {
+    private static final long serialVersionUID = 98745298745198245L;
+
+    @Override
+    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
+      if (t1 == t2) {
+        return true;
+      }
+      return PARENT_OF.satisfies(t1, t2, root, matcher);
+    }
+
+    @Override
+    Iterator<Tree> searchNodeIterator(final Tree t,
+                                      final TregexMatcher matcher) {
+      return new SearchNodeIterator() {
+        int nextNum;
+        boolean usedParent;
+
+        @Override
+        public void advance() {
+          if (!usedParent) {
+            next = t;
+            usedParent = true;
+          } else {
+            if (nextNum < t.numChildren()) {
+              next = t.getChild(nextNum);
+              nextNum++;
+            } else {
+              next = null;
+            }
+          }
+        }
+      };
+    }
+  };
+
   private static final Relation[] SIMPLE_RELATIONS = {
       DOMINATES, DOMINATED_BY, PARENT_OF, CHILD_OF, PRECEDES,
       IMMEDIATELY_PRECEDES, FOLLOWS, IMMEDIATELY_FOLLOWS,
@@ -1074,7 +1110,8 @@ abstract class Relation implements Serializable {
           LEFTMOST_DESCENDANT_OF, RIGHTMOST_DESCENDANT_OF, SISTER_OF,
       LEFT_SISTER_OF, RIGHT_SISTER_OF, IMMEDIATE_LEFT_SISTER_OF,
       IMMEDIATE_RIGHT_SISTER_OF, ONLY_CHILD_OF, HAS_ONLY_CHILD, EQUALS,
-      PATTERN_SPLITTER,UNARY_PATH_ANCESTOR_OF, UNARY_PATH_DESCENDANT_OF};
+      PATTERN_SPLITTER,UNARY_PATH_ANCESTOR_OF, UNARY_PATH_DESCENDANT_OF,
+      PARENT_EQUALS };
 
   private static final Map<String, Relation> SIMPLE_RELATIONS_MAP = Generics.newHashMap();
 
