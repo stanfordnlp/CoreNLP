@@ -227,7 +227,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     setType(dict);
     setNERString();
     List<String> mStr = getMentionString();
-    setNumber(dict);
+    setNumber(dict, getNumberCount(dict, mStr));
     setGender(dict, getGenderCount(dict, mStr));
     setAnimacy(dict);
     setPerson(dict);
@@ -282,6 +282,24 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       if(l==this.headWord) break;   // remove words after headword
     }
     return mStr;
+  }
+
+  private static int[] getNumberCount(Dictionaries dict, List<String> mStr) {
+    int len = mStr.size();
+    if(len > 1) {
+      for(int i = 0 ; i < len-1 ; i++) {
+        if(dict.genderNumber.containsKey(mStr.subList(i, len))) return dict.genderNumber.get(mStr.subList(i, len));
+      }
+
+      // find converted string with ! (e.g., "dr. martin luther king jr. boulevard" -> "! boulevard")
+      List<String> convertedStr = new ArrayList<String>();
+      convertedStr.add("!");
+      convertedStr.add(mStr.get(len-1));
+      if(dict.genderNumber.containsKey(convertedStr)) return dict.genderNumber.get(convertedStr);
+    }
+    if(mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
+
+    return null;
   }
 
   private int[] getGenderCount(Dictionaries dict, List<String> mStr) {
@@ -559,7 +577,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
   }
 
-  protected void setNumber(Dictionaries dict) {
+  protected void setNumber(Dictionaries dict, int[] genderNumberCount) {
     if (mentionType == MentionType.PRONOMINAL) {
       if (dict.pluralPronouns.contains(headString)) {
         number = Number.PLURAL;
