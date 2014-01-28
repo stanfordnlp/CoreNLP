@@ -500,15 +500,15 @@ public class EnglishGrammaticalRelations {
           // eg take a tree where the verb doesn't have an object
           "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN|TO) !< (S < (VP < TO))))",
 
-          // matches direct object for long dependencies in relative clause without explicit relative pronouns
-          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " + 
-            // avoid conflicts with rcmod.  TODO: we could look for
-            // empty nodes in this kind of structure and use that to
-            // find dobj, tmod, advmod, etc.  won't help the parser,
-            // of course, but will help when converting a treeback
-            // which contains empties
-            // Example: "with the way his split-fingered fastball is behaving"
-            "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
+          // // matches direct object for long dependencies in relative clause without explicit relative pronouns
+          // "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " + 
+          //   // avoid conflicts with rcmod.  TODO: we could look for
+          //   // empty nodes in this kind of structure and use that to
+          //   // find dobj, tmod, advmod, etc.  won't help the parser,
+          //   // of course, but will help when converting a treebank
+          //   // which contains empties
+          //   // Example: "with the way his split-fingered fastball is behaving"
+          //   "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
 
           // If there was an NP between the WHNP and the ADJP, we want
           // that NP to have the nsubj relation, and the WHNP is either
@@ -592,8 +592,6 @@ public class EnglishGrammaticalRelations {
           "(PP <: IN|TO) >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
           "(PP <: IN|TO) $- (NP $-- (VBZ|VBD) !$++ VP) >+(SQ) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/)",
 
-          // to deal with preposition stranding in relative clause (works well but doesn't preserve the tree structure!)
-          "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
           "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
           //"PP < (CC < less) < NP",
           "@PP < CC  < @NP=target !< @IN|TO|VBG|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
@@ -846,7 +844,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "advcl", "adverbial clause modifier",
-        AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
+        AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ|NP", tregexCompiler,
         new String[] {
           // first case includes regular in order to purpose clauses
           // second disjunct matches inverted "had he investigated" cases
@@ -868,6 +866,18 @@ public class EnglishGrammaticalRelations {
           "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
           // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // part of former purpcl [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
+
+          // // matches direct object for long dependencies in relative clause without explicit relative pronouns
+          // "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " + 
+          //   // avoid conflicts with rcmod.  TODO: we could look for
+          //   // empty nodes in this kind of structure and use that to
+          //   // find dobj, tmod, advmod, etc.  won't help the parser,
+          //   // of course, but will help when converting a treebank
+          //   // which contains empties
+          //   // Example: "with the way his split-fingered fastball is behaving"
+          //   "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
+          "NP < (NP $++ (SBAR=target < (IN < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))"
+
 
         });
   public static class AdvClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
@@ -924,6 +934,7 @@ public class EnglishGrammaticalRelations {
           // (it doesn't distinguish whether actually gapped).
           "@NP|WHNP < RRC=target <# NP|WHNP|NML|DT|S",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
+          "NP < (NP $++ (SBAR=target !< (IN < /^(?i:than|that|whether)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))"
         });
   public static class RelativeClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
