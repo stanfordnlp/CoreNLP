@@ -1339,32 +1339,7 @@ public class TregexTest extends TestCase {
     
     matcher = pattern.matcher(trees[2]);
     assertFalse(matcher.find());
-  }
-
-  /** 
-   * Test a few possible ways to make disjunctions at the root level.
-   * Note that disjunctions at lower levels can always be created by
-   * repeating the relation, but that is not true at the root, since
-   * the root "relation" is implicit.
-   */
-  public void testRootDisjunction() {
-    runTest("A | B", "(A (B 1))", "(A (B 1))", "(B 1)");
-
-    runTest("(A) | (B)", "(A (B 1))", "(A (B 1))", "(B 1)");
-
-    runTest("A < B | A < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-
-    runTest("A < B | B < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-    runTest("A < B | B < C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))");
-
-    runTest("A | B | C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))", "(C 1)", "(C 2)");
-
-    // The binding of the | should look like this:
-    // A ( (< B) | (< C) )
-    runTest("A < B | < C", "(A (B 1))", "(A (B 1))");
-    runTest("A < B | < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-    runTest("A < B | < C", "(B (C 1))");
-  }
+ }
 
 
   /**
