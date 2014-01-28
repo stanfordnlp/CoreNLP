@@ -88,7 +88,24 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After moveRB:                     " + movedRB);
     }
-    return movedRB;
+    Tree changedSbar = changeSbarToPP(movedRB);
+    if (VERBOSE) {
+      System.err.println("After changeSbarToPP:             " + movedRB);
+    }
+    return changedSbar;
+  }
+
+  private static TregexPattern changeSbarToPPTregex =
+    TregexPattern.compile("NP < (NP $++ (SBAR=sbar < (IN < /^(?i:after|before|until|since|during)$/ $++ S)))");
+
+  private static TsurgeonPattern changeSbarToPPTsurgeon =
+    Tsurgeon.parseOperation("relabel sbar PP");
+
+  public Tree changeSbarToPP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(changeSbarToPPTregex, changeSbarToPPTsurgeon, t);
   }
 
   private static TregexPattern findFlatConjpTregex =
