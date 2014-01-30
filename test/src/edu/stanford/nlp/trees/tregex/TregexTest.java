@@ -1384,6 +1384,26 @@ public class TregexTest extends TestCase {
 
 
   /**
+   * Tests the subtree pattern, <code>&lt;...</code>, which checks for
+   * an exact subtree under our current tree
+   */
+  public void testSubtreePattern() {
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3))", "(A (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))");
+    runTest("A <... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2))");
+    runTest("A <... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))", "(A (B 1) (C 2) (D 3))");
+
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))", "(A (B 1) (C 2) (D 3) (E 4))");
+    runTest("A !<... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))", "(A (E 4) (B 1) (C 2) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))", "(A (B 1) (C 2) (E 4) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+    runTest("A !<... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))");
+  }
+
+  /**
    * Stores an input and the expected output.  Obviously this is only
    * expected to work with a given pattern, but this is a bit more
    * convenient than calling the same pattern by hand over and over

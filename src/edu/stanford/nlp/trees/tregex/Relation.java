@@ -3,6 +3,7 @@ package edu.stanford.nlp.trees.tregex;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
@@ -16,6 +17,7 @@ import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IdentityHashSet;
 import edu.stanford.nlp.util.Interner;
+import edu.stanford.nlp.util.Pair;
 
 
 /**
@@ -158,6 +160,31 @@ abstract class Relation implements Serializable {
           + arg);
     }
     return Interner.globalIntern(r);
+  }
+
+  /**
+   * Produce a TregexPattern which represents the given MULTI_RELATION
+   * and its children
+   */
+  static TregexPattern constructMultiRelation(String s, List<DescriptionPattern> children,
+                                              Function<String, String> basicCatFunction,
+                                              HeadFinder headFinder) throws ParseException {
+    if (s.equals("<...")) {
+      List<TregexPattern> newChildren = Generics.newArrayList();
+      for (int i = 0; i < children.size(); ++i) {
+        Relation rel = getRelation("<", Integer.toString(i + 1), basicCatFunction, headFinder); 
+        DescriptionPattern oldChild = children.get(i);
+        TregexPattern newChild = new DescriptionPattern(rel, oldChild);
+        newChildren.add(newChild);
+      }
+      Relation rel = getRelation("<", Integer.toString(children.size() + 1), basicCatFunction, headFinder);
+      TregexPattern noExtraChildren = new DescriptionPattern(rel, false, "__", null, false, basicCatFunction, Collections.<Pair<Integer,String>>emptyList(), false, null);
+      noExtraChildren.negate();
+      newChildren.add(noExtraChildren);
+      return new CoordinationPattern(newChildren, true);
+    } else {
+      throw new ParseException("Unknown multi relation " + s);
+    }
   }
 
   private Relation(String symbol) {
