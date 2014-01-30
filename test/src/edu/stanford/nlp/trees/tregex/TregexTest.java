@@ -1388,19 +1388,26 @@ public class TregexTest extends TestCase {
    * an exact subtree under our current tree
    */
   public void testSubtreePattern() {
+    // test the obvious expected matches and several expected match failures
     runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3))", "(A (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))", "(A (B 1) (C 2) (D 3))");
     runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))");
     runTest("A <... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))");
     runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))");
     runTest("A <... { B ; C ; D }", "(A (B 1) (C 2))");
-    runTest("A <... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))", "(A (B 1) (C 2) (D 3))");
 
+    // every test above should return the opposite when negated
     runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))");
     runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))", "(A (B 1) (C 2) (D 3) (E 4))");
     runTest("A !<... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))", "(A (E 4) (B 1) (C 2) (D 3))");
     runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))", "(A (B 1) (C 2) (E 4) (D 3))");
     runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-    runTest("A !<... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))");
+
+    // test a couple various forms of nesting
+    runTest("A <... { (B < C) ; D }", "(A (B (C 2)) (D 3))", "(A (B (C 2)) (D 3))");
+    runTest("A <... { (B <... { C ; D }) ; E }", "(A (B (C 2) (D 3)) (E 4))", "(A (B (C 2) (D 3)) (E 4))");
+    runTest("A <... { (B !< C) ; D }", "(A (B (C 2)) (D 3))");
   }
 
   /**
