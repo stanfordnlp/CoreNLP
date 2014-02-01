@@ -31,6 +31,35 @@ public class TsurgeonTest extends TestCase {
     }
   }
 
+  public void testAdjoin() {
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@)) foo");
+    TregexPattern tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (FOO (BAR 1 2)))");
+    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
+    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (FOO (BAR (FOO (BAR 1 2)))))");
+
+    try {
+      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR)) foo");
+      throw new RuntimeException("Should have failed for not having a foot");
+    } catch (TsurgeonParseException e) {
+      // yay
+    }
+
+    try {
+      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@) (BAZ@)) foo");
+      throw new RuntimeException("Should have failed for having two feet");
+    } catch (TsurgeonParseException e) {
+      // yay
+    }
+
+    try {
+      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO@ (BAR)) foo");
+      throw new RuntimeException("Non-leaves cannot be foot nodes");
+    } catch (TsurgeonParseException e) {
+      // yay
+    }
+  }
+
   public void testCreateSubtrees() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("createSubtree FOO left right");
 
