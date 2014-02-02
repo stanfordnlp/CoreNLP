@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.util.Index;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -104,6 +105,37 @@ public class WeightedDataset<L, F> extends Dataset<L, F> {
       float tmpW = weights[randIndex];
       weights[randIndex] = weights[j];
       weights[j] = tmpW;
+    }
+  }
+
+  /**
+   * Randomizes (shuffles) the data array in place.
+   * Needs to be redefined here because we need to randomize the weights as well.
+   */
+  @Override
+  public <E> void shuffleWithSideInformation(long randomSeed, List<E> sideInformation) {
+    if (size != sideInformation.size()) {
+      throw new IllegalArgumentException("shuffleWithSideInformation: sideInformation not of same size as Dataset");
+    }
+    Random rand = new Random(randomSeed);
+    for(int j = size - 1; j > 0; j --){
+      int randIndex = rand.nextInt(j);
+
+      int [] tmp = data[randIndex];
+      data[randIndex] = data[j];
+      data[j] = tmp;
+
+      int tmpL = labels[randIndex];
+      labels[randIndex] = labels[j];
+      labels[j] = tmpL;
+
+      float tmpW = weights[randIndex];
+      weights[randIndex] = weights[j];
+      weights[j] = tmpW;
+
+      E tmpE = sideInformation.get(randIndex);
+      sideInformation.set(randIndex, sideInformation.get(j));
+      sideInformation.set(j, tmpE);
     }
   }
 
