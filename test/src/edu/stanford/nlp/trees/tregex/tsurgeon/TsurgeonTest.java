@@ -31,6 +31,83 @@ public class TsurgeonTest extends TestCase {
     }
   }
 
+  public void testAdjoin() {
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@)) foo");
+    TregexPattern tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (FOO (BAR 1 2)))");
+    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
+    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (FOO (BAR (FOO (BAR 1 2)))))");
+
+    Tree tree = treeFromString("(A (B 1 2))");
+    TregexMatcher matcher = tregex.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
+    Tree updated = tsurgeon.evaluate(tree, matcher);
+    assertEquals("(A (FOO (BAR 1 2)))", updated.toString());
+    // TODO: do we want the tsurgeon to implicitely update the matched node?
+    // System.err.println(matcher.getNode("foo"));
+    assertFalse(matcher.find());
+  }
+
+  public void testAdjoinH() {
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoinH (FOO (BAR@)) foo");
+    TregexPattern tregex = TregexPattern.compile("B=foo !< BAR");
+    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (B (BAR 1 2)))");
+    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
+    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (B (BAR (B (BAR 1 2)))))");
+
+    Tree tree = treeFromString("(A (B 1 2))");
+    TregexMatcher matcher = tregex.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
+    Tree updated = tsurgeon.evaluate(tree, matcher);
+    assertEquals("(A (B (BAR 1 2)))", updated.toString());
+    assertEquals("(B (BAR 1 2))", matcher.getNode("foo").toString());
+    assertFalse(matcher.find());
+  }
+
+
+  public void testAdjoinF() {
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoinF (FOO (BAR@)) foo");
+    TregexPattern tregex = TregexPattern.compile("B=foo !> FOO");
+    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (FOO (B 1 2)))");
+    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
+    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (FOO (B (FOO (B 1 2)))))");
+
+    Tree tree = treeFromString("(A (B 1 2))");
+    TregexMatcher matcher = tregex.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
+    Tree updated = tsurgeon.evaluate(tree, matcher);
+    assertEquals("(A (FOO (B 1 2)))", updated.toString());
+    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
+    assertFalse(matcher.find());
+  }
+
+  public void testAuxiliaryTreeErrors() {
+    TsurgeonPattern tsurgeon;
+    try {
+      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR)) foo");
+      throw new RuntimeException("Should have failed for not having a foot");
+    } catch (TsurgeonParseException e) {
+      // yay
+    }
+
+    try {
+      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@) (BAZ@)) foo");
+      throw new RuntimeException("Should have failed for having two feet");
+    } catch (TsurgeonParseException e) {
+      // yay
+    }
+
+    try {
+      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO@ (BAR)) foo");
+      throw new RuntimeException("Non-leaves cannot be foot nodes");
+    } catch (TsurgeonParseException e) {
+      // yay
+    }
+  }
+
   public void testCreateSubtrees() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("createSubtree FOO left right");
 
