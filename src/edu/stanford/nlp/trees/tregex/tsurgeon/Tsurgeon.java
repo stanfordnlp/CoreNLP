@@ -227,17 +227,6 @@ public class Tsurgeon {
    *     an accidental clash of indices across things that are not meant to be coindexed.
    * </ul>
    *
-   * <p>
-   * In the context of <code>adjoin</code>, <code>adjoinH</code>, and
-   * <code>adjoinF</code>, an auxiliary tree is a tree in Penn
-   * Treebank format with <code>@</code> on exactly one of the leaves
-   * denoting the foot of the tree.  The operations which use the foot
-   * use the labeled node.  For example: <br>
-   * Tsurgeon: <code>adjoin (FOO (BAR@)) foo</code> <br>
-   * Tregex: <code>B=foo</code> <br>
-   * Input: <code>(A (B 1 2))</code>
-   * Output: <code>(A (FOO (BAR 1 2)))</code>
-   * </p><p>
    * Tsurgeon applies the same operation to the same tree for as long
    * as the given tregex operation matches.  This means that infinite
    * loops are very easy to cause.  One common situation this comes up
@@ -247,7 +236,7 @@ public class Tsurgeon {
    *
    * <blockquote>
    * <code>
-   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP"); <br>
+   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP");
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>
@@ -256,7 +245,7 @@ public class Tsurgeon {
    *
    * <blockquote>
    * <code>
-   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo"); <br>
+   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo");
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>

@@ -110,12 +110,15 @@ public class ConvertMatlabModel {
 
     Map<String, SimpleMatrix> wordVectors = Generics.newTreeMap();
 
-    for (int i = 0; i < lines.size() - 1; ++i) { // leave out UNK
+    for (int i = 0; i < lines.size() && i < combinedWV.numCols(); ++i) {
       String[] pieces = lines.get(i).split(" +");
       if (pieces.length == 0 || pieces.length > 1) {
         continue;
       }
       wordVectors.put(pieces[0], combinedWV.extractMatrix(0, numSlices, i, i+1));
+      if (pieces[0].equals("UNK")) {
+        wordVectors.put(SentimentModel.UNKNOWN_WORD, wordVectors.get("UNK"));
+      }
     }
 
     // If there is no ",", we first try to look for an HTML escaping,
@@ -143,7 +146,9 @@ public class ConvertMatlabModel {
       op.numClasses = 2;
     }
 
-    wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
+    if (!wordVectors.containsKey(SentimentModel.UNKNOWN_WORD)) {
+      wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
+    }
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);
     model.saveSerialized("matlab.ser.gz");

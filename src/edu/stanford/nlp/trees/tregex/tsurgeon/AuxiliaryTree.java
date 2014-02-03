@@ -25,7 +25,7 @@ class AuxiliaryTree {
     this.tree = tree;
     this.foot = findFootNode(tree);
     if (foot == null && mustHaveFoot) {
-      throw new TsurgeonParseException("Error -- no foot node found for " + originalTreeString);
+      throw new RuntimeException("Error -- no foot node found for " + originalTreeString);
     }
     namesToNodes = Generics.newHashMap();
     nodesToNames = new IdentityHashMap<Tree,String>();
@@ -138,7 +138,7 @@ class AuxiliaryTree {
       Tree thisFoundDtr = findFootNodeHelper(child);
       if (thisFoundDtr != null) {
         if (foundDtr != null) {
-          throw new TsurgeonParseException("Error -- two foot nodes in subtree" + t.toString());
+          throw new RuntimeException("Error -- two foot nodes in subtree" + t.toString());
         } else {
           foundDtr = thisFoundDtr;
         }
