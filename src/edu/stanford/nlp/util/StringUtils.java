@@ -1908,7 +1908,7 @@ public class StringUtils {
       String vrValue;
       //either in the props file
       if (props.containsKey(varName)) {
-        vrValue = (String) props.get(varName);
+        vrValue = ((String) props.get(varName));
       } else {
         //or as the environment variable
         vrValue = System.getenv(varName);
