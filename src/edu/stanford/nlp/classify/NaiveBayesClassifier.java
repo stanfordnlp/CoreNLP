@@ -165,5 +165,8 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
     }
   }
 
+  public Counter<L> probabilitiesOf(){
+    
+  }
 
 }
