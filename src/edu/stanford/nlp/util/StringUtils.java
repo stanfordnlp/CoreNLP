@@ -1909,6 +1909,7 @@ public class StringUtils {
       //either in the props file
       if (props.containsKey(varName)) {
         vrValue = ((String) props.get(varName));
+        vrValue = Matcher.quoteReplacement(vrValue);
       } else {
         //or as the environment variable
         vrValue = System.getenv(varName);
