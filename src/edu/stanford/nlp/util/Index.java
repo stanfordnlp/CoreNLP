@@ -7,9 +7,13 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * A collection that maps between a vocabulary of type E and a
- * continuous non-negative integer index series beginning (inclusively) at 0.
- * 
+ * Minimalist interface for implementations of Index.
+ *
+ * This interface should allow HashIndex and OAIndex to be used interchangeably
+ * in certain contexts.
+ *
+ * Originally extracted from util.Index on 3/13/2007.
+ *
  * @author Daniel Cer
  *
  * @param <E> The type of objects in the Index
