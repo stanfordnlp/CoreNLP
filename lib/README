@@ -326,16 +326,16 @@ LAST UPDATE: 2011-03-19
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-commons-lang-2.5.jar
-ORIGINAL JAR NAME: commons-lang-2.5.jar
-VERSION: 2.5
-RELEASE DATE: 2010-02-23
+commons-lang3-3.1.jar
+ORIGINAL JAR NAME: commons-lang3-3.1.jar
+VERSION: 
+RELEASE DATE: 11-14-2011
 SOURCE AVAILABLE: yes
-DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff
+DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff; changes from 2.5 - no escapeHtml function.
 URL: http://commons.apache.org/lang/
-USED BY: edu.stanford.nlp.kbp
-LAST UPDATE: 2010-07-15
-LAST UPDATE BY: John Bauer
+USED BY: edu.stanford.nlp.kbp and web servelets
+LAST UPDATE: 2013-06-05
+LAST UPDATE BY: Sonal Gupta
 
 -----------------------------------------------------------------------
 log4j-1.2.16.jar
