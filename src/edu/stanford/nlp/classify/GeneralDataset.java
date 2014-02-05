@@ -54,6 +54,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   public int[][] getDataArray() {
+    if (size == 0) {
+      return new int[0][]; // If we trim the data to size 0, we can never grow it again...
+    }
     data = trimToSize(data);
     return data;
   }
