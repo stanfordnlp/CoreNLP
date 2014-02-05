@@ -1813,6 +1813,7 @@ public class StringUtils {
    */
   public static Properties argsToPropertiesWithResolve(String[] args) {
     TreeMap<String, String> result = new TreeMap<String, String>();
+    Map<String, String> existingArgs = new TreeMap<String, String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -1820,13 +1821,29 @@ public class StringUtils {
           key = key.substring(2); // strip off 2 hyphens
         else
           key = key.substring(1); // strip off the hyphen
-        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-          result.putAll(propFileToTreeMap(args[i + 1]));
-          i++;
-        }
 
+        int max = 1;
+        int min = 0;
+        List<String> flagArgs = new ArrayList<String>();
+        // cdm oct 2007: add length check to allow for empty string argument!
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+          flagArgs.add(args[i + 1]);
+        }
+        if (flagArgs.isEmpty()) {
+          existingArgs.put(key, "true");
+        } else {
+          
+          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+            result.putAll(propFileToTreeMap(args[i + 1], existingArgs));
+            i++;
+            existingArgs.clear();
+          } else
+            existingArgs.put(key, join(flagArgs, " "));
+        }
       }
     }
+    result.putAll(existingArgs);
+    
     for (Entry<String, String> o : result.entrySet()) {
       String val = resolveVars(o.getValue(), result);
       result.put(o.getKey(), val);
@@ -1845,8 +1862,10 @@ public class StringUtils {
    * @return The corresponding TreeMap where the ordering is the same as in the
    *         props file
    */
-  public static TreeMap<String, String> propFileToTreeMap(String filename) {
+  public static TreeMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
+    
     TreeMap<String, String> result = new TreeMap<String, String>();
+    result.putAll(existingArgs);
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();
       if (l.isEmpty() || l.startsWith("#"))
