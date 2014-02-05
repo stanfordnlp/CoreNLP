@@ -2924,4 +2924,10 @@ public class Counters {
     }
     return fscores;
   }
+  
+  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
+    for(E key: counter.keySet()){
+      counter.setCount(key, func.apply(counter.getCount(key)));
+    }
+  }
 }
