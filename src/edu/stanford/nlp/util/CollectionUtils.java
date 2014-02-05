@@ -905,4 +905,20 @@ public class CollectionUtils {
     }
     return transformed;
   }
+  
+  /**
+   * get all values corresponding to the indices (if they exist in the map)
+   * @param map
+   * @param indices
+   * @return
+   */
+  public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices){
+    List<V> result = new ArrayList<V>();
+    for(T i: indices)
+      if(map.containsKey(i))
+        result.add(map.get(i));
+    return result;
+  }
+  
+  
 }
