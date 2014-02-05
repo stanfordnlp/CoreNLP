@@ -13,7 +13,7 @@ import org.junit.Test;
  *
  */
 
-public class EmbeddingTest {
+public class EmbeddingITest {
   public static final String wordVectorFile = "edu/stanford/nlp/neural/wordVector.txt";
   public static final String wordFile = "edu/stanford/nlp/neural/word.txt";
   public static final String vectorFile = "edu/stanford/nlp/neural/vector.txt";
