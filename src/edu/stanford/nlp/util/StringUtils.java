@@ -1949,6 +1949,7 @@ public class StringUtils {
         } else {
 
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+            System.out.println("key is " + key + " and arguments are " + flagArgs);
             for(String flagArg: flagArgs)
               result.putAll(propFileToTreeMap(flagArg, existingArgs));
             i++;
