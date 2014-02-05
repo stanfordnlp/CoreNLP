@@ -51,6 +51,37 @@ public class MultiCoreMapNodePattern extends MultiNodePattern<CoreMap> {
     return matched;
   }
 
+  public static class StringSequenceAnnotationPattern extends MultiNodePattern<CoreMap> {
+    Class textKey;
+    PhraseTable phraseTable;
+
+    public StringSequenceAnnotationPattern(Class textKey, Set<List<String>> targets, boolean ignoreCase) {
+      this.textKey = textKey;
+      phraseTable = new PhraseTable(false, ignoreCase, false);
+      for (List<String> target:targets) {
+        phraseTable.addPhrase(target);
+        if (maxNodes < 0 || target.size() > maxNodes) maxNodes = target.size();
+      }
+    }
+
+    public StringSequenceAnnotationPattern(Class textKey, Set<List<String>> targets) {
+      this(textKey, targets, false);
+    }
+
+    protected Collection<Interval<Integer>> match(List<? extends CoreMap> nodes, int start) {
+      PhraseTable.WordList words = new PhraseTable.TokenList(nodes, textKey);
+      List<PhraseTable.PhraseMatch> matches = phraseTable.findMatches(words, start, nodes.size(), false);
+      Collection<Interval<Integer>> intervals = new ArrayList<Interval<Integer>>(matches.size());
+      for (PhraseTable.PhraseMatch match:matches) {
+        intervals.add(match.getInterval());
+      }
+      return intervals;
+    }
+
+    public String toString() {
+      return ":" + phraseTable;
+    }
+  }
 
 
 }

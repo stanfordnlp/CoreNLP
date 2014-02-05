@@ -179,6 +179,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     return document;
   }
   */
+
   private static Annotation toAnnotation(String xml) throws IOException {
     Element docElem;
     try {
