@@ -921,5 +921,19 @@ public class CollectionUtils {
     return result;
   }
   
-  
+  public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
+   T max = null;;
+   int i = 0;
+   int maxindex = -1;
+   for(T t: list)
+   {
+     if(max == null || t.compareTo(max) > 0)
+     {
+       max = t;
+       maxindex = i;
+     }
+     i++;
+   }
+   return maxindex;
+  }
 }
