@@ -1192,6 +1192,9 @@ public class Counters {
     return result;
   }
 
+  /**
+   * increments every key in the counter by value
+   */
   public static <E> Counter<E> add(Counter<E> c1, double value) {
     Counter<E> result = c1.getFactory().create();
     for (E key : c1.keySet()) {
