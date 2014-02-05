@@ -1909,16 +1909,13 @@ public class StringUtils {
       //either in the props file
       if (props.containsKey(varName)) {
         vrValue = ((String) props.get(varName));
-        vrValue = Matcher.quoteReplacement(vrValue);
       } else {
         //or as the environment variable
         vrValue = System.getenv(varName);
       }
-      System.out.println(varName+":"+ sb + " and " + vrValue);
       m.appendReplacement(sb, null == vrValue ? "" : vrValue);
     }
     m.appendTail(sb);
-    System.out.println("replacing " + str + " with " + sb.toString());
     return sb.toString();
   }
 
@@ -1955,7 +1952,7 @@ public class StringUtils {
 
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
             for(String flagArg: flagArgs)
-              result.putAll(propFileToTreeMap(flagArg, existingArgs));
+              result.putAll(propFileToLinkedHashMap(flagArg, existingArgs));
             
             existingArgs.clear();
           } else
@@ -1976,14 +1973,14 @@ public class StringUtils {
 
   /**
    * This method reads in properties listed in a file in the format prop=value,
-   * one property per line. and reads them into a TreeMap (order preserving)
+   * one property per line. and reads them into a LinkedHashMap (insertion order preserving)
    * Flags not having any arguments is set to "true".
    *
    * @param filename A properties file to read
-   * @return The corresponding TreeMap where the ordering is the same as in the
+   * @return The corresponding LinkedHashMap where the ordering is the same as in the
    *         props file
    */
-  public static LinkedHashMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
+  public static LinkedHashMap<String, String> propFileToLinkedHashMap(String filename, Map<String, String> existingArgs) {
 
     LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
     result.putAll(existingArgs);
