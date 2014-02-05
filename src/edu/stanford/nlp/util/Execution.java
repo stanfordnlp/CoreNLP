@@ -180,6 +180,7 @@ public class Execution {
         f.setAccessible(true);
       }
       //--Set Value
+      System.out.println(value + " and " + f.getGenericType());
       Object objVal = MetaClass.cast(value, f.getGenericType());
       if (objVal != null) {
         if (objVal.getClass().isArray()) {
@@ -407,7 +408,6 @@ public class Execution {
       // (fill the field)
       if (target != null) {
         // (case: declared option)
-        System.out.println(target + ":" + value);
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
