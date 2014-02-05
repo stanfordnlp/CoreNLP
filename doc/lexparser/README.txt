@@ -1,21 +1,24 @@
-Stanford Lexicalized Parser v2.0.5 - 2013-04-05
+Stanford Lexicalized Parser v3.2.0 - 2013-06-19
 -----------------------------------------------
 
 Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
 University. All Rights Reserved.
 
-Original core parser code by Dan Klein.  Support code, additional modules,
-languages, features, internationalization, compaction, typed dependencies,
-etc. by Christopher Manning, Roger Levy, Teg Grenager, Galen Andrew,
-Marie-Catherine de Marneffe, Jenny Finkel, Spence Green, Bill MacCartney, Anna
-Rafferty, Huihsin Tseng, Pi-Chuan Chang, Wolfgang Maier, and Richard Eckart.
+Original core parser code by Dan Klein.  Support code, additional
+modules, languages, features, internationalization, compaction, typed
+dependencies, etc. by Christopher Manning, Roger Levy, Teg Grenager,
+Galen Andrew, Marie-Catherine de Marneffe, Jenny Finkel, Spence Green,
+Bill MacCartney, Anna Rafferty, Huihsin Tseng, Pi-Chuan Chang,
+Wolfgang Maier, Richard Eckart, Richard Socher, and John Bauer.
 
 This release prepared by John Bauer.
 
-This package contains 3 parsers: a high-accuracy unlexicalized PCFG, a
-lexicalized dependency parser, and a factored model, where the estimates
-of dependencies and an unlexicalized PCFG are jointly optimized to give a
-lexicalized PCFG treebank parser.  Also included are grammars for various
+This package contains 4 parsers: a high-accuracy unlexicalized PCFG; a
+lexicalized dependency parser; a factored model, where the estimates
+of dependencies and an unlexicalized PCFG are jointly optimized to
+give a lexicalized PCFG treebank parser; and an RNN parser, where
+recursive neural networks trained with semantic word vectors are used
+to score parse trees.  Also included are grammars for various
 languages for use with these parsers.
 
 For more information about the parser API, point a web browser at the
@@ -29,8 +32,8 @@ Secondly, you should also look at the Parser FAQ on the web:
 
     http://nlp.stanford.edu/software/parser-faq.shtml
 
-This software requires Java 5 (JDK 1.5.0+).  (You must have installed it
-separately. Check that the command "java -version" works and gives 1.5+.)
+This software requires Java 6 (JDK 1.6.0+).  (You must have installed it
+separately. Check that the command "java -version" works and gives 1.6+.)
 
 
 QUICKSTART
@@ -206,6 +209,10 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
+
+2013-06-19    3.2.0     New RNN model for WSJ and English with 
+                        improved test set accuracy, rel dependency 
+                        removed 
 
 2013-04-05    2.0.5     Dependency improvements, ctb7 model, -nthreads 
                         option 
