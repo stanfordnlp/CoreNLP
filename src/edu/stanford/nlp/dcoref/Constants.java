@@ -4,6 +4,8 @@ import java.util.logging.Logger;
 
 public class Constants {
 
+  protected Constants() {} // static class but extended by jcoref
+
   /** if true, use truecase annotator */
   public static final boolean USE_TRUECASE = false;
 
@@ -60,10 +62,10 @@ public class Constants {
 
   /** Use animacy list (Bergsma and Lin, 2006; Ji and Lin, 2009) */
   public static final boolean USE_ANIMACY_LIST = true;
-  
+
   /** Share attributes between coreferent mentions **/
   public static final boolean SHARE_ATTRIBUTES = true;
-    
+
   public static final String STATES_PROP = "dcoref.states";
   public static final String DEMONYM_PROP = "dcoref.demonym";
   public static final String ANIMATE_PROP = "dcoref.animate";
@@ -145,4 +147,5 @@ public class Constants {
     else logger.info("REMOVE_APPOSITION_PREDICATENOMINATIVES off");
     logger.info("=================================================================");
   }
+
 }

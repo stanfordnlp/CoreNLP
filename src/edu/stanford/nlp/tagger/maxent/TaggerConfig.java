@@ -70,7 +70,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
 
   public static final String ENCODING_PROPERTY = "encoding",
   TAG_SEPARATOR_PROPERTY = "tagSeparator";
-  
+
 
   private static final Map<String, String> defaultValues = Generics.newHashMap();
   static {
@@ -197,8 +197,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
 
     this.setProperty("search", props.getProperty("search", this.getProperty("search")).trim().toLowerCase());
     String srch = this.getProperty("search");
-    if ( ! (srch.equals("cg") || srch.equals("iis") || srch.equals("owlqn") || srch.equals("qn"))) {
-      throw new RuntimeException("'search' must be one of 'iis', 'cg', 'qn' or 'owlqn': " + srch);
+    if ( ! (srch.equals("cg") || srch.equals("iis") || srch.equals("owlqn") || srch.equals("qn") || srch.equals("owlqn2"))) {
+      throw new RuntimeException("'search' must be one of 'iis', 'cg', 'qn' or 'owlqn' or 'owlqn2': " + srch);
     }
 
     this.setProperty("sigmaSquared", props.getProperty("sigmaSquared", this.getProperty("sigmaSquared")));

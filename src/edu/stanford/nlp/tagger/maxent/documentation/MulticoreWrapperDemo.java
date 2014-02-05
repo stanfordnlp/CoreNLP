@@ -64,8 +64,6 @@ public class MulticoreWrapperDemo {
 
     } catch (IOException e) {
       e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
     }
   }
 

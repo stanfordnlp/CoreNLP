@@ -222,6 +222,7 @@ public class EntityMention extends ExtractionObject {
 
     return sb.toString();
   }
+
   
   @Override
   public String toString() {

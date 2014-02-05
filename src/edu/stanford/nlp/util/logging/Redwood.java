@@ -445,6 +445,11 @@ public class Redwood {
     }
   }
 
+  /**
+   * The Redwood equivalent to printf().
+   * @param format The format string, as per java's Formatter.format() object.
+   * @param args The arguments to format.
+   */
   public static void logf(String format, Object... args){ log(new Formatter().format(format, args)); }
 
   /**
@@ -1320,6 +1325,13 @@ public class Redwood {
      * @param numThreads The number of threads to run on
      */
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
+      // (short circuit if single thread)
+      if (numThreads == 1) {
+        startTrack( "Threads (" + title + ")" );
+        for (Runnable toRun : runnables) { toRun.run(); }
+        endTrack( "Threads (" + title + ")" );
+        return;
+      }
       //(create executor)
       ExecutorService exec = Executors.newFixedThreadPool(numThreads);
       //(add threads)

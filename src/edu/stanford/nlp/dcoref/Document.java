@@ -30,7 +30,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,7 @@ public class Document implements Serializable {
 
   private static final long serialVersionUID = -4139866807494603953L;
 
-  public enum DocType { CONVERSATION, ARTICLE };
+  public enum DocType { CONVERSATION, ARTICLE }
 
   /** The type of document: conversational or article */
   public DocType docType;
@@ -149,6 +148,7 @@ public class Document implements Serializable {
     processDiscourse(dict);
     printMentionDetection();
   }
+
   /** Process discourse information */
   protected void processDiscourse(Dictionaries dict) {
     docType = findDocType(dict);
@@ -158,10 +158,9 @@ public class Document implements Serializable {
     // find 'speaker mention' for each mention
     for(Mention m : allPredictedMentions.values()) {
       int utter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
-      int speakerMentionID;
       try{
-        speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
-        if(utter!=0) {
+        int speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
+        if (utter != 0) {
           speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
           speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
         }
@@ -176,6 +175,7 @@ public class Document implements Serializable {
       }
     }
   }
+
   /** Document initialize */
   protected void initialize() {
     if(goldOrderedMentionsBySentence==null) assignOriginalID();
@@ -284,7 +284,7 @@ public class Document implements Serializable {
       }
 
       List<Mention> remains = new ArrayList<Mention>();
-      for(Mention p : predicts) {
+      for (Mention p : predicts) {
         IntPair pos = new IntPair(p.startIndex, p.endIndex);
         if(goldMentionPositions.containsKey(pos)) {
           Mention g = goldMentionPositions.get(pos);
@@ -292,19 +292,19 @@ public class Document implements Serializable {
           p.twinless = false;
           g.twinless = false;
           goldMentionHeadPositions.get(g.headIndex).remove(g);
-          if(goldMentionHeadPositions.get(g.headIndex).size()==0) {
+          if(goldMentionHeadPositions.get(g.headIndex).isEmpty()) {
             goldMentionHeadPositions.remove(g.headIndex);
           }
         }
         else remains.add(p);
       }
-      for(Mention r : remains){
+      for (Mention r : remains){
         if(goldMentionHeadPositions.containsKey(r.headIndex)) {
           Mention g = goldMentionHeadPositions.get(r.headIndex).poll();
           r.mentionID = g.mentionID;
           r.twinless = false;
           g.twinless = false;
-          if(goldMentionHeadPositions.get(g.headIndex).size()==0) {
+          if(goldMentionHeadPositions.get(g.headIndex).isEmpty()) {
             goldMentionHeadPositions.remove(g.headIndex);
           }
         }
@@ -378,7 +378,7 @@ public class Document implements Serializable {
     }
   }
 
-  /** Extract gold coref cluster information */
+  /** Extract gold coref cluster information. */
   public void extractGoldCorefClusters(){
     goldCorefClusters = Generics.newHashMap();
     for (List<Mention> mentions : goldOrderedMentionsBySentence) {
@@ -389,10 +389,9 @@ public class Document implements Serializable {
         }
         CorefCluster c = goldCorefClusters.get(id);
         if (c == null) {
-          goldCorefClusters.put(id, new CorefCluster());
+          c = new CorefCluster(id);
+          goldCorefClusters.put(id, c);
         }
-        c = goldCorefClusters.get(id);
-        c.clusterID = id;
         c.corefMentions.add(m);
       }
     }
@@ -575,14 +574,14 @@ public class Document implements Serializable {
     if(beginQuotation.second() <= 1 && beginQuotation.first() > 0) {
       if(findSpeaker(utterNum, beginQuotation.first()-1, sentences, 0,
           sentences.get(beginQuotation.first()-1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
-        return ;
+        return;
     }
 
     if(endQuotation.second() == sentences.get(endQuotation.first()).size()-1
         && sentences.size() > endQuotation.first()+1) {
       if(findSpeaker(utterNum, endQuotation.first()+1, sentences, 0,
           sentences.get(endQuotation.first()+1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
-        return ;
+        return;
     }
   }
 
@@ -745,4 +744,5 @@ public class Document implements Serializable {
     SieveCoreferenceSystem.logger.fine("# of found gold mentions: "+foundGoldCount + " / # of gold mentions: "+allGoldMentions.size());
     SieveCoreferenceSystem.logger.fine("gold mentions == ");
   }
+
 }

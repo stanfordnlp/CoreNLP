@@ -45,8 +45,8 @@ public class ChineseUtils {
   public static final int DELETE_EXCEPT_BETWEEN_ASCII = 4;
   public static final int MAX_LEGAL = 4;
 
-  private int[] puaChars = { 0xE005 };
-  private int[] uniChars = { 0x42B5 };
+  // private int[] puaChars = { 0xE005 };
+  // private int[] uniChars = { 0x42B5 };
 
 
   // not instantiable
@@ -199,7 +199,7 @@ public class ChineseUtils {
         Character.UnicodeBlock cub = Character.UnicodeBlock.of(cp);
         if (cub == Character.UnicodeBlock.PRIVATE_USE_AREA ||
                 cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A ||
-                cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_A) {
+                cub == Character.UnicodeBlock.SUPPLEMENTARY_PRIVATE_USE_AREA_B) {
           EncodingPrintWriter.err.println("ChineseUtils.normalize warning: private use area codepoint U+" + Integer.toHexString(cp) + " in " + in);
         }
         delete = false;
@@ -340,20 +340,20 @@ public class ChineseUtils {
   private static final Pattern periodChars = Pattern.compile("[\ufe52\u2027\uff0e.\u70B9]+");
 
   // two punctuation classes for Low and Ng style features.
-  private final static Pattern separatingPuncChars = Pattern.compile("[]!\"(),;:<=>?\\[\\\\`{|}~^\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030" +
+  private static final Pattern separatingPuncChars = Pattern.compile("[]!\"(),;:<=>?\\[\\\\`{|}~^\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030" +
         "\uff3d\uff01\uff02\uff08\uff09\uff0c\uff1b\uff1a\uff1c\uff1d\uff1e\uff1f" +
         "\uff3b\uff3c\uff40\uff5b\uff5c\uff5d\uff5e\uff3e]+");
-  private final static Pattern ambiguousPuncChars = Pattern.compile("[-#$%&'*+/@_\uff0d\uff03\uff04\uff05\uff06\uff07\uff0a\uff0b\uff0f\uff20\uff3f]+");
-  private final static Pattern midDotPattern = Pattern.compile(ChineseUtils.MID_DOT_REGEX_STR + "+");
+  private static final Pattern ambiguousPuncChars = Pattern.compile("[-#$%&'*+/@_\uff0d\uff03\uff04\uff05\uff06\uff07\uff0a\uff0b\uff0f\uff20\uff3f]+");
+  private static final Pattern midDotPattern = Pattern.compile(ChineseUtils.MID_DOT_REGEX_STR + "+");
 
 
-  public static String shapeOf(String input, 
+  public static String shapeOf(CharSequence input,
                                boolean augmentedDateChars,
                                boolean useMidDotShape) {
     String shape;
     if (augmentedDateChars && dateCharsPlus.matcher(input).matches()) {
       shape = "D";
-    } else if (input.equals('第')) {
+    } else if (input.charAt(0) == '第') {
       return "o"; // detect those Chinese ordinals!
     } else if (dateChars.matcher(input).matches()) {
       shape = "D";
@@ -373,7 +373,7 @@ public class ChineseUtils {
       shape = "C";
     }
     return shape;
-    
+
   }
 
 }

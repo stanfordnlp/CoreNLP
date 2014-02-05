@@ -15,8 +15,8 @@ import edu.stanford.nlp.trees.Span;
 import edu.stanford.nlp.util.Generics;
 
 public class AceToken {
-  /** 
-   * The actual token bytes 
+  /**
+   * The actual token bytes
    * Normally we work with mWord (see below), but mLiteral is needed when
    *   we need to check if a sequence of tokens exists in a gazetteer
    */
@@ -54,16 +54,16 @@ public class AceToken {
   private String mMassiWnss;
 
   /** Dictionary for all words in the corpus */
-  public static StringDictionary WORDS;
+  public static final StringDictionary WORDS;
 
   /** Dictionary for all lemmas in the corpus */
-  public static StringDictionary LEMMAS;
+  public static final StringDictionary LEMMAS;
 
   /** Dictionary for all other strings in the corpus */
-  public static StringDictionary OTHERS;
+  public static final StringDictionary OTHERS;
 
   /** Map of all proximity classes */
-  public static Map<Integer, ArrayList<Integer>> PROX_CLASSES = null;
+  public static final Map<Integer, ArrayList<Integer>> PROX_CLASSES;
   /** How many elements per proximity class */
   private static final int PROXIMITY_CLASS_SIZE = 5;
 
@@ -299,7 +299,7 @@ public class AceToken {
   public static final int CASE_ALLDIGITS = 5;
   public static final int CASE_ALLDIGITSORDOTS = 6;
 
-  private int detectCase(String word) {
+  private static int detectCase(String word) {
 
     //
     // is the word all caps? (e.g. IBM)
@@ -482,13 +482,13 @@ public class AceToken {
   /** Pretty display */
   public String display() {
     if (mByteOffset != null) {
-      return new String("['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + ", " + mByteOffset.start() + ", "
-          + mByteOffset.end() + "]");
+      return "['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + ", " + mByteOffset.start() + ", "
+          + mByteOffset.end() + "]";
     }
 
-    return new String("['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + "]");
+    return "['" + WORDS.get(mWord) + "', " + OTHERS.get(mPos) + "]";
   }
-  
+
   public String toString() {
     return display();
   }

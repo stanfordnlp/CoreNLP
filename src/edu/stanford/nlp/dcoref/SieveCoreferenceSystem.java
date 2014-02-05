@@ -113,7 +113,7 @@ public class SieveCoreferenceSystem {
    * automatically set by looking at sieves
    */
   private final boolean useSemantics;
-  
+
   /**
    * Singleton predictor from Recasens, de Marneffe, and Potts (NAACL 2013)
    */
@@ -153,7 +153,7 @@ public class SieveCoreferenceSystem {
    * Semantic knowledge: WordNet
    */
   public final Semantics semantics;
-  
+
   public LogisticClassifier<String, String> singletonPredictor;
 
   /** Current sieve index */
@@ -203,7 +203,7 @@ public class SieveCoreferenceSystem {
     // setting singleton predictor
     //
     useSingletonPredictor = Boolean.parseBoolean(props.getProperty(Constants.SINGLETON_PROP, "true"));
-    
+
     //
     // setting maximum sentence distance between two mentions for resolution (-1: no constraint on distance)
     //
@@ -217,7 +217,7 @@ public class SieveCoreferenceSystem {
     // flag for replicating CoNLL result
     replicateCoNLL = Boolean.parseBoolean(props.getProperty(Constants.REPLICATECONLL_PROP, "false"));
     conllMentionEvalScript = props.getProperty(Constants.CONLL_SCORER, Constants.conllMentionEvalScript);
-   
+
     // flag for optimizing sieve ordering
     optimizeSieves = Boolean.parseBoolean(props.getProperty(Constants.OPTIMIZE_SIEVES_PROP, "false"));
     optimizeScoreType = props.getProperty(Constants.OPTIMIZE_SIEVES_SCORE_PROP, "pairwise.Precision");
@@ -225,12 +225,13 @@ public class SieveCoreferenceSystem {
     // Break down of the optimize score type
     String[] validMetricTypes = { "muc", "pairwise", "bcub", "ceafe", "ceafm", "combined" };
     String[] parts = optimizeScoreType.split("\\.");
-    optimizeConllScore = (parts.length > 2 && "conll".equalsIgnoreCase(parts[2]))? true:false;
+    optimizeConllScore = parts.length > 2 && "conll".equalsIgnoreCase(parts[2]);
     optimizeMetricType = parts[0];
     boolean optimizeMetricTypeOk = false;
-    for (int i = 0; i < validMetricTypes.length; i++) {
-      if (validMetricTypes[i].equalsIgnoreCase(optimizeMetricType)) {
+    for (String validMetricType : validMetricTypes) {
+      if (validMetricType.equalsIgnoreCase(optimizeMetricType)) {
         optimizeMetricTypeOk = true;
+        break;
       }
     }
     if (!optimizeMetricTypeOk) {
@@ -277,7 +278,7 @@ public class SieveCoreferenceSystem {
     //
     dictionaries = new Dictionaries(props);
     semantics = (useSemantics)? new Semantics(dictionaries) : null;
-        
+
     if(useSingletonPredictor){
       singletonPredictor = getSingletonPredictorFromSerializedFile(DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL);
     }
@@ -368,13 +369,13 @@ public class SieveCoreferenceSystem {
     // MentionExtractor extracts MUC, ACE, or CoNLL documents
     MentionExtractor mentionExtractor = null;
     if(props.containsKey(Constants.MUC_PROP)){
-      mentionExtractor = new MUCMentionExtractor(corefSystem.dictionaries, props, 
+      mentionExtractor = new MUCMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
     } else if(props.containsKey(Constants.ACE2004_PROP) || props.containsKey(Constants.ACE2005_PROP)) {
-      mentionExtractor = new ACEMentionExtractor(corefSystem.dictionaries, props, 
+      mentionExtractor = new ACEMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
     } else if (props.containsKey(Constants.CONLL2011_PROP)) {
-      mentionExtractor = new CoNLLMentionExtractor(corefSystem.dictionaries, props, 
+      mentionExtractor = new CoNLLMentionExtractor(corefSystem.dictionaries, props,
           corefSystem.semantics, corefSystem.singletonPredictor);
     }
     if(mentionExtractor == null){
@@ -452,7 +453,7 @@ public class SieveCoreferenceSystem {
       writerPredicted = new PrintWriter(new FileOutputStream(conllOutputMentionPredictedFile));
       writerPredictedCoref = new PrintWriter(new FileOutputStream(conllOutputMentionCorefPredictedFile));
     }
-    
+
     mentionExtractor.resetDocs();
     if (corefSystem.doScore()) {
       corefSystem.initScorers();
@@ -650,6 +651,7 @@ public class SieveCoreferenceSystem {
     logger.info("=============SIEVE OPTIMIZATION START ====================");
     logger.info("Optimize sieves using score: " + optimizeScoreType);
     FileFilter scoreFilesFilter = new FileFilter() {
+      @Override
       public boolean accept(File file) {
         return file.getAbsolutePath().endsWith(".score");
       }
@@ -705,7 +707,7 @@ public class SieveCoreferenceSystem {
           }
         }
       }
-      if (selectableSieveIndices.size() == 0) {
+      if (selectableSieveIndices.isEmpty()) {
         throw new RuntimeException("Unable to find sieve ordering to satisfy all ordering constraints!!!!");
       }
 
@@ -775,7 +777,7 @@ public class SieveCoreferenceSystem {
             logger.info(" Trying sieves score: " + score);
           }
         }
-        // Select bestscore
+        // Select bestScore
         double bestScore = -1;
         for (Pair<Double,Integer> p:scores) {
           if (selected < 0 || p.first() > bestScore) {
@@ -845,7 +847,7 @@ public class SieveCoreferenceSystem {
   private void coreference(
       Document document,
       DeterministicCorefSieve sieve) throws Exception {
-    
+
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     Map<Integer, CorefCluster> corefClusters = document.corefClusters;
     Set<Mention> roleSet = document.roleSet;
@@ -858,7 +860,7 @@ public class SieveCoreferenceSystem {
 
     additionalCorrectLinksCount = 0;
     additionalLinksCount = 0;
-    
+
     for (int sentI = 0; sentI < orderedMentionsBySentence.size(); sentI++) {
       List<Mention> orderedMentions = orderedMentionsBySentence.get(sentI);
 
@@ -895,7 +897,7 @@ public class SieveCoreferenceSystem {
               // Skip singletons according to the singleton predictor
               // (only for non-NE mentions)
               // Recasens, de Marneffe, and Potts (NAACL 2013)
-              if(m1.isSingleton && m2.isSingleton) continue;
+              if (m1.isSingleton && m2.isSingleton) continue;
 
               if (m1.corefClusterID == m2.corefClusterID) continue;
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
@@ -979,17 +981,18 @@ public class SieveCoreferenceSystem {
         removeClusterSet.add(c.clusterID);
       }
     }
-    for(int removeId : removeClusterSet){
+    for (int removeId : removeClusterSet){
       document.corefClusters.remove(removeId);
     }
+    // todo [cdm 2013]: This is buggy: positions is Map<Mention,IntTuple>, so can't remove IntTuple
     for(IntTuple pos : removeSet){
       document.positions.remove(pos);
     }
   }
-  
+
   public static LogisticClassifier<String, String> getSingletonPredictorFromSerializedFile(String serializedFile) {
     try {
-      ObjectInputStream ois = IOUtils.readStreamFromString(serializedFile);     
+      ObjectInputStream ois = IOUtils.readStreamFromString(serializedFile);
       Object o = ois.readObject();
       if (o instanceof LogisticClassifier<?, ?>) {
         return (LogisticClassifier<String, String>) o;
@@ -1001,7 +1004,7 @@ public class SieveCoreferenceSystem {
       throw new RuntimeException(e);
     }
   }
-  
+
   /** Remove singleton clusters */
   public static List<List<Mention>> filterMentionsWithSingletonClusters(Document document, List<List<Mention>> mentions)
   {
@@ -1059,12 +1062,10 @@ public class SieveCoreferenceSystem {
 
     logger.fine("=======ERROR ANALYSIS=========================================================");
 
-    boolean correct;
-    boolean chosen;
-    for(int i = 0 ; i < orderedMentionsBySentence.size(); i++){
-      for(int j =0 ; j < orderedMentionsBySentence.get(i).size(); j++){
-        Mention m = orderedMentionsBySentence.get(i).get(j);
-        List<Mention> orderedMentions = orderedMentionsBySentence.get(i);
+    for (int i = 0 ; i < orderedMentionsBySentence.size(); i++) {
+      List<Mention> orderedMentions = orderedMentionsBySentence.get(i);
+      for (int j = 0 ; j < orderedMentions.size(); j++) {
+        Mention m = orderedMentions.get(j);
         logger.fine("=========Line: "+i+"\tmention: "+j+"=======================================================");
         logger.fine(m.spanToString()+"\tmentionID: "+m.mentionID+"\tcorefClusterID: "+m.corefClusterID+"\tgoldCorefClusterID: "+m.goldCorefClusterID);
         CorefCluster corefCluster = corefClusters.get(m.corefClusterID);
@@ -1101,7 +1102,7 @@ public class SieveCoreferenceSystem {
           }
 
           for (Mention antecedent : l) {
-            chosen=(m.corefClusterID==antecedent.corefClusterID);
+            boolean chosen = (m.corefClusterID == antecedent.corefClusterID);
             IntTuple src = new IntTuple(2);
             src.set(0,i);
             src.set(1,j);
@@ -1111,7 +1112,7 @@ public class SieveCoreferenceSystem {
             boolean coreferent = golds.containsKey(m.mentionID)
             && golds.containsKey(antecedent.mentionID)
             && (golds.get(m.mentionID).goldCorefClusterID == golds.get(antecedent.mentionID).goldCorefClusterID);
-            correct=(chosen==coreferent);
+            boolean correct = (chosen == coreferent);
 
             String chosenness = chosen ? "Chosen" : "Not Chosen";
             String correctness = correct ? "Correct" : "Incorrect";
@@ -1187,11 +1188,12 @@ public class SieveCoreferenceSystem {
   }
 
   protected static void printList(Logger logger, String... args)  {
-    String p = "";
+    StringBuilder sb = new StringBuilder();
     for (String arg : args) {
-      p += arg + "\t";
+      sb.append(arg);
+      sb.append('\t');
     }
-    logger.fine(p);
+    logger.fine(sb.toString());
   }
 
   /** print a coref link information including context and parse tree */
@@ -1687,11 +1689,10 @@ public class SieveCoreferenceSystem {
   {
     List<List<Mention>> mentions = document.getOrderedMentions();
     boolean clustersOk = true;
-    for(int i = 0; i < mentions.size(); i ++){
-      for(int j = 0; j < mentions.get(i).size(); j ++){
-        Mention m = mentions.get(i).get(j);
+    for (List<Mention> mentionCluster : mentions) {
+      for (Mention m : mentionCluster) {
         String ms = "(" + m.mentionID + "," + m.originalRef + "," + m.corefClusterID
-                + ",[" + m.startIndex + "," + m.endIndex +"]" + ") ";
+                + ",[" + m.startIndex + "," + m.endIndex + "]" + ") ";
         CorefCluster cluster = document.corefClusters.get(m.corefClusterID);
         if (cluster == null) {
           logger.warning(tag + ": Cluster not found for mention: " + ms);

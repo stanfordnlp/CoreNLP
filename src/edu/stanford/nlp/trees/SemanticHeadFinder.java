@@ -55,8 +55,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
   /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc. */
   private static final String[] auxiliaries = {"will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "has", "have", "had", "having", "get", "gets", "getting", "got", "gotten", "do", "does", "did", "to", "'ve", "ve", "'d", "d", "'ll", "ll", "na" };
-  private static final String[] beGetVerbs = {"be", "being", "been", "am", "are", "is", "was", "were", "'m", "'re", "'s", "s", "get", "getting", "gets", "got"};
-  private static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "is", "was", "were", "'m", "'re", "'s", "s", "seem", "seems", "seemed", "appear", "appears", "appeared", "stay", "stays", "stayed", "remain", "remains", "remained", "resemble", "resembles", "resembled", "become", "becomes", "became"};
+  private static final String[] beGetVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "'re", "'s", "s", "get", "getting", "gets", "got"};
+  private static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "'re", "'s", "s", "seem", "seems", "seemed", "appear", "appears", "appeared", "stay", "stays", "stayed", "remain", "remains", "remained", "resemble", "resembles", "resembled", "become", "becomes", "became"};
 
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
 
@@ -138,11 +138,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
     nonTerminalInfo.put("CONJP", new String[][]{{"right", "VB", "JJ", "RB", "IN", "CC"}});
 
-    // FRAG: crap rule needs to be change if you want to parse glosses
+    // FRAG: crap rule needs to be change if you want to parse glosses; but it is correct to have ADJP and ADVP before S because of weird parses of reduced sentences.
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
-
-    // PP first word (especially in coordination of PPs)
-    nonTerminalInfo.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ"}, {"left", "PP"}});
 
     // PRN: sentence first
     nonTerminalInfo.put("PRN", new String[][]{{"left", "VP", "SQ", "S", "SINV", "SBAR", "NP", "ADJP", "PP", "ADVP", "INTJ", "WHNP", "NAC", "VBP", "JJ", "NN", "NNP"}});
@@ -165,7 +162,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
       if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
         int newHeadIdx = headIdx - 2;
-        while (newHeadIdx >= 0 && daughterTrees[newHeadIdx].isPreTerminal() && tlp.isPunctuationTag(daughterTrees[newHeadIdx].value())) {
+        // Don't allow INTJ - important in informal genres "Oh and don't forget to call!"
+        while (newHeadIdx >= 0 && (daughterTrees[newHeadIdx].isPreTerminal() && tlp.isPunctuationTag(daughterTrees[newHeadIdx].value()) ||
+                                   "INTJ".equals(daughterTrees[newHeadIdx].value()))) {
           newHeadIdx--;
         }
         while (newHeadIdx >= 2 && tlp.isPunctuationTag(daughterTrees[newHeadIdx - 1].value())) {
