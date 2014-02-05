@@ -1956,7 +1956,7 @@ public class StringUtils {
             System.out.println("key is " + key + " and arguments are " + flagArgs);
             for(String flagArg: flagArgs)
               result.putAll(propFileToTreeMap(flagArg, existingArgs));
-            i++;
+            
             existingArgs.clear();
           } else
             existingArgs.put(key, join(flagArgs, " "));
