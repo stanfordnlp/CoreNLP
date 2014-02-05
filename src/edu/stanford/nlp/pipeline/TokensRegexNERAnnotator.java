@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 
 
 /**
- * <p>
  * TokensRegexNERAnnotator labels tokens with types based on a simple manual mapping from
  * regular expressions to the types of the entities they are meant to describe.
  * The user provides a file formatted as follows:
@@ -32,31 +31,22 @@ import java.util.regex.Pattern;
  * NER system to label entities that don't fall into the usual NER categories. It only records the label
  * if the token has not already been NER-annotated, or it has been annotated but the NER-type has been
  * designated overwritable (the third argument).
- * </p>
  *
- * <p>
  * The first column regex may follow one of two formats:
- * <ol>
- * <li> A TokensRegex expression (marked by starting with "( " and ending with " )" </li>
- * <li> a sequence of regex, each separated by whitespace (matching "\\s+").
- *    <br/>
+ * 1) A TokensRegex expression (marked by starting with "( " and ending with " )"
+ * 2) a sequence of regex, each separated by whitespace (matching "\\s+").
  *    The regex will match if the successive regex match a sequence of tokens in the input.
  *    Spaces can only be used to separate regular expression tokens; within tokens \\s or similar non-space
  *    representations need to be used instead.
- *    <br/>
  *    Notes: Following Java regex conventions, some characters in the file need to be escaped. Only a single
  *    backslash should be used though, as these are not String literals. The input to RegexNER will have
  *    already been tokenized.  So, for example, with our usual English tokenization, things like genitives
- *    and commas at the end of words will be separated in the input and matched as a separate token.</li>
- * </ol>
- * </p>
+ *    and commas at the end of words will be separated in the input and matched as a separate token.
  *
- * <p>
  * This annotator is similar to {link @RegexNERAnnotator} but uses TokensRegex as the underlying library for matching
  * regular expressions.  This allows for more flexibility in the types of expressions matched as well as utilizing
  * any optimization that is included in the TokensRegex library.
- * </p>
- * <p>
+ *
  * Main differences from {@link RegexNERAnnotator}:
  * <ul>
  *   <li>Supports both TokensRegex patterns and patterns over the text of the tokens</li>
@@ -66,11 +56,11 @@ import java.util.regex.Pattern;
  *       <br/>  Example: Old NER phrase: The ABC Company, Found Phrase: ABC => Old NER labels are not replaced.
  *       <br/>If the found expression has inconsistent NER tags among the tokens, then the NER labels are replaced. </li>
  *       <br/>  Example: Old NER phrase: The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG
- *   <li>How <code>validpospattern</code> is handled for POS tags is specified by <code>PosMatchType</code></li>
+ *   <li>How <code>validpospattern</code> is handled for POS tags is specfied by <code>PosMatchType</code></li>
  *   <li>By default, there is no <code>validPosPattern</code></li>
- *   <li>By default, both O and MISC is always replaced</li>
+ *   <li>By default, MISC is always replaced</li>
  * </ul>
- * </p>
+ *
  * <p>
  *   Configuration:
  * <table>
@@ -93,7 +83,7 @@ import java.util.regex.Pattern;
  *   </tr>
  *   <tr><td><code>noDefaultOverwriteLabels</code></td>
  *      <td>Comma separated list of output types for which default NER labels are not overwritten.
- *          For these types, only if the matched expression has NER type matching the
+ *          For this types, only if the matched expression has NER type matching the
  *          specified overwriteableType for the regex will the NER type be overwritten.</td>
  *      <td><code></code></td></tr>
  *   <tr><td><code>ignoreCase</code></td><td><code>Boolean</code></td>
@@ -108,6 +98,7 @@ import java.util.regex.Pattern;
 public class TokensRegexNERAnnotator implements Annotator {
   protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokenRegexNER");
 
+  // TODO: Can remove entries and just have a MultiPatternMatcher probably
   private final boolean ignoreCase;
   private final List<Entry> entries;
   private final Map<TokenSequencePattern,Entry> patternToEntry = new IdentityHashMap<TokenSequencePattern,Entry>();
@@ -129,19 +120,6 @@ public class TokensRegexNERAnnotator implements Annotator {
     MATCH_ONE_TOKEN_PHRASE_ONLY }
   private final PosMatchType posMatchType;
   public static final PosMatchType DEFAULT_POS_MATCH_TYPE = PosMatchType.MATCH_AT_LEAST_ONE_TOKEN;
-  public static final String DEFAULT_BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC";
-
-  public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
-          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Comma separated list of mapping files to use."),
-          new PropertiesUtils.Property("ignorecase", "false", "Whether to ignore case or not when matching patterns."),
-          new PropertiesUtils.Property("validpospattern", "", "Regular expression pattern for matching POS tags."),
-          new PropertiesUtils.Property("posmatchtype", DEFAULT_POS_MATCH_TYPE.name(), "How should 'validpospattern' be used to match the POS of the tokens."),
-          new PropertiesUtils.Property("noDefaultOverwriteLabels", "", "Comma separated list of output types for which default NER labels are not overwritten.\n" +
-                  " For these types, only if the matched expression has NER type matching the\n" +
-                  " specified overwriteableType for the regex will the NER type be overwritten."),
-          new PropertiesUtils.Property("backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL, "Comma separated list of NER labels to always replace."),
-          new PropertiesUtils.Property("verbose", "false", ""),
-  };
 
   public TokensRegexNERAnnotator(String mapping) {
     this(mapping, false);
@@ -168,7 +146,8 @@ public class TokensRegexNERAnnotator implements Annotator {
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
     String prefix = (name != null && !name.isEmpty())? name + ".":"";
-    String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL);
+    String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol",
+            SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC");
     String[] backgroundSymbols = backgroundSymbol.split("\\s*,\\s*");
     String mappingFiles = properties.getProperty(prefix + "mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
     String[] mappings = mappingFiles.split("\\s*[,;]\\s*");
@@ -228,10 +207,8 @@ public class TokensRegexNERAnnotator implements Annotator {
   private MultiPatternMatcher<CoreMap> createPatternMatcher() {
     // Convert to tokensregex pattern
     int patternFlags = ignoreCase? Pattern.CASE_INSENSITIVE:0;
-    int stringMatchFlags = ignoreCase? NodePattern.CASE_INSENSITIVE:0;
     Env env = TokenSequencePattern.getNewEnv();
     env.setDefaultStringPatternFlags(patternFlags);
-    env.setDefaultStringMatchFlags(stringMatchFlags);
     NodePattern<String> posTagPattern = (validPosPattern != null && PosMatchType.MATCH_ALL_TOKENS.equals(posMatchType))?
             new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPattern):null;
     List<TokenSequencePattern> patterns = new ArrayList<TokenSequencePattern>(entries.size());
@@ -251,9 +228,6 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
         pattern = TokenSequencePattern.compile(
                 new SequencePattern.SequencePatternExpr(nodePatterns));
-      }
-      if (entry.annotateGroup < 0 || entry.annotateGroup > pattern.getTotalGroups()) {
-        throw new RuntimeException("Invalid match group for entry " + entry);
       }
       pattern.setPriority(entry.priority);
       patterns.add(pattern);
@@ -458,7 +432,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
       String[] split = line.split("\t");
-      if (split.length < 2 || split.length > 5)
+      if (split.length < 2 || split.length > 4)
         throw new IllegalArgumentException("Provided mapping file is in wrong format");
 
       String regex = split[0].trim();
@@ -486,27 +460,17 @@ public class TokensRegexNERAnnotator implements Annotator {
       if (split.length >= 3) {
         overwritableTypes.addAll(Arrays.asList(split[2].trim().split(",")));
       }
-      if (split.length >= 4) {
+      if (split.length == 4) {
         try {
           priority = Double.parseDouble(split[3].trim());
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid priority in line " + lineCount
-                  + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
-        }
-      }
-      int annotateGroup = 0;
-      // Get annotate group from input....
-      if (split.length >= 5) {
-        // Which group to take (allow for context)
-        String context = split[4].trim();
-        try {
-          annotateGroup = Integer.parseInt(context);
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid group in line " + lineCount
+        } catch(NumberFormatException e) {
+          throw new IllegalArgumentException("ERROR: Invalid line " + lineCount
                   + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
         }
       }
 
+      // TODO: Get annotate group from input....
+      int annotateGroup = 0;
       Entry entry = new Entry(tokensRegex, regexes, type, overwritableTypes, priority, annotateGroup);
       if (seenRegexes.containsKey(key)) {
         Entry oldEntry = seenRegexes.get(key);
