@@ -35,6 +35,11 @@ public class Env {
    * Mapping of variable names to their values
    */
   Map<String, Object> variables = Generics.newHashMap();
+
+  /**
+   * Mapping of per thread temporary variables to their values
+   */
+  ThreadLocal<Map<String,Object>> threadLocalVariables = new ThreadLocal<Map<String,Object>>();
   /**
    * Mapping of variables that can be expanded in a regular expression for strings,
    *   to their regular expressions.
@@ -349,6 +354,42 @@ public class Env {
   public Object get(String name)
   {
       return variables.get(name);
+  }
+
+  // Functions for storing temporary thread specific variables
+  //  that are used when running tokensregex
+  public void push(String name, Object value) {
+    Map<String,Object> vars = threadLocalVariables.get();
+    if (vars == null) {
+      threadLocalVariables.set(vars = Generics.newHashMap());
+    }
+    Stack<Object> stack = (Stack<Object>) vars.get(name);
+    if (stack == null) {
+      vars.put(name, stack = new Stack<Object>());
+    }
+    stack.push(value);
+  }
+
+  public Object pop(String name) {
+    Map<String,Object> vars = threadLocalVariables.get();
+    if (vars == null) return null;
+    Stack<Object> stack = (Stack<Object>) vars.get(name);
+    if (stack == null || stack.isEmpty()) {
+      return null;
+    } else {
+      return stack.pop();
+    }
+  }
+
+  public Object peek(String name) {
+    Map<String,Object> vars = threadLocalVariables.get();
+    if (vars == null) return null;
+    Stack<Object> stack = (Stack<Object>) vars.get(name);
+    if (stack == null || stack.isEmpty()) {
+      return null;
+    } else {
+      return stack.peek();
+    }
   }
 
 }

@@ -2,9 +2,11 @@ package edu.stanford.nlp.sentiment;
 
 import java.util.List;
 
-import edu.stanford.nlp.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -46,22 +48,22 @@ public class SentimentUtils {
     return trees;
   }
 
-  public static String sentimentString(int sentiment) {
-    switch(sentiment) {
-    case 0:
-      return "Very negative";
-    case 1:
-      return "Negative";
-    case 2:
-      return "Neutral";
-    case 3:
-      return "Positive";
-    case 4:
-      return "Very positive";
-    default:
-      return "Unknown sentiment label " + sentiment;
+  static final Filter<Tree> UNKNOWN_ROOT_FILTER = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      int gold = RNNCoreAnnotations.getGoldClass(tree);
+      return gold != -1;
     }
+  };
+
+  public static List<Tree> filterUnknownRoots(List<Tree> trees) {
+    return CollectionUtils.filterAsList(trees, UNKNOWN_ROOT_FILTER);
   }
 
-
+  public static String sentimentString(SentimentModel model, int sentiment) {
+    String[] classNames = model.op.classNames;
+    if (sentiment < 0 || sentiment > classNames.length) {
+      return "Unknown sentiment label " + sentiment;
+    }
+    return classNames[sentiment];
+  }
 }

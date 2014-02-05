@@ -398,6 +398,20 @@ public class IOUtils {
   }
 
   /**
+   * Check if this path exists either in the classpath or on the filesystem.
+   *
+   * @param name The file or resource name.
+   * @return true if a call to {@link IOUtils#getBufferedReaderFromClasspathOrFileSystem(String)} would return a valid stream.
+   */
+  public static boolean existsInClasspathOrFileSystem(String name) {
+    InputStream is = IOUtils.class.getClassLoader().getResourceAsStream(name);
+    if (is == null) {
+      is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+    }
+    return is != null || new File(name).exists();
+  }
+
+  /**
    * Locates this file either using the given URL, or in the CLASSPATH, or in the file system
    * The CLASSPATH takes priority over the file system!
    * This stream is buffered and gunzipped (if necessary).

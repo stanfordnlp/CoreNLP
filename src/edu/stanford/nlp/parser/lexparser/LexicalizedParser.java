@@ -144,6 +144,13 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     return loadModel(parserFileOrUrl, new Options(), extraFlags);
   }
 
+  public static LexicalizedParser loadModel(String parserFileOrUrl,
+                                            List<String> extraFlags) {
+    String[] flags = new String[extraFlags.size()];
+    extraFlags.toArray(flags);
+    return loadModel(parserFileOrUrl, flags);
+  }
+
   /**
    * Construct a new LexicalizedParser.  This loads a grammar
    * that was previously assembled and stored as a serialized file.
@@ -641,7 +648,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
 
   public static TreeAnnotatorAndBinarizer buildTrainBinarizer(Options op) {
     TreebankLangParserParams tlpParams = op.tlpParams;
-    TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
     if (!op.trainOptions.leftToRight) {
       return new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), !op.trainOptions.predictSplits, op);
     } else {
@@ -1341,38 +1347,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       }
     } // end while loop through arguments
 
-    // set up tokenizerFactory with options if provided
-    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
-      try {
-        if (tokenizerFactoryClass != null) {
-          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
-          Method factoryMethod;
-          if (tokenizerOptions != null) {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
-          } else {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
-          }
-        } else {
-          // have options but no tokenizer factory; default to PTB
-          tokenizerFactory = PTBTokenizer.PTBTokenizerFactory.newWordTokenizerFactory(tokenizerOptions);
-        }
-      } catch (IllegalAccessException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (NoSuchMethodException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (ClassNotFoundException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      }
-    }
-
     // all other arguments are order dependent and
     // are processed in order below
 
@@ -1445,6 +1419,41 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
         throw e;
       }
     }
+
+    // set up tokenizerFactory with options if provided
+    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
+      try {
+        if (tokenizerFactoryClass != null) {
+          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
+          Method factoryMethod;
+          if (tokenizerOptions != null) {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
+          } else {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
+          }
+        } else {
+          // have options but no tokenizer factory.  use the parser
+          // langpack's factory and set its options
+          tokenizerFactory = lp.op.langpack().getTokenizerFactory();
+          tokenizerFactory.setOptions(tokenizerOptions);
+        }
+      } catch (IllegalAccessException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      }
+    }
+
 
     // the following has to go after reading parser to make sure
     // op and tlpParams are the same for train and test

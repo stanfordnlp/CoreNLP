@@ -6,10 +6,10 @@ import java.util.Map;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.neural.NeuralUtils;
+import edu.stanford.nlp.neural.SimpleTensor;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
-import edu.stanford.nlp.rnn.RNNCoreAnnotations;
-import edu.stanford.nlp.rnn.RNNUtils;
-import edu.stanford.nlp.rnn.SimpleTensor;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
@@ -30,7 +30,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return model.totalParamSize();
   }
 
-  public double sumError(Tree tree) {
+  private static double sumError(Tree tree) {
     if (tree.isLeaf()) {
       return 0.0;
     } else if (tree.isPreTerminal()) {
@@ -91,7 +91,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryClassification) {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
-        
+
         binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
       }
     }
@@ -101,7 +101,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
         int numSlices = entry.getValue().numSlices();
-        
+
         binaryTensorTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleTensor(numRows, numCols, numSlices));
       }
     }
@@ -116,7 +116,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       int numCols = entry.getValue().numCols();
       wordVectorD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
     }
-    
+
     // TODO: This part can easily be parallelized
     List<Tree> forwardPropTrees = Generics.newArrayList();
     for (Tree tree : trainingBatch) {
@@ -139,13 +139,13 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     double scale = (1.0 / trainingBatch.size());
     value = error * scale;
 
-    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransform);
+    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix);
     value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification);
-    value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransform);
+    value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
     value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification);
     value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector);
 
-    derivative = RNNUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
+    derivative = NeuralUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
   }
 
   double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
@@ -190,7 +190,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return cost;
   }
 
-  private void backpropDerivativesAndError(Tree tree, 
+  private void backpropDerivativesAndError(Tree tree,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
                                            TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD,
@@ -200,7 +200,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     backpropDerivativesAndError(tree, binaryTD, binaryCD, binaryTensorTD, unaryCD, wordVectorD, delta);
   }
 
-  private void backpropDerivativesAndError(Tree tree, 
+  private void backpropDerivativesAndError(Tree tree,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
                                            TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD,
@@ -218,16 +218,22 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     // Build a vector that looks like 0,0,1,0,0 with an indicator for the correct class
     SimpleMatrix goldLabel = new SimpleMatrix(model.numClasses, 1);
     int goldClass = RNNCoreAnnotations.getGoldClass(tree);
-    goldLabel.set(goldClass, 1.0);
+    if (goldClass >= 0) {
+      goldLabel.set(goldClass, 1.0);
+    }
 
     double nodeWeight = model.op.trainOptions.getClassWeight(goldClass);
 
     SimpleMatrix predictions = RNNCoreAnnotations.getPredictions(tree);
 
-    SimpleMatrix deltaClass = predictions.minus(goldLabel).scale(nodeWeight);
-    SimpleMatrix localCD = deltaClass.mult(RNNUtils.concatenateWithBias(currentVector).transpose());
+    // If this is an unlabeled class, set deltaClass to 0.  We could
+    // make this more efficient by eliminating various of the below
+    // calculations, but this would be the easiest way to handle the
+    // unlabeled class
+    SimpleMatrix deltaClass = goldClass >= 0 ? predictions.minus(goldLabel).scale(nodeWeight) : new SimpleMatrix(predictions.numRows(), predictions.numCols());
+    SimpleMatrix localCD = deltaClass.mult(NeuralUtils.concatenateWithBias(currentVector).transpose());
 
-    double error = -(RNNUtils.elementwiseApplyLog(predictions).elementMult(goldLabel).elementSum());
+    double error = -(NeuralUtils.elementwiseApplyLog(predictions).elementMult(goldLabel).elementSum());
     error = error * nodeWeight;
     RNNCoreAnnotations.setPredictionError(tree, error);
 
@@ -237,13 +243,13 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       String word = tree.children()[0].label().value();
       word = model.getVocabWord(word);
 
-      //SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
+      //SimpleMatrix currentVectorDerivative = NeuralUtils.elementwiseApplyTanhDerivative(currentVector);
       //SimpleMatrix deltaFromClass = model.getUnaryClassification(category).transpose().mult(deltaClass);
       //SimpleMatrix deltaFull = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).plus(deltaUp);
       //SimpleMatrix wordDerivative = deltaFull.elementMult(currentVectorDerivative);
       //wordVectorD.put(word, wordVectorD.get(word).plus(wordDerivative));
 
-      SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
+      SimpleMatrix currentVectorDerivative = NeuralUtils.elementwiseApplyTanhDerivative(currentVector);
       SimpleMatrix deltaFromClass = model.getUnaryClassification(category).transpose().mult(deltaClass);
       deltaFromClass = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).elementMult(currentVectorDerivative);
       SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
@@ -257,15 +263,15 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       } else {
         binaryCD.put(leftCategory, rightCategory, binaryCD.get(leftCategory, rightCategory).plus(localCD));
       }
-      
-      SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
+
+      SimpleMatrix currentVectorDerivative = NeuralUtils.elementwiseApplyTanhDerivative(currentVector);
       SimpleMatrix deltaFromClass = model.getBinaryClassification(leftCategory, rightCategory).transpose().mult(deltaClass);
       deltaFromClass = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).elementMult(currentVectorDerivative);
       SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
-      
+
       SimpleMatrix leftVector = RNNCoreAnnotations.getNodeVector(tree.children()[0]);
       SimpleMatrix rightVector = RNNCoreAnnotations.getNodeVector(tree.children()[1]);
-      SimpleMatrix childrenVector = RNNUtils.concatenateWithBias(leftVector, rightVector);
+      SimpleMatrix childrenVector = NeuralUtils.concatenateWithBias(leftVector, rightVector);
       SimpleMatrix W_df = deltaFull.mult(childrenVector.transpose());
       binaryTD.put(leftCategory, rightCategory, binaryTD.get(leftCategory, rightCategory).plus(W_df));
       SimpleMatrix deltaDown;
@@ -277,8 +283,8 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
         deltaDown = model.getBinaryTransform(leftCategory, rightCategory).transpose().mult(deltaFull);
       }
 
-      SimpleMatrix leftDerivative = RNNUtils.elementwiseApplyTanhDerivative(leftVector);
-      SimpleMatrix rightDerivative = RNNUtils.elementwiseApplyTanhDerivative(rightVector);
+      SimpleMatrix leftDerivative = NeuralUtils.elementwiseApplyTanhDerivative(leftVector);
+      SimpleMatrix rightDerivative = NeuralUtils.elementwiseApplyTanhDerivative(rightVector);
       SimpleMatrix leftDeltaDown = deltaDown.extractMatrix(0, deltaFull.numRows(), 0, 1);
       SimpleMatrix rightDeltaDown = deltaDown.extractMatrix(deltaFull.numRows(), deltaFull.numRows() * 2, 0, 1);
       backpropDerivativesAndError(tree.children()[0], binaryTD, binaryCD, binaryTensorTD, unaryCD, wordVectorD, leftDerivative.elementMult(leftDeltaDown));
@@ -292,7 +298,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     SimpleMatrix WTDeltaNoBias = WTDelta.extractMatrix(0, deltaFull.numRows() * 2, 0, 1);
     int size = deltaFull.getNumElements();
     SimpleMatrix deltaTensor = new SimpleMatrix(size*2, 1);
-    SimpleMatrix fullVector = RNNUtils.concatenate(leftVector, rightVector);
+    SimpleMatrix fullVector = NeuralUtils.concatenate(leftVector, rightVector);
     for (int slice = 0; slice < size; ++slice) {
       SimpleMatrix scaledFullVector = fullVector.scale(deltaFull.get(slice));
       deltaTensor = deltaTensor.plus(Wt.getSlice(slice).plus(Wt.getSlice(slice).transpose()).mult(scaledFullVector));
@@ -304,7 +310,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     int size = deltaFull.getNumElements();
     SimpleTensor Wt_df = new SimpleTensor(size*2, size*2, size);
     // TODO: combine this concatenation with computeTensorDeltaDown?
-    SimpleMatrix fullVector = RNNUtils.concatenate(leftVector, rightVector);
+    SimpleMatrix fullVector = NeuralUtils.concatenate(leftVector, rightVector);
     for (int slice = 0; slice < size; ++slice) {
       Wt_df.setSlice(slice, fullVector.scale(deltaFull.get(slice)).mult(fullVector.transpose()));
     }
@@ -334,7 +340,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       classification = model.getUnaryClassification(tree.label().value());
       String word = tree.children()[0].label().value();
       SimpleMatrix wordVector = model.getWordVector(word);
-      nodeVector = RNNUtils.elementwiseApplyTanh(wordVector);
+      nodeVector = NeuralUtils.elementwiseApplyTanh(wordVector);
     } else if (tree.children().length == 1) {
       throw new AssertionError("Non-preterminal nodes of size 1 should have already been collapsed");
     } else if (tree.children().length == 2) {
@@ -348,20 +354,20 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
 
       SimpleMatrix leftVector = RNNCoreAnnotations.getNodeVector(tree.children()[0]);
       SimpleMatrix rightVector = RNNCoreAnnotations.getNodeVector(tree.children()[1]);
-      SimpleMatrix childrenVector = RNNUtils.concatenateWithBias(leftVector, rightVector);
+      SimpleMatrix childrenVector = NeuralUtils.concatenateWithBias(leftVector, rightVector);
       if (model.op.useTensors) {
         SimpleTensor tensor = model.getBinaryTensor(leftCategory, rightCategory);
-        SimpleMatrix tensorIn = RNNUtils.concatenate(leftVector, rightVector);
-        SimpleMatrix tensorOut = tensor.bilinearProducts(tensorIn);        
-        nodeVector = RNNUtils.elementwiseApplyTanh(W.mult(childrenVector).plus(tensorOut));
+        SimpleMatrix tensorIn = NeuralUtils.concatenate(leftVector, rightVector);
+        SimpleMatrix tensorOut = tensor.bilinearProducts(tensorIn);
+        nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector).plus(tensorOut));
       } else {
-        nodeVector = RNNUtils.elementwiseApplyTanh(W.mult(childrenVector));
+        nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector));
       }
     } else {
       throw new AssertionError("Tree not correctly binarized");
     }
 
-    SimpleMatrix predictions = RNNUtils.softmax(classification.mult(RNNUtils.concatenateWithBias(nodeVector)));
+    SimpleMatrix predictions = NeuralUtils.softmax(classification.mult(NeuralUtils.concatenateWithBias(nodeVector)));
 
     int index = getPredictedClass(predictions);
     if (!(tree.label() instanceof CoreLabel)) {

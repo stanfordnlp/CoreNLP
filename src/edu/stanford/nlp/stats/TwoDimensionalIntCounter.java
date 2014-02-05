@@ -151,7 +151,7 @@ public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
     int oldCount = getCount(o1, o2);
     total -= oldCount;
     c.remove(o2);
-    if (c.size()==0) {
+    if (c.isEmpty()) {
       map.remove(o1);
     }
     return oldCount;
@@ -210,7 +210,7 @@ public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
    */
   @SuppressWarnings({"unchecked"})
   public static <K1,K2> TwoDimensionalIntCounter<K2,K1> reverseIndexOrder(TwoDimensionalIntCounter<K1,K2> cc) {
-    // they typing on the outerMF is violated a bit, but it'll work....
+    // the typing on the outerMF is violated a bit, but it'll work....
     TwoDimensionalIntCounter<K2,K1> result = new TwoDimensionalIntCounter<K2,K1>(
         (MapFactory)cc.outerMF, (MapFactory)cc.innerMF);
 
@@ -376,8 +376,9 @@ public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
       IntCounter<K2> inner = c.getCounter(key);
       IntCounter<K2> myInner = getCounter(key);
       Counters.subtractInPlace(myInner, inner);
-      if(removeKeys)
-      Counters.retainNonZeros(myInner);
+      if (removeKeys) {
+        Counters.retainNonZeros(myInner);
+      }
       total -= inner.totalIntCount();
     }
   }
@@ -387,7 +388,9 @@ public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
     for (K1 k1 : firstKeySet) {
       IntCounter<K2> c = getCounter(k1);
       Counters.retainNonZeros(c);
-      if (c.size()==0) map.remove(k1); // it's empty, get rid of it!
+      if (c.isEmpty()) {
+        map.remove(k1); // it's empty, get rid of it!
+      }
     }
   }
 
@@ -436,20 +439,6 @@ public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
     outerMF = outerFactory;
     map = outerFactory.newMap(initialCapacity);
     total = 0;
-  }
-
-  public static void main(String[] args) {
-    TwoDimensionalIntCounter<String,String> cc = new TwoDimensionalIntCounter<String,String>();
-    cc.setCount("a", "c", 1.0);
-    cc.setCount("b", "c", 1.0);
-    cc.setCount("a", "d", 1.0);
-    cc.setCount("a", "d", -1.0);
-    cc.setCount("b", "d", 1.0);
-    System.out.println(cc);
-    cc.incrementCount("b", "d", 1.0);
-    System.out.println(cc);
-    TwoDimensionalIntCounter<String,String> cc2 = TwoDimensionalIntCounter.reverseIndexOrder(cc);
-    System.out.println(cc2);
   }
 
 }

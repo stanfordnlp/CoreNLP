@@ -1,4 +1,4 @@
-Tregex GUI v3.2.0 - 2013-06-19
+Tregex GUI v3.3.1 - 2014-01-04
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -155,6 +155,12 @@ LICENSE
 ----------------------------
 CHANGES
 ----------------------------
+
+2014-01-04    3.3.1     Bugfix release, new createSubtree tsurgeon 
+                        operation 
+
+2013-11-12    3.3.0     Allow a TregexMatcher to have its own 
+                        HeadFinder, useful for the dependencies 
 
 2013-06-19    3.2.0     Fix for tsurgeon number reading bug 
 
