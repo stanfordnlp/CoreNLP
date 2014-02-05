@@ -275,7 +275,7 @@ elements (which are not clearly linked to the structure of the
 sentence, except in an expressive way). We generally follow the
 guidelines of what the Penn Treebanks count as an INTJ.  They
 define this to include: interjections (\emph{oh}, \emph{uh-huh},
-\emph{Welcome}), fillers (\emph{um}, \emph{ah}), and discourse 
+\emph{Welcome}), fillers (\emph{um}, \emph{ah}), and discourse
 markers (\emph{well}, \emph{like}, \emph{actually}, but not \emph{you know}).
 \begin{quote}
 \begin{dependency}
@@ -350,7 +350,7 @@ The mark is a dependent of the subordinate clause head.
 \begin{dependency}
    \begin{deptext}[column sep=0.2em]
       He \& says \& that \& you \& like \& to \& swim
-%  \& \&  \hspace*{3em} \emph{complm}(like, that) 
+%  \& \&  \hspace*{3em} \emph{complm}(like, that)
 \\
    \end{deptext}
    \depedge[edge unit distance=0.5ex]{7}{3}{mark}
@@ -434,10 +434,11 @@ An element of compound number is a part of a number phrase or currency amount.
 \end{tabbing}
 
 \noindent\textbf{\emph{parataxis}: parataxis}\\
-The parataxis relation (from Greek for ``place side by side'') is a relation between the main verb of a clause and other sentential elements, such as a sentential parenthetical, or a clause after a ``:'' or a ``;''.
+The parataxis relation (from Greek for ``place side by side'') is a relation between the main verb of a clause and other sentential elements, such as a sentential parenthetical, a clause after a ``:'' or a ``;'', or two sentences placed side by side without any explicit coordination or subordination.
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
 \> ``The guy, John said, left early in the morning" \> \> \emph{parataxis}(left, said)\\
+\> ``Let's face it we're annoyed'' \>\> \emph(parataxis}(Let, annoyed)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{partmod}: participial modifier}\\
@@ -532,14 +533,6 @@ A quantifier modifier is an element modifying the head of a QP constituent.  (Th
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \>  ``About 200 people came to the party" \> \> \emph{quantmod}(200, About)\\
-\end{tabbing}
-
-\noindent\textbf{\emph{rcmod}: relative clause modifier}\\
-A relative clause modifier of an NP is a relative clause modifying the NP.  The relation points from the head noun of the NP to the head of the relative clause, normally a verb.
-\begin{tabbing}
-	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``I saw the man you love" \> \> \emph{rcmod}(man, love)\\
-\> ``I saw the book which you bought'' \> \> \emph{rcmod}(book,bought)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{ref}: referent}\\
@@ -935,7 +928,7 @@ If you need to parse texts and want to get different formatting options for the 
 \begin{description}
 \item[\texttt{basicDependencies}] Basic dependencies.
 \item[\texttt{collapsedDependencies}] Collapsed dependencies (not necessarily a tree structure).
-\item[\texttt{CCPropagatedDependencies}] Collapsed dependencies with propagation of conjunct 
+\item[\texttt{CCPropagatedDependencies}] Collapsed dependencies with propagation of conjunct
 dependencies (not necessarily a tree structure).  [This representation is the default, if no option is specified.]
 \item[\texttt{treeDependencies}] Collapsed dependencies that preserve a tree structure.
 \item[\texttt{nonCollapsedDependencies}]  Non-collapsed dependencies: basic dependencies as well as
@@ -979,7 +972,7 @@ System.out.println(tdl); }
 \end{quote}
 
 \subsubsection*{$\star$ \textbf{edu.stanford.nlp.trees.EnglishGrammaticalStructure}}
-If you already have Penn treebank-style trees (whether hand-annotated or as output from another parser), you can use this class to get the Stanford dependencies. 
+If you already have Penn treebank-style trees (whether hand-annotated or as output from another parser), you can use this class to get the Stanford dependencies.
 
 \paragraph{Command-line usage.} Use the \texttt{-treeFile} option as shown in the command line example below. The options to get the different types of representation are as follows:
 \begin{tabbing}
@@ -1029,7 +1022,7 @@ words but are given an ``erased'' grammatical relation:
 13 &	distributes &	\_ &	VBZ	 & VBZ &	\_ &	11 &	conj\_and &	\_ &	\_ \\
 14 &	computer &	\_ &	NN &	NN &	\_ &	15 &	nn &	\_ &	\_ \\
 15 &	products &	\_ &	NNS	 & NNS &	\_ &	11 &	dobj &	\_ &	\_ \\
-16 &	. &	\_ &	. &	. &	\_ &	11 &	punct &	\_ &	\_ 
+16 &	. &	\_ &	. &	. &	\_ &	11 &	punct &	\_ &	\_
 \end{tabular}
 
 \vspace*{.4cm}
@@ -1069,7 +1062,7 @@ to pass in when creating one is a punctuation filter. Pass in a
 \texttt{Filters.$\langle$String$\rangle$\discretionary{}{}{}acceptFilter()} to keep
 punctuation dependencies. A \texttt{GrammaticalStructure} is created
 for each \texttt{Tree}. The methods on a \texttt{GrammaticalStructure}
-for each kind of dependencies is as follows: 
+for each kind of dependencies is as follows:
 \begin{quote}
 \begin{tabular}{ll}
 basic & \texttt{gs.typedDependencies()} \\
@@ -1093,7 +1086,7 @@ A number of dependency parsers have now been trained to parse directly
 to the basic Stanford Dependencies, including MaltParser and
 MSTParser.  Several of these parsers distribute models trained for
 Stanford Dependencies parsing, including MaltParser and the Easy First
-Parser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.  
+Parser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.
 
 Any Penn Treebank constituency parser can be used to produce Stanford
 Dependencies by using our conversion tool to convert the output of other constituency parsers to the Stanford Dependencies representation.  For more information on other parser options, see:
