@@ -226,4 +226,9 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   public TokenSequenceMatcher getMatcher(List<? extends CoreMap> tokens) {
     return new TokenSequenceMatcher(this, tokens);
   }
+  
+  @Override
+  public String toString(){
+    return this.pattern();
+  }
 }
