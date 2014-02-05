@@ -1913,7 +1913,7 @@ public class StringUtils {
         //or as the environment variable
         vrValue = System.getenv(varName);
       }
-      System.out.println(sb + " and " + vrValue);
+      System.out.println(varName+":"+ sb + " and " + vrValue);
       m.appendReplacement(sb, null == vrValue ? "" : vrValue);
     }
     m.appendTail(sb);
