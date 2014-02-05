@@ -158,6 +158,21 @@ public class Maps {
     }
   }
 
+  /**
+   * get all values corresponding to the indices (if they exist in the map)
+   * @param map
+   * @param indices
+   * @return
+   */
+  public static<T,V> Map<T, V> getAll(Map<T, V> map, Collection<T> indices){
+    Map<T,V> result = new HashMap<T,V>();
+    for(T i: indices)
+      if(map.containsKey(i)){
+        result.put(i, map.get(i));
+      }
+    return result;
+  }
+  
   public static void main(String[] args) {
     Map<String, String> map1 = Generics.newHashMap();
     map1.put("a", "1");
