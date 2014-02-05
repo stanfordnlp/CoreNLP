@@ -915,8 +915,9 @@ public class CollectionUtils {
   public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices){
     List<V> result = new ArrayList<V>();
     for(T i: indices)
-      if(map.containsKey(i))
+      if(map.containsKey(i)){
         result.add(map.get(i));
+      }
     return result;
   }
   
