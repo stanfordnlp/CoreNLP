@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -57,19 +56,19 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   // passed to the constructor).
 
   // The input already been tokenized. Do not run the Arabic tokenizer.
-  private static final String optTokenized = "tokenized";
+  private final String optTokenized = "tokenized";
 
   // Tokenizer options
-  private static final String optTokenizer = "orthoOptions";
+  private final String optTokenizer = "orthoOptions";
 
   // Mark segmented prefixes with this String
-  private static final String optPrefix = "prefixMarker";
+  private final String optPrefix = "prefixMarker";
 
   // Mark segmented suffixes with this String
-  private static final String optSuffix = "suffixMarker";
+  private final String optSuffix = "suffixMarker";
 
   // Number of decoding threads
-  private static final String optThreads = "nthreads";
+  private final String optThreads = "nthreads";
 
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
@@ -79,11 +78,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final boolean isTokenized;
   private final String tokenizerOptions;
 
-  /** Make an Arabic Segmenter.
-   *
-   *  @param props Options for how to tokenize. See the main method of
-   *               {@see ArabicTokenizer} for details.
-   */
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
@@ -126,11 +120,12 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   }
 
   /**
-   * Creates an ArabicTokenizer. The default tokenizer
-   * is ArabicTokenizer.atbFactory(), which produces the
+   * Creates an ArabicTokenizer from the user-specified options. The
+   * default is ArabicTokenizer.atbFactory(), which produces the
    * same orthographic normalization as Green and Manning (2010).
    *
-   * @return A TokenizerFactory that produces each Arabic token as a CoreLabel
+   * @param props
+   * @return
    */
   private TokenizerFactory<CoreLabel> getTokenizerFactory() {
     TokenizerFactory<CoreLabel> tokFactory = null;
@@ -385,16 +380,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
     // Decode either an evaluation file or raw text
     try {
-      PrintWriter pwOut;
-      if (segmenter.flags.outputEncoding != null) {
-        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.outputEncoding);
-        pwOut = new PrintWriter(out, true);
-      } else if (segmenter.flags.inputEncoding != null) {
-        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.inputEncoding);
-        pwOut = new PrintWriter(out, true);
-      } else {
-        pwOut = new PrintWriter(System.out, true);
-      }
+      PrintWriter pwOut = new PrintWriter(System.out, true);
       if (segmenter.flags.testFile != null) {
         if (segmenter.flags.answerFile == null) {
           segmenter.evaluate(pwOut);
@@ -463,13 +449,10 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   }
 
   /**
-   * Train a new segmenter or load an trained model from file.  First
-   * checks to see if there is a "model" or "loadClassifier" flag to
-   * load from, and if not tries to run training using the given
-   * options.
+   * Train a new segmenter or load an trained model from file.
    *
    * @param options
-   * @return the trained or loaded model
+   * @return
    */
   private static ArabicSegmenter getSegmenter(Properties options) {
     ArabicSegmenter segmenter = new ArabicSegmenter(options);
@@ -494,5 +477,4 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     }
     return segmenter;
   }
-
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
 import edu.stanford.nlp.dcoref.Document;
@@ -25,7 +24,6 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Implements the Annotator for the new deterministic coreference resolution system.
@@ -45,14 +43,11 @@ public class DeterministicCorefAnnotator implements Annotator {
   // for backward compatibility
   private final boolean OLD_FORMAT;
 
-  private final boolean allowReparsing;
-
   public DeterministicCorefAnnotator(Properties props) {
     try {
       corefSystem = new SieveCoreferenceSystem(props);
       mentionExtractor = new MentionExtractor(corefSystem.dictionaries(), corefSystem.semantics());
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
-      allowReparsing = PropertiesUtils.getBool(props, Constants.ALLOW_REPARSING_PROP, Constants.ALLOW_REPARSING);
     } catch (Exception e) {
       System.err.println("ERROR: cannot create DeterministicCorefAnnotator!");
       e.printStackTrace();
@@ -72,7 +67,6 @@ public class DeterministicCorefAnnotator implements Annotator {
 
       // extract trees and sentence words
       // we are only supporting the new annotation standard for this Annotator!
-      boolean hasSpeakerAnnotations = false;
       if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
         // int sentNum = 0;
         for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -81,15 +75,6 @@ public class DeterministicCorefAnnotator implements Annotator {
           Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
           trees.add(tree);
 
-          if (!hasSpeakerAnnotations) {
-            // check for speaker annotations
-            for (CoreLabel t:tokens) {
-              if (t.get(CoreAnnotations.SpeakerAnnotation.class) != null) {
-                hasSpeakerAnnotations = true;
-                break;
-              }
-            }
-          }
           MentionExtractor.mergeLabels(tree, tokens);
           MentionExtractor.initializeUtterance(tokens);
         }
@@ -97,13 +82,10 @@ public class DeterministicCorefAnnotator implements Annotator {
         System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
       }
-      if (hasSpeakerAnnotations) {
-        annotation.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);
-      }
 
       // extract all possible mentions
       // this is created for each new annotation because it is not threadsafe
-      RuleBasedCorefMentionFinder finder = new RuleBasedCorefMentionFinder(allowReparsing);
+      RuleBasedCorefMentionFinder finder = new RuleBasedCorefMentionFinder();
       List<List<Mention>> allUnprocessedMentions = finder.extractPredictedMentions(annotation, 0, corefSystem.dictionaries());
 
       // add the relevant info to mentions and order them for coref

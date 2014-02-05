@@ -69,11 +69,6 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         return Long.valueOf(str);
       }
     }
-
-    private String parseQuotedString(String str) {
-      // Trim start/end quote and unescape \"
-      return str.substring(1,str.length()-1).replaceAll("\\\\\"", "\"");
-    }
 }
 
 PARSER_END(TokenSequenceParser)
@@ -104,7 +99,6 @@ TOKEN:
 |	< STR: "\"" ("\\\""|~["\n","\r", "\""])* "\"" >
 |   < NUMCMP: "<=" | ">=" | ">" | "<" | "==" | "!=" >
 |   < STRREGEXCMP: "=~" | "!=" >
-|   < STRSIMPLE: (["A"-"Z","a"-"z","0"-"9", "_"] )+ >
 }
 
 
@@ -176,7 +170,7 @@ Expression Expression(Env env) : {
 } {
   (
     LOOKAHEAD(4)
-    expr = NestedFunctionCallExpression(env) |
+    expr = FunctionCallExpression(env) |
     LOOKAHEAD(4)
     expr = NestedVarExpression(env) |
     LOOKAHEAD(4)
@@ -248,7 +242,7 @@ Map<String,Expression> FieldValue(Env env, Map<String,Expression> attributes) : 
 }   {
 	    fieldname = RelaxedString()
 	    (    ":" expr = Expression(env) )
-	    {
+	    { 
 	      if (fieldname != null && expr != null)  {
 	        if (attributes.containsKey(fieldname)) {
                 throw new Error("Field already defined: " + fieldname);
@@ -265,7 +259,7 @@ Value BasicValue(Env env) : {
 }   {
         tok = <REGEX> { return new Expressions.RegexValue(/*"REGEX",*/ tok.image.substring(1,tok.image.length()-1)); }
         |
-        tok = <STR> { return new Expressions.PrimitiveValue<String>("STRING", parseQuotedString(tok.image) ); }
+        tok = <STR> { return new Expressions.PrimitiveValue<String>("STRING", tok.image.substring(1,tok.image.length()-1) ); }
         |
         tok = IntegerToken() { return new Expressions.PrimitiveValue<Number>("INTEGER", parseInteger(tok.image)); }
         |
@@ -378,38 +372,6 @@ Expression NestedVarExpression(Env env) : {
   { return expr;   }
 }
 
-Expression NestedFunctionCallExpression(Env env) : {
-  Expression expr;
-  Expression fieldExpr;
-  String s;
-  Token tok;
-  int i;
-} {
-  ( expr = FunctionCallExpression(env)
-   (
-     LOOKAHEAD(3)
-     i = Index()
-    { expr = new Expressions.IndexedExpression(expr, i);   }
-     |
-     LOOKAHEAD(3)
-     "["
-     fieldExpr = Expression(env)
-     { expr = new Expressions.FieldExpression(expr, fieldExpr); }
-     "]"
-     |
-     LOOKAHEAD(3)
-     "."
-     expr = MethodCallExpression(env, expr)
-     |
-     LOOKAHEAD(3)
-     "."
-     s = RelaxedString()
-     { expr = new Expressions.FieldExpression(expr, s); }
-    )*
-  )
-  { return expr;   }
-}
-
 Expression ListExpression(Env env) : {
   List<Expression> exprs = new ArrayList<Expression>();
   Expression expr;
@@ -446,7 +408,7 @@ Expression BasicCondExpression(Env env) : {
   }
   |
   LOOKAHEAD(3)
-    expr1 = NestedFunctionCallExpression(env)
+    expr1 = FunctionCallExpression(env)
     { return new Expressions.ConditionalExpression(expr1); }
 }
 
@@ -534,7 +496,7 @@ SequencePattern.PatternExpr SeqRegex(Env env) : {
 Object StringNumberValue(Env env) : {
 	Token tok = null;
 }   {
-        tok = <STR> { return parseQuotedString(tok.image); }
+        tok = <STR> { return tok.image.substring(1,tok.image.length()-1); }
         |
         tok = IntegerToken() { return parseInteger(tok.image); }
         |
@@ -604,7 +566,7 @@ SequencePattern.PatternExpr SeqRegexRepeatTimes(Env env, SequencePattern.Pattern
        |
        ( "{"  value = <NONNEGINT>  "," v2 = <NONNEGINT> "}" ) { min = Integer.parseInt(value.image); max = Integer.parseInt(v2.image);  }
    )
-   (  "?" {  greedy = false; } )?
+   (  "?" {  greedy = false; } )? 
  )
    {
       return new SequencePattern.RepeatPatternExpr(expr, min, max, greedy);
@@ -636,9 +598,9 @@ SequencePattern.PatternExpr SeqRegexDisjConj(Env env) : {
 	(  ( op = "&"| op = "|" | op = "&&"| op = "||" )
 	   child = SeqRegexBasic(env)
 	  {
-	     if ("&".equals(op.image) || "&&".equals(op.image)) {
+	     if ("&".equals(op.image) | "&&".equals(op.image)) {
 	      conjChildren.add(child);
-	     } else if ("|".equals(op.image) || "||".equals(op.image)) {
+	     } else if ("|".equals(op.image) | "||".equals(op.image)) {
 	       if (conjChildren.size() > 1) {
 	          disjChildren.add(new SequencePattern.AndPatternExpr(conjChildren));
 	       } else {
@@ -711,7 +673,7 @@ SequencePattern.PatternExpr SeqVar(Env env) : {
         expr = env.getSequencePatternExpr(name.image, true);
         if (expr == null) {
             throw new Error("Unknown sequence pattern variable " + name.image);
-        }
+        } 
     }
   )
   { return expr; }
@@ -847,8 +809,6 @@ NodePattern CoreMapNode(Env env) : {
 			( ("," | ";")  AttrValue(env, attributes)
 		    )*
 		"}"
-		    |  LOOKAHEAD(2)
-                AttrValue(env, attributes)
 		    | ( value = RelaxedStringToken() | value = <REGEX>  )
 		      { attributes.put("word", value.image); }
     )
@@ -900,9 +860,7 @@ NodePattern CoreMapWordPattern(Env env) : {
 	Token value = null;
 } {
 	(
-        ( value = <STR> | value = <REGEX>  | value = <IDENTIFIER>
-           | value = <NONNEGINT> | value = <INT> | value = <LONGINT>
-           | value = <REAL> | value = <STRSIMPLE> )
+        ( value = <STR> | value = <REGEX>  | value = <IDENTIFIER> )
 		{ attributes.put("word", value.image); }
     )
   	{ pat = CoreMapNodePattern.valueOf(env, attributes);
@@ -1057,7 +1015,7 @@ Token RelaxedStringToken() : {
 String RelaxedString() : {
    Token value = null;
 } {
-  value = <STR> { return parseQuotedString(value.image); }
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
   | ( value = <IDENTIFIER> )
     { return value.image; }
 }
@@ -1071,11 +1029,11 @@ String VarName() : {
   | ( value = <REGEXVAR> )
     { return value.image; }
   | ( value = <STR> )
-    { return parseQuotedString(value.image); }
+    { return value.image.substring(1,value.image.length()-1); }
 } */
 
 String RelaxedStringNoIdentifier() : {
    Token value = null;
 } {
-  value = <STR> { return parseQuotedString(value.image); }
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
 }

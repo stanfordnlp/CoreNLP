@@ -31,7 +31,6 @@ package edu.stanford.nlp.trees.tregex;
 import java.util.*;
 
 import edu.stanford.nlp.trees.HasParent;
-import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 
 /**
@@ -52,18 +51,14 @@ public abstract class TregexMatcher {
   Iterator<Tree> findIterator;
   Tree findCurrent;
 
-  final HeadFinder headFinder;
 
-  TregexMatcher(Tree root, Tree tree, IdentityHashMap<Tree, Tree> nodesToParents, Map<String, Tree> namesToNodes, VariableStrings variableStrings, HeadFinder headFinder) {
+  TregexMatcher(Tree root, Tree tree, IdentityHashMap<Tree, Tree> nodesToParents, Map<String, Tree> namesToNodes, VariableStrings variableStrings) {
     this.root = root;
     this.tree = tree;
     this.nodesToParents = nodesToParents;
     this.namesToNodes = namesToNodes;
     this.variableStrings = variableStrings;
-    this.headFinder = headFinder;
   }
-
-  public HeadFinder getHeadFinder() { return this.headFinder; }
 
   /**
    * Resets the matcher so that its search starts over.
@@ -143,7 +138,7 @@ public abstract class TregexMatcher {
   }
 
   /**
-   * Similar to {@code find()}, but matches only if {@code node} is
+   * Similar to find, but matches count only if <code>node</code> is
    * the root of the match.  All other matches are ignored.  If you
    * know you are looking for matches with a particular root, this is
    * much faster than iterating over all matches and taking only the
@@ -152,7 +147,7 @@ public abstract class TregexMatcher {
    * <br>
    * If called multiple times with the same node, this will return
    * subsequent matches in the same manner as find() returns
-   * subsequent matches in the same tree.  If you want to call this using
+   * subsequent matches in the same tree.  If you want to call this on
    * the same TregexMatcher on more than one node, call reset() first;
    * otherwise, an AssertionError will be thrown.
    */

@@ -91,7 +91,6 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    *
    * @param label Basis for this label
    */
-  @SuppressWarnings("unchecked")
   public CoreLabel(Label label) {
     super(0);
     if (label instanceof CoreMap) {
@@ -132,9 +131,9 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   public static interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
   //Unchecked is below because eclipse can't handle the level of type inference if we correctly parameterize GenericAnnotation with String
   @SuppressWarnings("unchecked")
-  public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
+  public static Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
   @SuppressWarnings("unchecked")
-  public static final Map<Class<? extends GenericAnnotation>, String> genericValues = Generics.newHashMap();
+  public static Map<Class<? extends GenericAnnotation>, String> genericValues = Generics.newHashMap();
 
 
   @SuppressWarnings("unchecked")
@@ -589,17 +588,6 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
       buf.append(map2);
     } else if (format.equals("value-index")) {
       buf.append(value());
-      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-      if (index != null) {
-        buf.append('-').append((index).intValue());
-      }
-      buf.append(toPrimes());
-    } else if (format.equals("value-tag-index")) {
-      buf.append(value());
-      String tag = tag();
-      if (tag != null) {
-        buf.append(TAG_SEPARATOR).append(tag);
-      }
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
         buf.append('-').append((index).intValue());

@@ -6,15 +6,16 @@ import edu.stanford.nlp.util.Generics;
 
 public class ScorerMUC extends CorefScorer {
 
-  public ScorerMUC() {
-    super(ScoreType.MUC);
+  public ScorerMUC(){
+    super();
+    scoreType = ScoreType.MUC;
   }
-
+  
   @Override
   protected void calculateRecall(Document doc) {
     int rDen = 0;
     int rNum = 0;
-
+    
     Map<Integer, Mention> predictedMentions = doc.allPredictedMentions;
     for(CorefCluster g : doc.goldCorefClusters.values()){
       if(g.corefMentions.size()==0) {
@@ -23,7 +24,7 @@ public class ScorerMUC extends CorefScorer {
       }
       rDen += g.corefMentions.size()-1;
       rNum += g.corefMentions.size();
-
+      
       Set<CorefCluster> partitions = Generics.newHashSet();
       for (Mention goldMention : g.corefMentions){
         if(!predictedMentions.containsKey(goldMention.mentionID)) {  // twinless goldmention
@@ -40,15 +41,15 @@ public class ScorerMUC extends CorefScorer {
       System.err.println("doc.goldCorefClusters.values().size() is " + doc.goldCorefClusters.values().size());
     }
     assert(rDen == (doc.allGoldMentions.size()-doc.goldCorefClusters.values().size()));
-
+    
     recallNumSum += rNum;
     recallDenSum += rDen;
   }
-
+  
   @Override
   protected void calculatePrecision(Document doc) {
     int pDen = 0;
-    int pNum = 0;
+    int pNum = 0;    
     Map<Integer, Mention> goldMentions = doc.allGoldMentions;
 
     for(CorefCluster c : doc.corefClusters.values()){
@@ -66,7 +67,7 @@ public class ScorerMUC extends CorefScorer {
       pNum -= partitions.size();
     }
     assert(pDen == (doc.allPredictedMentions.size()-doc.corefClusters.values().size()));
-
+    
     precisionDenSum += pDen;
     precisionNumSum += pNum;
   }

@@ -189,7 +189,6 @@ public class IOBUtils {
    */
   private static CoreLabel createDatum(String token, String label, int index) {
     CoreLabel newTok = new CoreLabel();
-    newTok.set(CoreAnnotations.TextAnnotation.class, token);
     newTok.set(CoreAnnotations.CharAnnotation.class, token);
     newTok.set(CoreAnnotations.AnswerAnnotation.class, label);
     newTok.set(CoreAnnotations.GoldAnswerAnnotation.class, label);

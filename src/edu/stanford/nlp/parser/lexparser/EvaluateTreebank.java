@@ -20,7 +20,6 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
-import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.Evalb;
 import edu.stanford.nlp.parser.metrics.EvalbByCat;
 import edu.stanford.nlp.parser.metrics.FilteredEval;
@@ -46,11 +45,9 @@ public class EvaluateTreebank {
   private final TreeTransformer tc;
   private final TreeTransformer br;
 
-  private final LexicalizedParser pqFactory;
+  private final ParserQueryFactory pqFactory;
 
   // private final Lexicon lex;
-
-  List<Eval> extraEvals = null;
 
   private final boolean runningAverages, summary, tsv;
 
@@ -103,13 +100,10 @@ public class EvaluateTreebank {
     this(parser.getOp(), parser.lex, parser);
   }
 
-  public EvaluateTreebank(Options op, Lexicon lex, LexicalizedParser pqFactory) {
+  private EvaluateTreebank(Options op, Lexicon lex, ParserQueryFactory pqFactory) {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
-
-    this.extraEvals = pqFactory.getExtraEvals();
-
     // this.lex = lex;
     this.pqFactory = pqFactory;
 
@@ -183,7 +177,12 @@ public class EvaluateTreebank {
       factDA = new UnlabeledAttachmentEval("factor DA", runningAverages, null);
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factTA"))) {
-      factTA = new TaggingEval("factor Tag", runningAverages, lex);
+      if (op.doPCFG) {
+        factTA = new TaggingEval("factor Tag", runningAverages, lex);
+      } else {
+        // only doing dep parser, and need to get tags out in special way....
+        factTA = new TaggingEval("factor Tag", runningAverages, lex);
+      }
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("pcfgRUO"))) {
       pcfgRUO = new AbstractEval.RuleErrorEval("pcfg Rule under/over");
@@ -540,11 +539,6 @@ public class EvaluateTreebank {
         if (factCB != null) {
           factCB.evaluate(treeFact, transGoldTree, pwErr);
         }
-        if (extraEvals != null) {
-          for (Eval eval : extraEvals) {
-            eval.evaluate(treeFact, transGoldTree, pwErr);
-          }
-        }
         if (op.testOptions.evalb) {
           // empty out scores just in case
           nanScores(tree);
@@ -665,11 +659,6 @@ public class EvaluateTreebank {
       if (factTA != null) factTA.display(false, pwErr);
       if (factLL != null && pq.getFactoredParser() != null) factLL.display(false, pwErr);
       if (pcfgCatE != null) pcfgCatE.display(false, pwErr);
-      if (extraEvals != null) {
-        for (Eval eval : extraEvals) {
-          eval.display(false, pwErr);
-        }
-      }
       for (BestOfTopKEval eval : topKEvals) {
         eval.display(false, pwErr);
       }

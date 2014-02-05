@@ -12,8 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Holds environment variables to be used for compiling string into a pattern.
- * Use {@link EnvLookup} to perform actual lookup (it will provide reasonable defaults)
+ * Holds environment variables to be used for compiling string into a pattern
  *
  * <p>
  * Some of the types of variables to bind are:
@@ -21,7 +20,7 @@ import java.util.regex.Pattern;
  * <li><code>SequencePattern</code> (compiled pattern)</li>
  * <li><code>PatternExpr</code> (sequence pattern expression - precompiled)</li>
  * <li><code>NodePattern</code> (pattern for matching one element)</li>
- * <li><code>Class</code> (binding of CoreMap attribute to java Class)</li>
+ * <li><code>Class</code> (binding of coremap attribute to java Class)</li>
  * </ul>
  * </p>
  */
@@ -35,11 +34,6 @@ public class Env {
    * Mapping of variable names to their values
    */
   Map<String, Object> variables = Generics.newHashMap();
-
-  /**
-   * Mapping of per thread temporary variables to their values
-   */
-  ThreadLocal<Map<String,Object>> threadLocalVariables = new ThreadLocal<Map<String,Object>>();
   /**
    * Mapping of variables that can be expanded in a regular expression for strings,
    *   to their regular expressions.
@@ -56,70 +50,18 @@ public class Env {
    */
   public Map<String, Object> defaults = Generics.newHashMap();
 
-  /**
-   * Default flags to use for string regular expressions match
-   * @see java.util.regex.Pattern#compile(String,int)
-   */
   public int defaultStringPatternFlags = 0;
-
-  /**
-   * Default flags to use for string literal match
-   * @see NodePattern#CASE_INSENSITIVE
-   */
-  public int defaultStringMatchFlags = 0;
-
   public Class sequenceMatchResultExtractor;
   public Class stringMatchResultExtractor;
-
-  /**
-   * Annotation key to use to getting tokens (default is CoreAnnotations.TokensAnnotation.class)
-   */
   public Class defaultTokensAnnotationKey;
-
-  /**
-   * Annotation key to use to getting text (default is CoreAnnotations.TextAnnotation.class)
-   */
   public Class defaultTextAnnotationKey;
-
-  /**
-   * List of keys indicating the per-token annotations (default is null).
-   * If specified, each token will be annotated with the extracted results from the
-   *   {@link #defaultResultsAnnotationExtractor}.
-   * If null, then individual tokens that are matched are not annotated.
-   */
   public List<Class> defaultTokensResultAnnotationKey;
-
-  /**
-   * List of keys indicating what fields should be annotated for the aggregated coremap.
-   * If specified, the aggregated coremap is annotated with the extracted results from the
-   *   {@link #defaultResultsAnnotationExtractor}.
-   * If null, then the aggregated coremap is not annotated.
-   */
   public List<Class> defaultResultAnnotationKey;
-
-  /**
-   * Annotation key to use during composite phase for storing matched sequences and to match against.
-   */
   public Class defaultNestedResultsAnnotationKey;
-
-  /**
-   * How should the tokens be aggregated when collapsing a sequence of tokens into one CoreMap
-   */
   public Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators;
 
-  /**
-   * How annotations be extracted from the MatchedExpression
-   * If the result type is a List and more than one annotation key is specified,
-   *   then the result is paired with the annotation key
-   *   Example: If annotation key is [ner,normalized] and result is [CITY,San Francisco]
-   *            then the final coremap will have ner=CITY, normalized=San Francisco
-   * Otherwise, the result is treated as one object (all keys will be assigned that value).
-   */
   Function<MatchedExpression,?> defaultResultsAnnotationExtractor;
 
-  /**
-   * Interface for performing custom binding of values to the environment
-   */
   public static interface Binder {
     public void init(String prefix, Properties props);
     public void bind(Env env);
@@ -244,14 +186,6 @@ public class Env {
     this.defaultStringPatternFlags = defaultStringPatternFlags;
   }
 
-  public int getDefaultStringMatchFlags() {
-    return defaultStringMatchFlags;
-  }
-
-  public void setDefaultStringMatchFlags(int defaultStringMatchFlags) {
-    this.defaultStringMatchFlags = defaultStringMatchFlags;
-  }
-
   private static final Pattern STRING_REGEX_VAR_NAME_PATTERN = Pattern.compile("\\$[A-Za-z0-9_]+");
   public void bindStringRegex(String var, String regex)
   {
@@ -354,42 +288,6 @@ public class Env {
   public Object get(String name)
   {
       return variables.get(name);
-  }
-
-  // Functions for storing temporary thread specific variables
-  //  that are used when running tokensregex
-  public void push(String name, Object value) {
-    Map<String,Object> vars = threadLocalVariables.get();
-    if (vars == null) {
-      threadLocalVariables.set(vars = Generics.newHashMap());
-    }
-    Stack<Object> stack = (Stack<Object>) vars.get(name);
-    if (stack == null) {
-      vars.put(name, stack = new Stack<Object>());
-    }
-    stack.push(value);
-  }
-
-  public Object pop(String name) {
-    Map<String,Object> vars = threadLocalVariables.get();
-    if (vars == null) return null;
-    Stack<Object> stack = (Stack<Object>) vars.get(name);
-    if (stack == null || stack.isEmpty()) {
-      return null;
-    } else {
-      return stack.pop();
-    }
-  }
-
-  public Object peek(String name) {
-    Map<String,Object> vars = threadLocalVariables.get();
-    if (vars == null) return null;
-    Stack<Object> stack = (Stack<Object>) vars.get(name);
-    if (stack == null || stack.isEmpty()) {
-      return null;
-    } else {
-      return stack.peek();
-    }
   }
 
 }

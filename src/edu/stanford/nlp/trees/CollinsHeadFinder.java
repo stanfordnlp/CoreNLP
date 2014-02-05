@@ -3,7 +3,6 @@ package edu.stanford.nlp.trees;
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.util.Generics;
 
-
 /**
  * Implements the HeadFinder found in Michael Collins' 1999 thesis.
  * Except: we've added a head rule for NX, which returns the leftmost item.
@@ -23,11 +22,30 @@ import edu.stanford.nlp.util.Generics;
 
 public class CollinsHeadFinder extends AbstractCollinsHeadFinder {
 
-  private static final String[] EMPTY_STRING_ARRAY = {};
-
   public CollinsHeadFinder() {
     this(new PennTreebankLanguagePack());
   }
+
+  @Override
+  protected int postOperationFix(int headIdx, Tree[] daughterTrees) {
+    if (headIdx >= 2) {
+      String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
+      if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
+        int newHeadIdx = headIdx - 2;
+        Tree t = daughterTrees[newHeadIdx];
+        while (newHeadIdx >= 0 && t.isPreTerminal() &&
+            tlp.isPunctuationTag(t.value())) {
+          newHeadIdx--;
+        }
+        if (newHeadIdx >= 0) {
+          headIdx = newHeadIdx;
+        }
+      }
+    }
+    return headIdx;
+  }
+
+  private static final String[] EMPTY_STRING_ARRAY = {};
 
   /** This constructor provides the traditional behavior, where there is
    *  no special avoidance of punctuation categories.
@@ -73,25 +91,6 @@ public class CollinsHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("TYPO", new String[][] {{"left"}}); // another crap rule, for Brown (Roger)
     nonTerminalInfo.put("EDITED", new String[][] {{"left"}});  // crap rule for Switchboard (if don't delete EDITED nodes)
     nonTerminalInfo.put("XS", new String[][] {{"right", "IN"}}); // rule for new structure in QP
-  }
-
-  @Override
-  protected int postOperationFix(int headIdx, Tree[] daughterTrees) {
-    if (headIdx >= 2) {
-      String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
-      if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
-        int newHeadIdx = headIdx - 2;
-        Tree t = daughterTrees[newHeadIdx];
-        while (newHeadIdx >= 0 && t.isPreTerminal() &&
-            tlp.isPunctuationTag(t.value())) {
-          newHeadIdx--;
-        }
-        if (newHeadIdx >= 0) {
-          headIdx = newHeadIdx;
-        }
-      }
-    }
-    return headIdx;
   }
 
 

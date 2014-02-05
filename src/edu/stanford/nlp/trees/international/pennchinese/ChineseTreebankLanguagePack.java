@@ -19,10 +19,10 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final long serialVersionUID = 5757403475523638802L;
 
-  private TokenizerFactory<? extends HasWord> tf;
+  private static TokenizerFactory<? extends HasWord> tf;
 
-  public void setTokenizerFactory(TokenizerFactory<? extends HasWord> tf) {
-    this.tf = tf;
+  public static void setTokenizerFactory(TokenizerFactory<? extends HasWord> tf) {
+    ChineseTreebankLanguagePack.tf = tf;
   }
 
   @Override
@@ -197,7 +197,7 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
           "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠" };  // ( and ) still must be escaped
   private static final String[] colon = {"：", "；", "∶", ":"};
   private static final String[] dash = {"…", "—", "——", "———", 
-          "－", "--", "---", "－－", "－－－", "──", "━", "━━", "—－",
+          "－", "--", "---", "－－", "──", "━", "━━", "—－",
           "-", "----", "~", "……", "～",
           "．．．" /* 3 full width dots as ellipsis */ };
   private static final String[] other = {"·", "／", "／", "＊", "＆", "/", "//", "*", "※", "●", "｜" };  // slashes are used in urls

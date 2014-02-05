@@ -35,14 +35,9 @@ import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NO
  * Functions for retrieving matched patterns
  * <pre><code>
  *    int groupCount()
- *    List&lt;T&gt; groupNodes(), List&lt;T&gt; groupNodes(int g)
+ *    List<T> groupNodes(), List<T> groupNodes(int g)
  *    String group(), String group(int g)
  *    int start(), int start(int g), int end(), int end(int g)
- * </code></pre>
- * Functions for replacing
- * <pre><code>
- *    List&lt;T&gt; replaceFirst(List&lt;T&gt; seq), List replaceAll(List&lt;T&gt; seq)
- *    List&lt;T&gt; replaceFirstExtended(List&lt;MatchReplacement&lt;T&gt;&gt; seq), List&lt;T&gt; replaceAllExtended(List&lt;MatchReplacement&lt;T&gt;&gt; seq)
  * </code></pre>
  * Functions for defining the region of the sequence to search over
  *  (default region is entire sequence)
@@ -62,6 +57,7 @@ import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NO
  */
 public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   private static final Logger logger = Logger.getLogger(SequenceMatcher.class.getName());
+  SequencePattern pattern;    // Pattern we are trying to match against
 
   boolean matchingCompleted = false;
   boolean matched = false;
@@ -87,9 +83,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   // For FIND_ALL
   Iterator<Integer> curMatchIter = null;
   MatchedStates<T> curMatchStates = null;
-
-  // Branching limit for searching with back tracking
-  int branchLimit = 2;
 
   protected SequenceMatcher(SequencePattern pattern, List<? extends T> elements)
   {
@@ -377,48 +370,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   }
 
   /**
-   * Applies the matcher and returns all non overlapping matches
-   * @return a Iterable of match results
-   */
-  public Iterable<SequenceMatchResult<T>> findAllNonOverlapping() {
-    Iterator<SequenceMatchResult<T>> iter = new Iterator<SequenceMatchResult<T>>() {
-      SequenceMatchResult<T> next;
-
-      private SequenceMatchResult<T> getNext() {
-        boolean found = find();
-        if (found) {
-          return toBasicSequenceMatchResult();
-        } else {
-          return null;
-        }
-      }
-
-      @Override
-      public boolean hasNext() {
-        if (next == null) {
-          next = getNext();
-          return (next != null);
-        } else {
-          return true;
-        }
-      }
-
-      @Override
-      public SequenceMatchResult<T> next() {
-        if (!hasNext()) { throw new NoSuchElementException(); }
-        SequenceMatchResult<T> res = next;
-        next = null;
-        return res;
-      }
-
-      public void remove() {
-        throw new UnsupportedOperationException();
-      }
-    };
-    return new IterableIterator<SequenceMatchResult<T>>(iter);
-  }
-
-  /**
    * Searches for the next occurrence of the pattern
    * @return true if a match is found (false otherwise)
    * @see #find(int)
@@ -477,6 +428,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   protected boolean findMatchStartBacktracking(int start, boolean matchAllTokens)
   {
     boolean matchAll = true;
+    int branchLimit = 2;
     Stack<MatchedStates> todo = new Stack<MatchedStates>();
     MatchedStates cStates = getStartStates();
     cStates.curPosition = start-1;
@@ -511,7 +463,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   }
 
   /**
-   * Checks if the pattern matches the entire sequence
+   * Checkes if the pattern matches the entire sequence
    * @return true if the entire sequence is matched (false otherwise)
    * @see #find()
    */
@@ -583,12 +535,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     return regionStart;
   }
 
-  /**
-   * Returns a copy of the current match results.  Use this method
-   * to save away match results for later use, since future operations
-   * using the SequenceMatcher changes the match results.
-   * @return Copy of the the current match results
-   */
   public BasicSequenceMatchResult<T> toBasicSequenceMatchResult() {
     if (matchingCompleted && matched) {
       return super.toBasicSequenceMatchResult();
@@ -616,7 +562,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
   }
 
-  public List<T> groupNodes(int group) {
+  public List<? extends T> groupNodes(int group) {
     if (matchingCompleted && matched) {
       return super.groupNodes(group);
     } else {
@@ -1187,10 +1133,10 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       removeMatchStateInfo(bid, node);
     }
 
-    protected void setMatchedInterval(int bid, SequencePattern.State node, HasInterval<Integer> interval)
+    protected void setMatchedInterval(int bid, SequencePattern.State node, Interval<Integer> interval)
     {
       Map<SequencePattern.State,Object> matchStateInfo = getMatchStateInfo(bid, true);
-      HasInterval<Integer> p = (HasInterval<Integer>) matchStateInfo.get(node);
+      Interval<Integer> p = (Interval<Integer>) matchStateInfo.get(node);
       if (p == null) {
         matchStateInfo.put(node, interval);
       } else {
@@ -1198,10 +1144,10 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       }
     }
 
-    protected HasInterval<Integer> getMatchedInterval(int bid, SequencePattern.State node)
+    protected Interval<Integer> getMatchedInterval(int bid, SequencePattern.State node)
     {
       Map<SequencePattern.State,Object> matchStateInfo = getMatchStateInfo(bid, true);
-      HasInterval<Integer> p = (HasInterval<Integer>) matchStateInfo.get(node);
+      Interval<Integer> p = (Interval<Integer>) matchStateInfo.get(node);
       return p;
     }
 
@@ -1398,7 +1344,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
 
     /**
-     * Returns index of state that results in match (-1 if no matches)
+     * Returns index of state that results in match (-1 if no mtaches)
      */
     private int getMatchIndex()
     {

@@ -101,7 +101,7 @@ import java.util.regex.Pattern;
  *        # Type of the rule
  *        ruleType: "tokens" | "text" | "composite" | "filter",
  *        # Pattern to match against
- *        pattern: ( &lt;TokenSequencePattern&gt; ) | /&lt;TextPattern&gt;/,
+ *        pattern: ( <TokenSequencePattern> ) | /<TextPattern>/,
  *        # Resulting value to go into the resulting annotation
  *        result: ...
  *
@@ -113,43 +113,41 @@ import java.util.regex.Pattern;
  *   {
  *     ruleType: "tokens",
  *     pattern: ( /one/ ),
- *     result: 1
+ *     value: 1
  *   }
  * </pre>
  * </p>
- * Extraction rule fields (most fields are optional):
+ * Extraction rule fields:
  * <table>
  *   <tr><th>Field</th><th>Values</th><th>Example</th><th>Description</th></tr>
  *   <tr><td><code>ruleType</code></td><td><code>"tokens" | "text" | "composite" | "filter" </code></td>
- *      <td><code>tokens</code></td><td>Type of the rule (required).</td></tr>
- *   <tr><td><code>pattern</code></td><td><code>&lt;Token Sequence Pattern&gt; = (...) | &lt;Text Pattern&gt; = /.../</code></td>
+ *      <td><code>tokens</code></td><td>Type of the rule</td></tr>
+ *   <tr><td><code>pattern</code></td><td><code>&lt;Token Sequence Pattern&gt;&lt; = (...) | &lt;Text Pattern&gt; = /.../</code></td>
  *      <td><code>( /winter/ /of/ $YEAR )</code></td><td>Pattern to match against.
  *      See {@link TokenSequencePattern} and {@link Pattern} for
- *      how to specify patterns over tokens and strings (required).</td></tr>
- *   <tr><td><code>action</code></td><td><code>&lt;Action List&gt; = (...)</code></td>
- *      <td><code>( Annotate($0, ner, "DATE") )</code></td><td>List of actions to apply when the pattern is triggered.
- *      Each action is a {@link Expressions TokensRegex Expression}</td></tr>
- *   <tr><td><code>result</code></td><td><code>&lt;Expression&gt;</code></td>
- *      <td><code></code></td><td>Resulting value to go into the resulting annotation.  See {@link Expressions} for how to specify the result.</td></tr>
+ *      how to specify patterns over tokens and strings</td></tr>
+ *   <tr><td><code>action</code></td><td><code>&lt;Action List&gt;&lt; = (...)</code></td>
+ *      <td><code></code></td><td>List of actions to apply when the pattern is triggered</td></tr>
+ *   <tr><td><code>result</code></td><td><code>...</code></td>
+ *      <td><code></code></td><td>Resulting value to go into the resulting annotation</td></tr>
  *   <tr><td><code>name</code></td><td><code>STRING</code></td>
- *      <td><code></code></td><td>Name to identify the extraction rule.</td></tr>
+ *      <td><code></code></td><td>Name to identify the extraction rule/td></tr>
  *   <tr><td><code>stage</code></td><td><code>INTEGER</code></td>
- *      <td><code></code></td><td>Stage at which the rule is to be applied.  Rules are grouped in stages, which are applied from lowest to highest.</td></tr>
+ *      <td><code></code></td><td>Stage at which the rule is to be applied/td></tr>
  *   <tr><td><code>active</code></td><td><code>Boolean</code></td>
- *      <td><code></code></td><td>Whether this rule is enabled (active) or not (default true).</td></tr>
+ *      <td><code></code></td><td>Whether this rule is enabled (active) or not</td></tr>
  *   <tr><td><code>priority</code></td><td><code>DOUBLE</code></td>
- *      <td><code></code></td><td>Priority of rule.  Within a stage, matches from higher priority rules are preferred.</td></tr>
+ *      <td><code></code></td><td>Priority of rule</tr>
  *   <tr><td><code>weight</code></td><td><code>DOUBLE</code></td>
- *      <td><code></code></td><td>Weight of rule (not currently used).</td></tr>
+ *      <td><code></code></td><td>Weight of rule (not currently used)</td></tr>
  *   <tr><td><code>over</code></td><td><code>CLASS</code></td>
- *      <td><code></code></td><td>Annotation field to check pattern against.</td></tr>
+ *      <td><code></code></td><td>Annotation field to check pattern against</td></tr>
  *   <tr><td><code>matchFindType</code></td><td><code>FIND_NONOVERLAPPING | FIND_ALL</code></td>
- *      <td><code></code></td><td>Whether to find all matched expression or just the nonoverlapping ones (default <code>FIND_NONOVERLAPPING</code>).</td></tr>
+ *      <td><code></code></td><td>Whether to find all matched expression or just the nonoverlaping ones</td></tr>
  *   <tr><td><code>matchWithResults</code></td><td><code>Boolean</code></td>
- *      <td><code></code></td><td>Whether results of the matches should be returned (default false).
- *        Set to true to access captured groups of embedded regular expressions.</td></tr>
+ *      <td><code></code></td><td>Whether results of the matches should be returned (default false)</td></tr>
  *   <tr><td><code>matchedExpressionGroup</code></td><td><code>Integer</code></td>
- *      <td><code></code></td><td>What group should be treated as the matched expression group (default 0).</td></tr>
+ *      <td><code></code></td><td>What group should be treated as the matched expression group (default 0)</td></tr>
  * </table>
  *
  * @author Angel Chang
@@ -404,7 +402,7 @@ public class SequenceMatchRules {
       MatchedExpression.SingleAnnotationExtractor valueExtractor = createAnnotationExtractor(env, r);
       valueExtractor.valueExtractor =
               new CoreMapFunctionApplier< List<? extends CoreMap>, Value>(
-                      env, r.annotationField,
+                      r.annotationField,
                       new SequencePatternExtractRule<CoreMap, Value>(
                               pattern,
                               new SequenceMatchResultExtractor<CoreMap>(env, action, result), r.matchFindType, r.matchWithResults));
@@ -461,18 +459,18 @@ public class SequenceMatchRules {
       if (r.annotationField != null && r.annotationField != CoreMap.class) {
         valueExtractor.valueExtractor =
               new CoreMapFunctionApplier< List<? extends CoreMap>, Value >(
-                      env, r.annotationField,
+                      r.annotationField,
                       new SequencePatternExtractRule<CoreMap, Value>(
                               pattern,
                               new SequenceMatchResultExtractor<CoreMap>(env, action, result), r.matchFindType, r.matchWithResults));
         r.extractRule = new CoreMapExtractRule< List<? extends CoreMap>, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new SequencePatternExtractRule<CoreMap, MatchedExpression>(pattern,
                       new SequenceMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup), r.matchFindType, r.matchWithResults));
       } else {
         valueExtractor.valueExtractor =
                 new CoreMapToListFunctionApplier< Value >(
-                        env, new SequencePatternExtractRule<CoreMap, Value>(
+                        new SequencePatternExtractRule<CoreMap, Value>(
                                 pattern,
                                 new SequenceMatchResultExtractor<CoreMap>(env, action, result), r.matchFindType, r.matchWithResults));
         r.extractRule = new CoreMapToListExtractRule< MatchedExpression >(
@@ -516,12 +514,12 @@ public class SequenceMatchRules {
       Pattern pattern = env.getStringPattern(expr);
       valueExtractor.valueExtractor =
               new CoreMapFunctionApplier< String, Value >(
-                      env, r.annotationField,
+                      r.annotationField,
                       new StringPatternExtractRule<Value>(
                               pattern,
                               new StringMatchResultExtractor(env, action, result)));
       r.extractRule = new CoreMapExtractRule< String, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new StringPatternExtractRule<MatchedExpression>(pattern,
                       new StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
       r.filterRule = new AnnotationMatchedFilter(valueExtractor);
@@ -629,20 +627,10 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Interface for a rule that extracts a list of matched items from a input
-   * @param <I>
-   * @param <O>
-   */
   public static interface ExtractRule<I,O> {
     public boolean extract(I in, List<O> out);
-  }
+  };
 
-  /**
-   * Extraction rule that filters the input before passing it on to the next extractor
-   * @param <I>
-   * @param <O>
-   */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
   {
     Filter<I> filter;
@@ -667,12 +655,6 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Extraction rule that applies a list of rules in sequence and aggregates
-   *   all matches found
-   * @param <I>
-   * @param <O>
-   */
   public static class ListExtractRule<I,O> implements ExtractRule<I,O>
   {
     List<ExtractRule<I,O>> rules;
@@ -713,29 +695,19 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Extraction rule to apply a extraction rule on a particular CoreMap field
-   * @param <T>
-   * @param <O>
-   */
   public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
   {
-    Env env;
     Class annotationField;
     ExtractRule<T,O> extractRule;
 
-    public CoreMapExtractRule(Env env, Class annotationField, ExtractRule<T,O> extractRule) {
+    public CoreMapExtractRule(Class annotationField, ExtractRule<T,O> extractRule) {
       this.annotationField = annotationField;
       this.extractRule = extractRule;
-      this.env = env;
     }
 
     public boolean extract(CoreMap cm, List<O> out) {
-      env.push(Expressions.VAR_SELF, cm);
       T field = (T) cm.get(annotationField);
-      boolean res = extractRule.extract(field, out);
-      env.pop(Expressions.VAR_SELF);
-      return res;
+      return extractRule.extract(field, out);
     }
 
   }
@@ -913,43 +885,33 @@ public class SequenceMatchRules {
 
   public static class CoreMapFunctionApplier<T,O> implements Function<CoreMap, O>
   {
-    Env env;
     Class annotationField;
     Function<T,O> func;
 
-    public CoreMapFunctionApplier(Env env, Class annotationField, Function<T,O> func) {
+    public CoreMapFunctionApplier(Class annotationField, Function<T,O> func) {
       this.annotationField = annotationField;
       if (annotationField == null) {
         throw new IllegalArgumentException("Annotation field cannot be null");
       }
       this.func = func;
-      this.env = env;
     }
 
     public O apply(CoreMap cm) {
-      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
       T field = (T) cm.get(annotationField);
-      O res = func.apply(field);
-      if (env != null) { env.pop(Expressions.VAR_SELF); }
-      return res;
+      return func.apply(field);
     }
   }
 
   public static class CoreMapToListFunctionApplier<O> implements Function<CoreMap, O>
   {
-    Env env;
     Function<List<? extends CoreMap>,O> func;
 
-    public CoreMapToListFunctionApplier(Env env, Function<List<? extends CoreMap>,O> func) {
+    public CoreMapToListFunctionApplier(Function<List<? extends CoreMap>,O> func) {
       this.func = func;
-      this.env = env;
     }
 
     public O apply(CoreMap cm) {
-      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
-      O res = func.apply(Arrays.asList(cm));
-      if (env != null) { env.pop(Expressions.VAR_SELF); }
-      return res;
+      return func.apply(Arrays.asList(cm));
     }
   }
 }

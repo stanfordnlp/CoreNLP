@@ -14,14 +14,8 @@ package edu.stanford.nlp.util;
 public class ArrayStringFilter implements Filter<String> {
   private final String[] words;
   private final int length;
-  private final Mode mode;
 
-  public enum Mode {
-    EXACT, PREFIX, CASE_INSENSITIVE
-  }
-
-  public ArrayStringFilter(Mode mode, String ... words) {
-    this.mode = mode;
+  public ArrayStringFilter(String ... words) {
     this.words = new String[words.length];
     for (int i = 0; i < words.length; ++i) {
       this.words[i] = words[i];
@@ -30,39 +24,12 @@ public class ArrayStringFilter implements Filter<String> {
   }
 
   public boolean accept(String input) {
-    switch (mode) {
-    case EXACT:
-      for (int i = 0; i < length; ++i) {
-        if (words[i].equals(input)) {
-          return true;
-        }
+    for (int i = 0; i < length; ++i) {
+      if (words[i].equals(input)) {
+        return true;
       }
-      return false;
-    case PREFIX:
-      if (input == null) {
-        return false;
-      }
-      for (int i = 0; i < length; ++i) {
-        if (input.startsWith(words[i])) {
-          return true;
-        }
-      }
-      return false;
-    case CASE_INSENSITIVE:
-      for (int i = 0; i < length; ++i) {
-        if (words[i].equalsIgnoreCase(input)) {
-          return true;
-        }
-      }
-      return false;      
-    default:
-      throw new IllegalArgumentException("Unknown mode " + mode);
     }
-  }
-
-  @Override
-  public String toString() {
-    return mode.toString() + ":" + StringUtils.join(words, ",");
+    return false;
   }
 
   private static final long serialVersionUID = 1;

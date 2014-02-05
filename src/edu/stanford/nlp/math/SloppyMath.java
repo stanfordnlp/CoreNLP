@@ -3,13 +3,13 @@ package edu.stanford.nlp.math;
 import java.util.Collection;
 
 /**
- * The class {@code SloppyMath} contains methods for performing basic
+ * The class <code>SloppyMath</code> contains methods for performing basic
  * numeric operations.  In some cases, such as max and min, they cut a few
  * corners in
  * the implementation for the sake of efficiency.  In particular, they may
  * not handle special notions like NaN and -0.0 correctly.  This was the
  * origin of the class name, but many other methods are just useful
- * math additions, such as logAdd.  This class just has static math methods.
+ * math additions, such as logAdd.  This class just has static math methds.
  *
  * @author Christopher Manning
  * @version 2003/01/02
@@ -158,18 +158,6 @@ public final class SloppyMath {
    */
   public static double min(double a, double b) {
     return (a <= b) ? a : b;
-  }
-
-  /** Returns a mod where the sign of the answer is the same as the sign of the second
-   *  argument.  This is how languages like Python do it. Helpful for array accesses.
-   *
-   *  @param num The number
-   * @param modulus The modulus
-   * @return num mod modulus, where the sign of the answer is the same as the sign of modulus
-   */
-  public static int pythonMod(int num, int modulus) {
-    // This is: num < 0 ? num % modulus + modulus: num % modulus, but avoids a test-and-branch
-    return (num % modulus + modulus) % modulus;
   }
 
   /**
@@ -335,8 +323,6 @@ public final class SloppyMath {
    * the exponent is treated as 0, and 1 is returned.  0^0 also
    * returns 1.
    * Biased to do quickly small exponents, like the CRF needs.
-   * Todo: Claim is that it will be faster if use if, not switch, and also do 3 (and even 4, 5) via cases:
-   * http://jafama.svn.sourceforge.net/viewvc/jafama/src/odk/lang/FastMath.java?view=markup
    *
    * @param b base
    * @param e exponent
@@ -634,32 +620,6 @@ public final class SloppyMath {
       return 1.0 / den;
     }
   }
-
-
-  private static float[] acosCache = null;
-  /**
-   * Compute acos very quickly by directly looking up the value.
-   * @param cosValue The cosine of the angle to fine.
-   * @return The angle corresponding to the cosine value.
-   * @throws IllegalArgumentException if cosValue is not between -1 and 1
-   */
-  public static double acos(double cosValue) {
-    if (cosValue < -1.0 || cosValue > 1.0) {
-      throw new IllegalArgumentException("Cosine is not between -1 and 1: " + cosValue);
-    }
-    int numSamples = 10000;
-    if (acosCache == null) {
-      acosCache = new float[numSamples + 1];
-      for (int i = 0; i <= numSamples; ++i) {
-        double x = 2.0 / ((double) numSamples) * ((double) i) - 1.0;
-        acosCache[i] = (float) Math.acos(x);
-      }
-    }
-
-    int i = ((int) (((cosValue + 1.0) / 2.0) * ((double) numSamples)));
-    return acosCache[i];
-  }
-
 
   public static double poisson(int x, double lambda) {
     if (x<0 || lambda<=0.0) throw new RuntimeException("Bad arguments: " + x + " and " + lambda);

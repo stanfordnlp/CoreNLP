@@ -23,14 +23,7 @@ public class MatchedExpression {
   /** Text representing the matched expression */
   protected String text;
 
-  /**
-   * Character offsets (relative to original text)
-   * TODO: Fix up
-   *  If matched using regular text patterns,
-   *     the character offsets are with respect to the annotation (usually sentence)
-   *     from which the text was matched against
-   *  If matched using tokens, the character offsets are with respect to the overall document
-   */
+  /** Character offsets (relative to original text) */
   protected Interval<Integer> charOffsets;
   /**Token offsets (relative to original text tokenization) */
   protected Interval<Integer> tokenOffsets;
@@ -367,6 +360,7 @@ public class MatchedExpression {
   public static <T extends MatchedExpression> List<T> removeNested(List<T> chunks)
   {
     if (chunks.size() > 1) {
+      // TODO: presort chunks by priority, length, given order
       for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
@@ -379,6 +373,7 @@ public class MatchedExpression {
   public static <T extends MatchedExpression> List<T> removeOverlapping(List<T> chunks)
   {
     if (chunks.size() > 1) {
+      // TODO: presort chunks by priority, length, given order
       for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
@@ -487,17 +482,31 @@ public class MatchedExpression {
       }
     };
 
+  public final static Comparator<MatchedExpression> EXPR_TOKEN_OFFSETS_CONTAINS_FIRST_COMPARATOR =
+          new Comparator<MatchedExpression>() {
+            public int compare(MatchedExpression e1, MatchedExpression e2) {
+              Interval.RelType rel = e1.tokenOffsets.getRelation(e2.tokenOffsets);
+              if (rel.equals(Interval.RelType.CONTAIN)) {
+                return -1;
+              } else if (rel.equals(Interval.RelType.INSIDE)) {
+                return 1;
+              } else {
+                return 0;
+              }
+            }
+          };
+
   // Compares two matched expressions.
   // Use to order matched expressions by:
    //   score
   //    length (longest first), then whether it has value or not (has value first),
   //    original order
-  //    and then beginning token offset (smaller offset first)
+  //    and then begining token offset (smaller offset first)
   public final static Comparator<MatchedExpression> EXPR_PRIORITY_LENGTH_COMPARATOR =
-          Comparators.chain(EXPR_PRIORITY_COMPARATOR, EXPR_LENGTH_COMPARATOR,
+          Comparators.chain(EXPR_TOKEN_OFFSETS_CONTAINS_FIRST_COMPARATOR, EXPR_PRIORITY_COMPARATOR, EXPR_LENGTH_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
 
   public final static Comparator<MatchedExpression> EXPR_LENGTH_PRIORITY_COMPARATOR =
-          Comparators.chain(EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
+          Comparators.chain(EXPR_TOKEN_OFFSETS_CONTAINS_FIRST_COMPARATOR, EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
 }

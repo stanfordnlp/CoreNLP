@@ -36,7 +36,7 @@ import java.util.*;
  * <td>useQN</td>
  * <td>boolean</td>
  * <td>true</td>
- * <td>Use Quasi-Newton (L-BFGS) optimization to find minimum. NOTE: Need to set this to
+ * <td>Use Quasi-Newton (L-BFGS) to find minimum. NOTE: Need to set this to
  * false if using other minimizers such as SGD.</td>
  * </tr>
  * <tr>
@@ -163,6 +163,9 @@ public class SeqClassifierFlags implements Serializable {
   public boolean retainEntitySubclassification = false;
   public boolean useGazettePhrases = false;
   public boolean makeConsistent = false;
+  public boolean useWordLabelCounts = false;
+  // boolean usePrevInstanceLabel = false;
+  // boolean useNextInstanceLabel = false;
   public boolean useViterbi = true;
 
   public int[] binnedLengths = null;
@@ -440,7 +443,8 @@ public class SeqClassifierFlags implements Serializable {
   public transient List<String> gazettes = new ArrayList<String>();
   public transient String selfTrainFile = null;
 
-  public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as well
+  public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as
+  // well
 
   public boolean bioSubmitOutput = false;
   public int numRuns = 1;
@@ -450,11 +454,7 @@ public class SeqClassifierFlags implements Serializable {
   public String printGazFeatures = null;
   public int numStartLayers = 1;
   public boolean dump = false;
-
-  // whether to merge B- and I- tags in an input file and to tag with IO tags
-  // (lacking a prefix). E.g., "I-PERS" goes to "PERS"
-  public boolean mergeTags;
-
+  public boolean mergeTags; // whether to merge B- and I- tags
   public boolean splitOnHead;
 
   // threshold
@@ -552,9 +552,7 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean booleanFeatures = false;
 
-  // This flag is only used for the sequences Type 2 CRF, not for ie.crf.CRFClassifier
   public boolean iobWrapper = false;
-
   public boolean iobTags = false;
   public boolean useSegmentation = false; /*
                                            * binary segmentation feature for
@@ -687,12 +685,37 @@ public class SeqClassifierFlags implements Serializable {
   public boolean doFE = false;
   public boolean restrictLabels = true;
 
-  // whether to print a line saying each ObjectBank entry (usually a filename)
-  public boolean announceObjectBankEntries = false;
+  public boolean announceObjectBankEntries = false; // whether to print a line
+  // giving each ObjectBank
+  // entry (usually a
+  // filename)
 
-  // This is for use with the OWLQNMinimizer. To use it, set useQN=false, and this to a positive number.
-  // A smaller number means more features are retained. Depending on the problem, a good value might be
-  // between 0.75 (POS tagger) down to 0.01 (Chinese word segmentation)
+  // Arabic Subject Detector flags
+  public boolean usePos = false;
+  public boolean useAgreement = false;
+  public boolean useAccCase = false;
+  public boolean useInna = false;
+  public boolean useConcord = false;
+  public boolean useFirstNgram = false;
+  public boolean useLastNgram = false;
+  public boolean collapseNN = false;
+  public boolean useConjBreak = false;
+  public boolean useAuxPairs = false;
+  public boolean usePPVBPairs = false;
+  public boolean useAnnexing = false;
+  public boolean useTemporalNN = false;
+  public boolean usePath = false;
+  public boolean innaPPAttach = false;
+  public boolean markProperNN = false;
+  public boolean markMasdar = false;
+  public boolean useSVO = false;
+
+  public int numTags = 3;
+  public boolean useTagsCpC = false;
+  public boolean useTagsCpCp2C = false;
+  public boolean useTagsCpCp2Cp3C = false;
+  public boolean useTagsCpCp2Cp3Cp4C = false;
+
   public double l1reg = 0.0;
 
   // truecaser flags:
@@ -849,16 +872,19 @@ public class SeqClassifierFlags implements Serializable {
   public String bisequenceTestOutputEn = null;
   public String bisequenceTestOutputCh = null;
   public String bisequenceTestAlignmentFile = null;
-  public String bisequenceAlignmentTestOutput = null;
   public int bisequencePriorType = 1;
   public String bisequenceAlignmentPriorPenaltyCh = null;
   public String bisequenceAlignmentPriorPenaltyEn = null;
   public double alignmentPruneThreshold = 0.0;
-  public double alignmentDecodeThreshold = 0.5;
   public boolean factorInAlignmentProb = false;
   public boolean useChromaticSampling = false;
   public boolean useSequentialScanSampling = false;
   public int maxAllowedChromaticSize = 8;
+
+  /** Whether to drop out some fraction of features in the input during
+   *  training (and then to scale the weights at test time).
+   */
+  public double inputDropOut = 0.0;
 
   /**
    * Whether or not to keep blank sentences when processing.  Useful
@@ -880,8 +906,7 @@ public class SeqClassifierFlags implements Serializable {
   public String embeddingWords = null;
   public String embeddingVectors = null;
   public boolean transitionEdgeOnly = false;
-  // L1-prior used in OWLQN
-  public double priorLambda = 0;
+  public double priorL1Lambda = 0;
   public boolean addCapitalFeatures = false;
   public int arbitraryInputLayerSize = -1;
   public boolean noEdgeFeature = false;
@@ -903,124 +928,9 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useNERPriorBIO = false;
   public String entityMatrix = null;
   public int multiThreadClassifier = 0;
-  public boolean useDualDecomp = false;
-  public boolean biAlignmentPriorIsPMI = true;
-  public boolean dampDDStepSizeWithAlignmentProb = false;
-  public boolean dualDecompAlignment = false;
-  public double dualDecompInitialStepSizeAlignment = 0.1;
-  public boolean dualDecompNotBIO = false;
-  public String berkeleyAlignerLoadPath = null;
-  public boolean useBerkeleyAlignerForViterbi = false;
-  public boolean useBerkeleyCompetitivePosterior = false;
-  public boolean useDenero = true;
-  public double alignDDAlpha = 1;
-  public boolean factorInBiEdgePotential = false;
-  public boolean noNeighborConstraints = false;
-  public boolean includeC2EViterbi = true;
-  public boolean initWithPosterior = true;
-  public int nerSkipFirstK = 0;
-  public int nerSlowerTimes = 1;
-  public boolean powerAlignProb = false;
-  public boolean powerAlignProbAsAddition = false;
-  public boolean initWithNERPosterior = false;
-  public boolean applyNERPenalty = true;
-  public boolean printFactorTable = false;
-  public boolean useAdaGradFOBOS = false;
-  public double initRate = 0.1;
-  public boolean groupByFeatureTemplate = false;
-  public boolean groupByOutputClass = false;
-  public double priorAlpha = 0;
-
+  
   public String splitWordRegex = null;
-  public boolean groupByInput = false;
-  public boolean groupByHiddenUnit = false;
-
-  public String unigramLM = null;
-  public String bigramLM = null;
-  public int wordSegBeamSize = 1000;
-  public String vocabFile = null;
-  public String normalizedFile = null;
-  public boolean averagePerceptron = true;
-  public String loadCRFSegmenterPath = null;
-  public String loadPCTSegmenterPath = null;
-  public String crfSegmenterProp = null;
-  public String pctSegmenterProp = null;
-  public String intermediateSegmenterOut = null;
-  public String intermediateSegmenterModel = null;
-
-  public int dualDecompMaxItr = 0;
-  public double dualDecompInitialStepSize = 0.1;
-  public boolean dualDecompDebug = false;
-  public boolean useCWSWordFeatures = false;
-  public boolean useCWSWordFeaturesAll = false;
-  public boolean useCWSWordFeaturesBigram = false;
-  public boolean pctSegmenterLenAdjust = false;
-  public boolean useTrainLexicon = false;
-  public boolean useCWSFeatures = true;
-  public boolean appendLC = false;
-  public boolean perceptronDebug = false;
-  public boolean pctSegmenterScaleByCRF = false;
-  public double pctSegmenterScale = 0.0;
-  public boolean separateASCIIandRange = true;
-  public double dropoutRate = 0.0;
-  public double dropoutScale = 1.0;
-  public int multiThreadGrad = 1;
-  public int maxQNItr = 0;
-  public boolean dropoutApprox = false;
-  public String unsupDropoutFile = null;
-  public double unsupDropoutScale = 1.0;
-  public int startEvaluateIters = 0;
-  public int multiThreadPerceptron = 1;
-  public boolean lazyUpdate = false;
-  public int featureCountThresh = 0;
-  public transient String serializeWeightsTo = null;
-  public boolean geDebug = false;
-  public boolean doFeatureDiscovery = false;
-  public transient String loadWeightsFrom = null;
-  public transient String loadClassIndexFrom = null;
-  public transient String serializeClassIndexTo = null;
-  public boolean learnCHBasedOnEN = true;
-  public boolean learnENBasedOnCH = false;
-  public String loadWeightsFromEN = null;
-  public String loadWeightsFromCH = null;
-  public String serializeToEN = null;
-  public String serializeToCH = null;
-  public String testFileEN = null;
-  public String testFileCH = null;
-  public String unsupFileEN = null;
-  public String unsupFileCH = null;
-  public String unsupAlignFile = null;
-  public String supFileEN = null;
-  public String supFileCH = null;
-  public transient String serializeFeatureIndexTo = null;
-  public String loadFeatureIndexFromEN = null;
-  public String loadFeatureIndexFromCH = null;
-  public double lambdaEN = 1.0;
-  public double lambdaCH = 1.0;
-  public boolean alternateTraining = false;
-  public boolean weightByEntropy = false;
-  public boolean useKL = false;
-  public boolean useHardGE = false;
-  public boolean useCRFforUnsup = false;
-  public boolean useGEforSup = false;
-  public boolean useKnownLCWords = true;
-  // allow for multiple feature factories.
-  public String[] featureFactories = null;
-  public List<Object[]> featureFactoriesArgs = null;
-  public boolean useNoisyLabel = false;
-  public String errorMatrix = null;
-  public boolean printTrainLabels = false;
-
-  // Inference label dictionary cutoff
-  public int labelDictionaryCutoff = -1;
-
-  public boolean useAdaDelta = false;
-  public boolean useAdaDiff = false;
-  public double adaGradEps = 1e-3;
-  public double adaDeltaRho = 0.95;
-
-  public boolean useRandomSeed = false;
-  public boolean terminateOnAvgImprovement = false;
+  
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1326,8 +1236,6 @@ public class SeqClassifierFlags implements Serializable {
         }
       } else if (key.equalsIgnoreCase("useSum")) {
         useSum = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("verbose")) {
-        verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("verboseMode")) {
         verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("tolerance")) {
@@ -1633,19 +1541,19 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("backgroundSymbol")) {
         backgroundSymbol = val;
       } else if (key.equalsIgnoreCase("featureFactory")) {
-        // handle multiple feature factories.
-        String[] tokens = val.split("\\s*,\\s*"); // multiple feature factories could be specified and are comma separated.
-        int numFactories = tokens.length;
-        if (numFactories==1){ // for compatible reason
-          featureFactory = getFeatureFactory(val);
+        featureFactory = val;
+        if (featureFactory.equalsIgnoreCase("SuperSimpleFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.sequences.SuperSimpleFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("NERFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("GazNERFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.sequences.GazNERFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("IncludeAllFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.sequences.IncludeAllFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("PhraseFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.article.extraction.PhraseFeatureFactory";
         }
 
-        featureFactories = new String[numFactories];
-        featureFactoriesArgs = new ArrayList<Object[]>(numFactories);
-        for (int i = 0; i < numFactories; i++) {
-          featureFactories[i] = getFeatureFactory(tokens[i]);
-          featureFactoriesArgs.add(new Object[0]);
-        }
       } else if (key.equalsIgnoreCase("printXML")) {
         printXML = Boolean.parseBoolean(val); // todo: This appears unused now.
         // Was it replaced by
@@ -2105,6 +2013,52 @@ public class SeqClassifierFlags implements Serializable {
         transferSigmas = val;
       } else if (key.equalsIgnoreCase("announceObjectBankEntries")) {
         announceObjectBankEntries = true;
+      } else if (key.equalsIgnoreCase("usePos")) {
+        usePos = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAgreement")) {
+        useAgreement = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAccCase")) {
+        useAccCase = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useInna")) {
+        useInna = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useConcord")) {
+        useConcord = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useFirstNgram")) {
+        useFirstNgram = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useLastNgram")) {
+        useLastNgram = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("collapseNN")) {
+        collapseNN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpC")) {
+        useTagsCpC = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpCp2C")) {
+        useTagsCpCp2C = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpCp2Cp3C")) {
+        useTagsCpCp2Cp3C = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTagsCpCp2Cp3Cp4C")) {
+        useTagsCpCp2Cp3Cp4C = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("numTags")) {
+        numTags = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("useConjBreak")) {
+        useConjBreak = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAuxPairs")) {
+        useAuxPairs = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("usePPVBPairs")) {
+        usePPVBPairs = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAnnexing")) {
+        useAnnexing = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTemporalNN")) {
+        useTemporalNN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("markProperNN")) {
+        markProperNN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("usePath")) {
+        usePath = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("markMasdar")) {
+        markMasdar = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("innaPPAttach")) {
+        innaPPAttach = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useSVO")) {
+        useSVO = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("mixedCaseMapFile")) {
         mixedCaseMapFile = val;
       } else if (key.equalsIgnoreCase("auxTrueCaseModels")) {
@@ -2220,8 +2174,6 @@ public class SeqClassifierFlags implements Serializable {
         bisequenceTestOutputCh = val;
       } else if (key.equalsIgnoreCase("bisequenceTestAlignmentFile")) {
         bisequenceTestAlignmentFile = val;
-      } else if (key.equalsIgnoreCase("bisequenceAlignmentTestOutput")) {
-        bisequenceAlignmentTestOutput = val;
       } else if (key.equalsIgnoreCase("bisequencePriorType")) {
         bisequencePriorType = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("bisequenceAlignmentPriorPenaltyCh")) {
@@ -2230,8 +2182,6 @@ public class SeqClassifierFlags implements Serializable {
         bisequenceAlignmentPriorPenaltyEn = val;
       } else if (key.equalsIgnoreCase("alignmentPruneThreshold")) {
         alignmentPruneThreshold = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("alignmentDecodeThreshold")) {
-        alignmentDecodeThreshold = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("factorInAlignmentProb")) {
         factorInAlignmentProb = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useChromaticSampling")) {
@@ -2240,6 +2190,8 @@ public class SeqClassifierFlags implements Serializable {
         useSequentialScanSampling = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("maxAllowedChromaticSize")) {
         maxAllowedChromaticSize = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("inputDropOut")) {
+        inputDropOut = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("keepEmptySentences")) {
         keepEmptySentences = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useBilingualNERPrior")) {
@@ -2264,8 +2216,8 @@ public class SeqClassifierFlags implements Serializable {
         embeddingVectors = val;
       } else if (key.equalsIgnoreCase("transitionEdgeOnly")) {
         transitionEdgeOnly = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorLambda")) {
-        priorLambda = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("priorL1Lambda")) {
+        priorL1Lambda = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("addCapitalFeatures")) {
         addCapitalFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("arbitraryInputLayerSize")) {
@@ -2306,225 +2258,10 @@ public class SeqClassifierFlags implements Serializable {
         entityMatrix = val;
       } else if (key.equalsIgnoreCase("multiThreadClassifier")) {
         multiThreadClassifier = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useDualDecomp")) {
-        useDualDecomp = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("biAlignmentPriorIsPMI")) {
-        biAlignmentPriorIsPMI = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dampDDStepSizeWithAlignmentProb")) {
-        dampDDStepSizeWithAlignmentProb = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dualDecompAlignment")) {
-        dualDecompAlignment = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dualDecompInitialStepSizeAlignment")) {
-        dualDecompInitialStepSizeAlignment = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dualDecompNotBIO")) {
-        dualDecompNotBIO = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("berkeleyAlignerLoadPath")) {
-        berkeleyAlignerLoadPath = val;
-      } else if (key.equalsIgnoreCase("useBerkeleyAlignerForViterbi")) {
-        useBerkeleyAlignerForViterbi = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useBerkeleyCompetitivePosterior")) {
-        useBerkeleyCompetitivePosterior = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useDenero")) {
-        useDenero = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("alignDDAlpha")) {
-        alignDDAlpha = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("factorInBiEdgePotential")) {
-        factorInBiEdgePotential = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("noNeighborConstraints")) {
-        noNeighborConstraints = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("includeC2EViterbi")) {
-        includeC2EViterbi = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initWithPosterior")) {
-        initWithPosterior = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("nerSlowerTimes")) {
-        nerSlowerTimes = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("nerSkipFirstK")) {
-        nerSkipFirstK = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("powerAlignProb")) {
-        powerAlignProb = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("powerAlignProbAsAddition")) {
-        powerAlignProbAsAddition = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initWithNERPosterior")) {
-        initWithNERPosterior = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("applyNERPenalty")) {
-        applyNERPenalty = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useGenericFeatures")) {
         useGenericFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("printFactorTable")) {
-        printFactorTable = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAdaGradFOBOS")) {
-        useAdaGradFOBOS = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("initRate")) {
-        initRate = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("groupByFeatureTemplate")) {
-        groupByFeatureTemplate = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("groupByOutputClass")) {
-        groupByOutputClass = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorAlpha")) {
-        priorAlpha = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("splitWordRegex")){
         splitWordRegex = val;
-      } else if (key.equalsIgnoreCase("groupByInput")){
-        groupByInput = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("groupByHiddenUnit")){
-        groupByHiddenUnit = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("unigramLM")){
-        unigramLM = val;
-      } else if (key.equalsIgnoreCase("bigramLM")){
-        bigramLM = val;
-      } else if (key.equalsIgnoreCase("wordSegBeamSize")){
-        wordSegBeamSize = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("vocabFile")){
-        vocabFile = val;
-      } else if (key.equalsIgnoreCase("normalizedFile")){
-        normalizedFile = val;
-      } else if (key.equalsIgnoreCase("averagePerceptron")){
-        averagePerceptron = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadCRFSegmenterPath")){
-        loadCRFSegmenterPath = val;
-      } else if (key.equalsIgnoreCase("loadPCTSegmenterPath")){
-        loadPCTSegmenterPath = val;
-      } else if (key.equalsIgnoreCase("crfSegmenterProp")){
-        crfSegmenterProp = val;
-      } else if (key.equalsIgnoreCase("pctSegmenterProp")){
-        pctSegmenterProp = val;
-      } else if (key.equalsIgnoreCase("dualDecompMaxItr")){
-        dualDecompMaxItr = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("dualDecompInitialStepSize")){
-        dualDecompInitialStepSize = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dualDecompDebug")){
-        dualDecompDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("intermediateSegmenterOut")){
-        intermediateSegmenterOut = val;
-      } else if (key.equalsIgnoreCase("intermediateSegmenterModel")){
-        intermediateSegmenterModel = val;
-      } else if (key.equalsIgnoreCase("useCWSWordFeatures")){
-        useCWSWordFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSWordFeaturesAll")){
-        useCWSWordFeaturesAll = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSWordFeaturesBigram")){
-        useCWSWordFeaturesBigram = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterLenAdjust")){
-        pctSegmenterLenAdjust = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useTrainLexicon")){
-        useTrainLexicon = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSFeatures")){
-        useCWSFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("appendLC")){
-        appendLC = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("perceptronDebug")){
-        perceptronDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterScaleByCRF")){
-        pctSegmenterScaleByCRF = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterScale")){
-        pctSegmenterScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("separateASCIIandRange")){
-        separateASCIIandRange = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dropoutRate")){
-        dropoutRate = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dropoutScale")){
-        dropoutScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("multiThreadGrad")){
-        multiThreadGrad = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("maxQNItr")){
-        maxQNItr = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("dropoutApprox")){
-        dropoutApprox = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("unsupDropoutFile")){
-        unsupDropoutFile = val;
-      } else if (key.equalsIgnoreCase("unsupDropoutScale")){
-        unsupDropoutScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("startEvaluateIters")){
-        startEvaluateIters = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("multiThreadPerceptron")){
-        multiThreadPerceptron = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("lazyUpdate")){
-        lazyUpdate = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("featureCountThresh")){
-        featureCountThresh = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("serializeWeightsTo")) {
-        serializeWeightsTo = val;
-      } else if (key.equalsIgnoreCase("geDebug")){
-        geDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("doFeatureDiscovery")){
-        doFeatureDiscovery = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadWeightsFrom")) {
-        loadWeightsFrom = val;
-      } else if (key.equalsIgnoreCase("loadClassIndexFrom")) {
-        loadClassIndexFrom = val;
-      } else if (key.equalsIgnoreCase("serializeClassIndexTo")) {
-        serializeClassIndexTo = val;
-      } else if (key.equalsIgnoreCase("learnCHBasedOnEN")){
-        learnCHBasedOnEN = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("learnENBasedOnCH")){
-        learnENBasedOnCH = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadWeightsFromEN")){
-        loadWeightsFromEN = val;
-      } else if (key.equalsIgnoreCase("loadWeightsFromCH")){
-        loadWeightsFromCH = val;
-      } else if (key.equalsIgnoreCase("serializeToEN")){
-        serializeToEN = val;
-      } else if (key.equalsIgnoreCase("serializeToCH")){
-        serializeToCH = val;
-      } else if (key.equalsIgnoreCase("testFileEN")){
-        testFileEN = val;
-      } else if (key.equalsIgnoreCase("testFileCH")){
-        testFileCH = val;
-      } else if (key.equalsIgnoreCase("unsupFileEN")){
-        unsupFileEN = val;
-      } else if (key.equalsIgnoreCase("unsupFileCH")){
-        unsupFileCH = val;
-      } else if (key.equalsIgnoreCase("unsupAlignFile")){
-        unsupAlignFile = val;
-      } else if (key.equalsIgnoreCase("supFileEN")){
-        supFileEN = val;
-      } else if (key.equalsIgnoreCase("supFileCH")){
-        supFileCH = val;
-      } else if (key.equalsIgnoreCase("serializeFeatureIndexTo")){
-        serializeFeatureIndexTo = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromEN")){
-        loadFeatureIndexFromEN = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){
-        loadFeatureIndexFromCH = val;
-      } else if (key.equalsIgnoreCase("lambdaEN")){
-        lambdaEN = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("lambdaCH")){
-        lambdaCH = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("alternateTraining")){
-        alternateTraining = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("weightByEntropy")){
-        weightByEntropy = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKL")){
-        useKL = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useHardGE")){
-        useHardGE = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCRFforUnsup")){
-        useCRFforUnsup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useGEforSup")){
-        useGEforSup = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useKnownLCWords")){
-        useKnownLCWords = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNoisyLabel")){
-        useNoisyLabel = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("errorMatrix")) {
-        errorMatrix = val;
-      } else if (key.equalsIgnoreCase("printTrainLabels")){
-        printTrainLabels = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
-        labelDictionaryCutoff = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useAdaDelta")){
-        useAdaDelta = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAdaDiff")){
-        useAdaDiff = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("adaGradEps")){
-        adaGradEps = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("adaDeltaRho")){
-        adaDeltaRho = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("useRandomSeed")){
-        useRandomSeed = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("terminateOnAvgImprovement")){
-        terminateOnAvgImprovement = Boolean.parseBoolean(val);
-
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
@@ -2546,24 +2283,6 @@ public class SeqClassifierFlags implements Serializable {
     stringRep = sb.toString();
   } // end setProperties()
 
-  // Thang Sep13: refactor to be used for multiple factories.
-  private String getFeatureFactory(String val){
-    if (val.equalsIgnoreCase("SuperSimpleFeatureFactory")) {
-      val = "edu.stanford.nlp.sequences.SuperSimpleFeatureFactory";
-    } else if (val.equalsIgnoreCase("NERFeatureFactory")) {
-      val = "edu.stanford.nlp.ie.NERFeatureFactory";
-    } else if (val.equalsIgnoreCase("GazNERFeatureFactory")) {
-      val = "edu.stanford.nlp.sequences.GazNERFeatureFactory";
-    } else if (val.equalsIgnoreCase("IncludeAllFeatureFactory")) {
-      val = "edu.stanford.nlp.sequences.IncludeAllFeatureFactory";
-    } else if (val.equalsIgnoreCase("PhraseFeatureFactory")) {
-      val = "edu.stanford.nlp.article.extraction.PhraseFeatureFactory";
-    } else if (val.equalsIgnoreCase("EmbeddingFeatureFactory")) {
-      val = "edu.stanford.nlp.ie.EmbeddingFeatureFactory";
-    }
-
-    return val;
-  }
   /**
    * Print the properties specified by this object.
    *
