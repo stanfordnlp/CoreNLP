@@ -1932,6 +1932,7 @@ public class StringUtils {
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
+        System.out.println("key is " + key);
         if (key.length() > 1 && key.charAt(1) == '-')
           key = key.substring(2); // strip off 2 hyphens
         else
@@ -1943,8 +1944,10 @@ public class StringUtils {
         // cdm oct 2007: add length check to allow for empty string argument!
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
+          System.out.println("args is " + args[i+1]);
         }
         if (flagArgs.isEmpty()) {
+          System.out.println("empty ");
           existingArgs.put(key, "true");
         } else {
 
