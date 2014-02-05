@@ -1900,7 +1900,7 @@ public class StringUtils {
     if (str == null)
       return null;
     // ${VAR_NAME} or $VAR_NAME
-    Pattern p = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
+    Pattern p = Pattern.compile("\\$\\{(\\w+)\\}");
     Matcher m = p.matcher(str);
     StringBuffer sb = new StringBuffer();
     while (m.find()) {
