@@ -1918,6 +1918,7 @@ public class StringUtils {
       m.appendReplacement(sb, null == vrValue ? "" : vrValue);
     }
     m.appendTail(sb);
+    System.out.println("replacing " + str + " with " + sb.toString());
     return sb.toString();
   }
 
