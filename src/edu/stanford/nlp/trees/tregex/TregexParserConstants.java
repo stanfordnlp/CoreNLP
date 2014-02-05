@@ -13,17 +13,19 @@ interface TregexParserConstants {
   /** RegularExpression Id. */
   int RELATION = 4;
   /** RegularExpression Id. */
-  int REL_W_STR_ARG = 5;
+  int MULTI_RELATION = 5;
   /** RegularExpression Id. */
-  int NUMBER = 6;
+  int REL_W_STR_ARG = 6;
   /** RegularExpression Id. */
-  int IDENTIFIER = 7;
+  int NUMBER = 7;
   /** RegularExpression Id. */
-  int BLANK = 8;
+  int IDENTIFIER = 8;
   /** RegularExpression Id. */
-  int REGEX = 9;
+  int BLANK = 9;
   /** RegularExpression Id. */
-  int VARNAME = 10;
+  int REGEX = 10;
+  /** RegularExpression Id. */
+  int VARNAME = 11;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -35,12 +37,14 @@ interface TregexParserConstants {
     "\"\\r\"",
     "\"\\t\"",
     "<RELATION>",
+    "\"<...\"",
     "<REL_W_STR_ARG>",
     "<NUMBER>",
     "<IDENTIFIER>",
     "\"__\"",
     "<REGEX>",
     "<VARNAME>",
+    "\"|\"",
     "\"\\n\"",
     "\"(\"",
     "\")\"",
@@ -50,11 +54,13 @@ interface TregexParserConstants {
     "\"%\"",
     "\"=\"",
     "\"~\"",
-    "\"|\"",
     "\"&\"",
     "\"?\"",
     "\"[\"",
     "\"]\"",
+    "\"{\"",
+    "\";\"",
+    "\"}\"",
   };
 
 }

@@ -5,9 +5,7 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 
 /**
- * An Index is a collection that maps between a vocabulary of type E and a
- * continuous non-negative integer index series beginning (inclusively) at 0.
- * It supports constant-time lookup in
+ * Implements an Index that supports constant-time lookup in
  * both directions (via {@code get(int)} and {@code indexOf(E)}.
  * The {@code indexOf(E)} method compares objects by
  * {@code equals()}, as other Collections.

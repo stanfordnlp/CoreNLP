@@ -6,19 +6,17 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * A simple tool to change the default baseParserWeight flag embedded
+ * A simple tool to change flags embedded
  * in a LexicalizedParser model.
  * <br>
  * Expected arguments: <br>
  * <code> -input model </code> <br>
  * <code> -output model </code> <br>
- * <code> -baseParserWeight weight </code> <br>
- *
- * TODO: could be generalized to allow updating of many different options
+ * <code> [list of arguments to set] </code> <br>
  *
  * @author John Bauer
  */
-public class ChangeBaseParserWeight {
+public class UpdateParserOptions {
   public static void main(String[] args) {
     String input = null;
     String output = null;
