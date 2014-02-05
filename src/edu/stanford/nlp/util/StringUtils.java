@@ -1929,6 +1929,7 @@ public class StringUtils {
   public static Properties argsToPropertiesWithResolve(String[] args) {
     TreeMap<String, String> result = new TreeMap<String, String>();
     Map<String, String> existingArgs = new TreeMap<String, String>();
+    System.out.println(args);
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
