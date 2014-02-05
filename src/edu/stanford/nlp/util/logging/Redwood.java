@@ -57,11 +57,11 @@ public class Redwood {
   /**
    * The real System.out stream
    */
-  private static final PrintStream realSysOut = System.out;
+  protected static final PrintStream realSysOut = System.out;
   /**
    * The real System.err stream
    */
-  private static final PrintStream realSysErr = System.err;
+  protected static final PrintStream realSysErr = System.err;
 
   // -- BASIC LOGGING --
   /**
@@ -241,9 +241,13 @@ public class Redwood {
   protected static void captureSystemStreams(boolean captureOut, boolean captureErr){
     if(captureOut){
       System.setOut(new RedwoodPrintStream(STDOUT, realSysOut));
+    } else {
+      System.setOut(realSysOut);
     }
     if(captureErr){
       System.setErr(new RedwoodPrintStream(STDERR, realSysErr));
+    } else {
+      System.setErr(realSysErr);
     }
   }
 
@@ -431,7 +435,7 @@ public class Redwood {
       attemptThreadControl( threadId, finish );
     } else {
       //(case: no threading)
-      throw new IllegalStateException("finishThreads() called outside of threaded environment");
+      Redwood.log(Flag.WARN, "finishThreads() called outside of threaded environment");
     }
   }
 
@@ -444,7 +448,7 @@ public class Redwood {
     //(error check)
     isThreaded = false;
     if(currentThread != -1L){
-      throw new IllegalStateException("endThreads() called, but thread " + currentThread + " has not finished (exception in thread?)");
+      Redwood.log(Flag.WARN, "endThreads() called, but thread " + currentThread + " has not finished (exception in thread?)");
     }
     //(end threaded environment)
     assert !control.isHeldByCurrentThread();
@@ -462,7 +466,7 @@ public class Redwood {
           currentThread = thread;
           //(clear buffer)
           while(currentThread >= 0){
-            if(backlog.isEmpty()){ throw new IllegalStateException("Forgot to call finishThread() on thread " + currentThread); }
+            if(backlog.isEmpty()){ Redwood.log(Flag.WARN, "Forgot to call finishThread() on thread " + currentThread); }
             assert !control.isHeldByCurrentThread();
             backlog.poll().run();
           }
@@ -884,7 +888,7 @@ public class Redwood {
       try {
         printWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")));
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        Redwood.log(Flag.ERROR, e);
       }
     }
 
@@ -1037,7 +1041,7 @@ public class Redwood {
      */
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
       // (short circuit if single thread)
-      if (numThreads == 1) {
+      if (numThreads <= 1 || isThreaded) {
         startTrack( "Threads (" + title + ")" );
         for (Runnable toRun : runnables) { toRun.run(); }
         endTrack( "Threads (" + title + ")" );
@@ -1054,7 +1058,6 @@ public class Redwood {
       try {
         exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
       } catch (InterruptedException e) {
-        throw new RuntimeException(e);
       }
     }
     public static void threadAndRun(String title, Iterable<Runnable> runnables){
@@ -1195,6 +1198,12 @@ public class Redwood {
    */
   // TODO(gabor) update this with the new RedwoodConfiguration
   public static void main(String[] args){
+
+    Redwood.log(Redwood.DBG, "hello world!");
+    Redwood.hideChannelsEverywhere(Redwood.DBG);
+    Redwood.log(Redwood.DBG, "hello debug!");
+
+    System.exit(1);
 
     // -- STRESS TEST THREADS --
     LinkedList<Runnable> tasks = new LinkedList<Runnable>();

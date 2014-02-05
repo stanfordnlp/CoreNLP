@@ -8,7 +8,7 @@ import java.util.*;
  * Static utility methods for operating on arrays.
  *
  * Note: You can also find some methods for printing arrays that are tables in
- * StringUtils.  (Search for makeAsciiTable etc.)
+ * StringUtils.  (Search for makeTextTable, etc.)
  *
  * @author Huy Nguyen (htnguyen@cs.stanford.edu)
  * @author Michel Galley (mgalley@stanford.edu)
@@ -36,7 +36,6 @@ public class ArrayUtils {
        System.err.print(i+" ");
      }
      System.err.println();
-
   }
 
   public static byte[] gapEncode(int[] orig) {
@@ -934,7 +933,7 @@ public class ArrayUtils {
     }
     return ar2;
   }
-  
+
   public static Object[] subArray(Object[] arr, int startindexInclusive, int endindexExclusive){
     if(arr == null)
       return arr;

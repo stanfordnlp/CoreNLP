@@ -22,7 +22,7 @@ public class GenericAnnotationSerializer extends AnnotationSerializer {
   }
 
   @Override
-  public OutputStream append(Annotation corpus, OutputStream os) throws IOException {
+  public OutputStream write(Annotation corpus, OutputStream os) throws IOException {
     if (os instanceof AppendingObjectOutputStream) {
       ((AppendingObjectOutputStream) os).writeObject(corpus);
       return os;
