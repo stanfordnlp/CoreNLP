@@ -34,6 +34,8 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
   private static final Pattern PPTmpPattern = Pattern.compile("PP.*-TMP.*");
   private static final Pattern TmpPattern = Pattern.compile(".*-TMP.*");
 
+  private static final boolean DEBUG = System.getProperty("CTBErrorCorrectingTreeNormalizer", null) != null;
+
   @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
   private TreeTransformer tagExtender;
 
@@ -176,40 +178,60 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       if (subtree.isPreTerminal()) {
         if (subtree.value().matches("NP")) {
           if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().accept(subtree.firstChild().value())) {
-            EncodingPrintWriter.err.println("Correcting error: NP preterminal over douhao; preterminal changed to PU: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: NP preterminal over douhao; preterminal changed to PU: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            }
             subtree.setValue("PU");
           } else if (subtree.parent(newTree).value().matches("NP")) {
-            EncodingPrintWriter.err.println("Correcting error: NP preterminal w/ NP parent; preterminal changed to NN: " + subtree.parent(newTree), ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: NP preterminal w/ NP parent; preterminal changed to NN: " + subtree.parent(newTree), ChineseTreebankLanguagePack.ENCODING);
+            }
             subtree.setValue("NN");
           } else {
-            EncodingPrintWriter.err.println("Correcting error: NP preterminal w/o NP parent, changing preterminal to NN: " + subtree.parent(newTree), ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: NP preterminal w/o NP parent, changing preterminal to NN: " + subtree.parent(newTree), ChineseTreebankLanguagePack.ENCODING);
+            }
             // Tree newChild = tf.newTreeNode("NN", Collections.singletonList(subtree.firstChild()));
             // subtree.setChildren(Collections.singletonList(newChild));
             subtree.setValue("NN");
           }
         } else if (subtree.value().matches("PU")) {
           if (subtree.firstChild().value().matches("\u4ed6")) {
-            EncodingPrintWriter.err.println("Correcting error: \"\u4ed6\" under PU tag; tag changed to PN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: \"\u4ed6\" under PU tag; tag changed to PN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            }
             subtree.setValue("PN");
           } else if (subtree.firstChild().value().equals("里")) {
-            EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to LC: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to LC: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            }
             subtree.setValue("LC");
           } else if (subtree.firstChild().value().equals("是")) {
-            EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to VC: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to VC: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            }
             subtree.setValue("VC");
           } else if (subtree.firstChild().value().matches("tw|\u534A\u7A74\u5F0F")) {
-            EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to NN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to NN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            }
             subtree.setValue("NN");
           } else if (subtree.firstChild().value().matches("33")) {
-            EncodingPrintWriter.err.println("Correcting error: \"33\" under PU tag; tag changed to CD: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            if (DEBUG) {
+              EncodingPrintWriter.err.println("Correcting error: \"33\" under PU tag; tag changed to CD: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            }
             subtree.setValue("CD");
           }
         }
       } else if (subtree.value().matches("NN")) {
-        EncodingPrintWriter.err.println("Correcting error: NN phrasal tag changed to NP: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+        if (DEBUG) {
+          EncodingPrintWriter.err.println("Correcting error: NN phrasal tag changed to NP: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+        }
         subtree.setValue("NP");
       } else if (subtree.value().matches("MSP")) {
-        EncodingPrintWriter.err.println("Correcting error: MSP phrasal tag changed to VP: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+        if (DEBUG) {
+          EncodingPrintWriter.err.println("Correcting error: MSP phrasal tag changed to VP: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+        }
         subtree.setValue("VP");
       }
     }
