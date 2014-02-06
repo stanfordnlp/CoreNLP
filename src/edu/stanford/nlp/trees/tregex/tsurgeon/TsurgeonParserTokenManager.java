@@ -3,6 +3,7 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 import java.io.StringReader;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import java.util.*;
 
