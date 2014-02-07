@@ -483,7 +483,7 @@ public class DVParser {
           "-unknownchinesepercentvector",
           "-unknownchinesenumbervector",
           "-unknownchineseyearvector",
-          "-unkWord", "UNK",
+          "-unkWord", "*UNK*",
           "-transformMatrixType", "DIAGONAL",
           "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT)
         } ));
@@ -619,6 +619,7 @@ public class DVParser {
 
     if (runTraining) {
       System.err.println("Training the RNN parser");
+      System.err.println("Current train options: " + dvparser.getOp().trainOptions);
       dvparser.train(trainSentences, trainCompressedParses, testTreebank, modelPath, resultsRecordPath);
       if (modelPath != null) {
         dvparser.saveModel(modelPath);
