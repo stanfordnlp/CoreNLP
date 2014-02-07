@@ -69,7 +69,7 @@ TOKEN:
 | < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
 | < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
 | < HASH_INTEGER: "#" (["0"-"9"])+ >
-| < TREE_NODE_TERMINAL_LABEL: ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )+ >
+| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","(",")",":"] )+ >
 | < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
 }
 
@@ -217,7 +217,7 @@ Tree TreeNode() :
 {
  label = <TREE_NODE_NONTERMINAL_LABEL> dtrs = TreeDtrs(new ArrayList<Tree>())
     { return treeFactory.newTreeNode(label.image.substring(1),dtrs); }
-| ( label = <TREE_NODE_TERMINAL_LABEL> | label = <IDENTIFIER> )
+| ( label = <TREE_NODE_TERMINAL_LABEL> )
     { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
 }
 
