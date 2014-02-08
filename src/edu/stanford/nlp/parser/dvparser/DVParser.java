@@ -236,51 +236,57 @@ public class DVParser {
     // 1: QNMinimizer, 2: SGD
     switch (MINIMIZER) {
     case (1): {
-    	QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);    
-    	qn.useMinPackSearch();
-    	qn.useDiagonalScaling();
-    	qn.terminateOnAverageImprovement(true);
-    	qn.terminateOnNumericalZero(true);
-    	qn.terminateOnRelativeNorm(true);
-
-    	theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);   	
+      QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);    
+      qn.useMinPackSearch();
+      qn.useDiagonalScaling();
+      qn.terminateOnAverageImprovement(true);
+      qn.terminateOnNumericalZero(true);
+      qn.terminateOnRelativeNorm(true);
+      
+      theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);   	
+      break;
     }
     case 2:{
-    	//Minimizer smd = new SGDMinimizer();    	double tol = 1e-4;    	theta = smd.minimize(gcFunc,tol,theta,op.trainOptions.qnIterationsPerBatch);
-    	double lastCost = 0, currCost = 0;
-    	boolean firstTime = true;
-    	for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
-    		//gcFunc.calculate(theta);
-    		double[] grad = gcFunc.derivativeAt(theta);
-    		currCost = gcFunc.valueAt(theta);
-    		System.err.println("batch cost: " + currCost);
-//    		if(!firstTime){
-//    			if(currCost > lastCost){
-//    				System.out.println("HOW IS FUNCTION VALUE INCREASING????!!! ... still updating theta");
-//    			}
-//    			if(Math.abs(currCost - lastCost) < 0.0001){
-//    				System.out.println("function value is not decreasing. stop");
-//    			}
-//    		}else{
-//    			firstTime = false;
-//    		}
-		lastCost = currCost;
-		ArrayMath.addMultInPlace(theta, grad, -1*op.trainOptions.learningRate);
-    	}
+      //Minimizer smd = new SGDMinimizer();    	double tol = 1e-4;    	theta = smd.minimize(gcFunc,tol,theta,op.trainOptions.qnIterationsPerBatch);
+      double lastCost = 0, currCost = 0;
+      boolean firstTime = true;
+      for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
+        //gcFunc.calculate(theta);
+        double[] grad = gcFunc.derivativeAt(theta);
+        currCost = gcFunc.valueAt(theta);
+        System.err.println("batch cost: " + currCost);
+        //    		if(!firstTime){
+        //    			if(currCost > lastCost){
+        //    				System.out.println("HOW IS FUNCTION VALUE INCREASING????!!! ... still updating theta");
+        //    			}
+        //    			if(Math.abs(currCost - lastCost) < 0.0001){
+        //    				System.out.println("function value is not decreasing. stop");
+        //    			}
+        //    		}else{
+        //    			firstTime = false;
+        //    		}
+        lastCost = currCost;
+        ArrayMath.addMultInPlace(theta, grad, -1*op.trainOptions.learningRate);
+      }
+      break;
     }
     case 3:{
-    	// AdaGrad
-    	double eps = 1e-3;
-    	double currCost = 0;
-    	for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
-    		double[] gradf = gcFunc.derivativeAt(theta);
-    		currCost = gcFunc.valueAt(theta);
-    		System.err.println("batch cost: " + currCost);
-    	    for (int feature =0; feature<gradf.length;feature++ ) {
-    	    	sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
-    	        theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
-    	      }    		
-    	} 
+      // AdaGrad
+      double eps = 1e-3;
+      double currCost = 0;
+      for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
+        double[] gradf = gcFunc.derivativeAt(theta);
+        currCost = gcFunc.valueAt(theta);
+        System.err.println("batch cost: " + currCost);
+        for (int feature =0; feature<gradf.length;feature++ ) {
+          sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
+          theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
+        }    		
+      } 
+      break;
+    }
+    default: {
+      throw new IllegalArgumentException("Unsupported minimizer " + MINIMIZER);
     }
     }
 
