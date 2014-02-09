@@ -687,7 +687,7 @@ public class EnglishGrammaticalRelations {
           "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
           // to find "...", he said or "...?" he asked.
           // We eliminate conflicts with conj by looking for CC
-          "S|SINV < (S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN))",
+          "@S|SINV < (@S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN)) !< (@S !== =target $++ =target !$++ @CC|CONJP)",
           "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
           "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
           // That ... he know
@@ -1583,7 +1583,7 @@ public class EnglishGrammaticalRelations {
           // "But even if he agrees -- which he won't -- etc etc"
           "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
           // two juxtaposed sentences; common in web materials (but this also matches quite a few wsj things)
-          "@S < (@S $.. @S=target) !< @CC|CONJP",
+          "@S < (@S|SBARQ $++ @S|SBARQ=target !$++ @CC|CONJP)",
           "@S|VP < (/^:$/ $-- /^V/ $+ @NP=target) !< @CONJP|CC", // sometimes CC cases are right node raising, etc.
         });
   public static class ParataxisGRAnnotation extends GrammaticalRelationAnnotation { }
