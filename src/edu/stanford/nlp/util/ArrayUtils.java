@@ -575,6 +575,27 @@ public class ArrayUtils {
     return result;
   }
 
+  /**
+   * Returns an array with only the elements accepted by <code>filter</code>
+   * <br>
+   * Implementation notes: creates two arrays, calls <code>filter</code> 
+   * once for each element, does not alter <code>original</code>
+   */
+  public static <T> T[] filter(T[] original, Filter<? super T> filter) {
+    T[] result = Arrays.copyOf(original, original.length); // avoids generic array creation compile error
+    int size = 0;
+    for (T value : original) {
+      if (filter.accept(value)) {
+        result[size] = value;
+        size++;
+      }
+    }
+    if (size == original.length) {
+      return result;
+    }
+    return Arrays.copyOf(result, size);
+  }
+
   /** Return a Set containing the same elements as the specified array.
    */
   public static <T> Set<T> asSet(T[] a) {
