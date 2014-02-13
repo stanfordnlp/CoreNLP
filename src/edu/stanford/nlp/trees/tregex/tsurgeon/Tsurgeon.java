@@ -204,14 +204,8 @@ public class Tsurgeon {
    *      <code>$- &#60;name&#62;</code>     the right sister of the named node<br>
    *      <code>&gt;i &#60;name&#62;</code> the i_th daughter of the named node<br>
    *      <code>&gt;-i &#60;name&#62;</code> the i_th daughter, counting from the right, of the named node.
-   * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code>
-   *     deletes name1 and inserts a copy of name2 in its place.
-   * <li><code>replace &#60;name&#62; &#60;tree&#62; &#60;tree2&#62;...</code>
-   *     deletes name and inserts the new tree(s) in its place.  If
-   *     more than one replacement tree is given, each of the new
-   *     subtrees will be added in order where the old tree was.
-   *     Multiple subtrees at the root is an illegal operation and
-   *     will throw an exception.
+   * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code> or <code>replace &#60;name1&#62; &#60;tree&#62;</code>
+   *     deletes name1 and inserts tree or a copy of name2 in its place.
    * <li><code>createSubtree &#60;new-label&#62; &#60;name1&#62; [&#60;name2&#62;]</code> 
    *     Create a subtree out of all the nodes from
    *     <code>&#60;name1&#62;</code> through
