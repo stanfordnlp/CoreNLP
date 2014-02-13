@@ -864,6 +864,12 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-noUseContextWords")) {
       trainOptions.useContextWords = false;
       i += 1;
+    } else if (args[i].equalsIgnoreCase("-trainWordVectors")) {
+      trainOptions.trainWordVectors = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noTrainWordVectors")) {
+      trainOptions.trainWordVectors = false;
+      i += 1;
     }
     return i;
   }
