@@ -461,46 +461,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
   /**
-   * Tries to return a <code>Set</code> of leaf (terminal) nodes
-   * which are the {@link GrammaticalRelation#DEPENDENT
-   * <code>DEPENDENT</code>}s of the given node <code>t</code>.
-   * Probably, <code>t</code> should be a leaf node as well.
-   *
-   * @param t a leaf node in this <code>GrammaticalStructure</code>
-   * @return a <code>Set</code> of nodes which are dependents of
-   *         node <code>t</code>, or else <code>null</code>
-   */
-  public static Set<TreeGraphNode> getDependents(TreeGraphNode t) {
-    Set<TreeGraphNode> deps = Generics.newHashSet();
-    for (Tree subtree : t.treeGraph().root()) {
-      TreeGraphNode node = (TreeGraphNode) subtree;
-      TreeGraphNode gov = getGovernor(node);
-      if (gov != null && gov == t) {
-        deps.add(node);
-      }
-    }
-    return deps;
-  }
-
-  /**
-   * Tries to return a leaf (terminal) node which is the {@link
-   * GrammaticalRelation#GOVERNOR
-   * <code>GOVERNOR</code>} of the given node <code>t</code>.
-   * Probably, <code>t</code> should be a leaf node as well.
-   *
-   * @param t a leaf node in this <code>GrammaticalStructure</code>
-   * @return a node which is the governor for node
-   *         <code>t</code>, or else <code>null</code>
-   */
-  public static TreeGraphNode getGovernor(TreeGraphNode t) {
-    return getNodeInRelation(t, GOVERNOR);
-  }
-
-  public static TreeGraphNode getNodeInRelation(TreeGraphNode t, GrammaticalRelation r) {
-    return t.followArcToNode(GrammaticalRelation.getAnnotationClass(r));
-  }
-
-  /**
    * Get GrammaticalRelation between gov and dep, and null if gov  is not the
    * governor of dep
    */
@@ -821,7 +781,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   private static List<String> getDependencyPath(TreeGraphNode node, TreeGraphNode root) {
     List<String> path = new ArrayList<String>();
     while (!node.equals(root)) {
-      TreeGraphNode gov = getGovernor(node);
+      TreeGraphNode gov = node.getGovernor();
       // System.out.println("Governor for \"" + node.value() + "\": \"" + gov.value() + "\"");
       List<GrammaticalRelation> relations = getListGrammaticalRelation(gov, node);
       StringBuilder sb = new StringBuilder();
