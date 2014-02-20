@@ -76,8 +76,6 @@ public class DVModel implements Serializable {
   static final String START_WORD = "*START*";
   static final String END_WORD = "*END*";
 
-  static final boolean TRAIN_WORD_VECTORS = true;
-
   private static final Function<SimpleMatrix, DenseMatrix64F> convertSimpleMatrix = new Function<SimpleMatrix, DenseMatrix64F>() {
     @Override
     public DenseMatrix64F apply(SimpleMatrix matrix) {
@@ -431,9 +429,6 @@ public class DVModel implements Serializable {
       if (basic.length() > 0 && basic.charAt(0) == '@') {
         basic = basic.substring(1);
       }
-      if (op.dvCombineCategories) {
-        basic = op.tlpParams.combineCategory(basic);
-      }
       return basic;
     }
   }
@@ -604,7 +599,7 @@ public class DVModel implements Serializable {
     int totalSize = 0;
     totalSize += numBinaryMatrices * (binaryTransformSize + binaryScoreSize);
     totalSize += numUnaryMatrices * (unaryTransformSize + unaryScoreSize);
-    if (TRAIN_WORD_VECTORS) {
+    if (op.trainOptions.trainWordVectors) {
       totalSize += wordVectors.size() * op.lexOptions.numHid;
     }
     return totalSize;
@@ -614,7 +609,7 @@ public class DVModel implements Serializable {
   @SuppressWarnings("unchecked")
   public double[] paramsToVector(double scale) {
     int totalSize = totalParamSize();
-    if (TRAIN_WORD_VECTORS) {
+    if (op.trainOptions.trainWordVectors) {
       return NeuralUtils.paramsToVector(scale, totalSize,
                                         binaryTransform.valueIterator(), unaryTransform.values().iterator(),
                                         binaryScore.valueIterator(), unaryScore.values().iterator(),
@@ -630,7 +625,7 @@ public class DVModel implements Serializable {
   @SuppressWarnings("unchecked")
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
-    if (TRAIN_WORD_VECTORS) {
+    if (op.trainOptions.trainWordVectors) {
       return NeuralUtils.paramsToVector(totalSize,
                                         binaryTransform.valueIterator(), unaryTransform.values().iterator(),
                                         binaryScore.valueIterator(), unaryScore.values().iterator(),
@@ -644,7 +639,7 @@ public class DVModel implements Serializable {
 
   @SuppressWarnings("unchecked")
   public void vectorToParams(double[] theta) {
-    if (TRAIN_WORD_VECTORS) {
+    if (op.trainOptions.trainWordVectors) {
       NeuralUtils.vectorToParams(theta,
                                  binaryTransform.valueIterator(), unaryTransform.values().iterator(),
                                  binaryScore.valueIterator(), unaryScore.values().iterator(),

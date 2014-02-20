@@ -234,14 +234,18 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     }
   }
 
-
+  /** Change some form of IOB/IOE encoding via forms like "I-PERS" to
+   *  IO encoding as just "PERS".
+   *
+   *  @param doc The document for which the AnswerAnnotation will be changed (in place)
+   */
   private void mergeTags(List<IN> doc) {
     for (IN wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
       if (answer == null) {
         continue;
       }
-      if (!answer.equals(flags.backgroundSymbol)) {
+      if ( ! answer.equals(flags.backgroundSymbol)) {
         int index = answer.indexOf('-');
         if (index >= 0) {
           answer = answer.substring(index + 1);

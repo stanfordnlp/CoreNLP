@@ -212,6 +212,22 @@ class DescriptionPattern extends TregexPattern {
     this.variableGroups = variableGroups;
   }
 
+  public DescriptionPattern(Relation newRelation, DescriptionPattern oldPattern) {
+    this.rel = newRelation;
+    this.negDesc = oldPattern.negDesc;
+    this.isLink = oldPattern.isLink;
+    this.linkedName = oldPattern.linkedName;
+    this.stringDesc = oldPattern.stringDesc;
+    this.descriptionMode = oldPattern.descriptionMode;
+    this.descPattern = oldPattern.descPattern;
+    this.exactMatch = oldPattern.exactMatch;
+    this.stringFilter = oldPattern.stringFilter;
+    this.name = oldPattern.name;
+    this.setChild(oldPattern.child);
+    this.basicCatFunction = oldPattern.basicCatFunction;
+    this.variableGroups = oldPattern.variableGroups;
+  }  
+
   @Override
   public String localString() {
     return rel.toString() + ' ' + (negDesc ? "!" : "") + (basicCatFunction != null ? "@" : "") + stringDesc + (name == null ? "" : '=' + name);

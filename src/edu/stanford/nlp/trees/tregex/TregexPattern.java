@@ -105,7 +105,9 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td>A &lt;&#35; B <td>B is the immediate head of phrase A
  * <tr><td>A &gt;&#35; B <td>A is the immediate head of phrase B
  * <tr><td>A == B <td>A and B are the same node
+ * <tr><td>A &lt;= B <td>A and B are the same node or A is the parent of B
  * <tr><td>A : B<td>[this is a pattern-segmenting operator that places no constraints on the relationship between A and B]
+ * <tr><td>A &lt;... { B ; C ; ... }<td>A has exactly B, C, etc as its subtree, with no other children.
  * </table>
  * <p> Label descriptions can be literal strings, which much match labels
  * exactly, or regular expressions in regular expression bars: /regex/.
