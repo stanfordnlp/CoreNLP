@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
@@ -113,6 +114,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
       newLabel.setValue(part);
+      newLabel.set(OriginalTextAnnotation.class, part);
       compoundBuffer.add(newLabel);
     }
     return compoundBuffer.remove(0);
