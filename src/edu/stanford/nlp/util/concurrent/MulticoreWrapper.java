@@ -177,7 +177,7 @@ public class MulticoreWrapper<I,O> {
     runningJobs.clear();
     for (int i = 0; i < nThreads; ++i) {
       try {
-        Future<JobResult<O>> result = queue.take();
+        queue.take();
         idleProcessors.add(i);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
