@@ -184,9 +184,7 @@ public class EnglishGrammaticalRelations {
         CopulaGRAnnotation.class, AUX_MODIFIER, "VP|SQ|SINV|SBARQ", tregexCompiler,
         new String[] {
           // disallow things like NP-TMP in this pattern, so don't use @NP
-          // !< (VBN|VBD) avoids things like "foo were acquired by bar"
-          // !< (VBN|VBD !$++ /^N/) then reallows things like "i am a licensed foo"
-          "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) ] )",
+          "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$)/ !< VBN|VBD) | $++ (S <: (ADJP < JJ)) ] )",
           "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
           // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
           "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
