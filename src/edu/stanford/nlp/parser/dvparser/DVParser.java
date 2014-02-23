@@ -425,10 +425,9 @@ public class DVParser {
     System.err.println("  -(no)unknownCapsVector: Whether or not to use a word vector for unknown words with capitals");
     System.err.println("  -dvSimplifiedModel: Use a greatly dumbed down DVModel");
     System.err.println("  -scalingForInit: How much to scale matrices when creating a new DVModel");
-    System.err.println("  -baseParserWeight: A weight to give the original LexicalizedParser when testing (0.2 seems to work well for English)");
+    System.err.println("  -lpWeight: A weight to give the original LexicalizedParser when testing (0.2 seems to work well)");
     System.err.println("  -unkWord: The vector representing unknown word in the word vectors file");
     System.err.println("  -transformMatrixType: A couple different methods for initializing transform matrices");
-    System.err.println("  -(no)trainWordVectors: whether or not to train the word vectors along with the matrices.  True by default");
   }
 
   /**
@@ -492,8 +491,7 @@ public class DVParser {
           "-unknownchineseyearvector",
           "-unkWord", "*UNK*",
           "-transformMatrixType", "DIAGONAL",
-          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT),
-          "-trainWordVectors",
+          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT)
         } ));
     argsWithDefaults.addAll(Arrays.asList(args));
     args = argsWithDefaults.toArray(new String[argsWithDefaults.size()]);

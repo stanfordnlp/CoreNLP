@@ -416,21 +416,7 @@ public class TrainOptions implements Serializable {
 
   public TransformMatrixType transformMatrixType = TransformMatrixType.DIAGONAL;
 
-  /**
-   * Specifically for the DVModel, uses words on either side of a
-   * context when combining constituents.  Gives perhaps a microscopic
-   * improvement in performance but causes a large slowdown.
-   */
   public boolean useContextWords = false;
-
-  /**
-   * Do we want a model that uses word vectors (such as the DVParser)
-   * to train those word vectors when training the model?
-   * <br>
-   * Note: models prior to 2014-02-13 may have incorrect values in
-   * this field, as it was originally a compile time constant
-   */
-  public boolean trainWordVectors = true;
   
   public void display() {
     System.err.println(toString());
@@ -496,7 +482,6 @@ public class TrainOptions implements Serializable {
     result.append(" lowercaseWordVectors=" + lowercaseWordVectors + "\n");
     result.append(" transformMatrixType=" + transformMatrixType + "\n");
     result.append(" useContextWords=" + useContextWords + "\n");
-    result.append(" trainWordVectors=" + trainWordVectors + "\n");
     return result.toString();
   }
 
