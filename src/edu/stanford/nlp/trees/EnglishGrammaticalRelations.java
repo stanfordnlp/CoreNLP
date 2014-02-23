@@ -184,7 +184,9 @@ public class EnglishGrammaticalRelations {
         CopulaGRAnnotation.class, AUX_MODIFIER, "VP|SQ|SINV|SBARQ", tregexCompiler,
         new String[] {
           // disallow things like NP-TMP in this pattern, so don't use @NP
-          "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$)/ !< VBN|VBD) | $++ (S <: (ADJP < JJ)) ] )",
+          // !< (VBN|VBD) avoids things like "foo were acquired by bar"
+          // !< (VBN|VBD !$++ /^N/) then reallows things like "i am a licensed foo"
+          "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) ] )",
           "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
           // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
           "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
@@ -583,7 +585,8 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "pobj", "prepositional object",
         PrepositionalObjectGRAnnotation.class, OBJECT, "SBARQ|PP(?:-TMP)?|WHPP|PRT|ADVP|WHADVP|XS", tregexCompiler,
         new String[] {
-          "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (IN|VBG|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP))",
+          // "not" should not be the cause of a pobj
+          "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
           // We allow ADVP with NP objects for cases like (ADVP earlier this year)
           "/^PP(?:-TMP)?$/ < (/^(?:IN|VBG|TO)$/ $+ (ADVP=target [ < (RB < /^(?i:here|there)$/) | < (ADVP < /^NP(?:-TMP)?$/) ] ))",
           // second disjunct is weird ADVP, only matches 1 tree in 2-21
@@ -687,7 +690,9 @@ public class EnglishGrammaticalRelations {
           "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
           // to find "...", he said or "...?" he asked.
           // We eliminate conflicts with conj by looking for CC
-          "@S|SINV < (@S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN)) !< (@S !== =target $++ =target !$++ @CC|CONJP)",
+          // Matching against "!< (VP < TO|VBG|VBN)" matches against vmod
+          // "!< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])))" also matches against vmod
+          "@S|SINV < (@S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN) !< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))) !< (@S !== =target $++ =target !$++ @CC|CONJP)",
           "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
           "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
           // That ... he know
@@ -1191,7 +1196,9 @@ public class EnglishGrammaticalRelations {
           // Allows an adverb to come before the participle
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
           // to get "John, knowing ..., announced "
-          "S|SINV < (S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
+          // allowing both VP=verb and VP <1 VP=verb catches
+          // conjunctions of two VP clauses
+          "S|SINV < (S=target (< VP=verb | < (VP <1 VP=verb)) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] ) : (=verb [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])",
           "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
           // What are you wearing dancing tonight?
           "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
