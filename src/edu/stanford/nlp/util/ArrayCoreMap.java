@@ -2,14 +2,7 @@ package edu.stanford.nlp.util;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -73,6 +66,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   public ArrayCoreMap(int capacity) {
     keys = ErasureUtils.uncheckedCast(new Class[capacity]);
     values = new Object[capacity];
+    // size starts at 0
   }
 
   /**
@@ -81,13 +75,8 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    */
   public ArrayCoreMap(ArrayCoreMap other) {
     size = other.size;
-    keys = ErasureUtils.uncheckedCast(new Class[size]);
-    values = new Object[size];
-
-    for (int i = 0; i < size; i++) {
-      this.keys[i] = other.keys[i];
-      this.values[i] = other.values[i];
-    }
+    keys = Arrays.copyOf(other.keys, size);
+    values = Arrays.copyOf(other.values, size);
   }
 
   /**
@@ -451,7 +440,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    * track of its own state.  When a call to toString is about to
    * return, this is reset to null for that particular thread.
    */
-  private static ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>> equalsCalled =
+  private static final ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>> equalsCalled =
           new ThreadLocal<TwoDimensionalMap<CoreMap, CoreMap, Boolean>>();
 
 
@@ -572,7 +561,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    * state.  When a call to toString is about to return, this is reset
    * to null for that particular thread.
    */
-  private static ThreadLocal<IdentityHashSet<CoreMap>> hashCodeCalled =
+  private static final ThreadLocal<IdentityHashSet<CoreMap>> hashCodeCalled =
           new ThreadLocal<IdentityHashSet<CoreMap>>();
 
 
