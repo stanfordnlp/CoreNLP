@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
