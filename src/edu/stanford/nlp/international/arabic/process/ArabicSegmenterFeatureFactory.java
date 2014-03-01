@@ -91,21 +91,17 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     // Character-level class features
     boolean seenPunc = false;
     boolean seenDigit = false;
-    for (int i = 0; i < charc.length(); ++i) {
+    for (int i = 0, limit = charc.length(); i < limit; ++i) {
       char charcC = charc.charAt(i);
-      if ( ! seenPunc && Characters.isPunctuation(charcC)) {
-        seenPunc = true;
-        features.add("haspunc");        
-      }
-      if ( ! seenDigit && Character.isDigit(charcC)) {
-        seenDigit = true;
-        features.add("hasdigit");        
-      }
+      seenPunc = seenPunc || Characters.isPunctuation(charcC);
+      seenDigit = seenDigit || Character.isDigit(charcC);
       String cuBlock = Characters.unicodeBlockStringOf(charcC);
       features.add(cuBlock + "-uBlock");
       String cuType = String.valueOf(Character.getType(charcC));
       features.add(cuType + "-uType");
     }
+    if (seenPunc) features.add("haspunc");        
+    if (seenDigit) features.add("hasdigit");        
 
     // Indicator transition feature
     features.add("cliqueC");
