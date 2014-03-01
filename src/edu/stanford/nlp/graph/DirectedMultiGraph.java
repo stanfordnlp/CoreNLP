@@ -65,7 +65,6 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return true;
   }
 
-  /** Returns the map, adding the vertex if necessary */
   private Map<V, List<E>> getOutgoingEdgesMap(V v) {
     Map<V, List<E>> map = outgoingEdges.get(v);
     if (map == null) {
@@ -76,7 +75,6 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return map;
   }
 
-  /** Returns the map, adding the vertex if necessary */
   private Map<V, List<E>> getIncomingEdgesMap(V v) {
     Map<V, List<E>> map = incomingEdges.get(v);
     if (map == null) {
