@@ -134,6 +134,7 @@ public class ParserAnnotator implements Annotator {
 
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
+      // TODO: expose keeping punctuation as an option to the user?
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     } else {
       this.gsf = null;
@@ -183,6 +184,11 @@ public class ParserAnnotator implements Annotator {
                                                     String[] flags) {
     if (verbose) {
       System.err.println("Loading Parser Model [" + parserLoc + "] ...");
+      System.err.print("  Flags:");
+      for (String flag : flags) {
+        System.err.print("  " + flag);
+      }
+      System.err.println();
     }
     LexicalizedParser result = LexicalizedParser.loadModel(parserLoc, flags);
     // lp.setOptionFlags(new String[]{"-outputFormat", "penn,typedDependenciesCollapsed", "-retainTmpSubcategories"});
