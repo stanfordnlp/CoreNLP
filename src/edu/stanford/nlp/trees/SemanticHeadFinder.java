@@ -157,9 +157,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
     nonTerminalInfo.put("CONJP", new String[][]{{"right", "CC", "VB", "JJ", "RB", "IN" }});
 
-    // FRAG: crap rule needs to be change if you want to parse
-    // glosses; but it is correct to have ADJP and ADVP before S
-    // because of weird parses of reduced sentences.
+    // FRAG: crap rule needs to be change if you want to parse glosses; but it is correct to have ADJP and ADVP before S because of weird parses of reduced sentences.
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
 
     // PRN: sentence first
