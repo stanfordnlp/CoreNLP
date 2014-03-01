@@ -2,6 +2,7 @@ package edu.stanford.nlp.trees;
 
 
 import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
@@ -108,8 +109,33 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After changeSbarToPP:             " + movedRB);
     }
-    return changedSbar;
+    Tree nowThat = rearrangeNowThat(changedSbar);
+    if (VERBOSE) {
+      System.err.println("After rearrangeNowThat:           " + nowThat);
+    }
+    return nowThat;
   }
+
+  private static TregexPattern rearrangeNowThatTregex =
+    TregexPattern.compile("ADVP=advp <1 (RB < /^(?i:now)$/) <2 (SBAR=sbar <1 (IN < /^(?i:that)$/))");
+
+  private static TsurgeonPattern[] rearrangeNowThatTsurgeon = {
+    Tsurgeon.parseOperation("relabel advp SBAR"),
+    Tsurgeon.parseOperation("excise sbar sbar"),
+  };
+
+  public Tree rearrangeNowThat(Tree t) {
+    if (t == null) {
+      return t;
+    }
+    TregexMatcher matcher = rearrangeNowThatTregex.matcher(t);
+    while (matcher.find()) {
+      t = rearrangeNowThatTsurgeon[0].evaluate(t, matcher);
+      t = rearrangeNowThatTsurgeon[1].evaluate(t, matcher);
+    }
+    return t;
+  }
+
 
   private static TregexPattern changeSbarToPPTregex =
     TregexPattern.compile("NP < (NP $++ (SBAR=sbar < (IN < /^(?i:after|before|until|since|during)$/ $++ S)))");
