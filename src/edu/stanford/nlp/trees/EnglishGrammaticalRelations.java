@@ -1445,7 +1445,8 @@ public class EnglishGrammaticalRelations {
           "WHNP < (NP $-- (WHNP=target < WDT))",
           // testing against CC|CONJP avoids conflicts with preconj in
           // phrases such as "both foo and bar"
-          "@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target !$++ CC|CONJP))",
+          // however, we allow WDT|WP to account for "what foo or bar" and "whatever foo or bar"
+          "@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target [ ==WDT|WP | !$++ CC|CONJP ]))",
           "@NP < (/^(?:NP|NN|CD|RBS)/ $-- WDT|WP=target)"
         });
   public static class DeterminerGRAnnotation extends GrammaticalRelationAnnotation { }
