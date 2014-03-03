@@ -148,7 +148,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "nsubj(gave-2, She-1)\n" + "root(ROOT-0, gave-2)\n" + "iobj(gave-2, me-3)\n" + "det(raise-5, a-4)\n" + "dobj(gave-2, raise-5)\n",
         "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
         "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "prep(sat-2, on-3)\n" + "det(chair-5, the-4)\n" + "pobj(on-3, chair-5)\n",
-        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "det(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
+        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
         "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "prep(heard-2, about-3)\n" + "pobj(about-3, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n",
         "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
         "nsubj(certain-3, I-1)\n" + "cop(certain-3, am-2)\n" + "root(ROOT-0, certain-3)\n" + "mark(did-6, that-4)\n" + "nsubj(did-6, he-5)\n" + "ccomp(certain-3, did-6)\n" + "dobj(did-6, it-7)\n",
@@ -1231,7 +1231,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "dobj(said-3, What-1)\n" + "nsubj(said-3, she-2)\n" + "csubj(is-4, said-3)\n" + "root(ROOT-0, is-4)\n" + "acomp(is-4, untrue-5)\n",
         "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "prep(defeated-3, by-4)\n" + "pobj(by-4, Clinton-5)\n",
         "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
-        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "det(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
+        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
         "nsubj(am-2, I-1)\n" + "root(ROOT-0, am-2)\n" + "acomp(am-2, certain-3)\n" + "mark(did-6, that-4)\n" + "nsubj(did-6, he-5)\n" + "ccomp(certain-3, did-6)\n" + "dobj(did-6, it-7)\n",
         "nsubj(am-2, I-1)\n" + "root(ROOT-0, am-2)\n" + "acomp(am-2, ready-3)\n" + "aux(leave-5, to-4)\n" + "xcomp(ready-3, leave-5)\n",
         "expl(is-2, There-1)\n" + "root(ROOT-0, is-2)\n" + "det(statue-4, a-3)\n" + "nsubj(is-2, statue-4)\n" + "prep(statue-4, in-5)\n" + "det(corner-7, the-6)\n" + "pobj(in-5, corner-7)\n",
@@ -1426,7 +1426,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "mark(lied-3, That-1)\n" + "nsubj(lied-3, she-2)\n" + "csubjpass(suspected-5, lied-3)\n" + "auxpass(suspected-5, was-4)\n" + "root(ROOT-0, suspected-5)\n" + "agent(suspected-5, everyone-7)\n",
         "nsubj(like-2, I-1)\n" + "xsubj(swim-4, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
         "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "det(chair-5, the-4)\n" + "prep_on(sat-2, chair-5)\n",
-        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "det(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "prepc_on(information-5, are-9)\n" + "prep_at(are-9, risk-11)\n",
+        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "prepc_on(information-5, are-9)\n" + "prep_at(are-9, risk-11)\n",
         "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "prep_about(heard-2, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n",
         "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "xsubj(swim-7, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
         "nn(forces-2, U.S.-1)\n" + "nsubjpass(engaged-5, forces-2)\n" + "aux(engaged-5, have-3)\n" + "auxpass(engaged-5, been-4)\n" + "root(ROOT-0, engaged-5)\n" + "amod(fighting-8, intense-7)\n" + "prep_in(engaged-5, fighting-8)\n" + "mark(launched-11, after-9)\n" + "nsubj(launched-11, insurgents-10)\n" + "advcl(engaged-5, launched-11)\n" + "amod(attacks-13, simultaneous-12)\n" + "dobj(launched-11, attacks-13)\n",
@@ -1549,7 +1549,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(produced-4, term-2)\n" +
                 "nsubj(chalked-22, term-2)\n" +
                 "aux(produced-4, has-3)\n" + "root(ROOT-0, produced-4)\n" +
-                "det(failures-7, no-5)\n" +
+                "neg(failures-7, no-5)\n" +
                 "amod(failures-7, spectacular-6)\n" +
                 "dobj(produced-4, failures-7)\n" +
                 "dobj(produced-4, failures-7')\n" +
