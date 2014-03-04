@@ -885,7 +885,9 @@ public class EnglishGrammaticalRelations {
           // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
           // note that we allow adverb phrases to come before the WHADVP, which allows for phrases such as "even when"
           // ":" indicates something that should be a parataxis
-          "S|SQ|VP < (SBAR|SBAR-TMP=target < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
+          // in cases where there are two SBARs conjoined, we're happy
+          // to use the head SBAR as a candidate for this relation
+          "S|SQ|VP < (@SBAR=target [ == @SBAR=sbar | <# @SBAR=sbar ] ): (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
           // "S|SQ < (PP=target <, RB < @S)", // caught as prep and pcomp.
           "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
