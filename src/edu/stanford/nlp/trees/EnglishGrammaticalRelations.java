@@ -1337,10 +1337,6 @@ public class EnglishGrammaticalRelations {
           // one word nouns like "cost efficient", "ice-free"
           "@ADJP < (NN=target $++ /^JJ/) !< CC|CONJP",
           "@NP|WHNP < /^NP-ADV/=target",
-          // Mr. Bush himself ..., in a couple different parse
-          // patterns.  Looking for CC|CONJP leaves out phrases such
-          // as "he and myself"
-          "@NP|WHNP [ < (NP=target <: (PRP < " + selfRegex + ")) | < (PRP=target < " + selfRegex + ") ] : (=target $-- NP|NN|NNS|NNP|NNPS|PRP=noun !$-- (/^,|CC|CONJP$/ $-- =noun))",
           // this next one is for weird financial listings: 4.7% three months
           "@NP <1 (@NP <<# /^%$/) <2 (@NP=target <<# days|month|months) !<3 __",
           "@VP < /^NP-ADV/=target",
