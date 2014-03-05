@@ -743,7 +743,6 @@ public class EnglishGrammaticalRelations {
           "VP < (/^(?:VB|AUX)/ $+ (VP=target < VB < NP))",
           "VP < (SBAR=target < (S !$- (NN < order) < (VP < TO))) !> (VP < (VB|AUX < be)) ",
           "VP < (S=target !$- (NN < order) <: NP) > VP",
-          "VP < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) $-- (/^VB/ < " + copularWordRegex + " )",
           // stop eating
           // note that we eliminate parentheticals and clauses that could match a vmod
           // the clause !$-- VBG eliminates matches such as "What are you wearing dancing tonight"
@@ -827,10 +826,7 @@ public class EnglishGrammaticalRelations {
           // ADJP=target used to be limited by !$-- NP, but that
           // stopped the converter from finding the right dependency
           // in cases such as "driving prices lower"
-          // The second half of the expression leaves out relations
-          // which should be xcomp because they are actually
-          // passivized verbs
-          "VP [ < ADJP=target | ( < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) !$-- (/^VB/ < " + copularWordRegex + " )) ]",          
+          "VP [ < ADJP=target |  < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) ]",
         });
   public static class AdjectivalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 

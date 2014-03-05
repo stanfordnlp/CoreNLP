@@ -1736,9 +1736,7 @@ public class SemanticGraph implements Serializable {
 
       if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
         IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), gov.label());
-        govVertex.setTag(gov.highestNodeWithSameHead().headTagNode().value());
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
-        depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
           govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
           depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
@@ -1750,7 +1748,6 @@ public class SemanticGraph implements Serializable {
         addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
       } else { //it's the root and we add it
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
-        depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
           depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
