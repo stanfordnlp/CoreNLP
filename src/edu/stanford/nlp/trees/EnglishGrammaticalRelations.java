@@ -191,7 +191,7 @@ public class EnglishGrammaticalRelations {
           // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
           "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
           // "Such a great idea this was"
-          "SINV < (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
+          "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
         });
 
   public static class CopulaGRAnnotation extends GrammaticalRelationAnnotation {
@@ -737,7 +737,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation XCLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "xcomp", "xclausal complement",
-        XClausalComplementGRAnnotation.class, COMPLEMENT, "VP|ADJP", tregexCompiler,
+        XClausalComplementGRAnnotation.class, COMPLEMENT, "VP|ADJP|SINV", tregexCompiler,
         new String[] {
           // basic VP complement xcomp; this used to exclude embedding under a VP headed by be, as some are purpose clauses, but it seems like the vast majority aren't so I've removed that restriction
           "VP < (S=target !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
@@ -758,7 +758,8 @@ public class EnglishGrammaticalRelations {
 
           // The old attr relation, used here to recover xcomp relations instead.
           "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
-
+          // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
+          "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
