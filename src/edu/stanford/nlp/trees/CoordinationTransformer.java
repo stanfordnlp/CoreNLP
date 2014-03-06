@@ -180,7 +180,7 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern moveRBTregex[] = {
-    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S|PP|VP)/=dest) "),
+    TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S|PP|VP|NP)/=dest) "),
     TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^(,|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
     TregexPattern.compile("/^FRAG/ < (ADVP|RB=adv $+ VP=dest)"),
   };
