@@ -38,7 +38,7 @@ public class SemanticGraphTest extends TestCase {
       throw new RuntimeException(e);
     }
     
-    return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, true, false, true);
+    return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, true, true);
   }
 
   public void testShortestPath() {

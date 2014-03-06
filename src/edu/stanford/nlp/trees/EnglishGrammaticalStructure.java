@@ -178,7 +178,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     addStrandedPobj(list);
     if (DEBUG) {
       printListSorted("After adding stranded pobj:", list);
-    }    
+    }
   }
 
   // Deal with preposition stranding in relative clauses.
