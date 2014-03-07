@@ -19,6 +19,7 @@ import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.trees.CoordinationTransformer;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.Tree;
@@ -37,6 +38,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   protected boolean assignIds = true;
 //  protected int maxID = -1;
   private final HeadFinder headFinder;
+  private final CoordinationTransformer coordinationTransformer;
   protected Annotator parserProcessor;
 
   private final boolean allowReparsing;
@@ -47,7 +49,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing) {
     SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
-    headFinder = new SemanticHeadFinder();
+    this.headFinder = new SemanticHeadFinder();
+    this.coordinationTransformer = new CoordinationTransformer(headFinder);
     this.allowReparsing = allowReparsing;
   }
 
@@ -467,6 +470,13 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private Tree safeHead(Tree top, int endIndex) {
+    // TODO: get rid of this when we think of a better solution
+    // It is rather wasteful to call the CoordinationTransformer each
+    // time we want to use the SemanticHeadFinder.  Possible solutions:
+    // 1) pass in already transformed trees
+    // 2) use a different headfinder
+    // 3) some other way entirely of getting the correct index?
+    top = coordinationTransformer.transformTree(top);
     Tree head = top.headTerminal(headFinder);
     // One obscure failure case is that the added period becomes the head. Disallow this.
     if (head != null) {
