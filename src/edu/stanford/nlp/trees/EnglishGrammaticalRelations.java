@@ -710,8 +710,7 @@ public class EnglishGrammaticalRelations {
           // Matching against "!< (VP < TO|VBG|VBN)" matches against vmod
           // "!< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])))" also matches against vmod
           "@S|SINV < (@S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN) !< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))) !< (@S !== =target $++ =target !$++ @CC|CONJP)",
-          // ADVP is things like "As long as they spend ..."
-          "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))",
+          "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
           "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
           // That ... he know
           "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
