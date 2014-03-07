@@ -617,7 +617,7 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t.isPreTerminal()) {
       if (t.value().startsWith("CC")) {
         Tree parent = t.parent(root);
-        if (parent.value().startsWith("NP")) {
+        if (parent != null && parent.value().startsWith("NP")) {
           List<Tree> children = parent.getChildrenAsList();
           //System.out.println(children);
           int ccIndex = children.indexOf(t);
