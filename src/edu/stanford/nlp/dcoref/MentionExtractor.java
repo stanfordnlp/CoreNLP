@@ -37,7 +37,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.trees.CoordinationTransformer;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.Tree;
@@ -59,7 +58,6 @@ import edu.stanford.nlp.util.Pair;
 public class MentionExtractor {
 
   private final HeadFinder headFinder;
-  private final CoordinationTransformer coordinationTransformer;
 
   protected String currentDocumentID;
 
@@ -77,7 +75,6 @@ public class MentionExtractor {
 
   public MentionExtractor(Dictionaries dict, Semantics semantics) {
     this.headFinder = new SemanticHeadFinder();
-    this.coordinationTransformer = new CoordinationTransformer(headFinder);
     this.dictionaries = dict;
     this.semantics = semantics;
     this.mentionFinder = new RuleBasedCorefMentionFinder();  // Default
@@ -112,13 +109,9 @@ public class MentionExtractor {
   }
 
   protected int getHeadIndex(Tree t) {
-    // TODO: get rid of this when we think of a better solution
-    // It is rather wasteful to call the CoordinationTransformer each
-    // time we want to use the SemanticHeadFinder.  Possible solutions:
-    // 1) pass in already transformed trees
-    // 2) use a different headfinder
-    // 3) some other way entirely of getting the correct index?
-    t = coordinationTransformer.transformTree(t);
+    // The trees passed in do not have the CoordinationTransformer
+    // applied, but that just means the SemanticHeadFinder results are
+    // slightly worse.
     Tree ht = t.headTerminal(headFinder);
     if(ht==null) return -1;  // temporary: a key which is matched to nothing
     CoreLabel l = (CoreLabel) ht.label();
