@@ -11,6 +11,7 @@ import java.util.Stack;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -255,13 +256,7 @@ abstract class GraphRelation implements Serializable {
     @Override
     Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
       return new SearchNodeIterator() {
-          int nextNum; // subtle bug warning here: if we use int nextNum=0;
-
-          // instead,
-
-          // we get the first daughter twice because the assignment occurs after
-          // advance() has already been
-          // called once by the constructor of SearchNodeIterator.
+          Iterator<SemanticGraphEdge> iterator;
 
           @Override
           public void advance() {
@@ -269,18 +264,19 @@ abstract class GraphRelation implements Serializable {
               next = null;
               return;
             }
-            List<Pair<GrammaticalRelation, IndexedWord>> deps = sg.childPairs(node);
-		        	
-            while (nextNum < deps.size() && !deps.get(nextNum).first().toString().matches(type)) { 
-              nextNum++;
+            if (iterator == null) {
+              iterator = sg.outgoingEdgeIterator(node);
             }
-            if (nextNum < deps.size()) {
-              next = deps.get(nextNum).second();
-              relation = deps.get(nextNum).first().toString();
-              nextNum++;
-            } else {
-              next = null;
+            while (iterator.hasNext()) {
+              SemanticGraphEdge edge = iterator.next();
+              relation = edge.getRelation().toString();
+              if (!relation.matches(type)) {
+                continue;
+              }
+              this.next = edge.getTarget();
+              return;
             }
+            this.next = null;
           }
         };
     }
