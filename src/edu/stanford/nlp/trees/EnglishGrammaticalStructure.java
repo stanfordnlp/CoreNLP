@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.*;
 
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
@@ -188,43 +189,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       printListSorted("After adding stranded pobj:", list);
     }
   }
-
-  // TODO: we would love to turn addStrandedPobj into something more
-  // readable like this.  However, SemanticGraph/Semgrex is a lot
-  // slower than tregex, so this is probably not feasible for now.
-  // static final SemgrexPattern strandedPobjSemgrex = SemgrexPattern.compile("{}=head >rcmod ({} [ == {}=prepgov | >xcomp {}=prepgov | >conj {}=prepgov ]) : {}=prepgov >prep ({}=prepdep !>pcomp {} !> pobj {})");
-  //
-  // // Deal with preposition stranding in relative clauses.
-  // // For example, "the only thing I'm rooting for"
-  // // This method will add pobj(for, thing) by connecting using the rcmod and prep
-  // private static void addStrandedPobj(List<TypedDependency> list) {
-  //   SemanticGraph graph = new SemanticGraph(list);
-  //
-  //   SemgrexMatcher matcher = strandedPobjSemgrex.matcher(graph);
-  //   TreeGraphNode[] nodeToWords = null;
-  //   while (matcher.find()) {
-  //     IndexedWord gov = matcher.getNode("prepdep");
-  //     IndexedWord dep = matcher.getNode("head");
-  //
-  //     if (nodeToWords == null) {
-  //       nodeToWords = getNodesToWords(list);
-  //     }
-  //     TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, nodeToWords[gov.index()], nodeToWords[dep.index()]);
-  //
-  //     newDep.setExtra();
-  //     list.add(newDep);
-  //   }
-  // }
-  //
-  // private static TreeGraphNode[] getNodesToWords(List<TypedDependency> list) {
-  //   TreeGraphNode[] nodes = new TreeGraphNode[list.size() * 2 + 1];
-  //   for (TypedDependency dependency : list) {
-  //     nodes[dependency.gov().index()] = dependency.gov();
-  //     nodes[dependency.dep().index()] = dependency.dep();
-  //   }
-  //   return nodes;
-  // }
-
 
   // Deal with preposition stranding in relative clauses.
   // For example, "the only thing I'm rooting for"
