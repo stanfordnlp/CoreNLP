@@ -330,6 +330,10 @@ public class TsurgeonTest extends TestCase {
     } catch (TsurgeonRuntimeException e) {
       // good, we expected to fail if you try to replace the root node with two nodes
     }
+
+    tsurgeon = Tsurgeon.parseOperation("replace foo (BAR blah)");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR blah) (BAR blah) (C 2))");
   }
 
   /**
@@ -376,6 +380,17 @@ public class TsurgeonTest extends TestCase {
     tregex = TregexPattern.compile("@NP < (/^,/=comma $+ CC)");
     tsurgeon = Tsurgeon.parseOperation("replace comma (COMMA)");
     runTest(tregex, tsurgeon, "(NP NP , NP , NP , CC NP)", "(NP NP , NP , NP COMMA CC NP)");
+  }
+
+  public void testCoindex() {
+    TregexPattern tregex = TregexPattern.compile("A=foo << B=bar << C=baz");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("coindex foo bar baz");
+    runTest(tregex, tsurgeon, "(A (B (C foo)))", "(A-1 (B-1 (C-1 foo)))");
+    // note that the indexing does not happen a second time, since the labels are now changed
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(A-1 (B-1 foo) (C-1 foo) (C bar))");
+
+    // Test that it indexes at 2 instead of 1
+    runTest(tregex, tsurgeon, "(A (B foo) (C-1 bar) (C baz))", "(A-2 (B-2 foo) (C-1 bar) (C-2 baz))");
   }
 
   public void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
