@@ -230,6 +230,8 @@ Tree TreeNode() :
     { return treeFactory.newTreeNode(label.image.substring(1),dtrs); }
 | ( label = <TREE_NODE_TERMINAL_LABEL> )
     { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
+| ( label = <IDENTIFIER> )
+    { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
 }
 
 List<Tree> TreeDtrs(List<Tree> dtrs) :
