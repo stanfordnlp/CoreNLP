@@ -103,6 +103,8 @@ public class EnglishGrammaticalRelations {
     "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
   private static final String selfRegex =
     "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
+  private static final String xcompVerbRegex =
+    "/^(?i:ask|asks|asked|asking|advise|advises|advised|advising|beg|begs|begged|begging|demand|demands|demanded|demanding|desire|desires|desired|desiring|implore|implores|implored|imploring|order|orders|ordered|ordering|persuade|persuades|persuaded|persuading|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
 
   // By setting the HeadFinder to null, we find out right away at
   // runtime if we have incorrectly set the HeadFinder for the
@@ -710,7 +712,8 @@ public class EnglishGrammaticalRelations {
           // Matching against "!< (VP < TO|VBG|VBN)" matches against vmod
           // "!< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])))" also matches against vmod
           "@S|SINV < (@S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN) !< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))) !< (@S !== =target $++ =target !$++ @CC|CONJP)",
-          "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
+          // ADVP is things like "As long as they spend ..."
+          "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))",
           "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
           // That ... he know
           "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
@@ -740,7 +743,8 @@ public class EnglishGrammaticalRelations {
         XClausalComplementGRAnnotation.class, COMPLEMENT, "VP|ADJP|SINV", tregexCompiler,
         new String[] {
           // basic VP complement xcomp; this used to exclude embedding under a VP headed by be, as some are purpose clauses, but it seems like the vast majority aren't so I've removed that restriction
-          "VP < (S=target !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
+          // one way to detect purpose clauses is to look for an NP before the S, though
+          "VP < (S=target [ !$-- NP | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
           "ADJP < (S=target <, (VP <, TO))",
           "VP < (S=target !$- (NN < order) < (NP $+ NP|ADJP))",
           // to find "help sustain ...
@@ -1228,6 +1232,8 @@ public class EnglishGrammaticalRelations {
           "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
+          // they wrote asking the SEC to ...
+          "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
           "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
           "SBARQ < WHNP < (S=target < (VP <1 TO))",
