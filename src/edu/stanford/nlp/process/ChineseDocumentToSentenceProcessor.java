@@ -39,8 +39,6 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public class ChineseDocumentToSentenceProcessor implements Serializable {
 
-  // todo: This class is a mess. We should try to get it out of core
-
   private static final long serialVersionUID = 4054964767812217460L;
 
   private static final Set<Character> fullStopsSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u3002', '\uff01', '\uff1f', '!', '?'}));
@@ -49,8 +47,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
   private static final Set<Character> rightMarkSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u201d', '\u2019', '\u300b', '\u300f', '\u3009', '\u300d', '\uff1e', '\uff07', '\uff09', '\'', '"', ')', ']', '>'}));
 
   // private final String normalizationTableFile;
-
-  private final String encoding = "UTF-8";
+  private String encoding = "UTF-8";
   private final List<Pair<String,String>> normalizationTable;
 
 

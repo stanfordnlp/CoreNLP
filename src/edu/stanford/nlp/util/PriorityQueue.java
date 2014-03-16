@@ -5,8 +5,8 @@ import java.util.Set;
 
 /**
  * A Set that also represents an ordering of its elements, and responds
- * quickly to {@code add()}, {@code changePriority()},
- * {@code removeFirst()}, and {@code getFirst()} method calls. <p/>
+ * quickly to <code>add()</code>, <code>changePriority()</code>,
+ * <code>removeFirst()</code>, and <code>getFirst()</code> method calls. <p/>
  *
  * There are several important differences between this interface and
  * the JDK {@link java.util.PriorityQueue}: <p/>
@@ -90,15 +90,7 @@ public interface PriorityQueue<E> extends Set<E> {
 
   /**
    * Convenience method for if you want to pretend relaxPriority doesn't exist,
-   * or if you really want to use the return conditions of add().
-   * <p>
-   * Warning: The semantics of this method currently varies between implementations.
-   * In some implementations, nothing will be changed if the key is already in the
-   * priority queue. In others, the element will be added a second time with the
-   * new priority. We maybe should at least change things so that the priority
-   * will be change to the priority given if the element is in the queue with
-   * a lower priority, but that wasn't the historical behavior, and it seemed like
-   * we'd need to do a lot of archeology before changing the behavior.
+   * or if you really want add's return conditions.
    *
    * @return <tt>true</tt> if this set did not already contain the specified
    *         element.

@@ -15,9 +15,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.PTBEscapingProcessor;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
-import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
-import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
@@ -45,42 +42,6 @@ public class ReadSentimentDataset {
       return word;
     }
   };
-
-  // A bunch of trees have some funky tokenization which we can
-  // somewhat correct using these tregex / tsurgeon expressions.
-  static final TregexPattern[] tregexPatterns = {
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <2 =single <1 (__=useless <<- (__=word !< __)))"),
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[aA]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, /^n$/=word))"),
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__=A <... { (__ < /^[aA]$/=letter) ; (__=paren < /^-RRB-$/) })"),
-    TregexPattern.compile("__ <1 (__ <<- (/^(?i:provide)$/=provide !<__)) <2 (__ <<, (__=s > __=useless <... { (__ <: -LRB-) ; (__ <1 (__ <: s)) } ))"),
-    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, (__=word !< __)))"),
-    TregexPattern.compile("-LRB-=lrb !, __ : (__=ltop > __ <<, =lrb <<- (-RRB-=rrb > (__ > __=rtop)) !<< (-RRB- !== =rrb))"),
-    TregexPattern.compile("__=top <1 (__=f1 < f) <2 (__=f2 <... { (__ < /^[*\\\\]+$/) ; (__ < ed) })"),
-    TregexPattern.compile("__=top <1 (__=f1 <1 (__ < don=do) <2 (__ < /^[\']$/=apos)) <2 (__=wrong < t)"),
-    TregexPattern.compile("-LRB-=lrb !, __ .. (-RRB-=rrb !< __ !.. -RRB-)"),
-    TregexPattern.compile("__ <: (__=unitary < __)"),
-  };
-
-  static final TsurgeonPattern[] tsurgeonPatterns = {
-    Tsurgeon.parseOperation("[relabel word /^.*$/={word}={letter}/] [prune single] [excise useless useless]"),
-    Tsurgeon.parseOperation("[relabel word /^.*$/={letter}n/] [prune single] [excise useless useless]"),
-    Tsurgeon.parseOperation("[excise single A] [prune paren]"),
-    Tsurgeon.parseOperation("[relabel provide /^.*$/={provide}s/] [prune s] [excise useless useless]"),
-    Tsurgeon.parseOperation("[relabel word /^.*$/={letter}={word}/] [prune single] [excise useless useless]"),
-    Tsurgeon.parseOperation("[prune lrb] [prune rrb] [excise ltop ltop] [excise rtop rtop]"),
-    Tsurgeon.parseOperation("replace top (0 fucked)"),
-    Tsurgeon.parseOperation("[prune wrong] [relabel do do] [relabel apos /^.*$/n={apos}t/] [excise top top]"),
-    // Note: this actually leaves unitary nodes, so we then fix them at the end
-    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
-    // Fix any stranded unitary nodes
-    Tsurgeon.parseOperation("[excise unitary unitary]"),
-  };
-
-  static {
-    if (tregexPatterns.length != tsurgeonPatterns.length) {
-      throw new RuntimeException("Expected the same number of tregex and tsurgeon when initializing");
-    }
-  }
 
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
@@ -154,10 +115,6 @@ public class ReadSentimentDataset {
     for (int i = 0; i < sentence.size(); ++i) {
       Tree leaf = subtrees[i].children()[0];
       leaf.label().setValue(escaper.escapeString(leaf.label().value()));
-    }
-
-    for (int i = 0; i < tregexPatterns.length; ++i) {
-      root = Tsurgeon.processPattern(tregexPatterns[i], tsurgeonPatterns[i], root);
     }
 
     return root;
@@ -236,14 +193,6 @@ public class ReadSentimentDataset {
       } else if (args[argIndex].equalsIgnoreCase("-split")) {
         splitFilename = args[argIndex + 1];
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-inputDir") ||
-                 args[argIndex].equalsIgnoreCase("-inputDirectory")) {
-        dictionaryFilename = args[argIndex + 1] + "/dictionary.txt";
-        sentimentFilename = args[argIndex + 1] + "/sentiment_labels.txt";
-        tokensFilename = args[argIndex + 1] + "/SOStr.txt";
-        parseFilename = args[argIndex + 1] + "/STree.txt";
-        splitFilename = args[argIndex + 1] + "/datasetSplit.txt";
-        argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-train")) {
         trainFilename = args[argIndex + 1];
         argIndex += 2;
@@ -252,12 +201,6 @@ public class ReadSentimentDataset {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-test")) {
         testFilename = args[argIndex + 1];
-        argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-outputDir") ||
-                 args[argIndex].equalsIgnoreCase("-outputDirectory")) {
-        trainFilename = args[argIndex + 1] + "/train.txt";
-        devFilename = args[argIndex + 1] + "/dev.txt";
-        testFilename = args[argIndex + 1] + "/test.txt";
         argIndex += 2;
       } else {
         System.err.println("Unknown argument " + args[argIndex]);
@@ -276,7 +219,7 @@ public class ReadSentimentDataset {
     // Split and read the phrase ids file.  This file is in the format
     //   w1 w2 w3 ... | id
     Map<List<String>, Integer> phraseIds = Generics.newHashMap();
-    for (String line : IOUtils.readLines(dictionaryFilename, "utf-8")) {
+    for (String line : IOUtils.readLines(dictionaryFilename)) {
       String[] pieces = line.split("\\|");
       String[] sentence = pieces[0].split(" ");
       Integer id = Integer.valueOf(pieces[1]);
@@ -287,7 +230,7 @@ public class ReadSentimentDataset {
     // file is of the format:
     //   phrasenum | score
     Map<Integer, Double> sentimentScores = Generics.newHashMap();
-    for (String line : IOUtils.readLines(sentimentFilename, "utf-8")) {
+    for (String line : IOUtils.readLines(sentimentFilename)) {
       if (line.startsWith("phrase")) {
         continue;
       }
@@ -301,7 +244,7 @@ public class ReadSentimentDataset {
     int index = 0;
     PTBEscapingProcessor escaper = new PTBEscapingProcessor();
     List<Tree> trees = Generics.newArrayList();
-    for (String line : IOUtils.readLines(parseFilename, "utf-8")) {
+    for (String line : IOUtils.readLines(parseFilename)) {
       String[] pieces = line.split("\\|");
       List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() { 
           public Integer apply(String arg) { return Integer.valueOf(arg) - 1; }
@@ -315,7 +258,7 @@ public class ReadSentimentDataset {
     splits.put(1, Generics.<Integer>newArrayList());
     splits.put(2, Generics.<Integer>newArrayList());
     splits.put(3, Generics.<Integer>newArrayList());
-    for (String line : IOUtils.readLines(splitFilename, "utf-8")) {
+    for (String line : IOUtils.readLines(splitFilename)) {
       if (line.startsWith("sentence_index")) {
         continue;
       }

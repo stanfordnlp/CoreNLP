@@ -196,11 +196,11 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final String[] parenthesis = {"（", "）", "［", "］", "｛", "｝", "-LRB-", "-RRB-", "【", "】",
           "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠" };  // ( and ) still must be escaped
   private static final String[] colon = {"：", "；", "∶", ":"};
-  private static final String[] dash = {"…", "―", "——", "———", "————", "—", "——", "———", 
-          "－", "--", "---", "－－", "－－－", "－－－－", "－－－－－", "－－－－－－", 
-          "──", "━", "━━", "—－", "-", "----", "~", "~~", "~~~", "~~~~", "~~~~~", "……", "～",
+  private static final String[] dash = {"…", "—", "——", "———", 
+          "－", "--", "---", "－－", "──", "━", "━━", "—－",
+          "-", "----", "~", "……", "～",
           "．．．" /* 3 full width dots as ellipsis */ };
-  private static final String[] other = {"·", "／", "／", "＊", "＆", "/", "//", "*", "※", "■", "●", "｜" };  // slashes are used in urls
+  private static final String[] other = {"·", "／", "／", "＊", "＆", "/", "//", "*", "※", "●", "｜" };  // slashes are used in urls
 
   // Note that these next four should contain only things in quoteMark and parenthesis.  All such things are there but straight quotes
   private static final String[] leftQuoteMark = {"“", "‘", "《", "『", "〈", "「", "＜", "`", "｀", "｢"};
