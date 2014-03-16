@@ -395,7 +395,7 @@ public class Execution {
       }
       //(check to ensure that something got filled, if any @Option annotation was found)
       if (someOptionFound && !someOptionFilled) {
-        warn("found @Option annotations in class, but didn't set any of them (all options were instance variables and no instance given?)");
+        warn("found @Option annotations in class " + c + ", but didn't set any of them (all options were instance variables and no instance given?)");
       }
     }
 
