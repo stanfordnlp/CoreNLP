@@ -227,8 +227,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     setType(dict);
     setNERString();
     List<String> mStr = getMentionString();
-    setNumber(dict, getNumberCount(dict, mStr));
-    setGender(dict, getGenderCount(dict, mStr));
+    setNumber(dict);
+    setGender(dict, getGender(dict, mStr));
     setAnimacy(dict);
     setPerson(dict);
     setDiscourse();
@@ -284,25 +284,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return mStr;
   }
 
-  private static int[] getNumberCount(Dictionaries dict, List<String> mStr) {
-    int len = mStr.size();
-    if(len > 1) {
-      for(int i = 0 ; i < len-1 ; i++) {
-        if(dict.genderNumber.containsKey(mStr.subList(i, len))) return dict.genderNumber.get(mStr.subList(i, len));
-      }
-
-      // find converted string with ! (e.g., "dr. martin luther king jr. boulevard" -> "! boulevard")
-      List<String> convertedStr = new ArrayList<String>();
-      convertedStr.add("!");
-      convertedStr.add(mStr.get(len-1));
-      if(dict.genderNumber.containsKey(convertedStr)) return dict.genderNumber.get(convertedStr);
-    }
-    if(mStr.size() > 0 && dict.genderNumber.containsKey(mStr.subList(len-1, len))) return dict.genderNumber.get(mStr.subList(len-1, len));
-
-    return null;
-  }
-
-  private int[] getGenderCount(Dictionaries dict, List<String> mStr) {
+  private Gender getGender(Dictionaries dict, List<String> mStr) {
     int len = mStr.size();
     char firstLetter = headWord.get(CoreAnnotations.TextAnnotation.class).charAt(0);
     if(len > 1 && Character.isUpperCase(firstLetter) && nerString.startsWith("PER")) {
@@ -515,23 +497,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
   }
 
-  private void setGender(Dictionaries dict, int[] genderNumberCount) {
+  private void setGender(Dictionaries dict, Gender genderNumberResult) {
     gender = Gender.UNKNOWN;
-    if(genderNumberCount!=null && this.number!=Number.PLURAL){
-      double male = genderNumberCount[0];
-      double female = genderNumberCount[1];
-      double neutral = genderNumberCount[2];
-
-      if (male * 0.5 > female + neutral && male > 2) {
-        this.gender = Gender.MALE;
-        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
-      } else if (female * 0.5 > male + neutral && female > 2) {
-        this.gender = Gender.FEMALE;
-        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
-      } else if (neutral * 0.5 > male + female && neutral > 2) {
-        this.gender = Gender.NEUTRAL;
-        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
-      }
+    if(genderNumberResult!=null && this.number!=Number.PLURAL){
+      gender = genderNumberResult;
+      SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\t" + gender + ":\t" +  headString + "\tspan:" + spanToString());
     }
     if (mentionType == MentionType.PRONOMINAL) {
       if (dict.malePronouns.contains(headString)) {
@@ -577,7 +547,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
   }
 
-  protected void setNumber(Dictionaries dict, int[] genderNumberCount) {
+  protected void setNumber(Dictionaries dict) {
     if (mentionType == MentionType.PRONOMINAL) {
       if (dict.pluralPronouns.contains(headString)) {
         number = Number.PLURAL;

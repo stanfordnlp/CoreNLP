@@ -3,6 +3,7 @@ package edu.stanford.nlp.trees.tregex;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
@@ -16,6 +17,7 @@ import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IdentityHashSet;
 import edu.stanford.nlp.util.Interner;
+import edu.stanford.nlp.util.Pair;
 
 
 /**
@@ -158,6 +160,31 @@ abstract class Relation implements Serializable {
           + arg);
     }
     return Interner.globalIntern(r);
+  }
+
+  /**
+   * Produce a TregexPattern which represents the given MULTI_RELATION
+   * and its children
+   */
+  static TregexPattern constructMultiRelation(String s, List<DescriptionPattern> children,
+                                              Function<String, String> basicCatFunction,
+                                              HeadFinder headFinder) throws ParseException {
+    if (s.equals("<...")) {
+      List<TregexPattern> newChildren = Generics.newArrayList();
+      for (int i = 0; i < children.size(); ++i) {
+        Relation rel = getRelation("<", Integer.toString(i + 1), basicCatFunction, headFinder); 
+        DescriptionPattern oldChild = children.get(i);
+        TregexPattern newChild = new DescriptionPattern(rel, oldChild);
+        newChildren.add(newChild);
+      }
+      Relation rel = getRelation("<", Integer.toString(children.size() + 1), basicCatFunction, headFinder);
+      TregexPattern noExtraChildren = new DescriptionPattern(rel, false, "__", null, false, basicCatFunction, Collections.<Pair<Integer,String>>emptyList(), false, null);
+      noExtraChildren.negate();
+      newChildren.add(noExtraChildren);
+      return new CoordinationPattern(newChildren, true);
+    } else {
+      throw new ParseException("Unknown multi relation " + s);
+    }
   }
 
   private Relation(String symbol) {
@@ -1067,6 +1094,42 @@ abstract class Relation implements Serializable {
     }
   };
 
+  private static final Relation PARENT_EQUALS = new Relation("<=") {
+    private static final long serialVersionUID = 98745298745198245L;
+
+    @Override
+    boolean satisfies(Tree t1, Tree t2, Tree root, final TregexMatcher matcher) {
+      if (t1 == t2) {
+        return true;
+      }
+      return PARENT_OF.satisfies(t1, t2, root, matcher);
+    }
+
+    @Override
+    Iterator<Tree> searchNodeIterator(final Tree t,
+                                      final TregexMatcher matcher) {
+      return new SearchNodeIterator() {
+        int nextNum;
+        boolean usedParent;
+
+        @Override
+        public void advance() {
+          if (!usedParent) {
+            next = t;
+            usedParent = true;
+          } else {
+            if (nextNum < t.numChildren()) {
+              next = t.getChild(nextNum);
+              nextNum++;
+            } else {
+              next = null;
+            }
+          }
+        }
+      };
+    }
+  };
+
   private static final Relation[] SIMPLE_RELATIONS = {
       DOMINATES, DOMINATED_BY, PARENT_OF, CHILD_OF, PRECEDES,
       IMMEDIATELY_PRECEDES, FOLLOWS, IMMEDIATELY_FOLLOWS,
@@ -1074,7 +1137,8 @@ abstract class Relation implements Serializable {
           LEFTMOST_DESCENDANT_OF, RIGHTMOST_DESCENDANT_OF, SISTER_OF,
       LEFT_SISTER_OF, RIGHT_SISTER_OF, IMMEDIATE_LEFT_SISTER_OF,
       IMMEDIATE_RIGHT_SISTER_OF, ONLY_CHILD_OF, HAS_ONLY_CHILD, EQUALS,
-      PATTERN_SPLITTER,UNARY_PATH_ANCESTOR_OF, UNARY_PATH_DESCENDANT_OF};
+      PATTERN_SPLITTER,UNARY_PATH_ANCESTOR_OF, UNARY_PATH_DESCENDANT_OF,
+      PARENT_EQUALS };
 
   private static final Map<String, Relation> SIMPLE_RELATIONS_MAP = Generics.newHashMap();
 

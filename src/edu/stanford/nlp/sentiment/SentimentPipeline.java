@@ -180,7 +180,7 @@ public class SentimentPipeline {
     System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
     System.err.println("  -stdin: Process stdin instead of a file");
     System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  Trees need to be binarized");
-    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
+    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTORS, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
     System.err.println("  -filterUnknown: remove neutral and unknown trees from the input.  Only applies to TREES input");
   }
 
