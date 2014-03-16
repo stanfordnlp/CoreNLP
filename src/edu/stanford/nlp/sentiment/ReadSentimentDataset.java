@@ -55,6 +55,10 @@ public class ReadSentimentDataset {
     TregexPattern.compile("__ <1 (__ <<- (/^(?i:provide)$/=provide !<__)) <2 (__ <<, (__=s > __=useless <... { (__ <: -LRB-) ; (__ <1 (__ <: s)) } ))"),
     TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, (__=word !< __)))"),
     TregexPattern.compile("-LRB-=lrb !, __ : (__=ltop > __ <<, =lrb <<- (-RRB-=rrb > (__ > __=rtop)) !<< (-RRB- !== =rrb))"),
+    TregexPattern.compile("__=top <1 (__=f1 < f) <2 (__=f2 <... { (__ < /^[*\\\\]+$/) ; (__ < ed) })"),
+    TregexPattern.compile("__=top <1 (__=f1 <1 (__ < don=do) <2 (__ < /^[\']$/=apos)) <2 (__=wrong < t)"),
+    TregexPattern.compile("-LRB-=lrb !, __ .. (-RRB-=rrb !< __ !.. -RRB-)"),
+    TregexPattern.compile("__ <: (__=unitary < __)"),
   };
 
   static final TsurgeonPattern[] tsurgeonPatterns = {
@@ -64,6 +68,12 @@ public class ReadSentimentDataset {
     Tsurgeon.parseOperation("[relabel provide /^.*$/={provide}s/] [prune s] [excise useless useless]"),
     Tsurgeon.parseOperation("[relabel word /^.*$/={letter}={word}/] [prune single] [excise useless useless]"),
     Tsurgeon.parseOperation("[prune lrb] [prune rrb] [excise ltop ltop] [excise rtop rtop]"),
+    Tsurgeon.parseOperation("replace top (0 fucked)"),
+    Tsurgeon.parseOperation("[prune wrong] [relabel do do] [relabel apos /^.*$/n={apos}t/] [excise top top]"),
+    // Note: this actually leaves unitary nodes, so we then fix them at the end
+    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
+    // Fix any stranded unitary nodes
+    Tsurgeon.parseOperation("[excise unitary unitary]"),
   };
 
   static {
