@@ -412,6 +412,25 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(relabel (B foo) (C foo) (C bar))");
   }
 
+  /**
+   * You can compile multiple patterns into one node with the syntax 
+   * [pattern1] [pattern2]
+   * Test that it does what it is supposed to do
+   */
+  public void testMultiplePatterns() {
+    TregexPattern tregex = TregexPattern.compile("A=foo < B=bar < C=baz");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[relabel baz BAZ] [move baz >-1 bar]");
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(A (B foo (BAZ foo) (BAZ bar)))");
+
+    tsurgeon = Tsurgeon.parseOperation("[relabel baz /^.*$/={bar}={baz}FOO/] [move baz >-1 bar]");
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(A (B foo (BCFOO foo) (BCFOO bar)))");
+
+    // This in particular was a problem until we required "/" to be escaped
+    tregex = TregexPattern.compile("A=foo < B=bar < C=baz < D=biff");
+    tsurgeon = Tsurgeon.parseOperation("[relabel baz /^.*$/={bar}={baz}/] [relabel biff /^.*$/={bar}={biff}/]");
+    runTest(tregex, tsurgeon, "(A (B foo) (C bar) (D baz))", "(A (B foo) (BC bar) (BD baz))");
+  }
+
   public void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
                       String input, String expected) {
     Tree result = Tsurgeon.processPattern(tregex, tsurgeon, 
