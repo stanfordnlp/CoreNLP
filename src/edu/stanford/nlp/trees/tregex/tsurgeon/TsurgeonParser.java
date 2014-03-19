@@ -17,7 +17,7 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants, Tsu
     System.out.println("Reading from standard input...");
     TsurgeonParser t = new TsurgeonParser(System.in);
     try {
-      TsurgeonPattern n = t.Root();
+      TsurgeonPattern n = new TsurgeonPatternRoot(t.Root());
       System.out.println(n.toString());
       System.out.println("Thank you.");
     } catch (Exception e) {
@@ -27,13 +27,10 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants, Tsu
     }
   }
 
-// TODO: this is wasteful in terms of creating TsurgeonPatternRoot.
-// Should separate that out into another production
-  final public TsurgeonPatternRoot Root() throws ParseException {/*@bgen(jjtree) Root */
+  final public TsurgeonPattern[] Root() throws ParseException {/*@bgen(jjtree) Root */
   SimpleNode jjtn000 = new SimpleNode(JJTROOT);
   boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);Token name;
-  TsurgeonPattern result;
+  jjtree.openNodeScope(jjtn000);TsurgeonPattern result;
   List<TsurgeonPattern> results = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -52,31 +49,19 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants, Tsu
         result = Operation();
 jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
-{if ("" != null) return new TsurgeonPatternRoot(result);}
-        break;
-        }
-      case IF:{
-        jj_consume_token(IF);
-        jj_consume_token(EXISTS);
-        name = jj_consume_token(NAME);
-        result = Root();
-jjtree.closeNodeScope(jjtn000, true);
-    jjtc000 = false;
-{if ("" != null) return new TsurgeonPatternRoot(new IfExistsNode(name.image, result.children));}
+{if ("" != null) return new TsurgeonPattern[] { result };}
         break;
         }
       case OPEN_BRACKET:{
         label_1:
         while (true) {
           jj_consume_token(OPEN_BRACKET);
-          result = Root();
+          result = Operation();
           jj_consume_token(CLOSE_BRACKET);
 if (results == null) {
         results = Generics.newArrayList();
       }
-      for (TsurgeonPattern child : result.children) {
-        results.add(child);
-      }
+      results.add(result);
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case OPEN_BRACKET:{
             ;
@@ -90,7 +75,7 @@ if (results == null) {
 jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
 TsurgeonPattern[] array = new TsurgeonPattern[results.size()];
-    {if ("" != null) return new TsurgeonPatternRoot(results.toArray(array));}
+    {if ("" != null) return results.toArray(array);}
         break;
         }
       default:
@@ -694,6 +679,44 @@ if (jjtc000) {
     finally { jj_save(7, xla); }
   }
 
+  private boolean jj_3_4()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(GENERAL_RELABEL)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(REGEX)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(QUOTEX)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6()
+ {
+    if (jj_scan_token(LOCATION_RELATION)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
   private boolean jj_3R_5()
  {
     if (jj_3R_7()) return true;
@@ -806,44 +829,6 @@ if (jjtc000) {
     return false;
   }
 
-  private boolean jj_3_4()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(GENERAL_RELABEL)) return true;
-    return false;
-  }
-
-  private boolean jj_3_3()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(REGEX)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(QUOTEX)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6()
- {
-    if (jj_scan_token(LOCATION_RELATION)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
   /** Generated Token Manager. */
   public TsurgeonParserTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -861,7 +846,7 @@ if (jjtc000) {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x20,0xfff60,0xb00,0x2000,0xf8000,0x1000000,0x61000000,0x61000000,0xe1000000,};
+      jj_la1_0 = new int[] {0x20,0x3ffe0,0x2c0,0x800,0x3e000,0x200000,0xc200000,0xc200000,0x1c200000,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[8];
   private boolean jj_rescan = false;
@@ -1051,7 +1036,7 @@ if (jjtc000) {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[32];
+    boolean[] la1tokens = new boolean[29];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1065,7 +1050,7 @@ if (jjtc000) {
         }
       }
     }
-    for (int i = 0; i < 32; i++) {
+    for (int i = 0; i < 29; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
