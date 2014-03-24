@@ -434,7 +434,7 @@ public class EnglishGrammaticalRelations {
    * "That she lied was suspected by everyone" &rarr; <code>csubjpass</code>(suspected, lied)
    */
   public static final GrammaticalRelation CLAUSAL_PASSIVE_SUBJECT =
-    new GrammaticalRelation(Language.English, "csubjpass", "clausal passive subject",
+    new GrammaticalRelation(Language.English, "csubjpass", "clausal subject",
         ClausalPassiveSubjectGRAnnotation.class, CLAUSAL_SUBJECT, "S", tregexCompiler,
         new String[] {
           "S < (SBAR|S=target !$+ /^,$/ $++ (VP < (VP < VBN|VBD) < (/^(?:VB|AUXG?)/ < " + passiveAuxWordRegex + ") !$-- NP))",
