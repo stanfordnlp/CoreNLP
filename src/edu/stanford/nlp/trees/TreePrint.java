@@ -548,7 +548,7 @@ public class TreePrint {
         //      that dependencies for other languages can be printed.
         // wsg2011: This code currently ignores the dependency label since the present implementation
         //          of mapDependencies() returns UnnamedDependency objects.
-
+        // TODO: if there is a GrammaticalStructureFactory available, use that instead of mapDependencies
         Tree it = outputTree.deepCopy(outputTree.treeFactory(), CoreLabel.factory());
         it.indexLeaves();
 
