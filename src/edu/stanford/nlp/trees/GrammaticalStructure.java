@@ -903,14 +903,20 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     if (conllx) {
       List<Tree> leaves = tree.getLeaves();
-      List<String> words = new ArrayList<String>(leaves.size());
-      List<String> pos = new ArrayList<String>(leaves.size());
+      String[] words = new String[leaves.size()];
+      String[] pos = new String[leaves.size()];
       String[] relns = new String[leaves.size()];
       int[] govs = new int[leaves.size()];
 
+      int index = 0;
       for (Tree leaf : leaves) {
-        words.add(leaf.value());
-        pos.add(leaf.parent(tree).value()); // use slow, but safe, parent look up
+        index++;
+        if (!indexToPos.containsKey(index)) {
+          continue;
+        }
+        int depPos = indexToPos.get(index) - 1;
+        words[depPos] = leaf.value();
+        pos[depPos] = leaf.parent(tree).value(); // use slow, but safe, parent look up
       }
 
       for (TypedDependency dep : deps) {
@@ -920,7 +926,10 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
 
       for (int i = 0; i < relns.length; i++) {
-        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words.get(i), pos.get(i), pos.get(i), govs[i], (relns[i] != null ? relns[i] : "erased"));
+        if (words[i] == null) {
+          continue;
+        }
+        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], pos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
         bf.append(out);
       }
 
