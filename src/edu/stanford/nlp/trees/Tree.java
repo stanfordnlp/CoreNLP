@@ -868,7 +868,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       return;
     }
     pw.print("(");
-    String nodeString = onlyLabelValue ? nodeString() : nodeString();
+    String nodeString = onlyLabelValue ? value() : nodeString();
     pw.print(nodeString);
     // pw.flush();
     boolean parentIsNull = label() == null || label().value() == null;
