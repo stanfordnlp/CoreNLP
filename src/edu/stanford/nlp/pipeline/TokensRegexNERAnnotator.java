@@ -149,6 +149,10 @@ public class TokensRegexNERAnnotator implements Annotator {
           new PropertiesUtils.Property("verbose", "false", ""),
   };
 
+  /** Construct a new TokensRegexAnnotator.
+   *
+   *  @param mapping A comma-separated list of files, URLs, or classpath resources to load mappings from
+   */
   public TokensRegexNERAnnotator(String mapping) {
     this(mapping, false);
   }
