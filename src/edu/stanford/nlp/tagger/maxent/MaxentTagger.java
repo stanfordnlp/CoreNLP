@@ -1577,6 +1577,9 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       docProcessor = new DocumentPreprocessor(new BufferedReader(new StringReader(line)));
 
       docProcessor.setTokenizerFactory(tokenizerFactory);
+      if (config.keepEmptySentences()) {
+        docProcessor.setKeepEmptySentences(true);
+      }
 
       for (List<HasWord> sentence : docProcessor) {
         numWords += sentence.size();
@@ -1738,9 +1741,15 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     if (tagInside.length() > 0) {
       docProcessor = new DocumentPreprocessor(reader, DocumentPreprocessor.DocType.XML);
       docProcessor.setElementDelimiter(tagInside);
+      if (config.keepEmptySentences()) {
+        docProcessor.setKeepEmptySentences(true);
+      }
     } else {
       docProcessor = new DocumentPreprocessor(reader);
       docProcessor.setSentenceDelimiter(sentenceDelimiter);
+      if (config.keepEmptySentences()) {
+        docProcessor.setKeepEmptySentences(true);
+      }
     }
     docProcessor.setTokenizerFactory(tokenizerFactory);
 
