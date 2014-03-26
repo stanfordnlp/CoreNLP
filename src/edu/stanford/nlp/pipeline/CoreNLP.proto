@@ -9,6 +9,8 @@ message Document {
   repeated Sentence   sentence    = 3;
   repeated CorefChain corefChain  = 4;
   optional string     docID       = 5;
+
+  extensions 100 to 255;
 }
 
 //
@@ -27,9 +29,11 @@ message Sentence {
   optional uint32          paragraph                           = 10;
   
   // Fields set by other annotators in CoreNLP
-  optional bool            hasRelationAnnotations              = 101;
-  repeated Entity          entity                              = 102;
-  repeated Relation        relation                            = 103;
+  optional bool            hasRelationAnnotations              = 51;
+  repeated Entity          entity                              = 52;
+  repeated Relation        relation                            = 53;
+
+  extensions 100 to 255;
 }
 
 //
@@ -62,9 +66,9 @@ message Token {
   optional string answer          = 24;   // A temporary annotation which is occasionally left in
 
   // Fields set by other annotators in CoreNLP
-  optional string gender          = 101;  // gender annotation (machine reading)
-  optional string trueCase        = 102;  // true case type of token
-  optional string trueCaseText    = 103;  // true case gloss of token
+  optional string gender          = 51;  // gender annotation (machine reading)
+  optional string trueCase        = 52;  // true case type of token
+  optional string trueCaseText    = 53;  // true case gloss of token
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
@@ -72,6 +76,8 @@ message Token {
   //       string docID          @see Document#docID
   //       uint32 index          @see implicit in Sentence
   //       uint32 paragraph      @see Sentence#paragraph
+
+  extensions 100 to 255;
 }
 
 //
