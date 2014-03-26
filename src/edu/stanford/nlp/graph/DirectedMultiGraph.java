@@ -170,10 +170,16 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   }
 
   public List<E> getOutgoingEdges(V v) {
+    if (!outgoingEdges.containsKey(v)) { //noinspection unchecked
+      return Collections.EMPTY_LIST;
+    }
     return CollectionUtils.flatten(outgoingEdges.get(v).values());
   }
 
   public List<E> getIncomingEdges(V v) {
+    if (!incomingEdges.containsKey(v)) { //noinspection unchecked
+      return Collections.EMPTY_LIST;
+    }
     return CollectionUtils.flatten(incomingEdges.get(v).values());
   }
 
@@ -366,7 +372,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   public int getInDegree(V vertex) {
     if (!containsVertex(vertex)) {
-      throw new IllegalArgumentException("Unknown vertex " + vertex);
+      return 0;
     }
     int result = 0;
     Map<V, List<E>> incoming = incomingEdges.get(vertex);
@@ -380,7 +386,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     int result = 0;
     Map<V, List<E>> outgoing = outgoingEdges.get(vertex);
     if (outgoing == null) {
-      throw new IllegalArgumentException("Unknown vertex " + vertex);
+      return 0;
     }
     for (List<E> edges : outgoing.values()) {
       result += edges.size();
