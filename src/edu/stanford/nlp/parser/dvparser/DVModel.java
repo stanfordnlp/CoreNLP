@@ -431,6 +431,9 @@ public class DVModel implements Serializable {
       if (basic.length() > 0 && basic.charAt(0) == '@') {
         basic = basic.substring(1);
       }
+      if (op.dvCombineCategories) {
+        basic = op.tlpParams.combineCategory(basic);
+      }
       return basic;
     }
   }

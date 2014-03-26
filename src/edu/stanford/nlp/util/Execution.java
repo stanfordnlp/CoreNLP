@@ -414,7 +414,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)
+        // (case: declared option)z
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -431,7 +431,7 @@ public class Execution {
           try {
             clazz = ClassLoader.getSystemClassLoader().loadClass(className);
           } catch (Exception e) {
-            err("Could not set option: " + rawKey + "; no such class: " + className);
+            err("Could not set option: " + rawKey + "; either the option is mistyped, not defined, or the class " + className + " does not exist.");
           }
           // get the field
           if (clazz != null) {
@@ -440,7 +440,12 @@ public class Execution {
             } catch (Exception e) {
               err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
             }
-            fillField(class2object.get(target.getDeclaringClass()), target, value);
+            if (target != null) {
+              log("option overrides " + target + " to '" + value + "'");
+              fillField(class2object.get(target.getDeclaringClass()), target, value);
+            } else {
+              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
+            }
           }
         }
       }

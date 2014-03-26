@@ -14,7 +14,7 @@ import java.util.*;
 public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements PriorityQueue<E>, Iterator<E> {
 
   /**
-   * An <code>Entry</code> stores an object in the queue along with
+   * An {@code Entry} stores an object in the queue along with
    * its current location (array position) and priority.
    * uses ~ 8 (self) + 4 (key ptr) + 4 (index) + 8 (priority) = 24 bytes?
    */
@@ -25,33 +25,39 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
 
     @Override
     public String toString() {
-      return key + " at " + index + " (" + priority + ")";
+      return key + " at " + index + " (" + priority + ')';
     }
   }
 
+  @Override
   public boolean hasNext() {
     return size() > 0;
   }
 
+  @Override
   public E next() {
+    if (size() == 0) {
+      throw new NoSuchElementException("Empty PQ");
+    }
     return removeFirst();
   }
 
+  @Override
   public void remove() {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * <code>indexToEntry</code> maps linear array locations (not
+   * {@code indexToEntry} maps linear array locations (not
    * priorities) to heap entries.
    */
-  private List<Entry<E>> indexToEntry;
+  private final List<Entry<E>> indexToEntry;
 
   /**
-   * <code>keyToEntry</code> maps heap objects to their heap
+   * {@code keyToEntry} maps heap objects to their heap
    * entries.
    */
-  private Map<E,Entry<E>> keyToEntry;
+  private final Map<E,Entry<E>> keyToEntry;
 
   private Entry<E> parent(Entry<E> entry) {
     int index = entry.index;
@@ -150,37 +156,36 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * On the assumption that
    * leftChild(entry) and rightChild(entry) satisfy the heap property,
    * make sure that the heap at entry satisfies this property by possibly
-   * percolating the element o downwards.  I've replaced the obvious
+   * percolating the element entry downwards.  I've replaced the obvious
    * recursive formulation with an iterative one to gain (marginal) speed
    */
-  private void heapifyDown(Entry<E> entry) {
-    Entry<E> currentEntry = entry;
+  private void heapifyDown(final Entry<E> entry) {
     Entry<E> bestEntry; // initialized below
 
     do {
-      bestEntry = currentEntry;
+      bestEntry = entry;
 
-      Entry<E> leftEntry = leftChild(currentEntry);
+      Entry<E> leftEntry = leftChild(entry);
       if (leftEntry != null) {
         if (compare(bestEntry, leftEntry) < 0) {
           bestEntry = leftEntry;
         }
       }
 
-      Entry<E> rightEntry = rightChild(currentEntry);
+      Entry<E> rightEntry = rightChild(entry);
       if (rightEntry != null) {
         if (compare(bestEntry, rightEntry) < 0) {
           bestEntry = rightEntry;
         }
       }
 
-      if (bestEntry != currentEntry) {
+      if (bestEntry != entry) {
         // Swap min and current
-        swap(bestEntry, currentEntry);
+        swap(bestEntry, entry);
         // at start of next loop, we set currentIndex to largestIndex
         // this indexation now holds current, so it is unchanged
       }
-    } while (bestEntry != currentEntry);
+    } while (bestEntry != entry);
     // System.err.println("Done with heapify down");
     // verify();
   }
@@ -192,11 +197,12 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
 
 
   /**
-   * Finds the object with the highest priority, removes it,
+   * Finds the E with the highest priority, removes it,
    * and returns it.
    *
-   * @return the object with highest priority
+   * @return the E with highest priority
    */
+  @Override
   public E removeFirst() {
     E first = getFirst();
     remove(first);
@@ -204,11 +210,12 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   }
 
   /**
-   * Finds the object with the highest priority and returns it, without
+   * Finds the E with the highest priority and returns it, without
    * modifying the queue.
    *
-   * @return the object with minimum key
+   * @return the E with minimum key
    */
+  @Override
   public E getFirst() {
     if (isEmpty()) {
       throw new NoSuchElementException();
@@ -216,9 +223,8 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
     return getEntry(0).key;
   }
 
-  /**
-   * Gets the priority of the highest-priority element of the queue.
-   */
+  /** {@inheritDoc} */
+  @Override
   public double getPriority() {
     if (isEmpty()) {
       throw new NoSuchElementException();
@@ -231,6 +237,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * you can create a new object that is .equals() to an object in the queue
    * but is not actually identical, or if you want to modify an object that is
    * in the queue.
+   *
    * @return null if the object is not in the queue, otherwise returns the
    * object.
    */
@@ -240,10 +247,8 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
     return e.key;
   }
 
-  /**
-   * Get the priority of a key -- if the key is not in the queue, Double.NEGATIVE_INFINITY is returned.
-   *
-   */
+  /** {@inheritDoc} */
+  @Override
   public double getPriority(E key) {
     Entry<E> entry = getEntry(key);
     if (entry == null) {
@@ -259,7 +264,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * already present, with better priority, it will NOT cause an
    * a decreasePriority.
    *
-   * @param key an <code>Object</code> value
+   * @param key an <code>E</code> value
    * @return whether the key was present before
    */
   @Override
@@ -271,9 +276,8 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
     return true;
   }
 
-  /**
-   * Convenience method for if you want to pretend relaxPriority doesn't exist, or if you really want add's return conditions.
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean add(E key, double priority) {
 //    System.err.println("Adding " + key + " with priority " + priority);
     if (add(key)) {
@@ -317,6 +321,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * @param key an <code>Object</code> value
    * @return whether the priority actually improved.
    */
+  @Override
   public boolean relaxPriority(E key, double priority) {
     Entry<E> entry = getEntry(key);
     if (entry == null) {
@@ -355,6 +360,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
    * @param key an <code>Object</code> value
    * @return whether the priority actually changed.
    */
+  @Override
   public boolean changePriority(E key, double priority) {
     Entry<E> entry = getEntry(key);
     if (entry == null) {
@@ -391,11 +397,13 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   /**
    * Returns whether the queue contains the given key.
    */
+  @SuppressWarnings("SuspiciousMethodCalls")
   @Override
   public boolean contains(Object key) {
     return keyToEntry.containsKey(key);
   }
 
+  @Override
   public List<E> toSortedList() {
     List<E> sortedList = new ArrayList<E>(size());
     BinaryHeapPriorityQueue<E> queue = this.deepCopy();
@@ -453,18 +461,19 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   }
 
   /** {@inheritDoc} */
+  @Override
   public String toString(int maxKeysToPrint) {
     if (maxKeysToPrint <= 0) maxKeysToPrint = Integer.MAX_VALUE;
     List<E> sortedKeys = toSortedList();
     StringBuilder sb = new StringBuilder("[");
     for (int i = 0; i < maxKeysToPrint && i < sortedKeys.size(); i++) {
       E key = sortedKeys.get(i);
-      sb.append(key).append("=").append(getPriority(key));
+      sb.append(key).append('=').append(getPriority(key));
       if (i < maxKeysToPrint - 1 && i < sortedKeys.size() - 1) {
         sb.append(", ");
       }
     }
-    sb.append("]");
+    sb.append(']');
     return sb.toString();
   }
 
@@ -474,10 +483,10 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
     for (Iterator<E> keyI = sortedKeys.iterator(); keyI.hasNext();) {
       E key = keyI.next();
       sb.append(key);
-      sb.append("\t");
+      sb.append('\t');
       sb.append(getPriority(key));
       if (keyI.hasNext()) {
-        sb.append("\n");
+        sb.append('\n');
       }
     }
     return sb.toString();
@@ -500,27 +509,6 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   public BinaryHeapPriorityQueue(MapFactory<E, Entry<E>> mapFactory, int initCapacity) {
 	indexToEntry = new ArrayList<Entry<E>>(initCapacity);
 	keyToEntry = mapFactory.newMap(initCapacity);
-  }
-
-  public static void main(String[] args) {
-    BinaryHeapPriorityQueue<String> queue =
-      new BinaryHeapPriorityQueue<String>();
-    queue.add("a", 1.0);
-    System.out.println("Added a:1 " + queue);
-    queue.add("b", 2.0);
-    System.out.println("Added b:2 " + queue);
-    queue.add("c", 1.5);
-    System.out.println("Added c:1.5 " + queue);
-    queue.relaxPriority("a", 3.0);
-    System.out.println("Increased a to 3 " + queue);
-    queue.decreasePriority("b", 0.0);
-    System.out.println("Decreased b to 0 " + queue);
-    System.out.println("removeFirst()=" + queue.removeFirst());
-    System.out.println("queue=" + queue);
-    System.out.println("removeFirst()=" + queue.removeFirst());
-    System.out.println("queue=" + queue);
-    System.out.println("removeFirst()=" + queue.removeFirst());
-    System.out.println("queue=" + queue);
   }
 
 }
