@@ -94,13 +94,7 @@ import java.io.*;
  * <code>collectOperations</code> to collect all the surgery patterns
  * into one TsurgeonPattern, and then to call processPatternOnTrees.
  * Either of these latter methods is much faster.
- * </p><p>
- * The parser also has the ability to collect multiple
- * TsurgeonPatterns into one pattern by itself by enclosing each
- * pattern in <code>[ ... ]</code>.  For example, 
- * <br>
- * <code>Tsurgeon.parseOperation("[relabel foo BAR] [prune bar]")</code>
- * </p><p>
+ * <p>
  * For more information on using Tsurgeon from the command line,
  * see the {@link #main} method and the package Javadoc.
  *
@@ -208,22 +202,10 @@ public class Tsurgeon {
    * <p>
    *      <code>$+ &#60;name&#62;</code>     the left sister of the named node<br>
    *      <code>$- &#60;name&#62;</code>     the right sister of the named node<br>
-   *      <code>&gt;i &#60;name&#62;</code> the i_th daughter of the named node<br>
-   *      <code>&gt;-i &#60;name&#62;</code> the i_th daughter, counting from the right, of the named node.
-   * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code>
-   *     deletes name1 and inserts a copy of name2 in its place.
-   * <li><code>replace &#60;name&#62; &#60;tree&#62; &#60;tree2&#62;...</code>
-   *     deletes name and inserts the new tree(s) in its place.  If
-   *     more than one replacement tree is given, each of the new
-   *     subtrees will be added in order where the old tree was.
-   *     Multiple subtrees at the root is an illegal operation and
-   *     will throw an exception.
-   * <li><code>createSubtree &#60;new-label&#62; &#60;name1&#62; [&#60;name2&#62;]</code> 
-   *     Create a subtree out of all the nodes from
-   *     <code>&#60;name1&#62;</code> through
-   *     <code>&#60;name2&#62;</code> and puts the new subtree where
-   *     that span used to be.  To limit the operation to just one
-   *     node, elide <code>&#60;name2&#62;</code>.
+   *      <code>&gt;i</code> the i_th daughter of the named node<br>
+   *      <code>&gt;-i</code> the i_th daughter, counting from the right, of the named node.
+   * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code> or <code>replace &#60;name1&#62; &#60;tree&#62;</code>
+   *     deletes name1 and inserts tree or a copy of name2 in its place.
    * <li><code>adjoin &#60;auxiliary_tree&#62; &lt;name&gt;</code> Adjoins the specified auxiliary tree into the named node.
    *     The daughters of the target node will become the daughters of the foot of the auxiliary tree.
    * <li><code>adjoinH &#60;auxiliary_tree&#62; &lt;name&gt;</code> Similar to adjoin, but preserves the target node
@@ -239,17 +221,6 @@ public class Tsurgeon {
    *     an accidental clash of indices across things that are not meant to be coindexed.
    * </ul>
    *
-   * <p>
-   * In the context of <code>adjoin</code>, <code>adjoinH</code>, and
-   * <code>adjoinF</code>, an auxiliary tree is a tree in Penn
-   * Treebank format with <code>@</code> on exactly one of the leaves
-   * denoting the foot of the tree.  The operations which use the foot
-   * use the labeled node.  For example: <br>
-   * Tsurgeon: <code>adjoin (FOO (BAR@)) foo</code> <br>
-   * Tregex: <code>B=foo</code> <br>
-   * Input: <code>(A (B 1 2))</code>
-   * Output: <code>(A (FOO (BAR 1 2)))</code>
-   * </p><p>
    * Tsurgeon applies the same operation to the same tree for as long
    * as the given tregex operation matches.  This means that infinite
    * loops are very easy to cause.  One common situation this comes up
@@ -259,7 +230,7 @@ public class Tsurgeon {
    *
    * <blockquote>
    * <code>
-   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP"); <br>
+   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP");
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>
@@ -268,21 +239,13 @@ public class Tsurgeon {
    *
    * <blockquote>
    * <code>
-   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo"); <br>
+   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo");
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>
    *
    * </p>
-   * <p>
-
-   * Tsurgeon has (very) limited support for conditional statements.
-   * If a pattern is prefaced with 
-   * <code>if exists &lt;name&gt;</code>, 
-   * the rest of the pattern will only execute if
-   * the named node was found in the corresponding TregexMatcher.
    *
-   * </p>
    *
    * @param args a list of names of files each of which contains a single tregex matching pattern plus a list, one per line,
    *        of transformation operations to apply to the matched pattern.
@@ -586,7 +549,7 @@ public class Tsurgeon {
     try {
       TsurgeonParser parser =
         new TsurgeonParser(new StringReader(operationString + "\n"));
-      return parser.Root();
+      return new TsurgeonPatternRoot(new TsurgeonPattern[] {parser.Root()} );
     } catch(ParseException e) {
       throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
                                        operationString, e);

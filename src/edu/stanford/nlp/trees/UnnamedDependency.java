@@ -76,13 +76,8 @@ public class UnnamedDependency implements Dependency<Label, Label, Object> {
   }
   
   protected String getText(Label label) {
-    if (label instanceof HasWord) {
-      String word = ((HasWord) label).word();
-      if (word != null) {
-        return word;
-      }
-    }
-    return label.value();
+    return ((label instanceof HasWord) ? 
+            ((HasWord) label).word() : label.value());
   }
 
   @Override
