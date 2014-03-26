@@ -83,6 +83,15 @@ public class WeightedDataset<L, F> extends Dataset<L, F> {
     addFeatures(features);
     weights[size++] = weight;
   }
+
+  /**
+   * Set the weight of datum i.
+   * @param i The index of the datum to change the weight of.
+   * @param weight The weight to set
+   */
+  public void setWeight(int i, float weight) {
+    weights[i] = weight;
+  }
   
   /**
    * Randomizes the data array in place
