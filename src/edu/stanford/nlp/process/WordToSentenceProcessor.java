@@ -167,7 +167,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     }
   }
 
-  private boolean matches(List<Pattern> patterns, String word) {
+  private static boolean matches(List<Pattern> patterns, String word) {
     for(Pattern p: patterns){
       Matcher m = p.matcher(word);
       if (m.matches()) {
@@ -238,7 +238,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       boolean inMultiTokenExpr = false;
       boolean discardToken = false;
       if (o instanceof CoreMap) {
-        // Hacky stuff to ensure sentence breaks does not happen in certain cases
+        // Hacky stuff to ensure sentence breaks do not happen in certain cases
         CoreMap cm = (CoreMap) o;
         Boolean forcedUntilEndValue = cm.get(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);
         cm.remove(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);  // clean up after ourselves

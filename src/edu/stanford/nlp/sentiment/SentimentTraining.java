@@ -44,7 +44,6 @@ public class SentimentTraining {
   public static void train(SentimentModel model, String modelPath, List<Tree> trainingTrees, List<Tree> devTrees) {
     Timing timing = new Timing();
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
-    long nextDebugCycle = model.op.trainOptions.debugOutputSeconds * 1000;
     int debugCycle = 0;
     double bestAccuracy = 0.0;
 
@@ -89,12 +88,14 @@ public class SentimentTraining {
           break;
         }
 
-        if (nextDebugCycle > 0 && totalElapsed > nextDebugCycle) {
-
-          Evaluate eval = new Evaluate(model);
-          eval.eval(devTrees);
-          eval.printSummary();
-          double score = eval.exactNodeAccuracy() * 100.0;
+        if (batch == 0 && epoch > 0 && epoch % model.op.trainOptions.debugOutputEpochs == 0) {
+          double score = 0.0;
+          if (devTrees != null) {
+            Evaluate eval = new Evaluate(model);
+            eval.eval(devTrees);
+            eval.printSummary();
+            score = eval.exactNodeAccuracy() * 100.0;
+          }
 
           // output an intermediate model
           if (modelPath != null) {
@@ -109,16 +110,12 @@ public class SentimentTraining {
             model.saveSerialized(tempPath);
           }
 
-          // TODO: output a summary of what's happened so far
-
           ++debugCycle;
-          nextDebugCycle = timing.report() + model.op.trainOptions.debugOutputSeconds * 1000;
         }
       }
       long totalElapsed = timing.report();
       
       if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
-        // no need to debug output, we're done now
         System.err.println("Max training time exceeded, exiting");
         break;
       }
@@ -129,6 +126,13 @@ public class SentimentTraining {
     SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trees);
     return gcFunc.gradientCheck(model.totalParamSize(), 50, model.paramsToVector());    
   }
+
+  static final Filter<Tree> NEUTRAL_FILTER = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      int gold = RNNCoreAnnotations.getGoldClass(tree);
+      return gold != 2;
+    }
+  };
 
   public static void main(String[] args) {
     RNNOptions op = new RNNOptions();
@@ -174,20 +178,19 @@ public class SentimentTraining {
     // read in the trees
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(trainPath);
     System.err.println("Read in " + trainingTrees.size() + " training trees");
-    List<Tree> devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
-    System.err.println("Read in " + devTrees.size() + " dev trees");
-
     if (filterNeutral) {
-      Filter<Tree> neutralFilter = new Filter<Tree>() {
-        public boolean accept(Tree tree) {
-          int gold = RNNCoreAnnotations.getGoldClass(tree);
-          return gold != 2;
-        }
-      };
-      trainingTrees = CollectionUtils.filterAsList(trainingTrees, neutralFilter);
-      devTrees = CollectionUtils.filterAsList(devTrees, neutralFilter);
+      trainingTrees = CollectionUtils.filterAsList(trainingTrees, NEUTRAL_FILTER);
       System.err.println("Filtered training trees: " + trainingTrees.size());
-      System.err.println("Filtered dev trees: " + devTrees.size());
+    }
+
+    List<Tree> devTrees = null;
+    if (devPath != null) {
+      devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
+      System.err.println("Read in " + devTrees.size() + " dev trees");
+      if (filterNeutral) {
+        devTrees = CollectionUtils.filterAsList(devTrees, NEUTRAL_FILTER);
+        System.err.println("Filtered dev trees: " + devTrees.size());
+      }
     }
 
     // TODO: binarize the trees, then collapse the unary chains.

@@ -30,7 +30,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return model.totalParamSize();
   }
 
-  public double sumError(Tree tree) {
+  private static double sumError(Tree tree) {
     if (tree.isLeaf()) {
       return 0.0;
     } else if (tree.isPreTerminal()) {
@@ -91,7 +91,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : model.binaryClassification) {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
-        
+
         binaryCD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleMatrix(numRows, numCols));
       }
     }
@@ -101,7 +101,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
         int numSlices = entry.getValue().numSlices();
-        
+
         binaryTensorTD.put(entry.getFirstKey(), entry.getSecondKey(), new SimpleTensor(numRows, numCols, numSlices));
       }
     }
@@ -116,7 +116,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       int numCols = entry.getValue().numCols();
       wordVectorD.put(entry.getKey(), new SimpleMatrix(numRows, numCols));
     }
-    
+
     // TODO: This part can easily be parallelized
     List<Tree> forwardPropTrees = Generics.newArrayList();
     for (Tree tree : trainingBatch) {
@@ -190,7 +190,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return cost;
   }
 
-  private void backpropDerivativesAndError(Tree tree, 
+  private void backpropDerivativesAndError(Tree tree,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
                                            TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD,
@@ -200,7 +200,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     backpropDerivativesAndError(tree, binaryTD, binaryCD, binaryTensorTD, unaryCD, wordVectorD, delta);
   }
 
-  private void backpropDerivativesAndError(Tree tree, 
+  private void backpropDerivativesAndError(Tree tree,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryTD,
                                            TwoDimensionalMap<String, String, SimpleMatrix> binaryCD,
                                            TwoDimensionalMap<String, String, SimpleTensor> binaryTensorTD,
@@ -218,13 +218,19 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     // Build a vector that looks like 0,0,1,0,0 with an indicator for the correct class
     SimpleMatrix goldLabel = new SimpleMatrix(model.numClasses, 1);
     int goldClass = RNNCoreAnnotations.getGoldClass(tree);
-    goldLabel.set(goldClass, 1.0);
+    if (goldClass >= 0) {
+      goldLabel.set(goldClass, 1.0);
+    }
 
     double nodeWeight = model.op.trainOptions.getClassWeight(goldClass);
 
     SimpleMatrix predictions = RNNCoreAnnotations.getPredictions(tree);
 
-    SimpleMatrix deltaClass = predictions.minus(goldLabel).scale(nodeWeight);
+    // If this is an unlabeled class, set deltaClass to 0.  We could
+    // make this more efficient by eliminating various of the below
+    // calculations, but this would be the easiest way to handle the
+    // unlabeled class
+    SimpleMatrix deltaClass = goldClass >= 0 ? predictions.minus(goldLabel).scale(nodeWeight) : new SimpleMatrix(predictions.numRows(), predictions.numCols());
     SimpleMatrix localCD = deltaClass.mult(NeuralUtils.concatenateWithBias(currentVector).transpose());
 
     double error = -(NeuralUtils.elementwiseApplyLog(predictions).elementMult(goldLabel).elementSum());
@@ -257,12 +263,12 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       } else {
         binaryCD.put(leftCategory, rightCategory, binaryCD.get(leftCategory, rightCategory).plus(localCD));
       }
-      
+
       SimpleMatrix currentVectorDerivative = NeuralUtils.elementwiseApplyTanhDerivative(currentVector);
       SimpleMatrix deltaFromClass = model.getBinaryClassification(leftCategory, rightCategory).transpose().mult(deltaClass);
       deltaFromClass = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).elementMult(currentVectorDerivative);
       SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
-      
+
       SimpleMatrix leftVector = RNNCoreAnnotations.getNodeVector(tree.children()[0]);
       SimpleMatrix rightVector = RNNCoreAnnotations.getNodeVector(tree.children()[1]);
       SimpleMatrix childrenVector = NeuralUtils.concatenateWithBias(leftVector, rightVector);
@@ -352,7 +358,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       if (model.op.useTensors) {
         SimpleTensor tensor = model.getBinaryTensor(leftCategory, rightCategory);
         SimpleMatrix tensorIn = NeuralUtils.concatenate(leftVector, rightVector);
-        SimpleMatrix tensorOut = tensor.bilinearProducts(tensorIn);        
+        SimpleMatrix tensorOut = tensor.bilinearProducts(tensorIn);
         nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector).plus(tensorOut));
       } else {
         nodeVector = NeuralUtils.elementwiseApplyTanh(W.mult(childrenVector));
