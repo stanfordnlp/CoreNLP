@@ -177,12 +177,23 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * This is in contrast to the default, where mutliple buffers may come out of the stream,
    * and therefore each one is prepended by the length of the buffer to follow.
    *
-   * @param is The input stream to read from. This should contain a single protocol buffer and nothing else.
+   * @param in The file to read.
    * @return A parsed Annotation.
    * @throws IOException In case the stream cannot be read from.
    */
-  public Annotation readUndelimited(InputStream is) throws IOException {
-    return fromProto(CoreNLPProtos.Document.parseDelimitedFrom(is));
+  public Annotation readUndelimited(File in) throws IOException {
+    FileInputStream delimited = new FileInputStream(in);
+    FileInputStream undelimited = new FileInputStream(in);
+    CoreNLPProtos.Document doc;
+    try {
+      doc = CoreNLPProtos.Document.parseFrom(delimited);
+    } catch (Exception e) {
+      doc = CoreNLPProtos.Document.parseDelimitedFrom(undelimited);
+    } finally {
+      delimited.close();
+      undelimited.close();
+    }
+    return fromProto(doc);
   }
 
   /**
