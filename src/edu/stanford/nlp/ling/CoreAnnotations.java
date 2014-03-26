@@ -278,6 +278,7 @@ public class CoreAnnotations {
    * we see a ForcedSentenceEndAnnotation.  Used to force the ssplit annotator
    * (eg the WordToSentenceProcessor) to keep tokens in the same sentence
    * until ForcedSentenceEndAnnotation is seen.
+   * This annotation should be removed by the sentence splitter.
    */
   public static class ForcedSentenceUntilEndAnnotation
           implements CoreAnnotation<Boolean> {
@@ -290,6 +291,7 @@ public class CoreAnnotations {
    * This indicates the sentence should end at this token.  Used to
    * force the ssplit annotator (eg the WordToSentenceProcessor) to
    * start a new sentence at the next token.
+   * This annotation should be removed by the sentence splitter.
    */
   public static class ForcedSentenceEndAnnotation
   implements CoreAnnotation<Boolean> {

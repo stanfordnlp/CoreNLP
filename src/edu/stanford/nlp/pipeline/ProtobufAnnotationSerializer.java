@@ -229,6 +229,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(NumericCompositeValueAnnotation.class);
     keysToSerialize.remove(NumericTypeAnnotation.class);
     keysToSerialize.remove(NumericValueAnnotation.class);
+    // Remove items which were never supposed to be there in the first place
+    keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
+    keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
