@@ -25,7 +25,7 @@ import java.util.Properties;
  */
 public class CoordinationTransformer implements TreeTransformer {
 
-  private static final boolean VERBOSE = false;
+  private static final boolean VERBOSE = System.getProperty("CoordinationTransformer", null) != null;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
   private final TreeTransformer qp = new QPTreeTransformer();         //to restructure the QP constituents
   private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns
@@ -76,11 +76,49 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After DateTreeTransformer:        " + fixedDates);
     }
-    Tree ret = removeXOverX(fixedDates);
+    Tree removedXX = removeXOverX(fixedDates);
     if (VERBOSE) {
-      System.err.println("After removeXoverX:               " + ret);
+      System.err.println("After removeXoverX:               " + removedXX);
     }
-    return ret;
+    Tree conjp = combineConjp(removedXX);
+    if (VERBOSE) {
+      System.err.println("After combineConjp:               " + conjp);
+    }
+    Tree movedRB = moveRB(conjp);
+    if (VERBOSE) {
+      System.err.println("After moveRB:                     " + movedRB);
+    }
+    return movedRB;
+  }
+
+  private static TregexPattern findFlatConjpTregex =
+    // TODO: add more patterns, perhaps ignore case
+    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " + 
+                          "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
+                          "  (< and $+ (RB=end < so)) | " + 
+                          "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
+
+  private static TsurgeonPattern addConjpTsurgeon =
+    Tsurgeon.parseOperation("createSubtree CONJP start end");
+
+  public Tree combineConjp(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(findFlatConjpTregex, addConjpTsurgeon, t);
+  }
+
+  private static TregexPattern moveRBTregex = 
+    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^([,]|CC|CONJP)$/ $+ (RB=adv $+ /^(S|PP|VP)/=dest [ < not | < then ] ))) ");
+
+  private static TsurgeonPattern moveRBTsurgeon =
+    Tsurgeon.parseOperation("move adv >0 dest");
+
+  public Tree moveRB(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(moveRBTregex, moveRBTsurgeon, t);
   }
 
   // Matches to be questions if the question starts with WHNP, such as
