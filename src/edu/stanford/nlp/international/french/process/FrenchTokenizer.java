@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
@@ -55,7 +56,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   private List<CoreLabel> compoundBuffer;
 
   // Produces the tokenization for parsing used by Green, de Marneffe, and Manning (2011)
-  private static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
+  public static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
 
   /**
    * Constructor.
@@ -113,6 +114,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
       newLabel.setValue(part);
+      newLabel.set(OriginalTextAnnotation.class, part);
       compoundBuffer.add(newLabel);
     }
     return compoundBuffer.remove(0);
