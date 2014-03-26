@@ -157,7 +157,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
     nonTerminalInfo.put("CONJP", new String[][]{{"right", "CC", "VB", "JJ", "RB", "IN" }});
 
-    // FRAG: crap rule needs to be change if you want to parse glosses; but it is correct to have ADJP and ADVP before S because of weird parses of reduced sentences.
+    // FRAG: crap rule needs to be change if you want to parse
+    // glosses; but it is correct to have ADJP and ADVP before S
+    // because of weird parses of reduced sentences.
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
 
     // PRN: sentence first
@@ -233,7 +235,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     return headIdx;
   }
 
-  // Note: so far, both of these patterns only work when the SQ
+  // Note: The first two SBARQ patterns only work when the SQ
   // structure has already been removed in CoordinationTransformer.
   static final TregexPattern[] headOfCopulaTregex = {
     // Matches phrases such as "what is wrong"
@@ -243,6 +245,10 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     // for example, "Who am I to judge?"
     // !$++ ADJP matches against "Why is the dog pink?"
     TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ NP !$++ ADJP))"),
+
+    // Actually somewhat limited in scope, this detects "Tuesday it is", 
+    // "Such a great idea this was", etc
+    TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishGrammaticalRelations.copularWordRegex + "))))"),
   };
 
   static final TregexPattern[] headOfConjpTregex = {
@@ -305,7 +311,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       // if none of the above patterns match, use the standard method
     }
 
-    if (motherCat.equals("SBARQ")) { 
+    if (motherCat.equals("SBARQ") || motherCat.equals("SINV")) { 
       if (!makeCopulaHead) {
         for (TregexPattern pattern : headOfCopulaTregex) {
           TregexMatcher matcher = pattern.matcher(t);
