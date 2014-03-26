@@ -13,7 +13,7 @@ import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
  * <br>
  * becomes
  * <br>
- * (NP (NP (NNP Month) (CD Day) (, ,) (CD Year) ))
+ * (NP (NNP Month) (CD Day) (, ,) (CD Year) )
  * <br>
  * (NP (NP (NNP Month) )
  * (NP (CD Year) ))
@@ -31,7 +31,12 @@ public class DateTreeTransformer implements TreeTransformer {
 
   public Tree transformTree(Tree t) {
     TregexMatcher matcher = tregexMonthYear.matcher(t);
+    boolean output = false;
     while (matcher.find()) {
+      if (!output) {
+        System.err.println(t);
+        output = true;
+      }
       Tree root = matcher.getNode("root");
       Tree month = matcher.getNode("month");
       Tree year = matcher.getNode("year");
@@ -41,6 +46,10 @@ public class DateTreeTransformer implements TreeTransformer {
     }
     matcher = tregexMonthDayYear.matcher(t);
     while (matcher.find()) {
+      if (!output) {
+        System.err.println(t);
+        output = true;
+      }
       Tree root = matcher.getNode("root");
       Tree month = matcher.getNode("month");
       Tree day = matcher.getNode("day");

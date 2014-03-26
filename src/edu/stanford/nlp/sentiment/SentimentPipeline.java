@@ -156,7 +156,6 @@ public class SentimentPipeline {
         break;
       }
       case ROOT: {
-        int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
         out.println("  " + sentence.get(SentimentCoreAnnotations.ClassName.class));
         break;
       }
