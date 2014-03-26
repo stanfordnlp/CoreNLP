@@ -1905,7 +1905,7 @@ public class IOUtils {
    * <ul>
    *   <li>Certain directories are prohibited from being removed.</li>
    *   <li>More than 100 files cannot be removed with this function.</li>
-   *   <li>More than 1GB cannot be removed with this function.</li>
+   *   <li>More than 10GB cannot be removed with this function.</li>
    * </ul>
    *
    * @param file The file or directory to delete.
@@ -1924,8 +1924,8 @@ public class IOUtils {
     if (count > 100) {
       throw new IllegalArgumentException("Deleting more than 100 files; you should do this manually");
     }
-    if (size > 1000000000) {  // 1 GB
-      throw new IllegalArgumentException("Deleting more than 1GB; you should do this manually");
+    if (size > 10000000000L) {  // 10 GB
+      throw new IllegalArgumentException("Deleting more than 10GB; you should do this manually");
     }
     // Do delete
     if (file.isDirectory()) {
