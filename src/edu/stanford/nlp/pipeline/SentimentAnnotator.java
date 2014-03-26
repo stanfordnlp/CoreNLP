@@ -6,10 +6,12 @@ import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.CollapseUnaryTransformer;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCostAndGradient;
 import edu.stanford.nlp.sentiment.SentimentModel;
+import edu.stanford.nlp.sentiment.SentimentUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
@@ -22,7 +24,8 @@ import edu.stanford.nlp.util.CoreMap;
  * <br>
  * The tree will be attached to each sentence in the
  * SentencesAnnotation via the SentimentCoreAnnotations.AnnotatedTree
- * annotation.
+ * annotation.  The class name for the top level class is also set
+ * using the SentimentCoreAnnotations.ClassName annotation.
  * <br>
  * The reason the decision was made to do the binarization in the
  * ParserAnnotator is because it may require specific options set in
@@ -63,6 +66,8 @@ public class SentimentAnnotator implements Annotator {
         SentimentCostAndGradient scorer = new SentimentCostAndGradient(model, null);
         scorer.forwardPropagateTree(collapsedUnary);
         sentence.set(SentimentCoreAnnotations.AnnotatedTree.class, collapsedUnary);
+        int sentiment = RNNCoreAnnotations.getPredictedClass(collapsedUnary);
+        sentence.set(SentimentCoreAnnotations.ClassName.class, SentimentUtils.sentimentString(model, sentiment));
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
