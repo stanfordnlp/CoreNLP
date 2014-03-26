@@ -163,7 +163,7 @@ public final class SloppyMath {
   /** Returns a mod where the sign of the answer is the same as the sign of the second
    *  argument.  This is how languages like Python do it. Helpful for array accesses.
    *
-   *  @param num The number
+   * @param num The number
    * @param modulus The modulus
    * @return num mod modulus, where the sign of the answer is the same as the sign of modulus
    */
