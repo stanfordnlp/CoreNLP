@@ -1025,7 +1025,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
       last = tokens.get(0);
     }
-    for (int i = 1; i < tokens.size(); ++i) {
+    for (int i = 1; i < tokens.size() - 1; ++i) {
       CoreLabel token = tokens.get(i);
       if (token.before() != null) {
         text.append(token.before());
