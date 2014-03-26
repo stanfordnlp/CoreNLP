@@ -134,6 +134,8 @@ public class EditDistance {
   }
 
   public double score(String sourceStr, String targetStr) {
+    if(sourceStr.equals(targetStr))
+      return 0;
     Object[] source = Characters.asCharacterArray(sourceStr);
     Object[] target = Characters.asCharacterArray(targetStr);
     clear(source.length, target.length);

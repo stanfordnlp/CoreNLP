@@ -36,7 +36,7 @@ import java.util.*;
  * <td>useQN</td>
  * <td>boolean</td>
  * <td>true</td>
- * <td>Use Quasi-Newton (L-BFGS) to find minimum. NOTE: Need to set this to
+ * <td>Use Quasi-Newton (L-BFGS) optimization to find minimum. NOTE: Need to set this to
  * false if using other minimizers such as SGD.</td>
  * </tr>
  * <tr>
@@ -440,8 +440,7 @@ public class SeqClassifierFlags implements Serializable {
   public transient List<String> gazettes = new ArrayList<String>();
   public transient String selfTrainFile = null;
 
-  public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as
-  // well
+  public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as well
 
   public boolean bioSubmitOutput = false;
   public int numRuns = 1;
@@ -451,7 +450,11 @@ public class SeqClassifierFlags implements Serializable {
   public String printGazFeatures = null;
   public int numStartLayers = 1;
   public boolean dump = false;
-  public boolean mergeTags; // whether to merge B- and I- tags
+
+  // whether to merge B- and I- tags in an input file and to tag with IO tags
+  // (lacking a prefix). E.g., "I-PERS" goes to "PERS"
+  public boolean mergeTags;
+
   public boolean splitOnHead;
 
   // threshold
@@ -461,7 +464,7 @@ public class SeqClassifierFlags implements Serializable {
   // feature factory
   public String featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
   public Object[] featureFactoryArgs = new Object[0];
-  
+
   public String backgroundSymbol = DEFAULT_BACKGROUND_SYMBOL;
   // use
   public boolean useObservedSequencesOnly = false;
@@ -549,7 +552,9 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean booleanFeatures = false;
 
+  // This flag is only used for the sequences Type 2 CRF, not for ie.crf.CRFClassifier
   public boolean iobWrapper = false;
+
   public boolean iobTags = false;
   public boolean useSegmentation = false; /*
                                            * binary segmentation feature for
@@ -682,11 +687,12 @@ public class SeqClassifierFlags implements Serializable {
   public boolean doFE = false;
   public boolean restrictLabels = true;
 
-  public boolean announceObjectBankEntries = false; // whether to print a line
-  // giving each ObjectBank
-  // entry (usually a
-  // filename)
+  // whether to print a line saying each ObjectBank entry (usually a filename)
+  public boolean announceObjectBankEntries = false;
 
+  // This is for use with the OWLQNMinimizer. To use it, set useQN=false, and this to a positive number.
+  // A smaller number means more features are retained. Depending on the problem, a good value might be
+  // between 0.75 (POS tagger) down to 0.01 (Chinese word segmentation)
   public double l1reg = 0.0;
 
   // truecaser flags:
@@ -998,8 +1004,8 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useCRFforUnsup = false;
   public boolean useGEforSup = false;
   public boolean useKnownLCWords = true;
-  // allow for multiple feature factories.  
-  public String[] featureFactories = null; 
+  // allow for multiple feature factories.
+  public String[] featureFactories = null;
   public List<Object[]> featureFactoriesArgs = null;
   public boolean useNoisyLabel = false;
   public String errorMatrix = null;
@@ -1633,7 +1639,7 @@ public class SeqClassifierFlags implements Serializable {
         if (numFactories==1){ // for compatible reason
           featureFactory = getFeatureFactory(val);
         }
-        
+
         featureFactories = new String[numFactories];
         featureFactoriesArgs = new ArrayList<Object[]>(numFactories);
         for (int i = 0; i < numFactories; i++) {
@@ -2555,7 +2561,7 @@ public class SeqClassifierFlags implements Serializable {
     } else if (val.equalsIgnoreCase("EmbeddingFeatureFactory")) {
       val = "edu.stanford.nlp.ie.EmbeddingFeatureFactory";
     }
-    
+
     return val;
   }
   /**

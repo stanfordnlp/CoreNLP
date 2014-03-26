@@ -6,6 +6,8 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.util.ArrayUtils;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
@@ -248,6 +250,24 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     TregexPattern.compile("CONJP < (CC <: /^(?i:but)$/ [ ($+ (RB=head <: /^(?i:also|rather)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:also|rather)$/))) ])"),
     TregexPattern.compile("CONJP < (CC <: /^(?i:and)$/ [ ($+ (RB=head <: /^(?i:yet)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:yet)$/))) ])"),
   };
+
+  /** 
+   * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
+   * For example, in the sentence "It is hands down the best dessert ...", 
+   * we want to avoid using "hands down" as the head.
+   */
+  static final Filter<Tree> REMOVE_TMP_AND_ADV = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      if (tree == null) 
+        return false;
+      Label label = tree.label();
+      if (label == null) 
+        return false;
+      if (label.value().contains("-TMP") || label.value().contains("-ADV"))
+        return false;
+      return true;
+    }
+  };
     
   /**
    * Determine which daughter of the current parse tree is the
@@ -333,11 +353,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
         } else {
           how = new String[]{"left", "VP", "ADJP", "NP", "WHADJP", "WHNP"};
         }
-        Tree pti = traverseLocate(kids, how, false);
-        // don't allow a temporal to become head
-        if (pti != null && pti.label() != null && pti.label().value().contains("-TMP")) {
-          pti = null;
-        }
+        // Avoid undesirable heads by filtering them from the list of potential children
+        Tree[] filteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
+        Tree pti = traverseLocate(filteredChildren, how, false);
         // In SQ, only allow an NP to become head if there is another one to the left (then it's probably predicative)
         if (motherCat.equals("SQ") && pti != null && pti.label() != null && pti.label().value().startsWith("NP")) {
             boolean foundAnotherNp = false;
