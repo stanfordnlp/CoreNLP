@@ -245,7 +245,7 @@ public class ReadSentimentDataset {
     }
 
     writeTrees(trainFilename, trees, splits.get(1));
-    writeTrees(testFilename, trees, splits.get(2));
-    writeTrees(devFilename, trees, splits.get(3));
+    writeTrees(devFilename, trees, splits.get(2));
+    writeTrees(testFilename, trees, splits.get(3));
   }
 }
