@@ -188,7 +188,10 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t == null) {
       return null;
     }
-    return Tsurgeon.processPattern(moveRBTregex, moveRBTsurgeon, t);
+    for (TregexPattern pattern : moveRBTregex) {
+      t = Tsurgeon.processPattern(pattern, moveRBTsurgeon, t);
+    }
+    return t;
   }
 
   // Matches to be questions if the question starts with WHNP, such as
