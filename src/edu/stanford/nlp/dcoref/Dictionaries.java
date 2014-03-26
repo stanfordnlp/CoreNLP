@@ -372,7 +372,6 @@ public class Dictionaries {
    * Load Bergsma and Lin (2006) gender and number list.
    *
    */
-  // todo: This is a complete memory hog. It takes at least 600MB and probably does pretty little. Either store more efficiently or just eliminate?
   private void loadGenderNumber(String file, String neutralWordsFile) {
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
