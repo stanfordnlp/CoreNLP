@@ -56,7 +56,7 @@ import java.util.Map;
  */
 public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Serializable */, CopulaHeadFinder {
 
-  private static final boolean DEBUG = System.getProperty("HeadFinder", null) != null;
+  private static final boolean DEBUG = false;
   protected final TreebankLanguagePack tlp;
   protected Map<String, String[][]> nonTerminalInfo;
 

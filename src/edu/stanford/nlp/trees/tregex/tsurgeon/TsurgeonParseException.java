@@ -12,10 +12,6 @@ public class TsurgeonParseException extends RuntimeException {
 
   private static final long serialVersionUID = -4417368416943652737L;
 
-  public TsurgeonParseException(String message) {
-    super(message);
-  }
-
   public TsurgeonParseException(String message, Throwable cause) {
     super(message, cause);
   }

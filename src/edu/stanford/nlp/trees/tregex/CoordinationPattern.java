@@ -45,19 +45,10 @@ class CoordinationPattern extends TregexPattern {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     if (isConj) {
-      if (isNegated()) {
-        sb.append("!(");
-      }
       for (TregexPattern node : children) {
         sb.append(node.toString());
       }
-      if (isNegated()) {
-        sb.append(")");
-      }
     } else {
-      if (isNegated()) {
-        sb.append("!");
-      }
       sb.append('[');
       for (Iterator<TregexPattern> iter = children.iterator(); iter.hasNext();) {
         TregexPattern node = iter.next();
@@ -198,8 +189,6 @@ class CoordinationPattern extends TregexPattern {
           }
           if (myNode.isNegated() != children[currChild].matches()) {
             // a negated node should only match once (before being reset)
-            // otherwise you get repeated matches for every node that
-            // causes the negated match to pass, which would be silly
             if (myNode.isNegated()) {
               currChild = children.length;
             }
@@ -222,18 +211,8 @@ class CoordinationPattern extends TregexPattern {
 
     @Override
     public Tree getMatch() {
-      // in general, only DescriptionNodes can match
-      // exception: if we are a positive disjunction, we care about
-      // exactly one of the children, so we return its match
-      if (!myNode.isConj && !myNode.isNegated()) {
-        if (currChild >= children.length || currChild < 0 || children[currChild] == null) {
-          return null;
-        } else {
-          return children[currChild].getMatch();
-        }
-      } else {
-        throw new UnsupportedOperationException();
-      }
+      // only DescriptionNodes can match
+      throw new UnsupportedOperationException();
     }
   } // end private class CoordinationMatcher
 

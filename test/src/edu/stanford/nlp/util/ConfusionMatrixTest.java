@@ -1,7 +1,5 @@
 package edu.stanford.nlp.util;
 
-import java.util.Locale;
-
 import junit.framework.TestCase;
 
 /**
@@ -31,7 +29,7 @@ public class ConfusionMatrixTest extends TestCase {
                       "              C2 = b        prec=0, recall=n/a, spec=0.75, f1=n/a\n" +
                       "              C3 = c        prec=1, recall=1, spec=1, f1=1\n";
 
-    ConfusionMatrix<String> conf = new ConfusionMatrix<String>(Locale.US);
+    ConfusionMatrix<String> conf = new ConfusionMatrix<String>();
     conf.add("a","a");
     conf.add("a","a");
     conf.add("b","a");
@@ -54,7 +52,7 @@ public class ConfusionMatrixTest extends TestCase {
                       "               b        prec=0, recall=n/a, spec=0.75, f1=n/a\n" +
                       "               c        prec=1, recall=1, spec=1, f1=1\n";
 
-    ConfusionMatrix<String> conf = new ConfusionMatrix<String>(Locale.US);
+    ConfusionMatrix<String> conf = new ConfusionMatrix<String>();
     conf.setUseRealLabels(true);
     conf.add("a","a");
     conf.add("a","a");
@@ -76,7 +74,7 @@ public class ConfusionMatrixTest extends TestCase {
                       "              C1 = 1        prec=0.66667, recall=0.83333, spec=0.375, f1=0.74074\n" +
                       "              C2 = 2        prec=0.6, recall=0.375, spec=0.83333, f1=0.46154\n";
 
-    ConfusionMatrix<Integer> conf = new ConfusionMatrix<Integer>(Locale.US);
+    ConfusionMatrix<Integer> conf = new ConfusionMatrix<Integer>();
     conf.add(1,1, 10);
     conf.add(1,2, 5);
     conf.add(2,1,2);
@@ -129,7 +127,7 @@ public class ConfusionMatrixTest extends TestCase {
     BackwardsInteger one = new BackwardsInteger(1);
     BackwardsInteger two = new BackwardsInteger(2);
 
-    ConfusionMatrix<BackwardsInteger> conf = new ConfusionMatrix<BackwardsInteger>(Locale.US);
+    ConfusionMatrix<BackwardsInteger> conf = new ConfusionMatrix<BackwardsInteger>();
     conf.setUseRealLabels(true);
     conf.add(one, one, 10);
     conf.add(one, two, 5);
