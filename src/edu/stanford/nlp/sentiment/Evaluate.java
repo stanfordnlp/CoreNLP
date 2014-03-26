@@ -3,10 +3,8 @@ package edu.stanford.nlp.sentiment;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.neural.rnn.TopNGramRecord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -37,11 +35,6 @@ public class Evaluate {
   IntCounter<Integer> lengthLabelsCorrect;
   IntCounter<Integer> lengthLabelsIncorrect;
 
-  TopNGramRecord ngrams;
-
-  // TODO: make this an option
-  static final int NUM_NGRAMS = 5;
-
   private static final NumberFormat NF = new DecimalFormat("0.000000");
 
   public Evaluate(SentimentModel model) {
@@ -64,12 +57,6 @@ public class Evaluate {
 
     lengthLabelsCorrect = new IntCounter<Integer>();
     lengthLabelsIncorrect = new IntCounter<Integer>();
-
-    if (model.op.testOptions.ngramRecordSize > 0) {
-      ngrams = new TopNGramRecord(model.op.numClasses, model.op.testOptions.ngramRecordSize, model.op.testOptions.ngramRecordMaximumLength);
-    } else {
-      ngrams = null;
-    }
   }
 
   public void eval(List<Tree> trees) {
@@ -84,9 +71,6 @@ public class Evaluate {
     countTree(tree);
     countRoot(tree);
     countLengthAccuracy(tree);
-    if (ngrams != null) {
-      ngrams.countTree(tree);
-    }
   }
 
   private int countLengthAccuracy(Tree tree) {
@@ -198,7 +182,7 @@ public class Evaluate {
           correct[i] += confusion[classes[i][j]][classes[i][k]];
         }
         for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
-          total[i] += confusion[classes[i][j]][k];
+          total[i] += confusion[k][classes[i][j]];
         }
       }
       results[i] = ((double) correct[i]) / ((double) (total[i]));
@@ -215,7 +199,7 @@ public class Evaluate {
           correct += confusion[classes[i][j]][classes[i][k]];
         }
         for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
-          total += confusion[classes[i][j]][k];
+          total += confusion[k][classes[i][j]];          
         }
       }
     }
@@ -249,16 +233,9 @@ public class Evaluate {
         System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
       }
       System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
-      System.err.println();
     }
 
-    if (model.op.testOptions.ngramRecordSize > 0) {
-      System.err.println(ngrams);
-    }
-
-    if (model.op.testOptions.printLengthAccuracies) {
-      printLengthAccuracies();
-    }
+    //printLengthAccuracies();
   }
 
   /**
@@ -276,8 +253,6 @@ public class Evaluate {
     String treePath = null;
     boolean filterUnknown = false;
 
-    List<String> remainingArgs = Generics.newArrayList();
-
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];
@@ -289,28 +264,16 @@ public class Evaluate {
         filterUnknown = true;
         argIndex++;
       } else {
-        remainingArgs.add(args[argIndex]);
-        argIndex++;
+        System.err.println("Unknown argument " + args[argIndex]);
+        System.exit(2);
       }
-    }
-
-    String[] newArgs = new String[remainingArgs.size()];
-    remainingArgs.toArray(newArgs);
-
-    SentimentModel model = SentimentModel.loadSerialized(modelPath);
-    for (int argIndex = 0; argIndex < newArgs.length; ) {
-      int newIndex = model.op.setOption(newArgs, argIndex);
-      if (argIndex == newIndex) {
-        System.err.println("Unknown argument " + newArgs[argIndex]);
-        throw new IllegalArgumentException("Unknown argument " + newArgs[argIndex]);
-      }
-      argIndex = newIndex;
     }
 
     List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(treePath);
     if (filterUnknown) {
       trees = SentimentUtils.filterUnknownRoots(trees);
     }
+    SentimentModel model = SentimentModel.loadSerialized(modelPath);
 
     Evaluate eval = new Evaluate(model);
     eval.eval(trees);

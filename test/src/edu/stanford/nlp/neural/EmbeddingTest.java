@@ -13,10 +13,11 @@ import org.junit.Test;
  *
  */
 
-public class EmbeddingITest {
-  public static final String wordVectorFile = "edu/stanford/nlp/neural/wordVector.txt";
-  public static final String wordFile = "edu/stanford/nlp/neural/word.txt";
-  public static final String vectorFile = "edu/stanford/nlp/neural/vector.txt";
+public class EmbeddingTest {
+  public static final String PREFIX = "projects/core/";
+  public static final String wordVectorFile = PREFIX + "data/edu/stanford/nlp/neural/wordVector.txt";
+  public static final String wordFile = PREFIX + "data/edu/stanford/nlp/neural/word.txt";
+  public static final String vectorFile = PREFIX + "data/edu/stanford/nlp/neural/vector.txt";
   
   @Test
   public void testLoadFromOneFile() {

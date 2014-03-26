@@ -57,7 +57,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
-import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.ScorerBCubed.BCubedType;
 import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch;
@@ -284,7 +283,7 @@ public class SieveCoreferenceSystem {
     semantics = (useSemantics)? new Semantics(dictionaries) : null;
 
     if(useSingletonPredictor){
-      singletonPredictor = getSingletonPredictorFromSerializedFile(props.getProperty(Constants.SINGLETON_MODEL_PROP, DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL));
+      singletonPredictor = getSingletonPredictorFromSerializedFile(DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL);
     }
   }
 
@@ -296,9 +295,6 @@ public class SieveCoreferenceSystem {
     os.append(Constants.SINGLETON_PROP + ":" +
         props.getProperty(Constants.SINGLETON_PROP,
                 "false"));
-    os.append(Constants.SINGLETON_MODEL_PROP + ":" +
-        props.getProperty(Constants.SINGLETON_MODEL_PROP,
-                DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL));
     os.append(Constants.SCORE_PROP + ":" +
             props.getProperty(Constants.SCORE_PROP,
                     "false"));
@@ -917,7 +913,7 @@ public class SieveCoreferenceSystem {
               // Skip singletons according to the singleton predictor
               // (only for non-NE mentions)
               // Recasens, de Marneffe, and Potts (NAACL 2013)
-              if (m1.isSingleton && m1.mentionType != MentionType.PROPER && m2.isSingleton && m2.mentionType != MentionType.PROPER) continue;
+              if (m1.isSingleton && m2.isSingleton) continue;
               if (m1.corefClusterID == m2.corefClusterID) continue;
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
               CorefCluster c2 = corefClusters.get(m2.corefClusterID);
@@ -1068,7 +1064,7 @@ public class SieveCoreferenceSystem {
     if ( ! errStr.isEmpty()) {
       summary += "\nERROR: " + errStr;
     }
-    Pattern pattern = Pattern.compile("\\d+\\.\\d\\d\\d+");
+    Pattern pattern = Pattern.compile("\\d+.\\d\\d\\d+");
     DecimalFormat df = new DecimalFormat("#.##");
     Matcher matcher = pattern.matcher(summary);
     while(matcher.find()) {
