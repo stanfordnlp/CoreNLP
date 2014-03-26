@@ -32,6 +32,12 @@ import java.util.*;
 /**
  * <p>
  *   A serializer using Google's protocol buffer format.
+ *   The files produced by this serializer, in addition to being language-independent,
+ *   are a little over 10% the size and 4x faster to read+write versus the default Java serialization
+ *   (see {@link GenericAnnotationSerializer}), when both files are compressed with gzip.
+ * </p>
+ *
+ * <p>
  *   Note that this handles only a subset of the possible annotations
  *   that can be attached to a sentence. Nonetheless, it is guaranteed to be
  *   lossless with the default set of named annotators you can create from a
@@ -76,19 +82,37 @@ import java.util.*;
  *   </li>
  *
  *   <li>
+ *     <p>
  *     Extend {@link ProtobufAnnotationSerializer} to serialize and deserialize your field.
  *     Generally, this entail overriding two functions -- one to write the proto and one to read it.
  *     In both cases, you usually want to call the superclass' implementation of the function, and add on to it
  *     from there.
  *     In our running example, adding a field to the {@link CoreNLPProtos.Sentence} proto, you would overwrite:
+ *     </p>
+ *
  *     <ul>
  *       <li>{@link ProtobufAnnotationSerializer#toProtoBuilder(edu.stanford.nlp.util.CoreMap, java.util.Set)}</li>
  *       <li>{@link ProtobufAnnotationSerializer#fromProto(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence)}</li>
  *     </ul>
+ *
+ *     <p>
  *     Note, importantly, that for the serializer to be able to check for lossless serialization, all annotations added
  *     to the proto must be registered as added by being removed from the set passed to
  *     {@link ProtobufAnnotationSerializer#toProtoBuilder(edu.stanford.nlp.util.CoreMap, java.util.Set)} (and the analogous
  *     functions for documents and tokens).
+ *     </p>
+ *
+ *     <p>
+ *       Lastly, the new annotations must be registered in the original .proto file; this can be achieved by including
+ *       a static block in the overwritten class:
+ *     </p>
+ *     <pre>
+ *       static {
+ *         ExtensionRegistry registry = ExtensionRegistry.newInstance();
+ *         registry.add(MyAppProtos.myNewField);
+ *         CoreNLPProtos.registerAllExtensions(registry);
+ *       }
+ *     </pre>
  *   </li>
  * </ol>
  *
