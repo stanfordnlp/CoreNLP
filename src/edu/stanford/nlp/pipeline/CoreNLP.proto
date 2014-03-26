@@ -38,7 +38,6 @@ message Sentence {
   optional bool            hasRelationAnnotations              = 51;
   repeated Entity          entity                              = 52;
   repeated Relation        relation                            = 53;
-  optional bool            hasNumerizedTokensAnnotation        = 54;
 
   extensions 100 to 255;
 }

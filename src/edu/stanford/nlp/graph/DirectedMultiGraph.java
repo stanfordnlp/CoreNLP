@@ -20,13 +20,11 @@ import edu.stanford.nlp.util.Generics;
 
 public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
-  final Map<V, Map<V, List<E>>> outgoingEdges;
+  Map<V, Map<V, List<E>>> outgoingEdges = Generics.newHashMap();
 
-  final Map<V, Map<V, List<E>>> incomingEdges;
+  Map<V, Map<V, List<E>>> incomingEdges = Generics.newHashMap();
 
   public DirectedMultiGraph() {
-    outgoingEdges = Generics.newHashMap();
-    incomingEdges = Generics.newHashMap();
   }
 
   /**
