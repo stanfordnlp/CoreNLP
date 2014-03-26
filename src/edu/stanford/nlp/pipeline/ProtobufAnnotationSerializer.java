@@ -24,9 +24,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.*;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.*;
 import edu.stanford.nlp.time.TimeAnnotations.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -172,6 +170,19 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   public Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
     CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseDelimitedFrom(is);
     return Pair.makePair( fromProto(doc), is );
+  }
+
+  /**
+   * Read a single protocol buffer, which constitutes the entire stream.
+   * This is in contrast to the default, where mutliple buffers may come out of the stream,
+   * and therefore each one is prepended by the length of the buffer to follow.
+   *
+   * @param is The input stream to read from. This should contain a single protocol buffer and nothing else.
+   * @return A parsed Annotation.
+   * @throws IOException In case the stream cannot be read from.
+   */
+  public Annotation readUndelimited(InputStream is) throws IOException {
+    return fromProto(CoreNLPProtos.Document.parseDelimitedFrom(is));
   }
 
   /**
