@@ -141,11 +141,8 @@ public class IOUtilsTest extends TestCase {
 
   protected void delete(File file) {
     if (file.isDirectory()) {
-      File[] children = file.listFiles();
-      if (children != null) {
-        for (File child : children) {
-          this.delete(child);
-        }
+      for (File child: file.listFiles()) {
+        this.delete(child);
       }
     }
     // Use an Assert here to make sure that all files were closed properly
@@ -154,7 +151,6 @@ public class IOUtilsTest extends TestCase {
 
   protected static void write(String text, File file) throws IOException {
     if (!file.getParentFile().exists()) {
-      //noinspection ResultOfMethodCallIgnored
       file.getParentFile().mkdirs();
     }
     FileWriter writer = new FileWriter(file);
@@ -285,33 +281,6 @@ public class IOUtilsTest extends TestCase {
     assertTrue( new File(dst + File.separator + "d2").delete() );
     assertTrue( new File(dst + File.separator + "bar").delete() );
     assertTrue( dst.delete() );
-  }
-
-  public void testTail() throws IOException {
-    File f = File.createTempFile("totail", ".file");
-    // Easy case
-    IOUtils.writeStringToFile("line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7", f.getPath(), "utf-8");
-    assertEquals("line 7", IOUtils.tail(f, 1)[0]);
-    assertEquals("line 6", IOUtils.tail(f, 2)[0]);
-    assertEquals("line 7", IOUtils.tail(f, 2)[1]);
-    // Hard case
-    IOUtils.writeStringToFile("line 1\nline 2\n\nline 3\n", f.getPath(), "utf-8");
-    assertEquals("", IOUtils.tail(f, 1)[0]);
-    assertEquals("", IOUtils.tail(f, 3)[0]);
-    assertEquals("line 3", IOUtils.tail(f, 3)[1]);
-    assertEquals("", IOUtils.tail(f, 3)[2]);
-    // Too few lines
-    IOUtils.writeStringToFile("line 1\nline 2", f.getPath(), "utf-8");
-    assertEquals(0, IOUtils.tail(f, 0).length);
-    assertEquals(1, IOUtils.tail(f, 1).length);
-    assertEquals(2, IOUtils.tail(f, 3).length);
-    assertEquals(2, IOUtils.tail(f, 2).length);
-    // UTF-reading
-    IOUtils.writeStringToFile("↹↝\n۝æ", f.getPath(), "utf-8");
-    assertEquals("↹↝", IOUtils.tail(f, 2)[0]);
-    assertEquals("۝æ", IOUtils.tail(f, 2)[1]);
-    // Clean up
-    assertTrue(f.delete());
   }
 
 }

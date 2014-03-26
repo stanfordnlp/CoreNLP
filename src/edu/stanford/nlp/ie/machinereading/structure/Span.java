@@ -191,21 +191,4 @@ public class Span implements Serializable, Iterable<Integer> {
     }
     return false;
   }
-
-  /**
-   * Returns the smallest distance between two spans.
-   */
-  public static int distance(Span a, Span b) {
-    if (Span.overlaps(a, b)) {
-      return 0;
-    } else if (a.contains(b) || b.contains(a)) {
-      return 0;
-    } else if (a.isBefore(b)) {
-      return b.start - a.end;
-    } else if (b.isBefore(a)) {
-      return a.start - b.end;
-    } else {
-      throw new IllegalStateException("This should be impossible...");
-    }
-  }
 }

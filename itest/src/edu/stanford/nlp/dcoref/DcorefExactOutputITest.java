@@ -164,7 +164,7 @@ public class DcorefExactOutputITest extends TestCase {
           break;
         }
       }
-      assertTrue("Dcoref produced chain " + chain + " which was not in the expected results", found);
+      assertTrue("Dcoref produced chain " + chain + " which was not in the expeted results", found);
     }
   }
 
