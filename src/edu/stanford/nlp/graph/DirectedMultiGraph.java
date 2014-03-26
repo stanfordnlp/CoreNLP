@@ -27,29 +27,9 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   public DirectedMultiGraph() {
   }
 
-  /**
-   * Creates a copy of the given graph. This will copy the entire data structure (this may be slow!), but will not copy
-   * any of the edge or vertex objects.
-   *
-   * @param graph The graph to copy into this object.
-   */
   public DirectedMultiGraph(DirectedMultiGraph<V,E> graph) {
-    outgoingEdges = Generics.newHashMap();
-    incomingEdges = Generics.newHashMap();
-    for (Map.Entry<V, Map<V, List<E>>> map : graph.outgoingEdges.entrySet()) {
-      Map<V, List<E>> edgesCopy = Generics.newHashMap();
-      for (Map.Entry<V, List<E>> entry : map.getValue().entrySet()) {
-        edgesCopy.put(entry.getKey(), Generics.newArrayList(entry.getValue()));
-      }
-      this.outgoingEdges.put(map.getKey(), edgesCopy);
-    }
-    for (Map.Entry<V, Map<V, List<E>>> map : graph.incomingEdges.entrySet()) {
-      Map<V, List<E>> edgesCopy = Generics.newHashMap();
-      for (Map.Entry<V, List<E>> entry : map.getValue().entrySet()) {
-        edgesCopy.put(entry.getKey(), Generics.newArrayList(entry.getValue()));
-      }
-      this.incomingEdges.put(map.getKey(), edgesCopy);
-    }
+    outgoingEdges = Generics.newHashMap(graph.outgoingEdges);
+    incomingEdges = Generics.newHashMap(graph.incomingEdges);
   }
 
   /**
@@ -458,11 +438,12 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     private Iterator<Map<V, List<E>>> vertexIterator;
     private Iterator<List<E>> connectionIterator;
     private Iterator<E> edgeIterator;
-    private boolean hasNext = true;
 
+    E next;
 
     public EdgeIterator(DirectedMultiGraph<V, E> graph) {
       vertexIterator = graph.outgoingEdges.values().iterator();
+      primeNext();
     }
 
     public EdgeIterator(Map<V, Map<V, List<E>>> source, V startVertex) {
@@ -470,38 +451,47 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
       if (neighbors == null) {
         return;
       }
-      vertexIterator = null;
       connectionIterator = neighbors.values().iterator();
+      primeNext();
     }
 
     public boolean hasNext() {
-      primeIterator();
-      return hasNext;
+      return next != null;
     }
 
     public E next() {
-      if (!hasNext()) {
+      if (next == null) {
         throw new NoSuchElementException("Graph edge iterator exhausted.");
       }
-      return edgeIterator.next();
+      E value = next;
+      primeNext();
+      return value;
     }
 
-    private void primeIterator() {
-      if (edgeIterator != null && edgeIterator.hasNext()) {
-        hasNext = true;  // technically, we shouldn't need to put this here, but let's be safe
-      } else if (connectionIterator != null && connectionIterator.hasNext()) {
-        edgeIterator = connectionIterator.next().iterator();
-        primeIterator();
-      } else if (vertexIterator != null && vertexIterator.hasNext()) {
-        connectionIterator = vertexIterator.next().values().iterator();
-        primeIterator();
-      } else {
-        hasNext = false;
+    private void primeNext() {
+      while (true) {
+        if (edgeIterator != null && edgeIterator.hasNext()) {
+          next = edgeIterator.next();
+          break;
+        }
+
+        if (connectionIterator != null && connectionIterator.hasNext()) {
+          edgeIterator = connectionIterator.next().iterator();
+          continue;
+        }
+
+        if (vertexIterator != null && vertexIterator.hasNext()) {
+          connectionIterator = vertexIterator.next().values().iterator();
+          continue;
+        }
+
+        next = null;
+        break;
       }
     }
 
     public void remove() {
-      edgeIterator.remove();
+      throw new UnsupportedOperationException();
     }
   }
 
