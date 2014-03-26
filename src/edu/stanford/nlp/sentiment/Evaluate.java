@@ -174,50 +174,37 @@ public class Evaluate {
 
   private static double[] approxAccuracy(int[][] confusion, int[][] classes) {
     int[] correct = new int[classes.length];
-    int[] incorrect = new int[classes.length];
+    int[] total = new int[classes.length];
     double[] results = new double[classes.length];
     for (int i = 0; i < classes.length; ++i) {
       for (int j = 0; j < classes[i].length; ++j) {
         for (int k = 0; k < classes[i].length; ++k) {
           correct[i] += confusion[classes[i][j]][classes[i][k]];
         }
-      }
-      for (int other = 0; other < classes.length; ++other) {
-        if (other == i) {
-          continue;
-        }
-        for (int j = 0; j < classes[i].length; ++j) {
-          for (int k = 0; k < classes[other].length; ++k) {
-            incorrect[i] += confusion[classes[i][j]][classes[other][k]];
-          }
+        for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
+          total[i] += confusion[k][classes[i][j]];
         }
       }
-      results[i] = ((double) correct[i]) / ((double) (correct[i] + incorrect[i]));
+      results[i] = ((double) correct[i]) / ((double) (total[i]));
     }
     return results;
   }
 
   private static double approxCombinedAccuracy(int[][] confusion, int[][] classes) {
     int correct = 0;
-    int incorrect = 0;
+    int total = 0;
     for (int i = 0; i < classes.length; ++i) {
       for (int j = 0; j < classes[i].length; ++j) {
         for (int k = 0; k < classes[i].length; ++k) {
           correct += confusion[classes[i][j]][classes[i][k]];
         }
-      }
-      for (int other = 0; other < classes.length; ++other) {
-        if (other == i) {
-          continue;
-        }
-        for (int j = 0; j < classes[i].length; ++j) {
-          for (int k = 0; k < classes[other].length; ++k) {
-            incorrect += confusion[classes[i][j]][classes[other][k]];
-          }
+        for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
+          total += confusion[k][classes[i][j]];          
         }
       }
     }
-    return ((double) correct) / ((double) (correct + incorrect));
+
+    return ((double) correct) / ((double) (total));
   }
 
   public void printSummary() {
