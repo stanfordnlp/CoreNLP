@@ -147,10 +147,12 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
       throw new AssertionError("Edge found in incoming but not outgoing");
     }
     // TODO: cut down the number of .get calls
-    if (outgoingEdges.get(source).get(dest).size() == 0) {
+    if (outgoingEdges.containsKey(source) && outgoingEdges.get(source).containsKey(dest) &&
+        outgoingEdges.get(source).get(dest).size() == 0) {
       outgoingEdges.get(source).remove(dest);
     }
-    if (incomingEdges.get(dest).get(source).size() == 0) {
+    if (incomingEdges.containsKey(dest) && incomingEdges.get(dest).containsKey(source) &&
+        incomingEdges.get(dest).get(source).size() == 0) {
       incomingEdges.get(dest).remove(source);
     }
     return foundOut;
