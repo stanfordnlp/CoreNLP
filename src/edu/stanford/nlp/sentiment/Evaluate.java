@@ -10,7 +10,6 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -40,8 +39,8 @@ public class Evaluate {
   public Evaluate(SentimentModel model) {
     this.model = model;
     this.cag = new SentimentCostAndGradient(model, null);
-    this.equivalenceClasses = model.op.equivalenceClasses;
-    this.equivalenceClassNames = model.op.equivalenceClassNames;
+    this.equivalenceClasses = (model.op.equivalenceClasses == null) ? RNNOptions.APPROXIMATE_EQUIVALENCE_CLASSES : model.op.equivalenceClasses;
+    this.equivalenceClassNames = (model.op.equivalenceClassNames == null) ? RNNOptions.DEFAULT_EQUIVALENCE_CLASS_NAMES : model.op.equivalenceClassNames;
 
     reset();
   }
@@ -161,50 +160,61 @@ public class Evaluate {
   }
 
   private static void printConfusionMatrix(String name, int[][] confusion) {
-    System.err.println(name + " confusion matrix");
-    ConfusionMatrix<Integer> confusionMatrix = new ConfusionMatrix<Integer>();
-    confusionMatrix.setUseRealLabels(true);
+    System.err.println(name + " confusion matrix: rows are gold label, columns predicted label");
     for (int i = 0; i < confusion.length; ++i) {
       for (int j = 0; j < confusion[i].length; ++j) {
-        confusionMatrix.add(j, i, confusion[i][j]);
+        System.err.print(StringUtils.padLeft(confusion[i][j], 10));
       }
+      System.err.println();
     }
-    System.err.println(confusionMatrix);
   }
 
   private static double[] approxAccuracy(int[][] confusion, int[][] classes) {
     int[] correct = new int[classes.length];
-    int[] total = new int[classes.length];
+    int[] incorrect = new int[classes.length];
     double[] results = new double[classes.length];
     for (int i = 0; i < classes.length; ++i) {
       for (int j = 0; j < classes[i].length; ++j) {
         for (int k = 0; k < classes[i].length; ++k) {
           correct[i] += confusion[classes[i][j]][classes[i][k]];
         }
-        for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
-          total[i] += confusion[k][classes[i][j]];
+      }
+      for (int other = 0; other < classes.length; ++other) {
+        if (other == i) {
+          continue;
+        }
+        for (int j = 0; j < classes[i].length; ++j) {
+          for (int k = 0; k < classes[other].length; ++k) {
+            incorrect[i] += confusion[classes[i][j]][classes[other][k]];
+          }
         }
       }
-      results[i] = ((double) correct[i]) / ((double) (total[i]));
+      results[i] = ((double) correct[i]) / ((double) (correct[i] + incorrect[i]));
     }
     return results;
   }
 
   private static double approxCombinedAccuracy(int[][] confusion, int[][] classes) {
     int correct = 0;
-    int total = 0;
+    int incorrect = 0;
     for (int i = 0; i < classes.length; ++i) {
       for (int j = 0; j < classes[i].length; ++j) {
         for (int k = 0; k < classes[i].length; ++k) {
           correct += confusion[classes[i][j]][classes[i][k]];
         }
-        for (int k = 0; k < confusion[classes[i][j]].length; ++k) {
-          total += confusion[k][classes[i][j]];          
+      }
+      for (int other = 0; other < classes.length; ++other) {
+        if (other == i) {
+          continue;
+        }
+        for (int j = 0; j < classes[i].length; ++j) {
+          for (int k = 0; k < classes[other].length; ++k) {
+            incorrect += confusion[classes[i][j]][classes[other][k]];
+          }
         }
       }
     }
-
-    return ((double) correct) / ((double) (total));
+    return ((double) correct) / ((double) (correct + incorrect));
   }
 
   public void printSummary() {
@@ -221,19 +231,17 @@ public class Evaluate {
     printConfusionMatrix("Label", labelConfusion);
     printConfusionMatrix("Root label", rootLabelConfusion);
 
-    if (equivalenceClasses != null && equivalenceClassNames != null) {
-      double[] approxLabelAccuracy = approxAccuracy(labelConfusion, equivalenceClasses);
-      for (int i = 0; i < equivalenceClassNames.length; ++i) {
-        System.err.println("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
-      }
-      System.err.println("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
-      
-      double[] approxRootLabelAccuracy = approxAccuracy(rootLabelConfusion, equivalenceClasses);
-      for (int i = 0; i < equivalenceClassNames.length; ++i) {
-        System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
-      }
-      System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
+    double[] approxLabelAccuracy = approxAccuracy(labelConfusion, equivalenceClasses);
+    for (int i = 0; i < equivalenceClassNames.length; ++i) {
+      System.err.println("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
     }
+    System.err.println("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
+
+    double[] approxRootLabelAccuracy = approxAccuracy(rootLabelConfusion, equivalenceClasses);
+    for (int i = 0; i < equivalenceClassNames.length; ++i) {
+      System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
+    }
+    System.err.println("Combined approximate root label accuracy: " + NF.format(approxCombinedAccuracy(rootLabelConfusion, equivalenceClasses)));
 
     //printLengthAccuracies();
   }
