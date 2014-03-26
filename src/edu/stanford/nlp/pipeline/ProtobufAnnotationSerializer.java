@@ -1038,7 +1038,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
       last = token;
     }
-    System.err.println(text.toString());
     return text.toString();
   }
 }
