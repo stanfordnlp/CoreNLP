@@ -541,7 +541,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         } else if (shortName.equals("prepc")) {
           return EnglishGrammaticalRelations.getPrepC(specific);
         } else {
-          throw new RuntimeException("Unknown English relation " + this);
+          // TODO: we need to figure out what to do with relations
+          // which were serialized and then deprecated.  Perhaps there
+          // is a good way to make them singletons
+          return this;
+          //throw new RuntimeException("Unknown English relation " + this);
         }
       } else {
         return rel;
@@ -550,8 +554,13 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     case Chinese: {
       GrammaticalRelation rel = ChineseGrammaticalRelations.valueOf(toString());      
       if (rel == null) {
-        throw new RuntimeException("Unknown Chinese relation " + this);
+        // TODO: we need to figure out what to do with relations
+        // which were serialized and then deprecated.  Perhaps there
+        // is a good way to make them singletons
+        return this;
+        //throw new RuntimeException("Unknown Chinese relation " + this);
       }
+      return rel;
     }
     default: {
       throw new RuntimeException("Unknown language " + language);

@@ -76,6 +76,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.trees.TreeTransformer;
@@ -792,6 +793,12 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   public static void main(String[] args) {
     if (isMacOSX()) {
       setMacProperties();
+    } else {
+      try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
     Properties props = new Properties();
     List<String> filenames = Generics.newArrayList();
