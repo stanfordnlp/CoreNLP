@@ -51,8 +51,6 @@ public class XMLOutputter {
     public String encoding = "UTF-8";
     /** How to print a constituent tree */
     public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
-    /** If false, will print only non-singleton entities*/
-    public boolean printSingletons = false;
   }
 
   /**
@@ -63,7 +61,6 @@ public class XMLOutputter {
     options.relationsBeam = pipeline.getBeamPrintingOption();
     options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
     options.encoding = pipeline.getEncoding();
-    options.printSingletons = pipeline.getPrintSingletons();
     return options;
   }
 
@@ -328,7 +325,7 @@ public class XMLOutputter {
   {
     boolean foundCoref = false;
     for (CorefChain chain : corefChains.values()) {
-      if (!options.printSingletons && chain.getMentionsInTextualOrder().size() <= 1)
+      if (chain.getMentionsInTextualOrder().size() <= 1)
         continue;
       foundCoref = true;
       Element chainElem = new Element("coreference", curNS);

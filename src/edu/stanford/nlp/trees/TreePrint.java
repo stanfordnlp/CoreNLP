@@ -552,20 +552,16 @@ public class TreePrint {
         it.indexLeaves();
 
         List<CoreLabel> tagged = it.taggedLabeledYield();
-        List<Dependency<Label, Label, Object>> sortedDeps = getSortedDeps(it, Filters.<Dependency<Label, Label, Object>>acceptFilter());
+        List<Dependency<Label, Label, Object>> sortedDeps = getSortedDeps(it, dependencyFilter);
 
-        for (int i = 0; i < sortedDeps.size(); i++) {
+        for (int i = 0; i < tagged.size(); i++) {
+          CoreLabel w = tagged.get(i);
           Dependency<Label, Label, Object> d = sortedDeps.get(i);
-          if (!dependencyFilter.accept(d)) {
-            continue;
-          }
           CoreMap dep = (CoreMap) d.dependent();
           CoreMap gov = (CoreMap) d.governor();
 
           Integer depi = dep.get(CoreAnnotations.IndexAnnotation.class);
           Integer govi = gov.get(CoreAnnotations.IndexAnnotation.class);
-
-          CoreLabel w = tagged.get(depi-1);
 
           // Used for both course and fine POS tag fields
           String tag = PTBTokenizer.ptbToken2Text(w.tag());
