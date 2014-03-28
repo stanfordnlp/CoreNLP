@@ -237,12 +237,6 @@ public interface TreebankLanguagePack extends Serializable {
    */
   public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder typedDependencyHF);
 
-  /**
-   * Whether or not we have typed dependencies for this language.  If
-   * this method returns false, a call to grammaticalStructureFactory
-   * will cause an exception.
-   */
-  public boolean supportsGrammaticalStructures();
 
   /**
    * Return the charset encoding of the Treebank.  See
