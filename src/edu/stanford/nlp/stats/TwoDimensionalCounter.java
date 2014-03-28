@@ -387,6 +387,16 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     map.remove(key);
   }
 
+  /**
+   * clears the map, total and default value
+   */       
+  public void clear(){
+    map.clear();
+    total = 0;
+    defaultValue = 0;
+  }
+
+
   public void clean() {
     for (K1 key1 : Generics.newHashSet(map.keySet())) {
       ClassicCounter<K2> c = map.get(key1);
