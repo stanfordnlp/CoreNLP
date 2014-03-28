@@ -217,6 +217,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return properties.getProperty("encoding", "UTF-8");
   }
 
+  public boolean getPrintSingletons() {
+    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false); 
+  }
+   
+
   public static boolean isXMLOutputPresent() {
     try {
       Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
