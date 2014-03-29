@@ -10,7 +10,7 @@ import java.util.Arrays;
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) (Templatization)
  *
  * @param <L> The type of the labels in the Dataset (one can be passed in to the constructor)
- * @param <F> The type of the features in the Dataset 
+ * @param <F> The type of the features in the Dataset
  */
 
 public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalObjectiveFunction<L, F> {
@@ -44,12 +44,12 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
       derivativeNumerator = new double[x.length];
       for (int d = 0; d < data.length; d++) {
         int[] features = data[d];
-        for (int f = 0; f < features.length; f++) {
-          int i = indexOf(features[f], labels[d]);
-          if (dataweights == null) {
+        for (int feature : features) {
+          int i = indexOf(feature, labels[d]);
+          if (dataWeights == null) {
             derivativeNumerator[i] -= 1;
           } else {
-            derivativeNumerator[i] -= dataweights[d];
+            derivativeNumerator[i] -= dataWeights[d];
           }
         }
       }
@@ -65,26 +65,26 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
       Arrays.fill(sums, 0.0);
 
       for (int c = 0; c < numClasses; c++) {
-        for (int f = 0; f < features.length; f++) {
-          int i = indexOf(features[f], c);
+        for (int feature : features) {
+          int i = indexOf(feature, c);
           sums[c] += x[i];
         }
       }
       double total = ArrayMath.logSum(sums);
       for (int c = 0; c < numClasses; c++) {
         probs[c] = Math.exp(sums[c] - total);
-        if (dataweights != null) {
-          probs[c] *= dataweights[d];
+        if (dataWeights != null) {
+          probs[c] *= dataWeights[d];
         }
-        for (int f = 0; f < features.length; f++) {
-          int i = indexOf(features[f], c);
+        for (int feature : features) {
+          int i = indexOf(feature, c);
           derivative[i] += probs[c];
         }
       }
 
       double dV = sums[labels[d]] - total;
-      if (dataweights != null) {
-        dV *= dataweights[d];
+      if (dataWeights != null) {
+        dV *= dataWeights[d];
       }
       value -= dV;
     }
@@ -101,7 +101,7 @@ public class AdaptedGaussianPriorObjectiveFunction<L, F> extends LogConditionalO
     throw new UnsupportedOperationException();
   }
 
-  public AdaptedGaussianPriorObjectiveFunction(GeneralDataset<L, F> dataset, LogPrior prior, double weights[][]) {
+  public AdaptedGaussianPriorObjectiveFunction(GeneralDataset<L, F> dataset, LogPrior prior, double[][] weights) {
     super(dataset, prior);
     this.weights = to1D(weights);
   }
