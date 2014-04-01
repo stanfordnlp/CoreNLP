@@ -46,7 +46,7 @@ public class EvaluateTreebank {
   private final TreeTransformer tc;
   private final TreeTransformer br;
 
-  private final ParserQueryFactory pqFactory;
+  private final LexicalizedParser pqFactory;
 
   // private final Lexicon lex;
 
@@ -103,7 +103,7 @@ public class EvaluateTreebank {
     this(parser.getOp(), parser.lex, parser);
   }
 
-  public EvaluateTreebank(Options op, Lexicon lex, ParserQueryFactory pqFactory) {
+  public EvaluateTreebank(Options op, Lexicon lex, LexicalizedParser pqFactory) {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
