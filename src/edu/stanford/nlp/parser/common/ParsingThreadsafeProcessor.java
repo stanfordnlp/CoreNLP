@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.common;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -12,15 +12,15 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  *
  * @author John Bauer
  */
-class ParsingThreadsafeProcessor implements ThreadsafeProcessor<List<? extends HasWord>, ParserQuery> {
+public class ParsingThreadsafeProcessor implements ThreadsafeProcessor<List<? extends HasWord>, ParserQuery> {
   ParserQueryFactory pqFactory;
   PrintWriter pwErr;
 
-  ParsingThreadsafeProcessor(ParserQueryFactory pqFactory) {
+  public ParsingThreadsafeProcessor(ParserQueryFactory pqFactory) {
     this(pqFactory, null);
   }
 
-  ParsingThreadsafeProcessor(ParserQueryFactory pqFactory, PrintWriter pwErr) {
+  public ParsingThreadsafeProcessor(ParserQueryFactory pqFactory, PrintWriter pwErr) {
     this.pqFactory = pqFactory;
     this.pwErr = pwErr;
   }
