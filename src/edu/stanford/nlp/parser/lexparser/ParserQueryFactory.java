@@ -1,20 +1,22 @@
-package edu.stanford.nlp.parser.common;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.List;
 
 import edu.stanford.nlp.parser.metrics.Eval;
 
 /**
- * An interface for the classes which store the data for a parser.
- * Objects which inherit this interface have a way to produce
- * ParserQuery objects, have a general Options object, and return a
- * list of Evals to perform on a parser.  This helps classes such as
+ * An interface which indicates the class involved can return
+ * ParserQuery objects.  Useful for something that wants to use
+ * ParserQueries in a multithreaded manner with more than one possible
+ * ParserQuery source.  For example, 
  * {@link edu.stanford.nlp.parser.lexparser.EvaluateTreebank} 
- * analyze the performance of a parser.
+ * does this.
+ * <br>
+ * TODO: perhaps this should actually just be an AbstractParser or something like that
  *
  * @author John Bauer
  */
-public interface ParserGrammar {
+public interface ParserQueryFactory {
   ParserQuery parserQuery();
 
   /**
