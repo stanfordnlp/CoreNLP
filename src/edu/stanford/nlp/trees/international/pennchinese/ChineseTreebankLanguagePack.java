@@ -308,11 +308,6 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
   @Override
-  public boolean supportsGrammaticalStructures() {
-    return true;
-  }
-
-  @Override
   public TreeReaderFactory treeReaderFactory() {
     final TreeNormalizer tn = new BobChrisTreeNormalizer();
     return new CTBTreeReaderFactory(tn);
