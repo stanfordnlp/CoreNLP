@@ -32,6 +32,9 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.parser.common.ArgUtils;
+import edu.stanford.nlp.parser.common.ParserGrammar;
+import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
@@ -85,7 +88,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable {
+public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable, ParserGrammar {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -392,6 +395,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     }
   }
 
+  @Override
   public ParserQuery parserQuery() {
     if (reranker == null) {
       return new LexicalizedParserQuery(this);

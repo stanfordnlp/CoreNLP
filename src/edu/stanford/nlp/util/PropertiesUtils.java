@@ -141,6 +141,18 @@ public class PropertiesUtils {
   }
   
   /**
+   * Load an integer property.  If the key is not present, returns defaultValue.
+   */
+  public static String getString(Properties props, String key, String defaultValue) {
+    String value = props.getProperty(key);
+    if (value != null) {
+      return value;
+    } else {
+      return defaultValue;
+    }
+  }
+  
+  /**
    * Load an integer property.  If the key is not present, returns 0.
    */
   public static int getInt(Properties props, String key) {

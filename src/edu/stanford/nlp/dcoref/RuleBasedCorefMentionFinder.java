@@ -14,8 +14,8 @@ import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.parser.lexparser.ParserConstraint;
-import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
+import edu.stanford.nlp.parser.common.ParserAnnotations;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -47,7 +47,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing) {
     SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
-    headFinder = new SemanticHeadFinder();
+    this.headFinder = new SemanticHeadFinder();
     this.allowReparsing = allowReparsing;
   }
 
@@ -467,6 +467,9 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private Tree safeHead(Tree top, int endIndex) {
+    // The trees passed in do not have the CoordinationTransformer
+    // applied, but that just means the SemanticHeadFinder results are
+    // slightly worse.
     Tree head = top.headTerminal(headFinder);
     // One obscure failure case is that the added period becomes the head. Disallow this.
     if (head != null) {
