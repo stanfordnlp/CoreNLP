@@ -699,6 +699,13 @@ public class TrieMapMatcher<K,V> {
                     }
                   }
                 }
+                if (o1.multimatches != null && o2.multimatches != null) {
+                  for (int i = 0; i < o1.multimatches.size(); i++) {
+                    Match mm1 = (Match) o1.multimatches.get(i);
+                    Match mm2 = (Match) o2.multimatches.get(i);
+                    return mm1.getInterval().compareTo(mm2.getInterval());
+                  }
+                }
                 return 0;
               }
               return (o1.end < o2.end)? -1:1;

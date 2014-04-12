@@ -166,7 +166,7 @@ public class TrieMapTest extends TestCase {
     // ([[a, black, cat]-[a, white, hat]] -> true-true at (0,8),4.0),
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "hat", "a", "white", "hat"), Boolean.TRUE, 0, 8,
         Arrays.asList(
-            new Match<String,Boolean>( Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 4),
+            new Match<String,Boolean>( Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 3),
             new Match<String,Boolean>( Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8)),
         4.0));
    // ([[a, black, cat]-[a, black, cat]-[a, white, hat]] -> true-true at (0,8),4.0)]
