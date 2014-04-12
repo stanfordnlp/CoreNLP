@@ -164,7 +164,6 @@ public class LexicalizedParserQuery implements ParserQuery {
     subcategoryStripper = op.tlpParams.subcategoryStripper();
   }
 
-  @Override
   public void setConstraints(List<ParserConstraint> constraints) {
     if (pparser != null) {
       pparser.setConstraints(constraints);
