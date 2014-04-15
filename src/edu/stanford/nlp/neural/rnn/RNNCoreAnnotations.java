@@ -57,7 +57,7 @@ public class RNNCoreAnnotations {
   public static int getPredictedClass(Tree tree) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
-      throw new IllegalArgumentException("CoreLabels required to get the attached gold class");
+      throw new IllegalArgumentException("CoreLabels required to get the attached predicted class");
     }
     return ((CoreLabel) label).get(PredictedClass.class);
   }
@@ -82,7 +82,7 @@ public class RNNCoreAnnotations {
   public static void setGoldClass(Tree tree, int goldClass) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
-      throw new IllegalArgumentException("CoreLabels required to get the attached gold class");
+      throw new IllegalArgumentException("CoreLabels required to set the attached gold class");
     }
     ((CoreLabel) label).set(GoldClass.class, goldClass);
   }
