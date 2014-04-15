@@ -70,7 +70,10 @@ public class ReadSentimentDataset {
     // only one of these, so can be very general
     TregexPattern.compile("/^401$/ > (__ > __=top)"),
     TregexPattern.compile("by . (all > (__=all > __=allgp) . (means > (__=means > __=meansgp))) : (=allgp !== =meansgp)"),
+    // Fix any stranded unitary nodes
     TregexPattern.compile("__ <: (__=unitary < __)"),
+    // relabel some nodes where punctuation changes the score for no apparent reason
+    // TregexPattern.compile("__=node <2 (__ < /^[!.?,;]$/) !<1 ~node <1 __=child > ~child"),
     // TODO: relabel words in some less expensive way?
     TregexPattern.compile("/^[1]$/=label <: /^(?i:protagonist)$/"),
   };
@@ -93,6 +96,7 @@ public class ReadSentimentDataset {
     Tsurgeon.parseOperation("[move means $- all] [excise meansgp meansgp] [createSubtree 2 all means]"),
     // Fix any stranded unitary nodes
     Tsurgeon.parseOperation("[excise unitary unitary]"),
+    //Tsurgeon.parseOperation("relabel node /^.*$/={child}/"),
     Tsurgeon.parseOperation("relabel label /^.*$/2/"),
   };
 
