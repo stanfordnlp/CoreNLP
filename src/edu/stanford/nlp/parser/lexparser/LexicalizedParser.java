@@ -97,12 +97,16 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
   public Index<String> stateIndex, wordIndex, tagIndex;
 
   private Options op;
+
+  @Override
   public Options getOp() { return op; }
 
   public Reranker reranker = null;
 
+  @Override
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
 
+  @Override
   public TreebankLanguagePack treebankLanguagePack() { return getTLPParams().treebankLanguagePack(); }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
