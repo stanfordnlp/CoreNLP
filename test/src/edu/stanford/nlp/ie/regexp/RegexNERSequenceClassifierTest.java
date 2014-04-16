@@ -43,8 +43,10 @@ public class RegexNERSequenceClassifierTest extends TestCase {
           "Shoreline\tPARK\n",
           "Shoreline Park and\tPARK\tLOCATION\n",
           "My\tPOSS\nsausage \\:\tFOO\n",
+          "My\tPOSS\nsausage :\tFOO\n",
           "My\tPOSS\n\\. \\.\tFOO\n",
           "\\.\tPERIOD\n",
+          ".\tPERIOD\n",
   };
 
   static final String[][] expectedNER =
@@ -59,10 +61,14 @@ public class RegexNERSequenceClassifierTest extends TestCase {
       "- - - PARK PARK PARK - - - - - - -" }, // not clear it should do this, but does, as it's only tokenwise compatibility
     { "POSS - - - - FOO FOO - - - - - - - -",
       "- - - - - - - - - - - - -" },
+    { "POSS - - - - FOO FOO - - - - - - - -",
+      "- - - - - - - - - - - - -" },
     { "POSS - - - - - - - - - - - - - -",
       "- - - - - - - - - - - - -" },
     { "- - - - - - - - - - - - - - PERIOD",
       "- - - - - - - - - - - - PERIOD" },
+    { "- - - - - - PERIOD - PERIOD - PERIOD - PERIOD - PERIOD",
+      "PERIOD - - - - - - - - - - - PERIOD" },
   };
 
   public List<List<CoreLabel>> sentences;
