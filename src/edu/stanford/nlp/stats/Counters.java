@@ -2286,8 +2286,6 @@ public class Counters {
     return result;
   }
 
-  static final Random RAND = new Random();
-
   /**
    * Does not assumes c is normalized.
    *
@@ -2303,7 +2301,6 @@ public class Counters {
     // } else {
     //   throw new RuntimeException("Results won't be stable since Counters keys are comparable.");
     // }
-    if (rand == null) rand = RAND;
     double r = rand.nextDouble() * c.totalCount();
     double total = 0.0;
 

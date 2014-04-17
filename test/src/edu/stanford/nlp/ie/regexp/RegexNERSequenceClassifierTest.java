@@ -20,21 +20,21 @@ public class RegexNERSequenceClassifierTest extends TestCase {
   private static File tempFile = null;
 
   static final String[] words =
-  { "My dog likes to eat sausage : turkey , pork , beef , etc .",
+  { "My dog likes to eat sausage .",
     "I went to Shoreline Park and saw an avocet and some curlews ." };
   static final String[] tags =
-  { "PRP$ NN RB VBZ VBG NN : NN , NN , NN , FW .",
+  { "PRP$ NN RB VBZ VBG NN .",
     "PRP VBD TO NNP NNP CC VBD DT NN CC DT NNS ." };
   static final String[] ner =
-  { "O O O O O O O O O O O O O O O",
+  { "O O O O O O O",
     "O O O LOCATION LOCATION O O O O O O O O"};
 
   static final String[] expectedUncased =
-  { "- - - - - food - - - - - - - - -",
+  { "- - - - - food -",
     "- - - park park - - - shorebird - - shorebird -" };
 
   static final String[] expectedCased =
-  { "- - - - - food - - - - - - - - -",
+  { "- - - - - food -",
     "- - - - - - - - shorebird - - shorebird -" };
 
   static final String[] nerPatterns = {
@@ -42,33 +42,24 @@ public class RegexNERSequenceClassifierTest extends TestCase {
           "Shoreline Park\tPARK\tLOCATION\n",
           "Shoreline\tPARK\n",
           "Shoreline Park and\tPARK\tLOCATION\n",
-          "My\tPOSS\nsausage \\:\tFOO\n",
-          "My\tPOSS\nsausage :\tFOO\n",
+          "My\tPOSS\nsausage \\.\tFOO\n",
           "My\tPOSS\n\\. \\.\tFOO\n",
-          "\\.\tPERIOD\n",
-          ".\tPERIOD\n",
   };
 
   static final String[][] expectedNER =
   {
-    { "- - - - - - - - - - - - - - -",
+    { "- - - - - - -",
       "- - - - - - - - - - - - -" },
-    { "- - - - - - - - - - - - - - -",
+    { "- - - - - - -",
       "- - - PARK PARK - - - - - - - -" },
-    { "- - - - - - - - - - - - - - -",
+    { "- - - - - - -",
       "- - - - - - - - - - - - -" },
-    { "- - - - - - - - - - - - - - -",
+    { "- - - - - - -",
       "- - - PARK PARK PARK - - - - - - -" }, // not clear it should do this, but does, as it's only tokenwise compatibility
-    { "POSS - - - - FOO FOO - - - - - - - -",
+    { "POSS - - - - FOO FOO",
       "- - - - - - - - - - - - -" },
-    { "POSS - - - - FOO FOO - - - - - - - -",
+    { "POSS - - - - - -",
       "- - - - - - - - - - - - -" },
-    { "POSS - - - - - - - - - - - - - -",
-      "- - - - - - - - - - - - -" },
-    { "- - - - - - - - - - - - - - PERIOD",
-      "- - - - - - - - - - - - PERIOD" },
-    { "- - - - - - PERIOD - PERIOD - PERIOD - PERIOD - PERIOD",
-      "PERIOD - - - - - - - - - - - PERIOD" },
   };
 
   public List<List<CoreLabel>> sentences;
@@ -100,7 +91,7 @@ public class RegexNERSequenceClassifierTest extends TestCase {
       String[] tagPieces = tags[snum].split(" ");
       String[] nerPieces = ner[snum].split(" ");
       assertEquals(wordPieces.length, tagPieces.length);
-      assertEquals("Input " + snum + " " + words[snum] + " of different length than " + ner[snum], wordPieces.length, nerPieces.length);
+      assertEquals(wordPieces.length, nerPieces.length);
       List<CoreLabel> sentence = new ArrayList<CoreLabel>();
       List<CoreLabel> NERsentence = new ArrayList<CoreLabel>();
       for (int wnum = 0; wnum < wordPieces.length; ++wnum) {
