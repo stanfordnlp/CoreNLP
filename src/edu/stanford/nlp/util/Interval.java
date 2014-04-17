@@ -894,5 +894,17 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return ErasureUtils.uncheckedCast(HasInterval.LENGTH_ENDPOINTS_COMPARATOR);
   }
 
+  @SuppressWarnings("unchecked")
+  public final static <T extends HasInterval<Integer>> Function<T, Double> lengthScorer() {
+    return ErasureUtils.uncheckedCast(LENGTH_SCORER);
+  }
+
+  public final static Function<HasInterval<Integer>, Double> LENGTH_SCORER = new Function<HasInterval<Integer>,Double>() {
+    public Double apply(HasInterval<Integer> in) {
+      Interval<Integer> interval = in.getInterval();
+      return (double) (interval.getEnd() - interval.getBegin());
+    }
+  };
+
   private static final long serialVersionUID = 1;
 }
