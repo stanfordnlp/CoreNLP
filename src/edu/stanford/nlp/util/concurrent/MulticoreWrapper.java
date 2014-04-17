@@ -198,17 +198,6 @@ public class MulticoreWrapper<I,O> {
     }
   }
 
-  // Thang Mar14: similar to join, but doesn't shutdown threadpool
-  public void joinNoShutDown() {
-    // Make blocking calls to the last processes that are running
-    if ( ! threadPool.isShutdown()) {
-      while(idleProcessors.size() != nThreads) {
-        blockingGetResult();
-      }
-      threadPool.shutdown();
-    }
-  }
-
   /**
    * Indicates whether a not a new result is available.
    *
