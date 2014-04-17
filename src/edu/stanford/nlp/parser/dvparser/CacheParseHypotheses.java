@@ -13,7 +13,7 @@ import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.parser.lexparser.ArgUtils;
+import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
