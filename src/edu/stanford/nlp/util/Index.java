@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * A collection that maps between a vocabulary of type E and a
  * continuous non-negative integer index series beginning (inclusively) at 0.
- * 
+ *
  * @author Daniel Cer
  *
  * @param <E> The type of objects in the Index
@@ -47,7 +47,8 @@ public interface Index<E> extends Iterable<E>, Serializable {
      *
      * @param o the Object whose index is desired.
      * @param add Whether it is okay to add new items to the index
-     * @return the index of the Object argument.  Returns -1 if the object is not in the index.
+     * @return the index of the Object argument.  Returns -1 if the object is not in the index
+     *     or if the Index is locked.
      */
     public abstract int indexOf(E o, boolean add);
 
