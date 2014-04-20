@@ -882,24 +882,25 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   }
 
   public static double getMidPoint(Interval<Integer> interval) {
-    return (interval.getBegin() + interval.getEnd())/2;
+    return (interval.getBegin() + interval.getEnd())/2.0;
   }
 
   public static double getRadius(Interval<Integer> interval) {
-    return (interval.getEnd() - interval.getBegin())/2;
+    return (interval.getEnd() - interval.getBegin())/2.0;
   }
 
   @SuppressWarnings("unchecked")
-  public final static <T extends HasInterval<Integer>> Comparator<T> lengthEndpointsComparator() {
+  public static <T extends HasInterval<Integer>> Comparator<T> lengthEndpointsComparator() {
     return ErasureUtils.uncheckedCast(HasInterval.LENGTH_ENDPOINTS_COMPARATOR);
   }
 
   @SuppressWarnings("unchecked")
-  public final static <T extends HasInterval<Integer>> Function<T, Double> lengthScorer() {
+  public static <T extends HasInterval<Integer>> Function<T, Double> lengthScorer() {
     return ErasureUtils.uncheckedCast(LENGTH_SCORER);
   }
 
-  public final static Function<HasInterval<Integer>, Double> LENGTH_SCORER = new Function<HasInterval<Integer>,Double>() {
+  public static final Function<HasInterval<Integer>, Double> LENGTH_SCORER = new Function<HasInterval<Integer>,Double>() {
+    @Override
     public Double apply(HasInterval<Integer> in) {
       Interval<Integer> interval = in.getInterval();
       return (double) (interval.getEnd() - interval.getBegin());
