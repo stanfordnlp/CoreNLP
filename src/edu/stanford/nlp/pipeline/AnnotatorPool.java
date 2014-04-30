@@ -54,6 +54,10 @@ public class AnnotatorPool {
         newAnnotator = true;
 
         // delete the existing annotator; we'll create one with the new props on demand
+        // removing the annotator like this will not affect any
+        // existing pipelines which use the old annotator, but if
+        // those are all gone, then the old annotator will be garbage
+        // collected and memory will be freed up
         annotators.remove(name);
       }
       // nothing to do if an annotator with same name and signature already exists
