@@ -23,6 +23,7 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
@@ -173,6 +174,8 @@ public class SentimentPipeline {
     }
   }
 
+  static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
+
   public static void help() {
     System.err.println("Known command line arguments:");
     System.err.println("  -sentimentModel <model>: Which model to use");
@@ -180,9 +183,10 @@ public class SentimentPipeline {
     System.err.println("  -file <filename>: Which file to process");
     System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
     System.err.println("  -stdin: Process stdin instead of a file");
-    System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  Trees need to be binarized");
+    System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  If trees are not already binarized, they will be binarized with -tlppClass's headfinder, which means they must have labels in that treebank's tagset.");
     System.err.println("  -output <format>: Which format to output, PENNTREES, VECTORS, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
-    System.err.println("  -filterUnknown: remove neutral and unknown trees from the input.  Only applies to TREES input");
+    System.err.println("  -filterUnknown: remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels");
+    System.err.println("  -tlppClass: a class to use for building the binarizer if using non-binarized TREES as input.  Defaults to " + DEFAULT_TLPP_CLASS);
   }
 
   /**
@@ -203,15 +207,23 @@ public class SentimentPipeline {
       return annotations;
     }
     case TREES: {
-      List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(filename);
+      List<Tree> trees;
       if (filterUnknown) {
+        trees = SentimentUtils.readTreesWithGoldLabels(filename);
         trees = SentimentUtils.filterUnknownRoots(trees);
+      } else {
+        trees = Generics.newArrayList();
+        MemoryTreebank treebank = new MemoryTreebank("utf-8");
+        treebank.loadPath(filename, null);
+        for (Tree tree : treebank) {
+          trees.add(tree);
+        }
       }
       
       List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
         CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
-        sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, tree);
+        sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
         List<CoreMap> sentences = Collections.singletonList(sentence);
         Annotation annotation = new Annotation("");
         annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
@@ -236,6 +248,8 @@ public class SentimentPipeline {
 
     List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
     Input inputFormat = Input.TEXT;
+
+    String tlppClass = DEFAULT_TLPP_CLASS;
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
@@ -266,6 +280,9 @@ public class SentimentPipeline {
       } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {
         filterUnknown = true;
         argIndex++;
+      } else if (args[argIndex].equalsIgnoreCase("-tlppClass")) {
+        tlppClass = args[argIndex + 1];
+        argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-help")) {
         help();
         System.exit(0);
@@ -291,7 +308,9 @@ public class SentimentPipeline {
       pipelineProps.setProperty("ssplit.eolonly", "true");
     }
     if (inputFormat == Input.TREES) {
-      pipelineProps.setProperty("annotators", "sentiment");
+      pipelineProps.setProperty("annotators", "binarizer, sentiment");
+      pipelineProps.setProperty("customAnnotatorClass.binarizer", "edu.stanford.nlp.pipeline.BinarizerAnnotator");
+      pipelineProps.setProperty("binarizer.tlppClass", tlppClass);
       pipelineProps.setProperty("enforceRequirements", "false");
     } else {
       pipelineProps.setProperty("annotators", "parse, sentiment");
