@@ -48,8 +48,8 @@ public class AnnotatorPool {
       if(! oldSig.equals(newSig)) {
         // the new annotator uses different properties so we need to update!
         // TODO: this printout should be logged instead of going to stderr. we need to standardize logging
-        System.err.println("Replacing old annotator \"" + name + "\" with signature ["
-                + oldSig + "] with new annotator with signature [" + newSig + "]");
+        // System.err.println("Replacing old annotator \"" + name + "\" with signature ["
+        //         + oldSig + "] with new annotator with signature [" + newSig + "]");
         this.factories.put(name, factory);
         newAnnotator = true;
 
