@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -187,28 +188,36 @@ public class SentimentPipeline {
   /**
    * Reads an annotation from the given filename using the requested input.
    */
-  public static Annotation getAnnotation(Input inputFormat, String filename, boolean filterUnknown) {
+  public static List<Annotation> getAnnotations(StanfordCoreNLP tokenizer, Input inputFormat, String filename, boolean filterUnknown) {
     switch (inputFormat) {
     case TEXT: {
       String text = IOUtils.slurpFileNoExceptions(filename);
       Annotation annotation = new Annotation(text);
-      return annotation;
+      tokenizer.annotate(annotation);
+      List<Annotation> annotations = Generics.newArrayList();
+      for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        Annotation nextAnnotation = new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class));
+        nextAnnotation.set(CoreAnnotations.SentencesAnnotation.class, Collections.singletonList(sentence));
+        annotations.add(nextAnnotation);
+      }
+      return annotations;
     }
     case TREES: {
       List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(filename);
       if (filterUnknown) {
         trees = SentimentUtils.filterUnknownRoots(trees);
       }
-      List<CoreMap> sentences = Generics.newArrayList();
       
+      List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
         CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
         sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, tree);
-        sentences.add(sentence);
+        List<CoreMap> sentences = Collections.singletonList(sentence);
+        Annotation annotation = new Annotation("");
+        annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+        annotations.add(annotation);
       }
-      Annotation annotation = new Annotation("");
-      annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
-      return annotation;
+      return annotations;
     }
     default:
       throw new IllegalArgumentException("Unknown format " + inputFormat);
@@ -262,25 +271,33 @@ public class SentimentPipeline {
         System.exit(0);
       } else {
         System.err.println("Unknown argument " + args[argIndex + 1]);
+        help();
         throw new IllegalArgumentException("Unknown argument " + args[argIndex + 1]);
       }
     }
 
-    Properties props = new Properties();
+    // We construct two pipelines.  One handles tokenization, if
+    // necessary.  The other takes tokenized sentences and converts
+    // them to sentiment trees.
+    Properties pipelineProps = new Properties();
+    Properties tokenizerProps = null;
     if (sentimentModel != null) {
-      props.setProperty("sentiment.model", sentimentModel);
+      pipelineProps.setProperty("sentiment.model", sentimentModel);
     }
     if (parserModel != null) {
-      props.setProperty("parse.model", parserModel);
+      pipelineProps.setProperty("parse.model", parserModel);
     }
     if (stdin) {
-      props.setProperty("ssplit.eolonly", "true");
+      pipelineProps.setProperty("ssplit.eolonly", "true");
     }
     if (inputFormat == Input.TREES) {
-      props.setProperty("annotators", "sentiment");
-      props.setProperty("enforceRequirements", "false");
+      pipelineProps.setProperty("annotators", "sentiment");
+      pipelineProps.setProperty("enforceRequirements", "false");
     } else {
-      props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
+      pipelineProps.setProperty("annotators", "parse, sentiment");
+      pipelineProps.setProperty("enforceRequirements", "false");
+      tokenizerProps = new Properties();
+      tokenizerProps.setProperty("annotators", "tokenize, ssplit");
     }
 
     int count = 0;
@@ -294,18 +311,21 @@ public class SentimentPipeline {
       throw new IllegalArgumentException("Please specify either -file, -fileList or -stdin");
     }
 
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    StanfordCoreNLP tokenizer = (tokenizerProps == null) ? null : new StanfordCoreNLP(tokenizerProps);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(pipelineProps);
 
     if (filename != null) {
       // Process a file.  The pipeline will do tokenization, which
       // means it will split it into sentences as best as possible
       // with the tokenizer.
-      Annotation annotation = getAnnotation(inputFormat, filename, filterUnknown);
-      pipeline.annotate(annotation);
+      List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, filename, filterUnknown);
+      for (Annotation annotation : annotations) {
+        pipeline.annotate(annotation);
 
-      for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        System.out.println(sentence);
-        outputTree(System.out, sentence, outputFormats);
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          System.out.println(sentence);
+          outputTree(System.out, sentence, outputFormats);
+        }
       }
     } else if (fileList != null) {
       // Process multiple files.  The pipeline will do tokenization,
@@ -313,17 +333,19 @@ public class SentimentPipeline {
       // possible with the tokenizer.  Output will go to filename.out
       // for each file.
       for (String file : fileList.split(",")) {
-        Annotation annotation = getAnnotation(inputFormat, file, filterUnknown);
-        pipeline.annotate(annotation);
+        List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, file, filterUnknown);
+        for (Annotation annotation : annotations) {
+          pipeline.annotate(annotation);
 
-        FileOutputStream fout = new FileOutputStream(file + ".out");
-        PrintStream pout = new PrintStream(fout);
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          pout.println(sentence);
-          outputTree(pout, sentence, outputFormats);
+          FileOutputStream fout = new FileOutputStream(file + ".out");
+          PrintStream pout = new PrintStream(fout);
+          for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+            pout.println(sentence);
+            outputTree(pout, sentence, outputFormats);
+          }
+          pout.flush();
+          fout.close();
         }
-        pout.flush();
-        fout.close();
       }
     } else {
       // Process stdin.  Each line will be treated as a single sentence.
@@ -338,7 +360,8 @@ public class SentimentPipeline {
         }
         line = line.trim();
         if (line.length() > 0) {
-          Annotation annotation = pipeline.process(line);
+          Annotation annotation = tokenizer.process(line);
+          pipeline.annotate(annotation);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             outputTree(System.out, sentence, outputFormats);
           }
