@@ -302,11 +302,10 @@ public class TrainOptions implements Serializable {
   public int dvIterations = DEFAULT_DV_ITERATIONS;
 
   /**
-   * When training using batches of trees, such as in the DVParser,
-   * how many trees to use in one batch
+   * When training the DV parsing method, how many trees to use in one batch
    */
-  static public final int DEFAULT_BATCH_SIZE = 25;
-  public int batchSize = DEFAULT_BATCH_SIZE;
+  static public final int DEFAULT_BATCH_SIZE = 500;
+  public int dvBatchSize = DEFAULT_BATCH_SIZE;
   /**
    * regularization constant
    */
@@ -475,7 +474,7 @@ public class TrainOptions implements Serializable {
     result.append(" trainingThreads=" + trainingThreads + "\n");
     result.append(" dvKBest=" + dvKBest + "\n");
     result.append(" dvIterations=" + dvIterations + "\n");
-    result.append(" batchSize=" + batchSize + "\n");
+    result.append(" dvBatchSize=" + dvBatchSize + "\n");
     result.append(" regCost=" + regCost + "\n");
     result.append(" qnIterationsPerBatch=" + qnIterationsPerBatch + "\n");
     result.append(" qnEstimates=" + qnEstimates + "\n");
