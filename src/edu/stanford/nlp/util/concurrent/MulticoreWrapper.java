@@ -2,12 +2,14 @@ package edu.stanford.nlp.util.concurrent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,13 +38,14 @@ public class MulticoreWrapper<I,O> {
   private long maxSubmitBlockTime = -1;
 
   private final int nThreads;
-  private int lastSubmittedItemId = 0;
+  private int submittedItemCounter = 0;
   // Which id was the last id returned.  Only meaningful in the case
   // of a queue where output order matters.
-  private int lastReturnedId = -1;
+  private int returnedItemCounter = -1;
   private final boolean orderResults;
 
-  private final PriorityBlockingQueue<QueueItem<O>> outputQueue;
+//  private final PriorityBlockingQueue<QueueItem<O>> outputQueue;
+  private final Map<Integer,O> outputQueue;
   private final ThreadPoolExecutor threadPool;
 //  private final ExecutorCompletionService<Integer> queue;
   private final BlockingQueue<Integer> idleProcessors;
@@ -72,14 +75,16 @@ public class MulticoreWrapper<I,O> {
   public MulticoreWrapper(int numThreads, ThreadsafeProcessor<I,O> processor, boolean orderResults) {
     nThreads = numThreads <= 0 ? Runtime.getRuntime().availableProcessors() : numThreads;
     this.orderResults = orderResults;
-    outputQueue = new PriorityBlockingQueue<QueueItem<O>>(10*nThreads);
+//    outputQueue = new PriorityBlockingQueue<QueueItem<O>>(10*nThreads);
+    outputQueue = new ConcurrentHashMap<Integer,O>(2*nThreads);
     threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
 //    queue = new ExecutorCompletionService<Integer>(threadPool);
     idleProcessors = new ArrayBlockingQueue<Integer>(nThreads, false);
     callback = new JobCallback<O>() {
       @Override
       public void call(QueueItem<O> result, int processorId) {
-        outputQueue.add(result);
+//        outputQueue.add(result);
+        outputQueue.put(result.id, result.item);
         idleProcessors.add(processorId);
       }
     };
@@ -145,7 +150,7 @@ public class MulticoreWrapper<I,O> {
     } catch (InterruptedException e) {
       throw new RejectedExecutionException("Exception in threadpool: " + e.toString());
     }
-    final int itemId = lastSubmittedItemId++;
+    final int itemId = submittedItemCounter++;
     CallableJob<I,O> job = new CallableJob<I,O>(item, itemId, processorList.get(procId), procId,
         callback);
     threadPool.submit(job);
@@ -198,8 +203,7 @@ public class MulticoreWrapper<I,O> {
     if (outputQueue.isEmpty()) {
       return false;
     } else {
-      final int nextId = outputQueue.peek().id;
-      return orderResults ? nextId == lastReturnedId + 1 : true;
+       return orderResults ? outputQueue.containsKey(returnedItemCounter + 1) : true;
     }
   }
 
@@ -210,9 +214,9 @@ public class MulticoreWrapper<I,O> {
    */
   public O poll() {
     if (!peek()) return null;
-    lastReturnedId++;
-    QueueItem<O> result = outputQueue.poll();
-    return result.item;
+    returnedItemCounter++;
+    return orderResults ? outputQueue.remove(returnedItemCounter) :
+      outputQueue.entrySet().iterator().next().getValue();
   }
   
   /**
