@@ -210,10 +210,9 @@ public class MulticoreWrapper<I,O> {
   public void join() {
     // Make blocking calls to the last processes that are running
     if ( ! threadPool.isShutdown()) {
-      int numActiveThreads = nThreads;
+      int numActiveThreads = nThreads - idleProcessors.size();
       while(numActiveThreads > 0) {
         try {
-          // Empty this queue
           idleProcessors.take();
         } catch (InterruptedException e) {
           // TODO Auto-generated catch block
