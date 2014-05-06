@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.lexparser;
 import java.io.*;
 import java.util.*;
 
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.util.Generics;
 
 public class Lattice implements Serializable, Iterable<LatticeEdge> {

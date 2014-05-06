@@ -7,6 +7,9 @@ import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.KBestViterbiParser;
+import edu.stanford.nlp.parser.common.NoSuchParseException;
+import edu.stanford.nlp.parser.common.ParserConstraint;
+import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Generics;

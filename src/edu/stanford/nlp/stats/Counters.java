@@ -340,6 +340,19 @@ public class Counters {
   }
 
   /**
+   * For all keys (u,v) in arg1 and arg2, sets return[u,v] to be summation of both
+   * @param <T1>
+   * @param <T2>
+   *                
+   */                
+  public static <T1, T2> TwoDimensionalCounter<T1, T2> add(TwoDimensionalCounter<T1, T2> arg1, TwoDimensionalCounter<T1, T2> arg2) {
+    TwoDimensionalCounter<T1, T2> add = new TwoDimensionalCounter<T1, T2>();
+    Counters.addInPlace(add , arg1);
+    Counters.addInPlace(add , arg2);
+    return add;
+  }
+
+   /**
    * For all keys (u,v) in arg, sets target[u,v] to be target[u,v] + scale *
    * arg[u,v]
    *
@@ -2273,6 +2286,8 @@ public class Counters {
     return result;
   }
 
+  static final Random RAND = new Random();
+
   /**
    * Does not assumes c is normalized.
    *
@@ -2288,6 +2303,7 @@ public class Counters {
     // } else {
     //   throw new RuntimeException("Results won't be stable since Counters keys are comparable.");
     // }
+    if (rand == null) rand = RAND;
     double r = rand.nextDouble() * c.totalCount();
     double total = 0.0;
 

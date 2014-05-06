@@ -22,15 +22,15 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
 
-  private static String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
+  private static final String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
 
-  private static String[] pennSFPunctTags = {"."};
+  private static final String[] pennSFPunctTags = {"."};
 
-  private static String[] collinsPunctTags = {"''", "``", ".", ":", ","};
+  private static final String[] collinsPunctTags = {"''", "``", ".", ":", ","};
 
-  private static String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
+  private static final String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
 
-  private static String[] pennSFPunctWords = {".", "!", "?"};
+  private static final String[] pennSFPunctWords = {".", "!", "?"};
 
 
   /**
@@ -41,12 +41,12 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * printing out lexicalized dependencies.  Note that ] ought to be
    * unnecessary, since it would end the annotation, not start it.
    */
-  private static char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
+  private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
 
   /**
    * This is valid for "BobChrisTreeNormalizer" conventions only.
    */
-  private static String[] pennStartSymbols = {"ROOT", "TOP"};
+  private static final String[] pennStartSymbols = {"ROOT", "TOP"};
 
 
   /**
@@ -178,6 +178,11 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder hf) {
     return new EnglishGrammaticalStructureFactory(puncFilter, hf);
+  }
+
+  @Override
+  public boolean supportsGrammaticalStructures() {
+    return true;
   }
 
   /** {@inheritDoc} */
