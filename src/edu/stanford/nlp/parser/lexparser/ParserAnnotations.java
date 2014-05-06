@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.common;
+package edu.stanford.nlp.parser.lexparser;
 
 import java.util.List;
 

@@ -674,8 +674,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private void setHeadString() {
     this.headString = headWord.get(CoreAnnotations.TextAnnotation.class).toLowerCase();
-    String ner = headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-    if (ner != null && !ner.equals("O")) {
+    if(headWord.has(CoreAnnotations.NamedEntityTagAnnotation.class)) {
       // make sure that the head of a NE is not a known suffix, e.g., Corp.
       int start = headIndex - startIndex;
       if (originalSpan.size() > 0 && start >= originalSpan.size()) {
@@ -688,8 +687,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
           start --;
         } else {
           this.headString = head;
-          this.headWord = originalSpan.get(start);
-          this.headIndex = startIndex + start;
           break;
         }
       }
