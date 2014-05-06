@@ -85,6 +85,7 @@ public class MulticoreWrapper<I,O> {
     // Sanity check: Fixed thread pool so prevent timeouts.
     // Default should be false
     threadPool.allowCoreThreadTimeOut(false);
+    threadPool.prestartAllCoreThreads();
 
     // Setup the processors, one per thread
     processorList.add(processor);
