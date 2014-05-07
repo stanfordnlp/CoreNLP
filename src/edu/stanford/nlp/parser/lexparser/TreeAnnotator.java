@@ -23,11 +23,19 @@ public class TreeAnnotator implements TreeTransformer {
   private HeadFinder hf;
   private TrainOptions trainOptions;
 
+  public TreeAnnotator(HeadFinder hf, TreebankLangParserParams tlpp,
+                       Options op) {
+    this.tlpParams = tlpp;
+    this.hf = hf;
+    this.tf = new LabeledScoredTreeFactory();
+    this.trainOptions = op.trainOptions;
+  }
+
   /** Do the category splitting of the tree passed in.
    *  This method defensively copies its argument, which is not changed.
    *
    *  @param t The tree to be annotated.  This can be any tree with a
-   *     <code>value() stored in Labels.  The tree is assumed to have
+   *     {@code value()} stored in Labels.  The tree is assumed to have
    *     preterminals that are parts of speech.
    *  @return The annotated version of the Tree (which is a completely
    *     separate Tree with new tree structure and new labels).  The
@@ -37,6 +45,9 @@ public class TreeAnnotator implements TreeTransformer {
   public Tree transformTree(Tree t) {
     // make a defensive copy which the helper method can then mangle
     Tree copy = t.deepCopy(tf);
+    if (trainOptions.markStrahler) {
+      markStrahler(copy);
+    }
     return transformTreeHelper(copy, copy);
   }
 
@@ -51,7 +62,7 @@ public class TreeAnnotator implements TreeTransformer {
    * and makes new tree structure when it needs to.
    *
    * @param t The tree node to subcategorize.
-   * @param root The root of the tree.  It must contain <code>t</code> or
+   * @param root The root of the tree.  It must contain {@code t} or
    *     this code will throw a NullPointerException.
    * @return The annotated tree.
    */
@@ -102,7 +113,7 @@ public class TreeAnnotator implements TreeTransformer {
         }
       } // otherwise, leave the tags alone!
 
-//      Label label = new CategoryWordTag(cat, word, cat);
+      // Label label = new CategoryWordTag(cat, word, cat);
       Label label = t.label().labelFactory().newLabel(t.label());
       label.setValue(cat);
       if(label instanceof HasCategory)
@@ -122,6 +133,7 @@ public class TreeAnnotator implements TreeTransformer {
         return tlpParams.transformTree(t, root);
       }
     } // end isPreTerminal()
+
     // handle phrasal categories
     Tree[] kids = t.children();
     for (int childNum = 0; childNum < kids.length; childNum++) {
@@ -268,12 +280,32 @@ public class TreeAnnotator implements TreeTransformer {
     return false;
   }
 
-  public TreeAnnotator(HeadFinder hf, TreebankLangParserParams tlpp,
-                       Options op) {
-    this.tlpParams = tlpp;
-    this.hf = hf;
-    this.tf = new LabeledScoredTreeFactory();
-    this.trainOptions = op.trainOptions;
+  private static int markStrahler(Tree t) {
+    if (t.isLeaf()) {
+      // don't annotate the words at leaves!
+      return 1;
+    } else {
+      String cat = t.label().value();
+      int maxStrahler = -1;
+      int maxMultiplicity = 0;
+      for (int i = 0; i < t.numChildren(); i++) {
+        int strahler = markStrahler(t.getChild(i));
+        if (strahler > maxStrahler) {
+          maxStrahler = strahler;
+          maxMultiplicity = 1;
+        } else if (strahler == maxStrahler) {
+          maxMultiplicity++;
+        }
+      }
+      if (maxMultiplicity > 1) {
+        maxStrahler++;  // this is the one case where it grows
+      }
+      cat = cat + '~' + maxStrahler;
+      Label label = t.label().labelFactory().newLabel(t.label());
+      label.setValue(cat);
+      t.setLabel(label);
+      return maxStrahler;
+    }
   }
 
 }

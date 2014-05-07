@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.common;
 import java.util.List;
 
 import edu.stanford.nlp.parser.metrics.Eval;
+import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 // TODO: it would be nice to move these to common, but that would
 // wreck all existing models
@@ -26,6 +27,12 @@ public interface ParserGrammar {
    * Returns a list of extra Eval objects to use when scoring the parser.
    */
   List<Eval> getExtraEvals();
+
+  /**
+   * Return a list of Eval-style objects which care about the whole
+   * ParserQuery, not just the finished tree
+   */
+  List<ParserQueryEval> getParserQueryEvals();
 
   Options getOp();
 

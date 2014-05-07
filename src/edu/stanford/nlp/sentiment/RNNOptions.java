@@ -10,8 +10,9 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.StringUtils;
 
 public class RNNOptions implements Serializable {
+
   /**
-   * The random seed the random number generator is initialized with.  
+   * The random seed the random number generator is initialized with.
    */
   public int randomSeed = (new Random()).nextInt();
 
@@ -51,7 +52,7 @@ public class RNNOptions implements Serializable {
   public TreebankLanguagePack langpack = new PennTreebankLanguagePack();
 
   /**
-   * No symantic untying - use the same category for all categories.
+   * No syntactic untying - use the same matrix/tensor for all categories.
    * This results in all nodes getting the same matrix (and tensor,
    * where applicable)
    */
@@ -188,7 +189,7 @@ public class RNNOptions implements Serializable {
         equivalenceClasses = null;
         return argIndex + 2;
       }
-      
+
       String[] pieces = args[argIndex + 1].split(";");
       equivalenceClasses = new int[pieces.length][];
       for (int i = 0; i < pieces.length; ++i) {
@@ -224,4 +225,5 @@ public class RNNOptions implements Serializable {
   }
 
   private static final long serialVersionUID = 1;
+
 }
