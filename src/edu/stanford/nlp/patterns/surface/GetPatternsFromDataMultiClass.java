@@ -490,14 +490,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         File f = new File(externalFeatureWeightsFileLabel);
         if (!f.exists()) {
           System.err
-              .println("externalweightsfile for the label does not exist: learning weights!");
+              .println("externalweightsfile for the label " + label + " does not exist: learning weights!");
           LearnImportantFeatures lmf = new LearnImportantFeatures();
           // if (answerClass.size() > 1 || this.labelDictionary.size() > 1)
           // throw new RuntimeException("not implemented");
+          Execution.fillOptions(lmf, props);
           lmf.answerClass = answerClass.get(label);
           lmf.answerLabel = label;
-
-          Execution.fillOptions(lmf, props);
+          System.out.println("Getting top features for " + label + " with class " + answerClass);
           lmf.setUp();
           lmf.getTopFeatures(Data.sents, constVars.perSelectRand,
               constVars.perSelectNeg, externalFeatureWeightsFileLabel);
