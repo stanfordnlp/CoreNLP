@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.common;
 
 import java.io.Serializable;
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ public class ParserConstraint implements Serializable {
   public int end;
   public Pattern state;
   
-  private static final long serialVersionUID = 4955237758572202093L;
+  private static final long serialVersionUID = 2;
 
   public ParserConstraint() {}
 

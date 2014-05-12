@@ -214,7 +214,7 @@ import java.text.DecimalFormat;
  * @author Christopher Manning
  * @author John Bauer
  */
-public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<TaggedWord>>, ListProcessor<List<? extends HasWord>,ArrayList<TaggedWord>>, Serializable {
+public class MaxentTagger implements Function<List<? extends HasWord>,List<TaggedWord>>, ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
 
   /**
    * The directory from which to get taggers when using
@@ -317,7 +317,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
-  List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
+  List<Map<String, int[]>> fAssociations = Generics.newArrayList();
   //PairsHolder pairs = new PairsHolder();
   Extractors extractors;
   Extractors extractorsRare;
@@ -612,7 +612,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    */
   private void removeDeadRules() {
     for (Map<String, int[]> fAssociation : fAssociations) {
-      List<String> deadRules = new ArrayList<String>();
+      List<String> deadRules = Generics.newArrayList();
       for (Map.Entry<String, int[]> entry : fAssociation.entrySet()) {
         String value = entry.getKey();
         int[] fAssociations = entry.getValue();
@@ -810,7 +810,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
       int[] numFA = new int[extractors.size() + extractorsRare.size()];
       int sizeAssoc = rf.readInt();
-      fAssociations = new ArrayList<Map<String, int[]>>();
+      fAssociations = Generics.newArrayList();
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
@@ -866,7 +866,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     NumberFormat nf = new DecimalFormat(" 0.000000;-0.000000");
     for (int i = 0; i < fAssociations.size(); ++i) {
       Map<String, int[]> fValueAssociations = fAssociations.get(i);
-      List<String> features = new ArrayList<String>(fValueAssociations.keySet());
+      List<String> features = Generics.newArrayList();
       Collections.sort(features);
       for (String featureValue : features) {
         int[] fTagAssociations = fValueAssociations.get(featureValue);
@@ -905,7 +905,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @return The same string with tags inserted in the form word/tag
    */
   public String tagTokenizedString(String toTag) {
-    ArrayList<Word> sent = Sentence.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
+    List<Word> sent = Sentence.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
     TestSentence testSentence = new TestSentence(this);
     testSentence.tagSentence(sent, false);
     return testSentence.getTaggedNice();
@@ -933,7 +933,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @param in This needs to be a Sentence
    * @return A Sentence of TaggedWord
    */
-  public ArrayList<TaggedWord> apply(List<? extends HasWord> in) {
+  public List<TaggedWord> apply(List<? extends HasWord> in) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(in, false);
   }
@@ -951,8 +951,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @return A List of Sentence of TaggedWord
    */
   @Override
-  public List<ArrayList<TaggedWord>> process(List<? extends List<? extends HasWord>> sentences) {
-    List<ArrayList<TaggedWord>> taggedSentences = new ArrayList<ArrayList<TaggedWord>>();
+  public List<List<TaggedWord>> process(List<? extends List<? extends HasWord>> sentences) {
+    List<List<TaggedWord>> taggedSentences = Generics.newArrayList();
 
     TestSentence testSentence = new TestSentence(this);
     for (List<? extends HasWord> sentence : sentences) {
@@ -969,7 +969,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @param sentence sentence to tag
    * @return tagged sentence
    */
-  public ArrayList<TaggedWord> tagSentence(List<? extends HasWord> sentence) {
+  public List<TaggedWord> tagSentence(List<? extends HasWord> sentence) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(sentence, false);
   }
@@ -984,7 +984,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @param reuseTags whether or not to reuse the given tag
    * @return tagged sentence
    */
-  public ArrayList<TaggedWord> tagSentence(List<? extends HasWord> sentence,
+  public List<TaggedWord> tagSentence(List<? extends HasWord> sentence,
                                            boolean reuseTags) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(sentence, reuseTags);
@@ -1031,7 +1031,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * actually give it CoreLabels.
    */
   private static List<CoreLabel> castCoreLabels(List<? extends HasWord> sent) {
-    List<CoreLabel> coreLabels = new ArrayList<CoreLabel>();
+    List<CoreLabel> coreLabels = Generics.newArrayList();
     for (HasWord word : sent) {
       if (!(word instanceof CoreLabel)) {
         throw new ClassCastException("Expected CoreLabels");
@@ -1070,7 +1070,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     if (tokenizerFactory != null) {
       documentPreprocessor.setTokenizerFactory(tokenizerFactory);
     }
-    List<List<HasWord>> out = new ArrayList<List<HasWord>>();
+    List<List<HasWord>> out = Generics.newArrayList();
     for (List<HasWord> item : documentPreprocessor) {
       out.add(item);
     }
@@ -1257,7 +1257,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       if (tokenize) {
         sentences = tokenizeText(new StringReader(o), tokenizerFactory);
       } else {
-        sentences = new ArrayList<List<HasWord>>();
+        sentences = Generics.newArrayList();
         sentences.add(Sentence.toWordList(o.split("\\s+")));
       }
 
@@ -1625,9 +1625,9 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     ObjectBank<List<CoreLabel>> ob = new ObjectBank<List<CoreLabel>>(new ReaderIteratorFactory(reader), readerAndWriter);
     PrintWriter pw = new PrintWriter(writer);
     for (List<CoreLabel> sentence : ob) {
-      ArrayList<CoreLabel> s = new ArrayList<CoreLabel>(sentence);
+      List<CoreLabel> s = Generics.newArrayList();
       numWords += s.size();
-      ArrayList<TaggedWord> taggedSentence = tagSentence(s, false);
+      List<TaggedWord> taggedSentence = tagSentence(s, false);
       Iterator<CoreLabel> origIter = sentence.iterator();
       for (TaggedWord tw : taggedSentence) {
         CoreLabel cl = origIter.next();
@@ -1771,7 +1771,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
       return coreLabels;
     } else {
-      ArrayList<TaggedWord> taggedSentence = tagSentence(sentence, false);
+      List<TaggedWord> taggedSentence = tagSentence(sentence, false);
       return taggedSentence;
     }
   }

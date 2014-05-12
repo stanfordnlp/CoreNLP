@@ -209,6 +209,18 @@ public class SimpleTensor implements Serializable {
   }
 
   /**
+   * Returns true iff every element of the tensor is 0
+   */
+  public boolean isZero() {
+    for (int i = 0; i < numSlices; ++i) {
+      if (!NeuralUtils.isZero(slices[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * Returns an iterator over the <code>SimpleMatrix</code> objects contained in the tensor.
    */
   public Iterator<SimpleMatrix> iteratorSimpleMatrix() {
