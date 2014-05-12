@@ -57,7 +57,7 @@ public class ConstantsAndVariables {
    */
   @Option(name = "useContextNERRestriction")
   public boolean useContextNERRestriction = false;
-
+  
   /**
    * Number of words to learn in each iteration
    */
