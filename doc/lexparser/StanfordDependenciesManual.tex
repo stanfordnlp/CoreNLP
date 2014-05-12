@@ -105,36 +105,37 @@ relations (depending slightly on the options discussed in section~\ref{types}). 
 An adjectival complement of a verb is an adjectival phrase which functions as the complement (like an object of the verb).
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``She looks very beautiful" \>\> \emph{acomp}(looks, beautiful)\\
+\> ``She looks very beautiful'' \>\> \emph{acomp}(looks, beautiful)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{advcl}: adverbial clause modifier}\\
 An adverbial clause modifier of a VP or S is a clause modifying the
 verb (temporal clause, consequence, conditional clause, purpose
 clause, etc.).
+% should a purpose clause now really be regarded as a vmod = nfmod
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``The accident happened as the night was falling" \> \> \emph{advcl}(happened, falling)\\
-\> ``If you know who did it, you should tell the teacher" \> \> \emph{advcl}(tell, know)\\
-\> ``He talked to him in order to secure the account" \>  \> \emph{advcl}(talked, secure)\\
+\> ``The accident happened as the night was falling'' \> \> \emph{advcl}(happened, falling)\\
+\> ``If you know who did it, you should tell the teacher'' \> \> \emph{advcl}(tell, know)\\
+\> ``He talked to him in order to secure the account'' \>  \> \emph{advcl}(talked, secure)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{advmod}: adverbial modifier}\\
 An adverbial modifier of a word is a (non-clausal) adverb or adverbial phrase (ADVP) that serves to modify the meaning of the word.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``Genetically modified food" \> \> \emph{advmod}(modified, genetically)\\
-\> ``less often" \> \> \emph{advmod}(often, less)\\
+\>  ``Genetically modified food'' \> \> \emph{advmod}(modified, genetically)\\
+\> ``less often'' \> \> \emph{advmod}(often, less)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{agent}: agent}\\
-An agent is the complement of a passive verb which is introduced by the preposition ``by" and does the action.
+An agent is the complement of a passive verb which is introduced by the preposition ``by'' and does the action.
 This relation only appears in the collapsed dependencies, where it can
 replace \emph{prep\_by}, where appropriate. It does not appear in
 basic dependencies output.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``The man has been killed by the police" \> \> \emph{agent}(killed, police)\\
+\>  ``The man has been killed by the police'' \> \> \emph{agent}(killed, police)\\
 \> ``Effects caused by the protein are important'' \> \> \emph{agent}(caused, protein)\\
 \end{tabbing}
 
@@ -142,9 +143,9 @@ basic dependencies output.
 An adjectival modifier of an NP is any adjectival phrase that serves to modify the meaning of the NP.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``Sam eats red meat" \> \> \emph{amod}(meat, red)\\
-\> ``Sam took out  a 3 million dollar loan" \> \> \emph{amod}(loan, dollar)\\
-\> ``Sam took out  a \$ 3 million loan" \> \> \emph{amod}(loan, \$)\\
+\> ``Sam eats red meat'' \> \> \emph{amod}(meat, red)\\
+\> ``Sam took out  a 3 million dollar loan'' \> \> \emph{amod}(loan, dollar)\\
+\> ``Sam took out  a \$ 3 million loan'' \> \> \emph{amod}(loan, \$)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{appos}: appositional modifier}\\
@@ -198,7 +199,7 @@ modal auxiliary, or a form of ``be'', ``do'' or ``have'' in a periphrastic tense
 A passive auxiliary of a clause is a non-main verb of the clause which contains the passive information.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``Kennedy has been killed"  \> \> \emph{auxpass}(killed, been)\\
+\> ``Kennedy has been killed''  \> \> \emph{auxpass}(killed, been)\\
 \> \> \> \emph{aux}(killed,has)\\
 \> ``Kennedy was/got killed'' \> \> \emph{auxpass}(killed, was/got)\\
 \end{tabbing}
@@ -208,8 +209,8 @@ A coordination is the relation between an element of a conjunct and the coordina
 A conjunction may also appear at the beginning of a sentence.  This is also called a cc, and dependent on the root predicate of the sentence.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Bill is big and honest" \hspace{1cm} \> \> \emph{cc}(big, and)\\
-\hspace{1cm} \> ``They either ski or snowboard" \> \> \emph{cc}(ski, or)\\
+\>  ``Bill is big and honest'' \hspace{1cm} \> \> \emph{cc}(big, and)\\
+\hspace{1cm} \> ``They either ski or snowboard'' \> \> \emph{cc}(ski, or)\\
 \> ``And then we left.'' \> \> \emph{cc}(left, And)\\
 \end{tabbing}
 
@@ -219,55 +220,69 @@ A clausal complement of a verb or adjective is a dependent clause with an intern
  analysis of this class as ``content clauses'' in Huddleston and Pullum 2002). Such clausal complements are usually finite (though there are occasional remnant English subjunctives).
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``He says that you like to swim" \> \> \emph{ccomp}(says, like)\\
-\hspace{1cm} \> ``I am certain that he did it" \> \>  \emph{ccomp}(certain, did)\\
+\>  ``He says that you like to swim'' \> \> \emph{ccomp}(says, like)\\
+\hspace{1cm} \> ``I am certain that he did it'' \> \>  \emph{ccomp}(certain, did)\\
 \hspace{1cm} \> ``I admire the fact that you are honest'' \>\> \emph{ccomp}(fact, honest)\\
 \end{tabbing}
 
+%% todo: put in a for-to infinitive example
+%% Would it be best for me for my kids to finish college?
+%1       Would   _       MD      MD      _       4       aux _       _
+%2       it      _       PRP     PRP     _       4       nsubj 4       expl
+%3       be      _       VB      VB      _       4       cop _       _
+%4       best    _       JJS     JJS     _       0       root _       _
+%5       for     _       IN      IN      _       8       mark 4       prep
+%6       me      _       PRP     PRP     _       8       nsubj 5       pobj
+%7       to      _       TO      TO      _       8       aux _       _
+%8       finish  _       VB      VB      _       4       advcl 4       xcomp
+%9       college _       NN      NN      _       8       dobj _       _
+%10      ?       _       .       .       _       4       punct _       _
+
+
 \noindent\textbf{\emph{conj}: conjunct}\\
-A conjunct is the relation between two elements connected by a coordinating conjunction, such as ``and", ``or", etc.  We treat conjunctions asymmetrically: The head of the relation is the first conjunct and other conjunctions depend on it via the \emph{conj} relation.
+A conjunct is the relation between two elements connected by a coordinating conjunction, such as ``and'', ``or'', etc.  We treat conjunctions asymmetrically: The head of the relation is the first conjunct and other conjunctions depend on it via the \emph{conj} relation.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Bill is big and honest" \> \> \emph{conj}(big, honest)\\
-\hspace{1cm} \> ``They either ski or snowboard" \> \>  \emph{conj}(ski, snowboard)\\
+\>  ``Bill is big and honest'' \> \> \emph{conj}(big, honest)\\
+\hspace{1cm} \> ``They either ski or snowboard'' \> \>  \emph{conj}(ski, snowboard)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{cop}: copula}\\
 A copula is the relation between the complement of a copular verb and the copular verb.  (We normally take a copula as a dependent of its complement; see the discussion in section~\ref{types}.)
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``Bill is big" \hspace{1cm} \> \> \emph{cop}(big, is)\\
-\hspace{1cm} \> ``Bill is an honest man" \>  \> \emph{cop}(man, is)\\
+\> ``Bill is big'' \hspace{1cm} \> \> \emph{cop}(big, is)\\
+\hspace{1cm} \> ``Bill is an honest man'' \>  \> \emph{cop}(man, is)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{csubj}: clausal subject}\\
 A clausal subject is a clausal syntactic subject of a clause, i.e., the subject is itself a clause. The governor of this relation might not always be a verb: when the verb is a copular verb, the root of the clause is the complement of the copular verb. In the two following examples, ``what she said'' is the subject.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``What she said makes sense" \> \> \emph{csubj}(makes, said)\\
-\hspace{1cm} \> ``What she said is not true" \> \>  \emph{csubj}(true, said)\\
+\> ``What she said makes sense'' \> \> \emph{csubj}(makes, said)\\
+\hspace{1cm} \> ``What she said is not true'' \> \>  \emph{csubj}(true, said)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{csubjpass}: clausal passive subject}\\
 A clausal passive subject is a clausal syntactic subject of a passive clause. In the example below, ``that she lied'' is the subject.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``That she lied was suspected by everyone" \> \> \emph{csubjpass}(suspected, lied)\\
+\>  ``That she lied was suspected by everyone'' \> \> \emph{csubjpass}(suspected, lied)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{dep}: dependent}\\
 A dependency is labeled as \emph{dep} when the system is unable to determine a more precise dependency relation between two words.  This may be because of a weird grammatical construction, a limitation in the Stanford Dependency conversion software, a parser error, or because of an unresolved long distance dependency.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Then, as if to show that he could, \ldots" \> \> \emph{dep}(show, if)\\
+\>  ``Then, as if to show that he could, \ldots'' \> \> \emph{dep}(show, if)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{det}: determiner}\\
 A determiner is the relation between the head of an NP and its determiner.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``The man is here" \> \> \emph{det}(man, the)\\
-\> ``Which book do you prefer?" \> \> \emph{det}(book, which)\\
+\>  ``The man is here'' \> \> \emph{det}(man, the)\\
+\> ``Which book do you prefer?'' \> \> \emph{det}(book, which)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{discourse}: discourse element}\\
@@ -291,16 +306,16 @@ markers (\emph{well}, \emph{like}, \emph{actually}, but not \emph{you know}).
 The direct object of a VP is the noun phrase which is the (accusative) object of the verb.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``She gave me a raise" \> \> \emph{dobj}(gave, raise)\\
-\hspace{1cm} \> ``They win the lottery" \> \>  \emph{dobj}(win, lottery)\\
+\>  ``She gave me a raise'' \> \> \emph{dobj}(gave, raise)\\
+\hspace{1cm} \> ``They win the lottery'' \> \>  \emph{dobj}(win, lottery)\\
 \end{tabbing}
 
 
 \noindent\textbf{\emph{expl}: expletive}\\
-This relation captures an existential ``there". The main verb of the clause is the governor.
+This relation captures an existential ``there''. The main verb of the clause is the governor.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``There is a ghost in the room" \>\> \emph{expl}(is, There)\\
+\> ``There is a ghost in the room'' \>\> \emph{expl}(is, There)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{goeswith}: goes with}\\
@@ -321,7 +336,7 @@ second part.
 The indirect object of a VP is the noun phrase which is the (dative) object of the verb.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
- \> ``She gave me a raise" \> \> \emph{iobj}(gave, me)\\
+ \> ``She gave me a raise'' \> \> \emph{iobj}(gave, me)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{mark}: marker}\\
@@ -360,36 +375,36 @@ present, this relation is used inside the following expressions:
 grow or shrink a little over time.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``I like dogs as well as cats" \> \> \emph{mwe}(well, as)\\
+\>  ``I like dogs as well as cats'' \> \> \emph{mwe}(well, as)\\
 \>                                 \> \> \emph{mwe}(well, as)\\
-\> ``He cried because of you" \> \> \emph{mwe}(of, because)\\
+\> ``He cried because of you'' \> \> \emph{mwe}(of, because)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{neg}: negation modifier}\\
 The negation modifier is the relation between a negation word and the word it modifies.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Bill is not a scientist" \> \> \emph{neg}(scientist, not)\\
-\> ``Bill doesn't drive" \> \> \emph{neg}(drive, n't)\\
+\>  ``Bill is not a scientist'' \> \> \emph{neg}(scientist, not)\\
+\> ``Bill doesn't drive'' \> \> \emph{neg}(drive, n't)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{nn}: noun compound modifier}\\
 A noun compound modifier of an NP is any noun that serves to modify the head noun. (Note that in the current system for dependency extraction, all nouns modify the rightmost noun of the NP -- there is no intelligent noun compound analysis.  This is likely to be fixed once the Penn Treebank represents the branching structure of NPs.)
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Oil price futures" \> \> \emph{nn}(futures, oil)\\
+\>  ``Oil price futures'' \> \> \emph{nn}(futures, oil)\\
 \> \> \> \emph{nn}(futures, price)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{npadvmod}: noun phrase as adverbial modifier}\\
 This relation captures various places where something syntactically a noun phrase (NP) is used as an adverbial modifier in a sentence.   These usages include: (i)~a measure phrase, which is the relation between
 the head of an ADJP/ADVP/PP and the head of a measure phrase modifying the ADJP/ADVP; (ii)~noun phrases giving an extent inside a VP which are not objects; (iii)~financial constructions involving an adverbial or PP-like NP, notably
-the following construction \emph{\$5 a share}, where the second NP means ``per share"; (iv)~floating reflexives; and (v)~certain other absolutive NP constructions.
+the following construction \emph{\$5 a share}, where the second NP means ``per share''; (iv)~floating reflexives; and (v)~certain other absolutive NP constructions.
 A temporal modifier (tmod) is a subclass of npadvmod which is distinguished as a separate relation.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``The director is 65 years old" \> \> \emph{npadvmod}(old, years)\\
-\> ``6 feet long" \> \> \emph{npadvmod}(long, feet)\\
+\>  ``The director is 65 years old'' \> \> \emph{npadvmod}(old, years)\\
+\> ``6 feet long'' \> \> \emph{npadvmod}(long, feet)\\
 \> ``Shares eased a fraction'' \>\> \emph{npadvmod}(eased, fraction)\\
 \> ``IBM earned \$ 5 a share'' \>\> \emph{npadvmod}(\$, share)\\
 \> ``The silence is itself significant'' \>\> \emph{npadvmod}(significant, itself) \\
@@ -400,15 +415,15 @@ A temporal modifier (tmod) is a subclass of npadvmod which is distinguished as a
 A nominal subject is a noun phrase which is the syntactic subject of a clause. The governor of this relation might not always be a verb: when the verb is a copular verb, the root of the clause is the complement of the copular verb, which can be an adjective or noun.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Clinton defeated Dole" \> \> \emph{nsubj}(defeated, Clinton)\\
-\hspace{1cm} \> ``The baby is cute" \> \> \emph{nsubj}(cute, baby)\\
+\>  ``Clinton defeated Dole'' \> \> \emph{nsubj}(defeated, Clinton)\\
+\hspace{1cm} \> ``The baby is cute'' \> \> \emph{nsubj}(cute, baby)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{nsubjpass}: passive nominal subject}\\
 A passive nominal subject is a noun phrase which is the syntactic subject of a passive clause.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``Dole was defeated by Clinton" \> \> \emph{nsubjpass}(defeated, Dole)\\
+\> ``Dole was defeated by Clinton'' \> \> \emph{nsubjpass}(defeated, Dole)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{num}: numeric modifier}\\
@@ -416,9 +431,9 @@ A numeric modifier of a noun is any number phrase that serves to
 modify the meaning of the noun with a quantity.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Sam ate 3 sheep" \> \>  \emph{num}(sheep, 3)\\
-\>  ``Sam spent forty dollars" \> \>  \emph{num}(dollars, 40)\\
-\>  ``Sam spent \$ 40" \> \>  \emph{num}(\$, 40)\\
+\>  ``Sam ate 3 sheep'' \> \>  \emph{num}(sheep, 3)\\
+\>  ``Sam spent forty dollars'' \> \>  \emph{num}(dollars, 40)\\
+\>  ``Sam spent \$ 40'' \> \>  \emph{num}(\$, 40)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{number}: element of compound number}\\
@@ -426,15 +441,15 @@ An element of compound number is a part of a number phrase or currency
 amount. We regard a number as a specialized kind of multi-word expression.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``I have four thousand sheep" \> \> \emph{number}(thousand, four)\\
-\>  ``I lost \$ 3.2 billion" \> \> \emph{number}(billion, 3.2)\\
+\>  ``I have four thousand sheep'' \> \> \emph{number}(thousand, four)\\
+\>  ``I lost \$ 3.2 billion'' \> \> \emph{number}(billion, 3.2)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{parataxis}: parataxis}\\
 The parataxis relation (from Greek for ``place side by side'') is a relation between the main verb of a clause and other sentential elements, such as a sentential parenthetical, a clause after a ``:'' or a ``;'', or two sentences placed side by side without any explicit coordination or subordination.
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
-\> ``The guy, John said, left early in the morning" \> \> \emph{parataxis}(left, said)\\
+\> ``The guy, John said, left early in the morning'' \> \> \emph{parataxis}(left, said)\\
 \> ``Let's face it we're annoyed'' \>\> \emph{parataxis}(Let, annoyed)\\
 \end{tabbing}
 
@@ -446,23 +461,23 @@ following the preposition,
 or the preposition head of the following PP.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
-\>  ``We have no information on whether users are at risk" \> \> \emph{pcomp}(on, are)\\
-\hspace{1cm} \> ``They heard about you missing classes" \> \>  \emph{pcomp}(about, missing)\\
-%\> ``It is warmer in Greece than in Italy" \>\> \emph{pcomp}(than, in)
+\>  ``We have no information on whether users are at risk'' \> \> \emph{pcomp}(on, are)\\
+\hspace{1cm} \> ``They heard about you missing classes'' \> \>  \emph{pcomp}(about, missing)\\
+%\> ``It is warmer in Greece than in Italy'' \>\> \emph{pcomp}(than, in)
 \end{tabbing}
 
 \noindent\textbf{\emph{pobj}: object of a preposition}\\
 The object of a preposition is the head of a noun phrase following the preposition, or the adverbs ``here'' and ``there''. (The preposition in turn may be modifying a noun, verb, etc.) Unlike the Penn Treebank, we here define cases of VBG quasi-prepositions like ``including'', ``concerning'', etc.\ as instances of \emph{pobj}. (The preposition can be tagged a FW for ``pace'', ``versus'', etc. It can also be called a CC -- but we don't currently handle that and would need to distinguish from conjoined prepositions.) In the case of preposition stranding, the object can precede the preposition (e.g., ``What does CPR stand for?'').
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``I sat on the chair" \> \> \emph{pobj}(on, chair)\\
+\>  ``I sat on the chair'' \> \> \emph{pobj}(on, chair)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{poss}: possession modifier}\\
 The possession modifier relation holds between the head of an NP and its possessive determiner, or a genitive 's complement.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``their offices" \> \> \emph{poss}(offices, their)\\
+\>  ``their offices'' \> \> \emph{poss}(offices, their)\\
 \> ``Bill's clothes'' \> \> \emph{poss}(clothes, Bill)\\
 \end{tabbing}
 
@@ -470,28 +485,28 @@ The possession modifier relation holds between the head of an NP and its possess
 The possessive modifier relation appears between the head of an NP and the genitive 's.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Bill's clothes" \> \> \emph{possessive}(John, 's)\\
+\>  ``Bill's clothes'' \> \> \emph{possessive}(John, 's)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{preconj}: preconjunct}\\
-A preconjunct is the relation between the head of an NP and a word that appears at the beginning bracketing a conjunction (and puts emphasis on it), such as ``either", ``both", ``neither").
+A preconjunct is the relation between the head of an NP and a word that appears at the beginning bracketing a conjunction (and puts emphasis on it), such as ``either'', ``both'', ``neither'').
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``Both the boys and the girls are here" \> \> \emph{preconj}(boys, both)\\
+\>  ``Both the boys and the girls are here'' \> \> \emph{preconj}(boys, both)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{predet}: predeterminer}\\
 A predeterminer is the relation between the head of an NP and a word that precedes and modifies the meaning of the NP determiner.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``All the boys are here" \> \> \emph{predet}(boys, all)\\
+\>  ``All the boys are here'' \> \> \emph{predet}(boys, all)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{prep}: prepositional modifier}\\
 A prepositional modifier of a verb, adjective, or noun is any prepositional phrase that serves to modify the meaning of the verb, adjective, noun, or even another prepositon.  In the collapsed representation, this is used only for prepositions with NP complements.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``I saw a cat in a hat" \> \> \emph{prep}(cat, in)\\
+\>  ``I saw a cat in a hat'' \> \> \emph{prep}(cat, in)\\
 \> ``I saw a cat with a telescope'' \> \> \emph{prep}(saw, with)\\
 \> ``He is responsible for meals'' \> \> \emph{prep}(responsible, for)\\
 \end{tabbing}
@@ -500,35 +515,43 @@ A prepositional modifier of a verb, adjective, or noun is any prepositional phra
 In the collapsed representation (see section \ref{types}), a prepositional clausal modifier of a verb, adjective, or noun is a clause introduced by a preposition which  serves to modify the meaning of the verb, adjective, or noun.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``He purchased it without paying a premium" \> \> \emph{prepc\_without}(purchased, paying)\\
+\>  ``He purchased it without paying a premium'' \> \> \emph{prepc\_without}(purchased, paying)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{prt}: phrasal verb particle}\\
 The phrasal verb particle relation identifies a phrasal verb, and holds between the verb and its particle.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``They shut down the station" \> \> \emph{prt}(shut, down)\\
+\>  ``They shut down the station'' \> \> \emph{prt}(shut, down)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{punct}: punctuation}\\
 This is used for any piece of punctuation in a clause, if punctuation is being retained in the typed dependencies. By default, punctuation is not retained in the output.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``Go home!" \> \> \emph{punct}(Go, !)\\
+\> ``Go home!'' \> \> \emph{punct}(Go, !)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{quantmod}: quantifier phrase modifier}\\
 A quantifier modifier is an element modifying the head of a QP constituent.  (These are modifiers in complex numeric quantifiers, not other types of ``quantification''.  Quantifiers like ``all'' become det.)
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``About 200 people came to the party" \> \> \emph{quantmod}(200, About)\\
+\>  ``About 200 people came to the party'' \> \> \emph{quantmod}(200, About)\\
+\end{tabbing}
+
+\noindent\textbf{\emph{rcmod}: relative clause modifier}\\
+A relative clause modifier of an NP is a relative clause modifying the NP.  The relation points from the head noun of the NP to the head of the relative clause, normally a verb.
+\begin{tabbing}
+\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
+\>  ``I saw the man you love'' \> \> \emph{rcmod}(man, love)\\
+\> ``I saw the book which you bought'' \> \> \emph{rcmod}(book,bought)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{ref}: referent}\\
 A referent of the head of an NP is the relative word introducing the relative clause modifying the NP.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``I saw the book which you bought" \> \> \emph{ref}(book, which)\\
+\>  ``I saw the book which you bought'' \> \> \emph{ref}(book, which)\\
 \end{tabbing}
 
 % \noindent\textbf{\emph{rel}: relative}\\
@@ -539,22 +562,22 @@ A referent of the head of an NP is the relative word introducing the relative cl
 % \emph{nsubj} or \emph{dobj}.
 % \begin{tabbing}
 % \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-% \> ``I saw the man whose wife you love" \> \> \emph{rel}(love, wife)
+% \> ``I saw the man whose wife you love'' \> \> \emph{rel}(love, wife)
 % \end{tabbing}
 
 \noindent\textbf{\emph{root}: root}\\
 The root grammatical relation points to the root of the sentence. A fake node ``ROOT'' is used as the governor. The ROOT node is indexed with ``0'', since the indexation of real words in the sentence starts at 1.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``I love French fries." \> \> \emph{root}(ROOT, love)\\
-\> ``Bill is an honest man" \>  \> \emph{root}(ROOT, man)\\
+\> ``I love French fries.'' \> \> \emph{root}(ROOT, love)\\
+\> ``Bill is an honest man'' \>  \> \emph{root}(ROOT, man)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{tmod}: temporal modifier}\\
 A temporal modifier (of a VP, NP, or an ADJP is a bare noun phrase constituent that serves to modify the meaning of the constituent by specifying a time.  (Other temporal modifiers are prepositional phrases and are introduced as prep.)
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``Last night, I swam in the pool" \> \> \emph{tmod}(swam, night)\\
+\> ``Last night, I swam in the pool'' \> \> \emph{tmod}(swam, night)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{vmod}: reduced non-finite verbal modifier}\\
@@ -565,21 +588,32 @@ another verb. They are not core arguments of a verb
 or full finite relative clauses.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
-\>  ``Points to establish are \ldots" \> \> \emph{vmod}(points, establish)\\
-\> ``I don't have anything to say to you" \> \> \emph{vmod}(anything, say)\\
-\>  ``Truffles picked during the spring are tasty" \> \> \emph{vmod}(truffles, picked)\\
-\>  ``Bill tried to shoot, demonstrating his incompetence" \> \> \emph{vmod}(shoot, demonstrating)\\
+\>  ``Points to establish are \ldots'' \> \> \emph{vmod}(points, establish)\\
+\> ``I don't have anything to say to you'' \> \> \emph{vmod}(anything, say)\\
+\>  ``Truffles picked during the spring are tasty'' \> \> \emph{vmod}(truffles, picked)\\
+\>  ``Bill tried to shoot, demonstrating his incompetence'' \> \> \emph{vmod}(shoot, demonstrating)\\
 \end{tabbing}
 
 
 
 
 \noindent\textbf{\emph{xcomp}: open clausal complement}\\
-An open clausal complement (\emph{xcomp}) of a VP or an ADJP is a clausal complement without its own subject, whose reference is determined by an external subject.  These complements are always non-finite.  The name \emph{xcomp} is borrowed from Lexical-Functional Grammar.
+An open clausal complement (\emph{xcomp}) of a verb or an adjective is
+a predicative or clausal complement without its own subject. The
+reference of the subject is necessarily determined by an argument
+external to the xcomp (normally by the object of the next higher
+clause, if there is one, or else by the subject of the next higher clause.  
+These complements are always non-finite, and they are complements
+(arguments of the higher verb or adjective) rather than
+adjuncts/modifiers, such as a purpose clause.
+The name \emph{xcomp} is borrowed from Lexical-Functional Grammar.
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``He says that you like to swim" \> \> \emph{xcomp}(like, swim)\\
-\hspace{1cm} \> ``I am ready to leave" \> \>  \emph{xcomp}(ready, leave)\\
+\>  ``He says that you like to swim'' \> \> \emph{xcomp}(like, swim)\\
+\hspace{1cm} \> ``I am ready to leave'' \> \>  \emph{xcomp}(ready, leave)\\
+\> ``Sue asked George to respond to her offer'' \> \> \emph{xcomp}(ask, respond) \\
+\> ``I consider him a fool'' \> \> \emph{xcomp}(consider, fool) \\
+\> ``I consider him honest'' \> \> \emph{xcomp}(consider, honest) \\
 \end{tabbing}
 
 \noindent\textbf{\emph{xsubj}: controlling subject}\\
@@ -587,7 +621,7 @@ A controlling subject is the relation between the head of a open clausal complem
 This is an additional dependency, not a basic depedency.
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``Tom likes to eat fish" \> \> \emph{xsubj}(eat, Tom)\\
+\> ``Tom likes to eat fish'' \> \> \emph{xsubj}(eat, Tom)\\
 \end{tabbing}
 
 \section{Hierarchy of typed dependencies}\label{hierarchy}
@@ -618,7 +652,7 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
 		  \> \> \> \> \emph{csubjpass} - passive clausal subject \\
  \> \emph{cc} - coordination \\
  \> \emph{conj} - conjunct \\
- \> \emph{expl} - expletive (expletive ``there") \\
+ \> \emph{expl} - expletive (expletive ``there'') \\
  \> \emph{mod} - modifier \\
     \> \> \emph{amod} - adjectival modifier \\
     \> \> \emph{appos} - appositional modifier \\
@@ -821,7 +855,7 @@ ref(company-4, which-5)
 In some cases, collapsing relations introduces a slight alteration of the semantics of the sentence. In all the representation styles involving collapsing, the two following phenomena may appear.
 
 \paragraph{Introduction of copy nodes marked with an apostrophe.}
-A copy node will be introduced in the case of PP conjunction as in ``Bill went over the river and through the woods". In this example, the two prepositions ``over'' and ``through'' are conjoined and governed by the verb ``went''. To avoid disjoint subgraphs when collapsing the relations (preposition and conjunction), sentences like this are transformed into VP coordination, which requires making a copy of the word ``went". A copy node will be marked with one or more apostrophes in the plain text output or by a \texttt{copy} attribute in the XML output. This gives the following representation, which corresponds to a sentence like ``Bill went over the river and went through the woods":\\
+A copy node will be introduced in the case of PP conjunction as in ``Bill went over the river and through the woods''. In this example, the two prepositions ``over'' and ``through'' are conjoined and governed by the verb ``went''. To avoid disjoint subgraphs when collapsing the relations (preposition and conjunction), sentences like this are transformed into VP coordination, which requires making a copy of the word ``went''. A copy node will be marked with one or more apostrophes in the plain text output or by a \texttt{copy} attribute in the XML output. This gives the following representation, which corresponds to a sentence like ``Bill went over the river and went through the woods'':\\
 \indent prep\_over(went-2, river-5)\\
 \indent prep\_through(went-2’, woods-10)\\
 \indent conj\_and(went-2, went-2’)
@@ -947,7 +981,7 @@ dependencies (not necessarily a tree structure).  [This representation is the de
 \item[\texttt{nonCollapsedDependencies}]  Non-collapsed dependencies: basic dependencies as well as
  the extra ones which do not preserve a tree structure.
 \item[\texttt{nonCollapsedDependenciesSeparated}] Non-collapsed dependencies where the basic dependencies
-are separated from the extra ones (by ``======").
+are separated from the extra ones (by ``======'').
 \end{description}
 
 \noindent You should also use the \texttt{-retainTmpSubcategories}

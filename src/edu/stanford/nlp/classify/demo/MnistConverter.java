@@ -1,15 +1,21 @@
 package edu.stanford.nlp.classify.demo;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+
+import edu.stanford.nlp.io.IOUtils;
 
 
 /** This class converts the MNIST data set from Yann LeCun's distributed binary
  *  form to the tab-separated column format of ColumnDataClassifier.
- *  Site for data: http://yann.lecun.com/exdb/mnist/
+ *  The converted files are huge (100MB of train data) compared to the compact original format.
+ *  Site for data: http://yann.lecun.com/exdb/mnist/ .
+ *  Commands:
+ *  java edu.stanford.nlp.classify.demo.MnistConverter train-images-idx3-ubyte.gz train-labels-idx1-ubyte.gz MNIST-train.tsv MNIST.prop
+ *  java edu.stanford.nlp.classify.demo.MnistConverter t10k-images-idx3-ubyte.gz  t10k-labels-idx1-ubyte.gz MNIST-test.tsv /dev/null
+ *  java -Xrunhprof:cpu=samples,depth=12,interval=2,file=hprof.txt edu.stanford.nlp.classify.ColumnDataClassifier -prop MNIST.prop -trainFile MNIST-train.tsv -testFile MNIST-test.tsv
+ *  ...
+ *  Accuracy/micro-averaged F1: 0.92140
+ *  Macro-averaged F1: 0.92025
  *
  *  @author Christopher Manning
  */
@@ -23,8 +29,8 @@ public class MnistConverter {
       return;
     }
 
-    DataInputStream xStream = new DataInputStream(new FileInputStream(args[0]));
-    DataInputStream yStream = new DataInputStream(new FileInputStream(args[1]));
+    DataInputStream xStream = IOUtils.getDataInputStream(args[0]);
+    DataInputStream yStream = IOUtils.getDataInputStream(args[1]);
     PrintWriter oStream = new PrintWriter(new FileWriter(args[2]));
     PrintWriter pStream = new PrintWriter(new FileWriter(args[3]));
 
