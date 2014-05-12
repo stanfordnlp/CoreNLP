@@ -19,7 +19,7 @@ public class RNNCoreAnnotations {
       return SimpleMatrix.class;
     }
   }
-  
+
   public static SimpleMatrix getNodeVector(Tree tree) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
@@ -36,7 +36,7 @@ public class RNNCoreAnnotations {
       return SimpleMatrix.class;
     }
   }
-  
+
   public static SimpleMatrix getPredictions(Tree tree) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
@@ -46,7 +46,11 @@ public class RNNCoreAnnotations {
   }
 
   /**
-   * argmax of the Predictions
+   * Get the argmax of the predicted class.
+   * The predicted classes can be an arbitrary set of non-negative integer classes,
+   * but in our current sentiment models, the values used are on a 5-point
+   * scale of 0 = very negative, 1 = negative, 2 = neutral, 3 = positive,
+   * and 4 = very positive.
    */
   public static class PredictedClass implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {
