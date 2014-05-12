@@ -6,17 +6,17 @@ import java.util.List;
 
 /**
  * A <code>SimpleTree</code> is a minimal concrete implementation of an
- * unlabeled, unscored <code>Tree</code>.  It has a tree structure, but
- * nothing is stored at a node (no label or score).
- * So, most of the time, this is the wrong class to use!
- * Look at {@code LabeledScoredTreeNode}.
+ * unlabeled, unscored <code>Tree</code>.  It has a tree structure, but no
+ * annotation at nodes.
  *
  * @author Christopher Manning
  */
 public class SimpleTree extends Tree {
 
+  /**
+   * 
+   */
   private static final long serialVersionUID = -8075763706877132926L;
-
   /**
    * Daughters of the parse tree.
    */

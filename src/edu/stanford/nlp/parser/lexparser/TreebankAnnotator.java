@@ -9,7 +9,6 @@ import edu.stanford.nlp.util.Generics;
 import java.io.Reader;
 import java.util.*;
 
-// todo [cdm 2014]: This class is all but dead. Delete it.
 /**
  * Class for getting an annotated treebank.
  *

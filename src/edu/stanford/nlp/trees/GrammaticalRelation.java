@@ -1,29 +1,3 @@
-// Stanford Dependencies - Code for producing and using Stanford dependencies.
-// Copyright © 2005-2014 The Board of Trustees of
-// The Leland Stanford Junior University. All Rights Reserved.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// For more information, bug reports, fixes, contact:
-//    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
-//    USA
-//    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/stanford-dependencies.shtml
-
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
@@ -80,7 +54,7 @@ import java.util.regex.Pattern;
  * <code>TregexPattern</code>} such that:
  * <ul>
  *   <li>the root of the pattern matches A, and</li>
- *   <li>the pattern includes a node labeled "target", which matches B.</li>
+ *   <li>the pattern includes a special node label, "target", which matches B.</li>
  * </ul>
  * For example, for the grammatical relation <code>PREDICATE</code>
  * which holds between a clause and its primary verb phrase, we might
@@ -120,7 +94,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private static final boolean DEBUG = System.getProperty("GrammaticalRelation", null) != null;
 
   public abstract static class GrammaticalRelationAnnotation implements CoreAnnotation<Set<TreeGraphNode>> {
-    @Override
     @SuppressWarnings({"unchecked", "RedundantCast"})
     public Class<Set<TreeGraphNode>> getType() {  return (Class) Set.class; }
   }
@@ -278,7 +251,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private final String specific; // to hold the specific prep or conjunction associated with the grammatical relation
 
   // TODO document constructor
-  // TODO change to put specificString after longName, and then use String... for targetPatterns
+  // TODO change to put specificString earlier, and then use String... for targetPatterns
   private GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
@@ -352,7 +325,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
                              GrammaticalRelation parent,
                              String sourcePattern,
                              TregexPatternCompiler tregexCompiler,
-                             String... targetPatterns) {
+                             String[] targetPatterns) {
     this(language, shortName, longName, annotation, parent, sourcePattern, tregexCompiler, targetPatterns, null);
   }
 
@@ -544,7 +517,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * relations in an array.  For another, it would be cleaner to have
    * subclasses for the English and Chinese relations
    */
-  protected Object readResolve() throws ObjectStreamException {
+  private Object readResolve() throws ObjectStreamException {
     switch (language) {
     case Any: {
       if (shortName.equals(GOVERNOR.shortName)) {
@@ -580,7 +553,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
     }
     case Chinese: {
-      GrammaticalRelation rel = ChineseGrammaticalRelations.valueOf(toString());
+      GrammaticalRelation rel = ChineseGrammaticalRelations.valueOf(toString());      
       if (rel == null) {
         // TODO: we need to figure out what to do with relations
         // which were serialized and then deprecated.  Perhaps there
