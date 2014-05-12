@@ -2149,11 +2149,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             .getProperty("lowercaseText"));
         boolean useTargetNERRestriction = Boolean.parseBoolean(props
             .getProperty("useTargetNERRestriction"));
+        boolean useContextNERRestriction = Boolean.parseBoolean(props.getProperty("useContextNERRestriction"));
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
           String text = IOUtils.stringFromFile(file);
           sents = tokenize(text, posModelPath, lowercase,
-              useTargetNERRestriction);
+              useTargetNERRestriction | useContextNERRestriction);
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           sents = IOUtils.readObjectFromFile(file);
         } else
