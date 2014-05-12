@@ -165,10 +165,8 @@ public class ParserAnnotator implements Annotator {
             props.getProperty(annotatorName + ".buildgraphs", "true"));
     os.append(annotatorName + ".nthreads:" + 
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
-    boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
-    boolean saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
-    os.append(annotatorName + ".binaryTrees:" + saveBinaryTrees);
-
+    os.append(annotatorName + ".binaryTrees:" + 
+              props.getProperty(annotatorName + ".binaryTrees", "false"));
     return os.toString();
   }
 
