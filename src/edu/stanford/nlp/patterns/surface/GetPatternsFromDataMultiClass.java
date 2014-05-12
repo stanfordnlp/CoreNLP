@@ -433,7 +433,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     // constVars.answerLabels = answerLabel;
     constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
     constVars.generalizeClasses = generalizeClasses;
-    constVars.labelDictionary = seedSets;
+    constVars.setLabelDictionary(seedSets);
 
     constVars.setUp(props);
 
@@ -660,7 +660,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         CollectionValuedMap<Integer, String> matchedPhrases = new CollectionValuedMap<Integer, String>();
         for (String[] s : seedwordsTokens) {
           List<Integer> indices = getSubListIndex(s, tokens, tokenslemma,
-              constVars.englishWords, seenFuzzyMatches,
+              constVars.getEnglishWords(), seenFuzzyMatches,
               constVars.minLen4FuzzyForPattern);
           if (indices != null && !indices.isEmpty())
             for (int index : indices)
@@ -848,8 +848,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               break;
             }
           if (!negToken)
-            if (constVars.otherSemanticClasses.contains(token.word())
-                || constVars.otherSemanticClasses.contains(token.lemma()))
+            if (constVars.getOtherSemanticClasses().contains(token.word())
+                || constVars.getOtherSemanticClasses().contains(token.lemma()))
               negToken = true;
 
           for (SurfacePattern s : CollectionUtils.union(
@@ -1430,7 +1430,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
 
         if (constVars.usePatternEvalDistSim) {
-          Integer num = constVars.distSimClusters.get(g);
+          Integer num = constVars.getWordClassClusters().get(g);
           if (num != null && constVars.distSimWeights.containsKey(num)) {
             externalFeatWtsNormalized.setCount(g,
                 constVars.distSimWeights.getCount(num));
@@ -1481,8 +1481,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           if (cachedScoresForThisIter.containsKey(word)) {
             score = cachedScoresForThisIter.getCount(word);
           } else {
-            if (constVars.otherSemanticClasses.contains(word)
-                || constVars.commonEngWords.contains(word))
+            if (constVars.getOtherSemanticClasses().contains(word)
+                || constVars.getCommonEngWords().contains(word))
               score = 1;
             else {
 
@@ -1652,7 +1652,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Redwood.log(Redwood.FORCE, channelNameLogger,
           "\n\n################################ Iteration " + (i + 1)
               + " ##############################");
-      for (String label : constVars.labelDictionary.keySet()) {
+      for (String label : constVars.getLabelDictionary().keySet()) {
         Redwood.log(Redwood.FORCE, channelNameLogger,
             "\n###Learning for label " + label + " ######");
         String wordsout = wordsOutputFile == null ? null : wordsOutputFile
@@ -1713,7 +1713,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           this.allPatternsandWords.get(label), identifier);
 
       if (usePatternResultAsLabel)
-        if (constVars.labelDictionary.containsKey(label))
+        if (constVars.getLabelDictionary().containsKey(label))
           labelWords(label, Data.sents, identifiedWords.keySet(),
               patterns.keySet(), sentsOutFile, tokensMatchedPatterns);
         else

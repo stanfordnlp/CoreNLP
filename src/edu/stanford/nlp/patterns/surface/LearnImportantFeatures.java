@@ -114,7 +114,7 @@ public class LearnImportantFeatures {
 //  }
 
 
-  public Counter<String> getTopFeatures(Map<String, List<CoreLabel>> sents, double perSelectRand, double perSelectNeg, String wekaOptions) throws IOException {
+  public Counter<String> getTopFeatures(Map<String, List<CoreLabel>> sents, double perSelectRand, double perSelectNeg) throws IOException {
     Counter<String> features = new ClassicCounter<String>();
     RVFDataset<String, String> dataset = new RVFDataset<String, String>();
     Random r = new Random(10);
@@ -225,8 +225,8 @@ public class LearnImportantFeatures {
       System.out.println("Read the sents file: " + sentsFile);
       double perSelectRand = Double.parseDouble(props.getProperty("perSelectRand"));
       double perSelectNeg = Double.parseDouble(props.getProperty("perSelectNeg"));
-      String wekaOptions = props.getProperty("wekaOptions");
-      lmf.getTopFeatures(sents, perSelectRand, perSelectNeg, wekaOptions);
+//      String wekaOptions = props.getProperty("wekaOptions");
+      lmf.getTopFeatures(sents, perSelectRand, perSelectNeg);
     } catch (Exception e) {
       e.printStackTrace();
     }

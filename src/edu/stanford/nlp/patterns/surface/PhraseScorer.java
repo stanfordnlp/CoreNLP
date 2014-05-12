@@ -26,8 +26,8 @@ public abstract class PhraseScorer {
   @Option(name = "usePatternWeights")
   public boolean usePatternWeights = true;
  
-  @Option(name = "wordNorm")
-  Normalization wordNorm = Normalization.valueOf("LOG");
+  @Option(name = "wordFreqNorm")
+  Normalization wordFreqNorm = Normalization.valueOf("LOG");
   
   public enum Normalization {
     NONE, SQRT, LOG
@@ -83,7 +83,7 @@ public abstract class PhraseScorer {
   }
 
   public double getDistSimWtScore(String ph) {
-    Integer num = constVars.distSimClusters.get(ph);
+    Integer num = constVars.getWordClassClusters().get(ph);
     if (num != null && constVars.distSimWeights.containsKey(num)) {
       return constVars.distSimWeights.getCount(num);
     } else {
@@ -95,7 +95,7 @@ public abstract class PhraseScorer {
       double minScore = Double.MAX_VALUE;
       for (String w : t) {
         double score = OOVExternalFeatWt;
-        Integer numw = constVars.distSimClusters.get(w);
+        Integer numw = constVars.getWordClassClusters().get(w);
         if (numw != null && constVars.distSimWeights.containsKey(numw))
           score = constVars.distSimWeights.getCount(numw);
         if (score < minScore)

@@ -30,34 +30,60 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables {
 
+  /**
+   * Sigma for L2 regularization in Logisitic regression, if a classifier is used to score phrases
+   */
   @Option(name = "LRSigma")
   public double LRSigma = 1.0;
 
+  /**
+   * English words that are not labeled when labeling using seed dictionaries
+   */
   @Option(name = "englishWordsFiles")
   public String englishWordsFiles = null;
-  public Set<String> englishWords = null;
+  
+  private Set<String> englishWords = null;
 
+  /**
+   * Words to be ignored when learning phrases if <code>removePhrasesWithStopWords</code> or  <code>removeStopWordsFromSelectedPhrases</code> is true.
+   * Also, these words are considered negative when scoring a pattern (similar to othersemanticclasses).
+   */
   @Option(name = "commonWordsPatternFiles")
   public String commonWordsPatternFiles = null;
-  public Set<String> commonEngWords = null;
+  
+  private Set<String> commonEngWords = null;
 
+  /**
+   * 
+   */
   @Option(name = "otherSemanticClassesFiles")
   public String otherSemanticClassesFiles = null;
 
-  public Set<String> otherSemanticClasses = null;
+  private Set<String> otherSemanticClasses = null;
 
-  public Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
+  /**
+   * Seed dictionary, set in the class that uses this class
+   */
+  private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
 
   public Map<String, Class> answerClass = null;
 
   public Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
   
-  // TODO: not getting used!!
+  /**
+   * TODO: not getting used!!
+   */
   public Map<String, Map<String, Class>> generalizeClasses = null;
 
+  /**
+   * Minimum length of words that can be matched fuzzily
+   */
   @Option(name = "minLen4FuzzyForPattern")
   public int minLen4FuzzyForPattern = 6;
 
+  /**
+   * Do not learn phrases that match this regex
+   */
   @Option(name = "wordIgnoreRegex")
   public String wordIgnoreRegex = "[^a-zA-Z]*";
 
@@ -67,27 +93,47 @@ public class ConstantsAndVariables {
   @Option(name = "numThreads")
   public int numThreads = 1;
 
+  /**
+   * 
+   */
   @Option(name = "stopWordsPatternFiles", gloss = "stop words")
   public String stopWordsPatternFiles = null;
 
   public Set<String> stopWords = null;
 
   public List<String> fillerWords = Arrays.asList("a", "an", "the", "`", "``", "'", "''");
+  
+  /**
+   * Environment for {@link TokenSequencePattern}
+   */
   public Map<String, Env> env = new HashMap<String, Env>();
-  // by default doesn't ignore anything
+  
+  /**
+   * by default doesn't ignore anything. What phrases to ignore.
+   */
   public Pattern ignoreWordRegex = Pattern.compile("a^");
 
+  /**
+   * 
+   */
   @Option(name = "removeStopWordsFromSelectedPhrases")
   public boolean removeStopWordsFromSelectedPhrases = false;
 
+  /**
+   * 
+   */
   @Option(name = "removePhrasesWithStopWords")
   public boolean removePhrasesWithStopWords = false;
 
-  boolean alreadySetUp = false;
+  private boolean alreadySetUp = false;
 
-  @Option(name = "distSimClusterFile")
-  String distSimClusterFile = null;
-  public Map<String, Integer> distSimClusters = null;
+  /**
+   * 
+   */
+  @Option(name = "wordClassClusterFile")
+  String wordClassClusterFile = null;
+  
+  private Map<String, Integer> wordClassClusters = null;
 
   @Option(name = "includeExternalFeatures")
   public boolean includeExternalFeatures = false;
@@ -101,31 +147,53 @@ public class ConstantsAndVariables {
   @Option(name = "numWordsCompound")
   public int numWordsCompound = 2;
   
-
-  public ConcurrentHashMap<String, Double> editDistanceFromEnglishWords = new ConcurrentHashMap<String, Double>();
-  public ConcurrentHashMap<String, String> editDistanceFromEnglishWordsMatches = new ConcurrentHashMap<String, String>();
-
-  public ConcurrentHashMap<String, Double> editDistanceFromOtherSemanticClasses = new ConcurrentHashMap<String, Double>();
-  public ConcurrentHashMap<String, String> editDistanceFromOtherSemanticClassesMatches = new ConcurrentHashMap<String, String>();
-
-  public ConcurrentHashMap<String, Double> editDistanceFromThisClass = new ConcurrentHashMap<String, Double>();
-  public ConcurrentHashMap<String, String> editDistanceFromThisClassMatches = new ConcurrentHashMap<String, String>();
+  /**
+   * Cached files
+   */
+  private ConcurrentHashMap<String, Double> editDistanceFromEnglishWords = new ConcurrentHashMap<String, Double>();
+  /**
+   * Cached files
+   */
+  private ConcurrentHashMap<String, String> editDistanceFromEnglishWordsMatches = new ConcurrentHashMap<String, String>();
+  /**
+   * Cached files
+   */
+  private ConcurrentHashMap<String, Double> editDistanceFromOtherSemanticClasses = new ConcurrentHashMap<String, Double>();
+  /**
+   * Cached files
+   */
+  private ConcurrentHashMap<String, String> editDistanceFromOtherSemanticClassesMatches = new ConcurrentHashMap<String, String>();
+  /**
+   * Cached files
+   */
+  private ConcurrentHashMap<String, Double> editDistanceFromThisClass = new ConcurrentHashMap<String, Double>();
+  /**
+   * Cached files
+   */
+  private ConcurrentHashMap<String, String> editDistanceFromThisClassMatches = new ConcurrentHashMap<String, String>();
 
   String channelNameLogger = "settingUp";
 
   public Counter<Integer> distSimWeights = new ClassicCounter<Integer>();
 
-  @Option(name = "scorePhrasesSumNormalized")
-  public boolean scorePhrasesSumNormalized = false;
 
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS
   };
 
+  /**
+   * Only works if you have single label. And the word classes are given. 
+   */
   @Option(name = "usePhraseEvalDistSim")
   public boolean usePhraseEvalDistSim = false;
+  
+  /**
+   * 
+   */
   @Option(name = "usePhraseEvalGoogleNgram")
   public boolean usePhraseEvalGoogleNgram = false;
+  
+  
   @Option(name = "usePhraseEvalDomainNgram")
   public boolean usePhraseEvalDomainNgram = false;
   @Option(name = "usePhraseEvalPatWtByFreq")
@@ -150,13 +218,13 @@ public class ConstantsAndVariables {
   @Option(name = "usePatternEvalEditDistOther")
   public boolean usePatternEvalEditDistOther = false;
 
-  // weka options
   @Option(name = "perSelectRand")
   public double perSelectRand = 0.01;
   @Option(name = "perSelectNeg")
   public double perSelectNeg = 0.1;
-  @Option(name = "wekaOptions")
-  public String wekaOptions = "";
+  
+//  @Option(name = "wekaOptions")
+//  public String wekaOptions = "";
 
   Properties props;
 
@@ -176,7 +244,7 @@ public class ConstantsAndVariables {
 
         Execution.fillOptions(lmf, props);
         lmf.setUp();
-        lmf.getTopFeatures(Data.sents, perSelectRand, perSelectNeg, wekaOptions);
+        lmf.getTopFeatures(Data.sents, perSelectRand, perSelectNeg);
 
       }
       for (String line : IOUtils.readLines(externalFeatureWeightsFile)) {
@@ -246,16 +314,39 @@ public class ConstantsAndVariables {
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
     }
 
-    if (distSimClusterFile != null) {
-      distSimClusters = new HashMap<String, Integer>();
-      for (String line : IOUtils.readLines(distSimClusterFile)) {
+    if (wordClassClusterFile != null) {
+      wordClassClusters = new HashMap<String, Integer>();
+      for (String line : IOUtils.readLines(wordClassClusterFile)) {
         String[] t = line.split("\t");
-        distSimClusters.put(t[0], Integer.parseInt(t[1]));
+        wordClassClusters.put(t[0], Integer.parseInt(t[1]));
       }
     }
     alreadySetUp = true;
   }
 
+  public void setLabelDictionary(Map<String, Set<String>> seedSets) {
+    this.labelDictionary = seedSets;
+  }
+  
+  public Map<String, Set<String>> getLabelDictionary(){
+    return this.labelDictionary;
+  }
+  
+  public Set<String> getEnglishWords(){
+    return this.englishWords;
+  }
+  
+  public Set<String> getCommonEngWords(){
+    return this.commonEngWords;
+  }
+  
+  public Set<String> getOtherSemanticClasses(){
+    return this.otherSemanticClasses;
+  }
+  
+  public Map<String, Integer> getWordClassClusters(){
+    return this.wordClassClusters;
+  }
   private Pair<String, Double> getEditDist(Set<String> words, String ph) {
     double minD = editDistMax;
     String minPh = ph;
@@ -433,5 +524,7 @@ public class ConstantsAndVariables {
     }
     return null;
   }
+
+  
 
 }

@@ -75,7 +75,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
       if (constVars.usePhraseEvalDistSim) {
         // calculate dist sim weights
-        Integer num = constVars.distSimClusters.get(g);
+        Integer num = constVars.getWordClassClusters().get(g);
         if (num != null && constVars.distSimWeights.containsKey(num)) {
           externalFeatWtsNormalized.setCount(g, constVars.distSimWeights.getCount(num));
         } else

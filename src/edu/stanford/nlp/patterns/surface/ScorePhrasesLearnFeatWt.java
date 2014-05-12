@@ -57,7 +57,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     Data.computeRawFreqIfNull(constVars.numWordsCompound);
     Counter<String> scores = new ClassicCounter<String>();
     RVFDataset<String, ScorePhraseMeasures> dataset = choosedatums(label, forLearningPatterns, sents, constVars.answerClass.get(label), label,
-        constVars.otherSemanticClasses, constVars.ignoreWordswithClassesDuringSelection.get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
+        constVars.getOtherSemanticClasses(), constVars.ignoreWordswithClassesDuringSelection.get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
         allSelectedPatterns, dictOddsWordWeights);
 
     edu.stanford.nlp.classify.Classifier classifier;

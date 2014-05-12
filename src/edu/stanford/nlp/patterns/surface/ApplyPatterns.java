@@ -97,7 +97,7 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
                 doNotUse = true;
               }
             }
-            boolean containsStop = containsStopWord(l, constVars.commonEngWords, constVars.ignoreWordRegex, ignoreWords);
+            boolean containsStop = containsStopWord(l, constVars.getCommonEngWords(), constVars.ignoreWordRegex, ignoreWords);
             if (removePhrasesWithStopWords && containsStop) {
               doNotUse = true;
             } else {

@@ -217,14 +217,14 @@ public class ScorePhrases {
       Data.processedDataFreq = new ClassicCounter<String>();
       Data.computeRawFreqIfNull(numWordsCompound);
 
-      if (!phraseScorer.wordNorm.equals(Normalization.NONE)) {
+      if (!phraseScorer.wordFreqNorm.equals(Normalization.NONE)) {
         System.out.println("computing processed freq");
         for (Entry<String, Double> fq : Data.rawFreq.entrySet()) {
           double in = fq.getValue();
-          if (phraseScorer.wordNorm.equals(Normalization.SQRT))
+          if (phraseScorer.wordFreqNorm.equals(Normalization.SQRT))
             in = Math.sqrt(in);
 
-          else if (phraseScorer.wordNorm.equals(Normalization.LOG))
+          else if (phraseScorer.wordFreqNorm.equals(Normalization.LOG))
             in = 1 + Math.log(in);
           else
             throw new RuntimeException("can't understand the normalization");
@@ -235,11 +235,11 @@ public class ScorePhrases {
     }
     Counter<String> words = learnNewPhrasesPrivate(label, sents,
         patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns,
-        constVars.labelDictionary.get(label), dictOddsWordWeights,
+        constVars.getLabelDictionary().get(label), dictOddsWordWeights,
         tokensMatchedPatterns, scoreForAllWordsThisIteration, terms,
         wordsPatExtracted, currentAllPatternWeights, patternsAndWords4Label,
         allPatternsAndWords4Label, identifier);
-    constVars.labelDictionary.get(label).addAll(words.keySet());
+    constVars.getLabelDictionary().get(label).addAll(words.keySet());
 
     return words;
   }
@@ -307,7 +307,7 @@ public class ScorePhrases {
         Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> task = null;
         task = new ApplyPatterns(keyset.subList(i * num,
             Math.min(keyset.size(), (i + 1) * num)), patternsLearnedThisIter,
-            constVars.commonEngWords, usePatternResultAsLabel,
+            constVars.getCommonEngWords(), usePatternResultAsLabel,
             alreadyIdentifiedWords, restrictToMatched, label,
             constVars.removeStopWordsFromSelectedPhrases,
             constVars.removePhrasesWithStopWords, constVars);
@@ -330,8 +330,8 @@ public class ScorePhrases {
     if (wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
       for (Pair<String, String> en : wordsandLemmaPatExtracted.firstKeySet()) {
-        if (!constVars.otherSemanticClasses.contains(en.first())
-            && !constVars.otherSemanticClasses.contains(en.second())) {
+        if (!constVars.getOtherSemanticClasses().contains(en.first())
+            && !constVars.getOtherSemanticClasses().contains(en.second())) {
           terms.addAll(en.first(), wordsandLemmaPatExtracted.getCounter(en));
         }
         wordsPatExtracted.addAll(en.first(),
@@ -371,7 +371,7 @@ public class ScorePhrases {
           alreadyIdentifiedWords, false);
 
       Counter<String> finalwords = chooseTopWords(phraseScores, terms,
-          phraseScores, constVars.otherSemanticClasses, thresholdWordExtract);
+          phraseScores, constVars.getOtherSemanticClasses(), thresholdWordExtract);
       // for (String w : finalwords.keySet()) {
       // System.out.println("Features for " + w + ": "
       // + this.phraseScoresRaw.getCounter(w));

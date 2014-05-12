@@ -54,9 +54,6 @@ public class CreatePatterns {
 
   @Option(name = "getCompoundNouns")
   public boolean getCompoundPhrases = true;
-  @Option(name = "insertModifierWildcard")
-  public boolean insertModifierWildcard = false;
-
 
   @Option(name = "addPatWithoutPOS")
   public boolean addPatWithoutPOS = true;
