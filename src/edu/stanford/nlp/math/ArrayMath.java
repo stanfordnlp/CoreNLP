@@ -280,7 +280,7 @@ public class ArrayMath {
 
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException();
+      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
