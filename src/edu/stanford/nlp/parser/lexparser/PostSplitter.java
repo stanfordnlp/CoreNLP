@@ -21,21 +21,20 @@ import java.util.*;
  */
 class PostSplitter implements TreeTransformer {
 
-  private ClassicCounter<String> nonTerms = new ClassicCounter<String>();
-  private TreebankLangParserParams tlpParams;
-  private TreeFactory tf;
-  private HeadFinder hf;
+  private final ClassicCounter<String> nonTerms = new ClassicCounter<String>();
+  private final TreebankLangParserParams tlpParams;
+  private final HeadFinder hf;
   private final TrainOptions trainOptions;
 
+  @Override
   public Tree transformTree(Tree t) {
-    tf = t.treeFactory();
-    return transformTreeHelper(t, t);
+    TreeFactory tf = t.treeFactory();
+    return transformTreeHelper(t, t, tf);
   }
 
-  public Tree transformTreeHelper(Tree t, Tree root) {
+  public Tree transformTreeHelper(Tree t, Tree root, TreeFactory tf) {
     Tree result;
     Tree parent;
-    Tree grandParent;
     String parentStr;
     String grandParentStr;
     if (root == null || t.equals(root)) {
@@ -46,10 +45,9 @@ class PostSplitter implements TreeTransformer {
       parentStr = parent.label().value();
     }
     if (parent == null || parent.equals(root)) {
-      grandParent = null;
       grandParentStr = "";
     } else {
-      grandParent = parent.parent(root);
+      Tree grandParent = parent.parent(root);
       grandParentStr = grandParent.label().value();
     }
     String cat = t.label().value();
@@ -66,9 +64,9 @@ class PostSplitter implements TreeTransformer {
       if (trainOptions.postPA && !trainOptions.smoothing && baseParentStr.length() > 0) {
         String cat2;
         if (trainOptions.postSplitWithBaseCategory) {
-          cat2 = cat + "^" + baseParentStr;
+          cat2 = cat + '^' + baseParentStr;
         } else {
-          cat2 = cat + "^" + parentStr;
+          cat2 = cat + '^' + parentStr;
         }
         if (!trainOptions.selectivePostSplit || trainOptions.postSplitters.contains(cat2)) {
           cat = cat2;
@@ -77,9 +75,9 @@ class PostSplitter implements TreeTransformer {
       if (trainOptions.postGPA && !trainOptions.smoothing && grandParentStr.length() > 0) {
         String cat2;
         if (trainOptions.postSplitWithBaseCategory) {
-          cat2 = cat + "~" + baseGrandParentStr;
+          cat2 = cat + '~' + baseGrandParentStr;
         } else {
-          cat2 = cat + "~" + grandParentStr;
+          cat2 = cat + '~' + grandParentStr;
         }
         if (trainOptions.selectivePostSplit) {
           if (cat.contains("^") && trainOptions.postSplitters.contains(cat2)) {
@@ -90,11 +88,11 @@ class PostSplitter implements TreeTransformer {
         }
       }
     }
-    result = tf.newTreeNode(new CategoryWordTag(cat, word, cat), Collections.EMPTY_LIST);
+    result = tf.newTreeNode(new CategoryWordTag(cat, word, cat), Collections.<Tree>emptyList());
     ArrayList<Tree> newKids = new ArrayList<Tree>();
     Tree[] kids = t.children();
     for (Tree kid : kids) {
-      newKids.add(transformTreeHelper(kid, root));
+      newKids.add(transformTreeHelper(kid, root, tf));
     }
     result.setChildren(newKids);
     return result;

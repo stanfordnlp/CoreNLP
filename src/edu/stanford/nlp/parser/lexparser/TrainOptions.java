@@ -302,16 +302,17 @@ public class TrainOptions implements Serializable {
   public int dvIterations = DEFAULT_DV_ITERATIONS;
 
   /**
-   * When training the DV parsing method, how many trees to use in one batch
+   * When training using batches of trees, such as in the DVParser,
+   * how many trees to use in one batch
    */
-  static public final int DEFAULT_BATCH_SIZE = 500;
-  public int dvBatchSize = DEFAULT_BATCH_SIZE;
+  static public final int DEFAULT_BATCH_SIZE = 25;
+  public int batchSize = DEFAULT_BATCH_SIZE;
   /**
    * regularization constant
    */
   public static final double DEFAULT_REGCOST = 0.0001;
   public double regCost = DEFAULT_REGCOST;
-  
+
   /**
    * When training the DV parsing method, how many iterations to loop
    * for one batch of trees
@@ -344,7 +345,7 @@ public class TrainOptions implements Serializable {
    * How fast to learn (can mean different things for different algorithms)
    */
   public double learningRate = DEFAULT_LEARNING_RATE;
-  
+
   public static final double DEFAULT_DELTA_MARGIN = 0.1;
   /**
    * How much to penalize the wrong trees for how different they are
@@ -406,7 +407,7 @@ public class TrainOptions implements Serializable {
   public String unkWord = DEFAULT_UNK_WORD;
 
   /**
-   * Whether or not to lowercase word vectors 
+   * Whether or not to lowercase word vectors
    */
   public boolean lowercaseWordVectors = false;
 
@@ -431,7 +432,10 @@ public class TrainOptions implements Serializable {
    * this field, as it was originally a compile time constant
    */
   public boolean trainWordVectors = true;
-  
+
+  /** Horton-Strahler number/dimension (Maximilian Schlund) */
+  public boolean markStrahler;
+
   public void display() {
     System.err.println(toString());
   }
@@ -474,7 +478,7 @@ public class TrainOptions implements Serializable {
     result.append(" trainingThreads=" + trainingThreads + "\n");
     result.append(" dvKBest=" + dvKBest + "\n");
     result.append(" dvIterations=" + dvIterations + "\n");
-    result.append(" dvBatchSize=" + dvBatchSize + "\n");
+    result.append(" batchSize=" + batchSize + "\n");
     result.append(" regCost=" + regCost + "\n");
     result.append(" qnIterationsPerBatch=" + qnIterationsPerBatch + "\n");
     result.append(" qnEstimates=" + qnEstimates + "\n");
@@ -497,6 +501,7 @@ public class TrainOptions implements Serializable {
     result.append(" transformMatrixType=" + transformMatrixType + "\n");
     result.append(" useContextWords=" + useContextWords + "\n");
     result.append(" trainWordVectors=" + trainWordVectors + "\n");
+    result.append(" markStrahler=" + markStrahler + "\n");
     return result.toString();
   }
 
