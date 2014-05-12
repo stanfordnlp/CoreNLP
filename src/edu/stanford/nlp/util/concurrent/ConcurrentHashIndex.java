@@ -33,7 +33,6 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   private static final int DEFAULT_INITIAL_CAPACITY = 100;
 
   private final ConcurrentHashMap<E,Integer> item2Index;
-  private int indexSize;
   private final ReentrantLock lock;
   private final AtomicReference<Object[]> index2Item;
   
@@ -51,7 +50,6 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
    */
   public ConcurrentHashIndex(int initialCapacity) {
     item2Index = new ConcurrentHashMap<E,Integer>(initialCapacity);
-    indexSize = 0;
     lock = new ReentrantLock();
     Object[] arr = new Object[initialCapacity];
     index2Item = new AtomicReference<Object[]>(arr);
@@ -61,12 +59,12 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public E get(int i) {
     Object[] arr = index2Item.get();
-    if (i < indexSize) {
+    if (i < size()) {
       // arr.length guaranteed to be == to size() given the
       // implementation of indexOf below.
       return (E) arr[i];
     }
-    throw new ArrayIndexOutOfBoundsException(String.format("Out of bounds: %d >= %d", i, indexSize));
+    throw new ArrayIndexOutOfBoundsException(String.format("Out of bounds: %d >= %d", i, size()));
   }
 
   @Override
@@ -90,7 +88,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
           return item2Index.get(o);
         
         } else {
-          final int newIndex = indexSize++;
+          final int newIndex = item2Index.size();
           Object[] arr = index2Item.get();
           assert newIndex <= arr.length;
           if (newIndex == arr.length) {
@@ -160,7 +158,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   @Override
   public void saveToWriter(Writer out) throws IOException {
     final String nl = System.getProperty("line.separator");
-    for (int i = 0, sz = indexSize; i < sz; i++) {
+    for (int i = 0, sz = size(); i < sz; i++) {
       E o = get(i);
       if (o != null) {
         out.write(i + "=" + get(i) + nl);
@@ -173,7 +171,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
     PrintWriter bw = null;
     try {
       bw = IOUtils.getPrintWriter(s);
-      for (int i = 0, size = indexSize; i < size; i++) {
+      for (int i = 0, size = size(); i < size; i++) {
         E o = get(i);
         if (o != null) {
           bw.printf("%d=%s%n", i, o.toString());
@@ -211,7 +209,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
 
   @Override
   public int size() {
-    return indexSize;
+    return item2Index.size();
   }
 
   @Override

@@ -760,7 +760,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         // keep track of all relevant properties for this annotator here!
         String type = properties.getProperty("parse.type", "stanford");
         if(type.equalsIgnoreCase("stanford")){
-          return ParserAnnotator.signature("parse", properties);
+          return ParserAnnotator.signature("parser", properties);
         } else if(type.equalsIgnoreCase("charniak")) {
           return "parse.model:" +
                   properties.getProperty("parse.model", "") +
