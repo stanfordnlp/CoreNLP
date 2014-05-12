@@ -511,7 +511,7 @@ public class ConstantsAndVariables {
       if (e.equals(ph))
         return new Pair<String, Double>(ph, 0.0);
 
-      double d = EditDistanceDL.editDistance(e, ph, 3);
+      double d = EditDistanceDamerauLevenshteinLike.editDistance(e, ph, 3);
 
       if (d == 1)
         return new Pair<String, Double>(e, d);
