@@ -264,7 +264,7 @@ public class Tsurgeon {
    * </p><p>
    * Tsurgeon applies the same operation to the same tree for as long
    * as the given tregex operation matches.  This means that infinite
-   * loops are very easy to cause.  One common situation this comes up
+   * loops are very easy to cause.  One common situation where this comes up
    * is with an insert operation will repeats infinitely many times
    * unless you add an expression to the tregex that matches against
    * the inserted pattern.  For example, this pattern will infinite loop:
@@ -289,8 +289,8 @@ public class Tsurgeon {
    * <p>
 
    * Tsurgeon has (very) limited support for conditional statements.
-   * If a pattern is prefaced with 
-   * <code>if exists &lt;name&gt;</code>, 
+   * If a pattern is prefaced with
+   * <code>if exists &lt;name&gt;</code>,
    * the rest of the pattern will only execute if
    * the named node was found in the corresponding TregexMatcher.
    *
@@ -546,10 +546,11 @@ public class Tsurgeon {
    */
   public static Tree processPattern(TregexPattern matchPattern, TsurgeonPattern p, Tree t) {
     TregexMatcher m = matchPattern.matcher(t);
-    while(m.find()) {
+    while (m.find()) {
       t = p.evaluate(t,m);
-      if(t==null)
+      if (t==null) {
         break;
+      }
       m = matchPattern.matcher(t);
     }
     return t;
