@@ -18,6 +18,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.LearnImportantFeatures;
+import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CollectionUtils;
@@ -30,6 +31,40 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables {
 
+  @Option(name = "numWordsToAdd")
+  public int numWordsToAdd = 10;
+
+  @Option(name = "weightDomainFreq")
+  public int weightDomainFreq = 10;
+
+  @Option(name = "thresholdNumPatternsApplied")
+  public double thresholdNumPatternsApplied = 2;
+
+  @Option(name = "restrictToMatched")
+  public boolean restrictToMatched = false;
+
+  @Option(name = "wordScoring")
+  public WordScoring wordScoring = WordScoring.WEIGHTEDNORM;
+
+  @Option(name = "thresholdWordExtract")
+  public double thresholdWordExtract = 0.2;
+
+  // @Option(name = "useGoogleNGrams")
+  // public boolean useGoogleNGrams = false;
+
+  @Option(name = "justify")
+  public boolean justify = false;
+
+//  @Option(name = "usePatternResultAsLabel")
+//  public boolean usePatternResultAsLabel = true;
+
+  @Option(name = "useLookAheadWeights")
+  boolean useLookAheadWeights = false;
+
+
+  @Option(name = "useClassifierForScoring")
+  boolean useClassifierForScoring = false;
+  
   /**
    * Sigma for L2 regularization in Logisitic regression, if a classifier is
    * used to score phrases
@@ -294,6 +329,8 @@ public class ConstantsAndVariables {
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
+  String backgroundSymbol = "O";
+
   Properties props;
 
   @SuppressWarnings("rawtypes")
@@ -332,7 +369,10 @@ public class ConstantsAndVariables {
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
     for (String label : labelDictionary.keySet()) {
       env.put(label, TokenSequencePattern.getNewEnv());
-      env.get(label).bind("answer", answerClass.get(label));
+      //env.get(label).bind("answer", answerClass.get(label));
+      for(Entry<String, Class> en: this.answerClass.entrySet()){
+        env.get(label).bind(en.getKey(), en.getValue());
+      }
       for (Entry<String, Class> en : generalizeClasses.get(label).entrySet())
         env.get(label).bind(en.getKey(), en.getValue());
     }

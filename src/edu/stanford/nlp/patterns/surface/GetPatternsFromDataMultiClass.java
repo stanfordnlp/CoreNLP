@@ -63,20 +63,31 @@ import edu.stanford.nlp.util.logging.Redwood;
  * by learning surface word patterns.
  * <p>
  * 
- * The multi-threaded class (<code>nthread</code> parameter for number of threads) takes as
- * input.
+ * The multi-threaded class (<code>nthread</code> parameter for number of
+ * threads) takes as input.
  * 
  * To use the default options, run
  * <p>
  * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -justificationDirJson output_directory (optional)</code>
  * <p>
- * IMPORTANT: Many flags are described in the classes {@link ConstantsAndVariables}, {@link CreatePatterns}, and {@link ScorePhrases}.
+ * IMPORTANT: Many flags are described in the classes
+ * {@link ConstantsAndVariables}, {@link CreatePatterns}, and
+ * {@link ScorePhrases}.
  * 
- * <code>fileFormat</code>: (Optional) Default is text. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.<p>
- * <code>file</code>: (Required) Input file (default assumed text) <p>
- * <code>seedWordsFiles</code>: (Required) label1,file_seed_words1;label2,file_seed_words2;... where file_seed_words are files with list of seed words, one in each line<p>
- * <code>justificationDirJson</code>: (Optional) output directory where visualization/output files are stored
- * <p>For other flags, see individual comments for each flag.
+ * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
+ * (or txt) and ser, where the serialized file is of the type Map<String,
+ * List<CoreLabel>>.
+ * <p>
+ * <code>file</code>: (Required) Input file (default assumed text)
+ * <p>
+ * <code>seedWordsFiles</code>: (Required)
+ * label1,file_seed_words1;label2,file_seed_words2;... where file_seed_words are
+ * files with list of seed words, one in each line
+ * <p>
+ * <code>justificationDirJson</code>: (Optional) output directory where
+ * visualization/output files are stored
+ * <p>
+ * For other flags, see individual comments for each flag.
  * 
  * @author Sonal Gupta (sonal@cs.stanford.edu)
  */
@@ -171,13 +182,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public String allPatternsFile = null;
 
   /**
-   * If all patterns should be computed. Otherwise patterns are read from allPatternsFile
+   * If all patterns should be computed. Otherwise patterns are read from
+   * allPatternsFile
    */
   @Option(name = "computeAllPatterns")
   public boolean computeAllPatterns = true;
 
-//  @Option(name = "removeRedundantPatterns")
-//  public boolean removeRedundantPatterns = true;
+  // @Option(name = "removeRedundantPatterns")
+  // public boolean removeRedundantPatterns = true;
 
   /**
    * Pattern Scoring mechanism. See {@link PatternScoring} for options.
@@ -192,20 +204,23 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public double thresholdSelectPattern = 1.0;
 
   /**
-   * Do not learn patterns that do not extract any unlabeled tokens (kind of useless)
+   * Do not learn patterns that do not extract any unlabeled tokens (kind of
+   * useless)
    */
   @Option(name = "discardPatternsWithNoUnlabSupport")
   public boolean discardPatternsWithNoUnlabSupport = true;
 
   /**
-   * Currently, does not work correctly. TODO: make this work.
-   * Ideally this would label words only when they occur in the context of any learned pattern
+   * Currently, does not work correctly. TODO: make this work. Ideally this
+   * would label words only when they occur in the context of any learned
+   * pattern
    */
   @Option(name = "restrictToMatched")
   public boolean restrictToMatched = false;
 
   /**
-   * Label words that are learned so that in further iterations we have more information
+   * Label words that are learned so that in further iterations we have more
+   * information
    */
   @Option(name = "usePatternResultAsLabel")
   public boolean usePatternResultAsLabel = true;
@@ -217,7 +232,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public boolean learnPatternsDebug = false;
 
   /**
-   * Do not learn patterns in which the neighboring words have the same label. 
+   * Do not learn patterns in which the neighboring words have the same label.
    */
   @Option(name = "ignorePatWithLabeledNeigh")
   public boolean ignorePatWithLabeledNeigh = false;
@@ -229,7 +244,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public String identifier = "getpatterns";
 
   /**
-   * Use the actual dictionary matching phrase(s) instead of the token word or lemma in calculating the stats
+   * Use the actual dictionary matching phrase(s) instead of the token word or
+   * lemma in calculating the stats
    */
   @Option(name = "useMatchingPhrase")
   public boolean useMatchingPhrase = false;
@@ -241,7 +257,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public int minPosPhraseSupportForPat = 1;
 
   /**
-   * Remove patterns that have number of words in the denominator of the patternscoring measure less than this.
+   * Remove patterns that have number of words in the denominator of the
+   * patternscoring measure less than this.
    */
   @Option(name = "minUnlabNegPhraseSupportForPat")
   public int minUnlabNegPhraseSupportForPat = 0;
@@ -265,9 +282,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   @Option(name = "extremedebug")
   public boolean extremedebug = false;
 
+  /**
+   * use the seed dictionaries and the new words learned for the other labels in
+   * the previous iterations as negative
+   */
+  @Option(name = "useOtherLabelsWordsasNegative")
+  public boolean useOtherLabelsWordsasNegative = true;
+
   Map<String, Boolean> writtenPatInJustification = new HashMap<String, Boolean>();
 
-  String backgroundSymbol = "O";
 
   Map<String, Counter<SurfacePattern>> learnedPatterns = new HashMap<String, Counter<SurfacePattern>>();
   Map<String, Counter<String>> learnedWords = new HashMap<String, Counter<String>>();
@@ -683,7 +706,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           if (labels[i])
             l.set(labelClass, label);
           else
-            l.set(labelClass, backgroundSymbol);
+            l.set(labelClass, constVars.backgroundSymbol);
           l.set(PatternsAnnotations.MatchedPhrases.class,
               (Set<String>) matchedPhrases.get(i));
         }
@@ -735,6 +758,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             + allPatternsFile);
       }
     }
+    
     Class answerClass4Label = constVars.answerClass.get(label);
     String answerLabel4Label = label;// constVars.answerLabels.get(label);
 
@@ -769,7 +793,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         String tokenWordOrLemma = token.word();
         String longestMatchingPhrase = null;
-        
+
         if (useMatchingPhrase) {
           if (matchedPhrases != null && !matchedPhrases.isEmpty()) {
             for (String s : matchedPhrases) {
@@ -888,7 +912,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       unlabWords.addAll(en.getKey(), en.getValue().keySet());
     }
 
-    //Baseline; ignore if not interested
+    // Baseline; ignore if not interested
     if (patternScoring.equals(PatternScoring.F1)) {
 
       Counter<SurfacePattern> specificity = new ClassicCounter<SurfacePattern>();
@@ -950,8 +974,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
         // deno = negandUnLabeledPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
-            negandUnLabeledPatternsandWords4Label, sqrtPatScore,
-            false, externalWordWeightsNormalized, minUnlabNegPhraseSupportForPat,
+            negandUnLabeledPatternsandWords4Label, sqrtPatScore, false,
+            externalWordWeightsNormalized, minUnlabNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.RatioAll)) {
         // deno = allPatternsandWords4Label;
@@ -1106,8 +1130,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               + alreadyIdentifiedPatterns.size() + ". New patterns size "
               + currentPatternWeights4Label.size());
     }
-    
-    
 
     PriorityQueue<SurfacePattern> q = Counters
         .toPriorityQueue(currentPatternWeights4Label);
@@ -1130,7 +1152,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
       boolean notchoose = false;
       if (discardPatternsWithNoUnlabSupport
-          && (unLabeledPatternsandWords4Label.containsFirstKey(pat) || unLabeledPatternsandWords4Label.getCounter(pat).isEmpty())) {
+          && (unLabeledPatternsandWords4Label.containsFirstKey(pat) || unLabeledPatternsandWords4Label
+              .getCounter(pat).isEmpty())) {
         Redwood.log("extremePatDebug", "Removing pattern " + pat
             + " because it has no unlab support; pos words: "
             + patternsandWords4Label.getCounter(pat) + " and all words "
@@ -1649,12 +1672,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       throws ClassNotFoundException, IOException, InterruptedException,
       ExecutionException {
 
+    Map<String, Set<String>> ignoreWordsAll = new HashMap<String, Set<String>>();
+    if (this.useOtherLabelsWordsasNegative) {
+      for (String label : constVars.getLabelDictionary().keySet()) {
+        Set<String> w = new HashSet<String>();
+        for (Entry<String, Set<String>> en : constVars.getLabelDictionary()
+            .entrySet()) {
+          if (en.getKey().equals(label))
+            continue;
+          w.addAll(en.getValue());
+        }
+        ignoreWordsAll.put(label, w);
+      }
+    }
+
     Redwood.log(Redwood.FORCE, "Iterating " + numIterationsForPatterns
         + " times.");
     for (int i = 0; i < numIterationsForPatterns; i++) {
       Redwood.log(Redwood.FORCE, channelNameLogger,
           "\n\n################################ Iteration " + (i + 1)
               + " ##############################");
+      Map<String, Counter<String>> learnedWordsThisIter = new HashMap<String, Counter<String>>();
       for (String label : constVars.getLabelDictionary().keySet()) {
         Redwood.log(Redwood.FORCE, channelNameLogger,
             "\n###Learning for label " + label + " ######");
@@ -1664,30 +1702,44 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             + label;
         String patout = patternsOutFile == null ? null : patternsOutFile + "_"
             + label;
-        iterateExtractApply4Label(
+        Counter<String> learnedWords4label = iterateExtractApply4Label(
             label,
             p0 != null ? p0.get(label) : null,
             p0Set != null ? p0Set.get(label) : null,
             externalWordWeights != null ? externalWordWeights.get(label) : null,
             wordsout, sentout, patout,
             ignorePatterns != null ? ignorePatterns.get(label) : null,
-            feedbackfile, 1);
+            feedbackfile, 1, ignoreWordsAll.get(label));
+        learnedWordsThisIter.put(label, learnedWords4label);
+      }
+
+      if (this.useOtherLabelsWordsasNegative) {
+        for (String label : constVars.getLabelDictionary().keySet()) {
+          for (Entry<String, Counter<String>> en : learnedWordsThisIter
+              .entrySet()) {
+            if (en.getKey().equals(label))
+              continue;
+            ignoreWordsAll.get(label).addAll(en.getValue().keySet());
+          }
+        }
       }
     }
-    
+
     System.out.println("\n\nAll words learned:");
-    for(Entry<String, Counter<String>> en: this.learnedWords.entrySet()){
-      System.out.println(en.getKey()+":\t\t"+en.getValue().keySet()+"\n\n");
+    for (Entry<String, Counter<String>> en : this.learnedWords.entrySet()) {
+      System.out.println(en.getKey() + ":\t\t" + en.getValue().keySet()
+          + "\n\n");
     }
-    
+
   }
 
-  public void iterateExtractApply4Label(String label, SurfacePattern p0,
-      Counter<String> p0Set, Counter<String> dictOddsWordWeights,
-      String wordsOutputFile, String sentsOutFile, String patternsOutFile,
-      Set<SurfacePattern> ignorePatterns, String feedbackfile, int numIter)
-      throws IOException, InterruptedException, ExecutionException,
-      ClassNotFoundException {
+  public Counter<String> iterateExtractApply4Label(String label,
+      SurfacePattern p0, Counter<String> p0Set,
+      Counter<String> dictOddsWordWeights, String wordsOutputFile,
+      String sentsOutFile, String patternsOutFile,
+      Set<SurfacePattern> ignorePatterns, String feedbackfile, int numIter,
+      Set<String> ignoreWords) throws IOException, InterruptedException,
+      ExecutionException, ClassNotFoundException {
 
     if (!learnedPatterns.containsKey(label)) {
       learnedPatterns.put(label, new ClassicCounter<SurfacePattern>());
@@ -1703,6 +1755,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       wordsOutput = new BufferedWriter(new FileWriter(wordsOutputFile));
     TwoDimensionalCounter<String, SurfacePattern> terms = new TwoDimensionalCounter<String, SurfacePattern>();
 
+    Counter<String> identifiedWords = new ClassicCounter<String>();
     for (int i = 0; i < numIter; i++) {
 
       Counter<SurfacePattern> patterns = getPatterns(label, learnedPatterns
@@ -1713,13 +1766,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         sentsOutFile = sentsOutFile + "_" + i + "iter.ser";
 
       Counter<String> scoreForAllWordsThisIteration = new ClassicCounter<String>();
-      Counter<String> identifiedWords = scorePhrases.learnNewPhrases(label,
-          Data.sents, this.patternsForEachToken, patterns,
-          learnedPatterns.get(label), dictOddsWordWeights,
-          tokensMatchedPatterns, scoreForAllWordsThisIteration, terms,
-          wordsPatExtracted.get(label), currentPatternWeights.get(label),
-          this.patternsandWords.get(label),
-          this.allPatternsandWords.get(label), identifier);
+      identifiedWords.addAll(scorePhrases.learnNewPhrases(label, Data.sents,
+          this.patternsForEachToken, patterns, learnedPatterns.get(label),
+          dictOddsWordWeights, tokensMatchedPatterns,
+          scoreForAllWordsThisIteration, terms, wordsPatExtracted.get(label),
+          currentPatternWeights.get(label), this.patternsandWords.get(label),
+          this.allPatternsandWords.get(label), identifier, ignoreWords));
 
       if (usePatternResultAsLabel)
         if (constVars.getLabelDictionary().containsKey(label))
@@ -1758,6 +1810,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       wordsOutput.close();
     if (patternsOutFile != null)
       this.writePatternsToFile(learnedPatterns.get(label), patternsOutFile);
+
+    return identifiedWords;
   }
 
   void writePatternsToFile(Counter<SurfacePattern> pattern, String outFile)
@@ -1981,7 +2035,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           sents = IOUtils.readObjectFromFile(file);
         } else
-          throw new RuntimeException("Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
+          throw new RuntimeException(
+              "Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
         System.out.println("Processing # sents " + sents.size());
         g = new GetPatternsFromDataMultiClass(props, sents, seedWords);
         Execution.fillOptions(g, props);

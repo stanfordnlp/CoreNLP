@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -61,7 +62,8 @@ public class CreatePatterns {
   String channelNameLogger = "createpatterns";
   ConstantsAndVariables constVars;
 
-  public CreatePatterns(Properties props, ConstantsAndVariables constVars) throws IOException {
+  public CreatePatterns(Properties props, ConstantsAndVariables constVars)
+      throws IOException {
     this.constVars = constVars;
     Execution.fillOptions(ConstantsAndVariables.class, props);
     constVars.setUp(props);
@@ -70,15 +72,17 @@ public class CreatePatterns {
 
   void setUp(Properties props) {
     Execution.fillOptions(this, props);
-    
+
     allowedTagsInitials = Arrays.asList(allowedTagsInitialsStr.split(","));
     if (!addPatWithoutPOS && !this.usePOS4Pattern) {
-      throw new RuntimeException("addPatWithoutPOS and usePOS4Pattern both cannot be false ");
+      throw new RuntimeException(
+          "addPatWithoutPOS and usePOS4Pattern both cannot be false ");
     }
   }
 
   boolean doNotUse(String word, Set<String> stopWords) {
-    if (stopWords.contains(word.toLowerCase()) || constVars.ignoreWordRegex.matcher(word).matches())
+    if (stopWords.contains(word.toLowerCase())
+        || constVars.ignoreWordRegex.matcher(word).matches())
       return true;
     else
       return false;
@@ -86,7 +90,8 @@ public class CreatePatterns {
   }
 
   @SuppressWarnings({ "unchecked" })
-  public Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> getContext(String label, List<CoreLabel> sent, int i) {
+  public Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> getContext(
+      String label, List<CoreLabel> sent, int i) {
 
     Set<SurfacePattern> prevpatterns = new HashSet<SurfacePattern>();
     Set<SurfacePattern> nextpatterns = new HashSet<SurfacePattern>();
@@ -101,40 +106,67 @@ public class CreatePatterns {
       List<String> nextTokens = new ArrayList<String>();
 
       int numStopWordsprev = 0, numStopWordsnext = 0;
-      int numPrevTokensSpecial = 0, numNextTokensSpecial = 0;
+      // int numPrevTokensSpecial = 0, numNextTokensSpecial = 0;
+      int numNonStopWordsNext = 0, numNonStopWordsPrev = 0;
       boolean useprev = false, usenext = false;
 
       if (usePreviousContext) {
-        int j = Math.max(0, i - 1);
+        //int j = Math.max(0, i - 1);
+        int j = i -1;
         int numTokens = 0;
         while (numTokens < maxWin && j >= 0) {
           // for (int j = Math.max(i - maxWin, 0); j < i; j++) {
           CoreLabel tokenj = sent.get(j);
           // do not use this word in context consideration
-          if (useFillerWordsInPat && constVars.fillerWords.contains(tokenj.word().toLowerCase())) {
+          if (useFillerWordsInPat
+              && constVars.fillerWords.contains(tokenj.word().toLowerCase())) {
             j--;
             continue;
           }
           if (!tokenj.containsKey(constVars.answerClass.get(label))) {
-            throw new RuntimeException("how come the class " + constVars.answerClass.get(label) + " for token " + tokenj.word() + " in " + sent + " is not set");
+            throw new RuntimeException("how come the class "
+                + constVars.answerClass.get(label) + " for token "
+                + tokenj.word() + " in " + sent + " is not set");
           }
-          boolean isLabeledO = tokenj.get(constVars.answerClass.get(label)).equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+          String strgeneric = "";
+          String strOriginal = "";
+          boolean isLabeledO = true;
+          for (Entry<String, Class> e : constVars.answerClass.entrySet()) {
+            if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
+              isLabeledO = false;
+              if (strgeneric.isEmpty()) {
+                strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
+                strOriginal = e.getKey();
+              } else {
+                strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
+                strOriginal += "|" + e.getKey();
+              }
+            }
+          }
+          // boolean isLabeledO = tokenj.get(constVars.answerClass.get(label))
+          // .equals(constVars.backgroundSymbol);
           if (!isLabeledO) {
-            numPrevTokensSpecial++;
-            previousTokens.add(0, "[{answer:" + tokenj.get(constVars.answerClass.get(label)).toString() + "}]");
-            originalPrevStr = tokenj.get(constVars.answerClass.get(label)).toString() + " " + originalPrevStr;
+            // numPrevTokensSpecial++;
+            previousTokens.add(0, "[" + strgeneric + "]");
+            // previousTokens.add(0,
+            // "[{answer:"
+            // + tokenj.get(constVars.answerClass.get(label)).toString()
+            // + "}]");
+            originalPrevStr = strOriginal + " " + originalPrevStr;
+            numNonStopWordsPrev++;
           } else if (tokenj.word().startsWith("http")) {
             useprev = false;
             previousTokens.clear();
             originalPrevStr = "";
             break;
-          } else{// if (!tokenj.word().matches("[.,?]")) {
+          } else {
             String str = SurfacePattern.getContextStr(tokenj);
             previousTokens.add(0, str);
             originalPrevStr = tokenj.lemma() + " " + originalPrevStr;
             if (doNotUse(tokenj.lemma(), constVars.stopWords)) {
               numStopWordsprev++;
-            }
+            } else
+              numNonStopWordsPrev++;
           }
           numTokens++;
           j--;
@@ -148,30 +180,57 @@ public class CreatePatterns {
           // for (int j = i + 1; j < sent.size() && j <= i + maxWin; j++) {
           CoreLabel tokenj = sent.get(j);
           // do not use this word in context consideration
-          if (useFillerWordsInPat && constVars.fillerWords.contains(tokenj.word().toLowerCase())) {
+          if (useFillerWordsInPat
+              && constVars.fillerWords.contains(tokenj.word().toLowerCase())) {
             j++;
             continue;
           }
           if (!tokenj.containsKey(constVars.answerClass.get(label))) {
-            throw new RuntimeException("how come the dict annotation for token " + tokenj.word() + " in " + sent + " is not set");
+            throw new RuntimeException(
+                "how come the dict annotation for token " + tokenj.word()
+                    + " in " + sent + " is not set");
           }
-          boolean isLabeledO = tokenj.get(constVars.answerClass.get(label)).equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+
+          String strgeneric = "";
+          String strOriginal = "";
+          boolean isLabeledO = true;
+          for (Entry<String, Class> e : constVars.answerClass.entrySet()) {
+            if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
+              isLabeledO = false;
+              if (strgeneric.isEmpty()) {
+                strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
+                strOriginal = e.getKey();
+              } else {
+                strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
+                strOriginal += "|" + e.getKey();
+              }
+            }
+          }
+          // boolean isLabeledO = tokenj.get(constVars.answerClass.get(label))
+          // .equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
           if (!isLabeledO) {
-            numNextTokensSpecial++;
-            nextTokens.add("[{answer:" + tokenj.get(constVars.answerClass.get(label)).toString() + "}]");
-            originalNextStr += " " + tokenj.get(constVars.answerClass.get(label)).toString();
+            // numNextTokensSpecial++;
+            numNonStopWordsNext++;
+            nextTokens.add("[" + strgeneric + "]");
+            // nextTokens.add("[{" + label + ":"
+            // + tokenj.get(constVars.answerClass.get(label)).toString()
+            // + "}]");
+            originalNextStr += strOriginal;
+            // originalNextStr += " "
+            // + tokenj.get(constVars.answerClass.get(label)).toString();
           } else if (tokenj.word().startsWith("http")) {
             usenext = false;
             nextTokens.clear();
             originalNextStr = "";
             break;
-          } else if (!tokenj.word().matches("[.,?()]")) {
+          } else {// if (!tokenj.word().matches("[.,?()]")) {
             String str = SurfacePattern.getContextStr(tokenj);
             nextTokens.add(str);
             originalNextStr += " " + tokenj.lemma();
             if (doNotUse(tokenj.lemma(), constVars.stopWords)) {
               numStopWordsnext++;
-            }
+            } else
+              numNonStopWordsNext++;
           }
           j++;
           numTokens++;
@@ -179,8 +238,9 @@ public class CreatePatterns {
       }
       String prevContext = null, nextContext = null;
 
-      int numNonSpecialPrevTokens = previousTokens.size() - numPrevTokensSpecial;
-      int numNonSpecialNextTokens = nextTokens.size() - numNextTokensSpecial;
+      // int numNonSpecialPrevTokens = previousTokens.size()
+      // - numPrevTokensSpecial;
+      // int numNonSpecialNextTokens = nextTokens.size() - numNextTokensSpecial;
 
       String fw = " ";
       if (useFillerWordsInPat)
@@ -191,30 +251,37 @@ public class CreatePatterns {
         sw = " $STOPWORD{0,2} ";
       }
 
-      if (previousTokens.size() >= minWindow4Pattern && (numStopWordsprev < numNonSpecialPrevTokens || numNonSpecialPrevTokens > numMinStopWordsToAdd)) {
-
+      // if (previousTokens.size() >= minWindow4Pattern
+      // && (numStopWordsprev < numNonSpecialPrevTokens ||
+      // numNonSpecialPrevTokens > numMinStopWordsToAdd)) {
+      if (previousTokens.size() >= minWindow4Pattern
+          && (numNonStopWordsPrev > 0 || numStopWordsprev > numMinStopWordsToAdd)) {
         prevContext = StringUtils.join(previousTokens, fw);
         String str = prevContext + fw + sw;
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
-          twithoutPOS = new PatternToken(tag, false, constVars.numWordsCompound> 1, constVars.numWordsCompound);
+          twithoutPOS = new PatternToken(tag, false,
+              constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithoutPOS.setPreviousContext(sw);
         }
 
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
-          twithPOS = new PatternToken(tag, true, constVars.numWordsCompound > 1, constVars.numWordsCompound);
+          twithPOS = new PatternToken(tag, true,
+              constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithPOS.setPreviousContext(sw);
         }
 
         if (isASCII(prevContext)) {
           if (previousTokens.size() >= minWindow4Pattern) {
             if (twithoutPOS != null) {
-              SurfacePattern pat = new SurfacePattern(str, twithoutPOS, "", originalPrevStr, "");
+              SurfacePattern pat = new SurfacePattern(str, twithoutPOS, "",
+                  originalPrevStr, "");
               prevpatterns.add(pat);
             }
             if (twithPOS != null) {
-              SurfacePattern patPOS = new SurfacePattern(str, twithPOS, "", originalPrevStr, "");
+              SurfacePattern patPOS = new SurfacePattern(str, twithPOS, "",
+                  originalPrevStr, "");
               prevpatterns.add(patPOS);
             }
           }
@@ -222,29 +289,37 @@ public class CreatePatterns {
         }
       }
 
-      if (nextTokens.size() > 0 && (numStopWordsnext < numNonSpecialNextTokens || numNonSpecialNextTokens > numMinStopWordsToAdd)) {
+      // if (nextTokens.size() > 0
+      // && (numStopWordsnext < numNonSpecialNextTokens ||
+      // numNonSpecialNextTokens > numMinStopWordsToAdd)) {
+      if (nextTokens.size() > 0
+          && (numNonStopWordsNext > 0 || numStopWordsnext > numMinStopWordsToAdd)) {
         nextContext = StringUtils.join(nextTokens, fw);
         String str = "";
 
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
-          twithoutPOS = new PatternToken(tag, false, constVars.numWordsCompound > 1, constVars.numWordsCompound);
+          twithoutPOS = new PatternToken(tag, false,
+              constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithoutPOS.setNextContext(sw);
         }
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
-          twithPOS = new PatternToken(tag, true, constVars.numWordsCompound > 1, constVars.numWordsCompound);
+          twithPOS = new PatternToken(tag, true,
+              constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithPOS.setNextContext(sw);
         }
         str += sw + fw + nextContext;
 
         if (nextTokens.size() >= minWindow4Pattern) {
           if (twithoutPOS != null) {
-            SurfacePattern pat = new SurfacePattern("", twithoutPOS, str, "", originalNextStr);
+            SurfacePattern pat = new SurfacePattern("", twithoutPOS, str, "",
+                originalNextStr);
             nextpatterns.add(pat);
           }
           if (twithPOS != null) {
-            SurfacePattern patPOS = new SurfacePattern("", twithPOS, str, "", originalNextStr);
+            SurfacePattern patPOS = new SurfacePattern("", twithPOS, str, "",
+                originalNextStr);
             nextpatterns.add(patPOS);
           }
 
@@ -258,14 +333,16 @@ public class CreatePatterns {
 
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
-          twithoutPOS = new PatternToken(tag, false, constVars.numWordsCompound > 1, constVars.numWordsCompound);
+          twithoutPOS = new PatternToken(tag, false,
+              constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithoutPOS.setNextContext(sw);
           // twithoutPOS.setPreviousContext(sw);
         }
 
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
-          twithPOS = new PatternToken(tag, true, constVars.numWordsCompound > 1, constVars.numWordsCompound);
+          twithPOS = new PatternToken(tag, true,
+              constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithPOS.setNextContext(sw);
           // twithPOS.setPreviousContext(sw);
         }
@@ -274,12 +351,14 @@ public class CreatePatterns {
         if (previousTokens.size() + nextTokens.size() >= minWindow4Pattern) {
 
           if (twithoutPOS != null) {
-            SurfacePattern pat = new SurfacePattern(strprev, twithoutPOS, strnext, originalPrevStr, originalNextStr);
+            SurfacePattern pat = new SurfacePattern(strprev, twithoutPOS,
+                strnext, originalPrevStr, originalNextStr);
             prevnextpatterns.add(pat);
           }
 
           if (twithPOS != null) {
-            SurfacePattern patPOS = new SurfacePattern(strprev, twithPOS, strnext, originalPrevStr, originalNextStr);
+            SurfacePattern patPOS = new SurfacePattern(strprev, twithPOS,
+                strnext, originalPrevStr, originalNextStr);
             prevnextpatterns.add(patPOS);
           }
         }
@@ -287,8 +366,14 @@ public class CreatePatterns {
       }
     }
 
-    Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> patterns = new Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>(prevpatterns,
-        nextpatterns, prevnextpatterns);
+    Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> patterns = new Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>(
+        prevpatterns, nextpatterns, prevnextpatterns);
+    // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
+    // " prev patterns are " + prevpatterns);
+    // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
+    // " next patterns are " + nextpatterns);
+    // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
+    // " prevnext patterns are " + prevnextpatterns);
     return patterns;
   }
 
@@ -302,7 +387,9 @@ public class CreatePatterns {
 
   }
 
-  Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> getAllPatterns(String label, Map<String, List<CoreLabel>> sents) throws InterruptedException, ExecutionException {
+  Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> getAllPatterns(
+      String label, Map<String, List<CoreLabel>> sents)
+      throws InterruptedException, ExecutionException {
 
     Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
     List<String> keyset = new ArrayList<String>(sents.keySet());
@@ -312,17 +399,22 @@ public class CreatePatterns {
       num = keyset.size();
     else
       num = keyset.size() / (constVars.numThreads - 1);
-    ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-    Redwood.log(Redwood.FORCE, channelNameLogger, "keyset size is " + keyset.size());
+    ExecutorService executor = Executors
+        .newFixedThreadPool(constVars.numThreads);
+    Redwood.log(Redwood.FORCE, channelNameLogger,
+        "keyset size is " + keyset.size());
     List<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
-      Redwood.log(Redwood.FORCE, channelNameLogger, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
+      Redwood.log(Redwood.FORCE, channelNameLogger, "assigning from " + i * num
+          + " till " + Math.min(keyset.size(), (i + 1) * num));
 
       Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> task = null;
-      List<String> ids = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
+      List<String> ids = keyset.subList(i * num,
+          Math.min(keyset.size(), (i + 1) * num));
       task = new CreatePatternsThread(label, sents, ids);
 
-      Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> submit = executor.submit(task);
+      Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> submit = executor
+          .submit(task);
       list.add(submit);
     }
 
@@ -335,15 +427,18 @@ public class CreatePatterns {
     return patternsForEachToken;
   }
 
-  public class CreatePatternsThread implements Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> {
-    
+  public class CreatePatternsThread
+      implements
+      Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> {
+
     String label;
     // Class otherClass;
     Map<String, List<CoreLabel>> sents;
     List<String> sentIds;
 
-    public CreatePatternsThread(String label, Map<String, List<CoreLabel>> sents, List<String> sentIds) {
-      
+    public CreatePatternsThread(String label,
+        Map<String, List<CoreLabel>> sents, List<String> sentIds) {
+
       this.label = label;
       // this.otherClass = otherClass;
       this.sents = sents;
@@ -351,7 +446,8 @@ public class CreatePatterns {
     }
 
     @Override
-    public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> call() throws Exception {
+    public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> call()
+        throws Exception {
       Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForTokens = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
 
       for (String id : sentIds) {
@@ -359,8 +455,11 @@ public class CreatePatterns {
 
         Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> p = new HashMap<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>();
         for (int i = 0; i < sent.size(); i++) {
-          p.put(i, new Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>(new HashSet<SurfacePattern>(), new HashSet<SurfacePattern>(),
-              new HashSet<SurfacePattern>()));
+          p.put(
+              i,
+              new Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>(
+                  new HashSet<SurfacePattern>(), new HashSet<SurfacePattern>(),
+                  new HashSet<SurfacePattern>()));
           CoreLabel token = sent.get(i);
           // do not create patterns around stop words!
           if (doNotUse(token.word(), constVars.stopWords)) {
@@ -368,7 +467,8 @@ public class CreatePatterns {
           }
           boolean use = false;
           String tag = token.tag();
-          if (allowedTagsInitials == null || allowedTagsInitials.get(0).equals("*"))
+          if (allowedTagsInitials == null
+              || allowedTagsInitials.get(0).equals("*"))
             use = true;
           else {
             for (String s : allowedTagsInitials) {
@@ -380,7 +480,8 @@ public class CreatePatterns {
           }
 
           if (use) {
-            Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> pat = getContext(label, sent, i);
+            Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> pat = getContext(
+                label, sent, i);
             p.put(i, pat);
           }
         }

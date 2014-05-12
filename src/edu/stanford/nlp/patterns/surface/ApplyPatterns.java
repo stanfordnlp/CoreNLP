@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
@@ -17,13 +16,12 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.logging.Redwood;
+
 
 public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> {
   String label;
   Counter<SurfacePattern> patterns;
   List<String> sentids;
-  boolean usePatternResultAsLabel;
   Set<String> alreadyIdentifiedWords;
   boolean restrictToMatched;
   boolean useGoogleNgrams;
@@ -32,10 +30,9 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
   ConstantsAndVariables constVars;
   Set<String> ignoreWords;
 
-  public ApplyPatterns(List<String> sentids, Counter<SurfacePattern> patterns, Set<String> commonEngWords, boolean usePatternResultAsLabel, Set<String> alreadyIdentifiedWords,
+  public ApplyPatterns(List<String> sentids, Counter<SurfacePattern> patterns, Set<String> commonEngWords, Set<String> alreadyIdentifiedWords,
       boolean restrictToMatched, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.patterns = patterns;
-    this.usePatternResultAsLabel = usePatternResultAsLabel;
     this.alreadyIdentifiedWords = alreadyIdentifiedWords;
     this.restrictToMatched = restrictToMatched;
     this.sentids = sentids;
@@ -48,16 +45,11 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
   @Override
   public Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>> call() throws Exception {
     CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
-    //Redwood.log(Redwood.FORCE, "applypatterns", "Applying the patterns");
-    // CollectionValuedMap<String, String> patForWord = new
-    // CollectionValuedMap<String, String>();
-    // Counter<String> rawFreq = new ClassicCounter<String>();
+
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> allFreq = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
 
     for (String sentid : sentids) {
       List<CoreLabel> sent = Data.sents.get(sentid);
-      // for (CoreLabel l : sent)
-      // rawFreq.incrementCount(l.word());
       for (SurfacePattern pat : patterns.keySet()) {
         String patternStr = pat.toString();
 
@@ -70,17 +62,6 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
 
           int s = m.start("$term");
           int e = m.end("$term");
-          // String st = "";
-          // for(CoreLabel l: sent)
-          // st += " " + l.word() + ":"+l.tag();
-          // System.out.println("matched " + sent.subList(s, e) +
-          // "  because of " + p + " from sent " + st);
-
-          // if (e - s > 1) {
-          // Redwood.log(Redwood.DBG, channelNameLogger,
-          // "Extracted multiword " + sent.subList(s,
-          // e) + " from pattern " + pat);
-          // }
 
           String phrase = "";
           String phraseLemma = "";
@@ -102,8 +83,8 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
               doNotUse = true;
             } else {
               if (!containsStop || !removeStopWordsFromSelectedPhrases) {
-                // TODO: remove answerAnntoation
-                if (label == null || l.get(CoreAnnotations.AnswerAnnotation.class) == null || !l.get(constVars.answerClass.get(label)).equals(label.toString())) {
+                
+                if (label == null || l.get(constVars.answerClass.get(label)) == null || !l.get(constVars.answerClass.get(label)).equals(label.toString())) {
                   useWordNotLabeled = true;
                 }
                 phrase += " " + l.word();
@@ -115,15 +96,6 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
           if (!doNotUse && useWordNotLabeled) {
             phrase = phrase.trim();
             phraseLemma = phraseLemma.trim();
-            // if (e - s > 1) {
-            // Redwood.log(Redwood.DBG, channelNameLogger, "Adding " + str);
-            // }
-            // if (justify) {
-            // if (!justificationForTokens.containsKey(phrase))
-            // justificationForTokens.put(phrase, new
-            // ClassicCounter<SurfacePattern>());
-            // justificationForTokens.get(phrase).incrementCount(pat);
-            // }
             allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), pat, 1.0);
           }
         }
