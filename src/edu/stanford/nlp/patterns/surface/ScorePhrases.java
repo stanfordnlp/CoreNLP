@@ -257,6 +257,7 @@ public class ScorePhrases {
             notAllowedClasses.add(l+":"+l);
           }
         }
+        notAllowedClasses.add("OTHERSEM:OTHERSEM");
       }
       int num = 0;
       if (constVars.numThreads == 1)

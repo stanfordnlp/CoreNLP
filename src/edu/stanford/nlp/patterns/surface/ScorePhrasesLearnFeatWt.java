@@ -240,7 +240,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     }
 
     if (constVars.usePatternEvalWordClass) {
-      double distSimWt = getDistSimWtScore(word);
+      double distSimWt = getDistSimWtScore(word, label);
       distSimWt = logistic(distSimWt);
       scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
     }
@@ -346,7 +346,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     }
 
     if (constVars.usePhraseEvalWordClass) {
-      double distSimWt = getDistSimWtScore(word);
+      double distSimWt = getDistSimWtScore(word, label);
       scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
     }
 

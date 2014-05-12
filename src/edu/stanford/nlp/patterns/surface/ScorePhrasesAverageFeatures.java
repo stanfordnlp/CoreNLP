@@ -63,7 +63,8 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
         if (Data.domainNGramRawFreq.containsKey(g)) {
           assert (Data.rawFreq.containsKey(g));
           domainNgramNormScores.setCount(g, getDomainNgramScore(g));
-        }
+        }else
+          throw new RuntimeException("why is " + g + " not present in domainNgram");
       }
 
       if (constVars.usePhraseEvalGoogleNgram) {
@@ -76,8 +77,8 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
       if (constVars.usePhraseEvalWordClass) {
         // calculate dist sim weights
         Integer num = constVars.getWordClassClusters().get(g);
-        if (num != null && constVars.distSimWeights.containsKey(num)) {
-          externalFeatWtsNormalized.setCount(g, constVars.distSimWeights.getCount(num));
+        if (num != null && constVars.distSimWeights.get(label).containsKey(num)) {
+          externalFeatWtsNormalized.setCount(g, constVars.distSimWeights.get(label).getCount(num));
         } else
           externalFeatWtsNormalized.setCount(g, OOVExternalFeatWt);
       }

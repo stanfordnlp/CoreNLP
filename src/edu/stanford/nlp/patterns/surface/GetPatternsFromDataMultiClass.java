@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -78,7 +79,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -justificationDirJson output_directory (optional)</code>
  * <p>
  * IMPORTANT: Many flags are described in the classes
- * {@link ConstantsAndVariables} and {@link CreatePatterns}
+ * {@link ConstantsAndVariables}, {@link CreatePatterns}, and
+ * {@link PhraseScorer}
  * 
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
  * (or txt) and ser, where the serialized file is of the type Map<String,
@@ -326,7 +328,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, List<CoreLabel>> sents, Set<String> seedSet,
       String answerLabel) throws IOException, InstantiationException,
       IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException {
+      InvocationTargetException, NoSuchMethodException, SecurityException,
+      InterruptedException, ExecutionException {
     this(props, sents, seedSet, PatternsAnnotations.PatternLabel1.class,
         answerLabel);
   }
@@ -336,7 +339,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, List<CoreLabel>> sents, Set<String> seedSet,
       Class answerClass, String answerLabel) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException {
+      InvocationTargetException, NoSuchMethodException, SecurityException,
+      InterruptedException, ExecutionException {
     this.props = props;
     Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     ansCl.put(answerLabel, answerClass);
@@ -358,7 +362,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       String answerLabel, Map<String, Class> generalizeClasses,
       Map<Class, Object> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException {
+      InvocationTargetException, NoSuchMethodException, SecurityException,
+      InterruptedException, ExecutionException {
     this(props, sents, seedSet, PatternsAnnotations.PatternLabel1.class,
         answerLabel, generalizeClasses, ignoreClasses);
   }
@@ -370,7 +375,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, Class> generalizeClasses, Map<Class, Object> ignoreClasses)
       throws IOException, InstantiationException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException,
-      NoSuchMethodException, SecurityException {
+      NoSuchMethodException, SecurityException, InterruptedException,
+      ExecutionException {
     this.props = props;
     Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     ansCl.put(answerLabel, answerClass);
@@ -388,7 +394,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets)
       throws IOException, InstantiationException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException,
-      NoSuchMethodException, SecurityException, ClassNotFoundException {
+      NoSuchMethodException, SecurityException, ClassNotFoundException,
+      InterruptedException, ExecutionException {
     this.props = props;
     Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     Map<String, Class> gC = new HashMap<String, Class>();
@@ -411,7 +418,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass)
       throws IOException, InstantiationException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException,
-      NoSuchMethodException, SecurityException {
+      NoSuchMethodException, SecurityException, InterruptedException,
+      ExecutionException {
     this(props, sents, seedSets, answerClass, new HashMap<String, Class>(),
         new HashMap<String, Map<Class, Object>>());
   }
@@ -427,6 +435,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * @throws IllegalArgumentException
    * @throws IllegalAccessException
    * @throws InstantiationException
+   * @throws ExecutionException
+   * @throws InterruptedException
    */
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
@@ -435,7 +445,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException {
+      InvocationTargetException, NoSuchMethodException, SecurityException,
+      InterruptedException, ExecutionException {
     this.props = props;
 
     if (ignoreClasses.isEmpty()) {
@@ -453,7 +464,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException {
+      InvocationTargetException, NoSuchMethodException, SecurityException,
+      InterruptedException, ExecutionException {
 
     Data.sents = sents;
     Execution.fillOptions(Data.class, props);
@@ -478,6 +490,87 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     createPats = new CreatePatterns(props, constVars);
     assert !(constVars.doNotApplyPatterns && (createPats.useStopWordsBeforeTerm || constVars.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
     // logFile = new PrintWriter(new FileWriter("patterns_log.txt"));
+
+    for (String l : seedSets.keySet()) {
+      runLabelSeedWords(constVars.answerClass.get(l), l, seedSets.get(l));
+
+    }
+
+    if (constVars.getOtherSemanticClasses() != null)
+      runLabelSeedWords(PatternsAnnotations.OtherSemanticLabel.class,
+          "OTHERSEM", constVars.getOtherSemanticClasses());
+
+    if (constVars.externalFeatureWeightsFile != null) {
+      for (String label : seedSets.keySet()) {
+        String externalFeatureWeightsFileLabel = constVars.externalFeatureWeightsFile
+            + "_" + label;
+        File f = new File(externalFeatureWeightsFileLabel);
+        if (!f.exists()) {
+          System.err
+              .println("externalweightsfile for the label does not exist: learning weights!");
+          LearnImportantFeatures lmf = new LearnImportantFeatures();
+          // if (answerClass.size() > 1 || this.labelDictionary.size() > 1)
+          // throw new RuntimeException("not implemented");
+          lmf.answerClass = answerClass.get(label);
+          lmf.answerLabel = label;
+
+          Execution.fillOptions(lmf, props);
+          lmf.setUp();
+          lmf.getTopFeatures(Data.sents, constVars.perSelectRand,
+              constVars.perSelectNeg, externalFeatureWeightsFileLabel);
+
+        }
+        Counter<Integer> distSimWeightsLabel = new ClassicCounter<Integer>();
+        for (String line : IOUtils.readLines(externalFeatureWeightsFileLabel)) {
+          String[] t = line.split(":");
+          if (!t[0].startsWith("Cluster"))
+            continue;
+          String s = t[0].replace("Cluster-", "");
+          Integer clusterNum = Integer.parseInt(s);
+          distSimWeightsLabel.setCount(clusterNum, Double.parseDouble(t[1]));
+        }
+        constVars.distSimWeights.put(label, distSimWeightsLabel);
+      }
+    }
+
+    if (constVars.usePatternEvalSemanticOdds
+        || constVars.usePhraseEvalSemanticOdds) {
+      Counter<String> dictOddsWeightsLabel = new ClassicCounter<String>();
+      Counter<String> otherSemanticClassFreq = new ClassicCounter<String>();
+      for (String s : constVars.getOtherSemanticClasses()) {
+        for (String s1 : StringUtils.getNgrams(Arrays.asList(s.split("\\s+")),
+            1, numWordsCompound))
+          otherSemanticClassFreq.incrementCount(s1);
+      }
+      otherSemanticClassFreq = Counters.add(otherSemanticClassFreq, 1.0);
+      // otherSemanticClassFreq.setDefaultReturnValue(1.0);
+
+      Map<String, Counter<String>> labelDictNgram = new HashMap<String, Counter<String>>();
+      for (String label : seedSets.keySet()) {
+        Counter<String> classFreq = new ClassicCounter<String>();
+        for (String s : seedSets.get(label)) {
+          for (String s1 : StringUtils.getNgrams(
+              Arrays.asList(s.split("\\s+")), 1, numWordsCompound))
+            classFreq.incrementCount(s1);
+        }
+        classFreq = Counters.add(classFreq, 1.0);
+        labelDictNgram.put(label, classFreq);
+        // classFreq.setDefaultReturnValue(1.0);
+      }
+
+      for (String label : seedSets.keySet()) {
+        Counter<String> otherLabelFreq = new ClassicCounter<String>();
+        for (String label2 : seedSets.keySet()) {
+          if (label.equals(label2))
+            continue;
+          otherLabelFreq.addAll(labelDictNgram.get(label2));
+        }
+        otherLabelFreq.addAll(otherSemanticClassFreq);
+        dictOddsWeightsLabel = Counters.division(labelDictNgram.get(label),
+            otherLabelFreq);
+        constVars.dictOddsWeights.put(label, dictOddsWeightsLabel);
+      }
+    }
   }
 
   public void setChannelName(String str) {
@@ -497,7 +590,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   }
 
-  public static Map<String, List<CoreLabel>> runPOSNEROnTokens(List<CoreMap> sentsCM, String posModelPath, boolean useTargetNERRestriction){
+  public static Map<String, List<CoreLabel>> runPOSNEROnTokens(
+      List<CoreMap> sentsCM, String posModelPath,
+      boolean useTargetNERRestriction) {
     Annotation doc = new Annotation(sentsCM);
     Properties props = new Properties();
     if (useTargetNERRestriction) {
@@ -505,8 +600,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     } else
       props.setProperty("annotators", "pos,lemma");
 
-    //props.put(          "tokenize.options",
-    //        "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
+    // props.put( "tokenize.options",
+    // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
     if (posModelPath != null) {
       props.setProperty("pos.model", posModelPath);
@@ -515,15 +610,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     pipeline.annotate(doc);
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
-    
+
     for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
-    
-      sents.put(s.get(CoreAnnotations.DocIDAnnotation.class),  s.get(CoreAnnotations.TokensAnnotation.class));
+
+      sents.put(s.get(CoreAnnotations.DocIDAnnotation.class),
+          s.get(CoreAnnotations.TokensAnnotation.class));
     }
 
     return sents;
   }
-  
+
   public static Map<String, List<CoreLabel>> tokenize(String text,
       String posModelPath, boolean lowercase, boolean useTargetNERRestriction)
       throws InterruptedException, ExecutionException, IOException {
@@ -653,8 +749,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return allIndices;
   }
 
-  public void runLabelSeedWords(String label, Set<String> seedWords)
-      throws InterruptedException, ExecutionException, IOException {
+  public void runLabelSeedWords(Class answerclass, String label,
+      Set<String> seedWords) throws InterruptedException, ExecutionException,
+      IOException {
 
     List<String> keyset = new ArrayList<String>(Data.sents.keySet());
 
@@ -675,7 +772,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           + " till " + Math.min(keyset.size(), (i + 1) * num));
 
       Callable<Map<String, List<CoreLabel>>> task = new LabelWithSeedWords(
-          seedWords, Data.sents, keys, constVars.answerClass.get(label), label);
+          seedWords, Data.sents, keys, answerclass, label);
       Future<Map<String, List<CoreLabel>>> submit = executor.submit(task);
       list.add(submit);
     }
@@ -1517,9 +1614,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         if (constVars.usePatternEvalWordClass) {
           Integer num = constVars.getWordClassClusters().get(g);
-          if (num != null && constVars.distSimWeights.containsKey(num)) {
+          if (num != null
+              && constVars.distSimWeights.get(label).containsKey(num)) {
             externalFeatWtsNormalized.setCount(g,
-                constVars.distSimWeights.getCount(num));
+                constVars.distSimWeights.get(label).getCount(num));
           } else
             externalFeatWtsNormalized.setCount(g, externalWtsDefault);
         }
@@ -1742,8 +1840,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   public void iterateExtractApply(Map<String, SurfacePattern> p0,
-      Map<String, Counter<String>> p0Set,
-      Map<String, Counter<String>> externalWordWeights, String wordsOutputFile,
+      Map<String, Counter<String>> p0Set, String wordsOutputFile,
       String sentsOutFile, String patternsOutFile,
       Map<String, Set<SurfacePattern>> ignorePatterns)
       throws ClassNotFoundException, IOException, InterruptedException,
@@ -1791,8 +1888,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             label,
             p0 != null ? p0.get(label) : null,
             p0Set != null ? p0Set.get(label) : null,
-            externalWordWeights != null ? externalWordWeights.get(label) : null,
-            wordsout, sentout, patout,
+            constVars.dictOddsWeights != null ? constVars.dictOddsWeights
+                .get(label) : null, wordsout, sentout, patout,
             ignorePatterns != null ? ignorePatterns.get(label) : null, 1,
             ignoreWordsAll.get(label), matchedTokensByPatAllLabels.get(label));
 
@@ -2016,7 +2113,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * COPIED from CRFClassifier Count the successes and failures of the model on
    * the given document. Fills numbers in to counters for true positives, false
    * positives, and false negatives, and also keeps track of the entities seen. <br>
-   * Returns false if we ever encounter null for gold or guess.
+   * Returns false if we ever encounter null for gold or guess. NOTE: The
+   * current implementation of counting wordFN/FP is incorrect.
    */
   public static boolean countResultsPerEntity(List<CoreLabel> doc,
       Counter<String> entityTP, Counter<String> entityFP,
@@ -2368,10 +2466,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
           CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
     }
-    // System.out.println("False Positives: " + Counters.toSortedString(wordFP,
-    // wordFP.size(), "%s:%.2f", ";"));
-    // System.out.println("False Negatives: " + Counters.toSortedString(wordFN,
-    // wordFN.size(), "%s:%.2f", ";"));
+    System.out.println("False Positives: "
+        + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
+    System.out.println("False Negatives: "
+        + Counters.toSortedString(wordFN, wordFN.size(), "%s:%.2f", ";"));
 
     System.out.println("\n\n True Positives: " + entityTP);
     System.out.println("\n\n False Positives: " + entityFP);
@@ -2420,7 +2518,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, Set<SurfacePattern>> ignorePatterns = new HashMap<String, Set<SurfacePattern>>();
       Map<String, SurfacePattern> p0 = new HashMap<String, SurfacePattern>();
       Map<String, Counter<String>> p0Set = new HashMap<String, Counter<String>>();
-      Map<String, Counter<String>> externalWordWeights = new HashMap<String, Counter<String>>();
 
       String fileFormat = props.getProperty("fileFormat");
 
@@ -2488,10 +2585,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           sents = IOUtils.readObjectFromFile(file);
         } else if (fileFormat.equals("textWithGoldLabels")) {
           Map setClassForTheseLabels = new HashMap<String, Class>();
-          boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct","true"));
-          List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(
-              new FileReader(file)), seedWords.keySet(), setClassForTheseLabels, true, splitOnPunct, lowercase);
-          sents = runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction | useContextNERRestriction);
+          boolean splitOnPunct = Boolean.parseBoolean(props.getProperty(
+              "splitOnPunct", "true"));
+          List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
+              new BufferedReader(new FileReader(file)), seedWords.keySet(),
+              setClassForTheseLabels, true, splitOnPunct, lowercase);
+          sents = runPOSNEROnTokens(sentsCMs, posModelPath,
+              useTargetNERRestriction | useContextNERRestriction);
         } else
           throw new RuntimeException(
               "Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
@@ -2501,17 +2601,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         g.extremedebug = Boolean
             .parseBoolean(props.getProperty("extremedebug"));
         g.setUp();
-        for (String l : seedWords.keySet()) {
-          g.runLabelSeedWords(l, seedWords.get(l));
-        }
       }
 
       g.extremedebug = Boolean.parseBoolean(props.getProperty("extremedebug"));
-      
+
       System.out.println("Already learned words are "
           + g.getLearnedWords("onelabel"));
-      g.iterateExtractApply(p0, p0Set, externalWordWeights, wordsOutputFile,
-          sentsOutFile, patternOutFile, ignorePatterns);
+      g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile,
+          patternOutFile, ignorePatterns);
 
       if (saveInstance) {
         System.out.println("Saving the instance to " + outputSavedInstanceFile);
@@ -2520,7 +2617,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
       if (evaluate) {
         if (fileFormat.equals("textWithGoldLabels")) {
-          boolean evalPerEntity = Boolean.parseBoolean(props.getProperty("evalPerEntity"));
+          boolean evalPerEntity = Boolean.parseBoolean(props
+              .getProperty("evalPerEntity"));
           g.evaluate(Data.sents, evalPerEntity);
         } else
           throw new RuntimeException(

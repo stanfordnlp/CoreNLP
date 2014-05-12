@@ -29,6 +29,14 @@ public abstract class PhraseScorer {
   @Option(name = "wordFreqNorm")
   Normalization wordFreqNorm = Normalization.valueOf("LOG");
   
+  /**
+   * For phrases, some phrases are evaluated as a combination of their individual words. 
+   * Default is taking minimum of all the words.
+   * This flag takes average instead of the min.
+   */
+  @Option(name="useAvgInsteadofMinPhraseScoring")
+  boolean useAvgInsteadofMinPhraseScoring = false;
+  
   public enum Normalization {
     NONE, SQRT, LOG
   };
@@ -82,28 +90,31 @@ public abstract class PhraseScorer {
     return ((1 + Data.rawFreq.getCount(g) * Math.sqrt(Data.ratioDomainNgramFreqWithDataFreq)) / Data.domainNGramRawFreq.getCount(g));
   }
 
-  public double getDistSimWtScore(String ph) {
+  public double getDistSimWtScore(String ph, String label) {
     Integer num = constVars.getWordClassClusters().get(ph);
-    if (num != null && constVars.distSimWeights.containsKey(num)) {
-      return constVars.distSimWeights.getCount(num);
+    if (num != null && constVars.distSimWeights.get(label).containsKey(num)) {
+      return constVars.distSimWeights.get(label).getCount(num);
     } else {
       String[] t = ph.split("\\s+");
       if (t.length < 2) {
         return OOVExternalFeatWt;
       }
-      //double totalscore = 0;
+      
+      double totalscore = 0;
       double minScore = Double.MAX_VALUE;
       for (String w : t) {
         double score = OOVExternalFeatWt;
         Integer numw = constVars.getWordClassClusters().get(w);
-        if (numw != null && constVars.distSimWeights.containsKey(numw))
-          score = constVars.distSimWeights.getCount(numw);
+        if (numw != null && constVars.distSimWeights.get(label).containsKey(numw))
+          score = constVars.distSimWeights.get(label).getCount(numw);
         if (score < minScore)
           minScore = score;
-       // totalscore += score;
+        totalscore += score;
       }
-      // return totalscore / ph.length();
-      return minScore;
+      if(useAvgInsteadofMinPhraseScoring)
+        return totalscore / ph.length();
+      else
+        return minScore;
     }
   }
 
@@ -125,7 +136,7 @@ public abstract class PhraseScorer {
       else
         return defaultWt;
     }
-    //double totalscore = 0;
+    double totalscore = 0;
     double minScore = Double.MAX_VALUE;
     for (String w : t) {
       double score = defaultWt;
@@ -133,10 +144,12 @@ public abstract class PhraseScorer {
         score = weights.getCount(w);
       if (score < minScore)
         minScore = score;
-      //totalscore += score;
+        totalscore += score;
     }
-    // return totalscore / ph.length();
-    return minScore;
+    if(useAvgInsteadofMinPhraseScoring)
+      return totalscore / ph.length();
+    else
+      return minScore;
   }
 
 }

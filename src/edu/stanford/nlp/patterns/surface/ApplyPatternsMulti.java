@@ -101,6 +101,11 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
         if (!doNotUse && useWordNotLabeled) {
           phrase = phrase.trim();
           phraseLemma = phraseLemma.trim();
+          
+          //means words were removed from between instead from at the ends
+          if(!Data.rawFreq.containsKey(phrase))
+            continue;
+          
           allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), matchedPat, 1.0);
         }
       }

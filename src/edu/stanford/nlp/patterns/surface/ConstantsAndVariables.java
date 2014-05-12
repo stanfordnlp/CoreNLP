@@ -32,32 +32,32 @@ import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables {
-  
+
   /**
    * Use lemma instead of words for the context tokens
    */
-  @Option(name="useLemmaContextTokens")
+  @Option(name = "useLemmaContextTokens")
   public boolean useLemmaContextTokens = true;
-  
+
   /**
    * Lowercase the context words/lemmas
    */
-  @Option(name="matchLowerCaseContext")
+  @Option(name = "matchLowerCaseContext")
   public boolean matchLowerCaseContext = true;
-  
+
   /**
    * Add NER restriction to the target phrase in the patterns
    */
-  @Option(name="useTargetNERRestriction")
+  @Option(name = "useTargetNERRestriction")
   public boolean useTargetNERRestriction = false;
-  
+
   /**
-   * If the NER tag of the context tokens is not the background symbol, 
+   * If the NER tag of the context tokens is not the background symbol,
    * generalize the token with the NER tag
    */
-  @Option(name="useContextNERRestriction")
+  @Option(name = "useContextNERRestriction")
   public boolean useContextNERRestriction = false;
-  
+
   /**
    * Number of words to learn in each iteration
    */
@@ -138,8 +138,8 @@ public class ConstantsAndVariables {
   public Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
 
   /**
-   * These classes will be generalized. It can only be used via the API using the appropriate constructor.
-   * All label classes are by default generalized. 
+   * These classes will be generalized. It can only be used via the API using
+   * the appropriate constructor. All label classes are by default generalized.
    */
   @SuppressWarnings("rawtypes")
   private Map<String, Class> generalizeClasses = new HashMap<String, Class>();
@@ -163,7 +163,8 @@ public class ConstantsAndVariables {
   public int numThreads = 1;
 
   /**
-   * Words that are not learned. Patterns are not created around these words. And, if useStopWordsBeforeTerm in {@link CreatePatterns} is true.
+   * Words that are not learned. Patterns are not created around these words.
+   * And, if useStopWordsBeforeTerm in {@link CreatePatterns} is true.
    */
   @Option(name = "stopWordsPatternFiles", gloss = "stop words")
   public String stopWordsPatternFiles = null;
@@ -244,8 +245,10 @@ public class ConstantsAndVariables {
 
   String channelNameLogger = "settingUp";
 
-  public Counter<Integer> distSimWeights = new ClassicCounter<Integer>();
+  public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
+  public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
+  
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS
   };
@@ -351,11 +354,12 @@ public class ConstantsAndVariables {
   public double perSelectNeg = 0.1;
 
   /**
-   * Especially useful for multi word phrase extraction. Do not extract a phrase if any word is labeled with any other class.
+   * Especially useful for multi word phrase extraction. Do not extract a phrase
+   * if any word is labeled with any other class.
    */
-  @Option(name="doNotExtractPhraseAnyWordLabeledOtherClass")
+  @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
-  
+
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
@@ -368,39 +372,14 @@ public class ConstantsAndVariables {
     if (alreadySetUp) {
       return;
     }
-    if (externalFeatureWeightsFile != null) {
-      File f = new File(externalFeatureWeightsFile);
-      if (!f.exists()) {
-        System.err
-            .println("externalweightsfile does not exist: learning weights!");
-        LearnImportantFeatures lmf = new LearnImportantFeatures();
-        if (answerClass.size() > 1 || this.labelDictionary.size() > 1)
-          throw new RuntimeException("not implemented");
-        lmf.answerClass = CollectionUtils.toList(answerClass.values()).get(0);
-        lmf.answerLabel = CollectionUtils.toList(labelDictionary.keySet()).get(
-            0);
-
-        Execution.fillOptions(lmf, props);
-        lmf.setUp();
-        lmf.getTopFeatures(Data.sents, perSelectRand, perSelectNeg);
-
-      }
-      for (String line : IOUtils.readLines(externalFeatureWeightsFile)) {
-        String[] t = line.split(":");
-        if (!t[0].startsWith("Cluster"))
-          continue;
-        String s = t[0].replace("Cluster-", "");
-        Integer clusterNum = Integer.parseInt(s);
-        distSimWeights.setCount(clusterNum, Double.parseDouble(t[1]));
-      }
-    }
 
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
     for (String label : labelDictionary.keySet()) {
       env.put(label, TokenSequencePattern.getNewEnv());
       // env.get(label).bind("answer", answerClass.get(label));
-      for (Entry<String, Class<? extends Key<String>>> en : this.answerClass.entrySet()) {
+      for (Entry<String, Class<? extends Key<String>>> en : this.answerClass
+          .entrySet()) {
         env.get(label).bind(en.getKey(), en.getValue());
       }
       for (Entry<String, Class> en : generalizeClasses.entrySet())
@@ -437,6 +416,8 @@ public class ConstantsAndVariables {
 
         }
       }
+      
+      
       System.out.println("Size of othersemantic class variables is "
           + otherSemanticClasses.size());
     } else {
@@ -458,8 +439,9 @@ public class ConstantsAndVariables {
           "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
-      if(matchLowerCaseContext)
+      if (matchLowerCaseContext)
         env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+      env.get(label).bind("OTHERSEM", PatternsAnnotations.OtherSemanticLabel.class);
     }
 
     if (wordClassClusterFile != null) {
@@ -471,19 +453,19 @@ public class ConstantsAndVariables {
     }
     alreadySetUp = true;
   }
-  
-  public void addGeneralizeClasses(Map<String, Class> gen){
+
+  public void addGeneralizeClasses(Map<String, Class> gen) {
     this.generalizeClasses.putAll(gen);
   }
-  
-  public Map<String, Class> getGeneralizeClasses(){
+
+  public Map<String, Class> getGeneralizeClasses() {
     return this.generalizeClasses;
   }
 
-  public Set<String> getStopWords(){
+  public Set<String> getStopWords() {
     return stopWords;
   }
-  
+
   public void setLabelDictionary(Map<String, Set<String>> seedSets) {
     this.labelDictionary = seedSets;
   }

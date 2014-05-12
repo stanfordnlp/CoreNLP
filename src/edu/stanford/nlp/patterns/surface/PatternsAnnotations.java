@@ -80,4 +80,10 @@ public class PatternsAnnotations implements Serializable {
       return String.class;
     }
   }
+  
+  public static class OtherSemanticLabel implements GenericAnnotation<String>{
+    public Class<String> getType(){
+      return String.class;
+    }
+  }
 }
