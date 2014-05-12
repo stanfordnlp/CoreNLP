@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
@@ -28,38 +29,71 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class CreatePatterns {
 
+  /**
+   * Use POS tag restriction in the target term: One of this and <code>addPatWithoutPOS</code> has to be true.
+   */
   @Option(name = "usePOS4Pattern")
   public boolean usePOS4Pattern = true;
-
-  @Option(name = "minWindow4Pattern")
-  public int minWindow4Pattern = 2;
-
-  @Option(name = "maxWindow4Pattern")
-  public int maxWindow4Pattern = 4;
-
-  @Option(name = "usePreviousContext")
-  public boolean usePreviousContext = true;
-
-  @Option(name = "useNextContext")
-  public boolean useNextContext = false;;
-
-  @Option(name = "numMinStopWordsToAdd")
-  public int numMinStopWordsToAdd = 3;
-
-  @Option(name = "allowedTagsInitials")
-  public String allowedTagsInitialsStr = "N,J";
-  public List<String> allowedTagsInitials = null;
-
-  @Option(name = "useFillerWordsInPat")
-  public boolean useFillerWordsInPat = true;
-
+  
+  /**
+   * Add patterns without POS restriction as well: One of this and <code>usePOS4Pattern</code> has to be true.
+   */
   @Option(name = "addPatWithoutPOS")
   public boolean addPatWithoutPOS = true;
 
+  /**
+   * Consider contexts longer or equal to these many tokens.
+   */
+  @Option(name = "minWindow4Pattern")
+  public int minWindow4Pattern = 2;
+
+  /**
+   * Consider contexts less than or equal to these many tokens -- total of left and right contexts be can double of this.
+   */
+  @Option(name = "maxWindow4Pattern")
+  public int maxWindow4Pattern = 4;
+
+  /**
+   * Consider contexts on the left of a token.
+   */
+  @Option(name = "usePreviousContext")
+  public boolean usePreviousContext = true;
+
+  /**
+   * Consider contexts on the right of a token.
+   */
+  @Option(name = "useNextContext")
+  public boolean useNextContext = false;;
+
+  /**
+   * If the whole (either left or right) context is just stop words, add the pattern only if number of tokens is equal or more than this. 
+   * This is get patterns like "I am on X" but ignore "on X".
+   */
+  @Option(name = "numMinStopWordsToAdd")
+  public int numMinStopWordsToAdd = 3;
+
+  /**
+   * Initials of all POS tags to use if <code>usePOS4Pattern<code> is true, separated by comma.
+   */
+  @Option(name = "allowedTagsInitials")
+  public String allowedTagsInitialsStr = "N,J";
+  
+  private List<String> allowedTagsInitials = null;
+
+  /**
+   * Ignore words like "a", "an", "the" when matching a pattern.
+   */
+  @Option(name = "useFillerWordsInPat")
+  public boolean useFillerWordsInPat = true;
+
+  /**
+   * allow to match stop words before a target term. This is to match something like "I am on some X" if the pattern is "I am on X"
+   */
   @Option(name = "useStopWordsBeforeTerm")
   public boolean useStopWordsBeforeTerm = false;
 
   String channelNameLogger = "createpatterns";
+
   ConstantsAndVariables constVars;
 
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
@@ -89,17 +123,64 @@ public class CreatePatterns {
 
   }
 
-  @SuppressWarnings({ "unchecked" })
+  Triple<Boolean, String, String> getContextTokenStr(CoreLabel tokenj){
+    String strgeneric = "";
+    String strOriginal = "";
+    boolean isLabeledO = true;
+    for (Entry<String, Class> e : constVars.answerClass.entrySet()) {
+      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
+        isLabeledO = false;
+        if (strgeneric.isEmpty()) {
+          strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
+          strOriginal = e.getKey();
+        } else {
+          strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
+          strOriginal += "|" + e.getKey();
+        }
+      }
+    }
+    
+    for (Entry<String, Class> e : constVars.getGeneralizeClasses().entrySet()) {
+      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
+        isLabeledO = false;
+        if (strgeneric.isEmpty()) {
+          strgeneric = "{" + e.getKey() + ":" + tokenj.get(e.getValue()) + "}";
+          strOriginal = e.getKey();
+        } else {
+          strgeneric += " | " + "{" + e.getKey() + ":" + tokenj.get(e.getValue()) + "}";
+          strOriginal += "|" + e.getKey();
+        }
+      }
+    }
+    
+    if(constVars.useContextNERRestriction){
+      String nerTag = tokenj.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+      if(!nerTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL)){
+        isLabeledO = false;
+        if (strgeneric.isEmpty()) {
+          strgeneric = "{ner:" +  nerTag + "}";
+          strOriginal = nerTag;
+        } else {
+          strgeneric += " | " + "{ner:" + nerTag + "}";
+          strOriginal += "|" + nerTag;
+        }
+      }
+    }
+    
+    return new Triple<Boolean, String, String>(isLabeledO, strgeneric, strOriginal);
+  }
+  
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> getContext(
       String label, List<CoreLabel> sent, int i) {
 
     Set<SurfacePattern> prevpatterns = new HashSet<SurfacePattern>();
     Set<SurfacePattern> nextpatterns = new HashSet<SurfacePattern>();
     Set<SurfacePattern> prevnextpatterns = new HashSet<SurfacePattern>();
-
-    String fulltag = sent.get(i).tag();
+    CoreLabel token = sent.get(i);
+    String fulltag = token.tag();
     String tag = fulltag.substring(0, Math.min(fulltag.length(), 2));
-
+    String nerTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
     for (int maxWin = 1; maxWin <= maxWindow4Pattern; maxWin++) {
       List<String> previousTokens = new ArrayList<String>();
       String originalPrevStr = "", originalNextStr = "";
@@ -117,6 +198,13 @@ public class CreatePatterns {
         while (numTokens < maxWin && j >= 0) {
           // for (int j = Math.max(i - maxWin, 0); j < i; j++) {
           CoreLabel tokenj = sent.get(j);
+          
+          String tokenjStr;
+          if(constVars.useLemmaContextTokens)
+            tokenjStr = tokenj.lemma();
+          else
+            tokenjStr = tokenj.word();
+          
           // do not use this word in context consideration
           if (useFillerWordsInPat
               && constVars.fillerWords.contains(tokenj.word().toLowerCase())) {
@@ -128,23 +216,12 @@ public class CreatePatterns {
                 + constVars.answerClass.get(label) + " for token "
                 + tokenj.word() + " in " + sent + " is not set");
           }
-          String strgeneric = "";
-          String strOriginal = "";
-          boolean isLabeledO = true;
-          for (Entry<String, Class> e : constVars.answerClass.entrySet()) {
-            if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
-              isLabeledO = false;
-              if (strgeneric.isEmpty()) {
-                strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
-                strOriginal = e.getKey();
-              } else {
-                strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
-                strOriginal += "|" + e.getKey();
-              }
-            }
-          }
-          // boolean isLabeledO = tokenj.get(constVars.answerClass.get(label))
-          // .equals(constVars.backgroundSymbol);
+        
+          Triple<Boolean, String, String> tr = this.getContextTokenStr(tokenj);
+          boolean isLabeledO = tr.first;
+          String strgeneric = tr.second;
+          String strOriginal = tr.third;
+
           if (!isLabeledO) {
             // numPrevTokensSpecial++;
             previousTokens.add(0, "[" + strgeneric + "]");
@@ -160,10 +237,10 @@ public class CreatePatterns {
             originalPrevStr = "";
             break;
           } else {
-            String str = SurfacePattern.getContextStr(tokenj);
+            String str = SurfacePattern.getContextStr(tokenj, constVars.useLemmaContextTokens, constVars.matchLowerCaseContext);
             previousTokens.add(0, str);
-            originalPrevStr = tokenj.lemma() + " " + originalPrevStr;
-            if (doNotUse(tokenj.lemma(), constVars.stopWords)) {
+            originalPrevStr = tokenjStr + " " + originalPrevStr;
+            if (doNotUse(tokenjStr, constVars.getStopWords())) {
               numStopWordsprev++;
             } else
               numNonStopWordsPrev++;
@@ -179,6 +256,13 @@ public class CreatePatterns {
         while (numTokens < maxWin && j < sent.size()) {
           // for (int j = i + 1; j < sent.size() && j <= i + maxWin; j++) {
           CoreLabel tokenj = sent.get(j);
+          
+          String tokenjStr;
+          if(constVars.useLemmaContextTokens)
+            tokenjStr = tokenj.lemma();
+          else
+            tokenjStr = tokenj.word();
+          
           // do not use this word in context consideration
           if (useFillerWordsInPat
               && constVars.fillerWords.contains(tokenj.word().toLowerCase())) {
@@ -191,21 +275,11 @@ public class CreatePatterns {
                     + " in " + sent + " is not set");
           }
 
-          String strgeneric = "";
-          String strOriginal = "";
-          boolean isLabeledO = true;
-          for (Entry<String, Class> e : constVars.answerClass.entrySet()) {
-            if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
-              isLabeledO = false;
-              if (strgeneric.isEmpty()) {
-                strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
-                strOriginal = e.getKey();
-              } else {
-                strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
-                strOriginal += "|" + e.getKey();
-              }
-            }
-          }
+          Triple<Boolean, String, String> tr = this.getContextTokenStr(tokenj);
+          boolean isLabeledO = tr.first;
+          String strgeneric = tr.second;
+          String strOriginal = tr.third;
+          
           // boolean isLabeledO = tokenj.get(constVars.answerClass.get(label))
           // .equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
           if (!isLabeledO) {
@@ -224,10 +298,10 @@ public class CreatePatterns {
             originalNextStr = "";
             break;
           } else {// if (!tokenj.word().matches("[.,?()]")) {
-            String str = SurfacePattern.getContextStr(tokenj);
+            String str = SurfacePattern.getContextStr(tokenj, constVars.useLemmaContextTokens, constVars.matchLowerCaseContext);
             nextTokens.add(str);
-            originalNextStr += " " + tokenj.lemma();
-            if (doNotUse(tokenj.lemma(), constVars.stopWords)) {
+            originalNextStr += " " + tokenjStr;
+            if (doNotUse(tokenjStr, constVars.getStopWords())) {
               numStopWordsnext++;
             } else
               numNonStopWordsNext++;
@@ -261,14 +335,14 @@ public class CreatePatterns {
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
           twithoutPOS = new PatternToken(tag, false,
-              constVars.numWordsCompound > 1, constVars.numWordsCompound);
+              constVars.numWordsCompound > 1, constVars.numWordsCompound, nerTag, constVars.useTargetNERRestriction);
           // twithoutPOS.setPreviousContext(sw);
         }
 
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
           twithPOS = new PatternToken(tag, true,
-              constVars.numWordsCompound > 1, constVars.numWordsCompound);
+              constVars.numWordsCompound > 1, constVars.numWordsCompound, nerTag, constVars.useTargetNERRestriction);
           // twithPOS.setPreviousContext(sw);
         }
 
@@ -300,13 +374,13 @@ public class CreatePatterns {
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
           twithoutPOS = new PatternToken(tag, false,
-              constVars.numWordsCompound > 1, constVars.numWordsCompound);
+              constVars.numWordsCompound > 1, constVars.numWordsCompound, nerTag, constVars.useTargetNERRestriction);
           // twithoutPOS.setNextContext(sw);
         }
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
           twithPOS = new PatternToken(tag, true,
-              constVars.numWordsCompound > 1, constVars.numWordsCompound);
+              constVars.numWordsCompound > 1, constVars.numWordsCompound, nerTag, constVars.useTargetNERRestriction);
           // twithPOS.setNextContext(sw);
         }
         str += sw + fw + nextContext;
@@ -334,7 +408,7 @@ public class CreatePatterns {
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
           twithoutPOS = new PatternToken(tag, false,
-              constVars.numWordsCompound > 1, constVars.numWordsCompound);
+              constVars.numWordsCompound > 1, constVars.numWordsCompound, nerTag, constVars.useTargetNERRestriction);
           // twithoutPOS.setNextContext(sw);
           // twithoutPOS.setPreviousContext(sw);
         }
@@ -342,7 +416,7 @@ public class CreatePatterns {
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
           twithPOS = new PatternToken(tag, true,
-              constVars.numWordsCompound > 1, constVars.numWordsCompound);
+              constVars.numWordsCompound > 1, constVars.numWordsCompound, nerTag, constVars.useTargetNERRestriction);
           // twithPOS.setNextContext(sw);
           // twithPOS.setPreviousContext(sw);
         }
@@ -462,7 +536,7 @@ public class CreatePatterns {
                   new HashSet<SurfacePattern>()));
           CoreLabel token = sent.get(i);
           // do not create patterns around stop words!
-          if (doNotUse(token.word(), constVars.stopWords)) {
+          if (doNotUse(token.word(), constVars.getStopWords())) {
             continue;
           }
           boolean use = false;

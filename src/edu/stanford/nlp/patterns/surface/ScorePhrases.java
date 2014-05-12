@@ -297,7 +297,7 @@ public class ScorePhrases {
             wordsandLemmaPatExtracted.getCounter(en));
       }
 
-      removeKeys(terms, constVars.stopWords);
+      removeKeys(terms, constVars.getStopWords());
 
       // if (constVars.scorePhrasesSumNormalized) {
       // Map<String, Counter<ScorePhraseMeasures>> indvPhraseScores = this

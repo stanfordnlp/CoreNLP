@@ -15,17 +15,31 @@ public class SurfacePattern implements Serializable {
 
   public static boolean insertModifierWildcard = false;
 
-  public SurfacePattern(String prevContext, PatternToken token, String nextContext, String originalPrevStr, String originalNextStr) {
+  public SurfacePattern(String prevContext, PatternToken token,
+      String nextContext, String originalPrevStr, String originalNextStr) {
     this.prevContext = prevContext;
     this.nextContext = nextContext;
     this.token = token;
     this.originalNextStr = originalNextStr;
     this.originalPrevStr = originalPrevStr;
-
   }
 
-  public static String getContextStr(CoreLabel tokenj) {
-    String str = "[{lemma:/\\Q" + tokenj.lemma().replaceAll("/", "\\\\/") + "\\E/}] ";
+  public static String getContextStr(CoreLabel tokenj,
+      boolean useLemmaContextTokens, boolean lowerCaseContext ) {
+    String str = "";
+
+    if (useLemmaContextTokens) {
+      String tok = tokenj.lemma();
+      if (lowerCaseContext)
+        tok = tok.toLowerCase();
+      str = "[{lemma:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
+    } else {
+      String tok = tokenj.word();
+      if (lowerCaseContext)
+        tok = tok.toLowerCase();
+      str = "[{word:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
+
+    }
     return str;
   }
 
@@ -39,7 +53,8 @@ public class SurfacePattern implements Serializable {
   }
 
   public String toString(String morePreviousPattern, String moreNextPattern) {
-    return (prevContext + " " + morePreviousPattern + " " + token.getTokenStr() + " " + moreNextPattern + " " + nextContext).trim();
+    return (prevContext + " " + morePreviousPattern + " " + token.getTokenStr()
+        + " " + moreNextPattern + " " + nextContext).trim();
   }
 
   // returns 0 is exactly equal, Integer.MAX_VALUE if the contexts are not same.
@@ -83,9 +98,10 @@ public class SurfacePattern implements Serializable {
   public String toStringToWrite() {
     return prevContext + "##" + token.toStringToWrite() + "##" + nextContext;
   }
-  
+
   public String toStringSimple() {
-    return originalPrevStr + " <b>" + token.toStringToWrite() + "</b> " + originalNextStr;
+    return originalPrevStr + " <b>" + token.toStringToWrite() + "</b> "
+        + originalNextStr;
   }
 
   // public static SurfacePattern parse(String s) {

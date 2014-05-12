@@ -71,8 +71,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -justificationDirJson output_directory (optional)</code>
  * <p>
  * IMPORTANT: Many flags are described in the classes
- * {@link ConstantsAndVariables}, {@link CreatePatterns}, and
- * {@link ScorePhrases}.
+ * {@link ConstantsAndVariables} and {@link CreatePatterns}
  * 
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
  * (or txt) and ser, where the serialized file is of the type Map<String,
@@ -291,7 +290,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   Map<String, Boolean> writtenPatInJustification = new HashMap<String, Boolean>();
 
-
   Map<String, Counter<SurfacePattern>> learnedPatterns = new HashMap<String, Counter<SurfacePattern>>();
   Map<String, Counter<String>> learnedWords = new HashMap<String, Counter<String>>();
 
@@ -328,8 +326,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Map<String, Class> ansCl = new HashMap<String, Class>();
     ansCl.put(answerLabel, answerClass);
 
-    Map<String, Map<String, Class>> generalizeClasses = new HashMap<String, Map<String, Class>>();
-    generalizeClasses.put(answerLabel, new HashMap<String, Class>());
+    Map<String, Class> generalizeClasses = new HashMap<String, Class>();
 
     Map<String, Map<Class, Object>> ignoreClasses = new HashMap<String, Map<Class, Object>>();
     ignoreClasses.put(answerLabel, new HashMap<Class, Object>());
@@ -363,14 +360,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Map<String, Class> ansCl = new HashMap<String, Class>();
     ansCl.put(answerLabel, answerClass);
 
-    Map<String, Map<String, Class>> gC = new HashMap<String, Map<String, Class>>();
-    gC.put(answerLabel, generalizeClasses);
     Map<String, Map<Class, Object>> iC = new HashMap<String, Map<Class, Object>>();
     iC.put(answerLabel, ignoreClasses);
 
     Map<String, Set<String>> seedSets = new HashMap<String, Set<String>>();
     seedSets.put(answerLabel, seedSet);
-    setUpConstructor(sents, seedSets, ansCl, gC, iC);
+    setUpConstructor(sents, seedSets, ansCl, generalizeClasses, iC);
   }
 
   @SuppressWarnings("rawtypes")
@@ -381,15 +376,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       NoSuchMethodException, SecurityException, ClassNotFoundException {
     this.props = props;
     Map<String, Class> ansCl = new HashMap<String, Class>();
-    Map<String, Map<String, Class>> gC = new HashMap<String, Map<String, Class>>();
+    Map<String, Class> gC = new HashMap<String, Class>();
     Map<String, Map<Class, Object>> iC = new HashMap<String, Map<Class, Object>>();
     int i = 1;
     for (String label : seedSets.keySet()) {
       String ansclstr = "edu.stanford.nlp.patterns.surface.PatternsAnnotations$PatternLabel"
           + i;
       ansCl.put(label, Class.forName(ansclstr));
-
-      gC.put(label, new HashMap<String, Class>());
       iC.put(label, new HashMap<Class, Object>());
       i++;
     }
@@ -403,8 +396,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, Class> answerClass) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException {
-    this(props, sents, seedSets, answerClass,
-        new HashMap<String, Map<String, Class>>(),
+    this(props, sents, seedSets, answerClass, new HashMap<String, Class>(),
         new HashMap<String, Map<Class, Object>>());
   }
 
@@ -423,16 +415,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
       Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
-      Map<String, Class> answerClass,
-      Map<String, Map<String, Class>> generalizeClasses,
+      Map<String, Class> answerClass, Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException {
     this.props = props;
-    if (generalizeClasses.isEmpty()) {
-      for (String label : seedSets.keySet())
-        generalizeClasses.put(label, new HashMap<String, Class>());
-    }
+
     if (ignoreClasses.isEmpty()) {
       for (String label : seedSets.keySet())
         ignoreClasses.put(label, new HashMap<Class, Object>());
@@ -444,7 +432,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   @SuppressWarnings("rawtypes")
   private void setUpConstructor(Map<String, List<CoreLabel>> sents,
       Map<String, Set<String>> seedSets, Map<String, Class> answerClass,
-      Map<String, Map<String, Class>> generalizeClasses,
+      Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -455,7 +443,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     constVars.answerClass = answerClass;
     // constVars.answerLabels = answerLabel;
     constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
-    constVars.generalizeClasses = generalizeClasses;
+    constVars.addGeneralizeClasses(generalizeClasses);
     constVars.setLabelDictionary(seedSets);
 
     constVars.setUp(props);
@@ -492,14 +480,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   public static Map<String, List<CoreLabel>> tokenize(String text,
-      String posModelPath) throws InterruptedException, ExecutionException,
-      IOException {
+      String posModelPath, boolean lowercase, boolean useTargetNERRestriction)
+      throws InterruptedException, ExecutionException, IOException {
     Properties props = new Properties();
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+    if (useTargetNERRestriction) {
+      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+    } else
+      props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+
+    props
+        .put(
+            "tokenize.options",
+            "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
+
     if (posModelPath != null) {
       props.setProperty("pos.model", posModelPath);
     }
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+    if (lowercase)
+      text = text.toLowerCase();
+
     Annotation doc = new Annotation(text);
     pipeline.annotate(doc);
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
@@ -690,25 +691,25 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               for (int i = 0; i < s.length; i++) {
                 matchedPhrases.add(index + i, StringUtils.join(s, " "));
                 labels[index + i] = true;
-                Redwood
-                    .log(
-                        Redwood.DBG,
-                        channelNameLogger,
-                        "labeling " + tokens[index + i] + " or its lemma "
-                            + tokenslemma[index + i] + " as " + label
-                            + " because of the dict phrase "
-                            + StringUtils.join(s, " "));
               }
         }
         int i = -1;
         for (CoreLabel l : sent) {
           i++;
-          if (labels[i])
+          if (labels[i]) {
             l.set(labelClass, label);
-          else
+            Redwood.log(Redwood.DBG, channelNameLogger, "labeling " + l.word()
+                + " or its lemma " + l.lemma() + " as " + label
+                + " because of the dict phrases "
+                + (Set<String>) matchedPhrases.get(i));
+          } else
             l.set(labelClass, constVars.backgroundSymbol);
-          l.set(PatternsAnnotations.MatchedPhrases.class,
-              (Set<String>) matchedPhrases.get(i));
+          if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
+            l.set(PatternsAnnotations.MatchedPhrases.class,
+                new HashSet<String>());
+          l.get(PatternsAnnotations.MatchedPhrases.class).addAll(
+              matchedPhrases.get(i));
+
         }
         newsent.put(k, sent);
       }
@@ -758,7 +759,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             + allPatternsFile);
       }
     }
-    
+
     Class answerClass4Label = constVars.answerClass.get(label);
     String answerLabel4Label = label;// constVars.answerLabels.get(label);
 
@@ -895,6 +896,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
       }
     }
+
+    Redwood.log("extremePatDebug",
+        "Patterns around positive words in the label " + label + " are "
+            + patternsandWords4Label);
 
     CollectionValuedMap<SurfacePattern, String> posWords = new CollectionValuedMap<SurfacePattern, String>();
     for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
@@ -1152,7 +1157,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
       boolean notchoose = false;
       if (discardPatternsWithNoUnlabSupport
-          && (unLabeledPatternsandWords4Label.containsFirstKey(pat) || unLabeledPatternsandWords4Label
+          && (!unLabeledPatternsandWords4Label.containsFirstKey(pat) || unLabeledPatternsandWords4Label
               .getCounter(pat).isEmpty())) {
         Redwood.log("extremePatDebug", "Removing pattern " + pat
             + " because it has no unlab support; pos words: "
@@ -1318,7 +1323,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         Redwood.log(
             Redwood.DBG,
             channelNameLogger,
-            "Negative words: "
+            "Negative Words:"
+                + Counters.toSortedString(
+                    negPatternsandWords4Label.getCounter(key),
+                    negPatternsandWords4Label.getCounter(key).size(),
+                    "%1$s:%2$f", ";"));
+        Redwood.log(
+            Redwood.DBG,
+            channelNameLogger,
+            "All Words: "
                 + Counters.toSortedString(
                     allPatternsandWords4Label.getCounter(key),
                     allPatternsandWords4Label.getCounter(key).size(),
@@ -2028,10 +2041,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         String fileFormat = props.getProperty("fileFormat");
         String file = props.getProperty("file");
         String posModelPath = props.getProperty("posModelPath");
+        boolean lowercase = Boolean.parseBoolean(props
+            .getProperty("lowercaseText"));
+        boolean useTargetNERRestriction = Boolean.parseBoolean(props
+            .getProperty("useTargetNERRestriction"));
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
           String text = IOUtils.stringFromFile(file);
-          sents = tokenize(text, posModelPath);
+          sents = tokenize(text, posModelPath, lowercase,
+              useTargetNERRestriction);
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           sents = IOUtils.readObjectFromFile(file);
         } else

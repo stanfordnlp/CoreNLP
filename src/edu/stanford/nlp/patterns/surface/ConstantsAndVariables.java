@@ -30,7 +30,35 @@ import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables {
-
+  
+  /**
+   * Use lemma instead of words for the context tokens
+   */
+  @Option(name="useLemmaContextTokens")
+  public boolean useLemmaContextTokens = true;
+  
+  /**
+   * Lowercase the context words/lemmas
+   */
+  @Option(name="matchLowerCaseContext")
+  public boolean matchLowerCaseContext = true;
+  
+  /**
+   * Add NER restriction to the target phrase in the patterns
+   */
+  @Option(name="useTargetNERRestriction")
+  public boolean useTargetNERRestriction = false;
+  
+  /**
+   * If the NER tag of the context tokens is not the background symbol, 
+   * generalize the token with the NER tag
+   */
+  @Option(name="useContextNERRestriction")
+  public boolean useContextNERRestriction = false;
+  
+  /**
+   * Number of words to learn in each iteration
+   */
   @Option(name = "numWordsToAdd")
   public int numWordsToAdd = 10;
 
@@ -49,22 +77,9 @@ public class ConstantsAndVariables {
   @Option(name = "thresholdWordExtract")
   public double thresholdWordExtract = 0.2;
 
-  // @Option(name = "useGoogleNGrams")
-  // public boolean useGoogleNGrams = false;
-
   @Option(name = "justify")
   public boolean justify = false;
 
-//  @Option(name = "usePatternResultAsLabel")
-//  public boolean usePatternResultAsLabel = true;
-
-  @Option(name = "useLookAheadWeights")
-  boolean useLookAheadWeights = false;
-
-
-  @Option(name = "useClassifierForScoring")
-  boolean useClassifierForScoring = false;
-  
   /**
    * Sigma for L2 regularization in Logisitic regression, if a classifier is
    * used to score phrases
@@ -94,15 +109,16 @@ public class ConstantsAndVariables {
 
   /**
    * List of dictionary phrases that are negative for all labels to be learned.
-   * Format is file_1,file_2,... where file_i has each phrase in a different line
+   * Format is file_1,file_2,... where file_i has each phrase in a different
+   * line
    * 
    */
   @Option(name = "otherSemanticClassesFiles")
   public String otherSemanticClassesFiles = null;
 
-  //set of words that are considered negative for all classes
+  // set of words that are considered negative for all classes
   private Set<String> otherSemanticClasses = null;
-  
+
   /**
    * Seed dictionary, set in the class that uses this class
    */
@@ -111,14 +127,20 @@ public class ConstantsAndVariables {
   @SuppressWarnings("rawtypes")
   public Map<String, Class> answerClass = null;
 
+  /**
+   * Can be used only when using the API - using the appropriate constructor.
+   * Tokens with specified classes set (has to be boolean return value, even
+   * though this variable says object) will be ignored.
+   */
   @SuppressWarnings("rawtypes")
   public Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
 
   /**
-   * TODO: not getting used!!
+   * These classes will be generalized. It can only be used via the API using the appropriate constructor.
+   * All label classes are by default generalized. 
    */
   @SuppressWarnings("rawtypes")
-  public Map<String, Map<String, Class>> generalizeClasses = null;
+  private Map<String, Class> generalizeClasses = new HashMap<String, Class>();
 
   /**
    * Minimum length of words that can be matched fuzzily
@@ -139,12 +161,12 @@ public class ConstantsAndVariables {
   public int numThreads = 1;
 
   /**
-   * 
+   * Words that are not learned. Patterns are not created around these words. And, if useStopWordsBeforeTerm in {@link CreatePatterns} is true.
    */
   @Option(name = "stopWordsPatternFiles", gloss = "stop words")
   public String stopWordsPatternFiles = null;
 
-  public Set<String> stopWords = null;
+  private Set<String> stopWords = null;
 
   public List<String> fillerWords = Arrays.asList("a", "an", "the", "`", "``",
       "'", "''");
@@ -369,11 +391,11 @@ public class ConstantsAndVariables {
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
     for (String label : labelDictionary.keySet()) {
       env.put(label, TokenSequencePattern.getNewEnv());
-      //env.get(label).bind("answer", answerClass.get(label));
-      for(Entry<String, Class> en: this.answerClass.entrySet()){
+      // env.get(label).bind("answer", answerClass.get(label));
+      for (Entry<String, Class> en : this.answerClass.entrySet()) {
         env.get(label).bind(en.getKey(), en.getValue());
       }
-      for (Entry<String, Class> en : generalizeClasses.get(label).entrySet())
+      for (Entry<String, Class> en : generalizeClasses.entrySet())
         env.get(label).bind(en.getKey(), en.getValue());
     }
     Redwood.log(Redwood.DBG, channelNameLogger, "Running with debug output");
@@ -428,6 +450,8 @@ public class ConstantsAndVariables {
           "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
+      if(matchLowerCaseContext)
+        env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
     }
 
     if (wordClassClusterFile != null) {
@@ -439,7 +463,19 @@ public class ConstantsAndVariables {
     }
     alreadySetUp = true;
   }
+  
+  public void addGeneralizeClasses(Map<String, Class> gen){
+    this.generalizeClasses.putAll(gen);
+  }
+  
+  public Map<String, Class> getGeneralizeClasses(){
+    return this.generalizeClasses;
+  }
 
+  public Set<String> getStopWords(){
+    return stopWords;
+  }
+  
   public void setLabelDictionary(Map<String, Set<String>> seedSets) {
     this.labelDictionary = seedSets;
   }
