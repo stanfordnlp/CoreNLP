@@ -9,18 +9,20 @@ public class SurfacePattern implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  String[] prevContext;
-  String[] nextContext;
+  private String[] prevContext;
+  private String[] nextContext;
   String prevContextStr = "", nextContextStr = "";
-  PatternToken token;
-  String originalPrevStr, originalNextStr;
+  private PatternToken token;
+  private String originalPrevStr;
+
+  private String originalNextStr;
 
   public static boolean insertModifierWildcard = false;
 
   public SurfacePattern(String[] prevContext, PatternToken token,
       String[] nextContext, String originalPrevStr, String originalNextStr) {
-    this.prevContext = prevContext;
-    this.nextContext = nextContext;
+    this.setPrevContext(prevContext);
+    this.setNextContext(nextContext);
 
     if (prevContext != null)
       prevContextStr = StringUtils.join(prevContext, " ");
@@ -28,9 +30,9 @@ public class SurfacePattern implements Serializable {
     if (nextContext != null)
       nextContextStr = StringUtils.join(nextContext, " ");
 
-    this.token = token;
-    this.originalNextStr = originalNextStr;
-    this.originalPrevStr = originalPrevStr;
+    this.setToken(token);
+    this.setOriginalNextStr(originalNextStr);
+    this.setOriginalPrevStr(originalPrevStr);
   }
 
   public static String getContextStr(CoreLabel tokenj,
@@ -58,13 +60,13 @@ public class SurfacePattern implements Serializable {
   }
 
   public String toString() {
-    return (prevContextStr + " " + token.getTokenStr() + " " + nextContextStr)
+    return (prevContextStr + " " + getToken().getTokenStr() + " " + nextContextStr)
         .trim();
   }
 
   public String toString(String morePreviousPattern, String moreNextPattern) {
     return (prevContextStr + " " + morePreviousPattern + " "
-        + token.getTokenStr() + " " + moreNextPattern + " " + nextContextStr)
+        + getToken().getTokenStr() + " " + moreNextPattern + " " + nextContextStr)
         .trim();
   }
 
@@ -78,12 +80,12 @@ public class SurfacePattern implements Serializable {
     if (prevContextStr.equals(p.prevContextStr)
         && nextContextStr.equals(p.nextContextStr)) {
       int this_restriction = 0, p_restriction = 0;
-      if (this.token.useTag)
+      if (this.getToken().useTag)
         this_restriction++;
-      if (p.token.useTag)
+      if (p.getToken().useTag)
         p_restriction++;
-      this_restriction -= this.token.numWordsCompound;
-      p_restriction -= this.token.numWordsCompound;
+      this_restriction -= this.getToken().numWordsCompound;
+      p_restriction -= this.getToken().numWordsCompound;
       return this_restriction - p_restriction;
     }
     return Integer.MAX_VALUE;
@@ -108,13 +110,53 @@ public class SurfacePattern implements Serializable {
   }
 
   public String toStringToWrite() {
-    return prevContextStr + "##" + token.toStringToWrite() + "##"
+    return prevContextStr + "##" + getToken().toStringToWrite() + "##"
         + nextContextStr;
   }
 
   public String toStringSimple() {
-    return originalPrevStr + " <b>" + token.toStringToWrite() + "</b> "
-        + originalNextStr;
+    return getOriginalPrevStr() + " <b>" + getToken().toStringToWrite() + "</b> "
+        + getOriginalNextStr();
+  }
+
+  public String[] getPrevContext() {
+    return prevContext;
+  }
+
+  public void setPrevContext(String[] prevContext) {
+    this.prevContext = prevContext;
+  }
+
+  public String[] getNextContext() {
+    return nextContext;
+  }
+
+  public void setNextContext(String[] nextContext) {
+    this.nextContext = nextContext;
+  }
+
+  public PatternToken getToken() {
+    return token;
+  }
+
+  public void setToken(PatternToken token) {
+    this.token = token;
+  }
+
+  public String getOriginalPrevStr() {
+    return originalPrevStr;
+  }
+
+  public void setOriginalPrevStr(String originalPrevStr) {
+    this.originalPrevStr = originalPrevStr;
+  }
+
+  public String getOriginalNextStr() {
+    return originalNextStr;
+  }
+
+  public void setOriginalNextStr(String originalNextStr) {
+    this.originalNextStr = originalNextStr;
   }
 
   // public static SurfacePattern parse(String s) {
