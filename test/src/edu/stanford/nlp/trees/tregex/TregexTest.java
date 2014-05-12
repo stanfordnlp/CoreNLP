@@ -1427,11 +1427,6 @@ public class TregexTest extends TestCase {
     runTest("A <... { (B !< C) ; D }", "(A (B (C 2)) (D 3))");
   }
 
-  public void testDisjunctionVariableAssignments() {
-    outputResults("UCP [ <- (ADJP=adjp < JJR) | <, NNP=np ]", "(NP (UCP (NNP U.S.) (CC and) (ADJP (JJ northern) (JJ European))) (NNS diplomats))");
-
-  }
-
   /**
    * Stores an input and the expected output.  Obviously this is only
    * expected to work with a given pattern, but this is a bit more

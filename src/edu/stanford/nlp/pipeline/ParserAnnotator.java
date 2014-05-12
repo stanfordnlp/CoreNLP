@@ -8,12 +8,11 @@ import java.util.Set;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.parser.common.NoSuchParseException;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.common.ParserGrammar;
-import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
+import edu.stanford.nlp.parser.lexparser.ParserConstraint;
+import edu.stanford.nlp.parser.lexparser.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.Tree;
@@ -46,7 +45,7 @@ public class ParserAnnotator implements Annotator {
 
   private final boolean VERBOSE;
   private final boolean BUILD_GRAPHS;
-  private final ParserGrammar parser;
+  private final LexicalizedParser parser;
 
   private final Function<Tree, Tree> treeMap;
 
@@ -78,11 +77,11 @@ public class ParserAnnotator implements Annotator {
     this(loadModel(parserLoc, verbose, flags), verbose, maxSent);
   }
 
-  public ParserAnnotator(ParserGrammar parser, boolean verbose, int maxSent) {
+  public ParserAnnotator(LexicalizedParser parser, boolean verbose, int maxSent) {
     this(parser, verbose, maxSent, null);
   }
 
-  public ParserAnnotator(ParserGrammar parser, boolean verbose, int maxSent, Function<Tree, Tree> treeMap) {
+  public ParserAnnotator(LexicalizedParser parser, boolean verbose, int maxSent, Function<Tree, Tree> treeMap) {
     VERBOSE = verbose;
     this.BUILD_GRAPHS = parser.getTLPParams().supportsBasicDependencies();
     this.parser = parser;
@@ -180,9 +179,9 @@ public class ParserAnnotator implements Annotator {
     }
   }
 
-  private static ParserGrammar loadModel(String parserLoc,
-                                         boolean verbose,
-                                         String[] flags) {
+  private static LexicalizedParser loadModel(String parserLoc,
+                                                    boolean verbose,
+                                                    String[] flags) {
     if (verbose) {
       System.err.println("Loading Parser Model [" + parserLoc + "] ...");
       System.err.print("  Flags:");
@@ -300,6 +299,25 @@ public class ParserAnnotator implements Annotator {
     }
     return tree;
   }
+
+  @SuppressWarnings("unused")
+  private Tree doOneSentence(List<? extends CoreLabel> words) {
+    // TODO: might not need to create new tokens
+    List<CoreLabel> newWords = new ArrayList<CoreLabel>();
+    for (CoreLabel fl : words) {
+      CoreLabel ml = new CoreLabel();
+      ml.setWord(fl.word());
+      ml.setValue(fl.word());
+      newWords.add(ml);
+    }
+
+    if(maxSentenceLength <= 0 || newWords.size() < maxSentenceLength) {
+      return parser.apply(newWords);
+    } else {
+      return ParserAnnotatorUtils.xTree(newWords);
+    }
+  }
+
 
   @Override
   public Set<Requirement> requires() {

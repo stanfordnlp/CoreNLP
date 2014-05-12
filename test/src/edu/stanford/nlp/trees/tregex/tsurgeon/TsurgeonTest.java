@@ -36,7 +36,7 @@ public class TsurgeonTest extends TestCase {
   public void testBackReference() {
     TregexPattern tregex = TregexPattern.compile("__ <1 B=n <2 ~n");
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("relabel n X");
-    runTest(tregex, tsurgeon, "(A (B w) (B w))",
+    runTest(tregex, tsurgeon, "(NP A1 A2 A3 A4 A5 A6 NN B5 B4 B3 B2 (B1 B11 B12))",
             "(A (X w) (B w))");
   }
 
