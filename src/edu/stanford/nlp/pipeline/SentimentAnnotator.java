@@ -62,9 +62,6 @@ public class SentimentAnnotator implements Annotator {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       for (CoreMap sentence : sentences) {
         Tree binarized = sentence.get(TreeCoreAnnotations.BinarizedTreeAnnotation.class);
-        if (binarized == null) {
-          throw new AssertionError("Binarized sentences not built by parser");
-        }
         Tree collapsedUnary = transformer.transformTree(binarized);
         SentimentCostAndGradient scorer = new SentimentCostAndGradient(model, null);
         scorer.forwardPropagateTree(collapsedUnary);
