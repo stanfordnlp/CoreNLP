@@ -3,29 +3,38 @@ package edu.stanford.nlp.patterns.surface;
 import java.io.Serializable;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.StringUtils;
 
 public class SurfacePattern implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  String prevContext;
-  String nextContext;
+  String[] prevContext;
+  String[] nextContext;
+  String prevContextStr = "", nextContextStr = "";
   PatternToken token;
   String originalPrevStr, originalNextStr;
 
   public static boolean insertModifierWildcard = false;
 
-  public SurfacePattern(String prevContext, PatternToken token,
-      String nextContext, String originalPrevStr, String originalNextStr) {
+  public SurfacePattern(String[] prevContext, PatternToken token,
+      String[] nextContext, String originalPrevStr, String originalNextStr) {
     this.prevContext = prevContext;
     this.nextContext = nextContext;
+
+    if (prevContext != null)
+      prevContextStr = StringUtils.join(prevContext, " ");
+
+    if (nextContext != null)
+      nextContextStr = StringUtils.join(nextContext, " ");
+
     this.token = token;
     this.originalNextStr = originalNextStr;
     this.originalPrevStr = originalPrevStr;
   }
 
   public static String getContextStr(CoreLabel tokenj,
-      boolean useLemmaContextTokens, boolean lowerCaseContext ) {
+      boolean useLemmaContextTokens, boolean lowerCaseContext) {
     String str = "";
 
     if (useLemmaContextTokens) {
@@ -49,12 +58,14 @@ public class SurfacePattern implements Serializable {
   }
 
   public String toString() {
-    return (prevContext + " " + token.getTokenStr() + " " + nextContext).trim();
+    return (prevContextStr + " " + token.getTokenStr() + " " + nextContextStr)
+        .trim();
   }
 
   public String toString(String morePreviousPattern, String moreNextPattern) {
-    return (prevContext + " " + morePreviousPattern + " " + token.getTokenStr()
-        + " " + moreNextPattern + " " + nextContext).trim();
+    return (prevContextStr + " " + morePreviousPattern + " "
+        + token.getTokenStr() + " " + moreNextPattern + " " + nextContextStr)
+        .trim();
   }
 
   // returns 0 is exactly equal, Integer.MAX_VALUE if the contexts are not same.
@@ -64,7 +75,8 @@ public class SurfacePattern implements Serializable {
   public int equalContext(SurfacePattern p) {
     if (p.equals(this))
       return 0;
-    if (prevContext.equals(p.prevContext) && nextContext.equals(p.nextContext)) {
+    if (prevContextStr.equals(p.prevContextStr)
+        && nextContextStr.equals(p.nextContextStr)) {
       int this_restriction = 0, p_restriction = 0;
       if (this.token.useTag)
         this_restriction++;
@@ -96,7 +108,8 @@ public class SurfacePattern implements Serializable {
   }
 
   public String toStringToWrite() {
-    return prevContext + "##" + token.toStringToWrite() + "##" + nextContext;
+    return prevContextStr + "##" + token.toStringToWrite() + "##"
+        + nextContextStr;
   }
 
   public String toStringSimple() {

@@ -1173,8 +1173,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         if (alreadyIdentifiedPatterns != null) {
           for (SurfacePattern p : alreadyIdentifiedPatterns) {
 
-            if (pat.nextContext.contains(p.nextContext)
-                && pat.prevContext.contains(p.prevContext)) {
+            if (pat.nextContextStr.contains(p.nextContextStr)
+                && pat.prevContextStr.contains(p.prevContextStr)) {
               Redwood
                   .log(
                       "extremePatDebug",
@@ -1202,9 +1202,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       if (!notchoose) {
         for (SurfacePattern p : chosenPat.keySet()) {
-
-          if (pat.nextContext.contains(p.nextContext)
-              && pat.prevContext.contains(p.prevContext)) {
+          if (pat.nextContextStr.contains(p.nextContextStr)
+              && pat.prevContextStr.contains(p.prevContextStr)) {
             Redwood
                 .log(
                     "extremePatDebug",
