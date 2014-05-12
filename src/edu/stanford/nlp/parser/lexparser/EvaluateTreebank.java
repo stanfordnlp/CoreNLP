@@ -29,7 +29,6 @@ import edu.stanford.nlp.parser.metrics.Evalb;
 import edu.stanford.nlp.parser.metrics.EvalbByCat;
 import edu.stanford.nlp.parser.metrics.FilteredEval;
 import edu.stanford.nlp.parser.metrics.LeafAncestorEval;
-import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.TaggingEval;
 import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
 import edu.stanford.nlp.trees.LeftHeadFinder;
@@ -57,7 +56,6 @@ public class EvaluateTreebank {
   // private final Lexicon lex;
 
   List<Eval> extraEvals = null;
-  List<ParserQueryEval> parserQueryEvals = null;
 
   private final boolean summary;
   private final boolean tsv;
@@ -118,7 +116,6 @@ public class EvaluateTreebank {
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
 
     this.extraEvals = pqFactory.getExtraEvals();
-    this.parserQueryEvals = pqFactory.getParserQueryEvals();
 
     // this.lex = lex;
     this.pqFactory = pqFactory;
@@ -552,11 +549,6 @@ public class EvaluateTreebank {
             eval.evaluate(treeFact, transGoldTree, pwErr);
           }
         }
-        if (parserQueryEvals != null) {
-          for (ParserQueryEval eval : parserQueryEvals) {
-            eval.evaluate(pq, transGoldTree, pwErr);
-          }
-        }
         if (op.testOptions.evalb) {
           // empty out scores just in case
           nanScores(tree);
@@ -716,12 +708,6 @@ public class EvaluateTreebank {
     //Close files (if necessary)
     if(pwFileOut != null) pwFileOut.close();
     if(pwStats != null) pwStats.close();
-
-    if (parserQueryEvals != null) {
-      for (ParserQueryEval parserQueryEval : parserQueryEvals) {
-        parserQueryEval.display(false, pwErr);
-      }
-    }
 
     return f1;
   } // end testOnTreebank()
