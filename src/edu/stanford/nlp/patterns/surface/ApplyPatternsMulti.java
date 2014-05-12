@@ -21,9 +21,10 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 
 
-public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> {
+public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> {
   String label;
   Map<TokenSequencePattern, SurfacePattern> patterns;
   List<String> sentids;
@@ -51,9 +52,10 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
   }
 
   @Override
-  public Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>> call() throws Exception {
+  public Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> call() throws Exception {
     
-    CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
+    //CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
+    CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>();
 
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> allFreq = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
 
@@ -65,7 +67,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
         int s = m.start("$term");
         int e = m.end("$term");
         SurfacePattern matchedPat = patterns.get(m.pattern());
-        
+        matchedTokensByPat.add(matchedPat, new Triple<String, Integer, Integer>(sentid, s, e));
         String phrase = "";
         String phraseLemma = "";
         boolean useWordNotLabeled = false;
@@ -73,9 +75,9 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
         for (int i = s; i < e; i++) {
           CoreLabel l = sent.get(i);
           l.set(PatternsAnnotations.MatchedPattern.class, true);
-          if (restrictToMatched) {
-            tokensMatchedPattern.add(sentid, i);
-          }
+          // if (restrictToMatched) {
+          // tokensMatchedPattern.add(sentid, i);
+          // }
           for (Entry<Class, Object> ig : constVars.ignoreWordswithClassesDuringSelection.get(label).entrySet()) {
             if (l.containsKey(ig.getKey()) && l.get(ig.getKey()).equals(ig.getValue())) {
               doNotUse = true;
@@ -155,7 +157,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
 //      }
     }
 
-    return new Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>(allFreq, tokensMatchedPattern);
+    return new Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
   }
 
   boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex, Set<String> ignoreWords) {

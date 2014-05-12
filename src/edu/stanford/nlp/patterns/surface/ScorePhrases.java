@@ -163,7 +163,7 @@ public class ScorePhrases {
       Counter<SurfacePattern> patternsLearnedThisIter,
       Counter<SurfacePattern> allSelectedPatterns,
       Counter<String> dictOddsWordWeights,
-      CollectionValuedMap<String, Integer> tokensMatchedPatterns,
+      CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> tokensMatchedPatterns,
       Counter<String> scoreForAllWordsThisIteration,
       TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
@@ -211,7 +211,7 @@ public class ScorePhrases {
       Counter<SurfacePattern> patternsLearnedThisIter,
       Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, Counter<String> dictOddsWordWeights,
-      CollectionValuedMap<String, Integer> tokensMatchedPatterns,
+      CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat,
       Counter<String> scoreForAllWordsThisIteration,
       TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
@@ -259,12 +259,12 @@ public class ScorePhrases {
       ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
       // Redwood.log(Redwood.FORCE, channelNameLogger, "keyset size is " +
       // keyset.size());
-      List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>>>();
+      List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>>();
       for (int i = 0; i < constVars.numThreads; i++) {
         // Redwood.log(Redwood.FORCE, channelNameLogger, "assigning from " + i *
         // num + " till " + Math.min(keyset.size(), (i + 1) * num));
 
-        Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> task = null;
+        Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> task = null;
         Map<TokenSequencePattern, SurfacePattern> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , SurfacePattern>();
         for(SurfacePattern p : patternsLearnedThisIter.keySet()){
           TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString());
@@ -278,18 +278,18 @@ public class ScorePhrases {
             constVars.removeStopWordsFromSelectedPhrases,
             constVars.removePhrasesWithStopWords, constVars);
 
-        Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> submit = executor
+        Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> submit = executor
             .submit(task);
         list.add(submit);
       }
 
       // // Now retrieve the result
-      for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> future : list) {
-        Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>> result = future
+      for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> future : list) {
+        Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
             .get();
 
         wordsandLemmaPatExtracted.addAll(result.first());
-        tokensMatchedPatterns.addAll(result.second());
+        matchedTokensByPat.addAll(result.second());
       }
       executor.shutdown();
     }
@@ -359,7 +359,7 @@ public class ScorePhrases {
                   "%1$s:%2$.2f", "\t"));
 
       if (justificationDirJson != null && !justificationDirJson.isEmpty()) {
-        IOUtils.ensureDir(new File(justificationDirJson + "/" + label));
+        IOUtils.ensureDir(new File(justificationDirJson + "/" + identifier +"/"+ label));
         TwoDimensionalCounter<String, String> reasonForWords = new TwoDimensionalCounter<String, String>();
         for (String word : finalwords.keySet()) {
           for (SurfacePattern l : wordsPatExtracted.getCounter(word).keySet()) {
@@ -368,8 +368,8 @@ public class ScorePhrases {
             }
           }
         }
-        String filename = justificationDirJson + "/" + label + "/" + identifier
-            + "_words" + ".json";
+        String filename = justificationDirJson + "/" + identifier + "/" + label
+            + "/words" + ".json";
 
         // the json object is an array corresponding to each iteration - of list
         // of objects,

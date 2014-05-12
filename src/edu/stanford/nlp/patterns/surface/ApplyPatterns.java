@@ -16,9 +16,11 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 
-
-public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> {
+public class ApplyPatterns
+    implements
+    Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>,CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> {
   String label;
   Counter<SurfacePattern> patterns;
   List<String> sentids;
@@ -30,8 +32,11 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
   ConstantsAndVariables constVars;
   Set<String> ignoreWords;
 
-  public ApplyPatterns(List<String> sentids, Counter<SurfacePattern> patterns, Set<String> commonEngWords, Set<String> alreadyIdentifiedWords,
-      boolean restrictToMatched, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatterns(List<String> sentids, Counter<SurfacePattern> patterns,
+      Set<String> commonEngWords, Set<String> alreadyIdentifiedWords,
+      boolean restrictToMatched, String label,
+      boolean removeStopWordsFromSelectedPhrases,
+      boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.patterns = patterns;
     this.alreadyIdentifiedWords = alreadyIdentifiedWords;
     this.restrictToMatched = restrictToMatched;
@@ -43,17 +48,20 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
   }
 
   @Override
-  public Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>> call() throws Exception {
-    CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
+  public Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> call()
+      throws Exception {
+    // CollectionValuedMap<String, Integer> tokensMatchedPattern = new
+    // CollectionValuedMap<String, Integer>();
 
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> allFreq = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
-
+    CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>();
     for (String sentid : sentids) {
       List<CoreLabel> sent = Data.sents.get(sentid);
       for (SurfacePattern pat : patterns.keySet()) {
         String patternStr = pat.toString();
 
-        TokenSequencePattern p = TokenSequencePattern.compile(constVars.env.get(label), patternStr);
+        TokenSequencePattern p = TokenSequencePattern.compile(
+            constVars.env.get(label), patternStr);
         if (pat == null || p == null)
           throw new RuntimeException("why is the pattern " + pat + " null?");
 
@@ -70,21 +78,28 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
           for (int i = s; i < e; i++) {
             CoreLabel l = sent.get(i);
             l.set(PatternsAnnotations.MatchedPattern.class, true);
-            if (restrictToMatched) {
-              tokensMatchedPattern.add(sentid, i);
-            }
-            for (Entry<Class, Object> ig : constVars.ignoreWordswithClassesDuringSelection.get(label).entrySet()) {
-              if (l.containsKey(ig.getKey()) && l.get(ig.getKey()).equals(ig.getValue())) {
+            // if (restrictToMatched) {
+            // tokensMatchedPattern.add(sentid, i);
+            // }
+            for (Entry<Class, Object> ig : constVars.ignoreWordswithClassesDuringSelection
+                .get(label).entrySet()) {
+              if (l.containsKey(ig.getKey())
+                  && l.get(ig.getKey()).equals(ig.getValue())) {
                 doNotUse = true;
               }
             }
-            boolean containsStop = containsStopWord(l, constVars.getCommonEngWords(), constVars.ignoreWordRegex, ignoreWords);
+            boolean containsStop = containsStopWord(l,
+                constVars.getCommonEngWords(), constVars.ignoreWordRegex,
+                ignoreWords);
             if (removePhrasesWithStopWords && containsStop) {
               doNotUse = true;
             } else {
               if (!containsStop || !removeStopWordsFromSelectedPhrases) {
-                
-                if (label == null || l.get(constVars.answerClass.get(label)) == null || !l.get(constVars.answerClass.get(label)).equals(label.toString())) {
+
+                if (label == null
+                    || l.get(constVars.answerClass.get(label)) == null
+                    || !l.get(constVars.answerClass.get(label)).equals(
+                        label.toString())) {
                   useWordNotLabeled = true;
                 }
                 phrase += " " + l.word();
@@ -93,24 +108,35 @@ public class ApplyPatterns implements Callable<Pair<TwoDimensionalCounter<Pair<S
               }
             }
           }
-          if (!doNotUse && useWordNotLabeled) {
-            phrase = phrase.trim();
-            phraseLemma = phraseLemma.trim();
-            allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), pat, 1.0);
+          if (!doNotUse) {
+            matchedTokensByPat.add(pat, new Triple<String, Integer, Integer>(
+                sentid, s, e -1 ));
+            if (useWordNotLabeled) {
+              phrase = phrase.trim();
+              phraseLemma = phraseLemma.trim();
+              allFreq.incrementCount(new Pair<String, String>(phrase,
+                  phraseLemma), pat, 1.0);
+            }
           }
         }
       }
     }
 
-    return new Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>(allFreq, tokensMatchedPattern);
+    return new Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>(
+        allFreq, matchedTokensByPat);
   }
 
-  boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex, Set<String> ignoreWords) {
+  boolean containsStopWord(CoreLabel l, Set<String> commonEngWords,
+      Pattern ignoreWordRegex, Set<String> ignoreWords) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 
-    if ((commonEngWords.contains(l.lemma()) || commonEngWords.contains(l.word())) || (ignoreWordRegex != null && ignoreWordRegex.matcher(l.lemma()).matches())
-        || (ignoreWords !=null && (ignoreWords.contains(l.lemma()) || ignoreWords.contains(l.word())))) {
+    if ((commonEngWords.contains(l.lemma()) || commonEngWords
+        .contains(l.word()))
+        || (ignoreWordRegex != null && ignoreWordRegex.matcher(l.lemma())
+            .matches())
+        || (ignoreWords != null && (ignoreWords.contains(l.lemma()) || ignoreWords
+            .contains(l.word())))) {
       // useWordResultCache.putIfAbsent(l.word(), false);
       return true;
     }

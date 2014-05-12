@@ -485,7 +485,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Properties props = new Properties();
     if (useTargetNERRestriction) {
       props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
-    } else
+    } else 
       props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
 
     props
@@ -1262,10 +1262,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     // if (deno != null) {
     if (justificationDirJson != null && !justificationDirJson.isEmpty()) {
-      IOUtils.ensureDir(new File(justificationDirJson + "/" + label));
+      IOUtils.ensureDir(new File(justificationDirJson + "/" + identifier + "/" + label));
 
-      String filename = this.justificationDirJson + "/" + label + "/"
-          + identifier + "_patterns" + ".json";
+      String filename = this.justificationDirJson + "/" + identifier + "/"
+          + label + "/patterns" + ".json";
 
       JsonArrayBuilder obj = Json.createArrayBuilder();
       if (writtenPatInJustification.containsKey(label)
@@ -1292,10 +1292,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           neg.add(w);
         for (String w : unlabWords.get(pat.first()))
           unlab.add(w);
+
         o.add("Positive", pos);
         o.add("Negative", neg);
         o.add("Unlabeled", unlab);
         o.add("Score", pat.second());
+
         objThisIter.add(pat.first().toStringSimple(), o);
       }
       obj.add(objThisIter.build());
@@ -1604,10 +1606,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   // TODO: this right now doesn't work for matchPatterns because of
   // DictAnnotationDTorSC. we are not setting DT, SC thing in the test sentences
   @SuppressWarnings({ "unchecked" })
-  public void labelWords(String label, Map<String, List<CoreLabel>> sents,
-      Set<String> identifiedWords, Set<SurfacePattern> patterns,
-      String outFile, CollectionValuedMap<String, Integer> tokensMatchedPatterns)
+  public void labelWords(
+      String label,
+      Map<String, List<CoreLabel>> sents,
+      Set<String> identifiedWords,
+      Set<SurfacePattern> patterns,
+      String outFile,
+      CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat)
       throws IOException {
+
+    CollectionValuedMap<String, Integer> tokensMatchedPatterns = null;
+    if (restrictToMatched) {
+      tokensMatchedPatterns = new CollectionValuedMap<String, Integer>();
+      for (Entry<SurfacePattern, Collection<Triple<String, Integer, Integer>>> en : matchedTokensByPat
+          .entrySet()) {
+        for (Triple<String, Integer, Integer> en2 : en.getValue()) {
+          for (int i = en2.second(); i <= en2.third(); i++) {
+            tokensMatchedPatterns.add(en2.first(), i);
+          }
+        }
+      }
+    }
 
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
 
@@ -1681,13 +1700,19 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, Counter<String>> p0Set,
       Map<String, Counter<String>> externalWordWeights, String wordsOutputFile,
       String sentsOutFile, String patternsOutFile,
-      Map<String, Set<SurfacePattern>> ignorePatterns, String feedbackfile)
+      Map<String, Set<SurfacePattern>> ignorePatterns)
       throws ClassNotFoundException, IOException, InterruptedException,
       ExecutionException {
 
+    Map<String, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> matchedTokensByPatAllLabels = new HashMap<String, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>();
+
     Map<String, Set<String>> ignoreWordsAll = new HashMap<String, Set<String>>();
-    if (this.useOtherLabelsWordsasNegative) {
-      for (String label : constVars.getLabelDictionary().keySet()) {
+    for (String label : constVars.getLabelDictionary().keySet()) {
+      matchedTokensByPatAllLabels
+          .put(
+              label,
+              new CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>());
+      if (this.useOtherLabelsWordsasNegative) {
         Set<String> w = new HashSet<String>();
         for (Entry<String, Set<String>> en : constVars.getLabelDictionary()
             .entrySet()) {
@@ -1723,8 +1748,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             p0Set != null ? p0Set.get(label) : null,
             externalWordWeights != null ? externalWordWeights.get(label) : null,
             wordsout, sentout, patout,
-            ignorePatterns != null ? ignorePatterns.get(label) : null,
-            feedbackfile, 1, ignoreWordsAll.get(label));
+            ignorePatterns != null ? ignorePatterns.get(label) : null, 1,
+            ignoreWordsAll.get(label), matchedTokensByPatAllLabels.get(label));
 
         learnedWordsThisIter.put(label, learnedPatWords4label.second());
         if (learnedPatWords4label.first().size() > 0) {
@@ -1749,13 +1774,67 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     }
 
-    System.out.println("\n\nAll patterns learned:");
-    for (Entry<String, Counter<SurfacePattern>> en : this.learnedPatterns.entrySet()) {
-      System.out.println(en.getKey() + ":\t\t" + StringUtils.join(en.getValue().keySet(),"\n")
-          + "\n\n");
+    if (justificationDirJson != null && !justificationDirJson.isEmpty()) {
+      Redwood.log(Redwood.FORCE, "Writing justification files");
+      Set<String> allMatchedSents = new HashSet<String>();
+
+      for (String label : constVars.getLabelDictionary().keySet()) {
+        CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> tokensMatchedPat = matchedTokensByPatAllLabels
+            .get(label);
+        IOUtils.ensureDir(new File(justificationDirJson + "/" + identifier+"/"+label));
+
+        String matchedtokensfilename = this.justificationDirJson + "/" + identifier + "/"+ label
+            + "/tokensmatchedpatterns" + ".json";
+        JsonObjectBuilder pats = Json.createObjectBuilder();
+        for (Entry<SurfacePattern, Collection<Triple<String, Integer, Integer>>> en : tokensMatchedPat
+            .entrySet()) {
+          CollectionValuedMap<String, Pair<Integer, Integer>> matchedStrs = new CollectionValuedMap<String, Pair<Integer, Integer>>();
+          for (Triple<String, Integer, Integer> en2 : en.getValue()) {
+            allMatchedSents.add(en2.first());
+            matchedStrs.add(en2.first(),
+                new Pair<Integer, Integer>(en2.second(), en2.third()));
+          }
+
+          JsonObjectBuilder senttokens = Json.createObjectBuilder();
+          for (Entry<String, Collection<Pair<Integer, Integer>>> sen : matchedStrs
+              .entrySet()) {
+            JsonArrayBuilder obj = Json.createArrayBuilder();
+            for (Pair<Integer, Integer> sen2 : sen.getValue()) {
+              JsonArrayBuilder startend = Json.createArrayBuilder();
+              startend.add(sen2.first());
+              startend.add(sen2.second());
+              obj.add(startend);
+            }
+            senttokens.add(sen.getKey(), obj);
+          }
+          pats.add(en.getKey().toStringSimple(), senttokens);
+        }
+        IOUtils.writeStringToFile(pats.build().toString(),
+            matchedtokensfilename, "utf8");
+
+        // Writing the sentence json file -- tokens for each sentence
+        JsonObjectBuilder senttokens = Json.createObjectBuilder();
+        for (String sentId : allMatchedSents) {
+          JsonArrayBuilder sent = Json.createArrayBuilder();
+          for (CoreLabel l : Data.sents.get(sentId)) {
+            sent.add(l.word());
+          }
+          senttokens.add(sentId, sent);
+        }
+        String sentfilename = this.justificationDirJson + "/" + identifier
+            + "/sentences" + ".json";
+        IOUtils.writeStringToFile(senttokens.build().toString(), sentfilename, "utf8");
+      }
+
     }
 
-    
+    System.out.println("\n\nAll patterns learned:");
+    for (Entry<String, Counter<SurfacePattern>> en : this.learnedPatterns
+        .entrySet()) {
+      System.out.println(en.getKey() + ":\t\t"
+          + StringUtils.join(en.getValue().keySet(), "\n") + "\n\n");
+    }
+
     System.out.println("\n\nAll words learned:");
     for (Entry<String, Counter<String>> en : this.learnedWords.entrySet()) {
       System.out.println(en.getKey() + ":\t\t" + en.getValue().keySet()
@@ -1765,12 +1844,19 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   public Pair<Counter<SurfacePattern>, Counter<String>> iterateExtractApply4Label(
-      String label, SurfacePattern p0, Counter<String> p0Set,
-      Counter<String> dictOddsWordWeights, String wordsOutputFile,
-      String sentsOutFile, String patternsOutFile,
-      Set<SurfacePattern> ignorePatterns, String feedbackfile, int numIter,
-      Set<String> ignoreWords) throws IOException, InterruptedException,
-      ExecutionException, ClassNotFoundException {
+      String label,
+      SurfacePattern p0,
+      Counter<String> p0Set,
+      Counter<String> dictOddsWordWeights,
+      String wordsOutputFile,
+      String sentsOutFile,
+      String patternsOutFile,
+      Set<SurfacePattern> ignorePatterns,
+      int numIter,
+      Set<String> ignoreWords,
+      CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat)
+      throws IOException, InterruptedException, ExecutionException,
+      ClassNotFoundException {
 
     if (!learnedPatterns.containsKey(label)) {
       learnedPatterns.put(label, new ClassicCounter<SurfacePattern>());
@@ -1778,8 +1864,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (!learnedWords.containsKey(label)) {
       learnedWords.put(label, new ClassicCounter<String>());
     }
-
-    CollectionValuedMap<String, Integer> tokensMatchedPatterns = new CollectionValuedMap<String, Integer>();
 
     BufferedWriter wordsOutput = null;
     if (wordsOutputFile != null)
@@ -1800,7 +1884,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Counter<String> scoreForAllWordsThisIteration = new ClassicCounter<String>();
       identifiedWords.addAll(scorePhrases.learnNewPhrases(label, Data.sents,
           this.patternsForEachToken, patterns, learnedPatterns.get(label),
-          dictOddsWordWeights, tokensMatchedPatterns,
+          dictOddsWordWeights, matchedTokensByPat,
           scoreForAllWordsThisIteration, terms, wordsPatExtracted.get(label),
           currentPatternWeights.get(label), this.patternsandWords.get(label),
           this.allPatternsandWords.get(label), identifier, ignoreWords));
@@ -1808,7 +1892,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (usePatternResultAsLabel)
         if (constVars.getLabelDictionary().containsKey(label))
           labelWords(label, Data.sents, identifiedWords.keySet(),
-              patterns.keySet(), sentsOutFile, tokensMatchedPatterns);
+              patterns.keySet(), sentsOutFile, matchedTokensByPat);
         else
           throw new RuntimeException("why is the answer label null?");
       learnedWords.get(label).addAll(identifiedWords);
@@ -1843,7 +1927,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (patternsOutFile != null)
       this.writePatternsToFile(learnedPatterns.get(label), patternsOutFile);
 
-    return new Pair(patterns, identifiedWords);
+    return new Pair<Counter<SurfacePattern>, Counter<String>>(patterns,
+        identifiedWords);
   }
 
   void writePatternsToFile(Counter<SurfacePattern> pattern, String outFile)
@@ -2087,11 +2172,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       g.extremedebug = Boolean.parseBoolean(props.getProperty("extremedebug"));
 
-      String feedbackfile = props.getProperty("feedbackFile");
       System.out.println("Already learned words are "
           + g.getLearnedWords("onelabel"));
       g.iterateExtractApply(p0, p0Set, externalWordWeights, wordsOutputFile,
-          sentsOutFile, patternOutFile, ignorePatterns, feedbackfile);
+          sentsOutFile, patternOutFile, ignorePatterns);
 
       if (saveInstance) {
         System.out.println("Saving the instance to " + outputSavedInstanceFile);

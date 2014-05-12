@@ -289,7 +289,7 @@ public class CreatePatterns {
             // nextTokens.add("[{" + label + ":"
             // + tokenj.get(constVars.answerClass.get(label)).toString()
             // + "}]");
-            originalNextStr += strOriginal;
+            originalNextStr += " " + strOriginal;
             // originalNextStr += " "
             // + tokenj.get(constVars.answerClass.get(label)).toString();
           } else if (tokenj.word().startsWith("http")) {
