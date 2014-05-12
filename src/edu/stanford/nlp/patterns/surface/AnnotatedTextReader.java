@@ -33,7 +33,7 @@ public class AnnotatedTextReader {
       BufferedReader reader,
       Set<String> categoriesAllowed,
       Map<String, Class<? extends TypesafeMap.Key<String>>> setClassForTheseLabels,
-      boolean setGoldClass, boolean splitOnPunct, boolean lowercase)
+      boolean setGoldClass, boolean splitOnPunct, boolean lowercase, String sentIDprefix)
       throws IOException {
 
     Pattern startingLabelToken = Pattern.compile("<("
@@ -58,7 +58,7 @@ public class AnnotatedTextReader {
         text = t[0];
         id = String.valueOf(lineNum);
       }
-
+      id = sentIDprefix + id;
       DocumentPreprocessor dp = new DocumentPreprocessor(new StringReader(text));
       PTBTokenizerFactory<CoreLabel> tokenizerFactory = PTBTokenizerFactory
           .newCoreLabelTokenizerFactory("ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");

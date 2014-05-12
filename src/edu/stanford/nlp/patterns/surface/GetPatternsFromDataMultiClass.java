@@ -4,9 +4,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -27,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -37,6 +40,7 @@ import javax.json.JsonValue;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
@@ -86,7 +90,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * (or txt) and ser, where the serialized file is of the type Map<String,
  * List<CoreLabel>>.
  * <p>
- * <code>file</code>: (Required) Input file (default assumed text)
+ * <code>file</code>: (Required) Input file(s) (default assumed text). Can be
+ * one or more of (concatenated by comma or semi-colon): file, directory, files
+ * with regex in the filename (for example: "mydir/health-.*-processed.txt")
  * <p>
  * <code>seedWordsFiles</code>: (Required)
  * label1,file_seed_words1;label2,file_seed_words2;... where file_seed_words are
@@ -592,7 +598,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public static Map<String, List<CoreLabel>> runPOSNEROnTokens(
       List<CoreMap> sentsCM, String posModelPath,
-      boolean useTargetNERRestriction) {
+      boolean useTargetNERRestriction, String prefix) {
     Annotation doc = new Annotation(sentsCM);
     Properties props = new Properties();
     if (useTargetNERRestriction) {
@@ -613,32 +619,36 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
 
-      sents.put(s.get(CoreAnnotations.DocIDAnnotation.class),
+      sents.put(prefix + s.get(CoreAnnotations.DocIDAnnotation.class),
           s.get(CoreAnnotations.TokensAnnotation.class));
     }
 
     return sents;
   }
 
+  static StanfordCoreNLP pipeline = null;
+
   public static Map<String, List<CoreLabel>> tokenize(String text,
-      String posModelPath, boolean lowercase, boolean useTargetNERRestriction)
-      throws InterruptedException, ExecutionException, IOException {
-    Properties props = new Properties();
-    if (useTargetNERRestriction) {
-      props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
-    } else
-      props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+      String posModelPath, boolean lowercase, boolean useTargetNERRestriction,
+      String sentIDPrefix) throws InterruptedException, ExecutionException,
+      IOException {
+    if (pipeline == null) {
+      Properties props = new Properties();
+      if (useTargetNERRestriction) {
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
+      } else
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
 
-    props
-        .put(
-            "tokenize.options",
-            "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
+      props
+          .put(
+              "tokenize.options",
+              "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
-    if (posModelPath != null) {
-      props.setProperty("pos.model", posModelPath);
+      if (posModelPath != null) {
+        props.setProperty("pos.model", posModelPath);
+      }
+      pipeline = new StanfordCoreNLP(props);
     }
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
     if (lowercase)
       text = text.toLowerCase();
 
@@ -648,8 +658,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     int i = -1;
     for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
       i++;
-      sents.put(Integer.toString(i),
-          s.get(CoreAnnotations.TokensAnnotation.class));
+      sents
+          .put(sentIDPrefix + i, s.get(CoreAnnotations.TokensAnnotation.class));
     }
 
     return sents;
@@ -840,10 +850,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           i++;
           if (labels[i]) {
             l.set(labelClass, label);
-            Redwood.log(Redwood.DBG, channelNameLogger, "labeling " + l.word()
-                + " or its lemma " + l.lemma() + " as " + label
-                + " because of the dict phrases "
-                + (Set<String>) matchedPhrases.get(i));
+            Redwood.log("extremePatDebug", channelNameLogger,
+                "labeling " + l.word() + " or its lemma " + l.lemma() + " as "
+                    + label + " because of the dict phrases "
+                    + (Set<String>) matchedPhrases.get(i));
           } else
             l.set(labelClass, constVars.backgroundSymbol);
           if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
@@ -1797,7 +1807,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           if (restrictToMatched) {
             for (int j = 0; j < ph.length; j++) {
               if (!tokensMatchedPatterns.get(sentEn.getKey()).contains(idx + j)) {
-                Redwood.log(Redwood.DBG, "not labeling "
+                Redwood.log("extremePatDebug", "not labeling "
                     + sentEn.getValue().get(idx + j).word());
                 donotuse = true;
                 break;
@@ -2493,6 +2503,29 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         (Counters.add(Counters.scale(precision, betasq), recall)));
   }
 
+  public static List<File> getAllFiles(String file) {
+    List<File> allFiles = new ArrayList<File>();
+    for (String tokfile : file.split("[,;]")) {
+      File filef = new File(tokfile);
+      String ext = ".*";
+      File dir = null;
+      if (filef.isDirectory())
+        dir = filef;
+      else {
+        dir = filef.getParentFile();
+        ext = filef.getName();
+      }
+
+      RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
+
+      File[] files = dir.listFiles(fileFilter);
+      for (int i = 0; i < files.length; i++) {
+        allFiles.add(files[i]);
+      }
+    }
+    return allFiles;
+  }
+
   @SuppressWarnings({ "rawtypes" })
   public static void main(String[] args) {
     try {
@@ -2527,81 +2560,121 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
       Map<String, Set<String>> seedWords = new HashMap<String, Set<String>>();
 
-      if (readFromSavedInstance) {
-        System.out.println("Reading the GetPatternsFromData instance from "
-            + inputSavedInstanceFile);
-        g = IOUtils.readObjectFromFile(inputSavedInstanceFile);
-      } else {
-        String seedWordsFiles = props.getProperty("seedWordsFiles");
-        if (seedWordsFiles == null) {
-          throw new RuntimeException(
-              "Needs both seedWordsFiles and file parameters to run this class!\nseedWordsFiles has format: label1,filewithlistofwords1;label2,filewithlistofwords2;...");
+      String seedWordsFiles = props.getProperty("seedWordsFiles");
+      if (seedWordsFiles == null) {
+        throw new RuntimeException(
+            "Needs both seedWordsFiles and file parameters to run this class!\nseedWordsFiles has format: label1,filewithlistofwords1;label2,filewithlistofwords2;...");
+      }
+      for (String seedFile : seedWordsFiles.split(";")) {
+        String[] t = seedFile.split(",");
+        String label = t[0];
+        String seedWordsFile = t[1];
+        Set<String> seedWords4Label = new HashSet<String>();
+        for (String line : IOUtils.readLines(seedWordsFile)) {
+          line = line.trim();
+          if (line.isEmpty() || line.startsWith("#"))
+            continue;
+          seedWords4Label.add(line);
         }
-        for (String seedFile : seedWordsFiles.split(";")) {
-          String[] t = seedFile.split(",");
+        seedWords.put(label, seedWords4Label);
+        System.out.println("Number of seed words for label " + label + " is "
+            + seedWords4Label.size());
+      }
+
+      Map<String, Class> answerClasses = new HashMap<String, Class>();
+      String ansClasses = props.getProperty("answerClasses");
+      if (ansClasses != null) {
+        for (String l : ansClasses.split(";")) {
+          String[] t = l.split(",");
           String label = t[0];
-          String seedWordsFile = t[1];
-          Set<String> seedWords4Label = new HashSet<String>();
-          for (String line : IOUtils.readLines(seedWordsFile)) {
-            line = line.trim();
-            if (line.isEmpty() || line.startsWith("#"))
-              continue;
-            seedWords4Label.add(line);
-          }
-          seedWords.put(label, seedWords4Label);
-          System.out.println("Number of seed words for label " + label + " is "
-              + seedWords4Label.size());
+          String cl = t[1];
+          Class answerClass = ClassLoader.getSystemClassLoader().loadClass(cl);
+          answerClasses.put(label, answerClass);
         }
+      }
 
-        Map<String, Class> answerClasses = new HashMap<String, Class>();
-        String ansClasses = props.getProperty("answerClasses");
-        if (ansClasses != null) {
-          for (String l : ansClasses.split(";")) {
-            String[] t = l.split(",");
-            String label = t[0];
-            String cl = t[1];
-            Class answerClass = ClassLoader.getSystemClassLoader()
-                .loadClass(cl);
-            answerClasses.put(label, answerClass);
-          }
-        }
+      Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
 
-        Map<String, List<CoreLabel>> sents = null;
+      String file = props.getProperty("file");
 
-        String file = props.getProperty("file");
-        String posModelPath = props.getProperty("posModelPath");
-        boolean lowercase = Boolean.parseBoolean(props
-            .getProperty("lowercaseText"));
-        boolean useTargetNERRestriction = Boolean.parseBoolean(props
-            .getProperty("useTargetNERRestriction"));
-        boolean useContextNERRestriction = Boolean.parseBoolean(props
-            .getProperty("useContextNERRestriction"));
+      String posModelPath = props.getProperty("posModelPath");
+      boolean lowercase = Boolean.parseBoolean(props
+          .getProperty("lowercaseText"));
+      boolean useTargetNERRestriction = Boolean.parseBoolean(props
+          .getProperty("useTargetNERRestriction"));
+      boolean useContextNERRestriction = Boolean.parseBoolean(props
+          .getProperty("useContextNERRestriction"));
+
+      boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
+      boolean addEvalSentsToTrain = Boolean.parseBoolean(props
+          .getProperty("addEvalSentsToTrain"));
+      String evalFileWithGoldLabels = props
+          .getProperty("evalFileWithGoldLabels");
+
+      if (file == null
+          && (evalFileWithGoldLabels == null || addEvalSentsToTrain == false)) {
+        throw new RuntimeException("No training data! file is " + file
+            + " and evalFileWithGoldLabels is " + evalFileWithGoldLabels
+            + " and addEvalSentsToTrain is " + addEvalSentsToTrain);
+      }
+
+      // Read training file
+      if (file != null) {
+        List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
-          String text = IOUtils.stringFromFile(file);
-          sents = tokenize(text, posModelPath, lowercase,
-              useTargetNERRestriction | useContextNERRestriction);
+          for (File f : allFiles) {
+            String text = IOUtils.stringFromFile(f.getAbsolutePath());
+            sents.putAll(tokenize(text, posModelPath, lowercase,
+                useTargetNERRestriction | useContextNERRestriction, f.getName()
+                    + "-"));
+          }
         } else if (fileFormat.equalsIgnoreCase("ser")) {
-          sents = IOUtils.readObjectFromFile(file);
-        } else if (fileFormat.equals("textWithGoldLabels")) {
-          Map setClassForTheseLabels = new HashMap<String, Class>();
-          boolean splitOnPunct = Boolean.parseBoolean(props.getProperty(
-              "splitOnPunct", "true"));
-          List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
-              new BufferedReader(new FileReader(file)), seedWords.keySet(),
-              setClassForTheseLabels, true, splitOnPunct, lowercase);
-          sents = runPOSNEROnTokens(sentsCMs, posModelPath,
-              useTargetNERRestriction | useContextNERRestriction);
+          for (File f : allFiles)
+            sents.putAll((Map<String, List<CoreLabel>>) IOUtils
+                .readObjectFromFile(f));
         } else
           throw new RuntimeException(
               "Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
-        System.out.println("Processing # sents " + sents.size());
-        g = new GetPatternsFromDataMultiClass(props, sents, seedWords);
-        Execution.fillOptions(g, props);
-        g.extremedebug = Boolean
-            .parseBoolean(props.getProperty("extremedebug"));
-        g.setUp();
       }
+
+      // Read Evaluation File
+      Map<String, List<CoreLabel>> evalsents = new HashMap<String, List<CoreLabel>>();
+      if (evaluate) {
+        Map setClassForTheseLabels = new HashMap<String, Class>();
+        boolean splitOnPunct = Boolean.parseBoolean(props.getProperty(
+            "splitOnPunct", "true"));
+        List<File> allFiles = GetPatternsFromDataMultiClass
+            .getAllFiles(evalFileWithGoldLabels);
+        for (File f : allFiles) {
+          List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
+              new BufferedReader(new FileReader(f)), seedWords.keySet(),
+              setClassForTheseLabels, true, splitOnPunct, lowercase,
+              f.getName());
+          evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
+              useTargetNERRestriction | useContextNERRestriction, ""));
+        }
+        if (addEvalSentsToTrain) {
+          System.out.println("Adding " + evalsents.size()
+              + " eval sents to the training set");
+
+          sents.putAll(evalsents);
+
+        }
+      }
+
+      System.out.println("Processing # sents " + sents.size()
+          + " from file(s) " + file);
+
+      g = new GetPatternsFromDataMultiClass(props, sents, seedWords);
+
+      Execution.fillOptions(g, props);
+
+      g.extremedebug = Boolean.parseBoolean(props.getProperty("extremedebug"));
+      g.setUp();
+
+      System.out.println("Total number of training sentences "
+          + Data.sents.size());
 
       g.extremedebug = Boolean.parseBoolean(props.getProperty("extremedebug"));
 
@@ -2610,19 +2683,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile,
           patternOutFile, ignorePatterns);
 
-      if (saveInstance) {
-        System.out.println("Saving the instance to " + outputSavedInstanceFile);
-        IOUtils.writeObjectToFile(g, outputSavedInstanceFile);
-      }
-      boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
+      // if (saveInstance) {
+      // System.out.println("Saving the instance to " +
+      // outputSavedInstanceFile);
+      // IOUtils.writeObjectToFile(g, outputSavedInstanceFile);
+      // }
+
       if (evaluate) {
-        if (fileFormat.equals("textWithGoldLabels")) {
-          boolean evalPerEntity = Boolean.parseBoolean(props
-              .getProperty("evalPerEntity"));
-          g.evaluate(Data.sents, evalPerEntity);
-        } else
-          throw new RuntimeException(
-              "Evaluation is only imlemented for textWithGoldLabels");
+        boolean evalPerEntity = Boolean.parseBoolean(props
+            .getProperty("evalPerEntity"));
+        g.evaluate(evalsents, evalPerEntity);
         // String evalFile = props.getProperty("evalFile");
         // Map<String, List<CoreLabel>> evalSents =
         // g.loadJavaNLPAnnotatorLabeledFile(evalFile, props);
