@@ -61,6 +61,22 @@ import edu.stanford.nlp.util.logging.Redwood;
 /**
  * Given text and a seed list, this class gives more words like the seed words
  * by learning surface word patterns.
+ * <p>
+ * 
+ * The multi-threaded class (<code>nthread</code> parameter for number of threads) takes as
+ * input.
+ * 
+ * To use the default options, run
+ * <p>
+ * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -justificationDirJson output_directory (optional)</code>
+ * <p>
+ * Many flags are described in the class {@link ConstantsAndVariables}
+ * 
+ * <code>fileFormat</code>: (Optional) Default is text. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.<p>
+ * <code>file</code>: (Required) Input file (default assumed text) <p>
+ * <code>seedWordsFiles</code>: (Required) label1,file_seed_words1;label2,file_seed_words2;... where file_seed_words are files with list of seed words, one in each line<p>
+ * <code>justificationDirJson</code>: (Optional) output directory where visualization/output files are stored
+ * <p>For other flags, see individual comments for each flag.
  * 
  * @author Sonal Gupta (sonal@cs.stanford.edu)
  */
@@ -76,94 +92,176 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   String channelNameLogger = "patterns";
 
-  /*
+  /**
+   * 
+   * RlogF is from Riloff 1996, when R's denominator is (pos+neg+unlabeled)
+   * <p>
+   * RlogFPosNeg is when the R's denominator is just (pos+negative) examples
+   * <p>
+   * PosNegOdds is just the ratio of number of positive words to number of
+   * negative
+   * <p>
+   * PosNegUnlabOdds is just the ratio of number of positive words to number of
+   * negative (unlabeled words + negative)
+   * <p>
+   * RatioAll is pos/(neg+pos+unlabeled)
+   * <p>
+   * YanGarber02 is the modified version presented in
+   * "Unsupervised Learning of Generalized Names"
+   * <p>
+   * LOGREG is learning logisitic regression
+   * <p>
+   * SqrtAllRatio is the pattern scoring used in Gupta et al. JAMIA
+   * <p>
    * Below F1 and BPB based on paper
    * "Unsupervised Method for Automatics Construction of a disease dictionary..."
-   * RlogF is from Riloff 1996, when R's denominator is (pos+neg+unlabeled)
-   * RlogFPosNeg is when the R's denominator is just (pos+negative) examples;
-   * PosNegOdds is just the ratio of number of positive words to number of
-   * negative PosNegUnlabOdds is just the ratio of number of positive words to
-   * number of negative (unlabeled words + negative); RatioAll is
-   * pos/(neg+pos+unlabeled) YanGarber02 is the modified version presented in
-   * "Unsupervised Learning of Generalized Names" LOGREG is learning logisitic
-   * regression SqrtAllRatio is the pattern scoring used in Gupta et al. JAMIA
    * 2014 paper
    */
-  enum PatternScoring {
+  public enum PatternScoring {
     F1, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds, YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, SqrtAllRatio, LinICML03
 
   };
 
   enum WordScoring {
-    BPB, WEIGHTEDNORM, WEKA
+    BPB, WEIGHTEDNORM
   };
 
+  /**
+   * Maximum number of iterations to run
+   */
   @Option(name = "numIterationsForPatterns")
   public Integer numIterationsForPatterns = 10;
 
+  /**
+   * Maximum number of patterns learned in each iteration
+   */
   @Option(name = "numPatterns")
   public int numPatterns = 10;
 
+  /**
+   * Detailed review of why each pattern and phrase was extracted in the command
+   * line
+   */
   @Option(name = "justify")
   public boolean justify = false;
 
+  /**
+   * The output directory where the justifications of learning patterns and
+   * phrases would be saved. These are needed for visualization
+   */
   @Option(name = "justificationDirJson")
   public String justificationDirJson = null;
 
+  /**
+   * Maximum number of words in the target phrase
+   */
   @Option(name = "numWordsCompound")
   public int numWordsCompound = 2;
 
-  @Option(name = "normWordFreqInPattern")
-  public boolean normWordFreqInPattern = false;
+  /**
+   * If score for a pattern is square rooted
+   */
+  @Option(name = "sqrtPatScore")
+  public boolean sqrtPatScore = false;
 
+  /**
+   * Cached file of all patterns for all tokens
+   */
   @Option(name = "allPatternsFile")
   public String allPatternsFile = null;
 
+  /**
+   * If all patterns should be computed. Otherwise patterns are read from allPatternsFile
+   */
   @Option(name = "computeAllPatterns")
   public boolean computeAllPatterns = true;
 
-  @Option(name = "removeRedundantPatterns")
-  public boolean removeRedundantPatterns = true;
+//  @Option(name = "removeRedundantPatterns")
+//  public boolean removeRedundantPatterns = true;
 
+  /**
+   * Pattern Scoring mechanism. See {@link PatternScoring} for options.
+   */
   @Option(name = "patternScoring")
   public PatternScoring patternScoring = PatternScoring.PosNegUnlabOdds;
 
+  /**
+   * Threshold for learning a pattern
+   */
   @Option(name = "thresholdSelectPattern")
   public double thresholdSelectPattern = 1.0;
 
+  /**
+   * Do not learn patterns that do not extract any unlabeled tokens (kind of useless)
+   */
   @Option(name = "discardPatternsWithNoNegSupport")
-  public boolean discardPatternsWithNoNegSupport = true;
+  public boolean discardPatternsWithNoUnlabSupport = true;
 
+  /**
+   * Currently, does not work correctly. TODO: make this work.
+   * Ideally this would label words only when they occur in the context of any learned pattern
+   */
   @Option(name = "restrictToMatched")
   public boolean restrictToMatched = false;
 
+  /**
+   * Label words that are learned so that in further iterations we have more information
+   */
   @Option(name = "usePatternResultAsLabel")
   public boolean usePatternResultAsLabel = true;
 
+  /**
+   * Debug flag for learning patterns
+   */
   @Option(name = "learnPatternsDebug")
   public boolean learnPatternsDebug = false;
 
+  /**
+   * Do not learn patterns in which the neighboring words have the same label. 
+   */
   @Option(name = "ignorePatWithLabeledNeigh")
   public boolean ignorePatWithLabeledNeigh = false;
 
+  /**
+   * Save this run as ...
+   */
   @Option(name = "identifier")
   public String identifier = "getpatterns";
 
+  /**
+   * Use the actual dictionary matching phrase(s) instead of the token word or lemma in calculating the stats
+   */
   @Option(name = "useMatchingPhrase")
   public boolean useMatchingPhrase = false;
 
+  /**
+   * Remove patterns that have number of positive words less than this.
+   */
   @Option(name = "minPosPhraseSupportForPat")
   public int minPosPhraseSupportForPat = 1;
 
+  /**
+   * Remove patterns that have number of words in the denominator of the patternscoring measure less than this.
+   */
   @Option(name = "minNegPhraseSupportForPat")
   public int minNegPhraseSupportForPat = 0;
 
+  /**
+   * Reduce pattern threshold (=0.8*current_value) to extract as many patterns
+   * as possible (still restricted by <code>numPatterns</code>)
+   */
   @Option(name = "tuneThresholdKeepRunning")
   public boolean tuneThresholdKeepRunning = false;
 
+  /**
+   * Maximum number of words to learn
+   */
   @Option(name = "maxExtractNumWords")
   public int maxExtractNumWords = Integer.MAX_VALUE;
 
+  /**
+   * Debug log output
+   */
   @Option(name = "extremedebug")
   public boolean extremedebug = false;
 
@@ -288,10 +386,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   /**
-   * answerClass maps label strings to label classes answerLabel maps label
-   * strings to label strings (kinda stupid :)) generalize classes basically
-   * maps label strings to a map of generalized strings and the corresponding
-   * class ignoreClasses have to be boolean
+   * generalize classes basically maps label strings to a map of generalized
+   * strings and the corresponding class ignoreClasses have to be boolean
    * 
    * @throws IOException
    * @throws SecurityException
@@ -846,26 +942,26 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         useFreqPhraseExtractedByPat = true;
 
       Counter<SurfacePattern> numeratorPatWt = this.convert2OneDim(label,
-          patternsandWords4Label, normWordFreqInPattern, false, null,
+          patternsandWords4Label, sqrtPatScore, false, null,
           minPosPhraseSupportForPat, useFreqPhraseExtractedByPat);
       Counter<SurfacePattern> denominatorPatWt = null;
 
       if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
         // deno = negandUnLabeledPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
-            negandUnLabeledPatternsandWords4Label, normWordFreqInPattern,
+            negandUnLabeledPatternsandWords4Label, sqrtPatScore,
             false, externalWordWeightsNormalized, minNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.RatioAll)) {
         // deno = allPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
-            allPatternsandWords4Label, normWordFreqInPattern, false,
+            allPatternsandWords4Label, sqrtPatScore, false,
             externalWordWeightsNormalized, minNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.PosNegOdds)) {
         // deno = negPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
-            negPatternsandWords4Label, normWordFreqInPattern, false,
+            negPatternsandWords4Label, sqrtPatScore, false,
             externalWordWeightsNormalized, minNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.PhEvalInPat)
@@ -873,7 +969,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           || patternScoring.equals(PatternScoring.LOGREG)) {
         // deno = negandUnLabeledPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
-            negandUnLabeledPatternsandWords4Label, normWordFreqInPattern, true,
+            negandUnLabeledPatternsandWords4Label, sqrtPatScore, true,
             externalWordWeightsNormalized, minNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.SqrtAllRatio)) {
@@ -1030,11 +1126,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         break;
       }
       boolean notchoose = false;
-      if (discardPatternsWithNoNegSupport
-          && patternsandWords4Label.getCounter(pat).equals(
-              allPatternsandWords4Label.getCounter(pat))) {
+      if (discardPatternsWithNoUnlabSupport
+          && (unLabeledPatternsandWords4Label.containsFirstKey(pat) || unLabeledPatternsandWords4Label.getCounter(pat).isEmpty())) {
         Redwood.log("extremePatDebug", "Removing pattern " + pat
-            + " because it has no neg support; pos words: "
+            + " because it has no unlab support; pos words: "
             + patternsandWords4Label.getCounter(pat) + " and all words "
             + allPatternsandWords4Label.getCounter(pat));
         notchoose = true;
@@ -1277,7 +1372,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   Counter<SurfacePattern> convert2OneDim(String label,
       TwoDimensionalCounter<SurfacePattern, String> patternsandWords,
-      boolean normWordFreqInPat, boolean scorePhrasesInPatSelection,
+      boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
       Counter<String> dictOddsWordWeights, Integer minPhraseSupport,
       boolean useFreqPhraseExtractedByPat) throws IOException {
 
@@ -1456,7 +1551,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
         if (useFreqPhraseExtractedByPat)
           score = score * e.getValue();
-        if (normWordFreqInPat)
+        if (sqrtPatScore)
           patterns.incrementCount(d.getKey(), Math.sqrt(score));
         else
           patterns.incrementCount(d.getKey(), score);
@@ -1809,8 +1904,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       GetPatternsFromDataMultiClass g = null;
       String patternOutFile = props.getProperty("patternOutFile");
-      //TODO: are we not using this?
-      //Map<String, Set<String>> ignoreWordsList = new HashMap<String, Set<String>>();
+      // TODO: are we not using this?
+      // Map<String, Set<String>> ignoreWordsList = new HashMap<String,
+      // Set<String>>();
       // Set<String> ignoreWordsList4Label = new HashSet<String>();
       String sentsOutFile = props.getProperty("sentsOutFile");
       String wordsOutputFile = props.getProperty("wordsOutputFile");
@@ -1831,6 +1927,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         g = IOUtils.readObjectFromFile(inputSavedInstanceFile);
       } else {
         String seedWordsFiles = props.getProperty("seedWordsFiles");
+        if (seedWordsFiles == null) {
+          throw new RuntimeException(
+              "Needs both seedWordsFiles and file parameters to run this class!\nseedWordsFiles has format: label1,filewithlistofwords1;label2,filewithlistofwords2;...");
+        }
         for (String seedFile : seedWordsFiles.split(";")) {
           String[] t = seedFile.split(",");
           String label = t[0];
@@ -1865,14 +1965,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         String fileFormat = props.getProperty("fileFormat");
         String file = props.getProperty("file");
         String posModelPath = props.getProperty("posModelPath");
-        if (fileFormat.equalsIgnoreCase("text")
+        if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
           String text = IOUtils.stringFromFile(file);
           sents = tokenize(text, posModelPath);
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           sents = IOUtils.readObjectFromFile(file);
         } else
-          throw new RuntimeException("Cannot identify the file format");
+          throw new RuntimeException("Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
         System.out.println("Processing # sents " + sents.size());
         g = new GetPatternsFromDataMultiClass(props, sents, seedWords);
         Execution.fillOptions(g, props);

@@ -49,8 +49,9 @@ public class ConstantsAndVariables {
   public Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
 
   public Map<String, Class> answerClass = null;
-  //public Map<String, String> answerLabels = null;
+
   public Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
+  
   // TODO: not getting used!!
   public Map<String, Map<String, Class>> generalizeClasses = null;
 
@@ -60,6 +61,9 @@ public class ConstantsAndVariables {
   @Option(name = "wordIgnoreRegex")
   public String wordIgnoreRegex = "[^a-zA-Z]*";
 
+  /**
+   * Number of threads
+   */
   @Option(name = "numThreads")
   public int numThreads = 1;
 
