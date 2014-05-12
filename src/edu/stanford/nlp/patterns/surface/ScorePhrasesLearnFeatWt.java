@@ -146,7 +146,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
         boolean ignoreclass = false;
         Boolean datumlabel = false;
         for (Class cl : otherIgnoreClasses.keySet()) {
-          if ((boolean) l.get(cl))
+          if ((Boolean) l.get(cl))
             ignoreclass = true;
         }
         if (l.get(answerClass).equals(answerLabel)) {
