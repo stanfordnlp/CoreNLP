@@ -31,7 +31,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class ConstantsAndVariables {
 
   /**
-   * Sigma for L2 regularization in Logisitic regression, if a classifier is used to score phrases
+   * Sigma for L2 regularization in Logisitic regression, if a classifier is
+   * used to score phrases
    */
   @Option(name = "LRSigma")
   public double LRSigma = 1.0;
@@ -41,38 +42,47 @@ public class ConstantsAndVariables {
    */
   @Option(name = "englishWordsFiles")
   public String englishWordsFiles = null;
-  
+
   private Set<String> englishWords = null;
 
   /**
-   * Words to be ignored when learning phrases if <code>removePhrasesWithStopWords</code> or  <code>removeStopWordsFromSelectedPhrases</code> is true.
-   * Also, these words are considered negative when scoring a pattern (similar to othersemanticclasses).
+   * Words to be ignored when learning phrases if
+   * <code>removePhrasesWithStopWords</code> or
+   * <code>removeStopWordsFromSelectedPhrases</code> is true. Also, these words
+   * are considered negative when scoring a pattern (similar to
+   * othersemanticclasses).
    */
   @Option(name = "commonWordsPatternFiles")
   public String commonWordsPatternFiles = null;
-  
+
   private Set<String> commonEngWords = null;
 
   /**
+   * List of dictionary phrases that are negative for all labels to be learned.
+   * Format is file_1,file_2,... where file_i has each phrase in a different line
    * 
    */
   @Option(name = "otherSemanticClassesFiles")
   public String otherSemanticClassesFiles = null;
 
+  //set of words that are considered negative for all classes
   private Set<String> otherSemanticClasses = null;
-
+  
   /**
    * Seed dictionary, set in the class that uses this class
    */
   private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
 
+  @SuppressWarnings("rawtypes")
   public Map<String, Class> answerClass = null;
 
+  @SuppressWarnings("rawtypes")
   public Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
-  
+
   /**
    * TODO: not getting used!!
    */
+  @SuppressWarnings("rawtypes")
   public Map<String, Map<String, Class>> generalizeClasses = null;
 
   /**
@@ -101,13 +111,14 @@ public class ConstantsAndVariables {
 
   public Set<String> stopWords = null;
 
-  public List<String> fillerWords = Arrays.asList("a", "an", "the", "`", "``", "'", "''");
-  
+  public List<String> fillerWords = Arrays.asList("a", "an", "the", "`", "``",
+      "'", "''");
+
   /**
    * Environment for {@link TokenSequencePattern}
    */
   public Map<String, Env> env = new HashMap<String, Env>();
-  
+
   /**
    * by default doesn't ignore anything. What phrases to ignore.
    */
@@ -132,7 +143,7 @@ public class ConstantsAndVariables {
    */
   @Option(name = "wordClassClusterFile")
   String wordClassClusterFile = null;
-  
+
   private Map<String, Integer> wordClassClusters = null;
 
   @Option(name = "includeExternalFeatures")
@@ -146,7 +157,7 @@ public class ConstantsAndVariables {
 
   @Option(name = "numWordsCompound")
   public int numWordsCompound = 2;
-  
+
   /**
    * Cached files
    */
@@ -176,58 +187,116 @@ public class ConstantsAndVariables {
 
   public Counter<Integer> distSimWeights = new ClassicCounter<Integer>();
 
-
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS
   };
 
   /**
-   * Only works if you have single label. And the word classes are given. 
+   * Only works if you have single label. And the word classes are given.
    */
-  @Option(name = "usePhraseEvalDistSim")
-  public boolean usePhraseEvalDistSim = false;
-  
+  @Option(name = "usePhraseEvalWordClass")
+  public boolean usePhraseEvalWordClass = false;
+
   /**
-   * 
+   * use google tf-idf for learning phrases
    */
   @Option(name = "usePhraseEvalGoogleNgram")
   public boolean usePhraseEvalGoogleNgram = false;
-  
-  
+
+  /**
+   * use domain tf-idf for learning phrases
+   */
   @Option(name = "usePhraseEvalDomainNgram")
   public boolean usePhraseEvalDomainNgram = false;
+
+  /**
+   * use \sum_allpat pattern_wt_that_extracted_phrase/phrase_freq for learning
+   * phrases
+   */
   @Option(name = "usePhraseEvalPatWtByFreq")
   public boolean usePhraseEvalPatWtByFreq = false;
+
+  /**
+   * odds of the phrase freq in the label dictionary vs other dictionaries
+   */
   @Option(name = "usePhraseEvalSemanticOdds")
   public boolean usePhraseEvalSemanticOdds = false;
+
+  /**
+   * Edit distance between this phrase and the other phrases in the label
+   * dictionary
+   */
   @Option(name = "usePhraseEvalEditDistSame")
   public boolean usePhraseEvalEditDistSame = false;
+
+  /**
+   * Edit distance between this phrase and other phrases in other dictionaries
+   */
   @Option(name = "usePhraseEvalEditDistOther")
   public boolean usePhraseEvalEditDistOther = false;
 
-  @Option(name = "usePatternEvalDistSim")
-  public boolean usePatternEvalDistSim = false;
+  /**
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   */
+  @Option(name = "usePatternEvalWordClass")
+  public boolean usePatternEvalWordClass = false;
+
+  /**
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   */
   @Option(name = "usePatternEvalGoogleNgram")
   public boolean usePatternEvalGoogleNgram = false;
+
+  /**
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   */
   @Option(name = "usePatternEvalDomainNgram")
   public boolean usePatternEvalDomainNgram = false;
+
+  /**
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   */
   @Option(name = "usePatternEvalSemanticOdds")
   public boolean usePatternEvalSemanticOdds = false;
+
+  /**
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   */
   @Option(name = "usePatternEvalEditDistSame")
   public boolean usePatternEvalEditDistSame = false;
+
+  /**
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   */
   @Option(name = "usePatternEvalEditDistOther")
   public boolean usePatternEvalEditDistOther = false;
 
+  /**
+   * These are used to learn weights for features if using logistic regression.
+   * Percentage of non-labeled tokens selected as negative.
+   */
   @Option(name = "perSelectRand")
   public double perSelectRand = 0.01;
+
+  /**
+   * These are used to learn weights for features if using logistic regression.
+   * Percentage of negative tokens selected as negative.
+   */
   @Option(name = "perSelectNeg")
   public double perSelectNeg = 0.1;
-  
-//  @Option(name = "wekaOptions")
-//  public String wekaOptions = "";
+
+  // @Option(name = "wekaOptions")
+  // public String wekaOptions = "";
 
   Properties props;
 
+  @SuppressWarnings("rawtypes")
   public void setUp(Properties props) throws IOException {
     if (alreadySetUp) {
       return;
@@ -235,12 +304,14 @@ public class ConstantsAndVariables {
     if (externalFeatureWeightsFile != null) {
       File f = new File(externalFeatureWeightsFile);
       if (!f.exists()) {
-        System.err.println("externalweightsfile does not exist: learning weights!");
+        System.err
+            .println("externalweightsfile does not exist: learning weights!");
         LearnImportantFeatures lmf = new LearnImportantFeatures();
         if (answerClass.size() > 1 || this.labelDictionary.size() > 1)
           throw new RuntimeException("not implemented");
         lmf.answerClass = CollectionUtils.toList(answerClass.values()).get(0);
-        lmf.answerLabel = CollectionUtils.toList(labelDictionary.keySet()).get(0);
+        lmf.answerLabel = CollectionUtils.toList(labelDictionary.keySet()).get(
+            0);
 
         Execution.fillOptions(lmf, props);
         lmf.setUp();
@@ -267,7 +338,8 @@ public class ConstantsAndVariables {
     }
     Redwood.log(Redwood.DBG, channelNameLogger, "Running with debug output");
     stopWords = new HashSet<String>();
-    Redwood.log(Redwood.FORCE, channelNameLogger, "Reading stop words from " + stopWordsPatternFiles);
+    Redwood.log(Redwood.FORCE, channelNameLogger, "Reading stop words from "
+        + stopWordsPatternFiles);
     for (String stopwfile : stopWordsPatternFiles.split("[;,]"))
       stopWords.addAll(IOUtils.linesFromFile(stopwfile));
 
@@ -283,7 +355,9 @@ public class ConstantsAndVariables {
     }
 
     if (otherSemanticClassesFiles != null) {
-      otherSemanticClasses = Collections.synchronizedSet(new HashSet<String>());
+      if (otherSemanticClasses == null)
+        otherSemanticClasses = Collections
+            .synchronizedSet(new HashSet<String>());
       for (String file : otherSemanticClassesFiles.split("[;,]")) {
         for (String w : IOUtils.linesFromFile(file)) {
 
@@ -293,9 +367,10 @@ public class ConstantsAndVariables {
 
         }
       }
-      System.out.println("Size of othersemantic class variables is " + otherSemanticClasses.size());
+      System.out.println("Size of othersemantic class variables is "
+          + otherSemanticClasses.size());
     } else {
-      otherSemanticClasses = new HashSet<String>();
+      otherSemanticClasses = Collections.synchronizedSet(new HashSet<String>());
       System.out.println("Size of othersemantic class variables is " + 0);
     }
 
@@ -309,7 +384,8 @@ public class ConstantsAndVariables {
     }
     stopStr += "/";
     for (String label : labelDictionary.keySet()) {
-      env.get(label).bind("$FILLER", "/" + StringUtils.join(fillerWords, "|") + "/");
+      env.get(label).bind("$FILLER",
+          "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
     }
@@ -327,26 +403,31 @@ public class ConstantsAndVariables {
   public void setLabelDictionary(Map<String, Set<String>> seedSets) {
     this.labelDictionary = seedSets;
   }
-  
-  public Map<String, Set<String>> getLabelDictionary(){
+
+  public Map<String, Set<String>> getLabelDictionary() {
     return this.labelDictionary;
   }
-  
-  public Set<String> getEnglishWords(){
+
+  public Set<String> getEnglishWords() {
     return this.englishWords;
   }
-  
-  public Set<String> getCommonEngWords(){
+
+  public Set<String> getCommonEngWords() {
     return this.commonEngWords;
   }
-  
-  public Set<String> getOtherSemanticClasses(){
+
+  public Set<String> getOtherSemanticClasses() {
     return this.otherSemanticClasses;
   }
-  
-  public Map<String, Integer> getWordClassClusters(){
+
+  public void setOtherSemanticClasses(Set<String> other) {
+    this.otherSemanticClasses = other;
+  }
+
+  public Map<String, Integer> getWordClassClusters() {
     return this.wordClassClusters;
   }
+
   private Pair<String, Double> getEditDist(Set<String> words, String ph) {
     double minD = editDistMax;
     String minPh = ph;
@@ -371,11 +452,13 @@ public class ConstantsAndVariables {
 
   double editDistMax = 100;
 
-  public Pair<String, Double> getEditDistanceFromThisClass(String label, String ph, int minLen) {
+  public Pair<String, Double> getEditDistanceFromThisClass(String label,
+      String ph, int minLen) {
     if (ph.length() < minLen)
       return new Pair<String, Double>(ph, editDistMax);
     if (editDistanceFromThisClass.containsKey(ph))
-      return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph), editDistanceFromThisClass.get(ph));
+      return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph),
+          editDistanceFromThisClass.get(ph));
 
     Pair<String, Double> minD = getEditDist(labelDictionary.get(label), ph);
 
@@ -401,11 +484,14 @@ public class ConstantsAndVariables {
     return new Pair<String, Double>(minPh, minDtotal);
   }
 
-  public Pair<String, Double> getEditDistanceFromOtherSemanticClasses(String ph, int minLen) {
+  public Pair<String, Double> getEditDistanceFromOtherSemanticClasses(
+      String ph, int minLen) {
     if (ph.length() < minLen)
       return new Pair<String, Double>(ph, editDistMax);
     if (editDistanceFromOtherSemanticClasses.containsKey(ph))
-      return new Pair<String, Double>(editDistanceFromOtherSemanticClassesMatches.get(ph), editDistanceFromOtherSemanticClasses.get(ph));
+      return new Pair<String, Double>(
+          editDistanceFromOtherSemanticClassesMatches.get(ph),
+          editDistanceFromOtherSemanticClasses.get(ph));
 
     Pair<String, Double> minD = getEditDist(otherSemanticClasses, ph);
 
@@ -451,6 +537,14 @@ public class ConstantsAndVariables {
     return minD;
   }
 
+  public ConcurrentHashMap<String, Double> getEditDistanceFromEnglishWords() {
+    return this.editDistanceFromEnglishWords;
+  }
+
+  public ConcurrentHashMap<String, String> getEditDistanceFromEnglishWordsMatches() {
+    return this.editDistanceFromEnglishWordsMatches;
+  }
+
   public double getEditDistanceScoresOtherClass(String g) {
     double editDist;
     String editDistPh;
@@ -458,7 +552,8 @@ public class ConstantsAndVariables {
       editDist = editDistanceFromOtherSemanticClasses.get(g);
       editDistPh = editDistanceFromOtherSemanticClassesMatches.get(g);
     } else {
-      Pair<String, Double> editMatch = getEditDistanceFromOtherSemanticClasses(g, 4);
+      Pair<String, Double> editMatch = getEditDistanceFromOtherSemanticClasses(
+          g, 4);
       editDist = editMatch.second();
       editDistPh = editMatch.first();
     }
@@ -503,7 +598,7 @@ public class ConstantsAndVariables {
     assert (!editDistPh.isEmpty());
     return editDist / (double) editDistPh.length();
   }
-  
+
   public static boolean isFuzzyMatch(String w1, String w2, int minLen4Fuzzy) {
     EditDistance editDistance = new EditDistance(true);
     if (w1.equals(w2))
@@ -517,14 +612,13 @@ public class ConstantsAndVariables {
     return false;
   }
 
-  public static String containsFuzzy(Set<String> words, String w, int minLen4Fuzzy) {
+  public static String containsFuzzy(Set<String> words, String w,
+      int minLen4Fuzzy) {
     for (String w1 : words) {
       if (isFuzzyMatch(w1, w, minLen4Fuzzy))
         return w1;
     }
     return null;
   }
-
-  
 
 }

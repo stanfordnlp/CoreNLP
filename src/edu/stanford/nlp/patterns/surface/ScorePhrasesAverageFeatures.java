@@ -73,7 +73,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
         }
       }
 
-      if (constVars.usePhraseEvalDistSim) {
+      if (constVars.usePhraseEvalWordClass) {
         // calculate dist sim weights
         Integer num = constVars.getWordClassClusters().get(g);
         if (num != null && constVars.distSimWeights.containsKey(num)) {
@@ -129,7 +129,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
         scoreslist.setCount(ScorePhraseMeasures.GOOGLENGRAM, googlescore);
       }
 
-      if (constVars.usePhraseEvalDistSim) {
+      if (constVars.usePhraseEvalWordClass) {
         double externalFeatureWt;
         if (externalFeatWtsNormalized.containsKey(word))
           externalFeatureWt = externalFeatWtsNormalized.getCount(word);

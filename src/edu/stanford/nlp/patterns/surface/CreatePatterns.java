@@ -52,9 +52,6 @@ public class CreatePatterns {
   @Option(name = "useFillerWordsInPat")
   public boolean useFillerWordsInPat = true;
 
-  @Option(name = "getCompoundNouns")
-  public boolean getCompoundPhrases = true;
-
   @Option(name = "addPatWithoutPOS")
   public boolean addPatWithoutPOS = true;
 
@@ -73,8 +70,7 @@ public class CreatePatterns {
 
   void setUp(Properties props) {
     Execution.fillOptions(this, props);
-    if (!getCompoundPhrases && constVars.numWordsCompound > 1)
-      throw new RuntimeException("getCompoundNouns=false and numWordsCompund>1 cannot happen at the same time");
+    
     allowedTagsInitials = Arrays.asList(allowedTagsInitialsStr.split(","));
     if (!addPatWithoutPOS && !this.usePOS4Pattern) {
       throw new RuntimeException("addPatWithoutPOS and usePOS4Pattern both cannot be false ");
@@ -201,13 +197,13 @@ public class CreatePatterns {
         String str = prevContext + fw + sw;
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
-          twithoutPOS = new PatternToken(tag, false, getCompoundPhrases, constVars.numWordsCompound);
+          twithoutPOS = new PatternToken(tag, false, constVars.numWordsCompound> 1, constVars.numWordsCompound);
           // twithoutPOS.setPreviousContext(sw);
         }
 
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
-          twithPOS = new PatternToken(tag, true, getCompoundPhrases, constVars.numWordsCompound);
+          twithPOS = new PatternToken(tag, true, constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithPOS.setPreviousContext(sw);
         }
 
@@ -232,12 +228,12 @@ public class CreatePatterns {
 
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
-          twithoutPOS = new PatternToken(tag, false, getCompoundPhrases, constVars.numWordsCompound);
+          twithoutPOS = new PatternToken(tag, false, constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithoutPOS.setNextContext(sw);
         }
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
-          twithPOS = new PatternToken(tag, true, getCompoundPhrases, constVars.numWordsCompound);
+          twithPOS = new PatternToken(tag, true, constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithPOS.setNextContext(sw);
         }
         str += sw + fw + nextContext;
@@ -262,14 +258,14 @@ public class CreatePatterns {
 
         PatternToken twithoutPOS = null;
         if (addPatWithoutPOS) {
-          twithoutPOS = new PatternToken(tag, false, getCompoundPhrases, constVars.numWordsCompound);
+          twithoutPOS = new PatternToken(tag, false, constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithoutPOS.setNextContext(sw);
           // twithoutPOS.setPreviousContext(sw);
         }
 
         PatternToken twithPOS = null;
         if (usePOS4Pattern) {
-          twithPOS = new PatternToken(tag, true, getCompoundPhrases, constVars.numWordsCompound);
+          twithPOS = new PatternToken(tag, true, constVars.numWordsCompound > 1, constVars.numWordsCompound);
           // twithPOS.setNextContext(sw);
           // twithPOS.setPreviousContext(sw);
         }

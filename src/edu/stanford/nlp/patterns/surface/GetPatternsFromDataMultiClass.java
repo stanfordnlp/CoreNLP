@@ -70,7 +70,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -justificationDirJson output_directory (optional)</code>
  * <p>
- * Many flags are described in the class {@link ConstantsAndVariables}
+ * IMPORTANT: Many flags are described in the classes {@link ConstantsAndVariables}, {@link CreatePatterns}, and {@link ScorePhrases}.
  * 
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.<p>
  * <code>file</code>: (Required) Input file (default assumed text) <p>
@@ -194,7 +194,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   /**
    * Do not learn patterns that do not extract any unlabeled tokens (kind of useless)
    */
-  @Option(name = "discardPatternsWithNoNegSupport")
+  @Option(name = "discardPatternsWithNoUnlabSupport")
   public boolean discardPatternsWithNoUnlabSupport = true;
 
   /**
@@ -243,8 +243,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   /**
    * Remove patterns that have number of words in the denominator of the patternscoring measure less than this.
    */
-  @Option(name = "minNegPhraseSupportForPat")
-  public int minNegPhraseSupportForPat = 0;
+  @Option(name = "minUnlabNegPhraseSupportForPat")
+  public int minUnlabNegPhraseSupportForPat = 0;
 
   /**
    * Reduce pattern threshold (=0.8*current_value) to extract as many patterns
@@ -769,8 +769,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         String tokenWordOrLemma = token.word();
         String longestMatchingPhrase = null;
+        
         if (useMatchingPhrase) {
-
           if (matchedPhrases != null && !matchedPhrases.isEmpty()) {
             for (String s : matchedPhrases) {
               if (s.equals(tokenWordOrLemma)) {
@@ -888,6 +888,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       unlabWords.addAll(en.getKey(), en.getValue().keySet());
     }
 
+    //Baseline; ignore if not interested
     if (patternScoring.equals(PatternScoring.F1)) {
 
       Counter<SurfacePattern> specificity = new ClassicCounter<SurfacePattern>();
@@ -950,19 +951,19 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         // deno = negandUnLabeledPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
             negandUnLabeledPatternsandWords4Label, sqrtPatScore,
-            false, externalWordWeightsNormalized, minNegPhraseSupportForPat,
+            false, externalWordWeightsNormalized, minUnlabNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.RatioAll)) {
         // deno = allPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
             allPatternsandWords4Label, sqrtPatScore, false,
-            externalWordWeightsNormalized, minNegPhraseSupportForPat,
+            externalWordWeightsNormalized, minUnlabNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.PosNegOdds)) {
         // deno = negPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
             negPatternsandWords4Label, sqrtPatScore, false,
-            externalWordWeightsNormalized, minNegPhraseSupportForPat,
+            externalWordWeightsNormalized, minUnlabNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.PhEvalInPat)
           || patternScoring.equals(PatternScoring.PhEvalInPatLogP)
@@ -970,13 +971,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         // deno = negandUnLabeledPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
             negandUnLabeledPatternsandWords4Label, sqrtPatScore, true,
-            externalWordWeightsNormalized, minNegPhraseSupportForPat,
+            externalWordWeightsNormalized, minUnlabNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else if (patternScoring.equals(PatternScoring.SqrtAllRatio)) {
         // deno = negandUnLabeledPatternsandWords4Label;
         denominatorPatWt = this.convert2OneDim(label,
             negandUnLabeledPatternsandWords4Label, true, false,
-            externalWordWeightsNormalized, minNegPhraseSupportForPat,
+            externalWordWeightsNormalized, minUnlabNegPhraseSupportForPat,
             useFreqPhraseExtractedByPat);
       } else
         throw new RuntimeException("Cannot understand patterns scoring");
@@ -1105,6 +1106,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               + alreadyIdentifiedPatterns.size() + ". New patterns size "
               + currentPatternWeights4Label.size());
     }
+    
+    
 
     PriorityQueue<SurfacePattern> q = Counters
         .toPriorityQueue(currentPatternWeights4Label);
@@ -1429,7 +1432,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
         }
 
-        if (constVars.usePatternEvalDistSim) {
+        if (constVars.usePatternEvalWordClass) {
           Integer num = constVars.getWordClassClusters().get(g);
           if (num != null && constVars.distSimWeights.containsKey(num)) {
             externalFeatWtsNormalized.setCount(g,
@@ -1447,7 +1450,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         domainNgramNormScores = GetPatternsFromDataMultiClass
             .normalizeSoftMaxMinMaxScores(domainNgramNormScores, true, true,
                 false);
-      if (constVars.usePatternEvalDistSim)
+      if (constVars.usePatternEvalWordClass)
         externalFeatWtsNormalized = GetPatternsFromDataMultiClass
             .normalizeSoftMaxMinMaxScores(externalFeatWtsNormalized, true,
                 true, false);
@@ -1513,7 +1516,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                 scoreslist.setCount(ScorePhraseMeasures.DOMAINNGRAM,
                     domainscore);
               }
-              if (constVars.usePatternEvalDistSim) {
+              if (constVars.usePatternEvalWordClass) {
                 double externalFeatureWt = externalWtsDefault;
                 if (externalFeatWtsNormalized.containsKey(e.getKey()))
                   externalFeatureWt = 1 - externalFeatWtsNormalized.getCount(e
@@ -1671,6 +1674,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             feedbackfile, 1);
       }
     }
+    
+    System.out.println("\n\nAll words learned:");
+    for(Entry<String, Counter<String>> en: this.learnedWords.entrySet()){
+      System.out.println(en.getKey()+":\t\t"+en.getValue().keySet()+"\n\n");
+    }
+    
   }
 
   public void iterateExtractApply4Label(String label, SurfacePattern p0,
