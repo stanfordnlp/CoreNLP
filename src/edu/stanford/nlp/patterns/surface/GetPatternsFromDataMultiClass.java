@@ -476,6 +476,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     if (labelUsingSeedSets) {
       for (String l : seedSets.keySet()) {
+        Redwood.log(Redwood.DBG, "Labeling data using seed set for " + l);
         runLabelSeedWords(constVars.answerClass.get(l), l, seedSets.get(l));
       }
 
