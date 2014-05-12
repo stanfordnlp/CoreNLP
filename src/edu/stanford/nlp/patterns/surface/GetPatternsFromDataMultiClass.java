@@ -1150,8 +1150,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         Redwood.log(
             Redwood.DBG,
             channelNameLogger,
-            "The max count in pattern is "
-                + currentPatternWeights4Label.getCount(pat)
+            "The max weight of candidate patterns is "
+                + df.format(currentPatternWeights4Label.getCount(pat))
                 + " so not adding anymore patterns");
         break;
       }
@@ -1701,10 +1701,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Redwood.log(Redwood.FORCE, "Iterating " + numIterationsForPatterns
         + " times.");
+
     for (int i = 0; i < numIterationsForPatterns; i++) {
       Redwood.log(Redwood.FORCE, channelNameLogger,
           "\n\n################################ Iteration " + (i + 1)
               + " ##############################");
+      boolean keepRunning = false;
       Map<String, Counter<String>> learnedWordsThisIter = new HashMap<String, Counter<String>>();
       for (String label : constVars.getLabelDictionary().keySet()) {
         Redwood.log(Redwood.FORCE, channelNameLogger,
@@ -1715,7 +1717,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             + label;
         String patout = patternsOutFile == null ? null : patternsOutFile + "_"
             + label;
-        Counter<String> learnedWords4label = iterateExtractApply4Label(
+        Pair<Counter<SurfacePattern>, Counter<String>> learnedPatWords4label = iterateExtractApply4Label(
             label,
             p0 != null ? p0.get(label) : null,
             p0Set != null ? p0Set.get(label) : null,
@@ -1723,7 +1725,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             wordsout, sentout, patout,
             ignorePatterns != null ? ignorePatterns.get(label) : null,
             feedbackfile, 1, ignoreWordsAll.get(label));
-        learnedWordsThisIter.put(label, learnedWords4label);
+
+        learnedWordsThisIter.put(label, learnedPatWords4label.second());
+        if (learnedPatWords4label.first().size() > 0) {
+          keepRunning = true;
+        }
       }
 
       if (this.useOtherLabelsWordsasNegative) {
@@ -1736,8 +1742,20 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
         }
       }
+      if (!keepRunning && !this.tuneThresholdKeepRunning) {
+        Redwood.log(Redwood.FORCE,
+            "No patterns learned for all labels. Ending iterations.");
+        break;
+      }
     }
 
+    System.out.println("\n\nAll patterns learned:");
+    for (Entry<String, Counter<SurfacePattern>> en : this.learnedPatterns.entrySet()) {
+      System.out.println(en.getKey() + ":\t\t" + StringUtils.join(en.getValue().keySet(),"\n")
+          + "\n\n");
+    }
+
+    
     System.out.println("\n\nAll words learned:");
     for (Entry<String, Counter<String>> en : this.learnedWords.entrySet()) {
       System.out.println(en.getKey() + ":\t\t" + en.getValue().keySet()
@@ -1746,8 +1764,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   }
 
-  public Counter<String> iterateExtractApply4Label(String label,
-      SurfacePattern p0, Counter<String> p0Set,
+  public Pair<Counter<SurfacePattern>, Counter<String>> iterateExtractApply4Label(
+      String label, SurfacePattern p0, Counter<String> p0Set,
       Counter<String> dictOddsWordWeights, String wordsOutputFile,
       String sentsOutFile, String patternsOutFile,
       Set<SurfacePattern> ignorePatterns, String feedbackfile, int numIter,
@@ -1769,10 +1787,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     TwoDimensionalCounter<String, SurfacePattern> terms = new TwoDimensionalCounter<String, SurfacePattern>();
 
     Counter<String> identifiedWords = new ClassicCounter<String>();
+    Counter<SurfacePattern> patterns = new ClassicCounter<SurfacePattern>();
     for (int i = 0; i < numIter; i++) {
 
-      Counter<SurfacePattern> patterns = getPatterns(label, learnedPatterns
-          .get(label).keySet(), p0, p0Set, ignorePatterns, dictOddsWordWeights);
+      patterns.addAll(getPatterns(label, learnedPatterns.get(label).keySet(),
+          p0, p0Set, ignorePatterns, dictOddsWordWeights));
       learnedPatterns.get(label).addAll(patterns);
 
       if (sentsOutFile != null)
@@ -1824,7 +1843,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (patternsOutFile != null)
       this.writePatternsToFile(learnedPatterns.get(label), patternsOutFile);
 
-    return identifiedWords;
+    return new Pair(patterns, identifiedWords);
   }
 
   void writePatternsToFile(Counter<SurfacePattern> pattern, String outFile)
