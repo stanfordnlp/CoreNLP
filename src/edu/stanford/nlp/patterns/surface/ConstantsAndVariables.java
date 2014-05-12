@@ -26,7 +26,9 @@ import edu.stanford.nlp.util.EditDistance;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables {
@@ -125,7 +127,7 @@ public class ConstantsAndVariables {
   private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
 
   @SuppressWarnings("rawtypes")
-  public Map<String, Class> answerClass = null;
+  public Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass = null;
 
   /**
    * Can be used only when using the API - using the appropriate constructor.
@@ -348,6 +350,12 @@ public class ConstantsAndVariables {
   @Option(name = "perSelectNeg")
   public double perSelectNeg = 0.1;
 
+  /**
+   * Especially useful for multi word phrase extraction. Do not extract a phrase if any word is labeled with any other class.
+   */
+  @Option(name="doNotExtractPhraseAnyWordLabeledOtherClass")
+  public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
+  
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
@@ -392,7 +400,7 @@ public class ConstantsAndVariables {
     for (String label : labelDictionary.keySet()) {
       env.put(label, TokenSequencePattern.getNewEnv());
       // env.get(label).bind("answer", answerClass.get(label));
-      for (Entry<String, Class> en : this.answerClass.entrySet()) {
+      for (Entry<String, Class<? extends Key<String>>> en : this.answerClass.entrySet()) {
         env.get(label).bind(en.getKey(), en.getValue());
       }
       for (Entry<String, Class> en : generalizeClasses.entrySet())

@@ -1,9 +1,11 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
@@ -11,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,9 +34,11 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
 
+import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.surface.Data;
@@ -56,6 +61,8 @@ import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.util.Sets;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.TypesafeMap;
+import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -288,6 +295,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   @Option(name = "useOtherLabelsWordsasNegative")
   public boolean useOtherLabelsWordsasNegative = true;
 
+  /**
+   * If not null, write the output like
+   * "w1 w2 <label1> w3 <label2>w4</label2> </label1> w5 ... " if w3 w4 have
+   * label1 and w4 has label 2
+   */
+  @Option(name = "markedOutputTextFile")
+  String markedOutputTextFile = null;
+
   Map<String, Boolean> writtenPatInJustification = new HashMap<String, Boolean>();
 
   Map<String, Counter<SurfacePattern>> learnedPatterns = new HashMap<String, Counter<SurfacePattern>>();
@@ -323,7 +338,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException {
     this.props = props;
-    Map<String, Class> ansCl = new HashMap<String, Class>();
+    Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     ansCl.put(answerLabel, answerClass);
 
     Map<String, Class> generalizeClasses = new HashMap<String, Class>();
@@ -357,7 +372,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       IllegalArgumentException, InvocationTargetException,
       NoSuchMethodException, SecurityException {
     this.props = props;
-    Map<String, Class> ansCl = new HashMap<String, Class>();
+    Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     ansCl.put(answerLabel, answerClass);
 
     Map<String, Map<Class, Object>> iC = new HashMap<String, Map<Class, Object>>();
@@ -375,14 +390,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       IllegalArgumentException, InvocationTargetException,
       NoSuchMethodException, SecurityException, ClassNotFoundException {
     this.props = props;
-    Map<String, Class> ansCl = new HashMap<String, Class>();
+    Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     Map<String, Class> gC = new HashMap<String, Class>();
     Map<String, Map<Class, Object>> iC = new HashMap<String, Map<Class, Object>>();
     int i = 1;
     for (String label : seedSets.keySet()) {
       String ansclstr = "edu.stanford.nlp.patterns.surface.PatternsAnnotations$PatternLabel"
           + i;
-      ansCl.put(label, Class.forName(ansclstr));
+      ansCl.put(label, (Class<? extends Key<String>>) Class.forName(ansclstr));
       iC.put(label, new HashMap<Class, Object>());
       i++;
     }
@@ -393,9 +408,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
       Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
-      Map<String, Class> answerClass) throws IOException,
-      InstantiationException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException {
+      Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass)
+      throws IOException, InstantiationException, IllegalAccessException,
+      IllegalArgumentException, InvocationTargetException,
+      NoSuchMethodException, SecurityException {
     this(props, sents, seedSets, answerClass, new HashMap<String, Class>(),
         new HashMap<String, Map<Class, Object>>());
   }
@@ -415,7 +431,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
       Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
-      Map<String, Class> answerClass, Map<String, Class> generalizeClasses,
+      Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass,
+      Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -431,7 +448,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   @SuppressWarnings("rawtypes")
   private void setUpConstructor(Map<String, List<CoreLabel>> sents,
-      Map<String, Set<String>> seedSets, Map<String, Class> answerClass,
+      Map<String, Set<String>> seedSets,
+      Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass,
       Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
@@ -479,13 +497,40 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   }
 
+  public static Map<String, List<CoreLabel>> runPOSNEROnTokens(List<CoreMap> sentsCM, String posModelPath, boolean useTargetNERRestriction){
+    Annotation doc = new Annotation(sentsCM);
+    Properties props = new Properties();
+    if (useTargetNERRestriction) {
+      props.setProperty("annotators", "pos,lemma,ner");
+    } else
+      props.setProperty("annotators", "pos,lemma");
+
+    //props.put(          "tokenize.options",
+    //        "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
+
+    if (posModelPath != null) {
+      props.setProperty("pos.model", posModelPath);
+    }
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props, false);
+
+    pipeline.annotate(doc);
+    Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
+    
+    for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+    
+      sents.put(s.get(CoreAnnotations.DocIDAnnotation.class),  s.get(CoreAnnotations.TokensAnnotation.class));
+    }
+
+    return sents;
+  }
+  
   public static Map<String, List<CoreLabel>> tokenize(String text,
       String posModelPath, boolean lowercase, boolean useTargetNERRestriction)
       throws InterruptedException, ExecutionException, IOException {
     Properties props = new Properties();
     if (useTargetNERRestriction) {
       props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
-    } else 
+    } else
       props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
 
     props
@@ -1261,7 +1306,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     // if (deno != null) {
     if (justificationDirJson != null && !justificationDirJson.isEmpty()) {
-      IOUtils.ensureDir(new File(justificationDirJson + "/" + identifier + "/" + label));
+      IOUtils.ensureDir(new File(justificationDirJson + "/" + identifier + "/"
+          + label));
 
       String filename = this.justificationDirJson + "/" + identifier + "/"
           + label + "/patterns" + ".json";
@@ -1780,10 +1826,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       for (String label : constVars.getLabelDictionary().keySet()) {
         CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> tokensMatchedPat = matchedTokensByPatAllLabels
             .get(label);
-        IOUtils.ensureDir(new File(justificationDirJson + "/" + identifier+"/"+label));
+        IOUtils.ensureDir(new File(justificationDirJson + "/" + identifier
+            + "/" + label));
 
-        String matchedtokensfilename = this.justificationDirJson + "/" + identifier + "/"+ label
-            + "/tokensmatchedpatterns" + ".json";
+        String matchedtokensfilename = this.justificationDirJson + "/"
+            + identifier + "/" + label + "/tokensmatchedpatterns" + ".json";
         JsonObjectBuilder pats = Json.createObjectBuilder();
         for (Entry<SurfacePattern, Collection<Triple<String, Integer, Integer>>> en : tokensMatchedPat
             .entrySet()) {
@@ -1822,7 +1869,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
         String sentfilename = this.justificationDirJson + "/" + identifier
             + "/sentences" + ".json";
-        IOUtils.writeStringToFile(senttokens.build().toString(), sentfilename, "utf8");
+        IOUtils.writeStringToFile(senttokens.build().toString(), sentfilename,
+            "utf8");
       }
 
     }
@@ -1838,6 +1886,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     for (Entry<String, Counter<String>> en : this.learnedWords.entrySet()) {
       System.out.println(en.getKey() + ":\t\t" + en.getValue().keySet()
           + "\n\n");
+    }
+
+    if (markedOutputTextFile != null) {
+      this.writeLabeledData(markedOutputTextFile);
     }
 
   }
@@ -1960,6 +2012,227 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return this.learnedPatterns.get(label);
   }
 
+  /**
+   * COPIED from CRFClassifier Count the successes and failures of the model on
+   * the given document. Fills numbers in to counters for true positives, false
+   * positives, and false negatives, and also keeps track of the entities seen. <br>
+   * Returns false if we ever encounter null for gold or guess.
+   */
+  public static boolean countResultsPerEntity(List<CoreLabel> doc,
+      Counter<String> entityTP, Counter<String> entityFP,
+      Counter<String> entityFN, String background, Counter<String> wordTP,
+      Counter<String> wordTN, Counter<String> wordFP, Counter<String> wordFN,
+      Class<? extends TypesafeMap.Key<String>> whichClassToCompare) {
+    int index = 0;
+    int goldIndex = 0, guessIndex = 0;
+    String lastGold = background, lastGuess = background;
+
+    // As we go through the document, there are two events we might be
+    // interested in. One is when a gold entity ends, and the other
+    // is when a guessed entity ends. If the gold and guessed
+    // entities end at the same time, started at the same time, and
+    // match entity type, we have a true positive. Otherwise we
+    // either have a false positive or a false negative.
+    String str = "";
+
+    String s = "";
+    for (CoreLabel l : doc) {
+      s += " " + l.word() + ":"
+          + l.get(CoreAnnotations.GoldAnswerAnnotation.class) + ":"
+          + l.get(whichClassToCompare);
+    }
+    for (CoreLabel line : doc) {
+
+      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String guess = line.get(whichClassToCompare);
+
+      if (gold == null || guess == null)
+        return false;
+
+      if (lastGold != null && !lastGold.equals(gold)
+          && !lastGold.equals(background)) {
+        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess)
+            && goldIndex == guessIndex) {
+          wordTP.incrementCount(str);
+          entityTP.incrementCount(lastGold, 1.0);
+        } else {
+          System.out.println("false negative: " + str);
+          wordFN.incrementCount(str);
+          entityFN.incrementCount(lastGold, 1.0);
+          str = "";
+
+        }
+      }
+
+      if (lastGuess != null && !lastGuess.equals(guess)
+          && !lastGuess.equals(background)) {
+        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess)
+            && goldIndex == guessIndex && !lastGold.equals(gold)) {
+          // correct guesses already tallied
+          // str = "";
+          // only need to tally false positives
+        } else {
+          System.out.println("false positive: " + str);
+          entityFP.incrementCount(lastGuess, 1.0);
+          wordFP.incrementCount(str);
+        }
+        str = "";
+      }
+
+      if (lastGuess != null && lastGold != null && lastGold.equals(background)
+          && lastGuess.equals(background)) {
+        str = "";
+      }
+
+      if (lastGold == null || !lastGold.equals(gold)) {
+        lastGold = gold;
+        goldIndex = index;
+      }
+
+      if (lastGuess == null || !lastGuess.equals(guess)) {
+        lastGuess = guess;
+        guessIndex = index;
+      }
+
+      ++index;
+      if (str.isEmpty())
+        str = line.word();
+      else
+        str += " " + line.word();
+    }
+
+    // We also have to account for entities at the very end of the
+    // document, since the above logic only occurs when we see
+    // something that tells us an entity has ended
+    if (lastGold != null && !lastGold.equals(background)) {
+      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
+        entityTP.incrementCount(lastGold, 1.0);
+        wordTP.incrementCount(str);
+      } else {
+        entityFN.incrementCount(lastGold, 1.0);
+        wordFN.incrementCount(str);
+      }
+      str = "";
+    }
+    if (lastGuess != null && !lastGuess.equals(background)) {
+      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
+        // correct guesses already tallied
+      } else {
+        entityFP.incrementCount(lastGuess, 1.0);
+        wordFP.incrementCount(str);
+      }
+      str = "";
+    }
+    return true;
+  }
+
+  /**
+   * Count the successes and failures of the model on the given document
+   * ***token-based***. Fills numbers in to counters for true positives, false
+   * positives, and false negatives, and also keeps track of the entities seen. <br>
+   * Returns false if we ever encounter null for gold or guess.
+   * 
+   * this currrently is only for testing one label at a time
+   */
+  public static void countResultsPerToken(List<CoreLabel> doc,
+      Counter<String> entityTP, Counter<String> entityFP,
+      Counter<String> entityFN, String background, Counter<String> wordTP,
+      Counter<String> wordTN, Counter<String> wordFP, Counter<String> wordFN,
+      Class<? extends TypesafeMap.Key<String>> whichClassToCompare) {
+
+    CRFClassifier.countResults(doc, entityTP, entityFP, entityFN, background);
+
+    // int index = 0;
+    // int goldIndex = 0, guessIndex = 0;
+    // String lastGold = background, lastGuess = background;
+    // As we go through the document, there are two events we might be
+    // interested in. One is when a gold entity ends, and the other
+    // is when a guessed entity ends. If the gold and guessed
+    // entities end at the same time, started at the same time, and
+    // match entity type, we have a true positive. Otherwise we
+    // either have a false positive or a false negative.
+    for (CoreLabel line : doc) {
+
+      String gold = line.get(GoldAnswerAnnotation.class);
+      String guess = line.get(whichClassToCompare);
+
+      if (gold == null || guess == null)
+        throw new RuntimeException("why is gold or guess null?");
+
+      if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
+        entityTP.incrementCount(gold);
+        wordTP.incrementCount(line.word());
+      } else if (!gold.equals(guess) && !gold.equalsIgnoreCase(background)
+          && guess.equalsIgnoreCase(background)) {
+        entityFN.incrementCount(gold);
+        wordFN.incrementCount(line.word());
+
+      } else if (!gold.equals(guess) && !guess.equalsIgnoreCase(background)
+          && gold.equalsIgnoreCase(background)) {
+        wordFP.incrementCount(line.word());
+        entityFP.incrementCount(guess);
+      } else if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
+        wordTN.incrementCount(line.word());
+      } else if (!(gold.equalsIgnoreCase(background) && guess
+          .equalsIgnoreCase(background)))
+        throw new RuntimeException(
+            "don't know reached here. not meant for more than one entity label");
+
+    }
+
+  }
+
+  public static void countResults(List<CoreLabel> doc,
+      Counter<String> entityTP, Counter<String> entityFP,
+      Counter<String> entityFN, String background, Counter<String> wordTP,
+      Counter<String> wordTN, Counter<String> wordFP, Counter<String> wordFN,
+      Class<? extends TypesafeMap.Key<String>> whichClassToCompare,
+      boolean evalPerEntity) {
+    if (evalPerEntity) {
+      countResultsPerEntity(doc, entityTP, entityFP, entityFN, background,
+          wordTP, wordTN, wordFP, wordFN, whichClassToCompare);
+    } else {
+      countResultsPerToken(doc, entityTP, entityFP, entityFN, background,
+          wordTP, wordTN, wordFP, wordFN, whichClassToCompare);
+    }
+  }
+
+  public void writeLabeledData(String outFile) throws IOException {
+    BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
+    for (Entry<String, List<CoreLabel>> sent : Data.sents.entrySet()) {
+      writer.write(sent.getKey() + "\t");
+
+      Map<String, Boolean> lastWordLabeled = new HashMap<String, Boolean>();
+      for (String label : constVars.getLabelDictionary().keySet()) {
+        lastWordLabeled.put(label, false);
+      }
+
+      for (CoreLabel s : sent.getValue()) {
+        String str = "";
+        for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : constVars.answerClass
+            .entrySet()) {
+          String label = as.getKey();
+          boolean lastwordlabeled = lastWordLabeled.get(label);
+          if (s.get(as.getValue()).equals(label)) {
+            if (!lastwordlabeled) {
+              str += " <" + label + "> ";
+            }
+            lastWordLabeled.put(label, true);
+          } else {
+            if (lastwordlabeled) {
+              str += " </" + label + ">";
+            }
+            lastWordLabeled.put(label, false);
+          }
+        }
+        str += " " + s.word();
+        writer.write(str.trim() + " ");
+      }
+      writer.write("\n");
+    }
+    writer.close();
+  }
+
   // public Map<String, List<CoreLabel>> loadJavaNLPAnnotatorLabeledFile(String
   // labeledFile, Properties props) throws FileNotFoundException {
   // System.out.println("Loading evaluate file " + labeledFile);
@@ -2067,6 +2340,61 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   // System.out.println("FScore: " + fscore);
   // }
 
+  public void evaluate(Map<String, List<CoreLabel>> testSentences,
+      boolean evalPerEntity) throws IOException {
+
+    Counter<String> entityTP = new ClassicCounter<String>();
+    Counter<String> entityFP = new ClassicCounter<String>();
+    Counter<String> entityFN = new ClassicCounter<String>();
+
+    Counter<String> wordTP = new ClassicCounter<String>();
+    Counter<String> wordTN = new ClassicCounter<String>();
+    Counter<String> wordFP = new ClassicCounter<String>();
+    Counter<String> wordFN = new ClassicCounter<String>();
+
+    for (Entry<String, List<CoreLabel>> docEn : testSentences.entrySet()) {
+      List<CoreLabel> doc = docEn.getValue();
+      for (CoreLabel l : doc) {
+        for (Entry<String, Class<? extends Key<String>>> anscl : constVars.answerClass
+            .entrySet()) {
+          l.set(CoreAnnotations.AnswerAnnotation.class,
+              constVars.backgroundSymbol);
+          if (l.get(anscl.getValue()).equals(anscl.getKey())) {
+            l.set(CoreAnnotations.AnswerAnnotation.class, anscl.getKey());
+          }
+        }
+      }
+      countResults(doc, entityTP, entityFP, entityFN,
+          constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
+          CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
+    }
+    // System.out.println("False Positives: " + Counters.toSortedString(wordFP,
+    // wordFP.size(), "%s:%.2f", ";"));
+    // System.out.println("False Negatives: " + Counters.toSortedString(wordFN,
+    // wordFN.size(), "%s:%.2f", ";"));
+
+    System.out.println("\n\n True Positives: " + entityTP);
+    System.out.println("\n\n False Positives: " + entityFP);
+    System.out.println("\n\n False Negatives: " + entityFN);
+    Counter<String> precision = Counters.division(entityTP,
+        Counters.add(entityTP, entityFP));
+    Counter<String> recall = Counters.division(entityTP,
+        Counters.add(entityTP, entityFN));
+    System.out.println("\n Precision: " + precision);
+    System.out.println("\n Recall: " + recall);
+    System.out.println("\n F1 score:  " + FScore(precision, recall, 1));
+    System.out.println("Total: " + Counters.add(entityFP, entityTP));
+
+  }
+
+  public static <D> Counter<D> FScore(Counter<D> precision, Counter<D> recall,
+      double beta) {
+    double betasq = beta * beta;
+    return Counters.divisionNonNaN(
+        Counters.scale(Counters.product(precision, recall), (1 + betasq)),
+        (Counters.add(Counters.scale(precision, betasq), recall)));
+  }
+
   @SuppressWarnings({ "rawtypes" })
   public static void main(String[] args) {
     try {
@@ -2093,6 +2421,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Map<String, SurfacePattern> p0 = new HashMap<String, SurfacePattern>();
       Map<String, Counter<String>> p0Set = new HashMap<String, Counter<String>>();
       Map<String, Counter<String>> externalWordWeights = new HashMap<String, Counter<String>>();
+
+      String fileFormat = props.getProperty("fileFormat");
 
       if (inputSavedInstanceFile == null
           || !new File(inputSavedInstanceFile).exists()) {
@@ -2141,14 +2471,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         Map<String, List<CoreLabel>> sents = null;
 
-        String fileFormat = props.getProperty("fileFormat");
         String file = props.getProperty("file");
         String posModelPath = props.getProperty("posModelPath");
         boolean lowercase = Boolean.parseBoolean(props
             .getProperty("lowercaseText"));
         boolean useTargetNERRestriction = Boolean.parseBoolean(props
             .getProperty("useTargetNERRestriction"));
-        boolean useContextNERRestriction = Boolean.parseBoolean(props.getProperty("useContextNERRestriction"));
+        boolean useContextNERRestriction = Boolean.parseBoolean(props
+            .getProperty("useContextNERRestriction"));
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
           String text = IOUtils.stringFromFile(file);
@@ -2156,6 +2486,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               useTargetNERRestriction | useContextNERRestriction);
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           sents = IOUtils.readObjectFromFile(file);
+        } else if (fileFormat.equals("textWithGoldLabels")) {
+          Map setClassForTheseLabels = new HashMap<String, Class>();
+          boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct","true"));
+          List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(
+              new FileReader(file)), seedWords.keySet(), setClassForTheseLabels, true, splitOnPunct, lowercase);
+          sents = runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction | useContextNERRestriction);
         } else
           throw new RuntimeException(
               "Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
@@ -2171,7 +2507,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
 
       g.extremedebug = Boolean.parseBoolean(props.getProperty("extremedebug"));
-
+      
       System.out.println("Already learned words are "
           + g.getLearnedWords("onelabel"));
       g.iterateExtractApply(p0, p0Set, externalWordWeights, wordsOutputFile,
@@ -2183,7 +2519,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
       boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
       if (evaluate) {
-        throw new RuntimeException("not implemented");
+        if (fileFormat.equals("textWithGoldLabels")) {
+          boolean evalPerEntity = Boolean.parseBoolean(props.getProperty("evalPerEntity"));
+          g.evaluate(Data.sents, evalPerEntity);
+        } else
+          throw new RuntimeException(
+              "Evaluation is only imlemented for textWithGoldLabels");
         // String evalFile = props.getProperty("evalFile");
         // Map<String, List<CoreLabel>> evalSents =
         // g.loadJavaNLPAnnotatorLabeledFile(evalFile, props);

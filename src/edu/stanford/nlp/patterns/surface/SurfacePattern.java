@@ -1,26 +1,34 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.Serializable;
+import java.util.List;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
+
+/**
+ * To present a surface pattern in more detail. The class is not completely kosher. See {@link PatternToken} for more info.
+ * 
+ * Author: Sonal Gupta (sonalg@stanford.edu)
+ */
 
 public class SurfacePattern implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private String[] prevContext;
-  private String[] nextContext;
+  protected String[] prevContext;
+  protected String[] nextContext;
   String prevContextStr = "", nextContextStr = "";
-  private PatternToken token;
-  private String originalPrevStr;
-
-  private String originalNextStr;
+  protected PatternToken token;
+  protected String[] originalPrev;
+  protected String[] originalNext;
+  protected String originalPrevStr = "";
+  protected String originalNextStr = "";
 
   public static boolean insertModifierWildcard = false;
 
   public SurfacePattern(String[] prevContext, PatternToken token,
-      String[] nextContext, String originalPrevStr, String originalNextStr) {
+      String[] nextContext, String[] originalPrev, String[] originalNext) {
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
 
@@ -31,8 +39,12 @@ public class SurfacePattern implements Serializable {
       nextContextStr = StringUtils.join(nextContext, " ");
 
     this.setToken(token);
-    this.setOriginalNextStr(originalNextStr);
-    this.setOriginalPrevStr(originalPrevStr);
+    this.setOriginalPrev(originalPrev);
+    this.setOriginalNext(originalNext);
+    if (originalPrev != null)
+      originalPrevStr = StringUtils.join(originalPrev, " ");
+    if (originalNext != null)
+      originalNextStr = StringUtils.join(originalNext, " ");
   }
 
   public static String getContextStr(CoreLabel tokenj,
@@ -59,14 +71,14 @@ public class SurfacePattern implements Serializable {
     return str;
   }
 
-  public String toString() {
-    return (prevContextStr + " " + getToken().getTokenStr() + " " + nextContextStr)
+  public String toString(List<String> notAllowedClasses) {
+    return (prevContextStr + " " + getToken().getTokenStr(notAllowedClasses) + " " + nextContextStr)
         .trim();
   }
 
-  public String toString(String morePreviousPattern, String moreNextPattern) {
+  public String toString(String morePreviousPattern, String moreNextPattern, List<String> notAllowedClasses) {
     return (prevContextStr + " " + morePreviousPattern + " "
-        + getToken().getTokenStr() + " " + moreNextPattern + " " + nextContextStr)
+        + getToken().getTokenStr(notAllowedClasses) + " " + moreNextPattern + " " + nextContextStr)
         .trim();
   }
 
@@ -108,6 +120,11 @@ public class SurfacePattern implements Serializable {
   public int hashCode() {
     return toString().hashCode();
   }
+  
+  @Override
+  public String toString(){
+    return toString(null);
+  }
 
   public String toStringToWrite() {
     return prevContextStr + "##" + getToken().toStringToWrite() + "##"
@@ -115,8 +132,8 @@ public class SurfacePattern implements Serializable {
   }
 
   public String toStringSimple() {
-    return getOriginalPrevStr() + " <b>" + getToken().toStringToWrite() + "</b> "
-        + getOriginalNextStr();
+    return getOriginalPrevStr() + " <b>" + getToken().toStringToWrite()
+        + "</b> " + getOriginalNextStr();
   }
 
   public String[] getPrevContext() {
@@ -157,6 +174,22 @@ public class SurfacePattern implements Serializable {
 
   public void setOriginalNextStr(String originalNextStr) {
     this.originalNextStr = originalNextStr;
+  }
+
+  public String[] getOriginalPrev() {
+    return originalPrev;
+  }
+
+  public void setOriginalPrev(String[] originalPrev) {
+    this.originalPrev = originalPrev;
+  }
+
+  public String[] getOriginalNext() {
+    return originalNext;
+  }
+
+  public void setOriginalNext(String[] originalNext) {
+    this.originalNext = originalNext;
   }
 
   // public static SurfacePattern parse(String s) {

@@ -250,7 +250,14 @@ public class ScorePhrases {
       }
     } else {
       List<String> keyset = new ArrayList<String>(sents.keySet());
-
+      List<String> notAllowedClasses = new ArrayList<String>();
+      if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
+        for(String l: constVars.answerClass.keySet()){
+          if(!l.equals(label)){
+            notAllowedClasses.add(l+":"+l);
+          }
+        }
+      }
       int num = 0;
       if (constVars.numThreads == 1)
         num = keyset.size();
@@ -267,7 +274,7 @@ public class ScorePhrases {
         Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> task = null;
         Map<TokenSequencePattern, SurfacePattern> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , SurfacePattern>();
         for(SurfacePattern p : patternsLearnedThisIter.keySet()){
-          TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString());
+          TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString(notAllowedClasses));
           patternsLearnedThisIterConverted.put(pat, p);
         }
         
