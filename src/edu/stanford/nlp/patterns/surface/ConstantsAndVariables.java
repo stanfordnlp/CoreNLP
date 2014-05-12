@@ -373,7 +373,7 @@ public class ConstantsAndVariables {
    * Percentage of negative tokens selected as negative.
    */
   @Option(name = "perSelectNeg")
-  public double perSelectNeg = 0.1;
+  public double perSelectNeg = 1;
 
   /**
    * Especially useful for multi word phrase extraction. Do not extract a phrase
