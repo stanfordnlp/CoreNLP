@@ -64,7 +64,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
           assert (Data.rawFreq.containsKey(g));
           domainNgramNormScores.setCount(g, getDomainNgramScore(g));
         }else
-          throw new RuntimeException("why is " + g + " not present in domainNgram");
+          System.err.println("why is " + g + " not present in domainNgram");
       }
 
       if (constVars.usePhraseEvalGoogleNgram) {
