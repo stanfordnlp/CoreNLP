@@ -2686,7 +2686,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param overWrite Whether to replace an existing index for a leaf.
    * @return the next index still unassigned
    */
-  private int indexLeaves(int startIndex, boolean overWrite) {
+  public int indexLeaves(int startIndex, boolean overWrite) {
     if (isLeaf()) {
 
       /*CoreLabel afl = (CoreLabel) label();
