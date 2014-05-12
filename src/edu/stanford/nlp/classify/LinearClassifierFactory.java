@@ -934,19 +934,19 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
                 + currLine + " in file " + file);
         }
         currLine++;
-        int feature = Integer.parseInt(tuples[0]);
-        int label = Integer.parseInt(tuples[1]);
-        double value = Double.parseDouble(tuples[2]);
+        int feature = Integer.valueOf(tuples[0]);
+        int label = Integer.valueOf(tuples[1]);
+        double value = Double.valueOf(tuples[2]);
         weights[feature][label] = value;
         line = in.readLine();
       }
 
       // First line in thresholds is the number of thresholds
-      int numThresholds = Integer.parseInt(in.readLine());
+      int numThresholds = Integer.valueOf(in.readLine());
       double[] thresholds = new double[numThresholds];
       int curr = 0;
       while ((line = in.readLine()) != null) {
-        double tval = Double.parseDouble(line.trim());
+        double tval = Double.valueOf(line.trim());
         thresholds[curr++] = tval;
       }
       in.close();

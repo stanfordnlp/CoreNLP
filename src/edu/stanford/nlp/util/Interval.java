@@ -26,14 +26,14 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
    * Flag indicating that an interval's begin point is not inclusive
    * (by default, begin points are inclusive)
    */
-  public static final int INTERVAL_OPEN_BEGIN = 0x01;
+  public static int INTERVAL_OPEN_BEGIN = 0x01;
   /**
    * Flag indicating that an interval's end point is not inclusive
    * (by default, begin points are inclusive)
    */
-  public static final int INTERVAL_OPEN_END = 0x02;
+  public static int INTERVAL_OPEN_END = 0x02;
 
-  private final int flags;
+  private int flags;
 
   /**
    * RelType gives the basic types of relations between two intervals
@@ -391,16 +391,15 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   }
 
   /**
-   * Returns this interval.
+   * Returns this interval
    * @return this interval
    */
-  @Override
   public Interval<E> getInterval() {
     return this;
   }
 
   /**
-   * Returns the start point.
+   * Returns the start point
    * @return the start point of this interval
    */
   public E getBegin()
@@ -409,7 +408,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   }
 
   /**
-   * Returns the end point.
+   * Returns the end point
    * @return the end point of this interval
    */
   public E getEnd()
@@ -628,7 +627,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     }
   }
 
-  protected static int toRelFlags(int comp, int shift)
+  protected int toRelFlags(int comp, int shift)
   {
     int flags = 0;
     if (comp == 0) {
@@ -665,7 +664,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return flags;
   }
 
-  protected static int addIntervalRelationFlags(int flags, boolean checkFuzzy) {
+  protected int addIntervalRelationFlags(int flags, boolean checkFuzzy) {
     int f11 = extractRelationSubflags(flags, REL_FLAGS_SS_SHIFT);
     int f22 = extractRelationSubflags(flags, REL_FLAGS_EE_SHIFT);
     int f12 = extractRelationSubflags(flags, REL_FLAGS_SE_SHIFT);
@@ -739,7 +738,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
 
   /**
    * Utility function to check if a particular flag is set
-   *   given a particular set of flags.
+   *   given a particular set of flags
    * @param flags flags to check
    * @param flag bit for flag of interest (is this flag set or not)
    * @return true if flag is set for flags
