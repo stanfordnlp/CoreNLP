@@ -965,7 +965,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           Map<Class, Object> ignore = constVars.ignoreWordswithClassesDuringSelection
               .get(label);
           for (Class igCl : ignore.keySet())
-            if ((Boolean) token.get(igCl)) {
+            if ((boolean) token.get(igCl)) {
               negToken = true;
               break;
             }
