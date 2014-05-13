@@ -2235,7 +2235,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       // Read Evaluation File
       Map<String, List<CoreLabel>> evalsents = new HashMap<String, List<CoreLabel>>();
       if (evaluate) {
-        Map<String, Class> setClassForTheseLabels = new HashMap<String, Class>();
+        Map setClassForTheseLabels = new HashMap<String, Class>();
         boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
         List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
         int numFile = 0;
