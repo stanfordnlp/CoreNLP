@@ -519,11 +519,14 @@ public class ConstantsAndVariables {
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
 
+  @Option(name="wordNetFile")
+  public String wordNetFile = null;
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
   String backgroundSymbol = "O";
 
+  
   Properties props;
 
   @SuppressWarnings("rawtypes")

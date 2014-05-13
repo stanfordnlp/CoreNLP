@@ -998,10 +998,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class);
+        
         scorePatterns = ctor.newInstance(new Object[] { constVars,
             constVars.patternScoring, label, patternsandWords4Label,
             negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-            negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label });
+            negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, constVars.wordNetFile });
 
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(
