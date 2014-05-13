@@ -1717,7 +1717,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           wordTP.incrementCount(str);
           entityTP.incrementCount(lastGold, 1.0);
         } else {
-          System.out.println("false negative: " + str);
+          //System.out.println("false negative: " + str);
           wordFN.incrementCount(str);
           entityFN.incrementCount(lastGold, 1.0);
           str = "";
@@ -1733,7 +1733,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           // str = "";
           // only need to tally false positives
         } else {
-          System.out.println("false positive: " + str);
+          //System.out.println("false positive: " + str);
           entityFP.incrementCount(lastGuess, 1.0);
           wordFP.incrementCount(str);
         }
@@ -2029,10 +2029,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
           CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
     }
-    System.out.println("False Positives: "
-        + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
-    System.out.println("False Negatives: "
-        + Counters.toSortedString(wordFN, wordFN.size(), "%s:%.2f", ";"));
+    // System.out.println("False Positives: "
+    // + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
+    // System.out.println("False Negatives: "
+    // + Counters.toSortedString(wordFN, wordFN.size(), "%s:%.2f", ";"));
 
     System.out.println("\n\n True Positives: " + entityTP);
     System.out.println("\n\n False Positives: " + entityFP);
