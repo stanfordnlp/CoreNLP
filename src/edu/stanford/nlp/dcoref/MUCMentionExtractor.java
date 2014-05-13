@@ -52,9 +52,7 @@ import edu.stanford.nlp.util.Generics;
 /**
  * Extracts {@literal <COREF>} mentions from a file annotated in MUC format.
  *
- * @author Jenny Finkel
- * @author Mihai Surdeanu
- * @author Karthik Raghunathan
+ * @author Jenny Finkel, Mihai Surdeanu, Karthik Raghunathan
  */
 public class MUCMentionExtractor extends MentionExtractor {
 
@@ -185,11 +183,11 @@ public class MUCMentionExtractor extends MentionExtractor {
 
           Matcher m = idPattern.matcher(w);
           m.find();
-          mention.mentionID = Integer.parseInt(m.group(1));
+          mention.mentionID = Integer.valueOf(m.group(1));
 
           m = refPattern.matcher(w);
           if (m.find()) {
-            mention.originalRef = Integer.parseInt(m.group(1));
+            mention.originalRef = Integer.valueOf(m.group(1));
           }
 
           // open mention. keep track of all open mentions using the stack
