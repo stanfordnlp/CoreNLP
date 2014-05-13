@@ -997,16 +997,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             ConstantsAndVariables.class, PatternScoring.class, String.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
-            TwoDimensionalCounter.class, String.class);
+            TwoDimensionalCounter.class);
         
         scorePatterns = ctor.newInstance(new Object[] { constVars,
             constVars.patternScoring, label, patternsandWords4Label,
             negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-            negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, constVars.wordNetFile });
+            negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label });
 
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(
-            "kNN pattern scoring is not released yet. Keep tuned.");
+            "kNN pattern scoring is not released yet. Stay tuned.");
       } catch (NoSuchMethodException | InvocationTargetException
           | IllegalAccessException | InstantiationException e) {
         e.printStackTrace();
@@ -1016,7 +1016,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       throw new RuntimeException(constVars.patternScoring
           + " is not implemented (check spelling?). ");
     }
-
+    
+    scorePatterns.setUp(props);
     currentPatternWeights4Label = scorePatterns.score();
 
     Redwood.log("extremePatDebug", "patterns counter size is "

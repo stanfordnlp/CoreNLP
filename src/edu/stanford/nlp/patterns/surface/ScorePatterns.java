@@ -1,6 +1,7 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
@@ -41,4 +42,5 @@ public abstract class ScorePatterns {
     this.negandUnLabeledPatternsandWords4Label = negandUnLabeledPatternsandWords4Label;
     this.allPatternsandWords4Label = allPatternsandWords4Label;
   }
+  abstract public void setUp(Properties props);
 }

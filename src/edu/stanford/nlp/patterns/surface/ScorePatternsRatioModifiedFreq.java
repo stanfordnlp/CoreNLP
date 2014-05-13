@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -37,8 +38,10 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
   private ScorePhrases scorePhrases;
 
-  // private Counter<String> externalWordWeights;
-
+  @Override
+  public void setUp(Properties props){}
+  
+  @Override
   Counter<SurfacePattern> score() throws IOException {
     // TODO: changed
     Counter<String> externalWordWeightsNormalized = null;
