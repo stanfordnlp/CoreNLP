@@ -25,7 +25,9 @@ public class SurfacePattern implements Serializable {
   protected String[] originalNext;
   protected String originalPrevStr = "";
   protected String originalNextStr = "";
-
+  protected String toString;
+  protected int hashcode;
+  
   public static boolean insertModifierWildcard = false;
 
   public SurfacePattern(String[] prevContext, PatternToken token,
@@ -46,6 +48,9 @@ public class SurfacePattern implements Serializable {
       originalPrevStr = StringUtils.join(originalPrev, " ");
     if (originalNext != null)
       originalNextStr = StringUtils.join(originalNext, " ");
+    
+    toString = toString(null);
+    hashcode = toString.hashCode();
   }
 
   public static String getContextStr(CoreLabel tokenj,
@@ -120,12 +125,12 @@ public class SurfacePattern implements Serializable {
 
   @Override
   public int hashCode() {
-    return toString().hashCode();
+    return hashcode;
   }
 
   @Override
   public String toString() {
-    return toString(null);
+    return toString;
   }
 
   public String toStringToWrite() {
