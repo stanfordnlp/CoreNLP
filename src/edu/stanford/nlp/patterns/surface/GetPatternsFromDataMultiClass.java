@@ -445,6 +445,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       boolean useTargetNERRestriction, String prefix,
       boolean useTargetParserParentRestriction, String numThreads) {
     Annotation doc = new Annotation(sentsCM);
+    
     Properties props = new Properties();
     List<String> anns = new ArrayList<String>();
     anns.add("pos");
@@ -460,10 +461,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     props.setProperty("annotators", StringUtils.join(anns, ","));
     props.setProperty("parse.maxlen", "80");
-    //props.setProperty("pos.maxlen", "80");
+    // props.setProperty("pos.maxlen", "80");
     props.setProperty("nthreads", numThreads);
     props.setProperty("threads", numThreads);
-    
+
     // props.put( "tokenize.options",
     // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
@@ -512,7 +513,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       props.setProperty("annotators", StringUtils.join(anns, ","));
       props.setProperty("parse.maxlen", "80");
-      //props.setProperty("pos.maxlen", "100");
+      // props.setProperty("pos.maxlen", "100");
       props.setProperty("threads", numThreads);
 
       props
@@ -2153,8 +2154,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
 
-      GetPatternsFromDataMultiClass g = null;
-
       Map<String, Set<SurfacePattern>> ignorePatterns = new HashMap<String, Set<SurfacePattern>>();
       Map<String, SurfacePattern> p0 = new HashMap<String, SurfacePattern>();
       Map<String, Counter<String>> p0Set = new HashMap<String, Counter<String>>();
@@ -2234,13 +2233,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             String text = IOUtils.stringFromFile(f.getAbsolutePath());
             sents.putAll(tokenize(text, posModelPath, lowercase,
                 useTargetNERRestriction | useContextNERRestriction, f.getName()
-                    + "-", useTargetParserParentRestriction, props.getProperty("numThreads")));
+                    + "-", useTargetParserParentRestriction,
+                props.getProperty("numThreads")));
           }
-          String saveSentencesSerFile = props
-              .getProperty("saveSentencesSerFile");
-          if (saveSentencesSerFile != null) {
-            IOUtils.writeObjectToFile(sents, saveSentencesSerFile);
-          }
+
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           for (File f : allFiles)
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils
@@ -2268,13 +2264,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                 f.getName());
             evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
                 useTargetNERRestriction | useContextNERRestriction, "",
-                useTargetParserParentRestriction, props.getProperty("numThreads")));
+                useTargetParserParentRestriction,
+                props.getProperty("numThreads")));
           }
-          String saveEvalSentencesSerFile = props
-              .getProperty("saveEvalSentencesSerFile");
-          if (saveEvalSentencesSerFile != null) {
-            IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFile);
-          }
+
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           for (File f : allFiles) {
             evalsents
@@ -2288,33 +2281,44 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           sents.putAll(evalsents);
         }
       }
-      System.out.println("Processing # sents " + sents.size()
-          + " from file(s) " + file);
+
+      boolean learn = Boolean.parseBoolean(props.getProperty("learn", "true"));
+
       boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty(
           "labelUsingSeedSets", "true"));
-      g = new GetPatternsFromDataMultiClass(props, sents, seedWords,
-          labelUsingSeedSets);
-
-      Execution.fillOptions(g, props);
-
-      Redwood.log(Redwood.FORCE, "Total number of training sentences "
-          + Data.sents.size());
-
-      String sentsOutFile = props.getProperty("sentsOutFile");
-
-      String wordsOutputFile = props.getProperty("wordsOutputFile");
-
-      String patternOutFile = props.getProperty("patternOutFile");
-
-      g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile,
-          patternOutFile, ignorePatterns);
-
-      if (evaluate) {
-        boolean evalPerEntity = Boolean.parseBoolean(props.getProperty(
-            "evalPerEntity", "true"));
-        g.evaluate(evalsents, evalPerEntity);
+      GetPatternsFromDataMultiClass g = new GetPatternsFromDataMultiClass(
+          props, sents, seedWords, labelUsingSeedSets);
+      String saveEvalSentencesSerFile = props
+          .getProperty("saveEvalSentencesSerFile");
+      if (saveEvalSentencesSerFile != null) {
+        IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFile);
+      }
+      String saveSentencesSerFile = props.getProperty("saveSentencesSerFile");
+      if (saveSentencesSerFile != null) {
+        IOUtils.writeObjectToFile(sents, saveSentencesSerFile);
       }
 
+      Execution.fillOptions(g, props);
+      if (learn) {
+
+        Redwood.log(Redwood.FORCE, "Total number of training sentences "
+            + Data.sents.size());
+
+        String sentsOutFile = props.getProperty("sentsOutFile");
+
+        String wordsOutputFile = props.getProperty("wordsOutputFile");
+
+        String patternOutFile = props.getProperty("patternOutFile");
+
+        g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile,
+            patternOutFile, ignorePatterns);
+
+        if (evaluate) {
+          boolean evalPerEntity = Boolean.parseBoolean(props.getProperty(
+              "evalPerEntity", "true"));
+          g.evaluate(evalsents, evalPerEntity);
+        }
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
