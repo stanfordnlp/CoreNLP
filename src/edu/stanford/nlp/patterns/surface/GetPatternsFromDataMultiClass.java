@@ -1898,21 +1898,17 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
         entityTP.incrementCount(gold);
         wordTP.incrementCount(line.word());
-      } else if (!gold.equals(guess) && !gold.equalsIgnoreCase(background)
-          && guess.equalsIgnoreCase(background)) {
+      } else if (!gold.equals(guess) && !gold.equalsIgnoreCase(background) && guess.equalsIgnoreCase(background)) {
         entityFN.incrementCount(gold);
         wordFN.incrementCount(line.word());
 
-      } else if (!gold.equals(guess) && !guess.equalsIgnoreCase(background)
-          && gold.equalsIgnoreCase(background)) {
+      } else if (!gold.equals(guess) && !guess.equalsIgnoreCase(background) && gold.equalsIgnoreCase(background)) {
         wordFP.incrementCount(line.word());
         entityFP.incrementCount(guess);
       } else if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
         wordTN.incrementCount(line.word());
-      } else if (!(gold.equalsIgnoreCase(background) && guess
-          .equalsIgnoreCase(background)))
-        throw new RuntimeException(
-            "don't know reached here. not meant for more than one entity label");
+      } else if (!(gold.equalsIgnoreCase(background) && guess.equalsIgnoreCase(background)))
+        throw new RuntimeException("don't know reached here. not meant for more than one entity label");
 
     }
 
@@ -2091,18 +2087,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     for (Entry<String, List<CoreLabel>> docEn : testSentences.entrySet()) {
       List<CoreLabel> doc = docEn.getValue();
       for (CoreLabel l : doc) {
-        for (Entry<String, Class<? extends Key<String>>> anscl : constVars.answerClass
-            .entrySet()) {
-          l.set(CoreAnnotations.AnswerAnnotation.class,
-              constVars.backgroundSymbol);
+        for (Entry<String, Class<? extends Key<String>>> anscl : constVars.answerClass.entrySet()) {
+          l.set(CoreAnnotations.AnswerAnnotation.class, constVars.backgroundSymbol);
           if (l.get(anscl.getValue()).equals(anscl.getKey())) {
             l.set(CoreAnnotations.AnswerAnnotation.class, anscl.getKey());
           }
         }
       }
       countResults(doc, entityTP, entityFP, entityFN,
-          constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
-          CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
+                   constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
+                   CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
     }
     // System.out.println("False Positives: "
     // + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
@@ -2112,10 +2106,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     System.out.println("\n\n True Positives: " + entityTP);
     System.out.println("\n\n False Positives: " + entityFP);
     System.out.println("\n\n False Negatives: " + entityFN);
-    Counter<String> precision = Counters.division(entityTP,
-        Counters.add(entityTP, entityFP));
-    Counter<String> recall = Counters.division(entityTP,
-        Counters.add(entityTP, entityFN));
+    Counter<String> precision = Counters.division(entityTP, Counters.add(entityTP, entityFP));
+    Counter<String> recall = Counters.division(entityTP, Counters.add(entityTP, entityFN));
     System.out.println("\n Precision: " + precision);
     System.out.println("\n Recall: " + recall);
     System.out.println("\n F1 score:  " + FScore(precision, recall, 1));
@@ -2123,12 +2115,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   }
 
-  public static <D> Counter<D> FScore(Counter<D> precision, Counter<D> recall,
-      double beta) {
+  public static <D> Counter<D> FScore(Counter<D> precision, Counter<D> recall, double beta) {
     double betasq = beta * beta;
-    return Counters.divisionNonNaN(
-        Counters.scale(Counters.product(precision, recall), (1 + betasq)),
-        (Counters.add(Counters.scale(precision, betasq), recall)));
+    return Counters.divisionNonNaN(Counters.scale(Counters.product(precision, recall), (1 + betasq)),
+                                   (Counters.add(Counters.scale(precision, betasq), recall)));
   }
 
   public static List<File> getAllFiles(String file) {
@@ -2137,9 +2127,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       File filef = new File(tokfile);
       String ext = ".*";
       File dir = null;
-      if (filef.isDirectory())
+      if (filef.isDirectory()) {
         dir = filef;
-      else {
+      } else {
         dir = filef.getParentFile();
         ext = filef.getName();
       }
@@ -2245,7 +2235,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       // Read Evaluation File
       Map<String, List<CoreLabel>> evalsents = new HashMap<String, List<CoreLabel>>();
       if (evaluate) {
-        Map setClassForTheseLabels = new HashMap<String, Class>();
+        Map<String, Class> setClassForTheseLabels = new HashMap<String, Class>();
         boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
         List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
         int numFile = 0;
