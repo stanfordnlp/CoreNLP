@@ -443,7 +443,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public static Map<String, List<CoreLabel>> runPOSNEROnTokens(
       List<CoreMap> sentsCM, String posModelPath,
       boolean useTargetNERRestriction, String prefix,
-      boolean useTargetParserParentRestriction) {
+      boolean useTargetParserParentRestriction, String numThreads) {
     Annotation doc = new Annotation(sentsCM);
     Properties props = new Properties();
     List<String> anns = new ArrayList<String>();
@@ -460,6 +460,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     props.setProperty("annotators", StringUtils.join(anns, ","));
     props.setProperty("parser.maxlen", "120");
+    props.setProperty("nthreads", numThreads);
     // props.put( "tokenize.options",
     // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
@@ -488,8 +489,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public static Map<String, List<CoreLabel>> tokenize(String text,
       String posModelPath, boolean lowercase, boolean useTargetNERRestriction,
-      String sentIDPrefix, boolean useTargetParserParentRestriction)
-      throws InterruptedException, ExecutionException, IOException {
+      String sentIDPrefix, boolean useTargetParserParentRestriction,
+      String numThreads) throws InterruptedException, ExecutionException,
+      IOException {
     if (pipeline == null) {
       Properties props = new Properties();
       List<String> anns = new ArrayList<String>();
@@ -507,6 +509,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       props.setProperty("annotators", StringUtils.join(anns, ","));
       props.setProperty("parser.maxlen", "120");
+      props.setProperty("nthreads", numThreads);
+
       props
           .put(
               "tokenize.options",
@@ -2226,7 +2230,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             String text = IOUtils.stringFromFile(f.getAbsolutePath());
             sents.putAll(tokenize(text, posModelPath, lowercase,
                 useTargetNERRestriction | useContextNERRestriction, f.getName()
-                    + "-", useTargetParserParentRestriction));
+                    + "-", useTargetParserParentRestriction, props.getProperty("numThreads")));
           }
           String saveSentencesSerFile = props
               .getProperty("saveSentencesSerFile");
@@ -2260,7 +2264,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                 f.getName());
             evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
                 useTargetNERRestriction | useContextNERRestriction, "",
-                useTargetParserParentRestriction));
+                useTargetParserParentRestriction, props.getProperty("numThreads")));
           }
           String saveEvalSentencesSerFile = props
               .getProperty("saveEvalSentencesSerFile");
