@@ -42,10 +42,7 @@ import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
-import edu.stanford.nlp.patterns.surface.Data;
-import edu.stanford.nlp.patterns.surface.PatternsAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -64,7 +61,6 @@ import edu.stanford.nlp.util.EditDistance;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PriorityQueue;
-import edu.stanford.nlp.util.Sets;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.TypesafeMap;
@@ -75,10 +71,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  * Given text and a seed list, this class gives more words like the seed words
  * by learning surface word patterns.
  * <p>
- * 
+ *
  * The multi-threaded class (<code>nthread</code> parameter for number of
  * threads) takes as input.
- * 
+ *
  * To use the default options, run
  * <p>
  * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -outDir output_directory (optional)</code>
@@ -86,7 +82,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * IMPORTANT: Many flags are described in the classes
  * {@link ConstantsAndVariables}, {@link CreatePatterns}, and
  * {@link PhraseScorer}
- * 
+ *
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
  * (or txt) and ser, where the serialized file is of the type Map<String,
  * List<CoreLabel>>.
@@ -103,7 +99,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * files are stored
  * <p>
  * For other flags, see individual comments for each flag.
- * 
+ *
  * @author Sonal Gupta (sonal@cs.stanford.edu)
  */
 
@@ -118,7 +114,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   // String channelNameLogger = "patterns";
   /**
-   * 
+   *
    * RlogF is from Riloff 1996, when R's denominator is (pos+neg+unlabeled)
    * <p>
    * RlogFPosNeg is when the R's denominator is just (pos+negative) examples
@@ -145,11 +141,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public enum PatternScoring {
     F1, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds, YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, SqrtAllRatio, LinICML03, kNN
 
-  };
+  }
 
   enum WordScoring {
     BPB, WEIGHTEDNORM
-  };
+  }
 
   Map<String, Boolean> writtenPatInJustification = new HashMap<String, Boolean>();
 
@@ -169,9 +165,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * when there is only one label
    */
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
-      boolean labelUsingSeedSets, String answerLabel) throws IOException,
-      InstantiationException, IllegalAccessException, IllegalArgumentException,
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets,
+      String answerLabel) throws IOException, InstantiationException,
+      IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException,
       InterruptedException, ExecutionException {
     this(props, sents, seedSet, labelUsingSeedSets,
@@ -180,12 +176,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
-      boolean labelUsingSeedSets, Class answerClass, String answerLabel)
-      throws IOException, InstantiationException, IllegalAccessException,
-      IllegalArgumentException, InvocationTargetException,
-      NoSuchMethodException, SecurityException, InterruptedException,
-      ExecutionException {
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets,
+      Class answerClass, String answerLabel) throws IOException,
+      InstantiationException, IllegalAccessException, IllegalArgumentException,
+      InvocationTargetException, NoSuchMethodException, SecurityException,
+      InterruptedException, ExecutionException {
     this.props = props;
     Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     ansCl.put(answerLabel, answerClass);
@@ -218,8 +213,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
-      boolean labelUsingSeedSets, Class answerClass, String answerLabel,
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets,
+      Class answerClass, String answerLabel,
       Map<String, Class> generalizeClasses, Map<Class, Object> ignoreClasses)
       throws IOException, InstantiationException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException,
@@ -277,7 +272,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   /**
    * generalize classes basically maps label strings to a map of generalized
    * strings and the corresponding class ignoreClasses have to be boolean
-   * 
+   *
    * @throws IOException
    * @throws SecurityException
    * @throws NoSuchMethodException
@@ -562,7 +557,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * If l1 is a part of l2, it finds the starting index of l1 in l2 If l1 is not
    * a sub-array of l2, then it returns -1 note that l2 should have the exact
    * elements and order as in l1
-   * 
+   *
    * @param l1
    *          array you want to find in l2
    * @param l2
@@ -902,7 +897,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           Map<Class, Object> ignore = constVars.ignoreWordswithClassesDuringSelection
               .get(label);
           for (Class igCl : ignore.keySet())
-            if ((boolean) token.get(igCl)) {
+            if ((Boolean) token.get(igCl)) {
               negToken = true;
               break;
             }
@@ -995,19 +990,22 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class);
-        
-        scorePatterns = ctor.newInstance(new Object[] { constVars,
-            constVars.patternScoring, label, patternsandWords4Label,
-            negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-            negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label });
+        scorePatterns = ctor.newInstance(constVars,
+                constVars.patternScoring, label, patternsandWords4Label,
+                negPatternsandWords4Label, unLabeledPatternsandWords4Label,
+                negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
 
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(
-            "kNN pattern scoring is not released yet. Stay tuned.");
-      } catch (NoSuchMethodException | InvocationTargetException
-          | IllegalAccessException | InstantiationException e) {
-        e.printStackTrace();
-        throw new RuntimeException("newinstance of kNN not created");
+            "kNN pattern scoring is not released yet. Keep tuned.");
+      } catch (NoSuchMethodException e) {
+        throw new RuntimeException("newinstance of kNN not created", e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException("newinstance of kNN not created", e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException("newinstance of kNN not created", e);
+      } catch (InstantiationException e) {
+        throw new RuntimeException("newinstance of kNN not created", e);
       }
     } else {
       throw new RuntimeException(constVars.patternScoring
@@ -1869,7 +1867,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * ***token-based***. Fills numbers in to counters for true positives, false
    * positives, and false negatives, and also keeps track of the entities seen. <br>
    * Returns false if we ever encounter null for gold or guess.
-   * 
+   *
    * this currrently is only for testing one label at a time
    */
   public static void countResultsPerToken(List<CoreLabel> doc,
@@ -2240,9 +2238,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
             String text = IOUtils.stringFromFile(f.getAbsolutePath());
             sents.putAll(tokenize(text, posModelPath, lowercase,
-                useTargetNERRestriction | useContextNERRestriction, f.getName()
+                useTargetNERRestriction || useContextNERRestriction, f.getName()
                     + "-", useTargetParserParentRestriction,
-                props.getProperty("numThreads")));
+                    props.getProperty("numThreads")));
           }
 
         } else if (fileFormat.equalsIgnoreCase("ser")) {
@@ -2274,7 +2272,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                 setClassForTheseLabels, true, splitOnPunct, lowercase,
                 f.getName());
             evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
-                useTargetNERRestriction | useContextNERRestriction, "",
+                useTargetNERRestriction || useContextNERRestriction, "",
                 useTargetParserParentRestriction,
                 props.getProperty("numThreads")));
           }
@@ -2333,5 +2331,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
+  } // end main()
+
 }
