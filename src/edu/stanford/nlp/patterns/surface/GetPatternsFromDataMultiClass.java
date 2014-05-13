@@ -460,7 +460,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     props.setProperty("annotators", StringUtils.join(anns, ","));
     props.setProperty("parse.maxlen", "80");
-    props.setProperty("pos.maxlen", "80");
+    //props.setProperty("pos.maxlen", "80");
     props.setProperty("nthreads", numThreads);
     props.setProperty("threads", numThreads);
     
@@ -512,7 +512,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       props.setProperty("annotators", StringUtils.join(anns, ","));
       props.setProperty("parse.maxlen", "80");
-      props.setProperty("pos.maxlen", "80");
+      //props.setProperty("pos.maxlen", "100");
       props.setProperty("threads", numThreads);
 
       props
