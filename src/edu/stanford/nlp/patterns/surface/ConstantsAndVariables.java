@@ -34,7 +34,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables {
 
-
   /**
    * Maximum number of iterations to run
    */
@@ -46,7 +45,6 @@ public class ConstantsAndVariables {
    */
   @Option(name = "numPatterns")
   public int numPatterns = 10;
-
 
   /**
    * The output directory where the justifications of learning patterns and
@@ -83,12 +81,12 @@ public class ConstantsAndVariables {
   @Option(name = "thresholdSelectPattern")
   public double thresholdSelectPattern = 1.0;
 
-  /**
-   * Do not learn patterns that do not extract any unlabeled tokens (kind of
-   * useless)
-   */
-  @Option(name = "discardPatternsWithNoUnlabSupport")
-  public boolean discardPatternsWithNoUnlabSupport = true;
+//  /**
+//   * Do not learn patterns that do not extract any unlabeled tokens (kind of
+//   * useless)
+//   */
+//  @Option(name = "discardPatternsWithNoUnlabSupport")
+//  public boolean discardPatternsWithNoUnlabSupport = true;
 
   /**
    * Currently, does not work correctly. TODO: make this work. Ideally this
@@ -163,7 +161,7 @@ public class ConstantsAndVariables {
    */
   @Option(name = "markedOutputTextFile")
   String markedOutputTextFile = null;
-  
+
   /**
    * Use lemma instead of words for the context tokens
    */
@@ -188,7 +186,7 @@ public class ConstantsAndVariables {
    */
   @Option(name = "useContextNERRestriction")
   public boolean useContextNERRestriction = false;
-  
+
   /**
    * Number of words to learn in each iteration
    */
@@ -333,13 +331,14 @@ public class ConstantsAndVariables {
   String wordClassClusterFile = null;
 
   private Map<String, Integer> wordClassClusters = null;
-  
+
   /**
-   * General cluster file, if you wanna use it somehow, in which each line is word/phrase<tab>clusterid
+   * General cluster file, if you wanna use it somehow, in which each line is
+   * word/phrase<tab>clusterid
    */
   @Option(name = "generalWordClassClusterFile")
   String generalWordClassClusterFile = null;
-  
+
   private Map<String, Integer> generalWordClassClusters = null;
 
   @Option(name = "includeExternalFeatures")
@@ -360,14 +359,11 @@ public class ConstantsAndVariables {
   @Option(name = "sqrtPatScore")
   public boolean sqrtPatScore = false;
 
-
   /**
-   * Remove patterns that have number of words in the denominator of the
-   * patternscoring measure less than this.
+   * Remove patterns that have number of unlabeled words is less than this.
    */
-  @Option(name = "minUnlabNegPhraseSupportForPat")
-  public int minUnlabNegPhraseSupportForPat = 0;
-  
+  @Option(name = "minUnlabPhraseSupportForPat")
+  public int minUnlabPhraseSupportForPat = 0;
 
   /**
    * Remove patterns that have number of positive words less than this.
@@ -375,7 +371,6 @@ public class ConstantsAndVariables {
   @Option(name = "minPosPhraseSupportForPat")
   public int minPosPhraseSupportForPat = 1;
 
-  
   /**
    * Cached files
    */
@@ -406,7 +401,6 @@ public class ConstantsAndVariables {
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
-  
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS
   };
@@ -574,8 +568,7 @@ public class ConstantsAndVariables {
 
         }
       }
-      
-      
+
       System.out.println("Size of othersemantic class variables is "
           + otherSemanticClasses.size());
     } else {
@@ -599,7 +592,8 @@ public class ConstantsAndVariables {
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
       if (matchLowerCaseContext)
         env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-      env.get(label).bind("OTHERSEM", PatternsAnnotations.OtherSemanticLabel.class);
+      env.get(label).bind("OTHERSEM",
+          PatternsAnnotations.OtherSemanticLabel.class);
     }
 
     if (wordClassClusterFile != null) {
@@ -609,7 +603,7 @@ public class ConstantsAndVariables {
         wordClassClusters.put(t[0], Integer.parseInt(t[1]));
       }
     }
-    
+
     if (generalWordClassClusterFile != null) {
       setGeneralWordClassClusters(new HashMap<String, Integer>());
       for (String line : IOUtils.readLines(generalWordClassClusterFile)) {
@@ -617,7 +611,7 @@ public class ConstantsAndVariables {
         getGeneralWordClassClusters().put(t[0], Integer.parseInt(t[1]));
       }
     }
-    
+
     alreadySetUp = true;
   }
 
@@ -858,7 +852,8 @@ public class ConstantsAndVariables {
     return generalWordClassClusters;
   }
 
-  public void setGeneralWordClassClusters(Map<String, Integer> generalWordClassClusters) {
+  public void setGeneralWordClassClusters(
+      Map<String, Integer> generalWordClassClusters) {
     this.generalWordClassClusters = generalWordClassClusters;
   }
 
