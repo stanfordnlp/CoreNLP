@@ -516,10 +516,7 @@ public class CreatePatterns {
     ExecutorService executor = Executors
         .newFixedThreadPool(constVars.numThreads);
     
-    
-    System.out.println("Getting all patterns for label " + label + ". Assigning " + num + " values to each thread");
-    
-    Redwood.log(Redwood.DBG, "Computing all patterns. keyset size is " + keyset.size());
+    Redwood.log(Redwood.DBG, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
     List<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
       
