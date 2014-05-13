@@ -1212,13 +1212,19 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (en.getValue().size() < constVars.minPosPhraseSupportForPat) {
         remove.add(en.getKey());
       }
+    
     }
+    int numRemoved = remove.size();
+    Redwood.log(Redwood.DBG,"Removing " + numRemoved + " patterns that do not meet minPosPhraseSupportForPat requirement of >= " + constVars.minPosPhraseSupportForPat);
+    
+    
     for (Entry<SurfacePattern, ClassicCounter<String>> en : unLabeledPatternsandWords4Label
         .entrySet()) {
       if (en.getValue().size() < constVars.minUnlabPhraseSupportForPat) {
         remove.add(en.getKey());
       }
     }
+    Redwood.log(Redwood.DBG,"Removing " + (remove.size() - numRemoved) + " patterns that do not meet minUnlabPhraseSupportForPat requirement of >= " + constVars.minUnlabPhraseSupportForPat);
     return remove;
   }
 
