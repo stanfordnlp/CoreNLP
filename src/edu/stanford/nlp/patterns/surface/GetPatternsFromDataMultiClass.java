@@ -542,7 +542,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     for (Tree child : tree.children()) {
       for (Tree grand : child.children()) {
         if (grand.isLeaf()) {
-          System.out.println("label for " + grand.label() + " is " + grandstr);
           ((CoreLabel) grand.label()).set(
               CoreAnnotations.GrandparentAnnotation.class, grandstr);
         }
