@@ -210,14 +210,14 @@ public class CreatePatterns {
       if (addPatWithoutPOS) {
         twithoutPOS = new PatternToken(tag, false,
             constVars.numWordsCompound > 1, constVars.numWordsCompound,
-            nerTag, constVars.useTargetNERRestriction);
+            nerTag, constVars.useTargetNERRestriction, constVars.useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 
       PatternToken twithPOS = null;
       if (usePOS4Pattern) {
         twithPOS = new PatternToken(tag, true,
             constVars.numWordsCompound > 1, constVars.numWordsCompound,
-            nerTag, constVars.useTargetNERRestriction);
+            nerTag, constVars.useTargetNERRestriction, constVars.useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
       
       if (usePreviousContext) {

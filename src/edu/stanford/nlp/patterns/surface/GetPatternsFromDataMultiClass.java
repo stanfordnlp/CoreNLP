@@ -42,6 +42,9 @@ import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.GrandparentAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.StateAnnotation;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.surface.Data;
@@ -52,6 +55,9 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Execution.*;
@@ -436,14 +442,22 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public static Map<String, List<CoreLabel>> runPOSNEROnTokens(
       List<CoreMap> sentsCM, String posModelPath,
-      boolean useTargetNERRestriction, String prefix) {
+      boolean useTargetNERRestriction, String prefix,
+      boolean useTargetParserParentRestriction) {
     Annotation doc = new Annotation(sentsCM);
     Properties props = new Properties();
-    if (useTargetNERRestriction) {
-      props.setProperty("annotators", "pos,lemma,ner");
-    } else
-      props.setProperty("annotators", "pos,lemma");
+    List<String> anns = new ArrayList<String>();
+    anns.add("pos");
+    anns.add("lemma");
 
+    if (useTargetParserParentRestriction) {
+      anns.add("parse");
+    }
+    if (useTargetNERRestriction) {
+      anns.add("ner");
+    }
+
+    props.setProperty("annotators", StringUtils.join(anns, ","));
     // props.put( "tokenize.options",
     // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
@@ -452,11 +466,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props, false);
 
+    Redwood.log(Redwood.DBG, "Annotating text with NER and POS");
     pipeline.annotate(doc);
+    Redwood.log(Redwood.DBG, "Done annotating text with NER and POS");
+
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
 
     for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
-
+      if (useTargetParserParentRestriction)
+        inferParentParseTag(s.get(TreeAnnotation.class));
       sents.put(prefix + s.get(CoreAnnotations.DocIDAnnotation.class),
           s.get(CoreAnnotations.TokensAnnotation.class));
     }
@@ -468,14 +486,24 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public static Map<String, List<CoreLabel>> tokenize(String text,
       String posModelPath, boolean lowercase, boolean useTargetNERRestriction,
-      String sentIDPrefix) throws InterruptedException, ExecutionException,
-      IOException {
+      String sentIDPrefix, boolean useTargetParserParentRestriction)
+      throws InterruptedException, ExecutionException, IOException {
     if (pipeline == null) {
       Properties props = new Properties();
+      List<String> anns = new ArrayList<String>();
+      anns.add("tokenize");
+      anns.add("ssplit");
+      anns.add("pos");
+      anns.add("lemma");
+
+      if (useTargetParserParentRestriction) {
+        anns.add("parse");
+      }
       if (useTargetNERRestriction) {
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
-      } else
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+        anns.add("ner");
+      }
+
+      props.setProperty("annotators", StringUtils.join(anns, ","));
 
       props
           .put(
@@ -491,16 +519,37 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       text = text.toLowerCase();
 
     Annotation doc = new Annotation(text);
+    Redwood.log(Redwood.DBG, "Annotating text");
     pipeline.annotate(doc);
+    Redwood.log(Redwood.DBG, "Done annotating text");
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
     int i = -1;
     for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
       i++;
+      if (useTargetParserParentRestriction)
+        inferParentParseTag(s.get(TreeAnnotation.class));
       sents
           .put(sentIDPrefix + i, s.get(CoreAnnotations.TokensAnnotation.class));
+
     }
 
     return sents;
+  }
+
+  static void inferParentParseTag(Tree tree) {
+
+    String grandstr = tree.value();
+    for (Tree child : tree.children()) {
+      for (Tree grand : child.children()) {
+        if (grand.isLeaf()) {
+          System.out.println("label for " + grand.label() + " is " + grandstr);
+          ((CoreLabel) grand.label()).set(
+              CoreAnnotations.GrandparentAnnotation.class, grandstr);
+        }
+      }
+      inferParentParseTag(child);
+    }
+
   }
 
   /**
@@ -884,7 +933,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Counters.removeKeys(allPatternsandWords4Label, removePats);
     Counters.removeKeys(posnegPatternsandWords4Label, removePats);
     Counters.removeKeys(negPatternsandWords4Label, removePats);
-    
+
     // patternsandWords4Label.g postconstVars.minPosPhraseSupportForPat
     Redwood.log("extremePatDebug",
         "Patterns around positive words in the label " + label + " are "
@@ -999,8 +1048,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         break;
       }
       boolean notchoose = false;
-      if (!unLabeledPatternsandWords4Label.containsFirstKey(pat) || unLabeledPatternsandWords4Label
-              .getCounter(pat).isEmpty()) {
+      if (!unLabeledPatternsandWords4Label.containsFirstKey(pat)
+          || unLabeledPatternsandWords4Label.getCounter(pat).isEmpty()) {
         Redwood.log("extremePatDebug", "Removing pattern " + pat
             + " because it has no unlab support; pos words: "
             + patternsandWords4Label.getCounter(pat) + " and all words "
@@ -1212,19 +1261,30 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (en.getValue().size() < constVars.minPosPhraseSupportForPat) {
         remove.add(en.getKey());
       }
-    
+
     }
     int numRemoved = remove.size();
-    Redwood.log(Redwood.DBG,"Removing " + numRemoved + " patterns that do not meet minPosPhraseSupportForPat requirement of >= " + constVars.minPosPhraseSupportForPat);
-    
-    
+    Redwood
+        .log(
+            Redwood.DBG,
+            "Removing "
+                + numRemoved
+                + " patterns that do not meet minPosPhraseSupportForPat requirement of >= "
+                + constVars.minPosPhraseSupportForPat);
+
     for (Entry<SurfacePattern, ClassicCounter<String>> en : unLabeledPatternsandWords4Label
         .entrySet()) {
       if (en.getValue().size() < constVars.minUnlabPhraseSupportForPat) {
         remove.add(en.getKey());
       }
     }
-    Redwood.log(Redwood.DBG,"Removing " + (remove.size() - numRemoved) + " patterns that do not meet minUnlabPhraseSupportForPat requirement of >= " + constVars.minUnlabPhraseSupportForPat);
+    Redwood
+        .log(
+            Redwood.DBG,
+            "Removing "
+                + (remove.size() - numRemoved)
+                + " patterns that do not meet minUnlabPhraseSupportForPat requirement of >= "
+                + constVars.minUnlabPhraseSupportForPat);
     return remove;
   }
 
@@ -1717,7 +1777,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           wordTP.incrementCount(str);
           entityTP.incrementCount(lastGold, 1.0);
         } else {
-          //System.out.println("false negative: " + str);
+          // System.out.println("false negative: " + str);
           wordFN.incrementCount(str);
           entityFN.incrementCount(lastGold, 1.0);
           str = "";
@@ -1733,7 +1793,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           // str = "";
           // only need to tally false positives
         } else {
-          //System.out.println("false positive: " + str);
+          // System.out.println("false positive: " + str);
           entityFP.incrementCount(lastGuess, 1.0);
           wordFP.incrementCount(str);
         }
@@ -2153,6 +2213,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           .getProperty("lowercaseText"));
       boolean useTargetNERRestriction = Boolean.parseBoolean(props
           .getProperty("useTargetNERRestriction"));
+      boolean useTargetParserParentRestriction = Boolean.parseBoolean(props
+          .getProperty("useTargetParserParentRestriction"));
       boolean useContextNERRestriction = Boolean.parseBoolean(props
           .getProperty("useContextNERRestriction"));
 
@@ -2178,7 +2240,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             String text = IOUtils.stringFromFile(f.getAbsolutePath());
             sents.putAll(tokenize(text, posModelPath, lowercase,
                 useTargetNERRestriction | useContextNERRestriction, f.getName()
-                    + "-"));
+                    + "-", useTargetParserParentRestriction));
+          }
+          String saveSentencesSerFile = props
+              .getProperty("saveSentencesSerFile");
+          if (saveSentencesSerFile != null) {
+            IOUtils.writeObjectToFile(sents, saveSentencesSerFile);
           }
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           for (File f : allFiles)
@@ -2203,7 +2270,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               setClassForTheseLabels, true, splitOnPunct, lowercase,
               f.getName());
           evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
-              useTargetNERRestriction | useContextNERRestriction, ""));
+              useTargetNERRestriction | useContextNERRestriction, "",
+              useTargetParserParentRestriction));
         }
         if (addEvalSentsToTrain) {
           Redwood.log(Redwood.DBG, "Adding " + evalsents.size()
@@ -2242,8 +2310,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       // }
 
       if (evaluate) {
-        boolean evalPerEntity = Boolean.parseBoolean(props
-            .getProperty("evalPerEntity","true"));
+        boolean evalPerEntity = Boolean.parseBoolean(props.getProperty(
+            "evalPerEntity", "true"));
         g.evaluate(evalsents, evalPerEntity);
         // String evalFile = props.getProperty("evalFile");
         // Map<String, List<CoreLabel>> evalSents =
