@@ -42,9 +42,6 @@ import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.GrandparentAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.StateAnnotation;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.surface.Data;
@@ -1162,7 +1159,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           en.first().toStringToWrite() + ":" + df.format(en.second) + "\n");
 
     if (constVars.outDir != null && !constVars.outDir.isEmpty()) {
-
       CollectionValuedMap<SurfacePattern, String> posWords = new CollectionValuedMap<SurfacePattern, String>();
       for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
           .entrySet()) {
@@ -1179,11 +1175,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           .entrySet()) {
         unlabWords.addAll(en.getKey(), en.getValue().keySet());
       }
-      IOUtils.ensureDir(new File(constVars.outDir + "/" + constVars.identifier
-          + "/" + label));
+      String outputdir  = constVars.outDir + "/" + constVars.identifier
+          + "/" + label;
+      Redwood.log(Redwood.FORCE,"Saving output in " + outputdir);
 
-      String filename = constVars.outDir + "/" + constVars.identifier + "/"
-          + label + "/patterns" + ".json";
+      IOUtils.ensureDir(new File(outputdir));
+
+      String filename = outputdir + "/patterns" + ".json";
 
       JsonArrayBuilder obj = Json.createArrayBuilder();
       if (writtenPatInJustification.containsKey(label)
