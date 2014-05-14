@@ -769,7 +769,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Set<SurfacePattern> alreadyIdentifiedPatterns, SurfacePattern p0,
       Counter<String> p0Set, Set<SurfacePattern> ignorePatterns)
       throws InterruptedException, ExecutionException, IOException,
-      ClassNotFoundException {
+      ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
     if (this.patternsForEachToken == null) {
       if (constVars.computeAllPatterns) {
@@ -946,7 +946,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       scorePatterns = new ScorePatternsF1(constVars, constVars.patternScoring,
           label, patternsandWords4Label, negPatternsandWords4Label,
           unLabeledPatternsandWords4Label,
-          negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label,
+          negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props,
           p0Set, p0);
       Counter<SurfacePattern> finalPat = scorePatterns.score();
       Counters.removeKeys(finalPat, alreadyIdentifiedPatterns);
@@ -969,7 +969,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           constVars.patternScoring, label, patternsandWords4Label,
           negPatternsandWords4Label, unLabeledPatternsandWords4Label,
           negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label,
-          phInPatScores, scorePhrases);
+          phInPatScores, scorePhrases, props);
 
     } else if (constVars.patternScoring.equals(PatternScoring.RlogF)
         || constVars.patternScoring.equals(PatternScoring.RlogFPosNeg)
@@ -980,7 +980,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       scorePatterns = new ScorePatternsFreqBased(constVars,
           constVars.patternScoring, label, patternsandWords4Label,
           negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-          negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
+          negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
 
     } else if (constVars.patternScoring.equals(PatternScoring.kNN)) {
       try {
@@ -990,11 +990,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             ConstantsAndVariables.class, PatternScoring.class, String.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
-            TwoDimensionalCounter.class);
+            TwoDimensionalCounter.class, Properties.class);
         scorePatterns = ctor.newInstance(constVars,
                 constVars.patternScoring, label, patternsandWords4Label,
                 negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-                negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
+                negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
 
       } catch (ClassNotFoundException e) {
         throw new RuntimeException(
@@ -1449,7 +1449,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       String sentsOutFile, String patternsOutFile,
       Map<String, Set<SurfacePattern>> ignorePatterns)
       throws ClassNotFoundException, IOException, InterruptedException,
-      ExecutionException {
+      ExecutionException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
     Map<String, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> matchedTokensByPatAllLabels = new HashMap<String, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>();
 
@@ -1643,7 +1643,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Set<String> ignoreWords,
       CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat)
       throws IOException, InterruptedException, ExecutionException,
-      ClassNotFoundException {
+      ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
     if (!learnedPatterns.containsKey(label)) {
       learnedPatterns.put(label, new ClassicCounter<SurfacePattern>());

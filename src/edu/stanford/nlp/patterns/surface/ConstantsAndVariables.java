@@ -454,6 +454,9 @@ public class ConstantsAndVariables {
    */
   @Option(name = "usePhraseEvalEditDistOther")
   public boolean usePhraseEvalEditDistOther = false;
+  
+  @Option(name = "usePhraseEvalWordShape")
+  public boolean usePhraseEvalWordShape = false;
 
   /**
    * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
