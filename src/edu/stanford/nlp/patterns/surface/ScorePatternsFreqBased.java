@@ -1,6 +1,5 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.util.Properties;
 import java.util.Map.Entry;
 
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
@@ -26,10 +25,6 @@ public class ScorePatternsFreqBased extends ScorePatterns {
         negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
   }
 
-  @Override
-  public void setUp(Properties props){}
-  
-  @Override
   Counter<SurfacePattern> score() {
 
     Counter<SurfacePattern> currentPatternWeights4Label = new ClassicCounter<SurfacePattern>();
