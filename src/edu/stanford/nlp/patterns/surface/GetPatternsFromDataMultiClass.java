@@ -2144,6 +2144,36 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return allFiles;
   }
 
+  private Pair<Double, Double> getPrecisionRecall(String label, Map<String, Boolean> goldWords4Label) {
+    Set<String> learnedWords = getLearnedWords(label).keySet();
+    int numcorrect =0, numincorrect =0;
+    int numgoldcorrect =0;
+    for(Entry<String, Boolean> en: goldWords4Label.entrySet()){
+      if(en.getValue())
+        numgoldcorrect++;
+    }
+    for(String e: learnedWords){
+      if(!goldWords4Label.containsKey(e)){
+        System.err.println("Gold entity list does not contain word " + e + ". Assuming negative.");
+        numincorrect++;
+        continue;
+      }
+      if(goldWords4Label.get(e)){
+        numcorrect++;
+      }else
+        numincorrect++;
+    }
+    double precision = numcorrect/(double)(numcorrect + numincorrect);
+    double recall = numcorrect /(double)(numgoldcorrect);
+    return new Pair<Double, Double>(precision, recall);
+  }
+  
+  public double FScore(double precision, double recall, double beta){
+    double betasq = beta * beta;
+    return (1+betasq)*precision*recall/(betasq*precision+recall);
+  }
+
+  
   @SuppressWarnings({ "rawtypes" })
   public static void main(String[] args) {
     try {
@@ -2235,31 +2265,33 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       // Read Evaluation File
       Map<String, List<CoreLabel>> evalsents = new HashMap<String, List<CoreLabel>>();
       if (evaluate) {
-        Map setClassForTheseLabels = new HashMap<String, Class>();
-        boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
-        List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
-        int numFile = 0;
-        if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
-          for (File f : allFiles) {
-            numFile++;
-            Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
-            List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), seedWords.keySet(),
-                                                                   setClassForTheseLabels, true, splitOnPunct, lowercase,
-                                                                   f.getName());
-            evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
-                                               useTargetNERRestriction || useContextNERRestriction, "",
-                                               useTargetParserParentRestriction,
-                                               props.getProperty("numThreads")));
+        if(evalFileWithGoldLabels!=null){
+          Map setClassForTheseLabels = new HashMap<String, Class>();
+          boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
+          List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
+          int numFile = 0;
+          if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
+            for (File f : allFiles) {
+              numFile++;
+              Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
+              List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), seedWords.keySet(),
+                                                                     setClassForTheseLabels, true, splitOnPunct, lowercase,
+                                                                     f.getName());
+              evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
+                                                 useTargetNERRestriction || useContextNERRestriction, "",
+                                                 useTargetParserParentRestriction,
+                                                 props.getProperty("numThreads")));
+            }
+  
+          } else if (fileFormat.equalsIgnoreCase("ser")) {
+            for (File f : allFiles) {
+              evalsents.putAll((Map<? extends String, ? extends List<CoreLabel>>) IOUtils.readObjectFromFile(f));
+            }
           }
-
-        } else if (fileFormat.equalsIgnoreCase("ser")) {
-          for (File f : allFiles) {
-            evalsents.putAll((Map<? extends String, ? extends List<CoreLabel>>) IOUtils.readObjectFromFile(f));
+          if (addEvalSentsToTrain) {
+            Redwood.log(Redwood.DBG, "Adding " + evalsents.size() + " eval sents to the training set");
+            sents.putAll(evalsents);
           }
-        }
-        if (addEvalSentsToTrain) {
-          Redwood.log(Redwood.DBG, "Adding " + evalsents.size() + " eval sents to the training set");
-          sents.putAll(evalsents);
         }
       }
 
@@ -2290,17 +2322,59 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile, patternOutFile, ignorePatterns);
 
         if (evaluate) {
-          if (evalsents.size() == 0) 
-            System.err.println("No eval sentences provided to evaluate! Make sure evalFileWithGoldLabels is set or turn off the evaluate flag");
-          else{
+          //The format of goldEntitiesEvalFiles is assumed same as seedwordsfiles: label,file;label2,file2;...
+          //Each file of gold entities consists of each entity in newline with incorrect entities marked with "#" at the end of the entity.
+          //Learned entities not present in the gold file are considered negative.
+          String goldEntitiesEvalFiles = props.getProperty("goldEntitiesEvalFiles");
+          if(goldEntitiesEvalFiles != null){
+            for (String gfile : goldEntitiesEvalFiles.split(";")) {
+              String[] t = gfile.split(",");
+              String label = t[0];
+              String goldfile = t[1];
+              Map<String, Boolean> goldWords4Label = new HashMap<String, Boolean>();
+              for (String line : IOUtils.readLines(goldfile)) {
+                line = line.trim();
+                if (line.isEmpty())
+                  continue;
+                
+                if(line.endsWith("#"))
+                  goldWords4Label.put(line.substring(0, line.length() -1), false);
+                else
+                goldWords4Label.put(line, true);
+              }
+              Pair<Double, Double> pr = g.getPrecisionRecall(label, goldWords4Label);
+              Redwood
+                  .log(
+                      Redwood.FORCE,
+                      "For label "
+                          + label
+                          + ": Number of gold entities is "
+                          + goldWords4Label.size()
+                          + ", Precision is "
+                          + g.df.format(pr.first() * 100)
+                          + ", Recall is "
+                          + g.df.format(pr.second() * 100)
+                          + ", F1 is "
+                          + g.df.format(g.FScore(pr.first(), pr.second(), 1.0) * 100));
+            }
+            
+          }
+          
+          if (evalsents.size() > 0){
             boolean evalPerEntity = Boolean.parseBoolean(props.getProperty("evalPerEntity", "true"));
             g.evaluate(evalsents, evalPerEntity);
           }
+          
+          if (evalsents.size() == 0 && goldEntitiesEvalFiles ==null) 
+            System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
+          
         }
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
   } // end main()
+
+
 
 }
