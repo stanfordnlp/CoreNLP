@@ -1,11 +1,7 @@
 package edu.stanford.nlp.international.arabic.process;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -17,7 +13,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.LineIterator;
 import edu.stanford.nlp.process.TokenizerFactory;
