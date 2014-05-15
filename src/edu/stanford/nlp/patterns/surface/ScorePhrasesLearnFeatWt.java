@@ -25,12 +25,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Execution.Option;
 
-//import edu.stanford.nlp.classify.WekaDatumClassifier;
-//import edu.stanford.nlp.classify.WekaDatumClassifierFactory;
-//
-//import weka.classifiers.Classifier;
-//import weka.classifiers.trees.J48;
-//import weka.classifiers.trees.RandomForest;
 
 public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
