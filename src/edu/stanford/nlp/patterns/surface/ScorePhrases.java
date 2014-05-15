@@ -49,6 +49,8 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class ScorePhrases {
 
+  static String channelNameLogger = "scorephrases";
+
   Map<String, Boolean> writtenInJustification = new HashMap<String, Boolean>();
 
   ConstantsAndVariables constVars = null;
@@ -88,6 +90,7 @@ public class ScorePhrases {
         Redwood
             .log(
                 "extremePatDebug",
+                channelNameLogger,
                 "Not adding "
                     + w
                     + " because the number of non redundant patterns are below threshold: "
@@ -103,7 +106,7 @@ public class ScorePhrases {
         finalwords.setCount(w, newdt.getCount(w));
       } else {
         Redwood
-            .log("extremePatDebug", "not adding " + w
+            .log("extremePatDebug", channelNameLogger, "not adding " + w
                 + " because it matched " + matchedFuzzy
                 + " in common English word");
         ignoreWords.add(w);
@@ -353,6 +356,7 @@ public class ScorePhrases {
 
       Redwood.log(
           Redwood.FORCE,
+          channelNameLogger,
           "## Selected Words: "
               + Counters.toSortedString(finalwords, finalwords.size(),
                   "%1$s:%2$.2f", "\t"));
@@ -416,6 +420,7 @@ public class ScorePhrases {
         for (String word : finalwords.keySet()) {
           Redwood.log(
               Redwood.DBG,
+              channelNameLogger,
               word
                   + "\t"
                   + Counters.toSortedString(wordsPatExtracted.getCounter(word),
@@ -460,7 +465,7 @@ public class ScorePhrases {
       else
         return new ClassicCounter<String>();
 
-      Redwood.log(Redwood.FORCE, "Selected Words: " + bestw);
+      Redwood.log(Redwood.FORCE, channelNameLogger, "Selected Words: " + bestw);
 
       return Counters.asCounter(Arrays.asList(bestw));
     }

@@ -1,7 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -13,9 +12,8 @@ public abstract class ScorePatterns {
   
   ConstantsAndVariables constVars;
   protected PatternScoring patternScoring;
-  protected Properties props;
-  
-  abstract Counter<SurfacePattern> score() throws IOException, InterruptedException, ExecutionException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException;
+
+  abstract Counter<SurfacePattern> score() throws IOException, InterruptedException, ExecutionException;
   protected TwoDimensionalCounter<SurfacePattern, String> patternsandWords4Label = new TwoDimensionalCounter<SurfacePattern, String>();
   protected TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label = new TwoDimensionalCounter<SurfacePattern, String>();
   // protected TwoDimensionalCounter<SurfacePattern, String>
@@ -34,7 +32,7 @@ public abstract class ScorePatterns {
       TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label, Properties props) {
+      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label) {
     this.constVars = constVars;
     this.patternScoring = patternScoring;
     this.label = label;
@@ -43,7 +41,6 @@ public abstract class ScorePatterns {
     this.unLabeledPatternsandWords4Label = unLabeledPatternsandWords4Label;
     this.negandUnLabeledPatternsandWords4Label = negandUnLabeledPatternsandWords4Label;
     this.allPatternsandWords4Label = allPatternsandWords4Label;
-    this.props = props;
   }
   abstract public void setUp(Properties props);
 }

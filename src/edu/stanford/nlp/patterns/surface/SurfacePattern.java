@@ -7,8 +7,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * To represent a surface pattern in more detail than TokenSequencePattern (this class object is eventually compiled as TokenSequencePattern via the toString method).
- * See {@link PatternToken} for more info on how matching of target phrases is done.
+ * To present a surface pattern in more detail. The class is not completely
+ * kosher. See {@link PatternToken} for more info.
  * 
  * Author: Sonal Gupta (sonalg@stanford.edu)
  */

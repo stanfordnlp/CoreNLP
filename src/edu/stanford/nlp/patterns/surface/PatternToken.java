@@ -7,8 +7,9 @@ import java.util.List;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * Class to represent a target phrase. Note that you can give additional negative constraints 
- * in getTokenStr(List) but those are not used by toString, hashCode and equals functions
+ * Class to represent a target phrase. The class is not completely kosher -
+ * toString, hashCode and equals to do not notAllowedClasses, which can be given
+ * as input to getTokenStr()
  * 
  * Author: Sonal Gupta (sonalg@stanford.edu)
  */
@@ -122,6 +123,14 @@ public class PatternToken implements Serializable {
 
     if (t.getTokenStr(null).equals(this.getTokenStr(null)))
       return true;
+    // if (useTag != t.useTag)
+    // return false;
+    // else if (useTag && !tag.equals(t.tag)) {
+    // return false;
+    // }
+    // if (numWordsCompound != t.numWordsCompound)
+    // return false;
+
     return false;
   }
 

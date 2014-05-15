@@ -8,30 +8,30 @@ import junit.framework.TestCase;
 public class TwoDimensionalIntCounterTest extends TestCase {
 
   public void testTraditionalMain() {
+    String answer1 = "b\td\t1.0\n" +
+            "b\tc\t1.0\n" +
+            "a\td\t-1.0\n" +
+            "a\tc\t1.0\n";
+    String answer2 = "b\td\t2.0\n" +
+            "b\tc\t1.0\n" +
+            "a\td\t-1.0\n" +
+            "a\tc\t1.0\n";
+    String answer3 = "d\tb\t2.0\n" +
+            "d\ta\t-1.0\n" +
+            "c\tb\t1.0\n" +
+            "c\ta\t1.0\n";
+
     TwoDimensionalIntCounter<String,String> cc = new TwoDimensionalIntCounter<String,String>();
     cc.setCount("a", "c", 1.0);
     cc.setCount("b", "c", 1.0);
     cc.setCount("a", "d", 1.0);
     cc.setCount("a", "d", -1.0);
     cc.setCount("b", "d", 1.0);
-    assertEquals("Error in counter setup", 1.0, cc.getCount("a", "c"), 1e-8);
-    assertEquals("Error in counter setup", 1.0, cc.getCount("b", "c"), 1e-8);
-    assertEquals("Error in counter setup", -1.0, cc.getCount("a", "d"), 1e-8);
-    assertEquals("Error in counter setup", 1.0, cc.getCount("b", "d"), 1e-8);
-    assertEquals("Error in counter setup", 0.0, cc.getCount("a", "a"), 1e-8);
-
+    assertEquals("Error in counter setup", answer1, cc.toString());
     cc.incrementCount("b", "d", 1.0);
-    assertEquals("Error in counter increment", -1.0, cc.getCount("a", "d"), 1e-8);
-    assertEquals("Error in counter increment", 2.0, cc.getCount("b", "d"), 1e-8);
-    assertEquals("Error in counter increment", 0.0, cc.getCount("a", "a"), 1e-8);
-
+    assertEquals("Error in counter setup", answer2, cc.toString());
     TwoDimensionalIntCounter<String,String> cc2 = TwoDimensionalIntCounter.reverseIndexOrder(cc);
-    assertEquals("Error in counter reverseIndexOrder", 1.0, cc2.getCount("c", "a"), 1e-8);
-    assertEquals("Error in counter reverseIndexOrder", 1.0, cc2.getCount("c", "b"), 1e-8);
-    assertEquals("Error in counter reverseIndexOrder", -1.0, cc2.getCount("d", "a"), 1e-8);
-    assertEquals("Error in counter reverseIndexOrder", 2.0, cc2.getCount("d", "b"), 1e-8);
-    assertEquals("Error in counter reverseIndexOrder", 0.0, cc2.getCount("a", "a"), 1e-8);
-    assertEquals("Error in counter reverseIndexOrder", 0.0, cc2.getCount("a", "c"), 1e-8);
+    assertEquals("Error in counter setup", answer3, cc2.toString());
   }
 
 }
