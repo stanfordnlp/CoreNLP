@@ -139,7 +139,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> printTo</td><td>String</td><td>n/a</td><td>Path to print a text representation of the linear classifier to</td></tr>
  * <tr><td> trainFile</td><td>String</td><td>n/a</td><td>Path of file to use as training data</td></tr>
  * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as test data</td></tr>
- * <tr><td> encoding</td><td>String</td><td><i>platform default</i></td><td>Character encoding of training and test file, e.g. utf-8 or iso-8859-1</td></tr>
+ * <tr><td> encoding</td><td>String</td><td><i>utf-8</i></td><td>Character encoding of training and test file, e.g., utf-8, GB18030, or iso-8859-1</td></tr>
  * <tr><td> displayedColumn</td><td>int</td><td>1</td><td>Column number that will be printed out to stdout in the output next to the gold class and the chosen class.  This is just an aide memoire.  If the value is negative, nothing is printed. </td></tr>
  * <tr><td> displayAllAnswers</td><td>boolean</td><td>false</td><td>If true, print all classes and their probability, sorted by probability, rather than just the highest scoring and correct classes. </td></tr>
  * <tr><td> goldAnswerColumn</td><td>int</td><td>0</td><td>Column number that contains the correct class for each data item (again, columns are numbered from 0 up).</td></tr>
@@ -243,7 +243,7 @@ public class ColumnDataClassifier {
    *
    * @param line Line of file
    * @param lineNo The line number. This is just used in error messages if there is an input format problem. You can make it 0.
-   * @return A Datum (may be an RVFDatum)
+   * @return A Datum (may be an RVFDatum; never null)
    */
   public Datum<String,String> makeDatumFromLine(String line, int lineNo) {
     if (globalFlags.usesRealValues) {
@@ -328,7 +328,7 @@ public class ColumnDataClassifier {
    */
   public Pair<GeneralDataset<String,String>, List<String[]>> readAndReturnTrainingExamples(String fileName) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "train");
+      newFeaturePrinter(globalFlags.printFeatures, "train", Flags.encoding);
     }
     Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, true);
     GeneralDataset<String,String> train = dataInfo.first();
@@ -409,10 +409,7 @@ public class ColumnDataClassifier {
             String[] wi = makeSimpleLineInfo(line, lineNo);
             lineInfos.add(wi);
           }
-          Datum<String,String> d = makeDatumFromLine(line, lineNo);
-          if (d != null) {
-            dataset.add(d);
-          }
+          dataset.add(makeDatumFromLine(line, lineNo));
         }
       } catch (Exception e) {
         throw new RuntimeException("Dataset could not be processed", e);
@@ -833,7 +830,7 @@ public class ColumnDataClassifier {
         cWord = IOUtils.slurpFileNoExceptions(cWord);
       }
       if (flags.lowercase) {
-        cWord = cWord.toLowerCase();
+        cWord = cWord.toLowerCase(Locale.ENGLISH);
       }
 
       if (flags.useString) {
@@ -1029,7 +1026,7 @@ public class ColumnDataClassifier {
       prefixSuffixNGrams = flags.usePrefixSuffixNGrams;
     }
     if (flags.lowercaseNGrams) {
-      toNGrams = toNGrams.toLowerCase();
+      toNGrams = toNGrams.toLowerCase(Locale.ENGLISH);
     }
     if (flags.partialNGramRegexp != null) {
       Matcher m = flags.partialNGramPattern.matcher(toNGrams);
@@ -1080,12 +1077,12 @@ public class ColumnDataClassifier {
 
   private static PrintWriter cliqueWriter;
 
-  private static void newFeaturePrinter(String prefix, String suffix) {
+  private static void newFeaturePrinter(String prefix, String suffix, String encoding) {
     if (cliqueWriter != null) {
       closeFeaturePrinter();
     }
     try {
-      cliqueWriter = new PrintWriter(new FileOutputStream(prefix + '.' + suffix), true);
+      cliqueWriter = IOUtils.getPrintWriter(prefix + '.' + suffix, encoding);
     } catch (IOException ioe) {
       cliqueWriter = null;
     }
@@ -1349,7 +1346,6 @@ public class ColumnDataClassifier {
       ObjectInputStream ois = null;
       try {
         // load the classifier
-        //ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(loadPath)));
         ois = IOUtils.readStreamFromString(loadPath);
         classifier = ErasureUtils.<LinearClassifier<String,String>>uncheckedCast(ois.readObject());
         myFlags = (Flags[]) ois.readObject();
@@ -1760,8 +1756,7 @@ public class ColumnDataClassifier {
     String serializeTo = Flags.serializeTo;
     if (serializeTo != null) {
       System.err.println("Serializing classifier to " + serializeTo + "...");
-      //ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serializeTo)));
-      ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(IOUtils.getFileOutputStream(serializeTo)));
+      ObjectOutputStream oos = IOUtils.writeStreamFromString(serializeTo);
       oos.writeObject(classifier);
       // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
       String testFile = globalFlags.testFile;
@@ -1801,7 +1796,7 @@ public class ColumnDataClassifier {
 
   private void testClassifier(String testFile) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "test");
+      newFeaturePrinter(globalFlags.printFeatures, "test", Flags.encoding);
     }
 
     Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(testFile);
