@@ -127,6 +127,15 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(featureType + value1 + "-" + value2);
   }
 
+  public static void addPositionFeatures(Set<String> features, State state) {
+    if (state.tokenPosition >= state.sentence.size()) {
+      features.add("QUEUE_FINISHED");
+    }
+    if (state.tokenPosition >= state.sentence.size() && state.stack.size() == 1) {
+      features.add("QUEUE_FINISHED_STACK_SINGLETON");
+    }
+  }
+
   public Set<String> featurize(State state) {
     Set<String> features = Generics.newHashSet();
 
@@ -193,6 +202,8 @@ public class BasicFeatureFactory implements FeatureFactory {
     addBinaryFeature(features, "S1WQ0T-", s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
     addBinaryFeature(features, "S1CQ0W-", s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADWORD);
     addBinaryFeature(features, "S1CQ0T-", s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
+
+    addPositionFeatures(features, state);
 
     return features;
   }
