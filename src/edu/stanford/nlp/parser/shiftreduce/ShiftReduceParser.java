@@ -88,19 +88,30 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   public ShiftReduceParser deepCopy() {
     // TODO: should we deep copy the options?
     ShiftReduceParser copy = new ShiftReduceParser(op);
-    for (Transition transition : transitionIndex) {
-      copy.transitionIndex.add(transition);
+    copy.copyWeights(this);
+    return copy;
+  }
+
+  /**
+   * Fill in the current object's weights with the other parser's weights.
+   */
+  public void copyWeights(ShiftReduceParser other) {
+    transitionIndex.clear();
+    for (Transition transition : other.transitionIndex) {
+      transitionIndex.add(transition);
     }
-    for (String feature : featureWeights.keySet()) {
+    featureWeights.clear();
+    for (String feature : other.featureWeights.keySet()) {
       List<ScoredObject<Integer>> newWeights = Generics.newArrayList();
-      for (ScoredObject<Integer> weight : featureWeights.get(feature)) {
-        newWeights.add(new ScoredObject<Integer>(weight.object(), weight.score()));
+      for (ScoredObject<Integer> weight : other.featureWeights.get(feature)) {
+        if (weight.score() != 0.0) {
+          newWeights.add(new ScoredObject<Integer>(weight.object(), weight.score()));
+        }
       }
       if (newWeights.size() > 0) {
-        copy.featureWeights.put(feature, newWeights);
+        featureWeights.put(feature, newWeights);
       }
     }
-    return copy;
   }
 
   public static ShiftReduceParser averageModels(Collection<ScoredObject<ShiftReduceParser>> scoredModels) {
@@ -388,6 +399,161 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
+  private void trainAndSave(String trainTreebankPath, FileFilter trainTreebankFilter,
+                            String devTreebankPath, FileFilter devTreebankFilter,
+                            String serializedPath) {
+    List<Tree> binarizedTrees = readBinarizedTreebank(trainTreebankPath, trainTreebankFilter);
+
+    int nThreads = op.trainOptions.trainingThreads;
+    nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;      
+
+    MaxentTagger tagger = null;
+    if (op.testOptions.preTag) {
+      Timing retagTimer = new Timing();
+      tagger = new MaxentTagger(op.testOptions.taggerSerializedFile);
+      redoTags(binarizedTrees, tagger, nThreads);
+      retagTimer.done("Retagging");
+    }
+
+    Timing transitionTimer = new Timing();
+    List<List<Transition>> transitionLists = createTransitionSequences(binarizedTrees);
+    for (List<Transition> transitions : transitionLists) {
+      transitionIndex.addAll(transitions);
+    }
+    transitionTimer.done("Converting trees into transition lists");
+    System.err.println("Number of transitions: " + transitionIndex.size());
+    
+    Random random = new Random(op.trainOptions.randomSeed);
+
+    Treebank devTreebank = null;
+    if (devTreebankPath != null) {
+      devTreebank = readTreebank(devTreebankPath, devTreebankFilter);
+    }
+
+    double bestScore = 0.0;
+    int bestIteration = 0;
+    PriorityQueue<ScoredObject<ShiftReduceParser>> bestModels = null;
+    if (op.averagedModels > 0) {
+      bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(op.averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    }
+
+    List<Integer> indices = Generics.newArrayList();
+    for (int i = 0; i < binarizedTrees.size(); ++i) {
+      indices.add(i);
+    }
+
+    for (int iteration = 1; iteration <= op.trainOptions.trainingIterations; ++iteration) {
+      Timing trainingTimer = new Timing();
+      int numCorrect = 0;
+      int numWrong = 0;
+      Collections.shuffle(indices, random);
+      for (int i = 0; i < indices.size(); ++i) {
+        int index = indices.get(i);
+        Tree tree = binarizedTrees.get(index);
+        List<Transition> transitions = transitionLists.get(index);
+        State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
+        for (Transition transition : transitions) {
+          int transitionNum = transitionIndex.indexOf(transition);
+          List<String> features = featureFactory.featurize(state);
+          int predictedNum = findHighestScoringTransition(state, features, false).object();
+          Transition predicted = transitionIndex.get(predictedNum);
+          if (transitionNum == predictedNum) {
+            numCorrect++;
+          } else {
+            numWrong++;
+            for (String feature : features) {
+              List<ScoredObject<Integer>> weights = featureWeights.get(feature);
+              if (weights == null) {
+                weights = Generics.newArrayList();
+                featureWeights.put(feature, weights);
+              }
+              // TODO: allow weighted features, weighted training, etc
+              updateWeight(weights, transitionNum, 1.0);
+              updateWeight(weights, predictedNum, -1.0);
+            }
+          }
+          state = transition.apply(state);
+        }
+      }
+      trainingTimer.done("Iteration " + iteration);
+      System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
+      System.err.println("Number of weight vectors: " + featureWeights.size());
+
+
+      double labelF1 = 0.0;
+      if (devTreebank != null) {
+        EvaluateTreebank evaluator = new EvaluateTreebank(op, null, this, tagger);
+        evaluator.testOnTreebank(devTreebank);
+        labelF1 = evaluator.getLBScore();
+        System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
+        
+        if (labelF1 > bestScore) {
+          System.err.println("New best dev score (previous best " + bestScore + ")");
+          bestScore = labelF1;
+          bestIteration = iteration;
+        } else {
+          System.err.println("Failed to improve for " + (iteration - bestIteration) + " iteration(s) on previous best score of " + bestScore);
+          if (op.trainOptions.stalledIterationLimit > 0 && (iteration - bestIteration >= op.trainOptions.stalledIterationLimit)) {
+            System.err.println("Failed to improve for too long, stopping training");
+            break;
+          }
+        }
+        
+        if (bestModels != null) {
+          bestModels.add(new ScoredObject<ShiftReduceParser>(this.deepCopy(), labelF1));
+          if (bestModels.size() > op.averagedModels) {
+            bestModels.poll();
+          }
+        }
+      }
+      if (serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
+        String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
+        try {
+          IOUtils.writeObjectToFile(this, tempName);
+        } catch (IOException e) {
+          throw new RuntimeIOException(e);
+        }
+      }
+    }
+
+    if (bestModels != null) {
+      if (op.cvAveragedModels && devTreebank != null) {
+        List<ScoredObject<ShiftReduceParser>> models = Generics.newArrayList();
+        while (bestModels.size() > 0) {
+          models.add(bestModels.poll());
+        }
+        Collections.reverse(models);
+        double bestF1 = 0.0;
+        int bestSize = 0;
+        for (int i = 1; i < models.size(); ++i) {
+          System.err.println("Testing with " + i + " models averaged together");
+          ShiftReduceParser parser = averageModels(models.subList(0, i));
+          EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
+          evaluator.testOnTreebank(devTreebank);
+          double labelF1 = evaluator.getLBScore();
+          System.err.println("Label F1 for " + i + " models: " + labelF1);
+          if (labelF1 > bestF1) {
+            bestF1 = labelF1;
+            bestSize = i;
+          }
+        }
+        copyWeights(averageModels(models.subList(0, bestSize)));
+      } else {
+        copyWeights(ShiftReduceParser.averageModels(bestModels));
+      }
+    }
+
+    condenseFeatures();
+
+    if (serializedPath != null) {
+      try {
+        IOUtils.writeObjectToFile(this, serializedPath);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }
+  }
+
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // Sources:
@@ -444,7 +610,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     newArgs = remainingArgs.toArray(newArgs);
 
     if (trainTreebankPath == null && serializedPath == null) {
-      throw new IllegalArgumentException("Must specify a treebank to train from with -trainTreebank");
+      throw new IllegalArgumentException("Must specify a treebank to train from with -trainTreebank or a parser to load with -serializedPath");
     }
 
     ShiftReduceParser parser = null;
@@ -452,161 +618,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     if (trainTreebankPath != null) {
       ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
       parser = new ShiftReduceParser(op);
-      List<Tree> binarizedTrees = parser.readBinarizedTreebank(trainTreebankPath, trainTreebankFilter);
-
-      Index<Transition> transitionIndex = parser.transitionIndex;
-
-      int nThreads = op.trainOptions.trainingThreads;
-      nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;      
-
-      MaxentTagger tagger = null;
-      if (op.testOptions.preTag) {
-        Timing retagTimer = new Timing();
-        tagger = new MaxentTagger(op.testOptions.taggerSerializedFile);
-        redoTags(binarizedTrees, tagger, nThreads);
-        retagTimer.done("Retagging");
-      }
-
-      Timing transitionTimer = new Timing();
-      List<List<Transition>> transitionLists = parser.createTransitionSequences(binarizedTrees);
-      for (List<Transition> transitions : transitionLists) {
-        transitionIndex.addAll(transitions);
-      }
-      transitionTimer.done("Converting trees into transition lists");
-      System.err.println("Number of transitions: " + transitionIndex.size());
-
-      FeatureFactory featureFactory = parser.featureFactory;
-      Map<String, List<ScoredObject<Integer>>> featureWeights = parser.featureWeights;
-      
-      Random random = new Random(parser.op.trainOptions.randomSeed);
-
-      Treebank devTreebank = null;
-      if (devTreebankPath != null) {
-        devTreebank = parser.readTreebank(devTreebankPath, devTreebankFilter);
-      }
-
-      double bestScore = 0.0;
-      int bestIteration = 0;
-      PriorityQueue<ScoredObject<ShiftReduceParser>> bestModels = null;
-      if (parser.op.averagedModels > 0) {
-        bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(parser.op.averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
-      }
-
-      List<Integer> indices = Generics.newArrayList();
-      for (int i = 0; i < binarizedTrees.size(); ++i) {
-        indices.add(i);
-      }
-
-      for (int iteration = 1; iteration <= parser.op.trainOptions.trainingIterations; ++iteration) {
-        Timing trainingTimer = new Timing();
-        int numCorrect = 0;
-        int numWrong = 0;
-        Collections.shuffle(indices, random);
-        for (int i = 0; i < indices.size(); ++i) {
-          int index = indices.get(i);
-          Tree tree = binarizedTrees.get(index);
-          List<Transition> transitions = transitionLists.get(index);
-          State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
-          for (Transition transition : transitions) {
-            int transitionNum = transitionIndex.indexOf(transition);
-            List<String> features = featureFactory.featurize(state);
-            int predictedNum = parser.findHighestScoringTransition(state, features, false).object();
-            Transition predicted = transitionIndex.get(predictedNum);
-            if (transitionNum == predictedNum) {
-              numCorrect++;
-            } else {
-              numWrong++;
-              for (String feature : features) {
-                List<ScoredObject<Integer>> weights = featureWeights.get(feature);
-                if (weights == null) {
-                  weights = Generics.newArrayList();
-                  featureWeights.put(feature, weights);
-                }
-                // TODO: allow weighted features, weighted training, etc
-                ShiftReduceParser.updateWeight(weights, transitionNum, 1.0);
-                ShiftReduceParser.updateWeight(weights, predictedNum, -1.0);
-              }
-            }
-            state = transition.apply(state);
-          }
-        }
-        trainingTimer.done("Iteration " + iteration);
-        System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
-        System.err.println("Number of weight vectors: " + featureWeights.size());
-
-
-        double labelF1 = 0.0;
-        if (devTreebank != null) {
-          EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser, tagger);
-          evaluator.testOnTreebank(devTreebank);
-          labelF1 = evaluator.getLBScore();
-          System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
-
-          if (labelF1 > bestScore) {
-            System.err.println("New best dev score (previous best " + bestScore + ")");
-            bestScore = labelF1;
-            bestIteration = iteration;
-          } else {
-            System.err.println("Failed to improve for " + (iteration - bestIteration) + " iteration(s) on previous best score of " + bestScore);
-            if (op.trainOptions.stalledIterationLimit > 0 && (iteration - bestIteration >= op.trainOptions.stalledIterationLimit)) {
-              System.err.println("Failed to improve for too long, stopping training");
-              break;
-            }
-          }
-
-          if (bestModels != null) {
-            bestModels.add(new ScoredObject<ShiftReduceParser>(parser.deepCopy(), labelF1));
-            if (bestModels.size() > parser.op.averagedModels) {
-              bestModels.poll();
-            }
-          }
-        }
-        if (serializedPath != null && parser.op.trainOptions.debugOutputFrequency > 0) {
-          String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
-          try {
-            IOUtils.writeObjectToFile(parser, tempName);
-          } catch (IOException e) {
-            throw new RuntimeIOException(e);
-          }
-        }
-      }
-
-      if (bestModels != null) {
-        if (op.cvAveragedModels && devTreebank != null) {
-          List<ScoredObject<ShiftReduceParser>> models = Generics.newArrayList();
-          while (bestModels.size() > 0) {
-            models.add(bestModels.poll());
-          }
-          Collections.reverse(models);
-          double bestF1 = 0.0;
-          int bestSize = 0;
-          for (int i = 1; i < models.size(); ++i) {
-            System.err.println("Testing with " + i + " models averaged together");
-            parser = averageModels(models.subList(0, i));
-            EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
-            evaluator.testOnTreebank(devTreebank);
-            double labelF1 = evaluator.getLBScore();
-            System.err.println("Label F1 for " + i + " models: " + labelF1);
-            if (labelF1 > bestF1) {
-              bestF1 = labelF1;
-              bestSize = i;
-            }
-          }
-          parser = averageModels(models.subList(0, bestSize));
-        } else {
-          parser = ShiftReduceParser.averageModels(bestModels);
-        }
-      }
-
-      parser.condenseFeatures();
-
-      if (serializedPath != null) {
-        try {
-          IOUtils.writeObjectToFile(parser, serializedPath);
-        } catch (IOException e) {
-          throw new RuntimeIOException(e);
-        }
-      }
+      parser.trainAndSave(trainTreebankPath, trainTreebankFilter, devTreebankPath, devTreebankFilter, serializedPath);
     }
 
     if (serializedPath != null && parser == null) {
