@@ -30,6 +30,10 @@ import edu.stanford.nlp.util.TreeShapedStack;
  * </ul>
  */
 public class State {
+  /**
+   * Expects a list of preterminals.  The preterminals should be built
+   * with CoreLabels and have HeadWord and HeadTag annotations set.
+   */
   public State(List<Tree> sentence) {
     this(new TreeShapedStack<Tree>(), sentence, 0, 0.0, false);
   }
