@@ -476,10 +476,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         List<String> features = featureFactory.featurize(state);
         ScoredObject<Integer> prediction = findHighestScoringTransition(state, features, true);
         if (prediction == null) {
-          // No legal transitions.  Skip this and move on... should be a rare event
-          // In fact this is technically an error.  Should never happen if the constraints are correct.
-          // One way to trigger this: batchSize 10, randomSeed 3573391606864793956
-          break;
+          throw new AssertionError("Did not find a legal transition");
         }
         int predictedNum = prediction.object();
         Transition predicted = transitionIndex.get(predictedNum);
