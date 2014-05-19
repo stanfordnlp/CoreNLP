@@ -27,6 +27,10 @@ public class UnaryTransition implements Transition {
       return false;
     }
     Tree top = state.stack.peek();
+    if (top.label().value().equals(label)) {
+      // Disallow unary transitions where the label doesn't change
+      return false;
+    }
     if (top.children().length == 1) {
       Tree child = top.children()[0];
       if (child.children().length == 1) {
