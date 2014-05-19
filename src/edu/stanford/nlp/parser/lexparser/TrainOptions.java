@@ -299,7 +299,7 @@ public class TrainOptions implements Serializable {
    * When training a parsing method where the training has a (max)
    * number of iterations, how many iterations to loop
    */
-  static public final int DEFAULT_TRAINING_ITERATIONS = 20;
+  static public final int DEFAULT_TRAINING_ITERATIONS = 40;
   public int trainingIterations = DEFAULT_TRAINING_ITERATIONS;
 
   /**
@@ -432,6 +432,13 @@ public class TrainOptions implements Serializable {
    * this field, as it was originally a compile time constant
    */
   public boolean trainWordVectors = true;
+
+  public static final int DEFAULT_STALLED_ITERATION_LIMIT = 8;
+  /**
+   * How many iterations to allow training to stall before taking the
+   * best model, if training in an iterative manner
+   */
+  public int stalledIterationLimit = DEFAULT_STALLED_ITERATION_LIMIT;
   
   public void display() {
     System.err.println(toString());
@@ -498,6 +505,7 @@ public class TrainOptions implements Serializable {
     result.append(" transformMatrixType=" + transformMatrixType + "\n");
     result.append(" useContextWords=" + useContextWords + "\n");
     result.append(" trainWordVectors=" + trainWordVectors + "\n");
+    result.append(" stalledIterationLimit=" + stalledIterationLimit + "\n");
     return result.toString();
   }
 

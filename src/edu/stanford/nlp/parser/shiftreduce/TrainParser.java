@@ -170,6 +170,9 @@ public class TrainParser {
         System.err.println("Loaded " + devTreebank.size() + " trees");
       }
 
+      double bestScore = 0.0;
+      int bestIteration = 0;
+
       for (int iteration = 1; iteration <= parser.op.trainOptions.trainingIterations; ++iteration) {
         int numCorrect = 0;
         int numWrong = 0;
@@ -204,6 +207,18 @@ public class TrainParser {
           evaluator.testOnTreebank(devTreebank);
           double labelF1 = evaluator.getLBScore();
           System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
+
+          if (labelF1 > bestScore) {
+            System.err.println("New best dev score (previous best " + bestScore + ")");
+            bestScore = labelF1;
+            bestIteration = iteration;
+          } else {
+            System.err.println("Failed to improve for " + (iteration - bestIteration) + " iteration(s) on previous best score of " + bestScore);
+            if (op.trainOptions.stalledIterationLimit > 0 && (iteration - bestIteration >= op.trainOptions.stalledIterationLimit)) {
+              System.err.println("Failed to improve for too long, stopping training");
+              break;
+            }
+          }
         }
       }
 
