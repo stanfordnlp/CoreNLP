@@ -234,6 +234,18 @@ public class BasicFeatureFactory implements FeatureFactory {
     CoreLabel s0RLabel = getStackLabel(stack, 0, Transition.RIGHT);
     CoreLabel s0ULabel = getStackLabel(stack, 0, Transition.UNARY);
 
+    CoreLabel s0LLLabel = getStackLabel(stack, 0, Transition.LEFT, Transition.LEFT);
+    CoreLabel s0LRLabel = getStackLabel(stack, 0, Transition.LEFT, Transition.RIGHT);
+    CoreLabel s0LULabel = getStackLabel(stack, 0, Transition.LEFT, Transition.UNARY);
+
+    CoreLabel s0RLLabel = getStackLabel(stack, 0, Transition.RIGHT, Transition.LEFT);
+    CoreLabel s0RRLabel = getStackLabel(stack, 0, Transition.RIGHT, Transition.RIGHT);
+    CoreLabel s0RULabel = getStackLabel(stack, 0, Transition.RIGHT, Transition.UNARY);
+
+    CoreLabel s0ULLabel = getStackLabel(stack, 0, Transition.UNARY, Transition.LEFT);
+    CoreLabel s0URLabel = getStackLabel(stack, 0, Transition.UNARY, Transition.RIGHT);
+    CoreLabel s0UULabel = getStackLabel(stack, 0, Transition.UNARY, Transition.UNARY);
+
     CoreLabel s1LLabel = getStackLabel(stack, 1, Transition.LEFT);
     CoreLabel s1RLabel = getStackLabel(stack, 1, Transition.RIGHT);
     CoreLabel s1ULabel = getStackLabel(stack, 1, Transition.UNARY);
@@ -253,6 +265,18 @@ public class BasicFeatureFactory implements FeatureFactory {
     addUnaryStackFeatures(features, s0LLabel, "S0LC-", "S0LWT-", "S0LT-", "S0LWC-", "S0LTC-");
     addUnaryStackFeatures(features, s0RLabel, "S0RC-", "S0RWT-", "S0RT-", "S0RWC-", "S0RTC-");
     addUnaryStackFeatures(features, s0ULabel, "S0UC-", "S0UWT-", "S0UT-", "S0UWC-", "S0UTC-");
+
+    addUnaryStackFeatures(features, s0LLLabel, "S0LLC-", "S0LLWT-", "S0LLT-", "S0LLWC-", "S0LLTC-");
+    addUnaryStackFeatures(features, s0LRLabel, "S0LRC-", "S0LRWT-", "S0LRT-", "S0LRWC-", "S0LRTC-");
+    addUnaryStackFeatures(features, s0LULabel, "S0LUC-", "S0LUWT-", "S0LUT-", "S0LUWC-", "S0LUTC-");
+
+    addUnaryStackFeatures(features, s0RLLabel, "S0RLC-", "S0RLWT-", "S0RLT-", "S0RLWC-", "S0RLTC-");
+    addUnaryStackFeatures(features, s0RRLabel, "S0RRC-", "S0RRWT-", "S0RRT-", "S0RRWC-", "S0RRTC-");
+    addUnaryStackFeatures(features, s0RULabel, "S0RUC-", "S0RUWT-", "S0RUT-", "S0RUWC-", "S0RUTC-");
+
+    addUnaryStackFeatures(features, s0ULLabel, "S0ULC-", "S0ULWT-", "S0ULT-", "S0ULWC-", "S0ULTC-");
+    addUnaryStackFeatures(features, s0URLabel, "S0URC-", "S0URWT-", "S0URT-", "S0URWC-", "S0URTC-");
+    addUnaryStackFeatures(features, s0UULabel, "S0UUC-", "S0UUWT-", "S0UUT-", "S0UUWC-", "S0UUTC-");
 
     addUnaryStackFeatures(features, s1LLabel, "S1LC-", "S1LWT-", "S1LT-", "S1LWC-", "S1LTC-");
     addUnaryStackFeatures(features, s1RLabel, "S1RC-", "S1RWT-", "S1RT-", "S1RWC-", "S1RTC-");
