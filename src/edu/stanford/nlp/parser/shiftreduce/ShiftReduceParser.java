@@ -51,6 +51,9 @@ import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
+
 
 public class ShiftReduceParser implements Serializable, ParserGrammar {
   final Index<Transition> transitionIndex;
@@ -338,17 +341,47 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   // TODO: factor out the retagging?
-  public static void redoTags(List<Tree> trees, MaxentTagger tagger) {
-    for (Tree tree : trees) {
-      List<Word> words = tree.yieldWords();
-      List<TaggedWord> tagged = tagger.apply(words);
-      List<Label> tags = tree.preTerminalYield();
-      if (tags.size() != tagged.size()) {
-        throw new AssertionError("Tags are not the same size");
+  public static void redoTags(Tree tree, MaxentTagger tagger) {
+    List<Word> words = tree.yieldWords();
+    List<TaggedWord> tagged = tagger.apply(words);
+    List<Label> tags = tree.preTerminalYield();
+    if (tags.size() != tagged.size()) {
+      throw new AssertionError("Tags are not the same size");
+    }
+    for (int i = 0; i < tags.size(); ++i) {
+      tags.get(i).setValue(tagged.get(i).tag());
+    }
+  }
+
+  private static class RetagProcessor implements ThreadsafeProcessor<Tree, Tree> {
+    MaxentTagger tagger;
+
+    public RetagProcessor(MaxentTagger tagger) {
+      this.tagger = tagger;
+    }
+
+    public Tree process(Tree tree) {
+      redoTags(tree, tagger);
+      return tree;
+    }
+
+    public RetagProcessor newInstance() {
+      return new RetagProcessor(tagger);
+    }
+  }
+
+  public static void redoTags(List<Tree> trees, MaxentTagger tagger, int nThreads) {
+    if (nThreads == 1) {
+      for (Tree tree : trees) {
+        redoTags(tree, tagger);
       }
-      for (int i = 0; i < tags.size(); ++i) {
-        tags.get(i).setValue(tagged.get(i).tag());
+    } else {
+      MulticoreWrapper<Tree, Tree> wrapper = new MulticoreWrapper<Tree, Tree>(nThreads, new RetagProcessor(tagger));
+      for (Tree tree : trees) {
+        wrapper.put(tree);
       }
+      wrapper.join();
+      // trees are changed in place
     }
   }
 
@@ -417,8 +450,10 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
       MaxentTagger tagger = null;
       if (op.testOptions.preTag) {
+        Timing retagTimer = new Timing();
         tagger = new MaxentTagger(op.testOptions.taggerSerializedFile);
-        redoTags(binarizedTrees, tagger);
+        redoTags(binarizedTrees, tagger, op.trainOptions.trainingThreads);
+        retagTimer.done("Retagging");
       }
       List<List<Transition>> transitionLists = parser.createTransitionSequences(binarizedTrees);
       for (List<Transition> transitions : transitionLists) {
