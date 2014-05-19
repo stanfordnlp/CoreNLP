@@ -28,7 +28,7 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants/*@eg
     System.out.println("Reading from standard input...");
     TsurgeonParser t = new TsurgeonParser(System.in);
     try {
-      TsurgeonPattern n = new TsurgeonPatternRoot(t.Root());
+      TsurgeonPattern n = t.Root();
       System.out.println(n.toString());
       System.out.println("Thank you.");
     } catch (Exception e) {
@@ -43,7 +43,7 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants/*@eg
 PARSER_END(TsurgeonParser)
 
 
-<DEFAULT,OPERATION> SKIP:
+<*> SKIP:
 {
   " "
 | "\r"
@@ -57,8 +57,9 @@ PARSER_END(TsurgeonParser)
 }
 
 TOKEN:
-{ 
-  < DELETE: "delete" > : OPERATION
+{ < IF: "if" >
+| < EXISTS: "exists" > : CONDITIONAL
+| < DELETE: "delete" > : OPERATION
 | < PRUNE:  "prune" > : OPERATION
 | < RELABEL: "relabel" > : OPERATION
 | < EXCISE: "excise" > : OPERATION
@@ -71,6 +72,9 @@ TOKEN:
 | < ADJOIN_TO_FOOT: "adjoinF" > : OPERATION
 | < COINDEX: "coindex" > : OPERATION
 }
+
+<CONDITIONAL> TOKEN:
+{ < NAME: ( ~[" ","\n","\r","[","]","(",")",":"] )+ > : DEFAULT }
 
 <OPERATION> TOKEN:
 { 
@@ -87,12 +91,15 @@ TOKEN:
 | < CLOSE_PAREN: ")" >
 }
 
-TsurgeonPattern[] Root() :
+// TODO: this is wasteful in terms of creating TsurgeonPatternRoot.
+// Should separate that out into another production
+TsurgeonPatternRoot Root() :
 {/*@bgen(jjtree) Root */
   SimpleNode jjtn000 = new SimpleNode(JJTROOT);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
 /*@egen*/
+  Token name;
   TsurgeonPattern result;
   List<TsurgeonPattern> results = null;
 }
@@ -105,14 +112,24 @@ TsurgeonPattern[] Root() :
     jjtc000 = false;
   }
 /*@egen*/
-  { return new TsurgeonPattern[] { result }; } 
+  { return new TsurgeonPatternRoot(result); } 
+ | 
+  ( <IF> <EXISTS> name = <NAME> result = Root() )/*@bgen(jjtree)*/
+  {
+    jjtree.closeNodeScope(jjtn000, true);
+    jjtc000 = false;
+  }
+/*@egen*/
+  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, result.children)); }
  |
-  ( <OPEN_BRACKET> result = Operation() <CLOSE_BRACKET>
+  ( <OPEN_BRACKET> result = Root() <CLOSE_BRACKET>
     {
       if (results == null) {
         results = Generics.newArrayList();
       }
-      results.add(result);
+      for (TsurgeonPattern child : result.children) {
+        results.add(child);
+      }
     } )+/*@bgen(jjtree)*/
   {
     jjtree.closeNodeScope(jjtn000, true);
@@ -121,7 +138,7 @@ TsurgeonPattern[] Root() :
 /*@egen*/
   {
     TsurgeonPattern[] array = new TsurgeonPattern[results.size()];
-    return results.toArray(array);
+    return new TsurgeonPatternRoot(results.toArray(array));
   }/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
