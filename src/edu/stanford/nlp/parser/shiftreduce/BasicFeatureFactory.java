@@ -169,7 +169,26 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(featureType + value + "-" + separator);
   }
 
+  public static void addSeparatorFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature, boolean between) {
+    String value = getFeatureFromCoreLabel(label, feature);
+
+    features.add(featureType + value + "-" + between);
+  }
+
+  public static void addSeparatorFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2, boolean between) {
+    String value1 = getFeatureFromCoreLabel(label1, feature1);
+    String value2 = getFeatureFromCoreLabel(label2, feature2);
+
+    features.add(featureType + value1 + "-" + value2 + "-" + between);
+  }
+
   public static void addSeparatorFeatures(Set<String> features, CoreLabel s0Label, CoreLabel s1Label, State.HeadPosition s0Separator, State.HeadPosition s1Separator) {
+    boolean between = false;
+    if ((s0Separator != null && (s0Separator == State.HeadPosition.BOTH || s0Separator == State.HeadPosition.LEFT)) ||
+        (s1Separator != null && (s1Separator == State.HeadPosition.BOTH || s1Separator == State.HeadPosition.RIGHT))) {
+      between = true;
+    }
+
     addSeparatorFeature(features, "s0sep-", s0Separator);
     addSeparatorFeature(features, "s1sep-", s1Separator);
 
@@ -187,6 +206,19 @@ public class BasicFeatureFactory implements FeatureFactory {
     addSeparatorFeature(features, "s0ts1sep-", s0Label, FeatureComponent.HEADTAG, s1Separator);
     addSeparatorFeature(features, "s1ts0sep-", s1Label, FeatureComponent.HEADTAG, s0Separator);
     addSeparatorFeature(features, "s1ts1sep-", s1Label, FeatureComponent.HEADTAG, s1Separator);
+
+    if (s0Label != null && s1Label != null) {
+      addSeparatorFeature(features, "s0wsb-", s0Label, FeatureComponent.HEADWORD, between);
+      addSeparatorFeature(features, "s1wsb-", s1Label, FeatureComponent.HEADWORD, between);
+
+      addSeparatorFeature(features, "s0csb-", s0Label, FeatureComponent.VALUE, between);
+      addSeparatorFeature(features, "s1csb-", s1Label, FeatureComponent.VALUE, between);
+
+      addSeparatorFeature(features, "s0tsb-", s0Label, FeatureComponent.HEADTAG, between);
+      addSeparatorFeature(features, "s1tsb-", s1Label, FeatureComponent.HEADTAG, between);
+
+      addSeparatorFeature(features, "s0cs1csb-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, between);
+    }
   }
 
   public Set<String> featurize(State state) {
