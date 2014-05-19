@@ -2321,7 +2321,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
           List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
           int numFile = 0;
-          if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
+          String evalFileFormat = props.getProperty("evalFileFormat");
+          if (evalFileFormat == null || evalFileFormat.equalsIgnoreCase("text") || evalFileFormat.equalsIgnoreCase("txt")) {
             for (File f : allFiles) {
               numFile++;
               Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
