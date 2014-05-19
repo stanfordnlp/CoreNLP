@@ -2,9 +2,11 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.HasWord;
@@ -16,6 +18,7 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
 public class ShiftReduceParserQuery implements ParserQuery {
@@ -28,14 +31,14 @@ public class ShiftReduceParserQuery implements ParserQuery {
   boolean success;
   boolean unparsable;
 
+  List<State> bestParses;
+
   final ShiftReduceParser parser;
 
   public ShiftReduceParserQuery(ShiftReduceParser parser) {
     this.parser = parser;
   }
 
-  // TODO: this isn't a beam, this is just a single width beam.  
-  // Make it a beam search
   @Override
   public boolean parse(List<? extends HasWord> sentence) {
     this.originalSentence = sentence;
@@ -49,25 +52,52 @@ public class ShiftReduceParserQuery implements ParserQuery {
     return parseInternal();
   }
 
+  // TODO: make this a parameter
+  static final int BEAM_SIZE = 1;
+
   private boolean parseInternal() {
-    State state = initialState;
     success = true;
     unparsable = false;
-    while (!state.finished) {
-      Set<String> features = parser.featureFactory.featurize(state);
-      ScoredObject<Integer> predictedTransition = parser.findHighestScoringTransition(state, features, true);
-      if (predictedTransition.object() >= 0) {
-        // TODO: do something with the score
-        Transition transition = parser.transitionIndex.get(predictedTransition.object());
-        state = transition.apply(state);
-      } else {
-        success = false;
-        unparsable = true;
+    PriorityQueue<State> beam = new PriorityQueue<State>(BEAM_SIZE + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    beam.add(initialState);
+    // TODO: don't construct as many PriorityQueues
+    while (beam.size() > 0) {
+      // System.err.println("================================================");
+      // System.err.println("Current beam:");
+      // System.err.println(beam);
+      PriorityQueue<State> oldBeam = beam;
+      beam = new PriorityQueue<State>(BEAM_SIZE + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      State bestState = null;
+      for (State state : oldBeam) {
+        Set<String> features = parser.featureFactory.featurize(state);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, BEAM_SIZE);
+        // System.err.println("Examining state: " + state);
+        for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
+          Transition transition = parser.transitionIndex.get(predictedTransition.object());
+          State newState = transition.apply(state, predictedTransition.score());
+          // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
+          if (bestState == null || newState.score() < bestState.score()) {
+            bestState = newState;
+          }
+          beam.add(newState);
+          if (beam.size() > BEAM_SIZE) {
+            beam.poll();
+          }
+        }
+      }
+      if (bestState == null || bestState.isFinished()) {
         break;
       }
     }
-    finalState = state;
-    debinarized = debinarizer.transformTree(state.stack.peek());
+    if (beam.size() == 0) {
+      success = false;
+      unparsable = true;
+    } else {
+      bestParses = Generics.newArrayList(beam);
+      Collections.reverse(bestParses);
+      finalState = bestParses.get(0);
+      debinarized = debinarizer.transformTree(finalState.stack.peek());
+    }
     return success;
   }
 
