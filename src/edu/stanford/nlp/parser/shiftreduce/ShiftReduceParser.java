@@ -739,6 +739,25 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
   }
 
+  public void setOptionFlags(String ... flags) {
+    op.setOptions(flags);
+  }
+
+  public static ShiftReduceParser loadModel(String path, String ... extraFlags) {
+    ShiftReduceParser parser = null;
+    try {
+      parser = IOUtils.readObjectFromFile(path);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeIOException(e);
+    }
+    if (extraFlags.length > 0) {
+      parser.setOptionFlags(extraFlags);
+    }
+    return parser;
+  }
+
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath ../codebase/retagged7.ser.gz -preTag -taggerSerializedFile ../data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -trainingThreads 4 -batchSize 12 -serializedPath foo.ser.gz 
@@ -766,6 +785,8 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
     String tlppClass = null;
 
+    String continueTraining = null;
+
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-trainTreebank");
@@ -788,6 +809,9 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       } else if (args[argIndex].equalsIgnoreCase("-tlpp")) {
         tlppClass = args[argIndex] + 1;
         argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-continueTraining")) {
+        continueTraining = args[argIndex + 1];
+        argIndex += 2;
       } else {
         remainingArgs.add(args[argIndex]);
         ++argIndex;
@@ -804,20 +828,18 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     ShiftReduceParser parser = null;
 
     if (trainTreebankPath != null) {
-      ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
-      parser = new ShiftReduceParser(op);
+      if (continueTraining != null) {
+        parser = ShiftReduceParser.loadModel(continueTraining, "-forceTags");
+      } else {
+        ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
+        parser = new ShiftReduceParser(op);
+      }
       parser.trainAndSave(trainTreebankPath, trainTreebankFilter, devTreebankPath, devTreebankFilter, serializedPath);
     }
 
     if (serializedPath != null && parser == null) {
-      try {
-        parser = IOUtils.readObjectFromFile(serializedPath);
-        parser.op.setOptions("-forceTags");
-      } catch (IOException e) {
-        throw new RuntimeIOException(e);
-      } catch (ClassNotFoundException e) {
-        throw new RuntimeIOException(e);
-      }
+      parser = ShiftReduceParser.loadModel(serializedPath);
+      parser.op.setOptions("-forceTags");
       parser.op.setOptions(newArgs);
     }
 
