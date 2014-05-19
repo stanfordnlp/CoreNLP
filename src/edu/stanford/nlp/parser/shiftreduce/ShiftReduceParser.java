@@ -456,11 +456,14 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
       Index<Transition> transitionIndex = parser.transitionIndex;
 
+      int nThreads = op.trainOptions.trainingThreads;
+      nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;      
+
       MaxentTagger tagger = null;
       if (op.testOptions.preTag) {
         Timing retagTimer = new Timing();
         tagger = new MaxentTagger(op.testOptions.taggerSerializedFile);
-        redoTags(binarizedTrees, tagger, op.trainOptions.trainingThreads);
+        redoTags(binarizedTrees, tagger, nThreads);
         retagTimer.done("Retagging");
       }
 
@@ -470,31 +473,10 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         transitionIndex.addAll(transitions);
       }
       transitionTimer.done("Converting trees into transition lists");
-
-      Timing featureTimer = new Timing();
-      FeatureFactory featureFactory = parser.featureFactory;
-      Index<String> featureIndex = new HashIndex<String>();
-      for (int i = 0; i < binarizedTrees.size(); ++i) {
-        Tree tree = binarizedTrees.get(i);
-        List<Transition> transitions = transitionLists.get(i);
-        State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
-        for (Transition transition : transitions) {
-          featureIndex.addAll(featureFactory.featurize(state));
-          state = transition.apply(state);
-        }
-      }
-      featureTimer.done("Building an initial index of feature types");
-
-      Map<String, List<ScoredObject<Integer>>> featureWeights = parser.featureWeights;
-      for (String feature : featureIndex) {
-        List<ScoredObject<Integer>> weights = Generics.newArrayList();
-        featureWeights.put(feature, weights);
-      }
-
-      System.err.println("Number of unique features: " + featureWeights.size());
       System.err.println("Number of transitions: " + transitionIndex.size());
-      System.err.println("Total number of weights: " + (featureWeights.size() * transitionIndex.size()));
-      System.err.println("(Note: if training with a beam, additional features may be added for incorrect states)");
+
+      FeatureFactory featureFactory = parser.featureFactory;
+      Map<String, List<ScoredObject<Integer>>> featureWeights = parser.featureWeights;
       
       Random random = new Random(parser.op.trainOptions.randomSeed);
 
@@ -536,6 +518,10 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
               numWrong++;
               for (String feature : features) {
                 List<ScoredObject<Integer>> weights = featureWeights.get(feature);
+                if (weights == null) {
+                  weights = Generics.newArrayList();
+                  featureWeights.put(feature, weights);
+                }
                 // TODO: allow weighted features, weighted training, etc
                 ShiftReduceParser.updateWeight(weights, transitionNum, 1.0);
                 ShiftReduceParser.updateWeight(weights, predictedNum, -1.0);
@@ -546,6 +532,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         }
         trainingTimer.done("Iteration " + iteration);
         System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
+        System.err.println("Number of weight vectors: " + featureWeights.size());
 
 
         double labelF1 = 0.0;
