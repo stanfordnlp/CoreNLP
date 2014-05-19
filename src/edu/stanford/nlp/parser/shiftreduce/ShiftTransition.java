@@ -22,6 +22,8 @@ public class ShiftTransition implements Transition {
     }
     // We disallow shifting when the previous transition was a right
     // head transition to a partial (binarized) state
+    // TODO: I don't have an explanation for this, it was just stated
+    // in Zhang & Clark 2009
     if (state.stack.size() > 0) {
       Tree top = state.stack.peek();
       // Temporary node, eg part of a binarized sequence
