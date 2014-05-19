@@ -76,7 +76,10 @@ public class ShiftReduceParserQuery implements ParserQuery {
    */
   @Override
   public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
-    return parse(sentence);
+    boolean success = parse(sentence);
+    //System.err.println(getBestTransitionSequence());
+    //System.err.println(getBestBinarizedParse());
+    return success;
   }
 
   public Tree getBestBinarizedParse() {
