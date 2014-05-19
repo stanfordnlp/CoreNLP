@@ -16,10 +16,12 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.Options;
+import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
@@ -40,6 +42,21 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     this.featureWeights = Generics.newHashMap();
     this.op = op;
     this.featureFactory = ReflectionLoading.loadByReflection(op.featureFactoryClass);
+  }
+
+  @Override
+  public Options getOp() {
+    return op;
+  }
+
+  @Override
+  public TreebankLangParserParams getTLPParams() { 
+    return op.tlpParams; 
+  }
+
+  @Override
+  public TreebankLanguagePack treebankLanguagePack() {
+    return getTLPParams().treebankLanguagePack();
   }
 
   public ShiftReduceParser deepCopy() {
