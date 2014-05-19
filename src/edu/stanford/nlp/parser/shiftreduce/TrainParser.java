@@ -7,8 +7,6 @@ import java.util.Set;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
@@ -17,10 +15,8 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.HeadFinder;
-import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
@@ -28,51 +24,6 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
 public class TrainParser {
-
-  static int findHighestScoringTransition(Index<String> featureIndex, Index<Transition> transitionIndex, double[][] featureWeights, State state, Set<String> features, boolean requireLegal) {
-    double[] scores = new double[featureWeights.length];
-    for (String feature : features) {
-      int featureNum = featureIndex.indexOf(feature);
-      if (featureNum >= 0) {
-        // Features not in our index are represented by < 0 and are ignored
-        for (int i = 0; i < scores.length; ++i) {
-          scores[i] += featureWeights[i][featureNum];
-        }
-      }
-    }
-
-    int bestFeature = -1;
-    for (int i = 0; i < scores.length; ++i) {
-      if ((bestFeature < 0 || scores[i] > scores[bestFeature]) && 
-          (!requireLegal || transitionIndex.get(i).isLegal(state))) {
-        bestFeature = i;
-      }
-    }
-    
-    return bestFeature;
-  }
-
-  static State initialStateFromGoldTagTree(Tree tree) {
-    List<Tree> preterminals = Generics.newArrayList();
-    for (TaggedWord tw : tree.taggedYield()) {
-      CoreLabel word = new CoreLabel();
-      word.setValue(tw.word());
-      CoreLabel tag = new CoreLabel();
-      tag.setValue(tw.tag());
-      
-      LabeledScoredTreeNode wordNode = new LabeledScoredTreeNode(word);
-      LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tag);
-      tagNode.addChild(wordNode);
-
-      word.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
-      word.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
-      tag.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
-      tag.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
-
-      preterminals.add(tagNode);
-    }
-    return new State(preterminals);
-  }
 
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
@@ -147,7 +98,7 @@ public class TrainParser {
         List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
         transitionIndex.addAll(transitions);
 
-        State state = initialStateFromGoldTagTree(tree);
+        State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
         for (Transition transition : transitions) {
           Set<String> features = featureFactory.featurize(state);
           featureIndex.addAll(features);
@@ -160,16 +111,19 @@ public class TrainParser {
       System.err.println("Feature space will be " + (featureIndex.size() * transitionIndex.size()));
       
       double[][] featureWeights = new double[transitionIndex.size()][featureIndex.size()];
+
+      parser = new ShiftReduceParser(transitionIndex, featureIndex, featureWeights, op, featureFactory);
+
       for (int i = 0; i < numTrainingIterations; ++i) {
         int numCorrect = 0;
         int numWrong = 0;
         for (Tree tree : binarizedTrees) {
           List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
-          State state = initialStateFromGoldTagTree(tree);
+          State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
           for (Transition transition : transitions) {
             int transitionNum = transitionIndex.indexOf(transition);
             Set<String> features = featureFactory.featurize(state);
-            int predictedNum = findHighestScoringTransition(featureIndex, transitionIndex, featureWeights, state, features, false);
+            int predictedNum = parser.findHighestScoringTransition(state, features, false);
             Transition predicted = transitionIndex.get(predictedNum);
             if (transitionNum == predictedNum) {
               numCorrect++;
@@ -188,8 +142,6 @@ public class TrainParser {
         System.err.println("Iteration " + i + " complete");
         System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
       }
-
-      parser = new ShiftReduceParser(transitionIndex, featureIndex, featureWeights, op, featureFactory);
 
       if (serializedPath != null) {
         try {
@@ -217,11 +169,11 @@ public class TrainParser {
       Treebank testTreebank = parser.op.tlpParams.memoryTreebank();
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       for (Tree tree : testTreebank) {
-        State state = initialStateFromGoldTagTree(tree);
+        State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
         List<Transition> transitions = Generics.newArrayList();
         while (!state.finished) {
           Set<String> features = parser.featureFactory.featurize(state);
-          int predictedNum = findHighestScoringTransition(parser.featureIndex, parser.transitionIndex, parser.featureWeights, state, features, true);
+          int predictedNum = parser.findHighestScoringTransition(state, features, true);
           Transition transition = parser.transitionIndex.get(predictedNum);
           state = transition.apply(state);
           transitions.add(transition);
