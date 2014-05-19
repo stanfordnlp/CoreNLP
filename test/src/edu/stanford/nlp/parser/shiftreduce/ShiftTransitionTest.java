@@ -14,6 +14,8 @@ import java.util.List;
  * @author John Bauer
  */
 public class ShiftTransitionTest extends TestCase {
+  // TODO: add test for isLegal
+
   public void testTransition() {
     String[] words = { "This", "is", "a", "short", "test", "." };
     String[] tags = { "DT", "VBZ", "DT", "JJ", "NN", "." };
