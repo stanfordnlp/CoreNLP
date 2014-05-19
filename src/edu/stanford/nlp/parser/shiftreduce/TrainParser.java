@@ -246,7 +246,6 @@ public class TrainParser {
       } catch (ClassNotFoundException e) {
         throw new RuntimeIOException(e);
       }
-      parser.op.setOptions("-forceTags");
       parser.op.setOptions(newArgs);
     }
 
