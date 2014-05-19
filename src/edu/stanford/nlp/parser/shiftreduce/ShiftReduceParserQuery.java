@@ -105,12 +105,12 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   @Override
   public Tree getBestDependencyParse(boolean debinarize) {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   @Override
   public Tree getBestFactoredParse() {
-    throw new UnsupportedOperationException();
+    return null;
   }
 
   /** TODO: if this is a beam, return all equal parses */
