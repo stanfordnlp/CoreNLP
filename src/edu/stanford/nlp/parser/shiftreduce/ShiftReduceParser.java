@@ -280,6 +280,49 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return new State(preterminals);
   }
 
+  public static ShiftReduceOptions buildTrainingOptions(String tlppClass, String[] args) {
+    ShiftReduceOptions op = new ShiftReduceOptions();
+    op.setOptions("-forceTags", "-debugOutputFrequency", "1");
+    if (tlppClass != null) {
+      op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
+    }
+    op.setOptions(args);
+    
+    if (op.trainOptions.randomSeed == 0) {
+      op.trainOptions.randomSeed = (new Random()).nextLong();
+      System.err.println("Random seed not set by options, using " + op.trainOptions.randomSeed);
+    }
+    return op;
+  }
+
+  public Treebank readTreebank(String treebankPath, FileFilter treebankFilter) {
+    System.err.println("Loading trees from " + treebankPath);
+    Treebank treebank = op.tlpParams.memoryTreebank();
+    treebank.loadPath(treebankPath, treebankFilter);
+    System.err.println("Read in " + treebank.size() + " trees from " + treebankPath);
+    return treebank;
+  }
+
+  public List<Tree> readBinarizedTreebank(String treebankPath, FileFilter treebankFilter) {
+    TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
+    BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
+    CompositeTreeTransformer transformer = new CompositeTreeTransformer();
+    transformer.addTransformer(binarizer);
+    transformer.addTransformer(basicTransformer);
+      
+    Treebank treebank = readTreebank(treebankPath, treebankFilter);
+    treebank = treebank.transform(transformer);
+
+    HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
+    List<Tree> binarizedTrees = Generics.newArrayList();
+    for (Tree tree : treebank) {
+      Trees.convertToCoreLabels(tree);
+      tree.percolateHeadAnnotations(binaryHeadFinder);
+      binarizedTrees.add(tree);
+    }
+    System.err.println("Converted trees to binarized format");
+    return binarizedTrees;
+  }
 
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
@@ -338,39 +381,9 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     ShiftReduceParser parser = null;
 
     if (trainTreebankPath != null) {
-      ShiftReduceOptions op = new ShiftReduceOptions();
-      op.setOptions("-forceTags", "-debugOutputFrequency", "1");
-      if (tlppClass != null) {
-        op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
-      }
-      op.setOptions(newArgs);
-
-      if (op.trainOptions.randomSeed == 0) {
-        op.trainOptions.randomSeed = (new Random()).nextLong();
-        System.err.println("Random seed not set by options, using " + op.trainOptions.randomSeed);
-      }
-
-      TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
-      BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
-      CompositeTreeTransformer transformer = new CompositeTreeTransformer();
-      transformer.addTransformer(binarizer);
-      transformer.addTransformer(basicTransformer);
-      
-      System.err.println("Loading training trees from " + trainTreebankPath);
-      Treebank trainTreebank = op.tlpParams.memoryTreebank();
-      trainTreebank.loadPath(trainTreebankPath, trainTreebankFilter);
-      trainTreebank = trainTreebank.transform(transformer);
-      System.err.println("Read in " + trainTreebank.size() + " trees from " + trainTreebankPath);
-
-      HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
-      List<Tree> binarizedTrees = Generics.newArrayList();
-      for (Tree tree : trainTreebank) {
-        Trees.convertToCoreLabels(tree);
-        tree.percolateHeadAnnotations(binaryHeadFinder);
-        binarizedTrees.add(tree);
-      }
-
+      ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
       parser = new ShiftReduceParser(op);
+      List<Tree> binarizedTrees = parser.readBinarizedTreebank(trainTreebankPath, trainTreebankFilter);
 
       Index<Transition> transitionIndex = parser.transitionIndex;
       FeatureFactory featureFactory = parser.featureFactory;
@@ -387,24 +400,22 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         }
       }
 
-      System.err.println("Number of unique features: " + featureIndex.size());
-      System.err.println("Number of transitions: " + transitionIndex.size());
-      System.err.println("Feature space will be " + (featureIndex.size() * transitionIndex.size()));
-      
       Map<String, List<ScoredObject<Integer>>> featureWeights = parser.featureWeights;
       for (String feature : featureIndex) {
         List<ScoredObject<Integer>> weights = Generics.newArrayList();
         featureWeights.put(feature, weights);
       }
 
+      System.err.println("Number of unique features: " + featureWeights.size());
+      System.err.println("Number of transitions: " + transitionIndex.size());
+      System.err.println("Total number of weights: " + (featureWeights.size() * transitionIndex.size()));
+      System.err.println("(Note: if training with a beam, additional features may be added for incorrect states)");
+      
       Random random = new Random(parser.op.trainOptions.randomSeed);
 
       Treebank devTreebank = null;
       if (devTreebankPath != null) {
-        System.err.println("Loading dev trees from " + devTreebankPath);
-        devTreebank = parser.op.tlpParams.memoryTreebank();
-        devTreebank.loadPath(devTreebankPath, devTreebankFilter);
-        System.err.println("Loaded " + devTreebank.size() + " trees");
+        parser.readTreebank(devTreebankPath, devTreebankFilter);
       }
 
       double bestScore = 0.0;
