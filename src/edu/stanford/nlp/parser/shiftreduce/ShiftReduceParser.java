@@ -324,6 +324,15 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return binarizedTrees;
   }
 
+  public List<List<Transition>> createTransitionSequences(List<Tree> binarizedTrees) {
+    List<List<Transition>> transitionLists = Generics.newArrayList();
+    for (Tree tree : binarizedTrees) {
+      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, op.compoundUnaries);
+      transitionLists.add(transitions);
+    }
+    return transitionLists;
+  }
+
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
@@ -386,12 +395,17 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       List<Tree> binarizedTrees = parser.readBinarizedTreebank(trainTreebankPath, trainTreebankFilter);
 
       Index<Transition> transitionIndex = parser.transitionIndex;
+
+      List<List<Transition>> transitionLists = parser.createTransitionSequences(binarizedTrees);
+      for (List<Transition> transitions : transitionLists) {
+        transitionIndex.addAll(transitions);
+      }
+
       FeatureFactory featureFactory = parser.featureFactory;
       Index<String> featureIndex = new HashIndex<String>();
-      for (Tree tree : binarizedTrees) {
-        List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, op.compoundUnaries);
-        transitionIndex.addAll(transitions);
-
+      for (int i = 0; i < binarizedTrees.size(); ++i) {
+        Tree tree = binarizedTrees.get(i);
+        List<Transition> transitions = transitionLists.get(i);
         State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
         for (Transition transition : transitions) {
           Set<String> features = featureFactory.featurize(state);
@@ -415,7 +429,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
       Treebank devTreebank = null;
       if (devTreebankPath != null) {
-        parser.readTreebank(devTreebankPath, devTreebankFilter);
+        devTreebank = parser.readTreebank(devTreebankPath, devTreebankFilter);
       }
 
       double bestScore = 0.0;
@@ -425,12 +439,19 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(parser.op.averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
       }
 
+      List<Integer> indices = Generics.newArrayList();
+      for (int i = 0; i < binarizedTrees.size(); ++i) {
+        indices.add(i);
+      }
+
       for (int iteration = 1; iteration <= parser.op.trainOptions.trainingIterations; ++iteration) {
         int numCorrect = 0;
         int numWrong = 0;
-        Collections.shuffle(binarizedTrees, random);
-        for (Tree tree : binarizedTrees) {
-          List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, op.compoundUnaries);
+        Collections.shuffle(indices, random);
+        for (int i = 0; i < indices.size(); ++i) {
+          int index = indices.get(i);
+          Tree tree = binarizedTrees.get(index);
+          List<Transition> transitions = transitionLists.get(index);
           State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
           for (Transition transition : transitions) {
             int transitionNum = transitionIndex.indexOf(transition);
