@@ -854,7 +854,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
       @Override
       public String signature() {
-        return "model=" + inputProps.get("model");
+        return "sentiment.model=" + inputProps.get("sentiment.model");
       }
     });
 
