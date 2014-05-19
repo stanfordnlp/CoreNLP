@@ -4,6 +4,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -25,8 +26,23 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.ScoredObject;
 
 public class TrainParser {
+
+  public static void updateWeight(List<ScoredObject<Integer>> weights, int transition, double delta) {
+    for (int i = 0; i < weights.size(); ++i) {
+      ScoredObject<Integer> weight = weights.get(i);
+      if (weight.object() == transition) {
+        weight.setScore(weight.score() + delta);
+        return;
+      } else if (weight.object() > transition) {
+        weights.add(i, new ScoredObject<Integer>(transition, delta));
+        return;
+      }
+    }
+    weights.add(new ScoredObject<Integer>(transition, delta));
+  }
 
   // java -mx15g edu.stanford.nlp.parser.shiftreduce.TrainParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx15g edu.stanford.nlp.parser.shiftreduce.TrainParser -trainTreebank ../data/parsetrees/wsj.train.mrg -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
@@ -137,9 +153,12 @@ public class TrainParser {
       System.err.println("Number of transitions: " + transitionIndex.size());
       System.err.println("Feature space will be " + (featureIndex.size() * transitionIndex.size()));
       
-      double[][] featureWeights = new double[transitionIndex.size()][featureIndex.size()];
-
-      parser = new ShiftReduceParser(transitionIndex, featureIndex, featureWeights, op, featureFactory);
+      Map<String, List<ScoredObject<Integer>>> featureWeights = Generics.newHashMap();
+      for (String feature : featureIndex) {
+        List<ScoredObject<Integer>> weights = Generics.newArrayList();
+        featureWeights.put(feature, weights);
+      }
+      parser = new ShiftReduceParser(transitionIndex, featureWeights, op, featureFactory);
 
       Random random = new Random(parser.op.trainOptions.randomSeed);
 
@@ -151,7 +170,7 @@ public class TrainParser {
         System.err.println("Loaded " + devTreebank.size() + " trees");
       }
 
-      for (int i = 0; i < parser.op.trainOptions.trainingIterations; ++i) {
+      for (int iteration = 1; iteration <= parser.op.trainOptions.trainingIterations; ++iteration) {
         int numCorrect = 0;
         int numWrong = 0;
         Collections.shuffle(binarizedTrees, random);
@@ -168,23 +187,23 @@ public class TrainParser {
             } else {
               numWrong++;
               for (String feature : features) {
-                int featureNum = featureIndex.indexOf(feature);
+                List<ScoredObject<Integer>> weights = featureWeights.get(feature);
                 // TODO: allow weighted features, weighted training, etc
-                featureWeights[predictedNum][featureNum] -= 1.0;
-                featureWeights[transitionNum][featureNum] += 1.0;
+                updateWeight(weights, transitionNum, 1.0);
+                updateWeight(weights, predictedNum, -1.0);
               }
             }
             state = transition.apply(state);
           }
         }
-        System.err.println("Iteration " + i + " complete");
+        System.err.println("Iteration " + iteration + " complete");
         System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
 
         if (devTreebank != null) {
           EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
           evaluator.testOnTreebank(devTreebank);
           double labelF1 = evaluator.getLBScore();
-          System.err.println("Label F1 after " + i + " iterations: " + labelF1);
+          System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
         }
       }
 
