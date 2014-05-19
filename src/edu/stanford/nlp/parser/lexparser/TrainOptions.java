@@ -433,7 +433,7 @@ public class TrainOptions implements Serializable {
    */
   public boolean trainWordVectors = true;
 
-  public static final int DEFAULT_STALLED_ITERATION_LIMIT = 8;
+  public static final int DEFAULT_STALLED_ITERATION_LIMIT = 12;
   /**
    * How many iterations to allow training to stall before taking the
    * best model, if training in an iterative manner
