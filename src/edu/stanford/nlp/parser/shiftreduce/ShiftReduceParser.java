@@ -463,15 +463,11 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         redoTags(binarizedTrees, tagger, op.trainOptions.trainingThreads);
         retagTimer.done("Retagging");
       }
-
-      Timing transitionTimer = new Timing();
       List<List<Transition>> transitionLists = parser.createTransitionSequences(binarizedTrees);
       for (List<Transition> transitions : transitionLists) {
         transitionIndex.addAll(transitions);
       }
-      transitionTimer.done("Converting trees into transition lists");
 
-      Timing featureTimer = new Timing();
       FeatureFactory featureFactory = parser.featureFactory;
       Index<String> featureIndex = new HashIndex<String>();
       for (int i = 0; i < binarizedTrees.size(); ++i) {
@@ -483,7 +479,6 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
           state = transition.apply(state);
         }
       }
-      featureTimer.done("Building an initial index of feature types");
 
       Map<String, List<ScoredObject<Integer>>> featureWeights = parser.featureWeights;
       for (String feature : featureIndex) {
