@@ -42,6 +42,7 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
@@ -758,6 +759,8 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return parser;
   }
 
+  static final String[] FORCE_TAGS = { "-forceTags" };
+
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath ../codebase/retagged7.ser.gz -preTag -taggerSerializedFile ../data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -trainingThreads 4 -batchSize 12 -serializedPath foo.ser.gz 
@@ -829,7 +832,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
     if (trainTreebankPath != null) {
       if (continueTraining != null) {
-        parser = ShiftReduceParser.loadModel(continueTraining, "-forceTags");
+        parser = ShiftReduceParser.loadModel(continueTraining, ArrayUtils.concatenate(FORCE_TAGS, newArgs));
       } else {
         ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
         parser = new ShiftReduceParser(op);
@@ -838,9 +841,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
 
     if (serializedPath != null && parser == null) {
-      parser = ShiftReduceParser.loadModel(serializedPath);
-      parser.op.setOptions("-forceTags");
-      parser.op.setOptions(newArgs);
+      parser = ShiftReduceParser.loadModel(serializedPath, ArrayUtils.concatenate(FORCE_TAGS, newArgs));
     }
 
     //parser.outputStats();
