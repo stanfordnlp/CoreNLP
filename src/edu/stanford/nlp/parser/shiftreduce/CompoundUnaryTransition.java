@@ -46,6 +46,8 @@ public class CompoundUnaryTransition implements Transition {
       // Disallow unary transitions where the final label doesn't change
       return false;
     }
+    // TODO: need to think more about when a unary transition is
+    // allowed if the top of the stack is temporary
     if (top.label().value().startsWith("@") && !labels[labels.length - 1].equals(top.label().value().substring(1))) {
       // Disallow a transition if the top is a binarized node and the
       // bottom of the unary transition chain isn't the same type

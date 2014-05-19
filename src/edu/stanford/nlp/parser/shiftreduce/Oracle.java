@@ -20,6 +20,9 @@ import edu.stanford.nlp.util.Generics;
  * <br>
  * If the partial parse is in the correct state, though, this will
  * return the gold transition.
+ * <br>
+ * TODO: make sure all of the return values respect the logic for
+ * which transitions are and aren't legal.
  *
  * @author John Bauer
  */
@@ -154,7 +157,7 @@ class Oracle {
       Tree enclosingS1 = getEnclosingTree(S1, parents, leaves);
       if (spansEqual(S1, enclosingS1)) {
         // the two subtrees should be combined
-        return new OracleTransition(new BinaryTransition(parent.value(), getBinarySide(parent)), false, false, false);
+        return new OracleTransition(new BinaryTransition(parent.value(), ShiftReduceUtils.getBinarySide(parent)), false, false, false);
       }
       return new OracleTransition(null, false, true, false);
     }
@@ -178,19 +181,6 @@ class Oracle {
     }
     // S0 doesn't match either endpoint of the enclosing tree
     return new OracleTransition(null, true, true, true);
-  }
-
-  static BinaryTransition.Side getBinarySide(Tree tree) {
-    if (tree.children().length != 2) {
-      throw new AssertionError();
-    }
-    CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
-    CoreLabel childLabel = ErasureUtils.uncheckedCast(tree.children()[0].label());
-    if (label.get(TreeCoreAnnotations.HeadWordAnnotation.class) == childLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class)) {
-      return BinaryTransition.Side.LEFT;
-    } else {
-      return BinaryTransition.Side.RIGHT;
-    }
   }
 
   static Tree getEnclosingTree(Tree subtree, Map<Tree, Tree> parents, List<Tree> leaves) {

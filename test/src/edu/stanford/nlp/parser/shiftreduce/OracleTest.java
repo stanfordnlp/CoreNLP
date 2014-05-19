@@ -2,14 +2,11 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import junit.framework.TestCase;
 
-import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -28,25 +25,6 @@ public class OracleTest extends TestCase {
       children += recursiveTestBuildParentMap(child, parents);
     }
     return children;
-  }
-
-  public void testBinarySide() {
-    String[] words = { "This", "is", "a", "short", "test", "." };
-    String[] tags = { "DT", "VBZ", "DT", "JJ", "NN", "." };
-    assertEquals(words.length, tags.length);
-    List<TaggedWord> sentence = Sentence.toTaggedList(Arrays.asList(words), Arrays.asList(tags));
-    State state = ShiftReduceParser.initialStateFromTaggedSentence(sentence);
-
-    ShiftTransition shift = new ShiftTransition();
-    state = shift.apply(shift.apply(state));
-
-    BinaryTransition transition = new BinaryTransition("NP", BinaryTransition.Side.RIGHT);
-    State next = transition.apply(state);
-    assertEquals(BinaryTransition.Side.RIGHT, Oracle.getBinarySide(next.stack.peek()));
-
-    transition = new BinaryTransition("NP", BinaryTransition.Side.LEFT);
-    next = transition.apply(state);
-    assertEquals(BinaryTransition.Side.LEFT, Oracle.getBinarySide(next.stack.peek()));
   }
 
   // A small variety of trees to test on, especially with different depths of unary transitions

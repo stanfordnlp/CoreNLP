@@ -28,13 +28,9 @@ public class ShiftTransition implements Transition {
     if (state.stack.size() > 0) {
       Tree top = state.stack.peek();
       // Temporary node, eg part of a binarized sequence
-      if (top.label().value().startsWith("@")) {
-        if (top.children().length == 2) {
-          Tree rightChild = top.children()[1];
-          if (rightChild.label().value().equals(top.label().value())) {
-            return false;
-          }
-        }
+      if (top.label().value().startsWith("@") && top.children().length == 2 && 
+          ShiftReduceUtils.getBinarySide(top) == BinaryTransition.Side.RIGHT) {
+        return false;
       }
     }
     return true;
