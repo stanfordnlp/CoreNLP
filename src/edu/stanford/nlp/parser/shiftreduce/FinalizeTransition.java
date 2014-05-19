@@ -5,7 +5,7 @@ package edu.stanford.nlp.parser.shiftreduce;
  */
 public class FinalizeTransition implements Transition {
   public boolean isLegal(State state) {
-    return !state.finished && state.tokenPosition >= state.sentence.size();
+    return !state.finished && state.tokenPosition >= state.sentence.size() && state.stack.size() == 1;
   }
 
   public State apply(State state) {
