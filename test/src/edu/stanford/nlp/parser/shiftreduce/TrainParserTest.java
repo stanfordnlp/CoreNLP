@@ -32,7 +32,7 @@ public class TrainParserTest extends TestCase {
       tree.percolateHeadAnnotations(binaryHeadFinder);
 
       List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
-      State state = TrainParser.initialStateFromTrainingTree(tree);
+      State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       for (Transition transition : transitions) {
         state = transition.apply(state);
       }
