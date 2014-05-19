@@ -471,7 +471,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     // leaving out features with low weights or low frequencies would
     // significantly help with that.  Otherwise, not sure how to keep
     // it under control.
-    if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.ORACLE) {
+    if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.ORACLE) {
       while (!state.isFinished()) {
         List<String> features = featureFactory.featurize(state);
         ScoredObject<Integer> prediction = findHighestScoringTransition(state, features, true);
@@ -520,7 +520,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
           // TODO: allow weighted features, weighted training, etc
           updates.add(new Update(features, transitionNum, predictedNum, 1.0));
         }
-        if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.EARLY_TERMINATION && transitionNum != predictedNum) {
+        if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.EARLY_TERMINATION && transitionNum != predictedNum) {
           break;
         }
         state = transition.apply(state);
@@ -620,7 +620,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
 
     Oracle oracle = null;
-    if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.ORACLE) {
+    if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.ORACLE) {
       oracle = new Oracle(binarizedTrees, op.compoundUnaries);
     }
 

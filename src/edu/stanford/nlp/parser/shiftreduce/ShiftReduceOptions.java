@@ -27,10 +27,10 @@ public class ShiftReduceOptions extends Options {
 
   public String recordDebinarized = null;
 
-  public enum TrainingErrorHandling {
+  public enum TrainingMethod {
     EARLY_TERMINATION, GOLD, ORACLE;
   };
-  public TrainingErrorHandling trainingErrorHandling = TrainingErrorHandling.GOLD;
+  public TrainingMethod trainingMethod = TrainingMethod.GOLD;
 
   protected int setOptionFlag(String[] args, int i) {
     int j = super.setOptionFlag(args, i);
@@ -64,8 +64,8 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-recordDebinarized")) {
       recordDebinarized = args[i + 1];
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-trainingErrorHandling")) {
-      trainingErrorHandling = TrainingErrorHandling.valueOf(args[i + 1].toUpperCase());
+    } else if (args[i].equalsIgnoreCase("-trainingMethod")) {
+      trainingMethod = TrainingMethod.valueOf(args[i + 1].toUpperCase());
       i += 2;
     }
     return i;
