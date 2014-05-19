@@ -98,8 +98,6 @@ public class TrainParser {
     ShiftReduceParser parser = null;
 
     if (trainTreebankPath != null) {
-      // TODO: since Options and buildTrainTransformer are used in so
-      // many different places, it would make sense to factor that out
       ShiftReduceOptions op = new ShiftReduceOptions();
       op.setOptions("-forceTags");
       if (tlppClass != null) {
@@ -132,10 +130,12 @@ public class TrainParser {
         binarizedTrees.add(tree);
       }
 
-      // TODO: allow different feature factories, such as for different languages
-      FeatureFactory featureFactory = new BasicFeatureFactory();
+      parser = new ShiftReduceParser(op);
 
-      Index<Transition> transitionIndex = new HashIndex<Transition>();
+      // TODO: the following training code should be a method of ShiftReduceParser
+
+      Index<Transition> transitionIndex = parser.transitionIndex;
+      FeatureFactory featureFactory = parser.featureFactory;
       Index<String> featureIndex = new HashIndex<String>();
       for (Tree tree : binarizedTrees) {
         List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, op.compoundUnaries);
@@ -153,12 +153,11 @@ public class TrainParser {
       System.err.println("Number of transitions: " + transitionIndex.size());
       System.err.println("Feature space will be " + (featureIndex.size() * transitionIndex.size()));
       
-      Map<String, List<ScoredObject<Integer>>> featureWeights = Generics.newHashMap();
+      Map<String, List<ScoredObject<Integer>>> featureWeights = parser.featureWeights;
       for (String feature : featureIndex) {
         List<ScoredObject<Integer>> weights = Generics.newArrayList();
         featureWeights.put(feature, weights);
       }
-      parser = new ShiftReduceParser(transitionIndex, featureWeights, op, featureFactory);
 
       Random random = new Random(parser.op.trainOptions.randomSeed);
 

@@ -23,6 +23,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
@@ -32,15 +33,13 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
   final ShiftReduceOptions op;
 
-  // TODO: fold the featureFactory into our options
   final FeatureFactory featureFactory;
 
-  public ShiftReduceParser(Index<Transition> transitionIndex, Map<String, List<ScoredObject<Integer>>> featureWeights,
-                           ShiftReduceOptions op, FeatureFactory featureFactory) {
-    this.transitionIndex = transitionIndex;
-    this.featureWeights = featureWeights;
+  public ShiftReduceParser(ShiftReduceOptions op) {
+    this.transitionIndex = new HashIndex<Transition>();
+    this.featureWeights = Generics.newHashMap();
     this.op = op;
-    this.featureFactory = featureFactory;
+    this.featureFactory = ReflectionLoading.loadByReflection(op.featureFactoryClass);
   }
 
   public ParserQuery parserQuery() {
