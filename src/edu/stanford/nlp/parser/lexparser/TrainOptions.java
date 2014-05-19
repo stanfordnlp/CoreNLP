@@ -337,7 +337,7 @@ public class TrainOptions implements Serializable {
    */
   public int debugOutputFrequency = 0;
 
-  public long dvSeed = 0;
+  public long randomSeed = 0;
 
   public static final double DEFAULT_LEARNING_RATE = 0.1;
   /**
@@ -480,7 +480,7 @@ public class TrainOptions implements Serializable {
     result.append(" qnEstimates=" + qnEstimates + "\n");
     result.append(" qnTolerance=" + qnTolerance + "\n");
     result.append(" debugOutputFrequency=" + debugOutputFrequency + "\n");
-    result.append(" dvSeed=" + dvSeed + "\n");
+    result.append(" randomSeed=" + randomSeed + "\n");
     result.append(" learningRate=" + learningRate + "\n");
     result.append(" deltaMargin=" + deltaMargin + "\n");
     result.append(" unknownNumberVector=" + unknownNumberVector + "\n");
