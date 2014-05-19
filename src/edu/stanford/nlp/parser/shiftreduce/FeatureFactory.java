@@ -1,8 +1,8 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 public interface FeatureFactory extends Serializable {
-  Set<String> featurize(State state);
+  List<String> featurize(State state);
 }

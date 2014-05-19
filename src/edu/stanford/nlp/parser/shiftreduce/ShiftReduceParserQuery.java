@@ -68,7 +68,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        Set<String> features = parser.featureFactory.featurize(state);
+        List<String> features = parser.featureFactory.featurize(state);
         Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {

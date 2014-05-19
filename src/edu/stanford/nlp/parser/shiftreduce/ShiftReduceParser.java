@@ -217,7 +217,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return Collections.emptyList();
   }
 
-  public ScoredObject<Integer> findHighestScoringTransition(State state, Set<String> features, boolean requireLegal) {
+  public ScoredObject<Integer> findHighestScoringTransition(State state, List<String> features, boolean requireLegal) {
     Collection<ScoredObject<Integer>> transitions = findHighestScoringTransitions(state, features, requireLegal, 1);
     if (transitions.size() == 0) {
       return null;
@@ -225,7 +225,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return transitions.iterator().next();
   }
 
-  public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, Set<String> features, boolean requireLegal, int numTransitions) {
+  public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, List<String> features, boolean requireLegal, int numTransitions) {
     double[] scores = new double[transitionIndex.size()];
     for (String feature : features) {
       List<ScoredObject<Integer>> weights = featureWeights.get(feature);
@@ -432,8 +432,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         List<Transition> transitions = transitionLists.get(i);
         State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
         for (Transition transition : transitions) {
-          Set<String> features = featureFactory.featurize(state);
-          featureIndex.addAll(features);
+          featureIndex.addAll(featureFactory.featurize(state));
           state = transition.apply(state);
         }
       }
@@ -480,7 +479,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
           State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
           for (Transition transition : transitions) {
             int transitionNum = transitionIndex.indexOf(transition);
-            Set<String> features = featureFactory.featurize(state);
+            List<String> features = featureFactory.featurize(state);
             int predictedNum = parser.findHighestScoringTransition(state, features, false).object();
             Transition predicted = transitionIndex.get(predictedNum);
             if (transitionNum == predictedNum) {
