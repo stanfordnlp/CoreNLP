@@ -398,10 +398,10 @@ public class BasicFeatureFactory implements FeatureFactory {
     CoreLabel recentR0Label = getRecentDependent(stack, Transition.RIGHT, 0);
     CoreLabel recentL1Label = getRecentDependent(stack, Transition.LEFT, 1);
     CoreLabel recentR1Label = getRecentDependent(stack, Transition.RIGHT, 1);
-    addUnaryFeature(features, "recL0-", recentL0Label, FeatureComponent.HEADWORD);
-    addUnaryFeature(features, "recR0-", recentR0Label, FeatureComponent.HEADWORD);
-    addUnaryFeature(features, "recL1-", recentL1Label, FeatureComponent.HEADWORD);
-    addUnaryFeature(features, "recR1-", recentR1Label, FeatureComponent.HEADWORD);
+    addUnaryStackFeatures(features, recentL0Label, "recL0C-", "recL0WT-", "recL0T-", "recL0WC-", "recL0TC-");
+    addUnaryStackFeatures(features, recentR0Label, "recR0C-", "recR0WT-", "recR0T-", "recR0WC-", "recR0TC-");
+    addUnaryStackFeatures(features, recentL1Label, "recL1C-", "recL1WT-", "recL1T-", "recL1WC-", "recL1TC-");
+    addUnaryStackFeatures(features, recentR1Label, "recR1C-", "recR1WT-", "recR1T-", "recR1WC-", "recR1TC-");
 
     addBinaryFeatures(features, "S0", s0Label, FeatureComponent.HEADWORD, FeatureComponent.VALUE, "S1", s1Label, FeatureComponent.HEADWORD, FeatureComponent.VALUE);
     addBinaryFeatures(features, "S0", s0Label, FeatureComponent.HEADWORD, FeatureComponent.VALUE, "Q0", q0Label, FeatureComponent.HEADWORD, FeatureComponent.HEADTAG);
