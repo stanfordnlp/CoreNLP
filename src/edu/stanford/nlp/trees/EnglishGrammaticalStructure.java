@@ -84,7 +84,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    */
   public EnglishGrammaticalStructure(Tree t, Filter<String> puncFilter, HeadFinder hf, boolean threadSafe) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super((new CoordinationTransformer(hf)).transformTree(t), EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, hf, puncFilter);
+    super((new CoordinationTransformer(hf)).transformTree(t.deepCopy()), EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, hf, puncFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -128,15 +128,15 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    *         <code>null</code>
    */
   public static TreeGraphNode getSubject(TreeGraphNode t) {
-    TreeGraphNode subj = getNodeInRelation(t, NOMINAL_SUBJECT);
+    TreeGraphNode subj = t.getNodeInRelation(NOMINAL_SUBJECT);
     if (subj != null) {
       return subj;
     }
-    subj = getNodeInRelation(t, CLAUSAL_SUBJECT);
+    subj = t.getNodeInRelation(CLAUSAL_SUBJECT);
     if (subj != null) {
       return subj;
     } else {
-      return getNodeInRelation(t, NOMINAL_PASSIVE_SUBJECT);
+      return t.getNodeInRelation(NOMINAL_PASSIVE_SUBJECT);
     }
   }
 
@@ -178,7 +178,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     addStrandedPobj(list);
     if (DEBUG) {
       printListSorted("After adding stranded pobj:", list);
-    }    
+    }
   }
 
   // Deal with preposition stranding in relative clauses.
