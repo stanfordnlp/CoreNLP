@@ -19,6 +19,26 @@ public class BasicFeatureFactory implements FeatureFactory {
     HEADWORD, HEADTAG, VALUE
   };
 
+  static final String NULL = "*NULL*";
+
+  public static String getFeatureFromCoreLabel(CoreLabel label, FeatureComponent feature) {
+    String value = null;
+    switch(feature) {
+    case HEADWORD:
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      break;
+    case HEADTAG:
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      break;
+    case VALUE:
+      value = (label == null) ? NULL : label.value();
+      break;
+    default:
+      throw new IllegalArgumentException("Unexpected feature type: " + feature);
+    }
+    return value;
+  }
+
   public static State.HeadPosition getSeparator(TreeShapedStack<State.HeadPosition> separators, int nodeNum) {
     if (separators.size() <= nodeNum) {
       return null;
@@ -86,8 +106,6 @@ public class BasicFeatureFactory implements FeatureFactory {
     return (CoreLabel) node.label();
   }
 
-  static final String NULL = "*NULL*";
-
   public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String conFeature, String wordFeature, String tagFeature) {
     String constituent = (label == null) ? NULL : label.value();
     String tag = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
@@ -107,103 +125,20 @@ public class BasicFeatureFactory implements FeatureFactory {
   }
 
   public static void addUnaryFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature) {
-    String value = null;
-    switch(feature) {
-    case HEADWORD:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value = (label == null) ? NULL : label.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature);
-    }
-
+    String value = getFeatureFromCoreLabel(label, feature);
     features.add(featureType + value);
   }
 
   public static void addBinaryFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2) {
-    String value1 = null;
-    switch(feature1) {
-    case HEADWORD:
-      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value1 = (label1 == null) ? NULL : label1.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature1);
-    }
-
-    String value2 = null;
-    switch(feature2) {
-    case HEADWORD:
-      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value2 = (label2 == null) ? NULL : label2.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature2);
-    }
-
+    String value1 = getFeatureFromCoreLabel(label1, feature1);
+    String value2 = getFeatureFromCoreLabel(label2, feature2);
     features.add(featureType + value1 + "-" + value2);
   }
 
   public static void addTrigramFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2, CoreLabel label3, FeatureComponent feature3) {
-    String value1 = null;
-    switch(feature1) {
-    case HEADWORD:
-      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value1 = (label1 == null) ? NULL : label1.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature1);
-    }
-
-    String value2 = null;
-    switch(feature2) {
-    case HEADWORD:
-      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value2 = (label2 == null) ? NULL : label2.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature2);
-    }
-
-    String value3 = null;
-    switch(feature3) {
-    case HEADWORD:
-      value3 = (label3 == null) ? NULL : label3.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value3 = (label3 == null) ? NULL : label3.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value3 = (label3 == null) ? NULL : label3.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature3);
-    }
+    String value1 = getFeatureFromCoreLabel(label1, feature1);
+    String value2 = getFeatureFromCoreLabel(label2, feature2);
+    String value3 = getFeatureFromCoreLabel(label3, feature3);
 
     features.add(featureType + value1 + "-" + value2 + "-" + value3);
   }
@@ -228,21 +163,8 @@ public class BasicFeatureFactory implements FeatureFactory {
     if (separator == null) {
       return;
     }
-    
-    String value = null;
-    switch(feature) {
-    case HEADWORD:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value = (label == null) ? NULL : label.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature);
-    }
+
+    String value = getFeatureFromCoreLabel(label, feature);
 
     features.add(featureType + value + "-" + separator);
   }
