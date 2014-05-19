@@ -18,6 +18,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.ScoredObject;
 
 public class ShiftReduceParser implements Serializable, ParserQueryFactory {
   final Index<Transition> transitionIndex;
@@ -48,7 +49,7 @@ public class ShiftReduceParser implements Serializable, ParserQueryFactory {
     return Collections.emptyList();
   }
 
-  public int findHighestScoringTransition(State state, Set<String> features, boolean requireLegal) {
+  public ScoredObject<Integer> findHighestScoringTransition(State state, Set<String> features, boolean requireLegal) {
     double[] scores = new double[featureWeights.length];
     for (String feature : features) {
       int featureNum = featureIndex.indexOf(feature);
@@ -68,7 +69,11 @@ public class ShiftReduceParser implements Serializable, ParserQueryFactory {
       }
     }
     
-    return bestTransition;
+    if (bestTransition >= 0) {
+      return new ScoredObject<Integer>(bestTransition, scores[bestTransition]);
+    } else {
+      return new ScoredObject<Integer>(-1, Double.NEGATIVE_INFINITY);
+    }
   }
 
   public static State initialStateFromGoldTagTree(Tree tree) {

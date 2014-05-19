@@ -26,7 +26,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   Tree debinarized;
 
   boolean success;
-  boolean unparsable = false;
+  boolean unparsable;
 
   final ShiftReduceParser parser;
 
@@ -51,15 +51,23 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   private boolean parseInternal() {
     State state = initialState;
+    success = true;
+    unparsable = false;
     while (!state.finished) {
       Set<String> features = parser.featureFactory.featurize(state);
-      int predictedNum = parser.findHighestScoringTransition(state, features, true);
-      Transition transition = parser.transitionIndex.get(predictedNum);
-      state = transition.apply(state);
+      ScoredObject<Integer> predictedTransition = parser.findHighestScoringTransition(state, features, true);
+      if (predictedTransition.object() >= 0) {
+        // TODO: do something with the score
+        Transition transition = parser.transitionIndex.get(predictedTransition.object());
+        state = transition.apply(state);
+      } else {
+        success = false;
+        unparsable = true;
+        break;
+      }
     }
     finalState = state;
     debinarized = debinarizer.transformTree(state.stack.peek());
-    success = true;
     return success;
   }
 
