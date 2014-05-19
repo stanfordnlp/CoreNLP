@@ -243,7 +243,17 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
   @Override
   public List<ParserQueryEval> getParserQueryEvals() {
-    return Collections.emptyList();
+    if (op.recordBinarized == null && op.recordDebinarized == null) {
+      return Collections.emptyList();
+    }
+    List<ParserQueryEval> evals = Generics.newArrayList();
+    if (op.recordBinarized != null) {
+      evals.add(new TreeRecorder(TreeRecorder.Mode.BINARIZED, op.recordBinarized));
+    }
+    if (op.recordDebinarized != null) {
+      evals.add(new TreeRecorder(TreeRecorder.Mode.DEBINARIZED, op.recordDebinarized));
+    }
+    return evals;
   }
 
   public ScoredObject<Integer> findHighestScoringTransition(State state, List<String> features, boolean requireLegal) {
@@ -658,6 +668,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
+  // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath ../codebase/retagged7.ser.gz -preTag -taggerSerializedFile ../data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // Sources:
   //   A Classifier-Based Parser with Linear Run-Time Complexity (Kenji Sagae and Alon Lavie)
