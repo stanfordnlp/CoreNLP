@@ -108,8 +108,5 @@ public class TrainParser {
         state = transition.apply(state);
       }
     }
-
-    System.err.println(transitionIndex);
-
   }
 }
