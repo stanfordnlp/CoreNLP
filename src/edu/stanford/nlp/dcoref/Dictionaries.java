@@ -189,6 +189,11 @@ public class Dictionaries {
   public final Set<String> statesAndProvinces = Generics.newHashSet();
 
   public final Set<String> neutralWords = Generics.newHashSet();
+  public final Set<String> femaleWords = Generics.newHashSet();
+  public final Set<String> maleWords = Generics.newHashSet();
+
+  public final Set<String> pluralWords = Generics.newHashSet();
+  public final Set<String> singularWords = Generics.newHashSet();
 
   public final Set<String> inanimateWords = Generics.newHashSet();
   public final Set<String> animateWords = Generics.newHashSet();
@@ -252,6 +257,9 @@ public class Dictionaries {
   }
 
   private static void getWordsFromFile(String filename, Set<String> resultSet, boolean lowercase) throws IOException {
+    if(filename==null) {
+      return ;
+    }
     BufferedReader reader = IOUtils.readerFromString(filename);
     while(reader.ready()) {
       if(lowercase) resultSet.add(reader.readLine().toLowerCase());
@@ -269,6 +277,24 @@ public class Dictionaries {
     }
   }
 
+  private void loadGenderLists(String maleWordsFile, String neutralWordsFile, String femaleWordsFile) {
+    try {
+      getWordsFromFile(maleWordsFile, maleWords, false);
+      getWordsFromFile(neutralWordsFile, neutralWords, false);
+      getWordsFromFile(femaleWordsFile, femaleWords, false);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
+  private void loadNumberLists(String pluralWordsFile, String singularWordsFile) {
+    try {
+      getWordsFromFile(pluralWordsFile, pluralWords, false);
+      getWordsFromFile(singularWordsFile, singularWords, false);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
   private void loadStatesLists(String file) {
     try {
       getWordsFromFile(file, statesAndProvinces, true);
@@ -385,7 +411,11 @@ public class Dictionaries {
     this(props.getProperty(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM),
         props.getProperty(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE),
         props.getProperty(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE),
-        props.getProperty(Constants.NEUTRAL_PROP, DefaultPaths.DEFAULT_DCOREF_NEUTRAL),
+        props.getProperty(Constants.MALE_PROP),
+        props.getProperty(Constants.NEUTRAL_PROP),
+        props.getProperty(Constants.FEMALE_PROP),
+        props.getProperty(Constants.PLURAL_PROP),
+        props.getProperty(Constants.SINGULAR_PROP),
         props.getProperty(Constants.STATES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES),
         props.getProperty(Constants.GENDER_NUMBER_PROP, DefaultPaths.DEFAULT_DCOREF_GENDER_NUMBER),
         props.getProperty(Constants.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
@@ -408,9 +438,26 @@ public class Dictionaries {
     os.append(Constants.INANIMATE_PROP + ":" +
             props.getProperty(Constants.INANIMATE_PROP,
                     DefaultPaths.DEFAULT_DCOREF_INANIMATE));
-    os.append(Constants.NEUTRAL_PROP + ":" +
-            props.getProperty(Constants.NEUTRAL_PROP,
-                    DefaultPaths.DEFAULT_DCOREF_NEUTRAL));
+    if(props.containsKey(Constants.MALE_PROP)) {
+      os.append(Constants.MALE_PROP + ":" +
+            props.getProperty(Constants.MALE_PROP));
+    }
+    if(props.containsKey(Constants.NEUTRAL_PROP)) {
+      os.append(Constants.NEUTRAL_PROP + ":" +
+            props.getProperty(Constants.NEUTRAL_PROP));
+    }
+    if(props.containsKey(Constants.FEMALE_PROP)) {
+      os.append(Constants.FEMALE_PROP + ":" +
+            props.getProperty(Constants.FEMALE_PROP));
+    }
+    if(props.containsKey(Constants.PLURAL_PROP)) {
+      os.append(Constants.PLURAL_PROP + ":" +
+            props.getProperty(Constants.PLURAL_PROP));
+    }
+    if(props.containsKey(Constants.SINGULAR_PROP)) {
+      os.append(Constants.SINGULAR_PROP + ":" +
+            props.getProperty(Constants.SINGULAR_PROP));
+    }
     os.append(Constants.STATES_PROP + ":" +
             props.getProperty(Constants.STATES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_STATES));
@@ -433,7 +480,11 @@ public class Dictionaries {
       String demonymWords,
       String animateWords,
       String inanimateWords,
+      String maleWords,
       String neutralWords,
+      String femaleWords,
+      String pluralWords,
+      String singularWords,
       String statesWords,
       String genderNumber,
       String countries,
@@ -445,6 +496,8 @@ public class Dictionaries {
     loadDemonymLists(demonymWords);
     loadStateAbbreviation(statesWords);
     if(Constants.USE_ANIMACY_LIST) loadAnimacyLists(animateWords, inanimateWords);
+    loadGenderLists(maleWords, neutralWords, femaleWords);
+    loadNumberLists(pluralWords, singularWords);
     loadGenderNumber(genderNumber, neutralWords);
     loadCountriesLists(countries);
     loadStatesLists(states);
