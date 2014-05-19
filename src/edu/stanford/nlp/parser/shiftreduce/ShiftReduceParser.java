@@ -254,15 +254,15 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
   @Override
   public List<ParserQueryEval> getParserQueryEvals() {
-    if (op.recordBinarized == null && op.recordDebinarized == null) {
+    if (op.testOptions().recordBinarized == null && op.testOptions().recordDebinarized == null) {
       return Collections.emptyList();
     }
     List<ParserQueryEval> evals = Generics.newArrayList();
-    if (op.recordBinarized != null) {
-      evals.add(new TreeRecorder(TreeRecorder.Mode.BINARIZED, op.recordBinarized));
+    if (op.testOptions().recordBinarized != null) {
+      evals.add(new TreeRecorder(TreeRecorder.Mode.BINARIZED, op.testOptions().recordBinarized));
     }
-    if (op.recordDebinarized != null) {
-      evals.add(new TreeRecorder(TreeRecorder.Mode.DEBINARIZED, op.recordDebinarized));
+    if (op.testOptions().recordDebinarized != null) {
+      evals.add(new TreeRecorder(TreeRecorder.Mode.DEBINARIZED, op.testOptions().recordDebinarized));
     }
     return evals;
   }
@@ -471,7 +471,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     // leaving out features with low weights or low frequencies would
     // significantly help with that.  Otherwise, not sure how to keep
     // it under control.
-    if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.ORACLE) {
+    if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       while (!state.isFinished()) {
         List<String> features = featureFactory.featurize(state);
@@ -507,26 +507,26 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         }
         state = predicted.apply(state);
       }
-    } else if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.BEAM) {
-      if (op.beamSize <= 0) {
-        throw new IllegalArgumentException("Illegal beam size " + op.beamSize);
+    } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM) {
+      if (op.trainOptions().beamSize <= 0) {
+        throw new IllegalArgumentException("Illegal beam size " + op.trainOptions().beamSize);
       }
       List<Transition> transitions = transitionLists.get(index);
-      PriorityQueue<State> agenda = new PriorityQueue<State>(op.beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      PriorityQueue<State> agenda = new PriorityQueue<State>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State goldState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       agenda.add(goldState);
       int transitionCount = 0;
       for (Transition goldTransition : transitions) {
-        PriorityQueue<State> newAgenda = new PriorityQueue<State>(op.beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+        PriorityQueue<State> newAgenda = new PriorityQueue<State>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
         State highestScoringState = null;
         State highestCurrentState = null;
         for (State currentState : agenda) {
           List<String> features = featureFactory.featurize(currentState);
-          Collection<ScoredObject<Integer>> stateTransitions = findHighestScoringTransitions(currentState, features, true, op.beamSize);
+          Collection<ScoredObject<Integer>> stateTransitions = findHighestScoringTransitions(currentState, features, true, op.trainOptions().beamSize);
           for (ScoredObject<Integer> transition : stateTransitions) {
             State newState = transitionIndex.get(transition.object()).apply(currentState, transition.score());
             newAgenda.add(newState);
-            if (newAgenda.size() > op.beamSize) {
+            if (newAgenda.size() > op.trainOptions().beamSize) {
               newAgenda.poll();
             }
             if (highestScoringState == null || highestScoringState.score() < newState.score()) {
@@ -579,7 +579,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
           // TODO: allow weighted features, weighted training, etc
           updates.add(new Update(features, transitionNum, predictedNum, 1.0));
         }
-        if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.EARLY_TERMINATION && transitionNum != predictedNum) {
+        if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION && transitionNum != predictedNum) {
           break;
         }
         state = transition.apply(state);
@@ -669,8 +669,8 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     double bestScore = 0.0;
     int bestIteration = 0;
     PriorityQueue<ScoredObject<ShiftReduceParser>> bestModels = null;
-    if (op.averagedModels > 0) {
-      bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(op.averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    if (op.trainOptions().averagedModels > 0) {
+      bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(op.trainOptions().averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
     }
 
     List<Integer> indices = Generics.newArrayList();
@@ -679,7 +679,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
 
     Oracle oracle = null;
-    if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.ORACLE) {
+    if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.ORACLE) {
       oracle = new Oracle(binarizedTrees, op.compoundUnaries);
     }
 
@@ -741,7 +741,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         
         if (bestModels != null) {
           bestModels.add(new ScoredObject<ShiftReduceParser>(this.deepCopy(), labelF1));
-          if (bestModels.size() > op.averagedModels) {
+          if (bestModels.size() > op.trainOptions().averagedModels) {
             bestModels.poll();
           }
         }
@@ -761,7 +761,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
 
     if (bestModels != null) {
-      if (op.cvAveragedModels && devTreebank != null) {
+      if (op.trainOptions().cvAveragedModels && devTreebank != null) {
         List<ScoredObject<ShiftReduceParser>> models = Generics.newArrayList();
         while (bestModels.size() > 0) {
           models.add(bestModels.poll());

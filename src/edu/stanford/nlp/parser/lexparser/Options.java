@@ -1117,7 +1117,12 @@ public class Options implements Serializable {
   public boolean nodePrune = false;
 
 
-  public TrainOptions trainOptions = new TrainOptions();
+  public TrainOptions trainOptions = newTrainOptions();
+
+  /** Separated out so subclasses of Options can override */
+  public TrainOptions newTrainOptions() {
+    return new TrainOptions();
+  }
 
   /**
    * Note that the TestOptions is transient.  This means that whatever
@@ -1126,7 +1131,12 @@ public class Options implements Serializable {
    * parser is reloaded, put it in either TrainOptions or in this
    * class itself.
    */
-  public transient TestOptions testOptions = new TestOptions();
+  public transient TestOptions testOptions = newTestOptions();
+
+  /** Separated out so subclasses of Options can override */
+  public TestOptions newTestOptions() {
+    return newTestOptions();
+  }
 
 
   /**
@@ -1160,7 +1170,7 @@ public class Options implements Serializable {
     throws IOException, ClassNotFoundException
   {
     in.defaultReadObject();
-    testOptions = new TestOptions();
+    testOptions = newTestOptions();
   }
 
   public void display() {
