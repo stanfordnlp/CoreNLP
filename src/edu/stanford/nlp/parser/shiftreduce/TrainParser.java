@@ -9,6 +9,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.parser.lexparser.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
+import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
@@ -165,14 +166,17 @@ public class TrainParser {
       System.err.println("Loading test trees from " + testTreebankPath);
       Treebank testTreebank = parser.op.tlpParams.memoryTreebank();
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
-      for (Tree tree : testTreebank) {
-        ShiftReduceParserQuery query = new ShiftReduceParserQuery(parser);
-        query.parse(tree);
-        System.err.println("Input tree: " + tree);
-        System.err.println("Debinarized tree: " + query.getBestParse());
-        System.err.println("Parsed binarized tree: " + query.getBestBinarizedParse());
-        System.err.println("Predicted transition sequence: " + query.getBestTransitionSequence());
-      }
+      System.err.println("Loaded " + testTreebank.size() + " trees");
+
+      parser.op.setOptions("-forceTags");
+
+      EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
+      evaluator.testOnTreebank(testTreebank);
+
+      // System.err.println("Input tree: " + tree);
+      // System.err.println("Debinarized tree: " + query.getBestParse());
+      // System.err.println("Parsed binarized tree: " + query.getBestBinarizedParse());
+      // System.err.println("Predicted transition sequence: " + query.getBestTransitionSequence());
     }
   }
 }
