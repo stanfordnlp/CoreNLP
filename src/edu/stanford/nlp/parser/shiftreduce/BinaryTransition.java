@@ -52,6 +52,13 @@ public class BinaryTransition implements Transition {
    * Add a binary node to the existing node on top of the stack
    */
   public State apply(State state) {
+    return apply(state, 0.0);
+  }
+
+  /**
+   * Add a binary node to the existing node on top of the stack
+   */
+  public State apply(State state, double scoreDelta) {
     TreeShapedStack<Tree> stack = state.stack;
     Tree right = stack.peek();
     stack = stack.pop();
@@ -84,7 +91,7 @@ public class BinaryTransition implements Transition {
     newTop.addChild(right);
 
     stack = stack.push(newTop);
-    return new State(stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score, false);    
+    return new State(stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score + scoreDelta, false);    
   }
 
   @Override

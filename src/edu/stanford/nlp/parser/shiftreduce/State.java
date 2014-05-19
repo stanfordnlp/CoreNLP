@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 import java.util.List;
 
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Scored;
 import edu.stanford.nlp.util.TreeShapedStack;
 
 /**
@@ -29,7 +30,7 @@ import edu.stanford.nlp.util.TreeShapedStack;
  *
  * </ul>
  */
-public class State {
+public class State implements Scored {
   /**
    * Expects a list of preterminals.  The preterminals should be built
    * with CoreLabels and have HeadWord and HeadTag annotations set.
@@ -79,11 +80,16 @@ public class State {
    */
   final double score;
 
+  @Override
+  public double score() { return score; }
+
   /**
    * Whether or not processing has finished.  Once that is true, only
    * idle transitions are allowed.
    */ 
   final boolean finished;
+
+  public boolean isFinished() { return finished; }
 
   public boolean endOfQueue() {
     return tokenPosition == sentence.size();
@@ -96,6 +102,8 @@ public class State {
     result.append("  Tokens: " + sentence + "\n");
     result.append("  Token position: " + tokenPosition + "\n");
     result.append("  Current stack contents: " + stack + "\n");
+    result.append("  Score: " + score + "\n");
+    result.append("  " + ((finished) ? "" : "not ") + "finished\n");
     return result.toString();
   }
 }

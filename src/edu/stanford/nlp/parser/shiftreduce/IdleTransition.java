@@ -15,7 +15,14 @@ public class IdleTransition implements Transition {
    * Do nothing
    */
   public State apply(State state) {
-    return new State(state.stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score, state.finished);
+    return apply(state, 0.0);
+  }
+
+  /**
+   * Do nothing
+   */
+  public State apply(State state, double scoreDelta) {
+    return new State(state.stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score + scoreDelta, state.finished);
   }
 
   @Override
