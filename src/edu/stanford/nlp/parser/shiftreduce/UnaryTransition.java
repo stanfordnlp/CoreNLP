@@ -28,7 +28,18 @@ public class UnaryTransition implements Transition {
     if (state.stack.size() == 0) {
       return false;
     }
-    // TODO: check for multiple unary transitions
+    Tree top = state.stack.peek();
+    if (top.children().length == 1) {
+      Tree child = top.children()[0];
+      if (child.children().length == 1) {
+        Tree grandChild = child.children()[0];
+        if (grandChild.children().length == 1) {
+          // Three consecutive unary trees.  Not legal to keep adding unaries.
+          // TODO: do preterminals count in that equation?
+          return false;
+        }
+      }
+    }
     return true;
   }
 
