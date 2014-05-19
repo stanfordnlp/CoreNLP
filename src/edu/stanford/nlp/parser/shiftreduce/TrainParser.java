@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
 public class TrainParser {
@@ -171,6 +173,10 @@ public class TrainParser {
 
       double bestScore = 0.0;
       int bestIteration = 0;
+      PriorityQueue<ScoredObject<ShiftReduceParser>> bestModels = null;
+      if (parser.op.averagedModels > 0) {
+        bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(parser.op.averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      }
 
       for (int iteration = 1; iteration <= parser.op.trainOptions.trainingIterations; ++iteration) {
         int numCorrect = 0;
@@ -218,6 +224,20 @@ public class TrainParser {
               break;
             }
           }
+
+          if (bestModels != null) {
+            bestModels.add(new ScoredObject<ShiftReduceParser>(parser.deepCopy(), labelF1));
+            if (bestModels.size() > parser.op.averagedModels) {
+              bestModels.poll();
+            }
+          }
+        }
+      }
+
+      if (bestModels != null) {
+        // TODO: average all the best models
+        while (bestModels.size() > 0) {
+          parser = bestModels.poll().object();
         }
       }
 

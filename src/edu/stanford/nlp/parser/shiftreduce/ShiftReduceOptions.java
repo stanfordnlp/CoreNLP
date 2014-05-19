@@ -9,6 +9,13 @@ public class ShiftReduceOptions extends Options {
 
   public String featureFactoryClass = "edu.stanford.nlp.parser.shiftreduce.BasicFeatureFactory";
 
+  /** 
+   * If set to 0, training outputs the last model produced, regardless
+   * of its score.  Otherwise it takes the best k models and averages
+   * them together.
+   */
+  public int averagedModels = 1;
+
   protected int setOptionFlag(String[] args, int i) {
     int j = super.setOptionFlag(args, i);
     if (i != j) {
@@ -16,7 +23,7 @@ public class ShiftReduceOptions extends Options {
     }
     if (args[i].equalsIgnoreCase("-beamSize")) {
       beamSize = Integer.valueOf(args[i + 1]);
-      i = i + 2;
+      i += 2;
     } else if (args[i].equalsIgnoreCase("-compoundUnaries")) {
       compoundUnaries = true;
       i++;
@@ -25,6 +32,9 @@ public class ShiftReduceOptions extends Options {
       i++;
     } else if (args[i].equalsIgnoreCase("-featureFactory")) {
       featureFactoryClass = args[i + 1];
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-averagedModels")) {
+      averagedModels = Integer.valueOf(args[i + 1]);
       i += 2;
     }
     return i;

@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.ScoredObject;
 
 public class ShiftReduceParser implements Serializable, ParserGrammar {
   final Index<Transition> transitionIndex;
-  Map<String, List<ScoredObject<Integer>>> featureWeights;
+  final Map<String, List<ScoredObject<Integer>>> featureWeights;
 
   final ShiftReduceOptions op;
 
@@ -40,6 +40,24 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     this.featureWeights = Generics.newHashMap();
     this.op = op;
     this.featureFactory = ReflectionLoading.loadByReflection(op.featureFactoryClass);
+  }
+
+  public ShiftReduceParser deepCopy() {
+    // TODO: should we deep copy the options?
+    ShiftReduceParser copy = new ShiftReduceParser(op);
+    for (Transition transition : transitionIndex) {
+      copy.transitionIndex.add(transition);
+    }
+    for (String feature : featureWeights.keySet()) {
+      List<ScoredObject<Integer>> newWeights = Generics.newArrayList();
+      for (ScoredObject<Integer> weight : featureWeights.get(feature)) {
+        newWeights.add(new ScoredObject<Integer>(weight.object(), weight.score()));
+      }
+      if (newWeights.size() > 0) {
+        copy.featureWeights.put(feature, newWeights);
+      }
+    }
+    return copy;
   }
 
   public ParserQuery parserQuery() {
