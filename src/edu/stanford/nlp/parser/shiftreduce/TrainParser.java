@@ -25,6 +25,25 @@ import edu.stanford.nlp.util.Pair;
 
 public class TrainParser {
 
+  static int findHighestScoringTransition(Index<String> featureIndex, Set<String> features, double[][] featureWeights) {
+    double[] scores = new double[featureWeights.length];
+    for (String feature : features) {
+      int featureNum = featureIndex.indexOf(feature);
+      for (int i = 0; i < scores.length; ++i) {
+        scores[i] += featureWeights[i][featureNum];
+      }
+    }
+
+    int bestFeature = 0;
+    for (int i = 1; i < scores.length; ++i) {
+      if (scores[i] > scores[bestFeature]) {
+        bestFeature = i;
+      }
+    }
+    
+    return bestFeature;
+  }
+
   static State initialStateFromTrainingTree(Tree tree) {
     List<Tree> preterminals = Generics.newArrayList();
     for (TaggedWord tw : tree.taggedYield()) {
@@ -52,6 +71,7 @@ public class TrainParser {
 
     String trainTreebankPath = null;
     FileFilter trainTreebankFilter = null;
+    int numTrainingIterations = 10;
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-treebank")) {
@@ -59,6 +79,9 @@ public class TrainParser {
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         trainTreebankPath = treebankDescription.first();
         trainTreebankFilter = treebankDescription.second();
+      } else if (args[argIndex].equalsIgnoreCase("-numTrainingIterations")) {
+        numTrainingIterations = Integer.valueOf(args[argIndex + 1]);
+        argIndex += 2;
       } else {
         remainingArgs.add(args[argIndex]);
         ++argIndex;
@@ -108,5 +131,40 @@ public class TrainParser {
         state = transition.apply(state);
       }
     }
+
+    System.err.println("Number of unique features: " + featureIndex.size());
+    System.err.println("Number of transitions: " + transitionIndex.size());
+    System.err.println("Feature space will be " + (featureIndex.size() * transitionIndex.size()));
+
+    double[][] featureWeights = new double[transitionIndex.size()][featureIndex.size()];
+    for (int i = 0; i < numTrainingIterations; ++i) {
+      int numCorrect = 0;
+      int numWrong = 0;
+      for (Tree tree : binarizedTrees) {
+        List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
+        State state = initialStateFromTrainingTree(tree);
+        for (Transition transition : transitions) {
+          int transitionNum = transitionIndex.indexOf(transition);
+          Set<String> features = featureFactory.featurize(state);
+          int predictedNum = findHighestScoringTransition(featureIndex, features, featureWeights);
+          Transition predicted = transitionIndex.get(predictedNum);
+          if (transitionNum == predictedNum) {
+            numCorrect++;
+          } else {
+            numWrong++;
+            for (String feature : features) {
+              int featureNum = featureIndex.indexOf(feature);
+              // TODO: allow weighted features, weighted training, etc
+              featureWeights[predictedNum][featureNum] -= 1.0;
+              featureWeights[transitionNum][featureNum] += 1.0;
+            }
+          }
+          state = transition.apply(state);
+        }
+      }
+      System.err.println("Iteration " + i + " complete");
+      System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
+    }
+
   }
 }
