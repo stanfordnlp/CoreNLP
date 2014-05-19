@@ -128,6 +128,55 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(featureType + value1 + "-" + value2);
   }
 
+  public static void addTrigramFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2, CoreLabel label3, FeatureComponent feature3) {
+    String value1 = null;
+    switch(feature1) {
+    case HEADWORD:
+      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      break;
+    case HEADTAG:
+      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      break;
+    case VALUE:
+      value1 = (label1 == null) ? NULL : label1.value();
+      break;
+    default:
+      throw new IllegalArgumentException("Unexpected feature type: " + feature1);
+    }
+
+    String value2 = null;
+    switch(feature2) {
+    case HEADWORD:
+      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      break;
+    case HEADTAG:
+      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      break;
+    case VALUE:
+      value2 = (label2 == null) ? NULL : label2.value();
+      break;
+    default:
+      throw new IllegalArgumentException("Unexpected feature type: " + feature2);
+    }
+
+    String value3 = null;
+    switch(feature3) {
+    case HEADWORD:
+      value3 = (label3 == null) ? NULL : label3.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      break;
+    case HEADTAG:
+      value3 = (label3 == null) ? NULL : label3.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      break;
+    case VALUE:
+      value3 = (label3 == null) ? NULL : label3.value();
+      break;
+    default:
+      throw new IllegalArgumentException("Unexpected feature type: " + feature3);
+    }
+
+    features.add(featureType + value1 + "-" + value2 + "-" + value3);
+  }
+
   public static void addPositionFeatures(Set<String> features, State state) {
     if (state.tokenPosition >= state.sentence.size()) {
       features.add("QUEUE_FINISHED");
@@ -203,6 +252,15 @@ public class BasicFeatureFactory implements FeatureFactory {
     addBinaryFeature(features, "S1WQ0T-", s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
     addBinaryFeature(features, "S1CQ0W-", s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADWORD);
     addBinaryFeature(features, "S1CQ0T-", s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
+
+    addTrigramFeature(features, "S0cS1cS2c-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.VALUE);
+    addTrigramFeature(features, "S0wS1cS2c-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.VALUE);
+    addTrigramFeature(features, "S0cS1wQ0t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0cS1cS2w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0cS1cQ0t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0wS1cQ0t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0cS1wQ0t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0cS1cQ0w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADWORD);
 
     addPositionFeatures(features, state);
 
