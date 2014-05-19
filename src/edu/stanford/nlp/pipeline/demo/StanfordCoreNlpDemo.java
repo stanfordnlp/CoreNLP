@@ -6,6 +6,8 @@ import java.util.*;
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
 
@@ -56,8 +58,13 @@ public class StanfordCoreNlpDemo {
         ArrayCoreMap aToken = (ArrayCoreMap) token;
         out.println(aToken.toShorterString());
       }
-      out.println("The first sentence parsed is:");
+      out.println("The first sentence parse tree is:");
       tree.pennPrint(out);
+      out.println("The first sentence basic dependencies are:"); 
+      System.out.println(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).toString("plain"));
+      out.println("The first sentence collapsed, CC-processed dependencies are:");
+      SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+      System.out.println(graph.toString("plain"));
     }
   }
 

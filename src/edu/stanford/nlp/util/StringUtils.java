@@ -1900,7 +1900,7 @@ public class StringUtils {
     if (str == null)
       return null;
     // ${VAR_NAME} or $VAR_NAME
-    Pattern p = Pattern.compile("\\$\\{(\\w+)\\}|\\$(\\w+)");
+    Pattern p = Pattern.compile("\\$\\{(\\w+)\\}");
     Matcher m = p.matcher(str);
     StringBuffer sb = new StringBuffer();
     while (m.find()) {
@@ -1908,7 +1908,7 @@ public class StringUtils {
       String vrValue;
       //either in the props file
       if (props.containsKey(varName)) {
-        vrValue = (String) props.get(varName);
+        vrValue = ((String) props.get(varName));
       } else {
         //or as the environment variable
         vrValue = System.getenv(varName);
@@ -1927,8 +1927,9 @@ public class StringUtils {
    * variables. if the variable is not found then substitute it for empty string
    */
   public static Properties argsToPropertiesWithResolve(String[] args) {
-    TreeMap<String, String> result = new TreeMap<String, String>();
-    Map<String, String> existingArgs = new TreeMap<String, String>();
+    LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+    Map<String, String> existingArgs = new LinkedHashMap<String, String>();
+    
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -1944,13 +1945,15 @@ public class StringUtils {
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
+        
         if (flagArgs.isEmpty()) {
           existingArgs.put(key, "true");
         } else {
 
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-            result.putAll(propFileToTreeMap(join(flagArgs," "), existingArgs));
-            i++;
+            for(String flagArg: flagArgs)
+              result.putAll(propFileToLinkedHashMap(flagArg, existingArgs));
+            
             existingArgs.clear();
           } else
             existingArgs.put(key, join(flagArgs, " "));
@@ -1970,16 +1973,16 @@ public class StringUtils {
 
   /**
    * This method reads in properties listed in a file in the format prop=value,
-   * one property per line. and reads them into a TreeMap (order preserving)
+   * one property per line. and reads them into a LinkedHashMap (insertion order preserving)
    * Flags not having any arguments is set to "true".
    *
    * @param filename A properties file to read
-   * @return The corresponding TreeMap where the ordering is the same as in the
+   * @return The corresponding LinkedHashMap where the ordering is the same as in the
    *         props file
    */
-  public static TreeMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
+  public static LinkedHashMap<String, String> propFileToLinkedHashMap(String filename, Map<String, String> existingArgs) {
 
-    TreeMap<String, String> result = new TreeMap<String, String>();
+    LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
     result.putAll(existingArgs);
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();

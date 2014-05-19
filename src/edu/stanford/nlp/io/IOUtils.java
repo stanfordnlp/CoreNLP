@@ -268,12 +268,20 @@ public class IOUtils {
    * @return The object read from the file.
    */
   public static <T> T readObjectFromFile(File file) throws IOException,
-          ClassNotFoundException {
-    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-            new GZIPInputStream(new FileInputStream(file))));
-    Object o = ois.readObject();
-    ois.close();
-    return ErasureUtils.uncheckedCast(o);
+      ClassNotFoundException {
+    try {
+      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
+          new GZIPInputStream(new FileInputStream(file))));
+      Object o = ois.readObject();
+      ois.close();
+      return ErasureUtils.uncheckedCast(o);
+    } catch (java.util.zip.ZipException e) {
+      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
+          new FileInputStream(file)));
+      Object o = ois.readObject();
+      ois.close();
+      return ErasureUtils.uncheckedCast(o);
+    }
   }
 
   public static DataInputStream getDataInputStream(String filenameUrlOrClassPath) throws IOException {
@@ -387,6 +395,20 @@ public class IOUtils {
     // if not found in the CLASSPATH, load from the file system
     if (is == null) is = new FileInputStream(name);
     return is;
+  }
+
+  /**
+   * Check if this path exists either in the classpath or on the filesystem.
+   *
+   * @param name The file or resource name.
+   * @return true if a call to {@link IOUtils#getBufferedReaderFromClasspathOrFileSystem(String)} would return a valid stream.
+   */
+  public static boolean existsInClasspathOrFileSystem(String name) {
+    InputStream is = IOUtils.class.getClassLoader().getResourceAsStream(name);
+    if (is == null) {
+      is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+    }
+    return is != null || new File(name).exists();
   }
 
   /**
@@ -1570,11 +1592,19 @@ public class IOUtils {
    * and null is returned. Encoding can also be specified
    */
   public static List<String> linesFromFile(String filename,String encoding) {
+    return linesFromFile(filename, encoding, false);
+  }
+
+  public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
       BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
+      int i = 0; 
       while ((line = in.readLine()) != null) {
+        i++;
+        if(ignoreHeader && i == 1)
+          continue;
         lines.add(line);
       }
       in.close();
@@ -1585,7 +1615,7 @@ public class IOUtils {
       return null;
     }
   }
-
+  
   public static String backupName(String filename) {
     return backupFile(new File(filename)).toString();
   }

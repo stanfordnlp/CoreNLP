@@ -78,7 +78,7 @@ public class ProtobufAnnotationSerializerSlowITest {
           CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(k);
           // Set docID
           if (doc.containsKey(CoreAnnotations.DocIDAnnotation.class)) { token.setDocID(doc.get(CoreAnnotations.DocIDAnnotation.class)); }
-          // Set sentence index
+          // Set sentence index if not already there
           token.setSentIndex(i);
           // Set index annotation if not already there
           if (!token.containsKey(CoreAnnotations.IndexAnnotation.class)) {
@@ -100,26 +100,11 @@ public class ProtobufAnnotationSerializerSlowITest {
             }
           }
         }
-        // Remove empty entity mention fields
-//        if (sentence.containsKey(MachineReadingAnnotations.EntityMentionsAnnotation.class)) {
-//          if (sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class).size() == 0) {
-//            sentence.remove(MachineReadingAnnotations.EntityMentionsAnnotation.class);
-//          }
-//        }
-//        if (sentence.containsKey(MachineReadingAnnotations.RelationMentionsAnnotation.class)) {
-//          if (sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class).size() == 0) {
-//            sentence.remove(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-//          }
-//        }
       }
     }
     if (doc.containsKey(CoreAnnotations.TokensAnnotation.class)) {
       for (int i = 0; i < doc.get(CoreAnnotations.TokensAnnotation.class).size(); i++) {
         CoreLabel token = doc.get(CoreAnnotations.TokensAnnotation.class).get(i);
-        // Remove empty xml context
-//        if (token.containsKey(CoreAnnotations.XmlContextAnnotation.class) && token.get(CoreAnnotations.XmlContextAnnotation.class).isEmpty()) {
-//          token.remove(CoreAnnotations.XmlContextAnnotation.class);
-//        }
         // Remove null gender
         if (token.get(MachineReadingAnnotations.GenderAnnotation.class) == null) {
           token.remove(MachineReadingAnnotations.GenderAnnotation.class);
@@ -161,7 +146,13 @@ public class ProtobufAnnotationSerializerSlowITest {
             if (sentA.containsKey(TreeCoreAnnotations.TreeAnnotation.class) && !sentA.get(TreeCoreAnnotations.TreeAnnotation.class).equals(sentB.get(TreeCoreAnnotations.TreeAnnotation.class))) {
               assertTrue("Tree for sentence " + i + " doesn't match", false);
             } else if (sentA.containsKey(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class) && !sentA.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).equals(sentB.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class))) {
-                assertTrue("Basic graph for sentence " + i + " doesn't match", false);
+              System.err.println("Graph A:");
+              System.err.println("========");
+              System.err.println(sentA.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
+              System.err.println("Graph B:");
+              System.err.println("========");
+              System.err.println(sentB.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
+              assertTrue("Basic graph for sentence " + i + " doesn't match", false);
             } else if (sentA.containsKey(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class) && !sentA.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class).equals(sentB.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class))) {
               assertTrue("Collapsed CC processed graph for sentence " + i + " doesn't match", false);
             } else if (sentA.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) && !sentA.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).equals(sentB.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class))) {

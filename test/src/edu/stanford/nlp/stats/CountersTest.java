@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Pair;
 
 import junit.framework.Assert;
@@ -17,13 +19,15 @@ import junit.framework.TestCase;
 
 public class CountersTest extends TestCase {
 
-  private ClassicCounter<String> c1;
-  private ClassicCounter<String> c2;
+  private Counter<String> c1;
+  private Counter<String> c2;
 
   private static final double TOLERANCE = 0.001;
 
   @Override
   protected void setUp() {
+    Locale.setDefault(Locale.US);
+
     c1 = new ClassicCounter<String>();
     c1.setCount("p", 1.0);
     c1.setCount("q", 2.0);
@@ -37,7 +41,7 @@ public class CountersTest extends TestCase {
   }
 
   public void testUnion() {
-    ClassicCounter<String> c3 = Counters.union(c1, c2);
+    Counter<String> c3 = Counters.union(c1, c2);
     assertEquals(c3.getCount("p"), 6.0);
     assertEquals(c3.getCount("s"), 4.0);
     assertEquals(c3.getCount("t"), 8.0);
@@ -346,5 +350,45 @@ public class CountersTest extends TestCase {
     Counter<String> rank = Counters.toTiedRankCounter(c1);
     assertEquals(1.5, rank.getCount("z"));
     assertEquals(7.0, rank.getCount("t"));
+  }
+  
+  public void testTransformWithValuesAdd(){
+    setUp();
+    c1.setCount("P",2.0);
+    System.out.println(c1);
+    c1 = Counters.transformWithValuesAdd(c1, new Function<String, String>() {
+      @Override
+      public String apply(String in) {
+        return in.toLowerCase();
+      }
+    });
+    System.out.println(c1);
+
+  }
+
+  public void testEquals(){
+    setUp();
+    c1.clear();
+    c2.clear();
+    c1.setCount("p", 1.0);
+    c1.setCount("q", 2.0);
+    c1.setCount("r", 3.0);
+    c1.setCount("s", 4.0);
+    c2.setCount("p", 1.0);
+    c2.setCount("q", 2.0);
+    c2.setCount("r", 3.0);
+    c2.setCount("s", 4.0);
+    assertTrue(Counters.equals(c1, c2));
+    c2.setCount("s", 4.1);
+    assertFalse(Counters.equals(c1, c2));
+    c2.remove("s");
+    assertFalse(Counters.equals(c1, c2));
+    c2.setCount("s", 4.0 + 1e-10);
+    assertFalse(Counters.equals(c1, c2));
+    assertTrue(Counters.equals(c1, c2, 1e-5));
+    c2.setCount("2", 3.0 + 8e-5);
+    c2.setCount("s", 4.0 + 8e-5);
+    assertFalse(Counters.equals(c1, c2, 1e-5));  // fails totalCount() equality check
+
   }
 }
