@@ -17,13 +17,14 @@ import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 
 public class ShiftReduceParser implements Serializable, ParserGrammar {
   final Index<Transition> transitionIndex;
-  final Index<String> featureIndex;
-  final double[][] featureWeights;
+  Index<String> featureIndex;
+  double[][] featureWeights;
 
   // TODO: replace this with our own options object?
   final Options op;
@@ -43,6 +44,38 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   public ParserQuery parserQuery() {
     return new ShiftReduceParserQuery(this);
   }
+
+  public void condenseFeatures() {
+    Index<String> newFeatureIndex = new HashIndex<String>();
+    for (int j = 0; j < featureWeights[0].length; ++j) {
+      boolean useless = true;
+      for (int i = 0; i < featureWeights.length; ++i) {
+        if (featureWeights[i][j] != 0.0) {
+          useless = false;
+          break;
+        }
+      }
+      if (useless) {
+        continue;
+      }
+      newFeatureIndex.add(featureIndex.get(j));
+    }
+
+    double[][] newFeatureWeights = new double[transitionIndex.size()][newFeatureIndex.size()];
+    for (int j = 0; j < featureWeights[0].length; ++j) {
+      int newIndex = newFeatureIndex.indexOf(featureIndex.get(j));
+      if (newIndex < 0) {
+        continue;
+      }
+      for (int i = 0; i < featureWeights.length; ++i) {
+        newFeatureWeights[i][newIndex] = featureWeights[i][j];
+      }
+    }
+
+    featureIndex = newFeatureIndex;
+    featureWeights = newFeatureWeights;
+  }
+
 
   public void outputStats() {
     int countZeros = 0;
