@@ -60,6 +60,66 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return copy;
   }
 
+  public static ShiftReduceParser averageModels(Collection<ShiftReduceParser> models) {
+    if (models.size() == 0) {
+      throw new IllegalArgumentException("Cannot average empty models");
+    }
+    ShiftReduceParser firstModel = models.iterator().next();
+    ShiftReduceOptions op = firstModel.op;
+    // TODO: should we deep copy the options?
+    ShiftReduceParser copy = new ShiftReduceParser(op);
+
+    for (Transition transition : firstModel.transitionIndex) {
+      copy.transitionIndex.add(transition);
+    }
+    
+    for (ShiftReduceParser model : models) {
+      if (!model.transitionIndex.equals(copy.transitionIndex)) {
+        throw new IllegalArgumentException("Can only average models with the same transition index");
+      }
+    }
+
+    Set<String> features = Generics.newHashSet();
+    for (ShiftReduceParser model : models) {
+      for (String feature : model.featureWeights.keySet()) {
+        features.add(feature);
+      }
+    }
+
+    for (String feature : features) {
+      List<ScoredObject<Integer>> weights = Generics.newArrayList();
+      copy.featureWeights.put(feature, weights);
+    }
+    
+    int numModels = models.size();
+    for (String feature : features) {
+      for (ShiftReduceParser model : models) {
+        if (!model.featureWeights.containsKey(feature)) {
+          continue;
+        }
+        for (ScoredObject<Integer> weight : model.featureWeights.get(feature)) {
+          updateWeight(copy.featureWeights.get(feature), weight.object(), weight.score() / numModels);
+        }
+      }
+    }
+
+    return copy;
+  }
+
+  public static void updateWeight(List<ScoredObject<Integer>> weights, int transition, double delta) {
+    for (int i = 0; i < weights.size(); ++i) {
+      ScoredObject<Integer> weight = weights.get(i);
+      if (weight.object() == transition) {
+        weight.setScore(weight.score() + delta);
+        return;
+      } else if (weight.object() > transition) {
+        weights.add(i, new ScoredObject<Integer>(transition, delta));
+        return;
+      }
+    }
+    weights.add(new ScoredObject<Integer>(transition, delta));
+  }
+
   public ParserQuery parserQuery() {
     return new ShiftReduceParserQuery(this);
   }
