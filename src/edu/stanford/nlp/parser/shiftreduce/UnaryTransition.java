@@ -55,11 +55,7 @@ public class UnaryTransition implements Transition {
     return apply(state, 0.0);
   }
 
-  /**
-   * Add a unary node to the existing node on top of the stack
-   */
-  public State apply(State state, double scoreDelta) {
-    Tree top = state.stack.peek();
+  static Tree addUnaryNode(Tree top, String label) {
     if (!(top.label() instanceof CoreLabel)) {
       throw new IllegalArgumentException("Stack should have CoreLabel nodes");
     }
@@ -70,6 +66,15 @@ public class UnaryTransition implements Transition {
     production.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     Tree newTop = new LabeledScoredTreeNode(production);
     newTop.addChild(top);
+    return newTop;
+  }
+
+  /**
+   * Add a unary node to the existing node on top of the stack
+   */
+  public State apply(State state, double scoreDelta) {
+    Tree top = state.stack.peek();
+    Tree newTop = addUnaryNode(top, label);
 
     TreeShapedStack<Tree> stack = state.stack.pop();
     stack = stack.push(newTop);

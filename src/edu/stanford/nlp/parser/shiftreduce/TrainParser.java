@@ -119,7 +119,7 @@ public class TrainParser {
       Index<Transition> transitionIndex = new HashIndex<Transition>();
       Index<String> featureIndex = new HashIndex<String>();
       for (Tree tree : binarizedTrees) {
-        List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
+        List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, op.compoundUnaries);
         transitionIndex.addAll(transitions);
 
         State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
@@ -145,7 +145,7 @@ public class TrainParser {
         int numWrong = 0;
         Collections.shuffle(binarizedTrees, random);
         for (Tree tree : binarizedTrees) {
-          List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
+          List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, op.compoundUnaries);
           State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
           for (Transition transition : transitions) {
             int transitionNum = transitionIndex.indexOf(transition);
