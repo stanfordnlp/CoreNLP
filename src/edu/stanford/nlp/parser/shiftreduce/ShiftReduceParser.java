@@ -459,6 +459,9 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         // TODO: allow weighted features, weighted training, etc
         updates.add(new Update(features, transitionNum, predictedNum, 1.0));
       }
+      if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.EARLY_TERMINATION && transitionNum != predictedNum) {
+        break;
+      }
       state = transition.apply(state);
     }
 
@@ -670,6 +673,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath ../codebase/retagged7.ser.gz -preTag -taggerSerializedFile ../data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
+  // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -preTag -taggerSerializedFile ../data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger -trainingThreads 4 -batchSize 10 -serializedPath foo.ser.gz
   // Sources:
   //   A Classifier-Based Parser with Linear Run-Time Complexity (Kenji Sagae and Alon Lavie)
   //   Transition-Based Parsing of the Chinese Treebank using a Global Discriminative Model (Zhang and Clark)
