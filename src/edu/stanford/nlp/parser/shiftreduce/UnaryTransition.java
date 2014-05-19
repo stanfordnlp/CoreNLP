@@ -59,13 +59,20 @@ public class UnaryTransition implements Transition {
     if (!(top.label() instanceof CoreLabel)) {
       throw new IllegalArgumentException("Stack should have CoreLabel nodes");
     }
+    Tree newTop = createNode(top, label, top);
+    return newTop;
+  }
+
+  static Tree createNode(Tree top, String label, Tree ... children) {
     CoreLabel headLabel = (CoreLabel) top.label();
     CoreLabel production = new CoreLabel();
     production.setValue(label);
     production.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
     production.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     Tree newTop = new LabeledScoredTreeNode(production);
-    newTop.addChild(top);
+    for (Tree child : children) {
+      newTop.addChild(child);
+    }
     return newTop;
   }
 
