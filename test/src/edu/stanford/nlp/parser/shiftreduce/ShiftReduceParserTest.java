@@ -78,13 +78,12 @@ public class ShiftReduceParserTest extends TestCase {
     List<String> expectedTransitions = Arrays.asList(new String[] { "Shift", "Shift", "Shift", "Shift", "RightBinary(@ADJP)", "RightBinary(ADJP)", "Shift", "RightBinary(@NP)", "RightBinary(NP)", "CompoundUnary([ROOT, FRAG])", "Finalize", "Idle" });
     assertEquals(expectedTransitions, CollectionUtils.transformAsList(transitions, new Function<Transition, String>() { public String apply(Transition t) { return t.toString(); } }));
 
-    String[] expectedSeparators = { "[NONE]", "[NONE, NONE]", "[HEAD, NONE, NONE]", "[NONE, HEAD, NONE, NONE]", "[LEFT, NONE, NONE]", "[LEFT, NONE]", "[NONE, LEFT, NONE]", "[LEFT, NONE]", "[LEFT]", "[LEFT]", "[LEFT]", "[LEFT]" };
+    String expectedSeparators = "[{2=,}]";
 
     State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
-    for (int i = 0; i < transitions.size(); ++i) {
-      state = transitions.get(i).apply(state);
-      assertEquals(expectedSeparators[i], state.separators.toString());
-    }
+    assertEquals(1, state.separators.size());
+    assertEquals(2, state.separators.firstKey().intValue());
+    assertEquals(",", state.separators.get(2));
   }
 
   public void testInitialStateFromTagged() {
