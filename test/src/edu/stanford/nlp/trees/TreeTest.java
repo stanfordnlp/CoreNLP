@@ -7,6 +7,10 @@ import junit.framework.TestCase;
 import java.util.Set;
 import java.util.HashSet;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+
 /**
  * Test Tree.java
  *

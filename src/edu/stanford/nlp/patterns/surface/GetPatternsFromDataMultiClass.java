@@ -137,7 +137,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * YanGarber02 is the modified version presented in
    * "Unsupervised Learning of Generalized Names"
    * <p>
-   * LOGREG is learning logisitic regression
+   * LOGREG is learning a logisitic regression classifier to combine weights to score a phrase (Same as PhEvalInPat, except score of an unlabeled phrase is computed using a logistic regression classifier)
+   * <p>
+   * LOGREGlogP is learning a logisitic regression classifier to combine weights to score a phrase (Same as PhEvalInPatLogP, except score of an unlabeled phrase is computed using a logistic regression classifier)
    * <p>
    * SqrtAllRatio is the pattern scoring used in Gupta et al. JAMIA 2014 paper
    * <p>
@@ -146,7 +148,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * 
    */
   public enum PatternScoring {
-    F1, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds, YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, SqrtAllRatio, LinICML03, kNN
+    F1, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds, YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, LOGREGlogP, SqrtAllRatio, LinICML03, kNN
 
   }
 
@@ -396,6 +398,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     }
 
+    //computing semantic odds values
     if (constVars.usePatternEvalSemanticOdds
         || constVars.usePhraseEvalSemanticOdds) {
       Counter<String> dictOddsWeightsLabel = new ClassicCounter<String>();
@@ -429,7 +432,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           otherLabelFreq.addAll(labelDictNgram.get(label2));
         }
         otherLabelFreq.addAll(otherSemanticClassFreq);
-        dictOddsWeightsLabel = Counters.division(labelDictNgram.get(label),
+        dictOddsWeightsLabel = Counters.divisionNonNaN(labelDictNgram.get(label),
             otherLabelFreq);
         constVars.dictOddsWeights.put(label, dictOddsWeightsLabel);
       }
@@ -963,6 +966,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         || constVars.patternScoring.equals(PatternScoring.PhEvalInPat)
         || constVars.patternScoring.equals(PatternScoring.PhEvalInPatLogP)
         || constVars.patternScoring.equals(PatternScoring.LOGREG)
+        || constVars.patternScoring.equals(PatternScoring.LOGREGlogP)
         || constVars.patternScoring.equals(PatternScoring.SqrtAllRatio)) {
 
       scorePatterns = new ScorePatternsRatioModifiedFreq(constVars,

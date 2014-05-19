@@ -99,9 +99,4 @@
 	<lib name="javacc.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javacc.jar!/"/>
 	</lib>
-	<lib name="javax.json.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/javax.json-api-1.0-sources.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/javax.json-api-1.0-sources.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.json.jar!/"/>
-	</lib>
 </component>

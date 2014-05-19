@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +166,14 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
       phraseScores.setCount(wEn.getKey(), avgScore);
     }
     return phraseScores;
+  }
+
+
+  @Override
+  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
+      String label, Set<String> terms, boolean forLearningPatterns)
+      throws IOException {
+    throw new RuntimeException("not implemented");
   }
 
 

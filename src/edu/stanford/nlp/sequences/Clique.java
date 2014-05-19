@@ -23,11 +23,11 @@ public class Clique implements Serializable {
 
   private static final long serialVersionUID = -8109637472035159453L;
 
-  private final int[] relativeIndices;
-  protected static final Map<CliqueEqualityWrapper, Clique> interner = Generics.newHashMap();
+  private int[] relativeIndices;
+  protected static Map<CliqueEqualityWrapper, Clique> interner = Generics.newHashMap();
 
   private static class CliqueEqualityWrapper {
-    private final Clique c;
+    private Clique c;
 
     public CliqueEqualityWrapper(Clique c) {
       this.c = c;
@@ -53,7 +53,7 @@ public class Clique implements Serializable {
       }
       return h;
     }
-  } // end static class CliqueEqualityWrapper
+  }
 
 
   private static Clique intern(Clique c) {
@@ -67,8 +67,7 @@ public class Clique implements Serializable {
   }
 
 
-  private Clique(int[] relativeIndices) {
-    this.relativeIndices = relativeIndices;
+  private Clique() {
   }
 
   public static Clique valueOf(int maxLeft, int maxRight) {
@@ -103,7 +102,8 @@ public class Clique implements Serializable {
    */
   private static Clique valueOfHelper(int[] relativeIndices) {
     // if clique already exists, return that one
-    Clique c = new Clique(relativeIndices);
+    Clique c = new Clique();
+    c.relativeIndices = relativeIndices;
     return intern(c);
   }
 
@@ -153,14 +153,14 @@ public class Clique implements Serializable {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append('[');
+    sb.append("[");
     for (int i = 0; i < relativeIndices.length; i++) {
       sb.append(relativeIndices[i]);
       if (i != relativeIndices.length-1) {
         sb.append(", ");
       }
     }
-    sb.append(']');
+    sb.append("]");
     return sb.toString();
   }
 
