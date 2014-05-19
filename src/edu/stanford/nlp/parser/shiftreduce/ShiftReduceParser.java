@@ -3,7 +3,9 @@ package edu.stanford.nlp.parser.shiftreduce;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -26,18 +28,16 @@ import edu.stanford.nlp.util.ScoredObject;
 
 public class ShiftReduceParser implements Serializable, ParserGrammar {
   final Index<Transition> transitionIndex;
-  Index<String> featureIndex;
-  double[][] featureWeights;
+  Map<String, List<ScoredObject<Integer>>> featureWeights;
 
   final ShiftReduceOptions op;
 
   // TODO: fold the featureFactory into our options
   final FeatureFactory featureFactory;
 
-  public ShiftReduceParser(Index<Transition> transitionIndex, Index<String> featureIndex,
-                           double[][] featureWeights, ShiftReduceOptions op, FeatureFactory featureFactory) {
+  public ShiftReduceParser(Index<Transition> transitionIndex, Map<String, List<ScoredObject<Integer>>> featureWeights,
+                           ShiftReduceOptions op, FeatureFactory featureFactory) {
     this.transitionIndex = transitionIndex;
-    this.featureIndex = featureIndex;
     this.featureWeights = featureWeights;
     this.op = op;
     this.featureFactory = featureFactory;
@@ -48,51 +48,37 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   public void condenseFeatures() {
-    Index<String> newFeatureIndex = new HashIndex<String>();
-    for (int j = 0; j < featureWeights[0].length; ++j) {
-      boolean useless = true;
-      for (int i = 0; i < featureWeights.length; ++i) {
-        if (featureWeights[i][j] != 0.0) {
-          useless = false;
-          break;
+    // iterate over feature weight map
+    // for each feature, remove all transitions with score of 0
+    // any feature with no transitions left is then removed
+    Iterator<String> featureIt = featureWeights.keySet().iterator();
+    while (featureIt.hasNext()) {
+      String feature = featureIt.next();
+      List<ScoredObject<Integer>> weights = featureWeights.get(feature);
+      Iterator<ScoredObject<Integer>> weightIt = weights.iterator();
+      while (weightIt.hasNext()) {
+        ScoredObject<Integer> score = weightIt.next();
+        if (score.score() == 0.0) {
+          weightIt.remove();
         }
       }
-      if (useless) {
-        continue;
-      }
-      newFeatureIndex.add(featureIndex.get(j));
-    }
-
-    double[][] newFeatureWeights = new double[transitionIndex.size()][newFeatureIndex.size()];
-    for (int j = 0; j < featureWeights[0].length; ++j) {
-      int newIndex = newFeatureIndex.indexOf(featureIndex.get(j));
-      if (newIndex < 0) {
-        continue;
-      }
-      for (int i = 0; i < featureWeights.length; ++i) {
-        newFeatureWeights[i][newIndex] = featureWeights[i][j];
+      if (weights.size() == 0) {
+        featureIt.remove();
       }
     }
-
-    featureIndex = newFeatureIndex;
-    featureWeights = newFeatureWeights;
   }
 
 
   public void outputStats() {
-    int countZeros = 0;
-    for (int i = 0; i < featureWeights.length; ++i) {
-      for (int j = 0; j < featureWeights[i].length; ++j) {
-        if (featureWeights[i][j] == 0) {
-          countZeros++;
-        }
-      }
+    int numWeights = 0;
+    for (String feature : featureWeights.keySet()) {
+      numWeights += featureWeights.get(feature).size();
     }
-    System.err.println("Number of zeros: " + countZeros + " out of weights: " + featureWeights.length * featureWeights[0].length);
+    System.err.println("Number of non-zero weights: " + numWeights);
 
-    System.err.println("Feature index size: " + featureIndex.size());
+    System.err.println("Number of known features: " + featureWeights.size());
     int wordLength = 0;
-    for (String feature : featureIndex) {
+    for (String feature : featureWeights.keySet()) {
       wordLength += feature.length();
     }
     System.err.println("Total word length: " + wordLength);
@@ -114,14 +100,15 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, Set<String> features, boolean requireLegal, int numTransitions) {
-    double[] scores = new double[featureWeights.length];
+    double[] scores = new double[transitionIndex.size()];
     for (String feature : features) {
-      int featureNum = featureIndex.indexOf(feature);
-      if (featureNum >= 0) {
-        // Features not in our index are represented by < 0 and are ignored
-        for (int i = 0; i < scores.length; ++i) {
-          scores[i] += featureWeights[i][featureNum];
-        }
+      List<ScoredObject<Integer>> weights = featureWeights.get(feature);
+      if (weights == null) {
+        // Features not in our index are ignored
+        continue;
+      }
+      for (ScoredObject<Integer> weight : weights) {
+        scores[weight.object()] += weight.score();
       }
     }
 
