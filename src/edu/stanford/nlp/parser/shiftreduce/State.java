@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -73,6 +74,74 @@ public class State implements Scored {
    * subtree, relative to the head of the subtree
    */
   final TreeMap<Integer, String> separators;
+
+  Tree getStackNode(int depth) {
+    if (depth >= stack.size()) {
+      return null;
+    }
+    TreeShapedStack<Tree> node = stack;
+    for (int i = 0; i < depth; ++i) {
+      node = node.pop();
+    }
+    return node.peek();
+  }
+
+  Tree getQueueNode(int depth) {
+    if (tokenPosition + depth >= sentence.size()) {
+      return null;
+    }
+    return sentence.get(tokenPosition + depth);
+  }
+
+  /**
+   * Returns the first separator between two nodes or returns null if
+   * such a thing does not exist
+   */
+  String getSeparatorBetween(int right, int left) {
+    if (right >= left) {
+      throw new AssertionError("Expected right < left");
+    }
+    return getSeparatorBetween(getStackNode(right), getStackNode(left));
+  }
+
+  String getSeparatorBetween(Tree right, Tree left) {
+    if (right == null || left == null) {
+      return null;
+    }
+    int leftHead = ShiftReduceUtils.headIndex(left);
+    int rightHead = ShiftReduceUtils.headIndex(right);
+    Map.Entry<Integer, String> nextSeparator = separators.ceilingEntry(leftHead);
+    if (nextSeparator == null || nextSeparator.getKey() > rightHead) {
+      return null;
+    }
+    return nextSeparator.getValue().substring(0, 1);
+  }
+
+  /**
+   * Returns the separator count between two nodes 
+   * (0 if any of the nodes don't exist)
+   */
+  int getSeparatorCount(int right, int left) {
+    if (right >= left) {
+      throw new AssertionError("Expected right < left");
+    }
+    return getSeparatorCount(getStackNode(right), getStackNode(left));
+  }
+
+  int getSeparatorCount(Tree right, Tree left) {
+    if (right == null || left == null) {
+      return 0;
+    }
+    int leftHead = ShiftReduceUtils.headIndex(left);
+    int rightHead = ShiftReduceUtils.headIndex(right);
+    Integer nextSeparator = separators.higherKey(leftHead);
+    int count = 0;
+    while (nextSeparator != null && nextSeparator < rightHead) {
+      ++count;
+      nextSeparator = separators.higherKey(nextSeparator);
+    }
+    return count;
+  }
 
   HeadPosition getSeparator(int nodeNum) {
     if (nodeNum >= stack.size()) {

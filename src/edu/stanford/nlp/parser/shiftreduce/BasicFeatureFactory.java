@@ -265,6 +265,29 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(featureType + value1 + "-" + value2 + "-" + between);
   }
 
+  public static void addSeparatorFeatures(List<String> features, String name1, CoreLabel label1, String name2, CoreLabel label2, String separatorBetween, int countBetween) {
+    if (label1 == null || label2 == null) {
+      return;
+    }
+
+    // 0 separators is captured by the countBetween features
+    if (separatorBetween != null) {
+      String separatorBetweenName = "Sepb" + name1 + name2 + "-" + separatorBetween + "-";
+      addUnaryFeature(features, name1 + "w" + separatorBetweenName, label1, FeatureComponent.HEADWORD);
+      addBinaryFeature(features, name1 + "wc" + separatorBetweenName, label1, FeatureComponent.HEADWORD, label1, FeatureComponent.VALUE);
+      addUnaryFeature(features, name2 + "w" + separatorBetweenName, label2, FeatureComponent.HEADWORD);
+      addBinaryFeature(features, name2 + "wc" + separatorBetweenName, label2, FeatureComponent.HEADWORD, label2, FeatureComponent.VALUE);
+      addBinaryFeature(features, name1 + "c" + name2 + "c" + separatorBetweenName, label1, FeatureComponent.VALUE, label2, FeatureComponent.VALUE);
+    }
+
+    String countBetweenName = "Sepb" + name1 + name2 + "-" + countBetween + "-";
+    addUnaryFeature(features, name1 + "w" + countBetweenName, label1, FeatureComponent.HEADWORD);
+    addBinaryFeature(features, name1 + "wc" + countBetweenName, label1, FeatureComponent.HEADWORD, label1, FeatureComponent.VALUE);
+    addUnaryFeature(features, name2 + "w" + countBetweenName, label2, FeatureComponent.HEADWORD);
+    addBinaryFeature(features, name2 + "wc" + countBetweenName, label2, FeatureComponent.HEADWORD, label2, FeatureComponent.VALUE);
+    addBinaryFeature(features, name1 + "c" + name2 + "c" + countBetweenName, label1, FeatureComponent.VALUE, label2, FeatureComponent.VALUE);
+  }
+
   public static void addSeparatorFeatures(List<String> features, CoreLabel s0Label, CoreLabel s1Label, State.HeadPosition s0Separator, State.HeadPosition s1Separator) {
     boolean between = false;
     if ((s0Separator != null && (s0Separator == State.HeadPosition.BOTH || s0Separator == State.HeadPosition.LEFT)) ||
@@ -407,9 +430,15 @@ public class BasicFeatureFactory implements FeatureFactory {
 
     addPositionFeatures(features, state);
 
-    State.HeadPosition s0Separator = state.getSeparator(0);
-    State.HeadPosition s1Separator = state.getSeparator(1);
-    addSeparatorFeatures(features, s0Label, s1Label, s0Separator, s1Separator);
+    // State.HeadPosition s0Separator = state.getSeparator(0);
+    // State.HeadPosition s1Separator = state.getSeparator(1);
+    // addSeparatorFeatures(features, s0Label, s1Label, s0Separator, s1Separator);
+
+    Tree s0Node = state.getStackNode(0);
+    Tree s1Node = state.getStackNode(1);
+    Tree q0Node = state.getQueueNode(0);
+    addSeparatorFeatures(features, "S0", s0Label, "S1", s1Label, state.getSeparatorBetween(s0Node, s1Node), state.getSeparatorCount(s0Node, s1Node));
+    addSeparatorFeatures(features, "S0", s0Label, "Q0", q0Label, state.getSeparatorBetween(q0Node, s0Node), state.getSeparatorCount(q0Node, s0Node));
 
     return features;
   }
