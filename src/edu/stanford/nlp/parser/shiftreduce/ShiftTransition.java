@@ -43,7 +43,7 @@ public class ShiftTransition implements Transition {
    * Add the new preterminal to the stack, increment the queue position.
    */
   public State apply(State state) {
-    return new State(state.stack.push(state.sentence.get(state.tokenPosition)), state.sentence, state.tokenPosition + 1, state.score, false);
+    return new State(state.stack.push(state.sentence.get(state.tokenPosition)), state.transitions.push(this), state.sentence, state.tokenPosition + 1, state.score, false);
   }
 
   @Override

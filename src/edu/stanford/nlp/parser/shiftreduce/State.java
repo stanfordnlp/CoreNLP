@@ -35,12 +35,14 @@ public class State {
    * with CoreLabels and have HeadWord and HeadTag annotations set.
    */
   public State(List<Tree> sentence) {
-    this(new TreeShapedStack<Tree>(), sentence, 0, 0.0, false);
+    this(new TreeShapedStack<Tree>(), new TreeShapedStack<Transition>(), sentence, 0, 0.0, false);
   }
 
-  State(TreeShapedStack<Tree> stack, List<Tree> sentence, int tokenPosition,
+  State(TreeShapedStack<Tree> stack, TreeShapedStack<Transition> transitions, 
+        List<Tree> sentence, int tokenPosition,
         double score, boolean finished) {
     this.stack = stack;
+    this.transitions = transitions;
     this.sentence = sentence;
     this.tokenPosition = tokenPosition;
     this.score = score;
@@ -51,6 +53,11 @@ public class State {
    * The stack of Tree pieces we have already assembled.
    */
   final TreeShapedStack<Tree> stack;
+
+  /**
+   * The transition sequence used to get to the current position
+   */
+  final TreeShapedStack<Transition> transitions;
 
   /**
    * The words we are parsing.  They need to be tagged before we can
