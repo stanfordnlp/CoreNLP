@@ -330,7 +330,17 @@ public class TsurgeonTest extends TestCase {
     } catch (TsurgeonRuntimeException e) {
       // good, we expected to fail if you try to replace the root node with two nodes
     }
+
+    // it is possible for numbers to work and words to not work if
+    // the tsurgeon parser is not correct
+    tsurgeon = Tsurgeon.parseOperation("replace foo (BAR blah)");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR blah) (BAR blah) (C 2))");
   }
+
+  // public void testKeywords() {
+  //   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace foo replace");
+  // }
 
   /**
    * Test (part of) an actual tree that we use in the Chinese transforming reader
@@ -376,6 +386,49 @@ public class TsurgeonTest extends TestCase {
     tregex = TregexPattern.compile("@NP < (/^,/=comma $+ CC)");
     tsurgeon = Tsurgeon.parseOperation("replace comma (COMMA)");
     runTest(tregex, tsurgeon, "(NP NP , NP , NP , CC NP)", "(NP NP , NP , NP COMMA CC NP)");
+  }
+
+  public void testCoindex() {
+    TregexPattern tregex = TregexPattern.compile("A=foo << B=bar << C=baz");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("coindex foo bar baz");
+    runTest(tregex, tsurgeon, "(A (B (C foo)))", "(A-1 (B-1 (C-1 foo)))");
+    // note that the indexing does not happen a second time, since the labels are now changed
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(A-1 (B-1 foo) (C-1 foo) (C bar))");
+
+    // Test that it indexes at 2 instead of 1
+    runTest(tregex, tsurgeon, "(A (B foo) (C-1 bar) (C baz))", "(A-2 (B-2 foo) (C-1 bar) (C-2 baz))");
+  }
+
+  /**
+   * Since tsurgeon uses a lot of keywords, those keywords would not
+   * be allowed in the operations unless you handle them correctly
+   * (for example, using lexical states).  This tests that this is
+   * done correctly.
+   */
+  public void testKeyword() {
+    // This should successfully compile, assuming the keyword parsing is correct
+    TregexPattern tregex = TregexPattern.compile("A=foo << B=bar << C=baz");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("relabel foo relabel");
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(relabel (B foo) (C foo) (C bar))");
+  }
+
+  /**
+   * You can compile multiple patterns into one node with the syntax 
+   * [pattern1] [pattern2]
+   * Test that it does what it is supposed to do
+   */
+  public void testMultiplePatterns() {
+    TregexPattern tregex = TregexPattern.compile("A=foo < B=bar < C=baz");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[relabel baz BAZ] [move baz >-1 bar]");
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(A (B foo (BAZ foo) (BAZ bar)))");
+
+    tsurgeon = Tsurgeon.parseOperation("[relabel baz /^.*$/={bar}={baz}FOO/] [move baz >-1 bar]");
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(A (B foo (BCFOO foo) (BCFOO bar)))");
+
+    // This in particular was a problem until we required "/" to be escaped
+    tregex = TregexPattern.compile("A=foo < B=bar < C=baz < D=biff");
+    tsurgeon = Tsurgeon.parseOperation("[relabel baz /^.*$/={bar}={baz}/] [relabel biff /^.*$/={bar}={biff}/]");
+    runTest(tregex, tsurgeon, "(A (B foo) (C bar) (D baz))", "(A (B foo) (BC bar) (BD baz))");
   }
 
   public void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,

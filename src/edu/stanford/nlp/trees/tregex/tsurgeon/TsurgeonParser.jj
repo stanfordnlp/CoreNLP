@@ -28,7 +28,7 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants/*@eg
     System.out.println("Reading from standard input...");
     TsurgeonParser t = new TsurgeonParser(System.in);
     try {
-      TsurgeonPattern n = t.Root();
+      TsurgeonPattern n = new TsurgeonPatternRoot(t.Root());
       System.out.println(n.toString());
       System.out.println("Thank you.");
     } catch (Exception e) {
@@ -43,58 +43,86 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants/*@eg
 PARSER_END(TsurgeonParser)
 
 
-SKIP:
+<DEFAULT,OPERATION> SKIP:
 {
   " "
 | "\r"
 | "\t"
-//| "\n"
+| "\n"
+}
+
+<*> TOKEN:
+{
+  < OPEN_BRACKET: "[" > : DEFAULT
 }
 
 TOKEN:
-{
-  < DELETE: "delete" >
-| < PRUNE:  "prune" >
-| < RELABEL: "relabel" >
-| < EXCISE: "excise" >
-| < INSERT: "insert" >
-| < MOVE: "move" >
-| < REPLACE: "replace" > 
-| < CREATE_SUBTREE: "createSubtree" >
-| < ADJOIN: "adjoin" >
-| < ADJOIN_TO_HEAD: "adjoinH" >
-| < ADJOIN_TO_FOOT: "adjoinF" >
-| < COINDEX: "coindex" >
-| < SELECTION: "#rightmost" | "#leftmost" >
-| < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|~["\n","\r"])* "/") )+ >
-| < IDENTIFIER: ["-","*","a"-"z","A"-"Z"] ( ["-","*","a"-"z","A"-"Z","_","0"-"9","|","@","="] )* >
-| < LABEL: ["A"-"Z"] (["A"-"Z","0"-"9","-","_"])* >
-| < LOCATION_RELATION: "$-" | "$+" | ">" ("-")? (["0"-"9"])+ >
-| < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
-| < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
-| < HASH_INTEGER: "#" (["0"-"9"])+ >
-| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","(",")",":"] )+ >
-| < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
+{ 
+  < DELETE: "delete" > : OPERATION
+| < PRUNE:  "prune" > : OPERATION
+| < RELABEL: "relabel" > : OPERATION
+| < EXCISE: "excise" > : OPERATION
+| < INSERT: "insert" > : OPERATION
+| < MOVE: "move" > : OPERATION
+| < REPLACE: "replace" >  : OPERATION
+| < CREATE_SUBTREE: "createSubtree" > : OPERATION
+| < ADJOIN: "adjoin" > : OPERATION
+| < ADJOIN_TO_HEAD: "adjoinH" > : OPERATION
+| < ADJOIN_TO_FOOT: "adjoinF" > : OPERATION
+| < COINDEX: "coindex" > : OPERATION
 }
 
-TsurgeonPattern Root() :
+<OPERATION> TOKEN:
+{ 
+  < CLOSE_BRACKET: "]" >
+| < SELECTION: "#rightmost" | "#leftmost" >
+| < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|"\\]"|"\\\\"|~["\n","\r","]","\\"])* "/") )+ >
+| < IDENTIFIER: ["-","*","a"-"z","A"-"Z"] ( ["-","*","a"-"z","A"-"Z","_","0"-"9","|","@","="] )* >
+| < LOCATION_RELATION: "$-" | "$+" | ">" ("-")? (["0"-"9"])+ >
+| < REGEX: "/" ("\\/"|"\\]"|"\\\\"|~["\n","\r","]","\\"])* "/" >
+| < QUOTEX: "|" ("\\|"|"\\\\"|~["\n","\r","|","\\"])* "|" >
+| < HASH_INTEGER: "#" (["0"-"9"])+ >
+| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","[","]","(",")",":"] )+ >
+| < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
+| < CLOSE_PAREN: ")" >
+}
+
+TsurgeonPattern[] Root() :
 {/*@bgen(jjtree) Root */
   SimpleNode jjtn000 = new SimpleNode(JJTROOT);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
 /*@egen*/
   TsurgeonPattern result;
+  List<TsurgeonPattern> results = null;
 }
 {/*@bgen(jjtree) Root */
   try {
 /*@egen*/
-  result = Operation() "\n"/*@bgen(jjtree)*/
+  result = Operation()/*@bgen(jjtree)*/
   {
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
   }
 /*@egen*/
-  { return result; }/*@bgen(jjtree)*/
+  { return new TsurgeonPattern[] { result }; } 
+ |
+  ( <OPEN_BRACKET> result = Operation() <CLOSE_BRACKET>
+    {
+      if (results == null) {
+        results = Generics.newArrayList();
+      }
+      results.add(result);
+    } )+/*@bgen(jjtree)*/
+  {
+    jjtree.closeNodeScope(jjtn000, true);
+    jjtc000 = false;
+  }
+/*@egen*/
+  {
+    TsurgeonPattern[] array = new TsurgeonPattern[results.size()];
+    return results.toArray(array);
+  }/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -376,6 +404,7 @@ List<TsurgeonPattern> NodeSelectionList(List<TsurgeonPattern> l) :
 /*@egen*/
 }
 
+// TODO: what does this next comment mean?
 // we'll also put in a way to use a SELECTION with a list of nodes.
 TsurgeonPattern NodeSelection() :
 {/*@bgen(jjtree) NodeSelection */
@@ -552,6 +581,13 @@ Tree TreeNode() :
       jjtc000 = false;
     }
 /*@egen*/
+    { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
+| ( label = <IDENTIFIER> )/*@bgen(jjtree)*/
+    {
+      jjtree.closeNodeScope(jjtn000, true);
+      jjtc000 = false;
+    }
+/*@egen*/
     { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }/*@bgen(jjtree)*/
  } catch (Throwable jjte000) {
    if (jjtc000) {
@@ -593,7 +629,7 @@ List<Tree> TreeDtrs(List<Tree> dtrs) :
     }
 /*@egen*/
     {dtrs.add(0,tree); return dtrs; }
-| ")"/*@bgen(jjtree)*/
+| <CLOSE_PAREN>/*@bgen(jjtree)*/
   {
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;

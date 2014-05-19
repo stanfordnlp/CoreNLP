@@ -245,24 +245,16 @@ public class CoordinationTransformer implements TreeTransformer {
     return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);    
   }
 
-  private static final TregexPattern[][] matchPatterns = {
-    {
-      // UCP (JJ ...) -> ADJP
-      TregexPattern.compile("/^UCP/=ucp <, /^JJ|ADJP/"),
-      // UCP (DT JJ ...) -> ADJP
-      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)")
-    },
-    {
-      // UCP (N ...) -> NP
-      TregexPattern.compile("/^UCP/=ucp <, /^N/"),
-      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^N/)")
-    },
-    {
-      // UCP ADVP -> ADVP
-      // Might want to look for ways to include RB for flatter structures,
-      // but then we have to watch out for (RB not) for example
-      TregexPattern.compile("/^UCP/=ucp <, /^ADVP/")
-    },
+  private static final TregexPattern[] matchPatterns = {
+    // UCP (JJ ...) -> ADJP
+    // UCP (DT JJ ...) -> ADJP
+    TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/ | ( <1 DT <2 /^JJ|ADJP/ ) ]"),
+    // UCP (N ...) -> NP
+    TregexPattern.compile("/^UCP/=ucp [ <, /^N/ | ( <1 DT <2 /^N/ ) ]"),
+    // UCP ADVP -> ADVP
+    // Might want to look for ways to include RB for flatter structures,
+    // but then we have to watch out for (RB not) for example
+    TregexPattern.compile("/^UCP/=ucp <, /^ADVP/")
   };
 
   private static final TsurgeonPattern[] operations = {
@@ -288,12 +280,12 @@ public class CoordinationTransformer implements TreeTransformer {
     }
     Tree firstChild = t.firstChild();
     if (firstChild != null) {
+      // TODO: precompile the patterns, check to see whether this or
+      // calling for each pattern is more efficient
       List<Pair<TregexPattern,TsurgeonPattern>> ops = Generics.newArrayList();
 
       for (int i = 0; i < operations.length; i++) {
-        for (TregexPattern pattern : matchPatterns[i]) {
-          ops.add(Generics.newPair(pattern, operations[i]));
-        }
+        ops.add(Generics.newPair(matchPatterns[i], operations[i]));
       }
 
       return Tsurgeon.processPatternsOnTree(ops, t);
