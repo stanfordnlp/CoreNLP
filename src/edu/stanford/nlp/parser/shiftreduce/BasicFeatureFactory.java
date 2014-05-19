@@ -107,6 +107,10 @@ public class BasicFeatureFactory implements FeatureFactory {
   }
 
   public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String conFeature, String wordTagFeature, String tagFeature, String wordConFeature, String tagConFeature) {
+    if (label == null) {
+      features.add(conFeature + NULL);
+      return;
+    }
     String constituent = getFeatureFromCoreLabel(label, FeatureComponent.VALUE);
     String tag = getFeatureFromCoreLabel(label, FeatureComponent.HEADTAG);
     String word = getFeatureFromCoreLabel(label, FeatureComponent.HEADWORD);
