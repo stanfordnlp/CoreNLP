@@ -2,6 +2,8 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.FileFilter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,9 @@ import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
 public class TrainParser {
+
+  private static final NumberFormat NF = new DecimalFormat("0.00");
+  private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.TrainParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.TrainParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
@@ -89,7 +94,7 @@ public class TrainParser {
 
     if (trainTreebankPath != null) {
       ShiftReduceOptions op = new ShiftReduceOptions();
-      op.setOptions("-forceTags");
+      op.setOptions("-forceTags", "-debugOutputFrequency", "1");
       if (tlppClass != null) {
         op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
       }
@@ -195,10 +200,12 @@ public class TrainParser {
         System.err.println("Iteration " + iteration + " complete");
         System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
 
+
+        double labelF1 = 0.0;
         if (devTreebank != null) {
           EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
           evaluator.testOnTreebank(devTreebank);
-          double labelF1 = evaluator.getLBScore();
+          labelF1 = evaluator.getLBScore();
           System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
 
           if (labelF1 > bestScore) {
@@ -218,6 +225,14 @@ public class TrainParser {
             if (bestModels.size() > parser.op.averagedModels) {
               bestModels.poll();
             }
+          }
+        }
+        if (serializedPath != null && parser.op.trainOptions.debugOutputFrequency > 0) {
+          String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
+          try {
+            IOUtils.writeObjectToFile(parser, tempName);
+          } catch (IOException e) {
+            throw new RuntimeIOException(e);
           }
         }
       }
@@ -241,6 +256,7 @@ public class TrainParser {
     if (serializedPath != null && parser == null) {
       try {
         parser = IOUtils.readObjectFromFile(serializedPath);
+        parser.setOptions("-forceTags");
       } catch (IOException e) {
         throw new RuntimeIOException(e);
       } catch (ClassNotFoundException e) {
