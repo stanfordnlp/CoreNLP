@@ -84,7 +84,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
         Counters.multiplyInPlace(weights, -1);
       }
       List<Pair<String, Double>> wtd = Counters.toDescendingMagnitudeSortedListWithCounts(weights);
-      Redwood.log(Redwood.FORCE, "The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 200)), "\n"));
+      Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 200)), "\n"));
     }
 //    else if (scoreClassifierType.equals(ClassifierType.RF)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.RandomForest", constVars.wekaOptions);
