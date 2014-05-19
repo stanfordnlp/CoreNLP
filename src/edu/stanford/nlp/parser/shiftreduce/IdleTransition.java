@@ -22,7 +22,7 @@ public class IdleTransition implements Transition {
    * Do nothing
    */
   public State apply(State state, double scoreDelta) {
-    return new State(state.stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score + scoreDelta, state.finished);
+    return new State(state.stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, state.finished);
   }
 
   @Override

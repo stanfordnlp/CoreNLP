@@ -64,7 +64,7 @@ public class BinaryTransition implements Transition {
     stack = stack.pop();
     Tree left = stack.peek();
     stack = stack.pop();
-    
+
     Tree head;
     switch(side) {
     case LEFT:
@@ -76,7 +76,7 @@ public class BinaryTransition implements Transition {
     default:
       throw new IllegalArgumentException("Unknown side " + side);
     }
-    
+
     if (!(head.label() instanceof CoreLabel)) {
       throw new IllegalArgumentException("Stack should have CoreLabel nodes");
     }
@@ -91,7 +91,44 @@ public class BinaryTransition implements Transition {
     newTop.addChild(right);
 
     stack = stack.push(newTop);
-    return new State(stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score + scoreDelta, false);    
+
+
+    TreeShapedStack<State.HeadPosition> separators = state.separators;
+    State.HeadPosition rightSeparator = separators.peek();
+    separators = separators.pop();
+    State.HeadPosition leftSeparator = separators.peek();
+    separators = separators.pop();
+
+    State.HeadPosition newSeparator;
+    switch(side) {
+    case LEFT:
+      if (rightSeparator == State.HeadPosition.NONE) {
+        newSeparator = leftSeparator;
+      } else if (leftSeparator == State.HeadPosition.LEFT || leftSeparator == State.HeadPosition.BOTH) {
+        newSeparator = State.HeadPosition.BOTH;
+      } else if (leftSeparator == State.HeadPosition.HEAD) {
+        newSeparator = State.HeadPosition.HEAD;
+      } else {
+        newSeparator = State.HeadPosition.RIGHT;
+      }
+      break;
+    case RIGHT:
+      if (leftSeparator == State.HeadPosition.NONE) {
+        newSeparator = rightSeparator;
+      } else if (rightSeparator == State.HeadPosition.RIGHT || rightSeparator == State.HeadPosition.BOTH) {
+        newSeparator = State.HeadPosition.BOTH;
+      } else if (rightSeparator == State.HeadPosition.HEAD) {
+        newSeparator = State.HeadPosition.HEAD;
+      } else {
+        newSeparator = State.HeadPosition.LEFT;
+      }
+      break;
+    default:
+      throw new IllegalArgumentException("Unknown side " + side);
+    }
+    separators = separators.push(newSeparator);
+
+    return new State(stack, state.transitions.push(this), separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);    
   }
 
   @Override

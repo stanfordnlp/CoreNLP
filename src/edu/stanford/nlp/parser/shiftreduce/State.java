@@ -36,14 +36,14 @@ public class State implements Scored {
    * with CoreLabels and have HeadWord and HeadTag annotations set.
    */
   public State(List<Tree> sentence) {
-    this(new TreeShapedStack<Tree>(), new TreeShapedStack<Transition>(), sentence, 0, 0.0, false);
+    this(new TreeShapedStack<Tree>(), new TreeShapedStack<Transition>(), new TreeShapedStack<HeadPosition>(), sentence, 0, 0.0, false);
   }
 
-  State(TreeShapedStack<Tree> stack, TreeShapedStack<Transition> transitions, 
-        List<Tree> sentence, int tokenPosition,
-        double score, boolean finished) {
+  State(TreeShapedStack<Tree> stack, TreeShapedStack<Transition> transitions, TreeShapedStack<HeadPosition> separators,
+        List<Tree> sentence, int tokenPosition, double score, boolean finished) {
     this.stack = stack;
     this.transitions = transitions;
+    this.separators = separators;
     this.sentence = sentence;
     this.tokenPosition = tokenPosition;
     this.score = score;
@@ -59,6 +59,17 @@ public class State implements Scored {
    * The transition sequence used to get to the current position
    */
   final TreeShapedStack<Transition> transitions;
+
+  /**
+   * Used to describe the relative location of separators to the head of a subtree
+   */
+  public enum HeadPosition { NONE, LEFT, RIGHT, BOTH, HEAD };
+
+  /**
+   * A description of where the separators such as ,;:- are in a
+   * subtree, relative to the head of the subtree
+   */
+  final TreeShapedStack<HeadPosition> separators;
 
   /**
    * The words we are parsing.  They need to be tagged before we can

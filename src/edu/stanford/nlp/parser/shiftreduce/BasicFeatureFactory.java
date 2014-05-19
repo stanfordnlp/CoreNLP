@@ -19,6 +19,18 @@ public class BasicFeatureFactory implements FeatureFactory {
     HEADWORD, HEADTAG, VALUE
   };
 
+  public static State.HeadPosition getSeparator(TreeShapedStack<State.HeadPosition> separators, int nodeNum) {
+    if (separators.size() <= nodeNum) {
+      return null;
+    }
+
+    for (int i = 0; i < nodeNum; ++i) {
+      separators = separators.pop();
+    }
+
+    return separators.peek();
+  }
+
   public static CoreLabel getStackLabel(TreeShapedStack<Tree> stack, int nodeNum, Transition ... transitions) {
     if (stack.size() <= nodeNum) {
       return null;
@@ -205,6 +217,56 @@ public class BasicFeatureFactory implements FeatureFactory {
     }
   }
 
+  public static void addSeparatorFeature(Set<String> features, String featureType, State.HeadPosition separator) {
+    if (separator == null) {
+      return;
+    }
+    features.add(featureType + separator);
+  }
+
+  public static void addSeparatorFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature, State.HeadPosition separator) {
+    if (separator == null) {
+      return;
+    }
+    
+    String value = null;
+    switch(feature) {
+    case HEADWORD:
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      break;
+    case HEADTAG:
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      break;
+    case VALUE:
+      value = (label == null) ? NULL : label.value();
+      break;
+    default:
+      throw new IllegalArgumentException("Unexpected feature type: " + feature);
+    }
+
+    features.add(featureType + value + "-" + separator);
+  }
+
+  public static void addSeparatorFeatures(Set<String> features, CoreLabel s0Label, CoreLabel s1Label, State.HeadPosition s0Separator, State.HeadPosition s1Separator) {
+    addSeparatorFeature(features, "s0sep-", s0Separator);
+    addSeparatorFeature(features, "s1sep-", s1Separator);
+
+    addSeparatorFeature(features, "s0ws0sep-", s0Label, FeatureComponent.HEADWORD, s0Separator);
+    addSeparatorFeature(features, "s0ws1sep-", s0Label, FeatureComponent.HEADWORD, s1Separator);
+    addSeparatorFeature(features, "s1ws0sep-", s1Label, FeatureComponent.HEADWORD, s0Separator);
+    addSeparatorFeature(features, "s1ws1sep-", s1Label, FeatureComponent.HEADWORD, s1Separator);
+
+    addSeparatorFeature(features, "s0cs0sep-", s0Label, FeatureComponent.VALUE, s0Separator);
+    addSeparatorFeature(features, "s0cs1sep-", s0Label, FeatureComponent.VALUE, s1Separator);
+    addSeparatorFeature(features, "s1cs0sep-", s1Label, FeatureComponent.VALUE, s0Separator);
+    addSeparatorFeature(features, "s1cs1sep-", s1Label, FeatureComponent.VALUE, s1Separator);
+
+    addSeparatorFeature(features, "s0ts0sep-", s0Label, FeatureComponent.HEADTAG, s0Separator);
+    addSeparatorFeature(features, "s0ts1sep-", s0Label, FeatureComponent.HEADTAG, s1Separator);
+    addSeparatorFeature(features, "s1ts0sep-", s1Label, FeatureComponent.HEADTAG, s0Separator);
+    addSeparatorFeature(features, "s1ts1sep-", s1Label, FeatureComponent.HEADTAG, s1Separator);
+  }
+
   public Set<String> featurize(State state) {
     Set<String> features = Generics.newHashSet();
 
@@ -282,6 +344,10 @@ public class BasicFeatureFactory implements FeatureFactory {
     addTrigramFeature(features, "S0cS1cQ0w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADWORD);
 
     addPositionFeatures(features, state);
+
+    State.HeadPosition s0Separator = getSeparator(state.separators, 0);
+    State.HeadPosition s1Separator = getSeparator(state.separators, 1);
+    addSeparatorFeatures(features, s0Label, s1Label, s0Separator, s1Separator);
 
     return features;
   }

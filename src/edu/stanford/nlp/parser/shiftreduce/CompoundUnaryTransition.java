@@ -72,7 +72,7 @@ public class CompoundUnaryTransition implements Transition {
 
     TreeShapedStack<Tree> stack = state.stack.pop();
     stack = stack.push(top);
-    return new State(stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score + scoreDelta, false);
+    return new State(stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);
   }
 
   @Override

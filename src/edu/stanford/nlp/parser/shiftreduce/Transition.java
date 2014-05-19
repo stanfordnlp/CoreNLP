@@ -5,7 +5,11 @@ import java.io.Serializable;
 /**
  * An interface which defines a transition type in the shift-reduce
  * parser.  Expected transition types are shift, unary, binary,
- * finalize, and idle.
+ * finalize, and idle.  
+ * <br>
+ * There is also a compound unary transition for combining multiple
+ * unary transitions into one, which lets us prevent the parser from
+ * creating arbitrary unary transition sequences.
  */
 public interface Transition extends Serializable {
   /**

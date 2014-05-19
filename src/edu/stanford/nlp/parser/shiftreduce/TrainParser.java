@@ -44,8 +44,8 @@ public class TrainParser {
     weights.add(new ScoredObject<Integer>(transition, delta));
   }
 
-  // java -mx15g edu.stanford.nlp.parser.shiftreduce.TrainParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
-  // java -mx15g edu.stanford.nlp.parser.shiftreduce.TrainParser -trainTreebank ../data/parsetrees/wsj.train.mrg -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
+  // java -mx5g edu.stanford.nlp.parser.shiftreduce.TrainParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
+  // java -mx10g edu.stanford.nlp.parser.shiftreduce.TrainParser -compoundUnaries -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
