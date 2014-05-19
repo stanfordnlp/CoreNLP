@@ -7,7 +7,6 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
@@ -133,24 +132,11 @@ public class POSTaggerAnnotator implements Annotator {
 
   private CoreMap doOneSentence(CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<TaggedWord> tagged = null;
     if (tokens.size() <= maxSentenceLength) {
-      try {
-        tagged = pos.tagSentence(tokens, this.reuseTags);
-      } catch (OutOfMemoryError e) {
-        System.err.println("WARNING: Tagging of sentence ran out of memory. " +
-                           "Will ignore and continue: " +
-                           Sentence.listToString(tokens));
-      }
-    }
+      List<TaggedWord> tagged = pos.tagSentence(tokens, this.reuseTags);
 
-    if (tagged != null) {
       for (int i = 0, sz = tokens.size(); i < sz; i++) {
         tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
-      }
-    } else {
-      for (int i = 0, sz = tokens.size(); i < sz; i++) {
-        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
       }
     }
     return sentence;

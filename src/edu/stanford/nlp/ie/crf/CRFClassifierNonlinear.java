@@ -51,7 +51,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Subclass of {@link edu.stanford.nlp.ie.crf.CRFClassifier} for implementing the nonlinear architecture in [Wang and Manning IJCNLP-2013 Effect of Nonlinear ...].
+ * Subclass of {@link edu.stanford.edu.ie.crf.CRFClassifier} for implementing the nonlinear architecture in [Wang and Manning IJCNLP-2013 Effect of Nonlinear ...].
  *
  * @author Mengqiu Wang 
  */
@@ -111,7 +111,7 @@ public class CRFClassifierNonlinear<IN extends CoreMap> extends CRFClassifier<IN
   }
 
   @Override
-  protected CliquePotentialFunction getCliquePotentialFunctionForTest() {
+  protected CliquePotentialFunction getCliquePotentialFunction() {
     if (cliquePotentialFunction == null) {
       if (flags.secondOrderNonLinear)
         cliquePotentialFunction = new NonLinearSecondOrderCliquePotentialFunction(inputLayerWeights4Edge, outputLayerWeights4Edge, inputLayerWeights, outputLayerWeights, flags);

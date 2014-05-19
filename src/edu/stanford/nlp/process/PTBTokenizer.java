@@ -163,7 +163,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // the underlying lexer
-  private final PTBLexer lexer;
+  private PTBLexer lexer;
 
 
   /**
@@ -183,7 +183,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that makes CoreLabel tokens.
    * It optionally returns carriage returns
    * as their own token. CRs come back as Words whose text is
-   * the value of {@code PTBLexer.NEWLINE_TOKEN}.
+   * the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
    *
    * @param r The Reader to read tokens from
    * @param tokenizeNLs Whether to return newlines as separate tokens
@@ -202,7 +202,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that optionally returns carriage returns
    * as their own token, and has a custom LexedTokenFactory.
    * If asked for, CRs come back as Words whose text is
-   * the value of {@code PTBLexer.cr}.  This constructor translates
+   * the value of <code>PTBLexer.cr</code>.  This constructor translates
    * between the traditional boolean options of PTBTokenizer and the new
    * options String.
    *
@@ -542,9 +542,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     /**
      * Constructs a new PTBTokenizer that returns Word objects and
      * uses the options passed in.
-     * THIS METHOD IS INVOKED BY REFLECTION BY SOME OF THE JAVANLP
-     * CODE TO LOAD A TOKENIZER FACTORY.  IT SHOULD BE PRESENT IN A
-     * TokenizerFactory.
      *
      * @param options A String of options
      * @return A TokenizerFactory that returns Word objects

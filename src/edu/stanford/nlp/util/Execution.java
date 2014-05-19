@@ -71,12 +71,6 @@ public class Execution {
   public static int threads = Runtime.getRuntime().availableProcessors();
   @Option(name = "host", gloss = "Name of computer we are running on")
   public static String host = "(unknown)";
-  @SuppressWarnings("FieldCanBeLocal")
-  @Option(name = "strict", gloss = "If true, make sure that all options passed in are used somewhere")
-  private static boolean strict = false;
-  @SuppressWarnings("FieldCanBeLocal")
-  @Option(name = "exec.verbose", gloss = "If true, print options as they are set.")
-  private static boolean verbose = false;
 
   static {
     try {
@@ -172,17 +166,6 @@ public class Execution {
 	 */
 
   private static void fillField(Object instance, Field f, String value) {
-    //--Verbose
-    if (verbose) {
-      Option opt = f.getAnnotation(Option.class);
-      StringBuilder b = new StringBuilder("setting ").append(f.getDeclaringClass().getName()).append("#").append(f.getName()).append(" ");
-      if (opt != null) {
-        b.append("[").append(opt.name()).append("] ");
-      }
-      b.append("to: ").append(value);
-      log(b.toString());
-    }
-
     try {
       //--Permissions
       boolean accessState = true;
@@ -361,17 +344,13 @@ public class Execution {
         continue;
       }
 
-      boolean someOptionFilled = false;
-      boolean someOptionFound = false;
       for (Field f : fields) {
         Option o = f.getAnnotation(Option.class);
         if (o != null) {
-          someOptionFound = true;
           //(check if field is static)
           if ((f.getModifiers() & Modifier.STATIC) == 0 && instances == null) {
-            continue;
+            fatal("An instance object must be provided if an option is applied to a non-static field: " + c + "." + f);
           }
-          someOptionFilled = true;
           //(required marker)
           Pair<Boolean, Boolean> mark = Pair.makePair(false, false);
           if (o.required()) {
@@ -407,10 +386,6 @@ public class Execution {
           }
         }
       }
-      //(check to ensure that something got filled, if any @Option annotation was found)
-      if (someOptionFound && !someOptionFilled) {
-        warn("found @Option annotations in class " + c + ", but didn't set any of them (all options were instance variables and no instance given?)");
-      }
     }
 
     //--Fill Options
@@ -428,7 +403,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)z
+        // (case: declared option)
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -437,30 +412,23 @@ public class Execution {
         if (lastDotIndex < 0) {
           fatal("Unrecognized option: " + key);
         }
-        if (!rawKeyStr.startsWith("log.")) {  // ignore Redwood options
-          String className = rawKeyStr.substring(0, lastDotIndex);
-          String fieldName = rawKeyStr.substring(lastDotIndex + 1);
-          // get the class
-          Class clazz = null;
+        String className = rawKeyStr.substring(0, lastDotIndex);
+        String fieldName = rawKeyStr.substring(lastDotIndex + 1);
+        // get the class
+        Class clazz = null;
+        try {
+          clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+        } catch (Exception e) {
+          debug("Could not set option: " + rawKey + "; no such class: " + className);
+        }
+        // get the field
+        if (clazz != null) {
           try {
-            clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+            target = clazz.getField(fieldName);
           } catch (Exception e) {
-            err("Could not set option: " + rawKey + "; either the option is mistyped, not defined, or the class " + className + " does not exist.");
+            debug("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
           }
-          // get the field
-          if (clazz != null) {
-            try {
-              target = clazz.getField(fieldName);
-            } catch (Exception e) {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
-            }
-            if (target != null) {
-              log("option overrides " + target + " to '" + value + "'");
-              fillField(class2object.get(target.getDeclaringClass()), target, value);
-            } else {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
-            }
-          }
+          fillField(class2object.get(target.getDeclaringClass()), target, value);
         }
       }
     }
@@ -486,7 +454,7 @@ public class Execution {
       Object[] instances,
       Class<?>[] classes,
       Properties options) {
-    return fillOptionsImpl(instances, classes, options, strict);
+    return fillOptionsImpl(instances, classes, options, false);
   }
 
 
@@ -511,10 +479,7 @@ public class Execution {
       options.put(key, props.getProperty(key));
     }
     //(bootstrap)
-    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    for (String key : bootstrapMap.keySet()) {
-      options.remove(key);
-    }
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
     if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
@@ -603,10 +568,7 @@ public class Execution {
   public static void exec(Runnable toRun, Properties options, boolean exit) {
     //--Init
     //(bootstrap)
-    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    for (String key : bootstrapMap.keySet()) {
-      options.remove(key);
-    }
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
     startTrack("init");
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
@@ -624,7 +586,7 @@ public class Execution {
       log(FORCE, t);
       exitCode = 1;
     }
-    endTracksTo("main");  // end main
+    endTrack("main"); //ends main
     if (exit) {
       System.exit(exitCode);
     }

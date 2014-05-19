@@ -89,8 +89,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
   private static final String PROPS_SUFFIX = ".properties";
   public static final String NEWLINE_SPLITTER_PROPERTY = "ssplit.eolonly";
-  public static final String NEWLINE_IS_SENTENCE_BREAK_PROPERTY = "ssplit.newlineIsSentenceBreak";
-  public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "two";
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
@@ -217,11 +215,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return properties.getProperty("encoding", "UTF-8");
   }
 
-  public boolean getPrintSingletons() {
-    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false); 
-  }
-   
-
   public static boolean isXMLOutputPresent() {
     try {
       Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
@@ -315,12 +308,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                           "false"))) {
           return new WhitespaceTokenizerAnnotator(properties);
         } else {
-          String options = properties.getProperty("tokenize.options", PTBTokenizerAnnotator.DEFAULT_OPTIONS);
-          boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-          // If they
-          if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-            keepNewline = true;
-          }
+          String options = properties.getProperty("tokenize.options",
+                  PTBTokenizerAnnotator.DEFAULT_OPTIONS);
+          boolean keepNewline =
+                  Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
+                          "false"));
           // If the user specifies "tokenizeNLs=false" in tokenize.options, then this default will
           // be overridden.
           if (keepNewline) {
@@ -349,8 +341,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
                   Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
                           "false")));
-          os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
-                    properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
         return os.toString();
       }
@@ -520,7 +510,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             String [] elements = bounds.split(",");
             htmlElementsToDiscard = Generics.newHashSet(Arrays.asList(elements));
           }
-          String nlsb = properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
+          String nlsb = properties.getProperty("ssplit.newlineIsSentenceBreak", "two");
 
           return new WordsToSentencesAnnotator(false, boundaryTokenRegex, boundariesToDiscard, htmlElementsToDiscard,
                   nlsb, boundaryMultiTokenRegex, tokenRegexesToDiscard);
@@ -547,8 +537,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                     properties.getProperty("ssplit.boundariesToDiscard", ""));
             os.append("ssplit.htmlBoundariesToDiscard:" +
                     properties.getProperty("ssplit.htmlBoundariesToDiscard", ""));
-            os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
-                    properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+            os.append("ssplit.newlineIsSentenceBreak:" +
+                    properties.getProperty("ssplit.newlineIsSentenceBreak", "two"));
           }
         }
         return os.toString();
@@ -760,7 +750,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         // keep track of all relevant properties for this annotator here!
         String type = properties.getProperty("parse.type", "stanford");
         if(type.equalsIgnoreCase("stanford")){
-          return ParserAnnotator.signature("parse", properties);
+          return ParserAnnotator.signature("parser", properties);
         } else if(type.equalsIgnoreCase("charniak")) {
           return "parse.model:" +
                   properties.getProperty("parse.model", "") +
@@ -794,7 +784,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // add annotators loaded via reflection from classnames specified
     // in the properties
-    for (String property : inputProps.stringPropertyNames()) {
+    for (Object propertyKey : inputProps.stringPropertyNames()) {
+      if (!(propertyKey instanceof String))
+        continue; // should this be an Exception?
+      String property = (String) propertyKey;
       if (property.startsWith(CUSTOM_ANNOTATOR_PREFIX)) {
         final String customName =
           property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
@@ -844,20 +837,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
       }
     });
-
-    pool.register(STANFORD_SENTIMENT, new AnnotatorFactory(inputProps) {
-      private static final long serialVersionUID = 1L;
-      @Override
-      public Annotator create() {
-        return new SentimentAnnotator(STANFORD_SENTIMENT, properties);
-      }
-
-      @Override
-      public String signature() {
-        return "sentiment.model=" + inputProps.get("sentiment.model");
-      }
-    });
-
+    
     //
     // add more annotators here!
     //
@@ -884,21 +864,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     List<CoreLabel> words = annotation.get(CoreAnnotations.TokensAnnotation.class);
     if (words != null) {
       numWords += words.size();
-    }
-  }
-
-  /**
-   * Determines whether the parser annotator should default to
-   * producing binary trees.  Currently there is only one condition
-   * under which this is true: the sentiment annotator is used.
-   */
-  public static boolean usesBinaryTrees(Properties props) {
-    String annotators = props.getProperty("annotators");
-    Set<String> annoNames = Generics.newHashSet(Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+")));
-    if (annoNames.contains(STANFORD_SENTIMENT)) {
-      return true;
-    } else {
-      return false;
     }
   }
 
@@ -1270,9 +1235,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 if (inputSerializerClass != null) {
                   AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
                   InputStream is = new BufferedInputStream(new FileInputStream(file));
-                  Pair<Annotation, InputStream> pair = inputSerializer.read(is);
-                  pair.second.close();
-                  annotation = pair.first;
+                  annotation = inputSerializer.load(is);
                   IOUtils.closeIgnoringExceptions(is);
                 } else {
                   annotation = IOUtils.readObjectFromFile(file);
@@ -1335,7 +1298,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 if (outputSerializerClass != null) {
                   AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
                   OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-                  outputSerializer.write(annotation, fos).close();
+                  outputSerializer.save(annotation, fos);
+                  fos.close();
                 } else {
                   IOUtils.writeObjectToFile(annotation, finalOutputFilename);
                 }

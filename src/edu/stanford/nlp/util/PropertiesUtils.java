@@ -6,6 +6,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -81,7 +82,7 @@ public class PropertiesUtils {
   }
   
   /**
-   * Tired of Properties not behaving like {@code Map<String,String>}s?  This method will solve that problem for you.
+   * Tired of Properties not behaving like Map<String,String>s?  This method will solve that problem for you.
    */
   public static Map<String, String> asMap(Properties properties) {
     Map<String, String> map = Generics.newHashMap();
@@ -98,8 +99,7 @@ public class PropertiesUtils {
   /**
    * Checks to make sure that all properties specified in <code>properties</code>
    * are known to the program by checking that each simply overrides
-   * a default value.
-   *
+   * a default value
    * @param properties Current properties
    * @param defaults Default properties which lists all known keys
    */
@@ -137,18 +137,6 @@ public class PropertiesUtils {
       return defaultValue;
     } else {
       return (E) MetaClass.cast(value, type);
-    }
-  }
-  
-  /**
-   * Load an integer property.  If the key is not present, returns defaultValue.
-   */
-  public static String getString(Properties props, String key, String defaultValue) {
-    String value = props.getProperty(key);
-    if (value != null) {
-      return value;
-    } else {
-      return defaultValue;
     }
   }
   

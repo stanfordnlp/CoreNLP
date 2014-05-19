@@ -8,17 +8,13 @@ import java.util.Set;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.parser.common.NoSuchParseException;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.common.ParserGrammar;
-import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
+import edu.stanford.nlp.parser.lexparser.ParserConstraint;
+import edu.stanford.nlp.parser.lexparser.ParserQuery;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.Trees;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
@@ -46,7 +42,7 @@ public class ParserAnnotator implements Annotator {
 
   private final boolean VERBOSE;
   private final boolean BUILD_GRAPHS;
-  private final ParserGrammar parser;
+  private final LexicalizedParser parser;
 
   private final Function<Tree, Tree> treeMap;
 
@@ -63,8 +59,6 @@ public class ParserAnnotator implements Annotator {
 
   private final int nThreads;
 
-  private final boolean saveBinaryTrees;
-
   public static final String[] DEFAULT_FLAGS = { "-retainTmpSubcategories" };
 
   public ParserAnnotator(boolean verbose, int maxSent) {
@@ -78,11 +72,11 @@ public class ParserAnnotator implements Annotator {
     this(loadModel(parserLoc, verbose, flags), verbose, maxSent);
   }
 
-  public ParserAnnotator(ParserGrammar parser, boolean verbose, int maxSent) {
+  public ParserAnnotator(LexicalizedParser parser, boolean verbose, int maxSent) {
     this(parser, verbose, maxSent, null);
   }
 
-  public ParserAnnotator(ParserGrammar parser, boolean verbose, int maxSent, Function<Tree, Tree> treeMap) {
+  public ParserAnnotator(LexicalizedParser parser, boolean verbose, int maxSent, Function<Tree, Tree> treeMap) {
     VERBOSE = verbose;
     this.BUILD_GRAPHS = parser.getTLPParams().supportsBasicDependencies();
     this.parser = parser;
@@ -91,12 +85,11 @@ public class ParserAnnotator implements Annotator {
     this.maxParseTime = 0;
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
-      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
+      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), tlp.typedDependencyHeadFinder());
     } else {
       this.gsf = null;
     }
     this.nThreads = 1;
-    this.saveBinaryTrees = false;
   }
 
 
@@ -135,15 +128,12 @@ public class ParserAnnotator implements Annotator {
 
     if (this.BUILD_GRAPHS) {
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
-      // TODO: expose keeping punctuation as an option to the user?
-      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
+      this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), tlp.typedDependencyHeadFinder());
     } else {
       this.gsf = null;
     }
 
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
-    boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
-    this.saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
   }
 
   public static String signature(String annotatorName, Properties props) {
@@ -165,10 +155,6 @@ public class ParserAnnotator implements Annotator {
             props.getProperty(annotatorName + ".buildgraphs", "true"));
     os.append(annotatorName + ".nthreads:" + 
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
-    boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
-    boolean saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
-    os.append(annotatorName + ".binaryTrees:" + saveBinaryTrees);
-
     return os.toString();
   }
 
@@ -182,16 +168,11 @@ public class ParserAnnotator implements Annotator {
     }
   }
 
-  private static ParserGrammar loadModel(String parserLoc,
-                                         boolean verbose,
-                                         String[] flags) {
+  private static LexicalizedParser loadModel(String parserLoc,
+                                                    boolean verbose,
+                                                    String[] flags) {
     if (verbose) {
       System.err.println("Loading Parser Model [" + parserLoc + "] ...");
-      System.err.print("  Flags:");
-      for (String flag : flags) {
-        System.err.print("  " + flag);
-      }
-      System.err.println();
     }
     LexicalizedParser result = LexicalizedParser.loadModel(parserLoc, flags);
     // lp.setOptionFlags(new String[]{"-outputFormat", "penn,typedDependenciesCollapsed", "-retainTmpSubcategories"});
@@ -271,14 +252,6 @@ public class ParserAnnotator implements Annotator {
     }
     
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
-
-    if (saveBinaryTrees) {
-      TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(), 
-                                                  false, false, 0, false, false, 0.0, false, true, true);
-      Tree binarized = binarizer.transformTree(tree);
-      Trees.convertToCoreLabels(binarized);
-      sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);
-    }
   }
 
   private Tree doOneSentence(List<ParserConstraint> constraints, 
@@ -303,6 +276,25 @@ public class ParserAnnotator implements Annotator {
     return tree;
   }
 
+  @SuppressWarnings("unused")
+  private Tree doOneSentence(List<? extends CoreLabel> words) {
+    // TODO: might not need to create new tokens
+    List<CoreLabel> newWords = new ArrayList<CoreLabel>();
+    for (CoreLabel fl : words) {
+      CoreLabel ml = new CoreLabel();
+      ml.setWord(fl.word());
+      ml.setValue(fl.word());
+      newWords.add(ml);
+    }
+
+    if(maxSentenceLength <= 0 || newWords.size() < maxSentenceLength) {
+      return parser.apply(newWords);
+    } else {
+      return ParserAnnotatorUtils.xTree(newWords);
+    }
+  }
+
+
   @Override
   public Set<Requirement> requires() {
     return TOKENIZE_AND_SSPLIT;
@@ -310,10 +302,6 @@ public class ParserAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    if (this.saveBinaryTrees) {
-      return PARSE_TAG_BINARIZED_TREES;
-    } else {
-      return PARSE_AND_TAG;
-    }
+    return PARSE_AND_TAG;
   }
 }

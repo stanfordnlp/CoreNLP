@@ -52,8 +52,6 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     }
   };
 
-  //TODO(Mengqiu) Need to figure out what to do with dataDimension() in case of 
-  // mixed supervised+unsupervised data for SGD (AdaGrad)
   CRFLogConditionalObjectiveFunctionWithDropout(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal, double delta, double dropoutScale, int multiThreadGrad, boolean dropoutApprox, double unsupDropoutScale, int[][][][] unsupDropoutData) {
     super(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal, multiThreadGrad);
     this.delta = delta;

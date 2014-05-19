@@ -32,9 +32,7 @@ import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -149,7 +147,6 @@ public class LexicalizedParserITest extends TestCase {
     for (String word : words) {
       CoreLabel label = new CoreLabel();
       label.setWord(word);
-      label.setValue(word);
       sentence.add(label);
     }
     return sentence;

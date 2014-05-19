@@ -340,19 +340,6 @@ public class Counters {
   }
 
   /**
-   * For all keys (u,v) in arg1 and arg2, sets return[u,v] to be summation of both
-   * @param <T1>
-   * @param <T2>
-   *                
-   */                
-  public static <T1, T2> TwoDimensionalCounter<T1, T2> add(TwoDimensionalCounter<T1, T2> arg1, TwoDimensionalCounter<T1, T2> arg2) {
-    TwoDimensionalCounter<T1, T2> add = new TwoDimensionalCounter<T1, T2>();
-    Counters.addInPlace(add , arg1);
-    Counters.addInPlace(add , arg2);
-    return add;
-  }
-
-   /**
    * For all keys (u,v) in arg, sets target[u,v] to be target[u,v] + scale *
    * arg[u,v]
    *
@@ -652,34 +639,6 @@ public class Counters {
     }
     return removed;
   }
-  
-  /**
-   * Removes all entries with counts below the given threshold, returning the
-   * set of removed entries.
-   * 
-   * @param counter
-   *          The counter.
-   * @param countThreshold
-   *          The minimum count for an entry to be kept. Entries (strictly) less
-   *          than this threshold are discarded.
-   * @return The set of discarded entries.
-   */
-  public static <E1, E2> Set<Pair<E1, E2>> retainAbove(
-      TwoDimensionalCounter<E1, E2> counter, double countThreshold) {
-
-    Set<Pair<E1, E2>> removed = new HashSet<Pair<E1, E2>>();
-    for (Entry<E1, ClassicCounter<E2>> en : counter.entrySet()) {
-      for (Entry<E2, Double> en2 : en.getValue().entrySet()) {
-        if (counter.getCount(en.getKey(), en2.getKey()) < countThreshold) {
-          removed.add(new Pair<E1, E2>(en.getKey(), en2.getKey()));
-        }
-      }
-    }
-    for (Pair<E1, E2> key : removed) {
-      counter.remove(key.first(), key.second());
-    }
-    return removed;
-  }
 
   /**
    * Removes all entries with counts above the given threshold, returning the
@@ -770,19 +729,6 @@ public class Counters {
       counter.remove(key);
   }
 
-  /**
-   * Removes all entries with keys (first key set) in the given collection
-   *
-   * @param <E>
-   * @param counter
-   * @param removeKeysCollection
-   */
-  public static <E, F> void removeKeys(TwoDimensionalCounter<E, F> counter, Collection<E> removeKeysCollection) {
-
-    for (E key : removeKeysCollection)
-      counter.remove(key);
-  }
-  
   /**
    * Returns the set of keys whose counts are at or above the given threshold.
    * This set may have 0 elements but will not be null.
@@ -1096,22 +1042,6 @@ public class Counters {
   }
 
   /**
-   * A List of the keys in c, sorted by the given comparator, paired with
-   * counts.
-   *
-   * @return A List of the keys in c, sorted from highest count to lowest.
-   */
-  public static <E> List<Pair<E, Double>> toSortedListWithCounts(Counter<E> c, Comparator<Pair<E,Double>> comparator) {
-    List<Pair<E, Double>> l = new ArrayList<Pair<E, Double>>(c.size());
-    for (E e : c.keySet()) {
-      l.add(new Pair<E, Double>(e, c.getCount(e)));
-    }
-    // descending order
-    Collections.sort(l, comparator);
-    return l;
-  }
-
-  /**
    * Returns a {@link edu.stanford.nlp.util.PriorityQueue} whose elements are
    * the keys of Counter c, and the score of each key in c becomes its priority.
    *
@@ -1252,16 +1182,6 @@ public class Counters {
     }
     return dotProd;
   }
-  
-
-  public static <E> Counter<E> add(Counter<E> c1, Collection<E> c2) {
-    Counter<E> result = c1.getFactory().create();
-    addInPlace(result, c1);
-    for (E key : c2) {
-      result.incrementCount(key, 1);
-    }
-    return result;
-  }
 
   public static <E> Counter<E> add(Counter<E> c1, Counter<E> c2) {
     Counter<E> result = c1.getFactory().create();
@@ -1272,9 +1192,6 @@ public class Counters {
     return result;
   }
 
-  /**
-   * increments every key in the counter by value
-   */
   public static <E> Counter<E> add(Counter<E> c1, double value) {
     Counter<E> result = c1.getFactory().create();
     for (E key : c1.keySet()) {
@@ -1351,22 +1268,7 @@ public class Counters {
     }
     return result;
   }
-  
-  /**
-   * Returns c1 divided by c2. Safe - will not calculate scores for keys that are zero or that do not exist in c2
-   *
-   * @return c1 divided by c2.
-   */
-  public static <E> Counter<E> divisionNonNaN(Counter<E> c1, Counter<E> c2) {
-    Counter<E> result = c1.getFactory().create();
-    for (E key : Sets.union(c1.keySet(), c2.keySet())) {
-      if(c2.getCount(key) != 0)
-        result.setCount(key, c1.getCount(key) / c2.getCount(key));
-    }
-    return result;
-  }
 
-  
   /**
    * Calculates the entropy of the given counter (in bits). This method
    * internally uses normalized counts (so they sum to one), but the value
@@ -2286,8 +2188,6 @@ public class Counters {
     return result;
   }
 
-  static final Random RAND = new Random();
-
   /**
    * Does not assumes c is normalized.
    *
@@ -2303,7 +2203,6 @@ public class Counters {
     // } else {
     //   throw new RuntimeException("Results won't be stable since Counters keys are comparable.");
     // }
-    if (rand == null) rand = RAND;
     double r = rand.nextDouble() * c.totalCount();
     double total = 0.0;
 
@@ -2382,18 +2281,11 @@ public class Counters {
    * alternative implementations.
    */
   public static <E> boolean equals(Counter<E> o1, Counter<E> o2) {
-    return equals(o1, o2, 0.0);
-  }
-
-  /**
-   * Equality comparison between two counters, allowing for a tolerance fudge factor.
-   */
-  public static <E> boolean equals(Counter<E> o1, Counter<E> o2, double tolerance) {
     if (o1 == o2) {
       return true;
     }
 
-    if (Math.abs(o1.totalCount() - o2.totalCount()) > tolerance) {
+    if (o1.totalCount() != o2.totalCount()) {
       return false;
     }
 
@@ -2402,13 +2294,12 @@ public class Counters {
     }
 
     for (E key : o1.keySet()) {
-      if (Math.abs(o1.getCount(key) - o2.getCount(key)) > tolerance) {
+      if (o1.getCount(key) != o2.getCount(key)) {
         return false;
       }
     }
 
     return true;
-
   }
 
   /**
@@ -2881,25 +2772,6 @@ public class Counters {
   }
 
   /**
-   * Check if this counter is a uniform distribution.
-   * That is, it should sum to 1.0, and every value should be equal to every other value.
-   * @param distribution The distribution to check.
-   * @param tolerance The tolerance for floating point error, in both the equality and total count checks.
-   * @param <E> The type of the counter.
-   * @return True if this counter is the uniform distribution over its domain.
-   */
-  public static <E> boolean isUniformDistribution(Counter<E> distribution, double tolerance) {
-    double value = Double.NaN;
-    double totalCount = 0.0;
-    for (double val : distribution.values()) {
-      if (Double.isNaN(value)) { value = val; }
-      if (Math.abs(val - value) > tolerance) { return false; }
-      totalCount += val;
-    }
-    return Math.abs(totalCount - 1.0) < tolerance;
-  }
-
-  /**
    * Default comparator for breaking ties in argmin and argmax.
    * //TODO: What type should this be?
    * // Unused, so who cares?
@@ -3051,11 +2923,5 @@ public class Counters {
       fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
     }
     return fscores;
-  }
-  
-  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
-    for(E key: counter.keySet()){
-      counter.setCount(key, func.apply(counter.getCount(key)));
-    }
   }
 }

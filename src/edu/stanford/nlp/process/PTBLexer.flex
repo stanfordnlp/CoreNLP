@@ -156,6 +156,7 @@ import edu.stanford.nlp.util.StringUtils;
       } else if ("tokenizeNLs".equals(key)) {
         tokenizeNLs = val;
       } else if ("ptb3Escaping".equals(key)) {
+        americanize = val;
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
         normalizeCurrency = val;
@@ -168,6 +169,7 @@ import edu.stanford.nlp.util.StringUtils;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
+        escapeForwardSlashAsterisk = val;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
@@ -255,7 +257,7 @@ import edu.stanford.nlp.util.StringUtils;
   /* Flags begin with historical ptb3Escaping behavior */
   private boolean invertible;
   private boolean tokenizeNLs;
-  private boolean americanize = false;
+  private boolean americanize = true;
   private boolean normalizeSpace = true;
   private boolean normalizeAmpersandEntity = true;
   private boolean normalizeCurrency = true;
@@ -268,7 +270,7 @@ import edu.stanford.nlp.util.StringUtils;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
   private boolean ptb3Dashes = true;
-  private boolean escapeForwardSlashAsterisk = false;
+  private boolean escapeForwardSlashAsterisk = true;
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
 
@@ -573,7 +575,7 @@ DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\u
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
 LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
-FILENAME_EXT = bat|bmp|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip
+FILENAME_EXT = bat|bmp|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|xml|zip
 FILENAME = ({LETTER}|{DIGIT})+([.]({LETTER}|{DIGIT})+)*([.]{FILENAME_EXT})
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
@@ -583,8 +585,8 @@ THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
-APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
-HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
+HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO}\.))+
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
 /* \u00AD is soft hyphen */
@@ -597,12 +599,12 @@ SREDAUX = n{APOSETCETERA}t
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l
 APOWORD2 = y{APOS}
-FULLURL = https?:\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"<>|.!?(){},-]
+FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
-EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}.\u00A0]+)(&gt;|>)?
+EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)*([^ \t\n\f\r\"<>|().\u00A0]+)(&gt;|>)?
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
@@ -622,7 +624,7 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 /* Ma. or Me. isn't included as too many errors, and most sources use Mass. etc. */
 /* Fed. is tricky.  Usually sentence end, but not before "Governor" or "Natl. Mtg. Assn." */
 /* Make some states case sensitive, since they're also reasonably common words */
-ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
+ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
 /* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
 ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
@@ -642,8 +644,7 @@ ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq)\.
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
 /* ACRO Is a bad case -- can go either way! */
-ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
-ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
+ACRO = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
 ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
 ABCOMP2 = Invt|Elec|Natl|M[ft]g
@@ -651,7 +652,7 @@ ABCOMP2 = Invt|Elec|Natl|M[ft]g
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally. Ph is in there for Ph. D
  */
-ABBREV4 = {ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
+ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -693,7 +694,7 @@ TBSPEC2 = {APOS}[0-9][0-9]
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
-ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)
+ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)
 
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
@@ -705,14 +706,7 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
-c[+][+]                     { return getNext(); }
 cannot                  { if (splitAssimilations) {
-                            yypushback(3) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-'twas                   { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
                             return getNext();
@@ -776,7 +770,7 @@ gonna|gotta|lemme|gimme|wanna
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^A-Za-z]      { return handleQuotes(yytext(), false);
                         }
-{SREDAUX}/[^A-Za-z]     { return handleQuotes(yytext(), false);
+{SREDAUX}               { return handleQuotes(yytext(), false);
                         }
 {DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -823,7 +817,7 @@ gonna|gotta|lemme|gimme|wanna
                             return getNext();
                           }
                         }
-/* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. */
+/* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!) */
 {ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[E]arlier|[H]e|[H]er|[H]ere|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[Y]et|[Y]ou|{SGML}){SPACENL} {
                           // try to work around an apparent jflex bug where it
                           // gets a space at the token end by getting
@@ -837,15 +831,12 @@ gonna|gotta|lemme|gimme|wanna
                             }
                           }
                           String s;
-			  if (yylength() == 2) { // "I.", etc.
-			    yypushback(1); // return a period next time;
-			    s = yytext(); // return the word without the final period
-                          } else if (strictTreebank3 && ! "U.S.".equals(yytext())) {
+                          if (strictTreebank3 && ! "U.S.".equals(yytext())) {
                             yypushback(1); // return a period for next time
-                            s = yytext(); // return the word without the final period
+                            s = yytext();
                           } else {
-                            s = yytext(); // return the word WITH the final period
-                            yypushback(1); // (redpulication:) also return a period for next time
+                            s = yytext();
+                            yypushback(1); // return a period for next time
                           }
                           return getNext(s, yytext());
                         }
@@ -914,7 +905,7 @@ gonna|gotta|lemme|gimme|wanna
                         } }
 {LESSTHAN}              { return getNext("<", yytext()); }
 {GREATERTHAN}           { return getNext(">", yytext()); }
-{SMILEY}/[^A-Za-z0-9] { String txt = yytext();
+{SMILEY}/[^A-Za-z] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
@@ -1002,9 +993,7 @@ gonna|gotta|lemme|gimme|wanna
 '/[A-Za-z][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
                   return handleQuotes(yytext(), true);
                 }
-/* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
 {REDAUX}        { return handleQuotes(yytext(), false); }
-{SREDAUX}       { return handleQuotes(yytext(), false); }
 {QUOTES}        { return handleQuotes(yytext(), false); }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }

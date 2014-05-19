@@ -12,12 +12,12 @@ import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
 public class DeterministicCorefAnnotatorITest extends TestCase {
   private static AnnotationPipeline pipeline;
 
-  @Override
   public void setUp() throws Exception {
     synchronized(DeterministicCorefAnnotatorITest.class) {
       pipeline = new AnnotationPipeline();
@@ -32,6 +32,7 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
       corefProps.put(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM);
       corefProps.put(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE);
       corefProps.put(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE);
+      corefProps.put(Constants.NEUTRAL_PROP, DefaultPaths.DEFAULT_DCOREF_NEUTRAL);
       pipeline.addAnnotator(new DeterministicCorefAnnotator(corefProps));
     }
   }
@@ -131,5 +132,4 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
     DeterministicCorefAnnotatorITest itest = new DeterministicCorefAnnotatorITest();
     itest.testDeterministicCorefAnnotator();
   }
-
 }

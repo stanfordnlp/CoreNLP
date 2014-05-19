@@ -107,19 +107,19 @@ public class EvaluationMetric {
     StringBuilder sb = new StringBuilder();
     double pSent = (numTestInstances > 0.0) ? precisions / numTestInstances : 0.0;
     double pEvalB = (pnums2 > 0.0) ? precisions2 / pnums2 : 0.0;
-    sb.append(String.format("P: %.2f (sent ave: %.2f) (evalb: %.2f)%n", lastP*100.0, pSent*100.0, pEvalB*100.0));
+    sb.append(String.format("P: %.2f (sent ave: %.2f) (evalb: %.2f)\n", lastP*100.0, pSent*100.0, pEvalB*100.0));
 
     double rSent = (numTestInstances > 0.0) ? recalls / numTestInstances : 0.0;
     double rEvalB = (rnums2 > 0.0) ? recalls2 / rnums2 : 0.0;
-    sb.append(String.format("R: %.2f (sent ave: %.2f) (evalb: %.2f)%n", lastR*100.0, rSent*100.0, rEvalB*100.0));
+    sb.append(String.format("R: %.2f (sent ave: %.2f) (evalb: %.2f)\n", lastR*100.0, rSent*100.0, rEvalB*100.0));
 
     double f1Sent = (numTestInstances > 0.0) ? f1s / numTestInstances : 0.0;
     double f1EvalB = (pEvalB > 0.0 && rEvalB > 0.0) ? 2.0 / ((1.0 / pEvalB) + (1.0 / rEvalB)) : 0.0;
-    sb.append(String.format("F1: %.2f (sent ave: %.2f) (evalb: %.2f)%n", lastF1*100.0, f1Sent*100.0, f1EvalB*100.0));
+    sb.append(String.format("F1: %.2f (sent ave: %.2f) (evalb: %.2f)\n", lastF1*100.0, f1Sent*100.0, f1EvalB*100.0));
 
-    sb.append(String.format("Num:\t%.2f (test instances)%n", numTestInstances));
-    sb.append(String.format("Rel:\t%.0f (relevant examples)%n", rnums2));
-    sb.append(String.format("Exact:\t%.2f (test instances)%n", exact));
+    sb.append(String.format("Num:\t%.2f (test instances)\n", numTestInstances));
+    sb.append(String.format("Rel:\t%.0f (relevant examples)\n", rnums2));
+    sb.append(String.format("Exact:\t%.2f (test instances)\n", exact));
 
     return sb.toString();
   }

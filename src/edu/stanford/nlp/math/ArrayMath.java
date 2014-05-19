@@ -280,7 +280,7 @@ public class ArrayMath {
 
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
+      throw new RuntimeException();
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
@@ -383,22 +383,6 @@ public class ArrayMath {
   /**
    * Assumes that both arrays have same length.
    */
-  public static double dotProduct(double[] a, double[] b) {
-    if (a.length != b.length) {
-      throw new RuntimeException("Can't calculate dot product of multiple different lengths: a.length=" + a.length + " b.length=" + b.length);
-    }
-    double result = 0;
-    for (int i = 0; i < a.length; i++) {
-      result += a[i] * b[i];
-    }
-    return result;
-  }
-
-
-
-  /**
-   * Assumes that both arrays have same length.
-   */
   public static double[] pairwiseMultiply(double[] a, double[] b) {
     if (a.length != b.length) {
       throw new RuntimeException("Can't pairwise multiple different lengths: a.length=" + a.length + " b.length=" + b.length);
@@ -452,7 +436,7 @@ public class ArrayMath {
 
   /**
    * Divide the first array by the second elementwise,
-   * and store results in place. Assume arrays have
+   * and store results in place. Assume arrays have 
    * the same length
    */
   public static void pairwiseDivideInPlace(double[] a, double[] b) {
@@ -1391,11 +1375,6 @@ public class ArrayMath {
     return sum(a) / a.length;
   }
 
-  // Thang Mar14
-  public static int mean(int[] a) {
-    return sum(a) / a.length;
-  }
-  
   public static double median(double[] a) {
     double[] b = new double[a.length];
     System.arraycopy(a, 0, b, 0, b.length);
@@ -1482,15 +1461,8 @@ public class ArrayMath {
     shuffle(a, rand);
   }
 
-  /* Shuffle the integers in an array using a source of randomness.
-   * Uses the Fisher-Yates shuffle. Makes all orderings equally likely, iff
-   * the randomizer is good.
-   *
-   * @param a The array to shuffle
-   * @param rand The source of randomness
-   */
   public static void shuffle(int[] a, Random rand) {
-    for (int i = a.length - 1; i > 0; i--) {
+    for (int i=a.length-1; i>=1; i--) {
       int j = rand.nextInt(i+1); // a random index from 0 to i inclusive, may shuffle with itself
       int tmp = a[i];
       a[i] = a[j];

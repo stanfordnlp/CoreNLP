@@ -56,11 +56,8 @@ public class ParserAnnotatorUtils {
 
       Integer sentenceIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
       int index = (sentenceIndex == null) ? 0 : sentenceIndex;
-      
+
       // generate the dependency graph
-      // unfortunately, it is necessary to make the
-      // GrammaticalStructure three times, as the dependency
-      // conversion changes the given data structure
       SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
       SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
       SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), docID, index);

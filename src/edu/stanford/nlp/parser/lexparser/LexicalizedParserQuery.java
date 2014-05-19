@@ -39,14 +39,10 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.KBestViterbiParser;
-import edu.stanford.nlp.parser.common.NoSuchParseException;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.DeltaIndex;
@@ -164,7 +160,6 @@ public class LexicalizedParserQuery implements ParserQuery {
     subcategoryStripper = op.tlpParams.subcategoryStripper();
   }
 
-  @Override
   public void setConstraints(List<ParserConstraint> constraints) {
     if (pparser != null) {
       pparser.setConstraints(constraints);
@@ -206,32 +201,13 @@ public class LexicalizedParserQuery implements ParserQuery {
       throw new UnsupportedOperationException("Can't parse a zero-length sentence!");
     }
 
-    List<HasWord> sentenceB;
-    if (op.wordFunction != null) {
-      sentenceB = Generics.newArrayList();
-      for (HasWord word : originalSentence) {
-        if (word instanceof Label) {
-          Label label = (Label) word;
-          Label newLabel = label.labelFactory().newLabel(label);
-          if (newLabel instanceof HasWord) {
-            sentenceB.add((HasWord) newLabel);
-          } else {
-            throw new AssertionError("This should have been a HasWord");
-          }
-        } else if (word instanceof HasTag) {
-          TaggedWord tw = new TaggedWord(word.word(), ((HasTag) word).tag());
-          sentenceB.add(tw);
-        } else {
-          sentenceB.add(new Word(word.word()));
-        }
-      }
-      for (HasWord word : sentenceB) {
+    for (HasWord word : sentence) {
+      if (op.wordFunction != null) {
         word.setWord(op.wordFunction.apply(word.word()));
       }
-    } else {
-      sentenceB = new ArrayList<HasWord>(sentence);
     }
 
+    List<HasWord> sentenceB = new ArrayList<HasWord>(sentence);
     if (op.testOptions.addMissingFinalPunctuation) {
       addSentenceFinalPunctIfNeeded(sentenceB, length);
     }
@@ -260,6 +236,7 @@ public class LexicalizedParserQuery implements ParserQuery {
 
     if (op.doPCFG) {
       if (!pparser.parse(sentenceB)) {
+        restoreOriginalWords(sentence);
         return parseSucceeded;
       }
       if (op.testOptions.verbose) {
@@ -273,6 +250,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
     if (op.doDep && ! op.testOptions.useFastFactored) {
       if ( ! dparser.parse(sentenceB)) {
+        restoreOriginalWords(sentence);
         return parseSucceeded;
       }
       // cdm nov 2006: should move these printing bits to the main printing section,
@@ -287,14 +265,28 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
     if (op.doPCFG && op.doDep) {
       if ( ! bparser.parse(sentenceB)) {
+        restoreOriginalWords(sentence);
         return parseSucceeded;
       } else {
         parseSucceeded = true;
       }
     }
+    restoreOriginalWords(sentence);
     return true;
   }
 
+
+  private <T extends HasWord> void restoreOriginalWords(List<T> sentence) {
+    if (originalSentence == null) {
+      return;
+    }
+    if (sentence.size() != originalSentence.size()) {
+      throw new IllegalStateException("originalWords and sentence of different sizes");
+    }
+    for (int i = 0; i < sentence.size(); i++) {
+      sentence.set(i, (T) originalSentence.get(i));
+    }
+  }
 
   @Override
   public void restoreOriginalWords(Tree tree) {
@@ -304,7 +296,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     List<Tree> leaves = tree.getLeaves();
     if (leaves.size() != originalSentence.size()) {
       throw new IllegalStateException("originalWords and sentence of different sizes: " + originalSentence.size() + " vs. " + leaves.size() +
-                                      "\n Orig: " + Sentence.listToString(originalSentence) +
+                                      "\n Orig: " + Sentence.listToString(originalSentence) + 
                                       "\n Pars: " + Sentence.listToString(leaves));
     }
     Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();
@@ -472,7 +464,6 @@ public class LexicalizedParserQuery implements ParserQuery {
     return t;
   }
 
-  @Override
   public double getPCFGScore() {
     return pparser.getBestScore();
   }
@@ -496,7 +487,6 @@ public class LexicalizedParserQuery implements ParserQuery {
     return getBestDependencyParse(false);
   }
 
-  @Override
   public Tree getBestDependencyParse(boolean debinarize) {
     if (dparser == null || parseSkipped || parseUnparsable) {
       return null;
@@ -584,7 +574,6 @@ public class LexicalizedParserQuery implements ParserQuery {
    * Implements the same parsing with fallback that parse() does, but
    * also outputs status messages for failed parses to pwErr.
    */
-  @Override
   public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
     boolean result = parse(sentence);
     if (result) {
@@ -648,7 +637,6 @@ public class LexicalizedParserQuery implements ParserQuery {
    *  in a parser language pack) to sentences that don't have one within
    *  the last 3 words (to allow for close parentheses, etc.).  It checks
    *  tags for punctuation, if available, otherwise words.
-   *
    *  @param sentence The sentence to check
    *  @param length The length of the sentence (just to avoid recomputation)
    */
@@ -657,20 +645,25 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (start < 0) start = 0;
     TreebankLanguagePack tlp = op.tlpParams.treebankLanguagePack();
     for (int i = length - 1; i >= start; i--) {
-      HasWord item = sentence.get(i);
-      // An object (e.g., CoreLabel) can implement HasTag but not actually store
+      Object item = sentence.get(i);
+      // An object (e.g., MapLabel) can implement HasTag but not actually store
       // a tag so we need to check that there is something there for this case.
       // If there is, use only it, since word tokens can be ambiguous.
       String tag = null;
       if (item instanceof HasTag) {
         tag = ((HasTag) item).tag();
       }
-      if (tag != null && ! tag.isEmpty()) {
+      if (tag != null && ! "".equals(tag)) {
         if (tlp.isSentenceFinalPunctuationTag(tag)) {
           return;
         }
+      } else if (item instanceof HasWord) {
+        String str = ((HasWord) item).word();
+        if (tlp.isPunctuationWord(str)) {
+          return;
+        }
       } else {
-        String str = item.word();
+        String str = item.toString();
         if (tlp.isPunctuationWord(str)) {
           return;
         }

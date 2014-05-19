@@ -1,5 +1,5 @@
 // Stanford Parser -- a probabilistic lexicalized NL CFG parser
-// Copyright (c) 2002 - 2014 The Board of Trustees of
+// Copyright (c) 2002 - 2011 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -32,12 +32,9 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.parser.common.ArgUtils;
-import edu.stanford.nlp.parser.common.ParserGrammar;
-import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.metrics.Eval;
-import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Function;
@@ -88,7 +85,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable, ParserGrammar {
+public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -97,16 +94,12 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
   public Index<String> stateIndex, wordIndex, tagIndex;
 
   private Options op;
-
-  @Override
   public Options getOp() { return op; }
 
   public Reranker reranker = null;
 
-  @Override
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
 
-  @Override
   public TreebankLanguagePack treebankLanguagePack() { return getTLPParams().treebankLanguagePack(); }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
@@ -149,13 +142,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
   public static LexicalizedParser loadModel(String parserFileOrUrl,
                                             String ... extraFlags) {
     return loadModel(parserFileOrUrl, new Options(), extraFlags);
-  }
-
-  public static LexicalizedParser loadModel(String parserFileOrUrl,
-                                            List<String> extraFlags) {
-    String[] flags = new String[extraFlags.size()];
-    extraFlags.toArray(flags);
-    return loadModel(parserFileOrUrl, flags);
   }
 
   /**
@@ -399,13 +385,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     }
   }
 
-
-  public List<ParserQueryEval> getParserQueryEvals() {
-    return Collections.emptyList();
-  }
-
-
-  @Override
   public ParserQuery parserQuery() {
     if (reranker == null) {
       return new LexicalizedParserQuery(this);
@@ -662,6 +641,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
 
   public static TreeAnnotatorAndBinarizer buildTrainBinarizer(Options op) {
     TreebankLangParserParams tlpParams = op.tlpParams;
+    TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
     if (!op.trainOptions.leftToRight) {
       return new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), !op.trainOptions.predictSplits, op);
     } else {
@@ -1243,7 +1223,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       if (args[argIndex].equalsIgnoreCase("-train") ||
           args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         train = true;
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-train");
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-test");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         treebankPath = treebankDescription.first();
         trainFilter = treebankDescription.second();
@@ -1361,6 +1341,38 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       }
     } // end while loop through arguments
 
+    // set up tokenizerFactory with options if provided
+    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
+      try {
+        if (tokenizerFactoryClass != null) {
+          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
+          Method factoryMethod;
+          if (tokenizerOptions != null) {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
+          } else {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
+          }
+        } else {
+          // have options but no tokenizer factory; default to PTB
+          tokenizerFactory = PTBTokenizer.PTBTokenizerFactory.newWordTokenizerFactory(tokenizerOptions);
+        }
+      } catch (IllegalAccessException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      }
+    }
+
     // all other arguments are order dependent and
     // are processed in order below
 
@@ -1433,41 +1445,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
         throw e;
       }
     }
-
-    // set up tokenizerFactory with options if provided
-    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
-      try {
-        if (tokenizerFactoryClass != null) {
-          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
-          Method factoryMethod;
-          if (tokenizerOptions != null) {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
-          } else {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
-          }
-        } else {
-          // have options but no tokenizer factory.  use the parser
-          // langpack's factory and set its options
-          tokenizerFactory = lp.op.langpack().getTokenizerFactory();
-          tokenizerFactory.setOptions(tokenizerOptions);
-        }
-      } catch (IllegalAccessException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (NoSuchMethodException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (ClassNotFoundException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      }
-    }
-
 
     // the following has to go after reading parser to make sure
     // op and tlpParams are the same for train and test

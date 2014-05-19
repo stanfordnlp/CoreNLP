@@ -165,16 +165,6 @@ public class Timex implements Serializable {
     this.xml = (val == null ? "<TIMEX3/>" : String.format("<TIMEX3 VAL=\"%s\" TYPE=\"%s\"/>", this.val, this.type));
   }
 
-  public Timex(String type, String val, String altVal, String tid, String text, int beginPoint, int endPoint) {
-    this.type = type;
-    this.val = val;
-    this.altVal = altVal;
-    this.tid = tid;
-    this.text = text;
-    this.beginPoint = beginPoint;
-    this.endPoint = endPoint;
-  }
-
   private void init(Element element) {
     init(XMLUtils.nodeToString(element, false), element);
   }
@@ -206,9 +196,6 @@ public class Timex implements Serializable {
     String endPoint = XMLUtils.getAttribute(element, "endPoint");
     this.endPoint = (endPoint == null || endPoint.length() == 0)? -1 : Integer.parseInt(endPoint.substring(1));
   }
-
-  public int beginPoint() { return beginPoint; }
-  public int endPoint() { return endPoint; }
 
   public String toString() {
     return this.xml;

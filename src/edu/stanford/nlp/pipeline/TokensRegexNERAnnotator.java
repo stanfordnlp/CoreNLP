@@ -80,12 +80,12 @@ import java.util.regex.Pattern;
  * <p>
  *   Configuration:
  * <table>
- *   <tr><th>Field</th><th>Description</th><th>Default</th></tr>
+ *   <tr><th>Field</th><th>Description</th></tr>
  *   <tr><td><code>mapping</code></td><td>Comma separated list of mapping files to use </td>
  *      <td><code>edu/stanford/nlp/models/regexner/type_map_clean</code></td>
  *   </tr>
- *   <tr><td><code>backgroundSymbol</code></td><td>Comma separated list of NER labels to always replace</td>
- *      <td><code>O,MISC</code></td></tr>
+ *   <tr><td><code>backgroundSymbol</code></td><td><code></code></td>
+ *      <td><code>O,MISC</code></td><td>Comma separated list of NER labels to always replace</td></tr>
  *   <tr><td><code>posmatchtype</code></td>
  *     <td>How should <code>validpospattern</code> be used to match the POS of the tokens.
  *         <code>MATCH_ALL_TOKENS</code> - All tokens has to match.<br/>
@@ -102,10 +102,10 @@ import java.util.regex.Pattern;
  *          For these types, only if the matched expression has NER type matching the
  *          specified overwriteableType for the regex will the NER type be overwritten.</td>
  *      <td><code></code></td></tr>
- *   <tr><td><code>ignoreCase</code></td><td>If true, case is ignored</td></td>
- *      <td><code>false</code></td></tr>
- *   <tr><td><code>verbose</code></td><td>If true, turns on extra debugging messages.</td>
- *      <td><code>false</code></td></tr>
+ *   <tr><td><code>ignoreCase</code></td><td><code>Boolean</code></td>
+ *      <td><code>false</code></td><td>If true, case is ignored</td></tr>
+ *   <tr><td><code>verbose</code></td><td><<code>Boolean</code></td>
+ *      <td><code>false</code></td><td>If true, turns on extra debugging messages.</td></tr>
  * </table>
  * </p>
  *
@@ -149,10 +149,6 @@ public class TokensRegexNERAnnotator implements Annotator {
           new PropertiesUtils.Property("verbose", "false", ""),
   };
 
-  /** Construct a new TokensRegexAnnotator.
-   *
-   *  @param mapping A comma-separated list of files, URLs, or classpath resources to load mappings from
-   */
   public TokensRegexNERAnnotator(String mapping) {
     this(mapping, false);
   }
