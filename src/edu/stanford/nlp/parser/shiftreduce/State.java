@@ -44,7 +44,7 @@ public class State {
     this.sentence = sentence;
     this.tokenPosition = tokenPosition;
     this.score = score;
-    this.finished = true;
+    this.finished = finished;
   }
 
   /**
