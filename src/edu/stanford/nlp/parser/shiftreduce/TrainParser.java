@@ -67,6 +67,9 @@ public class TrainParser {
       }
     }
 
+    String[] newArgs = new String[remainingArgs.size()];
+    newArgs = remainingArgs.toArray(newArgs);
+
     if (trainTreebankPath == null && serializedPath == null) {
       throw new IllegalArgumentException("Must specify a treebank to train from with -trainTreebank");
     }
@@ -76,9 +79,8 @@ public class TrainParser {
     if (trainTreebankPath != null) {
       // TODO: since Options and buildTrainTransformer are used in so
       // many different places, it would make sense to factor that out
-      String[] newArgs = new String[remainingArgs.size()];
-      newArgs = remainingArgs.toArray(newArgs);
       ShiftReduceOptions op = new ShiftReduceOptions();
+      op.setOptions("-forceTags");
       if (tlppClass != null) {
         op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
       }
@@ -177,6 +179,8 @@ public class TrainParser {
       } catch (ClassNotFoundException e) {
         throw new RuntimeIOException(e);
       }
+      parser.op.setOptions("-forceTags");
+      parser.op.setOptions(newArgs);
     }
 
     //parser.outputStats();
@@ -186,8 +190,6 @@ public class TrainParser {
       Treebank testTreebank = parser.op.tlpParams.memoryTreebank();
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       System.err.println("Loaded " + testTreebank.size() + " trees");
-
-      parser.op.setOptions("-forceTags");
 
       EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
       evaluator.testOnTreebank(testTreebank);
