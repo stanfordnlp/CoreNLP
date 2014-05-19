@@ -768,8 +768,8 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-stalledIterationLimit")) {
       trainOptions.stalledIterationLimit = Integer.parseInt(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-dvBatchSize")) {
-      trainOptions.dvBatchSize = Integer.parseInt(args[i + 1]);
+    } else if (args[i].equalsIgnoreCase("-dvBatchSize") || args[i].equalsIgnoreCase("-batchSize")) {
+      trainOptions.batchSize = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-qnIterationsPerBatch")) {
       trainOptions.qnIterationsPerBatch = Integer.parseInt(args[i + 1]);
