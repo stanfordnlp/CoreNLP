@@ -95,6 +95,40 @@ public class TreeShapedStack<T> {
     }
   }
 
+  @Override
+  public int hashCode() {
+    int hash = size();
+    if (size() > 0 && peek() != null) {
+      hash ^= peek().hashCode();
+    }
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) {
+      return true;
+    }
+    if (!(o instanceof TreeShapedStack)) {
+      return false;
+    }
+    TreeShapedStack<?> other = (TreeShapedStack<?>) o;
+    TreeShapedStack<T> current = this;
+    if (other.size() != this.size()) {
+      return false;
+    }
+    for (int i = 0; i < size(); ++i) {
+      T currentObject = current.peek();
+      Object otherObject = other.peek();
+      if (!(currentObject == otherObject || (currentObject != null && currentObject.equals(otherObject)))) {
+        return false;
+      }
+      other = other.pop();
+      current = current.pop();
+    }
+    return true;
+  }
+
   final T data;
   final int size;
   final TreeShapedStack<T> previous;
