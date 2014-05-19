@@ -197,5 +197,6 @@ public class BasicFeatureFactory implements FeatureFactory {
     return features;
   }
 
+  private static final long serialVersionUID = 1;  
 }
 
