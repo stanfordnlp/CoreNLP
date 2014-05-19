@@ -123,7 +123,7 @@ public class TrainParser {
           for (Transition transition : transitions) {
             int transitionNum = transitionIndex.indexOf(transition);
             Set<String> features = featureFactory.featurize(state);
-            int predictedNum = parser.findHighestScoringTransition(state, features, false);
+            int predictedNum = parser.findHighestScoringTransition(state, features, false).object();
             Transition predicted = transitionIndex.get(predictedNum);
             if (transitionNum == predictedNum) {
               numCorrect++;
