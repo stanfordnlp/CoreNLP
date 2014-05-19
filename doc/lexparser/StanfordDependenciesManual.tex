@@ -112,6 +112,7 @@ An adjectival complement of a verb is an adjectival phrase which functions as th
 An adverbial clause modifier of a VP or S is a clause modifying the
 verb (temporal clause, consequence, conditional clause, purpose
 clause, etc.).
+% should a purpose clause now really be regarded as a vmod = nfmod
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \> ``The accident happened as the night was falling" \> \> \emph{advcl}(happened, falling)\\
@@ -223,6 +224,20 @@ A clausal complement of a verb or adjective is a dependent clause with an intern
 \hspace{1cm} \> ``I am certain that he did it" \> \>  \emph{ccomp}(certain, did)\\
 \hspace{1cm} \> ``I admire the fact that you are honest'' \>\> \emph{ccomp}(fact, honest)\\
 \end{tabbing}
+
+%% todo: put in a for-to infinitive example
+%% Would it be best for me for my kids to finish college?
+%1       Would   _       MD      MD      _       4       aux _       _
+%2       it      _       PRP     PRP     _       4       nsubj 4       expl
+%3       be      _       VB      VB      _       4       cop _       _
+%4       best    _       JJS     JJS     _       0       root _       _
+%5       for     _       IN      IN      _       8       mark 4       prep
+%6       me      _       PRP     PRP     _       8       nsubj 5       pobj
+%7       to      _       TO      TO      _       8       aux _       _
+%8       finish  _       VB      VB      _       4       advcl 4       xcomp
+%9       college _       NN      NN      _       8       dobj _       _
+%10      ?       _       .       .       _       4       punct _       _
+
 
 \noindent\textbf{\emph{conj}: conjunct}\\
 A conjunct is the relation between two elements connected by a coordinating conjunction, such as ``and", ``or", etc.  We treat conjunctions asymmetrically: The head of the relation is the first conjunct and other conjunctions depend on it via the \emph{conj} relation.
@@ -575,11 +590,22 @@ or full finite relative clauses.
 
 
 \noindent\textbf{\emph{xcomp}: open clausal complement}\\
-An open clausal complement (\emph{xcomp}) of a VP or an ADJP is a clausal complement without its own subject, whose reference is determined by an external subject.  These complements are always non-finite.  The name \emph{xcomp} is borrowed from Lexical-Functional Grammar.
+An open clausal complement (\emph{xcomp}) of a verb or an adjective is
+a predicative or clausal complement without its own subject. The
+reference of the subject is necessarily determined by an argument
+external to the xcomp (normally by the object of the next higher
+clause, if there is one, or else by the subject of the next higher clause.  
+These complements are always non-finite, and they are complements
+(arguments of the higher verb or adjective) rather than
+adjuncts/modifiers, such as a purpose clause.
+The name \emph{xcomp} is borrowed from Lexical-Functional Grammar.
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``He says that you like to swim" \> \> \emph{xcomp}(like, swim)\\
-\hspace{1cm} \> ``I am ready to leave" \> \>  \emph{xcomp}(ready, leave)\\
+\>  ``He says that you like to swim'' \> \> \emph{xcomp}(like, swim)\\
+\hspace{1cm} \> ``I am ready to leave'' \> \>  \emph{xcomp}(ready, leave)\\
+\> ``Sue asked George to respond to her offer'' \> \> \emph{xcomp}(ask, respond) \\
+\> ``I consider him a fool'' \> \> \emph{xcomp}(consider, fool) \\
+\> ``I consider him honest'' \> \> \emph{xcomp}(consider, honest) \\
 \end{tabbing}
 
 \noindent\textbf{\emph{xsubj}: controlling subject}\\
