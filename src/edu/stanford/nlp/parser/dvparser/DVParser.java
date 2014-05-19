@@ -304,11 +304,11 @@ public class DVParser {
     this.parser = parser;
     this.op = parser.getOp();
 
-    if (op.trainOptions.dvSeed == 0) {
-      op.trainOptions.dvSeed = (new Random()).nextLong();
-      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.dvSeed);
+    if (op.trainOptions.randomSeed == 0) {
+      op.trainOptions.randomSeed = (new Random()).nextLong();
+      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.randomSeed);
     } else {
-      System.err.println("Random seed set to " + op.trainOptions.dvSeed);
+      System.err.println("Random seed set to " + op.trainOptions.randomSeed);
     }
 
     System.err.println("Word vector file: " + op.lexOptions.wordVectorFile);
