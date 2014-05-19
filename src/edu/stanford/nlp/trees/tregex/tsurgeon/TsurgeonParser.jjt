@@ -163,7 +163,7 @@ TsurgeonPattern Operation() :
 | LOOKAHEAD(3)
   operator = <INSERT> tree = TreeRoot(false) loc = Location()
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> newLabel = <IDENTIFIER> nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
+| operator = <CREATE_SUBTREE> (( newLabel = <IDENTIFIER> ) | ( newLabel = <TREE_NODE_TERMINAL_LABEL> )) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
     { if (nodeSelections.size() == 1) {
         return new CreateSubtreeNode(nodeSelections.get(0), newLabel.image);
       } else if (nodeSelections.size() == 2) {

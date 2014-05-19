@@ -274,7 +274,7 @@ TsurgeonPattern Operation() :
     }
 /*@egen*/
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> newLabel = <IDENTIFIER> nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())/*@bgen(jjtree)*/
+| operator = <CREATE_SUBTREE> (( newLabel = <IDENTIFIER> ) | ( newLabel = <TREE_NODE_TERMINAL_LABEL> )) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
