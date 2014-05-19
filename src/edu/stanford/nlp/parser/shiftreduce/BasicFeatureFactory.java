@@ -51,6 +51,64 @@ public class BasicFeatureFactory implements FeatureFactory {
     return separators.peek();
   }
 
+  public static CoreLabel getRecentDependent(TreeShapedStack<Tree> stack, Transition transition, int nodeNum) {
+    if (stack.size() <= nodeNum) {
+      return null;
+    }
+
+    for (int i = 0; i < nodeNum; ++i) {
+      stack = stack.pop();
+    }
+
+    Tree node = stack.peek();
+    if (node == null) {
+      return null;
+    }
+    if (!(node.label() instanceof CoreLabel)) {
+      throw new IllegalArgumentException("Can only featurize CoreLabel trees");
+    }
+    Tree head = ((CoreLabel) node.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class);
+
+    switch (transition) {
+    case LEFT: {
+      while (true) {
+        if (node.children().length == 0) {
+          return null;
+        }
+        Tree child = node.children()[0];
+        if (!(child.label() instanceof CoreLabel)) {
+          throw new IllegalArgumentException("Can only featurize CoreLabel trees");
+        }
+        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class) != head) {
+          return (CoreLabel) child.label();
+        }
+        node = child;
+      }
+    }
+    case RIGHT: {
+      while (true) {
+        if (node.children().length == 0) {
+          return null;
+        }
+        if (node.children().length == 1) {
+          node = node.children()[0];
+          continue;
+        }
+        Tree child = node.children()[1];
+        if (!(child.label() instanceof CoreLabel)) {
+          throw new IllegalArgumentException("Can only featurize CoreLabel trees");
+        }
+        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class) != head) {
+          return (CoreLabel) child.label();
+        }
+        node = child;
+      }
+    }
+    default:
+      throw new IllegalArgumentException("Can only get left or right heads");
+    }
+  }
+
   public static CoreLabel getStackLabel(TreeShapedStack<Tree> stack, int nodeNum, Transition ... transitions) {
     if (stack.size() <= nodeNum) {
       return null;
@@ -128,6 +186,11 @@ public class BasicFeatureFactory implements FeatureFactory {
 
     // TODO: check to see if this is slow because of the string concat
     features.add(wtFeature + tag + "-" + word);
+  }
+
+  public static void addUnaryFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature) {
+    String value = getFeatureFromCoreLabel(label, feature);
+    features.add(featureType + value);
   }
 
   public static void addBinaryFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2) {
@@ -292,6 +355,20 @@ public class BasicFeatureFactory implements FeatureFactory {
     addUnaryQueueFeatures(features, q3Label, "Q3WT-");
     addUnaryQueueFeatures(features, qP1Label, "QP1WT-");
     addUnaryQueueFeatures(features, qP2Label, "QP2WT-");
+
+    // Figure out which are the most recent left and right node
+    // attachments to the heads of the given nodes.  It seems like it
+    // should be more efficient to keep track of this in the state, as
+    // that would have a constant cost per transformation, but it is
+    // actually faster to find it by walking down the tree each time
+    CoreLabel recentL0Label = getRecentDependent(stack, Transition.LEFT, 0);
+    CoreLabel recentR0Label = getRecentDependent(stack, Transition.RIGHT, 0);
+    CoreLabel recentL1Label = getRecentDependent(stack, Transition.LEFT, 1);
+    CoreLabel recentR1Label = getRecentDependent(stack, Transition.RIGHT, 1);
+    addUnaryFeature(features, "recL0-", recentL0Label, FeatureComponent.HEADWORD);
+    addUnaryFeature(features, "recR0-", recentR0Label, FeatureComponent.HEADWORD);
+    addUnaryFeature(features, "recL1-", recentL1Label, FeatureComponent.HEADWORD);
+    addUnaryFeature(features, "recR1-", recentR1Label, FeatureComponent.HEADWORD);
 
     addBinaryFeature(features, "S0WS1W-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD);
     addBinaryFeature(features, "S0WS1C-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE);
