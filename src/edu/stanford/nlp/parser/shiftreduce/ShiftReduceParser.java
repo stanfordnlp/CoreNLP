@@ -19,7 +19,9 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
@@ -29,6 +31,7 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.parser.metrics.Eval;
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -333,6 +336,21 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return transitionLists;
   }
 
+  // TODO: factor out the retagging?
+  public static void redoTags(List<Tree> trees, MaxentTagger tagger) {
+    for (Tree tree : trees) {
+      List<Word> words = tree.yieldWords();
+      List<TaggedWord> tagged = tagger.apply(words);
+      List<Label> tags = tree.preTerminalYield();
+      if (tags.size() != tagged.size()) {
+        throw new AssertionError("Tags are not the same size");
+      }
+      for (int i = 0; i < tags.size(); ++i) {
+        tags.get(i).setValue(tagged.get(i).tag());
+      }
+    }
+  }
+
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
@@ -396,6 +414,11 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
       Index<Transition> transitionIndex = parser.transitionIndex;
 
+      MaxentTagger tagger = null;
+      if (op.testOptions.preTag) {
+        tagger = new MaxentTagger(op.testOptions.taggerSerializedFile);
+        redoTags(binarizedTrees, tagger);
+      }
       List<List<Transition>> transitionLists = parser.createTransitionSequences(binarizedTrees);
       for (List<Transition> transitions : transitionLists) {
         transitionIndex.addAll(transitions);
@@ -478,7 +501,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
         double labelF1 = 0.0;
         if (devTreebank != null) {
-          EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
+          EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser, tagger);
           evaluator.testOnTreebank(devTreebank);
           labelF1 = evaluator.getLBScore();
           System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
