@@ -30,7 +30,7 @@ public class ShiftReduceOptions extends Options {
   public enum TrainingMethod {
     EARLY_TERMINATION, GOLD, ORACLE;
   };
-  public TrainingMethod trainingMethod = TrainingMethod.GOLD;
+  public TrainingMethod trainingMethod = TrainingMethod.EARLY_TERMINATION;
 
   protected int setOptionFlag(String[] args, int i) {
     int j = super.setOptionFlag(args, i);
