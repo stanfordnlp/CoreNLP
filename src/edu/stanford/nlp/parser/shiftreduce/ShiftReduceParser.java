@@ -104,15 +104,22 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
     featureWeights.clear();
     for (String feature : other.featureWeights.keySet()) {
-      List<ScoredObject<Integer>> newWeights = Generics.newArrayList();
+      int count = 0;
+      for (ScoredObject<Integer> weight : other.featureWeights.get(feature)) {
+        if (weight.score() != 0.0) {
+          ++count;
+        }        
+      }
+      if (count == 0) {
+        continue;
+      }
+      List<ScoredObject<Integer>> newWeights = Generics.newArrayList(count);
       for (ScoredObject<Integer> weight : other.featureWeights.get(feature)) {
         if (weight.score() != 0.0) {
           newWeights.add(new ScoredObject<Integer>(weight.object(), weight.score()));
         }
       }
-      if (newWeights.size() > 0) {
-        featureWeights.put(feature, newWeights);
-      }
+      featureWeights.put(feature, newWeights);
     }
   }
 
@@ -172,6 +179,9 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   public static void updateWeight(List<ScoredObject<Integer>> weights, int transition, double delta) {
+    if (transition < 0) {
+      return;
+    }
     for (int i = 0; i < weights.size(); ++i) {
       ScoredObject<Integer> weight = weights.get(i);
       if (weight.object() == transition) {
@@ -296,8 +306,11 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
   public static State initialStateFromTaggedSentence(List<? extends HasWord> words) {
     List<Tree> preterminals = Generics.newArrayList();
-    for (HasWord hw : words) {
+    for (int index = 0; index < words.size(); ++index) {
+      HasWord hw = words.get(index);
+
       CoreLabel wordLabel = new CoreLabel();
+      wordLabel.setIndex(index);
       wordLabel.setValue(hw.word());
       if (!(hw instanceof HasTag)) {
         throw new RuntimeException("Expected tagged words");
@@ -347,13 +360,19 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   public List<Tree> readBinarizedTreebank(String treebankPath, FileFilter treebankFilter) {
+    Treebank treebank = readTreebank(treebankPath, treebankFilter);
+    List<Tree> binarized = binarizeTreebank(treebank, op);
+    System.err.println("Converted trees to binarized format");
+    return binarized;
+  }
+
+  public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {
     TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
     BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
     transformer.addTransformer(binarizer);
     transformer.addTransformer(basicTransformer);
       
-    Treebank treebank = readTreebank(treebankPath, treebankFilter);
     treebank = treebank.transform(transformer);
 
     HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
@@ -361,9 +380,9 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     for (Tree tree : treebank) {
       Trees.convertToCoreLabels(tree);
       tree.percolateHeadAnnotations(binaryHeadFinder);
+      tree.indexLeaves(0, true);
       binarizedTrees.add(tree);
     }
-    System.err.println("Converted trees to binarized format");
     return binarizedTrees;
   }
 
@@ -439,30 +458,76 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
   }
 
-  private Pair<Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates) {
+  private Pair<Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
 
     Tree tree = binarizedTrees.get(index);
-    List<Transition> transitions = transitionLists.get(index);
-
     State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
-    for (Transition transition : transitions) {
-      int transitionNum = transitionIndex.indexOf(transition);
-      List<String> features = featureFactory.featurize(state);
-      int predictedNum = findHighestScoringTransition(state, features, false).object();
-      Transition predicted = transitionIndex.get(predictedNum);
-      if (transitionNum == predictedNum) {
-        numCorrect++;
-      } else {
-        numWrong++;
-        // TODO: allow weighted features, weighted training, etc
-        updates.add(new Update(features, transitionNum, predictedNum, 1.0));
+
+    // TODO.  This training method seems to be working in that it
+    // trains models just like the gold and early termination methods do.
+    // However, it causes the feature space to go crazy.  Presumably
+    // leaving out features with low weights or low frequencies would
+    // significantly help with that.  Otherwise, not sure how to keep
+    // it under control.
+    if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.ORACLE) {
+      while (!state.isFinished()) {
+        List<String> features = featureFactory.featurize(state);
+        ScoredObject<Integer> prediction = findHighestScoringTransition(state, features, true);
+        if (prediction == null) {
+          // No legal transitions.  Skip this and move on... should be a rare event
+          // In fact this is technically an error.  Should never happen if the constraints are correct.
+          // One way to trigger this: batchSize 10, randomSeed 3573391606864793956
+          break;
+        }
+        int predictedNum = prediction.object();
+        Transition predicted = transitionIndex.get(predictedNum);
+        OracleTransition gold = oracle.goldTransition(index, state);
+        if (gold.isCorrect(predicted)) {
+          numCorrect++;
+          if (gold.transition != null && !gold.transition.equals(predicted)) {
+            int transitionNum = transitionIndex.indexOf(gold.transition);
+            if (transitionNum < 0) {
+              // TODO: do we want to add unary transitions which are
+              // only possible when the parser has gone off the rails?
+              continue;
+            }
+            updates.add(new Update(features, transitionNum, -1, 1.0));
+          }
+        } else {
+          numWrong++;
+          int transitionNum = -1;
+          if (gold.transition != null) {
+            transitionNum = transitionIndex.indexOf(gold.transition);
+            // TODO: this can theoretically result in a -1 gold
+            // transition if the transition exists, but is a
+            // CompoundUnaryTransition which only exists because the
+            // parser is wrong.  Do we want to add those transitions?
+          }
+          updates.add(new Update(features, transitionNum, predictedNum, 1.0));
+        }
+        state = predicted.apply(state);
       }
-      if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.EARLY_TERMINATION && transitionNum != predictedNum) {
-        break;
+    } else {
+      List<Transition> transitions = transitionLists.get(index);
+      for (Transition transition : transitions) {
+        int transitionNum = transitionIndex.indexOf(transition);
+        List<String> features = featureFactory.featurize(state);
+        int predictedNum = findHighestScoringTransition(state, features, false).object();
+        Transition predicted = transitionIndex.get(predictedNum);
+        if (transitionNum == predictedNum) {
+          numCorrect++;
+        } else {
+          numWrong++;
+          // TODO: allow weighted features, weighted training, etc
+          updates.add(new Update(features, transitionNum, predictedNum, 1.0));
+        }
+        if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.EARLY_TERMINATION && transitionNum != predictedNum) {
+          break;
+        }
+        state = transition.apply(state);
       }
-      state = transition.apply(state);
     }
 
     return Pair.makePair(numCorrect, numWrong);
@@ -472,15 +537,17 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     List<Tree> binarizedTrees;
     List<List<Transition>> transitionLists;
     List<Update> updates; // this needs to be a synchronized list
+    Oracle oracle;
     
-    public TrainTreeProcessor(List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates) {
+    public TrainTreeProcessor(List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
       this.binarizedTrees = binarizedTrees;
       this.transitionLists = transitionLists;
       this.updates = updates;
+      this.oracle = oracle;
     }
 
     public Pair<Integer, Integer> process(Integer index) {
-      return trainTree(index, binarizedTrees, transitionLists, updates);
+      return trainTree(index, binarizedTrees, transitionLists, updates, oracle);
     }
 
     public TrainTreeProcessor newInstance() {
@@ -489,12 +556,12 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
   }
 
-  private Triple<List<Update>, Integer, Integer> trainBatch(List<Integer> indices, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper) {
+  private Triple<List<Update>, Integer, Integer> trainBatch(List<Integer> indices, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle, MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper) {
     int numCorrect = 0;
     int numWrong = 0;
     if (op.trainOptions.trainingThreads == 1) {
       for (Integer index : indices) {
-        Pair<Integer, Integer> count = trainTree(index, binarizedTrees, transitionLists, updates);
+        Pair<Integer, Integer> count = trainTree(index, binarizedTrees, transitionLists, updates, oracle);
         numCorrect += count.first;
         numWrong += count.second;
       }
@@ -555,11 +622,16 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       indices.add(i);
     }
 
+    Oracle oracle = null;
+    if (op.trainingErrorHandling == ShiftReduceOptions.TrainingErrorHandling.ORACLE) {
+      oracle = new Oracle(binarizedTrees, op.compoundUnaries);
+    }
+
     List<Update> updates = Generics.newArrayList();
     MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper = null;
     if (nThreads != 1) {
       updates = Collections.synchronizedList(updates);
-      wrapper = new MulticoreWrapper<Integer, Pair<Integer, Integer>>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, updates));
+      wrapper = new MulticoreWrapper<Integer, Pair<Integer, Integer>>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, updates, oracle));
     }
 
     for (int iteration = 1; iteration <= op.trainOptions.trainingIterations; ++iteration) {
@@ -569,7 +641,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       Collections.shuffle(indices, random);
       for (int start = 0; start < indices.size(); start += op.trainOptions.batchSize) {
         int end = Math.min(start + op.trainOptions.batchSize, indices.size());
-        Triple<List<Update>, Integer, Integer> result = trainBatch(indices.subList(start, end), binarizedTrees, transitionLists, updates, wrapper);
+        Triple<List<Update>, Integer, Integer> result = trainBatch(indices.subList(start, end), binarizedTrees, transitionLists, updates, oracle, wrapper);
 
         numCorrect += result.second;
         numWrong += result.third;
