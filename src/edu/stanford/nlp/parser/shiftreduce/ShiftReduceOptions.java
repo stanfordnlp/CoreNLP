@@ -14,7 +14,14 @@ public class ShiftReduceOptions extends Options {
    * of its score.  Otherwise it takes the best k models and averages
    * them together.
    */
-  public int averagedModels = 1;
+  public int averagedModels = 8;
+
+  /**
+   * Cross-validate over the number of models to average, using the
+   * dev set, to figure out which number between 1 and averagedModels
+   * we actually want to use
+   */
+  public boolean cvAveragedModels = true;
 
   protected int setOptionFlag(String[] args, int i) {
     int j = super.setOptionFlag(args, i);
@@ -36,6 +43,12 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-averagedModels")) {
       averagedModels = Integer.valueOf(args[i + 1]);
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-cvAveragedModels")) {
+      cvAveragedModels = true;
+      i++;
+    } else if (args[i].equalsIgnoreCase("-noCVAveragedModels")) {
+      cvAveragedModels = false;
+      i++;
     }
     return i;
   }

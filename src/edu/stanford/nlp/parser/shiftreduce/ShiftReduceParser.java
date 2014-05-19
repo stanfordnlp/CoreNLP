@@ -96,10 +96,19 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return copy;
   }
 
-  public static ShiftReduceParser averageModels(Collection<ShiftReduceParser> models) {
-    if (models.size() == 0) {
+  public static ShiftReduceParser averageModels(Collection<ScoredObject<ShiftReduceParser>> scoredModels) {
+    if (scoredModels.size() == 0) {
       throw new IllegalArgumentException("Cannot average empty models");
     }
+
+    System.err.print("Averaging models with scores");
+    for (ScoredObject<ShiftReduceParser> model : scoredModels) {
+      System.err.print(" " + NF.format(model.score()));
+    }
+    System.err.println();
+
+    List<ShiftReduceParser> models = CollectionUtils.transformAsList(scoredModels, new Function<ScoredObject<ShiftReduceParser>, ShiftReduceParser>() { public ShiftReduceParser apply(ScoredObject<ShiftReduceParser> object) { return object.object(); }});
+
     ShiftReduceParser firstModel = models.iterator().next();
     ShiftReduceOptions op = firstModel.op;
     // TODO: should we deep copy the options?
@@ -472,8 +481,30 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       }
 
       if (bestModels != null) {
-        List<ShiftReduceParser> models = CollectionUtils.transformAsList(bestModels, new Function<ScoredObject<ShiftReduceParser>, ShiftReduceParser>() { public ShiftReduceParser apply(ScoredObject<ShiftReduceParser> object) { return object.object(); }});
-        parser = ShiftReduceParser.averageModels(models);
+        if (op.cvAveragedModels && devTreebank != null) {
+          List<ScoredObject<ShiftReduceParser>> models = Generics.newArrayList();
+          while (bestModels.size() > 0) {
+            models.add(bestModels.poll());
+          }
+          Collections.reverse(models);
+          double bestF1 = 0.0;
+          int bestSize = 0;
+          for (int i = 1; i < models.size(); ++i) {
+            System.err.println("Testing with " + i + " models averaged together");
+            parser = averageModels(models.subList(0, i));
+            EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
+            evaluator.testOnTreebank(devTreebank);
+            double labelF1 = evaluator.getLBScore();
+            System.err.println("Label F1 for " + i + " models: " + labelF1);
+            if (labelF1 > bestF1) {
+              bestF1 = labelF1;
+              bestSize = i;
+            }
+          }
+          parser = averageModels(models.subList(0, bestSize));
+        } else {
+          parser = ShiftReduceParser.averageModels(bestModels);
+        }
       }
 
       parser.condenseFeatures();
