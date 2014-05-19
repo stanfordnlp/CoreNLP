@@ -483,7 +483,7 @@ public class TrainOptions implements Serializable {
     result.append(" trainingThreads=" + trainingThreads + "\n");
     result.append(" dvKBest=" + dvKBest + "\n");
     result.append(" trainingIterations=" + trainingIterations + "\n");
-    result.append(" batchSize=" + dvBatchSize + "\n");
+    result.append(" batchSize=" + batchSize + "\n");
     result.append(" regCost=" + regCost + "\n");
     result.append(" qnIterationsPerBatch=" + qnIterationsPerBatch + "\n");
     result.append(" qnEstimates=" + qnEstimates + "\n");
