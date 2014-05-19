@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.TreeShapedStack;
 
 /**
@@ -36,8 +37,14 @@ public class UnaryTransition implements Transition {
    */
   public State apply(State state) {
     Tree top = state.stack.peek();
+    if (!(top.label() instanceof CoreLabel)) {
+      throw new IllegalArgumentException("Stack should have CoreLabel nodes");
+    }
+    CoreLabel topLabel = (CoreLabel) top.label();
     CoreLabel production = new CoreLabel();
     production.setValue(label);
+    production.set(TreeCoreAnnotations.HeadWordAnnotation.class, topLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
+    production.set(TreeCoreAnnotations.HeadTagAnnotation.class, topLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     Tree newTop = new LabeledScoredTreeNode(production);
     newTop.addChild(top);
 

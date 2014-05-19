@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.TreeShapedStack;
 
 /**
@@ -47,9 +48,28 @@ public class BinaryTransition implements Transition {
     stack = stack.pop();
     Tree left = stack.peek();
     stack = stack.pop();
+    
+    Tree head;
+    switch(side) {
+    case LEFT:
+      head = left;
+      break;
+    case RIGHT:
+      head = right;
+      break;
+    default:
+      throw new IllegalArgumentException("Unknown side " + side);
+    }
+    
+    if (!(head.label() instanceof CoreLabel)) {
+      throw new IllegalArgumentException("Stack should have CoreLabel nodes");
+    }
+    CoreLabel headLabel = (CoreLabel) head.label();
 
     CoreLabel production = new CoreLabel();
     production.setValue(label);
+    production.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
+    production.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     Tree newTop = new LabeledScoredTreeNode(production);
     newTop.addChild(left);
     newTop.addChild(right);
