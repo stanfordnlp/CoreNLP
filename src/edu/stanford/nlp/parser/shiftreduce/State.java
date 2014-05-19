@@ -71,6 +71,21 @@ public class State implements Scored {
    */
   final TreeShapedStack<HeadPosition> separators;
 
+  HeadPosition getSeparator(int nodeNum) {
+    return getSeparator(separators, nodeNum);
+  }
+
+  private HeadPosition getSeparator(TreeShapedStack<HeadPosition> sep, int nodeNum) {
+    if (sep.size() <= nodeNum) {
+      return null;
+    }
+
+    for (int i = 0; i < nodeNum; ++i) {
+      sep = sep.pop();
+    }
+    return sep.peek();
+  }
+
   /**
    * The words we are parsing.  They need to be tagged before we can
    * parse.  The words are stored as preterminal Trees whose only
