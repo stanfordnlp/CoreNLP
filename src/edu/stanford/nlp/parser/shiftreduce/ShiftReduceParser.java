@@ -1,19 +1,25 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.Options;
+import edu.stanford.nlp.parser.lexparser.ParserQuery;
+import edu.stanford.nlp.parser.lexparser.ParserQueryFactory;
+import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
-public class ShiftReduceParser implements Serializable {
+public class ShiftReduceParser implements Serializable, ParserQueryFactory {
   final Index<Transition> transitionIndex;
   final Index<String> featureIndex;
   final double[][] featureWeights;
@@ -31,6 +37,15 @@ public class ShiftReduceParser implements Serializable {
     this.featureWeights = featureWeights;
     this.op = op;
     this.featureFactory = featureFactory;
+  }
+
+  public ParserQuery parserQuery() {
+    return new ShiftReduceParserQuery(this);
+  }
+
+  /** TODO: add an eval which measures transition accuracy? */
+  public List<Eval> getExtraEvals() {
+    return Collections.emptyList();
   }
 
   public int findHighestScoringTransition(State state, Set<String> features, boolean requireLegal) {
@@ -57,21 +72,32 @@ public class ShiftReduceParser implements Serializable {
   }
 
   public static State initialStateFromGoldTagTree(Tree tree) {
+    return initialStateFromTaggedSentence(tree.taggedYield());
+  }
+
+  public static State initialStateFromTaggedSentence(List<? extends HasWord> words) {
     List<Tree> preterminals = Generics.newArrayList();
-    for (TaggedWord tw : tree.taggedYield()) {
-      CoreLabel word = new CoreLabel();
-      word.setValue(tw.word());
-      CoreLabel tag = new CoreLabel();
-      tag.setValue(tw.tag());
+    for (HasWord hw : words) {
+      CoreLabel wordLabel = new CoreLabel();
+      wordLabel.setValue(hw.word());
+      if (!(hw instanceof HasTag)) {
+        throw new RuntimeException("Expected tagged words");
+      }
+      String tag = ((HasTag) hw).tag();
+      if (tag == null) {
+        throw new RuntimeException("Word is not tagged");
+      }
+      CoreLabel tagLabel = new CoreLabel();
+      tagLabel.setValue(((HasTag) hw).tag());
       
-      LabeledScoredTreeNode wordNode = new LabeledScoredTreeNode(word);
-      LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tag);
+      LabeledScoredTreeNode wordNode = new LabeledScoredTreeNode(wordLabel);
+      LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tagLabel);
       tagNode.addChild(wordNode);
 
-      word.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
-      word.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
-      tag.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
-      tag.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
+      wordLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
+      wordLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
+      tagLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
+      tagLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
 
       preterminals.add(tagNode);
     }
