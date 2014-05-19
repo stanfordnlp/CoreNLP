@@ -71,14 +71,21 @@ public class TrainParser {
 
     String trainTreebankPath = null;
     FileFilter trainTreebankFilter = null;
+    String testTreebankPath = null;
+    FileFilter testTreebankFilter = null;
     int numTrainingIterations = 10;
 
     for (int argIndex = 0; argIndex < args.length; ) {
-      if (args[argIndex].equalsIgnoreCase("-treebank")) {
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-treebank");
+      if (args[argIndex].equalsIgnoreCase("-trainTreebank")) {
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-trainTreebank");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         trainTreebankPath = treebankDescription.first();
         trainTreebankFilter = treebankDescription.second();
+      } else if (args[argIndex].equalsIgnoreCase("-testTreebank")) {
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-testTreebank");
+        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
+        testTreebankPath = treebankDescription.first();
+        testTreebankFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-numTrainingIterations")) {
         numTrainingIterations = Integer.valueOf(args[argIndex + 1]);
         argIndex += 2;
