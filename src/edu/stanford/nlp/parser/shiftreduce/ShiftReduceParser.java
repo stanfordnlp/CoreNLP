@@ -390,6 +390,14 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
+  // Sources:
+  //   A Classifier-Based Parser with Linear Run-Time Complexity (Kenji Sagae and Alon Lavie)
+  //   Transition-Based Parsing of the Chinese Treebank using a Global Discriminative Model (Zhang and Clark)
+  //   Fast and Accurate Shift-Reduce Constituent Parsing (Zhu et al)
+  // Sources with stuff to implement:
+  //   http://honnibal.wordpress.com/2013/12/18/a-simple-fast-algorithm-for-natural-language-dependency-parsing/
+  //   Learning Sparser Perceptron Models (Goldberg and Elhadad) (unpublished)
+  //   A Dynamic Oracle for Arc-Eager Dependency Parsing (Goldberg and Nivre)
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
