@@ -29,4 +29,29 @@ class ShiftReduceUtils {
     if (l2.startsWith("@")) l2 = l2.substring(1);
     return l1.equals(l2);
   }
+
+  static int headIndex(Tree tree) {
+    CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
+    Tree head = label.get(TreeCoreAnnotations.HeadWordAnnotation.class);
+    CoreLabel headLabel = ErasureUtils.uncheckedCast(head.label());
+    return headLabel.index();
+  }
+
+  static int leftIndex(Tree tree) {
+    if (tree.isLeaf()) {
+      CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
+      return label.index();
+    }
+
+    return leftIndex(tree.children()[0]);
+  }
+    
+  static int rightIndex(Tree tree) {
+    if (tree.isLeaf()) {
+      CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
+      return label.index();
+    }
+
+    return rightIndex(tree.children()[tree.children().length - 1]);
+  }
 }

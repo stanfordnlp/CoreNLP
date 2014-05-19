@@ -128,43 +128,7 @@ public class BinaryTransition implements Transition {
 
     stack = stack.push(newTop);
 
-
-    TreeShapedStack<State.HeadPosition> separators = state.separators;
-    State.HeadPosition rightSeparator = separators.peek();
-    separators = separators.pop();
-    State.HeadPosition leftSeparator = separators.peek();
-    separators = separators.pop();
-
-    State.HeadPosition newSeparator;
-    switch(side) {
-    case LEFT:
-      if (rightSeparator == State.HeadPosition.NONE) {
-        newSeparator = leftSeparator;
-      } else if (leftSeparator == State.HeadPosition.LEFT || leftSeparator == State.HeadPosition.BOTH) {
-        newSeparator = State.HeadPosition.BOTH;
-      } else if (leftSeparator == State.HeadPosition.HEAD) {
-        newSeparator = State.HeadPosition.HEAD;
-      } else {
-        newSeparator = State.HeadPosition.RIGHT;
-      }
-      break;
-    case RIGHT:
-      if (leftSeparator == State.HeadPosition.NONE) {
-        newSeparator = rightSeparator;
-      } else if (rightSeparator == State.HeadPosition.RIGHT || rightSeparator == State.HeadPosition.BOTH) {
-        newSeparator = State.HeadPosition.BOTH;
-      } else if (rightSeparator == State.HeadPosition.HEAD) {
-        newSeparator = State.HeadPosition.HEAD;
-      } else {
-        newSeparator = State.HeadPosition.LEFT;
-      }
-      break;
-    default:
-      throw new IllegalArgumentException("Unknown side " + side);
-    }
-    separators = separators.push(newSeparator);
-
-    return new State(stack, state.transitions.push(this), separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);    
+    return new State(stack, state.transitions.push(this), state.separators, state.sentence, state.tokenPosition, state.score + scoreDelta, false);    
   }
 
   @Override

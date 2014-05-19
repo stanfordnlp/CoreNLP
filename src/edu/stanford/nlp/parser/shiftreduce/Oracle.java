@@ -161,10 +161,10 @@ class Oracle {
       }
       return new OracleTransition(null, false, true, false);
     }
-    if (leftIndex(S0) == leftIndex(enclosingS0)) {
+    if (ShiftReduceUtils.leftIndex(S0) == ShiftReduceUtils.leftIndex(enclosingS0)) {
       return new OracleTransition(new ShiftTransition(), false, false, false);
     }
-    if (rightIndex(S0) == rightIndex(enclosingS0)) {
+    if (ShiftReduceUtils.rightIndex(S0) == ShiftReduceUtils.rightIndex(enclosingS0)) {
       Tree S1 = state.stack.pop().peek();
       Tree enclosingS1 = getEnclosingTree(S1, parents, leaves);
       if (enclosingS0 == enclosingS1) {
@@ -173,7 +173,7 @@ class Oracle {
       }
       // S1 is smaller than the next tree S0 is supposed to be part of,
       // so we must have a BinaryTransition
-      if (leftIndex(S1) > leftIndex(enclosingS0)) {
+      if (ShiftReduceUtils.leftIndex(S1) > ShiftReduceUtils.leftIndex(enclosingS0)) {
         return new OracleTransition(null, false, true, true);
       }
       // S1 is larger than the next tree.  This is the worst case
@@ -185,10 +185,10 @@ class Oracle {
 
   static Tree getEnclosingTree(Tree subtree, Map<Tree, Tree> parents, List<Tree> leaves) {
     // TODO: make this more efficient
-    int left = leftIndex(subtree);
-    int right = rightIndex(subtree);
+    int left = ShiftReduceUtils.leftIndex(subtree);
+    int right = ShiftReduceUtils.rightIndex(subtree);
     Tree gold = leaves.get(left);
-    while (rightIndex(gold) < right) {
+    while (ShiftReduceUtils.rightIndex(gold) < right) {
       gold = parents.get(gold);
     }
     if (gold.isLeaf()) {
@@ -198,25 +198,8 @@ class Oracle {
   }
 
   static boolean spansEqual(Tree subtree, Tree goldSubtree) {
-    return (leftIndex(subtree) == leftIndex(goldSubtree)) && (rightIndex(subtree) == rightIndex(goldSubtree));
-  }
-
-  static int leftIndex(Tree tree) {
-    if (tree.isLeaf()) {
-      CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
-      return label.index();
-    }
-
-    return leftIndex(tree.children()[0]);
-  }
-    
-  static int rightIndex(Tree tree) {
-    if (tree.isLeaf()) {
-      CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
-      return label.index();
-    }
-
-    return rightIndex(tree.children()[tree.children().length - 1]);
+    return ((ShiftReduceUtils.leftIndex(subtree) == ShiftReduceUtils.leftIndex(goldSubtree)) && 
+            (ShiftReduceUtils.rightIndex(subtree) == ShiftReduceUtils.rightIndex(goldSubtree)));
   }
     
   static OracleTransition getUnaryTransition(Tree S0, Tree enclosingS0, Map<Tree, Tree> parents, boolean compoundUnaries) {

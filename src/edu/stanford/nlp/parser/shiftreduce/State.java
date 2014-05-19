@@ -1,8 +1,11 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Scored;
 import edu.stanford.nlp.util.TreeShapedStack;
 
@@ -36,10 +39,10 @@ public class State implements Scored {
    * with CoreLabels and have HeadWord and HeadTag annotations set.
    */
   public State(List<Tree> sentence) {
-    this(new TreeShapedStack<Tree>(), new TreeShapedStack<Transition>(), new TreeShapedStack<HeadPosition>(), sentence, 0, 0.0, false);
+    this(new TreeShapedStack<Tree>(), new TreeShapedStack<Transition>(), findSeparators(sentence), sentence, 0, 0.0, false);
   }
 
-  State(TreeShapedStack<Tree> stack, TreeShapedStack<Transition> transitions, TreeShapedStack<HeadPosition> separators,
+  State(TreeShapedStack<Tree> stack, TreeShapedStack<Transition> transitions, TreeMap<Integer, String> separators,
         List<Tree> sentence, int tokenPosition, double score, boolean finished) {
     this.stack = stack;
     this.transitions = transitions;
@@ -69,21 +72,51 @@ public class State implements Scored {
    * A description of where the separators such as ,;:- are in a
    * subtree, relative to the head of the subtree
    */
-  final TreeShapedStack<HeadPosition> separators;
+  final TreeMap<Integer, String> separators;
 
   HeadPosition getSeparator(int nodeNum) {
-    return getSeparator(separators, nodeNum);
-  }
-
-  private HeadPosition getSeparator(TreeShapedStack<HeadPosition> sep, int nodeNum) {
-    if (sep.size() <= nodeNum) {
+    if (nodeNum >= stack.size()) {
       return null;
     }
-
+    TreeShapedStack<Tree> stack = this.stack;
     for (int i = 0; i < nodeNum; ++i) {
-      sep = sep.pop();
+      stack = stack.pop();
     }
-    return sep.peek();
+    Tree node = stack.peek();
+    int head = ShiftReduceUtils.headIndex(node);
+    if (separators.get(head) != null) {
+      return HeadPosition.HEAD;
+    }
+    int left = ShiftReduceUtils.leftIndex(node);
+    Integer nextLeft = separators.floorKey(head);
+    boolean hasLeft = (nextLeft != null && nextLeft >= left);
+
+    int right = ShiftReduceUtils.rightIndex(node);
+    Integer nextRight = separators.ceilingKey(head);
+    boolean hasRight = (nextRight != null && nextRight <= right);
+
+    if (hasLeft && hasRight) {
+      return HeadPosition.BOTH;
+    } else if (hasLeft) {
+      return HeadPosition.LEFT;
+    } else if (hasRight) {
+      return HeadPosition.RIGHT;
+    } else {
+      return HeadPosition.NONE;
+    }
+  }
+
+  static final Pattern separatorRegex = Pattern.compile("^[,;:-]+$");
+
+  static TreeMap<Integer, String> findSeparators(List<Tree> sentence) {
+    TreeMap<Integer, String> separators = Generics.newTreeMap();
+    for (int index = 0; index < sentence.size(); ++index) {
+      Tree leaf = sentence.get(index).children()[0];
+      if (separatorRegex.matcher(leaf.value()).matches()) {
+        separators.put(index, leaf.value());
+      }
+    }
+    return separators;
   }
 
   /**
