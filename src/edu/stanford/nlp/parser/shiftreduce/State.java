@@ -85,6 +85,10 @@ public class State {
    */ 
   final boolean finished;
 
+  public boolean endOfQueue() {
+    return tokenPosition == sentence.size();
+  }
+
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
