@@ -31,6 +31,9 @@ public class UnaryTransition implements Transition {
       // Disallow unary transitions where the label doesn't change
       return false;
     }
+    if (top.label().value().startsWith("@") && !label.equals(top.label().value().substring(1))) {
+      return false;
+    }
     if (top.children().length == 1) {
       Tree child = top.children()[0];
       if (child.children().length == 1) {
