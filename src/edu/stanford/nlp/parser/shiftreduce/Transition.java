@@ -1,11 +1,13 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.io.Serializable;
+
 /**
  * An interface which defines a transition type in the shift-reduce
  * parser.  Expected transition types are shift, unary, binary,
  * finalize, and idle.
  */
-public interface Transition {
+public interface Transition extends Serializable {
   /**
    * Whether or not it is legal to apply this transition to this state.
    */

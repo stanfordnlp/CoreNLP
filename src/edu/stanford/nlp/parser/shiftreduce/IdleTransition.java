@@ -38,4 +38,6 @@ public class IdleTransition implements Transition {
   public String toString() {
     return "Idle";
   }
+
+  private static final long serialVersionUID = 1;  
 }

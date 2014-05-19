@@ -18,8 +18,6 @@ public class UnaryTransition implements Transition {
 
   /**
    * Legal as long as there is at least one item on the state's stack.
-   *
-   * TODO: implement other measures of legality, such as not allowing infinite unary transition cycles
    */
   public boolean isLegal(State state) {
     if (state.finished) {
@@ -85,5 +83,7 @@ public class UnaryTransition implements Transition {
   public String toString() {
     return "Unary(" + label + ")";
   }
+
+  private static final long serialVersionUID = 1;  
 }
 

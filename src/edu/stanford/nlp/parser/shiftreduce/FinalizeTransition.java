@@ -33,4 +33,6 @@ public class FinalizeTransition implements Transition {
   public String toString() {
     return "Finalize";
   }
+
+  private static final long serialVersionUID = 1;  
 }

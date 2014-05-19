@@ -114,4 +114,6 @@ public class BinaryTransition implements Transition {
       throw new IllegalArgumentException("Unknown side " + side);
     }
   }
+
+  private static final long serialVersionUID = 1;  
 }

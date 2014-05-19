@@ -1,9 +1,12 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.ArgUtils;
@@ -79,6 +82,8 @@ public class TrainParser {
     FileFilter testTreebankFilter = null;
     int numTrainingIterations = 10;
 
+    String serializedPath = null;
+
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-trainTreebank");
@@ -92,6 +97,9 @@ public class TrainParser {
         testTreebankFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-numTrainingIterations")) {
         numTrainingIterations = Integer.valueOf(args[argIndex + 1]);
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-serializedPath")) {
+        serializedPath = args[argIndex + 1];
         argIndex += 2;
       } else {
         remainingArgs.add(args[argIndex]);
@@ -177,9 +185,18 @@ public class TrainParser {
       System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
     }
 
+    ShiftReduceParser parser = new ShiftReduceParser(transitionIndex, featureIndex, featureWeights);
+    if (serializedPath != null) {
+      try {
+        IOUtils.writeObjectToFile(parser, serializedPath);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }
+
     if (testTreebankPath != null) {
       System.err.println("Loading test trees from " + testTreebankPath);
-      Treebank testTreebank = op.tlpParams.memoryTreebank();;
+      Treebank testTreebank = op.tlpParams.memoryTreebank();
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       for (Tree tree : testTreebank) {
         State state = initialStateFromGoldTagTree(tree);

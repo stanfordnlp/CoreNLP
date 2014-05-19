@@ -1,5 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import edu.stanford.nlp.trees.Tree;
+
 /**
  * Transition that moves a single item from the front of the queue to
  * the top of the stack without making any other changes.
@@ -17,6 +19,20 @@ public class ShiftTransition implements Transition {
     }
     if (state.tokenPosition >= state.sentence.size()) {
       return false;
+    }
+    // We disallow shifting when the previous transition was a right
+    // head transition to a partial (binarized) state
+    if (state.stack.size() > 0) {
+      Tree top = state.stack.peek();
+      // Temporary node, eg part of a binarized sequence
+      if (top.label().value().startsWith("@")) {
+        if (top.children().length == 2) {
+          Tree rightChild = top.children()[1];
+          if (rightChild.label().value().equals(top.label().value())) {
+            return false;
+          }
+        }
+      }
     }
     return true;
   }
@@ -48,4 +64,6 @@ public class ShiftTransition implements Transition {
   public String toString() {
     return "Shift";
   }
+
+  private static final long serialVersionUID = 1;  
 }
