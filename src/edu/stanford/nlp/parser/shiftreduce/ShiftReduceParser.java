@@ -44,6 +44,27 @@ public class ShiftReduceParser implements Serializable, ParserQueryFactory {
     return new ShiftReduceParserQuery(this);
   }
 
+  public void outputStats() {
+    int countZeros = 0;
+    for (int i = 0; i < featureWeights.length; ++i) {
+      for (int j = 0; j < featureWeights[i].length; ++j) {
+        if (featureWeights[i][j] == 0) {
+          countZeros++;
+        }
+      }
+    }
+    System.err.println("Number of zeros: " + countZeros + " out of weights: " + featureWeights.length * featureWeights[0].length);
+
+    System.err.println("Feature index size: " + featureIndex.size());
+    int wordLength = 0;
+    for (String feature : featureIndex) {
+      wordLength += feature.length();
+    }
+    System.err.println("Total word length: " + wordLength);
+
+    System.err.println("Number of transitions: " + transitionIndex.size());
+  }
+
   /** TODO: add an eval which measures transition accuracy? */
   public List<Eval> getExtraEvals() {
     return Collections.emptyList();
