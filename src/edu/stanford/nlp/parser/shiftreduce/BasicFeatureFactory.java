@@ -74,8 +74,9 @@ public class BasicFeatureFactory implements FeatureFactory {
     return (CoreLabel) node.label();
   }
 
-  public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String wordFeature, String tagFeature) {
+  public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String conFeature, String wordFeature, String tagFeature) {
     if (label != null) {
+      features.add(conFeature + label.value());
       features.add(wordFeature + label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value() + "-" + label.value());
       features.add(tagFeature + label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value() + "-" + label.value());
     }
@@ -153,18 +154,18 @@ public class BasicFeatureFactory implements FeatureFactory {
     CoreLabel qP1Label = getQueueLabel(sentence, tokenPosition, -1); // previous location in queue
     CoreLabel qP2Label = getQueueLabel(sentence, tokenPosition, -2); // two locations prior in queue
 
-    addUnaryStackFeatures(features, s0Label, "S0WC-", "S0TC-");
-    addUnaryStackFeatures(features, s1Label, "S1WC-", "S1TC-");
-    addUnaryStackFeatures(features, s2Label, "S2WC-", "S2TC-");
-    addUnaryStackFeatures(features, s3Label, "S3WC-", "S3TC-");
+    addUnaryStackFeatures(features, s0Label, "S0C-", "S0WC-", "S0TC-");
+    addUnaryStackFeatures(features, s1Label, "S1C-", "S1WC-", "S1TC-");
+    addUnaryStackFeatures(features, s2Label, "S2C-", "S2WC-", "S2TC-");
+    addUnaryStackFeatures(features, s3Label, "S3C-", "S3WC-", "S3TC-");
 
-    addUnaryStackFeatures(features, s0LLabel, "S0LWC-", "S0LTC-");
-    addUnaryStackFeatures(features, s0RLabel, "S0RWC-", "S0RTC-");
-    addUnaryStackFeatures(features, s0ULabel, "S0UWC-", "S0UTC-");
+    addUnaryStackFeatures(features, s0LLabel, "S0LC-", "S0LWC-", "S0LTC-");
+    addUnaryStackFeatures(features, s0RLabel, "S0RC-", "S0RWC-", "S0RTC-");
+    addUnaryStackFeatures(features, s0ULabel, "S0UC-", "S0UWC-", "S0UTC-");
 
-    addUnaryStackFeatures(features, s1LLabel, "S1LWC-", "S1LTC-");
-    addUnaryStackFeatures(features, s1RLabel, "S1RWC-", "S1RTC-");
-    addUnaryStackFeatures(features, s1ULabel, "S1UWC-", "S1UTC-");
+    addUnaryStackFeatures(features, s1LLabel, "S1LC-", "S1LWC-", "S1LTC-");
+    addUnaryStackFeatures(features, s1RLabel, "S1RC-", "S1RWC-", "S1RTC-");
+    addUnaryStackFeatures(features, s1ULabel, "S1UC-", "S1UWC-", "S1UTC-");
 
     addUnaryQueueFeatures(features, q0Label, "Q0WT-");
     addUnaryQueueFeatures(features, q1Label, "Q1WT-");
