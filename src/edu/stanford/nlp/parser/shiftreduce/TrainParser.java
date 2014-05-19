@@ -10,8 +10,8 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.parser.lexparser.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
-import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
+import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -71,8 +71,10 @@ public class TrainParser {
       // TODO: since Options and buildTrainTransformer are used in so
       // many different places, it would make sense to factor that out
       Options op = new Options();
-      CompositeTreeTransformer transformer = LexicalizedParser.buildTrainTransformer(op);
+      TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
       BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
+      CompositeTreeTransformer transformer = new CompositeTreeTransformer();
+      transformer.addTransformer(binarizer);
       transformer.addTransformer(basicTransformer);
       
       System.err.println("Loading training trees from " + trainTreebankPath);
