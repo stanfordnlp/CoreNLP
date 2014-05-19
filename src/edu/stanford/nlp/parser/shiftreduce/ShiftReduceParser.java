@@ -750,10 +750,10 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   //   A Classifier-Based Parser with Linear Run-Time Complexity (Kenji Sagae and Alon Lavie)
   //   Transition-Based Parsing of the Chinese Treebank using a Global Discriminative Model (Zhang and Clark)
   //   Fast and Accurate Shift-Reduce Constituent Parsing (Zhu et al)
+  //   A Dynamic Oracle for Arc-Eager Dependency Parsing (Goldberg and Nivre) (a rough constituency oracle is implemented)
   // Sources with stuff to implement:
   //   http://honnibal.wordpress.com/2013/12/18/a-simple-fast-algorithm-for-natural-language-dependency-parsing/
   //   Learning Sparser Perceptron Models (Goldberg and Elhadad) (unpublished)
-  //   A Dynamic Oracle for Arc-Eager Dependency Parsing (Goldberg and Nivre)
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
