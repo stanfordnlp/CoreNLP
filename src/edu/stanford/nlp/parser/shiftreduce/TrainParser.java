@@ -37,7 +37,6 @@ public class TrainParser {
     FileFilter trainTreebankFilter = null;
     String testTreebankPath = null;
     FileFilter testTreebankFilter = null;
-    int numTrainingIterations = 10;
 
     String serializedPath = null;
 
@@ -54,9 +53,6 @@ public class TrainParser {
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         testTreebankPath = treebankDescription.first();
         testTreebankFilter = treebankDescription.second();
-      } else if (args[argIndex].equalsIgnoreCase("-numTrainingIterations")) {
-        numTrainingIterations = Integer.valueOf(args[argIndex + 1]);
-        argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-serializedPath")) {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
@@ -140,7 +136,7 @@ public class TrainParser {
 
       Random random = new Random(parser.op.trainOptions.randomSeed);
 
-      for (int i = 0; i < numTrainingIterations; ++i) {
+      for (int i = 0; i < parser.op.trainOptions.trainingIterations; ++i) {
         int numCorrect = 0;
         int numWrong = 0;
         Collections.shuffle(binarizedTrees, random);

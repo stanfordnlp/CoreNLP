@@ -762,8 +762,8 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-regCost")) {
         trainOptions.regCost = Double.parseDouble(args[i + 1]);
         i += 2;
-    } else if (args[i].equalsIgnoreCase("-dvIterations")) {
-      trainOptions.dvIterations = Integer.parseInt(args[i + 1]);
+    } else if (args[i].equalsIgnoreCase("-dvIterations") || args[i].equalsIgnoreCase("-trainingIterations")) {
+      trainOptions.trainingIterations = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-dvBatchSize")) {
       trainOptions.dvBatchSize = Integer.parseInt(args[i + 1]);
