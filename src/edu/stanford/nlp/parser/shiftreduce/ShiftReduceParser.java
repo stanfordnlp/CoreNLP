@@ -641,7 +641,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         Collections.reverse(models);
         double bestF1 = 0.0;
         int bestSize = 0;
-        for (int i = 1; i < models.size(); ++i) {
+        for (int i = 1; i <= models.size(); ++i) {
           System.err.println("Testing with " + i + " models averaged together");
           ShiftReduceParser parser = averageModels(models.subList(0, i));
           EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
