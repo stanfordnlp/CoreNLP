@@ -1,10 +1,14 @@
 package edu.stanford.nlp.parser.common;
 
+import java.io.IOException;
 import java.util.List;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Timing;
 // TODO: it would be nice to move these to common, but that would
 // wreck all existing models
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -17,26 +21,50 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
  * list of Evals to perform on a parser.  This helps classes such as
  * {@link edu.stanford.nlp.parser.lexparser.EvaluateTreebank} 
  * analyze the performance of a parser.
+ *  
+ * TODO: it would be nice to actually make this an interface again.
+ * Perhaps Java 8 will allow that
  *
  * @author John Bauer
  */
-public interface ParserGrammar {
-  ParserQuery parserQuery();
+public abstract class ParserGrammar {
+  public abstract ParserQuery parserQuery();
 
   /**
    * Returns a list of extra Eval objects to use when scoring the parser.
    */
-  List<Eval> getExtraEvals();
+  public abstract List<Eval> getExtraEvals();
 
   /**
    * Return a list of Eval-style objects which care about the whole
    * ParserQuery, not just the finished tree
    */
-  List<ParserQueryEval> getParserQueryEvals();
+  public abstract List<ParserQueryEval> getParserQueryEvals();
 
-  Options getOp();
+  public abstract Options getOp();
 
-  TreebankLangParserParams getTLPParams();
+  public abstract TreebankLangParserParams getTLPParams();
 
-  TreebankLanguagePack treebankLanguagePack();
+  public abstract TreebankLanguagePack treebankLanguagePack();
+
+  public abstract void setOptionFlags(String ... flags);  
+
+  public static ParserGrammar loadModel(String path, String ... extraFlags) {
+    ParserGrammar parser;
+    try {
+      Timing timing = new Timing();
+      System.err.print("Loading parser from serialized file " + path + " ...");
+      parser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
+      timing.done();
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeIOException(e);
+    }
+    if (extraFlags.length > 0) {
+      parser.setOptionFlags(extraFlags);
+    }
+    return parser;
+  }
+  
 }

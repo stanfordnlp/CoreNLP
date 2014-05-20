@@ -58,7 +58,7 @@ import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 
-public class ShiftReduceParser implements Serializable, ParserGrammar {
+public class ShiftReduceParser extends ParserGrammar implements Serializable {
   final Index<Transition> transitionIndex;
   final Map<String, List<ScoredObject<Integer>>> featureWeights;
 
@@ -805,7 +805,10 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   public static ShiftReduceParser loadModel(String path, String ... extraFlags) {
     ShiftReduceParser parser = null;
     try {
+      Timing timing = new Timing();
+      System.err.print("Loading parser from serialized file " + path + " ...");
       parser = IOUtils.readObjectFromFile(path);
+      timing.done();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     } catch (ClassNotFoundException e) {
