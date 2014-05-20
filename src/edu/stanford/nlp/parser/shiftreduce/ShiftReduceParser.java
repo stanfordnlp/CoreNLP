@@ -768,13 +768,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       if (serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
         String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
         saveModel(tempName);
-
-        if (featureFrequencies != null) {
-          ShiftReduceParser copy = this.deepCopy();
-          copy.filterFeatures(featureFrequencies.keysAbove(op.trainOptions().featureFrequencyCutoff));
-          tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".cutoff.ser.gz";
-          copy.saveModel(tempName);          
-        }
+        // TODO: we could save a cutoff version of the model,
+        // especially if we also get a dev set number for it, but that
+        // might be overkill
       }
     }
 
@@ -809,6 +805,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       }
     }
 
+    // TODO: perhaps we should filter the features and then get dev
+    // set scores.  That way we can merge the models which are best
+    // after filtering.
     if (featureFrequencies != null) {
       filterFeatures(featureFrequencies.keysAbove(op.trainOptions().featureFrequencyCutoff));
     }
