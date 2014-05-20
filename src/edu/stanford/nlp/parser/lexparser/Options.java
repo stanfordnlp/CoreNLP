@@ -1135,7 +1135,7 @@ public class Options implements Serializable {
 
   /** Separated out so subclasses of Options can override */
   public TestOptions newTestOptions() {
-    return newTestOptions();
+    return new TestOptions();
   }
 
 
