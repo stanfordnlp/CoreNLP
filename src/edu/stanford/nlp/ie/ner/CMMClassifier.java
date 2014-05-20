@@ -1,5 +1,5 @@
 // CMMClassifier -- a conditional maximum-entropy markov model, mainly used for NER.
-// Copyright (c) 2002-2014 The Board of Trustees of
+// Copyright (c) 2002-20014 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -1307,8 +1307,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       confusionMatrix[i2][i1] = d;
     }
 
-    for (double[] row : confusionMatrix) {
-      ArrayMath.normalize(row);
+    for (int i = 0; i < confusionMatrix.length; i++) {
+      ArrayMath.normalize(confusionMatrix[i]);
     }
 
     for (int i = 0; i < confusionMatrix.length; i++) {
