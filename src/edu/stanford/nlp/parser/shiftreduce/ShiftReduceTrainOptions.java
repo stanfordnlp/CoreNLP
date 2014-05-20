@@ -23,4 +23,7 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   public TrainingMethod trainingMethod = TrainingMethod.EARLY_TERMINATION;
 
   public int beamSize = 1;
+  
+  /** How many times a feature must be seen when training.  Less than this and it is filtered. */
+  public int featureFrequencyCutoff = 0;
 }

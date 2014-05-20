@@ -32,6 +32,7 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.Eval;
+import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
@@ -219,6 +220,15 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         }
       }
       if (weights.size() == 0) {
+        featureIt.remove();
+      }
+    }
+  }
+
+  public void filterFeatures(Set<String> keep) {
+    Iterator<String> featureIt = featureWeights.keySet().iterator();
+    while (featureIt.hasNext()) {
+      if (!keep.contains(featureIt.next())) {
         featureIt.remove();
       }
     }
@@ -690,6 +700,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       wrapper = new MulticoreWrapper<Integer, Pair<Integer, Integer>>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, updates, oracle));
     }
 
+    IntCounter<String> featureFrequencies = null;
+    if (op.trainOptions().featureFrequencyCutoff > 1) {
+      featureFrequencies = new IntCounter<String>();
+    }
+
     for (int iteration = 1; iteration <= op.trainOptions.trainingIterations; ++iteration) {
       Timing trainingTimer = new Timing();
       int numCorrect = 0;
@@ -711,6 +726,10 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
             }
             updateWeight(weights, update.goldTransition, update.delta);
             updateWeight(weights, update.predictedTransition, -update.delta);
+
+            if (featureFrequencies != null) {
+              featureFrequencies.incrementCount(feature, (update.goldTransition >= 0 && update.predictedTransition >= 0) ? 2 : 1);
+            }
           }
         }
         updates.clear();
@@ -748,10 +767,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       }
       if (serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
         String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
-        try {
-          IOUtils.writeObjectToFile(this, tempName);
-        } catch (IOException e) {
-          throw new RuntimeIOException(e);
+        saveModel(tempName);
+
+        if (featureFrequencies != null) {
+          ShiftReduceParser copy = this.deepCopy();
+          copy.filterFeatures(featureFrequencies.keysAbove(op.trainOptions().featureFrequencyCutoff));
+          tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".cutoff.ser.gz";
+          copy.saveModel(tempName);          
         }
       }
     }
@@ -787,6 +809,10 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       }
     }
 
+    if (featureFrequencies != null) {
+      filterFeatures(featureFrequencies.keysAbove(op.trainOptions().featureFrequencyCutoff));
+    }
+
     condenseFeatures();
 
     if (serializedPath != null) {
@@ -818,6 +844,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       parser.setOptionFlags(extraFlags);
     }
     return parser;
+  }
+
+  public void saveModel(String path) {
+    try {
+      IOUtils.writeObjectToFile(this, path);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   static final String[] FORCE_TAGS = { "-forceTags" };

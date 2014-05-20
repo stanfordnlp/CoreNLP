@@ -60,6 +60,9 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-trainingMethod")) {
       trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase());
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-featureFrequencyCutoff")) {
+      trainOptions().featureFrequencyCutoff = Integer.valueOf(args[i + 1]);
+      i += 2;
     } else if (args[i].equalsIgnoreCase("-recordBinarized")) {
       testOptions().recordBinarized = args[i + 1];
       i += 2;
