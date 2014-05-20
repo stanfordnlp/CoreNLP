@@ -1,5 +1,5 @@
 // CRFClassifier -- a probabilistic (CRF) sequence model, mainly used for NER.
-// Copyright (c) 2002-20014 The Board of Trustees of
+// Copyright (c) 2002-2008 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
