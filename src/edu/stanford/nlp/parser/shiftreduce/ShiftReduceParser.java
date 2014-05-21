@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -45,6 +46,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
@@ -60,12 +62,13 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 
 public class ShiftReduceParser extends ParserGrammar implements Serializable {
-  final Index<Transition> transitionIndex;
-  final Map<String, List<ScoredObject<Integer>>> featureWeights;
+  Index<Transition> transitionIndex;
+  Map<String, Weight> featureWeights;
+  //final Map<String, List<ScoredObject<Integer>>> featureWeights;
 
-  final ShiftReduceOptions op;
+  ShiftReduceOptions op;
 
-  final FeatureFactory featureFactory;
+  FeatureFactory featureFactory;
 
   public ShiftReduceParser(ShiftReduceOptions op) {
     this.transitionIndex = new HashIndex<Transition>();
@@ -73,6 +76,27 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     this.op = op;
     this.featureFactory = ReflectionLoading.loadByReflection(op.featureFactoryClass);
   }
+
+  /*
+  private void readObject(ObjectInputStream in)
+    throws IOException, ClassNotFoundException 
+  {
+    ObjectInputStream.GetField fields = in.readFields();
+    transitionIndex = ErasureUtils.uncheckedCast(fields.get("transitionIndex", null));
+    op = ErasureUtils.uncheckedCast(fields.get("op", null));
+    featureFactory = ErasureUtils.uncheckedCast(fields.get("featureFactory", null));
+    featureWeights = Generics.newHashMap();
+    Map<String, List<ScoredObject<Integer>>> oldWeights = ErasureUtils.uncheckedCast(fields.get("featureWeights", null));
+    for (String feature : oldWeights.keySet()) {
+      List<ScoredObject<Integer>> oldFeature = oldWeights.get(feature);
+      Weight newFeature = new Weight();
+      for (int i = 0; i < oldFeature.size(); ++i) {
+        newFeature.updateWeight(oldFeature.get(i).object(), (float) oldFeature.get(i).score());
+      }
+      featureWeights.put(feature, newFeature);
+    }
+  }
+  */
 
   @Override
   public Options getOp() {
@@ -106,26 +130,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
     featureWeights.clear();
     for (String feature : other.featureWeights.keySet()) {
-      int count = 0;
-      for (ScoredObject<Integer> weight : other.featureWeights.get(feature)) {
-        if (weight.score() != 0.0) {
-          ++count;
-        }        
-      }
-      if (count == 0) {
-        continue;
-      }
-      List<ScoredObject<Integer>> newWeights = Generics.newArrayList(count);
-      for (ScoredObject<Integer> weight : other.featureWeights.get(feature)) {
-        if (weight.score() != 0.0) {
-          newWeights.add(new ScoredObject<Integer>(weight.object(), weight.score()));
-        }
-      }
-      featureWeights.put(feature, newWeights);
+      featureWeights.put(feature, new Weight(other.featureWeights.get(feature)));
     }
   }
 
-  public static ShiftReduceParser averageModels(Collection<ScoredObject<ShiftReduceParser>> scoredModels) {
+  public static ShiftReduceParser averageScoredModels(Collection<ScoredObject<ShiftReduceParser>> scoredModels) {
     if (scoredModels.size() == 0) {
       throw new IllegalArgumentException("Cannot average empty models");
     }
@@ -137,7 +146,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     System.err.println();
 
     List<ShiftReduceParser> models = CollectionUtils.transformAsList(scoredModels, new Function<ScoredObject<ShiftReduceParser>, ShiftReduceParser>() { public ShiftReduceParser apply(ScoredObject<ShiftReduceParser> object) { return object.object(); }});
+    return averageModels(models);
 
+  }
+
+  public static ShiftReduceParser averageModels(Collection<ShiftReduceParser> models) {
     ShiftReduceParser firstModel = models.iterator().next();
     ShiftReduceOptions op = firstModel.op;
     // TODO: should we deep copy the options?
@@ -161,8 +174,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
 
     for (String feature : features) {
-      List<ScoredObject<Integer>> weights = Generics.newArrayList();
-      copy.featureWeights.put(feature, weights);
+      copy.featureWeights.put(feature, new Weight());
     }
     
     int numModels = models.size();
@@ -171,30 +183,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         if (!model.featureWeights.containsKey(feature)) {
           continue;
         }
-        for (ScoredObject<Integer> weight : model.featureWeights.get(feature)) {
-          updateWeight(copy.featureWeights.get(feature), weight.object(), weight.score() / numModels);
-        }
+        copy.featureWeights.get(feature).addScaled(model.featureWeights.get(feature), 1.0f / numModels);
       }
     }
 
     return copy;
-  }
-
-  public static void updateWeight(List<ScoredObject<Integer>> weights, int transition, double delta) {
-    if (transition < 0) {
-      return;
-    }
-    for (int i = 0; i < weights.size(); ++i) {
-      ScoredObject<Integer> weight = weights.get(i);
-      if (weight.object() == transition) {
-        weight.setScore(weight.score() + delta);
-        return;
-      } else if (weight.object() > transition) {
-        weights.add(i, new ScoredObject<Integer>(transition, delta));
-        return;
-      }
-    }
-    weights.add(new ScoredObject<Integer>(transition, delta));
   }
 
   public ParserQuery parserQuery() {
@@ -211,14 +204,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     Iterator<String> featureIt = featureWeights.keySet().iterator();
     while (featureIt.hasNext()) {
       String feature = featureIt.next();
-      List<ScoredObject<Integer>> weights = featureWeights.get(feature);
-      Iterator<ScoredObject<Integer>> weightIt = weights.iterator();
-      while (weightIt.hasNext()) {
-        ScoredObject<Integer> score = weightIt.next();
-        if (score.score() == 0.0) {
-          weightIt.remove();
-        }
-      }
+      Weight weights = featureWeights.get(feature);
+      weights.condense();
       if (weights.size() == 0) {
         featureIt.remove();
       }
@@ -286,16 +273,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, List<String> features, boolean requireLegal, int numTransitions) {
-    double[] scores = new double[transitionIndex.size()];
+    float[] scores = new float[transitionIndex.size()];
     for (String feature : features) {
-      List<ScoredObject<Integer>> weights = featureWeights.get(feature);
-      if (weights == null) {
+      Weight weight = featureWeights.get(feature);
+      if (weight == null) {
         // Features not in our index are ignored
         continue;
       }
-      for (ScoredObject<Integer> weight : weights) {
-        scores[weight.object()] += weight.score();
-      }
+      weight.score(scores);
     }
 
     PriorityQueue<ScoredObject<Integer>> queue = new PriorityQueue<ScoredObject<Integer>>(numTransitions + 1, ScoredComparator.ASCENDING_COMPARATOR);
@@ -459,9 +444,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     final List<String> features;
     final int goldTransition;
     final int predictedTransition;
-    final double delta;
+    final float delta;
 
-    Update(List<String> features, int goldTransition, int predictedTransition, double delta) {
+    Update(List<String> features, int goldTransition, int predictedTransition, float delta) {
       this.features = features;
       this.goldTransition = goldTransition;
       this.predictedTransition = predictedTransition;
@@ -501,7 +486,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
               // only possible when the parser has gone off the rails?
               continue;
             }
-            updates.add(new Update(features, transitionNum, -1, 1.0));
+            updates.add(new Update(features, transitionNum, -1, 1.0f));
           }
         } else {
           numWrong++;
@@ -513,7 +498,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
             // CompoundUnaryTransition which only exists because the
             // parser is wrong.  Do we want to add those transitions?
           }
-          updates.add(new Update(features, transitionNum, predictedNum, 1.0));
+          updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
         }
         state = predicted.apply(state);
       }
@@ -554,8 +539,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         if (!goldState.areTransitionsEqual(highestScoringState)) {
           ++numWrong;
           int lastTransition = transitionIndex.indexOf(highestScoringState.transitions.peek());
-          updates.add(new Update(featureFactory.featurize(highestCurrentState), -1, lastTransition, 1.0));
-          updates.add(new Update(goldFeatures, transitionIndex.indexOf(goldTransition), -1, 1.0));
+          updates.add(new Update(featureFactory.featurize(highestCurrentState), -1, lastTransition, 1.0f));
+          updates.add(new Update(goldFeatures, transitionIndex.indexOf(goldTransition), -1, 1.0f));
         } else {
           ++numCorrect;
         }
@@ -587,7 +572,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         } else {
           numWrong++;
           // TODO: allow weighted features, weighted training, etc
-          updates.add(new Update(features, transitionNum, predictedNum, 1.0));
+          updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
         }
         if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION && transitionNum != predictedNum) {
           break;
@@ -719,13 +704,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
         for (Update update : result.first) {
           for (String feature : update.features) {
-            List<ScoredObject<Integer>> weights = featureWeights.get(feature);
+            Weight weights = featureWeights.get(feature);
             if (weights == null) {
-              weights = Generics.newArrayList();
+              weights = new Weight();
               featureWeights.put(feature, weights);
             }
-            updateWeight(weights, update.goldTransition, update.delta);
-            updateWeight(weights, update.predictedTransition, -update.delta);
+            weights.updateWeight(update.goldTransition, update.delta);
+            weights.updateWeight(update.predictedTransition, -update.delta);
 
             if (featureFrequencies != null) {
               featureFrequencies.incrementCount(feature, (update.goldTransition >= 0 && update.predictedTransition >= 0) ? 2 : 1);
@@ -789,7 +774,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         int bestSize = 0;
         for (int i = 1; i <= models.size(); ++i) {
           System.err.println("Testing with " + i + " models averaged together");
-          ShiftReduceParser parser = averageModels(models.subList(0, i));
+          ShiftReduceParser parser = averageScoredModels(models.subList(0, i));
           EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
           evaluator.testOnTreebank(devTreebank);
           double labelF1 = evaluator.getLBScore();
@@ -799,9 +784,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
             bestSize = i;
           }
         }
-        copyWeights(averageModels(models.subList(0, bestSize)));
+        copyWeights(averageScoredModels(models.subList(0, bestSize)));
       } else {
-        copyWeights(ShiftReduceParser.averageModels(bestModels));
+        copyWeights(ShiftReduceParser.averageScoredModels(bestModels));
       }
     }
 
@@ -957,6 +942,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
 
-  private static final long serialVersionUID = 1;  
+  private static final long serialVersionUID = 1;
 }
 
