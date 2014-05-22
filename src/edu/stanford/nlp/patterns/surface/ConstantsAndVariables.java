@@ -529,12 +529,23 @@ public class ConstantsAndVariables {
    */
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
-
+  
+  @Option(name="tempFileFolder")
+  public String tempFileFolder = null;
+  
+  /**
+   * Use FileBackedCache for the inverted index -- use if memory is limited
+   */
+  @Option(name="diskBackedInvertedIndex")
+  public boolean diskBackedInvertedIndex = false;
+  
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
   String backgroundSymbol = "O";
 
+  public InvertedIndexByTokens invertedIndex;
+  
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
   
@@ -645,7 +656,7 @@ public class ConstantsAndVariables {
       }      
     }
     
-    if(targetAllowedNERs !=null){
+    if(useTargetNERRestriction && targetAllowedNERs !=null){
       allowedNERsforLabels = new HashMap<String, Set<String>>();
       for(String labelstr : targetAllowedNERs.split(";")){
         String[] t = labelstr.split(",");
@@ -722,6 +733,12 @@ public class ConstantsAndVariables {
   }
 
   double editDistMax = 100;
+
+  @Option(name="batchProcessSents")
+  public boolean batchProcessSents = false;
+
+  @Option(name="writeMatchedTokensFiles")
+  public boolean writeMatchedTokensFiles = false;
 
   public Pair<String, Double> getEditDistanceFromThisClass(String label,
       String ph, int minLen) {
