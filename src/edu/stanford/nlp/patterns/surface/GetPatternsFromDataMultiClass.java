@@ -2022,11 +2022,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         ext = filef.getName();
       }
 
-      RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
-
-      File[] files = dir.listFiles(fileFilter);
-      for (int i = 0; i < files.length; i++) {
-        allFiles.add(files[i]);
+      //RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
+      //File[] files = dir.listFiles(fileFilter);
+      for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(ext))) {
+        allFiles.add(f);
       }
     }
 
