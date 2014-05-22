@@ -506,7 +506,7 @@ public class CreatePatterns {
     ExecutorService executor = Executors
         .newFixedThreadPool(constVars.numThreads);
     
-    Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
+    Redwood.log(Redwood.DBG, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
     List<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
       
@@ -516,9 +516,9 @@ public class CreatePatterns {
         to = keyset.size();
       else
        to =Math.min(keyset.size(), (i + 1) * num);
-//      
-//      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num
-//          + " till " + Math.min(keyset.size(), (i + 1) * num));
+      
+      Redwood.log(Redwood.DBG, "assigning from " + i * num
+          + " till " + Math.min(keyset.size(), (i + 1) * num));
 
       Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> task = null;
       List<String> ids = keyset.subList(from ,to);
@@ -535,7 +535,7 @@ public class CreatePatterns {
       patternsForEachToken.putAll(future.get());
     }
     executor.shutdown();
-    Redwood.log(ConstantsAndVariables.extremedebug, "Done computing all patterns");
+    Redwood.log(Redwood.DBG, "Done computing all patterns");
     
     return patternsForEachToken;
   }

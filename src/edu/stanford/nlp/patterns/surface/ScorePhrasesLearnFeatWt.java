@@ -1,7 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import edu.stanford.nlp.classify.LogPrior;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.classify.LogisticClassifierFactory;
 import edu.stanford.nlp.classify.RVFDataset;
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
@@ -49,40 +47,20 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   public TwoDimensionalCounter<String, ScorePhraseMeasures> phraseScoresRaw = new TwoDimensionalCounter<String, ScorePhraseMeasures>();
 
 
-  public edu.stanford.nlp.classify.Classifier learnClassifier(String label, boolean forLearningPatterns,
-      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns) throws IOException, ClassNotFoundException {
+  public edu.stanford.nlp.classify.Classifier learnClassifier(Map<String, List<CoreLabel>> sents, String label, boolean forLearningPatterns,
+      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns) throws IOException {
     phraseScoresRaw.clear();
     learnedScores.clear();
     
     if(Data.domainNGramsFile != null)
       Data.loadDomainNGrams();
     
-    RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
-    
-    boolean computeRawFreq = false;
-    if (Data.rawFreq == null) {
-      Data.rawFreq = new ClassicCounter<String>();
-      computeRawFreq = true;
-    }
-    
-    if(constVars.batchProcessSents){
-      
-      for(File f: Data.sentsFiles){
-        Redwood.log(Redwood.DBG,"Sampling sentences from " + f);
-        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-        if(computeRawFreq)
-          Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
-        dataset.addAll(choosedatums(label, forLearningPatterns, sents, constVars.answerClass.get(label), label,
-            constVars.getOtherSemanticClasses(), constVars.ignoreWordswithClassesDuringSelection.get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
-            allSelectedPatterns));
-      }
-    } else{
-      if(computeRawFreq)
-        Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
-      dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.answerClass.get(label), label,
+    Data.computeRawFreqIfNull(constVars.numWordsCompound);
+    Counter<String> scores = new ClassicCounter<String>();
+    RVFDataset<String, ScorePhraseMeasures> dataset = choosedatums(label, forLearningPatterns, sents, constVars.answerClass.get(label), label,
         constVars.getOtherSemanticClasses(), constVars.ignoreWordswithClassesDuringSelection.get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
-        allSelectedPatterns));
-    }
+        allSelectedPatterns);
+
     edu.stanford.nlp.classify.Classifier classifier;
 //    if (scoreClassifierType.equals(ClassifierType.DT)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.J48", constVars.wekaOptions);
@@ -128,12 +106,12 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   }
 
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents, String label, TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns,
-      Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
+      Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) throws IOException {
 
     Counter<String> scores = new ClassicCounter<String>();
-    edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, wordsPatExtracted, allSelectedPatterns);
+    edu.stanford.nlp.classify.Classifier classifier = learnClassifier(sents, label, forLearningPatterns, wordsPatExtracted, allSelectedPatterns);
     for (Entry<String, ClassicCounter<SurfacePattern>> en : terms.entrySet()) {
       double score = this.scoreUsingClassifer(classifier, en.getKey(), label, forLearningPatterns, en.getValue(), allSelectedPatterns);
       scores.setCount(en.getKey(), score);
@@ -142,9 +120,9 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   }
   
   @Override
-  public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
+  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents, String label, Set<String> terms, boolean forLearningPatterns) throws IOException {
     Counter<String> scores = new ClassicCounter<String>();
-    edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, null, null);
+    edu.stanford.nlp.classify.Classifier classifier = learnClassifier(sents, label, forLearningPatterns, null, null);
     for (String en : terms) {
       double score = this.scoreUsingClassifer(classifier, en, label, forLearningPatterns,null, null);
       scores.setCount(en, score);
