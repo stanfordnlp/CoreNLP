@@ -120,6 +120,7 @@ public class InvertedIndexByTokens {
         relevantWords.addAll(relwordsThisPat);
             
     }
+    System.out.println("searching for " + relevantWords);
     return getFileSentIds(relevantWords);
   }
 }

@@ -366,7 +366,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     for (String label : answerClass.keySet()) {
       wordsPatExtracted.put(label,
           new TwoDimensionalCounter<String, SurfacePattern>());
-      System.out.println("adding " + label);
+      
       stopwords4Index.add(label);
       stopwords4Index.add(label.toLowerCase());
     }
