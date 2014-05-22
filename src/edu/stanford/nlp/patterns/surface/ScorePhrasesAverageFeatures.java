@@ -170,8 +170,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
 
   @Override
-  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
-      String label, Set<String> terms, boolean forLearningPatterns)
+  public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns)
       throws IOException {
     throw new RuntimeException("not implemented");
   }

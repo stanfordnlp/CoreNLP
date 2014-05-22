@@ -73,7 +73,7 @@ public abstract class PhraseScorer {
       total += weight;
     }
     assert Data.processedDataFreq.containsKey(word) : "How come the processed corpus freq doesnt have "
-        + word;
+        + word + " .Size of processedDataFreq is " + Data.processedDataFreq.size()  + " and size of raw freq is " + Data.rawFreq.size();
     return total / Data.processedDataFreq.getCount(word);
   }
 
@@ -164,8 +164,7 @@ public abstract class PhraseScorer {
       return minScore;
   }
 
-  abstract public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
-      String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
+  abstract public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
   
 
 }

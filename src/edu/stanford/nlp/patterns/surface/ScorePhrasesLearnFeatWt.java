@@ -65,7 +65,6 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
       computeRawFreq = true;
     }
     
-    Counter<String> scores = new ClassicCounter<String>();
     if(constVars.batchProcessSents){
       
       for(File f: Data.sentsFiles){
@@ -143,7 +142,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   }
   
   @Override
-  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents, String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
+  public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
     Counter<String> scores = new ClassicCounter<String>();
     edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, null, null);
     for (String en : terms) {

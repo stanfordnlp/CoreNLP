@@ -726,7 +726,7 @@ public class ConstantsAndVariables {
 
   double editDistMax = 100;
 
-  
+  @Option(name="batchProcessSents")
   public boolean batchProcessSents = false;
 
   @Option(name="writeMatchedTokensFiles")

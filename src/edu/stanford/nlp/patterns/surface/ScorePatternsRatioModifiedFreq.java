@@ -204,7 +204,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
       Execution.fillOptions(Data.class, props2);
-      classifierScores = scoreclassifier.phraseScorer.scorePhrases(Data.sents, label, patternsandWords.secondKeySet(),  true);
+      classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, patternsandWords.secondKeySet(),  true);
       // scorePhrases(Data.sents, label, true,
       // constVars.perSelectRand, constVars.perSelectNeg, null, null,
       // dictOddsWordWeights);

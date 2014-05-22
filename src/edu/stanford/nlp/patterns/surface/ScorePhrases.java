@@ -168,7 +168,8 @@ public class ScorePhrases {
       IOException, ClassNotFoundException {
 
     boolean computeDataFreq = false;
-    if (Data.processedDataFreq == null) {
+    if (Data.processedDataFreq == null || Data.rawFreq == null) {
+      Data.rawFreq = new ClassicCounter<String>();
       computeDataFreq = true;
       Data.processedDataFreq = new ClassicCounter<String>();
     }
@@ -181,23 +182,7 @@ public class ScorePhrases {
         allPatternsAndWords4Label, identifier, ignoreWords, computeDataFreq);
     constVars.getLabelDictionary().get(label).addAll(words.keySet());
     
-    if(computeDataFreq){
-      if (!phraseScorer.wordFreqNorm.equals(Normalization.NONE)) {
-        Redwood.log(Redwood.DBG, "computing processed freq");
-        for (Entry<String, Double> fq : Data.rawFreq.entrySet()) {
-          double in = fq.getValue();
-          if (phraseScorer.wordFreqNorm.equals(Normalization.SQRT))
-            in = Math.sqrt(in);
 
-          else if (phraseScorer.wordFreqNorm.equals(Normalization.LOG))
-            in = 1 + Math.log(in);
-          else
-            throw new RuntimeException("can't understand the normalization");
-          Data.processedDataFreq.setCount(fq.getKey(), in);
-        }
-      } else
-        Data.processedDataFreq = Data.rawFreq;
-    }
     return words;
   }
 
@@ -252,6 +237,35 @@ public class ScorePhrases {
     }
     executor.shutdown();
   }
+  
+  private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
+      Counter<SurfacePattern> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted){
+    for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
+      Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> pat4Sent = patternsForEachToken
+          .get(sentEn.getKey());
+      if (pat4Sent == null) {
+        throw new RuntimeException("How come there are no patterns for "
+            + sentEn.getKey() + ". The total patternsForEachToken size is "
+            + patternsForEachToken.size() + " and keys "
+            + patternsForEachToken.keySet());
+      }
+      for (Entry<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> en : pat4Sent
+          .entrySet()) {
+        CoreLabel token = null;
+        Set<SurfacePattern> p1 = en.getValue().first();
+        Set<SurfacePattern> p2 = en.getValue().second();
+        Set<SurfacePattern> p3 = en.getValue().third();
+        for (SurfacePattern p : patternsLearnedThisIter.keySet()) {
+          if (p1.contains(p) || p2.contains(p) || p3.contains(p)) {
+            if (token == null)
+              token = sentEn.getValue().get(en.getKey());
+            wordsandLemmaPatExtracted.incrementCount(
+                new Pair<String, String>(token.word(), token.lemma()), p);
+          }
+        }
+      }
+    }
+  }
   private Counter<String> learnNewPhrasesPrivate(
       String label,
       Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
@@ -269,31 +283,14 @@ public class ScorePhrases {
 
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
     if (constVars.doNotApplyPatterns) {
-      for (Entry<String, List<CoreLabel>> sentEn : Data.sents.entrySet()) {
-        Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> pat4Sent = patternsForEachToken
-            .get(sentEn.getKey());
-        if (pat4Sent == null) {
-          throw new RuntimeException("How come there are no patterns for "
-              + sentEn.getKey() + ". The total patternsForEachToken size is "
-              + patternsForEachToken.size() + " and keys "
-              + patternsForEachToken.keySet());
+      if(constVars.batchProcessSents){
+        for(File f: Data.sentsFiles){
+          Redwood.log(Redwood.DBG, "Calculating stats from sents file " + f);
+          Map<String, List<CoreLabel>> sents  = IOUtils.readObjectFromFile(f);
+          this.statsWithoutApplyingPatterns(sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
         }
-        for (Entry<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> en : pat4Sent
-            .entrySet()) {
-          CoreLabel token = null;
-          Set<SurfacePattern> p1 = en.getValue().first();
-          Set<SurfacePattern> p2 = en.getValue().second();
-          Set<SurfacePattern> p3 = en.getValue().third();
-          for (SurfacePattern p : patternsLearnedThisIter.keySet()) {
-            if (p1.contains(p) || p2.contains(p) || p3.contains(p)) {
-              if (token == null)
-                token = sentEn.getValue().get(en.getKey());
-              wordsandLemmaPatExtracted.incrementCount(
-                  new Pair<String, String>(token.word(), token.lemma()), p);
-            }
-          }
-        }
-      }
+      }else
+        this.statsWithoutApplyingPatterns(Data.sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
     } else {
       if(constVars.batchProcessSents){
         for(File f: Data.sentsFiles){
@@ -301,13 +298,30 @@ public class ScorePhrases {
           Map<String, List<CoreLabel>> sents  = IOUtils.readObjectFromFile(f);
           this.runParallelApplyPats(sents, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
           if(computeDataFreq)
-          Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
+            Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
         }
       } else{
         this.runParallelApplyPats(Data.sents, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
         Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
       }
      
+    }
+    if(computeDataFreq){
+      if (!phraseScorer.wordFreqNorm.equals(Normalization.NONE)) {
+        Redwood.log(Redwood.DBG, "computing processed freq");
+        for (Entry<String, Double> fq : Data.rawFreq.entrySet()) {
+          double in = fq.getValue();
+          if (phraseScorer.wordFreqNorm.equals(Normalization.SQRT))
+            in = Math.sqrt(in);
+
+          else if (phraseScorer.wordFreqNorm.equals(Normalization.LOG))
+            in = 1 + Math.log(in);
+          else
+            throw new RuntimeException("can't understand the normalization");
+          Data.processedDataFreq.setCount(fq.getKey(), in);
+        }
+      } else
+        Data.processedDataFreq = Data.rawFreq;
     }
     
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
