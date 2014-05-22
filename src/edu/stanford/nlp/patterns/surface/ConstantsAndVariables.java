@@ -533,11 +533,19 @@ public class ConstantsAndVariables {
   @Option(name="tempFileFolder")
   public String tempFileFolder = null;
   
+  /**
+   * Use FileBackedCache for the inverted index -- use if memory is limited
+   */
+  @Option(name="diskBackedInvertedIndex")
+  public boolean diskBackedInvertedIndex = false;
+  
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
   String backgroundSymbol = "O";
 
+  public InvertedIndexByTokens invertedIndex;
+  
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
   
@@ -648,7 +656,7 @@ public class ConstantsAndVariables {
       }      
     }
     
-    if(targetAllowedNERs !=null){
+    if(useTargetNERRestriction && targetAllowedNERs !=null){
       allowedNERsforLabels = new HashMap<String, Set<String>>();
       for(String labelstr : targetAllowedNERs.split(";")){
         String[] t = labelstr.split(",");

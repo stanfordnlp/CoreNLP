@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -186,9 +187,10 @@ public class ScorePhrases {
     return words;
   }
 
-  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, Counter<SurfacePattern> patternsLearnedThisIter,   TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
-    List<String> keyset = new ArrayList<String>(sents.keySet());
+  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, Set<String> sentIds, String label, Counter<SurfacePattern> patternsLearnedThisIter,   TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
+    List<String> keyset = new ArrayList<String>(sentIds);
     List<String> notAllowedClasses = new ArrayList<String>();
+    
     if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
       for(String l: constVars.answerClass.keySet()){
         if(!l.equals(label)){
@@ -281,31 +283,45 @@ public class ScorePhrases {
 
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
     if (constVars.doNotApplyPatterns) {
-      //if want to get the stats by the lossy way of just counting without applying the patterns
-      if(constVars.batchProcessSents){
-        for(File f: Data.sentsFiles){
+      // if want to get the stats by the lossy way of just counting without
+      // applying the patterns
+      if (constVars.batchProcessSents) {
+        for (File f : Data.sentsFiles) {
           Redwood.log(Redwood.DBG, "Calculating stats from sents file " + f);
-          Map<String, List<CoreLabel>> sents  = IOUtils.readObjectFromFile(f);
+          Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
           this.statsWithoutApplyingPatterns(sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
         }
-      }else
+      } else
         this.statsWithoutApplyingPatterns(Data.sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
-    
+
     } else {
-      
-      if(constVars.batchProcessSents){
-        for(File f: Data.sentsFiles){
-          Redwood.log(Redwood.DBG, "Applying patterns to sents from " + f);
-          Map<String, List<CoreLabel>> sents  = IOUtils.readObjectFromFile(f);
-          this.runParallelApplyPats(sents, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
-          if(computeDataFreq)
-            Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
+      if (patternsLearnedThisIter.size() > 0) {
+        Map<String, Set<String>> sentidswithfile = constVars.invertedIndex.getFileSentIdsFromPats(patternsLearnedThisIter.keySet());
+        if (constVars.batchProcessSents) {
+          for (String fname : sentidswithfile.keySet()) {
+            Redwood.log(Redwood.DBG, "Applying patterns to sents from " + fname);
+            Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(new File(fname));
+
+            Set<String> sentIDs = sentidswithfile.get(fname);
+            if (sentIDs != null)
+              this.runParallelApplyPats(sents, sentIDs, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
+
+            if (computeDataFreq)
+              Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
+          }
+        } else {
+          if (sentidswithfile != null && !sentidswithfile.isEmpty()) {
+            Set<String> sentids = sentidswithfile.get(CollectionUtils.toList(sentidswithfile.keySet()).get(0));
+            if (sentids != null) {
+              this.runParallelApplyPats(Data.sents, sentids, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
+            } else
+              Redwood.log(Redwood.DBG, "Inverted index did not retrieve any sentence for the patterns learned in this iteration");
+          } else
+            Redwood.log(Redwood.DBG, "Inverted index did not retrieve any sentence for the patterns learned in this iteration");
+          Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
         }
-      } else{
-        this.runParallelApplyPats(Data.sents, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
-        Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
+
       }
-     
     }
     if(computeDataFreq){
       if (!phraseScorer.wordFreqNorm.equals(Normalization.NONE)) {
@@ -335,7 +351,7 @@ public class ScorePhrases {
         wordsPatExtracted.addAll(en.first(),
             wordsandLemmaPatExtracted.getCounter(en));
       }
-
+      System.out.println("all candidate phrases are "  + terms.firstKeySet() + " and wordsandLemmaPatExtracted keyset is " + wordsandLemmaPatExtracted.firstKeySet());
       removeKeys(terms, constVars.getStopWords());
 
       // if (constVars.scorePhrasesSumNormalized) {

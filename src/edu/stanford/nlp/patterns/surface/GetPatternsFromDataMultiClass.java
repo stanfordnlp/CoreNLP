@@ -343,6 +343,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (constVars.debug < 2) {
       Redwood.hideChannelsEverywhere(Redwood.DBG);
     }
+    constVars.justify = true;
     if(constVars.debug < 3){
       constVars.justify = false;
     }
@@ -362,25 +363,37 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     scorePhrases = new ScorePhrases(props, constVars);
     createPats = new CreatePatterns(props, constVars);
     assert !(constVars.doNotApplyPatterns && (createPats.useStopWordsBeforeTerm || constVars.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
-
+    
+    String dir = System.getProperty("java.io.tmpdir");
+    File invIndexDir = File.createTempFile(dir, ".dir");
+    invIndexDir.delete();
+    constVars.invertedIndex = new InvertedIndexByTokens(invIndexDir, constVars.matchLowerCaseContext, constVars.diskBackedInvertedIndex, constVars.getStopWords());
+    
+    
     if (labelUsingSeedSets) {
-      for (String l : seedSets.keySet()) {
-        Redwood.log(Redwood.DBG, "Labeling data using seed set for " + l);
         if(constVars.batchProcessSents){
-          
           for(File f: Data.sentsFiles){
             Redwood.log(Redwood.DBG,"Labeling sents from " + f);
             Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
+
+            constVars.invertedIndex.add(sentsf, f.getAbsolutePath(), constVars.useLemmaContextTokens);
+            for (String l : seedSets.keySet()) {
+              Redwood.log(Redwood.DBG, "Labeling data using seed set for " + l);
+            
+            
             runLabelSeedWords(sentsf, constVars.answerClass.get(l), l, seedSets.get(l));
             if (constVars.getOtherSemanticClasses() != null)
               runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class,
                   "OTHERSEM", constVars.getOtherSemanticClasses());
             Redwood.log(Redwood.DBG, "Saving the labeled seed sents to the same file " + f);
-            IOUtils.writeObjectToFile(sentsf, f);
+            IOUtils.writeObjectToFile(sentsf, f);}
           }
-        }
-        else{
-        
+        } else{
+
+          constVars.invertedIndex.add(Data.sents, "1", constVars.useLemmaContextTokens);
+          for (String l : seedSets.keySet()) {
+            Redwood.log(Redwood.DBG, "Labeling data using seed set for " + l);
+          
           runLabelSeedWords(Data.sents, constVars.answerClass.get(l), l, seedSets.get(l));
           if (constVars.getOtherSemanticClasses() != null)
             runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class,
@@ -390,7 +403,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
 
     }
-
+    Redwood.log(Redwood.DBG, "Done creating inverted index and labeling data");
+    
     if (constVars.externalFeatureWeightsFile != null) {
       for (String label : seedSets.keySet()) {
         String externalFeatureWeightsFileLabel = constVars.externalFeatureWeightsFile
@@ -1775,42 +1789,41 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       Counter<String> scoreForAllWordsThisIteration = new ClassicCounter<String>();
       identifiedWords.addAll(scorePhrases.learnNewPhrases(label, this.patternsForEachToken, patterns, learnedPatterns.get(label),
-          matchedTokensByPat, scoreForAllWordsThisIteration, terms,
-          wordsPatExtracted.get(label), currentPatternWeights.get(label),
-          this.patternsandWords.get(label),
-          this.allPatternsandWords.get(label), constVars.identifier,
-          ignoreWords));
+            matchedTokensByPat, scoreForAllWordsThisIteration, terms,
+            wordsPatExtracted.get(label), currentPatternWeights.get(label),
+            this.patternsandWords.get(label),
+            this.allPatternsandWords.get(label), constVars.identifier,
+            ignoreWords));
 
-      if (constVars.usePatternResultAsLabel)
-        if (constVars.getLabelDictionary().containsKey(label))
-        {
-          if(constVars.batchProcessSents){
-            for(File f: Data.sentsFiles){
-              Redwood.log(Redwood.DBG, "labeling sentences from " + f);
-              Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-              labelWords(label, sents, identifiedWords.keySet(),
+      if (identifiedWords.size() > 0) {
+        if (constVars.usePatternResultAsLabel) {
+          if (constVars.getLabelDictionary().containsKey(label)) {
+            if (constVars.batchProcessSents) {
+              for (File f : Data.sentsFiles) {
+                Redwood.log(Redwood.DBG, "labeling sentences from " + f);
+                Map<String, List<CoreLabel>> sents = IOUtils
+                    .readObjectFromFile(f);
+                labelWords(label, sents, identifiedWords.keySet(), patterns.keySet(), sentsOutFile, matchedTokensByPat);
+                IOUtils.writeObjectToFile(sents, f);
+              }
+            } else
+              labelWords(label, Data.sents, identifiedWords.keySet(),
                   patterns.keySet(), sentsOutFile, matchedTokensByPat);
-              IOUtils.writeObjectToFile(sents, f);
-            }
-          }
-          else
-            labelWords(label, Data.sents, identifiedWords.keySet(),
-              patterns.keySet(), sentsOutFile, matchedTokensByPat);
-          }
-        else
-          throw new RuntimeException("why is the answer label null?");
-      learnedWords.get(label).addAll(identifiedWords);
+          } else
+            throw new RuntimeException("why is the answer label null?");
+          learnedWords.get(label).addAll(identifiedWords);
+        }
 
-      if (wordsOutput != null) {
-        // if (i > 0)
-        // wordsOutput.write("\n");
-        // wordsOutput.write("\n#Iteration " + (i + 1) + "\n");
-        wordsOutput.write("\n"
-            + Counters.toSortedString(identifiedWords, identifiedWords.size(),
-                "%1$s", "\n"));
-        wordsOutput.flush();
+        if (wordsOutput != null) {
+          // if (i > 0)
+          // wordsOutput.write("\n");
+          // wordsOutput.write("\n#Iteration " + (i + 1) + "\n");
+          wordsOutput.write("\n"
+              + Counters.toSortedString(identifiedWords,
+                  identifiedWords.size(), "%1$s", "\n"));
+          wordsOutput.flush();
+        }
       }
-
       if (patterns.size() == 0 && identifiedWords.size() == 0) {
         if (learnedWords.get(label).size() >= constVars.maxExtractNumWords) {
           System.out
