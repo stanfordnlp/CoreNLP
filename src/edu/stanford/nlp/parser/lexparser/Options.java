@@ -195,7 +195,7 @@ public class Options implements Serializable {
    *      processing this option, or the value i unchanged if a valid option couldn't
    *      be processed starting at position i.
    */
-  private int setOptionFlag(String[] args, int i) {
+  protected int setOptionFlag(String[] args, int i) {
     if (args[i].equalsIgnoreCase("-PCFG")) {
       doDep = false;
       doPCFG = true;
@@ -762,8 +762,11 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-regCost")) {
         trainOptions.regCost = Double.parseDouble(args[i + 1]);
         i += 2;
-    } else if (args[i].equalsIgnoreCase("-dvIterations")) {
-      trainOptions.dvIterations = Integer.parseInt(args[i + 1]);
+    } else if (args[i].equalsIgnoreCase("-dvIterations") || args[i].equalsIgnoreCase("-trainingIterations")) {
+      trainOptions.trainingIterations = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-stalledIterationLimit")) {
+      trainOptions.stalledIterationLimit = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-dvBatchSize") || args[i].equalsIgnoreCase("-batchSize")) {
       trainOptions.batchSize = Integer.parseInt(args[i + 1]);
@@ -783,9 +786,9 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-maxTrainTimeSeconds")) {
       trainOptions.maxTrainTimeSeconds = Integer.parseInt(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-dvSeed")) {
-      trainOptions.dvSeed = Long.parseLong(args[i + 1]);
-      i += 2;
+    } else if (args[i].equalsIgnoreCase("-dvSeed") || args[i].equalsIgnoreCase("-randomSeed")) {
+      trainOptions.randomSeed = Long.parseLong(args[i + 1]);
+      i += 2;      
     } else if (args[i].equalsIgnoreCase("-wordVectorFile")) {
       lexOptions.wordVectorFile = args[i + 1];
       i += 2;
@@ -1114,7 +1117,12 @@ public class Options implements Serializable {
   public boolean nodePrune = false;
 
 
-  public TrainOptions trainOptions = new TrainOptions();
+  public TrainOptions trainOptions = newTrainOptions();
+
+  /** Separated out so subclasses of Options can override */
+  public TrainOptions newTrainOptions() {
+    return new TrainOptions();
+  }
 
   /**
    * Note that the TestOptions is transient.  This means that whatever
@@ -1123,7 +1131,12 @@ public class Options implements Serializable {
    * parser is reloaded, put it in either TrainOptions or in this
    * class itself.
    */
-  public transient TestOptions testOptions = new TestOptions();
+  public transient TestOptions testOptions = newTestOptions();
+
+  /** Separated out so subclasses of Options can override */
+  public TestOptions newTestOptions() {
+    return new TestOptions();
+  }
 
 
   /**
@@ -1157,7 +1170,7 @@ public class Options implements Serializable {
     throws IOException, ClassNotFoundException
   {
     in.defaultReadObject();
-    testOptions = new TestOptions();
+    testOptions = newTestOptions();
   }
 
   public void display() {
