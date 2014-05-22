@@ -76,7 +76,15 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   }
 
   private int compare(Entry<E> entryA, Entry<E> entryB) {
-    return compare(entryA.priority, entryB.priority);
+    int result = compare(entryA.priority, entryB.priority);
+    if (result != 0) {
+      return result;
+    }
+    if ((entryA.key instanceof Comparable) && (entryB.key instanceof Comparable)) {
+      Comparable<E> key = ErasureUtils.uncheckedCast(entryA.key);
+      return key.compareTo(entryB.key);
+    }
+    return result;
   }
 
   private static int compare(double a, double b) {
