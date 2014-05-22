@@ -13,7 +13,6 @@ import edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
-import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.patterns.surface.PatternsAnnotations;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;

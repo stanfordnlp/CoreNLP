@@ -37,13 +37,6 @@ public class InvertedIndexByTokens {
     this.stopWords = stopWords;
     if(this.stopWords == null)
       this.stopWords  = new HashSet<String>();
-    
-    //Special words for filler words and stop words
-    this.stopWords.add("FW");
-    this.stopWords.add("SW");
-    //Special words for filler words and stop words
-    this.stopWords.add("fw");
-    this.stopWords.add("sw");
   }
 
   void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {

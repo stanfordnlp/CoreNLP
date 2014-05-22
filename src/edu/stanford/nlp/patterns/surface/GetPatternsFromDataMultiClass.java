@@ -366,6 +366,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     for (String label : answerClass.keySet()) {
       wordsPatExtracted.put(label,
           new TwoDimensionalCounter<String, SurfacePattern>());
+      System.out.println("adding " + label);
       stopwords4Index.add(label);
       stopwords4Index.add(label.toLowerCase());
     }
@@ -420,7 +421,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             + "_" + label;
         File f = new File(externalFeatureWeightsFileLabel);
         if (!f.exists()) {
-          System.err.println("externalweightsfile for the label " + label
+          Redwood.log(Redwood.DBG, "externalweightsfile for the label " + label
               + " does not exist: learning weights!");
           LearnImportantFeatures lmf = new LearnImportantFeatures();
           // if (answerClass.size() > 1 || this.labelDictionary.size() > 1)
@@ -428,8 +429,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           Execution.fillOptions(lmf, props);
           lmf.answerClass = answerClass.get(label);
           lmf.answerLabel = label;
-          System.out.println("Getting top features for " + label
-              + " with class " + answerClass);
           lmf.setUp();
           lmf.getTopFeatures(constVars.batchProcessSents, Data.sentsFiles, Data.sents, constVars.perSelectRand,
               constVars.perSelectNeg, externalFeatureWeightsFileLabel);
