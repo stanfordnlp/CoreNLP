@@ -32,7 +32,7 @@ public class Weight implements Serializable {
       packed = null;
       return;
     }
-    packed = ArrayUtils.copy(other.packed);
+    packed = ArrayUtils.copy(packed);
     condense();
   }
 
@@ -109,7 +109,7 @@ public class Weight implements Serializable {
       }
       int index = unpackIndex(i);
       float score = unpackScore(i);
-      newPacked[j] = pack(index, score);
+      packed[j] = pack(index, score);
       ++j;
     }
     packed = newPacked;
