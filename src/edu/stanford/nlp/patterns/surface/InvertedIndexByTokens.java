@@ -24,9 +24,9 @@ public class InvertedIndexByTokens {
   Map<String, Hashtable<String, Set<String>>> index;
   boolean convertToLowercase;
   boolean filebacked;
-  Set<String> stopWords;
+  Set<String> stopWords, specialWords;
   
-  public InvertedIndexByTokens(File invertedIndexDir, boolean lc, boolean filebacked, Set<String> stopWords) {
+  public InvertedIndexByTokens(File invertedIndexDir, boolean lc, boolean filebacked, Set<String> stopWords, Set<String> specialWords) {
     if(filebacked)
       index = new FileBackedCache<String, Hashtable<String, Set<String>>>(
         invertedIndexDir);
@@ -37,6 +37,7 @@ public class InvertedIndexByTokens {
     this.stopWords = stopWords;
     if(this.stopWords == null)
       this.stopWords  = new HashSet<String>();
+    this.specialWords = specialWords;
   }
 
   void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {
@@ -110,7 +111,7 @@ public class InvertedIndexByTokens {
         }
       boolean nonStopW = false;
       for(String w: relwordsThisPat){
-        if(!stopWords.contains(w)){
+        if(!stopWords.contains(w) && !specialWords.contains(w)){
           relevantWords.add(w);
           nonStopW = true;
         }
@@ -121,6 +122,7 @@ public class InvertedIndexByTokens {
             
     }
     System.out.println("searching for " + relevantWords);
+    relevantWords.removeAll(specialWords);
     return getFileSentIds(relevantWords);
   }
 }

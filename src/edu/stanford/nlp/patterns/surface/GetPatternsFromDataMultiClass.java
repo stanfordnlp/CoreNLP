@@ -359,16 +359,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     String dir = System.getProperty("java.io.tmpdir");
     File invIndexDir = File.createTempFile(dir, ".dir");
     invIndexDir.delete();
-    Set<String> stopwords4Index = new HashSet<String>();
-    stopwords4Index.addAll(constVars.getStopWords());
-    stopwords4Index.addAll(Arrays.asList("fw","FW","sw","SW","OTHERSEM","othersem"));
+    Set<String> specialwords4Index = new HashSet<String>();
+    specialwords4Index.addAll(Arrays.asList("fw","FW","sw","SW","OTHERSEM","othersem"));
     
     for (String label : answerClass.keySet()) {
       wordsPatExtracted.put(label,
           new TwoDimensionalCounter<String, SurfacePattern>());
       
-      stopwords4Index.add(label);
-      stopwords4Index.add(label.toLowerCase());
+      specialwords4Index.add(label);
+      specialwords4Index.add(label.toLowerCase());
     }
     
     scorePhrases = new ScorePhrases(props, constVars);
@@ -377,7 +376,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     
     
     
-    constVars.invertedIndex = new InvertedIndexByTokens(invIndexDir, constVars.matchLowerCaseContext, constVars.diskBackedInvertedIndex, stopwords4Index);
+    constVars.invertedIndex = new InvertedIndexByTokens(invIndexDir, constVars.matchLowerCaseContext, constVars.diskBackedInvertedIndex, constVars.getStopWords(), specialwords4Index);
     
     
     if (labelUsingSeedSets) {
