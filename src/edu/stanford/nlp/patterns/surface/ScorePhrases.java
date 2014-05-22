@@ -351,7 +351,6 @@ public class ScorePhrases {
         wordsPatExtracted.addAll(en.first(),
             wordsandLemmaPatExtracted.getCounter(en));
       }
-      System.out.println("all candidate phrases are "  + terms.firstKeySet() + " and wordsandLemmaPatExtracted keyset is " + wordsandLemmaPatExtracted.firstKeySet());
       removeKeys(terms, constVars.getStopWords());
 
       // if (constVars.scorePhrasesSumNormalized) {

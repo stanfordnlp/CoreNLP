@@ -10,12 +10,11 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.FileBackedCache;
-import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Creates an inverted index of (word or lemma) => {file1 => {sentid1,
- * sentid2,.. }, file2 => {sentid1, sentid2, ...}} It is backed by
- * <code>FileBackedCache</code>
+ * sentid2,.. }, file2 => {sentid1, sentid2, ...}}. 
+ * It can be backed by <code>FileBackedCache</code> if given the option (to save memory)
  * 
  * @author Sonal Gupta (sonalg@stanford.edu)
  * 
@@ -36,6 +35,15 @@ public class InvertedIndexByTokens {
       index = new HashMap<String, Hashtable<String, Set<String>>>();
     this.convertToLowercase = lc;
     this.stopWords = stopWords;
+    if(this.stopWords == null)
+      this.stopWords  = new HashSet<String>();
+    
+    //Special words for filler words and stop words
+    this.stopWords.add("FW");
+    this.stopWords.add("SW");
+    //Special words for filler words and stop words
+    this.stopWords.add("fw");
+    this.stopWords.add("sw");
   }
 
   void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {
@@ -91,6 +99,7 @@ public class InvertedIndexByTokens {
       String[] next = p.getOriginalNext();
       if (next != null)
         for (String s : next) {
+          s = s.trim();
           if(convertToLowercase)
             s = s.toLowerCase();
           if(!s.isEmpty())
@@ -99,6 +108,7 @@ public class InvertedIndexByTokens {
       String[] prev = p.getOriginalPrev();
       if (prev != null)
         for (String s : prev) {
+          s = s.trim();
           if(convertToLowercase)
             s = s.toLowerCase();
           if(!s.isEmpty())
@@ -116,7 +126,6 @@ public class InvertedIndexByTokens {
         relevantWords.addAll(relwordsThisPat);
             
     }
-    System.out.println("searching for word " + relevantWords);
     return getFileSentIds(relevantWords);
   }
 }

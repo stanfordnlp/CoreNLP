@@ -2321,7 +2321,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }else
         numincorrect++;
     }
-    System.err.println("Gold entity list does not contain words " + assumedNeg + " for label " + label + ". Assuming them as negative.");
+    
+    if(!assumedNeg.isEmpty())
+      System.err.println("Gold entity list does not contain words " + assumedNeg + " for label " + label + ". Assuming them as negative.");
+    
     double precision = numcorrect/(double)(numcorrect + numincorrect);
     double recall = numcorrect /(double)(numgoldcorrect);
     return new Pair<Double, Double>(precision, recall);
