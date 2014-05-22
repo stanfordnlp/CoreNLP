@@ -197,19 +197,17 @@ public class ScorePhrases {
       }
       notAllowedClasses.add("OTHERSEM:OTHERSEM");
     }
+    
+    //Apply the patterns and extract candidate phrases
     int num = 0;
     if (constVars.numThreads == 1)
       num = keyset.size();
     else
       num = keyset.size() / (constVars.numThreads - 1);
     ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-    // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "keyset size is " +
-    // keyset.size());
     List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
-      // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "assigning from " + i *
-      // num + " till " + Math.min(keyset.size(), (i + 1) * num));
-
+    
       Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> task = null;
       Map<TokenSequencePattern, SurfacePattern> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , SurfacePattern>();
       for(SurfacePattern p : patternsLearnedThisIter.keySet()){
@@ -227,7 +225,7 @@ public class ScorePhrases {
       list.add(submit);
     }
 
-    // // Now retrieve the result
+    // Now retrieve the result
     for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> future : list) {
       Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
           .get();
@@ -283,6 +281,7 @@ public class ScorePhrases {
 
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
     if (constVars.doNotApplyPatterns) {
+      //if want to get the stats by the lossy way of just counting without applying the patterns
       if(constVars.batchProcessSents){
         for(File f: Data.sentsFiles){
           Redwood.log(Redwood.DBG, "Calculating stats from sents file " + f);
@@ -291,7 +290,9 @@ public class ScorePhrases {
         }
       }else
         this.statsWithoutApplyingPatterns(Data.sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
+    
     } else {
+      
       if(constVars.batchProcessSents){
         for(File f: Data.sentsFiles){
           Redwood.log(Redwood.DBG, "Applying patterns to sents from " + f);
