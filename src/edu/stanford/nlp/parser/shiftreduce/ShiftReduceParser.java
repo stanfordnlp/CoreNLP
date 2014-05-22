@@ -55,6 +55,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -910,6 +911,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     ShiftReduceParser parser = null;
 
     if (trainTreebankPath != null) {
+      System.err.println("Training ShiftReduceParser");
+      System.err.println("Initial arguments:");
+      System.err.println("   " + StringUtils.join(args));
       if (continueTraining != null) {
         parser = ShiftReduceParser.loadModel(continueTraining, ArrayUtils.concatenate(FORCE_TAGS, newArgs));
       } else {
