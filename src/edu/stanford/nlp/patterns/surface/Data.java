@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public class Data {
   public static double ratioDomainNgramFreqWithDataFreq = 1;
   static public Counter<String> rawFreq = null;
+  public static List<File> sentsFiles = null;
   public static Map<String, List<CoreLabel>> sents = null;
   public static Counter<String> processedDataFreq = null;
   public static Counter<String> domainNGramRawFreq = new ClassicCounter<String>();;
@@ -28,9 +30,7 @@ public class Data {
 
   public static Counter<String> googleNGram = new ClassicCounter<String>();
 
-  public static void computeRawFreqIfNull(int numWordsCompound) {
-    if (Data.rawFreq == null) {
-      Data.rawFreq = new ClassicCounter<String>();
+  public static void computeRawFreqIfNull(Map<String, List<CoreLabel>> sents, int numWordsCompound) {
       for (List<CoreLabel> l : sents.values()) {
         List<List<CoreLabel>> ngrams = CollectionUtils.getNGrams(l, 1, numWordsCompound);
         for (List<CoreLabel> n : ngrams) {
@@ -45,16 +45,16 @@ public class Data {
         }
       }
       if (googleNGram != null && googleNGram.size() > 0)
-        getRatioGoogleNgramFreqWithDataFreq();
+        setRatioGoogleNgramFreqWithDataFreq();
       if (domainNGramRawFreq != null && domainNGramRawFreq.size() > 0)
         ratioDomainNgramFreqWithDataFreq = domainNGramRawFreq.totalCount() / Data.rawFreq.totalCount();
-    }
+    
   }
 
-  public static double getRatioGoogleNgramFreqWithDataFreq() {
+  public static void setRatioGoogleNgramFreqWithDataFreq() {
     ratioGoogleNgramFreqWithDataFreq = googleNGram.totalCount() / Data.rawFreq.totalCount();
     Redwood.log(ConstantsAndVariables.minimaldebug, "Data", "ratioGoogleNgramFreqWithDataFreq is " + ratioGoogleNgramFreqWithDataFreq);
-    return ratioGoogleNgramFreqWithDataFreq;
+    //return ratioGoogleNgramFreqWithDataFreq;
 
   }
 
