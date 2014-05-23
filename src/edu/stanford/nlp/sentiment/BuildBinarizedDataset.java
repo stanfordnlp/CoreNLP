@@ -201,7 +201,7 @@ public class BuildBinarizedDataset {
         scorer.forwardPropagateTree(collapsedUnary);
         setPredictedLabels(collapsedUnary);
       } else {
-        setUnknownLabels(binarized, mainLabel);
+        setUnknownLabels(collapsedUnary, mainLabel);
       }
 
       Trees.convertToCoreLabels(collapsedUnary);
