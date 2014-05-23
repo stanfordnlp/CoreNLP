@@ -1,6 +1,9 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -8,17 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.FileBackedCache;
 
 /**
  * Creates an inverted index of (word or lemma) => {file1 => {sentid1,
- * sentid2,.. }, file2 => {sentid1, sentid2, ...}}. It can be backed by
- * <code>FileBackedCache</code> if given the option (to save memory).
+ * sentid2,.. }, file2 => {sentid1, sentid2, ...}}.
  * 
- * IMPORTANT: If you are using FileBackedCache, you CANNOT save the index on disk and reload it - you should create the inverted index every time! 
- * This is because Java 7 does not guarantee consistency of String.hashCode() across different JVM invocations (booooo). And FileBackedCache relies on 
- * the output of the hashCode() function.
+ * (Commented out FileBackedCache because it currrently doesnt support changing
+ * the values)
  * 
  * @author Sonal Gupta (sonalg@stanford.edu)
  * 
@@ -27,16 +28,33 @@ public class InvertedIndexByTokens {
 
   Map<String, Hashtable<String, Set<String>>> index;
   boolean convertToLowercase;
-  boolean filebacked;
+  // boolean filebacked;
   Set<String> stopWords, specialWords;
-
-  public InvertedIndexByTokens(File invertedIndexDir, boolean lc, boolean filebacked, Set<String> stopWords, Set<String> specialWords) {
-    if (filebacked)
-      index = new FileBackedCache<String, Hashtable<String, Set<String>>>(invertedIndexDir, 10);
-    else
-      // memory mapped
-      index = new HashMap<String, Hashtable<String, Set<String>>>();
+  // static int numfilesindiskbacked = 10000;
+  int numAllEntries = 0;
+  boolean batchProcessSents = false;
+  
+  public InvertedIndexByTokens(File invertedIndexDir, boolean lc, Set<String> stopWords, Set<String> specialWords, boolean batchProcessSents) {
+    // if (filebacked)
+    // index = new FileBackedCache<StringwithConsistentHashCode,
+    // Hashtable<String, Set<String>>>(invertedIndexDir, numfilesindiskbacked);
+    // else
+    // memory mapped
+    index = new HashMap<String, Hashtable<String, Set<String>>>();
     this.convertToLowercase = lc;
+    this.batchProcessSents = batchProcessSents;
+    // this.filebacked = filebacked;
+    this.stopWords = stopWords;
+    if (this.stopWords == null)
+      this.stopWords = new HashSet<String>();
+    this.specialWords = specialWords;
+  }
+
+  public InvertedIndexByTokens(Map<String, Hashtable<String, Set<String>>> index, boolean lc, Set<String> stopWords,
+      Set<String> specialWords, boolean batchProcessSents) {
+    this.index = index;
+    this.convertToLowercase = lc;
+    this.batchProcessSents = batchProcessSents;
     this.stopWords = stopWords;
     if (this.stopWords == null)
       this.stopWords = new HashSet<String>();
@@ -45,7 +63,6 @@ public class InvertedIndexByTokens {
 
   void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {
 
-    
     for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
       for (CoreLabel l : sEn.getValue()) {
         String w = l.word();
@@ -58,14 +75,19 @@ public class InvertedIndexByTokens {
         Hashtable<String, Set<String>> t = index.get(w);
         if (t == null)
           t = new Hashtable<String, Set<String>>();
+
         Set<String> sentids = t.get(filename);
-        if (sentids == null)
+        if (sentids == null) {
           sentids = new HashSet<String>();
+        }
+        numAllEntries = numAllEntries - sentids.size();
         sentids.add(sEn.getKey());
         t.put(filename, sentids);
+        numAllEntries = numAllEntries + sentids.size();
         index.put(w, t);
       }
     }
+
   }
 
   public Map<String, Set<String>> getFileSentIds(String word) {
@@ -82,6 +104,7 @@ public class InvertedIndexByTokens {
         if (!sentids.containsKey(en.getKey())) {
           sentids.put(en.getKey(), new HashSet<String>());
         }
+
         sentids.get(en.getKey()).addAll(en.getValue());
       }
     }
@@ -129,5 +152,49 @@ public class InvertedIndexByTokens {
 
   public Set<String> getSpecialWordsList() {
     return this.specialWords;
+  }
+
+  public void saveIndex(String dir) throws IOException {
+    BufferedWriter w = new BufferedWriter(new FileWriter(dir + "/param.txt"));
+    w.write(String.valueOf(convertToLowercase) + "\n");
+    w.write(String.valueOf(this.batchProcessSents) + "\n");
+    w.close();
+    IOUtils.writeObjectToFile(this.stopWords, dir + "/stopwords.ser");
+    IOUtils.writeObjectToFile(this.specialWords, dir + "/specialwords.ser");
+    // if (!filebacked)
+    IOUtils.writeObjectToFile(index, dir + "/map.ser");
+
+  }
+
+  public static InvertedIndexByTokens loadIndex(String dir) {
+    try {
+      List<String> lines = IOUtils.linesFromFile(dir + "/param.txt");
+      boolean lc = Boolean.parseBoolean(lines.get(0));
+      boolean batchProcessSents = Boolean.parseBoolean(lines.get(1));
+
+      Set<String> stopwords = IOUtils.readObjectFromFile(dir + "/stopwords.ser");
+      Set<String> specialwords = IOUtils.readObjectFromFile(dir + "/specialwords.ser");
+      Map<String, Hashtable<String, Set<String>>> index = null;
+      // if (!filebacked)
+      index = IOUtils.readObjectFromFile(dir + "/map.ser");
+      // else
+      // index = new FileBackedCache<StringwithConsistentHashCode,
+      // Hashtable<String, Set<String>>>(dir + "/cache", numfilesindiskbacked);
+      return new InvertedIndexByTokens(index, lc, stopwords, specialwords, batchProcessSents);
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot load the inverted index. " + e);
+    }
+  }
+
+  public int size() {
+    return index.size();
+  }
+  
+  public boolean isBatchProcessed(){
+    return this.batchProcessSents;
+  }
+
+  public int numAllEntries() {
+    return this.numAllEntries;
   }
 }
