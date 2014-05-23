@@ -31,7 +31,7 @@ public class IOUtils {
   private IOUtils() { }
 
   /**
-   * Write object to a file with the specified name.  The file is silently gzipped if the filename ends with .gz.
+   * Write object to a file with the specified name.
    *
    * @param o Object to be written to file
    * @param filename Name of the temp file
@@ -44,7 +44,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File.  The file is silently gzipped if the filename ends with .gz.
+   * Write an object to a specified File.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -56,7 +56,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File. The file is silently gzipped if the filename ends with .gz.
+   * Write an object to a specified File. The file is silently gzipped regardless of name.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -66,12 +66,8 @@ public class IOUtils {
    */
   public static File writeObjectToFile(Object o, File file, boolean append) throws IOException {
     // file.createNewFile(); // cdm may 2005: does nothing needed
-    OutputStream os = new FileOutputStream(file, append);
-    if (file.getName().endsWith(".gz")) {
-      os = new GZIPOutputStream(os);
-    }
-    os = new BufferedOutputStream(os);
-    ObjectOutputStream oos = new ObjectOutputStream(os);
+    ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(
+            new GZIPOutputStream(new FileOutputStream(file, append))));
     oos.writeObject(o);
     oos.close();
     return file;

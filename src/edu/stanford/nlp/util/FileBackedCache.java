@@ -45,6 +45,14 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * </p>
  *
  * <p>
+ *   The values in this map should not be modified once read -- the cache has no reliable way to pick up this change
+ *   and synchronize it with the disk.
+ *   To enforce this, the cache will cast collections to their unmodifiable counterparts -- to avoid class cast exceptions,
+ *   you should not parameterize the class with a particular type of collection
+ *   (e.g., use {@link java.util.Map} rather than {@link java.util.HashMap}).
+ * </p>
+ *
+ * <p>
  *   The serialization behavior can be safely changed by overwriting:
  *   <ul>
  *     <li>@See FileBackedCache#newInputStream</li>
@@ -60,7 +68,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * @author Gabor Angeli (angeli at cs)
  */
 
-public class FileBackedCache<KEY extends Serializable, T extends Serializable> implements Map<KEY, T>, Iterable <Map.Entry<KEY,T>> {
+public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>, Iterable <Map.Entry<KEY,T>> {
   //
   // Variables
   //
@@ -308,7 +316,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
    * Else, this requires a single disk access, of undeterminable size but roughly correlated with the
    * quality of the key's hash code.
    */
-  @SuppressWarnings("SuspiciousMethodCalls")
+  @SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})
   @Override
   public T get(Object key) {
     SoftReference<T> likelyReferenceOrNull = mapping.get(key);
@@ -326,7 +334,13 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
       mapping.remove(key);
       return get(key);  // try again
     } else {
-      return referenceOrNull;
+      if (referenceOrNull instanceof Collection) {
+        return (T) Collections.unmodifiableCollection((Collection) referenceOrNull);
+      } else if (referenceOrNull instanceof Map) {
+        return (T) Collections.unmodifiableMap((Map) referenceOrNull);
+      } else {
+        return referenceOrNull;
+      }
     }
   }
 
@@ -334,6 +348,11 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
   public T put(KEY key, T value) {
     T existing = get(key);
     if (existing == value || (existing != null && existing.equals(value))) {
+      // Make sure we flush objects which have changed
+      if (existing != null && !existing.equals(value)) {
+        updateBlockOrDelete(key, value);
+      }
+      // Return the same object back
       return existing;
     } else {
       // In-memory
