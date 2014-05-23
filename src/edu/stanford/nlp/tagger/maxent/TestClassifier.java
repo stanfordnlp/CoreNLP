@@ -131,21 +131,22 @@ public class TestClassifier {
 
   String resultsString(MaxentTagger maxentTagger) {
     StringBuilder output = new StringBuilder();
-    output.append("Model " + maxentTagger.config.getModel() + " has xSize=" + maxentTagger.xSize +
-                  ", ySize=" + maxentTagger.ySize + ", and numFeatures=" +
-                  maxentTagger.getLambdaSolve().lambda.length + ".\n");
-    output.append("Results on " + numSentences + " sentences and " +
-                  (numRight + numWrong) + " words, of which " +
-                  unknownWords + " were unknown.\n");
-    output.append(String.format("Total sentences right: %d (%f%%); wrong: %d (%f%%).\n",
+    output.append(String.format("Model %s has xSize=%d, ySize=%d, and numFeatures=%d.%n",
+            maxentTagger.config.getModel(),
+            maxentTagger.xSize,
+            maxentTagger.ySize,
+            maxentTagger.getLambdaSolve().lambda.length));
+    output.append(String.format("Results on %d sentences and %d words, of which %d were unknown.%n",
+            numSentences, numRight + numWrong, unknownWords));
+    output.append(String.format("Total sentences right: %d (%f%%); wrong: %d (%f%%).%n",
                                 numCorrectSentences, numCorrectSentences * 100.0 / numSentences,
                                 numSentences - numCorrectSentences,
                                 (numSentences - numCorrectSentences) * 100.0 / (numSentences)));
-    output.append(String.format("Total tags right: %d (%f%%); wrong: %d (%f%%).\n",
+    output.append(String.format("Total tags right: %d (%f%%); wrong: %d (%f%%).%n",
                                 numRight, numRight * 100.0 / (numRight + numWrong), numWrong,
                                 numWrong * 100.0 / (numRight + numWrong)));
     if (unknownWords > 0) {
-      output.append(String.format("Unknown words right: %d (%f%%); wrong: %d (%f%%).\n",
+      output.append(String.format("Unknown words right: %d (%f%%); wrong: %d (%f%%).%n",
                                   (unknownWords - numWrongUnknown),
                                   100.0 - (numWrongUnknown * 100.0 / unknownWords),
                                   numWrongUnknown, numWrongUnknown * 100.0 / unknownWords));
