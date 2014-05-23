@@ -2013,18 +2013,19 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     List<File> allFiles = new ArrayList<File>();
     for (String tokfile : file.split("[,;]")) {
       File filef = new File(tokfile);
-      String ext = ".*";
+      String path = ".*";
       File dir = null;
       if (filef.isDirectory()) {
         dir = filef;
       } else {
         dir = filef.getParentFile();
-        ext = filef.getName();
+        path = "^"+filef.getAbsolutePath()+"$";
       }
 
       //RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
       //File[] files = dir.listFiles(fileFilter);
-      for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(ext))) {
+      for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
+        System.out.println("Reading file " + f);
         allFiles.add(f);
       }
     }
