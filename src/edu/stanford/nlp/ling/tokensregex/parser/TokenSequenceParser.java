@@ -9,11 +9,10 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ArrayMap;
 import edu.stanford.nlp.util.Pair;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.util.*;
 
-public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, TokenSequenceParserConstants, Serializable {
+public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, TokenSequenceParserConstants {
     public TokenSequenceParser() {}
 
     public CoreMapExpressionExtractor getExpressionExtractor(Env env, Reader r) throws ParseException {
