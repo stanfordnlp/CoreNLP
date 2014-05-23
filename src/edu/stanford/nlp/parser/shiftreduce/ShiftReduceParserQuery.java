@@ -93,6 +93,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       unparsable = true;
     } else {
       bestParses = Generics.newArrayList(beam);
+      Collections.sort(bestParses, beam.comparator());
       Collections.reverse(bestParses);
       finalState = bestParses.get(0);
       debinarized = debinarizer.transformTree(finalState.stack.peek());
