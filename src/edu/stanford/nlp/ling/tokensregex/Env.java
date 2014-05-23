@@ -7,6 +7,7 @@ import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
  * </ul>
  * </p>
  */
-public class Env {
+public class Env implements Serializable{
   /**
    * Parser that converts a string into a SequencePattern.
    * @see edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser
