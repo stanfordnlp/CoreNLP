@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,15 +109,8 @@ public class LearnImportantFeatures {
   // System.out.println(j48decisiontree.toString());
   //
   // }
-
-  public Counter<String> getTopFeatures(Map<String, List<CoreLabel>> sents,
-      double perSelectRand, double perSelectNeg, String externalFeatureWeightsFileLabel) throws IOException {
-    Counter<String> features = new ClassicCounter<String>();
-    RVFDataset<String, String> dataset = new RVFDataset<String, String>();
-    Random r = new Random(10);
-    Random rneg = new Random(10);
-    int numrand = 0;
-    List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
+  
+  private int sample(Map<String, List<CoreLabel>> sents, Random r, Random rneg, double perSelectNeg, double perSelectRand, int numrand, List<Pair<String, Integer>> chosen, RVFDataset<String, String> dataset){
     for (Entry<String, List<CoreLabel>> en : sents.entrySet()) {
       CoreLabel[] sent = en.getValue().toArray(new CoreLabel[0]);
 
@@ -143,6 +137,26 @@ public class LearnImportantFeatures {
         }
       }
     }
+    return numrand;
+  }
+
+  public Counter<String> getTopFeatures(boolean batchProcessSents, List<File> sentFiles, Map<String, List<CoreLabel>> sents,
+      double perSelectRand, double perSelectNeg, String externalFeatureWeightsFileLabel) throws IOException, ClassNotFoundException {
+    Counter<String> features = new ClassicCounter<String>();
+    RVFDataset<String, String> dataset = new RVFDataset<String, String>();
+    Random r = new Random(10);
+    Random rneg = new Random(10);
+    int numrand = 0;
+    List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
+    
+    if(batchProcessSents){
+      for(File f: sentFiles){
+        Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
+        numrand = this.sample(sentsf, r, rneg, perSelectNeg, perSelectRand, numrand, chosen, dataset);
+      }
+    }else
+      numrand = this.sample(sents, r, rneg, perSelectNeg, perSelectRand, numrand, chosen, dataset);
+
     System.out.println("num random chosen: " + numrand);
     System.out.println("Number of datums per label: "
         + dataset.numDatumsPerLabel());
@@ -233,7 +247,7 @@ public class LearnImportantFeatures {
       double perSelectNeg = Double.parseDouble(props
           .getProperty("perSelectNeg"));
       // String wekaOptions = props.getProperty("wekaOptions");
-      lmf.getTopFeatures(sents, perSelectRand, perSelectNeg, props.getProperty("externalFeatureWeightsFile"));
+      lmf.getTopFeatures(false, null, sents, perSelectRand, perSelectNeg, props.getProperty("externalFeatureWeightsFile"));
     } catch (Exception e) {
       e.printStackTrace();
     }
