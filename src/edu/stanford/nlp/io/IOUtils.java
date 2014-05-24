@@ -31,7 +31,7 @@ public class IOUtils {
   private IOUtils() { }
 
   /**
-   * Write object to a file with the specified name.  The file is silently gzipped if the filename ends with .gz.
+   * Write object to a file with the specified name.
    *
    * @param o Object to be written to file
    * @param filename Name of the temp file
@@ -44,7 +44,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File.  The file is silently gzipped if the filename ends with .gz.
+   * Write an object to a specified File.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -56,7 +56,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File. The file is silently gzipped if the filename ends with .gz.
+   * Write an object to a specified File. The file is silently gzipped regardless of name.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -66,12 +66,8 @@ public class IOUtils {
    */
   public static File writeObjectToFile(Object o, File file, boolean append) throws IOException {
     // file.createNewFile(); // cdm may 2005: does nothing needed
-    OutputStream os = new FileOutputStream(file, append);
-    if (file.getName().endsWith(".gz")) {
-      os = new GZIPOutputStream(os);
-    }
-    os = new BufferedOutputStream(os);
-    ObjectOutputStream oos = new ObjectOutputStream(os);
+    ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(
+            new GZIPOutputStream(new FileOutputStream(file, append))));
     oos.writeObject(o);
     oos.close();
     return file;
@@ -450,13 +446,12 @@ public class IOUtils {
       }
     }
 
-    if (textFileOrUrl.endsWith(".gz")) {
-      // gunzip it if necessary
-      in = new GZIPInputStream(in, 65536); 
-    }
-
     // buffer this stream
     in = new BufferedInputStream(in);
+
+    // gzip it if necessary
+    if (textFileOrUrl.endsWith(".gz"))
+      in = new GZIPInputStream(in);
 
     return in;
   }
@@ -1678,21 +1673,6 @@ public class IOUtils {
     }
   }
 
-  /**
-   * Given a filepath, delete all files in the directory recursively
-   * @param dir
-   * @return
-   */
-  public static boolean deleteDirRecursively(File dir) {
-    if (dir.isDirectory()) {
-      for (File f : dir.listFiles()) {
-        boolean success = deleteDirRecursively(f);
-        if (!success)
-          return false;
-      }
-    }
-    return dir.delete();
-  }
 
   public static String getExtension(String fileName) {
     if(!fileName.contains("."))
