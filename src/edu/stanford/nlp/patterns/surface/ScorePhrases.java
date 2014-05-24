@@ -339,7 +339,7 @@ public class ScorePhrases {
           else{
             filesToLoad = new ArrayList<File>();
             for (String fname : sentidswithfilerest.keySet()) {
-              filesToLoad.add(new File(fname));
+              filesToLoad.add(new File(constVars.saveSentencesSerDir+"/"+fname));
             }  
           }
           
@@ -348,7 +348,7 @@ public class ScorePhrases {
             Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(fname);
 
             if(sentidswithfilerest != null && !sentidswithfilerest.isEmpty()){
-              Set<String> sentIDs = sentidswithfilerest.get(fname.getAbsolutePath());
+              Set<String> sentIDs = sentidswithfilerest.get(fname.getName());
               if (sentIDs != null){
                 this.runParallelApplyPats(sents, sentIDs, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
               }
