@@ -452,7 +452,7 @@ public class IOUtils {
 
     if (textFileOrUrl.endsWith(".gz")) {
       // gunzip it if necessary
-      in = new GZIPInputStream(in, 65536); 
+      in = new GZIPInputStream(in, 65536);
     }
 
     // buffer this stream
@@ -503,10 +503,29 @@ public class IOUtils {
 
   /**
    * Open a BufferedReader on stdin. Use the user's default encoding.
+   *
+   * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
    */
   public static BufferedReader readerFromStdin() throws IOException {
     return new BufferedReader(new InputStreamReader(System.in));
   }
+
+  /**
+   * Open a BufferedReader on stdin. Use the specified character encoding.
+   *
+   * @param encoding CharSet encoding. Maybe be null, in which case the
+   *         platform default encoding is used
+   * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
+   */
+  public static BufferedReader readerFromStdin(String encoding) throws IOException {
+    if (encoding == null) {
+      return new BufferedReader(new InputStreamReader(System.in));
+    }
+    return new BufferedReader(new InputStreamReader(System.in, encoding));
+  }
+
 
   /**
    * Open a BufferedReader to a file or URL specified by a String name. If the
@@ -1605,7 +1624,7 @@ public class IOUtils {
       List<String> lines = new ArrayList<String>();
       BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
-      int i = 0; 
+      int i = 0;
       while ((line = in.readLine()) != null) {
         i++;
         if(ignoreHeader && i == 1)
@@ -1620,7 +1639,7 @@ public class IOUtils {
       return null;
     }
   }
-  
+
   public static String backupName(String filename) {
     return backupFile(new File(filename)).toString();
   }

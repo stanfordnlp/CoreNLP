@@ -156,6 +156,11 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
         double editDSame = editDistanceSameBinaryScores.getCount(word);
         scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, editDSame);
       }
+      
+      if(constVars.usePhraseEvalWordShape){
+        scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word, label));
+      }
+      
       scores.put(word, scoreslist);
       phraseScoresNormalized.setCounter(word, scoreslist);
     }
