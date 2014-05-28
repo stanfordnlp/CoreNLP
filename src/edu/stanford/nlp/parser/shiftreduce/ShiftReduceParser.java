@@ -890,7 +890,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-tlpp")) {
-        tlppClass = args[argIndex] + 1;
+        tlppClass = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-continueTraining")) {
         continueTraining = args[argIndex + 1];

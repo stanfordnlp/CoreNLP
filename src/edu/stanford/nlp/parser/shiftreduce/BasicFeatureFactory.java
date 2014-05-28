@@ -158,13 +158,6 @@ public class BasicFeatureFactory implements FeatureFactory {
     return (CoreLabel) node.label();
   }
 
-  public static CoreLabel getCoreLabel(Tree node) {
-    if (!(node.label() instanceof CoreLabel)) {
-      throw new IllegalArgumentException("Can only featurize CoreLabel trees");
-    }
-    return (CoreLabel) node.label();
-  }
-
   public static void addUnaryStackFeatures(List<String> features, CoreLabel label, String conFeature, String wordTagFeature, String tagFeature, String wordConFeature, String tagConFeature) {
     if (label == null) {
       features.add(conFeature + NULL);
@@ -332,48 +325,6 @@ public class BasicFeatureFactory implements FeatureFactory {
 
       addSeparatorFeature(features, "s0cs1csb-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, between);
     }
-  }
-
-  /**
-   * Could potentially add the tags and words for the left and right
-   * ends of the tree.  Also adds notes about the sizes of the given
-   * tree.  However, it seems somewhat slow and doesn't help accuracy.
-   */
-  public void addEdgeFeatures(List<String> features, State state, String nodeName, String neighborName, Tree node, Tree neighbor) {
-    if (node == null) {
-      return;
-    }
-
-    int left = ShiftReduceUtils.leftIndex(node);
-    int right = ShiftReduceUtils.rightIndex(node);
-
-    // Trees of size one are already featurized
-    if (right == left) {
-      features.add(nodeName + "SZ1");
-      return;
-    }
-
-    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(left)), nodeName + "EL-");
-    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(right)), nodeName + "ER-");
-
-    if (neighbor != null) {
-      addBinaryFeatures(features, nodeName, getCoreLabel(state.sentence.get(right)), FeatureComponent.HEADWORD, FeatureComponent.HEADTAG, neighborName, getCoreLabel(neighbor), FeatureComponent.HEADWORD, FeatureComponent.HEADTAG);
-    }
-
-    if (right - left == 1) {
-      features.add(nodeName + "SZ2");
-      return;
-    }
-
-    if (right - left == 2) {
-      features.add(nodeName + "SZ3");
-      addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(left + 1)), nodeName + "EM-");
-      return;
-    }
-
-    features.add(nodeName + "SZB");
-    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(left + 1)), nodeName + "El-");
-    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(right - 1)), nodeName + "Er-");
   }
 
   public List<String> featurize(State state) {
