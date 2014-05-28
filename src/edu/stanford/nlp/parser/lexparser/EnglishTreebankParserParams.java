@@ -2304,6 +2304,13 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     return true;
   }
 
+  private static final String[] RETAIN_TMP_ARGS = { "-retainTmpSubcategories" };
+
+  @Override
+  public String[] defaultCoreNLPFlags() {
+    return RETAIN_TMP_ARGS;
+  }
+
   public static void main(String[] args) {
     TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
     Treebank tb = tlpp.memoryTreebank();
