@@ -870,6 +870,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         if (constVars.computeAllPatterns) {
           Redwood.log(Redwood.DBG, "Computing all patterns");
           this.patternsForEachToken = createPats.getAllPatterns(label, Data.sents);
+          constVars.computeAllPatterns =false;
         } else {
           // read from the saved file
           this.patternsForEachToken = IOUtils.readObjectFromFile(constVars.allPatternsFile);
