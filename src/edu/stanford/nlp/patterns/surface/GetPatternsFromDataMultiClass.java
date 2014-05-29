@@ -774,6 +774,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       try {
         sents.putAll(future.get());
       } catch (Exception e) {
+        executor.shutdownNow();
         throw new RuntimeException(e);
       }
     }

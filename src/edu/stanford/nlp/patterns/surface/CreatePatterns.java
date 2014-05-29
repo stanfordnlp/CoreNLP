@@ -536,6 +536,7 @@ public class CreatePatterns {
       try{
         patternsForEachToken.putAll(future.get());
       } catch(Exception e){
+        executor.shutdownNow();
         throw new RuntimeException(e);
       }
     }
@@ -563,8 +564,7 @@ public class CreatePatterns {
     }
 
     @Override
-    public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> call()
-        throws Exception {
+    public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> call() throws Exception {
       Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForTokens = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
 
       for (String id : sentIds) {
