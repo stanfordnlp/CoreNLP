@@ -147,13 +147,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * <p>
    * SqrtAllRatio is the pattern scoring used in Gupta et al. JAMIA 2014 paper
    * <p>
-   * Below F1 and BPB based on paper
+   * Below F1SeedPattern and BPB based on paper
    * "Unsupervised Method for Automatics Construction of a disease dictionary..."
-   * 
+   * <p>
+   * Precision, Recall, and FMeasure (controlled by fbeta flag) is ranking the patterns using 
+   * their precision, recall and F_beta measure 
    */
   public enum PatternScoring {
-    F1, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds, YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, LOGREGlogP, SqrtAllRatio, LinICML03, kNN
-
+    F1SeedPattern, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds, 
+    YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, LOGREGlogP, SqrtAllRatio, LinICML03, kNN, Precision, Recall, FMeasure
   }
 
   enum WordScoring {
@@ -559,9 +561,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props, false);
 
-    Redwood.log(Redwood.DBG, "Annotating text with NER and POS");
+    Redwood.log(Redwood.DBG, "Annotating text");
     pipeline.annotate(doc);
-    Redwood.log(Redwood.DBG, "Done annotating text with NER and POS");
+    Redwood.log(Redwood.DBG, "Done annotating text");
 
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
 
@@ -936,7 +938,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     ScorePatterns scorePatterns;
 
     Class<?> patternscoringclass = getPatternScoringClass(constVars.patternScoring);
-    // One of the baseline measures
 
     if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsF1.class)) {
       scorePatterns = new ScorePatternsF1(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
@@ -1223,7 +1224,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   public static Class getPatternScoringClass(PatternScoring patternScoring) {
-    if (patternScoring.equals(PatternScoring.F1)) {
+    if (patternScoring.equals(PatternScoring.F1SeedPattern)) {
       return ScorePatternsF1.class;
     } else if (patternScoring.equals(PatternScoring.PosNegUnlabOdds) || patternScoring.equals(PatternScoring.PosNegOdds)
         || patternScoring.equals(PatternScoring.RatioAll) || patternScoring.equals(PatternScoring.PhEvalInPat)
