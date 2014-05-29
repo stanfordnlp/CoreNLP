@@ -109,11 +109,6 @@ public class LexicalizedParser extends ParserGrammar implements Function<List<? 
   @Override
   public TreebankLanguagePack treebankLanguagePack() { return getTLPParams().treebankLanguagePack(); }
 
-  @Override
-  public String[] defaultCoreNLPFlags() {
-    return getTLPParams().defaultCoreNLPFlags();
-  }
-
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
   public static final String DEFAULT_PARSER_LOC = ((System.getenv("NLP_PARSER") != null) ?
                                                    System.getenv("NLP_PARSER") :

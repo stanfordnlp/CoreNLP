@@ -47,16 +47,6 @@ public abstract class ParserGrammar {
 
   public abstract TreebankLanguagePack treebankLanguagePack();
 
-  /**
-   * Returns a set of options which should be set by default when used
-   * in corenlp.  For example, the English PCFG/RNN models want
-   * -retainTmpSubcategories, and the ShiftReduceParser models may
-   * want -beamSize 4 depending on how they were trained.
-   * <br>
-   * TODO: right now completely hardcoded, should be settable as a training time option
-   */
-  public abstract String[] defaultCoreNLPFlags();
-
   public abstract void setOptionFlags(String ... flags);  
 
   public static ParserGrammar loadModel(String path, String ... extraFlags) {
