@@ -282,7 +282,12 @@ public class ScorePhrases {
       else{
         filesToLoad = new ArrayList<File>();
         for (String fname : sentidswithfilerest.keySet()) {
-          filesToLoad.add(new File(constVars.saveSentencesSerDir+"/"+fname));
+          String filename = "";
+          if(constVars.usingDirForSentsInIndex)
+            filename = constVars.saveSentencesSerDir+"/"+fname;
+          else
+            filename = fname;
+          filesToLoad.add(new File(filename));
         }  
       }
       
