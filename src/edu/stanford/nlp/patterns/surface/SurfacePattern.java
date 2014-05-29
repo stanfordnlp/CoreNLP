@@ -416,6 +416,24 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
       return this.toString().compareTo(o.toString());
   }
 
+  public int getPreviousContextLen(){
+    if(this.prevContext == null)
+      return 0;
+    else return this.prevContext.length;
+  }
+  
+  public int getNextContextLen(){
+    if(this.nextContext == null)
+      return 0;
+    else return this.nextContext.length;
+  }
+  
+  public static boolean sameLength(SurfacePattern p1, SurfacePattern p2) {
+    if(p1.getPreviousContextLen() == p2.getPreviousContextLen() && p1.getNextContextLen() == p2.getNextContextLen())
+      return true;
+    else return false;
+  }
+
   // public static SurfacePattern parse(String s) {
   // String[] t = s.split("##", -1);
   // String prev = t[0];
