@@ -409,9 +409,9 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     numthat += o.nextContext != null ? o.nextContext.length : 0;
 
     if (numthis > numthat) {
-      return 1;
-    } else if (numthis < numthat) {
       return -1;
+    } else if (numthis < numthat) {
+      return 1;
     } else
       return this.toString().compareTo(o.toString());
   }
