@@ -210,9 +210,9 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     return getSimplerTokens(nextContext);
   }
 
-  Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)" + Pattern.quote("\\E")+"/\\s*" + Pattern.quote("}")
+  static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)" + Pattern.quote("\\E")+"/\\s*" + Pattern.quote("}")
       + "\\s*" + Pattern.quote("]"));
-  Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
+  static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
       + Pattern.quote("]"));
 
   public String[] getSimplerTokens(String[] p) {
@@ -222,8 +222,14 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     String[] sim = new String[p.length];
     for (int i = 0; i < p.length; i++) {
       p[i] = p[i].trim();
+      
       assert p[i] != null : "How is the any one " + Arrays.toString(p) + " null!";
+      
+      if(p1 == null)
+        throw new RuntimeException("how is p1 null");
+      
       Matcher m = p1.matcher(p[i]);
+
       if (m.matches()) {
         sim[i] = m.group(2);
       } else {
