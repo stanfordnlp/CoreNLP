@@ -1000,7 +1000,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         if (alreadyIdentifiedPatterns != null) {
           for (SurfacePattern p : alreadyIdentifiedPatterns) {
 
-            if (pat.nextContextStr.contains(p.nextContextStr) && pat.prevContextStr.contains(p.prevContextStr)) {
+            if (pat.getNextContextStr().contains(p.getNextContextStr()) && pat.getPrevContextStr().contains(p.getPrevContextStr())) {
               Redwood.log(ConstantsAndVariables.extremedebug, "Removing pattern " + pat
                   + " because it is contained in or contains the already chosen pattern " + p);
               notchoose = true;
@@ -1023,7 +1023,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       if (!notchoose) {
         for (SurfacePattern p : chosenPat.keySet()) {
-          if (pat.nextContextStr.contains(p.nextContextStr) && pat.prevContextStr.contains(p.prevContextStr)) {
+          if (pat.getNextContextStr().contains(p.getNextContextStr()) && pat.getPrevContextStr().contains(p.getPrevContextStr())) {
             Redwood.log(ConstantsAndVariables.extremedebug, "Removing pattern " + pat
                 + " because it is contained in or contains the already chosen pattern " + p);
             notchoose = true;
