@@ -928,7 +928,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Counters.removeKeys(posnegPatternsandWords4Label, removePats);
     Counters.removeKeys(negPatternsandWords4Label, removePats);
 
-    Redwood.log(ConstantsAndVariables.extremedebug, "Patterns around positive words in the label " + label + " are " + patternsandWords4Label);
+    //Redwood.log(ConstantsAndVariables.extremedebug, "Patterns around positive words in the label " + label + " are " + patternsandWords4Label);
     ScorePatterns scorePatterns;
     
     Class<?> patternscoringclass = getPatternScoringClass(constVars.patternScoring);
@@ -1027,7 +1027,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             if (SurfacePattern.subsumes(pat, p)) {
               // if (pat.getNextContextStr().contains(p.getNextContextStr()) &&
               // pat.getPrevContextStr().contains(p.getPrevContextStr())) {
-              Redwood.log(ConstantsAndVariables.extremedebug, "Removing pattern " + pat
+              Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
                   + " because it is contained in or contains the already chosen pattern " + p);
               notchoose = true;
               break;
@@ -1051,10 +1051,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (!notchoose) {
         for (SurfacePattern p : chosenPat.keySet()) {
           if (SurfacePattern.sameGenre(pat, p) && SurfacePattern.subsumes(pat, p)) {
-            Redwood.log(ConstantsAndVariables.extremedebug, "Removing pattern " + pat
+            Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
                 + " because it is contained in or contains the already chosen pattern " + p);
             notchoose = true;
             break;
+          }
+          if(pat.toStringSimple().contains("upon") && p.toStringSimple().contains("upon")){
+            System.out.println("For " + pat  + " and " + p + ": samegenre is " + SurfacePattern.sameGenre(pat, p) + " and subsumes answer is " + SurfacePattern.subsumes(pat, p));
           }
            int rest = pat.equalContext(p);
            
@@ -1074,9 +1077,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
       }
       if (notchoose){
-        Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing " + pat + " for whatever reason!");
+        Redwood.log(Redwood.DBG, "Not choosing " + pat + " for whatever reason!");
         continue;
       }
+      
+
       
        if (removeChosenPat != null) {
          Redwood.log(ConstantsAndVariables.extremedebug,
