@@ -72,6 +72,10 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   }
 
   String[] trim(String[] p){
+    
+    if(p == null)
+      return null;
+    
     for(int i = 0 ; i < p.length; i++){
       String trimmed = p[i].trim();
       if(!trimmed.equals(p[i]))
