@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Class to represent a target phrase. Note that you can give additional negative constraints 
@@ -36,9 +37,13 @@ public class PatternToken implements Serializable {
     this.useNER = useNER;
     this.useTargetParserParentRestriction = useTargetParserParentRestriction;
     if(useTargetParserParentRestriction){
-      System.out.println("grand parent tag is " + grandparentParseTag);
+      if(grandparentParseTag == null){
+        Redwood.log(ConstantsAndVariables.extremedebug,"Grand parent parse tag null ");
+        this.grandparentParseTag = "";
+      }
+      else
+        this.grandparentParseTag = grandparentParseTag;
     }
-    this.grandparentParseTag = grandparentParseTag;
   }
 
   // static public PatternToken parse(String str) {
