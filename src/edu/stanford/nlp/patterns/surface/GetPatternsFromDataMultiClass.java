@@ -1016,7 +1016,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
 
       SurfacePattern removeChosenPat = null;
-      // SurfacePatten removeIdentifiedPattern = null,
+      SurfacePattern removeIdentifiedPattern = null;
 
       if (!notchoose) {
         if (alreadyIdentifiedPatterns != null) {
@@ -1030,24 +1030,24 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               break;
             }
 
-            // int rest = pat.equalContext(p);
-            // // the contexts dont match
-            // if (rest == Integer.MAX_VALUE)
-            // continue;
-            // // if pat is less restrictive, remove p and add pat!
-            // if (rest < 0) {
-            // removeIdentifiedPattern = p;
-            // } else {
-            // notchoose = true;
-            // break;
-            // }
+             int rest = pat.equalContext(p);
+             // the contexts dont match
+             if (rest == Integer.MAX_VALUE)
+             continue;
+             // if pat is less restrictive, remove p and add pat!
+             if (rest < 0) {
+               removeIdentifiedPattern = p;
+             } else {
+             notchoose = true;
+             break;
+             }
           }
         }
       }
 
       if (!notchoose) {
         for (SurfacePattern p : chosenPat.keySet()) {
-          if (SurfacePattern.subsumes(pat, p)) {
+          if (SurfacePattern.sameGenre(pat, p) && SurfacePattern.subsumes(pat, p)) {
             Redwood.log(ConstantsAndVariables.extremedebug, "Removing pattern " + pat
                 + " because it is contained in or contains the already chosen pattern " + p);
             notchoose = true;
@@ -1071,25 +1071,25 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
       if (notchoose)
         continue;
-      // if (removeChosenPat != null) {
-      // Redwood.log(ConstantsAndVariables.extremedebug,
-      // "Removing already chosen pattern in this iteration " + removeChosenPat
-      // + " in favor of "
-      // + pat);
-      // chosenPat.remove(removeChosenPat);
-      // }
-      // if (removeIdentifiedPattern != null) {
-      // Redwood.log(ConstantsAndVariables.extremedebug,
-      // "Removing already identified pattern " + removeIdentifiedPattern +
-      // " in favor of " + pat);
-      // removePatterns.add(removeIdentifiedPattern);
-      //
-      // }
+       if (removeChosenPat != null) {
+         Redwood.log(ConstantsAndVariables.extremedebug,
+             "Removing already chosen pattern in this iteration " + removeChosenPat
+             + " in favor of "
+             + pat);
+         chosenPat.remove(removeChosenPat);
+       }
+       if (removeIdentifiedPattern != null) {
+         Redwood.log(ConstantsAndVariables.extremedebug,
+             "Removing already identified pattern " + removeIdentifiedPattern +
+             " in favor of " + pat);
+         removePatterns.add(removeIdentifiedPattern);
+      
+       }
       chosenPat.setCount(pat, currentPatternWeights4Label.getCount(pat));
       num++;
     }
 
-    // this.removeLearnedPatterns(label, removePatterns);
+    this.removeLearnedPatterns(label, removePatterns);
 
     Redwood.log(Redwood.DBG, "final size of the patterns is " + chosenPat.size());
     Redwood.log(ConstantsAndVariables.minimaldebug, "## Selected Patterns ## \n");

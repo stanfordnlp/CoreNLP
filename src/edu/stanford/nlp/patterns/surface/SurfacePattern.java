@@ -318,10 +318,6 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
    */
   public static boolean subsumes(SurfacePattern p1, SurfacePattern p2){
     
-    if (!sameGenre(p1, p2)) {
-      return false;
-    }
-    
     if (subsumesArray(p1.getOriginalNext(), p2.getOriginalNext()) && subsumesArray(p1.getOriginalPrev(), p2.getOriginalPrev())) {
       return true;
     }
@@ -330,13 +326,10 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   
   // true if one pattern subsumes another
   public static boolean subsumesEitherWay(SurfacePattern p1, SurfacePattern p2) {
-    boolean subsume = false;
-    
     if(subsumes(p1, p2) || subsumes(p2, p1)){
       return true;
     }
-    
-    return subsume;
+    return false;
   }
 
   public static boolean sameRestrictions(SurfacePattern p1, SurfacePattern p2) {
