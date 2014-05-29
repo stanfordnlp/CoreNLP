@@ -266,7 +266,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     this.originalNext = originalNext;
   }
 
-  public static boolean notSameGenre(SurfacePattern p1, SurfacePattern p2) {
+  public static boolean sameGenre(SurfacePattern p1, SurfacePattern p2) {
     return p1.getGenre().equals(p2.getGenre());
   }
 
@@ -318,7 +318,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
    */
   public static boolean subsumes(SurfacePattern p1, SurfacePattern p2){
     
-    if (notSameGenre(p1, p2)) {
+    if (!sameGenre(p1, p2)) {
       return false;
     }
     
