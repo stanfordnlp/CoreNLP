@@ -35,6 +35,9 @@ public class PatternToken implements Serializable {
     this.nerTag = nerTag;
     this.useNER = useNER;
     this.useTargetParserParentRestriction = useTargetParserParentRestriction;
+    if(useTargetParserParentRestriction){
+      System.out.println("grand parent tag is " + grandparentParseTag);
+    }
     this.grandparentParseTag = grandparentParseTag;
   }
 
