@@ -249,7 +249,6 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     String nextstr = simnext == null ? "" : StringUtils.join(simnext, " ");
 
     String sim =  prevstr.trim() + " <b>" + getToken().toStringToWrite() + "</b> " + nextstr.trim();
-    System.out.println("simple is " + sim);
     return sim;
   }
 
