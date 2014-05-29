@@ -968,7 +968,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyStdin(DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
-    BufferedReader is = IOUtils.readerFromStdin(flags.inputEncoding);
+    BufferedReader is = new BufferedReader(new InputStreamReader(System.in, flags.inputEncoding));
     for (String line; (line = is.readLine()) != null; ) {
       Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
       if (flags.keepEmptySentences && documents.size() == 0) {

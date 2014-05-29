@@ -683,12 +683,4 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   public boolean supportsBasicDependencies() {
     return false;
   }
-
-  private static final String[] EMPTY_ARGS = new String[0];
-
-  @Override
-  public String[] defaultCoreNLPFlags() {
-    return EMPTY_ARGS;
-  }
-
 }
