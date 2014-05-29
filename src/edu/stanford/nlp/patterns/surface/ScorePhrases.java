@@ -290,16 +290,24 @@ public class ScorePhrases {
           filesToLoad.add(new File(filename));
         }  
       }
-      
+
       for (File fname : filesToLoad) {
         Redwood.log(Redwood.DBG, "Applying patterns to sents from " + fname);
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(fname);
 
         if(sentidswithfilerest != null && !sentidswithfilerest.isEmpty()){
-          Set<String> sentIDs = sentidswithfilerest.get(fname.getName());
+          
+          String filename = "";
+          if(constVars.usingDirForSentsInIndex)
+            filename = constVars.saveSentencesSerDir+"/"+fname.getName();
+          else
+            filename = fname.getAbsolutePath();
+          
+          Set<String> sentIDs = sentidswithfilerest.get(filename);
           if (sentIDs != null){
             this.runParallelApplyPats(sents, sentIDs, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
-          }
+          } else
+            throw new RuntimeException("How come no sentIds for " + filename  + ". Index keyset is " + constVars.invertedIndex.getKeySet());
         }
         if(patternsLearnedThisIterConsistsOnlyGeneralized.size() > 0){
           this.runParallelApplyPats(sents, sents.keySet(), label, patternsLearnedThisIterConsistsOnlyGeneralized, wordsandLemmaPatExtracted, matchedTokensByPat);
@@ -311,17 +319,21 @@ public class ScorePhrases {
     } else {
       
       if (sentidswithfilerest != null && !sentidswithfilerest.isEmpty()) {
-        Set<String> sentids = sentidswithfilerest.get(CollectionUtils.toList(sentidswithfilerest.keySet()).get(0));
+        String filename = CollectionUtils.toList(sentidswithfilerest.keySet()).get(0);
+        Set<String> sentids = sentidswithfilerest.get(filename);
         if (sentids != null) {
           this.runParallelApplyPats(Data.sents, sentids, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
-        } 
+        } else
+          throw new RuntimeException("How come no sentIds for " + filename  + ". Index keyset is " + constVars.invertedIndex.getKeySet());
       }
       if(patternsLearnedThisIterConsistsOnlyGeneralized.size() > 0){
         this.runParallelApplyPats(Data.sents, Data.sents.keySet(), label, patternsLearnedThisIterConsistsOnlyGeneralized, wordsandLemmaPatExtracted, matchedTokensByPat);
       }
       Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
     }
+    Redwood.log(Redwood.DBG, "# words/lemma and pattern pairs are " + wordsandLemmaPatExtracted.size());
   }
+  
   
   private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
       Counter<SurfacePattern> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted){
