@@ -114,6 +114,19 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return getTLPParams().treebankLanguagePack();
   }
 
+  private final static String[] BEAM_FLAGS = { "-beamSize", "4" };
+
+  @Override
+  public String[] defaultCoreNLPFlags() {
+    if (op.trainOptions().beamSize > 1) {
+      return ArrayUtils.concatenate(getTLPParams().defaultCoreNLPFlags(), BEAM_FLAGS);
+    } else {
+      // TODO: this may result in some options which are useless for
+      // this model, such as -retainTmpSubcategories
+      return getTLPParams().defaultCoreNLPFlags();
+    }
+  }
+
   public ShiftReduceParser deepCopy() {
     // TODO: should we deep copy the options?
     ShiftReduceParser copy = new ShiftReduceParser(op);
@@ -890,7 +903,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-tlpp")) {
-        tlppClass = args[argIndex] + 1;
+        tlppClass = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-continueTraining")) {
         continueTraining = args[argIndex + 1];
