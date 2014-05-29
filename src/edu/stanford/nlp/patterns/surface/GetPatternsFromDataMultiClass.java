@@ -365,10 +365,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     assert !(constVars.doNotApplyPatterns && (createPats.useStopWordsBeforeTerm || constVars.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
 
     String prefixFileForIndex = null;
-    if(constVars.usingDirForSentsInIndex){
-      prefixFileForIndex = constVars.saveSentencesSerDir;  
+    if (constVars.usingDirForSentsInIndex) {
+      prefixFileForIndex = constVars.saveSentencesSerDir;
     }
-    
+
     if (createInvIndex)
       constVars.invertedIndex = new InvertedIndexByTokens(invIndexDir, constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
           constVars.batchProcessSents, prefixFileForIndex);
@@ -384,13 +384,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
           totalNumSents += sentsf.size();
 
-          if (createInvIndex){
+          if (createInvIndex) {
             String filename = "";
-            if(constVars.usingDirForSentsInIndex){
+            if (constVars.usingDirForSentsInIndex) {
               filename = f.getName();
-            }else
+            } else
               filename = f.getAbsolutePath();
-            
+
             constVars.invertedIndex.add(sentsf, filename, constVars.useLemmaContextTokens);
           }
           Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size()
@@ -454,15 +454,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Redwood.log(Redwood.DBG, "Done creating inverted index of " + constVars.invertedIndex.size() + " tokens and labeling data with total of "
         + totalNumSents + " sentences");
 
-    if(constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass){
-      
+    if (constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass) {
+
       if (constVars.externalFeatureWeightsFile == null) {
         File f = File.createTempFile("tempfeat", ".txt");
         f.delete();
         f.deleteOnExit();
         constVars.externalFeatureWeightsFile = f.getAbsolutePath();
       }
-      
+
       for (String label : seedSets.keySet()) {
         String externalFeatureWeightsFileLabel = constVars.externalFeatureWeightsFile + "_" + label;
         File f = new File(externalFeatureWeightsFileLabel);
@@ -771,9 +771,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     // Now retrieve the result
 
     for (Future<Map<String, List<CoreLabel>>> future : list) {
-      try{
+      try {
         sents.putAll(future.get());
-      }catch(Exception e){
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
@@ -850,7 +850,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public Map<String, TwoDimensionalCounter<SurfacePattern, String>> allPatternsandWords = null;
   public Map<String, Counter<SurfacePattern>> currentPatternWeights = null;
 
-  @SuppressWarnings({ "unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public Counter<SurfacePattern> getPatterns(String label, Set<SurfacePattern> alreadyIdentifiedPatterns, SurfacePattern p0, Counter<String> p0Set,
       Set<SurfacePattern> ignorePatterns) throws InterruptedException, ExecutionException, IOException, ClassNotFoundException,
       InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -928,12 +928,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Counters.removeKeys(posnegPatternsandWords4Label, removePats);
     Counters.removeKeys(negPatternsandWords4Label, removePats);
 
-    //Redwood.log(ConstantsAndVariables.extremedebug, "Patterns around positive words in the label " + label + " are " + patternsandWords4Label);
+    // Redwood.log(ConstantsAndVariables.extremedebug,
+    // "Patterns around positive words in the label " + label + " are " +
+    // patternsandWords4Label);
     ScorePatterns scorePatterns;
-    
+
     Class<?> patternscoringclass = getPatternScoringClass(constVars.patternScoring);
     // One of the baseline measures
-    
+
     if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsF1.class)) {
       scorePatterns = new ScorePatternsF1(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
           unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props, p0Set, p0);
@@ -1002,7 +1004,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Counter<SurfacePattern> chosenPat = new ClassicCounter<SurfacePattern>();
 
     Set<SurfacePattern> removePatterns = new HashSet<SurfacePattern>();
-
+    
+    Set<SurfacePattern> removeIdentifiedPatterns = null;
+    
     while (num < constVars.numPatterns && !q.isEmpty()) {
       SurfacePattern pat = q.removeFirst();
       if (currentPatternWeights4Label.getCount(pat) < constVars.thresholdSelectPattern) {
@@ -1018,8 +1022,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         continue;
       }
 
-      SurfacePattern removeChosenPat = null;
-      SurfacePattern removeIdentifiedPattern = null;
+      Set<SurfacePattern> removeChosenPats = null;
 
       if (!notchoose) {
         if (alreadyIdentifiedPatterns != null) {
@@ -1033,72 +1036,93 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               break;
             }
 
-             int rest = pat.equalContext(p);
-             // the contexts dont match
-             if (rest == Integer.MAX_VALUE)
-             continue;
-             // if pat is less restrictive, remove p and add pat!
-             if (rest < 0) {
-               removeIdentifiedPattern = p;
-             } else {
-               notchoose = true;
-             break;
-             }
+            int rest = pat.equalContext(p);
+            // the contexts dont match
+            if (rest == Integer.MAX_VALUE)
+              continue;
+            // if pat is less restrictive, remove p and add pat!
+            if (rest < 0) {
+              if(removeIdentifiedPatterns == null)
+                removeIdentifiedPatterns = new HashSet<SurfacePattern>();
+              
+              removeIdentifiedPatterns.add(p);
+            } else {
+              notchoose = true;
+              break;
+            }
           }
         }
       }
 
+      // In this iteration:
       if (!notchoose) {
         for (SurfacePattern p : chosenPat.keySet()) {
-          if (SurfacePattern.sameGenre(pat, p) && SurfacePattern.subsumes(pat, p)) {
-            Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
-                + " because it is contained in or contains the already chosen pattern " + p);
-            notchoose = true;
-            break;
-          }
-          if(pat.toStringSimple().contains("upon") && p.toStringSimple().contains("upon")){
-            System.out.println("For " + pat  + " and " + p + ": samegenre is " + SurfacePattern.sameGenre(pat, p) + " and subsumes answer is " + SurfacePattern.subsumes(pat, p));
-          }
-           int rest = pat.equalContext(p);
-           
-           // the contexts dont match
-           if (rest == Integer.MAX_VALUE)
-             continue;
-           // if pat is less restrictive, remove p from chosen patterns and  add pat!
-           if (rest < 0) {
-             removeChosenPat = p;
-             num--;
-           } else {
-             removeIdentifiedPattern = null;
-             notchoose = true;
-             break;
-           }
+          boolean removeChosenPatFlag = false;
+          if (SurfacePattern.sameGenre(pat, p)) {
+            if (SurfacePattern.subsumes(pat, p)) {
+              Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
+                  + " because it is contained in or contains the already chosen pattern " + p);
+              notchoose = true;
+              break;
+            } else if (SurfacePattern.sameGenre(p, pat)) {
+              Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + p
+                  + " because it is contained in or contains the another chosen pattern in this iteration " + pat);
+              removeChosenPatFlag = true;
+            }
+            
+            if (pat.toStringSimple().contains("upon") && p.toStringSimple().contains("upon")) {
+              System.out.println("For " + pat + " and " + p + ": samegenre is " + SurfacePattern.sameGenre(pat, p) + " and subsumes answer is "
+                  + SurfacePattern.subsumes(pat, p) + " and notchoose varaible is " + notchoose);
+              
+            }
+            
+            if (!removeChosenPatFlag) {
+              int rest = pat.equalContext(p);
 
+              // the contexts dont match
+              if (rest == Integer.MAX_VALUE)
+                continue;
+              // if pat is less restrictive, remove p from chosen patterns and
+              // add pat!
+              if (rest < 0) {
+                removeChosenPatFlag = true;
+              } else {
+                //removeIdentifiedPattern = null;
+                notchoose = true;
+                break;
+              }
+            }
+            if (removeChosenPatFlag) {
+              if(removeChosenPats == null)
+                removeChosenPats = new HashSet<SurfacePattern>();
+              removeChosenPats.add(p);
+              num--;
+            }
+
+          }
         }
       }
-      if (notchoose){
+      
+      if (notchoose) {
         Redwood.log(Redwood.DBG, "Not choosing " + pat + " for whatever reason!");
         continue;
       }
-      
 
+      if (removeChosenPats != null) {
+        Redwood.log(ConstantsAndVariables.extremedebug, "Removing already chosen patterns in this iteration " + removeChosenPats + " in favor of "
+            + pat);
+        Counters.removeKeys(chosenPat, removeChosenPats);
+      }
       
-       if (removeChosenPat != null) {
-         Redwood.log(ConstantsAndVariables.extremedebug,
-             "Removing already chosen pattern in this iteration " + removeChosenPat
-             + " in favor of "
-             + pat);
-         chosenPat.remove(removeChosenPat);
-       }
-       if (removeIdentifiedPattern != null) {
-         Redwood.log(ConstantsAndVariables.extremedebug,
-             "Removing already identified pattern " + removeIdentifiedPattern +
-             " in favor of " + pat);
-         removePatterns.add(removeIdentifiedPattern);
+      if (removeIdentifiedPatterns != null) {
+        Redwood.log(ConstantsAndVariables.extremedebug, "Removing already identified patterns " + removeIdentifiedPatterns + " in favor of " + pat);
+        removePatterns.addAll(removeIdentifiedPatterns);
+
+      }
       
-       }
       chosenPat.setCount(pat, currentPatternWeights4Label.getCount(pat));
       num++;
+      
     }
 
     this.removeLearnedPatterns(label, removePatterns);
@@ -1197,8 +1221,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return chosenPat;
 
   }
-  
-  public static Class getPatternScoringClass(PatternScoring patternScoring){
+
+  public static Class getPatternScoringClass(PatternScoring patternScoring) {
     if (patternScoring.equals(PatternScoring.F1)) {
       return ScorePatternsF1.class;
     } else if (patternScoring.equals(PatternScoring.PosNegUnlabOdds) || patternScoring.equals(PatternScoring.PosNegOdds)
@@ -1677,7 +1701,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       patterns.addAll(getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns));
       learnedPatterns.get(label).addAll(patterns);
-
 
       if (sentsOutFile != null)
         sentsOutFile = sentsOutFile + "_" + i + "iter.ser";
@@ -2384,10 +2407,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets", "true"));
 
       GetPatternsFromDataMultiClass g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
-      
+
       g.constVars.usingDirForSentsInIndex = usingDirForSentsInIndex;
       g.constVars.saveSentencesSerDir = saveSentencesSerDir;
-      
+
       Execution.fillOptions(g, props);
 
       // Redwood.log(ConstantsAndVariables.minimaldebug,
