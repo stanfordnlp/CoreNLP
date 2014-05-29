@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,7 +38,6 @@ import javax.json.JsonValue;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
@@ -924,8 +922,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Redwood.log(ConstantsAndVariables.extremedebug, "Patterns around positive words in the label " + label + " are " + patternsandWords4Label);
     ScorePatterns scorePatterns;
+    
+    Class<?> patternscoringclass = getPatternScoringClass(constVars.patternScoring);
     // One of the baseline measures
-    if (constVars.patternScoring.equals(PatternScoring.F1)) {
+    
+    if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsF1.class)) {
       scorePatterns = new ScorePatternsF1(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
           unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props, p0Set, p0);
       Counter<SurfacePattern> finalPat = scorePatterns.score();
@@ -937,18 +938,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Redwood.log(ConstantsAndVariables.minimaldebug, "Selected Pattern: " + finalPat);
       return finalPat;
 
-    } else if (constVars.patternScoring.equals(PatternScoring.PosNegUnlabOdds) || constVars.patternScoring.equals(PatternScoring.PosNegOdds)
-        || constVars.patternScoring.equals(PatternScoring.RatioAll) || constVars.patternScoring.equals(PatternScoring.PhEvalInPat)
-        || constVars.patternScoring.equals(PatternScoring.PhEvalInPatLogP) || constVars.patternScoring.equals(PatternScoring.LOGREG)
-        || constVars.patternScoring.equals(PatternScoring.LOGREGlogP) || constVars.patternScoring.equals(PatternScoring.SqrtAllRatio)) {
-
+    } else if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsRatioModifiedFreq.class)) {
       scorePatterns = new ScorePatternsRatioModifiedFreq(constVars, constVars.patternScoring, label, patternsandWords4Label,
           negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label,
           phInPatScores, scorePhrases, props);
 
-    } else if (constVars.patternScoring.equals(PatternScoring.RlogF) || constVars.patternScoring.equals(PatternScoring.RlogFPosNeg)
-        || constVars.patternScoring.equals(PatternScoring.RlogFUnlabNeg) || constVars.patternScoring.equals(PatternScoring.RlogFNeg)
-        || constVars.patternScoring.equals(PatternScoring.YanGarber02) || constVars.patternScoring.equals(PatternScoring.LinICML03)) {
+    } else if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsFreqBased.class)) {
       scorePatterns = new ScorePatternsFreqBased(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
           unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
 
@@ -1038,7 +1033,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
              if (rest < 0) {
                removeIdentifiedPattern = p;
              } else {
-             notchoose = true;
+               notchoose = true;
              break;
              }
           }
@@ -1054,23 +1049,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             break;
           }
            int rest = pat.equalContext(p);
+           
            // the contexts dont match
            if (rest == Integer.MAX_VALUE)
-           continue;
+             continue;
            // if pat is less restrictive, remove p from chosen patterns and  add pat!
            if (rest < 0) {
-           removeChosenPat = p;
-           num--;
+             removeChosenPat = p;
+             num--;
            } else {
-           //removeIdentifiedPattern = null;
-           notchoose = true;
-           break;
+             removeIdentifiedPattern = null;
+             notchoose = true;
+             break;
            }
 
         }
       }
-      if (notchoose)
+      if (notchoose){
+        Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing " + pat + " for whatever reason!");
         continue;
+      }
+      
        if (removeChosenPat != null) {
          Redwood.log(ConstantsAndVariables.extremedebug,
              "Removing already chosen pattern in this iteration " + removeChosenPat
@@ -1184,6 +1183,26 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     return chosenPat;
 
+  }
+  
+  public static Class getPatternScoringClass(PatternScoring patternScoring){
+    if (patternScoring.equals(PatternScoring.F1)) {
+      return ScorePatternsF1.class;
+    } else if (patternScoring.equals(PatternScoring.PosNegUnlabOdds) || patternScoring.equals(PatternScoring.PosNegOdds)
+        || patternScoring.equals(PatternScoring.RatioAll) || patternScoring.equals(PatternScoring.PhEvalInPat)
+        || patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREG)
+        || patternScoring.equals(PatternScoring.LOGREGlogP) || patternScoring.equals(PatternScoring.SqrtAllRatio)) {
+
+      return ScorePatternsRatioModifiedFreq.class;
+
+    } else if (patternScoring.equals(PatternScoring.RlogF) || patternScoring.equals(PatternScoring.RlogFPosNeg)
+        || patternScoring.equals(PatternScoring.RlogFUnlabNeg) || patternScoring.equals(PatternScoring.RlogFNeg)
+        || patternScoring.equals(PatternScoring.YanGarber02) || patternScoring.equals(PatternScoring.LinICML03)) {
+      return ScorePatternsFreqBased.class;
+
+    } else {
+      return null;
+    }
   }
 
   private void calculateSufficientStats(Map<String, List<CoreLabel>> sents,

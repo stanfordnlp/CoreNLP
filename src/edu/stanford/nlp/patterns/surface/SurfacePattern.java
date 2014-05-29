@@ -239,7 +239,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   // this.originalPrevStr = originalPrevStr;
   // }
 
-  private String getOriginalNextStr() {
+  public String getOriginalNextStr() {
     String originalNextStr = "";
     if (originalNext != null)
       originalNextStr = StringUtils.join(originalNext, " ");
@@ -293,10 +293,10 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     }
 
     for (int i = 0; i < array1.length; i++) {
-      if (array1[i] == array2[0]) {
+      if (array1[i].equals(array2[0])) {
         boolean found = true;
         for (int j = 0; j < array2.length; j++) {
-          if (array1.length <= i + j || array2[j] != array1[i + j]) {
+          if (array1.length <= i + j || ! array2[j].equals(array1[i + j])) {
             found = false;
             break;
           }
@@ -318,7 +318,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
    */
   public static boolean subsumes(SurfacePattern p1, SurfacePattern p2){
     
-    if (subsumesArray(p1.getOriginalNext(), p2.getOriginalNext()) && subsumesArray(p1.getOriginalPrev(), p2.getOriginalPrev())) {
+    if (subsumesArray(p1.getNextContext(), p2.getNextContext()) && subsumesArray(p1.getPrevContext(), p2.getPrevContext())) {
       return true;
     }
     return false;
