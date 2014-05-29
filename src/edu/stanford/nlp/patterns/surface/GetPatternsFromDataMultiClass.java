@@ -366,9 +366,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     createPats = new CreatePatterns(props, constVars);
     assert !(constVars.doNotApplyPatterns && (createPats.useStopWordsBeforeTerm || constVars.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
 
+    String prefixFileForIndex = null;
+    if(constVars.usingTempDirForSents){
+      prefixFileForIndex = constVars.saveSentencesSerDir;  
+    }
+    
     if (createInvIndex)
       constVars.invertedIndex = new InvertedIndexByTokens(invIndexDir, constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
-          constVars.batchProcessSents);
+          constVars.batchProcessSents, prefixFileForIndex);
 
     int totalNumSents = 0;
 
@@ -381,9 +386,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
           totalNumSents += sentsf.size();
 
-          if (createInvIndex)
-            constVars.invertedIndex.add(sentsf, f.getName(), constVars.useLemmaContextTokens);
-
+          if (createInvIndex){
+            String filename = "";
+            if(constVars.usingTempDirForSents){
+              filename = f.getName();
+            }else
+              filename = f.getAbsolutePath();
+            
+            constVars.invertedIndex.add(sentsf, filename, constVars.useLemmaContextTokens);
+          }
           Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size()
               + " sentences, either by labeling with the seed set or just setting the right classes");
           for (String l : constVars.answerClass.keySet()) {
@@ -2231,6 +2242,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
 
       String saveSentencesSerDir = null;
+      boolean usingTempDirForSents = false;
       // Read training file
       if (file != null) {
         saveSentencesSerDir = props.getProperty("saveSentencesSerDir");
@@ -2238,7 +2250,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         if (saveSentencesSerDir != null) {
           saveSentencesSerDirFile = new File(saveSentencesSerDir);
           IOUtils.ensureDir(saveSentencesSerDirFile);
-          IOUtils.writeObjectToFile(sents, saveSentencesSerDir + "/sents_001.ser");
+          IOUtils.writeObjectToFile(sents, saveSentencesSerDir + "/sents_0.ser");
         } else {
           String systemdir = System.getProperty("java.io.tmpdir");
           saveSentencesSerDirFile = File.createTempFile("sents", ".tmp", new File(systemdir));
@@ -2246,6 +2258,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           saveSentencesSerDir = saveSentencesSerDirFile.getAbsolutePath();
           saveSentencesSerDirFile.delete();
           saveSentencesSerDirFile.mkdir();
+          usingTempDirForSents = true;
         }
 
         List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
@@ -2270,6 +2283,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
 
         } else if (fileFormat.equalsIgnoreCase("ser")) {
+          usingTempDirForSents = false;
           for (File f : allFiles) {
             if (!batchProcessSents)
               sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
@@ -2337,8 +2351,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets", "true"));
 
       GetPatternsFromDataMultiClass g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
-
+      
+      g.constVars.usingTempDirForSents = usingTempDirForSents;
       g.constVars.saveSentencesSerDir = saveSentencesSerDir;
+      
       Execution.fillOptions(g, props);
 
       // Redwood.log(ConstantsAndVariables.minimaldebug,
