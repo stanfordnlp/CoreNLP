@@ -66,8 +66,16 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
     // toString = toString(null);
     hashcode = toString().hashCode();
+    trim(prevContext);
+    trim(nextContext);
   }
 
+  void trim(String[] p){
+    for(int i = 0;i < p.length; i++){
+      p[i] = p[i].trim();
+    }
+  }
+  
   public static String getContextStr(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {
     String str = "";
 
@@ -221,8 +229,6 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
     String[] sim = new String[p.length];
     for (int i = 0; i < p.length; i++) {
-      p[i] = p[i].trim();
-      
       assert p[i] != null : "How is the any one " + Arrays.toString(p) + " null!";
       
       if(p1 == null)
