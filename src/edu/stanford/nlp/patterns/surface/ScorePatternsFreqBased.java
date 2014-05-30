@@ -105,7 +105,7 @@ public class ScorePatternsFreqBased extends ScorePatterns {
         currentPatternWeights4Label.setCount(p, conf.getCount(p));
       }
     } else {
-      throw new RuntimeException("not implemented " + patternScoring + " . check spelling!");
+      throw new RuntimeException("not implemented");
     }
     return currentPatternWeights4Label;
   }
