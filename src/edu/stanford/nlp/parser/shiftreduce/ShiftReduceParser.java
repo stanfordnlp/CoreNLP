@@ -75,7 +75,30 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     this.transitionIndex = new HashIndex<Transition>();
     this.featureWeights = Generics.newHashMap();
     this.op = op;
-    this.featureFactory = ReflectionLoading.loadByReflection(op.featureFactoryClass);
+
+    String[] classes = op.featureFactoryClass.split(";");
+    if (classes.length == 1) {
+      this.featureFactory = ReflectionLoading.loadByReflection(classes[0]);
+    } else {
+      FeatureFactory[] factories = new FeatureFactory[classes.length];
+      for (int i = 0; i < classes.length; ++i) {
+        int paren = classes[i].indexOf("(");
+        if (paren >= 0) {
+          String arg = classes[i].substring(paren + 1, classes[i].length() - 1);
+          factories[i] = ReflectionLoading.loadByReflection(classes[i].substring(0, paren), arg);
+        } else {
+          factories[i] = ReflectionLoading.loadByReflection(classes[i]);
+        }
+      }
+      this.featureFactory = new CombinationFeatureFactory(factories);
+    }
+  }
+
+  public ShiftReduceParser(ShiftReduceOptions op, FeatureFactory factory) {
+    this.transitionIndex = new HashIndex<Transition>();
+    this.featureWeights = Generics.newHashMap();
+    this.op = op;
+    this.featureFactory = factory;
   }
 
   /*
@@ -128,8 +151,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   public ShiftReduceParser deepCopy() {
-    // TODO: should we deep copy the options?
-    ShiftReduceParser copy = new ShiftReduceParser(op);
+    // TODO: should we deep copy the options / factory?  seems wasteful
+    ShiftReduceParser copy = new ShiftReduceParser(op, featureFactory);
     copy.copyWeights(this);
     return copy;
   }
@@ -166,9 +189,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
   public static ShiftReduceParser averageModels(Collection<ShiftReduceParser> models) {
     ShiftReduceParser firstModel = models.iterator().next();
-    ShiftReduceOptions op = firstModel.op;
-    // TODO: should we deep copy the options?
-    ShiftReduceParser copy = new ShiftReduceParser(op);
+    ShiftReduceParser copy = new ShiftReduceParser(firstModel.op, firstModel.featureFactory);
 
     for (Transition transition : firstModel.transitionIndex) {
       copy.transitionIndex.add(transition);
