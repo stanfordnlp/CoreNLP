@@ -63,6 +63,12 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-featureFrequencyCutoff")) {
       trainOptions().featureFrequencyCutoff = Integer.valueOf(args[i + 1]);
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-saveIntermediateModels")) {
+      trainOptions().saveIntermediateModels = true;
+      i++;
+    } else if (args[i].equalsIgnoreCase("-nosaveIntermediateModels")) {
+      trainOptions().saveIntermediateModels = false;
+      i++;
     } else if (args[i].equalsIgnoreCase("-recordBinarized")) {
       testOptions().recordBinarized = args[i + 1];
       i += 2;

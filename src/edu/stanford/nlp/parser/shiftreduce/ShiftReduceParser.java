@@ -785,7 +785,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
           }
         }
       }
-      if (serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
+      if (op.trainOptions().saveIntermediateModels && serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
         String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
         saveModel(tempName);
         // TODO: we could save a cutoff version of the model,
