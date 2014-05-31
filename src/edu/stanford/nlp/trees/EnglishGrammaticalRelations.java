@@ -135,7 +135,7 @@ public class EnglishGrammaticalRelations {
   // verb would be a ccomp.  For example, "I know when the train is
   // arriving."  What does the person know?
   private static final String ccompVerbRegex =
-    "/^(?i:know|knows|knew|knowing|specify|specifies|specified|specifying|tell|tells|told|telling|understand|understands|understood|understanding|wonder|wonders|wondered|wondering)$/";
+    "/^(?i:ask|asks|asked|asking|know|knows|knew|knowing|specify|specifies|specified|specifying|tell|tells|told|telling|understand|understands|understood|understanding|wonder|wonders|wondered|wondering)$/";
   // A subset of ccompVerbRegex where you could expect an object and
   // still have a ccomp.  For example, "They told me when ..." can
   // still have a ccomp.  "They know my order when ..." would not
