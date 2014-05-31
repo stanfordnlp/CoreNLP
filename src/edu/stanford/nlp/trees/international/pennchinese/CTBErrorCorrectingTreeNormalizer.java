@@ -40,11 +40,11 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
   private static final boolean DEBUG = System.getProperty("CTBErrorCorrectingTreeNormalizer", null) != null;
 
   @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-  private TreeTransformer tagExtender;
+  private final TreeTransformer tagExtender;
 
-  private boolean splitNPTMP;
-  private boolean splitPPTMP;
-  private boolean splitXPTMP;
+  private final boolean splitNPTMP;
+  private final boolean splitPPTMP;
+  private final boolean splitXPTMP;
 
   /** Constructor with all of the options of the other constructor false */
   public CTBErrorCorrectingTreeNormalizer() {
@@ -70,6 +70,8 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
+    } else {
+      tagExtender = null;
     }
   }
 
@@ -124,10 +126,10 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
 
   }
 
-  private Filter<Tree> chineseEmptyFilter = new ChineseEmptyFilter();
+  private final Filter<Tree> chineseEmptyFilter = new ChineseEmptyFilter();
 
-  private static final TregexPattern[] splitPuncTregex = { 
-    TregexPattern.compile("PU=punc < 她｛") 
+  private static final TregexPattern[] splitPuncTregex = {
+    TregexPattern.compile("PU=punc < 她｛")
   };
   private static final TsurgeonPattern[] splitPuncTsurgeon = {
     Tsurgeon.parseOperation("replace punc (PN 她) (PU ｛)")
@@ -263,14 +265,14 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       }
     }
 
-    
+
     if (tagExtender != null) {
       newTree = tagExtender.transformTree(newTree);
     }
     return newTree;
   }
 
-  /** So you can create one of these easily by reflection. */
+  /** So you can create a TreeReaderFactory using this TreeNormalizer easily by reflection. */
   public static class CTBErrorCorrectingTreeReaderFactory extends CTBTreeReaderFactory {
 
     public CTBErrorCorrectingTreeReaderFactory() {
