@@ -38,9 +38,7 @@ public class DistsimFeatureFactory extends FeatureFactory {
   }
 
   @Override
-  public List<String> featurize(State state) {
-    List<String> features = Generics.newArrayList();
-
+  public List<String> featurize(State state, List<String> features) {
     CoreLabel s0Label = getStackLabel(state.stack, 0); // current top of stack
     CoreLabel s1Label = getStackLabel(state.stack, 1); // one previous
     CoreLabel q0Label = getQueueLabel(state.sentence, state.tokenPosition, 0); // current location in queue
@@ -52,4 +50,5 @@ public class DistsimFeatureFactory extends FeatureFactory {
     return features;
   }
 
+  private static final long serialVersionUID = -396152777907151063L;
 }

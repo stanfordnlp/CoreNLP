@@ -17,10 +17,9 @@ public class CombinationFeatureFactory extends FeatureFactory {
   }
   
   @Override
-  public List<String> featurize(State state) {
-    List<String> features = Generics.newArrayList();
+  public List<String> featurize(State state, List<String> features) {
     for (FeatureFactory factory : factories) {
-      features.addAll(factory.featurize(state));
+      factory.featurize(state, features);
     }
     return features;
   }

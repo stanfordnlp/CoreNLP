@@ -222,9 +222,7 @@ public class BasicFeatureFactory extends FeatureFactory {
   }
 
   @Override
-  public List<String> featurize(State state) {
-    List<String> features = Generics.newArrayList();
-
+  public List<String> featurize(State state, List<String> features) {
     final TreeShapedStack<Tree> stack = state.stack;
     final List<Tree> sentence = state.sentence;
     final int tokenPosition = state.tokenPosition;
