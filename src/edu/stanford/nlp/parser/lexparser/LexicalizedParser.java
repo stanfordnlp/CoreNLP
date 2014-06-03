@@ -35,6 +35,7 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -88,7 +89,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser extends ParserGrammar implements Function<List<? extends HasWord>, Tree>, Serializable {
+public class LexicalizedParser extends ParserGrammar implements Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -329,16 +330,7 @@ public class LexicalizedParser extends ParserGrammar implements Function<List<? 
       System.err.println("Recovering using fall through strategy: will construct an (X ...) tree.");
     }
     // if can't parse or exception, fall through
-    // TODO: merge with ParserAnnotatorUtils
-    TreeFactory lstf = new LabeledScoredTreeFactory();
-    List<Tree> lst2 = new ArrayList<Tree>();
-    for (HasWord obj : lst) {
-      String s = obj.word();
-      Tree t = lstf.newLeaf(s);
-      Tree t2 = lstf.newTreeNode("X", Collections.singletonList(t));
-      lst2.add(t2);
-    }
-    return lstf.newTreeNode("X", lst2);
+    return ParserUtils.xTree(lst);
   }
 
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {
