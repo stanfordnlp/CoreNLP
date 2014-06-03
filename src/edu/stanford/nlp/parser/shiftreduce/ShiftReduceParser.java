@@ -665,10 +665,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return new Triple<List<Update>, Integer, Integer>(updates, numCorrect, numWrong);
   }
 
-  private void trainAndSave(String trainTreebankPath, FileFilter trainTreebankFilter,
-                            String devTreebankPath, FileFilter devTreebankFilter,
+  private void trainAndSave(List<Pair<String, FileFilter>> trainTreebankPath, 
+                            Pair<String, FileFilter> devTreebankPath,
                             String serializedPath) {
-    List<Tree> binarizedTrees = readBinarizedTreebank(trainTreebankPath, trainTreebankFilter);
+    List<Tree> binarizedTrees = Generics.newArrayList();
+    for (Pair<String, FileFilter> treebank : trainTreebankPath) {
+      binarizedTrees.addAll(readBinarizedTreebank(treebank.first(), treebank.second()));
+    }
 
     int nThreads = op.trainOptions.trainingThreads;
     nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;      
@@ -693,7 +696,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
     Treebank devTreebank = null;
     if (devTreebankPath != null) {
-      devTreebank = readTreebank(devTreebankPath, devTreebankFilter);
+      devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
     }
 
     double bestScore = 0.0;
@@ -891,12 +894,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
-    String trainTreebankPath = null;
-    FileFilter trainTreebankFilter = null;
-    String testTreebankPath = null;
-    FileFilter testTreebankFilter = null;
-    String devTreebankPath = null;
-    FileFilter devTreebankFilter = null;
+    List<Pair<String, FileFilter>> trainTreebankPath = null;
+    Pair<String, FileFilter> testTreebankPath = null;
+    Pair<String, FileFilter> devTreebankPath = null;
 
     String serializedPath = null;
 
@@ -906,20 +906,17 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-trainTreebank")) {
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-trainTreebank");
+        if (trainTreebankPath == null) {
+          trainTreebankPath = Generics.newArrayList();
+        }
+        trainTreebankPath.add(ArgUtils.getTreebankDescription(args, argIndex, "-trainTreebank"));
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
-        trainTreebankPath = treebankDescription.first();
-        trainTreebankFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-testTreebank")) {
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-testTreebank");
+        testTreebankPath = ArgUtils.getTreebankDescription(args, argIndex, "-testTreebank");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
-        testTreebankPath = treebankDescription.first();
-        testTreebankFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-devTreebank")) {
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-devTreebank");
+        devTreebankPath = ArgUtils.getTreebankDescription(args, argIndex, "-devTreebank");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
-        devTreebankPath = treebankDescription.first();
-        devTreebankFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-serializedPath")) {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
@@ -954,7 +951,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
         parser = new ShiftReduceParser(op);
       }
-      parser.trainAndSave(trainTreebankPath, trainTreebankFilter, devTreebankPath, devTreebankFilter, serializedPath);
+      parser.trainAndSave(trainTreebankPath, devTreebankPath, serializedPath);
     }
 
     if (serializedPath != null && parser == null) {
@@ -964,9 +961,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     //parser.outputStats();
 
     if (testTreebankPath != null) {
-      System.err.println("Loading test trees from " + testTreebankPath);
+      System.err.println("Loading test trees from " + testTreebankPath.first());
       Treebank testTreebank = parser.op.tlpParams.memoryTreebank();
-      testTreebank.loadPath(testTreebankPath, testTreebankFilter);
+      testTreebank.loadPath(testTreebankPath.first(), testTreebankPath.second());
       System.err.println("Loaded " + testTreebank.size() + " trees");
 
       EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
