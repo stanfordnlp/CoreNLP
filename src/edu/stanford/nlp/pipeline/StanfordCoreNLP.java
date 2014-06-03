@@ -336,9 +336,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         StringBuilder os = new StringBuilder();
         os.append("tokenize.whitespace:" +
                 properties.getProperty("tokenize.whitespace", "false"));
-        if (properties.getProperty("tokenize.options") != null) {
-          os.append(":tokenize.options:" + properties.getProperty("tokenize.options"));
-        }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
                 "false"))) {
           os.append(WhitespaceTokenizerAnnotator.EOL_PROPERTY + ":" +
@@ -575,7 +572,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       @Override
       public String signature() {
         // keep track of all relevant properties for this annotator here!
-        return POSTaggerAnnotator.signature(properties);
+        return ("pos.maxlen:" + properties.getProperty("pos.maxlen", "") +
+                "pos.model:" + properties.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL) +
+                "pos.nthreads:" + properties.getProperty("pos.nthreads", properties.getProperty("nthreads", "")));
       }
     });
 
