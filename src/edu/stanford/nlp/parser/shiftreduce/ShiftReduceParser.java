@@ -63,6 +63,12 @@ import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 
+/**
+ * Overview and description available at 
+ * http://nlp.stanford.edu/software/srparser.shtml
+ *
+ * @author John Bauer
+ */
 public class ShiftReduceParser extends ParserGrammar implements Serializable {
   Index<Transition> transitionIndex;
   Map<String, Weight> featureWeights;
@@ -889,19 +895,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
   static final String[] FORCE_TAGS = { "-forceTags" };
 
-  // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
-  // java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath ../codebase/retagged7.ser.gz -preTag -taggerSerializedFile ../data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger
-  // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -trainingThreads 4 -batchSize 12 -serializedPath foo.ser.gz 
-  // java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -preTag -taggerSerializedFile ../data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tagger -trainingThreads 4 -batchSize 12 -serializedPath foo.ser.gz
-  // Sources:
-  //   A Classifier-Based Parser with Linear Run-Time Complexity (Kenji Sagae and Alon Lavie)
-  //   Transition-Based Parsing of the Chinese Treebank using a Global Discriminative Model (Zhang and Clark)
-  //     http://aclweb.org/anthology-new/W/W09/W09-3825.pdf
-  //   Fast and Accurate Shift-Reduce Constituent Parsing (Zhu et al)
-  //   A Dynamic Oracle for Arc-Eager Dependency Parsing (Goldberg and Nivre) (a rough constituency oracle is implemented)
-  //   Learning Sparser Perceptron Models (Goldberg and Elhadad) (unpublished)
-  // Sources with stuff to implement:
-  //   http://honnibal.wordpress.com/2013/12/18/a-simple-fast-algorithm-for-natural-language-dependency-parsing/
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
