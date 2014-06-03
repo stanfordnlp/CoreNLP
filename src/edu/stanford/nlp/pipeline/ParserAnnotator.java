@@ -12,7 +12,6 @@ import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
@@ -258,7 +257,7 @@ public class ParserAnnotator implements Annotator {
     // tree == null may happen if the parser takes too long or if
     // the sentence is longer than the max length
     if (tree == null) {
-      tree = ParserUtils.xTree(words);
+      tree = ParserAnnotatorUtils.xTree(words);
     }
 
     if (treeMap != null) {
