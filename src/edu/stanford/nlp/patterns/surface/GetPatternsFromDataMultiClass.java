@@ -96,9 +96,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * 
  * <p>
  * To use a properties file, see
- * projects/core/data/edu/stanford/nlp/patterns/surface/data/example.properties
+ * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties
  * as an example for the flags and their brief descriptions. Run the code as:
- * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props projects/core/data/edu/stanford/nlp/patterns/surface/data/example.properties</code>
+ * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props projects/core/data/edu/stanford/nlp/patterns/surface/example.properties</code>
  * 
  * <p>
  * IMPORTANT: Many flags are described in the classes
@@ -2169,24 +2169,24 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   public static List<File> getAllFiles(String file) {
+    
     List<File> allFiles = new ArrayList<File>();
     for (String tokfile : file.split("[,;]")) {
       File filef = new File(tokfile);
-      String path = ".*";
-      File dir = null;
       if (filef.isDirectory()) {
-        dir = filef;
+        String path = ".*";
+        File dir = filef;
+        for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
+          Redwood.log(Redwood.DBG, "Reading file " + f);
+          allFiles.add(f);
+        }
       } else {
-        dir = filef.getParentFile();
-        path = "^" + filef.getAbsolutePath() + "$";
+        Redwood.log(Redwood.DBG, "Reading file " + filef);
+        allFiles.add(filef);
       }
 
       // RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
       // File[] files = dir.listFiles(fileFilter);
-      for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
-        System.out.println("Reading file " + f);
-        allFiles.add(f);
-      }
     }
 
     return allFiles;
