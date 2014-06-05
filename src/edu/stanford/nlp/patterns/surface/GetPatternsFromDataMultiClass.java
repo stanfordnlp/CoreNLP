@@ -78,8 +78,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * 
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
- * (or txt) and ser, where the serialized file is of the type Map<String,
- * List<CoreLabel>>.
+ * (or txt) and ser, where the serialized file is of the type Map&lt;String,
+ * List&lt;CoreLabel&gt;&gt;.
  * <p>
  * <code>file</code>: (Required) Input file(s) (default assumed text). Can be
  * one or more of (concatenated by comma or semi-colon): file, directory, files
@@ -2525,14 +2525,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
 
         if (evalsents.size() == 0 && goldEntitiesEvalFiles == null)
-          System.err
-              .println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
+          System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
 
       }
 
     } catch (OutOfMemoryError e) {
-      System.out
-          .println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you wanna allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
+      System.out.println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you wanna allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
       e.printStackTrace();
     } catch (Exception e) {
       e.printStackTrace();
