@@ -127,6 +127,7 @@ public class IOBUtils {
       MorphoFeatureSpecification featureSpec = new ArabicMorphoFeatureSpecification();
       featureSpec.activate(MorphoFeatureType.NGEN);
       featureSpec.activate(MorphoFeatureType.NNUM);
+      featureSpec.activate(MorphoFeatureType.DEF);
       MorphoFeatures features = featureSpec.strToFeatures(tag);
 
       // Rule #1 : ت --> ة
@@ -137,7 +138,10 @@ public class IOBUtils {
       }
 
       // Rule #2 : لل --> ل ال
-      if (lastToken.equals("ل") && rawToken.startsWith("-ل")) {
+      if (lastToken.equals("ل") &&
+          features.getValue(MorphoFeatureType.DEF).equals("D")) {
+        assert rawToken.startsWith("-ال") && token.startsWith("ا");
+        token = token.substring(1);
         firstLabel = RewriteTareefSymbol;
       }
     }
