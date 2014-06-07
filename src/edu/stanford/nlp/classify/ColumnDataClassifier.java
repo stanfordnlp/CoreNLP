@@ -157,8 +157,8 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> countChars</td><td>String</td><td>null</td><td>If non-null, count the number of occurrences of each character in the String, and make a feature for each character, binned according to <code>countCharsBins</code></td><td>Char-<i>ch</i>-<i>range</i></td></tr>
  * <tr><td> countCharsBins</td><td>String</td><td>"0,1"</td><td>Treat as a sequence of comma separated integer bounds, where character counts above the previous bound up to and including the next bound are binned. For instance, a value of "0,2" will give 3 bins, dividing a character count into bins of 0, 1-or-2, and 3-or-more occurrences.</td><td></td></tr>
  * <tr><td> splitWordsRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression on which to split the whole string (as in the String.split() function, which will return the things between delimiters, and discard the delimiters).  The resulting split-up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.</td></tr>
- * <tr><td> splitWordsTokenizerRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression to cut initial pieces off a String.  This regular expression <i>should always match</i> the String, and the size of the token is the number of characters matched.  So, for example, one can group letter and number characters but do nothing else with a regular expression like <code>([A-Za-z]+|[0-9]+|.)</code>.  (If the regular expression doesn't match, the first character of the string is treated as a one character word, and then matching is tried again, but in this case a warning message is printed.)  Note that, for Java regular expressions with disjunctions like this, the match is the first matching disjunction, not the longest matching disjunction, so patterns with common prefixes need to be ordered from most specific (longest) to least specific (shortest).)  The resulting split up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.  Note that as usual for Java String processing, backslashes must be doubled in the regular expressions that you write.</td></tr>
- * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>null</td><td>If defined, this regexp is used to determine character sequences which should not be returned as tokens when using the splitWordsTokenizerRegexp.  Typically, these might be whitespace tokens (i.e., \\s+).</td></tr>
+ * <tr><td> splitWordsTokenizerRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression to cut initial pieces off a String.  Either this regular expression or <code>splitWordsIgnoreRegexp</code> <i>should always match</i> the start of the String, and the size of the token is the number of characters matched.  So, for example, one can group letter and number characters but do nothing else with a regular expression like <code>([A-Za-z]+|[0-9]+|.)</code>, where the last disjunct will match any other single character.  (If neither regular expression matches, the first character of the string is treated as a one character word, and then matching is tried again, but in this case a warning message is printed.)  Note that, for Java regular expressions with disjunctions like this, the match is the first matching disjunction, not the longest matching disjunction, so patterns with common prefixes need to be ordered from most specific (longest) to least specific (shortest).)  The resulting split up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.  Note that as usual for Java String processing, backslashes must be doubled in the regular expressions that you write.</td></tr>
+ * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>\\s+</td><td>If non-empty, this regexp is used to determine character sequences which should not be returned as tokens when using <code>splitWordsTokenizerRegexp</code> or <code>splitWordsRegexp</code>. With the former, first the program attempts to match this regular expression at the start of the string (with <code>lookingAt()</code>) and if it matches, those characters are discarded, but if it doesn't match then <code>splitWordsTokenizerRegexp</code> is tried. With <code>splitWordsRegexp</code>, this is used to filter tokens (with <code>matches()</code> resulting from the splitting.  By default this regular expression is set to be all whitespace tokens (i.e., \\s+). Set it to an empty string to get all tokens returned.</td></tr>
  * <tr><td> useSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SW-<i>str</i></td></tr>
  * <tr><td> useLowercaseSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp and then lowercasing the result.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.  Note that this can be specified independently of useSplitWords. You can put either or both original cased and lowercased words in as features.</td><td>SW-<i>str</i></td></tr>
  * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
@@ -229,6 +229,7 @@ import edu.stanford.nlp.util.Triple;
 public class ColumnDataClassifier {
 
   private static final double DEFAULT_VALUE = 1.0; // default value for setting categorical, boolean features
+  private static final String DEFAULT_IGNORE_REGEXP = "\\s+";
 
   private final Flags[] flags;
   private final Flags globalFlags; // simply points to flags[0]
@@ -521,7 +522,7 @@ public class ColumnDataClassifier {
     }
 
     String line;
-    if ("".equals(printedText)) {
+    if (printedText.isEmpty()) {
       line = goldAnswer + '\t' + results;
      } else {
       line = printedText + '\t' + goldAnswer + '\t' + results;
@@ -748,9 +749,10 @@ public class ColumnDataClassifier {
   }
 
   private void addAllInterningAndPrefixingRVF(ClassicCounter<String> accumulator, ClassicCounter<String> addend, String prefix) {
+    assert prefix != null;
     for (String protoFeat : addend.keySet()) {
       double count = addend.getCount(protoFeat);
-      if (!"".equals(prefix)) {
+      if ( ! prefix.isEmpty()) {
         protoFeat = prefix + protoFeat;
       }
       if (globalFlags.intern) {
@@ -761,8 +763,9 @@ public class ColumnDataClassifier {
   }
 
   private void addAllInterningAndPrefixing(Collection<String> accumulator, Collection<String> addend, String prefix) {
+    assert prefix != null;
     for (String protoFeat : addend) {
-      if ( ! "".equals(prefix)) {
+      if ( ! prefix.isEmpty()) {
         protoFeat = prefix + protoFeat;
       }
       if (globalFlags.intern) {
@@ -1289,7 +1292,8 @@ public class ColumnDataClassifier {
           al.add(word.substring(0, m.end()));
           word = word.substring(m.end());
         } else {
-          System.err.println("Warning: regexpTokenize pattern " + tokenizerRegexp + " didn't match on " + word);
+          System.err.println("Warning: regexpTokenize pattern " + tokenizerRegexp + " didn't match on |" +
+                  word.substring(0, 1) + "| of |" + word + '|');
           // System.err.println("Default matched 1 char: " +
           //		       word.substring(0, 1));
           al.add(word.substring(0, 1));
@@ -1523,12 +1527,16 @@ public class ColumnDataClassifier {
           System.err.println("Ill-formed splitWordsTokenizerRegexp: " + val);
         }
       } else if (key.equals("splitWordsIgnoreRegexp")) {
-        try {
-          myFlags[col].splitWordsIgnorePattern = Pattern.compile(val);
-        } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWordsIgnoreRegexp: " + val);
+        String trimVal = val.trim();
+        if (trimVal.isEmpty()) {
+          myFlags[col].splitWordsIgnorePattern = null;
+        } else {
+          try {
+            myFlags[col].splitWordsIgnorePattern = Pattern.compile(trimVal);
+          } catch (PatternSyntaxException pse) {
+            System.err.println("Ill-formed splitWordsIgnoreRegexp: " + trimVal);
+          }
         }
-
       } else if (key.equals("useSplitWords")) {
         myFlags[col].useSplitWords = Boolean.parseBoolean(val);
       } else if (key.equals("useSplitWordPairs")) {
@@ -1632,7 +1640,7 @@ public class ColumnDataClassifier {
         myFlags[col].shuffleTrainingData = Boolean.parseBoolean(val);
       } else if (key.equals("shuffleSeed")) {
         myFlags[col].shuffleSeed = Long.parseLong(val);
-      } else if (key.length() > 0 && !key.equals("prop")) {
+      } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
     }
@@ -1882,7 +1890,7 @@ public class ColumnDataClassifier {
 
     Pattern splitWordsPattern = null;
     Pattern splitWordsTokenizerPattern = null;
-    Pattern splitWordsIgnorePattern = null;
+    Pattern splitWordsIgnorePattern = Pattern.compile(DEFAULT_IGNORE_REGEXP);
     boolean useSplitWords = false;
     boolean useSplitWordPairs = false;
     boolean useSplitFirstLastWords = false;
