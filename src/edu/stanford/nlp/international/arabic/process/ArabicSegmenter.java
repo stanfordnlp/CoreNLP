@@ -73,6 +73,11 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
   // Write TedEval files
   private static final String optTedEval = "tedEval";
+  
+  // Use a custom feature factory
+  private static final String optFeatureFactory = "featureFactory";
+  private static final String defaultFeatureFactory =
+      "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory";
 
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
@@ -105,8 +110,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     props.remove(optThreads);
     props.remove(optTedEval);
 
-    // Currently, this class only supports one featureFactory.
-    props.put("featureFactory", "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory");
+    if (!props.containsKey(optFeatureFactory))
+      props.put(optFeatureFactory, defaultFeatureFactory);
 
     flags = new SeqClassifierFlags(props);
     classifier = new CRFClassifier<CoreLabel>(flags);
@@ -401,6 +406,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     sb.append("  -suffixMarker char   : Mark segmented suffixes with specified character.").append(nl);
     sb.append("  -nthreads num        : Number of threads  (default: 1)").append(nl);
     sb.append("  -tedEval prefix      : Output TedEval-compliant gold and parse files.").append(nl);
+    sb.append("  -featureFactory cls  : Name of feature factory class  (default: ").append(defaultFeatureFactory);
+    sb.append(")").append(nl);
     sb.append(nl).append(" Otherwise, all flags correspond to those present in SeqClassifierFlags.java.").append(nl);
     return sb.toString();
   }
@@ -418,6 +425,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     optionArgDefs.put("suffixMarker", 1);
     optionArgDefs.put("nthreads", 1);
     optionArgDefs.put("tedEval", 1);
+    optionArgDefs.put("featureFactory", 1);
     return optionArgDefs;
   }
 
