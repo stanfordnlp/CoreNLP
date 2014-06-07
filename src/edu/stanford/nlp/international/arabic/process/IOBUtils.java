@@ -34,6 +34,8 @@ public class IOBUtils {
   public static final String NosegSymbol = "NOSEG";
   public static final String RewriteTahSymbol = "REWTA";
   public static final String RewriteTareefSymbol = "REWAL";
+  private static final String RewriteSymbol = "REW";
+  private static final String ShaddaSymbol = "SHADDA";
   
   private static final String BoundarySymbol = ".##.";
   private static final String BoundaryChar = ".#.";
@@ -180,6 +182,7 @@ public class IOBUtils {
       featureSpec.activate(MorphoFeatureType.NGEN);
       featureSpec.activate(MorphoFeatureType.NNUM);
       featureSpec.activate(MorphoFeatureType.DEF);
+      featureSpec.activate(MorphoFeatureType.TENSE);
       MorphoFeatures features = featureSpec.strToFeatures(tag);
 
       // Rule #1 : ت --> ة
@@ -187,20 +190,53 @@ public class IOBUtils {
           features.getValue(MorphoFeatureType.NNUM).equals("SG") &&
           rawToken.endsWith("ت-") &&
           !stripRewrites) {
-        lastLabel = RewriteTahSymbol;
+        lastLabel = RewriteSymbol;
+      } else if (rawToken.endsWith("ة-")) {
+        assert token.endsWith("ة");
+        token = token.substring(0, token.length() - 1) + "ت";
+        lastLabel = RewriteSymbol;
       }
 
       // Rule #2 : لل --> ل ال
       if (lastToken.equals("ل") &&
           features.getValue(MorphoFeatureType.DEF).equals("D")) {
-        assert rawToken.startsWith("-ال") && token.startsWith("ا");
-        token = token.substring(1);
+        if (rawToken.startsWith("-ال")) {
+          if (!token.startsWith("ا"))
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
+          token = token.substring(1);
+          if (!stripRewrites)
+            firstLabel = RewriteSymbol;
+        } else if (rawToken.startsWith("-ل")) {
+          if (!token.startsWith("ل"))
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
+          if (!stripRewrites)
+            firstLabel = RewriteSymbol;
+        } else {
+          System.err.println("Ignoring REWAL: " + rawToken + " / " + token);
+        }
+      }
+      
+      // Rule #3 : ي --> ى
+      // Rule #4 : ا --> ى
+      if (rawToken.endsWith("ى-")) {
+        if (features.getValue(MorphoFeatureType.TENSE) != null) {
+          // verb: ى becomes ا
+          token = token.substring(0, token.length() - 1) + "ا";
+        } else {
+          // assume preposition:
+          token = token.substring(0, token.length() - 1) + "ي";
+        }
         if (!stripRewrites)
-          firstLabel = RewriteTareefSymbol;
+          lastLabel = RewriteSymbol;
+      } else if (rawToken.equals("علي-") || rawToken.equals("-علي-")) {
+        if (!stripRewrites)
+          lastLabel = RewriteSymbol;
       }
     }
 
     // Create datums and add to iobList
+    if (token.isEmpty())
+      System.err.println("Rewriting resulted in empty token: " + tokenLabel.word());
     String firstChar = String.valueOf(token.charAt(0));
     iobList.add(createDatum(cl, firstChar, firstLabel));
     final int numChars = token.length();
@@ -377,25 +413,23 @@ public class IOBUtils {
       } else if (label.equals(BoundarySymbol)) {
         sb.append(" ");
 
-      } else if (label.equals(RewriteTahSymbol)) {
-        if (applyRewrites) {
-          sb.append("ة");
+      } else if (label.equals(RewriteSymbol) || label.equals("REWAL") || label.equals("REWTA")) {
+        if (token.equals("ت")) {
+          sb.append((applyRewrites ? "ة" : "ت") +
+                    (addSpace ? " " : ""));
+          if (addSuffixMarker) sb.append(suffixMarker);
+          else if (addPrefixMarker && !addSpace) sb.append(prefixMarker);
+        } else if (token.equals("ل")) {
+          sb.append((addPrefixMarker ? prefixMarker : "") +
+                    (addSpace ? " " : "") + 
+                    (applyRewrites ? "ال" : "ل"));
+        } else if (token.equals("ي") || token.equals("ا")) {
+          sb.append((applyRewrites ? "ى" : token) +
+                    (addSpace ? " " : ""));
         } else {
-          sb.append("ت");
+          // Nonsense rewrite predicted by the classifier--just assume CONT
+          sb.append(token);
         }
-        if (addSpace) sb.append(" ");
-        if (addSuffixMarker) sb.append(suffixMarker);
-        else if (addPrefixMarker && !addSpace) sb.append(prefixMarker);
-
-      } else if (label.equals(RewriteTareefSymbol)) {
-        if (addPrefixMarker) sb.append(prefixMarker);
-        if (addSpace) sb.append(" ");
-        if (applyRewrites) {
-          sb.append("ال");
-        } else {
-          sb.append("ل");
-        }
-
       } else {
         throw new RuntimeException("Unknown label: " + label);
       }
