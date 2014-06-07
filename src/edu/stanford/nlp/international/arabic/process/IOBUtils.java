@@ -319,10 +319,11 @@ public class IOBUtils {
         if (applyRewrites) {
           sb.append("ة");
         } else {
-          sb.append(token);
+          sb.append("ت");
         }
         if (addSpace) sb.append(" ");
         if (addSuffixMarker) sb.append(suffixMarker);
+        else if (addPrefixMarker && !addSpace) sb.append(prefixMarker);
 
       } else if (label.equals(RewriteTareefSymbol)) {
         if (addPrefixMarker) sb.append(prefixMarker);
@@ -330,7 +331,7 @@ public class IOBUtils {
         if (applyRewrites) {
           sb.append("ال");
         } else {
-          sb.append(token);
+          sb.append("ل");
         }
 
       } else {
