@@ -398,7 +398,7 @@ public class IOBUtils {
       if (addSuffixMarker && token.equals(suffixMarker))
         token = "#sm#";
       String label = labeledChar.get(CoreAnnotations.AnswerAnnotation.class);
-      if (label.equals(BoundarySymbol) || token.equals(BoundaryChar)) {
+      if (token.equals(BoundaryChar)) {
         sb.append(" ");
 
       } else if (label.equals(BeginSymbol)) {
@@ -416,7 +416,7 @@ public class IOBUtils {
         }
         sb.append(token);
 
-      } else if (label.equals(ContinuationSymbol)) {
+      } else if (label.equals(ContinuationSymbol) || label.equals(BoundarySymbol)) {
         sb.append(token);
 
       } else if (label.equals(NosegSymbol)) {

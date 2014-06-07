@@ -120,20 +120,21 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
       public List<CoreLabel> apply(String in) {
         List<CoreLabel> tokenList;
         
-        if (inputHasTags) {
-          String lineDomain = "";
-          if (inputHasDomainLabels) {
-            String[] domainAndData = in.split("\\s+", 2);
-            if (domainAndData.length < 2) {
-              System.err.println("Missing domain label or text: ");
-              System.err.println(in);
-            } else {
-              lineDomain = domainAndData[0];
-              in = domainAndData[1];
-            }
+        String lineDomain = "";
+        if (inputHasDomainLabels) {
+          String[] domainAndData = in.split("\\s+", 2);
+          if (domainAndData.length < 2) {
+            System.err.println("Missing domain label or text: ");
+            System.err.println(in);
           } else {
-            lineDomain = inputDomain;
+            lineDomain = domainAndData[0];
+            in = domainAndData[1];
           }
+        } else {
+          lineDomain = inputDomain;
+        }
+
+        if (inputHasTags) {
           String[] toks = in.split("\\s+");
           List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
           final String delim = Pattern.quote(tagDelimiter);
@@ -177,7 +178,9 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
           tokenList = IOBUtils.StringToIOB(line, segMarker, false);
         }
         
-        if (!inputHasDomainLabels)
+        if (inputHasDomainLabels && !inputHasTags)
+          IOBUtils.labelDomain(tokenList, lineDomain);
+        else if (!inputHasDomainLabels)
           IOBUtils.labelDomain(tokenList, inputDomain);
         return tokenList;
       }
