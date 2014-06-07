@@ -1295,7 +1295,13 @@ class ArabicLexer {
           }
         case 13: break;
         case 7: 
-          { return removeProMarker ? "-" : getNext(false);
+          { if (removeProMarker) {
+                if ( ! removeSegMarker) {
+                  return getNext("-", yytext());
+                }
+              } else {
+                return getNext(false);
+              }
           }
         case 14: break;
         default: 

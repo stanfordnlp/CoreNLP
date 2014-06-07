@@ -337,7 +337,14 @@ EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a
 {DIGITS}    |
 {PUNC}      { return getNext(false); }
 
-{NULLPRON}  { return removeProMarker ? "-" : getNext(false); }
+{NULLPRON}  { if (removeProMarker) {
+                if ( ! removeSegMarker) {
+                  return getNext("-", yytext());
+                }
+              } else {
+                return getNext(false);
+              }
+            }
 
 {ARWORD}    |
 {FORNWORD}  { return getNext(true); }
