@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -185,7 +186,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     if ( ! isTokenized) {
       if (tokenizerOptions == null) {
         tokFactory = ArabicTokenizer.atbFactory();
-        String atbVocOptions = "removeProMarker,removeMorphMarker";
+        String atbVocOptions = "removeProMarker,removeMorphMarker,removeLengthening";
         tokFactory.setOptions(atbVocOptions);
       } else {
         if (tokenizerOptions.contains("removeSegMarker")) {
@@ -351,10 +352,24 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
         }
       }
       if (tedEvalParseSeg != null) {
-        assert inputTokens.length == parseTokens.length && inputTokens.length == goldTokens.length;
         tedEvalGoldTree.printf("(root");
         tedEvalParseTree.printf("(root");
-        for (int i = 0; i < inputTokens.length; i++) {
+        int safeLength = inputTokens.length;
+        if (inputTokens.length != goldTokens.length) {
+          System.err.println("In generating TEDEval files: Input and gold do not have the same number of tokens");
+          System.err.println("    (ignoring any extras)");
+          System.err.println("  input: " + Arrays.toString(inputTokens));
+          System.err.println("  gold: " + Arrays.toString(goldTokens));
+          safeLength = Math.min(inputTokens.length, goldTokens.length);
+        }
+        if (inputTokens.length != parseTokens.length) {
+          System.err.println("In generating TEDEval files: Input and parse do not have the same number of tokens");
+          System.err.println("    (ignoring any extras)");
+          System.err.println("  input: " + Arrays.toString(inputTokens));
+          System.err.println("  parse: " + Arrays.toString(parseTokens));
+          safeLength = Math.min(inputTokens.length, parseTokens.length);
+        }
+        for (int i = 0; i < safeLength; i++) {
           for (String segment : goldTokens[i].split(":"))
             tedEvalGoldTree.printf(" (seg %s)", segment);
           tedEvalGoldSeg.printf("%s\t%s%n", inputTokens[i], goldTokens[i]);

@@ -15,9 +15,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.CollectionFactory;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -26,7 +24,7 @@ import edu.stanford.nlp.util.Pair;
  * and IOB sequence model.
  *
  * @author Spence Green
- *
+ * @author Will Monroe
  */
 public class IOBUtils {
 
@@ -37,11 +35,13 @@ public class IOBUtils {
   public static final String BeginSymbol = "BEGIN";
   public static final String ContinuationSymbol = "CONT";
   public static final String NosegSymbol = "NOSEG";
-  public static final String RewriteTahSymbol = "REWTA";
-  public static final String RewriteTareefSymbol = "REWAL";
-  private static final String RewriteSymbol = "REW";
-  private static final String ShaddaSymbol = "SHADDA";
+  public static final String RewriteSymbol = "REW";
   
+  /** @deprecated use RewriteSymbol instead */
+  public static final String RewriteTahSymbol = "REWTA";
+  /** @deprecated use RewriteSymbol instead */
+  public static final String RewriteTareefSymbol = "REWAL";
+
   private static final String BoundarySymbol = ".##.";
   private static final String BoundaryChar = ".#.";
 
@@ -250,6 +250,8 @@ public class IOBUtils {
     for (int j = 1; j < numChars; ++j) {
       String thisChar = String.valueOf(token.charAt(j));
       String charLabel = (j == numChars-1) ? lastLabel : ContinuationSymbol;
+      if (charLabel == ContinuationSymbol && thisChar.equals("ى") && j != numChars - 1)
+        charLabel = RewriteSymbol; // Assume all mid-word alef maqsura are supposed to be yah
       iobList.add(createDatum(cl, thisChar, charLabel));
     }
   }
@@ -396,8 +398,12 @@ public class IOBUtils {
       if (addSuffixMarker && token.equals(suffixMarker))
         token = "#sm#";
       String label = labeledChar.get(CoreAnnotations.AnswerAnnotation.class);
-      if (label.equals(BeginSymbol)) {
-        if (lastLabel.equals(ContinuationSymbol) || lastLabel.equals(BeginSymbol)) {
+      if (label.equals(BoundarySymbol) || token.equals(BoundaryChar)) {
+        sb.append(" ");
+
+      } else if (label.equals(BeginSymbol)) {
+        if (lastLabel.equals(ContinuationSymbol) || lastLabel.equals(BeginSymbol) ||
+            lastLabel.equals(RewriteSymbol)) {
           if (addPrefixMarker && (!addSpace || addPrefixMarker(i, labeledSequence))) {
             sb.append(prefixMarker);
           }
@@ -414,27 +420,20 @@ public class IOBUtils {
         sb.append(token);
 
       } else if (label.equals(NosegSymbol)) {
-        if ( ! lastLabel.equals(BoundarySymbol)) {
+        if ( ! lastLabel.equals(BoundarySymbol) && addSpace) {
           sb.append(" ");
         }
         sb.append(token);
 
-      } else if (label.equals(BoundarySymbol)) {
-        sb.append(" ");
-
       } else if (label.equals(RewriteSymbol) || label.equals("REWAL") || label.equals("REWTA")) {
         if (token.equals("ت")) {
-          sb.append((applyRewrites ? "ة" : "ت") +
-                    (addSpace ? " " : ""));
-          if (addSuffixMarker) sb.append(suffixMarker);
-          else if (addPrefixMarker && !addSpace) sb.append(prefixMarker);
+          sb.append(applyRewrites ? "ة" : "ت");
         } else if (token.equals("ل")) {
           sb.append((addPrefixMarker ? prefixMarker : "") +
                     (addSpace ? " " : "") + 
                     (applyRewrites ? "ال" : "ل"));
         } else if (token.equals("ي") || token.equals("ا")) {
-          sb.append((applyRewrites ? "ى" : token) +
-                    (addSpace ? " " : ""));
+          sb.append(applyRewrites ? "ى" : token);
         } else {
           // Nonsense rewrite predicted by the classifier--just assume CONT
           sb.append(token);

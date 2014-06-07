@@ -55,6 +55,9 @@ import edu.stanford.nlp.util.PropertiesUtils;
  private boolean removeProMarker;
  private boolean removeSegMarker;
  private boolean removeMorphMarker;
+ 
+ // Lengthening effects (yAAAAAAA): replace three or more of the same character with one
+ private boolean removeLengthening;
 
  private final Pattern segmentationMarker = Pattern.compile("^-+|-+$");
  
@@ -84,6 +87,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
    removeProMarker = PropertiesUtils.getBool(props, "removeProMarker", false);
    removeSegMarker = PropertiesUtils.getBool(props, "removeSegMarker", false);
    removeMorphMarker = PropertiesUtils.getBool(props, "removeMorphMarker", false);
+   removeLengthening = PropertiesUtils.getBool(props, "removeLengthening", false);
    atbEscaping = PropertiesUtils.getBool(props, "atbEscaping", false);
 
    setupNormalizationMap();
@@ -240,6 +244,9 @@ import edu.stanford.nlp.util.PropertiesUtils;
      if (isWord && removeMorphMarker && thisChar.equals("+")) {
        continue;
      }
+     if (removeLengthening && isLengthening(text, i)) {
+       continue;
+     }
      if (normMap.containsKey(thisChar)) {
        thisChar = normMap.get(thisChar);
      }
@@ -250,6 +257,17 @@ import edu.stanford.nlp.util.PropertiesUtils;
    return sb.toString();
  }
  
+ private boolean isLengthening(String text, int pos) {
+   if (pos == 0) return false;
+   String thisChar = String.valueOf(text.charAt(pos));
+   if (!thisChar.equals(String.valueOf(text.charAt(pos - 1))))
+     return false;
+   if (pos < text.length() - 1 && thisChar.equals(String.valueOf(text.charAt(pos + 1))))
+     return true;
+   if (pos >= 2 && thisChar.equals(String.valueOf(text.charAt(pos - 2))))
+     return true;
+   return false;
+ }
  
    /** Make the next token.
    *

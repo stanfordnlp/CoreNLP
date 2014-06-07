@@ -158,6 +158,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * <li><code>removeProMarker</code> : Remove the ATB null pronoun marker</li>
    * <li><code>removeSegMarker</code> : Remove the ATB clitic segmentation marker</li>
    * <li><code>removeMorphMarker</code> : Remove the ATB morpheme boundary markers</li>
+   * <li><code>removeLengthening</code> : Replace all sequences of three or more identical (non-period) characters with one copy</li>
    * <li><code>atbEscaping</code> : Replace left/right parentheses with ATB escape characters</li>
    * </ul>
    * </p>
