@@ -431,4 +431,10 @@ public class IOBUtils {
     }
     return arAffixSet.contains(sb.toString());
   }
+
+  public static void labelDomain(List<CoreLabel> tokenList, String domain) {
+    for (CoreLabel cl : tokenList) {
+      cl.set(CoreAnnotations.DomainAnnotation.class, domain);
+    }
+  }
 }
