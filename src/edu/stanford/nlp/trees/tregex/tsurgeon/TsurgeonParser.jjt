@@ -39,47 +39,82 @@ class TsurgeonParser {
 PARSER_END(TsurgeonParser)
 
 
-SKIP:
+<*> SKIP:
 {
   " "
 | "\r"
 | "\t"
-//| "\n"
+| "\n"
+}
+
+<*> TOKEN:
+{
+  < OPEN_BRACKET: "[" > : DEFAULT
 }
 
 TOKEN:
-{
-  < DELETE: "delete" >
-| < PRUNE:  "prune" >
-| < RELABEL: "relabel" >
-| < EXCISE: "excise" >
-| < INSERT: "insert" >
-| < MOVE: "move" >
-| < REPLACE: "replace" > 
-| < CREATE_SUBTREE: "createSubtree" >
-| < ADJOIN: "adjoin" >
-| < ADJOIN_TO_HEAD: "adjoinH" >
-| < ADJOIN_TO_FOOT: "adjoinF" >
-| < COINDEX: "coindex" >
-| < SELECTION: "#rightmost" | "#leftmost" >
-| < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|~["\n","\r"])* "/") )+ >
-| < IDENTIFIER: ["-","*","a"-"z","A"-"Z"] ( ["-","*","a"-"z","A"-"Z","_","0"-"9","|","@","="] )* >
-| < LABEL: ["A"-"Z"] (["A"-"Z","0"-"9","-","_"])* >
-| < LOCATION_RELATION: "$-" | "$+" | ">" ("-")? (["0"-"9"])+ >
-| < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
-| < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
-| < HASH_INTEGER: "#" (["0"-"9"])+ >
-| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","(",")",":"] )+ >
-| < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
+{ < IF: "if" >
+| < EXISTS: "exists" > : CONDITIONAL
+| < DELETE: "delete" > : OPERATION
+| < PRUNE:  "prune" > : OPERATION
+| < RELABEL: "relabel" > : OPERATION
+| < EXCISE: "excise" > : OPERATION
+| < INSERT: "insert" > : OPERATION
+| < MOVE: "move" > : OPERATION
+| < REPLACE: "replace" >  : OPERATION
+| < CREATE_SUBTREE: "createSubtree" > : OPERATION
+| < ADJOIN: "adjoin" > : OPERATION
+| < ADJOIN_TO_HEAD: "adjoinH" > : OPERATION
+| < ADJOIN_TO_FOOT: "adjoinF" > : OPERATION
+| < COINDEX: "coindex" > : OPERATION
 }
 
-TsurgeonPattern Root() :
+<CONDITIONAL> TOKEN:
+{ < NAME: ( ~[" ","\n","\r","[","]","(",")",":"] )+ > : DEFAULT }
+
+<OPERATION> TOKEN:
+{ 
+  < CLOSE_BRACKET: "]" >
+| < SELECTION: "#rightmost" | "#leftmost" >
+| < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|"\\]"|"\\\\"|~["\n","\r","]","\\"])* "/") )+ >
+| < IDENTIFIER: ["-","*","a"-"z","A"-"Z"] ( ["-","*","a"-"z","A"-"Z","_","0"-"9","|","@","="] )* >
+| < LOCATION_RELATION: "$-" | "$+" | ">" ("-")? (["0"-"9"])+ >
+| < REGEX: "/" ("\\/"|"\\]"|"\\\\"|~["\n","\r","]","\\"])* "/" >
+| < QUOTEX: "|" ("\\|"|"\\\\"|~["\n","\r","|","\\"])* "|" >
+| < HASH_INTEGER: "#" (["0"-"9"])+ >
+| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","[","]","(",")",":"] )+ >
+| < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
+| < CLOSE_PAREN: ")" >
+}
+
+// TODO: this is wasteful in terms of creating TsurgeonPatternRoot.
+// Should separate that out into another production
+TsurgeonPatternRoot Root() :
 {
+  Token name;
   TsurgeonPattern result;
+  List<TsurgeonPattern> results = null;
 }
 {
-  result = Operation() "\n"
-  { return result; }
+  result = Operation()
+  { return new TsurgeonPatternRoot(result); } 
+ | 
+  ( <IF> <EXISTS> name = <NAME> result = Root() )
+  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, result.children)); }
+ |
+  ( <OPEN_BRACKET> result = Root() <CLOSE_BRACKET>
+    {
+      if (results == null) {
+        results = Generics.newArrayList();
+      }
+      for (TsurgeonPattern child : result.children) {
+        results.add(child);
+      }
+    } )+
+  {
+    TsurgeonPattern[] array = new TsurgeonPattern[results.size()];
+    return new TsurgeonPatternRoot(results.toArray(array));
+  }
 }
 
 TsurgeonPattern Operation() :
@@ -128,7 +163,7 @@ TsurgeonPattern Operation() :
 | LOOKAHEAD(3)
   operator = <INSERT> tree = TreeRoot(false) loc = Location()
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> newLabel = <IDENTIFIER> nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
+| operator = <CREATE_SUBTREE> (( newLabel = <IDENTIFIER> ) | ( newLabel = <TREE_NODE_TERMINAL_LABEL> )) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
     { if (nodeSelections.size() == 1) {
         return new CreateSubtreeNode(nodeSelections.get(0), newLabel.image);
       } else if (nodeSelections.size() == 2) {
@@ -168,6 +203,7 @@ List<TsurgeonPattern> NodeSelectionList(List<TsurgeonPattern> l) :
    { return l; }
 }
 
+// TODO: what does this next comment mean?
 // we'll also put in a way to use a SELECTION with a list of nodes.
 TsurgeonPattern NodeSelection() :
 {
@@ -219,6 +255,8 @@ Tree TreeNode() :
     { return treeFactory.newTreeNode(label.image.substring(1),dtrs); }
 | ( label = <TREE_NODE_TERMINAL_LABEL> )
     { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
+| ( label = <IDENTIFIER> )
+    { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
 }
 
 List<Tree> TreeDtrs(List<Tree> dtrs) :
@@ -228,6 +266,6 @@ List<Tree> TreeDtrs(List<Tree> dtrs) :
 {
   tree = TreeNode() TreeDtrs(dtrs)
     {dtrs.add(0,tree); return dtrs; }
-| ")"
+| <CLOSE_PAREN>
   {return dtrs; }
 }

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.util.regex.Matcher;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.util.Index;
 
 /** Does iterative deepening search inside the CKY algorithm for faster

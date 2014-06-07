@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
+import edu.stanford.nlp.util.StringUtils;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -112,7 +113,7 @@ public class TrieMapTest extends TestCase {
     List<ApproxMatch<String,Boolean>> expected = new ArrayList<ApproxMatch<String,Boolean>>();
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 3, 1.0));
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3, 2.0));
-    assertEquals("Expecting " + expected + ", got " + matches, expected, matches);
+    assertEquals("\nExpecting " + expected + ",\n got " + matches, expected, matches);
     //System.out.println(matches);
 
     // TODO: ordering of results with same score
@@ -120,23 +121,23 @@ public class TrieMapTest extends TestCase {
     expected = new ArrayList<ApproxMatch<String,Boolean>>();
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 2, 2.0));
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 2, 2.0));
-    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "white", "hat"), Boolean.TRUE, 0, 2, 3.0));
-    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "white", "cat"), Boolean.TRUE, 0, 2, 3.0));
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "colored", "hat"), Boolean.TRUE, 0, 2, 3.0));
-    assertEquals("Expecting " + expected + ", got " + matches, expected, matches);
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "white", "cat"), Boolean.TRUE, 0, 2, 3.0));
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "white", "hat"), Boolean.TRUE, 0, 2, 3.0));
+    assertEquals("\nExpecting " + StringUtils.join(expected, "\n") + ",\ngot " + StringUtils.join(matches, "\n"), expected, matches);
     //System.out.println(matches);
 
     matches = matcher.findClosestMatches(new String[]{"the", "black","cat","is","wearing","a","white","hat"}, 5);
     expected = new ArrayList<ApproxMatch<String,Boolean>>();
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "white", "hat"), Boolean.TRUE, 0, 8, 5.0));
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 8, 6.0));
-    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "white", "cat"), Boolean.TRUE, 0, 8, 6.0));
-    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "colored", "hat"), Boolean.TRUE, 0, 8, 6.0));
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 8, 6.0));
-    assertEquals("Expecting " + expected + ", got " + matches, expected, matches);
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "colored", "hat"), Boolean.TRUE, 0, 8, 6.0));
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "white", "cat"), Boolean.TRUE, 0, 8, 6.0));
+    assertEquals("Expecting " + StringUtils.join(expected, "\n") + ",\ngot " + StringUtils.join(matches, "\n"), expected, matches);
     //System.out.println(matches);
 
-    matches = matcher.findClosestMatches(new String[]{"the", "black","cat","is","wearing","a","white","hat"}, 5, true, true);
+    matches = matcher.findClosestMatches(new String[]{"the", "black","cat","is","wearing","a","white","hat"}, 6, true, true);
     //   [([[a, black, cat]-[a, white, hat]] -> true-true at (0,8),3.0),
     expected = new ArrayList<ApproxMatch<String,Boolean>>();
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat", "a", "white", "hat"), Boolean.TRUE, 0, 8,
@@ -144,32 +145,37 @@ public class TrieMapTest extends TestCase {
               new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3),
               new Match<String,Boolean>( Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8)),
             3.0));
-    // ([[a, black, cat]-[a, colored, hat]] -> true-true at (0,8),4.0),      0000000
+    // ([[a, black, hat]-[a, black, hat]] -> true-true at (0,8),4.0),
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat", "a", "black", "hat"), Boolean.TRUE, 0, 8,
+        Arrays.asList(
+            new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3),
+            new Match<String,Boolean>( Arrays.asList("a", "black", "hat"), Boolean.TRUE, 5, 8)),
+        4.0));
+    // ([[a, black, hat]-[a, colored, hat]] -> true-true at (0,8),4.0),
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat", "a", "colored", "hat"), Boolean.TRUE, 0, 8,
+        Arrays.asList(
+            new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3),
+            new Match<String,Boolean>( Arrays.asList("a", "colored", "hat"), Boolean.TRUE, 5, 8)),
+        4.0));
+    // ([[a, black, cat]-[a, white, cat]] -> true-true at (0,8),4.0),
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat", "a", "white", "cat"), Boolean.TRUE, 0, 8,
+        Arrays.asList(
+            new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3),
+            new Match<String,Boolean>( Arrays.asList("a", "white", "cat"), Boolean.TRUE, 5, 8)),
+        4.0));
+    // ([[a, black, cat]-[a, white, hat]] -> true-true at (0,8),4.0),
+    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "hat", "a", "white", "hat"), Boolean.TRUE, 0, 8,
+        Arrays.asList(
+            new Match<String,Boolean>( Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 3),
+            new Match<String,Boolean>( Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8)),
+        4.0));
+   // ([[a, black, cat]-[a, black, cat]-[a, white, hat]] -> true-true at (0,8),4.0)]
     expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat", "a", "black", "cat", "a", "white", "hat"), Boolean.TRUE, 0, 8,
             Arrays.asList(
                     new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3),
                     new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 3, 5),
                     new Match<String,Boolean>( Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8)),
             4.0));
-    // ([[a, black, hat]-[a, white, hat]] -> true-true at (0,8),4.0),
-    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat", "a", "white", "cat"), Boolean.TRUE, 0, 8,
-            Arrays.asList(
-                    new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3),
-                    new Match<String,Boolean>( Arrays.asList("a", "white", "cat"), Boolean.TRUE, 5, 8)),
-            4.0));
-    // ([[a, black, cat]-[a, black, hat]] -> true-true at (0,8),4.0),
-    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "hat", "a", "white", "hat"), Boolean.TRUE, 0, 8,
-            Arrays.asList(
-                    new Match<String,Boolean>( Arrays.asList("a", "black", "hat"), Boolean.TRUE, 0, 5),
-                    new Match<String,Boolean>( Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8)),
-            4.0));
-   // ([[a, black, cat]-[a, white, cat]] -> true-true at (0,8),4.0)]
-    expected.add(new ApproxMatch<String,Boolean>(Arrays.asList("a", "black", "cat", "a", "black", "hat", "a", "white", "hat"), Boolean.TRUE, 0, 8,
-            Arrays.asList(
-                    new Match<String,Boolean>( Arrays.asList("a", "black", "cat"), Boolean.TRUE, 0, 3),
-                    new Match<String,Boolean>( Arrays.asList("a", "black", "hat"), Boolean.TRUE, 3, 5),
-                    new Match<String,Boolean>( Arrays.asList("a", "white", "hat"), Boolean.TRUE, 5, 8)),
-            4.0));
-    assertEquals("Expecting " + expected + ",\ngot " + matches, expected, matches);
+    assertEquals("\nExpecting " + StringUtils.join(expected, "\n") + ",\ngot " + StringUtils.join(matches, "\n"), expected, matches);
   }
 }

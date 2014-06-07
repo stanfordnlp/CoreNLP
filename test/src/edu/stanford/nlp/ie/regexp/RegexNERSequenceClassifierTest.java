@@ -6,6 +6,8 @@ import java.io.*;
 import java.util.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * A simple test for the regex ner.  Writes out a temporary file with
@@ -20,46 +22,58 @@ public class RegexNERSequenceClassifierTest extends TestCase {
   private static File tempFile = null;
 
   static final String[] words =
-  { "My dog likes to eat sausage .",
-    "I went to Shoreline Park and saw an avocet and some curlews ." };
+  { "My dog likes to eat sausage : turkey , pork , beef , etc .",
+    "I went to Shoreline Park and saw an avocet and some curlews ( shorebirds ) ." };
   static final String[] tags =
-  { "PRP$ NN RB VBZ VBG NN .",
-    "PRP VBD TO NNP NNP CC VBD DT NN CC DT NNS ." };
+  { "PRP$ NN RB VBZ VBG NN : NN , NN , NN , FW .",
+    "PRP VBD TO NNP NNP CC VBD DT NN CC DT NNS -LRB- NNP -RRB- ." };
   static final String[] ner =
-  { "O O O O O O O",
-    "O O O LOCATION LOCATION O O O O O O O O"};
+  { "O O O O O O O O O O O O O O O",
+    "O O O LOCATION LOCATION O O O O O O O O O O O"};
 
   static final String[] expectedUncased =
-  { "- - - - - food -",
-    "- - - park park - - - shorebird - - shorebird -" };
+  { "- - - - - food - - - - - - - - -",
+    "- - - park park - - - shorebird - - shorebird - - - -" };
 
   static final String[] expectedCased =
-  { "- - - - - food -",
-    "- - - - - - - - shorebird - - shorebird -" };
+  { "- - - - - food - - - - - - - - -",
+    "- - - - - - - - shorebird - - shorebird - - - -" };
 
   static final String[] nerPatterns = {
           "Shoreline Park\tPARK\n",
           "Shoreline Park\tPARK\tLOCATION\n",
           "Shoreline\tPARK\n",
           "Shoreline Park and\tPARK\tLOCATION\n",
-          "My\tPOSS\nsausage \\.\tFOO\n",
+          "My\tPOSS\nsausage \\:\tFOO\n",
+          "My\tPOSS\nsausage :\tFOO\n",
           "My\tPOSS\n\\. \\.\tFOO\n",
+          "\\.\tPERIOD\n",
+          ".\tPERIOD\n",
+          "\\(|\\)\tPAREN\n",
   };
 
   static final String[][] expectedNER =
   {
-    { "- - - - - - -",
-      "- - - - - - - - - - - - -" },
-    { "- - - - - - -",
-      "- - - PARK PARK - - - - - - - -" },
-    { "- - - - - - -",
-      "- - - - - - - - - - - - -" },
-    { "- - - - - - -",
-      "- - - PARK PARK PARK - - - - - - -" }, // not clear it should do this, but does, as it's only tokenwise compatibility
-    { "POSS - - - - FOO FOO",
-      "- - - - - - - - - - - - -" },
-    { "POSS - - - - - -",
-      "- - - - - - - - - - - - -" },
+    { "- - - - - - - - - - - - - - -",
+      "- - - - - - - - - - - - - - - -" },
+    { "- - - - - - - - - - - - - - -",
+      "- - - PARK PARK - - - - - - - - - - -" },
+    { "- - - - - - - - - - - - - - -",
+      "- - - - - - - - - - - - - - - -" },
+    { "- - - - - - - - - - - - - - -",
+      "- - - PARK PARK PARK - - - - - - - - - -" }, // not clear it should do this, but does, as it's only tokenwise compatibility
+    { "POSS - - - - FOO FOO - - - - - - - -",
+      "- - - - - - - - - - - - - - - -" },
+    { "POSS - - - - FOO FOO - - - - - - - -",
+      "- - - - - - - - - - - - - - - -" },
+    { "POSS - - - - - - - - - - - - - -",
+      "- - - - - - - - - - - - - - - -" },
+    { "- - - - - - - - - - - - - - PERIOD",
+      "- - - - - - - - - - - - - - - PERIOD" },
+    { "- - - - - - PERIOD - PERIOD - PERIOD - PERIOD - PERIOD",
+      "PERIOD - - - - - - - - - - - PERIOD - PERIOD PERIOD" },
+    { "- - - - - - - - - - - - - - -",
+      "- - - - - - - - - - - - PAREN - PAREN -" },
   };
 
   public List<List<CoreLabel>> sentences;
@@ -91,7 +105,7 @@ public class RegexNERSequenceClassifierTest extends TestCase {
       String[] tagPieces = tags[snum].split(" ");
       String[] nerPieces = ner[snum].split(" ");
       assertEquals(wordPieces.length, tagPieces.length);
-      assertEquals(wordPieces.length, nerPieces.length);
+      assertEquals("Input " + snum + " " + words[snum] + " of different length than " + ner[snum], wordPieces.length, nerPieces.length);
       List<CoreLabel> sentence = new ArrayList<CoreLabel>();
       List<CoreLabel> NERsentence = new ArrayList<CoreLabel>();
       for (int wnum = 0; wnum < wordPieces.length; ++wnum) {
@@ -136,7 +150,7 @@ public class RegexNERSequenceClassifierTest extends TestCase {
   }
 
   private static void compareAnswers(String[] expected, List<CoreLabel> sentence) {
-    assertEquals(expected.length, sentence.size());
+    assertEquals("Lengths different for " + StringUtils.join(expected) + " and " + Sentence.listToString(sentence), expected.length, sentence.size());
     String str = "Comparing " + Arrays.toString(expected) + " and " + listToString(sentence);
     for (int i = 0; i < expected.length; ++i) {
       if (expected[i].equals("-")) {

@@ -63,6 +63,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 
  // Normalize newlines to this token
  public static final String NEWLINE_TOKEN = "*NL*";
+ private static final String SYSTEM_NEWLINE = System.getProperty("line.separator");
 
  private Map<String,String> normMap;
  
@@ -280,7 +281,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
   }
 
   private Object getNewline() {
-    String nlString = tokenizeNL ? NEWLINE_TOKEN : System.getProperty("line.separator");
+    String nlString = tokenizeNL ? NEWLINE_TOKEN : SYSTEM_NEWLINE;
     return getNext(nlString, yytext());
   }
 
@@ -336,10 +337,7 @@ EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a
 {DIGITS}    |
 {PUNC}      { return getNext(false); }
 
-{NULLPRON}  { if ( ! removeProMarker) {
-                return getNext(false);
-              }
-	    }
+{NULLPRON}  { return removeProMarker ? "-" : getNext(false); }
 
 {ARWORD}    |
 {FORNWORD}  { return getNext(true); }

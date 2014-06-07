@@ -281,5 +281,18 @@ public class NeuralUtils {
     }
     return result;
   }
+
+  /**
+   * Returns true iff every element of matrix is 0
+   */
+  public static boolean isZero(SimpleMatrix matrix) {
+    int size = matrix.getNumElements();
+    for (int i = 0; i < size; ++i) {
+      if (matrix.get(i) != 0.0) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 

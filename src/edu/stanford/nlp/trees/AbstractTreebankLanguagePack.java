@@ -599,6 +599,11 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
     return grammaticalStructureFactory();
   }
 
+  @Override
+  public boolean supportsGrammaticalStructures() {
+    return false;
+  }
+
   public char getGfCharacter() {
     return gfCharacter;
   }
