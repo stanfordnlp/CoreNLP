@@ -12,13 +12,11 @@ import edu.stanford.nlp.trees.*;
  * @author Spence Green
  *
  */
-public class FrenchTreeReaderFactory implements TreeReaderFactory, Serializable {
+public class FrenchXMLTreeReaderFactory implements TreeReaderFactory, Serializable {
 
-  private static final long serialVersionUID = 8943534517L;
- 
-  public FrenchTreeReaderFactory() { }
-  
+  private static final long serialVersionUID = 578942679136874L;
+
   public TreeReader newTreeReader(Reader in) {
-    return new PennTreeReader(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer(),new PennTreebankTokenizer(in));
+    return new FrenchXMLTreeReader(in);
   }
 }
