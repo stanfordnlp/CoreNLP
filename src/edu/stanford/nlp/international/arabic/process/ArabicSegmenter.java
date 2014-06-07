@@ -79,6 +79,9 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private static final String defaultFeatureFactory =
       "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory";
 
+  // Training and evaluation files have domain labels
+  private static final String optDomains = "withDomains";
+
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
   private final TokenizerFactory<CoreLabel> tf;
@@ -87,6 +90,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final boolean isTokenized;
   private final String tokenizerOptions;
   private final String tedEvalPrefix;
+  private final boolean hasDomainLabels;
 
   /** Make an Arabic Segmenter.
    *
@@ -97,6 +101,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
     tedEvalPrefix = props.getProperty(optTedEval, null);
+    hasDomainLabels = props.containsKey(optDomains);
     tf = getTokenizerFactory();
 
     prefixMarker = props.getProperty(optPrefix, "");
@@ -109,6 +114,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     props.remove(optSuffix);
     props.remove(optThreads);
     props.remove(optTedEval);
+    props.remove(optDomains);
 
     if (!props.containsKey(optFeatureFactory))
       props.put(optFeatureFactory, defaultFeatureFactory);
@@ -128,6 +134,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     prefixMarker = other.prefixMarker;
     suffixMarker = other.suffixMarker;
     tedEvalPrefix = other.tedEvalPrefix;
+    hasDomainLabels = other.hasDomainLabels;
     flags = other.flags;
 
     // ArabicTokenizerFactory is *not* threadsafe. Make a new copy.
@@ -246,7 +253,9 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     boolean hasSegmentationMarkers = true;
     boolean hasTags = true;
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
-                                                                                     hasTags, tf);
+                                                                                     hasTags,
+                                                                                     hasDomainLabels,
+                                                                                     tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.trainFile, docReader);
 
@@ -266,7 +275,9 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     boolean hasSegmentationMarkers = true;
     boolean hasTags = true;
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
-                                                                                     hasTags, tf);
+                                                                                     hasTags,
+                                                                                     hasDomainLabels,
+                                                                                     tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.testFile, docReader);
     
@@ -408,6 +419,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     sb.append("  -tedEval prefix      : Output TedEval-compliant gold and parse files.").append(nl);
     sb.append("  -featureFactory cls  : Name of feature factory class  (default: ").append(defaultFeatureFactory);
     sb.append(")").append(nl);
+    sb.append("  -withDomains         : Train file (if given) and eval file have domain labels.").append(nl);
     sb.append(nl).append(" Otherwise, all flags correspond to those present in SeqClassifierFlags.java.").append(nl);
     return sb.toString();
   }
@@ -426,6 +438,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     optionArgDefs.put("nthreads", 1);
     optionArgDefs.put("tedEval", 1);
     optionArgDefs.put("featureFactory", 1);
+    optionArgDefs.put("withDomains", 0);
     return optionArgDefs;
   }
 

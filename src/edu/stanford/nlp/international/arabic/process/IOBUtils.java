@@ -74,24 +74,26 @@ public class IOBUtils {
     final int numTokens = tokenList.size();
     String lastToken = "";
     for (int i = 0; i < numTokens; ++i) {
+      // What type of token is this
+      CoreLabel cl = tokenList.get(i);
+
       if (addWhitespace) {
-        iobList.add(createDatum(BoundaryChar, BoundarySymbol, charIndex++));
+        iobList.add(createDatum(cl, BoundaryChar, BoundarySymbol, charIndex++));
         addWhitespace = false;
       }
 
-      // What type of token is this?
-      String token = tokenList.get(i).word();
+      String token = cl.word();
       TokenType tokType = getTokenType(token, strSegMarker);
       token = stripSegmentationMarkers(token, tokType);
       assert token.length() != 0;
 
       if (shouldNotSegment(token)) {
-        iobList.add(createDatum(token, NosegSymbol, charIndex++));
+        iobList.add(createDatum(cl, token, NosegSymbol, charIndex++));
         addWhitespace = true;
 
       } else {
         // Iterate over the characters in the token
-        tokenToDatums(iobList, token, tokType, tokenList.get(i), lastToken, charIndex, applyRewriteRules);
+        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, charIndex, applyRewriteRules);
         addWhitespace = (tokType == TokenType.BeginMarker || tokType == TokenType.NoMarker);
       }
       lastToken = token;
@@ -111,6 +113,7 @@ public class IOBUtils {
    * @param applyRewriteRules
    */
   private static void tokenToDatums(List<CoreLabel> iobList,
+                                CoreLabel cl,
                                 String token,
                                 TokenType tokType, 
                                 CoreLabel tokenLabel,
@@ -149,12 +152,12 @@ public class IOBUtils {
 
     // Create datums and add to iobList
     String firstChar = String.valueOf(token.charAt(0));
-    iobList.add(createDatum(firstChar, firstLabel, charIndex++));
+    iobList.add(createDatum(cl, firstChar, firstLabel, charIndex++));
     final int numChars = token.length();
     for (int j = 1; j < numChars; ++j) {
       String thisChar = String.valueOf(token.charAt(j));
       String charLabel = (j == numChars-1) ? lastLabel : ContinuationSymbol;
-      iobList.add(createDatum(thisChar, charLabel, charIndex++));
+      iobList.add(createDatum(cl, thisChar, charLabel, charIndex++));
     }
   }
 
@@ -185,19 +188,25 @@ public class IOBUtils {
 
   /**
    * Create a datum from a string. The CoreAnnotations must correspond to those used by
-   * SequenceClassifier.
+   * SequenceClassifier. The following annotations are copied from the provided
+   * CoreLabel cl, if present:
+   *    DomainAnnotation
    *
+   * @param cl
    * @param token
    * @param label
    * @param index
    * @return
    */
-  private static CoreLabel createDatum(String token, String label, int index) {
+  private static CoreLabel createDatum(CoreLabel cl, String token, String label, int index) {
     CoreLabel newTok = new CoreLabel();
     newTok.set(CoreAnnotations.TextAnnotation.class, token);
     newTok.set(CoreAnnotations.CharAnnotation.class, token);
     newTok.set(CoreAnnotations.AnswerAnnotation.class, label);
     newTok.set(CoreAnnotations.GoldAnswerAnnotation.class, label);
+    if (cl != null && cl.containsKey(CoreAnnotations.DomainAnnotation.class))
+      newTok.set(CoreAnnotations.DomainAnnotation.class,
+                 cl.get(CoreAnnotations.DomainAnnotation.class));
     newTok.setIndex(index);
     return newTok;
   }

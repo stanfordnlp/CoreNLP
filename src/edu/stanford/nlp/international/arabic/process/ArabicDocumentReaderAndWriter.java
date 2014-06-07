@@ -95,7 +95,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
           String domain = "";
           if (inputHasDomainLabels) {
             String[] domainAndData = in.split("\\s+", 2);
-            if (domainAndData.length == 1) {
+            if (domainAndData.length < 2) {
               System.err.println("Missing domain label or text: ");
               System.err.println(in);
             } else {
