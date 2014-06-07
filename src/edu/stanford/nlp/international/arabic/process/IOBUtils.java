@@ -29,13 +29,14 @@ public class IOBUtils {
   private enum TokenType { BeginMarker, EndMarker, BothMarker, NoMarker }
 
   // Label inventory
-  private static final String BeginSymbol = "BEGIN";
-  private static final String ContinuationSymbol = "CONT";
-  private static final String NosegSymbol = "NOSEG";
+  public static final String BeginSymbol = "BEGIN";
+  public static final String ContinuationSymbol = "CONT";
+  public static final String NosegSymbol = "NOSEG";
+  public static final String RewriteTahSymbol = "REWTA";
+  public static final String RewriteTareefSymbol = "REWAL";
+  
   private static final String BoundarySymbol = ".##.";
   private static final String BoundaryChar = ".#.";
-  private static final String RewriteTahSymbol = "REWTA";
-  private static final String RewriteTareefSymbol = "REWAL";
 
   // Patterns for tokens that should not be segmented.
   private static final Pattern isPunc = Pattern.compile("\\p{Punct}+");
@@ -66,6 +67,23 @@ public class IOBUtils {
   public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
                                             Character segMarker,
                                             boolean applyRewriteRules) {
+    return StringToIOB(tokenList, segMarker, applyRewriteRules, false);
+  }
+  
+  /**
+   * Convert a String to a list of characters suitable for labeling in an IOB
+   * segmentation model.
+   *
+   * @param tokenList
+   * @param segMarker
+   * @param applyRewriteRules add rewrite labels (for training data)
+   * @param stripRewrites revert training data to old Green & DeNero model (remove
+   *    rewrite labels but still rewrite to try to preserve raw text)
+   */
+  public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
+                                            Character segMarker,
+                                            boolean applyRewriteRules,
+                                            boolean stripRewrites) {
     List<CoreLabel> iobList = new ArrayList<CoreLabel>(tokenList.size()*7 + tokenList.size());
     final String strSegMarker = String.valueOf(segMarker);
 
@@ -101,7 +119,7 @@ public class IOBUtils {
 
       } else {
         // Iterate over the characters in the token
-        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, applyRewriteRules);
+        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, applyRewriteRules, stripRewrites);
         addWhitespace = (tokType == TokenType.BeginMarker || tokType == TokenType.NoMarker);
       }
       currentWord += token;
@@ -148,7 +166,8 @@ public class IOBUtils {
                                 TokenType tokType, 
                                 CoreLabel tokenLabel,
                                 String lastToken,
-                                boolean applyRewriteRules) {
+                                boolean applyRewriteRules,
+                                boolean stripRewrites) {
 
     if (token.isEmpty()) return;
     String lastLabel = ContinuationSymbol;
@@ -166,7 +185,8 @@ public class IOBUtils {
       // Rule #1 : ت --> ة
       if (features.getValue(MorphoFeatureType.NGEN).equals("F") &&
           features.getValue(MorphoFeatureType.NNUM).equals("SG") &&
-          rawToken.endsWith("ت-")) {
+          rawToken.endsWith("ت-") &&
+          !stripRewrites) {
         lastLabel = RewriteTahSymbol;
       }
 
@@ -175,7 +195,8 @@ public class IOBUtils {
           features.getValue(MorphoFeatureType.DEF).equals("D")) {
         assert rawToken.startsWith("-ال") && token.startsWith("ا");
         token = token.substring(1);
-        firstLabel = RewriteTareefSymbol;
+        if (!stripRewrites)
+          firstLabel = RewriteTareefSymbol;
       }
     }
 

@@ -84,6 +84,24 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
                                        boolean hasTags,
                                        boolean hasDomainLabels,
                                        TokenizerFactory<CoreLabel> tokFactory) {
+    this(hasSegMarkers, hasTags, hasDomainLabels, false, tokFactory);
+  }
+  
+  /**
+  *
+  * @param hasSegMarkers if true, input has segmentation markers
+  * @param hasTags if true, input has morphological analyses separated by tagDelimiter.
+  * @param hasDomainLabels if true, input has a whitespace-terminated domain at the beginning
+  *     of each line of text
+  * @param stripRewrites if true, erase orthographical rewrites from the gold labels (for
+  *     comparison purposes)
+  * @param tokFactory a TokenizerFactory for the input
+  */
+  public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
+      boolean hasTags,
+      boolean hasDomainLabels,
+      final boolean stripRewrites,
+      TokenizerFactory<CoreLabel> tokFactory) {
     tf = tokFactory;
     inputHasTags = hasTags;
     inputHasDomainLabels = hasDomainLabels;
@@ -127,7 +145,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
               cl.set(CoreAnnotations.DomainAnnotation.class, domain);
             input.add(cl);
           }
-          return IOBUtils.StringToIOB(input, segMarker, true);
+          return IOBUtils.StringToIOB(input, segMarker, true, stripRewrites);
 
         } else if (tf == null) {
           return IOBUtils.StringToIOB(in, segMarker);
