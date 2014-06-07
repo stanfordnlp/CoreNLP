@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ $# -ne 2 ]; then
+    echo "Usage: `basename $0` <integrated_file> <output_file>"
+    exit
+fi
+
+INPUT=$1
+OUTPUT=$2
+
+# ===== Raw side =====
+
+cat ${INPUT} | \
+# Escape TEDEval special characters
+sed 's/:/#pm#/g' | \
+sed 's/(/#lp#/g' | \
+sed 's/)/#rp#/g' | \
+# Concatenate t: UTF-8 field entries
+awk '
+BEGIN { FS = "·"; ORS = ""; }
+/^t/ { print $9 ($4 == "t" ? "" : "\n"); }
+/^TREE/ { print "\n"; }
+' | \
+# Fix problems that really mess up evaluation:
+# Patch over two badly annotated lines
+# sed 's/^8ـ9$/89/' | \
+sed 's/3-5-\.2/3/' | \
+sed 's/^8\.$/8/' | \
+# Delete all tatweels after numbers
+sed 's/\([0-9]\)ـ/\1/g' | \
+# Split all digits from miscellaneous characters
+sed 's/\([0-9]\)\([^0-9 -]\)/\1\n\2/g' | \
+sed 's/\([^0-9 -]\)\([0-9]\)/\1\n\2/g' > ${OUTPUT}.__raw__
+
+
+# =====Segmented side=====
+
+cat ${INPUT} | \
+# Escape TEDEval special characters
+sed 's/:/#pm#/g' | \
+# Concatenate t: Buckwalter field entries
+awk '
+BEGIN { FS = "·"; ORS = ":"; }
+/^t/ { print $10 ($4 == "t" ? "" : "\n"); }
+/^TREE/ { print "\n"; }
+' | \
+# Remove empty segments
+sed 's/^://' | \
+# Remove errant annotations such as AlY_1 (turn it into AlY)
+sed 's/_[0-9]\+$//' | \
+# Delete all tatweels after numbers
+sed 's/\([0-9]\)ـ/\1/g' | \
+# Split all digits from miscellaneous characters
+sed 's/\([0-9]\)\([^0-9 -]\)/\1\n\2/g' | \
+sed 's/\([^0-9 -]\)\([0-9]\)/\1\n\2/g' | \
+# Normalize alifs
+sed 's/[<>IO{|]/A/g' | \
+# Convert Buckwalter to UTF-8
+java edu.stanford.nlp.international.arabic.Buckwalter | \
+# Undo Buckwaltering of escaped :, escape other TEDEval characters
+sed 's/#ةم#/#pm#/g' | \
+sed 's/(/#lp#/g' | \
+sed 's/)/#rp#/g' > ${OUTPUT}.__segmented__
+
+# Join columns with tabs
+pr -m -t -s\	 ${OUTPUT}.__raw__ ${OUTPUT}.__segmented__ | \
+# Make sure empty lines are actually empty
+sed 's/^\t$//' | \
+# Remove sentences with no words
+awk '
+BEGIN { empty = 1; }
+{
+  if ($0 == "") {
+    if (!empty) {
+      empty = 1;
+      print;
+    }
+  } else {
+    empty = 0;
+    print;
+  }
+}
+' | \
+# Remove tokens that consist entirely of tatweel or diacritics
+perl -C -ne 'print unless /^[~_\x{0640}\x{064b}-\x{065e}\x{0670}]*\t[~_\x{0640}\x{064b}-\x{065e}\x{0670}]*$/' > $OUTPUT
+
+# Clean up
+rm ${OUTPUT}.__raw__ ${OUTPUT}.__segmented__
