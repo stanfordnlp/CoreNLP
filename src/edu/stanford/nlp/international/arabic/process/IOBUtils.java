@@ -70,15 +70,23 @@ public class IOBUtils {
     final String strSegMarker = String.valueOf(segMarker);
 
     boolean addWhitespace = false;
-    int charIndex = 0;
     final int numTokens = tokenList.size();
     String lastToken = "";
+    String currentWord = "";
+    int wordStartIndex = 0;
     for (int i = 0; i < numTokens; ++i) {
       // What type of token is this
       CoreLabel cl = tokenList.get(i);
 
       if (addWhitespace) {
-        iobList.add(createDatum(cl, BoundaryChar, BoundarySymbol, charIndex++));
+        fillInWordStatistics(iobList, currentWord, wordStartIndex);
+        currentWord = "";
+        wordStartIndex = iobList.size() + 1;
+        
+        iobList.add(createDatum(cl, BoundaryChar, BoundarySymbol));
+        final CoreLabel boundaryDatum = iobList.get(iobList.size() - 1);
+        boundaryDatum.setIndex(0);
+        boundaryDatum.setWord("");
         addWhitespace = false;
       }
 
@@ -88,17 +96,40 @@ public class IOBUtils {
       assert token.length() != 0;
 
       if (shouldNotSegment(token)) {
-        iobList.add(createDatum(cl, token, NosegSymbol, charIndex++));
+        iobList.add(createDatum(cl, token, NosegSymbol));
         addWhitespace = true;
 
       } else {
         // Iterate over the characters in the token
-        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, charIndex, applyRewriteRules);
+        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, applyRewriteRules);
         addWhitespace = (tokType == TokenType.BeginMarker || tokType == TokenType.NoMarker);
       }
+      currentWord += token;
       lastToken = token;
     }
+    fillInWordStatistics(iobList, currentWord, wordStartIndex);
     return iobList;
+  }
+
+  /**
+   * Loops back through all the datums inserted for the most recent word
+   * and inserts statistics about the word they are a part of. This needs to
+   * be post hoc because the CoreLabel lists coming from testing data sets
+   * are pre-segmented (so treating each of those CoreLabels as a "word" lets
+   * us cheat and get 100% classification accuracy by just looking at whether
+   * we're at the beginning of a "word"). 
+   * 
+   * @param iobList
+   * @param currentWord
+   * @param wordStartIndex
+   */
+  private static void fillInWordStatistics(List<CoreLabel> iobList,
+      String currentWord, int wordStartIndex) {
+    for (int j = wordStartIndex; j < iobList.size(); j++) {
+      CoreLabel tok = iobList.get(j);
+      tok.setIndex(j - wordStartIndex);
+      tok.setWord(currentWord);
+    }
   }
 
   /**
@@ -109,7 +140,6 @@ public class IOBUtils {
    * @param tokType
    * @param tokenLabel
    * @param lastToken
-   * @param charIndex
    * @param applyRewriteRules
    */
   private static void tokenToDatums(List<CoreLabel> iobList,
@@ -118,7 +148,6 @@ public class IOBUtils {
                                 TokenType tokType, 
                                 CoreLabel tokenLabel,
                                 String lastToken,
-                                int charIndex,
                                 boolean applyRewriteRules) {
 
     if (token.isEmpty()) return;
@@ -152,12 +181,12 @@ public class IOBUtils {
 
     // Create datums and add to iobList
     String firstChar = String.valueOf(token.charAt(0));
-    iobList.add(createDatum(cl, firstChar, firstLabel, charIndex++));
+    iobList.add(createDatum(cl, firstChar, firstLabel));
     final int numChars = token.length();
     for (int j = 1; j < numChars; ++j) {
       String thisChar = String.valueOf(token.charAt(j));
       String charLabel = (j == numChars-1) ? lastLabel : ContinuationSymbol;
-      iobList.add(createDatum(cl, thisChar, charLabel, charIndex++));
+      iobList.add(createDatum(cl, thisChar, charLabel));
     }
   }
 
@@ -195,10 +224,9 @@ public class IOBUtils {
    * @param cl
    * @param token
    * @param label
-   * @param index
    * @return
    */
-  private static CoreLabel createDatum(CoreLabel cl, String token, String label, int index) {
+  private static CoreLabel createDatum(CoreLabel cl, String token, String label) {
     CoreLabel newTok = new CoreLabel();
     newTok.set(CoreAnnotations.TextAnnotation.class, token);
     newTok.set(CoreAnnotations.CharAnnotation.class, token);
@@ -207,7 +235,6 @@ public class IOBUtils {
     if (cl != null && cl.containsKey(CoreAnnotations.DomainAnnotation.class))
       newTok.set(CoreAnnotations.DomainAnnotation.class,
                  cl.get(CoreAnnotations.DomainAnnotation.class));
-    newTok.setIndex(index);
     return newTok;
   }
 
