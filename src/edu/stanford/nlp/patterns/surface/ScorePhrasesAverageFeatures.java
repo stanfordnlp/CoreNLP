@@ -1,12 +1,11 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -15,6 +14,11 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.logging.Redwood;
 
+/**
+ * Score phrases by averaging scores of individual features.
+ * @author Sonal Gupta (sonalg@stanford.edu)
+ *
+ */
 public class ScorePhrasesAverageFeatures extends PhraseScorer{
   
   public ScorePhrasesAverageFeatures(ConstantsAndVariables constvar) {
@@ -26,7 +30,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
   
   @Override
-  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents, String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) {
     Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();
@@ -150,10 +154,13 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
         double editDSame = editDistanceSameBinaryScores.getCount(word);
         scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, editDSame);
       }
+      
+      if(constVars.usePhraseEvalWordShape){
+        scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word, label));
+      }
+      
       scores.put(word, scoreslist);
       phraseScoresNormalized.setCounter(word, scoreslist);
-      // double avgScore = score / 4;
-      // scores.setCount(word, avgScore);
     }
     Counter<String> phraseScores = new ClassicCounter<String>();
     for (Entry<String, Counter<ScorePhraseMeasures>> wEn : scores
@@ -162,6 +169,13 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
       phraseScores.setCount(wEn.getKey(), avgScore);
     }
     return phraseScores;
+  }
+
+
+  @Override
+  public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns)
+      throws IOException {
+    throw new RuntimeException("not implemented");
   }
 
 

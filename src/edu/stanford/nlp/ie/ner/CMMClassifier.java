@@ -1,19 +1,28 @@
-// CMMClassifier -- a probabilistic (CMM) Named Entity Recognizer
-// Copyright (c) 2002-2006 The Board of Trustees of
+// CMMClassifier -- a conditional maximum-entropy markov model, mainly used for NER.
+// Copyright (c) 2002-2014 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
-// This program has been made available for research purposes only.
-// Please do not further distribute it.
-// Commercial development of the software is not to be undertaken without
-// prior agreement from Stanford University.
-// This program is not open source nor is it in the public domain.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
-// For information contact:
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+// For more information, bug reports, fixes, contact:
 //    Christopher Manning
 //    Dept of Computer Science, Gates 1A
 //    Stanford CA 94305-9010
 //    USA
-//    manning@cs.stanford.edu
+//    Support/Questions: java-nlp-user@lists.stanford.edu
+//    Licensing: java-nlp-support@lists.stanford.edu
 
 package edu.stanford.nlp.ie.ner;
 
@@ -532,8 +541,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
   public void retrain(ObjectBank<List<IN>> doc) {
     if (classifier == null) {
-      System.err.println("Cannot retrain before you train!");
-      System.exit(-1);
+      throw new UnsupportedOperationException("Cannot retrain before you train!");
     }
     Index<String> findex = ((LinearClassifier<String, String>)classifier).featureIndex();
     Index<String> lindex = ((LinearClassifier<String, String>)classifier).labelIndex();
@@ -780,10 +788,9 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *                     some features, specifically those features not in the {@link edu.stanford.nlp.util.Index}
    *                     goodFeatures.
    * @param goodFeatures An {@link edu.stanford.nlp.util.Index} of features we wish to retain.
-   * @return A new {@link Dataset} wheres each datapoint contains only features
+   * @return A new {@link Dataset} wheres each data point contains only features
    *         which were in goodFeatures.
    */
-
   public Dataset<String, String> getDataset(Dataset<String, String> oldData, Index<String> goodFeatures) {
     //public Dataset getDataset(List data, Collection goodFeatures) {
     //makeAnswerArraysAndTagIndex(data);
@@ -810,15 +817,15 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     for (int i = 0; i < oldDataArray.length; i++) {
       int[] data = oldDataArray[i];
       size = 0;
-      for (int j = 0; j < data.length; j++) {
-        if (oldToNewFeatureMap[data[j]] > 0) {
+      for (int oldF : data) {
+        if (oldToNewFeatureMap[oldF] > 0) {
           size++;
         }
       }
       int[] newData = new int[size];
       int index = 0;
-      for (int j = 0; j < data.length; j++) {
-        int f = oldToNewFeatureMap[data[j]];
+      for (int oldF : data) {
+        int f = oldToNewFeatureMap[oldF];
         if (f > 0) {
           newData[index++] = f;
         }
@@ -1028,8 +1035,6 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     } catch (Exception e) {
       System.err.println("Error serializing to " + serializePath);
       e.printStackTrace();
-      // dont actually exit in case they're testing too
-      //System.exit(1);
     }
   }
 
@@ -1299,8 +1304,8 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       confusionMatrix[i2][i1] = d;
     }
 
-    for (int i = 0; i < confusionMatrix.length; i++) {
-      ArrayMath.normalize(confusionMatrix[i]);
+    for (double[] row : confusionMatrix) {
+      ArrayMath.normalize(row);
     }
 
     for (int i = 0; i < confusionMatrix.length; i++) {

@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
@@ -35,6 +35,7 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -88,7 +89,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable, ParserGrammar {
+public class LexicalizedParser extends ParserGrammar implements Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -108,6 +109,11 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
 
   @Override
   public TreebankLanguagePack treebankLanguagePack() { return getTLPParams().treebankLanguagePack(); }
+
+  @Override
+  public String[] defaultCoreNLPFlags() {
+    return getTLPParams().defaultCoreNLPFlags();
+  }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
   public static final String DEFAULT_PARSER_LOC = ((System.getenv("NLP_PARSER") != null) ?
@@ -324,16 +330,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       System.err.println("Recovering using fall through strategy: will construct an (X ...) tree.");
     }
     // if can't parse or exception, fall through
-    // TODO: merge with ParserAnnotatorUtils
-    TreeFactory lstf = new LabeledScoredTreeFactory();
-    List<Tree> lst2 = new ArrayList<Tree>();
-    for (HasWord obj : lst) {
-      String s = obj.word();
-      Tree t = lstf.newLeaf(s);
-      Tree t2 = lstf.newTreeNode("X", Collections.singletonList(t));
-      lst2.add(t2);
-    }
-    return lstf.newTreeNode("X", lst2);
+    return ParserUtils.xTree(lst);
   }
 
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {

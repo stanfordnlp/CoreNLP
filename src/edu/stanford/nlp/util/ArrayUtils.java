@@ -20,24 +20,6 @@ public class ArrayUtils {
    */
   private ArrayUtils() {}
 
-  public static void main(String[] args) {
-
-    int[] orig = new int[args.length];
-    for (int i = 0; i < orig.length; i++) {
-      orig[i] = Integer.parseInt(args[i]);
-    }
-
-    for (int i : gapDecode(gapEncode(orig))) {
-      System.err.print(i+" ");
-    }
-    System.err.println();
-
-     for (int i : deltaDecode(deltaEncode(orig))) {
-       System.err.print(i+" ");
-     }
-     System.err.println();
-  }
-
   public static byte[] gapEncode(int[] orig) {
     List<Byte> encodedList = gapEncodeList(orig);
     byte[] arr = new byte[encodedList.size()];
@@ -192,7 +174,7 @@ public class ArrayUtils {
 
     for (int f : orig) {
       String n = (f == prevNum ? "" : Integer.toString(f-prevNum, 2));
-      String n1 = (n.length() == 0 ? "" : Integer.toString(n.length(), 2));
+      String n1 = (n.isEmpty() ? "" : Integer.toString(n.length(), 2));
       for (int ii = 0; ii < n1.length(); ii++) {
         if (index == 8) {
           bytes.add(currByte);
@@ -358,14 +340,14 @@ public class ArrayUtils {
     for (byte b : array) {
       int b1 = ((int)b) + 128;
 
-      bitSet.set(index++, (b1 >> 7) % 2 == 1);
-      bitSet.set(index++, (b1 >> 6) % 2 == 1);
-      bitSet.set(index++, (b1 >> 5) % 2 == 1);
-      bitSet.set(index++, (b1 >> 4) % 2 == 1);
-      bitSet.set(index++, (b1 >> 3) % 2 == 1);
-      bitSet.set(index++, (b1 >> 2) % 2 == 1);
-      bitSet.set(index++, (b1 >> 1) % 2 == 1);
-      bitSet.set(index++, b1 % 2 == 1);
+      bitSet.set(index++, ((b1 >> 7) & 1) == 1);
+      bitSet.set(index++, ((b1 >> 6) & 1) == 1);
+      bitSet.set(index++, ((b1 >> 5) & 1) == 1);
+      bitSet.set(index++, ((b1 >> 4) & 1) == 1);
+      bitSet.set(index++, ((b1 >> 3) & 1) == 1);
+      bitSet.set(index++, ((b1 >> 2) & 1) == 1);
+      bitSet.set(index++, ((b1 >> 1) & 1) == 1);
+      bitSet.set(index++, (b1 & 1) == 1);
     }
 
     return bitSet;
@@ -578,7 +560,7 @@ public class ArrayUtils {
   /**
    * Returns an array with only the elements accepted by <code>filter</code>
    * <br>
-   * Implementation notes: creates two arrays, calls <code>filter</code> 
+   * Implementation notes: creates two arrays, calls <code>filter</code>
    * once for each element, does not alter <code>original</code>
    */
   public static <T> T[] filter(T[] original, Filter<? super T> filter) {
@@ -708,6 +690,12 @@ public class ArrayUtils {
     return newI;
   }
 
+  public static long[] copy(long[] arr) {
+    if (arr == null) { return null; }
+    long[] newArr = new long[arr.length];
+    System.arraycopy(arr, 0, newArr, 0, arr.length);
+    return newArr;
+  }
 
   public static int[] copy(int[] i) {
     if (i == null) { return null; }

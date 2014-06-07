@@ -20,10 +20,10 @@ public class ScorePatternsFreqBased extends ScorePatterns {
       TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label) {
+      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label, Properties props) {
     super(constVars, patternScoring, label, patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
+        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class ScorePatternsFreqBased extends ScorePatterns {
         currentPatternWeights4Label.setCount(p, conf.getCount(p));
       }
     } else {
-      throw new RuntimeException("not implemented");
+      throw new RuntimeException("not implemented " + patternScoring + " . check spelling!");
     }
     return currentPatternWeights4Label;
   }
