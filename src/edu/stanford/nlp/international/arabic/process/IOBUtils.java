@@ -11,10 +11,15 @@ import edu.stanford.nlp.international.arabic.ArabicMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFeatureType;
 import edu.stanford.nlp.international.morph.MorphoFeatures;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.CollectionFactory;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * A class for converting strings to input suitable for processing by
@@ -45,12 +50,14 @@ public class IOBUtils {
   private static final Pattern isDigit = Pattern.compile("\\p{Digit}+");
   private static final Pattern notUnicodeArabic = Pattern.compile("\\P{InArabic}+");
 
-  // The set of clitics segmented in the ATBv3 training set (see the annotation guidelines).
-  // We need this list for tagging the clitics when reconstructing the segmented sequences.
-  private static final Set<String> arAffixSet;
+  // Sets of known clitics for tagging when reconstructing the segmented sequences.
+  private static final Set<String> arPrefixSet;
+  private static final Set<String> arSuffixSet;
   static {
-    String arabicAffixString = "ل ف و ما ه ها هم هن نا كم تن تم ى ي هما ك ب م س";
-    arAffixSet = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(arabicAffixString.split("\\s+"))));
+    String arabicPrefixString = "ل ف و م ما ح حا ه ها ك ب س";
+    arPrefixSet = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(arabicPrefixString.split("\\s+"))));
+    String arabicSuffixString = "ل و ما ه ها هم هن نا كم تن تم ى ي هما ك ب ش";
+    arSuffixSet = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(arabicSuffixString.split("\\s+"))));
   }
 
   // Only static methods
@@ -378,6 +385,8 @@ public class IOBUtils {
     String lastLabel = "";
     final boolean addPrefixMarker = prefixMarker != null && prefixMarker.length() > 0;
     final boolean addSuffixMarker = suffixMarker != null && suffixMarker.length() > 0;
+    if (addPrefixMarker || addSuffixMarker)
+      annotateMarkers(labeledSequence);
     final int sequenceLength = labeledSequence.size();
     for (int i = 0; i < sequenceLength; ++i) {
       CoreLabel labeledChar = labeledSequence.get(i);
@@ -437,33 +446,132 @@ public class IOBUtils {
     }
     return sb.toString().trim();
   }
-
-  private static boolean addPrefixMarker(int focus, List<CoreLabel> labeledSequence) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = focus-1; i >= 0; --i) {
+  
+  private static class PrefixMarkerAnnotation implements CoreAnnotation<Boolean> {
+    @Override
+    public Class<Boolean> getType() {
+      return Boolean.class;
+    }
+  }
+  
+  private static class SuffixMarkerAnnotation implements CoreAnnotation<Boolean> {
+    @Override
+    public Class<Boolean> getType() {
+      return Boolean.class;
+    }
+  }
+  
+  private static void annotateMarkers(List<CoreLabel> labeledSequence) {
+    StringBuilder segment = new StringBuilder();
+    List<String> segments = CollectionUtils.makeList();
+    int wordBegin = 0;
+    for (int i = 0; i < labeledSequence.size(); i++) {
       String token = labeledSequence.get(i).get(CoreAnnotations.CharAnnotation.class);
       String label = labeledSequence.get(i).get(CoreAnnotations.AnswerAnnotation.class);
-      sb.append(token);
-      if (label.equals(BeginSymbol) || label.equals(BoundarySymbol)) {
-        break;
+      if (label.equals(BeginSymbol)) {
+        if (i != wordBegin) {
+          segments.add(segment.toString());
+          segment.setLength(0);
+        }
+        segment.append(token);
+      } else if (label.equals(BoundarySymbol)) {
+        segments.add(segment.toString());
+        segment.setLength(0);
+        annotateMarkersOnWord(labeledSequence, wordBegin, i, segments);
+        segments.clear();
+        wordBegin = i + 1;
+      } else {
+        segment.append(token);
       }
     }
-    return arAffixSet.contains(sb.toString());
+    segments.add(segment.toString());
+    annotateMarkersOnWord(labeledSequence, wordBegin, labeledSequence.size(), segments);
+  }
+
+  private static void annotateMarkersOnWord(List<CoreLabel> labeledSequence,
+      int wordBegin, int wordEnd, List<String> segments) {
+    Pair<Integer, Integer> headBounds = getHeadBounds(segments);
+    int currentIndex = 0;
+    
+    for (int i = wordBegin; i < wordEnd; i++) {
+      String label = labeledSequence.get(i).get(CoreAnnotations.AnswerAnnotation.class);
+      labeledSequence.get(i).set(PrefixMarkerAnnotation.class, Boolean.FALSE);
+      labeledSequence.get(i).set(SuffixMarkerAnnotation.class, Boolean.FALSE);
+      if (label.equals(BeginSymbol)) {
+        // Add prefix markers for BEGIN characters up to and including the start of the head
+        // (but don't add prefix markers if there aren't any prefixes)
+        if (currentIndex <= headBounds.first && currentIndex != 0)
+          labeledSequence.get(i).set(PrefixMarkerAnnotation.class, Boolean.TRUE);
+        
+        // Add suffix markers for BEGIN characters starting one past the end of the head
+        // (headBounds.second is one past the end, no need to add one)
+        if (currentIndex >= headBounds.second)
+          labeledSequence.get(i).set(SuffixMarkerAnnotation.class, Boolean.TRUE);
+        
+        currentIndex++;
+      }
+    }
+  }
+
+  private static Pair<Integer, Integer> getHeadBounds(List<String> segments) {
+    final int NOT_FOUND = -1;
+    int potentialSuffix = segments.size() - 1;
+    int nonSuffix = NOT_FOUND;
+    int potentialPrefix = 0;
+    int nonPrefix = NOT_FOUND;
+    // Heuristic algorithm for finding the head of a segmented word:
+    while (true) {
+      /* Alternate considering suffixes and prefixes (starting with suffix).
+       * 
+       * If the current segment is a known Arabic {suffix|prefix}, mark it as
+       * such. Otherwise, stop considering tokens from that direction.
+       */ 
+      if (nonSuffix == NOT_FOUND){
+        if (arSuffixSet.contains(segments.get(potentialSuffix)))
+          potentialSuffix--;
+        else
+          nonSuffix = potentialSuffix;
+      }
+      if (potentialSuffix < potentialPrefix)
+        break;
+      
+      if (nonPrefix == NOT_FOUND) {
+        if (arPrefixSet.contains(segments.get(potentialPrefix)))
+          potentialPrefix++;
+        else
+          nonPrefix = potentialPrefix;
+      }
+      if (potentialSuffix < potentialPrefix || (nonSuffix != NOT_FOUND && nonPrefix != NOT_FOUND))
+        break;
+    }
+    
+    /* Once we have exhausted all known prefixes and suffixes, take the longest
+     * segment that remains to be the head. Break length ties by picking the first one.
+     * 
+     * Note that in some cases, no segments will remain (e.g. b# +y), so a
+     * segmented word may have zero or one heads, but never more than one.
+     */
+    if (potentialSuffix < potentialPrefix) {
+      // no head--start and end are index of first suffix
+      if (potentialSuffix + 1 != potentialPrefix)
+        throw new RuntimeException("Suffix pointer moved too far!");
+      return Pair.makePair(potentialSuffix + 1, potentialSuffix + 1);
+    } else {
+      int headIndex = nonPrefix;
+      for (int i = nonPrefix + 1; i <= nonSuffix; i++) {
+        if (segments.get(i).length() > segments.get(headIndex).length())
+          headIndex = i;
+      }
+      return Pair.makePair(headIndex, headIndex + 1);
+    }
+  }
+
+  private static boolean addPrefixMarker(int focus, List<CoreLabel> labeledSequence) {
+    return labeledSequence.get(focus).get(PrefixMarkerAnnotation.class).booleanValue();
   }
 
   private static boolean addSuffixMarker(int focus, List<CoreLabel> labeledSequence) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = focus; i < labeledSequence.size(); ++i) {
-      String token = labeledSequence.get(i).get(CoreAnnotations.CharAnnotation.class);
-      String label = labeledSequence.get(i).get(CoreAnnotations.AnswerAnnotation.class);
-      if (label.equals(BoundarySymbol)) {
-        break;
-      } else if (i != focus && label.equals(BeginSymbol)) {
-        return false;
-      }
-      sb.append(token);
-    }
-    return arAffixSet.contains(sb.toString());
+    return labeledSequence.get(focus).get(SuffixMarkerAnnotation.class).booleanValue();
   }
 
   public static void labelDomain(List<CoreLabel> tokenList, String domain) {
