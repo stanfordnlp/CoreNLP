@@ -23,7 +23,7 @@ public class BigWindowArabicSegmenterFeatureFactory<IN extends CoreLabel> extend
     super.init(flags);
   }
 
-  protected Collection<String> featuresC(PaddedList<? extends CoreLabel> cInfo, int loc) {
+  protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = super.featuresC(cInfo, loc);
     CoreLabel n3 = cInfo.get(loc + 3);
     CoreLabel p3 = cInfo.get(loc - 3);

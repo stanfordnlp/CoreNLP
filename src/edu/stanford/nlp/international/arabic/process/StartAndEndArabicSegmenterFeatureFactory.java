@@ -23,8 +23,8 @@ public class StartAndEndArabicSegmenterFeatureFactory<IN extends CoreLabel> exte
   }
 
   @Override
-  protected Collection<String> featuresCp2C(PaddedList<IN> cInfo, int loc) {
-    Collection<String> features = super.featuresCp2C(cInfo, loc);
+  protected Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
+    Collection<String> features = super.featuresCpC(cInfo, loc);
 
     CoreLabel c = cInfo.get(loc);
 

@@ -64,7 +64,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     return features;
   }
 
-  protected Collection<String> featuresC(PaddedList<? extends CoreLabel> cInfo, int loc) {
+  protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel n = cInfo.get(loc + 1);
