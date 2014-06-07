@@ -280,7 +280,7 @@ public class ArrayMath {
 
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
+      throw new RuntimeException();
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
@@ -1391,11 +1391,6 @@ public class ArrayMath {
     return sum(a) / a.length;
   }
 
-  // Thang Mar14
-  public static int mean(int[] a) {
-    return sum(a) / a.length;
-  }
-  
   public static double median(double[] a) {
     double[] b = new double[a.length];
     System.arraycopy(a, 0, b, 0, b.length);

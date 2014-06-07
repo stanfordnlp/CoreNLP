@@ -93,13 +93,11 @@ public class TreeTest extends TestCase {
     Tree t = Tree.valueOf("( (SBARQ (WHNP (WP What)) (SQ (VBP are) (NP (DT the) (NNP Valdez) (NNS Principles))) (. ?)))",
             new LabeledScoredTreeReaderFactory(new TreeNormalizer()));
     assertNull("Root of tree should have null label if none in String", t.label().value());
-
-    String separator = System.getProperty("line.separator");
-    String answer = ("( (SBARQ" + separator +
-                     "    (WHNP (WP What))" + separator +
-                     "    (SQ (VBP are)" + separator +
-                     "      (NP (DT the) (NNP Valdez) (NNS Principles)))" + separator +
-                     "    (. ?)))" + separator);
+    String answer = "( (SBARQ\n" +
+            "    (WHNP (WP What))\n" +
+            "    (SQ (VBP are)\n" +
+            "      (NP (DT the) (NNP Valdez) (NNS Principles)))\n" +
+            "    (. ?)))\n";
     assertEquals(answer, t.pennString());
   }
 }

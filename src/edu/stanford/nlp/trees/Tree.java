@@ -788,13 +788,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     Label label = label();
     if (label != null) {
       sb.append("<");
-      if (children.length > 0) {
-        sb.append("node value=\"");
-      } else {
-        sb.append("leaf value=\"");
-      }
       sb.append(XMLUtils.escapeXML(Sentence.wordToString(label, true)));
-      sb.append("\"");
       if (printScores) {
         sb.append(" score=");
         sb.append(score());
@@ -804,12 +798,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       } else {
         sb.append("/>");
       }
-    } else {
-      if (children.length > 0) {
-        sb.append("<node>");
-      } else {
-        sb.append("<leaf/>");
-      }
     }
     pw.println(sb.toString());
     if (children.length > 0) {
@@ -817,7 +805,13 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       for (Tree child : children) {
         child.indentedXMLPrint(newIndent, pad, pw, printScores);
       }
-      pw.println(indent + "</node>");
+      if (label != null) {
+        sb = new StringBuilder(indent);
+        sb.append("</");
+        sb.append(XMLUtils.escapeXML(Sentence.wordToString(label, true)));
+        sb.append(">");
+        pw.println(sb.toString());
+      }
     }
   }
 
@@ -847,6 +841,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return (value() == null) ? "" : value();
   }
 
+  public static boolean DISPLAY_SCORES = true;
+
   /**
    * Display a node, implementing Penn Treebank style layout
    */
@@ -872,13 +868,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       return;
     }
     pw.print("(");
-    String nodeString;
-    if (onlyLabelValue) {
-      String value = value();
-      nodeString = (value == null) ? "" : value;
-    } else {
-      nodeString = nodeString();
-    }
+    String nodeString = onlyLabelValue ? nodeString() : nodeString();
     pw.print(nodeString);
     // pw.flush();
     boolean parentIsNull = label() == null || label().value() == null;
@@ -1056,51 +1046,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
       System.err.println("Head preterminal is null: " + this);
       return null;
-    }
-  }
-
-  /**
-   * Finds the head words of each tree and assigns HeadWordAnnotation
-   * to each node pointing to the correct node.  This relies on the
-   * nodes being CoreLabels, so it throws an IllegalArgumentException
-   * if this is ever not true.
-   */
-  public void percolateHeadAnnotations(HeadFinder hf) {
-    if (!(label() instanceof CoreLabel)) {
-      throw new IllegalArgumentException("Expected CoreLabels in the trees");
-    }
-    CoreLabel nodeLabel = (CoreLabel) label();
-
-    if (isLeaf()) {
-      return;
-    }
-
-    if (isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, children()[0]);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, this);
-      return;
-    }
-
-    for (Tree kid : children()) {
-      kid.percolateHeadAnnotations(hf);
-    }
-
-    final Tree head = hf.determineHead(this);
-    if (head == null) {
-      throw new NullPointerException("HeadFinder " + hf + " returned null for " + this);
-    } else if (head.isLeaf()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head.parent(this));
-    } else if (head.isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head.children()[0]);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head);
-    } else {
-      if (!(head.label() instanceof CoreLabel)) {
-        throw new AssertionError("Horrible bug");
-      }
-      CoreLabel headLabel = (CoreLabel) head.label();
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     }
   }
 
@@ -2737,7 +2682,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param overWrite Whether to replace an existing index for a leaf.
    * @return the next index still unassigned
    */
-  public int indexLeaves(int startIndex, boolean overWrite) {
+  private int indexLeaves(int startIndex, boolean overWrite) {
     if (isLeaf()) {
 
       /*CoreLabel afl = (CoreLabel) label();

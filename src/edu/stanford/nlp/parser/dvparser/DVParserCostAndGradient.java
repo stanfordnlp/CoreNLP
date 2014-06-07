@@ -13,7 +13,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
-import edu.stanford.nlp.parser.common.NoSuchParseException;
+import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.metrics.TreeSpanScoring;
 import edu.stanford.nlp.trees.DeepTree;
@@ -256,7 +256,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       unaryScoreDerivativesG.put(entry.getKey(), new SimpleMatrix(1, numRows));
       unaryScoreDerivativesB.put(entry.getKey(), new SimpleMatrix(1, numRows));
     }
-    if (op.trainOptions.trainWordVectors) {
+    if (DVModel.TRAIN_WORD_VECTORS) {
       for (Map.Entry<String, SimpleMatrix> entry : dvModel.wordVectors.entrySet()) {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
@@ -319,7 +319,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
 
     double[] localDerivativeGood;
     double[] localDerivativeB;
-    if (op.trainOptions.trainWordVectors) {
+    if (DVModel.TRAIN_WORD_VECTORS) {
       localDerivativeGood = NeuralUtils.paramsToVector(theta.length,
                                                        binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
                                                        binaryScoreDerivativesG.valueIterator(),
@@ -401,7 +401,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       return;
     }
     if (tree.isPreTerminal()) {
-      if (op.trainOptions.trainWordVectors) {
+      if (DVModel.TRAIN_WORD_VECTORS) {
         String word = tree.children()[0].label().value();
         word = dvModel.getVocabWord(word);
 //        SimpleMatrix currentVector = nodeVectors.get(tree);
