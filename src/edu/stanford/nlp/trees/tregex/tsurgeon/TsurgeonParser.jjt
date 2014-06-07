@@ -1,5 +1,5 @@
-// jjtree "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon" projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.jjt
-// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon" projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.jj
+// java jjtree "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon" projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.jjt
+// java javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon" projects/core/src/edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.jj
 
 options { UNICODE_INPUT = true;
           SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
@@ -11,6 +11,7 @@ package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import java.io.StringReader;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import java.util.*;
 
@@ -68,7 +69,7 @@ TOKEN:
 | < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
 | < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
 | < HASH_INTEGER: "#" (["0"-"9"])+ >
-| < TREE_NODE_TERMINAL_LABEL: ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )+ >
+| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","(",")",":"] )+ >
 | < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
 }
 
@@ -89,6 +90,7 @@ TsurgeonPattern Operation() :
   TreeLocation loc = null;
   Token operator;
   AuxiliaryTree tree = null;
+  List<AuxiliaryTree> treeList = null;
   List<TsurgeonPattern> nodeSelections = null;
   Token regex;
   Token hash_int;
@@ -116,8 +118,8 @@ TsurgeonPattern Operation() :
   operator = <REPLACE> child1 = NodeSelection() child2 = NodeSelection()
     { return new ReplaceNode(child1,child2); }
 | LOOKAHEAD(3)
-  operator = <REPLACE> child1 = NodeSelection() tree = TreeRoot(false)
-    { return new ReplaceNode(child1,tree); } 
+  operator = <REPLACE> child1 = NodeSelection() treeList = TreeList(false)
+    { return new ReplaceNode(child1,treeList); } 
 |  operator = <MOVE> child1 = NodeSelection() loc = Location()
     { return new MoveNode(child1, loc); }
 | LOOKAHEAD(3)
@@ -185,6 +187,18 @@ TsurgeonPattern NodeName() :
   { return new FetchNode(t.image); }
 }
 
+List<AuxiliaryTree> TreeList(boolean requiresFoot) :
+{
+  List<AuxiliaryTree> trees = Generics.newArrayList();
+  AuxiliaryTree tree;
+}
+{
+ ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); } 
+ ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); } )* )
+   { return trees; }
+}
+ 
+
 // the argument says whether there must be a foot node on the aux tree.
 AuxiliaryTree TreeRoot(boolean requiresFoot) :
 {
@@ -203,7 +217,7 @@ Tree TreeNode() :
 {
  label = <TREE_NODE_NONTERMINAL_LABEL> dtrs = TreeDtrs(new ArrayList<Tree>())
     { return treeFactory.newTreeNode(label.image.substring(1),dtrs); }
-| ( label = <TREE_NODE_TERMINAL_LABEL> | label = <IDENTIFIER> )
+| ( label = <TREE_NODE_TERMINAL_LABEL> )
     { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
 }
 

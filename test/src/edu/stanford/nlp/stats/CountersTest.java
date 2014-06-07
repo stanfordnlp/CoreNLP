@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import edu.stanford.nlp.util.Function;
@@ -25,6 +26,8 @@ public class CountersTest extends TestCase {
 
   @Override
   protected void setUp() {
+    Locale.setDefault(Locale.US);
+
     c1 = new ClassicCounter<String>();
     c1.setCount("p", 1.0);
     c1.setCount("q", 2.0);

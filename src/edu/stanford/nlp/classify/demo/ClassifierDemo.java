@@ -26,9 +26,8 @@ class ClassifierDemo {
   }
 
 
-  public static void demonstrateSerialization(String[] args) 
-    throws IOException, ClassNotFoundException
-  {
+  public static void demonstrateSerialization(String[] args)
+    throws IOException, ClassNotFoundException {
     ColumnDataClassifier cdc = new ColumnDataClassifier("examples/cheese2007.prop");
     Classifier<String,String> cl =
         cdc.makeClassifier(cdc.readTrainingExamples("examples/cheeseDisease.train"));
@@ -46,6 +45,8 @@ class ClassifierDemo {
     ois.close();
     ColumnDataClassifier cdc2 = new ColumnDataClassifier("examples/cheese2007.prop");
 
+    // We compare the output of the deserialized classifier lc versus the original one cl
+    // For both we use a ColumnDataClassifier to convert text lines to examples
     for (String line : ObjectBank.getLineIterator("examples/cheeseDisease.test")) {
       Datum<String,String> d = cdc.makeDatumFromLine(line, 0);
       Datum<String,String> d2 = cdc2.makeDatumFromLine(line, 0);
