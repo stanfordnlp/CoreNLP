@@ -1,4 +1,4 @@
-Stanford Arabic Segmenter - v3.4.1 <<CHECK>> - 2014-05-03
+Stanford Arabic Segmenter - v3.3.1 - 2014-05-03
 --------------------------------------
 
 (c) 2012  The Board of Trustees of The Leland Stanford Junior University.
@@ -83,10 +83,11 @@ default, then you'll need to retrain ArabicSegmenter.
 
 SEGMENTING DIALECTAL TEXT
 
-As of version 3.4.1 <<CHECK>>, the segmenter supports Egyptian dialect using
-domain adaptation. [Hal Daumé III, Frustratingly Easy Domain Adaptation, ACL
-2007] To indicate that the provided text is in Egyptian dialect, add the
-command-line option:
+The segmenter supports segmenting dialectal Arabic using domain adaptation.
+[Hal Daumé III, Frustratingly Easy Domain Adaptation, ACL 2007] The model that
+comes with this distribution is trained to support Egyptian dialect. To
+indicate that the provided text is in Egyptian dialect, add the command-line
+option:
 
   -domain arz
 
@@ -105,41 +106,45 @@ TRAINING THE SEGMENTER
 The current model is trained on parts 1-3 of the ATB, parts 1-8 of the ARZ treebank,
 and the Broadcast News treebank. To train a new model, you need to create a data file from
 the unpacked LDC distributions. You can create this data file with
-the script seg-tb-preproc, which is included in the segmenter release.
+the script tb-preproc, which is included in the segmenter release.
 
 You'll need:
 
+  - Python 2.7 (for running the preprocessing scripts)
   - an unpacked LDC distribution with files in *integrated* format
-  - a directory with three text files called dev, train, and test, each of
+  - a directory with four text files called dev, train, test, and all, each of
     which lists filenames of integrated files (these usually end in .su.txt),
-    one per line. If you want to train on your entire dataset, you can leave
-    the dev and test files empty and list all files in train.
+    one per line. dev, train, and test can be left empty if you have no need
+    for a train/test split.
 
-You can find the splits that we use at
+The splits that we use are included in the distribution. You can also find
+them at
 
 http://nlp.stanford.edu/software/parser-arabic-data-splits.shtml
 
-Once you have these, run the seg-tb-preproc script, providing the necessary
+Once you have these, run the tb-preproc script, providing the necessary
 arguments:
 
-  atb_base - the most specific directory that is a parent of all integrated
-             files you wish to include. Files will be located recursively by
-             name in this directory; it is not recommended to have several
-             copies of the same distribution within this directory (though all
-             that will happen is that you will train on redundant data).
+  atb_base -      the most specific directory that is a parent of all
+                  integrated files you wish to include. Files will be located
+                  recursively by name in this directory; it is not recommended
+                  to have several copies of the same distribution within this
+                  directory (though all that will happen is that you will
+                  train on redundant data).
 
-  splits_dir - the directory containing dev, train, and test listings
+  splits_dir -    the directory containing dev, train, and test listings
 
   output_prefix - the location and filename prefix that will identify the
-                  output files. The preprocessor appends "-train.utf8.txt" to
+                  output files. The preprocessor appends "-all.utf8.txt" to
                   this argument to give the name of the output file for the
-                  train split (and similarly for dev and test).
+                  "all" split (and similarly for dev, train, and test).
 
-  domain - [optional] a label for the Arabic dialect/genre that this data is
-           in. Our model uses "atb" for ATB1-3, "bn" for Broadcast News, and
-           "arz" for Egyptian. If a domain is given, additional files will be
-           generated (named e.g. "output_prefix-withDomains-train.utf8.txt")
-           for training the domain adaptation model.
+  domain -        [optional] a label for the Arabic dialect/genre that this
+                  data is in. Our model uses "atb" for ATB1-3, "bn" for
+                  Broadcast News, and "arz" for Egyptian. If a domain is
+                  given, additional files will be generated (named e.g.
+                  "output_prefix-withDomains-all.utf8.txt") for training the
+                  domain adaptation model.
 
 Suppose your output_prefix is "./atb". You should see files in the current
 working directory named
@@ -154,6 +159,15 @@ You can use the train file to retrain the segmenter with this command:
 
 This command will produce the serialized model "my_trained_segmenter.ser.gz"
 that you can use for raw text processing as described in the "USAGE" section above.
+
+The command above train the model with L2 regularization. For the model
+included in the distribution has been trained using L1 regularization, which
+decreases the model file size dramatically in exchange for a usually
+negligible drop in accuracy. To use L1 regularization, add the options
+
+  -useOWLQN -priorLambda 0.05
+
+TRAINING FOR DIALECT
 
 To train a model with domain adaptation, first make sure you have generated a
 training file with domain labels. You can create this using the preprocessing
@@ -173,17 +187,11 @@ The training command for domain-labeled data is:
 
   java -Xmx64g -Xms64g edu.stanford.nlp.international.arabic.process.ArabicSegmenter -withDomains -trainFile atb+arz-withDomains-train.utf8.txt -serializeTo my_trained_segmenter.ser.gz
 
-By default, the model is trained with L2 regularization. Using L1
-regularization will decrease the model file size dramatically, with a usually
-negligible drop in accuracy. To use L1 regularization, add the options
-
-  -useOWLQN -priorLambda 0.05
-
 Warning: training with lots of data from several domains requires a lot of
 memory and processor time. If you have enough memory to fit all of the
 weights for the entire dataset in RAM (this is a bit less than 64G for ATB1-3
-+ BN + ARZ), training will take about a month of processor time. This can be
-parallelized by adding the option
++ BN + ARZ), training will take about ten days of single-threaded processor
+time. This can be parallelized by adding the option
 
   -multiThreadGrad <num_threads>
 
