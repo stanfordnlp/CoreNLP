@@ -118,6 +118,7 @@ public class IOBUtils {
                                 int charIndex,
                                 boolean applyRewriteRules) {
 
+    if (token.isEmpty()) return;
     String lastLabel = ContinuationSymbol;
     String firstLabel = BeginSymbol;
     if (applyRewriteRules) {
