@@ -29,7 +29,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReader;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
@@ -96,7 +96,7 @@ public final class SplitCanditoTrees {
   static Map<String, Tree> readTrees(String[] filenames)
     throws IOException
   {
-    final TreeReaderFactory trf = new FrenchTreeReaderFactory();
+    final TreeReaderFactory trf = new FrenchXMLTreeReaderFactory();
     Map<String, Tree> treeMap = Generics.newHashMap();
     for (String filename : filenames) {
       File file = new File(filename);
