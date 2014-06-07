@@ -84,7 +84,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   // Training and evaluation files have domain labels
   private static final String optDomains = "withDomains";
   
-  // Ignore rewrites (training only, produces a model than then can be used to do
+  // Ignore rewrites (training only, produces a model that then can be used to do
   // no-rewrite segmentation)
   private static final String optNoRewrites = "noRewrites";
   
