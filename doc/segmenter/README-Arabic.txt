@@ -74,6 +74,7 @@ normalization options. The following options are supported:
   removeProMarker   : Remove the ATB null pronoun marker
   removeSegMarker   : Remove the ATB clitic segmentation marker
   removeMorphMarker : Remove the ATB morpheme boundary markers
+  removeLengthening : Replace sequences of three identical characters with one
   atbEscaping       : Replace left/right parentheses with ATB escape characters
 
 The orthographic normalization options must match at both training and test time!
@@ -90,8 +91,9 @@ command-line option:
   -domain arz
 
 You can also construct a file that specifies a dialect for each
-newline-separated sentence, by adding "123" or "arz" at the beginning of each
-line followed by a tab character. This feature is enabled with the flag:
+newline-separated sentence, by adding "atb" [MSA] or "arz" [Egyptian] at the
+beginning of each line followed by a space character. This feature is enabled
+with the flag:
 
   -withDomains
 
@@ -100,37 +102,90 @@ segmenter on your own dialectal data.
 
 TRAINING THE SEGMENTER
 
-The current model is trained on parts1-3 of the ATB. This corpus contains newswire text
-sampled from three different news agencies. To train a new model, you need to create a data file from
+The current model is trained on parts 1-3 of the ATB, parts 1-8 of the ARZ treebank,
+and the Broadcast News treebank. To train a new model, you need to create a data file from
 the unpacked LDC distributions. You can create this data file with
-TreebankPreprocessor, which is included in the segmenter release.
+the script seg-tb-preproc, which is included in the segmenter release.
 
-Look at the example configuration file in arabic/atb-segmenter.conf. You'll need
- to update the paths to your unpacked LDC distributions. **MAKE SURE TO USE THE
-VOCALIZED SECTIONS.** Only the vocalized sections of the ATB contain gold
-segmentation markers required for training. Remove the SPLIT options in the
-configuration files as the train/dev/test split that we used is only valid
-for ATB parts 1-3.
+You'll need:
 
-Now run the following command:
+  - an unpacked LDC distribution with files in *integrated* format
+  - a directory with three text files called dev, train, and test, each of
+    which lists filenames of integrated files (these usually end in .su.txt),
+    one per line. If you want to train on your entire dataset, you can leave
+    the dev and test files empty and list all files in train.
 
-  java edu.stanford.nlp.trees.treebank.TreebankPreprocessor -v arabic/atb-segmenter.conf
+You can find the splits that we use at
 
-You should see several files in your current working directory, including a file that contains
-the entire ATB along with a split of the ATB. Suppose that you want to train on the file "1-Raw-All.utf8.txt"
-You can use this file to retrain the segmenter with this command:
+http://nlp.stanford.edu/software/parser-arabic-data-splits.shtml
 
-  java -Xmx6000m -Xms6000m edu.stanford.nlp.international.arabic.process.ArabicSegmenter -trainFile 1-Raw-All.utf8.txt -serializeTo my_trained_segmenter.ser.gz
+Once you have these, run the seg-tb-preproc script, providing the necessary
+arguments:
+
+  atb_base - the most specific directory that is a parent of all integrated
+             files you wish to include. Files will be located recursively by
+             name in this directory; it is not recommended to have several
+             copies of the same distribution within this directory (though all
+             that will happen is that you will train on redundant data).
+
+  splits_dir - the directory containing dev, train, and test listings
+
+  output_prefix - the location and filename prefix that will identify the
+                  output files. The preprocessor appends "-train.utf8.txt" to
+                  this argument to give the name of the output file for the
+                  train split (and similarly for dev and test).
+
+  domain - [optional] a label for the Arabic dialect/genre that this data is
+           in. Our model uses "atb" for ATB1-3, "bn" for Broadcast News, and
+           "arz" for Egyptian. If a domain is given, additional files will be
+           generated (named e.g. "output_prefix-withDomains-train.utf8.txt")
+           for training the domain adaptation model.
+
+Suppose your output_prefix is "./atb". You should see files in the current
+working directory named
+
+  atb-dev.utf8.txt
+  atb-train.utf8.txt
+  atb-test.utf8.txt
+
+You can use the train file to retrain the segmenter with this command:
+
+  java -Xmx12g -Xms12g edu.stanford.nlp.international.arabic.process.ArabicSegmenter -trainFile atb-train.utf8.txt -serializeTo my_trained_segmenter.ser.gz
 
 This command will produce the serialized model "my_trained_segmenter.ser.gz"
 that you can use for raw text processing as described in the "USAGE" section above.
 
-Adding the -withDomains flag lets you specify a domain (offset by a tab) at
-the beginning of each sentence in the training file. These domains can be
-arbitrary strings, as long as they don't contain tab or newline characters;
-thus, if you have data available for other dialects in ATB format, it is
-possible to train your own system that can support these dialects. For best
-results, include MSA data as well as your dialect data in your training.
-(Adding data from dialects other than your target dialect should not hurt
-performance, as long as they are marked as different domains--it may even
-help!)
+To train a model with domain adaptation, first make sure you have generated a
+training file with domain labels. You can create this using the preprocessing
+script with the optional domain argument, or do it yourself with a simple sed
+script (the -withDomains files differ from the simple training files only in
+the presence of a domain identifier prepended to each line followed by a
+space). These domain labels can be arbitrary strings, as long as they don't
+contain whitespace characters; thus, if you have data available for other
+dialects in ATB format, it is possible to train your own system that can
+support these dialects. For best results, include MSA data as well as your
+dialect data in your training. You can do this by simply concatenating the
+ATB1-3 -withDomains file and the dialect -withDomains file. (Adding data from
+dialects other than your target dialect should not hurt performance, as long
+as they are marked as different domains--it may even help!)
+
+The training command for domain-labeled data is:
+
+  java -Xmx64g -Xms64g edu.stanford.nlp.international.arabic.process.ArabicSegmenter -withDomains -trainFile atb+arz-withDomains-train.utf8.txt -serializeTo my_trained_segmenter.ser.gz
+
+By default, the model is trained with L2 regularization. Using L1
+regularization will decrease the model file size dramatically, with a usually
+negligible drop in accuracy. To use L1 regularization, add the options
+
+  -useOWLQN -priorLambda 0.05
+
+Warning: training with lots of data from several domains requires a lot of
+memory and processor time. If you have enough memory to fit all of the
+weights for the entire dataset in RAM (this is a bit less than 64G for ATB1-3
++ BN + ARZ), training will take about a month of processor time. This can be
+parallelized by adding the option
+
+  -multiThreadGrad <num_threads>
+
+If you are not running on a machine with 64G of RAM, the training is likely to
+take much longer. You have been warned.
