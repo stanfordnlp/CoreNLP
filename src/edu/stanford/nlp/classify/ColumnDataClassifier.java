@@ -216,7 +216,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>featureFormat</td><td>boolean</td><td>false</td><td>Assumes the input file isn't text strings but already featurized.  One column is treated as the class column (as defined by <code>goldAnswerColumn</code>, and all other columns are treated as features of the instance.  (If answers are not present, set <code>goldAnswerColumn</code> to a negative number.)</td></tr>
  * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight web page</a> for more information)</td></tr>
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
- * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization)</td></tr>
+ * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization). This is just an option to write out data in a particular format. After that, you're on your own using some other piece of software that reads SVMlight format files.</td></tr>
  * <tr><td>crossValidationFolds</td><td>int</td><td>-1</td><td>If positive, the training data is divided in to this many folds and cross-validation is done on the training data (prior to testing on test data, if it is also specified)</td></tr>
  * <tr><td>shuffleTrainingData</td><td>boolean</td><td>false</td><td>If true, the training data is shuffled prior to training and cross-validation. This is vital in cross-validation if the training data is otherwise sorted by class.</td></tr>
  * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
@@ -237,74 +237,66 @@ public class ColumnDataClassifier {
 
 
   /**
-   * Entry point for taking a String (formatted as a line of a TSV file)
-   * and translating it into a Datum of features.
+   * Entry point for taking a String (formatted as a line of a TSV file) and
+   * translating it into a Datum of features. If real-valued features are used,
+   * this method returns an RVFDatum; otherwise, categorical features are used.
+   *
+   * @param line Line of file
+   * @return A Datum (may be an RVFDatum; never null)
+   */
+  public Datum<String,String> makeDatumFromLine(String line) {
+    return makeDatumFromStrings(tab.split(line));
+  }
+
+
+  /**
+   * Takes a String[] of elements and translates them into a Datum of features.
    * If real-valued features are used, this method accesses makeRVFDatumFromLine
    * and returns an RVFDatum; otherwise, categorical features are used.
    *
-   * @param line Line of file
-   * @param lineNo The line number. This is just used in error messages if there is an input format problem. You can make it 0.
+   * @param strings The elements that features a made from (the tab-split columns of a TSV file)
    * @return A Datum (may be an RVFDatum; never null)
    */
-  public Datum<String,String> makeDatumFromLine(String line, int lineNo) {
+  public Datum<String,String> makeDatumFromStrings(String[] strings) {
     if (globalFlags.usesRealValues) {
-      return makeRVFDatumFromLine(line,lineNo);
+      return makeRVFDatumFromStrings(strings);
     }
 
     if (globalFlags.featureFormat) {
-      String[] fields = tab.split(line);
       Collection<String> theFeatures = new ArrayList<String>();
-      for (int i = 0; i < fields.length; i++) {
+      for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn)
             if (globalFlags.significantColumnId) {
-              theFeatures.add(String.format("%d:%s", i, fields[i]));
+              theFeatures.add(String.format("%d:%s", i, strings[i]));
             } else {
-              theFeatures.add(fields[i]);
+              theFeatures.add(strings[i]);
             }
       }
-      return new BasicDatum<String,String>(theFeatures, fields[globalFlags.goldAnswerColumn]);
+      return new BasicDatum<String,String>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
-      String[] wi = makeSimpleLineInfo(line, lineNo);
-      // System.err.println("Read in " + wi);
-      return makeDatum(wi);
+      // System.err.println("Read in " + strings);
+      return makeDatum(strings);
     }
   }
 
 
-  private RVFDatum<String,String> makeRVFDatumFromLine(String line, int lineNo) {
+  private RVFDatum<String,String> makeRVFDatumFromStrings(String[] strings) {
     if (globalFlags.featureFormat) {
-      String[] fields = tab.split(line);
       ClassicCounter<String> theFeatures = new ClassicCounter<String>();
-      for (int i = 0; i < fields.length; i++) {
+      for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn) {
           if (flags[i] != null && (flags[i].isRealValued || flags[i].logTransform || flags[i].logitTransform || flags[i].sqrtTransform)) {
-            addFeatureValue(fields[i], flags[i], theFeatures);
+            addFeatureValue(strings[i], flags[i], theFeatures);
           } else {
-            theFeatures.setCount(fields[i], 1.0);
+            theFeatures.setCount(strings[i], 1.0);
           }
         }
       }
-      return new RVFDatum<String,String>(theFeatures, fields[globalFlags.goldAnswerColumn]);
+      return new RVFDatum<String,String>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
-      String[] wi = makeSimpleLineInfo(line, lineNo);
-      // System.err.println("Read in " + wi);
-      return makeRVFDatum(wi);
+      // System.err.println("Read in " + strings);
+      return makeRVFDatum(strings);
     }
-  }
-
-  // NB: This is meant to do splitting strictly only on tabs, and to thus
-  // work with things that are exactly TSV files.  It shouldn't split on
-  // all whitespace, because it is useful to be able to have spaces inside
-  // fields for short text documents, and then to be able to split them into
-  // words with features like useSplitWords.
-  private static final Pattern tab = Pattern.compile("\\t");
-
-  private static String[] makeSimpleLineInfo(String line, int lineNo) {
-    String[] strings = tab.split(line);
-    if (strings.length < 2) {
-      throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
-    }
-    return strings;
   }
 
 
@@ -367,6 +359,15 @@ public class ColumnDataClassifier {
   }
 
 
+  /** NB: This is meant to do splitting strictly only on tabs, and to thus
+   *  work with things that are exactly TSV files.  It shouldn't split on
+   *  all whitespace, because it is useful to be able to have spaces inside
+   *  fields for short text documents, and then to be able to split them into
+   *  words with features like useSplitWords.
+   */
+  private static final Pattern tab = Pattern.compile("\\t");
+
+
   /** Read a data set from a file and convert it into a Dataset object.
    *  In test phase, returns the {@code List<String[]>} with the data columns for printing purposes.
    *  Otherwise, returns {@code null} for the second item.
@@ -404,13 +405,29 @@ public class ColumnDataClassifier {
           dataset = new Dataset<String,String>();
         }
         int lineNo = 0;
+        int minColumns = Integer.MAX_VALUE;
+        int maxColumns = 0;
         for (String line : ObjectBank.getLineIterator(new File(filename), Flags.encoding)) {
           lineNo++;
-          if (inTestPhase) {
-            String[] wi = makeSimpleLineInfo(line, lineNo);
-            lineInfos.add(wi);
+          String[] strings = tab.split(line);
+          if (strings.length < 2) {
+            throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
           }
-          dataset.add(makeDatumFromLine(line, lineNo));
+          if (strings.length < minColumns) {
+            minColumns = strings.length;
+          }
+          if (strings.length > maxColumns) {
+            maxColumns = strings.length;
+          }
+          if (inTestPhase) {
+            lineInfos.add(strings);
+          }
+          dataset.add(makeDatumFromStrings(strings));
+        }
+        if (lineNo > 0 && minColumns != maxColumns) {
+          System.err.println();
+          System.err.println("WARNING: Number of tab-separated columns in " +
+                  filename + " varies between " + minColumns + " and " + maxColumns);
         }
       } catch (Exception e) {
         throw new RuntimeException("Dataset could not be processed", e);
@@ -620,7 +637,7 @@ public class ColumnDataClassifier {
     }
 
     Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
-    for (int i = 0; i < test.size(); i++) {
+    for (int i = 0, sz = test.size(); i < sz; i++) {
       String[] simpleLineInfo = lineInfos.get(i);
       Datum<String,String> d;
       if (globalFlags.usesRealValues) {
