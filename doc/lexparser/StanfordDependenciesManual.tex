@@ -1,10 +1,12 @@
-\documentclass[11pt,letter]{article}
+\documentclass[11pt,letterpaper]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{tikz-dependency}
+\tikzset{/depgraph/.cd,/depgraph/.search also = {/tikz},
+    baseline=-0.6ex, inner sep=-0.1cm, edge horizontal padding=3pt, edge unit distance=1.5ex}
 \usepackage{natbib}
 \bibpunct{(}{)}{,}{a}{}{;}
 
@@ -26,7 +28,8 @@
 %Revised for Stanford Parser v.~1.6.5 in November 2010
 %Revised for Stanford Parser v.\ 1.6.9 in September 2011
 % Revised for Stanford Parser v.\ 2.0.4 in November 2012
-Revised for the Stanford Parser v.\ 2.0.5 in March 2013
+% Revised for the Stanford Parser v.\ 2.0.5 in March 2013
+Revised for the Stanford Parser v.\ 3.2 in June 2013
 }
 
 \begin{document}
@@ -92,7 +95,7 @@ references to further discussion and use of the SD representation (section~\ref{
 \section{Definitions of the Stanford typed dependencies}\label{def}
 
 The current representation contains approximately 50 grammatical
-relations (depending slightly on the options discussed in section~\ref{types}). The dependencies are all binary relations: a grammatical relation holds between a \emph{governor} (also known as a \emph{regent} or a \emph{head}) and a dependent. The grammatical relations are defined below, in alphabetical order according to the dependency's abbreviated name (which appears in the parser output). The definitions make use of the Penn Treebank part-of-speech tags and phrasal labels.
+relations (depending slightly on the options discussed in section~\ref{types}). The dependencies are all binary relations: a grammatical relation holds between a \emph{governor} (also known as a \emph{regent} or a \emph{head}) and a \emph{dependent}. The grammatical relations are defined below, in alphabetical order according to the dependency's abbreviated name (which appears in the parser output). The definitions make use of the Penn Treebank part-of-speech tags and phrasal labels.
 
 \bigskip
 
@@ -144,7 +147,7 @@ An adjectival modifier of an NP is any adjectival phrase that serves to modify t
 An appositional modifier of an NP is an NP immediately to the right of
 the first NP that serves to define or modify that NP. It includes
 parenthesized examples, as well as defining abbreviations in one of
-these structures
+these structures.
 \begin{quote}
 \begin{dependency}
    \begin{deptext}[column sep=0.2em]
@@ -172,11 +175,12 @@ these structures
 An attributive is a complement of a copular verb such as ``to be", ``to seem", ``to appear". Currently, the converter only recognizes WHNP complements.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``What is that?" \> \>  \emph{attr}(is, What)\\
+\>  ``What is that?'' \> \>  \emph{attr}(is, What)\\
 \end{tabbing}
 
 \noindent \textbf{\emph{aux}: auxiliary}\\
-An auxiliary of a clause is a non-main verb of the clause, e.g.\@ modal auxiliary, ``be" and ``have" in a composed tense.
+An auxiliary of a clause is a non-main verb of the clause, e.g., a
+modal auxiliary, or a form of ``be'', ``do'' or ``have'' in a periphrastic tense.
 \begin{quote}
 \begin{dependency}
    \begin{deptext}[column sep=0.25cm]
@@ -255,7 +259,7 @@ A clausal passive subject is a clausal syntactic subject of a passive clause. In
 \end{tabbing}
 
 \noindent\textbf{\emph{dep}: dependent}\\
-A dependency is labeled as dep when the system is unable to determine a more precise dependency relation between two words.  This may be because of a weird grammatical construction, a limitation in the Stanford Dependency conversion software, a parser error, or because of an unresolved long distance dependency.
+A dependency is labeled as \emph{dep} when the system is unable to determine a more precise dependency relation between two words.  This may be because of a weird grammatical construction, a limitation in the Stanford Dependency conversion software, a parser error, or because of an unresolved long distance dependency.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
 \>  ``Then, as if to show that he could, \ldots" \> \> \emph{dep}(show, if)\\
@@ -438,7 +442,7 @@ The parataxis relation (from Greek for ``place side by side'') is a relation bet
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
 \> ``The guy, John said, left early in the morning" \> \> \emph{parataxis}(left, said)\\
-\> ``Let's face it we're annoyed'' \>\> \emph(parataxis}(Let, annoyed)\\
+\> ``Let's face it we're annoyed'' \>\> \emph{parataxis}(Let, annoyed)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{partmod}: participial modifier}\\
@@ -463,7 +467,7 @@ or the preposition head of the following PP.
 \end{tabbing}
 
 \noindent\textbf{\emph{pobj}: object of a preposition}\\
-The object of a preposition is the head of a noun phrase following the preposition, or the adverbs ``here'' and ``there''. (The preposition in turn may be modifying a noun, verb, etc.) Unlike the Penn Treebank, we here define cases of VBG quasi-prepositions like ``including", ``concerning", etc.\ as instances of \emph{pobj}. (The preposition can be called a FW for ``pace", ``versus", etc. It can also be called a CC -- but we don't currently handle that and would need to distinguish from conjoined prepositions.) In the case of preposition stranding, the object can precede the preposition (e.g., ``What does CPR stand for?'').
+The object of a preposition is the head of a noun phrase following the preposition, or the adverbs ``here'' and ``there''. (The preposition in turn may be modifying a noun, verb, etc.) Unlike the Penn Treebank, we here define cases of VBG quasi-prepositions like ``including'', ``concerning'', etc.\ as instances of \emph{pobj}. (The preposition can be tagged a FW for ``pace'', ``versus'', etc. It can also be called a CC -- but we don't currently handle that and would need to distinguish from conjoined prepositions.) In the case of preposition stranding, the object can precede the preposition (e.g., ``What does CPR stand for?'').
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
 \>  ``I sat on the chair" \> \> \emph{pobj}(on, chair)\\
@@ -542,16 +546,16 @@ A referent of the head of an NP is the relative word introducing the relative cl
 \>  ``I saw the book which you bought" \> \> \emph{ref}(book, which)\\
 \end{tabbing}
 
-\noindent\textbf{\emph{rel}: relative}\\
-A relative of a relative clause is the head word of the WH-phrase introducing it.
-This analysis is used only for relative words which are not easily
-resolvable to a role in the relative clause. Relative words which act
-as the subject or object of a relative clause are analyzed as a
-\emph{nsubj} or \emph{dobj}.
-\begin{tabbing}
-\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``I saw the man whose wife you love" \> \> \emph{rel}(love, wife)
-\end{tabbing}
+% \noindent\textbf{\emph{rel}: relative}\\
+% A relative of a relative clause is the head word of the WH-phrase introducing it.
+% This analysis is used only for relative words which are not easily
+% resolvable to a role in the relative clause. Relative words which act
+% as the subject or object of a relative clause are analyzed as a
+% \emph{nsubj} or \emph{dobj}.
+% \begin{tabbing}
+% \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
+% \> ``I saw the man whose wife you love" \> \> \emph{rel}(love, wife)
+% \end{tabbing}
 
 \noindent\textbf{\emph{root}: root}\\
 The root grammatical relation points to the root of the sentence. A fake node ``ROOT'' is used as the governor. The ROOT node is indexed with ``0'', since the indexation of real words in the sentence starts at 1.
@@ -605,7 +609,7 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
         \> \> \> \> \emph{dobj} - direct object \\
         \> \> \> \> \emph{iobj} - indirect object \\
         \> \> \> \> \emph{pobj} - object of preposition \\
-      \> \> \> \emph{rel} - relative (word introducing a \emph{rcmod})\\
+%      \> \> \> \emph{rel} - relative (word introducing a \emph{rcmod})\\
 	\> \>  \emph{subj} - subject \\
 	      \> \> \> \emph{nsubj} - nominal subject \\
 	        \> \> \> \> \emph{nsubjpass} - passive nominal subject \\
@@ -906,12 +910,21 @@ There can be multiple arcs with the same label from a node.  For instance, this
 occurs when a noun has several adjective modifiers, each of which gets an
 \emph{amod} relation, as in \emph{its third consecutive monthly decline}.
 
-There can be multiple arcs between two nodes with different labels in the basic
-plus extras representation.  A relative word can be labeled both as a \emph{rel}
-and as its effective grammatical relation.  For example, for \emph{the company
-which you founded}, using the basic plus extras style, you get both the arcs
-\emph{dobj}(founded-7, which-5) and
-\emph{rel}(founded-7, which-5).
+% CDM Jun 2013: The rel case shouldn't happen any more. Are there other cases?
+% Yes, it does, but only due to converter bugs, I think.
+% There can be multiple arcs between two nodes with different labels in the basic
+% plus extras representation.  A relative word can be labeled both as a \emph{rel}
+% and as its effective grammatical relation.  For example, for \emph{the company
+% which you founded}, using the basic plus extras style, you get both the arcs
+% \emph{dobj}(founded-7, which-5) and
+% \emph{rel}(founded-7, which-5).
+In the basic plus extras representation, a word can be the dependent
+of two different words. For example, a relative word will be a
+\emph{ref} of the head of the noun phrase it modifies and will have a
+role in the relative clause.  For example you might get both the arcs
+\emph{ref}(researchers-5, who-6) and \emph{nsubj}(studied-7,
+who-6). You can even get two arcs between the same pair of words,
+though these normally result from bugs in the converter.
 
 All graphs should be connected (if it's not, it's a bug!).
 There are no self-loops in the graphs.
@@ -1129,7 +1142,8 @@ The Stanford dependency representation has also served as a model for
 developing dependency schemes in other languages. Recently schemes
 based on the Stanford dependency representation have been proposed for
 Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10},
-Persian \citep{Seraji12}, and French \citep{Maarouf12}. Recently, it
+Persian \citep{Seraji12}, and French \citep{Maarouf12}. The Stanford
+Dependencies representation
 was used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
 
 \section{Recent changes}
@@ -1150,6 +1164,11 @@ versions of the dependencies, or need to update your code.
 \item[goeswith] was introduced. It is useful on badly edited text.
 \item[purpcl] was removed as a relation. It is now a particular case
   of an \emph{advcl}.
+\item[rel] has been removed as a relation. \emph{rel} was the relation
+  between the main verb of a relative clause and the head of the
+  \emph{Wh-}phrase. Now, the converter resolves the grammatical
+  relation (\emph{nsubj}, \emph{dobj}, or \emph{pobj}) for simple
+  cases, and the rest are left unresolved as a \emph{dep} relation.
 \end{description}
 
 
