@@ -96,7 +96,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
   }
   
   private void loadModel(String segLoc, Properties props) {
-    if (VERBOSE) {    
+    if (VERBOSE) {
       timer.start();
       System.err.print("Loading Segmentation Model ["+segLoc+"]...");
     }
