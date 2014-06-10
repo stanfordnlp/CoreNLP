@@ -15,8 +15,12 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * Table used to lookup multi-word phrases
- * (useful for looking up all instances of known phrases in a document)
+ * Table used to lookup multi-word phrases.
+ * This class provides functions for looking up all instances of known phrases in a document in an efficient manner.
+ *
+ * Phrases can be added to the phrase table using
+ *   @link{#readPhrases}
+ *   #addPhrase
  *
  * @author Angel Chang
  */
@@ -788,8 +792,14 @@ public class PhraseTable implements Serializable
     }
   }
 
+  /**
+   * A phrase is a multiword expression
+   */
   public static class Phrase
   {
+    /**
+     * List of words in this phrase
+     */
     WordList wordList;
     String text;
     String tag;
@@ -850,6 +860,9 @@ public class PhraseTable implements Serializable
   public final static Comparator<PhraseMatch> PHRASEMATCH_LENGTH_ENDPOINTS_COMPARATOR =
           Comparators.chain(HasInterval.LENGTH_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
 
+  /**
+   * Represents a matched phrase
+   */
   public static class PhraseMatch implements HasInterval<Integer>
   {
     Phrase phrase;
