@@ -1073,10 +1073,11 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (VP=target < VBG|VBN|VBD $-- NP)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
           // to get "MBUSA, headquartered ..."
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (/^,$/ $+ (VP=target <, VBG|VBN))",
+          // Allows an adverb to come before the participle
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
           // to get "John, knowing ..., announced "
-          "S|SINV < (S=target < (VP <, VBG|VBN) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
-          "(VP < (@S=target < (VP <1 VBG|VBN )$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
+          "S|SINV < (S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
+          "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
         });
