@@ -17,7 +17,7 @@ import nu.xom.Document;
 import nu.xom.Nodes;
 import nu.xom.xslt.XSLTransform;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -150,7 +150,7 @@ public class CoreNLPServlet extends HttpServlet {
       String escapedXml = xmlOutput.toString().replaceAll("\\r\\n|\\r|\\n", ""
           ).replace("\"", "\\\"");
       
-      // Inject the XML results into the HTML to be retrieved by the Javscript.
+      // Inject the XML results into the HTML to be retrieved by the Javascript.
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
       out.println("    stanfordXML = \"" + escapedXml + "\";");
@@ -208,7 +208,7 @@ public class CoreNLPServlet extends HttpServlet {
     pipeline.xmlPrint(annotation, xmlOutput);
     xmlOutput.flush();
 
-    String escapedXml = StringEscapeUtils.escapeHtml(xmlOutput.toString());
+    String escapedXml = StringEscapeUtils.escapeHtml4(xmlOutput.toString());
     String[] lines = escapedXml.split("\n");
     out.print("<div>");
     for (String line : lines) {
