@@ -2,16 +2,17 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.Timing;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class will add NER information to an
@@ -70,13 +71,54 @@ public class NERCombinerAnnotator implements Annotator {
     this.ner = ner;
   }
 
-  public void annotate(Annotation annotation) {
+  public NERCombinerAnnotator(String name, Properties properties) {
+    this(createNERClassifierCombiner(name, properties), false);
+  }
+
+  private final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
+    // TODO: Move function into NERClassifierCombiner?
+    List<String> models = new ArrayList<String>();
+    String prefix = (name != null)? name + ".": "ner.";
+    String modelNames = properties.getProperty(prefix + "model");
+    if (modelNames == null) {
+      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+    }
+    if (modelNames.length() > 0) {
+      models.addAll(Arrays.asList(modelNames.split(",")));
+    }
+    if (models.isEmpty()) {
+      // Allow for no real NER model - can just use numeric classifiers or SUTime
+      System.err.println("WARNING: no NER models specified");
+    }
+    NERClassifierCombiner nerCombiner;
+    try {
+      // TODO: use constants for part after prefix so we can ensure consistent options
+      boolean applyNumericClassifiers =
+              PropertiesUtils.getBool(properties,
+                      prefix + "applyNumericClassifiers",
+                      NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
+      boolean useSUTime =
+              PropertiesUtils.getBool(properties,
+                      prefix + "useSUTime",
+                      NumberSequenceClassifier.USE_SUTIME_DEFAULT);
+      // TODO: properties are passed in as it for number sequence classifiers (don't care about the prefix)
+      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
+              useSUTime, properties,
+              models.toArray(new String[models.size()]));
+    } catch (FileNotFoundException e) {
+      throw new RuntimeIOException(e);
+   }
+   return nerCombiner;
+ }
+
+public void annotate(Annotation annotation) {
     timerStart("Adding NER Combiner annotation...");
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       // classify tokens for each sentence
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         doOneSentence(annotation, sentence);
       }
+      this.ner.finalizeAnnotation(annotation);
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
     }
