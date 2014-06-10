@@ -29,15 +29,15 @@ public class LambdaSolve {
    * These are the model parameters that have to be learned
    */
   public double[] lambda;
-  public boolean[] lambda_converged;
-  public double eps;
-  public double newtonerr;
+  protected boolean[] lambda_converged;  // Now only allocated and used if you're using IIS.
+  protected double eps; // only used by IIS. Convergence threshold / allowed "newtonErr"
+  // protected double newtonerr;
 
   /**
    * This flag is true if all (x,y)  have the same f# in which case the newton equation solving is avoided
    */
-  public boolean fixedFnumXY;
-  public Problem p;
+  private boolean fixedFnumXY;
+  protected Problem p;
 
   /**
    * Conditional probabilities.
@@ -76,15 +76,14 @@ public class LambdaSolve {
   private double[][] sum;// auxiliary array
   private double[][] sub;// auxiliary array
   public boolean weightRanks = false;
-  public boolean convertValues = false;
+  private boolean convertValues = false;
 
 
   public LambdaSolve(Problem p1, double eps1, double nerr1) {
     p = p1;
     eps = eps1;
-    newtonerr = nerr1;
-    lambda = new double[p.fSize];
-    lambda_converged = new boolean[p.fSize];
+    // newtonerr = nerr1;
+    // lambda = new double[p.fSize];
     probConds = new double[p.data.xSize][];
     System.err.println("xSize is " + p.data.xSize);
 
@@ -241,6 +240,7 @@ public class LambdaSolve {
   public void improvedIterative() {
     boolean flag;
     int iterations = 0;
+    lambda_converged = new boolean[p.fSize];
     int numNConverged = p.fSize;
     do {
       if (VERBOSE) {
@@ -274,6 +274,7 @@ public class LambdaSolve {
    */
   public void improvedIterative(int iters) {
     int iterations = 0;
+    lambda_converged = new boolean[p.fSize];
     int numNConverged = p.fSize;
     //double lOld=logLikelihood();
     do {

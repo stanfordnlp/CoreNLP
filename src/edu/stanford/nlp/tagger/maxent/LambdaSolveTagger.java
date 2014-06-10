@@ -24,12 +24,12 @@ public class LambdaSolveTagger extends LambdaSolve {
   //private static final boolean VERBOSE = false;
 
 
-  LambdaSolveTagger(Problem p1, double eps1, double nerr1, byte[][] fnumArr) {
+  LambdaSolveTagger(Problem p1, double eps1, byte[][] fnumArr) {
     p = p1;
     eps = eps1;
-    newtonerr = nerr1;
+    // newtonerr = nerr1;
     lambda = new double[p1.fSize];
-    lambda_converged = new boolean[p1.fSize];
+    // lambda_converged = new boolean[p1.fSize];
     probConds = new double[p1.data.xSize][p1.data.ySize];  // cdm 2008: Memory hog. Is there anything we can do to avoid this square array allocation?
     this.fnumArr = fnumArr;
     zlambda = new double[p1.data.xSize];
