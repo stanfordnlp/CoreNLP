@@ -1522,7 +1522,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     boolean basic = props.getProperty("basic") != null;
     boolean collapsed = props.getProperty("collapsed") != null;
     boolean CCprocessed = props.getProperty("CCprocessed") != null;
-    boolean collapsedTree = props.getProperty("collapsedTree") != null;
+    boolean tree = props.getProperty("collapsedTree") != null;
     boolean nonCollapsed = props.getProperty("nonCollapsed") != null;
     boolean extraSep = props.getProperty("extraSep") != null;
     boolean parseTree = props.getProperty("parseTree") != null;
@@ -1564,15 +1564,15 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     for (GrammaticalStructure gs : gsBank) {
 
-      Tree tree;
+      Tree t;
       if (gsBank instanceof TreeBankGrammaticalStructureWrapper) {
         // System.err.println("Using TreeBankGrammaticalStructureWrapper branch");
-        tree = ((TreeBankGrammaticalStructureWrapper) gsBank).getOriginalTree(gs);
+        t = ((TreeBankGrammaticalStructureWrapper) gsBank).getOriginalTree(gs);
         // System.err.println("Tree is: ");
         // System.err.println(t);
       } else {
         // System.err.println("Using gs.root() branch");
-        tree = gs.root(); // recover tree
+        t = gs.root(); // recover tree
         // System.err.println("Tree from gs is");
         // System.err.println(t);
       }
@@ -1581,7 +1581,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         // CCprocessed
 
         System.out.println("============= parse tree =======================");
-        tree.pennPrint();
+        t.pennPrint();
         System.out.println();
 
         System.out.println("------------- GrammaticalStructure -------------");
@@ -1632,61 +1632,61 @@ public abstract class GrammaticalStructure extends TreeGraph {
       else {
         if (parseTree) {
           System.out.println("============= parse tree =======================");
-          tree.pennPrint();
+          t.pennPrint();
           System.out.println();
         }
 
         if (basic) {
-          if (collapsed || CCprocessed || collapsedTree || nonCollapsed) {
+          if (collapsed || CCprocessed || tree || nonCollapsed) {
             System.out.println("------------- basic dependencies ---------------");
           }
           if (altDepPrinter == null) {
-            printDependencies(gs, gs.typedDependencies(false), tree, conllx, false);
+            printDependencies(gs, gs.typedDependencies(false), t, conllx, false);
           } else {
-            System.out.println(altDepPrinter.dependenciesToString(gs, gs.typedDependencies(false), tree));
+            System.out.println(altDepPrinter.dependenciesToString(gs, gs.typedDependencies(false), t));
           }
         }
 
         if (nonCollapsed) {
-          if (basic || CCprocessed || collapsed || collapsedTree) {
+          if (basic || CCprocessed || collapsed || tree) {
             System.out.println("----------- non-collapsed dependencies (basic + extra) -----------");
           }
-          printDependencies(gs, gs.allTypedDependencies(), tree, conllx, extraSep);
+          printDependencies(gs, gs.allTypedDependencies(), t, conllx, extraSep);
         }
 
         if (collapsed) {
-          if (basic || CCprocessed || collapsedTree || nonCollapsed) {
+          if (basic || CCprocessed || tree || nonCollapsed) {
             System.out.println("----------- collapsed dependencies -----------");
           }
-          printDependencies(gs, gs.typedDependenciesCollapsed(true), tree, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCollapsed(true), t, conllx, false);
         }
 
         if (CCprocessed) {
-          if (basic || collapsed || collapsedTree || nonCollapsed) {
+          if (basic || collapsed || tree || nonCollapsed) {
             System.out.println("---------- CCprocessed dependencies ----------");
           }
           List<TypedDependency> deps = gs.typedDependenciesCCprocessed(true);
           if (checkConnected) {
             if (!GrammaticalStructure.isConnected(deps)) {
               System.err.println("Graph is not connected for:");
-              System.err.println(tree);
+              System.err.println(t);
               System.err.println("possible offending nodes: " + GrammaticalStructure.getRoots(deps));
             }
           }
-          printDependencies(gs, deps, tree, conllx, false);
+          printDependencies(gs, deps, t, conllx, false);
         }
 
-        if (collapsedTree) {
+        if (tree) {
           if (basic || CCprocessed || collapsed || nonCollapsed) {
             System.out.println("----------- collapsed dependencies tree -----------");
           }
-          printDependencies(gs, gs.typedDependenciesCollapsedTree(), tree, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCollapsedTree(), t, conllx, false);
         }
 
         // default use: CCprocessed (to parallel what happens within the parser)
-        if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed) {
+        if (!basic && !collapsed && !CCprocessed && !tree && !nonCollapsed) {
           // System.out.println("----------- CCprocessed dependencies -----------");
-          printDependencies(gs, gs.typedDependenciesCCprocessed(true), tree, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCCprocessed(true), t, conllx, false);
         }
       }
 
