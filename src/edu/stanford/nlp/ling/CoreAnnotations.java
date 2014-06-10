@@ -1308,6 +1308,10 @@ public class CoreAnnotations {
     }
   }
 
+  /**
+   * Used in CleanXMLAnnotator.  The value is a list of XML element names indicating
+   * the XML tag the token was nested inside.
+   */
   public static class XmlContextAnnotation implements CoreAnnotation<List<String>> {
 
     public Class<List<String>> getType() {
@@ -1370,6 +1374,13 @@ public class CoreAnnotations {
     }
   }
 
+  // Document type
+  public static class DocTypeAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
   // Numeric annotations
 
   // Per token annotation indicating whether the token represents a NUMBER or ORDINAL
@@ -1423,6 +1434,17 @@ public class CoreAnnotations {
       return ErasureUtils.<Class<List<CoreMap>>> uncheckedCast(List.class);
     }
   }
+
+  /**
+   * used in dcoref.
+   * to indicate that the it should use the discourse information annotated in the document
+   */
+  public static class UseMarkedDiscourseAnnotation implements CoreAnnotation<Boolean> {
+    public Class<Boolean> getType() {
+      return Boolean.class;
+    }
+  }
+
   /**
    * used in dcoref.
    * to store discourse information. (marking <TURN> or quotation)
@@ -1450,6 +1472,16 @@ public class CoreAnnotations {
   public static class ParagraphAnnotation implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {
       return Integer.class;
+    }
+  }
+
+  /**
+   * used in dcoref.
+   * to store premarked entity mentions.
+   */
+  public static class MentionTokenAnnotation implements CoreAnnotation<MultiTokenTag> {
+    public Class<MultiTokenTag> getType() {
+      return MultiTokenTag.class;
     }
   }
 
