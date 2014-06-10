@@ -6,7 +6,7 @@ import edu.stanford.nlp.util.StringUtils;
 import java.util.*;
 
 /**
- * Implementation of Trie using map.
+ * Map that takes a iterable as key, and maps it to an value.
  *
  * This implementation is not particularly memory efficient, but will have relatively
  *   fast lookup times for sequences where there are many possible keys (e.g. sequences over Strings)
@@ -29,6 +29,10 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   // Should we have explicit marking if this element is a leaf node without requiring value?
 
   public TrieMap() {
+  }
+
+  public TrieMap(int initialCapacity) {
+    // TODO: initial capacity implementation
   }
 
   // Trie specific functions
@@ -275,5 +279,4 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
       });
     }
   }
-
 }
