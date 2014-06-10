@@ -1201,4 +1201,8 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("as Bishop of London in", matched.get(3).group());
   }
 
+//  public void testcompile() {
+//    String s = "(?$se diarrhea|fainting|/excessive/ /tiredness/|/fast/ /heartbeat/|tongue|/sore/ /throat/|hoarseness|fever|/muscle/ /aches/|/swelling/ /of/ /the/ /face/|eyes|/difficulty/ /breathing/ /or/ /swallowing/|/or/ /legs/|cough|vomiting|/dizziness/ /or/ /lightheadedness/|rash|headache|lips|arms) []{0,15} (?$dt moexipril)";
+//    TokenSequencePattern p =TokenSequencePattern.compile(s);
+//  }
 }
