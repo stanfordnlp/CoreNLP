@@ -881,6 +881,11 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useSequentialScanSampling = false;
   public int maxAllowedChromaticSize = 8;
 
+  /** Whether to drop out some fraction of features in the input during
+   *  training (and then to scale the weights at test time).
+   */
+  public double inputDropOut = 0.0;
+
   /**
    * Whether or not to keep blank sentences when processing.  Useful
    * for systems such as the segmenter if you want to line up each
@@ -929,7 +934,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean groupByFeatureTemplate = false;
   public boolean groupByOutputClass = false;
   public double priorAlpha = 0;
-
+  
   public String splitWordRegex = null;
   public boolean groupByInput = false;
   public boolean groupByHiddenUnit = false;
@@ -938,7 +943,6 @@ public class SeqClassifierFlags implements Serializable {
   public String bigramLM = null;
   public int wordSegBeamSize = 1000;
   public String vocabFile = null;
-  public String normalizedFile = null;
   public boolean averagePerceptron = true;
   public String loadCRFSegmenterPath = null;
   public String loadPCTSegmenterPath = null;
@@ -955,13 +959,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useCWSWordFeaturesBigram = false;
   public boolean pctSegmenterLenAdjust = false;
   public boolean useTrainLexicon = false;
-  public boolean useCWSFeatures = true;
-  public boolean appendLC = false;
-  public boolean lazyUpdate = true;
-  public boolean perceptronDebug = false;
-  public boolean pctSegmenterScaleByCRF = false;
-  public double pctSegmenterScale = 0.0;
-  public boolean separateASCIIandRange = true;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -1268,8 +1265,6 @@ public class SeqClassifierFlags implements Serializable {
         }
       } else if (key.equalsIgnoreCase("useSum")) {
         useSum = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("verbose")) {
-        verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("verboseMode")) {
         verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("tolerance")) {
@@ -2224,6 +2219,8 @@ public class SeqClassifierFlags implements Serializable {
         useSequentialScanSampling = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("maxAllowedChromaticSize")) {
         maxAllowedChromaticSize = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("inputDropOut")) {
+        inputDropOut = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("keepEmptySentences")) {
         keepEmptySentences = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useBilingualNERPrior")) {
@@ -2318,8 +2315,6 @@ public class SeqClassifierFlags implements Serializable {
         wordSegBeamSize = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("vocabFile")){
         vocabFile = val;
-      } else if (key.equalsIgnoreCase("normalizedFile")){
-        normalizedFile = val;
       } else if (key.equalsIgnoreCase("averagePerceptron")){
         averagePerceptron = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("loadCRFSegmenterPath")){
@@ -2350,20 +2345,6 @@ public class SeqClassifierFlags implements Serializable {
         pctSegmenterLenAdjust = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useTrainLexicon")){
         useTrainLexicon = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSFeatures")){
-        useCWSFeatures = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("appendLC")){
-        appendLC = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("lazyUpdate")){
-        lazyUpdate = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("perceptronDebug")){
-        perceptronDebug = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterScaleByCRF")){
-        pctSegmenterScaleByCRF = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("pctSegmenterScale")){
-        pctSegmenterScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("separateASCIIandRange")){
-        separateASCIIandRange = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
