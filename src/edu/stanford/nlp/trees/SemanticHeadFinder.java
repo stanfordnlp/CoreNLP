@@ -138,8 +138,11 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
     nonTerminalInfo.put("CONJP", new String[][]{{"right", "VB", "JJ", "RB", "IN", "CC"}});
 
-    // FRAG: crap rule needs to be change if you want to parse glosses; but it is correct to have ADJP and ADVP before S because of weird parses of reduced sentences.
+    // FRAG: crap rule needs to be change if you want to parse glosses
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
+
+    // PP first word (especially in coordination of PPs)
+    nonTerminalInfo.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ"}, {"left", "PP"}});
 
     // PRN: sentence first
     nonTerminalInfo.put("PRN", new String[][]{{"left", "VP", "SQ", "S", "SINV", "SBAR", "NP", "ADJP", "PP", "ADVP", "INTJ", "WHNP", "NAC", "VBP", "JJ", "NN", "NNP"}});
@@ -162,9 +165,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
       if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
         int newHeadIdx = headIdx - 2;
-        // Don't allow INTJ - important in informal genres "Oh and don't forget to call!"
-        while (newHeadIdx >= 0 && (daughterTrees[newHeadIdx].isPreTerminal() && tlp.isPunctuationTag(daughterTrees[newHeadIdx].value()) ||
-                                   "INTJ".equals(daughterTrees[newHeadIdx].value()))) {
+        while (newHeadIdx >= 0 && daughterTrees[newHeadIdx].isPreTerminal() && tlp.isPunctuationTag(daughterTrees[newHeadIdx].value())) {
           newHeadIdx--;
         }
         while (newHeadIdx >= 2 && tlp.isPunctuationTag(daughterTrees[newHeadIdx - 1].value())) {
