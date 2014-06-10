@@ -21,7 +21,6 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
 
   private final double delta;
   private final double dropoutScale;
-  private final int multiThreadGrad;
   private double[][] dropoutPriorGrad;
   private final boolean dropoutApprox;
   private double[][] weightSquare;
@@ -41,23 +40,22 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
   private Map<Integer, List<Integer>> currPrevLabelsMap;
   private Map<Integer, List<Integer>> currNextLabelsMap;
 
-  private ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> dropoutPriorThreadProcessor = 
-        new ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>() {
+  private ThreadsafeProcessor<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> dropoutPriorThreadProcessor = 
+        new ThreadsafeProcessor<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>() {
     @Override
-    public Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> process(Triple<Integer,Boolean, double[][]> docIndexUnsupWeights) {
-      return expectedCountsAndValueForADoc(docIndexUnsupWeights.third(), docIndexUnsupWeights.first(), false, docIndexUnsupWeights.second());
+    public Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> process(Pair<Integer,Boolean> docIndexUnsup) {
+      return expectedCountsAndValueForADoc(docIndexUnsup.first(), false, docIndexUnsup.second());
     }
     @Override
-    public ThreadsafeProcessor<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> newInstance() {
+    public ThreadsafeProcessor<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> newInstance() {
       return this;
     }
   };
 
   CRFLogConditionalObjectiveFunctionWithDropout(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal, double delta, double dropoutScale, int multiThreadGrad, boolean dropoutApprox, double unsupDropoutScale, int[][][][] unsupDropoutData) {
-    super(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal);
+    super(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal, multiThreadGrad);
     this.delta = delta;
     this.dropoutScale = dropoutScale;
-    this.multiThreadGrad = multiThreadGrad;
     this.dropoutApprox = dropoutApprox;
     dropoutPriorGrad = empty2D();
     this.unsupDropoutStartIndex = data.length;
@@ -101,18 +99,6 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     }
   }
 
-  public double valueForADoc(double[][] weights, int docIndex) {
-    return expectedCountsAndValueForADoc(weights, docIndex, true, false).second();
-  }
-
-  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(double[][] weights, int docIndex) {
-    return expectedCountsAndValueForADoc(weights, docIndex, false, false);
-  }
-
-  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsForADoc(double[][] weights, int docIndex) {
-    return expectedCountsAndValueForADoc(weights, docIndex, false, true);
-  }
-
   private Map<Integer, double[]> sparseE(Set<Integer> activeFeatures) {
     Map<Integer, double[]> aMap = new HashMap<Integer, double[]>(activeFeatures.size());
     for (int f: activeFeatures) {
@@ -131,7 +117,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     return aMap;
   }
 
-  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(double[][] weights, int docIndex, 
+  private Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> expectedCountsAndValueForADoc(int docIndex, 
       boolean skipExpectedCountCalc, boolean skipValCalc) {
     
     int[] activeFeatures = dataFeatureHashByDoc[docIndex];
@@ -149,7 +135,6 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     if (featureVal != null)
       featureVal3DArr = featureVal[docIndex];
 
-    CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
     // make a clique tree for this document
     CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
 
@@ -264,7 +249,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       dropoutPriorGrad = sparseE(activeFeatures);
 
       // System.err.print("computing dropout prior for doc " + docIndex + " ... ");
-      prob -= getDropoutPrior(weights, cliqueTree, docData, EForADoc, docDataHash, activeFeatures, dropoutPriorGrad, condensedFeaturesMap, EForADocPos);
+      prob -= getDropoutPrior(cliqueTree, docData, EForADoc, docDataHash, activeFeatures, dropoutPriorGrad, condensedFeaturesMap, EForADocPos);
       // System.err.println(" done!");
       if (TIMED) {
         long elapsedMs = timer.stop();
@@ -379,7 +364,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     System.err.println("initializing data feature hash done!"); 
   }
 
-  private double getDropoutPrior(double[][] weights, CRFCliqueTree cliqueTree, int[][][] docData, 
+  private double getDropoutPrior(CRFCliqueTree cliqueTree, int[][][] docData, 
       Map<Integer, double[]> EForADoc, List<Set<Integer>> docDataHash, int[] activeFeatures, Map<Integer, double[]> dropoutPriorGrad,
       Map<Integer, List<Integer>> condensedFeaturesMap, List<Map<Integer, double[]>> EForADocPos) {
 
@@ -581,7 +566,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
             else
               valIndex = yP;
             try {
-            theta = weights[fIndex][valIndex];
+              theta = weights[fIndex][valIndex];
             }catch (Exception ex) {
               System.err.printf("weights[%d][%d], map[%d]=%d, labelIndices.get(map[%d]).size() = %d, weights.length=%d\n", fIndex, valIndex, fIndex, map[fIndex], fIndex, labelIndices.get(map[fIndex]).size(), weights.length);
               throw new RuntimeException(ex);
@@ -708,16 +693,10 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     return dropoutScale * priorValue;
   }
 
-  /**
-   * Calculates both value and partial derivatives at the point x, and save them internally.
-   */
+
   @Override
-  public void calculate(double[] x) {
-
-    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
-    // final double[][] weights = to2D(x);
-    to2D(x, weights);
-
+  public void setWeights(double[][] weights) {
+    super.setWeights(weights);
     if (weightSquare == null) {
       weightSquare = new double[weights.length][];
       for (int i = 0; i < weights.length; i++)
@@ -730,18 +709,31 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         weightSquare[i][j] = w * w;
       }
     }
+  }
+
+  /**
+   * Calculates both value and partial derivatives at the point x, and save them internally.
+   */
+  @Override
+  public void calculate(double[] x) {
+
+    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
+    // final double[][] weights = to2D(x);
+    to2D(x, weights);
+
+    setWeights(weights);
 
     // the expectations over counts
     // first index is feature index, second index is of possible labeling
     // double[][] E = empty2D();
     clear2D(E);
 
-    MulticoreWrapper<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> wrapper =
-      new MulticoreWrapper<Triple<Integer,Boolean, double[][]>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>(multiThreadGrad, dropoutPriorThreadProcessor); 
+    MulticoreWrapper<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>> wrapper =
+      new MulticoreWrapper<Pair<Integer, Boolean>, Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>>>(multiThreadGrad, dropoutPriorThreadProcessor); 
     // supervised part
     for (int m = 0; m < totalData.length; m++) {
       boolean submitIsUnsup = (m >= unsupDropoutStartIndex);
-      wrapper.put(new Triple<Integer, Boolean, double[][]>(m, submitIsUnsup, weights));
+      wrapper.put(new Pair<Integer, Boolean>(m, submitIsUnsup));
       while (wrapper.peek()) {
         Quadruple<Integer, Double, Map<Integer, double[]>, Map<Integer, double[]>> result = wrapper.poll();
         int docIndex = result.first();
