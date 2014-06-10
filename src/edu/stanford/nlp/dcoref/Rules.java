@@ -94,13 +94,10 @@ public class Rules {
     if(disagree) return true;
     else return false;
   }
-
-  private static final List<String> entityWordsToExclude =
-          Arrays.asList(new String[]{ "the","this", "mr.", "miss", "mrs.", "dr.", "ms.", "inc.", "ltd.", "corp.", "'s"});
   /** Word inclusion except stop words  */
   public static boolean entityWordsIncluded(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Mention mention, Mention ant) {
     Set<String> wordsExceptStopWords = Generics.newHashSet(mentionCluster.words);
-    wordsExceptStopWords.removeAll(entityWordsToExclude);
+    wordsExceptStopWords.removeAll(Arrays.asList(new String[]{ "the","this", "mr.", "miss", "mrs.", "dr.", "ms.", "inc.", "ltd.", "corp.", "'s"}));
     wordsExceptStopWords.remove(mention.headString.toLowerCase());
     if(potentialAntecedent.words.containsAll(wordsExceptStopWords)) return true;
     else return false;
@@ -537,29 +534,28 @@ public class Rules {
   }
 
   /** Is the speaker for mention the same entity as the ant entity? */
-  public static boolean antecedentIsMentionSpeaker(Document document,
-                                                   Mention mention, Mention ant, Dictionaries dict) {
+  public static boolean entityIsSpeaker(Document document,
+      Mention mention, Mention ant, Dictionaries dict) {
     if(document.speakerPairs.contains(new Pair<Integer, Integer>(mention.mentionID, ant.mentionID))) {
       return true;
     }
 
-    if(antecedentMatchesMentionSpeakerAnnotation(mention, ant, document)) {
+    if(mentionMatchesSpeakerAnnotation(mention, ant, document)) {
+      return true;
+    }
+    if(mentionMatchesSpeakerAnnotation(ant, mention, document)) {
       return true;
     }
     return false;
   }
 
   /** Is the speaker for mention the same entity as the ant entity? */
-  public static boolean antecedentMatchesMentionSpeakerAnnotation(Mention mention, Mention ant) {
-    return antecedentMatchesMentionSpeakerAnnotation(mention, ant, null);
+  public static boolean mentionMatchesSpeakerAnnotation(Mention mention, Mention ant) {
+    return mentionMatchesSpeakerAnnotation(mention, ant, null);
   }
 
   public static final Pattern WHITESPACE_PATTERN = Pattern.compile(" +");
-
-  /**
-   * The antecedent matches the speaker annotation found in the mention
-   */
-  public static boolean antecedentMatchesMentionSpeakerAnnotation(Mention mention, Mention ant, Document document) {
+  public static boolean mentionMatchesSpeakerAnnotation(Mention mention, Mention ant, Document document) {
     if (mention.headWord == null) {
       return false;
     }
@@ -571,10 +567,19 @@ public class Rules {
 
     SpeakerInfo speakerInfo = (document != null)? document.getSpeakerInfo(speaker):null;
     if (speakerInfo != null) {
-      return (mentionMatchesSpeaker(ant, speakerInfo, false));
+      // Got info about this speaker
+      if (speakerInfo.containsMention(ant)) return true;
+      // speaker strings are pre-split
+      for (String s : speakerInfo.getSpeakerNameStrings()) {
+        if (ant.headString.equalsIgnoreCase(s)) {
+          speakerInfo.addMention(ant);
+          return true;
+        }
+      }
+      return false;
     }
 
-    // CAN'T get speaker info - take alternate path
+    // CAN'T get speaker info - take slow path
 
     // We optimize a little here: if the name has no spaces, which is
     // the common case, then it is unnecessarily expensive to call
@@ -586,36 +591,6 @@ public class Rules {
       }
     } else {
       if (ant.headString.equalsIgnoreCase(speaker)) return true;
-    }
-    return false;
-  }
-
-  public static boolean mentionMatchesSpeaker(Mention mention, SpeakerInfo speakerInfo, boolean strictMatch) {
-    // Got info about this speaker
-    if (mention.speakerInfo != null) {
-      if (mention.speakerInfo == speakerInfo) return true;
-    }
-    if (speakerInfo.containsMention(mention)) return true;
-    if (strictMatch) {
-      String spkstr = SpeakerInfo.WHITESPACE_PATTERN.matcher(speakerInfo.getSpeakerName()).replaceAll("");
-      String mstr = SpeakerInfo.WHITESPACE_PATTERN.matcher(mention.spanToString()).replaceAll("");
-      if (spkstr.equalsIgnoreCase(mstr)) {
-        speakerInfo.addMention(mention);
-        return true;
-      }
-    } else {
-      // speaker strings are pre-split
-      for (String s : speakerInfo.getSpeakerNameStrings()) {
-        if (mention.headString.equalsIgnoreCase(s)) {
-          speakerInfo.addMention(mention);
-          return true;
-        }
-      }
-      if (speakerInfo.getSpeakerDesc() != null) {
-        String spkDescStr = SpeakerInfo.WHITESPACE_PATTERN.matcher(speakerInfo.getSpeakerDesc()).replaceAll("");
-        String mstr = SpeakerInfo.WHITESPACE_PATTERN.matcher(mention.spanToString()).replaceAll("");
-        if (spkDescStr.equalsIgnoreCase(mstr)) return true;
-      }
     }
     return false;
   }
