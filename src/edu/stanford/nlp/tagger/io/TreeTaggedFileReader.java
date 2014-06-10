@@ -30,7 +30,7 @@ public class TreeTaggedFileReader implements TaggedFileReader {
 
   public TreeTaggedFileReader(TaggedFileRecord record) {
     filename = record.file;
-    trf = record.trf == null ? new LabeledScoredTreeReaderFactory() : record.trf;
+    trf = new LabeledScoredTreeReaderFactory();
     transformer = record.treeTransformer;
     normalizer = record.treeNormalizer;
     treeFilter = record.treeFilter;

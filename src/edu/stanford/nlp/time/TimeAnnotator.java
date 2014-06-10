@@ -175,60 +175,49 @@ public class TimeAnnotator implements Annotator {
   }
 
   public void annotate(Annotation annotation) {
-    SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
-    String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if(docDate == null){
-      Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
-      if(cal == null){
-        Redwood.log(Redwood.WARN, "No document date specified");
-      } else {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
-        docDate = dateFormat.format(cal.getTime());
-      }
-    }
-    List<CoreMap> allTimeExpressions; // initialized below = null;
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
-      allTimeExpressions = new ArrayList<CoreMap>();
+      List<CoreMap> allTimeExpressions = new ArrayList<CoreMap>();
       List<CoreMap> allNumerics = new ArrayList<CoreMap>();
+      allTimeExpressions = new ArrayList<CoreMap>();
       for (CoreMap sentence: sentences) {
-        // make sure that token character offsets align with the actual sentence text
-        // They may not align due to token normalizations, such as "(" to "-LRB-".
-        CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence); 
-        // uncomment the next line for verbose dumping of tokens....
-        // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
-        List<CoreMap> timeExpressions = 
-          timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
-        if (timeExpressions != null) {
-          allTimeExpressions.addAll(timeExpressions);
-          sentence.set(TimeAnnotations.TimexAnnotations.class, timeExpressions);
-          for (CoreMap timeExpression:timeExpressions) {
-            timeExpression.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
-          }
-        }
-        List<CoreMap> numbers = alignedSentence.get(CoreAnnotations.NumerizedTokensAnnotation.class);
-        if(numbers != null){
-          sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, numbers);
-          allNumerics.addAll(numbers);
-        }
+        annotateSingleSentence(sentence, annotation, allTimeExpressions, allNumerics);
       }
       annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, allNumerics);
+      annotation.set(TimeAnnotations.TimexAnnotations.class, allTimeExpressions);
     } else {
-      allTimeExpressions = annotateSingleSentence(annotation, docDate, timeIndex);
+      annotateSingleSentence(annotation, annotation, null, null);
     }
-    annotation.set(TimeAnnotations.TimexAnnotations.class, allTimeExpressions);
   }
-  
+
   /**
    * Helper method for people not working from a complete Annotation.
    * @return a list of CoreMap.  Each CoreMap represents a detected temporal expression.
    */
-  public List<CoreMap> annotateSingleSentence(CoreMap sentence, String docDate, SUTime.TimeIndex timeIndex) {
+  public void annotateSingleSentence(CoreMap sentence, CoreMap docAnnotation,
+                                     List<CoreMap> allTimeExpressions, List<CoreMap> allNumerics) {
+    // make sure that token character offsets align with the actual sentence text
+    // They may not align due to token normalizations, such as "(" to "-LRB-".
     CoreMap annotationCopy = NumberSequenceClassifier.alignSentence(sentence);
-    if (docDate.equals("")) {
-      docDate = null;
+    // uncomment the next line for verbose dumping of tokens....
+    // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
+    List<CoreMap> timeExpressions =
+            timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docAnnotation);
+    if (timeExpressions != null) {
+      if (allTimeExpressions != null) allTimeExpressions.addAll(timeExpressions);
+      sentence.set(TimeAnnotations.TimexAnnotations.class, timeExpressions);
+      if (sentence.containsKey(CoreAnnotations.SentenceIndexAnnotation.class)) {
+        for (CoreMap timeExpression:timeExpressions) {
+          timeExpression.set(CoreAnnotations.SentenceIndexAnnotation.class,
+                  sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
+        }
+      }
     }
-    return timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docDate, timeIndex);
+    List<CoreMap> numbers = annotationCopy.get(CoreAnnotations.NumerizedTokensAnnotation.class);
+    if(numbers != null){
+      sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, numbers);
+      if (allNumerics != null) allNumerics.addAll(numbers);
+    }
   }
 
   @Override
