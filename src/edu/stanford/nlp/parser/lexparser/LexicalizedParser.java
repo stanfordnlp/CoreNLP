@@ -1011,6 +1011,10 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
    * files are written (when the -writeOutputFiles option is specified).
    * If not specified, output files are written in the same directory as the
    * input files.
+   * <LI><code>-nthreads</code> Parsing files and testing on treebanks
+   * can use multiple threads.  This option tells the parser how many
+   * threads to use.  A negative number indicates to use as many
+   * threads as the machine has cores.
    * </UL>
    * See also the package documentation for more details and examples of use.
    *
