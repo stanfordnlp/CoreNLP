@@ -2491,6 +2491,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       func.setFeatureGrouping(fg);
     }
 
+
     Minimizer minimizer = getMinimizer(pruneFeatureItr, evaluators);
 
     double[] initialWeights;
@@ -2531,11 +2532,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
 
-  public Minimizer getMinimizer() {
+  protected Minimizer getMinimizer() {
     return getMinimizer(0, null);
   }
 
-  public Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
+  protected Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
     Minimizer<DiffFunction> minimizer = null;
     if (flags.useQN) {
       int QNmem;

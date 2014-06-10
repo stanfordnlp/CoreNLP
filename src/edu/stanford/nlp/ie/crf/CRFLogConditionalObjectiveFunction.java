@@ -57,6 +57,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   protected double[][] eHat4Update, e4Update;
 
   protected int[][] weightIndices;
+  protected double[][] weightSquare;
   protected final String backgroundSymbol;
 
   protected int[][] featureGrouping = null;
@@ -137,6 +138,143 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     domainDimension = myDomainDimension;
   }
 
+  // this used to be computed lazily, but that was clearly erroneous for multithreading!
+  @Override
+  public int domainDimension() {
+    return domainDimension;
+  }
+
+  public void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
+    for (int i = 0; i < toBeCombined.length; i++)
+      for (int j = 0; j < toBeCombined[i].length; j++)
+        combineInto[i][j] += toBeCombined[i][j];
+  }
+
+  // TODO(mengqiu) add dimension checks
+  public void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined) {
+    double[] source = null;
+    int key = 0;
+    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
+      key = entry.getKey();
+      source = entry.getValue();
+      for (int i = 0; i< source.length; i++)
+        combineInto[key][i] += source[i];
+    }
+  }
+
+  public void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined, double scale) {
+    double[] source = null;
+    int key = 0;
+    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
+      key = entry.getKey();
+      source = entry.getValue();
+      for (int i = 0; i< source.length; i++)
+        combineInto[key][i] += source[i] * scale;
+    }
+  }
+
+  /**
+   * Takes a double array of weights and creates a 2D array where:
+   *
+   * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matcing featuresIndex i
+   * the second element is the number of output classes for that clique size
+   *
+   * @return a 2D weight array
+   */
+  public double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
+    double[][] newWeights = new double[map.length][];
+    int index = 0;
+    for (int i = 0; i < map.length; i++) {
+      int labelSize = labelIndices.get(map[i]).size();
+      newWeights[i] = new double[labelSize];
+      try {
+        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
+      } catch (Exception ex) {
+        System.err.println("weights: " + weights);
+        System.err.println("newWeights["+i+"]: " + newWeights[i]);
+        throw new RuntimeException(ex);
+      }
+      index += labelSize;
+    }
+    return newWeights;
+  }
+
+  public double[][] to2D(double[] weights) {
+    return to2D(weights, this.labelIndices, this.map);
+  }
+
+  public void to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map, double[][] newWeights) {
+    int index = 0;
+    for (int i = 0; i < map.length; i++) {
+      int labelSize = labelIndices.get(map[i]).size();
+      try {
+        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
+      } catch (Exception ex) {
+        System.err.println("weights: " + weights);
+        System.err.println("newWeights["+i+"]: " + newWeights[i]);
+        throw new RuntimeException(ex);
+      }
+      index += labelSize;
+    }
+  }
+
+  public void to2D(double[] weights, double[][] newWeights) {
+    to2D(weights, this.labelIndices, this.map, newWeights);
+  }
+
+  /** Beware: this changes the input weights array in place. */
+  public double[][] to2D(double[] weights, double wscale) {
+    for (int i = 0; i < weights.length; i++)
+      weights[i] = weights[i] * wscale;
+
+    return to2D(weights, this.labelIndices, this.map);
+  }
+
+  public static void clear2D(double[][] arr2D) {
+    for (int i = 0; i < arr2D.length; i++)
+      for (int j = 0; j < arr2D[i].length; j++)
+        arr2D[i][j] = 0;
+  }
+
+  public static double[] to1D(double[][] weights, int domainDimension) {
+    double[] newWeights = new double[domainDimension];
+    int index = 0;
+    for (double[] weightVector : weights) {
+      System.arraycopy(weightVector, 0, newWeights, index, weightVector.length);
+      index += weightVector.length;
+    }
+    return newWeights;
+  }
+
+  public double[] to1D(double[][] weights) {
+    return to1D(weights, domainDimension());
+  }
+
+  public int[][] getWeightIndices()
+  {
+    if (weightIndices == null) {
+      weightIndices = new int[map.length][];
+      int index = 0;
+      for (int i = 0; i < map.length; i++) {
+        weightIndices[i] = new int[labelIndices.get(map[i]).size()];
+        for (int j = 0; j < labelIndices.get(map[i]).size(); j++) {
+          weightIndices[i][j] = index;
+          index++;
+        }
+      }
+    }
+    return weightIndices;
+  }
+
+  protected double[][] empty2D() {
+    double[][] d = new double[map.length][];
+    // int index = 0;
+    for (int i = 0; i < map.length; i++) {
+      d[i] = new double[labelIndices.get(map[i]).size()];
+    }
+    return d;
+  }
+
   protected void empiricalCounts(double[][] eHat) {
     for (int m = 0; m < data.length; m++) {
       empiricalCountsForADoc(eHat, m);
@@ -190,7 +328,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     return expectedCountsAndValueForADoc(weights, null, docIndex, true, false);
   }
 
-  protected double expectedCountsAndValueForADoc(double[][] weights, double[][] E, int docIndex) {
+  private double expectedCountsAndValueForADoc(double[][] weights, double[][] E, int docIndex) {
     return expectedCountsAndValueForADoc(weights, E, docIndex, false, false);
   }
 
@@ -593,229 +731,4 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       }
     }
   }
-
-
-  protected Pair<double[][][], double[][][]> getCondProbs(CRFCliqueTree cTree, int[][][] docData) {
-    // first index position is curr index, second index curr-class, third index prev-class
-    // e.g. [1][2][3] means curr is at position 1 with class 2, prev is at position 0 with class 3
-    double[][][] prevGivenCurr = new double[docData.length][][]; 
-    // first index position is curr index, second index curr-class, third index next-class
-    // e.g. [0][2][3] means curr is at position 0 with class 2, next is at position 1 with class 3
-    double[][][] nextGivenCurr = new double[docData.length][][]; 
-
-    for (int i = 0; i < docData.length; i++) {
-      prevGivenCurr[i] = new double[numClasses][]; 
-      nextGivenCurr[i] = new double[numClasses][]; 
-      for (int j = 0; j < numClasses; j++) {
-        prevGivenCurr[i][j] = new double[numClasses];
-        nextGivenCurr[i][j] = new double[numClasses];
-      }
-    }
-
-    // computing prevGivenCurr and nextGivenCurr
-    for (int i=0; i < docData.length; i++) {
-      int[] labelPair = new int[2];
-      for (int l1 = 0; l1 < numClasses; l1++) {
-        labelPair[0] = l1;
-        for (int l2 = 0; l2 < numClasses; l2++) {
-          labelPair[1] = l2;
-          double prob = cTree.logProb(i, labelPair);
-          // System.err.println(prob);
-          if (i-1 >= 0)
-            nextGivenCurr[i-1][l1][l2] = prob;
-          prevGivenCurr[i][l2][l1] = prob;
-        }
-      }
-
-      if (DEBUG2) {
-        System.err.println("unnormalized conditionals:");
-        if (i>0) {
-        System.err.println("nextGivenCurr[" + (i-1) + "]:");
-        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
-          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
-          System.err.println();
-        }
-        }
-        System.err.println("prevGivenCurr[" + (i) + "]:");
-        for (int a = 0; a < prevGivenCurr[i].length; a++) {
-          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            System.err.print((prevGivenCurr[i][a][b])+"\t");
-          System.err.println();
-        }
-      }
-
-      for (int j=0; j< numClasses; j++) {
-        if (i-1 >= 0) {
-          // ArrayMath.normalize(nextGivenCurr[i-1][j]);
-          ArrayMath.logNormalize(nextGivenCurr[i-1][j]);
-          for (int k = 0; k < nextGivenCurr[i-1][j].length; k++)
-            nextGivenCurr[i-1][j][k] = Math.exp(nextGivenCurr[i-1][j][k]);
-        }
-        // ArrayMath.normalize(prevGivenCurr[i][j]);
-        ArrayMath.logNormalize(prevGivenCurr[i][j]);
-        for (int k = 0; k < prevGivenCurr[i][j].length; k++)
-          prevGivenCurr[i][j][k] = Math.exp(prevGivenCurr[i][j][k]);
-      }
-
-      if (DEBUG2) {
-        System.err.println("normalized conditionals:");
-        if (i>0) {
-        System.err.println("nextGivenCurr[" + (i-1) + "]:");
-        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
-          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
-          System.err.println();
-        }
-        }
-        System.err.println("prevGivenCurr[" + (i) + "]:");
-        for (int a = 0; a < prevGivenCurr[i].length; a++) {
-          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            System.err.print((prevGivenCurr[i][a][b])+"\t");
-          System.err.println();
-        }
-      }
-    }
-
-    return new Pair<double[][][], double[][][]>(prevGivenCurr, nextGivenCurr);
-  }
-
-  protected void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
-    for (int i = 0; i < toBeCombined.length; i++)
-      for (int j = 0; j < toBeCombined[i].length; j++)
-        combineInto[i][j] += toBeCombined[i][j];
-  }
-
-  // TODO(mengqiu) add dimension checks
-  protected void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined) {
-    double[] source = null;
-    int key = 0;
-    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
-      key = entry.getKey();
-      source = entry.getValue();
-      for (int i = 0; i< source.length; i++)
-        combineInto[key][i] += source[i];
-    }
-  }
-
-  protected void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined, double scale) {
-    double[] source = null;
-    int key = 0;
-    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
-      key = entry.getKey();
-      source = entry.getValue();
-      for (int i = 0; i< source.length; i++)
-        combineInto[key][i] += source[i] * scale;
-    }
-  }
-  
-  // this used to be computed lazily, but that was clearly erroneous for multithreading!
-  @Override
-  public int domainDimension() {
-    return domainDimension;
-  }
-
-  /**
-   * Takes a double array of weights and creates a 2D array where:
-   *
-   * the first element is the mapped index of the clique size (e.g., node-0, edge-1) matcing featuresIndex i
-   * the second element is the number of output classes for that clique size
-   *
-   * @return a 2D weight array
-   */
-  public double[][] to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map) {
-    double[][] newWeights = new double[map.length][];
-    int index = 0;
-    for (int i = 0; i < map.length; i++) {
-      int labelSize = labelIndices.get(map[i]).size();
-      newWeights[i] = new double[labelSize];
-      try {
-        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
-      } catch (Exception ex) {
-        System.err.println("weights: " + weights);
-        System.err.println("newWeights["+i+"]: " + newWeights[i]);
-        throw new RuntimeException(ex);
-      }
-      index += labelSize;
-    }
-    return newWeights;
-  }
-
-  public double[][] to2D(double[] weights) {
-    return to2D(weights, this.labelIndices, this.map);
-  }
-
-  public void to2D(double[] weights, List<Index<CRFLabel>> labelIndices, int[] map, double[][] newWeights) {
-    int index = 0;
-    for (int i = 0; i < map.length; i++) {
-      int labelSize = labelIndices.get(map[i]).size();
-      try {
-        System.arraycopy(weights, index, newWeights[i], 0, labelSize);
-      } catch (Exception ex) {
-        System.err.println("weights: " + weights);
-        System.err.println("newWeights["+i+"]: " + newWeights[i]);
-        throw new RuntimeException(ex);
-      }
-      index += labelSize;
-    }
-  }
-
-  public void to2D(double[] weights, double[][] newWeights) {
-    to2D(weights, this.labelIndices, this.map, newWeights);
-  }
-
-  /** Beware: this changes the input weights array in place. */
-  public double[][] to2D(double[] weights, double wscale) {
-    for (int i = 0; i < weights.length; i++)
-      weights[i] = weights[i] * wscale;
-
-    return to2D(weights, this.labelIndices, this.map);
-  }
-
-  public static void clear2D(double[][] arr2D) {
-    for (int i = 0; i < arr2D.length; i++)
-      for (int j = 0; j < arr2D[i].length; j++)
-        arr2D[i][j] = 0;
-  }
-
-  public static double[] to1D(double[][] weights, int domainDimension) {
-    double[] newWeights = new double[domainDimension];
-    int index = 0;
-    for (double[] weightVector : weights) {
-      System.arraycopy(weightVector, 0, newWeights, index, weightVector.length);
-      index += weightVector.length;
-    }
-    return newWeights;
-  }
-
-  public double[] to1D(double[][] weights) {
-    return to1D(weights, domainDimension());
-  }
-
-  public int[][] getWeightIndices()
-  {
-    if (weightIndices == null) {
-      weightIndices = new int[map.length][];
-      int index = 0;
-      for (int i = 0; i < map.length; i++) {
-        weightIndices[i] = new int[labelIndices.get(map[i]).size()];
-        for (int j = 0; j < labelIndices.get(map[i]).size(); j++) {
-          weightIndices[i][j] = index;
-          index++;
-        }
-      }
-    }
-    return weightIndices;
-  }
-
-  protected double[][] empty2D() {
-    double[][] d = new double[map.length][];
-    // int index = 0;
-    for (int i = 0; i < map.length; i++) {
-      d[i] = new double[labelIndices.get(map[i]).size()];
-    }
-    return d;
-  }
-
-
 }
