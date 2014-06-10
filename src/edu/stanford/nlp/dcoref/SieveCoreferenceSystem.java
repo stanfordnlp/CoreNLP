@@ -76,6 +76,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.NewlineLogFormatter;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Multi-pass Sieve coreference resolution system (see EMNLP 2010 paper).
@@ -852,6 +853,7 @@ public class SieveCoreferenceSystem {
       Document document,
       DeterministicCorefSieve sieve) throws Exception {
 
+    //Redwood.forceTrack("Coreference: sieve " + sieve.getClass().getSimpleName());
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     Map<Integer, CorefCluster> corefClusters = document.corefClusters;
     Set<Mention> roleSet = document.roleSet;
@@ -960,6 +962,7 @@ public class SieveCoreferenceSystem {
 
       printSieveScore(document, sieve);
     }
+    //Redwood.endTrack("Coreference: sieve " + sieve.getClass().getSimpleName());
   }
 
   /** Remove singletons, appositive, predicate nominatives, relative pronouns */
@@ -1059,11 +1062,13 @@ public class SieveCoreferenceSystem {
 
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     Map<Integer, CorefCluster> corefClusters = document.corefClusters;
-    Map<Mention, IntTuple> positions = document.positions;
+    Map<Mention, IntTuple> positions = document.allPositions;
     Map<Integer, Mention> golds = document.allGoldMentions;
 
     logger.fine("=======ERROR ANALYSIS=========================================================");
 
+    // Temporary sieve for getting ordered antecedents
+    DeterministicCorefSieve tmpSieve = new ExactStringMatch();
     for (int i = 0 ; i < orderedMentionsBySentence.size(); i++) {
       List<Mention> orderedMentions = orderedMentionsBySentence.get(i);
       for (int j = 0 ; j < orderedMentions.size(); j++) {
@@ -1083,7 +1088,7 @@ public class SieveCoreferenceSystem {
         boolean alreadyChoose = false;
 
         for (int sentJ = i; sentJ >= 0; sentJ--) {
-          List<Mention> l = (new ExactStringMatch()).getOrderedAntecedents(sentJ, i, orderedMentions, orderedMentionsBySentence, m, j, corefClusters, dictionaries);
+          List<Mention> l = tmpSieve.getOrderedAntecedents(sentJ, i, orderedMentions, orderedMentionsBySentence, m, j, corefClusters, dictionaries);
 
           // Sort mentions by length whenever we have two mentions beginning at the same position and having the same head
           for(int ii = 0; ii < l.size(); ii++) {
@@ -1203,7 +1208,8 @@ public class SieveCoreferenceSystem {
       String header,
       IntTuple src,
       IntTuple dst,
-      Document document, Semantics semantics
+      Document document,
+      Semantics semantics
   ) {
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     List<List<Mention>> goldOrderedMentionsBySentence = document.goldOrderedMentionsBySentence;

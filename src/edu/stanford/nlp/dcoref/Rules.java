@@ -94,10 +94,13 @@ public class Rules {
     if(disagree) return true;
     else return false;
   }
+
+  private static final List<String> entityWordsToExclude =
+          Arrays.asList(new String[]{ "the","this", "mr.", "miss", "mrs.", "dr.", "ms.", "inc.", "ltd.", "corp.", "'s"});
   /** Word inclusion except stop words  */
   public static boolean entityWordsIncluded(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Mention mention, Mention ant) {
     Set<String> wordsExceptStopWords = Generics.newHashSet(mentionCluster.words);
-    wordsExceptStopWords.removeAll(Arrays.asList(new String[]{ "the","this", "mr.", "miss", "mrs.", "dr.", "ms.", "inc.", "ltd.", "corp.", "'s"}));
+    wordsExceptStopWords.removeAll(entityWordsToExclude);
     wordsExceptStopWords.remove(mention.headString.toLowerCase());
     if(potentialAntecedent.words.containsAll(wordsExceptStopWords)) return true;
     else return false;
@@ -143,7 +146,7 @@ public class Rules {
       String firstWord = first.get(0).get(CoreAnnotations.TextAnnotation.class);
       String secondWord = second.get(0).get(CoreAnnotations.TextAnnotation.class);
       longer = (firstWord.length() > secondWord.length()) ? first : second;
-      shorter = (firstWord.length() > secondWord.length()) ? second : first;;
+      shorter = (firstWord.length() > secondWord.length()) ? second : first;
     } else {
       longer = (first.size() > second.size()) ? first : second;
       shorter = (first.size() > second.size()) ? second : first;
@@ -203,6 +206,10 @@ public class Rules {
   }
 
   public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent){
+    return entityAttributesAgree(mentionCluster, potentialAntecedent, false);
+  }
+
+  public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent, boolean ignoreGender){
     
     boolean hasExtraAnt = false;
     boolean hasExtraThis = false;
@@ -225,14 +232,16 @@ public class Rules {
     hasExtraAnt = false;
     hasExtraThis = false;
 
-    if(!mentionCluster.genders.contains(Gender.UNKNOWN)){
-      for(Gender g : potentialAntecedent.genders){
-        if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) hasExtraAnt = true;
+    if (!ignoreGender) {
+      if(!mentionCluster.genders.contains(Gender.UNKNOWN)){
+        for(Gender g : potentialAntecedent.genders){
+          if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) hasExtraAnt = true;
+        }
       }
-    }
-    if(!potentialAntecedent.genders.contains(Gender.UNKNOWN)){
-      for(Gender g : mentionCluster.genders){
-        if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) hasExtraThis = true;
+      if(!potentialAntecedent.genders.contains(Gender.UNKNOWN)){
+        for(Gender g : mentionCluster.genders){
+          if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) hasExtraThis = true;
+        }
       }
     }
     if(hasExtraAnt && hasExtraThis) return false;
@@ -279,8 +288,8 @@ public class Rules {
   public static boolean entityHeadsAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Mention m, Mention ant, Dictionaries dict) {
     boolean headAgree = false;
     if(m.isPronominal() || ant.isPronominal()
-        || dict.allPronouns.contains(m.spanToString().toLowerCase())
-        || dict.allPronouns.contains(ant.spanToString().toLowerCase())) return false;
+        || dict.allPronouns.contains(m.lowercaseNormalizedSpanString())
+        || dict.allPronouns.contains(ant.lowercaseNormalizedSpanString())) return false;
     for(Mention a : potentialAntecedent.corefMentions){
       if(a.headString.equals(m.headString)) headAgree= true;
     }
@@ -294,7 +303,7 @@ public class Rules {
       if(m.isPronominal()) {
         continue;
       }
-      String mSpan = m.spanToString().toLowerCase();
+      String mSpan = m.lowercaseNormalizedSpanString();
       if(dict.allPronouns.contains(mSpan)) {
         continue;
       }
@@ -302,43 +311,10 @@ public class Rules {
         if(ant.isPronominal()) {
           continue;
         }
-        String antSpan = ant.spanToString().toLowerCase();
+        String antSpan = ant.lowercaseNormalizedSpanString();
         if(dict.allPronouns.contains(antSpan)) continue;
         if(mSpan.equals(antSpan)) matched = true;
         if(mSpan.equals(antSpan+" 's") || antSpan.equals(mSpan+" 's")) matched = true;
-      }
-    }
-    return matched;
-  }
-
-  private static boolean isNamedMention(Mention m, Dictionaries dict, Set<Mention> roleSet) {
-//    if(roleSet.contains(m)) return false;
-//    if(m.isPronominal()) {
-//      return false;
-//    }
-//    String mSpan = m.spanToString().toLowerCase();
-//    if(dict.allPronouns.contains(mSpan)) {
-//      return false;
-//    }
-//    return true;
-    return m.mentionType == MentionType.PROPER;
-  }
-
-  public static boolean entityNameMatch(MentionMatcher mentionMatcher, CorefCluster mentionCluster, CorefCluster potentialAntecedent,
-                                        Document document,
-                                        Dictionaries dict, Set<Mention> roleSet){
-    Boolean matched = false;
-    Mention mainMention = mentionCluster.getRepresentativeMention();
-    Mention antMention = potentialAntecedent.getRepresentativeMention();
-    // Check if the representative mentions are compatible
-    if (isNamedMention(mainMention, dict, roleSet) && isNamedMention(antMention, dict, roleSet)) {
-      matched = mentionMatcher.isCompatible(mainMention, antMention);
-      if (matched != null) {
-        if (!matched) {
-          document.addIncompatible(mainMention, antMention);
-        }
-      } else {
-        matched = false;
       }
     }
     return matched;
@@ -358,8 +334,8 @@ public class Rules {
     if(roleSet.contains(mention)) return false;
     if(mention.mentionType == MentionType.LIST || ant.mentionType == MentionType.LIST) return false;
     if(mention.isPronominal() || ant.isPronominal()
-        || dict.allPronouns.contains(mention.spanToString().toLowerCase())
-        || dict.allPronouns.contains(ant.spanToString().toLowerCase())) return false;
+        || dict.allPronouns.contains(mention.lowercaseNormalizedSpanString())
+        || dict.allPronouns.contains(ant.lowercaseNormalizedSpanString())) return false;
     String mentionSpan = mention.removePhraseAfterHead();
     String antSpan = ant.removePhraseAfterHead();
     if(mentionSpan.equals("") || antSpan.equals("")) return false;
@@ -421,6 +397,9 @@ public class Rules {
     return (thisHasExtra || hasLocationModifier);
   }
   /** Check whether two mentions have different locations */
+  private static final Set<String> locationModifier = Generics.newHashSet(Arrays.asList("east", "west", "north", "south",
+          "eastern", "western", "northern", "southern", "northwestern", "southwestern", "northeastern",
+          "southeastern", "upper", "lower"));
   public static boolean entityHaveDifferentLocation(Mention m, Mention a, Dictionaries dict) {
 
     // state and country cannot be coref
@@ -431,35 +410,36 @@ public class Rules {
 
     Set<String> locationM = Generics.newHashSet();
     Set<String> locationA = Generics.newHashSet();
-    String mString = m.spanToString().toLowerCase();
-    String aString = a.spanToString().toLowerCase();
-    Set<String> locationModifier = Generics.newHashSet(Arrays.asList("east", "west", "north", "south",
-        "eastern", "western", "northern", "southern", "northwestern", "southwestern", "northeastern",
-        "southeastern", "upper", "lower"));
+    String mString = m.lowercaseNormalizedSpanString();
+    String aString = a.lowercaseNormalizedSpanString();
 
     for (CoreLabel w : m.originalSpan){
-      if (locationModifier.contains(w.get(CoreAnnotations.TextAnnotation.class).toLowerCase())) return true;
+      String text = w.get(CoreAnnotations.TextAnnotation.class);
+      String lowercased = text.toLowerCase();
+      if (locationModifier.contains(lowercased)) return true;
       if (w.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("LOCATION")) {
-        String loc = w.get(CoreAnnotations.TextAnnotation.class);
+        String loc = text;
         if(dict.statesAbbreviation.containsKey(loc)) loc = dict.statesAbbreviation.get(loc);
-        locationM.add(loc);
+        locationM.add(lowercased);
       }
     }
     for (CoreLabel w : a.originalSpan){
-      if (locationModifier.contains(w.get(CoreAnnotations.TextAnnotation.class).toLowerCase())) return true;
+      String text = w.get(CoreAnnotations.TextAnnotation.class);
+      String lowercased = text.toLowerCase();
+      if (locationModifier.contains(lowercased)) return true;
       if (w.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("LOCATION")) {
-        String loc = w.get(CoreAnnotations.TextAnnotation.class);
+        String loc = text;
         if(dict.statesAbbreviation.containsKey(loc)) loc = dict.statesAbbreviation.get(loc);
-        locationA.add(loc);
+        locationA.add(lowercased);
       }
     }
     boolean mHasExtra = false;
     boolean aHasExtra = false;
     for (String s : locationM) {
-      if (!aString.contains(s.toLowerCase())) mHasExtra = true;
+      if (!aString.contains(s)) mHasExtra = true;
     }
     for (String s : locationA) {
-      if (!mString.contains(s.toLowerCase())) aHasExtra = true;
+      if (!mString.contains(s)) aHasExtra = true;
     }
     if(mHasExtra && aHasExtra) {
       return true;
@@ -502,8 +482,8 @@ public class Rules {
     return true;
   }
 
-  static final Set<String> NUMBERS = Generics.newHashSet(Arrays.asList(new String[]{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "hundred", "thousand", "million", "billion"}));
-
+  private static final Set<String> NUMBERS = Generics.newHashSet(Arrays.asList(new String[]{
+          "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "hundred", "thousand", "million", "billion"}));
   /** Check whether there is a new number in later mention */
   public static boolean entityNumberInLaterMention(Mention mention, Mention ant) {
     Set<String> antecedentWords = Generics.newHashSet();
@@ -556,24 +536,30 @@ public class Rules {
     return false;
   }
 
-  public static final Pattern WHITESPACE_PATTERN = Pattern.compile(" +");
-
-  public static boolean entityIsSpeaker(Document document,
-      Mention mention, Mention ant, Dictionaries dict) {
+  /** Is the speaker for mention the same entity as the ant entity? */
+  public static boolean antecedentIsMentionSpeaker(Document document,
+                                                   Mention mention, Mention ant, Dictionaries dict) {
     if(document.speakerPairs.contains(new Pair<Integer, Integer>(mention.mentionID, ant.mentionID))) {
       return true;
     }
 
-    if(mentionMatchesSpeakerAnnotation(mention, ant)) {
-      return true;
-    }
-    if(mentionMatchesSpeakerAnnotation(ant, mention)) {
+    if(antecedentMatchesMentionSpeakerAnnotation(mention, ant, document)) {
       return true;
     }
     return false;
   }
 
-  public static boolean mentionMatchesSpeakerAnnotation(Mention mention, Mention ant) {
+  /** Is the speaker for mention the same entity as the ant entity? */
+  public static boolean antecedentMatchesMentionSpeakerAnnotation(Mention mention, Mention ant) {
+    return antecedentMatchesMentionSpeakerAnnotation(mention, ant, null);
+  }
+
+  public static final Pattern WHITESPACE_PATTERN = Pattern.compile(" +");
+
+  /**
+   * The antecedent matches the speaker annotation found in the mention
+   */
+  public static boolean antecedentMatchesMentionSpeakerAnnotation(Mention mention, Mention ant, Document document) {
     if (mention.headWord == null) {
       return false;
     }
@@ -582,6 +568,14 @@ public class Rules {
     if (speaker == null) {
       return false;
     }
+
+    SpeakerInfo speakerInfo = (document != null)? document.getSpeakerInfo(speaker):null;
+    if (speakerInfo != null) {
+      return (mentionMatchesSpeaker(ant, speakerInfo, false));
+    }
+
+    // CAN'T get speaker info - take alternate path
+
     // We optimize a little here: if the name has no spaces, which is
     // the common case, then it is unnecessarily expensive to call
     // regex split
@@ -592,6 +586,36 @@ public class Rules {
       }
     } else {
       if (ant.headString.equalsIgnoreCase(speaker)) return true;
+    }
+    return false;
+  }
+
+  public static boolean mentionMatchesSpeaker(Mention mention, SpeakerInfo speakerInfo, boolean strictMatch) {
+    // Got info about this speaker
+    if (mention.speakerInfo != null) {
+      if (mention.speakerInfo == speakerInfo) return true;
+    }
+    if (speakerInfo.containsMention(mention)) return true;
+    if (strictMatch) {
+      String spkstr = SpeakerInfo.WHITESPACE_PATTERN.matcher(speakerInfo.getSpeakerName()).replaceAll("");
+      String mstr = SpeakerInfo.WHITESPACE_PATTERN.matcher(mention.spanToString()).replaceAll("");
+      if (spkstr.equalsIgnoreCase(mstr)) {
+        speakerInfo.addMention(mention);
+        return true;
+      }
+    } else {
+      // speaker strings are pre-split
+      for (String s : speakerInfo.getSpeakerNameStrings()) {
+        if (mention.headString.equalsIgnoreCase(s)) {
+          speakerInfo.addMention(mention);
+          return true;
+        }
+      }
+      if (speakerInfo.getSpeakerDesc() != null) {
+        String spkDescStr = SpeakerInfo.WHITESPACE_PATTERN.matcher(speakerInfo.getSpeakerDesc()).replaceAll("");
+        String mstr = SpeakerInfo.WHITESPACE_PATTERN.matcher(mention.spanToString()).replaceAll("");
+        if (spkDescStr.equalsIgnoreCase(mstr)) return true;
+      }
     }
     return false;
   }
@@ -645,6 +669,7 @@ public class Rules {
     return false;
   }
 
+  /** Do the mentions share the same speaker? */
   public static boolean entitySameSpeaker(Document document, Mention m, Mention ant) {
     String mSpeakerStr = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
     if (mSpeakerStr == null) {
@@ -678,12 +703,22 @@ public class Rules {
    */
   public static int getSpeakerClusterId(Document document, String speakerString) {
     int speakerClusterId = -1;
-    if (speakerString != null && NumberMatchingRegex.isDecimalInteger(speakerString)) {
+    // try looking up cluster id from speaker info
+    SpeakerInfo speakerInfo = null;
+    if (speakerString != null) {
+      speakerInfo = document.getSpeakerInfo(speakerString);
+      if (speakerInfo != null) {
+        speakerClusterId = speakerInfo.getCorefClusterId();
+      }
+    }
+    if (speakerClusterId < 0 && speakerString != null && NumberMatchingRegex.isDecimalInteger(speakerString)) {
+      // speakerString is number so is mention id
       try {
         int speakerMentionId = Integer.parseInt(speakerString);
         Mention mention = document.allPredictedMentions.get(speakerMentionId);
         if (mention != null) {
           speakerClusterId = mention.corefClusterID;
+          if (speakerInfo != null) speakerInfo.addMention(mention);
         }
       } catch (Exception e) {
       }
