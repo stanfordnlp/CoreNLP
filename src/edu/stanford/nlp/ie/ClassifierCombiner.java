@@ -189,9 +189,9 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
         System.err.println("mergeDocuments: Using classifier #" + i + " for " + baseLabels.get(i));
       System.err.println("mergeDocuments: Background symbol is " + background);
 
-      System.err.println("Base classify outputs:");
+      System.err.println("Base model outputs:");
       for( int i = 0; i < baseDocuments.size(); i ++){
-        System.err.printf("Output of classify #%d:", i);
+        System.err.printf("Output of model #%d:", i);
         for (IN l : baseDocuments.get(i)) {
           System.err.print(' ');
           System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
@@ -200,7 +200,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       }
     }
 
-    // incrementally merge each additional classify with the main classify (i.e., baseDocuments.get(0))
+    // incrementally merge each additional model with the main model (i.e., baseDocuments.get(0))
     // this keeps adding labels from the additional models to mainDocument
     // hence, when all is done, mainDocument contains the labels of all base models
     List<IN> mainDocument = baseDocuments.get(0);
@@ -209,7 +209,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
 
     if (DEBUG) {
-      System.err.print("Output of combined classify:");
+      System.err.print("Output of combined model:");
       for (IN l: mainDocument) {
         System.err.print(' ');
         System.err.print(l.get(CoreAnnotations.AnswerAnnotation.class));
@@ -280,7 +280,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
   /**
-   * Generates the AnswerAnnotation labels of the combined classify for the given
+   * Generates the AnswerAnnotation labels of the combined model for the given
    * tokens, storing them in place in the tokens.
    *
    * @param tokens A List of IN
@@ -293,7 +293,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
     List<List<IN>> baseOutputs = new ArrayList<List<IN>>();
 
-    // the first base classify works in place, modifying the original tokens
+    // the first base model works in place, modifying the original tokens
     List<IN> output = baseClassifiers.get(0).classifySentence(tokens);
     // classify(List<IN>) is supposed to work in place, so add AnswerAnnotation to tokens!
     for (int i = 0, sz = output.size(); i < sz; i++) {

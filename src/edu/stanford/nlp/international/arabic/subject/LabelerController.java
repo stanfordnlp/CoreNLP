@@ -34,7 +34,7 @@ public class LabelerController {
   private static int subjectLenLimit = Integer.MAX_VALUE;
 
   //wsg: The sentence boundary should be a blank line so that the CRF treats each
-  //sentence as a separate "document." This greatly reduces the classify's memory
+  //sentence as a separate "document." This greatly reduces the model's memory
   //requirement (per Jenny's advice).
   private final String sentBoundary = "";
 

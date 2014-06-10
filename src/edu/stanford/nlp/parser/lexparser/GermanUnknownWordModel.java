@@ -9,8 +9,8 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 /**
- * An unknown word classify for German; relies on BaseUnknownWordModel plus number matching.
- * An assumption of this classify is that numbers (arabic digit sequences)
+ * An unknown word model for German; relies on BaseUnknownWordModel plus number matching.
+ * An assumption of this model is that numbers (arabic digit sequences)
  * are tagged CARD. This is correct for all of NEGRA/Tiger/TuebaDZ.
  *
  * @author Roger Levy
@@ -52,7 +52,7 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
 
 
   /** Calculate the log-prob score of a particular TaggedWord in the
-   *  unknown word classify.
+   *  unknown word model.
    *
    *  @param itw the tag->word production in IntTaggedWord form
    *  @return The log-prob score of a particular TaggedWord.

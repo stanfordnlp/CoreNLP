@@ -73,7 +73,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
   }
 
   /**
-   * get the number of classes in the sequence classify.
+   * get the number of classes in the sequence model.
    */
   public int getNumClasses() {
     return classIndex.size();

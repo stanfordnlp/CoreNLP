@@ -15,7 +15,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 /**
- * Stores, trains, and scores with an unknown word classify.  A couple
+ * Stores, trains, and scores with an unknown word model.  A couple
  * of filters deterministically force rewrites for certain proper
  * nouns, dates, and cardinal and ordinal numbers; when none of these
  * filters are met, either the distribution of terminals with the same
@@ -65,7 +65,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
    * This constructor creates an UWM with empty data structures.  Only
    * use if loading in the data separately, such as by reading in text
    * lines containing the data.
-   * TODO: would need to set useGT correctly if you saved a classify with
+   * TODO: would need to set useGT correctly if you saved a model with 
    * useGT and then wanted to recover it from text.
    */
   public ChineseUnknownWordModel(Options op, Lexicon lex,
@@ -181,7 +181,7 @@ public class ChineseUnknownWordModel extends BaseUnknownWordModel {
         } else if (useGT) {
           logProb = scoreGT(tag);
         } else {
-          if (VERBOSE) System.err.println("Warning: no unknown word classify in place!\nGiving the combination " + word + " " + tag + " zero probability.");
+          if (VERBOSE) System.err.println("Warning: no unknown word model in place!\nGiving the combination " + word + " " + tag + " zero probability.");
           logProb = Float.NEGATIVE_INFINITY; // should never get this!
         }
     }

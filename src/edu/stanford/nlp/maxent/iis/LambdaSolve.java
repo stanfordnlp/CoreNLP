@@ -31,7 +31,7 @@ import java.io.ObjectOutputStream;
  */
 public class LambdaSolve {
   /**
-   * These are the classify parameters that have to be learned
+   * These are the model parameters that have to be learned
    */
   public double[] lambda;
   public boolean[] lambda_converged;
@@ -172,7 +172,7 @@ public class LambdaSolve {
 
 
   /**
-   * Initializes the classify parameters, empirical expectations of the
+   * Initializes the model parameters, empirical expectations of the
    * features, and f#(x,y).
    */
   void initCondsZlambdaEtc() {
@@ -395,7 +395,7 @@ public class LambdaSolve {
 
 
   /**
-   * This method updates the conditional probabilities in the classify, resulting from the
+   * This method updates the conditional probabilities in the model, resulting from the
    * update of lambda[index] to lambda[index]+deltaL .
    */
 
@@ -462,7 +462,7 @@ public class LambdaSolve {
 
 
   /**
-   * Computes the expected value of a feature for the current classify.
+   * Computes the expected value of a feature for the current model.
    *
    * @param f a feature
    * @return The expectation of f according to p(y|x)
@@ -794,7 +794,7 @@ public class LambdaSolve {
 
 
   /**
-   * @return The loglikelihood of the empirical distribution as predicted by the classify p.
+   * @return The loglikelihood of the empirical distribution as predicted by the model p.
    */
   public double logLikelihood() {
     //L=sumx,y log(p(y|x))*#x,y
@@ -810,7 +810,7 @@ public class LambdaSolve {
 
   /**
    * Given a numerator and denominator in log form, this calculates
-   * the conditional classify probabilities.
+   * the conditional model probabilities.
    *
    * @return Math.exp(first)/Math.exp(second);
    */
@@ -858,8 +858,8 @@ public class LambdaSolve {
   /**
    * Calculate the log-likelihood from scratch, hashing the conditional
    * probabilities in pcond, which we will use later. This is for
-   * a different classify, in which all features effectively get negative weights
-   * this classify is easier to use for heauristic search
+   * a different model, in which all features effectively get negative weights
+   * this model is easier to use for heauristic search
    * p(ti|s)=exp(sum_j{-(e^lambda_j)*f_j(ti)})
    *
    * @return The negative log likelihood of the data
@@ -1026,7 +1026,7 @@ public class LambdaSolve {
   /**
    * assuming we have the lambdas in the array and we need only the
    * derivatives now.
-   * this is for the case where the classify is parameterezied such that all weights are negative
+   * this is for the case where the model is parameterezied such that all weights are negative
    * see also logLikelihoodNeg
    */
   public double[] getDerivativesNeg() {

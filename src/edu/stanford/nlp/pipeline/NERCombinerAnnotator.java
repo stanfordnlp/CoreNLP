@@ -52,7 +52,7 @@ public class NERCombinerAnnotator implements Annotator {
 
   public NERCombinerAnnotator(boolean verbose) throws IOException, ClassNotFoundException {
     VERBOSE = verbose;
-    timerStart("Loading NER combiner classify...");
+    timerStart("Loading NER combiner model...");
     ner = new NERClassifierCombiner(new Properties());
     timerStop();
   }
@@ -60,7 +60,7 @@ public class NERCombinerAnnotator implements Annotator {
   public NERCombinerAnnotator(boolean verbose, String... classifiers)
   throws IOException, ClassNotFoundException {
     VERBOSE = verbose;
-    timerStart("Loading NER combiner classify...");
+    timerStart("Loading NER combiner model...");
     ner = new NERClassifierCombiner(classifiers);
     timerStop();
   }

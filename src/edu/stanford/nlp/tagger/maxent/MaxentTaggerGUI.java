@@ -68,7 +68,7 @@ public class MaxentTaggerGUI extends JFrame {
   /** Run the simple tagger GUI. Usage:<br><code>
    *  java edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI [modelPath]
    *  </code><br>
-   *  If you don't specify a classify, the code looks for one in a couple of
+   *  If you don't specify a model, the code looks for one in a couple of
    *  canonical places.
    *
    *  @param args None or a modelPath, as above

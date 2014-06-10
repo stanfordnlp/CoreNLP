@@ -39,7 +39,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * Normally you would run MaxentTagger with command line arguments such as:
  *
- * -classify ../data/tagger/my-left3words-distsim-wsj-0-18.tagger
+ * -model ../data/tagger/my-left3words-distsim-wsj-0-18.tagger
  * -testFile ../data/tagger/test-wsj-19-21 -verboseResults false
  *
  * If you provide the same arguments to this program, it will first
@@ -146,36 +146,36 @@ class TestThreadedTagger {
     System.out.println("Loading taggers...");
     System.out.println();
 
-    if (props.getProperty("classify") != null) {
+    if (props.getProperty("model") != null) {
       configs.add(props);
-      taggers.add(new MaxentTagger(configs.get(0).getProperty("classify"), configs.get(0)));
+      taggers.add(new MaxentTagger(configs.get(0).getProperty("model"), configs.get(0)));
     } else {
       int taggerNum = 1;
-      String taggerName = "classify" + taggerNum;
+      String taggerName = "model" + taggerNum;
       while (props.getProperty(taggerName) != null) {
         Properties newProps = new Properties();
         newProps.putAll(props);
-        newProps.setProperty("classify", props.getProperty(taggerName));
+        newProps.setProperty("model", props.getProperty(taggerName));
         configs.add(newProps);
-        taggers.add(new MaxentTagger(configs.get(taggerNum - 1).getProperty("classify"),
+        taggers.add(new MaxentTagger(configs.get(taggerNum - 1).getProperty("model"),
                                      configs.get(taggerNum - 1)));
 
         ++taggerNum;
-        taggerName = "classify" + taggerNum;
+        taggerName = "model" + taggerNum;
       }
     }
 
     // no models at all => bad
     if (taggers.size() == 0) {
       throw new IllegalArgumentException("Please specify at least one of " +
-                                         "-classify or -model1");
+                                         "-model or -model1");
     }
 
     System.out.println();
     System.out.println("Running the baseline results for tagger 1");
     System.out.println();
 
-    // run baseline results for the first tagger classify
+    // run baseline results for the first tagger model
     TaggerThread baselineThread =
       new TaggerThread(configs.get(0), taggers.get(0), "BaseResults-1");
     baselineThread.start();
@@ -204,7 +204,7 @@ class TestThreadedTagger {
                      baselineResults.get(0));
     }
 
-    // if we have more than one classify...
+    // if we have more than one model...
     if (taggers.size() > 1) {
       // first, produce baseline results for the other models
       // do this one thread at a time so we know there are no

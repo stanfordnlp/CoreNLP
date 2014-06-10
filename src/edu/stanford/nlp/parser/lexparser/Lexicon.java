@@ -29,7 +29,7 @@ public interface Lexicon extends Serializable {
 
 
   /**
-   * Set the classify via which unknown words should be scored by this lexicon
+   * Set the model via which unknown words should be scored by this lexicon
    */
   //void setUnknownWordModel(UnknownWordModel uwModel);
 

@@ -93,9 +93,9 @@ public class ParserAnnotator implements Annotator {
 
 
   public ParserAnnotator(String annotatorName, Properties props) {
-    String model = props.getProperty(annotatorName + ".classify", LexicalizedParser.DEFAULT_PARSER_LOC);
+    String model = props.getProperty(annotatorName + ".model", LexicalizedParser.DEFAULT_PARSER_LOC);
     if (model == null) {
-      throw new IllegalArgumentException("No classify specified for " +
+      throw new IllegalArgumentException("No model specified for " +
                                          "Parser annotator " +
                                          annotatorName);
     }
@@ -137,8 +137,8 @@ public class ParserAnnotator implements Annotator {
 
   public static String signature(String annotatorName, Properties props) {
     StringBuilder os = new StringBuilder();
-    os.append(annotatorName + ".classify:" +
-            props.getProperty(annotatorName + ".classify",
+    os.append(annotatorName + ".model:" +
+            props.getProperty(annotatorName + ".model",
                     LexicalizedParser.DEFAULT_PARSER_LOC));
     os.append(annotatorName + ".debug:" +
             props.getProperty(annotatorName + ".debug", "false"));

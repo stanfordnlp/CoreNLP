@@ -57,7 +57,7 @@ public interface UnknownWordModelTrainer {
 
   /**
    * Returns the trained UWM.  Many of the subclasses build exactly
-   * one classify, and some of the finishTraining methods manipulate the
+   * one model, and some of the finishTraining methods manipulate the
    * data in permanent ways, so this should only be called once
    */
   public UnknownWordModel finishTraining();
