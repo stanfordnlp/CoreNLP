@@ -834,7 +834,7 @@ public class EnglishGrammaticalRelations {
           // which makes sure it does not have a left sister
           // equivalent to the current node.  The reason for this is
           // to make sure you do not get two neighboring nodes both
-          // labeled as rcmod to the same sbar expression.  For
+          // labeled as rcmod to the same SBAR expression.  For
           // example, this prevents rcmod(34, works) in a sentence
           // such as "John Bauer, 34, who works at Stanford..."
           // It does also prevent rcmods in potentially useful
@@ -1079,12 +1079,12 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation PARTICIPIAL_MODIFIER =
     new GrammaticalRelation(Language.English, "partmod", "participial modifier",
-        ParticipialModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|VP|S|SINV", tregexCompiler,
+        ParticipialModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|VP|S|SINV", tregexCompiler,
         new String[] {
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (VP=target < VBG|VBN|VBD $-- NP)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (VP=target < VBG|VBN|VBD $-- @NP|NML|NX)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
           // to get "MBUSA, headquartered ..."
           // Allows an adverb to come before the participle
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
           // to get "John, knowing ..., announced "
           "S|SINV < (S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
           "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
