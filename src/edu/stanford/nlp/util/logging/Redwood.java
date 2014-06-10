@@ -566,6 +566,12 @@ public class Redwood {
     else b.append(" seconds");
   }
 
+  public static String formatTimeDifference(long diff){
+    StringBuilder b = new StringBuilder();
+    formatTimeDifference(diff, b);
+    return b.toString();
+  }
+
 
   public static final boolean supportsAnsi;
   static {
