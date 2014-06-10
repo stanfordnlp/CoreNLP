@@ -141,7 +141,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     // FRAG: crap rule needs to be change if you want to parse glosses
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
 
+    // PP first word (especially in coordination of PPs)
     nonTerminalInfo.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ"}, {"left", "PP"}});
+
     // PRN: sentence first
     nonTerminalInfo.put("PRN", new String[][]{{"left", "VP", "SQ", "S", "SINV", "SBAR", "NP", "ADJP", "PP", "ADVP", "INTJ", "WHNP", "NAC", "VBP", "JJ", "NN", "NNP"}});
 
