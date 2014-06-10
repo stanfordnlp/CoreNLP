@@ -8,6 +8,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -80,6 +81,14 @@ public class WordsToSentencesAnnotator implements Annotator {
 
   public void setOneSentence(boolean isOneSentence) {
     wts.setOneSentence(isOneSentence);
+  }
+
+  public void setSentenceBoundaryMultiTokenRegex(String regex) {
+    wts.setSentenceBoundaryMultiTokenPattern(TokenSequencePattern.compile(regex));
+  }
+
+  public void setTokenPatternsToDiscard(Set<String> regexSet) {
+    wts.setTokenPatternsToDiscard(regexSet);
   }
 
   /**

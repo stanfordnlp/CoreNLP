@@ -9,6 +9,8 @@ import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.MultiTokenTag;
+import edu.stanford.nlp.ling.tokensregex.SequenceMatcher;
+import edu.stanford.nlp.ling.tokensregex.SequencePattern;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -65,6 +67,12 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
   private final Pattern sentenceBoundaryTokenPattern;
 
   /**
+   * Regex for multi token sequences that qualify as sentence-final tokens.
+   * (i.e. use if you want to sentence split on 2 or more newlines)
+   */
+  private SequencePattern<? super IN> sentenceBoundaryMultiTokenPattern;
+
+  /**
    * Set of tokens (Strings) that qualify as tokens that can follow
    * what normally counts as an end of sentence token, and which are
    * attributed to the preceding sentence.  For example ")" coming after
@@ -76,6 +84,12 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    * List of regex Pattern that are sentence boundaries to be discarded.
    */
   private List<Pattern> sentenceBoundaryToDiscard;
+
+  /**
+   * List of regex Patterns that are not to be treated as sentence boundaries but should be discarded
+   * (i.e. these may have been used with context to identify sentence boundaries but are not needed any more)
+   */
+  private List<Pattern> tokenPatternsToDiscard;
 
   private final Pattern sentenceRegionBeginPattern;
 
@@ -90,6 +104,17 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     for (String s: regexSet) {
       sentenceBoundaryToDiscard.add(Pattern.compile(Pattern.quote(s)));
     }
+  }
+
+  public void setTokenPatternsToDiscard(Set<String> regexSet) {
+    tokenPatternsToDiscard = new ArrayList<Pattern>(regexSet.size());
+    for (String s: regexSet) {
+      tokenPatternsToDiscard.add(Pattern.compile(s));
+    }
+  }
+
+  public void setSentenceBoundaryMultiTokenPattern(SequencePattern<? super IN> pattern) {
+    sentenceBoundaryMultiTokenPattern = pattern;
   }
 
   public boolean isOneSentence() {
@@ -118,14 +143,22 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     }
   }
 
-  private boolean matchesSentenceBoundaryToDiscard(String word) {
-    for(Pattern p: sentenceBoundaryToDiscard){
+  private boolean matches(List<Pattern> patterns, String word) {
+    for(Pattern p: patterns){
       Matcher m = p.matcher(word);
       if(m.matches()){
         return true;
       }
     }
     return false;
+  }
+
+  private boolean matchesSentenceBoundaryToDiscard(String word) {
+    return matches(sentenceBoundaryToDiscard, word);
+  }
+
+  private boolean matchesTokenPatternsToDiscard(String word) {
+    return matches(tokenPatternsToDiscard, word);
   }
 
   @Override
@@ -137,6 +170,21 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     } else {
       return wordsToSentences(words);
     }
+  }
+
+  private String getWord(IN o) {
+    String word;
+    if (o instanceof HasWord) {
+      HasWord h = (HasWord) o;
+      word = h.word();
+    } else if (o instanceof String) {
+      word = (String) o;
+    } else if (o instanceof CoreMap) {
+      word = ((CoreMap)o).get(CoreAnnotations.TextAnnotation.class);
+    } else {
+      throw new RuntimeException("Expected token to be either Word or String.");
+    }
+    return word;
   }
 
   /**
@@ -153,26 +201,31 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    * @see #WordToSentenceProcessor(String, Set, Set, Pattern, Pattern)
    */
   public List<List<IN>> wordsToSentences(List<? extends IN> words) {
+    IdentityHashMap<Object, Boolean> isSentenceBoundary = new IdentityHashMap<Object, Boolean>();
+    if (sentenceBoundaryMultiTokenPattern != null) {
+      // Do initial pass using tokensregex to identify multi token patterns that need to be matched
+      // and add the last token to our table of sentence boundary tokens
+      SequenceMatcher<? super IN> matcher = sentenceBoundaryMultiTokenPattern.getMatcher(words);
+      while (matcher.find()) {
+        List nodes = matcher.groupNodes();
+        if (nodes != null & nodes.size() > 0) {
+          isSentenceBoundary.put(nodes.get(nodes.size() - 1), true);
+        }
+      }
+    }
+
+    // Split tokens into sentences!!!
     List<List<IN>> sentences = Generics.newArrayList();
     List<IN> currentSentence = new ArrayList<IN>();
     List<IN> lastSentence = null;
     boolean insideRegion = false;
     boolean inWaitForForcedEnd = false;
     for (IN o: words) {
-      String word;
-      if (o instanceof HasWord) {
-        HasWord h = (HasWord) o;
-        word = h.word();
-      } else if (o instanceof String) {
-        word = (String) o;
-      } else if (o instanceof CoreMap) {
-        word = ((CoreMap)o).get(CoreAnnotations.TextAnnotation.class);
-      } else {
-        throw new RuntimeException("Expected token to be either Word or String.");
-      }
+      String word = getWord(o);
 
       boolean forcedEnd = false;
       boolean inMultiTokenExpr = false;
+      boolean discardToken = false;
       if (o instanceof CoreMap) {
         CoreMap cm = (CoreMap) o;
         Boolean forcedEndValue = cm.get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
@@ -188,10 +241,12 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
             inMultiTokenExpr = true;
           }
         }
+        if (tokenPatternsToDiscard != null) {
+          discardToken = matchesTokenPatternsToDiscard(word);
+        }
       }
 
-
-        if (DEBUG) {
+      if (DEBUG) {
         EncodingPrintWriter.err.println("Word is " + word, "UTF-8");
       }
       if (sentenceRegionBeginPattern != null && ! insideRegion) {
@@ -204,44 +259,51 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         continue;
       }
       if (sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
-        lastSentence.add(o);
+        if (!discardToken) lastSentence.add(o);
         if (DEBUG) {
-          System.err.println("  added to last");
+          System.err.println(discardToken? "discarded":"  added to last");
         }
       } else {
         boolean newSent = false;
+        String debugText = (discardToken)? "discarded":"added to current";
         if (inWaitForForcedEnd && !forcedEnd) {
-          currentSentence.add(o);
+          if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
-            System.err.println("  is in wait for forced end; added to current");
+            System.err.println("  is in wait for forced end; " + debugText);
           }
         } else if (inMultiTokenExpr && !forcedEnd) {
-          currentSentence.add(o);
+          if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
-            System.err.println("  is in multi token expr; added to current");
+            System.err.println("  is in multi token expr; " + debugText);
           }
         } else if (matchesSentenceBoundaryToDiscard(word)) {
           newSent = true;
         } else if (sentenceRegionEndPattern != null && sentenceRegionEndPattern.matcher(word).matches()) {
           insideRegion = false;
           newSent = true;
-        } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
-          currentSentence.add(o);
+        } else if (isSentenceBoundary.containsKey(o) && isSentenceBoundary.get(o)) {
+          if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
-            System.err.println("  is sentence boundary; added to current");
+            System.err.println("  is sentence boundary (matched multi-token pattern); " + debugText);
+          }
+          newSent = true;
+        } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
+          if (!discardToken) currentSentence.add(o);
+          if (DEBUG) {
+            System.err.println("  is sentence boundary; " + debugText);
           }
           newSent = true;
         } else if (forcedEnd) {
-          currentSentence.add(o);
+          if (!discardToken) currentSentence.add(o);
           inWaitForForcedEnd = false;
           newSent = true;
           if (DEBUG) {
-            System.err.println("  annotated to be the end of a sentence");
+            System.err.println("  annotated to be the end of a sentence; " + debugText);
           }
         } else {
-          currentSentence.add(o);
+          if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
-            System.err.println("  added to current");
+            System.err.println("  " + debugText);
           }
         }
         if (newSent && (!currentSentence.isEmpty() || allowEmptySentences())) {
@@ -261,6 +323,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     if ( ! currentSentence.isEmpty()) {
       sentences.add(currentSentence); // adds last sentence
     }
+
     return sentences;
   }
 
