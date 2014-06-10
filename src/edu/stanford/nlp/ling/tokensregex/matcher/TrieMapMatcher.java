@@ -5,7 +5,10 @@ import edu.stanford.nlp.util.*;
 import java.util.*;
 
 /**
- * Functions to match using a trie map
+ * The <code>TrieMapMatcher</code> provides functions
+ *
+ *
+ *
  * TODO: Have TrieMapMatcher implement a matcher interface
  *
  * @author Angel Chang
@@ -31,27 +34,81 @@ public class TrieMapMatcher<K,V> {
     }
   }
 
+  /**
+   * Given a target sequence, returns the n closes matches (or sequences of matches) from the trie.
+   * The cost function used is a exact match cost function (exact match has cost 0, otherwise, cost is 1)
+   * @param target Target sequence to match
+   * @param n Number of matches to return. The actual number of matches may be less.
+   * @return List of approximate matches
+   */
   public List<ApproxMatch<K,V>> findClosestMatches(K[] target, int n) {
     return findClosestMatches(Arrays.asList(target), n);
   }
 
+  /**
+   * Given a target sequence, returns the n closes matches (or sequences of matches) from the trie.
+   * The cost function used is a exact match cost function (exact match has cost 0, otherwise, cost is 1)
+   * @param target Target sequence to match
+   * @param n Number of matches to return. The actual number of matches may be less.
+   * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
+   *                   Otherwise, only each match will contain one element from the trie.
+   * @return List of approximate matches
+   */
   public List<ApproxMatch<K,V>> findClosestMatches(K[] target, int n, boolean multimatch) {
     return findClosestMatches(Arrays.asList(target), n, multimatch);
   }
 
+  /**
+   * Given a target sequence, returns the n closes matches (or sequences of matches) from the trie
+   *  based on the cost function (lower cost mean better match).
+   * @param target Target sequence to match
+   * @param costFunction Cost function to use
+   * @param maxCost Matches with a cost higher than this are discarded
+   * @param n Number of matches to return. The actual number of matches may be less.
+   * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
+   *                   Otherwise, only each match will contain one element from the trie.
+   * @return List of approximate matches
+   */
   public List<ApproxMatch<K,V>> findClosestMatches(K[] target, MatchCostFunction<K,V> costFunction,
                                                    Double maxCost, int n, boolean multimatch) {
     return findClosestMatches(Arrays.asList(target), costFunction, maxCost, n, multimatch);
   }
 
+  /**
+   * Given a target sequence, returns the n closes matches (or sequences of matches) from the trie.
+   * The cost function used is a exact match cost function (exact match has cost 0, otherwise, cost is 1)
+   * @param target Target sequence to match
+   * @param n Number of matches to return. The actual number of matches may be less.
+   * @return List of approximate matches
+   */
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, int n) {
     return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, false);
   }
 
+  /**
+   * Given a target sequence, returns the n closes matches (or sequences of matches) from the trie.
+   * The cost function used is a exact match cost function (exact match has cost 0, otherwise, cost is 1)
+   * @param target Target sequence to match
+   * @param n Number of matches to return. The actual number of matches may be less.
+   * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
+   *                   Otherwise, only each match will contain one element from the trie.
+   * @return List of approximate matches
+   */
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, int n, boolean multimatch) {
     return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, multimatch);
   }
 
+  /**
+   * Given a target sequence, returns the n closes matches (or sequences of matches) from the trie
+   *  based on the cost function (lower cost mean better match).
+   * @param target Target sequence to match
+   * @param costFunction Cost function to use
+   * @param maxCost Matches with a cost higher than this are discarded
+   * @param n Number of matches to return. The actual number of matches may be less.
+   * @param multimatch If true, attempt to return matches with sequences of elements from the trie.
+   *                   Otherwise, only each match will contain one element from the trie.
+   * @return List of approximate matches
+   */
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, MatchCostFunction<K,V> costFunction,
                                                    double maxCost, int n, boolean multimatch) {
     if (root.isEmpty()) return null;
@@ -107,7 +164,7 @@ public class TrieMapMatcher<K,V> {
               }
             }
           } else {
-            matches[i][0].add(new PartialApproxMatch(0, root));
+            matches[i][0].add(new PartialApproxMatch<K,V>(0, root));
           }
         }
 //        System.out.println("i=" + i + ",j=" + j + "," + matches[i][j]);
@@ -121,51 +178,135 @@ public class TrieMapMatcher<K,V> {
     return res;
   }
 
+  /**
+   * Given a sequence to search through (e.g. piece of text would be a sequence of words),
+   * finds all matching sub-sequences that matches entries in the trie
+   * @param list Sequence to search through
+   * @return List of matches
+   */
   public List<Match<K,V>> findAllMatches(K ... list) {
     return findAllMatches(Arrays.asList(list));
   }
 
+  /**
+   * Given a sequence to search through (e.g. piece of text would be a sequence of words),
+   * finds all matching sub-sequences that matches entries in the trie
+   * @param list Sequence to search through
+   * @return List of matches
+   */
   public List<Match<K,V>> findAllMatches(List<K> list) {
     return findAllMatches(list, 0, list.size());
   }
 
+  /**
+   * Given a sequence to search through (e.g. piece of text would be a sequence of words),
+   * finds all matching sub-sequences that matches entries in the trie
+   * @param list Sequence to search through
+   * @param start start index to start search at
+   * @param end end index (exclusive) to end search at
+   * @return List of matches
+   */
   public List<Match<K,V>> findAllMatches(List<K> list, int start, int end) {
     List<Match<K,V>> allMatches = new ArrayList<Match<K,V>>();
     updateAllMatches(root, allMatches, new ArrayList<K>(), list, start, end);
     return allMatches;
   }
 
+  /**
+   * Given a sequence to search through (e.g. piece of text would be a sequence of words),
+   * finds all non-overlapping matching sub-sequences that matches entries in the trie.
+   * Sub-sequences that are longer are preferred, then sub-sequences that starts earlier.
+   * @param list Sequence to search through
+   * @return List of matches sorted by start position
+   */
   public List<Match<K,V>> findNonOverlapping(K ... list) {
     return findNonOverlapping(Arrays.asList(list));
   }
 
+  /**
+   * Given a sequence to search through (e.g. piece of text would be a sequence of words),
+   * finds all non-overlapping matching sub-sequences that matches entries in the trie.
+   * Sub-sequences that are longer are preferred, then sub-sequences that starts earlier.
+   * @param list Sequence to search through
+   * @return List of matches sorted by start position
+   */
   public List<Match<K,V>> findNonOverlapping(List<K> list) {
     return findNonOverlapping(list, 0, list.size());
   }
 
   public final static Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.<Match>lengthEndpointsComparator();
 
+  /**
+   * Given a sequence to search through (e.g. piece of text would be a sequence of words),
+   * finds all non-overlapping matching sub-sequences that matches entries in the trie.
+   * Sub-sequences that are longer are preferred, then sub-sequences that starts earlier.
+   * @param list Sequence to search through
+   * @param start start index to start search at
+   * @param end end index (exclusive) to end search at
+   * @return List of matches sorted by start position
+   */
   public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end) {
     return findNonOverlapping(list, start, end, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
   }
 
+  /**
+   * Given a sequence to search through (e.g. piece of text would be a sequence of words),
+   * finds all non-overlapping matching sub-sequences that matches entries in the trie.
+   * @param list Sequence to search through
+   * @param start start index to start search at
+   * @param end end index (exclusive) to end search at
+   * @param compareFunc Comparison function to use for evaluating which overlapping sub-sequence to keep.
+   *                    Earlier sub-sequences based on the comparison function are favored.
+   * @return List of matches sorted by start position
+   */
   public List<Match<K,V>> findNonOverlapping(List<K> list, int start, int end, Comparator<? super Match<K,V>> compareFunc) {
     List<Match<K,V>> allMatches = findAllMatches(list, start, end);
     return getNonOverlapping(allMatches, compareFunc);
   }
 
+  /**
+   * Segment a sequence into sequence of sub-sequences by attempting to find the longest non-overlapping
+   *  sub-sequences.  Non-matched parts will be included as a match with a null value.
+   * @param list Sequence to search through
+   * @return List of segments (as matches) sorted by start position
+   */
   public List<Match<K,V>> segment(K ... list) {
     return segment(Arrays.asList(list));
   }
 
+  /**
+   * Segment a sequence into sequence of sub-sequences by attempting to find the longest non-overlapping
+   *  sub-sequences.  Non-matched parts will be included as a match with a null value.
+   * @param list Sequence to search through
+   * @return List of segments (as matches) sorted by start position
+   */
   public List<Match<K,V>> segment(List<K> list) {
     return segment(list, 0, list.size());
   }
 
+  /**
+   * Segment a sequence into sequence of sub-sequences by attempting to find the longest non-overlapping
+   *  sub-sequences.  Non-matched parts will be included as a match with a null value.
+   * @param list Sequence to search through
+   * @param start start index to start search at
+   * @param end end index (exclusive) to end search at
+   * @return List of segments (as matches) sorted by start position
+   */
   public List<Match<K,V>> segment(List<K> list, int start, int end) {
     return segment(list, start, end, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
   }
 
+  /**
+   * Segment a sequence into sequence of sub-sequences by attempting to find the non-overlapping
+   *  sub-sequences that comes earlier using the compareFunc.
+   * Non-matched parts will be included as a match with a null value.
+   * @param list Sequence to search through
+   * @param start start index to start search at
+   * @param end end index (exclusive) to end search at
+   * @param compareFunc Comparison function to use for evaluating which overlapping sub-sequence to keep.
+   *                    Earlier sub-sequences based on the comparison function are favored.
+   * @return List of segments (as matches) sorted by start position
+   */
   public List<Match<K,V>> segment(List<K> list, int start, int end, Comparator<? super Match<K,V>> compareFunc) {
     List<Match<K,V>> nonOverlapping = findNonOverlapping(list, start, end, compareFunc);
     List<Match<K,V>> segments = new ArrayList<Match<K,V>>(nonOverlapping.size());
@@ -186,10 +327,23 @@ public class TrieMapMatcher<K,V> {
     return segments;
   }
 
+  /**
+   * Given a list of matches, returns all non-overlapping matches.
+   * Matches that are longer are preferred, then matches that starts earlier.
+   * @param allMatches List of matches
+   * @return List of matches sorted by start position
+   */
   public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches) {
     return getNonOverlapping(allMatches, MATCH_LENGTH_ENDPOINTS_COMPARATOR);
   }
 
+  /**
+   * Given a list of matches, returns all non-overlapping matches.
+   * @param allMatches List of matches
+   * @param compareFunc Comparison function to use for evaluating which overlapping sub-sequence to keep.
+   *                    Earlier sub-sequences based on the comparison function are favored.
+   * @return List of matches sorted by start position
+   */
   public List<Match<K,V>> getNonOverlapping(List<Match<K,V>> allMatches, Comparator<? super Match<K,V>> compareFunc) {
     if (allMatches.size() > 1) {
       List<Match<K,V>> nonOverlapping = IntervalTree.getNonOverlapping(allMatches, compareFunc);
@@ -415,10 +569,12 @@ public class TrieMapMatcher<K,V> {
     return true;
   }
 
-  public static final <K,V> MatchCostFunction<K,V> defaultCost() {
+  public static <K,V> MatchCostFunction<K,V> defaultCost() {
     return ErasureUtils.uncheckedCast(DEFAULT_COST);
   }
-  public static final <K,V> Comparator<PartialApproxMatch<K,V>> partialMatchComparator() {
+
+
+  public static <K,V> Comparator<PartialApproxMatch<K,V>> partialMatchComparator() {
     return ErasureUtils.uncheckedCast(PARTIAL_MATCH_COMPARATOR);
   }
   private static final MatchCostFunction DEFAULT_COST = new ExactMatchCost();

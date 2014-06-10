@@ -146,6 +146,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     TrieMap<K, V> curTrie = this;
     // go through each element
     for(Object element : key){
+      if (curTrie.children == null) return null;
       curTrie = curTrie.children.get(element);
       if(curTrie == null){
         return null;
