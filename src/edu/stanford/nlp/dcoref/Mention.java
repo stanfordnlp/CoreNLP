@@ -195,7 +195,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
    * Returns the features used by the singleton predictor (logistic
    * classifier) to decide whether the mention belongs to a singleton entity
    */
-  private ArrayList<String> getSingletonFeatures(Dictionaries dict){
+  protected ArrayList<String> getSingletonFeatures(Dictionaries dict){
     ArrayList<String> features = new ArrayList<String>();
     features.add(mentionType.toString());
     features.add(nerString);
@@ -952,7 +952,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
   }
 
-  //Returns filtered premodifiers (no determiners or numerals)
+  // Returns filtered premodifiers (no determiners or numerals)
   public ArrayList<ArrayList<IndexedWord>> getPremodifiers(){
 
     ArrayList<ArrayList<IndexedWord>> premod = new ArrayList<ArrayList<IndexedWord>>();
