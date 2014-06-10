@@ -1,7 +1,5 @@
 package edu.stanford.nlp.util;
 
-import edu.stanford.nlp.ling.tokensregex.matcher.Match;
-
 import java.util.Comparator;
 
 /**
