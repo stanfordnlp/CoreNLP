@@ -141,8 +141,9 @@ public class SieveCoreferenceSystem {
    * Array of sieve passes to be used in the system
    * Ordered from highest precision to lowest!
    */
+  /** Not final because may change when running optimize sieve ordering but otherwise should stay fixed */
   private /*final */DeterministicCorefSieve [] sieves;
-  public /*final*/ String [] sieveClassNames;
+  private /*final*/ String [] sieveClassNames;
 
   /**
    * Dictionaries of all the useful goodies (gender, animacy, number etc. lists)
@@ -152,27 +153,28 @@ public class SieveCoreferenceSystem {
   /**
    * Semantic knowledge: WordNet
    */
-  public final Semantics semantics;
+  private final Semantics semantics;
 
-  public LogisticClassifier<String, String> singletonPredictor;
+  private LogisticClassifier<String, String> singletonPredictor;
+
+  // Below are member variables used for scoring (not thread safe)
 
   /** Current sieve index */
-  public int currentSieve;
+  private int currentSieve;
 
   /** counter for links in passes (Pair<correct links, total links>)  */
-  public List<Pair<Integer, Integer>> linksCountInPass;
-
+  private List<Pair<Integer, Integer>> linksCountInPass;
 
   /** Scores for each pass */
-  public List<CorefScorer> scorePairwise;
-  public List<CorefScorer> scoreBcubed;
-  public List<CorefScorer> scoreMUC;
+  private List<CorefScorer> scorePairwise;
+  private List<CorefScorer> scoreBcubed;
+  private List<CorefScorer> scoreMUC;
 
   private List<CorefScorer> scoreSingleDoc;
 
   /** Additional scoring stats */
-  int additionalCorrectLinksCount;
-  int additionalLinksCount;
+  private int additionalCorrectLinksCount;
+  private int additionalLinksCount;
 
   public SieveCoreferenceSystem(Properties props) throws Exception {
     // initialize required fields
@@ -327,6 +329,8 @@ public class SieveCoreferenceSystem {
   public boolean doScore() { return doScore; }
   public Dictionaries dictionaries() { return dictionaries; }
   public Semantics semantics() { return semantics; }
+  public String sieveClassName(int sieveIndex)  {
+    return (sieveIndex >= 0 && sieveIndex < sieveClassNames.length)? sieveClassNames[sieveIndex]:null; }
 
   /**
    * Needs the following properties:
@@ -898,6 +902,7 @@ public class SieveCoreferenceSystem {
               // (only for non-NE mentions)
               // Recasens, de Marneffe, and Potts (NAACL 2013)
               if (m1.isSingleton && m2.isSingleton) continue;
+
               if (m1.corefClusterID == m2.corefClusterID) continue;
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
               CorefCluster c2 = corefClusters.get(m2.corefClusterID);
