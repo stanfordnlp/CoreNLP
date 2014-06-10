@@ -102,9 +102,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          // Two tricky conjunctions with punctuation and/or interjections
          "( (S (NP-SBJ (DT The) (NNPS Parks) (NNP Council)) (VP (VBD wrote) (NP (DT the) (NNP BPCA)) (SBAR (IN that) (S (NP-SBJ (DT this) (ADJP (`` ``) (RB too) (`` `) (JJ private) ('' ') (: ...) (JJ exclusive) (, ,) ('' '') (JJ complex) (CC and) (JJ expensive)) (`` ``) (VBN enclosed) (NN garden)) (: ...) (VP (VBZ belongs) (PP-LOC-CLR (IN in) (NP (NP (RB almost) (DT any) (NN location)) (CC but) (NP (DT the) (NN waterfront)))))))) (. .) ('' '')))",
          "( (S (`` ``) (CC And) (NP-SBJ (PRP you)) (VP (MD ca) (RB n't) (VP (VB have) (S (NP-SBJ (NP (NNS taxpayers)) (VP (VBG coming) (PP-DIR (IN into) (NP (DT an) (NN audit))))) (VP (VBG hearing) (NP (`` `) (UH oohs) (: ') (CC and) (`` `) (UH ahs)))))) (. .) ('' ') ('' '')))",
-         "( (S (NP-SBJ-1 (VBN Freed) (JJ black) (NNS nationalists)) (VP (VP (VBD resumed) (NP (JJ political) (NN activity)) (PP-LOC (IN in) (NP (NNP South) (NNP Africa)))) (CC and) (VP (VBD vowed) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB fight) (PP-CLR (IN against) (NP (NN apartheid))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *)) (VP (VBG raising) (NP (NP (NNS fears)) (PP (IN of) (NP (DT a) (JJ possible) (JJ white) (NN backlash))))))) (. .)))",
-         "( (S (S-NOM-SBJ (NP-SBJ-1 (-NONE- *)) (VP (VBG Being) (VP (VBN held) (S (NP-SBJ (-NONE- *-1)) (PP-PRD (ADVP (RB well)) (IN below) (NP (NN capacity))))))) (VP (VP (ADVP-MNR (RB greatly)) (VBZ irritates) (NP (PRP them))) (, ,) (CC and) (VP (VBZ has) (VP (VBN led) (PP-CLR (TO to) (NP (JJ widespread) (NN cheating)))))) (. .)))",
-         "( (S (NP-SBJ (PRP They)) (VP (VBD acquired) (NP (NP (NNS stakes)) (PP (IN in) (NP (NP (VBG bottling) (NNS companies)) (UCP-LOC (PP (IN in) (NP (DT the) (NNP U.S.))) (CC and) (ADVP (RB overseas))))))) (. .)))",
          // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
          // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -440,53 +437,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "dobj(hearing-12, oohs-14)\n" +
                 "cc(oohs-14, and-16)\n" +
                 "conj(oohs-14, ahs-18)\n",
-        "amod(nationalists-3, Freed-1)\n" +
-                "amod(nationalists-3, black-2)\n" +
-                "nsubj(resumed-4, nationalists-3)\n" +
-                "root(ROOT-0, resumed-4)\n" +
-                "amod(activity-6, political-5)\n" +
-                "dobj(resumed-4, activity-6)\n" +
-                "prep(resumed-4, in-7)\n" +
-                "nn(Africa-9, South-8)\n" +
-                "pobj(in-7, Africa-9)\n" +
-                "cc(resumed-4, and-10)\n" +
-                "conj(resumed-4, vowed-11)\n" +
-                "aux(fight-13, to-12)\n" +
-                "xcomp(vowed-11, fight-13)\n" +
-                "prep(fight-13, against-14)\n" +
-                "pobj(against-14, apartheid-15)\n" +
-                "partmod(resumed-4, raising-17)\n" +
-                "dobj(raising-17, fears-18)\n" +
-                "prep(fears-18, of-19)\n" +
-                "det(backlash-23, a-20)\n" +
-                "amod(backlash-23, possible-21)\n" +
-                "amod(backlash-23, white-22)\n" +
-                "pobj(of-19, backlash-23)\n",
-                "auxpass(held-2, Being-1)\n" +
-                        "csubj(irritates-7, held-2)\n" +
-                        "advmod(below-4, well-3)\n" +
-                        "prep(held-2, below-4)\n" +
-                        "pobj(below-4, capacity-5)\n" +
-                        "advmod(irritates-7, greatly-6)\n" +
-                        "root(ROOT-0, irritates-7)\n" +
-                        "dobj(irritates-7, them-8)\n" +
-                        "cc(irritates-7, and-10)\n" +
-                        "aux(led-12, has-11)\n" +
-                        "conj(irritates-7, led-12)\n" +
-                        "prep(led-12, to-13)\n" +
-                        "amod(cheating-15, widespread-14)\n" +
-                        "pobj(to-13, cheating-15)\n",
-        "nsubj(acquired-2, They-1)\n" +
-                "root(ROOT-0, acquired-2)\n" +
-                "dobj(acquired-2, stakes-3)\n" +
-                "prep(stakes-3, in-4)\n" +
-                "amod(companies-6, bottling-5)\n" +
-                "pobj(in-4, companies-6)\n" +
-                "prep(companies-6, in-7)\n" +
-                "det(U.S.-9, the-8)\n" +
-                "pobj(in-7, U.S.-9)\n" +
-                "cc(in-7, and-10)\n" +
-                "conj(in-7, overseas-11)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
