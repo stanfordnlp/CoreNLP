@@ -22,13 +22,13 @@ public class StanfordRedwoodConfiguration extends RedwoodConfiguration {
    */
   public static void apply(Properties props){
     //--Tweak Properties
+    //(output to stderr)
+    if (props.getProperty("log.output") == null) {
+      props.setProperty("log.output", "stderr");
+    }
     //(capture system streams)
     if(props.getProperty("log.captureStderr") == null){
       props.setProperty("log.captureStderr", "true");
-    }
-    //(log to stderr)
-    if(props.getProperty("log.toStderr") == null){
-      props.setProperty("log.toStderr", "true");
     }
     //(apply properties)
     RedwoodConfiguration.apply(props);
@@ -36,10 +36,6 @@ public class StanfordRedwoodConfiguration extends RedwoodConfiguration {
     //--Strange Tweaks
     //(adapt legacy logging systems)
     JavaUtilLoggingAdaptor.adapt();
-    //(skip stack trace elements from this class)
-    Redwood.addLoggingClass("edu.stanford.nlp.kbp.slotfilling.common.Log");
-
-    // TODO: Redwood.setIgnorableClassPrefix("edu.stanford.nlp")
   }
 
   /**
@@ -51,7 +47,7 @@ public class StanfordRedwoodConfiguration extends RedwoodConfiguration {
 
 	public static void minimalSetup(){
 		Properties props = new Properties();
-		props.setProperty("log.toStderr", "true");
+		props.setProperty("log.output", "stderr");
 		RedwoodConfiguration.apply(props);
 	}
 }
