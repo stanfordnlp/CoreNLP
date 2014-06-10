@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
@@ -7,6 +8,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -519,8 +521,8 @@ public class MetaClass {
 			rtn[i] = b.toString().trim();
 			i += 1;
 		}
-		return rtn;
-	}
+    return rtn;
+  }
 
   /**
    * Cast a String representation of an object into that object.
@@ -534,76 +536,112 @@ public class MetaClass {
    * @param type The type (usually class) to be returned (same as E)
    * @return An object corresponding to the String value passed
    */
-	@SuppressWarnings( "unchecked" )
-	public static <E> E cast(String value, Type type){
-		//--Get Type
-		Class <?> clazz = null;
-		if(type instanceof Class){
-			clazz = (Class <?>) type;
-		}else if(type instanceof ParameterizedType){
-			ParameterizedType pt = (ParameterizedType) type;
-			clazz = (Class <?>) pt.getRawType();
-		}else{
-			clazz = type2class(type);
-			throw new IllegalArgumentException("Cannot cast to type (unhandled type): " + type);
-		}
-		//--Cast
-		if(clazz.isAssignableFrom(String.class)){
-			// (case: String)
-			return (E) value;
-		}else if(Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz)){
-			//(case: boolean)
-			if(value.equals("1")){ return (E) new Boolean(true); }
-			return (E) new Boolean( Boolean.parseBoolean(value) );
-		}else if(Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz)){
-			//(case: integer)
-			return (E) new Integer(Integer.parseInt(value));
-		}else if(Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)){
-			//(case: long)
-			return (E) new Long(Long.parseLong(value));
-		}else if(Float.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)){
-			//(case: float)
-			if(value == null){ return (E) new Float(Float.NaN); }
-			return (E) new Float(Float.parseFloat(value));
-		}else if(Double.class.isAssignableFrom(clazz) || double.class.isAssignableFrom(clazz)){
-			//(case: double)
-			if(value == null){ return (E) new Double(Double.NaN); }
-			return (E) new Double(Double.parseDouble(value));
-		}else if(Short.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz)){
-			//(case: short)
-			return (E) new Short(Short.parseShort(value));
-		}else if(Byte.class.isAssignableFrom(clazz) || byte.class.isAssignableFrom(clazz)){
-			//(case: byte)
-			return (E) new Byte(Byte.parseByte(value));
-		}else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)){
-			//(case: char)
-			return (E) new Character((char) Integer.parseInt(value));
-		}else if(java.util.Date.class.isAssignableFrom(clazz)){
-			//(case: date)
-			try {
-				return (E) new Date(Long.parseLong(value));
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		}else if(clazz.isArray()){
-			if(value == null){ return null; }
-			Class <?> subType = clazz.getComponentType();
-			// (case: array)
-			String[] strings = decodeArray(value);
-			Object[] array = (Object[]) Array.newInstance(clazz.getComponentType(), strings.length);
-			for(int i=0; i<strings.length; i++){
-				array[i] = cast(strings[i], subType);
-			}
-			return (E) array;
-		} else if(clazz.isEnum()){
-			// (case: enumeration)
-			Class c = (Class) clazz;
-			if(value == null){ return null; }
-			return (E) Enum.valueOf(c, value);
-		} else {
-			return null;
-		}
-	}
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public static final <E> E cast(String value, Type type){
+    //--Get Type
+    Class <?> clazz = null;
+    Type[] params = null;
+    if(type instanceof Class){
+      clazz = (Class <?>) type;
+    }else if(type instanceof ParameterizedType){
+      ParameterizedType pt = (ParameterizedType) type;
+      params = pt.getActualTypeArguments();
+      clazz = (Class <?>) pt.getRawType();
+    }else{
+      clazz = type2class(type);
+      throw new IllegalArgumentException("Cannot cast to type (unhandled type): " + type);
+    }
+    //--Cast
+    if(String.class.isAssignableFrom(clazz)){
+      // (case: String)
+      return (E) value;
+    }else if(Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz)){
+      //(case: boolean)
+      if("1".equals(value)){ return (E) new Boolean(true); }
+      return (E) new Boolean( Boolean.parseBoolean(value) );
+    }else if(Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz)){
+      //(case: integer)
+      return (E) new Integer(Integer.parseInt(value));
+    }else if(Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)){
+      //(case: long)
+      return (E) new Long(Long.parseLong(value));
+    }else if(Float.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)){
+      //(case: float)
+      if(value == null){ return (E) new Float(Float.NaN); }
+      return (E) new Float(Float.parseFloat(value));
+    }else if(Double.class.isAssignableFrom(clazz) || double.class.isAssignableFrom(clazz)){
+      //(case: double)
+      if(value == null){ return (E) new Double(Double.NaN); }
+      return (E) new Double(Double.parseDouble(value));
+    }else if(Short.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz)){
+      //(case: short)
+      return (E) new Short(Short.parseShort(value));
+    }else if(Byte.class.isAssignableFrom(clazz) || byte.class.isAssignableFrom(clazz)){
+      //(case: byte)
+      return (E) new Byte(Byte.parseByte(value));
+    }else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)){
+      //(case: char)
+      return (E) new Character((char) Integer.parseInt(value));
+    }else if(java.util.Date.class.isAssignableFrom(clazz)){
+      //(case: date)
+      try {
+        return (E) new Date(Long.parseLong(value));
+      } catch (NumberFormatException e) {
+        return null;
+      }
+    } else if(java.util.Calendar.class.isAssignableFrom(clazz)){
+      //(case: date)
+      try {
+        Date d = new Date(Long.parseLong(value));
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(d);
+        return (E) cal;
+      } catch (NumberFormatException e) {
+        return null;
+      }
+    } else if(File.class.isAssignableFrom(clazz)){
+      return (E) new File(value);
+    } else if(Class.class.isAssignableFrom(clazz)){
+      try {
+        return (E) Class.forName(value);
+      } catch (ClassNotFoundException e) {
+        return null;
+      }
+    } else if(clazz.isArray()){
+      if(value == null){ return null; }
+      Class <?> subType = clazz.getComponentType();
+      // (case: array)
+      String[] strings = decodeArray(value);
+      Object[] array = (Object[]) Array.newInstance(clazz.getComponentType(), strings.length);
+      for(int i=0; i<strings.length; i++){
+        array[i] = cast(strings[i], subType);
+      }
+      return (E) array;
+    } else if(clazz.isEnum()){
+      // (case: enumeration)
+      Class c = (Class) clazz;
+      if(value == null){ return null; }
+      if (value.charAt(0) == '"') value = value.substring(1);
+      if (value.charAt(value.length()-1) == '"') value = value.substring(0, value.length() - 1);
+      try {
+        return (E) Enum.valueOf(c, value);
+      } catch (Exception e){
+        try {
+          return (E) Enum.valueOf(c, value.toLowerCase());
+        } catch (Exception e2){
+          try {
+            return (E) Enum.valueOf(c, value.toUpperCase());
+          } catch (Exception e3){
+            return (E) Enum.valueOf(c,
+                (Character.isUpperCase(value.charAt(0)) ? Character.toLowerCase(value.charAt(0)) : Character.toUpperCase(value.charAt(0))) +
+                    value.substring(1));
+          }
+        }
+      }
+    } else {
+      return null;
+    }
+  }
 
   private static <E> E argmin(E[] elems, int[] scores, int atLeast) {
     int argmin = argmin(scores, atLeast);
