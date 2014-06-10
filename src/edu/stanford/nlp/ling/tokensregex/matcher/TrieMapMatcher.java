@@ -464,7 +464,7 @@ public class TrieMapMatcher<K,V> {
                 res.value,
                 lastMultimatchedOriginalStartIndex, res.end
         ));
-        res.cost += costFunction.multiMatchDeltaCost(newlyMatched, res.value, multimatches, res.multimatches);
+        res.cost += costFunction.multiMatchDeltaCost(newlyMatched, res.value, res.multimatches.size());
         res.lastMultimatchedMatchedStartIndex = res.matched.size();
         res.lastMultimatchedOriginalStartIndex = res.end;
         // Reset current value/key being matched
@@ -627,17 +627,7 @@ public class TrieMapMatcher<K,V> {
     @Override
     public int compare(PartialApproxMatch o1, PartialApproxMatch o2) {
       if (o1.cost == o2.cost) {
-        if (o1.matched.size() == o2.matched.size()) {
-          int m1 = (o1.multimatches != null)? o1.multimatches.size():0;
-          int m2 = (o2.multimatches != null)? o2.multimatches.size():0;
-          if (m1 == m2) {
-            return 0;
-          } else return (m1 < m2)? -1:1;
-        } else return (o1.matched.size() < o2.matched.size())? -1:1;
-      } else if (Double.isNaN(o1.cost)) {
-        return -1;
-      } else if (Double.isNaN(o2.cost)) {
-        return 1;
+        return 0;
       } else return (o1.cost > o2.cost)? -1:1;
     }
   };
