@@ -1202,7 +1202,7 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
   public void testcompile() {
-    String s = "(?$se diarrhea|fainting|/excessive/ /tiredness/|/fast/ /heartbeat/|tongue|/sore/ /throat/|hoarseness|fever|/muscle/ /aches/|/swelling/ /of/ /the/ /face/|eyes|/difficulty/ /breathing/ /or/ /swallowing/|/or/ /legs/|cough|vomiting|/dizziness/ /or/ /lightheadedness/|rash|headache|lips|arms) []{0,15} (?$dt advil)";
+    String s = "(five|5)";
     TokenSequencePattern p =TokenSequencePattern.compile(s);
     CoreMap doc = createDocument("fainting and advil");
     // Test sequence with groups
