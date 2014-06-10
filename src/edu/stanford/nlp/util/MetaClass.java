@@ -470,6 +470,7 @@ public class MetaClass {
 			throw new IllegalArgumentException("Cannot convert type to class: " + type);
 		}
 	}
+
   /**
    * Decode an array encoded as a String. This entails a comma separated value enclosed in brackets
    * or parentheses
@@ -510,7 +511,7 @@ public class MetaClass {
           quoteCloseChar = '"';
 				} else if(chars[i] == '\''){
           quoteCloseChar = '\'';
-				} else if(chars[i] == ',' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
+				} else if(chars[i] == ',' || chars[i] == ';' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
 					//break
           if (current.length() > 0) {
 					  terms.add(current);
@@ -534,6 +535,81 @@ public class MetaClass {
   }
 
   /**
+   * Decode a map encoded as a string
+   * @param encoded The String encoded map
+   * @return A String map corresponding to the encoded map
+   */
+  private static Map<String, String> decodeMap(String encoded){
+    if (encoded.length() == 0) return new HashMap<String, String>();
+    char[] chars = encoded.trim().toCharArray();
+
+    //--Parse the String
+    //(state)
+    char quoteCloseChar = (char) 0;
+    Map<String, String> map = new HashMap<String, String>();
+    String key = "";
+    String value = "";
+    boolean onKey = true;
+    StringBuilder current = new StringBuilder();
+    //(start/stop overhead)
+    int start = 0; int end = chars.length;
+    if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded map: " + encoded); }
+    if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
+    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
+    //(finite state automata)
+    for(int i=start; i<end; i++){
+      if(chars[i] == '\\'){
+        //(case: escaped character)
+        if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
+        current.append(chars[i+1]);
+        i += 1;
+      } else if(quoteCloseChar != 0){
+        //(case: in quotes)
+        if(chars[i] == quoteCloseChar){
+          quoteCloseChar = (char) 0;
+        }else{
+          current.append(chars[i]);
+        }
+      }else{
+        //(case: normal)
+        if(chars[i] == '"'){
+          quoteCloseChar = '"';
+        } else if(chars[i] == '\''){
+          quoteCloseChar = '\'';
+        } else if (chars[i] == '\n' && current.length() == 0) {
+          current.append("");  // do nothing
+        } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == '\t' || chars[i] == '\n'){
+          // case: end a value
+          if (onKey) { throw new IllegalArgumentException("Encountered key without value"); }
+          if (current.length() > 0) {
+            value = current.toString().trim();
+          }
+          current = new StringBuilder();
+          onKey = true;
+          map.put(key, value);  // <- add value
+        } else if((chars[i] == '-' || chars[i] == '=') && (i < chars.length - 1 && chars[i + 1] == '>')) {
+          // case: end a key
+          if (!onKey) { throw new IllegalArgumentException("Encountered a value without a key"); }
+          if (current.length() > 0) {
+            key = current.toString().trim();
+          }
+          current = new StringBuilder();
+          onKey = false;
+          i += 1; // skip '>' character
+        } else {
+          current.append(chars[i]);
+        }
+      }
+    }
+
+    //--Return
+    if(current.toString().trim().length() > 0 && !onKey) {
+      map.put(key.trim(), current.toString().trim());
+    }
+    return map;
+  }
+
+  /**
    * Cast a String representation of an object into that object.
    * E.g. "5.4" will be cast to a Double; "[1,2,3]" will be cast
    * to an Integer[].
@@ -546,18 +622,15 @@ public class MetaClass {
    * @return An object corresponding to the String value passed
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static final <E> E cast(String value, Type type){
+  public static <E> E cast(String value, Type type){
     //--Get Type
-    Class <?> clazz = null;
-    Type[] params = null;
+    Class <?> clazz;
     if(type instanceof Class){
       clazz = (Class <?>) type;
     }else if(type instanceof ParameterizedType){
       ParameterizedType pt = (ParameterizedType) type;
-      params = pt.getActualTypeArguments();
       clazz = (Class <?>) pt.getRawType();
     }else{
-      clazz = type2class(type);
       throw new IllegalArgumentException("Cannot cast to type (unhandled type): " + type);
     }
     //--Cast
@@ -566,8 +639,8 @@ public class MetaClass {
       return (E) value;
     }else if(Boolean.class.isAssignableFrom(clazz) || boolean.class.isAssignableFrom(clazz)){
       //(case: boolean)
-      if("1".equals(value)){ return (E) new Boolean(true); }
-      return (E) new Boolean( Boolean.parseBoolean(value) );
+      if("1".equals(value)){ return (E) Boolean.TRUE; }
+      return (E) Boolean.valueOf(Boolean.parseBoolean(value));
     }else if(Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz)){
       //(case: integer)
       try {
@@ -642,6 +715,8 @@ public class MetaClass {
         array[i] = cast(strings[i], subType);
       }
       return (E) array;
+    } else if (Map.class.isAssignableFrom(clazz)) {
+      return (E) decodeMap(value);
     } else if(clazz.isEnum()){
       // (case: enumeration)
       Class c = (Class) clazz;
