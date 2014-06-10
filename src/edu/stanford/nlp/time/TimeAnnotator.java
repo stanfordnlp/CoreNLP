@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -17,7 +16,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Annotate temporal expressions with {@link SUTime}.
+ * Annotate temporal expressions in text with {@link SUTime}.
  * The expressions recognized by SUTime are loosely based on GUTIME.
  *
  * After annotation, the {@link TimeAnnotations.TimexAnnotations} annotation
@@ -25,7 +24,9 @@ import java.util.Set;
  * will represent one temporal expression.
  *
  * If a reference time is set (via {@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}),
- * then temporal expressions are resolved with respect the to document date.
+ * then temporal expressions are resolved with respect the to document date.  You set it on an
+ * Annotation as follows:
+ * <blockquote>{@code annotation.set(CoreAnnotations.DocDateAnnotation.class, "2013-07-14");}</blockquote>
  * <p>
  * <br>
  * <b>Input annotations</b>
@@ -175,49 +176,60 @@ public class TimeAnnotator implements Annotator {
   }
 
   public void annotate(Annotation annotation) {
+    SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
+    String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
+    if(docDate == null){
+      Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
+      if(cal == null){
+        Redwood.log(Redwood.WARN, "No document date specified");
+      } else {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+        docDate = dateFormat.format(cal.getTime());
+      }
+    }
+    List<CoreMap> allTimeExpressions; // initialized below = null;
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {
-      List<CoreMap> allTimeExpressions = new ArrayList<CoreMap>();
-      List<CoreMap> allNumerics = new ArrayList<CoreMap>();
       allTimeExpressions = new ArrayList<CoreMap>();
+      List<CoreMap> allNumerics = new ArrayList<CoreMap>();
       for (CoreMap sentence: sentences) {
-        annotateSingleSentence(sentence, annotation, allTimeExpressions, allNumerics);
+        // make sure that token character offsets align with the actual sentence text
+        // They may not align due to token normalizations, such as "(" to "-LRB-".
+        CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence);
+        // uncomment the next line for verbose dumping of tokens....
+        // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
+        List<CoreMap> timeExpressions =
+          timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
+        if (timeExpressions != null) {
+          allTimeExpressions.addAll(timeExpressions);
+          sentence.set(TimeAnnotations.TimexAnnotations.class, timeExpressions);
+          for (CoreMap timeExpression:timeExpressions) {
+            timeExpression.set(CoreAnnotations.SentenceIndexAnnotation.class, sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
+          }
+        }
+        List<CoreMap> numbers = alignedSentence.get(CoreAnnotations.NumerizedTokensAnnotation.class);
+        if(numbers != null){
+          sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, numbers);
+          allNumerics.addAll(numbers);
+        }
       }
       annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, allNumerics);
-      annotation.set(TimeAnnotations.TimexAnnotations.class, allTimeExpressions);
     } else {
-      annotateSingleSentence(annotation, annotation, null, null);
+      allTimeExpressions = annotateSingleSentence(annotation, docDate, timeIndex);
     }
+    annotation.set(TimeAnnotations.TimexAnnotations.class, allTimeExpressions);
   }
 
   /**
    * Helper method for people not working from a complete Annotation.
    * @return a list of CoreMap.  Each CoreMap represents a detected temporal expression.
    */
-  public void annotateSingleSentence(CoreMap sentence, CoreMap docAnnotation,
-                                     List<CoreMap> allTimeExpressions, List<CoreMap> allNumerics) {
-    // make sure that token character offsets align with the actual sentence text
-    // They may not align due to token normalizations, such as "(" to "-LRB-".
+  public List<CoreMap> annotateSingleSentence(CoreMap sentence, String docDate, SUTime.TimeIndex timeIndex) {
     CoreMap annotationCopy = NumberSequenceClassifier.alignSentence(sentence);
-    // uncomment the next line for verbose dumping of tokens....
-    // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
-    List<CoreMap> timeExpressions =
-            timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docAnnotation);
-    if (timeExpressions != null) {
-      if (allTimeExpressions != null) allTimeExpressions.addAll(timeExpressions);
-      sentence.set(TimeAnnotations.TimexAnnotations.class, timeExpressions);
-      if (sentence.containsKey(CoreAnnotations.SentenceIndexAnnotation.class)) {
-        for (CoreMap timeExpression:timeExpressions) {
-          timeExpression.set(CoreAnnotations.SentenceIndexAnnotation.class,
-                  sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
-        }
-      }
+    if (docDate.equals("")) {
+      docDate = null;
     }
-    List<CoreMap> numbers = annotationCopy.get(CoreAnnotations.NumerizedTokensAnnotation.class);
-    if(numbers != null){
-      sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, numbers);
-      if (allNumerics != null) allNumerics.addAll(numbers);
-    }
+    return timexExtractor.extractTimeExpressionCoreMaps(annotationCopy, docDate, timeIndex);
   }
 
   @Override

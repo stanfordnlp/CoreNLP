@@ -9,8 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
-* Trigger for CoreMap Node Patterns.  Allows for fast identification of which patterns
-*  may match for one node.
+* Trigger for CoreMap Node Patterns
 *
 * @author Angel Chang
 */
