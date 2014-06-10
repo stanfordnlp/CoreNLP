@@ -981,7 +981,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    *
    * @throws IOException
    */
-  public static List<GrammaticalStructure> readCoNLLXGrammaticStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
+  public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
     LineNumberReader reader = new LineNumberReader(new FileReader(fileName));
     List<GrammaticalStructure> gsList = new LinkedList<GrammaticalStructure>();
 

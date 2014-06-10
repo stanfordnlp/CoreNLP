@@ -37,10 +37,10 @@ import java.util.regex.Pattern;
  *   <code>TregexPattern</code>s} called <code>targetPatterns</code>,
  *   which describe the local tree structure which must hold between
  *   the source node and a target node for the
- *   <code>GrammaticalRelation</code> to apply. (Note <code>tregex</code>
- *   regular expressions match with the <code>find()</code> method - though
+ *   <code>GrammaticalRelation</code> to apply. (Note: {@code tregex}
+ *   regular expressions match with the {@code find()} method, while
  *   literal string label descriptions that are not regular expressions must
- *   be <code>equals()</code>.)</li>
+ *   be {@code equals()}.)</li>
  * </ul>
  *
  * The <code>targetPatterns</code> associated
@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
  * </ul>
  * For example, for the grammatical relation <code>PREDICATE</code>
  * which holds between a clause and its primary verb phrase, we might
- * want to use the pattern <code>"S &lt; VP=target"</code>, in which the
+ * want to use the pattern {@code "S < VP=target"}, in which the
  * root will match a clause and the node labeled <code>"target"</code>
  * will match the verb phrase.<p>
  *
@@ -359,7 +359,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         if (DEBUG) {
           System.err.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
           for (String nodeName : m.getNodeNames()) {
-            if (nodeName.equals("target")) 
+            if (nodeName.equals("target"))
               continue;
             System.err.println("  node " + nodeName + ": " + m.getNode(nodeName));
           }

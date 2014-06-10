@@ -1885,7 +1885,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName) throws IOException {
-    return readCoNLLXGrammaticStructureCollection(fileName, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+    return readCoNLLXGrammaticalStructureCollection(fileName, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
   public static EnglishGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {
