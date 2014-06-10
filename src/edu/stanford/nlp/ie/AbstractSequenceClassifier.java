@@ -90,6 +90,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   // so we need a concurrent data structure
   protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
+  private boolean VERBOSE = true;
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
@@ -1039,7 +1040,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         doc = classify(doc);
 
         int completedNo = threadCompletionCounter.incrementAndGet();
-        if (flags.verboseMode) System.err.println(completedNo + " examples completed");
+        if (VERBOSE) System.err.println(completedNo + " examples completed");
         return doc;
       }
       @Override
