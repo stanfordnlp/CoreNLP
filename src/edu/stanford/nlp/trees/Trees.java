@@ -757,4 +757,22 @@ public class Trees {
     }
   }
 
+  /**
+   * Converts the tree labels to CoreLabels.
+   * We need this because we store additional info in the CoreLabel, like token span.
+   * @param tree
+   */
+  public static void convertToCoreLabels(Tree tree) {
+    Label l = tree.label();
+    if (!(l instanceof CoreLabel)) {
+      CoreLabel cl = new CoreLabel();
+      cl.setValue(l.value());
+      tree.setLabel(cl);
+    }
+
+    for (Tree kid : tree.children()) {
+      convertToCoreLabels(kid);
+    }
+  }
+
 }
