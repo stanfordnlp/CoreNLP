@@ -227,7 +227,7 @@ public class TestSentence implements SequenceModel {
         for (int j = 0; j < tags.length; j++) {
           // score the j-th tag
           String tag = tags[j];
-          boolean approximate = maxentTagger.hasApproximateScoring();
+          boolean approximate = maxentTagger.defaultScore > 0.0;
           int tagindex = approximate ? maxentTagger.tags.getIndex(tag) : j;
           // System.err.println("Mapped from j="+ j + " " + tag + " to " + tagindex);
           probabilities[current][hyp][tagindex] = probs[j];
@@ -351,7 +351,7 @@ public class TestSentence implements SequenceModel {
   // This scores the current assignment in PairsHolder at
   // current position h.current (returns normalized scores)
   private double[] getScores(History h) {
-    if (maxentTagger.hasApproximateScoring()) {
+    if (maxentTagger.defaultScore > 0) {
       return getApproximateScores(h);
     }
     return getExactScores(h);
@@ -379,9 +379,9 @@ public class TestSentence implements SequenceModel {
     double[] scores = getHistories(tags, h); // log score for each active tag, unnormalized
 
     // Number of tags that get assigned a default score:
-    int nDefault = maxentTagger.ySize - tags.length;
+    double nDefault = maxentTagger.ySize - tags.length;
     double logScore = ArrayMath.logSum(scores);
-    double logScoreInactiveTags = maxentTagger.getInactiveTagDefaultScore(nDefault);
+    double logScoreInactiveTags = Math.log(nDefault*maxentTagger.defaultScore);
     double logTotal =
       ArrayMath.logSum(new double[] {logScore, logScoreInactiveTags});
     ArrayMath.addInPlace(scores, -logTotal);
@@ -410,7 +410,7 @@ public class TestSentence implements SequenceModel {
   }
 
   private double[] getHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
-    if(maxentTagger.hasApproximateScoring())
+    if(maxentTagger.defaultScore > 0)
       return getApproximateHistories(tags, h, extractors, extractorsRare);
     return getExactHistories(h, extractors, extractorsRare);
   }
