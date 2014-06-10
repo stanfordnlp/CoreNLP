@@ -418,7 +418,7 @@ public class TestSentence implements SequenceModel {
 
   private double[] getExactHistories(History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
     double[] scores = new double[maxentTagger.ySize];
-    int szCommon = maxentTagger.extractors.size();
+    int szCommon = maxentTagger.extractors.getSize();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
@@ -457,7 +457,7 @@ public class TestSentence implements SequenceModel {
   private double[] getApproximateHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
 
     double[] scores = new double[tags.length];
-    int szCommon = maxentTagger.extractors.size();
+    int szCommon = maxentTagger.extractors.getSize();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
