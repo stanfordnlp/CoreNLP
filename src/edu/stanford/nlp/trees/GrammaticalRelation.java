@@ -4,11 +4,11 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.Serializable;
+import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -208,8 +208,16 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return reln;
   }
 
+  private static Map<String, SoftReference<GrammaticalRelation>> valueOfCache = new HashMap<String, SoftReference<GrammaticalRelation>>();
   public static GrammaticalRelation valueOf(String s) {
-    return valueOf(Language.English, s);
+    GrammaticalRelation value = null;
+    SoftReference<GrammaticalRelation> possiblyCachedValue = valueOfCache.get(s);
+    if (possiblyCachedValue != null) { value = possiblyCachedValue.get(); }
+    if (value == null) {
+      value = valueOf(Language.English, s);
+      valueOfCache.put(s, new SoftReference<GrammaticalRelation>(value));
+    }
+    return value;
   }
 
   /**
@@ -351,7 +359,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     if (root.value() == null) {
       root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
     }
-    Set<Tree> nodeList = new ArraySet<Tree>();
+    Set<Tree> nodeList = new LinkedHashSet<Tree>();
     for (TregexPattern p : targetPatterns) {    // cdm: I deleted: && nodeList.isEmpty()
       TregexMatcher m = p.matcher(root);
       while (m.findAt(t)) {
