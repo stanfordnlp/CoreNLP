@@ -1440,10 +1440,10 @@ public class EnglishGrammaticalRelations {
   public static class PhrasalVerbParticleGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
-    /**
+  /**
    * The "parataxis" grammatical relation. Relation between the main verb of a sentence
-   * and other sentential elements, such as a sentential parenthetical, a sentence after a ":" or a ";"
-   * etc.
+   * and other sentential elements, such as a sentential parenthetical, a sentence after a ":" or a ";", when two
+   * sentences are juxtaposed next to each other without any coordinator or subordinator, etc.
    * <p> <p/>
    * Examples: <br/>
    * "The guy, John said, left early in the morning." &rarr; <code>parataxis</code>(left,said) <br/>
@@ -1463,9 +1463,8 @@ public class EnglishGrammaticalRelations {
           // First child can occur in rare circumstances such as
           // "But even if he agrees -- which he won't -- etc etc"
           "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
-          // two juxtaposed sentences; common in web materials.
+          // two juxtaposed sentences; common in web materials (but this also matches quite a few wsj things)
           "@S < (@S $.. @S=target) !< @CC|CONJP",
-
         });
   public static class ParataxisGRAnnotation extends GrammaticalRelationAnnotation { }
 

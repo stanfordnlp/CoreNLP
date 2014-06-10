@@ -95,6 +95,9 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S-IMP (INTJ (UH please)) (NP-SBJ (-NONE- *PRO*)) (VP (VB specify) (NP (WDT which) (NML (NNP royal) (CC or) (NNP carnival)) (NN ship))) (NFP -LRB-:)))",
          "(NP (DT those) (RRC (ADVP-TMP (RB still)) (PP-LOC (IN under) (NP (NNP GASB) (NNS rules)))))",
          "(NP (NP (DT the) (NN auction) (NN house)) (RRC (RRC (VP (VBN founded) (NP (-NONE- *)) (PP-LOC (IN in) (NP (NNP London))) (NP-TMP (CD 1744)))) (CC and) (RRC (ADVP-TMP (RB now)) (PP (IN under) (NP (NP (DT the) (NN umbrella)) (PP (IN of) (NP (NP (NNP Sotheby) (POS 's)) (NNPS Holdings) (NNP Inc.))))))))",
+         // tough movement example
+         "(S (NP-SBJ (NNS morcillas)) (VP (VBP are) (ADVP (RB basically)) (ADJP-PRD (JJ impossible) (SBAR (WHNP-1 (-NONE- *0*)) (S (NP-SBJ (-NONE- *PRO*)) (VP (TO to) (VP (VB find) (NP-1 (-NONE- *T*)) (PP-LOC (IN in) (NP (NNP California))))))))))",
+         "( (S (S (NP-SBJ (-NONE- *)) (VP (VBP Do) (RB n't) (VP (VB wait)))) (: --) (S (NP-SBJ (-NONE- *)) (VP (VBP act) (ADVP-TMP (RB now)))) (. !)))",
          // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
          // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -379,6 +382,19 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "possessive(Sotheby-14, 's-15)\n" +
                 "nn(Inc.-17, Holdings-16)\n" +
                 "pobj(of-13, Inc.-17)\n",
+        "nsubj(impossible-4, morcillas-1)\n" +
+                "cop(impossible-4, are-2)\n" +
+                "advmod(impossible-4, basically-3)\n" +
+                "root(ROOT-0, impossible-4)\n" +
+                "aux(find-6, to-5)\n" +
+                "ccomp(impossible-4, find-6)\n" +
+                "prep(find-6, in-7)\n" +
+                "pobj(in-7, California-8)\n",
+        "aux(wait-3, Do-1)\n" +
+                "neg(wait-3, n't-2)\n" +
+                "root(ROOT-0, wait-3)\n" +
+                "parataxis(wait-3, act-5)\n" +
+                "advmod(act-5, now-6)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
