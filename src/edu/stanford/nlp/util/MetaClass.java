@@ -695,7 +695,11 @@ public class MetaClass {
         Class <?> subType = clazz.getComponentType();
         String[] strings = decodeArray(value);
         for (String string : strings) {
-          rtn.add(cast(string, subType == null ? String.class : subType));
+          if (subType == null) {
+            rtn.add(castWithoutKnowingType(string));
+          } else {
+            rtn.add(cast(string, subType));
+          }
         }
         return (E) rtn;
       } else {
@@ -703,6 +707,26 @@ public class MetaClass {
         return null;
       }
     }
+  }
+
+  public static <E> E castWithoutKnowingType(String value){
+    Object rtn;
+    Class[] typesToTry = new Class[]{
+      File.class, Date.class, List.class, Set.class, Queue.class,
+      Integer[].class, Double[].class, Character[].class,
+      Integer.class, Double.class, String.class
+    };
+    for (Class toTry : typesToTry) {
+      if (Collection.class.isAssignableFrom(toTry) && !value.contains(",") || value.contains(" ")) { continue; }
+      try {
+        if ((rtn = cast(value, toTry)) != null &&
+            (!File.class.isAssignableFrom(rtn.getClass()) || ((File) rtn).exists()) &&
+            true) {
+          return (E) rtn;
+        }
+      } catch (NumberFormatException e) { }
+    }
+    return null;
   }
 
   private static <E> E argmin(E[] elems, int[] scores, int atLeast) {
@@ -728,5 +752,5 @@ public class MetaClass {
     abstractToConcreteCollectionMap.put(Set.class, MetaClass.create(HashSet.class));
     abstractToConcreteCollectionMap.put(Queue.class, MetaClass.create(LinkedList.class));
     abstractToConcreteCollectionMap.put(Deque.class, MetaClass.create(LinkedList.class));
-  };
+  }
 }
