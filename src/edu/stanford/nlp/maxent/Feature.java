@@ -31,7 +31,7 @@ public class Feature {
    * The pairs (x,y) are coded as x*ySize+y. The values are kept in valuesI.
    * For example, if a feature has only two non-zero values, e.g f(1,2)=3
    * and f(6,3)=0.74, then indexedValues will have values
-   * indexedValues={1*ySize+2,6*ySzie+2} and valuesI will be {3,.74}
+   * indexedValues={1*ySize+2,6*ySize+2} and valuesI will be {3,.74}
    */
   public int[] indexedValues;
 

@@ -287,8 +287,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   Dictionary dict = new Dictionary();
   TTags tags;
 
-  byte[][] fnumArr; // TODO: move this into TaggerExperiments. It could be a private method of that class with an accessor
-  LambdaSolveTagger prob;
+  private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
   List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
@@ -575,11 +574,10 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    *  the fAssociations' appropriate Map.
    */
   private void removeDeadRules() {
-    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
-      List<String> deadRules = new ArrayList();
-      Map<String, int[]> featureMap = fAssociations.get(extractor);
-      for (String value : featureMap.keySet()) {
-        int[] fAssociations = featureMap.get(value);
+    for (Map<String, int[]> fAssociation : fAssociations) {
+      List<String> deadRules = new ArrayList<String>();
+      for (String value : fAssociation.keySet()) {
+        int[] fAssociations = fAssociation.get(value);
 
         boolean found = false;
         for (int index = 0; index < ySize; ++index) {
@@ -597,7 +595,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
 
       for (String rule : deadRules) {
-        featureMap.remove(rule);
+        fAssociation.remove(rule);
       }
     }
   }
@@ -631,8 +629,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
     }
 
-    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
-      Map<String, int[]> featureMap = fAssociations.get(extractor);
+    for (Map<String, int[]> featureMap : fAssociations) {
       for (String value : featureMap.keySet()) {
         int[] fAssociations = featureMap.get(value);
         for (int index = 0; index < ySize; ++index) {
@@ -1092,10 +1089,11 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
     TaggerExperiments samples = new TaggerExperiments(config, maxentTagger);
     TaggerFeatures feats = samples.getTaggerFeatures();
+    byte[][] fnumArr = samples.getFnumArr();
     System.err.println("Samples from " + config.getFile());
     System.err.println("Number of features: " + feats.size());
     Problem p = new Problem(samples, feats);
-    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, maxentTagger.fnumArr);
+    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, fnumArr);
     maxentTagger.prob = prob;
 
     if (config.getSearch().equals("owlqn")) {
@@ -1208,6 +1206,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       tagSeparator = config.getTagSeparator();
     }
 
+    @Override
     public String apply(String o) {
       StringWriter taggedResults = new StringWriter();
 
