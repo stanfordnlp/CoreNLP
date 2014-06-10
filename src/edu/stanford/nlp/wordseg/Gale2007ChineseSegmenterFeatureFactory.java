@@ -189,13 +189,26 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     /* N-gram features. N is upto 2. */
 
     if (flags.useWord1) {
-      features.add(charc +"c");
-      features.add(charc2+"c2");
-      features.add(charp +"p");
-      features.add(charp + charc  +"pc");
-      features.add(charc + charc2  +"cc2");
+      // features.add(charc +"c");
+      // features.add(charc2+"c2");
+      // features.add(charp +"p");
+      // features.add(charp + charc  +"pc");
+      // features.add(charc + charc2  +"cc2");
       // cdm: need hyphen so you can see which of charp or charc2 is null....
-      features.add(charp + "-" + charc2 + "pc2");
+      // features.add(charp + "-" + charc2 + "pc2");
+
+      features.add(charc +"::c");
+      features.add(charc2+"::c2");
+      features.add(charp +"::p");
+      features.add(charp2 +"::p2");
+      // trying to restore the features that Huishin described in SIGHAN 2005 paper
+      features.add(charc +charc2  +"::cn");
+      features.add(charc +charc3  +"::cn2");
+      features.add(charp +charc  +"::pc");
+      features.add(charp +charc2  +"::pn");
+      features.add(charp2 +charp  +"::p2p");
+      features.add(charp2 +charc  +"::p2c");
+      features.add(charc2 +charc  +"::n2c");
     }
 
     if (flags.dictionary != null || flags.serializedDictionary != null) {
@@ -303,11 +316,17 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
     String charc = c.getString(CoreAnnotations.CharAnnotation.class);
+    if (charc == null) charc = "";
     String charc2 = c2.getString(CoreAnnotations.CharAnnotation.class);
+    if (charc2 == null) charc2 = "";
     String charc3 = c3.getString(CoreAnnotations.CharAnnotation.class);
+    if (charc3 == null) charc3 = "";
     String charp = p.getString(CoreAnnotations.CharAnnotation.class);
+    if (charp == null) charp = "";
     String charp2 = p2.getString(CoreAnnotations.CharAnnotation.class);
+    if (charp2 == null) charp2 = "";
     String charp3 = p3.getString(CoreAnnotations.CharAnnotation.class);
+    if (charp3 == null) charp3 = "";
     Integer cI = c.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec = (cI != null ? cI.toString() : "");
     Integer c2I = c2.get(CoreAnnotations.UTypeAnnotation.class);
@@ -330,13 +349,27 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
      * N-gram features. N is upto 2.
      */
     if (flags.useWord2) {
-      features.add(charc +"c");
-      features.add(charc2+"c2");
-      features.add(charp +"p");
-      features.add(charp + charc  +"pc");
-      features.add(charc + charc2  +"cc2");
-      // cdm: need hyphen so you can see which of charp or charc2 is null....
-      features.add(charp + "-" + charc2 + "pc2");
+      // features.add(charc +"c");
+      // features.add(charc2+"c2");
+      // features.add(charp +"p");
+      // features.add(charp + charc  +"pc");
+      // features.add(charc + charc2  +"cc2");
+      // // cdm: need hyphen so you can see which of charp or charc2 is null....
+      // features.add(charp + "-" + charc2 + "pc2");
+
+
+      features.add(charc +"::c");
+      features.add(charc2+"::c1");
+      features.add(charp +"::p");
+      features.add(charp2 +"::p2");
+      // trying to restore the features that Huishin described in SIGHAN 2005 paper
+      features.add(charc +charc2  +"::cn");
+      features.add(charp +charc  +"::pc");
+      features.add(charp +charc2  +"::pn");
+      features.add(charp2 +charp  +"::p2p");
+      features.add(charp2 +charc  +"::p2c");
+      features.add(charc2 +charc  +"::n2c");
+
     }
     if (flags.useFeaturesCpC4gram || flags.useFeaturesCpC5gram || flags.useFeaturesCpC6gram) {
       features.add(charp2 + charp  +"p2p");

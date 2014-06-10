@@ -9,6 +9,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
 import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
 import edu.stanford.nlp.parser.lexparser.ParserConstraint;
 import edu.stanford.nlp.parser.lexparser.ParserQuery;
@@ -265,6 +266,10 @@ public class ParserAnnotator implements Annotator {
       tree.setScore(pq.getPCFGScore() % -10000.0);
     } catch (OutOfMemoryError e) {
       System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
+                         "Will ignore and continue: " +
+                         Sentence.listToString(words));
+    } catch (NoSuchParseException e) {
+      System.err.println("WARNING: Parsing of sentence failed, possibly because of out of memory.  " +
                          "Will ignore and continue: " +
                          Sentence.listToString(words));
     }

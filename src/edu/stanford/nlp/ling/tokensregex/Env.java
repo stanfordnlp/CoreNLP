@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Holds environment variables to be used for compiling string into a pattern
+ * Holds environment variables to be used for compiling string into a pattern.
  *
  * <p>
  * Some of the types of variables to bind are:
@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * <li><code>SequencePattern</code> (compiled pattern)</li>
  * <li><code>PatternExpr</code> (sequence pattern expression - precompiled)</li>
  * <li><code>NodePattern</code> (pattern for matching one element)</li>
- * <li><code>Class</code> (binding of coremap attribute to java Class)</li>
+ * <li><code>Class</code> (binding of CoreMap attribute to java Class)</li>
  * </ul>
  * </p>
  */

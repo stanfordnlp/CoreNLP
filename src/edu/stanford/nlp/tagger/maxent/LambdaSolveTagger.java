@@ -30,7 +30,8 @@ public class LambdaSolveTagger extends LambdaSolve {
     // newtonerr = nerr1;
     lambda = new double[p1.fSize];
     // lambda_converged = new boolean[p1.fSize];
-    probConds = new double[p1.data.xSize][p1.data.ySize];  // cdm 2008: Memory hog. Is there anything we can do to avoid this square array allocation?
+    // cdm 2008: Below line is memory hog. Is there anything we can do to avoid this square array allocation?
+    probConds = new double[p1.data.xSize][p1.data.ySize];
     this.fnumArr = fnumArr;
     zlambda = new double[p1.data.xSize];
     ftildeArr = new double[p.fSize];
@@ -64,8 +65,27 @@ public class LambdaSolveTagger extends LambdaSolve {
   }
   --- */
 
+
+  /** Initialize a trained LambdaSolveTagger.
+   *  This is the version used when loading a saved tagger.
+   *  Only the lambda array is used, and the rest is irrelevant, CDM thinks.
+   *
+   *  @param dataStream Stream to load lambda parameters from.
+   */
   LambdaSolveTagger(DataInputStream dataStream) {
     lambda = read_lambdas(dataStream);
+    super.setBinary();
+  }
+
+  /** Initialize a trained LambdaSolveTagger.
+   *  This is the version used when creating a LambdaSolveTagger from
+   *  a condensed lambda array.
+   *  Only the lambda array is used, and the rest is irrelevant, CDM thinks.
+   *
+   *  @param lambda Array used as the lambda parameters (directly; no safety copy is made).
+   */
+  LambdaSolveTagger(double[] lambda) {
+    this.lambda = lambda;
     super.setBinary();
   }
 

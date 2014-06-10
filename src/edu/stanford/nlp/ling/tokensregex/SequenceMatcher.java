@@ -1133,10 +1133,10 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       removeMatchStateInfo(bid, node);
     }
 
-    protected void setMatchedInterval(int bid, SequencePattern.State node, Interval<Integer> interval)
+    protected void setMatchedInterval(int bid, SequencePattern.State node, HasInterval<Integer> interval)
     {
       Map<SequencePattern.State,Object> matchStateInfo = getMatchStateInfo(bid, true);
-      Interval<Integer> p = (Interval<Integer>) matchStateInfo.get(node);
+      HasInterval<Integer> p = (HasInterval<Integer>) matchStateInfo.get(node);
       if (p == null) {
         matchStateInfo.put(node, interval);
       } else {
@@ -1144,10 +1144,10 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       }
     }
 
-    protected Interval<Integer> getMatchedInterval(int bid, SequencePattern.State node)
+    protected HasInterval<Integer> getMatchedInterval(int bid, SequencePattern.State node)
     {
       Map<SequencePattern.State,Object> matchStateInfo = getMatchStateInfo(bid, true);
-      Interval<Integer> p = (Interval<Integer>) matchStateInfo.get(node);
+      HasInterval<Integer> p = (HasInterval<Integer>) matchStateInfo.get(node);
       return p;
     }
 

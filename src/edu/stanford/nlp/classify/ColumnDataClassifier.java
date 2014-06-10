@@ -1649,7 +1649,7 @@ public class ColumnDataClassifier {
       return false; // ENDS PROCESSING
     }
 
-    // build dataset of training data featureized
+    // build dataset of training data featurized
     GeneralDataset<String,String> train = readTrainingExamples(trainFile);
     // print any binned value histograms
     for (int i = 0; i < flags.length; i++) {

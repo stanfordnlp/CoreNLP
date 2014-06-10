@@ -33,7 +33,7 @@ public class POSTaggerAnnotator implements Annotator {
   }
 
   public POSTaggerAnnotator(boolean verbose) {
-    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_NLP_GROUP_MODEL_PATH), verbose);
+    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_JAR_PATH), verbose);
   }
 
   public POSTaggerAnnotator(String posLoc, boolean verbose) {

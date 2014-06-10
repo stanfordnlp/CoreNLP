@@ -142,11 +142,11 @@ public class TextOutputter {
           os.println("\t(" + mention.sentNum + "," +
               mention.headIndex + ",[" +
               mention.startIndex + "," +
-              mention.endIndex + ")) -> (" +
+              mention.endIndex + "]) -> (" +
               representative.sentNum + "," +
               representative.headIndex + ",[" +
               representative.startIndex + "," +
-              representative.endIndex + ")), that is: \"" +
+              representative.endIndex + "]), that is: \"" +
               mention.mentionSpan + "\" -> \"" +
               representative.mentionSpan + "\"");
         }
