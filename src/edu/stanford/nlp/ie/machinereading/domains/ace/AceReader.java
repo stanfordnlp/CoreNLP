@@ -44,7 +44,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  *
- * Simple wrapper of Mihai's ACE code to ie.machinereading.structure objects
+ * Simple wrapper of Mihai's ACE code to ie.machinereading.structure objects.
  *
  * @author David McClosky
  *

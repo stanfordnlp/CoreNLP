@@ -219,6 +219,11 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
   // MARGINAL PROB OF TAG AT SINGLE POSITION
   //
 
+  public double logProbStartPos() {
+    double u = factorTables[0].unnormalizedLogProbFront(backgroundIndex);
+    return u - z;
+  }
+
   public double logProb(int position, int label) {
     double u = factorTables[position].unnormalizedLogProbEnd(label);
     return u - z;
@@ -524,16 +529,22 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
         featureValByCliqueSize = featureVals[i];
       factorTables[i] = getFactorTable(data[i], labelIndices, numClasses, cliquePotentialFunc, featureValByCliqueSize);
 
+      // System.err.println("before calibration,FT["+i+"] = " + factorTables[i].toProbString());
+
       if (i > 0) {
         messages[i - 1] = factorTables[i - 1].sumOutFront();
+        // System.err.println("forward message, message["+(i-1)+"] = " + messages[i-1].toProbString());
         factorTables[i].multiplyInFront(messages[i - 1]);
+        // System.err.println("after forward calibration, FT["+i+"] = " + factorTables[i].toProbString());
       }
     }
 
     for (int i = factorTables.length - 2; i >= 0; i--) {
       FactorTable summedOut = factorTables[i + 1].sumOutEnd();
       summedOut.divideBy(messages[i]);
+      // System.err.println("backward summedOut, summedOut= " + summedOut.toProbString());
       factorTables[i].multiplyInEnd(summedOut);
+      // System.err.println("after backward calibration, FT["+i+"] = " + factorTables[i].toProbString());
     }
 
     return new CRFCliqueTree<E>(factorTables, classIndex, backgroundSymbol);
