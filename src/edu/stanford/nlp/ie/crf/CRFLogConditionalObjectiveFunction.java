@@ -233,7 +233,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     // make a clique tree for this document
     CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, featureVal3DArr);
 
-    // compute the log probability of the document given the classify with the parameters x
+    // compute the log probability of the document given the model with the parameters x
     int[] given = new int[window - 1];
     Arrays.fill(given, classIndex.indexOf(backgroundSymbol));
     if (docLabels.length>docData.length) { // only true for self-training
@@ -288,7 +288,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   @Override
   public void calculate(double[] x) {
 
-    double prob = 0.0; // the log prob of the sequence given the classify, which is the negation of value at this point
+    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     double[][] weights = to2D(x);
 
     // the expectations over counts
@@ -372,7 +372,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   //TODO(mengqiu) SGD based methods are not yet compatible with featureVals
   public void calculateStochasticGradientOnly(double[] x, int[] batch) {
 
-    double prob = 0.0; // the log prob of the sequence given the classify, which is the negation of value at this point
+    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     double[][] weights = to2D(x);
 
     double batchScale = ((double) batch.length)/((double) this.dataDimension());
@@ -426,7 +426,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
    */
   @Override
   public double calculateStochasticUpdate(double[] x, double xscale, int[] batch, double gscale) {
-    double prob = 0.0; // the log prob of the sequence given the classify, which is the negation of value at this point
+    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     // int[][] wis = getWeightIndices();
     double[][] weights = to2D(x, xscale);
 
@@ -499,7 +499,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
    */
   @Override
   public double valueAt(double[] x, double xscale, int[] batch) {
-    double prob = 0; // the log prob of the sequence given the classify, which is the negation of value at this point
+    double prob = 0; // the log prob of the sequence given the model, which is the negation of value at this point
     // int[][] wis = getWeightIndices();
     double[][] weights = to2D(x, xscale);
 

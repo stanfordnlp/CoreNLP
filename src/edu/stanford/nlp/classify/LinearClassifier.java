@@ -46,7 +46,7 @@ import java.util.*;
 
 /**
  * Implements a multiclass linear classifier. At classification time this
- * can be any generalized linear classify classifier (such as a perceptron,
+ * can be any generalized linear model classifier (such as a perceptron,
  * naive logistic regression, SVM).
  *
  * @author Dan Klein

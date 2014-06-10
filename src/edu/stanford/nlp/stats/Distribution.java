@@ -641,7 +641,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
 
   /**
    * Maps a counter representing the linear weights of a multiclass
-   * logistic regression classify to the probabilities of each class.
+   * logistic regression model to the probabilities of each class.
    */
   public static <E> Distribution<E> distributionFromLogisticCounter(Counter<E> cntr) {
     double expSum = 0.0;

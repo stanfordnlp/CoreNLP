@@ -7,7 +7,7 @@ import java.util.*;
 
 /**
  * This class is meant to represent a clique in a (directed
- * or undirected) linear-chain graphical classify.  It encodes
+ * or undirected) linear-chain graphical model.  It encodes
  * the relative indices that are included in a clique with
  * respect to the current index (0).  For instance if you have a clique
  * that is current label and two-ago label, then the relative

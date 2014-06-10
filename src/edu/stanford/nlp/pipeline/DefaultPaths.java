@@ -1,8 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
 /**
- * Default classify paths for StanfordCoreNLP
- * All these paths point to files distributed with the classify jar file (stanford-corenlp-models-*.jar)
+ * Default model paths for StanfordCoreNLP
+ * All these paths point to files distributed with the model jar file (stanford-corenlp-models-*.jar)
  */
 public class DefaultPaths {
 

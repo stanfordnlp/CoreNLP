@@ -37,7 +37,7 @@ public class POSTaggerAnnotator implements Annotator {
   }
 
   public POSTaggerAnnotator(boolean verbose) {
-    this(System.getProperty("pos.classify", MaxentTagger.DEFAULT_NLP_GROUP_MODEL_PATH), verbose);
+    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_NLP_GROUP_MODEL_PATH), verbose);
   }
 
   public POSTaggerAnnotator(String posLoc, boolean verbose) {
@@ -58,7 +58,7 @@ public class POSTaggerAnnotator implements Annotator {
   }
 
   public POSTaggerAnnotator(String annotatorName, Properties props) {
-    String posLoc = props.getProperty(annotatorName + ".classify");
+    String posLoc = props.getProperty(annotatorName + ".model");
     if (posLoc == null) {
       posLoc = DefaultPaths.DEFAULT_POS_MODEL;
     }

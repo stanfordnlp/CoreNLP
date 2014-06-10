@@ -443,11 +443,6 @@ public class Redwood {
     }
   }
 
-  /**
-   * The Redwood equivalent to printf().
-   * @param format The format string, as per java's Formatter.format() object.
-   * @param args The arguments to format.
-   */
   public static void logf(String format, Object... args){ log(new Formatter().format(format, args)); }
 
   /**

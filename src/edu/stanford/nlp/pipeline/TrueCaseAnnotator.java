@@ -35,7 +35,7 @@ public class TrueCaseAnnotator implements Annotator {
   }
 
   public TrueCaseAnnotator(boolean verbose) {
-    this(System.getProperty("truecase.classify", DefaultPaths.DEFAULT_TRUECASE_MODEL),
+    this(System.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL), 
         System.getProperty("truecase.bias", DEFAULT_MODEL_BIAS),
         System.getProperty("truecase.mixedcasefile", DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST),
         verbose);
@@ -111,7 +111,7 @@ public class TrueCaseAnnotator implements Annotator {
     } else if (trueCase.equals("INIT_UPPER")) {
       trueCaseText = text.substring(0,1).toUpperCase() + text.substring(1);
     } else if (trueCase.equals("O")) {
-      // The classify predicted mixed case, so lookup the map:
+      // The model predicted mixed case, so lookup the map:
       if(mixedCaseMap.containsKey(text))
         trueCaseText = mixedCaseMap.get(text);
     }

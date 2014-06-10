@@ -163,7 +163,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
           }
           POSspecificCharNGrams[0].incrementCount(context, sym); // POS-specific 1-gram
           if (unknownCharClass != null) {
-            POSspecificCharNGrams[0].incrementCount(context, unknownCharClass); // for unknown ch classify
+            POSspecificCharNGrams[0].incrementCount(context, unknownCharClass); // for unknown ch model
           }
 
           // context is constructed incrementally:
@@ -174,7 +174,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
               context.add(Symbol.BEGIN_WORD);
               POSspecificCharNGrams[j].incrementCount(context, sym);
               if (unknownCharClass != null) {
-                POSspecificCharNGrams[j].incrementCount(context, unknownCharClass); // for unknown ch classify
+                POSspecificCharNGrams[j].incrementCount(context, unknownCharClass); // for unknown ch model
               }
               break;
             } else {
@@ -186,7 +186,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
               }
               POSspecificCharNGrams[j].incrementCount(context, sym);
               if (unknownCharClass != null) {
-                POSspecificCharNGrams[j].incrementCount(context, unknownCharClass); // for unknown ch classify
+                POSspecificCharNGrams[j].incrementCount(context, unknownCharClass); // for unknown ch model
               }
             }
           }

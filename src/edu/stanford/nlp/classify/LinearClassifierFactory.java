@@ -698,9 +698,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     }
   }
 
-  /** If set to true, then when training a classifier, after an optimal sigma is chosen a classify is relearned from
-   * scratch. If set to false (the default), then the classify is updated from wherever it wound up in the sigma-tuning process.
-   * The latter is likely to be faster, but it's not clear which classify will wind up better.  */
+  /** If set to true, then when training a classifier, after an optimal sigma is chosen a model is relearned from
+   * scratch. If set to false (the default), then the model is updated from wherever it wound up in the sigma-tuning process.
+   * The latter is likely to be faster, but it's not clear which model will wind up better.  */
   public void setRetrainFromScratchAfterSigmaTuning( boolean retrainFromScratchAfterSigmaTuning) {
     this.retrainFromScratchAfterSigmaTuning = retrainFromScratchAfterSigmaTuning;
   }

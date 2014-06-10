@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 /**
  * A class which encapsulates configuration settings for Redwood.
- * The class operates on the builder classify; that is, you can chain method
+ * The class operates on the builder model; that is, you can chain method
  * calls.
  * @author Gabor Angeli (angeli at cs.stanford)
  */

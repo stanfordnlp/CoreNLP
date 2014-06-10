@@ -74,7 +74,7 @@ class RandomWalk implements Serializable {
   }
 
   /**
-   * builds a random walk classify with n steps.
+   * builds a random walk model with n steps.
    *
    * @param data A collection of seen/hidden event <code>Pair</code>s
    */

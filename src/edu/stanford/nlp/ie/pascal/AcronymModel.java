@@ -88,7 +88,7 @@ public class AcronymModel implements RelationalModel {
   /**
    * Scores the partial template containing only the fields relevant to the score.
    * @param temp the {@link InfoTemplate} to be scored.
-   * @return the classify's score
+   * @return the model's score
    */
   public double computeProb(InfoTemplate temp){
     return computeProb(temp.wname,temp.wacronym,temp.cname,temp.cacronym,
@@ -98,7 +98,7 @@ public class AcronymModel implements RelationalModel {
  * Scores the {@link PascalTemplate} using the fields it contains which are relevant to the score.
  * (Ignores location and date fields.)
  * @param temp the full {@link PascalTemplate} to be scored
- * @return the classify's score
+ * @return the model's score
  */
 
   public double computeProb(PascalTemplate temp) {

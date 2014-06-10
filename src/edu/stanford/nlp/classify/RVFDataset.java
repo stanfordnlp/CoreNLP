@@ -214,7 +214,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
 
   /**
    * Checks if the dataset has any unbounded values. Always good to use this
-   * before training a classify on the dataset. This way, one can avoid seeing the
+   * before training a model on the dataset. This way, one can avoid seeing the
    * infamous 4's that get printed by the QuasiNewton Method when NaNs exist in
    * the data! -Ramesh
    */

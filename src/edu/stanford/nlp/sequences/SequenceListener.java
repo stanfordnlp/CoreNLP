@@ -8,7 +8,7 @@ public interface SequenceListener {
 
   /**
    * Informs this sequence listener that the value of the element at position pos has changed.
-   * This allows this sequence classify to update its internal classify if desired.
+   * This allows this sequence model to update its internal model if desired.
    */
   public abstract void updateSequenceElement(int[] sequence, int pos, int oldVal);
 

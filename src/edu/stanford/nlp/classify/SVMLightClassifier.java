@@ -8,7 +8,7 @@ import edu.stanford.nlp.ling.RVFDatum;
 
 /**
  * This class represents a trained SVM Classifier.  It is actually just a
- * LinearClassifier, but it can have a Platt (sigmoid) classify overlaying
+ * LinearClassifier, but it can have a Platt (sigmoid) model overlaying
  * it for the purpose of producing meaningful probabilities.
  *
  * @author Jenny Finkel
@@ -45,7 +45,7 @@ public class SVMLightClassifier<L, F> extends LinearClassifier<L, F> {
   @Override
   public Counter<L> logProbabilityOf(Datum<L, F> example) {
     if (platt == null) {
-      throw new UnsupportedOperationException("If you want to ask for the probability, you must train a Platt classify!");
+      throw new UnsupportedOperationException("If you want to ask for the probability, you must train a Platt model!");
     }
     Counter<L> scores = scoresOf(example);
     scores.incrementCount(null);
@@ -63,7 +63,7 @@ public class SVMLightClassifier<L, F> extends LinearClassifier<L, F> {
   @Override
   public Counter<L> logProbabilityOf(RVFDatum<L, F> example) {
     if (platt == null) {
-      throw new UnsupportedOperationException("If you want to ask for the probability, you must train a Platt classify!");
+      throw new UnsupportedOperationException("If you want to ask for the probability, you must train a Platt model!");
     }
     Counter<L> scores = scoresOf(example);
     scores.incrementCount(null);

@@ -93,7 +93,7 @@ public class TestSentence implements SequenceModel {
   }
 
   /**
-   * Tags the sentence s by running maxent classify.  Returns a sentence (List) of
+   * Tags the sentence s by running maxent model.  Returns a sentence (List) of
    * TaggedWord objects.
    *
    * @param s Input sentence (List).  This isn't changed.

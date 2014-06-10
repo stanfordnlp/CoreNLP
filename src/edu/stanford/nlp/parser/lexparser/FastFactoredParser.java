@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.*;
 /** Provides a much faster way to realize the factored
  *  parsing idea, including easily returning "k good" results
  *  at the expense of optimality.  Exploiting the k best functionality
- *  of the ExhaustivePCFGParser, this classify simply gets more than
+ *  of the ExhaustivePCFGParser, this model simply gets more than
  *  k best PCFG parsers, scores them according to the dependency
  *  grammar, and returns them in terms of their product score.
  *  No actual parsing is done.

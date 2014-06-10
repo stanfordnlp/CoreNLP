@@ -39,7 +39,7 @@ public class FactoredSequenceModel implements SequenceModel {
           ArrayMath.logNormalize(distDebug);
           ArrayMath.expInPlace(distDebug);
           System.err.println("pos: " + pos);
-          System.err.println("classify 0:");
+          System.err.println("model 0:");
           for (int j = 0; j < distDebug.length; j++)
             System.err.println("\t" + distDebug[j]);
           System.err.println();
@@ -51,7 +51,7 @@ public class FactoredSequenceModel implements SequenceModel {
 
         if (BisequenceEmpiricalNERPrior.DEBUG) {
           if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) { 
-            System.err.println("classify " + i + ":");
+            System.err.println("model " + i + ":");
             double[] distDebug = Arrays.copyOf(dist_i, dist.length);
             ArrayMath.logNormalize(distDebug);
             ArrayMath.expInPlace(distDebug);
@@ -79,7 +79,7 @@ public class FactoredSequenceModel implements SequenceModel {
   }
 
   /**
-   * Computes the score assigned by this classify to the provided sequence. Typically this will be a
+   * Computes the score assigned by this model to the provided sequence. Typically this will be a
    * probability in log space (since the probabilities are small).
    *
    * @param sequence the sequence to compute a score for

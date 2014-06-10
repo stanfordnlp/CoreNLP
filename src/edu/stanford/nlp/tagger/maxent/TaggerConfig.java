@@ -135,13 +135,13 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     // load up the default properties
     this();
 
-    /* Try and use the default properties from the classify */
+    /* Try and use the default properties from the model */
     //Properties modelProps = new Properties();
     TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
     if (!props.containsKey("trainFile")) {
       try {
-        System.err.println("Loading default properties from tagger " + props.getProperty("classify"));
-        DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(props.getProperty("classify")));
+        System.err.println("Loading default properties from tagger " + props.getProperty("model"));
+        DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(props.getProperty("model")));
         this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
         in.close();
       } catch (Exception e) {
@@ -181,17 +181,17 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     } else if (props.containsKey("dump")) {
       this.setProperty("mode", Mode.DUMP.toString());
       this.setProperty("file", props.getProperty("dump").trim());
-      props.setProperty("classify", props.getProperty("dump").trim());
+      props.setProperty("model", props.getProperty("dump").trim());
     } else {
       this.setProperty("mode", Mode.TAG.toString());
       this.setProperty("file", "stdin");
     }
-    //for any mode other than train, we load a classifier, which means we load a config - classify always needs to be specified
+    //for any mode other than train, we load a classifier, which means we load a config - model always needs to be specified
     //on command line/in props file
-    //Get the path to the classify (or the path where you'd like to save the classify); this is necessary for training, testing, and tagging
-    this.setProperty("classify", props.getProperty("classify", this.getProperty("classify", "")).trim());
-    if ( ! (this.getMode() == Mode.DUMP) && this.getProperty("classify").equals("")) {
-      throw new RuntimeException("'classify' parameter must be specified");
+    //Get the path to the model (or the path where you'd like to save the model); this is necessary for training, testing, and tagging
+    this.setProperty("model", props.getProperty("model", this.getProperty("model", "")).trim());
+    if ( ! (this.getMode() == Mode.DUMP) && this.getProperty("model").equals("")) {
+      throw new RuntimeException("'model' parameter must be specified");
     }
 
     this.setProperty("search", props.getProperty("search", this.getProperty("search")).trim().toLowerCase());
@@ -265,7 +265,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
   }
 
 
-  public String getModel() { return getProperty("classify"); }
+  public String getModel() { return getProperty("model"); }
 
   public String getJarModel() { return getProperty("jarModel"); }
 
@@ -424,7 +424,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
   }
 
   private void dump(PrintWriter pw) {
-    pw.println("                   classify = " + getProperty("classify"));
+    pw.println("                   model = " + getProperty("model"));
     pw.println("                    arch = " + getProperty("arch"));
     pw.println("            wordFunction = " + getProperty("wordFunction"));
     if (this.getMode() == Mode.TRAIN) {
@@ -512,27 +512,27 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     out.println("## Sample properties file for maxent tagger. This file is used for three main");
     out.println("## operations: training, testing, and tagging. It may also be used to convert");
     out.println("## an old multifile tagger to a single file tagger or to dump the contents of");
-    out.println("## a classify.");
-    out.println("## To train or test a classify, or to tag something, run:");
+    out.println("## a model.");
+    out.println("## To train or test a model, or to tag something, run:");
     out.println("##   java edu.stanford.nlp.tagger.maxent.MaxentTagger -prop <properties file>");
     out.println("## Arguments can be overridden on the commandline, e.g.:");
     out.println("##   java ....MaxentTagger -prop <properties file> -testFile /other/file ");
     out.println();
 
     out.println("# Model file name (created at train time; used at tag and test time)");
-    out.println("# (you can leave this blank and specify it on the commandline with -classify)");
-    out.println("# classify = ");
+    out.println("# (you can leave this blank and specify it on the commandline with -model)");
+    out.println("# model = ");
     out.println();
 
     out.println("# Path to file to be operated on (trained from, tested against, or tagged)");
     out.println("# Specify -textFile <filename> to tag text in the given file, -trainFile <filename> to");
-    out.println("# to train a classify using data in the given file, or -testFile <filename> to test your");
-    out.println("# classify using data in the given file.  Alternatively, you may specify");
-    out.println("# -dump <filename> to dump the parameters stored in a classify or ");
-    out.println("# -convertToSingleFile <filename> to save an old, multi-file classify (specified as -classify)");
-    out.println("# to the new single file format.  The new classify will be saved in the file filename.");
+    out.println("# to train a model using data in the given file, or -testFile <filename> to test your");
+    out.println("# model using data in the given file.  Alternatively, you may specify");
+    out.println("# -dump <filename> to dump the parameters stored in a model or ");
+    out.println("# -convertToSingleFile <filename> to save an old, multi-file model (specified as -model)");
+    out.println("# to the new single file format.  The new model will be saved in the file filename.");
     out.println("# If you choose to convert an old file, you must specify ");
-    out.println("# the correct 'arch' parameter used to create the original classify.");
+    out.println("# the correct 'arch' parameter used to create the original model.");
     out.println("# trainFile = ");
     out.println();
 
@@ -600,7 +600,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     out.println("######### parameters for training  #########");
     out.println();
 
-    out.println("# classify architecture: This is one or more comma separated strings, which");
+    out.println("# model architecture: This is one or more comma separated strings, which");
     out.println("# specify which extractors to use. Some of them take one or more integer");
     out.println("# or string ");
     out.println("# (file path) arguments in parentheses, written as m, n, and s below:");
@@ -648,14 +648,14 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
     out.println("# closedClassTags = ");
     out.println();
 
-    out.println("# A boolean indicating whether you would like the trained classify to set POS tags as closed");
+    out.println("# A boolean indicating whether you would like the trained model to set POS tags as closed");
     out.println("# based on their frequency in training; default is false.  The frequency threshold can be set below. ");
     out.println("# This option is ignored if any of {openClassTags, closedClassTags, lang} are specified.");
     out.println("# learnClosedClassTags = ");
     out.println();
 
     out.println("# Used only if learnClosedClassTags=true.  Tags that have fewer tokens than this threshold are");
-    out.println("# considered closed in the trained classify.");
+    out.println("# considered closed in the trained model.");
     out.println("# closedClassTagThreshold = ");
     out.println();
 

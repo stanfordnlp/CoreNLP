@@ -14,7 +14,7 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Tree;
 
 /**
- * Serves requests to the given parser classify on the given port.
+ * Serves requests to the given parser model on the given port.
  * See processRequest for a description of the query formats that are
  * handled.
  */
@@ -181,7 +181,7 @@ public class LexicalizedParserServer {
       } else if (arg.startsWith("-")) {
         arg = arg.substring(1);
       }
-      if (arg.equalsIgnoreCase("classify")) {
+      if (arg.equalsIgnoreCase("model")) {
         model = args[i + 1];
       } else if (arg.equalsIgnoreCase("port")) {
         port = Integer.valueOf(args[i + 1]);
