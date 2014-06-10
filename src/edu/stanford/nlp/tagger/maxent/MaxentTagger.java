@@ -29,6 +29,7 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
@@ -287,7 +288,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   Dictionary dict = new Dictionary();
   TTags tags;
 
-  private LambdaSolveTagger prob;
+  byte[][] fnumArr; // TODO: move this into TaggerExperiments. It could be a private method of that class with an accessor
+  LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
   List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
@@ -574,10 +576,11 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    *  the fAssociations' appropriate Map.
    */
   private void removeDeadRules() {
-    for (Map<String, int[]> fAssociation : fAssociations) {
-      List<String> deadRules = new ArrayList<String>();
-      for (String value : fAssociation.keySet()) {
-        int[] fAssociations = fAssociation.get(value);
+    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
+      List<String> deadRules = new ArrayList();
+      Map<String, int[]> featureMap = fAssociations.get(extractor);
+      for (String value : featureMap.keySet()) {
+        int[] fAssociations = featureMap.get(value);
 
         boolean found = false;
         for (int index = 0; index < ySize; ++index) {
@@ -595,7 +598,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
 
       for (String rule : deadRules) {
-        fAssociation.remove(rule);
+        featureMap.remove(rule);
       }
     }
   }
@@ -629,7 +632,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
     }
 
-    for (Map<String, int[]> featureMap : fAssociations) {
+    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
+      Map<String, int[]> featureMap = fAssociations.get(extractor);
       for (String value : featureMap.keySet()) {
         int[] fAssociations = featureMap.get(value);
         for (int index = 0; index < ySize; ++index) {
@@ -645,7 +649,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
   protected void saveModel(String filename) {
     try {
-      DataOutputStream file = IOUtils.getDataOutputStream(filename);
+      OutDataStreamFile file = new OutDataStreamFile(filename);
       saveModel(file);
       file.close();
     } catch (IOException ioe) {
@@ -1089,11 +1093,10 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
     TaggerExperiments samples = new TaggerExperiments(config, maxentTagger);
     TaggerFeatures feats = samples.getTaggerFeatures();
-    byte[][] fnumArr = samples.getFnumArr();
     System.err.println("Samples from " + config.getFile());
     System.err.println("Number of features: " + feats.size());
     Problem p = new Problem(samples, feats);
-    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, fnumArr);
+    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, maxentTagger.fnumArr);
     maxentTagger.prob = prob;
 
     if (config.getSearch().equals("owlqn")) {
@@ -1206,7 +1209,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       tagSeparator = config.getTagSeparator();
     }
 
-    @Override
     public String apply(String o) {
       StringWriter taggedResults = new StringWriter();
 

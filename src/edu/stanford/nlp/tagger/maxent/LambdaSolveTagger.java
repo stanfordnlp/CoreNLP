@@ -82,7 +82,7 @@ public class LambdaSolveTagger extends LambdaSolve {
    *  a condensed lambda array.
    *  Only the lambda array is used, and the rest is irrelevant, CDM thinks.
    *
-   *  @param lambda Array used as the lambda parameters (directly; no safety copy is made).
+   *  @param dataStream Stream to load lambda parameters from.
    */
   LambdaSolveTagger(double[] lambda) {
     this.lambda = lambda;
