@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.1.5 - 2013-04-04
+Stanford POS Tagger, v3.1.4 - 2012-11-11
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -201,9 +201,6 @@ processing.
 
 CHANGES
 -----------------------------------------------
-
-2013-04-04    3.1.5     Speed improvements, ctb7 model, -nthreads 
-                        option 
 
 2012-11-11    3.1.4     Updated Chinese model 
 
