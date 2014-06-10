@@ -45,7 +45,7 @@ relations. That is, as triples of a relation between pairs of words, such as ``t
 \emph{distributes} is \emph{Bell.}''  Our experience is that this simple,
 uniform representation is quite accessible to non-linguists
 thinking about tasks involving information extraction from text and is
-effective in relation extraction applications.
+quite effective in relation extraction applications.
 
 Here is an example sentence:
 \begin{quote}
@@ -91,7 +91,7 @@ references to further discussion and use of the SD representation (section~\ref{
 
 \section{Definitions of the Stanford typed dependencies}\label{def}
 
-The current representation contains approximately 50 grammatical
+The current representation contains approximately 53 grammatical
 relations (depending slightly on the options discussed in section~\ref{types}). The dependencies are all binary relations: a grammatical relation holds between a \emph{governor} (also known as a \emph{regent} or a \emph{head}) and a dependent. The grammatical relations are defined below, in alphabetical order according to the dependency's abbreviated name (which appears in the parser output). The definitions make use of the Penn Treebank part-of-speech tags and phrasal labels.
 
 \bigskip
@@ -273,7 +273,7 @@ A determiner is the relation between the head of an NP and its determiner.
 This is used for interjections and other discourse particles and
 elements (which are not clearly linked to the structure of the
 sentence, except in an expressive way). We generally follow the
-guidelines of what the Penn Treebanks count as an INTJ.  They
+guidelines of the what the Penn Treebanks count as an INTJ.  They
 define this to include: interjections (\emph{oh}, \emph{uh-huh},
 \emph{Welcome}), fillers (\emph{um}, \emph{ah}), and discourse 
 markers (\emph{well}, \emph{like}, \emph{actually}, but not \emph{you know}).
@@ -336,7 +336,6 @@ The indirect object of a VP is the noun phrase which is the (dative) object of t
 A marker is the word introducing a finite clause subordinate to another clause.
 For a complement clause, this will typically be ``that'' or ``whether''.
 For an adverbial clause, the marker is typically a preposition like ``while'' or ``although''.
-The mark is a dependent of the subordinate clause head.
 \begin{quote}
 \begin{dependency}
    \begin{deptext}[column sep=0.2em]
@@ -356,6 +355,12 @@ The mark is a dependent of the subordinate clause head.
    \depedge[edge unit distance=0.5ex]{7}{3}{mark}
 \end{dependency}
 \end{quote}
+
+
+\begin{tabbing}
+\\
+\end{tabbing}
+
 
 \noindent\textbf{\emph{mwe}: multi-word expression}\\
 The multi-word expression (modifier) relation is used for certain multi-word idioms
@@ -551,14 +556,11 @@ A referent of the head of an NP is the relative word introducing the relative cl
 
 \noindent\textbf{\emph{rel}: relative}\\
 A relative of a relative clause is the head word of the WH-phrase introducing it.
-This analysis is used only for relative words which are not easily
-resolvable to a role in the relative clause. Relative words which act
-as the subject or object of a relative clause are analyzed as a
-\emph{nsubj} or \emph{dobj}.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \> ``I saw the man whose wife you love" \> \> \emph{rel}(love, wife)
 \end{tabbing}
+This analysis is used only for relative words which are not the subject of the relative clause.  Relative words which act as the subject of a relative clause are analyzed as a \emph{nsubj}.
 
 \noindent\textbf{\emph{root}: root}\\
 The root grammatical relation points to the root of the sentence. A fake node ``ROOT'' is used as the governor. The ROOT node is indexed with ``0'', since the indexation of real words in the sentence starts at 1.
@@ -585,7 +587,6 @@ An open clausal complement (\emph{xcomp}) of a VP or an ADJP is a clausal comple
 
 \noindent\textbf{\emph{xsubj}: controlling subject}\\
 A controlling subject is the relation between the head of a open clausal complement (\emph{xcomp}) and the external subject of that clause.
-This is an additional dependency, not a basic depedency.
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \> ``Tom likes to eat fish" \> \> \emph{xsubj}(eat, Tom)\\
@@ -612,6 +613,8 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
         \> \> \> \> \emph{dobj} - direct object \\
         \> \> \> \> \emph{iobj} - indirect object \\
         \> \> \> \> \emph{pobj} - object of preposition \\
+      \> \> \> \emph{mark} - marker (word introducing an \emph{advcl}
+      or \emph{ccomp})\\
       \> \> \> \emph{rel} - relative (word introducing a \emph{rcmod})\\
 	\> \>  \emph{subj} - subject \\
 	      \> \> \> \emph{nsubj} - nominal subject \\
@@ -630,8 +633,6 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
     \> \> \emph{preconj} - preconjunct \\
     \> \> \emph{infmod} - infinitival modifier \\
     \> \> \emph{mwe} - multi-word expression modifier \\
-    \> \> \> \emph{mark} - marker (word introducing an \emph{advcl} or
-    \emph{ccomp} \\
     \> \> \emph{partmod} - participial modifier \\
     \> \> \emph{advmod} - adverbial modifier \\
     \> \>  \> \emph{neg} - negation modifier \\
@@ -833,10 +834,7 @@ A copy node will be introduced in the case of PP conjunction as in ``Bill went o
 Another instance where collapsing sacrifices some linguistic fidelity is the case of preposition modifiers. When turning the preposition into a relation, the preposition does not appear as a word of the sentence anymore. Therefore preposition modifiers become dependent on the head of the clause in which they appear, and not on the preposition itself. In \emph{He left his office just before lunch time}, \emph{just} will be an adverbial modifier of the verb \emph{left}. This induces some distortion in the exact semantics of the sentence.
 
 \subsection{The treatment of copula verbs}
-The design philosophy of SD has been to maximize dependencies between
-content words, and so we normally regard a copula verb like \emph{be}
-as an auxiliary modifier, even when its complement is an adjective or
-predicative noun (see the references in section~\ref{refs} for more discussion and motivation).  However, some people do not like this because then the head of some sentences is no longer a verb.  In the dependency conversion software, you can ask for the copula to remain the head when its complement is an adjective or noun by giving the flag \texttt{-makeCopulaHead}.  Uses of the verb \emph{be} as in auxiliary in passives and progressives will still be treated as a non-head auxiliary.
+The design philosophy of SD has been to maximize dependencies between content words, and so we normally regard a copula verb like \emph{be} as an auxiliary modifier, even when its complement is an adjective or noun (see the references in section~\ref{refs} for more discussion and motivation).  However, some people do not like this because then the head of some sentences is no longer a verb.  In the dependency conversion software, you can ask for the copula to remain the head when its complement is an adjective or noun by giving the flag \texttt{-makeCopulaHead}.  Uses of the verb \emph{be} as in auxiliary in passives and progressives will still be treated as a non-head auxiliary.
 
 \subsection{Comparison of the representation styles}
 \noindent To facilitate comparison, the table below shows the dependencies for the four variants for the example sentence ``Bell, a company which is based in LA, makes and distributes computer products''. The ``non-collapsed'' variant (see section \ref{non-collapsed}) contains all the relations in the ``basic'' variant plus one extra dependency: ref(company-4, which-5).
@@ -1089,14 +1087,7 @@ dependencies, but altering their definitions.  This is a separate download.  It 
 
 \subsubsection*{$\star$ \textbf{Other parsers}}
 
-A number of dependency parsers have now been trained to parse directly
-to the basic Stanford Dependencies, including MaltParser and
-MSTParser.  Several of these parsers distribute models trained for
-Stanford Dependencies parsing, including MaltParser and the Easy First
-Parser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.  
-
-Any Penn Treebank constituency parser can be used to produce Stanford
-Dependencies by using our conversion tool to convert the output of other constituency parsers to the Stanford Dependencies representation.  For more information on other parser options, see:
+A number of dependency parsers have now been trained to parse directly to the basic Stanford Dependencies, including MaltParser and MSTParser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.  Or our conversion tool can convert the output of other constituency parsers to the Stanford Dependencies representation.  For more information on other parser options, see:
 \begin{quote}
 \url{http://nlp.stanford.edu/software/stanford-dependencies.shtml}
 \end{quote}
@@ -1130,14 +1121,14 @@ In the recent BioNLP 2009 Shared Task, many of the leading teams built their rel
 
 The SD representation has also been used in other domains.  It is a common representation for
 extracting opinions, sentiment, and relations
-\citep{Zhuang06cikm,Meena07sentiment,Banko07,Zouaq06tai,Zouaq07tel,chaumartin07knowledge,kessler08icwsm,Haghighi10,Hassan10,Joshi2010,Wu2010,Zouaq10}, as well as specific information (such as event, time or dialogue acts) \citep{Chambers11,McClosky12,Kluwer10}. The tool has been consistently used by several groups in the \textsc{Pascal}/NIST challenges targeting textual entailment \citep{adams-EtAl:2007:WTEP,blake:2007:WTEP,chambers-EtAl:2007:WTEP,harmeling:2007:WTEP,wang-neumann:2007:WTEP,Malakasiotis09,Mehdad09,Shivare2010,Glinos2010,Kouylekov2010,Pakray2011a}. It is also used for a variety of other tasks, such as unsupervised semantic parsing \citep{poon09unsupervised}, coreference resolution, disagreement detection and word sense induction \citep{Chen12,Abbott11,Lau12}, as well as being part of the preprocessing for machine translation systems by several groups \citep{xu09using,genzel10automatically,singh10statistical}.
+\citep{Zhuang06cikm,Meena07sentiment,Banko07,Zouaq06tai,Zouaq07tel,chaumartin07knowledge,kessler08icwsm,Haghighi10,Hassan10,Joshi2010,Wu2010,Zouaq10}, as well as specific information (such as event, time or dialogue acts) \citep{Chambers11,McClosky12,Kluwer10}. The tool has been consistently used by several groups in the \textsc{Pascal}/NIST challenges targeting textual entailment \citep{adams-EtAl:2007:WTEP,blake:2007:WTEP,chambers-EtAl:2007:WTEP,harmeling:2007:WTEP,wang-neumann:2007:WTEP,Malakasiotis09,Mehdad09,Shivare2010,Glinos2010,Kouylekov2010,Pakray2011a}. It is also used for a variety of other tasks, such as coreference resolution, disagreement detection and word sense induction \citep{Chen12,Abbott11,Lau12}, as well as part of the preprocessing for machine translation systems by several groups \citep{xu09using,genzel10automatically,singh10statistical}.
 
 The Stanford dependency representation has also served as a model for
 developing dependency schemes in other languages. Recently schemes
 based on the Stanford dependency representation have been proposed for
 Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10},
 Persian \citep{Seraji12}, and French \citep{Maarouf12}. Recently, it
-was used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
+has been used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
 
 \section{Recent changes}
 
@@ -1147,7 +1138,7 @@ versions of the dependencies, or need to update your code.
 \begin{description}
 \item[abbrev] was removed as a relation.  It is now a particular case
   of an \emph{appos}.
-\item[complm] was removed as a relation. It is now a particular case of
+\item[compl] was removed as a relation. It is now a particular case of
   \emph{mark}. This follows HPSG-like usage, where the complementizer
   is a mark on the clause.
 \item[discourse] was introduced. The lack of a dependency type for
@@ -1161,6 +1152,6 @@ versions of the dependencies, or need to update your code.
 
 
 \bibliographystyle{plainnat}
-\bibliography{StanfordDependenciesManual}
+\bibliography{dependencies_manual}
 
 \end{document}

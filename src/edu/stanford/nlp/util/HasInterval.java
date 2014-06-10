@@ -34,7 +34,7 @@ public interface HasInterval<E extends Comparable<E>> {
             }
           };
 
-  public final static Comparator<HasInterval> NESTED_FIRST_ENDPOINTS_COMPARATOR =
+  public final static Comparator<HasInterval> NESTED_FIRST_COMPARATOR =
           new Comparator<HasInterval>() {
             public int compare(HasInterval e1, HasInterval e2) {
               Interval.RelType rel = e1.getInterval().getRelation(e2.getInterval());
@@ -48,7 +48,7 @@ public interface HasInterval<E extends Comparable<E>> {
             }
           };
 
-  public final static Comparator<HasInterval> CONTAINS_FIRST_ENDPOINTS_COMPARATOR =
+  public final static Comparator<HasInterval> CONTAINS_FIRST_COMPARATOR =
           new Comparator<HasInterval>() {
             public int compare(HasInterval e1, HasInterval e2) {
               Interval.RelType rel = e1.getInterval().getRelation(e2.getInterval());
@@ -57,8 +57,13 @@ public interface HasInterval<E extends Comparable<E>> {
               } else if (rel.equals(Interval.RelType.INSIDE)) {
                 return 1;
               } else {
-                return (e1.getInterval().compareTo(e2.getInterval()));
+                return 0;
               }
             }
           };
+  public final static Comparator<HasInterval> CONTAINS_FIRST_ENDPOINTS_COMPARATOR =
+          Comparators.chain(CONTAINS_FIRST_COMPARATOR, ENDPOINTS_COMPARATOR);
+  public final static Comparator<HasInterval> NESTED_FIRST_ENDPOINTS_COMPARATOR =
+          Comparators.chain(NESTED_FIRST_COMPARATOR, ENDPOINTS_COMPARATOR);
+
 }

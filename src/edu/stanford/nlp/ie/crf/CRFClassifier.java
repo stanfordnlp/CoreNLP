@@ -2172,8 +2172,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (flags.initialLopWeights != null) {
       try {
+        //TODO(mengqiu) use GZIPInputStream
         System.err.println("Reading initial LOP weights from file " + flags.initialLopWeights + " ...");
-        BufferedReader br = IOUtils.readerFromString(flags.initialLopWeights);
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(flags.initialLopWeights))));
         List<double[]> listOfWeights = new ArrayList<double[]>(numLopExpert);
         for (String line; (line = br.readLine()) != null; ) {
           line = line.trim();
@@ -2737,7 +2738,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         String word = toks[0];
         double[] arr = ArrayUtils.toDoubleArray(toks[1].split(" "));
         embeddings.put(word, arr);
-        count++;
       }
     }
 
@@ -3395,7 +3395,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (crf.flags.useEmbedding && crf.flags.embeddingWords != null && crf.flags.embeddingVectors != null) {
       System.err.println("Reading Embedding Files");
-      BufferedReader br = IOUtils.readerFromString(crf.flags.embeddingWords);
+      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(crf.flags.embeddingWords))));
       String line = null;
       List<String> wordList = new ArrayList<String>();
       while ((line = br.readLine()) != null) {
@@ -3509,7 +3509,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     }
   }
-
+  
   public Map<String, Counter<String>> topWeights() {
     Map<String, Counter<String>> w = new HashMap<String, Counter<String>>();
     for (String feature : featureIndex) {
