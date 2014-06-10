@@ -365,7 +365,7 @@ public class StringUtils {
         fields.add(currentField);
         currentField = Generics.newArrayList();
       } else {
-        currentField.add(token);
+        currentField.add(token.trim());
       }
     }
     if (currentField.size() > 0) {
