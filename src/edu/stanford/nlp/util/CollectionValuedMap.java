@@ -91,29 +91,6 @@ public class CollectionValuedMap<K, V> implements Map<K, Collection<V>>, Seriali
       c.add(value); // modifying the old collection
     }
   }
-  
-  /**
-   * Adds the values to the Collection mapped to by the key.
-   */
-  
-  public void addAll(K key, Collection<V> values) {
-    if (treatCollectionsAsImmutable) {
-      Collection<V> newC = cf.newCollection();
-      Collection<V> c = map.get(key);
-      if (c != null) {
-        newC.addAll(c);
-      }
-      newC.addAll(values);
-      map.put(key, newC); // replacing the old collection
-    } else {
-      Collection<V> c = map.get(key);
-      if (c == null) {
-        c = cf.newCollection();
-        map.put(key, c);
-      }
-      c.addAll(values); // modifying the old collection
-    }
-  }
 
   // Just add the key (empty collection, but key is in the keySet
   public void addKey(K key) {
