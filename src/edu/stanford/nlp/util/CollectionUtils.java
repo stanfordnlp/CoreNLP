@@ -138,6 +138,24 @@ public class CollectionUtils {
     }
     return diff;
   }
+  
+  /**
+   * Returns all objects in list1 that are not in list2
+   *
+   * @param <T> Type of items in the collection
+   * @param list1 First collection
+   * @param list2 Second collection
+   * @return The collection difference list1 - list2
+   */
+  public static <T> Set<T> diffAsSet(Collection<T> list1, Collection<T> list2) {
+    Set<T> diff = new HashSet<T>();
+    for (T t : list1) {
+      if (!list2.contains(t)) {
+        diff.add(t);
+      }
+    }
+    return diff;
+  }
 
   // Utils for loading and saving Collections to/from text files
 
