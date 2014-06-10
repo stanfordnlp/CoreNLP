@@ -106,6 +106,7 @@ public class WordToSentenceProcessorTest extends TestCase {
             new WordToSentenceProcessor<CoreLabel>(WordToSentenceProcessor.NewlineIsSentenceBreak.TWO_CONSECUTIVE);
 
     String input1 = "Depending on the options,\nthis could be all sorts of things,\n\n as I like chocolate. And cookies.";
+    String input2 = "Depending on the options,\nthis could be all sorts of things,\n as I like chocolate. And cookies.";
     checkResult(wtsNever, input1,
             "Depending on the options,\nthis could be all sorts of things,\n\nas I like chocolate.",
             "And cookies.");
@@ -117,6 +118,17 @@ public class WordToSentenceProcessorTest extends TestCase {
     checkResult(wtsTwo, input1,
             "Depending on the options, this could be all sorts of things,",
             "as I like chocolate.",
+            "And cookies.");
+    checkResult(wtsNever, input2,
+            "Depending on the options,\nthis could be all sorts of things,\nas I like chocolate.",
+            "And cookies.");
+    checkResult(wtsAlways, input2,
+            "Depending on the options,",
+            "this could be all sorts of things,",
+            "as I like chocolate.",
+            "And cookies.");
+    checkResult(wtsTwo, input2,
+            "Depending on the options,\nthis could be all sorts of things,\nas I like chocolate.",
             "And cookies.");
   }
 

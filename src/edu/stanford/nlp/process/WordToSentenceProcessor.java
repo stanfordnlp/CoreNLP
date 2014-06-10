@@ -210,6 +210,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
             System.err.println("  entering region");
           }
         }
+        lastTokenWasNewline = false;
         continue;
       }
 
@@ -218,6 +219,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         if (DEBUG) {
           System.err.println("  added to last sentence");
         }
+        lastTokenWasNewline = false;
         continue;
       }
 
@@ -234,33 +236,36 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         if (DEBUG) {
           System.err.println("  discarded sentence boundary");
         }
-      } else if (xmlBreakElementsToDiscard != null && matchesXmlBreakElementToDiscard(word)) {
-        newSent = true;
-        if (DEBUG) {
-          System.err.println("  is XML break element; discarded");
-        }
-      } else if (sentenceRegionEndPattern != null && sentenceRegionEndPattern.matcher(word).matches()) {
-        insideRegion = false;
-        newSent = true;
-        if (DEBUG) {
-          System.err.println("  discarded; exiting region");
-        }
-      } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
-        currentSentence.add(o);
-        newSent = true;
-        if (DEBUG) {
-          System.err.println("  is sentence boundary; added to current");
-        }
-      } else if (forcedEnd) {
-        currentSentence.add(o);
-        newSent = true;
-        if (DEBUG) {
-          System.err.println("  annotated to be the end of a sentence");
-        }
       } else {
-        currentSentence.add(o);
-        if (DEBUG) {
-          System.err.println("  added to current");
+        lastTokenWasNewline = false;
+        if (xmlBreakElementsToDiscard != null && matchesXmlBreakElementToDiscard(word)) {
+          newSent = true;
+          if (DEBUG) {
+            System.err.println("  is XML break element; discarded");
+          }
+        } else if (sentenceRegionEndPattern != null && sentenceRegionEndPattern.matcher(word).matches()) {
+          insideRegion = false;
+          newSent = true;
+          if (DEBUG) {
+            System.err.println("  discarded; exiting region");
+          }
+        } else if (sentenceBoundaryTokenPattern.matcher(word).matches()) {
+          currentSentence.add(o);
+          newSent = true;
+          if (DEBUG) {
+            System.err.println("  is sentence boundary; added to current");
+          }
+        } else if (forcedEnd) {
+          currentSentence.add(o);
+          newSent = true;
+          if (DEBUG) {
+            System.err.println("  annotated to be the end of a sentence");
+          }
+        } else {
+          currentSentence.add(o);
+          if (DEBUG) {
+            System.err.println("  added to current");
+          }
         }
       }
 
