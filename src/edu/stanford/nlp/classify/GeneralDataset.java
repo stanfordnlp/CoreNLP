@@ -486,18 +486,12 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
     };
   }
-  /**
-   * same as summaryStatistics if detailed is false. Shows number of datums per label if detailed is true.
-   * @param detailed
-   */
-  public void summaryStatistics(boolean detailed){
-    summaryStatistics();
-    if(detailed){
-      ClassicCounter<L> numDatums = new ClassicCounter<L>();
-      for(int i : labels){
-        numDatums.incrementCount(labelIndex.get(i));
-      }
-      System.err.println("num Datums per label: " + numDatums);
+   
+  public ClassicCounter<L> numDatumsPerLabel(){
+    ClassicCounter<L> numDatums = new ClassicCounter<L>();
+    for(int i : labels){
+      numDatums.incrementCount(labelIndex.get(i));
     }
+    return numDatums;
   }
 }
