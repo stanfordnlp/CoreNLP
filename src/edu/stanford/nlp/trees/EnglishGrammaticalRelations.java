@@ -673,8 +673,9 @@ public class EnglishGrammaticalRelations {
   public static final GrammaticalRelation RELATIVE =
     new GrammaticalRelation(Language.English, "rel", "relative",
         RelativeGRAnnotation.class, COMPLEMENT, "SBAR", tregexCompiler,
-        new String[] {
-          "SBAR <, WHNP|WHPP|WHADJP=target > /^NP/ [ !<, /^WHNP/ | < (S < (VP $-- (/^NP/ !< /^-NONE-$/)))]"
+        new String[] { 
+          // Leave out time expressions such as "who yesterday cooked dinner"; those should be nsubj
+          "SBAR <, WHNP|WHPP|WHADJP=target > /^NP/ [ !<, /^WHNP/ | < (S < (VP $-- (/^NP(?!-TMP)/ !< (NN < " + timeWordRegex + ") !< /^-NONE-$/)))]"
         });
   public static class RelativeGRAnnotation extends GrammaticalRelationAnnotation { }
 
