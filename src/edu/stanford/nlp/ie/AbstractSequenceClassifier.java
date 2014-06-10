@@ -995,14 +995,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter);
   }
 
-  public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
+  public void classifyAndWriteAnswers(Collection<File> testFiles)
     throws IOException
   {
-    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter);
+    classifyAndWriteAnswers(testFiles, plainTextReaderAndWriter);
   }
 
-  public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
-                                           DocumentReaderAndWriter<IN> readerWriter)
+  public void classifyAndWriteAnswers(Collection<File> testFiles,
+                                      DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =

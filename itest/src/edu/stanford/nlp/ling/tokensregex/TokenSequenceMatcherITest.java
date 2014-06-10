@@ -1276,8 +1276,13 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   //just to test if a pattern is compiling or not
   public void testcompile() {
-    String s = "(five|5)";
+    String s = "(?$se \"matching\" \"this\"|\"don't\")";
+    CoreMap doc = createDocument("does this do matching this");
     TokenSequencePattern p =TokenSequencePattern.compile(s);
+    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    boolean match = m.find();
+    assertTrue(match);
+    //assertEquals(m.group(), "matching this");
   }
 
 }
