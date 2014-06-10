@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -277,19 +278,21 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
    * It can also be used for plotting the results of the optimization routine.
    *
    * @author akleeman
+   *
    */
+
   public class Record {
     // convergence options.
     // have average difference like before
     // zero gradient.
 
     // for convergence test
-    private final List<Double> evals = new ArrayList<Double>();
-    private final List<Double> values = new ArrayList<Double>();
+    List<Double> evals = new ArrayList<Double>();
+    List<Double> values = new ArrayList<Double>();
     List<Double> gNorms = new ArrayList<Double>();
     // List<Double> xNorms = new ArrayList<Double>();
-    private final List<Integer> funcEvals = new ArrayList<Integer>();
-    private final List<Double> time = new ArrayList<Double>();
+    List<Integer> funcEvals = new ArrayList<Integer>();
+    List<Double> time = new ArrayList<Double>();
     // gNormInit: This makes it so that if for some reason
     // you try and divide by the initial norm before it's been
     // initialized you don't get a NAN but you will also never
@@ -310,6 +313,22 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
     private int noImproveItrCount = 0;
     private double[] xBest;
+
+    public Record() {
+    }
+
+    public Record(PrintWriter output) {
+      outputFile = output;
+    }
+
+    public Record(boolean beQuiet) {
+      this.quiet = beQuiet;
+    }
+
+    public Record(boolean beQuiet, Function monitor) {
+      this.quiet = beQuiet;
+      this.mon = monitor;
+    }
 
     public Record(boolean beQuiet, Function monitor, double tolerance) {
       this.quiet = beQuiet;
@@ -501,7 +520,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       return xBest;
     }
 
-  } // end class Record
+  }
 
   /**
    * The QNInfo class is used to store information about the Quasi Newton
@@ -1171,7 +1190,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   }
 
   private static Set<Integer> initializeParamRange(Function func, double[] x) {
-    Set<Integer> paramRange;
+    Set<Integer> paramRange = null;
     if (func instanceof HasRegularizerParamRange) {
       paramRange = ((HasRegularizerParamRange)func).getRegularizerParamRange(x);
     } else {
