@@ -453,7 +453,7 @@ public class RedwoodConfiguration {
 
     //--Channels.Debug
     boolean debug = Boolean.parseBoolean(get(props, "log.channels.debug", "true", used));
-    if (debug) {
+    if (!debug) {
       chain.add(Handlers.hideDebug);
     }
 
