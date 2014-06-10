@@ -664,7 +664,7 @@ public class SequencePattern<T> {
     }
   }
 
-  // Expression that represents a disjunction
+  // Expression that represents a disjuction
   public static class OrPatternExpr extends PatternExpr {
     List<PatternExpr> patterns;
 
@@ -1468,7 +1468,7 @@ public class SequencePattern<T> {
      * Returns true if there is a feasible combination of child branch ids that
      * causes all child expressions to be satisfied with
      * respect to the specified child expression
-     *   (assuming satisfaction with the specified branch and node index)
+     *   (assuming satisfiction with the specified branch and node index)
      * For other child expressions to have a compatible satisfiable branch,
      *   that branch must also terminate with the same node index as this one.
      * @param index - Index of the child expression
