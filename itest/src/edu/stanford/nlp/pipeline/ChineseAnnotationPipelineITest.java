@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.ling.ChineseCoreAnnotations.CharactersAnnotation;
@@ -11,19 +10,16 @@ import edu.stanford.nlp.ling.CoreAnnotations.ChineseSegAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 
 public class ChineseAnnotationPipelineITest extends TestCase {
   AnnotationPipeline pipeline = null;
 
   @Override
-  public void setUp() 
-    throws Exception
-  {
+  public void setUp() throws Exception {
     synchronized(ChineseAnnotationPipelineITest.class) {
       if (pipeline == null) {
-        // This is loaded from the Chinese models jar file.  Editting
+        // This is loaded from the Chinese models jar file.  Editing
         // it directly in the source tree and hoping to see changes
         // will be a very frustrating experience.
         pipeline = new StanfordCoreNLP("StanfordCoreNLP-chinese.properties");
@@ -62,13 +58,13 @@ public class ChineseAnnotationPipelineITest extends TestCase {
     assertEquals(expectedCharacters.length, characters.size());
     for (int i = 0; i < expectedCharacters.length; ++i) {
       CoreLabel word = characters.get(i);
-      assertEquals(expectedCharacters[i], 
+      assertEquals(expectedCharacters[i],
                    word.get(ChineseCharAnnotation.class));
-      assertEquals(expectedSegs[i] ? "1" : "0", 
+      assertEquals(expectedSegs[i] ? "1" : "0",
                    word.get(ChineseSegAnnotation.class));
     }
   }
-  
+
   public void testTwoSentences() {
     String query = "你马上回来北京吗？我要回去美国。";
     Annotation ann = new Annotation(query);
@@ -92,6 +88,6 @@ public class ChineseAnnotationPipelineITest extends TestCase {
       }
     }
   }
-    
+
 }
 
