@@ -104,6 +104,7 @@ public class SequencePattern<T> {
     this.action = action;
 
     nodeSequencePattern = new GroupPatternExpr(nodeSequencePattern, true);
+//    nodeSequencePattern = nodeSequencePattern.optimize();
     this.totalGroups = nodeSequencePattern.assignGroupIds(0);
     Frag f = nodeSequencePattern.build();
     f.connect(MATCH_STATE);
@@ -219,6 +220,9 @@ public class SequencePattern<T> {
     protected abstract void updateBindings(VarGroupBindings bindings);
 
     protected Object value() { return null; }
+
+    /** Returns an optimized version of this pattern - default is a noop */
+    protected PatternExpr optimize() { return this; }
   }
 
   // Represents one element to be matched
@@ -341,6 +345,7 @@ public class SequencePattern<T> {
       this.patterns = Arrays.asList(patterns);
     }
 
+    @Override
     protected Frag build()
     {
       Frag frag = null;
@@ -370,11 +375,21 @@ public class SequencePattern<T> {
       }
     }
 
+    @Override
     protected PatternExpr copy()
     {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
       for (PatternExpr p:patterns) {
         newPatterns.add(p.copy());
+      }
+      return new SequencePatternExpr(newPatterns);
+    }
+
+    @Override
+    public PatternExpr optimize() {
+      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
+      for (PatternExpr p:patterns) {
+        newPatterns.add(p.optimize());
       }
       return new SequencePatternExpr(newPatterns);
     }
@@ -451,6 +466,11 @@ public class SequencePattern<T> {
     }
 
     @Override
+    protected PatternExpr optimize() {
+      return new ValuePatternExpr(expr.optimize(), value);
+    }
+
+    @Override
     protected void updateBindings(VarGroupBindings bindings) {
       expr.updateBindings(bindings);
     }
@@ -479,6 +499,13 @@ public class SequencePattern<T> {
       this.varname = varname;
     }
 
+    private GroupPatternExpr(PatternExpr pattern, boolean capture, int captureGroupId, String varname) {
+      this.pattern = pattern;
+      this.capture = capture;
+      this.captureGroupId = captureGroupId;
+      this.varname = varname;
+    }
+
     protected Frag build()
     {
       Frag f = pattern.build();
@@ -504,7 +531,12 @@ public class SequencePattern<T> {
 
     protected PatternExpr copy()
     {
-      return new GroupPatternExpr(pattern.copy(), capture);
+      return new GroupPatternExpr(pattern.copy(), capture, captureGroupId, varname);
+    }
+
+    protected PatternExpr optimize()
+    {
+      return new GroupPatternExpr(pattern.optimize(), capture, captureGroupId, varname);
     }
 
     public String toString() {
@@ -550,7 +582,7 @@ public class SequencePattern<T> {
       Frag f = pattern.build();
       if (minMatch == 1 && maxMatch == 1) {
         return f;
-      } else if (minMatch <= 10 && maxMatch <= 10 && greedyMatch) {
+      } else if (minMatch <= 5 && maxMatch <= 5 && greedyMatch) {
         // Make copies if number of matches is low
         // Doesn't handle nongreedy matches yet
         // For non greedy match need to move curOut before the recursive connect
@@ -610,6 +642,10 @@ public class SequencePattern<T> {
     protected PatternExpr copy()
     {
       return new RepeatPatternExpr(pattern.copy(), minMatch, maxMatch, greedyMatch);
+    }
+    protected PatternExpr optimize()
+    {
+      return new RepeatPatternExpr(pattern.optimize(), minMatch, maxMatch, greedyMatch);
     }
 
     public String toString() {
@@ -687,6 +723,83 @@ public class SequencePattern<T> {
     public String toString() {
       return StringUtils.join(patterns, " | ");
     }
+
+    // minimize size of or clauses to trigger optimization
+    private final static int OPTIMIZE_MIN_SIZE = 5;
+    protected PatternExpr optimize()
+    {
+      if (patterns.size() <= OPTIMIZE_MIN_SIZE) {
+        // Not enough patterns for fancy optimization
+        List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
+        for (PatternExpr p:patterns) {
+          newPatterns.add(p.optimize());
+        }
+        return new OrPatternExpr(newPatterns);
+      } else {
+        // More fancy optimization
+        return optimizeOr();
+      }
+    }
+
+    private PatternExpr optimizeOr() {
+      // Try to collapse OR of NodePattern with just strings into a StringInSetAnnotationPattern
+      List<PatternExpr> opts = new ArrayList<PatternExpr>(patterns.size());
+      // Map from annotation key (Class), ignoreCase (Boolean) to set of patterns/strings
+      Map<Pair<Class,Boolean>, Pair<Collection<PatternExpr>, Set<String>>> stringPatterns =
+              new HashMap<Pair<Class,Boolean>, Pair<Collection<PatternExpr>, Set<String>>>();
+      // Go through patterns and get candidates for optimization
+      for (PatternExpr p:patterns) {
+        PatternExpr opt = p.optimize();
+        opts.add(opt);
+        if (opt instanceof NodePatternExpr) {
+          NodePattern nodePattern = ((NodePatternExpr) opt).nodePattern;
+          if (nodePattern instanceof CoreMapNodePattern) {
+            List<Pair<Class, NodePattern>> annotationPatterns = ((CoreMapNodePattern) nodePattern).getAnnotationPatterns();
+            if (annotationPatterns.size() == 1) {
+              // Check if this can be optimized - if it is a string annotation pattern
+              Pair<Class, NodePattern> pair = annotationPatterns.get(0);
+              if (pair.second instanceof CoreMapNodePattern.StringAnnotationPattern) {
+                Boolean ignoreCase = ((CoreMapNodePattern.StringAnnotationPattern) pair.second).ignoreCase;
+                String target = ((CoreMapNodePattern.StringAnnotationPattern) pair.second).target;
+                Pair<Class,Boolean> key = Pair.makePair(pair.first, ignoreCase);
+                Pair<Collection<PatternExpr>, Set<String>> saved = stringPatterns.get(key);
+                if (saved == null) {
+                  saved = new Pair<Collection<PatternExpr>, Set<String>>(new ArrayList<PatternExpr>(), new HashSet<String>());
+                  stringPatterns.put(key, saved);
+                }
+                saved.first.add(opt);
+                saved.second.add(target);
+              }
+            }
+          }
+        }
+      }
+
+      // Go over our maps and see if any of these strings should be optimized away
+      // Keep track of things we have optimized away
+      Map<PatternExpr, Boolean> alreadyOptimized = new IdentityHashMap<PatternExpr, Boolean>();
+      List<PatternExpr> finalOptimizedPatterns = new ArrayList<PatternExpr>(patterns.size());
+      for (Pair<Class,Boolean> key:stringPatterns.keySet()) {
+        Pair<Collection<PatternExpr>, Set<String>> saved = stringPatterns.get(key);
+        Set<String> set = saved.second;
+        if (set.size() > OPTIMIZE_MIN_SIZE) {
+          PatternExpr optimized = new NodePatternExpr(
+                  new CoreMapNodePattern(key.first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, key.second)));
+          finalOptimizedPatterns.add(optimized);
+          for (PatternExpr p:saved.first) {
+            alreadyOptimized.put(p, true);
+          }
+        }
+      }
+      // Add back original stuff that we didn't optimize
+      for (PatternExpr p: opts) {
+        Boolean included = alreadyOptimized.get(p);
+        if (included == null || !included) {
+          finalOptimizedPatterns.add(p);
+        }
+      }
+      return new OrPatternExpr(finalOptimizedPatterns);
+    }
   }
 
   // Expression that represents a conjunction
@@ -747,6 +860,15 @@ public class SequencePattern<T> {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
       for (PatternExpr p:patterns) {
         newPatterns.add(p.copy());
+      }
+      return new AndPatternExpr(newPatterns);
+    }
+
+    protected PatternExpr optimize()
+    {
+      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
+      for (PatternExpr p:patterns) {
+        newPatterns.add(p.optimize());
       }
       return new AndPatternExpr(newPatterns);
     }
