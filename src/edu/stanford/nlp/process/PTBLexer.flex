@@ -851,7 +851,7 @@ gonna|gotta|lemme|gimme|wanna
                           return getNext(s, yytext());
                         }
 /* Special case to get ca., fig. or Prop. before numbers */
-{ABBREV3}/{SPACE}[:digit:]   { return getNext(); }
+{ABBREV3}/{SPACE}?[:digit:]   { return getNext(); }
 /* Special case to get pty. ltd. or pty limited */
 pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV1}/{SENTEND}     {
