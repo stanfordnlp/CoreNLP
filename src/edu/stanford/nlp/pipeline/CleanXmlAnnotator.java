@@ -9,8 +9,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.MultiTokenTag;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
 
@@ -44,36 +42,6 @@ public class CleanXmlAnnotator implements Annotator{
   private final Pattern dateTagMatcher;
 
   public static final String DEFAULT_DATE_TAGS = "datetime|date";
-
-  /**
-   * This tells us which XML tags wrap document id
-   */
-  private Pattern docIdTagMatcher;
-
-  public static final String DEFAULT_DOCID_TAGS = "docid";
-
-  /**
-   * This tells us which XML tags wrap document type
-   */
-  private Pattern docTypeTagMatcher;
-
-  public static final String DEFAULT_DOCTYPE_TAGS = "doctype";
-
-  /**
-   * This tells us when an utterance turn starts
-   * (used in dcoref)
-   */
-  private Pattern utteranceTurnTagMatcher = null;
-
-  public static final String DEFAULT_UTTERANCE_TURN_TAGS = "turn";
-
-  /**
-   * This tells us what the speaker tag is
-   * (used in dcoref)
-   */
-  private Pattern speakerTagMatcher = null;
-
-  public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
    * This setting allows handling of flawed XML.  For example,
@@ -118,57 +86,35 @@ public class CleanXmlAnnotator implements Annotator{
     }
   }
 
-  private Pattern toCaseInsensitivePattern(String tags) {
-    if(tags != null){
-      return Pattern.compile(tags, Pattern.CASE_INSENSITIVE);
-    } else {
-      return null;
-    }
-  }
-
-  public void setDocIdTagMatcher(String docIdTags) {
-    docIdTagMatcher = toCaseInsensitivePattern(docIdTags);
-  }
-
-  public void setDocTypeTagMatcher(String docTypeTags) {
-    docTypeTagMatcher = toCaseInsensitivePattern(docTypeTags);
-  }
-
-  public void setDiscourseTags(String utteranceTurnTags, String speakerTags) {
-    utteranceTurnTagMatcher = toCaseInsensitivePattern(utteranceTurnTags);
-    speakerTagMatcher = toCaseInsensitivePattern(speakerTags);
-  }
-
   public void annotate(Annotation annotation) {
     if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-      List<CoreLabel> newTokens = process(annotation, tokens);
+      List<CoreLabel> dateTokens = new ArrayList<CoreLabel>();
+      List<CoreLabel> newTokens = process(tokens, dateTokens);
       // We assume that if someone is using this annotator, they don't
       // want the old tokens any more and get rid of them
       annotation.set(CoreAnnotations.TokensAnnotation.class, newTokens);
+
+      // if the doc date was found, save it. it is used by SUTime (inside the "ner" annotator)
+      if(dateTokens.size() > 0){
+        StringBuffer os = new StringBuffer();
+        boolean first = true;
+        for (CoreLabel t : dateTokens) {
+          if (!first) os.append(" ");
+          os.append(t.word());
+          first = false;
+        }
+        //System.err.println("DOC DATE IS: " + os.toString());
+        annotation.set(CoreAnnotations.DocDateAnnotation.class, os.toString());
+      }
     }
   }
 
   public List<CoreLabel> process(List<CoreLabel> tokens) {
-    return process(null, tokens);
+    return process(tokens, null);
   }
 
-  private String tokensToString(Annotation annotation, List<CoreLabel> tokens) {
-    if (tokens.isEmpty()) return "";
-    // Try to get original text back?
-    String annotationText = (annotation != null)? annotation.get(CoreAnnotations.TextAnnotation.class) : null;
-    if (annotationText != null) {
-      CoreLabel firstToken = tokens.get(0);
-      CoreLabel lastToken = tokens.get(tokens.size() - 1);
-      int firstCharOffset = firstToken.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-      int lastCharOffset = lastToken.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-      return annotationText.substring(firstCharOffset, lastCharOffset);
-    } else {
-      return StringUtils.joinWords(tokens, " ");
-    }
-  }
-
-  public List<CoreLabel> process(Annotation annotation, List<CoreLabel> tokens) {
+  public List<CoreLabel> process(List<CoreLabel> tokens, List<CoreLabel> dateTokens) {
     // As we are processing, this stack keeps track of which tags we
     // are currently inside
     Stack<String> enclosingTags = new Stack<String>();
@@ -186,19 +132,9 @@ public class CleanXmlAnnotator implements Annotator{
     // we keep track of this so we can look at the last tag after
     // we're outside the loop
 
-    int utteranceIndex = 0;
-    boolean inUtterance = false;
-    boolean inSpeakerTag = false;
-    String currentSpeaker = null;
-    List<CoreLabel> speakerTokens = new ArrayList<CoreLabel>();
-    List<CoreLabel> docDateTokens = new ArrayList<CoreLabel>();
-    List<CoreLabel> docTypeTokens = new ArrayList<CoreLabel>();
-    List<CoreLabel> docIdTokens = new ArrayList<CoreLabel>();
-
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
       XMLUtils.XMLTag tag = XMLUtils.parseTag(word);
-
       // If it's not a tag, we do manipulations such as unescaping
       if (tag == null) {
         // TODO: put this into the lexer instead of here
@@ -208,10 +144,6 @@ public class CleanXmlAnnotator implements Annotator{
             xmlTagMatcher == null ||
             xmlTagMatcher.matcher("").matches()) {
           newTokens.add(token);
-          if (inUtterance) {
-            token.set(CoreAnnotations.UtteranceAnnotation.class, utteranceIndex);
-            if (currentSpeaker != null) token.set(CoreAnnotations.SpeakerAnnotation.class, currentSpeaker);
-          }
         }
         // if we removed any text, and the tokens are "invertible" and
         // therefore keep track of their before/after text, append
@@ -246,23 +178,7 @@ public class CleanXmlAnnotator implements Annotator{
         if (dateTagMatcher != null &&
             currentTagSet.size() > 0 &&
             dateTagMatcher.matcher(currentTagSet.get(currentTagSet.size() - 1)).matches()) {
-          docDateTokens.add(token);
-        }
-
-        if (docIdTagMatcher != null &&
-                currentTagSet.size() > 0 &&
-                docIdTagMatcher.matcher(currentTagSet.get(currentTagSet.size() - 1)).matches()) {
-          docIdTokens.add(token);
-        }
-
-        if (docTypeTagMatcher != null &&
-                currentTagSet.size() > 0 &&
-                docTypeTagMatcher.matcher(currentTagSet.get(currentTagSet.size() - 1)).matches()) {
-          docTypeTokens.add(token);
-        }
-
-        if (inSpeakerTag) {
-          speakerTokens.add(token);
+          dateTokens.add(token);
         }
 
         continue;
@@ -294,43 +210,6 @@ public class CleanXmlAnnotator implements Annotator{
         previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
       }
 
-      if (utteranceTurnTagMatcher != null && utteranceTurnTagMatcher.matcher(tag.name).matches()) {
-        if (newTokens.size() > 0) {
-          // Utterance turn is also sentence ending
-          CoreLabel previous = newTokens.get(newTokens.size() - 1);
-          previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-        }
-        inUtterance = !(tag.isEndTag || tag.isSingleTag);
-        if (inUtterance) {
-          utteranceIndex++;
-        }
-        if (!inUtterance) {
-          currentSpeaker = null;
-        }
-      }
-
-      if (speakerTagMatcher != null && speakerTagMatcher.matcher(tag.name).matches()) {
-        if (newTokens.size() > 0) {
-          // Speaker is not really part of sentence
-          CoreLabel previous = newTokens.get(newTokens.size() - 1);
-          previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-        }
-        inSpeakerTag = !(tag.isEndTag || tag.isSingleTag);
-        if (tag.isEndTag) {
-          currentSpeaker = tokensToString(annotation, speakerTokens);
-          MultiTokenTag.Tag mentionTag = new MultiTokenTag.Tag(currentSpeaker, "Speaker", speakerTokens.size());
-          int i = 0;
-          for (CoreLabel t:speakerTokens) {
-            t.set(CoreAnnotations.SpeakerAnnotation.class, currentSpeaker);
-            t.set(CoreAnnotations.MentionTokenAnnotation.class, new MultiTokenTag(mentionTag, i));
-            i++;
-          }
-        } else {
-          currentSpeaker = null;
-        }
-        speakerTokens.clear();
-      }
-
       if (xmlTagMatcher == null)
         continue;
 
@@ -344,8 +223,8 @@ public class CleanXmlAnnotator implements Annotator{
         while (true) {
           if (enclosingTags.size() == 0) {
             throw new IllegalArgumentException("Got a close tag " + tag.name +
-                                               " which does not match" +
-                                               " any open tag");
+                                               "which does not match " +
+                                               "any open tag");
           }
           String lastTag = enclosingTags.pop();
           if (xmlTagMatcher.matcher(lastTag).matches()){
@@ -394,24 +273,9 @@ public class CleanXmlAnnotator implements Annotator{
       }
     }
 
-    // Populate docid, docdate, doctype
-    if (annotation != null) {
-      if (!docIdTokens.isEmpty()) {
-        String str = tokensToString(annotation, docIdTokens).trim();
-        annotation.set(CoreAnnotations.DocIDAnnotation.class, str);
-      }
-      if (!docDateTokens.isEmpty()) {
-        String str = tokensToString(annotation, docDateTokens).trim();
-        annotation.set(CoreAnnotations.DocDateAnnotation.class, str);
-      }
-      if (!docTypeTokens.isEmpty()) {
-        String str = tokensToString(annotation, docTypeTokens).trim();
-        annotation.set(CoreAnnotations.DocTypeAnnotation.class, str);
-      }
-    }
-
     return newTokens;
   }
+
 
   @Override
   public Set<Requirement> requires() {

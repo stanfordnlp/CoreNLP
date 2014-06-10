@@ -130,14 +130,6 @@ public class IOUtils {
     }
   }
 
-  private static OutputStream getBufferedOutputStream(String path) throws IOException {
-    OutputStream os = new BufferedOutputStream(new FileOutputStream(path));
-    if (path.endsWith(".gz")) {
-      os = new GZIPOutputStream(os);
-    }
-    return os;
-  }
-
   //++ todo [cdm, Aug 2012]: None of the methods below in this block are used. Delete them all?
   //++ They're also kind of weird in unnecessarily bypassing using a Writer.
 
@@ -150,7 +142,12 @@ public class IOUtils {
    * @throws IOException In case of failure
    */
   public static void writeStringToFile(String contents, String path, String encoding) throws IOException {
-    OutputStream writer = getBufferedOutputStream(path);
+    OutputStream writer;
+    if (path.endsWith(".gz")) {
+      writer = new GZIPOutputStream(new FileOutputStream(path));
+    } else {
+      writer = new BufferedOutputStream(new FileOutputStream(path));
+    }
     writer.write(contents.getBytes(encoding));
     writer.close();
   }
@@ -273,14 +270,6 @@ public class IOUtils {
     Object o = ois.readObject();
     ois.close();
     return ErasureUtils.uncheckedCast(o);
-  }
-
-  public static DataInputStream getDataInputStream(String filenameUrlOrClassPath) throws IOException {
-    return new DataInputStream(getInputStreamFromURLOrClasspathOrFileSystem(filenameUrlOrClassPath));
-  }
-
-  public static DataOutputStream getDataOutputStream(String filename) throws IOException {
-    return new DataOutputStream(getBufferedOutputStream((filename)));
   }
 
   /**
