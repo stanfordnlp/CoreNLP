@@ -106,7 +106,7 @@ public class Document implements Serializable {
   /** UtteranceAnnotation -> String (speaker): mention ID or speaker string  */
   public Map<Integer, String> speakers;
 
-  /** Pair of mention id, and the mention's speaker id  */
+  /** mention ID pair  */
   public Set<Pair<Integer, Integer>> speakerPairs;
 
   public int maxUtter;
@@ -168,20 +168,15 @@ public class Document implements Serializable {
         // Populate speaker info
         SpeakerInfo speakerInfo = speakerInfoMap.get(speaker);
         if (speakerInfo == null) {
-          speakerInfoMap.put(speaker, speakerInfo = new SpeakerInfo(speaker));
-          // span indicates this is the speaker
-          if (Rules.mentionMatchesSpeaker(m, speakerInfo, true)) {
-            m.speakerInfo = speakerInfo;
-          }
+          speakerInfoMap.put(speaker, new SpeakerInfo(speaker));
         }
 
         if (NumberMatchingRegex.isDecimalInteger(speaker)) {
           try{
             int speakerMentionID = Integer.parseInt(speaker);
             if (utter != 0) {
-              // Add pairs of mention id and the mention id of the speaker
               speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
-//              speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
+              speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
             }
           } catch (Exception e){
             // no mention found for the speaker
@@ -195,21 +190,6 @@ public class Document implements Serializable {
         m.generic = true;
       }
     }
-    // now that we have identified the speakers, first pass to check if mentions should cluster with the speakers
-    for(Mention m : allPredictedMentions.values()) {
-      if (m.speakerInfo == null) {
-        for (SpeakerInfo speakerInfo: speakerInfoMap.values()) {
-          if (speakerInfo.hasRealSpeakerName()) {
-            // do loose match - assumes that there isn't that many speakers....
-            if (Rules.mentionMatchesSpeaker(m, speakerInfo, false)) {
-              m.speakerInfo = speakerInfo;
-              break;
-            }
-          }
-        }
-      }
-    }
-
   }
 
   /** Document initialize */
@@ -774,10 +754,6 @@ public class Document implements Serializable {
 
   public SpeakerInfo getSpeakerInfo(String speaker) {
     return speakerInfoMap.get(speaker);
-  }
-
-  public int numberOfSpeakers() {
-    return speakerInfoMap.size();
   }
 
   /** Check one mention is the speaker of the other mention */

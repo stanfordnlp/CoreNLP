@@ -16,26 +16,24 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <table border="1" style="background-color:#f0f0f0;" align="center">
     <tr><th>Document Info</th></tr>
     <tr><td>
-    <ul>
     <xsl:if test="root/document/docId">
-        <li><i>DocId</i>: <xsl:value-of select="root/document/docId"/></li>
+        <br/>DocId: <xsl:value-of select="root/document/docId"/>
     </xsl:if>
     <xsl:if test="root/document/docDate">
-        <li><i>DocDate</i>: <xsl:value-of select="root/document/docDate"/></li>
+        <br/>DocDate: <xsl:value-of select="root/document/docDate"/>
     </xsl:if>
     <xsl:if test="root/document/docSourceType">
-        <li><i>DocSourceType</i>: <xsl:value-of select="root/document/docSourceType"/></li>
+        <br/>DocSourceType: <xsl:value-of select="root/document/docSourceType"/>
     </xsl:if>
     <xsl:if test="root/document/docType">
-        <li><i>DocType</i>: <xsl:value-of select="root/document/docType"/></li>
+        <br/>DocType: <xsl:value-of select="root/document/docType"/>
     </xsl:if>
     <xsl:if test="root/document/author">
-        <li><i>Author</i>: <xsl:value-of select="root/document/author"/></li>
+        <br/>Author: <xsl:value-of select="root/document/author"/>
     </xsl:if>
     <xsl:if test="root/document/location">
-        <li><i>Location</i>: <xsl:value-of select="root/document/location"/></li>
+        <br/>Location: <xsl:value-of select="root/document/location"/>
     </xsl:if>
-    </ul>
     </td></tr>
 
     <xsl:if test="root/document/text">
@@ -166,14 +164,12 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
             <th>Sentence</th>
             <th>Head</th>
             <th>Text</th>
-            <th>Context</th>
         </tr>
         <xsl:for-each select="mention">
             <tr>
                 <td><xsl:value-of select="sentence"/></td>
                 <td><xsl:value-of select="head"/> <xsl:if test="@representative"> (gov) </xsl:if></td>
                 <td><xsl:value-of select="text"/></td>
-                <td><xsl:value-of select="context"/></td>
             </tr>
         </xsl:for-each>
         </table>
