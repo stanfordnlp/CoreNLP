@@ -42,16 +42,24 @@ public class TaggerFeature extends Feature {
   private int end;
   private FeatureKey key;
   private int yTag;
+  private final TTags ttags;
   private final TaggerExperiments domain;
 
   protected TaggerFeature(int start, int end, FeatureKey key,
-                          int yTag, TaggerExperiments domain) {
+                          TTags ttags, TaggerExperiments domain) {
     this.start = start;
     this.end = end;
     this.key = key;
+    this.ttags = ttags;
     this.domain = domain;
-    this.yTag = yTag;
+    yTag = ttags.getIndex(key.tag);
   }
+
+  public TaggerFeature(TTags ttags, TaggerExperiments domain) {
+    this.ttags = ttags;
+    this.domain = domain;
+  }
+
 
   @Override
   public double getVal(int index) {
