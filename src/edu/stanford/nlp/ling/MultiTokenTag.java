@@ -28,6 +28,28 @@ public class MultiTokenTag implements Serializable {
       this.tag = tag;
       this.length = length;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      Tag tag1 = (Tag) o;
+
+      if (length != tag1.length) return false;
+      if (!name.equals(tag1.name)) return false;
+      if (!tag.equals(tag1.tag)) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = name.hashCode();
+      result = 31 * result + tag.hashCode();
+      result = 31 * result + length;
+      return result;
+    }
   }
 
   public MultiTokenTag(Tag tag, int index) {
@@ -45,5 +67,25 @@ public class MultiTokenTag implements Serializable {
 
   public String toString() {
     return  tag.name + "/" + tag.tag +  "(" + index + "/" + tag.length + ")";
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    MultiTokenTag that = (MultiTokenTag) o;
+
+    if (index != that.index) return false;
+    if (!tag.equals(that.tag)) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = tag.hashCode();
+    result = 31 * result + index;
+    return result;
   }
 }
