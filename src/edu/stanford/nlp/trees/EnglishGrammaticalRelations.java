@@ -1600,7 +1600,7 @@ public class EnglishGrammaticalRelations {
       DISCOURSE_ELEMENT,
       GOES_WITH,
     }));
-  /* Cache frequently used views of the values list */
+  // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> unmodifiableValues =
     Collections.unmodifiableList(values);
   private static final List<GrammaticalRelation> synchronizedValues =
