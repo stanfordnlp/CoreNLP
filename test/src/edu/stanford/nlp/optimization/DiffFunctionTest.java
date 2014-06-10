@@ -1,10 +1,10 @@
 package edu.stanford.nlp.optimization;
 
-import java.util.Arrays;
 import java.util.Random;
 
-import edu.stanford.nlp.math.ArrayMath;
 import junit.framework.TestCase;
+
+import edu.stanford.nlp.math.ArrayMath;
 
 /**
  * This class both tests a particular DiffFunction and provides a basis
@@ -38,7 +38,7 @@ public class DiffFunctionTest extends TestCase {
   }
 
   public static void gradientCheck(DiffFunction f) {
-    for (int deg = -2; deg > -7; deg--) {
+    for (int deg = -2; deg > -8; deg--) {
       double eps = Math.pow(10, deg);
       System.err.println("testing for eps " + eps);
       gradientCheck(f, eps);
@@ -84,13 +84,13 @@ public class DiffFunctionTest extends TestCase {
 
     double[] diff = ArrayMath.pairwiseSubtract(testGrad, fGrad);
     System.err.println("1-norm:" + ArrayMath.norm_1(diff));
-    assertEquals(0.0, ArrayMath.norm_1(diff), eps);
+    assertEquals(0.0, ArrayMath.norm_1(diff), 2 * eps);
     System.err.println("2-norm:" + ArrayMath.norm(diff));
-    assertEquals(0.0, ArrayMath.norm(diff), eps);
+    assertEquals(0.0, ArrayMath.norm(diff), 2 * eps);
     System.err.println("inf-norm:" + ArrayMath.norm_inf(diff));
-    assertEquals(0.0, ArrayMath.norm_inf(diff), eps);
+    assertEquals(0.0, ArrayMath.norm_inf(diff), 2 * eps);
     System.err.println("pearson:" + ArrayMath.pearsonCorrelation(testGrad,fGrad));
-    assertEquals(1.0, ArrayMath.pearsonCorrelation(testGrad,fGrad), eps);
+    assertEquals(1.0, ArrayMath.pearsonCorrelation(testGrad,fGrad), 2 * eps);
     // This could exception if all numbers were the same and so there is no standard deviation.
     // ArrayMath.standardize(fGrad);
     // ArrayMath.standardize(testGrad);
