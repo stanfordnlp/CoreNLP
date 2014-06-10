@@ -20,7 +20,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     final File WORK_DIR_FILE = File.createTempFile("DcorefITest", "");
     WORK_DIR_FILE.delete();
     WORK_DIR_FILE.mkdir();
-    // TODO: delete the files left behind?
+    WORK_DIR_FILE.deleteOnExit();
 
     String baseLogFile = WORK_DIR_FILE + File.separator + "log";
 
