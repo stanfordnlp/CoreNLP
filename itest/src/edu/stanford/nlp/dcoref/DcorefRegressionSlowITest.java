@@ -10,10 +10,12 @@ import edu.stanford.nlp.util.StringUtils;
 /**
  * Run the dcoref system using the exact properties we distribute as
  * an example.  Check that the output does not change from expected.
+ * If performance numbers change, we'll notice and be able to verify
+ * that it's intended.
  *
  * @author John Bauer
  */
-public class DcorefRegressionITest extends TestCase {
+public class DcorefRegressionSlowITest extends TestCase {
   public void testDcoref() throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefITest", "");
     WORK_DIR_FILE.delete();
