@@ -240,12 +240,12 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
   private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations) {
-    // if (t.numChildren() > 0) {          // don't do leaves
     if (t.isPhrasal()) {    // don't do leaves or preterminals!
       TreeGraphNode tHigh = t.highestNodeWithSameHead();
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
           for (Tree u : egr.getRelatedNodes(t, root)) {
+            // System.out.println("Adding " + egr.getShortName() + " from " + t.value() + " to " + u.value() );
             tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
           }
         }
@@ -356,17 +356,19 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
 
-  /** Look through the tree t and adds to the List basicDep dependencies
-   *  which aren't in it but which satisfy the filter puncTypedDepFilter.
+  /** Look through the tree t and adds to the List basicDep
+   *  additional dependencies which aren't
+   *  in the List but which satisfy the filter puncTypedDepFilter.
    *
    * @param t The tree to examine (not changed)
    * @param basicDep The list of dependencies which may be augmented
-   * @param f Additional dependencies are added only if they pass this filter
+   * @param puncTypedDepFilter The filter that may skip punctuation dependencies
+   * @param extraTreeDepFilter Additional dependencies are added only if they pass this filter
    */
   private static void getTreeDeps(TreeGraphNode t, List<TypedDependency> basicDep,
                                   Filter<TypedDependency> puncTypedDepFilter,
                                   Filter<TypedDependency> extraTreeDepFilter) {
-    if (t.isPhrasal()) {          // don't do leaves of POS tags (chris changed this from numChildren > 0 in 2010)
+    if (t.isPhrasal()) {          // don't do leaves or POS tags (chris changed this from numChildren > 0 in 2010)
       Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> depMap = getAllDependents(t);
       for (Class<? extends GrammaticalRelationAnnotation> depName : depMap.keySet()) {
         for (TreeGraphNode depNode : depMap.get(depName)) {
