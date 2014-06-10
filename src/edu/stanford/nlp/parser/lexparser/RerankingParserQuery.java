@@ -28,6 +28,12 @@ public class RerankingParserQuery implements ParserQuery {
   
   private List<ScoredObject<Tree>> scoredTrees;
 
+  /**
+   * Data for this particular query stored by the Reranker will be
+   * stored in this object
+   */
+  private RerankerQuery rerankerQuery;
+
   public RerankingParserQuery(Options op, ParserQuery parserQuery, Reranker reranker) {
     this.op = op;
     this.parserQuery = parserQuery;
@@ -76,13 +82,13 @@ public class RerankingParserQuery implements ParserQuery {
   }
 
   List<ScoredObject<Tree>> rerank(List<? extends HasWord> sentence, List<ScoredObject<Tree>> bestKParses) {
-    RerankerQuery rq = reranker.process(sentence);
+    this.rerankerQuery = reranker.process(sentence);
 
     List<ScoredObject<Tree>> reranked = new ArrayList<ScoredObject<Tree>>();
     for (ScoredObject<Tree> scoredTree : bestKParses) {
       double score = scoredTree.score();
       try {
-        score = op.baseParserWeight * score + rq.score(scoredTree.object());
+        score = op.baseParserWeight * score + rerankerQuery.score(scoredTree.object());
       } catch (NoSuchParseException e) {
         score = Double.NEGATIVE_INFINITY;
       }
@@ -223,5 +229,9 @@ public class RerankingParserQuery implements ParserQuery {
   @Override
   public List<? extends HasWord> originalSentence() { 
     return parserQuery.originalSentence();
+  }
+
+  public RerankerQuery rerankerQuery() {
+    return rerankerQuery;
   }
 }

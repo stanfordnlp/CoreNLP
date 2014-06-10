@@ -15,10 +15,11 @@ public class ModCollinsHeadFinderTest extends TestCase {
     Tree.valueOf("(PRN (-LRB- -LRB-) (NP (NNP ABC)) (-RRB- -RRB-))"),
     // junk tree just for testing setCategoriesToAvoid (NP never matches VBZ but shouldn't pick the punctuation marks)
     Tree.valueOf("(NP (. .) (. .) (VBZ eats) (. .) (. .))"),
+    Tree.valueOf("(PP (SYM -) (NP (CD 3))))"),
     // Tree.valueOf("(FOO (BAR a) (BAZ b))")  // todo: If change to always do something rather than Exception (and edit hfFeads array)
   };
 
-  private String[] hfHeads = { "SQ", "NML", "VP", "NP", "NP", "VBZ" // , "BAR"
+  private String[] hfHeads = { "SQ", "NML", "VP", "NP", "NP", "VBZ", "SYM" // , "BAR"
   };
 
   private void runTesting(HeadFinder hf, String[] heads) {
