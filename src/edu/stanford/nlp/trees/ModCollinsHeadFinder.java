@@ -90,10 +90,7 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     nonTerminalInfo.put("PRT", new String[][]{{"right", "RP"}});
     // add '#' for pounds!!
     nonTerminalInfo.put("QP", new String[][]{{"left", "$", "IN", "NNS", "NN", "JJ", "CD", "PDT", "DT", "RB", "NCD", "QP", "JJR", "JJS"}});
-    // reduced relative clause can be any predicate VP, ADJP, NP, PP.
-    // For choosing between NP and PP, really need to know which one is temporal and to choose the other.
-    // It's not clear ADVP needs to be in the list at all (delete?).
-    nonTerminalInfo.put("RRC", new String[][]{{"left", "RRC"}, {"right", "VP", "ADJP", "JJP", "NP", "PP", "ADVP"}});
+    nonTerminalInfo.put("RRC", new String[][]{{"right", "VP", "NP", "ADVP", "ADJP", "JJP", "PP"}});
 
     // delete IN -- go for main part of sentence; add FRAG
 
