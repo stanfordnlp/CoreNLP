@@ -368,9 +368,9 @@ public class Redwood {
     Runnable endTrack = new Runnable(){
       public void run(){
         assert !isThreaded || control.isHeldByCurrentThread();
-        //(check name match)
         String expected = titleStack.pop();
-        if(!expected.equalsIgnoreCase(title)){
+        //(check name match)
+        if (!isThreaded && !expected.equalsIgnoreCase(title)){
           throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
         }
         //(decrement depth)
@@ -442,12 +442,12 @@ public class Redwood {
    */
   public static void endThreads(String check){
     //(error check)
+    isThreaded = false;
     if(currentThread != -1L){
       throw new IllegalStateException("endThreads() called, but thread " + currentThread + " has not finished (exception in thread?)");
     }
     //(end threaded environment)
     assert !control.isHeldByCurrentThread();
-    isThreaded = false;
     //(write remaining threads)
     boolean cleanPass = false;
     while(!cleanPass){
@@ -1003,7 +1003,7 @@ public class Redwood {
               finishThread();
               //(signal end of threads)
               int numStillPending = numPending.decrementAndGet();
-              if(numStillPending <= 0){ // should never actually be less than
+              if(numStillPending <= 0){
                 endThreads(title);
               }
             } catch(Throwable t){
