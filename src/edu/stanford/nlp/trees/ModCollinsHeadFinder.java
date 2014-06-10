@@ -82,7 +82,9 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
     // (PP (JJ next) (PP to them))
     // When you have both JJ and IN daughters, it is invariably "such as" -- not so clear which should be head, but leave as IN
     // should prefer JJ? (PP (JJ such) (IN as) (NP (NN crocidolite)))  Michel thinks we should make JJ a head of PP
-    nonTerminalInfo.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ"}, {"right", "PP"}});
+    // added SYM as used in new treebanks for symbols filling role of IN
+    // Changed PP search to left -- just what you want for conjunction (and consistent with SemanticHeadFinder)
+    nonTerminalInfo.put("PP", new String[][]{{"right", "IN", "TO", "VBG", "VBN", "RP", "FW", "JJ", "SYM"}, {"left", "PP"}});
 
     nonTerminalInfo.put("PRN", new String[][]{{"left", "VP", "NP", "PP", "SQ", "S", "SINV", "SBAR", "ADJP", "JJP", "ADVP", "INTJ", "WHNP", "NAC", "VBP", "JJ", "NN", "NNP"}});
     nonTerminalInfo.put("PRT", new String[][]{{"right", "RP"}});
