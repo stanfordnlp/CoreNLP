@@ -36,8 +36,9 @@ import edu.stanford.nlp.util.ArraySet;
  * @author Jenny Finkel
  */
 public interface Annotator {
+
   /**
-   * Given an annotation, perform a task on this annotaiton.
+   * Given an Annotation, perform a task on this Annotation.
    */
   public void annotate(Annotation annotation) ;
 
@@ -60,7 +61,7 @@ public interface Annotator {
    * TsurgeonAnnotator, cannot use a stricter equals() than the
    * superclass.  It is hard to get stricter than ==.
    */
-  public class Requirement { 
+  public class Requirement {
     public final String name;
     public Requirement(String name) {
       this.name = name;
@@ -69,7 +70,7 @@ public interface Annotator {
     public String toString() {
       return name;
     }
-  };
+  }
 
   /**
    * Returns a set of requirements for which tasks this annotator can
@@ -132,7 +133,7 @@ public interface Annotator {
 
   /**
    * These are typical combinations of annotators which may be used as
-   * requirements by other annotators
+   * requirements by other annotators.
    */
   public static final Set<Requirement> TOKENIZE_AND_SSPLIT = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT));
   public static final Set<Requirement> TOKENIZE_SSPLIT_POS = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT));
