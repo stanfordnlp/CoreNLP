@@ -93,36 +93,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   /**
-   * Returns a Filter which checks dependencies for usefulness as
-   * extra tree-based dependencies.  By default, everything is
-   * accepted.  One example of how this can be useful is in the
-   * English dependencies, where the REL dependency is used as an
-   * intermediate and we do not want this to be added when we make a
-   * second pass over the trees for missing dependencies.
-   */
-  protected Filter<TypedDependency> extraTreeDepFilter() {
-    return extraTreeDepFilter;
-  }
-
-  private static class ExtraTreeDepFilter implements Filter<TypedDependency> {
-    @Override
-    public boolean accept(TypedDependency d) {
-      if (d == null) return false;
-
-      if (d.reln() == RELATIVE) {
-        return false;
-      }
-
-      return true;
-    }
-
-    private static final long serialVersionUID = 1L;
-  }
-
-  private static final Filter<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
-  
-
-  /**
    * Tries to return a node representing the <code>SUBJECT</code> (whether
    * nominal or clausal) of the given node <code>t</code>. Probably, node
    * <code>t</code> should represent a clause or verb phrase.
@@ -161,14 +131,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   @Override
-  protected void postProcessDependencies(List<TypedDependency> list) {
-    convertRel(list);
-    if (DEBUG) {
-      printListSorted("After converting rel:", list);
-    }
-  }
-
-  @Override
   protected void getExtras(List<TypedDependency> list) {
     addRef(list);
     if (DEBUG) {
@@ -179,84 +141,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After adding xsubj:", list);
     }
-  }
-
-  /**
-   * What we do in this method is look for temporary dependencies of
-   * the type "rel".  These occur in sentences such as "I saw the man
-   * who you love".  In that case, we should produce dobj(love, who).
-   * On the other hand, in the sentence "... which Mr. Bush was
-   * fighting for", we should have pobj(for, which).  
-   */
-  private void convertRel(List<TypedDependency> list) {
-    List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
-    for (TypedDependency rel : list) {
-      if (rel.reln() != RELATIVE) {
-        continue;
-      }
-
-      boolean foundPrep = false;
-      for (TypedDependency prep : list) {
-        if (prep.reln() != PREPOSITIONAL_MODIFIER) {
-          continue;
-        }
-        if (prep.gov() != rel.gov()) {
-          continue;
-        }
-
-        // at this point, we have two dependencies as in the Mr. Bush
-        // example.  it should be rel(fighting, which) and
-        // prep(fighting, for).  We now look to see if there is a
-        // corresponding pobj associated with the dependent of the
-        // prep relation.  If not, we will connect the dep of the prep
-        // relation and the head of the rel relation.  Otherwise, the
-        // original rel relation will become a dobj.
-        boolean foundPobj = false;
-        for (TypedDependency pobj : list) {
-          if (pobj.reln() != PREPOSITIONAL_OBJECT && pobj.reln() != PREPOSITIONAL_COMPLEMENT) {
-            continue;
-          }
-          if (pobj.gov() != prep.dep()) {
-            continue;
-          }
-          // we did find a pobj/pcomp, so it is not necessary to
-          // change this rel.
-          foundPobj = true;
-          break;
-        }
-        
-        if (!foundPobj) {
-          foundPrep = true;
-          TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, prep.dep(), rel.dep());
-          newDeps.add(newDep);
-          rel.setReln(KILL);
-        }
-      }
-      if (!foundPrep) {
-        rel.setReln(DIRECT_OBJECT);
-      }
-    }
-
-    filterKill(list);
-    for (TypedDependency dep : newDeps) {
-      if (!list.contains(dep)) {
-        list.add(dep);
-      }
-    }
-  }
-
-  /**
-   * Alters a list in place by removing all the KILL relations
-   */
-  private void filterKill(List<TypedDependency> deps) {
-    List<TypedDependency> filtered = Generics.newArrayList();
-    for (TypedDependency dep : deps) {
-      if (dep.reln() != KILL) {
-        filtered.add(dep);
-      }
-    }
-    deps.clear();
-    deps.addAll(filtered);
   }
 
 
@@ -647,7 +531,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // helped stop things going haywire a couple of times (it stops the
         // creation of a unit cycle that probably leaves something else
         // disconnected) [cdm Jan 2010]
-        if (td.dep() == dep && td.reln() != REFERENT && td.gov() != ant) {
+        if (td.dep() == dep && td.reln() != RELATIVE && td.reln() != REFERENT && td.gov() != ant) {
           if (DEBUG)
             System.err.print("referent: changing " + td);
           td.setDep(ant);
@@ -871,7 +755,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     // governor p NP and p NP case ... a lot of special code cdm jan 2006
 
     for (TypedDependency td1 : list) {
-      if (td1.reln() != PREPOSITIONAL_MODIFIER) {
+      if (td1.reln() != PREPOSITIONAL_MODIFIER && td1.reln() != RELATIVE) {
         continue;
       }
       if (td1.reln() == KILL) {
@@ -1178,7 +1062,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       // find all other typedDeps having our dep as gov
       Set<TypedDependency> possibles = map.get(td1Dep);
 
-      if (possibles != null && (td1.reln() == PREPOSITIONAL_MODIFIER || td1.reln() == POSSESSION_MODIFIER || td1.reln() == CONJUNCT)) {
+      if (possibles != null && (td1.reln() == PREPOSITIONAL_MODIFIER || td1.reln() == RELATIVE || td1.reln() == POSSESSION_MODIFIER || td1.reln() == CONJUNCT)) {
 
         // look for the "second half"
         boolean pobj = true;// default for prep relation is prep_
@@ -1290,6 +1174,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     GrammaticalRelation reln;
     if (agent) {
       reln = AGENT;
+    } else if (pc.reln() == RELATIVE) {
+      reln = RELATIVE;
     } else {
       // for prepositions, use the preposition
       // for pobj: we collapse into "prep"; for pcomp: we collapse into "prepc"
@@ -2001,7 +1887,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName) throws IOException {
-    return readCoNLLXGrammaticalStructureCollection(fileName, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+    return readCoNLLXGrammaticStructureCollection(fileName, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
   public static EnglishGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {

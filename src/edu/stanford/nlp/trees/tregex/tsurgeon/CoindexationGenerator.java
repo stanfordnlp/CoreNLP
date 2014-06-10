@@ -26,15 +26,7 @@ class CoindexationGenerator {
       if (value != null) {
         Matcher m = coindexationPattern.matcher(value);
         if (m.find()) {
-          int thisIndex = 0;
-          try {
-            thisIndex = Integer.parseInt(m.group(1));
-          } catch (NumberFormatException e) {
-            // Ignore this exception.  This kind of exception can
-            // happen if there are nodes that happen to have the
-            // indexing character attached, even despite the attempt
-            // to ignore those nodes in the pattern above.
-          }
+          int thisIndex = Integer.parseInt(m.group(1));
           lastIndex = Math.max(thisIndex, lastIndex);
         }
       }

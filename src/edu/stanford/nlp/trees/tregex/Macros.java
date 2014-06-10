@@ -47,9 +47,9 @@ public class Macros {
         }
         String[] pieces = line.split("\t", 2);
         if (pieces.length < 2) {
-          throw new IllegalArgumentException("Expected lines of the format " +
+          throw new IllegalArgumentException("Expected lines of the format " + 
                                              "original (tab) replacement.  " +
-                                             "Line number " + lineNumber +
+                                             "Line number " + lineNumber + 
                                              " does not match.");
         }
         macros.add(new Pair<String, String>(pieces[0], pieces[1]));
@@ -60,7 +60,7 @@ public class Macros {
     }
   }
 
-  public static void addAllMacros(TregexPatternCompiler compiler,
+  public static void addAllMacros(TregexPatternCompiler compiler, 
                                   String filename, String encoding) {
     if (filename == null || filename.equals("")) {
       return;
@@ -69,12 +69,4 @@ public class Macros {
       compiler.addMacro(macro.first(), macro.second());
     }
   }
-
-  public static void addAllMacros(TregexPatternCompiler compiler,
-                                  BufferedReader br) {
-    for (Pair<String, String> macro : readMacros(br)) {
-      compiler.addMacro(macro.first(), macro.second());
-    }
-  }
-
 }

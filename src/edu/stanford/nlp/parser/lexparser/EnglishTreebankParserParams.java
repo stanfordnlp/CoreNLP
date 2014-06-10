@@ -27,7 +27,6 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
     protected TreeFactory tf = new LabeledScoredTreeFactory();
 
-    @Override
     public Tree transformTree(Tree tree) {
       Label lab = tree.label();
       String s = lab.value();
@@ -150,7 +149,6 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
    * encoding of the input.  It also is the responsibility of tr to properly
    * normalize trees.
    */
-  @Override
   public DiskTreebank diskTreebank() {
     return new DiskTreebank(treeReaderFactory());
   }
@@ -171,10 +169,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   /**
    * Makes appropriate TreeReaderFactory with all options specified
    */
-  @Override
   public TreeReaderFactory treeReaderFactory() {
     return new TreeReaderFactory() {
-      @Override
       public TreeReader newTreeReader(Reader in) {
         return new PennTreeReader(in, new LabeledScoredTreeFactory(), new NPTmpRetainingTreeNormalizer(englishTrain.splitTMP, englishTrain.splitSGapped == 5, englishTrain.leaveItAll, englishTrain.splitNPADV >= 1, headFinder()));
       }
@@ -188,7 +184,6 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   @Override
   public MemoryTreebank testMemoryTreebank() {
     return new MemoryTreebank(new TreeReaderFactory() {
-      @Override
       public TreeReader newTreeReader(Reader in) {
         return new PennTreeReader(in, new LabeledScoredTreeFactory(), new BobChrisTreeNormalizer(tlp));
       }
@@ -622,7 +617,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
      *  2 = collapse POS categories.
      *  4 = restore them in output (not yet implemented)
      */
-    public int collapseWhCategories = 0;
+    public static int collapseWhCategories = 0;
 
     public void display() {
       String englishParams = "Using EnglishTreebankParserParams" + " splitIN=" + splitIN + " sPercent=" + splitPercent + " sNNP=" + splitNNP + " sQuotes=" + splitQuotes + " sSFP=" + splitSFP + " rbGPA=" + tagRBGPA + " j#=" + joinPound + " jJJ=" + joinJJ + " jNounTags=" + joinNounTags + " sPPJJ=" + splitPPJJ + " sTRJJ=" + splitTRJJ + " sJJCOMP=" + splitJJCOMP + " sMoreLess=" + splitMoreLess + " unaryDT=" + unaryDT + " unaryRB=" + unaryRB + " unaryPRP=" + unaryPRP + " reflPRP=" + markReflexivePRP + " unaryIN=" + unaryIN + " sCC=" + splitCC + " sNT=" + splitNOT + " sRB=" + splitRB + " sAux=" + splitAux + " vpSubCat=" + vpSubCat + " mDTV=" + markDitransV + " sVP=" + splitVP + " sVPNPAgr=" + splitVPNPAgr + " sSTag=" + splitSTag + " mVP=" + markContainedVP + " sNP%=" + splitNPpercent + " sNPPRP=" + splitNPPRP + " dominatesV=" + dominatesV + " dominatesI=" + dominatesI + " dominatesC=" + dominatesC + " mCC=" + markCC + " sSGapped=" + splitSGapped + " numNP=" + splitNumNP + " sPoss=" + splitPoss + " baseNP=" + splitBaseNP + " sNPNNP=" + splitNPNNP + " sTMP=" + splitTMP + " sNPADV=" + splitNPADV + " cTags=" + correctTags + " rightPhrasal=" + rightPhrasal + " gpaRootVP=" + gpaRootVP + " splitSbar=" + splitSbar + " mPPTOiIN=" + makePPTOintoIN + " cWh=" + collapseWhCategories;
@@ -632,6 +627,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     private static final long serialVersionUID = 1831576434872643L;
 
   } // end class EnglishTrain
+
 
   private static final TreeFactory categoryWordTagTreeFactory =
     new LabeledScoredTreeFactory(new CategoryWordTagFactory());
@@ -1302,12 +1298,10 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
             foundJJ = true;
           }
         }
-        if (foundJJ) {
-          for (int j = i; j < kids.length; j++) {
-            if (kids[j].label().value().startsWith("NP")) {
-              cat = cat + "^T";
-              break;
-            }
+        for (int j = i; j < kids.length; j++) {
+          if (kids[j].label().value().startsWith("NP")) {
+            cat = cat + "^T";
+            break;
           }
         }
       }
@@ -1321,7 +1315,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
             break;
           }
         }
-        if (foundJJ && i < kids.length - 1) {
+        if (i < kids.length - 1) {
           // there's still a complement to go.
           cat = cat + "^CMPL";
         }
@@ -1381,8 +1375,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
       if (englishTrain.splitAux > 1 && (baseCat.equals("VBZ") || baseCat.equals("VBP") || baseCat.equals("VBD") || baseCat.equals("VBN") || baseCat.equals("VBG") || baseCat.equals("VB"))) {
         if (word.equalsIgnoreCase("'s") || word.equalsIgnoreCase("s")) {  // a few times the apostrophe is missing!
           Tree[] sisters = parent.children();
+          boolean foundMe = false;
           int i = 0;
-          for (boolean foundMe = false; i < sisters.length && !foundMe; i++) {
+          for (; i < sisters.length && !foundMe; i++) {
             if (sisters[i].label().value().startsWith("VBZ")) {
               foundMe = true;
             }
@@ -1390,8 +1385,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           boolean annotateHave = false;  // VBD counts as an erroneous VBN!
           for (int j = i; j < sisters.length; j++) {
             if (sisters[j].label().value().startsWith("VP")) {
-              for (Tree kid : sisters[j].children()) {
-                if (kid.label().value().startsWith("VBN") || kid.label().value().startsWith("VBD")) {
+              Tree[] kids = sisters[j].children();
+              for (int k = 0; k < kids.length; k++) {
+                if (kids[k].label().value().startsWith("VBN") || kids[k].label().value().startsWith("VBD")) {
                   annotateHave = true;
                 }
               }
@@ -1545,11 +1541,11 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
         boolean foundIn = false;
         boolean foundOrder = false;
         boolean infinitive = baseTag.equals("TO");
-        for (Tree kid : kids) {
-          if (kid.isPreTerminal() && kid.children()[0].value().equalsIgnoreCase("in")) {
+        for (int i = 0; i < kids.length; i++) {
+          if (kids[i].isPreTerminal() && kids[i].children()[0].value().equalsIgnoreCase("in")) {
             foundIn = true;
           }
-          if (kid.isPreTerminal() && kid.children()[0].value().equalsIgnoreCase("order")) {
+          if (kids[i].isPreTerminal() && kids[i].children()[0].value().equalsIgnoreCase("order")) {
             foundOrder = true;
           }
         }
@@ -1568,8 +1564,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           cat = cat + "-NNP";
         } else if (englishTrain.splitNPNNP == 3 && baseCat.equals("NP")) {
           boolean split = false;
-          for (Tree kid : kids) {
-            if (kid.value().startsWith("NNP")) {
+          for (int i = 0; i < kids.length; i++) {
+            if (kids[i].value().startsWith("NNP")) {
               split = true;
               break;
             }
@@ -1655,8 +1651,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
         // one (putatively predicative) NP with no VP, ADJP, NP, PP, or UCP
         boolean seenPredCat = false;
         int seenNP = 0;
-        for (Tree kid : kids) {
-          String cat2 = kid.label().value();
+        for (int i = 0; i < kids.length; i++) {
+          String cat2 = kids[i].label().value();
           if (cat2.startsWith("NP")) {
             seenNP++;
           } else if (cat2.startsWith("VP") || cat2.startsWith("ADJP") || cat2.startsWith("PP") || cat2.startsWith("UCP")) {
@@ -1674,8 +1670,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
         boolean seenCC = false;
         boolean seenS = false;
         int seenNP = 0;
-        for (Tree kid : kids) {
-          String cat2 = kid.label().value();
+        for (int i = 0; i < kids.length; i++) {
+          String cat2 = kids[i].label().value();
           if (cat2.startsWith("NP")) {
             seenNP++;
           } else if (cat2.startsWith("VP") || cat2.startsWith("ADJP") || cat2.startsWith("PP") || cat2.startsWith("UCP")) {
@@ -1698,8 +1694,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
         boolean sawSBeforePredCat = false;
         int seenS = 0;
         int seenNP = 0;
-        for (Tree kid : kids) {
-          String cat2 = kid.label().value();
+        for (int i = 0; i < kids.length; i++) {
+          String cat2 = kids[i].label().value();
           if (cat2.startsWith("NP")) {
             seenNP++;
           } else if (cat2.startsWith("VP") || cat2.startsWith("ADJP") || cat2.startsWith("PP") || cat2.startsWith("UCP")) {
@@ -1717,9 +1713,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
       }
       if (englishTrain.splitNumNP && baseCat.equals("NP")) {
         boolean seenNum = false;
-        for (Tree kid : kids) {
-          String cat2 = kid.label().value();
-          if (cat2.startsWith("QP") || cat2.startsWith("CD") || cat2.startsWith("$") || cat2.startsWith("#") || (cat2.startsWith("NN") && cat2.contains("-%"))) {
+        for (int i = 0; i < kids.length; i++) {
+          String cat2 = kids[i].label().value();
+          if (cat2.startsWith("QP") || cat2.startsWith("CD") || cat2.startsWith("$") || cat2.startsWith("#") || (cat2.startsWith("NN") && cat2.indexOf("-%") >= 0)) {
             seenNum = true;
             break;
           }
@@ -1796,8 +1792,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     if (cat.equals("VP")) {
       return true;
     } else {
-      for (Tree kid : t.children()) {
-        if (containsVP(kid)) {
+      Tree[] kids = t.children();
+      for (int i = 0; i < kids.length; i++) {
+        if (containsVP(kids[i])) {
           return true;
         }
       }
@@ -1808,9 +1805,10 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   private static boolean firstOfSeveralNNP(Tree parent, Tree t) {
     boolean firstIsT = false;
     int numNNP = 0;
-    for (Tree kid : parent.children()) {
-      if (kid.value().startsWith("NNP")) {
-        if (t.equals(kid) && numNNP == 0) {
+    Tree[] kids = parent.children();
+    for (int i = 0; i < kids.length; i++) {
+      if (kids[i].value().startsWith("NNP")) {
+        if (t.equals(kids[i]) && numNNP == 0) {
           firstIsT = true;
         }
         numNNP++;
@@ -1822,10 +1820,11 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   private static boolean lastOfSeveralNNP(Tree parent, Tree t) {
     Tree last = null;
     int numNNP = 0;
-    for (Tree kid : parent.children()) {
-      if (kid.value().startsWith("NNP")) {
+    Tree[] kids = parent.children();
+    for (int i = 0; i < kids.length; i++) {
+      if (kids[i].value().startsWith("NNP")) {
         numNNP++;
-        last = kid;
+        last = kids[i];
       }
     }
     return numNNP > 1 && t.equals(last);
@@ -1887,9 +1886,10 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
   private String ditrans(Tree t) {
     int n = 0;
-    for (Tree kid : t.children()) {
-      String childStr = kid.label().value();
-      if (childStr.startsWith("NP") && !childStr.contains("-TMP")) {
+    Tree[] kids = t.children();
+    for (int i = 0, len = kids.length; i < len; i++) {
+      String childStr = kids[i].label().value();
+      if (childStr.startsWith("NP") && ! childStr.contains("-TMP")) {
         n++;
       } else if (englishTrain.markDitransV == 1 && childStr.startsWith("S")) {
         n++;
@@ -1945,9 +1945,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     }
   }
 
-  private static boolean hasV(List<Label> tags) {
-    for (Label tag : tags) {
-      String str = tag.toString();
+  private static boolean hasV(List tags) {
+    for (int i = 0, tsize = tags.size(); i < tsize; i++) {
+      String str = tags.get(i).toString();
       if (str.startsWith("V") || str.startsWith("MD")) {
         return true;
       }
@@ -1955,18 +1955,18 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     return false;
   }
 
-  private static boolean hasI(List<Label> tags) {
-    for (Label tag : tags) {
-      if (tag.toString().startsWith("I")) {
+  private static boolean hasI(List tags) {
+    for (int i = 0, tsize = tags.size(); i < tsize; i++) {
+      if (tags.get(i).toString().startsWith("I")) {
         return true;
       }
     }
     return false;
   }
 
-  private static boolean hasC(List<Label> tags) {
-    for (Label tag : tags) {
-      if (tag.toString().startsWith("CC")) {
+  private static boolean hasC(List tags) {
+    for (int i = 0, tsize = tags.size(); i < tsize; i++) {
+      if (tags.get(i).toString().startsWith("CC")) {
         return true;
       }
     }
@@ -2059,7 +2059,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
       englishTrain.makePPTOintoIN = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-collapseWhCategories") && i + 1 < args.length) {
-      englishTrain.collapseWhCategories = Integer.parseInt(args[i + 1]);
+      EnglishTrain.collapseWhCategories = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-splitSTag")) {
       englishTrain.splitSTag = Integer.parseInt(args[i+1]);
@@ -2241,8 +2241,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   }
 
 
-  /** {@inheritDoc} */
-  @Override
+  /**
+   * Return a default sentence for the language (for testing)
+   */
   public List<Word> defaultTestSentence() {
     List<Word> ret = new ArrayList<Word>();
     String[] sent = {"This", "is", "just", "a", "test", "."};
@@ -2252,7 +2253,6 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     return ret;
   }
 
-  @Override
   public List<GrammaticalStructure>
     readGrammaticalStructureFromFile(String filename)
   {
@@ -2264,7 +2264,6 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     }
   }
 
-  @Override
   public GrammaticalStructure getGrammaticalStructure(Tree t,
                                                       Filter<String> filter,
                                                       HeadFinder hf) {

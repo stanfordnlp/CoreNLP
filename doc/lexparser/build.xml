@@ -84,10 +84,10 @@
 
   <target name="classpath" description="Sets the classpath">
       <path id="compile.classpath">
-        <fileset dir="${basedir}">
+       <!-- <fileset dir="${basedir}/lib">
           <include name="*.jar"/>
-          <exclude name="stanford-parser*"/>
-        </fileset>
+          <exclude name="javanlp*"/>
+        </fileset> -->
       </path>
   </target>
 

@@ -4,11 +4,11 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
-import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.Serializable;
+import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -37,10 +37,10 @@ import java.util.regex.Pattern;
  *   <code>TregexPattern</code>s} called <code>targetPatterns</code>,
  *   which describe the local tree structure which must hold between
  *   the source node and a target node for the
- *   <code>GrammaticalRelation</code> to apply. (Note: {@code tregex}
- *   regular expressions match with the {@code find()} method, while
+ *   <code>GrammaticalRelation</code> to apply. (Note <code>tregex</code>
+ *   regular expressions match with the <code>find()</code> method - though
  *   literal string label descriptions that are not regular expressions must
- *   be {@code equals()}.)</li>
+ *   be <code>equals()</code>.)</li>
  * </ul>
  *
  * The <code>targetPatterns</code> associated
@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
  * </ul>
  * For example, for the grammatical relation <code>PREDICATE</code>
  * which holds between a clause and its primary verb phrase, we might
- * want to use the pattern {@code "S < VP=target"}, in which the
+ * want to use the pattern <code>"S &lt; VP=target"</code>, in which the
  * root will match a clause and the node labeled <code>"target"</code>
  * will match the verb phrase.<p>
  *
@@ -95,11 +95,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     public Class<Set<TreeGraphNode>> getType() {  return (Class) Set.class; }
   }
 
-  private static final Map<Class<? extends GrammaticalRelationAnnotation>, GrammaticalRelation>
+  private static Map<Class<? extends GrammaticalRelationAnnotation>, GrammaticalRelation>
     annotationsToRelations = Generics.newHashMap();
-  private static final Map<GrammaticalRelation, Class<? extends GrammaticalRelationAnnotation>>
+  private static Map<GrammaticalRelation, Class<? extends GrammaticalRelationAnnotation>>
     relationsToAnnotations = Generics.newHashMap();
-  private static final EnumMap<Language, Map<String, GrammaticalRelation>>
+  private static EnumMap<Language, Map<String, GrammaticalRelation>>
     stringsToRelations = new EnumMap<Language, Map<String, GrammaticalRelation>>(Language.class);
 
   /**
@@ -208,8 +208,16 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return reln;
   }
 
+  private static Map<String, SoftReference<GrammaticalRelation>> valueOfCache = new HashMap<String, SoftReference<GrammaticalRelation>>();
   public static GrammaticalRelation valueOf(String s) {
-    return valueOf(Language.English, s);
+    GrammaticalRelation value = null;
+    SoftReference<GrammaticalRelation> possiblyCachedValue = valueOfCache.get(s);
+    if (possiblyCachedValue != null) { value = possiblyCachedValue.get(); }
+    if (value == null) {
+      value = valueOf(Language.English, s);
+      valueOfCache.put(s, new SoftReference<GrammaticalRelation>(value));
+    }
+    return value;
   }
 
   /**
@@ -339,16 +347,19 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     children.add(child);
   }
 
-  /** Given a {@code Tree} node {@code t}, attempts to
-   *  return a list of nodes to which node {@code t} has this
-   *  grammatical relation, with {@code t} as the governor.
+  /** Given a <code>Tree</code> node <code>t</code>, attempts to
+   *  return a list of nodes to which node <code>t</code> has this
+   *  grammatical relation.
    *
-   *  @param t Target for finding dependents of t related by this GR
+   *  @param t Target for finding governors of t related by this GR
    *  @param root The root of the Tree
-   *  @return A Collection of dependent nodes to which t bears this GR
+   *  @return Governor nodes to which t bears this GR
    */
   public Collection<Tree> getRelatedNodes(Tree t, Tree root) {
-    Set<Tree> nodeList = new ArraySet<Tree>();
+    if (root.value() == null) {
+      root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
+    }
+    Set<Tree> nodeList = new LinkedHashSet<Tree>();
     for (TregexPattern p : targetPatterns) {    // cdm: I deleted: && nodeList.isEmpty()
       TregexMatcher m = p.matcher(root);
       while (m.findAt(t)) {
@@ -356,7 +367,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         if (DEBUG) {
           System.err.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
           for (String nodeName : m.getNodeNames()) {
-            if (nodeName.equals("target"))
+            if (nodeName.equals("target")) 
               continue;
             System.err.println("  node " + nodeName + ": " + m.getNode(nodeName));
           }

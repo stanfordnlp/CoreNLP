@@ -1,10 +1,12 @@
 package edu.stanford.nlp.wordseg;
 
+import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITE;
+import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITEPLUS;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,9 +46,7 @@ import edu.stanford.nlp.fsm.DFSATransition;
  * @author Pi-Chuan Chang
  * @author Michel Galley (Viterbi seearch graph printing)
  */
-public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer>, Serializable {
-
-  private static final long serialVersionUID = 3260295150250263237L;
+public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer> {
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
@@ -105,9 +105,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
   }
 
 
-  class CTBDocumentParser implements Function<String,List<CoreLabel>>, Serializable {
-    private static final long serialVersionUID = 3260297180259462337L;
-
+  public class CTBDocumentParser implements Function<String,List<CoreLabel>> {
     private String defaultMap = "char=0,answer=1";
     public String[] map = StringUtils.mapStringToArray(defaultMap);
 
@@ -116,8 +114,6 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       if (line == null) {
         return null;
       }
-
-      // System.err.println("input: " + line);
 
       //Matcher tagMatcher = tagPattern.matcher(line);
       //line = tagMatcher.replaceAll("");
@@ -187,7 +183,6 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         String nonspaceLine = nonspaceLineSB.toString();
         addDictionaryFeatures(cdict2, CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class, nonspaceLine, lwi);
       }
-      // System.err.println("output: " + lwi.size());
       return lwi;
     }
   }
@@ -436,5 +431,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         tagLatticeToAnswerLattice(tDest, newASource, newAnswer, nodeId, pos+1, newCost, stateLinks, answerLattice, docArray);
     }
   }
+
+  private static final long serialVersionUID = 3260295150250263237L;
 
 }
