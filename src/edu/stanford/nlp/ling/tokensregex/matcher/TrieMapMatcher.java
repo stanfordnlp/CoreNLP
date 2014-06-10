@@ -12,23 +12,9 @@ import java.util.*;
  */
 public class TrieMapMatcher<K,V> {
   TrieMap<K,V> root;
-  TrieMap<K,V> rootWithDelimiter;
-  List<K> multimatchDelimiter;
 
   public TrieMapMatcher(TrieMap<K, V> root) {
     this.root = root;
-  }
-
-  public TrieMapMatcher(TrieMap<K, V> root, List<K> multimatchDelimiter) {
-    this.root = root;
-    this.multimatchDelimiter = multimatchDelimiter;
-    if (multimatchDelimiter != null && !multimatchDelimiter.isEmpty()) {
-      // Create a new root that always starts with the delimiter
-      rootWithDelimiter = new TrieMap<K, V>();
-      rootWithDelimiter.putChildTrie(multimatchDelimiter, root);
-    } else {
-      rootWithDelimiter = root;
-    }
   }
 
   public List<ApproxMatch<K,V>> findClosestMatches(K[] target, int n) {
@@ -45,11 +31,11 @@ public class TrieMapMatcher<K,V> {
   }
 
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, int n) {
-    return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, false);
+    return findClosestMatches(target, DEFAULT_COST, Double.MAX_VALUE, n, false);
   }
 
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, int n, boolean multimatch) {
-    return findClosestMatches(target, TrieMapMatcher.<K,V>defaultCost(), Double.MAX_VALUE, n, multimatch);
+    return findClosestMatches(target, DEFAULT_COST, Double.MAX_VALUE, n, multimatch);
   }
 
   public List<ApproxMatch<K,V>> findClosestMatches(List<K> target, MatchCostFunction<K,V> costFunction,
@@ -59,6 +45,7 @@ public class TrieMapMatcher<K,V> {
     // Find the closest n options to the key in the trie based on the given cost function for substitution
     // matches[i][j] stores the top n partial matches for i elements from the target
     //   and j elements from the partial matches from trie keys
+//    java.util.PriorityQueue<PartialApproxMatch<K,V>> best = new java.util.PriorityQueue<PartialApproxMatch<K, V>>(n, PARTIAL_MATCH_COMPARATOR);
     MatchQueue<K,V> best = new MatchQueue<K, V>(n, maxCost);
     List<PartialApproxMatch<K,V>>[][] matches = new List[target.size()+1][];
     for (int i = 0; i <= target.size(); i++) {
@@ -68,7 +55,7 @@ public class TrieMapMatcher<K,V> {
           // Try to pick best match from trie
           K t = (i > 0 && i <= target.size())? target.get(i-1):null;
           // Look at the top n choices we saved away and pick n new options
-          MatchQueue<K,V> queue = (multimatch)? new MultiMatchQueue<K, V>(n, maxCost):new MatchQueue<K, V>(n, maxCost);
+          MatchQueue<K,V> queue = new MatchQueue<K, V>(n, maxCost);
           if (i > 0) {
             for (PartialApproxMatch<K,V> pam:matches[i-1][j-1]) {
               if (pam.trie != null) {
@@ -110,7 +97,7 @@ public class TrieMapMatcher<K,V> {
             matches[i][0].add(new PartialApproxMatch(0, root));
           }
         }
-//        System.out.println("i=" + i + ",j=" + j + "," + matches[i][j]);
+       // System.out.println("i=" + i + ",j=" + j + "," + matches[i][j]);
       }
     }
     // Get the best matches
@@ -170,7 +157,7 @@ public class TrieMapMatcher<K,V> {
     }
 
 
-    private PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost, K t, K k) {
+    public PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost, K t, K k) {
       PartialApproxMatch<K,V> res = new PartialApproxMatch<K,V>();
       res.matched = matched;
       if (k != null) {
@@ -193,11 +180,10 @@ public class TrieMapMatcher<K,V> {
       return res;
     }
 
-    private PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost,
-                                              K t, K k, boolean multimatch, TrieMap<K,V> root) {
+    public PartialApproxMatch<K,V> withMatch(MatchCostFunction<K,V> costFunction, double deltaCost,
+                                             K t, K k, boolean multimatch, TrieMap<K,V> root) {
       PartialApproxMatch<K,V> res = withMatch(costFunction, deltaCost, t, k);
-      if (multimatch && res.matched != null && res.value != null) {
-        // Update tracking of matched keys and values for multiple entry matches
+      if (multimatch && matched != null && res.value != null) {
         if (res.multivalues == null) {
           res.multivalues = new ArrayList<V>(1);
         } else {
@@ -211,9 +197,9 @@ public class TrieMapMatcher<K,V> {
           res.multimatched = new ArrayList<List<K>>(multimatched.size()+1);
           res.multimatched.addAll(multimatched);
         }
-        res.multimatched.add(res.matched.subList(lastMultimatchedStartIndex, res.matched.size()));
-        res.cost += costFunction.multiMatchDeltaCost(res.multimatched.get(res.multimatched.size()-1), res.value, res.multimatched.size());
-        res.lastMultimatchedStartIndex = res.matched.size();
+        res.multimatched.add(matched.subList(lastMultimatchedStartIndex, matched.size()));
+        res.cost += costFunction.multiMatchDeltaCost(res.multimatched.get(res.multimatched.size()-1),res.value,res.multimatched.size());
+        res.lastMultimatchedStartIndex = matched.size();
         // Reset current value/key being matched
         res.trie = root;
       }
@@ -244,9 +230,9 @@ public class TrieMapMatcher<K,V> {
   }
 
   private static class MatchQueue<K,V> {
-    private final BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> queue;
-    protected final int maxSize;
-    protected final double maxCost;
+    BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> queue;
+    int maxSize;
+    double maxCost;
 
     public final Function<PartialApproxMatch<K,V>, Double> MATCH_COST_FUNCTION = new Function<PartialApproxMatch<K,V>, Double>() {
       @Override
@@ -262,8 +248,7 @@ public class TrieMapMatcher<K,V> {
     }
 
     public void add(PartialApproxMatch<K,V> pam) {
-      Match<K,V> m = new MultiMatch<K,V>(pam.matched, pam.value, pam.begin, pam.end, pam.multimatched, pam.multivalues);
-      queue.put(m, pam);
+      queue.put(new Match<K,V>(pam.matched, pam.value, pam.begin, pam.end), pam);
     }
 
     public double topCost() { return queue.topCost(); }
@@ -275,58 +260,10 @@ public class TrieMapMatcher<K,V> {
     }
   }
 
-  private static class MultiMatchQueue<K,V> extends MatchQueue<K,V> {
-    private final Map<Integer, BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>>> multimatchQueues;
-
-    public MultiMatchQueue(int maxSize, double maxCost) {
-      super(maxSize, maxCost);
-      this.multimatchQueues = new HashMap<Integer, BoundedCostOrderedMap<Match<K, V>, PartialApproxMatch<K, V>>>();
-    }
-
-    public void add(PartialApproxMatch<K,V> pam) {
-      Match<K,V> m = new MultiMatch<K,V>(
-              pam.matched, pam.value, pam.begin, pam.end, pam.multimatched, pam.multivalues);
-      Integer key = (pam.multimatched != null)? pam.multimatched.size():0;
-      if (pam.value == null) key = key + 1;
-      BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> mq = multimatchQueues.get(key);
-      if (mq == null) {
-        multimatchQueues.put(key, mq = new BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>>(
-                MATCH_COST_FUNCTION, maxSize, maxCost));
-      }
-      mq.put(m, pam);
-    }
-
-    public double topCost() {
-      double cost = Double.MIN_VALUE;
-      for (BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> q:multimatchQueues.values()) {
-        if (q.topCost() > cost) cost = q.topCost();
-      }
-      return cost;
-    }
-
-    public int size() {
-      int sz = 0;
-      for (BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> q:multimatchQueues.values()) {
-        sz += q.size();
-      }
-      return sz;
-    }
-
-    public List<PartialApproxMatch<K,V>> toSortedList() {
-      List<PartialApproxMatch<K,V>> all = new ArrayList<PartialApproxMatch<K, V>>(size());
-      for (BoundedCostOrderedMap<Match<K,V>, PartialApproxMatch<K,V>> q:multimatchQueues.values()) {
-        all.addAll(q.valuesList());
-      }
-      Collections.sort(all, TrieMapMatcher.<K,V>partialMatchComparator());
-      return all;
-    }
-  }
-
   private boolean addToQueue(MatchQueue<K,V> queue,
                              MatchQueue<K,V> best,
                              MatchCostFunction<K,V> costFunction,
-                             PartialApproxMatch<K,V> pam, K a, K b,
-                             boolean multimatch, boolean complete) {
+                             PartialApproxMatch<K,V> pam, K a, K b, boolean multimatch, boolean complete) {
     double deltaCost = costFunction.cost(a,b);
     double newCost = pam.cost + deltaCost;
     if (newCost > queue.maxCost) return false;
@@ -334,14 +271,14 @@ public class TrieMapMatcher<K,V> {
 
     PartialApproxMatch<K,V> npam = pam.withMatch(costFunction, deltaCost, a, b);
     if (!multimatch || npam.trie.children != null) {
-      if (!multimatch && complete && npam.value != null) {
+      if (complete && npam.value != null) {
         best.add(npam);
       }
       queue.add(npam);
     }
 
     if (multimatch && npam.value != null) {
-      npam = pam.withMatch(costFunction, deltaCost, a, b, multimatch, rootWithDelimiter);
+      npam = pam.withMatch(costFunction, deltaCost, a, b, multimatch, root);
       if (complete && npam.value != null) {
         best.add(npam);
       }
@@ -350,17 +287,11 @@ public class TrieMapMatcher<K,V> {
     return true;
   }
 
-  public static final <K,V> MatchCostFunction<K,V> defaultCost() {
-    return ErasureUtils.uncheckedCast(DEFAULT_COST);
-  }
-  public static final <K,V> Comparator<PartialApproxMatch<K,V>> partialMatchComparator() {
-    return ErasureUtils.uncheckedCast(PARTIAL_MATCH_COMPARATOR);
-  }
-  private static final MatchCostFunction DEFAULT_COST = new ExactMatchCost();
+  public final MatchCostFunction<K,V> DEFAULT_COST = new ExactMatchCost<K,V>();
 
-  private static final Comparator<PartialApproxMatch> PARTIAL_MATCH_COMPARATOR = new Comparator<PartialApproxMatch>() {
+  public final Comparator<PartialApproxMatch<K,V>> PARTIAL_MATCH_COMPARATOR = new Comparator<PartialApproxMatch<K,V>>() {
     @Override
-    public int compare(PartialApproxMatch o1, PartialApproxMatch o2) {
+    public int compare(PartialApproxMatch<K,V> o1, PartialApproxMatch<K,V> o2) {
       if (o1.cost == o2.cost) {
         return 0;
       } else return (o1.cost > o2.cost)? -1:1;
