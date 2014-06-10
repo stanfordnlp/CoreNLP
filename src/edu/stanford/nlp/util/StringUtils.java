@@ -346,28 +346,6 @@ public class StringUtils {
     return (Arrays.asList(str.split(regex)));
   }
 
-  public static String[] splitOnChar(String input, char delimiter) {
-    // State
-    String[] out = new String[input.length() + 1];
-    int nextIndex = 0;
-    int lastDelimiterIndex = -1;
-    char[] chars = input.toCharArray();
-    // Split
-    for ( int i = 0; i <= chars.length; ++i ) {
-      if (i >= chars.length || chars[i] == delimiter) {
-        char[] tokenChars = new char[i - (lastDelimiterIndex + 1)];
-        System.arraycopy(chars, lastDelimiterIndex + 1, tokenChars, 0, tokenChars.length);
-        out[nextIndex] = new String(tokenChars);
-        nextIndex += 1;
-        lastDelimiterIndex = i;
-      }
-    }
-    // Clean Result
-    String[] trimmedOut = new String[nextIndex];
-    System.arraycopy(out, 0, trimmedOut, 0, trimmedOut.length);
-    return trimmedOut;
-  }
-
 
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
