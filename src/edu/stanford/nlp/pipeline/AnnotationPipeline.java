@@ -26,15 +26,15 @@ public class AnnotationPipeline implements Annotator {
   protected static final boolean TIME = true;
 
   private final List<Annotator> annotators;
-  private List<MutableLong> accumulatedTime;
+  private List<MutableInteger> accumulatedTime;
 
   public AnnotationPipeline(List<Annotator> annotators) {
     this.annotators = annotators;
     if (TIME) {
       int num = annotators.size();
-      accumulatedTime = new ArrayList<MutableLong>(num);
+      accumulatedTime = new ArrayList<MutableInteger>(num);
       for (int i = 0; i < num; i++) {
-        accumulatedTime.add(new MutableLong());
+        accumulatedTime.add(new MutableInteger());
       }
     }
   }
@@ -46,7 +46,7 @@ public class AnnotationPipeline implements Annotator {
   public void addAnnotator(Annotator annotator) {
     annotators.add(annotator);
     if (TIME) {
-      accumulatedTime.add(new MutableLong());
+      accumulatedTime.add(new MutableInteger());
     }
   }
 
@@ -58,7 +58,7 @@ public class AnnotationPipeline implements Annotator {
    */
   @Override
   public void annotate(Annotation annotation) {
-    Iterator<MutableLong> it = accumulatedTime.iterator();
+    Iterator<MutableInteger> it = accumulatedTime.iterator();
     Timing t = new Timing();
     for (Annotator annotator : annotators) {
       if (TIME) {
@@ -67,7 +67,7 @@ public class AnnotationPipeline implements Annotator {
       annotator.annotate(annotation);
       if (TIME) {
         int elapsed = (int) t.stop();
-        MutableLong m = it.next();
+        MutableInteger m = it.next();
         m.incValue(elapsed);
       }
     }
@@ -173,7 +173,7 @@ public class AnnotationPipeline implements Annotator {
    */
   protected long getTotalTime() {
     long total = 0;
-    for (MutableLong m: accumulatedTime) {
+    for (MutableInteger m: accumulatedTime) {
       total += m.longValue();
     }
     return total;
@@ -191,10 +191,10 @@ public class AnnotationPipeline implements Annotator {
     StringBuilder sb = new StringBuilder();
     if (TIME) {
       sb.append("Annotation pipeline timing information:\n");
-      Iterator<MutableLong> it = accumulatedTime.iterator();
+      Iterator<MutableInteger> it = accumulatedTime.iterator();
       long total = 0;
       for (Annotator annotator : annotators) {
-        MutableLong m = it.next();
+        MutableInteger m = it.next();
         sb.append(StringUtils.getShortClassName(annotator)).append(": ");
         sb.append(Timing.toSecondsString(m.longValue())).append(" sec.\n");
         total += m.longValue();
