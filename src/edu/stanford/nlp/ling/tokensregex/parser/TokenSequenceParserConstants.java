@@ -38,8 +38,6 @@ interface TokenSequenceParserConstants {
   int NUMCMP = 19;
   /** RegularExpression Id. */
   int STRREGEXCMP = 20;
-  /** RegularExpression Id. */
-  int STRSIMPLE = 21;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -67,7 +65,6 @@ interface TokenSequenceParserConstants {
     "<STR>",
     "<NUMCMP>",
     "<STRREGEXCMP>",
-    "<STRSIMPLE>",
     "\"{\"",
     "\"=>\"",
     "\"}\"",
