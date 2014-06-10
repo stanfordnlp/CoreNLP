@@ -32,20 +32,12 @@ public class TokensRegexNERAnnotator implements Annotator {
   private final Pattern validPosPattern;
   private final boolean verbose;
 
-  public TokensRegexNERAnnotator(String mapping) {
-    this(mapping, false);
-  }
-
-  public TokensRegexNERAnnotator(String mapping, boolean ignoreCase) {
-    this("tokenregexner", getProperties("tokenregexner", mapping, ignoreCase));
-  }
-
-  private static Properties getProperties(String name, String mapping, boolean ignoreCase) {
-    Properties props = new Properties();
-    props.setProperty(name + ".mapping", mapping);
-    props.setProperty(name +".ignorecase", String.valueOf(ignoreCase));
-    return props;
-  }
+//  public TokensRegexNERAnnotator(String mapping) {
+//    this(mapping, false);
+//  }
+//
+//  public TokensRegexNERAnnotator(String mapping, boolean ignoreCase) {
+//  }
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
     String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol", SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
