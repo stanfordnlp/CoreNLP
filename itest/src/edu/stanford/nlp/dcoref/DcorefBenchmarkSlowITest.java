@@ -1,10 +1,11 @@
 package edu.stanford.nlp.dcoref;
 
 import java.io.File;
-import edu.stanford.nlp.io.IOUtils;
 import java.util.Properties;
 
 import junit.framework.TestCase;
+
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
