@@ -233,29 +233,14 @@ public class StringUtils {
     }, start, end);
   }
 
-  public static Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
-    @Override
-    public String apply(Object in) {
-      return in.toString();
-    }
-  };
   public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
-                                  String glue, int start, int end, final Function<Object,String> toStringFunc) {
+                                  String glue, int start, int end) {
     return join(l, glue, new Function<CoreMap, String>() {
       public String apply(CoreMap in) {
         Object val = in.get(field);
-        return (val != null)? toStringFunc.apply(val):defaultFieldValue;
+        return (val != null)? val.toString():defaultFieldValue;
       }
     }, start, end);
-  }
-
-  public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
-                                  String glue, int start, int end) {
-    return joinFields(l, field, defaultFieldValue, glue, start, end, DEFAULT_TOSTRING);
-  }
-
-  public static String joinFields(List<? extends CoreMap> l, final Class field, final Function<Object,String> toStringFunc) {
-    return joinFields(l, field, "-", " ", 0, l.size(), toStringFunc);
   }
 
   public static String joinFields(List<? extends CoreMap> l, final Class field) {
@@ -263,7 +248,7 @@ public class StringUtils {
   }
 
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
-                                          final String fieldGlue, String glue, int start, int end, final Function<Object,String> toStringFunc) {
+                                          final String fieldGlue, String glue, int start, int end) {
     return join(l, glue, new Function<CoreMap, String>() {
       public String apply(CoreMap in) {
         StringBuilder sb = new StringBuilder();
@@ -272,21 +257,12 @@ public class StringUtils {
             sb.append(fieldGlue);
           }
           Object val = in.get(field);
-          String str = (val != null)? toStringFunc.apply(val):defaultFieldValue;
+          String str = (val != null)? val.toString():defaultFieldValue;
           sb.append(str);
         }
         return sb.toString();
       }
     }, start, end);
-  }
-
-  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final Function<Object,String> toStringFunc) {
-    return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size(), toStringFunc);
-  }
-
-  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
-                                          final String fieldGlue, String glue, int start, int end) {
-    return joinMultipleFields(l, fields, defaultFieldValue, fieldGlue, glue, start, end, DEFAULT_TOSTRING);
   }
 
   public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields) {
