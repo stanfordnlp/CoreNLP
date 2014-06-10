@@ -93,6 +93,36 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   /**
+   * Returns a Filter which checks dependencies for usefulness as
+   * extra tree-based dependencies.  By default, everything is
+   * accepted.  One example of how this can be useful is in the
+   * English dependencies, where the REL dependency is used as an
+   * intermediate and we do not want this to be added when we make a
+   * second pass over the trees for missing dependencies.
+   */
+  protected Filter<TypedDependency> extraTreeDepFilter() {
+    return extraTreeDepFilter;
+  }
+
+  private static class ExtraTreeDepFilter implements Filter<TypedDependency> {
+    @Override
+    public boolean accept(TypedDependency d) {
+      if (d == null) return false;
+
+      if (d.reln() == RELATIVE) {
+        return false;
+      }
+
+      return true;
+    }
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  private static final Filter<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
+  
+
+  /**
    * Tries to return a node representing the <code>SUBJECT</code> (whether
    * nominal or clausal) of the given node <code>t</code>. Probably, node
    * <code>t</code> should represent a clause or verb phrase.
