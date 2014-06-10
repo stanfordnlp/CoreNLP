@@ -18,7 +18,7 @@ import edu.stanford.nlp.util.Generics;
 
 /**
  * A class for converting strings to input suitable for processing by
- * and IOB sequence model.
+ * and IOB sequence classify.
  *
  * @author Spence Green
  *
@@ -57,7 +57,7 @@ public class IOBUtils {
 
   /**
    * Convert a String to a list of characters suitable for labeling in an IOB
-   * segmentation model.
+   * segmentation classify.
    *
    * @param tokenList
    * @param segMarker

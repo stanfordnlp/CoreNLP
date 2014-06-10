@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class KBestSequenceFinder implements BestSequenceFinder {
 
   /**
-   * Runs the Viterbi algorithm on the sequence model given by the TagScorer
+   * Runs the Viterbi algorithm on the sequence classify given by the TagScorer
    * in order to find the best sequence.
    * @return an array containing the int tags of the best sequence
    */

@@ -1402,7 +1402,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
-   * Count the successes and failures of the model on the given document.
+   * Count the successes and failures of the classify on the given document.
    * Fills numbers in to counters for true positives, false positives,
    * and false negatives, and also keeps track of the entities seen.
    * <br>
@@ -1724,7 +1724,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * from inside a jar file, then this function will throw a RuntimeException.
    *
    * @param modelName
-   *          The name of the model file. Iff it ends in .gz, then it is assumed
+   *          The name of the classify file. Iff it ends in .gz, then it is assumed
    *          to be gzip compressed.
    * @param props
    *          A Properties object which can override certain properties in the

@@ -11,8 +11,8 @@ public class FactoredSequenceListener implements SequenceListener {
   SequenceListener[] models = null;
 
   /**
-   * Informs this sequence model that the value of the element at position pos has changed.
-   * This allows this sequence model to update its internal model if desired.
+   * Informs this sequence classify that the value of the element at position pos has changed.
+   * This allows this sequence classify to update its internal classify if desired.
    *
    */
   public void updateSequenceElement(int[] sequence, int pos, int oldVal) {
@@ -26,7 +26,7 @@ public class FactoredSequenceListener implements SequenceListener {
   }
 
   /**
-   * Informs this sequence model that the value of the whole sequence is initialized to sequence
+   * Informs this sequence classify that the value of the whole sequence is initialized to sequence
    *
    */
   public void setInitialSequence(int[] sequence) {

@@ -513,7 +513,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
     //   for the two different lattice implementations and then modify initializeChart() and
     //   extractBestParse() as appropriate. Another solution would be to duplicate these two
     //   methods and make the necessary changes for HTKLatticeReader. In both cases, the
-    //   acoustic model score provided by the HTK lattices should be included in the weighting.
+    //   acoustic classify score provided by the HTK lattices should be included in the weighting.
     //
     //   Note that I never actually tested HTKLatticeReader, so I am uncertain if this facility
     //   actually worked in the first place.

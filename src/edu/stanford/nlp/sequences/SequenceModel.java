@@ -14,13 +14,13 @@ public interface SequenceModel {
 
   /**
    * How many positions to the left a position is dependent on.
-   * @return the size of the left window used by this sequence model
+   * @return the size of the left window used by this sequence classify
    */
   int leftWindow();
 
   /**
    * How many positions to the right a position is dependent on.
-   * @return the size of the right window used by this sequence model
+   * @return the size of the right window used by this sequence classify
    */
   int rightWindow();
 
@@ -52,7 +52,7 @@ public interface SequenceModel {
   double scoreOf(int[] sequence, int position);
 
   /**
-   * Computes the score assigned by this model to the whole sequence. Typically this will be an unnormalized
+   * Computes the score assigned by this classify to the whole sequence. Typically this will be an unnormalized
    * probability in log space (since the probabilities are small).
    * @param sequence the sequence to compute a score for
    * @return the score for the sequence

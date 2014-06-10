@@ -19,7 +19,7 @@ import edu.stanford.nlp.util.Pair;
 
 
 /**
- *  An unknown word model for a generic language.  This was originally designed for
+ *  An unknown word classify for a generic language.  This was originally designed for
  *  German, changing only to remove German-specific numeric features.  Models unknown
  *  words based on their prefix and suffixes, as well as capital letters.
  *
@@ -65,7 +65,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
   protected final ClassicCounter<IntTaggedWord> unSeenCounter;
 
   /** This maps from a tag (as a label) to a Counter from word signatures to
-   *  their P(sig|tag), as estimated in the model. For Chinese, the word
+   *  their P(sig|tag), as estimated in the classify. For Chinese, the word
    *  signature is just the first character or its unicode type for things
    *  that aren't Chinese characters.
    */
@@ -150,7 +150,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
         if ( ! seenEnd.contains(end)) {
           end = unknown;
         }
-        //System.out.println("using end-character model for for unknown word "+  word + " for tag " + tag);
+        //System.out.println("using end-character classify for for unknown word "+  word + " for tag " + tag);
 
         /* get the Counter of terminal rewrites for the relevant tag */
         ClassicCounter<String> wordProbs = tagHash.get(tag);
@@ -169,7 +169,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
     } else if (useGT) {
       logProb = scoreGT(tagStr);
     } else {
-      System.err.println("Warning: no unknown word model in place!\nGiving the combination " + word + ' ' + tagStr + " zero probability.");
+      System.err.println("Warning: no unknown word classify in place!\nGiving the combination " + word + ' ' + tagStr + " zero probability.");
       logProb = Float.NEGATIVE_INFINITY; // should never get this!
     }
 
@@ -231,7 +231,7 @@ public class BaseUnknownWordModel implements UnknownWordModel {
 
 
   /**
-   * Get the lexicon associated with this unknown word model; usually not used, but
+   * Get the lexicon associated with this unknown word classify; usually not used, but
    * might be useful to tell you if a related word is known or unknown, for example.
    */
   public Lexicon getLexicon() {

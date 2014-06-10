@@ -214,7 +214,7 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
    *              factor over classes.  (If there are multiple such features, an
    *              integral "prior boost" will occur.)  If false, an always on
    *              feature is interpreted as an evidence feature (and, following
-   *              the standard math) will have no effect on the model.
+   *              the standard math) will have no effect on the classify.
 
    */
   public NBLinearClassifierFactory(double sigma, boolean interpretAlwaysOnFeatureAsPrior) {

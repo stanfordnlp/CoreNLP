@@ -46,9 +46,9 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
    */
   public double smooth_aTW_hTWd = 16.0;
   public double smooth_stop = 4.0;
-  /** Interpolation between model that directly predicts aTW and model
+  /** Interpolation between classify that directly predicts aTW and classify
    *  that predicts aT and then aW given aT.  This percent of the mass
-   *  is on the model directly predicting aTW.
+   *  is on the classify directly predicting aTW.
    */
   public double interp = 0.6;
   //  public double distanceDecay = 0.0;

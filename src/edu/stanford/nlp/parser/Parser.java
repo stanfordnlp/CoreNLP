@@ -10,7 +10,7 @@ import edu.stanford.nlp.ling.HasWord;
  * parser is to return the parsability of input sentences.  That is,
  * parsers need only actually be recognizers/acceptors.
  * <p/>
- * Specification of the grammar or model
+ * Specification of the grammar or classify
  * parameters is meant to be done by implementing classes' constructors.
  * If there is no specification of a goal, then this will also be determined
  * by the grammar or implementing class.

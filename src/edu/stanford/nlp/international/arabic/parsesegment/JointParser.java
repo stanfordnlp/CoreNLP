@@ -103,7 +103,7 @@ public final class JointParser {
     else if(parsingModel.run(trainTreebank, testTreebank, inputStream))
       System.err.println("Successful shutdown!");
     else
-      System.err.println("ERROR: Parsing model failure.");
+      System.err.println("ERROR: Parsing classify failure.");
 
 
     Date stopTime = new Date();

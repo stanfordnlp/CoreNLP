@@ -30,7 +30,7 @@ public class SUTimeServlet extends HttpServlet
     String dataDir = getServletContext().getRealPath("/WEB-INF/data");
     String taggerFilename = dataDir + "/english-left3words-distsim.tagger";
     Properties pipelineProps = new Properties();
-    pipelineProps.setProperty("pos.model", taggerFilename);
+    pipelineProps.setProperty("pos.classify", taggerFilename);
     pipeline = new SUTimePipeline(pipelineProps);
     System.setProperty("de.jollyday.config",
             getServletContext().getRealPath("/WEB-INF/classes/holidays/jollyday.properties"));

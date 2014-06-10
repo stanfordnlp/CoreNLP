@@ -10,7 +10,7 @@ import edu.stanford.nlp.trees.TreeFactory;
 
 /** This class manipulates punctuation in trees (used with training trees)
  *  in the same manner that Collins manipulated punctuation in trees when
- *  building his parsing model.  This is the same punctuation that is
+ *  building his parsing classify.  This is the same punctuation that is
  *  the punctuation ignored in the standard EvalB evaluation is promoted
  *  as high in the tree as possible.
  *

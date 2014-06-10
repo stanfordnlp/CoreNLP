@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
+import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -57,12 +58,12 @@ import edu.stanford.nlp.util.Pair;
  */
 public class MentionExtractor {
 
-  protected final HeadFinder headFinder;
+  protected HeadFinder headFinder;
 
   protected String currentDocumentID;
 
-  protected final Dictionaries dictionaries;
-  protected final Semantics semantics;
+  protected Dictionaries dictionaries;
+  protected Semantics semantics;
 
   public CorefMentionFinder mentionFinder;
   protected StanfordCoreNLP stanfordProcessor;
@@ -88,7 +89,7 @@ public class MentionExtractor {
   /**
    * Extracts the info relevant for coref from the next document in the corpus
    * @return List of mentions found in each sentence ordered according to the tree traversal.
-   * @throws Exception
+   * @throws Exception 
    */
   public Document nextDoc() throws Exception { return null; }
 
@@ -147,7 +148,7 @@ public class MentionExtractor {
    *                 Optionally, if scoring is desired, mentions must have mentionID and originalRef set.
    *                 All the other Mention fields are set here.
    * @return List of mentions ordered according to the tree traversal
-   * @throws Exception
+   * @throws Exception 
    */
   public List<List<Mention>> arrange(
       Annotation anno,
@@ -253,7 +254,7 @@ public class MentionExtractor {
   }
 
   static boolean inside(int i, Mention m) {
-    return i >= m.startIndex && i < m.endIndex;
+    return (i >= m.startIndex && i < m.endIndex);
   }
 
   /** Find syntactic relations (e.g., appositives) in a sentence */
@@ -286,8 +287,8 @@ public class MentionExtractor {
         if(np3!=null) addFoundPair(np2, np3, t, foundPairs);
       }
     } catch (Exception e) {
-      // shouldn't happen....
-      throw new RuntimeException(e);
+      e.printStackTrace();
+      System.exit(0);
     }
   }
 
@@ -311,7 +312,6 @@ public class MentionExtractor {
     findTreePattern(tree, appositionPattern3, appos);
     findTreePattern(tree, appositionPattern4, appos);
   }
-
   private void findPredicateNominatives(Tree tree, Set<Pair<Integer, Integer>> preNomi) {
     String predicateNominativePattern = "S < (NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2)))";
     String predicateNominativePattern2 = "S < (NP=m1 $.. (VP < (VP < ((/VB/ < /^(be|been|being)$/) $.. NP=m2))))";
@@ -319,12 +319,10 @@ public class MentionExtractor {
     findTreePattern(tree, predicateNominativePattern, preNomi);
     findTreePattern(tree, predicateNominativePattern2, preNomi);
   }
-
   private void findRelativePronouns(Tree tree, Set<Pair<Integer, Integer>> relativePronounPairs) {
     String relativePronounPattern = "NP < (NP=m1 $.. (SBAR < (WHNP < WP|WDT=m2)))";
     findTreePattern(tree, relativePronounPattern, relativePronounPairs);
   }
-
   private static void markMentionRelation(List<Mention> orderedMentions, Set<Pair<Integer, Integer>> foundPairs, String flag) {
     for(Mention m1 : orderedMentions){
       for(Mention m2 : orderedMentions){
@@ -362,7 +360,7 @@ public class MentionExtractor {
   }
 
   /** Load Stanford Processor: skip unnecessary annotator */
-  protected static StanfordCoreNLP loadStanfordProcessor(Properties props) {
+  protected StanfordCoreNLP loadStanfordProcessor(Properties props) {
     boolean replicateCoNLL = Boolean.parseBoolean(props.getProperty(Constants.REPLICATECONLL_PROP, "false"));
 
     Properties pipelineProps = new Properties(props);

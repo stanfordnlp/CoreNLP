@@ -225,7 +225,7 @@ public class BuildLexicalizedParserITest extends TestCase {
 
   /**
    * This tests that building and running a simple English parser
-   * model works correctly.
+   * classify works correctly.
    */
   public void testBuildEnglishParser()
     throws IOException

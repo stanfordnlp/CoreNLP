@@ -154,7 +154,7 @@ public class LambdaSolveTagger extends LambdaSolve {
 
 
   /**
-   * This method updates the conditional probabilities in the model, resulting from the
+   * This method updates the conditional probabilities in the classify, resulting from the
    * update of lambda[index] to lambda[index]+deltaL .
    */
 
@@ -242,13 +242,13 @@ public class LambdaSolveTagger extends LambdaSolve {
   }
 
 
-  /** Works out whether the model expectations match the empirical
+  /** Works out whether the classify expectations match the empirical
    *  expectations.
-   *  @return Whether the model is correct
+   *  @return Whether the classify is correct
    */
   @Override
   public boolean checkCorrectness() {
-    System.err.println("Checking model correctness; x size " + p.data.xSize + ' ' + ", ysize " + p.data.ySize);
+    System.err.println("Checking classify correctness; x size " + p.data.xSize + ' ' + ", ysize " + p.data.ySize);
 
     NumberFormat nf = NumberFormat.getNumberInstance();
     nf.setMaximumFractionDigits(4);

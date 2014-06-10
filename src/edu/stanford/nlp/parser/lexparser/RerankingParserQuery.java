@@ -197,7 +197,7 @@ public class RerankingParserQuery implements ParserQuery {
   }
 
   /**
-   * The model had to fall back to a simpler model on the previous parse
+   * The classify had to fall back to a simpler classify on the previous parse
    */
   @Override
   public boolean parseFallback() {
@@ -205,7 +205,7 @@ public class RerankingParserQuery implements ParserQuery {
   }
 
   /**
-   * The model ran out of memory on the most recent parse
+   * The classify ran out of memory on the most recent parse
    */
   @Override
   public boolean parseNoMemory() {
@@ -213,7 +213,7 @@ public class RerankingParserQuery implements ParserQuery {
   }
 
   /**
-   * The model could not parse the most recent sentence for some reason
+   * The classify could not parse the most recent sentence for some reason
    */
   @Override
   public boolean parseUnparsable() {

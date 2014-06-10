@@ -17,7 +17,7 @@ import edu.stanford.nlp.process.WordSegmenter;
 
 
 /**
- * Performs word segmentation with a hierarchical markov model over POS
+ * Performs word segmentation with a hierarchical markov classify over POS
  * and over characters given POS.
  *
  * @author Galen Andrew
@@ -183,7 +183,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
     return new ArrayList<TaggedWord>(words);
   }
 
-  /** Do max language model markov segmentation.
+  /** Do max language classify markov segmentation.
    *  Note that this algorithm inherently tags words as it goes, but that
    *  we throw away the tags in the final result so that the segmented words
    *  are untagged.  (Note: for a couple of years till Aug 2007, a tagged

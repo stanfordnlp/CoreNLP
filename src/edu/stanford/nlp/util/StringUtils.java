@@ -630,7 +630,7 @@ public class StringUtils {
    *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args) {
-    return argsToMap(args, Generics.<String, Integer>newHashMap());
+    return argsToMap(args, Collections.<String,Integer>emptyMap());
   }
 
   /**
@@ -661,9 +661,9 @@ public class StringUtils {
    * the String[] value for that flag.
    *
    * @param args           the argument array to be parsed
-   * @param flagsToNumArgs a {@link Map} of flag names to {@link
-   *                       Integer} values specifying the maximum number of
-   *                       allowed arguments for that flag (default 0).
+   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer
+   *                       values specifying the number of arguments
+   *                       for that flag (default min 0, max 1).
    * @return a {@link Map} of flag names to flag argument {@link
    *         String} arrays.
    */
@@ -673,10 +673,11 @@ public class StringUtils {
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.charAt(0) == '-') { // found a flag
-        Integer maxFlagArgs = flagsToNumArgs.get(key);
-        int max = maxFlagArgs == null ? 0 : maxFlagArgs.intValue();
+        Integer numFlagArgs = flagsToNumArgs.get(key);
+        int max = numFlagArgs == null ? 1 : numFlagArgs.intValue();
+        int min = numFlagArgs == null ? 0 : numFlagArgs.intValue();
         List<String> flagArgs = new ArrayList<String>();
-        for (int j = 0; j < max && i + 1 < args.length && args[i + 1].charAt(0) != '-'; i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (result.containsKey(key)) { // append the second specification into the args.
@@ -745,7 +746,7 @@ public class StringUtils {
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
         List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].length() > 0 && args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (flagArgs.isEmpty()) {

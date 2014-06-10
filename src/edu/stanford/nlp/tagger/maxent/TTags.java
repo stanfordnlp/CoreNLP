@@ -45,7 +45,7 @@ public class TTags {
    */
   private final int closedTagThreshold = Integer.valueOf(TaggerConfig.CLOSED_CLASS_THRESHOLD);
 
-  /** If true, when a model is trained, all tags that had fewer tokens than
+  /** If true, when a classify is trained, all tags that had fewer tokens than
    *  closedTagThreshold will be considered closed.
    */
   private boolean learnClosedTags = false;

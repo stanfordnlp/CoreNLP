@@ -766,7 +766,7 @@ public class Options implements Serializable {
 
     /**
      * Whether to use suffix and capitalization information for unknowns.
-     * Within the BaseLexicon model options have the following meaning:
+     * Within the BaseLexicon classify options have the following meaning:
      * 0 means a single unknown token.  1 uses suffix, and capitalization.
      * 2 uses a variant (richer) form of signature.  Good.
      * Use this one.  Using the richer signatures in versions 3 or 4 seems
@@ -825,7 +825,7 @@ public class Options implements Serializable {
      * If this option is true, then if a word has been seen more than
      * smoothInUnknownsThreshold, then it will still only get tags with which
      * it has been seen, but rarer words will get all tags for which the
-     * unknown word model (or smart mutation) does not give a score of -Inf.
+     * unknown word classify (or smart mutation) does not give a score of -Inf.
      * This will normally be all open class tags.
      * If floodTags is invoked by the parser, all other tags will also be
      * given a minimal non-zero, non-infinite probability.

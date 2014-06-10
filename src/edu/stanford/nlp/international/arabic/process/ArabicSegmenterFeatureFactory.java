@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 /**
- * Feature factory for an IOB clitic segmentation model.
+ * Feature factory for an IOB clitic segmentation classify.
  * 
  * @author Spence Green
  *
