@@ -18,6 +18,7 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("unchecked")
 public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
+
   protected static final Logger logger = Logger.getLogger(TimeExpressionExtractorImpl.class.getName());
 
   // Patterns for extracting time expressions
@@ -41,11 +42,13 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     init(name, props);
   }
 
+  @Override
   public void init(String name, Properties props)
   {
     init(new Options(name, props));
   }
 
+  @Override
   public void init(Options options)
   {
     this.options = options;
@@ -65,6 +68,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     this.expressionExtractor.setLogger(logger);
   }
 
+  @Override
   public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, CoreMap docAnnotation) {
     SUTime.TimeIndex timeIndex = null;
     String docDate = null;
@@ -103,6 +107,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     return extractTimeExpressionCoreMaps(annotation, refDate, timeIndex);
   }
 
+  @Override
   public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate)
   {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
@@ -151,15 +156,12 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
         try {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
-          logger.log(Level.WARNING, "Failed to process " + text + " with attributes " + timexAttributes, e);
+          logger.log(Level.WARNING, "Failed to process timex " + text + " with attributes " + timexAttributes, e);
           continue;
         }
+        assert timex != null;  // Timex.fromMap never returns null and if it exceptions, we've already done a continue
         cm.set(TimeAnnotations.TimexAnnotation.class, timex);
-        if (timex != null) {
-          coreMaps.add(cm);
-        } else {
-          logger.warning("No timex expression for: " + text);
-        }
+        coreMaps.add(cm);
       }
     }
     return coreMaps;
@@ -186,7 +188,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
     List<? extends MatchedExpression> matchedExpressions = expressionExtractor.extractExpressions(annotation);
     List<TimeExpression> timeExpressions = new ArrayList<TimeExpression>(matchedExpressions.size());
-    for (MatchedExpression expr:matchedExpressions) {
+    for (MatchedExpression expr : matchedExpressions) {
       if (expr instanceof TimeExpression) {
         timeExpressions.add((TimeExpression) expr);
       } else {
@@ -204,7 +206,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     // Didn't have a reference date - try using cached doc date
     if (refDate == null) refDate = timeIndex.docDate;
 
-    // Some resolving is done even if docDate null...
+    // Some resolving is done even if refDate null...
     if ( timeExpressions != null) {
       resolveTimeExpressions(annotation, timeExpressions, refDate);
     }

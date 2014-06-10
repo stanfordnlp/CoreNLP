@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -17,7 +16,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Annotate temporal expressions with {@link SUTime}.
+ * Annotate temporal expressions in text with {@link SUTime}.
  * The expressions recognized by SUTime are loosely based on GUTIME.
  *
  * After annotation, the {@link TimeAnnotations.TimexAnnotations} annotation
@@ -25,7 +24,9 @@ import java.util.Set;
  * will represent one temporal expression.
  *
  * If a reference time is set (via {@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}),
- * then temporal expressions are resolved with respect the to document date.
+ * then temporal expressions are resolved with respect the to document date.  You set it on an
+ * Annotation as follows:
+ * <blockquote>{@code annotation.set(CoreAnnotations.DocDateAnnotation.class, "2013-07-14");}</blockquote>
  * <p>
  * <br>
  * <b>Input annotations</b>
@@ -174,6 +175,7 @@ public class TimeAnnotator implements Annotator {
     timexExtractor = new TimeExpressionExtractorImpl(name, props);
   }
 
+  @Override
   public void annotate(Annotation annotation) {
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
     if (sentences != null) {

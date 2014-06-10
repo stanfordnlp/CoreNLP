@@ -837,7 +837,7 @@ public class StringUtils {
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
           {
             try {
-              InputStream is = new BufferedInputStream(new FileInputStream(result.getProperty(key)));
+              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
               InputStreamReader reader = new InputStreamReader(is, "utf-8");
               result.remove(key); // location of this line is critical
               result.load(reader);
@@ -850,7 +850,7 @@ public class StringUtils {
             } catch (IOException e) {
               result.remove(key);
               System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
-              throw new RuntimeException(e);
+              throw new RuntimeIOException(e);
             }
           }
         }
