@@ -354,33 +354,6 @@ import edu.stanford.nlp.util.StringUtils;
    * em dash    97      0151    2014    8212
    */
 
-  /* Bracket characters:
-   *
-   * Original Treebank 3 WSJ 
-   * Uses -LRB- -RRB- as the representation for ( ) and -LCB- -RCB- as the representation for { }. 
-   * There are no occurrences of [ ], though there is some mention of -LSB- -RSB- in early documents.
-   * There are no occurrences of < >.
-   * All brackets are tagged -LRB- -RRB-  [This stays constant.]
-   *
-   * Treebank 3 Brown corpus
-   * Has -LRB- -RRB-
-   * Has a few instances of unescaped [ ] in compounds (the token "A[fj]"
-   *
-   * Ontonotes (r4) 
-   * Uses -LRB- -RRB- -LCB- -RCB- -LSB- -RSB-.
-   * Has a very few uses of < and > in longer forms, which are not escaped.
-   * 
-   * LDC2012T13-eng_web_tbk (Google web treebank)
-   * Has -LRB- -RRB-
-   * Has { and } used unescaped, treated as brackets.
-   * Has < and > used unescaped, sometimes treated as brackets.  Sometimes << and >> are treated as brackets!
-   * Has [ and ] used unescaped, treated as brackets.
-   *
-   * Reasonable conclusions for now:
-   * - Never escape < >
-   * - Still by default escape [ ] { } but it can be turned off.  Use -LSB- -RSB- -LCB- -RCB-.
-   */
-
   public static final String openparen = "-LRB-";
   public static final String closeparen = "-RRB-";
   public static final String openbrace = "-LCB-";
@@ -592,16 +565,9 @@ import edu.stanford.nlp.util.StringUtils;
 
 %}
 
-/* Todo: Really SGML shouldn't be here at all, it's kind of legacy.
-   But we continue to tokenize some simple standard forms of concrete
-   SGML syntax, since it tends to give robustness.
-( +([A-Za-z][A-Za-z0-9:.-]*( *= *['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]| *\/))*
-SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]*([ ]+([A-Za-z][A-Za-z0-9:.-]*([ ]*=[ ]*['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)>
-( +[A-Za-z][A-Za-z0-9:.-]*)*
-FOO = ([ ]+[A-Za-z][A-Za-z0-9:.-]*)*
-SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]* *)>
- */
-SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9:\.\-]*|[A-Za-z][A-Za-z0-9:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
+/* Don't allow SGML to cross lines, even though it can...
+   Really SGML shouldn't be here at all, it's kind of legacy. */
+SGML = <\/?[A-Za-z!?][^>\r\n]*>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
@@ -684,7 +650,7 @@ ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
 ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
 /* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
-ABNUM = tel|est|ext|sq
+ABNUM = Ph|tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
@@ -705,9 +671,9 @@ ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs
 ABCOMP2 = Invt|Elec|Natl|M[ft]g
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
- *  We assume they aren't used sentence finally. Ph is in there for Ph. D
+ *  We assume they aren't used sentence finally.
  */
-ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
+ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -730,8 +696,8 @@ ABBREV3 = (ca|figs?|prop|nos?|art|bldg|prop|pp|op)\.
 PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{2,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{2,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
-LESSTHAN = <|&lt;
-GREATERTHAN = >|&gt;
+OPBRAC = [<\[]|&lt;
+CLBRAC = [>\]]|&gt;
 HYPHEN = [-_\u058A\u2010\u2011]
 HYPHENS = \-+
 LDOTS = \.{3,5}|(\.[ \u00A0]){2,4}\.|[\u0085\u2026]
@@ -900,8 +866,8 @@ gonna|gotta|lemme|gimme|wanna
                           }
 			  return getNext();
 			}
-/* Special case to get pty. ltd. or pty limited. Also added "Co." since someone complained, but usually a comma after it. */
-(pt[eyEY]|co)\./{SPACE}(ltd|lim)  { return getNext(); }
+/* Special case to get pty. ltd. or pty limited */
+pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV1}/{SENTEND}     {
                           String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
@@ -944,11 +910,21 @@ gonna|gotta|lemme|gimme|wanna
                         }
 {DBLQUOT}/[A-Za-z0-9$]  { return handleQuotes(yytext(), true); }
 {DBLQUOT}               { return handleQuotes(yytext(), false); }
-0x7f                    { if (invertible) {
-                            prevWordAfter.append(yytext());
-                        } }
-{LESSTHAN}              { return getNext("<", yytext()); }
-{GREATERTHAN}           { return getNext(">", yytext()); }
+0x7f            { if (invertible) {
+                     prevWordAfter.append(yytext());
+                  } }
+{OPBRAC}        { if (normalizeOtherBrackets) {
+                    return getNext(openparen, yytext()); }
+                  else {
+                    return getNext();
+                  }
+                }
+{CLBRAC}        { if (normalizeOtherBrackets) {
+                    return getNext(closeparen, yytext()); }
+                  else {
+                    return getNext();
+                  }
+                }
 {SMILEY}/[^A-Za-z] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
@@ -973,18 +949,6 @@ gonna|gotta|lemme|gimme|wanna
                 }
 \}              { if (normalizeOtherBrackets) {
                     return getNext(closebrace, yytext()); }
-                  else {
-                    return getNext();
-                  }
-                }
-\[              { if (normalizeOtherBrackets) {
-                    return getNext("-LSB-", yytext()); }
-                  else {
-                    return getNext();
-                  }
-                }
-\]              { if (normalizeOtherBrackets) {
-                    return getNext("-RSB-", yytext()); }
                   else {
                     return getNext();
                   }

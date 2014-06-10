@@ -3476,7 +3476,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * FUNCTION WILL ONLY WORK IF THE CODE WAS LOADED FROM A JAR FILE WHICH HAS A
    * SERIALIZED CLASSIFIER STORED INSIDE IT.
    *
-   * @param resourceName Name of classifier resource inside the jar file.
+   * @param resourceName
+   *          Name of clasifier resource inside the jar file.
    * @return A CRFClassifier stored in the jar file
    */
   public static <IN extends CoreMap> CRFClassifier<IN> getJarClassifier(String resourceName, Properties props) {
@@ -3645,7 +3646,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (String filename : testFiles.split(",")) {
         files.add(new File(filename));
       }
-      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter());
+      crf.classifyAndWriteAnswers(files, crf.defaultReaderAndWriter());
     }
 
     if (textFile != null) {
@@ -3657,7 +3658,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (String filename : textFiles.split(",")) {
         files.add(new File(filename));
       }
-      crf.classifyFilesAndWriteAnswers(files);
+      crf.classifyAndWriteAnswers(files);
     }
 
     if (crf.flags.readStdin) {

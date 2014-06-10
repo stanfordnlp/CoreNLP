@@ -56,8 +56,9 @@ import edu.stanford.nlp.util.Generics;
  */
 public class MUCMentionExtractor extends MentionExtractor {
 
-  private final TokenizerFactory<CoreLabel> tokenizerFactory;
-  private final String fileContents;
+  private TokenizerFactory<CoreLabel> tokenizerFactory;
+
+  private String fileContents;
   private int currentOffset;
 
   public MUCMentionExtractor(Dictionaries dict, Properties props, Semantics semantics) throws Exception {
@@ -260,7 +261,7 @@ public class MUCMentionExtractor extends MentionExtractor {
     docAnno.set(CoreAnnotations.SentencesAnnotation.class, allSentences);
     stanfordProcessor.annotate(docAnno);
 
-    if(allSentences.size()!=allWords.size()) throw new IllegalStateException("allSentences != allWords");
+    if(allSentences.size()!=allWords.size()) throw new RuntimeException();
     for(int i = 0 ; i< allSentences.size(); i++){
       List<CoreLabel> annotatedSent = allSentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
       List<CoreLabel> unannotatedSent = allWords.get(i);
@@ -269,13 +270,14 @@ public class MUCMentionExtractor extends MentionExtractor {
         m.dependency = allSentences.get(i).get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       }
       if(annotatedSent.size() != unannotatedSent.size()){
-        throw new IllegalStateException("annotatedSent != unannotatedSent");
+        throw new RuntimeException();
       }
-      for (int j = 0, sz = annotatedSent.size(); j < sz; j++){
+      int k = 0;
+      for(int j = 0 ; j < annotatedSent.size(); j++, k++){
         CoreLabel annotatedWord = annotatedSent.get(j);
-        CoreLabel unannotatedWord = unannotatedSent.get(j);
-        if ( ! annotatedWord.get(CoreAnnotations.TextAnnotation.class).equals(unannotatedWord.get(CoreAnnotations.TextAnnotation.class))) {
-          throw new IllegalStateException("annotatedWord != unannotatedWord");
+        CoreLabel unannotatedWord = unannotatedSent.get(k);
+        if(!annotatedWord.get(CoreAnnotations.TextAnnotation.class).equals(unannotatedWord.get(CoreAnnotations.TextAnnotation.class))) {
+          throw new RuntimeException();
         }
       }
       allWords.set(i, annotatedSent);
