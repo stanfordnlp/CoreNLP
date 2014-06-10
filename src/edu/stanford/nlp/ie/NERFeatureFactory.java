@@ -361,6 +361,7 @@ import edu.stanford.nlp.util.Timing;
  * @author Christopher Manning
  * @author Shipra Dingare
  * @author Huy Nguyen
+ * @author Mengqiu Wang
  */
 public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
 
