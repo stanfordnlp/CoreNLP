@@ -1,10 +1,17 @@
 package edu.stanford.nlp.dcoref;
 
 /**
- * TODO(gabor) This is a dummy class to fix compilation
+ * Are two mentions compatible
  *
- * @author Gabor Angeli
+ * @author Angel Chang
  */
 public interface MentionMatcher {
-  public Boolean isCompatible(Mention mainMention, Mention antMention);
+
+  /**
+   * Determines if two mentions are compatible
+   * @param m1 First mention to compare
+   * @param m2 Second mention to compare
+   * @return true if compatible, false if incompatible, null if not sure
+   */
+  public Boolean isCompatible(Mention m1, Mention m2);
 }

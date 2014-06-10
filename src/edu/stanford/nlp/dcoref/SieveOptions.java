@@ -69,7 +69,7 @@ public class SieveOptions {
   
   public SieveOptions() {
     DO_PRONOUN= false;
-//    USE_INCOMPATIBLES = true;
+    USE_INCOMPATIBLES = true;
     USE_iwithini = false;
     USE_APPOSITION = false;
     USE_PREDICATENOMINATIVES = false;
