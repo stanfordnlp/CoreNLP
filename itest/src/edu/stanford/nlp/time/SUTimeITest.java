@@ -24,7 +24,7 @@ public class SUTimeITest extends TestCase {
         pipeline = new AnnotationPipeline();
         pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
         pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
-        pipeline.addAnnotator(new POSTaggerAnnotator(false));
+        pipeline.addAnnotator(new POSTaggerAnnotator(DefaultPaths.DEFAULT_POS_MODEL, false));
         //pipeline.addAnnotator(new NumberAnnotator(false));
         //pipeline.addAnnotator(new QuantifiableEntityNormalizingAnnotator(false, false));
       }
@@ -1086,6 +1086,90 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"2010-02-17T24:00\" type=\"TIME\">24 o'clock</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t11\" value=\"2010-02-17T24:00\" type=\"TIME\">24:00</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t12\" value=\"2010-02-17T12:34\" type=\"TIME\">12:34 p.m.</TIMEX3>")).iterator();
+
+    // create document
+    Annotation document = createDocument(testText);
+
+    // Time annotate
+    TimeAnnotator sutime = getTimeAnnotator();
+    sutime.annotate(document);
+
+    // Check answers
+    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
+      Timex expectedTimex = expectedTimexes.next();
+      testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
+    }
+    assertFalse(expectedTimexes.hasNext());
+
+    Annotation documentWithRefTime = createDocument(testText, "20100217");
+    sutime.annotate(documentWithRefTime);
+
+    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
+      Timex expectedTimex = expectedTimexesResolved.next();
+      testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
+    }
+    assertFalse(expectedTimexes.hasNext());
+  }
+
+  public void testOverlaps() throws IOException {
+    String testText = "Sun Apr 21\n" +
+            "Wed Apr 24\n" +
+            "Fri Apr 26\n" +
+            "Wed May 1\n" +
+            "Fri May 3\n" +
+            "Sun May 5\n" +
+            "Fri May 10\n" +
+            "Sat May 11\n" +
+            "Wed May 15\n" +
+            "Sat May 18\n" +
+            "Wed May 22\n" +
+            "Mon May 27\n" +
+            "Fri May 31\n" +
+            "Mon June 3\n" +
+            "    June 8\n" +
+            "Tue Jun 18\n" +
+            "Wed Jun 19\n";
+
+    // set up expected results
+    Iterator<Timex> expectedTimexes =
+            Arrays.asList(
+                    Timex.fromXml("<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-04-21\">Sun Apr 21</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t2\" type=\"DATE\" value=\"XXXX-04-24\">Wed Apr 24</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t3\" type=\"DATE\" value=\"XXXX-04-26\">Fri Apr 26</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t4\" type=\"DATE\" value=\"XXXX-05-01\">Wed May 1</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t5\" type=\"DATE\" value=\"XXXX-05-03\">Fri May 3</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t6\" type=\"DATE\" value=\"XXXX-05-05\">Sun May 5</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t7\" type=\"DATE\" value=\"XXXX-05-10\">Fri May 10</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t8\" type=\"DATE\" value=\"XXXX-05-11\">Sat May 11</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t9\" type=\"DATE\" value=\"XXXX-05-15\">Wed May 15</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t10\" type=\"DATE\" value=\"XXXX-05-18\">Sat May 18</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t11\" type=\"DATE\" value=\"XXXX-05-22\">Wed May 22</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t12\" type=\"DATE\" value=\"XXXX-05-27\">Mon May 27</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t13\" type=\"DATE\" value=\"XXXX-05-31\">Fri May 31</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t14\" type=\"DATE\" value=\"XXXX-06-03\">Mon June 3</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t15\" type=\"DATE\" value=\"XXXX-06-08\">June 8\nTue</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t16\" type=\"DATE\" value=\"XXXX-06-18\">Jun 18\nWed</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t17\" type=\"DATE\" value=\"XXXX-06-19\">Jun 19</TIMEX3>")).iterator();
+
+    Iterator<Timex> expectedTimexesResolved =
+            Arrays.asList(
+                    Timex.fromXml("<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"2010-04-21\">Sun Apr 21</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t2\" type=\"DATE\" value=\"2010-04-24\">Wed Apr 24</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t3\" type=\"DATE\" value=\"2010-04-26\">Fri Apr 26</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t4\" type=\"DATE\" value=\"2010-05-01\">Wed May 1</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t5\" type=\"DATE\" value=\"2010-05-03\">Fri May 3</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t6\" type=\"DATE\" value=\"2010-05-05\">Sun May 5</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t7\" type=\"DATE\" value=\"2010-05-10\">Fri May 10</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t8\" type=\"DATE\" value=\"2010-05-11\">Sat May 11</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t9\" type=\"DATE\" value=\"2010-05-15\">Wed May 15</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t10\" type=\"DATE\" value=\"2010-05-18\">Sat May 18</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t11\" type=\"DATE\" value=\"2010-05-22\">Wed May 22</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t12\" type=\"DATE\" value=\"2010-05-27\">Mon May 27</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t13\" type=\"DATE\" value=\"2010-05-31\">Fri May 31</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t14\" type=\"DATE\" value=\"2010-06-03\">Mon June 3</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t15\" type=\"DATE\" value=\"2010-06-08\">June 8\nTue</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t16\" type=\"DATE\" value=\"2010-06-18\">Jun 18\nWed</TIMEX3>"),
+                    Timex.fromXml("<TIMEX3 tid=\"t17\" type=\"DATE\" value=\"2010-06-19\">Jun 19</TIMEX3>")).iterator();
 
     // create document
     Annotation document = createDocument(testText);
