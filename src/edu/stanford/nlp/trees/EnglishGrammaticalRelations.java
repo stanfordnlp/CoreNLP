@@ -784,10 +784,9 @@ public class EnglishGrammaticalRelations {
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "advcl", "adverbial clause modifier",
         AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
-        new String[] {   // !$+ (NN < order) has been added so that "in order to" is not marked as an advcl
-          // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses.
-          "VP < (@SBAR=target [ <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
-          "VP < (/^SBAR/=target < (IN < in) < (NN < order) < (S < (VP < TO)))",  // former purpcl
+        new String[] {  
+          // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses, first case includes regular in order to purpose clauses
+          "VP < (@SBAR=target [ <, (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)))",
@@ -796,8 +795,8 @@ public class EnglishGrammaticalRelations {
           "VP < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))", // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
           "S|SQ < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))",
           "S|SQ <, (PP=target <, RB)",
-          "@S < (@S=target < (VP < TO) $+ (/^,$/ $+ @NP))", // former purpcl
-          // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // former purpcl [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
+          "@S < (@S=target < (VP < TO) $+ (/^,$/ $+ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
+          // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // part of former purpcl [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
 
         });
   public static class AdvClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
