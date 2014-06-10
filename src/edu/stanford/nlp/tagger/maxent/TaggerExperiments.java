@@ -70,14 +70,12 @@ public class TaggerExperiments extends Experiments {
   TaggerExperiments(MaxentTagger maxentTagger) {
     this.maxentTagger = maxentTagger;
     this.tFeature = new TemplateHash(maxentTagger);
-    numFeatsGeneral = maxentTagger.extractors.size();
-    numFeatsAll = numFeatsGeneral + maxentTagger.extractorsRare.size();
-    feats = new TaggerFeatures(this);
+    numFeatsGeneral = maxentTagger.extractors.getSize();
+    numFeatsAll = numFeatsGeneral + maxentTagger.extractorsRare.getSize();
+    feats = new TaggerFeatures(maxentTagger.tags, this);
   }
 
-  /** This method gets feature statistics from a training file found in the TaggerConfig.
-   *  It is the start of the training process.
-   */
+  /** This method gets feature statistics from a training file found in the TaggerConfig. */
   protected TaggerExperiments(TaggerConfig config, MaxentTagger maxentTagger) throws IOException {
     this(maxentTagger);
 
@@ -225,7 +223,7 @@ public class TaggerExperiments extends Experiments {
               fnumArr[x][y]++;
             }
             TaggerFeature tF = new TaggerFeature(current, current + numElements - 1, fK,
-                                                 maxentTagger.getTagIndex(fK.tag), this);
+                                                 maxentTagger.tags, this);
             tFeature.addPositions(current, current + numElements - 1, fK);
             current = current + numElements;
             feats.add(tF);
@@ -239,7 +237,7 @@ public class TaggerExperiments extends Experiments {
             }
             // this is the second time to write these values
             TaggerFeature tF = new TaggerFeature(positions[0], positions[1], fK,
-                                                 maxentTagger.getTagIndex(fK.tag), this);
+                                                 maxentTagger.tags, this);
             feats.add(tF);
             if (VERBOSE) {
               System.err.println("  added feature with key " + fK.toString() + " has support " + xValues.length);
@@ -316,8 +314,8 @@ public class TaggerExperiments extends Experiments {
 
 
   private void hashHistories() {
-    int fAll = maxentTagger.extractors.size() + maxentTagger.extractorsRare.size();
-    int fGeneral = maxentTagger.extractors.size();
+    int fAll = maxentTagger.extractors.getSize() + maxentTagger.extractorsRare.getSize();
+    int fGeneral = maxentTagger.extractors.getSize();
     System.err.println("Hashing histories ...");
     for (int x = 0; x < xSize; x++) {
       History h = tHistories.getHistory(x);
@@ -358,7 +356,7 @@ public class TaggerExperiments extends Experiments {
     // Feature number 0 is hard-coded as the current word feature, which has a special threshold
     if (fNo == 0) {
       return (size > maxentTagger.curWordMinFeatureThresh);
-    } else if (fNo < maxentTagger.extractors.size()) {
+    } else if (fNo < maxentTagger.extractors.getSize()) {
       return (size > maxentTagger.minFeatureThresh);
     } else {
       return (size > maxentTagger.rareWordMinFeatureThresh);
@@ -381,10 +379,10 @@ public class TaggerExperiments extends Experiments {
       } //do not add the feature
       //iterate over tags in dictionary
       if (maxentTagger.alltags) {
-        int numTags = maxentTagger.numTags();
+        int numTags = maxentTagger.tags.getSize();
         for (int j = 0; j < numTags; j++) {
 
-          String tag1 = maxentTagger.getTag(j);
+          String tag1 = maxentTagger.tags.getTag(j);
 
           FeatureKey key = new FeatureKey(i, s, tag1);
 
@@ -422,10 +420,10 @@ public class TaggerExperiments extends Experiments {
         continue;
       } //do not add the feature
       if (maxentTagger.alltags) {
-        int numTags = maxentTagger.numTags();
+        int numTags = maxentTagger.tags.getSize();
         for (int j = 0; j < numTags; j++) {
 
-          String tag1 = maxentTagger.getTag(j);
+          String tag1 = maxentTagger.tags.getTag(j);
 
           FeatureKey key = new FeatureKey(i, s, tag1);
 
