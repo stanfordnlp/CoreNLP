@@ -142,6 +142,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   /** Set of other mentions in the same sentence that I am a member of */
   public Set<Mention> belongToLists = null;
 
+  transient private String spanString = null;
+  transient private String lowercaseNormalizedSpanString = null;
 
   @Override
   public Class<Mention> getType() {
@@ -154,22 +156,35 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   @Override
   public String toString() {
-    //    return headWord.toString();
     return spanToString();
   }
 
   public String spanToString() {
-    StringBuilder os = new StringBuilder();
-    for(int i = 0; i < originalSpan.size(); i ++){
-      if(i > 0) os.append(" ");
-      os.append(originalSpan.get(i).get(CoreAnnotations.TextAnnotation.class));
-    }
-    return os.toString();
+//    synchronized(this) {
+      if (spanString == null) {
+        StringBuilder os = new StringBuilder();
+        for(int i = 0; i < originalSpan.size(); i ++){
+          if(i > 0) os.append(" ");
+          os.append(originalSpan.get(i).get(CoreAnnotations.TextAnnotation.class));
+        }
+        spanString = os.toString();
+      }
+//    }
+    return spanString;
+  }
+
+  public String lowercaseNormalizedSpanString() {
+//    synchronized(this) {
+      if (lowercaseNormalizedSpanString == null) {
+        // We always normalize to lowercase!!!
+        lowercaseNormalizedSpanString = spanString.toLowerCase();
+      }
+//    }
+    return lowercaseNormalizedSpanString;
   }
 
   // Retrieves part of the span that corresponds to the NER (going out from head)
   public List<CoreLabel> nerTokens() {
-    StringBuilder os = new StringBuilder();
     if (nerString == null || "O".equals(nerString)) return null;
 
     int start = headIndex-startIndex;
@@ -298,7 +313,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       }
 
       // find converted string with ! (e.g., "dr. martin luther king jr. boulevard" -> "dr. !")
-      List<String> convertedStr = new ArrayList<String>();
+      List<String> convertedStr = new ArrayList<String>(2);
       convertedStr.add(mStr.get(firstNameIdx));
       convertedStr.add("!");
       if(dict.genderNumber.containsKey(convertedStr)) return dict.genderNumber.get(convertedStr);
@@ -1096,9 +1111,15 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         return false;
       }
     } else {
-      // pick mention with head with NER
+      // pick mention with better NER
       if (nerString == null && m.nerString != null) return false;
       if (nerString != null && m.nerString == null) return true;
+      if (!nerString.equals(m.nerString)) {
+        if ("O".equals(nerString)) return false;
+        if ("O".equals(m.nerString)) return true;
+        if ("MISC".equals(nerString)) return false;
+        if ("MISC".equals(m.nerString)) return true;
+      }
       if (headIndex - startIndex > m.headIndex - m.startIndex) {
         return true;
       } else if (sentNum < m.sentNum || (sentNum == m.sentNum && headIndex < m.headIndex)) {
@@ -1288,7 +1309,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public boolean isRoleAppositive(Mention m, Dictionaries dict) {
     String thisString = this.spanToString();
-    if(this.isPronominal() || dict.allPronouns.contains(thisString.toLowerCase())) return false;
+    String thisStringLower = this.lowercaseNormalizedSpanString();
+    if(this.isPronominal() || dict.allPronouns.contains(thisStringLower)) return false;
     if(!m.nerString.startsWith("PER") && !m.nerString.equals("O")) return false;
     if(!this.nerString.startsWith("PER") && !this.nerString.equals("O")) return false;
     if(!sameSentence(m) || !m.spanToString().startsWith(thisString)) return false;
@@ -1298,8 +1320,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
          || !this.numbersAgree(m)) {
       return false;
     }
-    if (dict.demonymSet.contains(thisString.toLowerCase())
-         || dict.demonymSet.contains(m.spanToString().toLowerCase())) {
+    if (dict.demonymSet.contains(thisStringLower)
+         || dict.demonymSet.contains(m.lowercaseNormalizedSpanString())) {
       return false;
     }
     return true;

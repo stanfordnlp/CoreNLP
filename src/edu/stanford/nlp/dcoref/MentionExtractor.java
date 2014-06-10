@@ -45,7 +45,6 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Generic mention extractor from a corpus.
@@ -276,16 +275,25 @@ public class MentionExtractor {
   }
 
   /** Find syntactic pattern in a sentence by tregex */
-  private void findTreePattern(Tree tree, String pattern, Set<Pair<Integer, Integer>> foundPairs) {
+  private void findTreePattern(Tree tree, String tregex, Set<Pair<Integer, Integer>> foundPairs) {
     try {
-      TregexPattern tgrepPattern = TregexPattern.compile(pattern);
+      TregexPattern tgrepPattern = TregexPattern.compile(tregex);
+      findTreePattern(tree, tgrepPattern, foundPairs);
+    } catch (Exception e) {
+      // shouldn't happen....
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void findTreePattern(Tree tree, TregexPattern tgrepPattern, Set<Pair<Integer, Integer>> foundPairs) {
+    try {
       TregexMatcher m = tgrepPattern.matcher(tree);
       while (m.find()) {
         Tree t = m.getMatch();
         Tree np1 = m.getNode("m1");
         Tree np2 = m.getNode("m2");
         Tree np3 = null;
-        if(pattern.contains("m3")) np3 = m.getNode("m3");
+        if(tgrepPattern.pattern().contains("m3")) np3 = m.getNode("m3");
         addFoundPair(np1, np2, t, foundPairs);
         if(np3!=null) addFoundPair(np2, np3, t, foundPairs);
       }
@@ -305,27 +313,27 @@ public class MentionExtractor {
     foundPairs.add(p);
   }
 
+  private static final TregexPattern appositionPattern = TregexPattern.compile("NP=m1 < (NP=m2 $.. (/,/ $.. NP=m3))");
+  private static final TregexPattern appositionPattern2 = TregexPattern.compile("NP=m1 < (NP=m2 $.. (/,/ $.. (SBAR < (WHNP < WP|WDT=m3))))");
+  private static final TregexPattern appositionPattern3 = TregexPattern.compile("/^NP(?:-TMP|-ADV)?$/=m1 < (NP=m2 $- /^,$/ $-- NP=m3 !$ CC|CONJP)");
+  private static final TregexPattern appositionPattern4 = TregexPattern.compile("/^NP(?:-TMP|-ADV)?$/=m1 < (PRN=m2 < (NP < /^NNS?|CD$/ $-- /^-LRB-$/ $+ /^-RRB-$/))");
   private void findAppositions(Tree tree, Set<Pair<Integer, Integer>> appos) {
-    String appositionPattern = "NP=m1 < (NP=m2 $.. (/,/ $.. NP=m3))";
-    String appositionPattern2 = "NP=m1 < (NP=m2 $.. (/,/ $.. (SBAR < (WHNP < WP|WDT=m3))))";
-    String appositionPattern3 = "/^NP(?:-TMP|-ADV)?$/=m1 < (NP=m2 $- /^,$/ $-- NP=m3 !$ CC|CONJP)";
-    String appositionPattern4 = "/^NP(?:-TMP|-ADV)?$/=m1 < (PRN=m2 < (NP < /^NNS?|CD$/ $-- /^-LRB-$/ $+ /^-RRB-$/))";
     findTreePattern(tree, appositionPattern, appos);
     findTreePattern(tree, appositionPattern2, appos);
     findTreePattern(tree, appositionPattern3, appos);
     findTreePattern(tree, appositionPattern4, appos);
   }
 
+  private static final TregexPattern predicateNominativePattern = TregexPattern.compile("S < (NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2)))");
+  private static final TregexPattern predicateNominativePattern2 = TregexPattern.compile("S < (NP=m1 $.. (VP < (VP < ((/VB/ < /^(be|been|being)$/) $.. NP=m2))))");
   private void findPredicateNominatives(Tree tree, Set<Pair<Integer, Integer>> preNomi) {
-    String predicateNominativePattern = "S < (NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2)))";
-    String predicateNominativePattern2 = "S < (NP=m1 $.. (VP < (VP < ((/VB/ < /^(be|been|being)$/) $.. NP=m2))))";
     //    String predicateNominativePattern2 = "NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2))";
     findTreePattern(tree, predicateNominativePattern, preNomi);
     findTreePattern(tree, predicateNominativePattern2, preNomi);
   }
 
+  private static final TregexPattern relativePronounPattern = TregexPattern.compile("NP < (NP=m1 $.. (SBAR < (WHNP < WP|WDT=m2)))");
   private void findRelativePronouns(Tree tree, Set<Pair<Integer, Integer>> relativePronounPairs) {
-    String relativePronounPattern = "NP < (NP=m1 $.. (SBAR < (WHNP < WP|WDT=m2)))";
     findTreePattern(tree, relativePronounPattern, relativePronounPairs);
   }
 
