@@ -61,19 +61,19 @@ public class ParseFiles {
 
   final Options op;
 
-  final ParserQueryFactory pqFactory;
+  final LexicalizedParser pqFactory;
 
   final TreePrint treePrint;
 
   /** Parse the files with names given in the String array args elements from
    *  index argIndex on.  Convenience method which builds and invokes a ParseFiles object.  
    */
-  static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, ParserQueryFactory pqFactory) {
+  static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
     ParseFiles pf = new ParseFiles(op, treePrint, pqFactory);
     pf.parseFiles(args, argIndex, tokenized, tokenizerFactory, elementDelimiter, sentenceDelimiter, escaper, tagDelimiter);
   }
 
-  public ParseFiles(Options op, TreePrint treePrint, ParserQueryFactory pqFactory) {
+  public ParseFiles(Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
     this.op = op;
     this.pqFactory = pqFactory;
     this.treePrint = treePrint;
