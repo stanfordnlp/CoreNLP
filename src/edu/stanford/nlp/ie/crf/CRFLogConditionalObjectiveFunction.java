@@ -57,6 +57,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   protected double[][] eHat4Update, e4Update;
 
   protected int[][] weightIndices;
+  protected double[][] weightSquare;
   protected final String backgroundSymbol;
 
   protected int[][] featureGrouping = null;
@@ -141,6 +142,35 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   @Override
   public int domainDimension() {
     return domainDimension;
+  }
+
+  public void combine2DArr(double[][] combineInto, double[][] toBeCombined) {
+    for (int i = 0; i < toBeCombined.length; i++)
+      for (int j = 0; j < toBeCombined[i].length; j++)
+        combineInto[i][j] += toBeCombined[i][j];
+  }
+
+  // TODO(mengqiu) add dimension checks
+  public void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined) {
+    double[] source = null;
+    int key = 0;
+    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
+      key = entry.getKey();
+      source = entry.getValue();
+      for (int i = 0; i< source.length; i++)
+        combineInto[key][i] += source[i];
+    }
+  }
+
+  public void combine2DArr(double[][] combineInto, Map<Integer, double[]> toBeCombined, double scale) {
+    double[] source = null;
+    int key = 0;
+    for (Map.Entry<Integer, double[]> entry: toBeCombined.entrySet()) {
+      key = entry.getKey();
+      source = entry.getValue();
+      for (int i = 0; i< source.length; i++)
+        combineInto[key][i] += source[i] * scale;
+    }
   }
 
   /**
@@ -700,91 +730,5 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
         derivative[i] += batchScale * w / sigmaQu;
       }
     }
-  }
-
-
-  protected Pair<double[][][], double[][][]> getCondProbs(CRFCliqueTree cTree, int[][][] docData) {
-    // first index position is curr index, second index curr-class, third index prev-class
-    // e.g. [1][2][3] means curr is at position 1 with class 2, prev is at position 0 with class 3
-    double[][][] prevGivenCurr = new double[docData.length][][]; 
-    // first index position is curr index, second index curr-class, third index next-class
-    // e.g. [0][2][3] means curr is at position 0 with class 2, next is at position 1 with class 3
-    double[][][] nextGivenCurr = new double[docData.length][][]; 
-
-    for (int i = 0; i < docData.length; i++) {
-      prevGivenCurr[i] = new double[numClasses][]; 
-      nextGivenCurr[i] = new double[numClasses][]; 
-      for (int j = 0; j < numClasses; j++) {
-        prevGivenCurr[i][j] = new double[numClasses];
-        nextGivenCurr[i][j] = new double[numClasses];
-      }
-    }
-
-    // computing prevGivenCurr and nextGivenCurr
-    for (int i=0; i < docData.length; i++) {
-      int[] labelPair = new int[2];
-      for (int l1 = 0; l1 < numClasses; l1++) {
-        labelPair[0] = l1;
-        for (int l2 = 0; l2 < numClasses; l2++) {
-          labelPair[1] = l2;
-          double prob = cTree.logProb(i, labelPair);
-          // System.err.println(prob);
-          if (i-1 >= 0)
-            nextGivenCurr[i-1][l1][l2] = prob;
-          prevGivenCurr[i][l2][l1] = prob;
-        }
-      }
-
-      if (DEBUG2) {
-        System.err.println("unnormalized conditionals:");
-        if (i>0) {
-        System.err.println("nextGivenCurr[" + (i-1) + "]:");
-        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
-          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
-          System.err.println();
-        }
-        }
-        System.err.println("prevGivenCurr[" + (i) + "]:");
-        for (int a = 0; a < prevGivenCurr[i].length; a++) {
-          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            System.err.print((prevGivenCurr[i][a][b])+"\t");
-          System.err.println();
-        }
-      }
-
-      for (int j=0; j< numClasses; j++) {
-        if (i-1 >= 0) {
-          // ArrayMath.normalize(nextGivenCurr[i-1][j]);
-          ArrayMath.logNormalize(nextGivenCurr[i-1][j]);
-          for (int k = 0; k < nextGivenCurr[i-1][j].length; k++)
-            nextGivenCurr[i-1][j][k] = Math.exp(nextGivenCurr[i-1][j][k]);
-        }
-        // ArrayMath.normalize(prevGivenCurr[i][j]);
-        ArrayMath.logNormalize(prevGivenCurr[i][j]);
-        for (int k = 0; k < prevGivenCurr[i][j].length; k++)
-          prevGivenCurr[i][j][k] = Math.exp(prevGivenCurr[i][j][k]);
-      }
-
-      if (DEBUG2) {
-        System.err.println("normalized conditionals:");
-        if (i>0) {
-        System.err.println("nextGivenCurr[" + (i-1) + "]:");
-        for (int a = 0; a < nextGivenCurr[i-1].length; a++) {
-          for (int b = 0; b < nextGivenCurr[i-1][a].length; b++)
-            System.err.print((nextGivenCurr[i-1][a][b])+"\t");
-          System.err.println();
-        }
-        }
-        System.err.println("prevGivenCurr[" + (i) + "]:");
-        for (int a = 0; a < prevGivenCurr[i].length; a++) {
-          for (int b = 0; b < prevGivenCurr[i][a].length; b++)
-            System.err.print((prevGivenCurr[i][a][b])+"\t");
-          System.err.println();
-        }
-      }
-    }
-
-    return new Pair<double[][][], double[][][]>(prevGivenCurr, nextGivenCurr);
   }
 }
