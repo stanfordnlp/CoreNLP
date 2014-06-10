@@ -9,7 +9,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Index;
 
 /**
- * This is a basic unknown word classify for Arabic.  It supports 4 different
+ * This is a basic unknown word model for Arabic.  It supports 4 different
  * types of feature modeling; see {@link #getSignature(String, int)}.
  *
  * <i>Implementation note: the contents of this class tend to overlap somewhat
@@ -68,7 +68,7 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
   public float score(IntTaggedWord iTW, int loc, double c_Tseen, double total, double smooth, String word) {
     double pb_W_T; // always set below
 
-    //  unknown word classify for P(T|S)
+    //  unknown word model for P(T|S)
 
     int wordSig = getSignatureIndex(iTW.word, loc, word);
     IntTaggedWord temp = new IntTaggedWord(wordSig, iTW.tag);

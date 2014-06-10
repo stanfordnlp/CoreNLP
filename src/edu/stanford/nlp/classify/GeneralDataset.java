@@ -321,7 +321,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    *
    * @param dataset
    * @return a new GeneralDataset whose features and ids map exactly to those of this GeneralDataset.
-   * Useful when two Datasets are created independently and one wants to train a classify on one dataset and test on the other. -Ramesh.
+   * Useful when two Datasets are created independently and one wants to train a model on one dataset and test on the other. -Ramesh.
    */
   public GeneralDataset<L,F> mapDataset(GeneralDataset<L,F> dataset){
     GeneralDataset<L,F> newDataset;

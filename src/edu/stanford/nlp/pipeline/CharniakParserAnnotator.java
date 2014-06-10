@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.CoreMap;
 /**
  * This class will add parse information to an Annotation from the BLLIP parser.
  * It allows you to use the Charniak parser or Charniak and Johnson reranking parser
- * along with any existing parser and reranking classify.
+ * along with any existing parser and reranking model.
  * 
  * It assumes that the Annotation already contains the tokenized words
  * as a {@code List<List<CoreLabel>>} under

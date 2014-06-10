@@ -359,7 +359,7 @@ public class PRCurve {
     System.err.println("acc " + pr.accuracy() + " opt " + pr.optimalAccuracy() + " cwa " + pr.cwa() + " optcwa " + pr.optimalCwa());
     for (int r = 1; r <= pr.numSamples(); r++) {
       System.err.println("optimal precision at recall " + r + " " + pr.precision(r));
-      System.err.println("classify precision at recall " + r + " " + pr.logPrecision(r));
+      System.err.println("model precision at recall " + r + " " + pr.logPrecision(r));
     }
   }
 

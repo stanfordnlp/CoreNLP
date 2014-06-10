@@ -210,7 +210,7 @@ public class ThreadedParserSlowITest extends TestCase {
     runTest(new ParserThread(parser, input, results),
             new ParserThread(parser, input, results));
 
-    // test two different instantiations of the same classify
+    // test two different instantiations of the same model
     runTest(new ParserThread(parserPath, input, results),
             new ParserThread(parserPath, input, results));
   }

@@ -258,7 +258,7 @@ public class FactoredLexicon extends BaseLexicon {
   @Override 
   public void train(Collection<Tree> trees, Collection<Tree> rawTrees) {
     double weight = 1.0;
-    // Train uw classify on words
+    // Train uw model on words
     uwModelTrainer.train(trees, weight);
     
     final double numTrees = trees.size();

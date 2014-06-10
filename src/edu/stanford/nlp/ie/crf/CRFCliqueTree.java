@@ -678,17 +678,17 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
   }
 
   /**
-   * Informs this sequence classify that the value of the element at position pos
-   * has changed. This allows this sequence classify to update its internal classify
+   * Informs this sequence model that the value of the element at position pos
+   * has changed. This allows this sequence model to update its internal model
    * if desired.
    *
    */
   public void updateSequenceElement(int[] sequence, int pos, int oldVal) {
-    // do nothing; we don't change this classify
+    // do nothing; we don't change this model
   }
 
   /**
-   * Informs this sequence classify that the value of the whole sequence is
+   * Informs this sequence model that the value of the whole sequence is
    * initialized to sequence
    *
    */

@@ -86,7 +86,7 @@ import edu.stanford.nlp.util.StringUtils;
  * POS, chunk, and class.
  * <p/>
  * <b>Typical usage</b>
- * <p>For running a trained classify with a provided serialized classifier: <p>
+ * <p>For running a trained model with a provided serialized classifier: <p>
  * <code>
  * java -server -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -loadClassifier
  * conll.ner.gz -textFile samplesentences.txt
@@ -96,7 +96,7 @@ import edu.stanford.nlp.util.StringUtils;
  * <code>
  * java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier -prop propFile
  * </code><p>
- * To train and test a classify from the command line:<p>
+ * To train and test a model from the command line:<p>
  * <code>java -mx1000m edu.stanford.nlp.ie.ner.CMMClassifier
  * -trainFile trainFile -testFile testFile -goodCoNLL &gt; output </code>
  * <p/>

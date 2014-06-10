@@ -362,7 +362,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
   @Override
   public void calculate(double[] x) {
 
-    double prob = 0.0; // the log prob of the sequence given the classify, which is the negation of value at this point
+    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     Quadruple<double[][], double[][], double[][], double[][]> allParams = separateWeights(x);
     double[][] W4Edge = allParams.first(); // inputLayerWeights4Edge
     double[][] U4Edge = allParams.second(); // outputLayerWeights4Edge
@@ -403,7 +403,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
       CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex,
         backgroundSymbol, new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags), null);
 
-      // compute the log probability of the document given the classify with the parameters x
+      // compute the log probability of the document given the model with the parameters x
       int[] given = new int[window - 1];
       Arrays.fill(given, classIndex.indexOf(backgroundSymbol));
       int[] windowLabels = new int[window];

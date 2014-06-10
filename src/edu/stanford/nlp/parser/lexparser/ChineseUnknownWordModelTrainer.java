@@ -91,7 +91,7 @@ public class ChineseUnknownWordModelTrainer
   }
   
   /**
-   * trains the first-character based unknown word classify.
+   * trains the first-character based unknown word model.
    *
    * @param tw The word we are currently training on
    * @param loc The position of that word

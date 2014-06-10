@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Stores a triple of an extractor ID, a feature value (derived from history)
  * and a y (tag) value.  Used to compute a feature number in the loglinear
- * classify.
+ * model.
  *
  * @author Kristina Toutanova, with minor changes by Daniel Cer
  * @version 1.0

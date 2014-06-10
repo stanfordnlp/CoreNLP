@@ -9,11 +9,11 @@ import edu.stanford.nlp.stats.Counter;
 
 public interface UnknownWordModel extends Serializable {
 
-  /** One unknown word classify may allow different options to be set; for example,
+  /** One unknown word model may allow different options to be set; for example,
    *  several models of unknown words for a given language could be included in one
-   *  class.  The unknown level can be used to set the classify one would like.  Effects
+   *  class.  The unknown level can be used to set the model one would like.  Effects
    *  of the level will vary based on the implementing class.  If a given class only
-   *  includes one classify, setting the unknown level should have no effect.
+   *  includes one model, setting the unknown level should have no effect.
    *
    *  @param unknownLevel Provides a choice between different unknown word
    *         processing schemes
@@ -22,7 +22,7 @@ public interface UnknownWordModel extends Serializable {
 
 
   /**
-   * Get the level of equivalence classing for the classify.
+   * Get the level of equivalence classing for the model.
    *
    * @return The current level of unknown word equivalence classing
    */
@@ -30,10 +30,10 @@ public interface UnknownWordModel extends Serializable {
 
 
   /**
-   * Returns the lexicon used by this unknown word classify;
+   * Returns the lexicon used by this unknown word model;
    * lexicon is used to check information about words being seen/unseen
    *
-   * @return The lexicon used by this unknown word classify
+   * @return The lexicon used by this unknown word model
    */
   Lexicon getLexicon();
 

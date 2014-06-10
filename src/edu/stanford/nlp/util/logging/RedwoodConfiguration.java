@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.Generics;
 
 /**
  * A class which encapsulates configuration settings for Redwood.
- * The class operates on the builder classify; that is, you can chain method
+ * The class operates on the builder model; that is, you can chain method
  * calls.
  * @author Gabor Angeli (angeli at cs.stanford)
  */
@@ -323,7 +323,6 @@ public class RedwoodConfiguration {
    *   <li>log.captureStderr = {true,false}: Capture stdout and route it through Redwood</li>
    *   <li>log.channels.hide = [channels]: Hide these channels (comma-separated list)</li>
    *   <li>log.channels.show = [channels]: Show only these channels (comma-separated list)</li>
-   *   <li>log.channels.debug = {true, false}: Show the debug channel
    *   <li>log.channels.width = [int]: If nonzero, the channels for each logging statement will be printed to their left</li>
    * </ul>
    * @param props The properties to use in configuration
@@ -439,7 +438,7 @@ public class RedwoodConfiguration {
     String channelsToShow = get(props,"log.channels.show",null,used);
     String channelsToHide = get(props,"log.channels.hide",null,used);
     int channelWidth = Integer.parseInt(get(props, "log.channels.width", "10", used));
-    if (channelsToShow != null && channelsToHide != null && !channelsToShow.toLowerCase().equals("true")) {
+    if (channelsToShow != null && channelsToHide != null) {
       throw new IllegalArgumentException("Can't specify both log.channels.show and log.channels.hide");
     }
     // (set visibility)
@@ -451,10 +450,6 @@ public class RedwoodConfiguration {
       }
     } else if (channelsToHide != null) {
       config = config.printChannels(channelWidth).hideChannels(channelsToHide.split(","));
-    }
-    // (hide debug)
-    if (get(props, "log.channels.debug", "true", used).equalsIgnoreCase("false")) {
-      config = config.hideChannels(new Object[]{ Redwood.DBG });
     }
     //--Error Check
     for(Object propAsObj : props.keySet()) {
