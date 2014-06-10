@@ -896,7 +896,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   @Deprecated
   @Override
   public LinearClassifier<L, F> trainClassifier(List<RVFDatum<L, F>> examples) {
-    throw new UnsupportedOperationException("Unsupported deprecated method");
+    // TODO Auto-generated method stub
+    return null;
   }
 
   public void setEvaluators(int iters, Evaluator[] evaluators)
