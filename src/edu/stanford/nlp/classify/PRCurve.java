@@ -11,14 +11,13 @@ import edu.stanford.nlp.util.PriorityQueue;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Triple;
 
-/** A class to create recall-precision curves given scores
- *  used to fit the best monotonic function for logistic regression and SVMs.
- *
- *  @author Kristina Toutanova
- *  @version May 23, 2005
+/**
+ * @author Kristina Toutanova
+ *         May 23, 2005
+ *         A class to create recall-precision curves given scores
+ *         used to fit the best monotonic function for logistic regression and svms
  */
 public class PRCurve {
-
   double[] scores; //sorted scores
   int[] classes; // the class of example i
   int[] guesses; // the guess of example i according to the argmax
@@ -34,7 +33,7 @@ public class PRCurve {
       ArrayList<Pair<Double, Integer>> dataScores = new ArrayList<Pair<Double, Integer>>();
       for(String line : ObjectBank.getLineIterator(new File(filename))) {
         List<String> elems = StringUtils.split(line);
-        Pair<Double, Integer> p = new Pair<Double, Integer>(Double.valueOf(elems.get(0)), Integer.valueOf(elems.get(1)));
+        Pair<Double, Integer> p = new Pair<Double, Integer>(new Double(elems.get(0).toString()), Integer.valueOf(elems.get(1).toString()));
         dataScores.add(p);
       }
       init(dataScores);
@@ -55,11 +54,11 @@ public class PRCurve {
       ArrayList<Pair<Double, Integer>> dataScores = new ArrayList<Pair<Double, Integer>>();
       for(String line : ObjectBank.getLineIterator(new File(filename))) {
         List<String> elems = StringUtils.split(line);
-        int cls = Double.valueOf(elems.get(0)).intValue();
+        int cls = (new Double(elems.get(0).toString())).intValue();
         if (cls == -1) {
           cls = 0;
         }
-        double score = Double.valueOf(elems.get(1)) + 0.5;
+        double score = Double.parseDouble(elems.get(1).toString()) + 0.5;
         Pair<Double, Integer> p = new Pair<Double, Integer>(new Double(score), Integer.valueOf(cls));
         dataScores.add(p);
       }
@@ -176,13 +175,14 @@ public class PRCurve {
   }
 
   /**
-   * the f-measure if we just guess as negative the first numleft and guess as positive the last numright
+   * the f-measure if we just guess as negativ the first numleft and guess as poitive the last numright
    *
    */
   public double fmeasure(int numleft, int numright) {
-    int tp = numpositive[numright];
-    int fp = numright - tp;
-    int fn = numleft - numnegative[numleft];
+    int tp = 0, fp = 0, fn = 0;
+    tp = numpositive[numright];
+    fp = numright - tp;
+    fn = numleft - numnegative[numleft];
     return f1(tp, fp, fn);
   }
 
@@ -320,7 +320,7 @@ public class PRCurve {
   }
 
   /**
-   * confidence weighted accuracy assuming the scores are probabilities and using .5 as threshold
+   * confidence weighted accuracy assuming the scores are probabilities and using .5 as treshold
    *
    */
   public int[] optimalCwaArray() {
