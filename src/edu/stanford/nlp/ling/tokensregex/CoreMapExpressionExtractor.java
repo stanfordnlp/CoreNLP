@@ -371,7 +371,6 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
         annotateExpressions(merged, newExprs);
         newExprs = MatchedExpression.removeNullValues(newExprs);
         if (newExprs.size() > 0) {
-          newExprs = MatchedExpression.removeNested(newExprs);
           newExprs = MatchedExpression.removeOverlapping(newExprs);
           merged = MatchedExpression.replaceMerged(merged, newExprs);
           // Favor newly matched expressions over older ones
@@ -420,7 +419,6 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
         basicExtractRule.extract(annotation, matchedExpressions);
         annotateExpressions(annotation, matchedExpressions);
         matchedExpressions = MatchedExpression.removeNullValues(matchedExpressions);
-        matchedExpressions = MatchedExpression.removeNested(matchedExpressions);
         matchedExpressions = MatchedExpression.removeOverlapping(matchedExpressions);
       }
 
