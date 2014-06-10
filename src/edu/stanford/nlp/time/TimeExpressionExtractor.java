@@ -6,33 +6,40 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * A TimeExpressionExtractor extracts a list of time expression from a document annotation.
+ * A TimeExpressionExtractor extracts a list of time expression from a document annotation
  *
  * @author Angel Chang
  */
 public interface TimeExpressionExtractor {
-
   void init(String name, Properties props);
 
   void init(Options options);
 
   /**
-   * Extract time expressions in a document (provided as a CoreMap Annotation).
+   * Returns list of CoreMaps indicating what the time expressions are
+   * @param annotation - Annotation holding tokenized text from which the time expressions are to be extracted
    *
-   * @param annotation The annotation to run time expression extraction over
-   * @param docDate A date for the document to be used as a reference time.
-   * @return A list of CoreMap.  Each CoreMap represents a detected temporal
-   *     expression.  Each CoreMap is a pipeline.Annotation, and you can get
-   *     various attributes of the temporal expression out of it. For example,
-   *     you can get the list of tokens with:
-   *     <pre>
-   *     {@code
-   *     List<CoreMap> cm = extractTimeExpressionCoreMaps(annotation, docDate);
-   *     List<CoreLabel> tokens = cm.get(CoreAnnotations.TokensAnnotation.class); }
-   *     </pre>
+   * @param docAnnotation - Annotation for the entire document
+   *                        Uses the following annotations:
+   *                          CoreAnnotations.DocDateAnnotation.class (String representing document date)
+   *                          TimeExpression.TimeIndexAnnotation.class (Holds index used to generated tids)
+   * @return List of CoreMaps
+   */
+  List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, CoreMap docAnnotation);
+
+  /**
+   * Returns list of CoreMaps indicating what the time expressions are
+   * @param annotation - Annotation holding tokenized text from which the time expressions are to be extracted
+   * @param docDate - String representing document date
+   * @return List of CoreMaps
    */
   List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate);
 
-//  List<TimeExpression> extractTimeExpressions(CoreMap annotation, String docDateStr);
+  /**
+   * Indicates that all annotations on the document has been completed
+   * Performs cleanup on the document annotation
+   * @param docAnnotation
+   */
+  void finalize(CoreMap docAnnotation);
 
 }
