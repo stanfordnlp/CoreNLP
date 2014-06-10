@@ -38,7 +38,7 @@ public class DiffFunctionTest extends TestCase {
   }
 
   public static void gradientCheck(DiffFunction f) {
-    for (int deg = -2; deg > -8; deg--) {
+    for (int deg = -2; deg > -7; deg--) {
       double eps = Math.pow(10, deg);
       System.err.println("testing for eps " + eps);
       gradientCheck(f, eps);
