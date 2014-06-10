@@ -755,7 +755,7 @@ public class StringUtils {
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
           {
             try {
-              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
+              InputStream is = new BufferedInputStream(new FileInputStream(result.getProperty(key)));
               InputStreamReader reader = new InputStreamReader(is, "utf-8");
               result.remove(key); // location of this line is critical
               result.load(reader);
@@ -768,7 +768,7 @@ public class StringUtils {
             } catch (IOException e) {
               result.remove(key);
               System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
-              throw new RuntimeIOException(e);
+              throw new RuntimeException(e);
             }
           }
         }
@@ -1884,21 +1884,6 @@ public class StringUtils {
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<String>();
-    for(List<String> n: ng)
-      ngrams.add(StringUtils.join(n," "));
-  
-    return ngrams;
-  }
-  
-  /**
-   * n grams for already splitted string. the ngrams are joined with a single space
-   */
-  public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
-    List<String> wordsStr = new ArrayList<String>();
-    for(CoreLabel l : words)
-      wordsStr.add(l.word());
-    List<List<String>> ng = CollectionUtils.getNGrams(wordsStr, minSize, maxSize);
     Collection<String> ngrams = new ArrayList<String>();
     for(List<String> n: ng)
       ngrams.add(StringUtils.join(n," "));
