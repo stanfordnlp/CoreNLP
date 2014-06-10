@@ -437,7 +437,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
     new GrammaticalRelation(Language.English, "dobj", "direct object",
-        DirectObjectGRAnnotation.class, OBJECT, "SBARQ|VP|SBAR", tregexCompiler,
+        DirectObjectGRAnnotation.class, OBJECT, "VP|SBARQ?", tregexCompiler,
         new String[] {
           // case with an iobj before
           "VP < (NP $+ (NP|WHNP=target !< (/^NN/ < " + timeWordLotRegex + "))) !<(/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
@@ -545,7 +545,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "pcomp", "prepositional complement",
-        PrepositionalComplementGRAnnotation.class, COMPLEMENT, "PP(?:-TMP)?", tregexCompiler,
+        PrepositionalComplementGRAnnotation.class, COMPLEMENT, "(?:WH)?PP(?:-TMP)?", tregexCompiler,
         new String[] {
           "@PP|WHPP < (IN|VBG|VBN|TO $+ @SBAR|S|PP|ADVP=target)", // no intervening NP; VBN is for "compared with"
           "@PP|WHPP < (RB $+ @SBAR|S=target)", // RB is for weird tagging like "after/RB adjusting for inflation"
@@ -598,7 +598,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "ccomp", "clausal complement",
-        ClausalComplementGRAnnotation.class, COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP", tregexCompiler,
+        ClausalComplementGRAnnotation.class, COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP(?:-.*)?", tregexCompiler,
         new String[] { // note if you add more words in the pattern, be sure to add them in the ADV_CLAUSE_MODIFIER too!
           "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP)",
           "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",

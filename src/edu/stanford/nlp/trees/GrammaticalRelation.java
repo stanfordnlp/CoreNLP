@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
+import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -350,7 +351,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     if (root.value() == null) {
       root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
     }
-    Set<Tree> nodeList = new LinkedHashSet<Tree>();
+    Set<Tree> nodeList = new ArraySet<Tree>();
     for (TregexPattern p : targetPatterns) {    // cdm: I deleted: && nodeList.isEmpty()
       TregexMatcher m = p.matcher(root);
       while (m.findAt(t)) {
