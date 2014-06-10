@@ -2,9 +2,11 @@ package edu.stanford.nlp.parser.common;
 
 import java.io.FileFilter;
 import java.io.PrintStream;
+import java.util.regex.Pattern;
 import edu.stanford.nlp.io.NumberRangeFileFilter;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 
 /**
  * Utility methods or common blocks of code for dealing with parser
@@ -30,14 +32,28 @@ public class ArgUtils {
     ps.println();
   }
 
+  static final Pattern DOUBLE_PATTERN = Pattern.compile("[-]?[0-9]+[.][0-9]+");
+
   public static Pair<String, FileFilter> getTreebankDescription(String[] args, int argIndex, String flag) {
+    Triple<String, FileFilter, Double> description = getWeightedTreebankDescription(args, argIndex, flag);
+    return Pair.makePair(description.first(), description.second());
+  }
+
+  public static Triple<String, FileFilter, Double> getWeightedTreebankDescription(String[] args, int argIndex, String flag) {
     String path = null;
     FileFilter filter = null;
+    Double weight = 1.0;
     // the next arguments are the treebank path and maybe the range for testing
     int numSubArgs = numSubArgs(args, argIndex);
-    if (numSubArgs > 0 && numSubArgs < 3) {
+    if (numSubArgs > 0 && numSubArgs < 4) {
       argIndex++;
       path = args[argIndex++];
+      boolean hasWeight = false;
+      if (numSubArgs > 1 && DOUBLE_PATTERN.matcher(args[argIndex + numSubArgs - 2]).matches()) {
+        weight = Double.parseDouble(args[argIndex + numSubArgs - 2]);
+        hasWeight = true;
+        numSubArgs--;
+      }
       if (numSubArgs == 2) {
         filter = new NumberRangesFileFilter(args[argIndex++], true);
       } else if (numSubArgs == 3) {
@@ -51,9 +67,12 @@ public class ArgUtils {
           filter = new NumberRangesFileFilter(args[argIndex++], true);
         }
       }
+      if (hasWeight) {
+        argIndex++;
+      }
     } else {
       throw new IllegalArgumentException("Bad arguments after " + flag);
     }
-    return Pair.makePair(path, filter);
+    return Triple.makeTriple(path, filter, weight);
   }
 }
