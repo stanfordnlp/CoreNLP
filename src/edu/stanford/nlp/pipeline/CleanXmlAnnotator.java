@@ -30,14 +30,14 @@ public class CleanXmlAnnotator implements Annotator{
 
   /**
    * This regular expression tells us which tags end a sentence...
-   * for example, {@code <p>} would be a great candidate.
+   * for example, &lt;p&gt; would be a great candidate
    */
   private final Pattern sentenceEndingTagMatcher;
 
   public static final String DEFAULT_SENTENCE_ENDERS = "";
 
   /**
-   * This tells us which XML tags wrap document date.
+   * This tells us which XML tags wrap document date
    */
   private final Pattern dateTagMatcher;
 
@@ -86,7 +86,6 @@ public class CleanXmlAnnotator implements Annotator{
     }
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -97,16 +96,13 @@ public class CleanXmlAnnotator implements Annotator{
       annotation.set(CoreAnnotations.TokensAnnotation.class, newTokens);
 
       // if the doc date was found, save it. it is used by SUTime (inside the "ner" annotator)
-      if ( ! dateTokens.isEmpty()) {
-        StringBuilder os = new StringBuilder();
+      if(dateTokens.size() > 0){
+        StringBuffer os = new StringBuffer();
         boolean first = true;
         for (CoreLabel t : dateTokens) {
-          if (first) {
-            first = false;
-          } else {
-           os.append(' ');
-          }
+          if (!first) os.append(" ");
           os.append(t.word());
+          first = false;
         }
         //System.err.println("DOC DATE IS: " + os.toString());
         annotation.set(CoreAnnotations.DocDateAnnotation.class, os.toString());
@@ -225,7 +221,7 @@ public class CleanXmlAnnotator implements Annotator{
       currentTagSet = null;
       if (tag.isEndTag) {
         while (true) {
-          if (enclosingTags.isEmpty()) {
+          if (enclosingTags.size() == 0) {
             throw new IllegalArgumentException("Got a close tag " + tag.name +
                                                "which does not match " +
                                                "any open tag");
@@ -290,5 +286,4 @@ public class CleanXmlAnnotator implements Annotator{
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(CLEAN_XML_REQUIREMENT);
   }
-
 }
