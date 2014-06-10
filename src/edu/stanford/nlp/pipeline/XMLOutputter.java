@@ -28,6 +28,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 import nu.xom.*;
 
 
@@ -72,6 +73,16 @@ public class XMLOutputter {
     String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
     if(docDate != null){
       setSingleElement(docElem, "docDate", NAMESPACE_URI, docDate);
+    }
+
+    String docSourceType = annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
+    if(docSourceType != null){
+      setSingleElement(docElem, "docSourceType", NAMESPACE_URI, docSourceType);
+    }
+
+    String docType = annotation.get(CoreAnnotations.DocTypeAnnotation.class);
+    if(docType != null){
+      setSingleElement(docElem, "docType", NAMESPACE_URI, docType);
     }
 
     Element sentencesElem = new Element("sentences", NAMESPACE_URI);
@@ -156,8 +167,9 @@ public class XMLOutputter {
     Map<Integer, CorefChain> corefChains =
       annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     if (corefChains != null) {
+      List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       Element corefInfo = new Element("coreference", NAMESPACE_URI);
-      if (addCorefGraphInfo(corefInfo, corefChains, NAMESPACE_URI))
+      if (addCorefGraphInfo(corefInfo, sentences, corefChains, NAMESPACE_URI))
         docElem.appendChild(corefInfo);
     }
 
@@ -266,7 +278,7 @@ public class XMLOutputter {
    * Generates the XML content for the coreference chain object
    */
   private static boolean addCorefGraphInfo
-    (Element corefInfo, Map<Integer, CorefChain> corefChains, String curNS)
+    (Element corefInfo, List<CoreMap> sentences, Map<Integer, CorefChain> corefChains, String curNS)
   {
     boolean foundCoref = false;
     for (CorefChain chain : corefChains.values()) {
@@ -275,11 +287,11 @@ public class XMLOutputter {
       foundCoref = true;
       Element chainElem = new Element("coreference", curNS);
       CorefChain.CorefMention source = chain.getRepresentativeMention();
-      addCorefMention(chainElem, curNS, source, true);
+      addCorefMention(chainElem, curNS, sentences, source, true);
       for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
         if (mention == source)
           continue;
-        addCorefMention(chainElem, curNS, mention, false);
+        addCorefMention(chainElem, curNS, sentences, mention, false);
       }
       corefInfo.appendChild(chainElem);
     }
@@ -287,6 +299,7 @@ public class XMLOutputter {
   }
 
   private static void addCorefMention(Element chainElem, String curNS,
+                                      List<CoreMap> sentences,
                                       CorefChain.CorefMention mention,
                                       boolean representative) {
     Element mentionElem = new Element("mention", curNS);
@@ -302,6 +315,12 @@ public class XMLOutputter {
                      Integer.toString(mention.endIndex));
     setSingleElement(mentionElem, "head", curNS,
                      Integer.toString(mention.headIndex));
+
+    if (sentences != null) {
+      String text = StringUtils.joinWords(sentences.get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class),
+              " ", mention.startIndex - 1, mention.endIndex -1);
+      setSingleElement(mentionElem, "text", curNS, text);
+    }
 
     chainElem.appendChild(mentionElem);
   }
