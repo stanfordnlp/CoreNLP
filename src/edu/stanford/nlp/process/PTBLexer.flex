@@ -703,9 +703,9 @@ DBLQUOT = \"|&quot;
 TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
 TBSPEC2 = {APOS}[0-9][0-9]
 
-/* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
-SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
-ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)
+/* Smileys (based on Chris Potts' sentiment tutorial) and simple Asian smileys */
+SMILEY = [<>]?[:;=8][\-o\*']?[\(\)DPdpO\/\\\:}{@\|\[\]]|[\(\)DPdpO\/\\\:}{@\|\[\]][\-o\*']?[:;=8][<>]?
+ASIANSMILEY = \(?[\-\^x=~<>'][_.]?[\-\^x=~<>']\)?
 
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
@@ -844,7 +844,7 @@ gonna|gotta|lemme|gimme|wanna
 /* Special case to get ca., fig. or Prop. before numbers */
 (ca|fig|prop)\./{SPACE}[:digit:]   { return getNext(); }
 /* Special case to get pty. ltd. or pty limited */
-pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
+pty\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV1}/{SENTEND}     {
                           String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
@@ -902,7 +902,7 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
                     return getNext();
                   }
                 }
-{SMILEY}/[^A-Za-z] { String txt = yytext();
+{SMILEY}        { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
