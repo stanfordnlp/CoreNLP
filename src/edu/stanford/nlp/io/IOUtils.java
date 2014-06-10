@@ -55,7 +55,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File. The file is silently gzipped regardless of name.
+   * Write an object to a specified File.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -256,7 +256,7 @@ public class IOUtils {
 
 
   /**
-   * Read an object from a stored file. It is silently ungzipped, regardless of name.
+   * Read an object from a stored file.
    *
    * @param file The file pointing to the object to be retrieved
    * @throws IOException If file cannot be read
@@ -423,17 +423,10 @@ public class IOUtils {
   }
 
   /**
-   * Open a BufferedReader on stdin. Use the user's default encoding.
-   */
-  public static BufferedReader readerFromStdin() throws IOException {
-    return new BufferedReader(new InputStreamReader(System.in));
-  }
-
-  /**
    * Open a BufferedReader to a file or URL specified by a String name. If the
    * String starts with https?://, then it is first tried as a URL, otherwise it
    * is next tried as a resource on the CLASSPATH, and then finally it is tried
-   * as a local file or other network-available file. If the String ends in .gz, it
+   * as a local file or other network-available file . If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
    *
@@ -480,7 +473,6 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path) {
-    if(path.endsWith(".gz")) return readLines(new File(path), GZIPInputStream.class);
     return readLines(new File(path));
   }
 
@@ -593,7 +585,6 @@ public class IOUtils {
             }
           }
 
-          @Override
           public void remove() {
             throw new UnsupportedOperationException();
           }
@@ -1074,7 +1065,6 @@ public class IOUtils {
     //--Return
     return lines;
   }
-
   public static LinkedList<String[]> readCSVStrictly(String filename, int numColumns) throws IOException {
     return readCSVStrictly(slurpFile(filename).toCharArray(), numColumns);
   }
@@ -1370,6 +1360,9 @@ public class IOUtils {
     }
   }
 
+  public static void main(String[] args) {
+    System.out.println(backupName(args[0]));
+  }
 
   public static String getExtension(String fileName) {
     if(!fileName.contains("."))
