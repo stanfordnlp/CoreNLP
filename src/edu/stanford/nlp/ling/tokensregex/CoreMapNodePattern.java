@@ -34,39 +34,14 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     return Collections.unmodifiableList(annotationPatterns);
   }
 
-  private static final Pattern LITERAL_PATTERN = Pattern.compile("[A-Za-z0-9]+");
-  public static NodePattern<String> newStringRegexPattern(String regex, int flags) {
-    boolean isLiteral = ((flags & Pattern.LITERAL) != 0) || LITERAL_PATTERN.matcher(regex).matches();
-    if (isLiteral) {
-      boolean caseInsensitive = (flags & Pattern.CASE_INSENSITIVE) != 0;
-      return new StringAnnotationPattern(regex, caseInsensitive);
-    } else {
-      return new StringAnnotationRegexPattern(regex, flags);
-    }
-  }
-
   public static CoreMapNodePattern valueOf(String textAnnotationPattern) {
     return valueOf(null, textAnnotationPattern);
-  }
-
-  public static CoreMapNodePattern valueOf(String textAnnotationPattern, int flags) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class, NodePattern>>(1));
-    p.add(CoreAnnotations.TextAnnotation.class,
-            newStringRegexPattern(textAnnotationPattern, flags));
-    return p;
   }
 
   public static CoreMapNodePattern valueOf(Env env, String textAnnotationPattern) {
     CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class, NodePattern>>(1));
     p.add(CoreAnnotations.TextAnnotation.class,
-            newStringRegexPattern(textAnnotationPattern, (env != null)? env.defaultStringPatternFlags: 0));
-    return p;
-  }
-
-  public static CoreMapNodePattern valueOf(Pattern textAnnotationPattern) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class, NodePattern>>(1));
-    p.add(CoreAnnotations.TextAnnotation.class,
-            new StringAnnotationRegexPattern(textAnnotationPattern));
+            new StringAnnotationRegexPattern(textAnnotationPattern, (env != null)? env.defaultStringPatternFlags: 0));
     return p;
   }
 
@@ -88,10 +63,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
           value = value.substring(1, value.length()-1);
           value = value.replaceAll("\\\\/", "/"); // Unescape forward slash
 //          p.annotationPatterns.put(c, new StringAnnotationRegexPattern(value, (env != null)? env.defaultStringPatternFlags: 0));
-//          p.add(c, new StringAnnotationRegexPattern((env != null)? env.getStringPattern(value): Pattern.compile(value)));
-          String regex = (env != null)? env.expandStringRegex(value): value;
-          int flags = (env != null)? env.defaultStringPatternFlags: 0;
-          p.add(c, newStringRegexPattern(regex, flags));
+          p.add(c, new StringAnnotationRegexPattern((env != null)? env.getStringPattern(value): Pattern.compile(value)));
         } else if (value.startsWith("::")) {
           if (value.equals("::IS_NIL") || value.equals("::NOT_EXISTS")) {
             p.add(c, new NilAnnotationPattern());
@@ -142,7 +114,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     return p;
   }
 
-  public void add(Class c, NodePattern pattern) {
+  private void add(Class c, NodePattern pattern) {
     annotationPatterns.add(Pair.makePair(c, pattern));
   }
 
