@@ -43,8 +43,8 @@ public abstract class TsurgeonPattern {
   static final TsurgeonPattern[] EMPTY_TSURGEON_PATTERN_ARRAY = new TsurgeonPattern[0];
 
   TsurgeonPatternRoot root;
-  String label;
-  TsurgeonPattern[] children;
+  final String label;
+  final TsurgeonPattern[] children;
 
   TsurgeonPattern(String label, TsurgeonPattern[] children) {
     this.label = label;
@@ -76,12 +76,12 @@ public abstract class TsurgeonPattern {
   }
 
   /**
-   * Evaluates the pattern against a {@link Tree} and a {@link TregexMatcher}
+   * Evaluates the surgery pattern against a {@link Tree} and a {@link TregexMatcher}
    * that has been successfully matched against the tree.
    *
-   * @param t the {@link Tree} that has been matched upon; typically this tree will be destructively modified.
-   * @param m the successfully matched {@link TregexMatcher}
-   * @return some node in the tree; depends on implementation and use of the specific subclass.
+   * @param t The {@link Tree} that has been matched upon; typically this tree will be destructively modified.
+   * @param m The successfully matched {@link TregexMatcher}.
+   * @return Some node in the tree; depends on implementation and use of the specific subclass.
    */
   public abstract Tree evaluate(Tree t, TregexMatcher m);
 
