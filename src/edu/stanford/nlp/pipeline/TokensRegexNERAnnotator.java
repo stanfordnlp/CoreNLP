@@ -5,9 +5,12 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.*;
+import edu.stanford.nlp.ling.tokensregex.matcher.TrieMap;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +21,14 @@ import java.util.regex.Pattern;
 /**
  * Similar to RegexNERAnnotator but uses TokensRegex as the underlying library for matching regular expressions.
  *
+ * Some Differences:
+ * <ul>
+ *   <li>Will not overwrite NER annotation, if found expression overlaps (i.e. does not contain the old NER phrase)</li>
+ *   <li>validPosPattern must match the entire POS tag of the token</li>
+ *   <li>there are different modes for matching the POS tag (PosMatchType)</li>
+ *   <li>By default, there is no validPosPattern</li>
+ *   <li>By default, MISC is always replaced</li>
+ * </ul>
  *
  * @author Angel Chang
  */
@@ -32,25 +43,46 @@ public class TokensRegexNERAnnotator implements Annotator {
   private final Pattern validPosPattern;
   private final boolean verbose;
 
+  enum PosMatchType {
+    // all tokens must match the pos pattern
+    MATCH_ALL_TOKENS,
+    // only one token must match the pos pattern
+    MATCH_AT_LEAST_ONE_TOKEN,
+    // only single token phrases have to match the pos pattern
+    MATCH_ONE_TOKEN_PHRASE_ONLY }
+  private final PosMatchType posMatchType;
+  public static final PosMatchType DEFAULT_POS_MATCH_TYPE = PosMatchType.MATCH_AT_LEAST_ONE_TOKEN;
+
   public TokensRegexNERAnnotator(String mapping) {
     this(mapping, false);
   }
 
   public TokensRegexNERAnnotator(String mapping, boolean ignoreCase) {
-    this("tokenregexner", getProperties("tokenregexner", mapping, ignoreCase));
+    this(mapping, ignoreCase, null);
   }
 
-  private static Properties getProperties(String name, String mapping, boolean ignoreCase) {
+  public TokensRegexNERAnnotator(String mapping, boolean ignoreCase, String validPosRegex) {
+    this("tokenregexner", getProperties("tokenregexner", mapping, ignoreCase, validPosRegex));
+  }
+
+  private static Properties getProperties(String name, String mapping, boolean ignoreCase, String validPosRegex) {
     Properties props = new Properties();
     props.setProperty(name + ".mapping", mapping);
     props.setProperty(name +".ignorecase", String.valueOf(ignoreCase));
+    if (validPosRegex != null) {
+      props.setProperty(name +".validpospattern", validPosRegex);
+    }
     return props;
   }
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
-    String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol", SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+    String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol",
+            SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC");
+    String[] backgroundSymbols = backgroundSymbol.split("\\s*,\\s*");
     String mapping = properties.getProperty(name + ".mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
     String validPosRegex = properties.getProperty(name + ".validpospattern");
+    this.posMatchType = PosMatchType.valueOf(properties.getProperty(name + ".posmatchtype",
+            DEFAULT_POS_MATCH_TYPE.name()));
     boolean overwriteMyLabels = true;
 
     this.ignoreCase = Boolean.parseBoolean(properties.getProperty(name + ".ignorecase", "false"));
@@ -64,7 +96,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     BufferedReader rd = null;
     try {
       rd = IOUtils.readerFromString(mapping);
-      entries = readEntries(rd);
+      entries = readEntries(name, mapping, rd, ignoreCase, verbose);
     } catch (IOException e) {
       throw new RuntimeIOException("Couldn't read TokensRegexNER from " + mapping, e);
     } finally {
@@ -73,7 +105,8 @@ public class TokensRegexNERAnnotator implements Annotator {
     multiPatternMatcher = createPatternMatcher();
     myLabels = Generics.newHashSet();
     // Can always override background or none.
-    myLabels.add(backgroundSymbol);
+    for (String s:backgroundSymbols)
+      myLabels.add(s);
     myLabels.add(null);
     if (overwriteMyLabels) {
       for (Entry entry: entries) myLabels.add(entry.type);
@@ -108,7 +141,8 @@ public class TokensRegexNERAnnotator implements Annotator {
   private MultiPatternMatcher<CoreMap> createPatternMatcher() {
     // Convert to tokensregex pattern
     int patternFlags = ignoreCase? Pattern.CASE_INSENSITIVE:0;
-    NodePattern<String> posTagPattern = (validPosPattern != null)? new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPattern):null;
+    NodePattern<String> posTagPattern = (validPosPattern != null && PosMatchType.MATCH_ALL_TOKENS.equals(posMatchType))?
+            new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPattern):null;
     List<TokenSequencePattern> patterns = new ArrayList<TokenSequencePattern>(entries.size());
     for (Entry entry:entries) {
       List<SequencePattern.PatternExpr> nodePatterns = new ArrayList<SequencePattern.PatternExpr>();
@@ -119,7 +153,8 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
         nodePatterns.add(new SequencePattern.NodePatternExpr(c));
       }
-      TokenSequencePattern pattern = TokenSequencePattern.compile(new SequencePattern.SequencePatternExpr(nodePatterns));
+      TokenSequencePattern pattern = TokenSequencePattern.compile(
+              new SequencePattern.SequencePatternExpr(nodePatterns));
       pattern.setPriority(entry.priority);
       patterns.add(pattern);
       patternToEntry.put(pattern, entry);
@@ -135,11 +170,63 @@ public class TokensRegexNERAnnotator implements Annotator {
       // Check if we will overwrite the existing annotation with this annotation
       int start = m.start();
       int end = m.end();
-      int prevNerEndIndex = start-1;
-      int nextNerStartIndex = end;
 
-      String startNer = tokens.get(start).ner();
-      String endNer = tokens.get(end-1).ner();
+      boolean overwriteOriginalNer = checkPosTags(entry, tokens, start, end);
+      if (overwriteOriginalNer) {
+        overwriteOriginalNer = checkOrigNerTags(entry, tokens, start, end);
+      }
+      if (overwriteOriginalNer) {
+        for (int i = start; i < end; i++) {
+          tokens.get(i).set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.type);
+        }
+      } else {
+        if (verbose) {
+          System.err.println("Not annotating  '" + m.group() + "': " +
+                  StringUtils.joinFields(m.groupNodes(), CoreAnnotations.NamedEntityTagAnnotation.class)
+                  + " with " + entry.type + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
+        }
+      }
+    }
+  }
+
+  private boolean checkPosTags(Entry entry, List<CoreLabel> tokens, int start, int end) {
+    if (validPosPattern != null) {
+      // Need to check POS tag too...
+      switch (posMatchType) {
+        case MATCH_ONE_TOKEN_PHRASE_ONLY:
+          if (tokens.size() > 1) return true;
+          // fall through
+        case MATCH_AT_LEAST_ONE_TOKEN:
+          for (int i = start; i < end; i++) {
+            CoreLabel token = tokens.get(i);
+            String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+            if (pos != null && validPosPattern.matcher(pos).matches()) {
+              return true;
+            }
+          }
+          return false;
+        case MATCH_ALL_TOKENS:
+          // Checked else where
+          return true;
+        default:
+          // Don't know this match type....
+          return true;
+      }
+    }
+    return true;
+  }
+
+  private boolean checkOrigNerTags(Entry entry, List<CoreLabel> tokens, int start, int end) {
+    int prevNerEndIndex = start-1;
+    int nextNerStartIndex = end;
+
+    // Check if we found a pattern that overlaps with existing ner labels
+    // tag1 tag1 x   x  tag2 tag2
+    //      tag tag tag tag
+    // Don't overwrite the old ner label if we overlap like this
+    String startNer = tokens.get(start).ner();
+    String endNer = tokens.get(end-1).ner();
+    if (startNer != null && !myLabels.contains(startNer)) {
       while (prevNerEndIndex >= 0) {
         // go backwards to find different entity type
         String ner = tokens.get(prevNerEndIndex).ner();
@@ -148,6 +235,8 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
         prevNerEndIndex--;
       }
+    }
+    if (endNer != null && !myLabels.contains(endNer)) {
       while (nextNerStartIndex < tokens.size()) {
         // go backwards to find different entity type
         String ner = tokens.get(nextNerStartIndex).ner();
@@ -156,36 +245,31 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
         nextNerStartIndex++;
       }
-
-      boolean overwriteOriginalNer = false;
-      if (prevNerEndIndex != (start-1) && nextNerStartIndex != end) {
-        // Cutting across already recognized NEs don't disturb
-      } else if (startNer == null) {
-        overwriteOriginalNer = true;
-      } else {
-        // Check if we have one consistent NER tag
-        // if not, overwrite
-        // if consistent, overwrite only if in our set of ner tags that we overwrite
-        for (int i = start+1; i < end; i++) {
-          if (!startNer.equals(tokens.get(i).ner())) {
-            overwriteOriginalNer = true;
-            break;
-          }
-        }
-        if (!overwriteOriginalNer) {
-          if (entry.overwritableTypes.contains(startNer) || myLabels.contains(startNer)) {
-            overwriteOriginalNer = true;
-          }
+    }
+    boolean overwriteOriginalNer = false;
+    if (prevNerEndIndex != (start-1) || nextNerStartIndex != end) {
+      // Cutting across already recognized NEs don't disturb
+    } else if (startNer == null) {
+      // No old ner, okay to replace
+      overwriteOriginalNer = true;
+    } else {
+      // Check if we have one consistent NER tag
+      // if not, overwrite
+      // if consistent, overwrite only if in our set of ner tags that we overwrite
+      for (int i = start+1; i < end; i++) {
+        if (!startNer.equals(tokens.get(i).ner())) {
+          overwriteOriginalNer = true;
+          break;
         }
       }
-      if (overwriteOriginalNer) {
-        for (int i = start; i < end; i++) {
-          tokens.get(i).set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.type);
+      if (!overwriteOriginalNer) {
+        if (entry.overwritableTypes.contains(startNer) || myLabels.contains(startNer)) {
+          overwriteOriginalNer = true;
         }
       }
     }
+    return overwriteOriginalNer;
   }
-
 
   private static class Entry {
     public String[] regex; // the regex, tokenized by splitting on white space
@@ -212,9 +296,12 @@ public class TokensRegexNERAnnotator implements Annotator {
    *  @param mapping The Reader containing RegexNER mappings. It's lines are counted from 1
    *  @return a sorted list of Entries
    */
-  private static List<Entry> readEntries(BufferedReader mapping) throws IOException {
+  private static List<Entry> readEntries(String annotatorName,
+                                         String mappingFilename,
+                                         BufferedReader mapping,
+                                         boolean ignoreCase, boolean verbose) throws IOException {
     List<Entry> entries = new ArrayList<Entry>();
-
+    TrieMap<String,Entry> seenRegexes = new TrieMap<String,Entry>();
     int lineCount = 0;
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
@@ -223,7 +310,26 @@ public class TokensRegexNERAnnotator implements Annotator {
         throw new IllegalArgumentException("Provided mapping file is in wrong format");
 
       String[] regexes = split[0].trim().split("\\s+");
+      String[] key = regexes;
+      if (ignoreCase) {
+        key = new String[regexes.length];
+        for (int i = 0; i < regexes.length; i++) {
+          key[i] = regexes[i].toLowerCase();
+        }
+      }
       String type = split[1].trim();
+
+      if (seenRegexes.containsKey(key)) {
+        Entry oldEntry = seenRegexes.get(key);
+        String[] types = oldEntry.type.split("\\s*,\\s*");
+        if (!CollectionUtils.asSet(types).contains(type)) {
+          if (verbose) {
+            System.err.println("Ignoring duplicate entry: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
+          }
+        }
+        continue;
+      }
+
       Set<String> overwritableTypes = Generics.newHashSet();
       double priority = 0.0;
 
@@ -234,14 +340,17 @@ public class TokensRegexNERAnnotator implements Annotator {
         try {
           priority = Double.parseDouble(split[3].trim());
         } catch(NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid line " + lineCount + " in regexner file " + mapping + ": \"" + line + "\"!", e);
+          throw new IllegalArgumentException("ERROR: Invalid line " + lineCount
+                  + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
         }
       }
 
       entries.add(new Entry(regexes, type, overwritableTypes, priority));
+      seenRegexes.put(key, entries.get(entries.size()-1));
     }
 
-    // System.err.println("Read these entries:");
+    System.err.println("TokensRegexAnnotator " + annotatorName +
+            ": Read " + entries.size() + " unique entries out of " + lineCount + " from " + mappingFilename);
     // System.err.println(entries);
     return entries;
   }

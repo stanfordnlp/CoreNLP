@@ -45,6 +45,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Generic mention extractor from a corpus.
@@ -258,7 +259,10 @@ public class MentionExtractor {
 
   /** Find syntactic relations (e.g., appositives) in a sentence */
   private void findSyntacticRelations(Tree tree, List<Mention> orderedMentions) {
+    markListMemberRelation(orderedMentions);
+
     Set<Pair<Integer, Integer>> appos = Generics.newHashSet();
+    // TODO: This apposition finding doesn't seem to be very good - what about using "appos" from dependencies?
     findAppositions(tree, appos);
     markMentionRelation(orderedMentions, appos, "APPOSITION");
 
@@ -325,9 +329,29 @@ public class MentionExtractor {
     findTreePattern(tree, relativePronounPattern, relativePronounPairs);
   }
 
+  private static void markListMemberRelation(List<Mention> orderedMentions) {
+    for(Mention m1 : orderedMentions){
+      for(Mention m2 : orderedMentions){
+        // Mark if m2 and m1 are in list relationship
+        if (m1.isListMemberOf(m2)) {
+          m2.addListMember(m1);
+          m1.addBelongsToList(m2);
+        } else if (m2.isListMemberOf(m1)) {
+          m1.addListMember(m2);
+          m2.addBelongsToList(m1);
+        }
+      }
+    }
+  }
+
   private static void markMentionRelation(List<Mention> orderedMentions, Set<Pair<Integer, Integer>> foundPairs, String flag) {
     for(Mention m1 : orderedMentions){
       for(Mention m2 : orderedMentions){
+        // Ignore if m2 and m1 are in list relationship
+        if (m1.isListMemberOf(m2) || m2.isListMemberOf(m1) || m1.isMemberOfSameList(m2)) {
+          SieveCoreferenceSystem.logger.finest("Not checking '" + m1 + "' and '" + m2 + "' for " + flag + ": in list relationship");
+          continue;
+        }
         for(Pair<Integer, Integer> foundPair: foundPairs){
           if((foundPair.first == m1.headIndex && foundPair.second == m2.headIndex)){
             if(flag.equals("APPOSITION")) m2.addApposition(m1);

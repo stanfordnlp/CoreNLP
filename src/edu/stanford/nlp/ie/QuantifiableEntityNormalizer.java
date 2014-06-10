@@ -387,9 +387,9 @@ public class QuantifiableEntityNormalizer {
     if(word.get(CoreAnnotations.PartOfSpeechAnnotation.class) == null || word.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CD")) {
       //one possibility: it's a two digit year with an apostrophe: '90
       if(wordString.length() == 3  && wordString.startsWith("'")) {
-	if (DEBUG) {
-	  System.err.println("Found potential two digit year: " + wordString);
-	}
+        if (DEBUG) {
+          System.err.println("Found potential two digit year: " + wordString);
+        }
         wordString = wordString.substring(1);
         try {
           Integer.parseInt(wordString);
@@ -452,6 +452,7 @@ public class QuantifiableEntityNormalizer {
       afterIndex++;
     }
     if (next2 != null && isYear(next2)) {
+      // This code here just seems wrong.... why are we marking next as a date without checking anything?
       date.add(next);
       assert(next != null); // keep the static analysis happy.
       next.set(CoreAnnotations.NamedEntityTagAnnotation.class, "DATE");
@@ -490,6 +491,23 @@ public class QuantifiableEntityNormalizer {
 
     return ISODateInstance.NO_RANGE;
   }
+
+  // Version of above without any weird stuff
+  private static <E extends CoreMap> String detectDateRangeModifier(E prev)
+  {
+    if(prev != null) {
+      String prevWord = prev.get(CoreAnnotations.TextAnnotation.class).toLowerCase();
+      if(prevWord.matches(dateRangeBeforeOneWord)) {
+        //we have an open range of the before type - e.g., Before June 6, John was 5
+        return ISODateInstance.OPEN_RANGE_BEFORE;
+      } else if(prevWord.matches(dateRangeAfterOneWord)) {
+        //we have an open range of the after type - e.g., After June 6, John was 6
+        return ISODateInstance.OPEN_RANGE_AFTER;
+      }
+    }
+    return ISODateInstance.NO_RANGE;
+  }
+
 
   /**
    * This should detect things like "between 5 and 5 million" and "from April 3 to June 6"
@@ -1235,9 +1253,12 @@ public class QuantifiableEntityNormalizer {
    *      document.  Note: the Labels are updated in place.
    */
   public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> l) {
-    addNormalizedQuantitiesToEntities(l, false);
+    addNormalizedQuantitiesToEntities(l, false, false);
   }
 
+  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> l, boolean concatenate) {
+    addNormalizedQuantitiesToEntities(l, concatenate, false);
+  }
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
    * and tags each of their constituents with a "normalizedQuantity"
@@ -1248,7 +1269,7 @@ public class QuantifiableEntityNormalizer {
    *      document.  Note: the Labels are updated in place.
    * @param concatenate true if quantities should be concatenated into one label, false otherwise
    */
-  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list, boolean concatenate) {
+  public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> list, boolean concatenate, boolean usesSUTime) {
     List<E> toRemove = new ArrayList<E>(); // list for storing those objects we're going to remove at the end (e.g., if concatenate, we replace 3 November with 3_November, have to remove one of the originals)
 
     // Goes through tokens and tries to fix up NER annotations
@@ -1288,7 +1309,13 @@ public class QuantifiableEntityNormalizer {
           processEntity(collector, prevNerTag, timeModifier, nextWord);
         } else if (prevNerTag.equals(("DATE"))) {
           //detect date range modifiers by looking at nearby words
-          compModifier = detectDateRangeModifier(collector, list, beforeIndex, i);
+          E prev = (beforeIndex >= 0) ? list.get(beforeIndex) : null;
+          if (usesSUTime) {
+            // If sutime was used don't do any weird relabeling of more things as DATE
+            compModifier = detectDateRangeModifier(prev);
+          } else {
+            compModifier = detectDateRangeModifier(collector, list, beforeIndex, i);
+          }
           if (!compModifier.equals(ISODateInstance.BOUNDED_RANGE))
             processEntity(collector, prevNerTag, compModifier, nextWord);
           //now repair this date if it's more than one word
