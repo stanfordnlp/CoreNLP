@@ -13,12 +13,4 @@ public enum Color {
   private Color(String ansiCode){
     this.ansiCode = ansiCode;
   }
-
-  public String apply(String toColor) {
-    StringBuilder b = new StringBuilder();
-    b.append(ansiCode);
-    b.append(toColor);
-    b.append("\033[0m");
-    return b.toString();
-  }
 }
