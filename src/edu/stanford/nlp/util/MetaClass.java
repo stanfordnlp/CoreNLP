@@ -491,6 +491,7 @@ public class MetaClass {
 		int start = 0; int end = chars.length;
 		if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
 		if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
+    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
 		//(finite state automata)
 		for(int i=start; i<end; i++){
 			if(chars[i] == '\\'){
