@@ -956,6 +956,8 @@ public class SeqClassifierFlags implements Serializable {
   public double dualDecompInitialStepSize = 0.1;
   public boolean dualDecompDebug = false;
   public boolean useCWSWordFeatures = false;
+  public boolean useCWSWordFeaturesAll = false;
+  public boolean pctSegmenterLenAdjust = false;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2336,6 +2338,10 @@ public class SeqClassifierFlags implements Serializable {
         intermediateSegmenterModel = val;
       } else if (key.equalsIgnoreCase("useCWSWordFeatures")){
         useCWSWordFeatures = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useCWSWordFeaturesAll")){
+        useCWSWordFeaturesAll = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("pctSegmenterLenAdjust")){
+        pctSegmenterLenAdjust = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
