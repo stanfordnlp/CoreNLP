@@ -520,6 +520,11 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "(NP (NP (NNP Mr.) (NNP Laidig)) (, ,) (SBAR (WHNP-1 (WP whom)) (S (NP-SBJ (PRP he)) (VP (VBD referred) (PP-CLR (TO to) (NP (-NONE- *T*-1))) (PP-CLR (IN as) (NP (DT a) (NN friend)))))))",
         "( (SBARQ (WHNP-9 (WP what)) (SQ (VBZ does) (NP-SBJ (PRP it)) (VP (VB mean) (NP-9 (-NONE- *T*)) (SBAR-TMP (WHADVP-1 (WRB when)) (S (NP-SBJ (DT a) (JJ veiled) (NN chameleon) (NN egg)) (VP (VBZ is) (ADJP-PRD (JJ soft)) (ADVP-TMP-1 (-NONE- *T*))))))) (. ?)))",
         "( (S (NP-SBJ (PRP it)) (VP (VBD wase) (RB nt) (VP (VBG going))) (. ....)))",
+        // Relative clauses used to not be recognized off NP-ADV or NP-TMP
+        "( (S (NP-SBJ (DT An) (NN arbitrator) ) (VP (VP (VBD awarded) (NP (NNP Eastern) (NNPS Airlines) (NNS pilots) ) (NP (NP (QP (IN between) ($ $) (CD 60) (CD million) (CC and) ($ $) (CD 100) (CD million) ) (-NONE- *U*) ) (PP (IN in) (NP (JJ back) (NN pay) )))) (, ,) (NP-ADV (NP (DT a) (NN decision) ) (SBAR (WHNP-285 (WDT that) ) (S (NP-SBJ (-NONE- *T*-285) ) (VP (MD could) (VP (VB complicate) (NP (NP (DT the) (NN carrier) (POS 's) ) (NN bankruptcy-law) (NN reorganization) ))))))) (. .) ))",
+        // Check same regardless of ROOT or none and functional categories or none
+        "(ROOT (S (NP (CD Two) (JJ former) (NNS ministers) ) (VP (VBD were) (ADJP (ADJP (ADVP (RB heavily) ) (VBN implicated) )) (PP (IN in) (NP (DT the) (NNP Koskotas) (NN affair) )))))",
+        "( (S (NP-SBJ (CD Two) (JJ former) (NNS ministers) ) (VP (VBD were) (ADJP-PRD (ADJP (ADVP (RB heavily) ) (VBN implicated) )) (PP-LOC (IN in) (NP (DT the) (NNP Koskotas) (NN affair) )))))",
         // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
         // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -559,13 +564,61 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "cop(soft-11, is-10)\n" +
                 "advcl(mean-4, soft-11)\n",
         "nsubj(going-4, it-1)\n" + "aux(going-4, wase-2)\n" + "neg(going-4, nt-3)\n" + "root(ROOT-0, going-4)\n" + "punct(going-4, ....-5)\n",
+        "det(arbitrator-2, An-1)\n" +
+                "nsubj(awarded-3, arbitrator-2)\n" +
+                "root(ROOT-0, awarded-3)\n" +
+                "nn(pilots-6, Eastern-4)\n" +
+                "nn(pilots-6, Airlines-5)\n" +
+                "iobj(awarded-3, pilots-6)\n" +
+                "amod($-8, between-7)\n" +
+                "dobj(awarded-3, $-8)\n" +
+                "num($-8, 60-9)\n" +
+                "num($-8, million-10)\n" +
+                "cc($-8, and-11)\n" +
+                "conj($-8, $-12)\n" +
+                "num($-12, 100-13)\n" +
+                "num($-12, million-14)\n" +
+                "prep($-8, in-15)\n" +
+                "amod(pay-17, back-16)\n" +
+                "pobj(in-15, pay-17)\n" +
+                "det(decision-20, a-19)\n" +
+                "npadvmod(awarded-3, decision-20)\n" +
+                "nsubj(complicate-23, that-21)\n" +
+                "aux(complicate-23, could-22)\n" +
+                "rcmod(decision-20, complicate-23)\n" +
+                "det(carrier-25, the-24)\n" +
+                "poss(reorganization-28, carrier-25)\n" +
+                "possessive(carrier-25, 's-26)\n" +
+                "nn(reorganization-28, bankruptcy-law-27)\n" +
+                "dobj(complicate-23, reorganization-28)\n",
+        "num(ministers-3, Two-1)\n" +
+                "amod(ministers-3, former-2)\n" +
+                "nsubjpass(implicated-6, ministers-3)\n" +
+                "auxpass(implicated-6, were-4)\n" +
+                "advmod(implicated-6, heavily-5)\n" +
+                "root(ROOT-0, implicated-6)\n" +
+                "prep(implicated-6, in-7)\n" +
+                "det(affair-10, the-8)\n" +
+                "nn(affair-10, Koskotas-9)\n" +
+                "pobj(in-7, affair-10)\n",
+        "num(ministers-3, Two-1)\n" +
+                "amod(ministers-3, former-2)\n" +
+                "nsubjpass(implicated-6, ministers-3)\n" +
+                "auxpass(implicated-6, were-4)\n" +
+                "advmod(implicated-6, heavily-5)\n" +
+                "root(ROOT-0, implicated-6)\n" +
+                "prep(implicated-6, in-7)\n" +
+                "det(affair-10, the-8)\n" +
+                "nn(affair-10, Koskotas-9)\n" +
+                "pobj(in-7, affair-10)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
-    TreeReaderFactory trf = new PennTreeReaderFactory();
+    // TreeReaderFactory trf = new PennTreeReaderFactory();
+    TreeReaderFactory trf = new NPTmpRetainingTreeNormalizer.NPTmpAdvRetainingTreeReaderFactory();
     for (int i = 0; i < testTrees.length; i++) {
       String testTree = testTrees[i];
       String testAnswer = testAnswers[i];
