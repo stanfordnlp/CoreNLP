@@ -231,7 +231,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
-    
+
     if (props == null) {
       // if undefined, find the properties file in the classpath
       props = loadPropertiesFromClasspath();
@@ -1113,6 +1113,17 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     final String baseOutputDir = properties.getProperty("outputDirectory", ".");
     final String baseInputDir = properties.getProperty("inputDirectory", base);
 
+    // Set of files to exclude
+    final String excludeFilesParam = properties.getProperty("excludeFiles");
+    final Set<String> excludeFiles = null;
+    if (excludeFilesParam != null) {
+      Iterable<String> lines = IOUtils.readLines(excludeFilesParam);
+      for (String line:lines) {
+        String name = line.trim();
+        if (!name.isEmpty()) excludeFiles.add(name);
+      }
+    }
+
     //(file info)
     final OutputFormat outputFormat =
             OutputFormat.valueOf(properties.getProperty("outputFormat", DEFAULT_OUTPUT_FORMAT).toUpperCase());
@@ -1141,6 +1152,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //for each file...
     for (final File file : files) {
       //register a task...
+      if (excludeFiles.contains(file.getName())) {
+        err("Skipping excluded file " + file.getName());
+        continue;
+      }
       toRun.add(new Runnable(){
         //who's run() method is...
         @Override
