@@ -1514,11 +1514,11 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
   /**
    * Gets the preterminal yield (i.e., tags) of the tree.  All data in
-   * preterminal nodes is returned as a list ordered by the natural left to
+   * preleaf nodes is returned as a list ordered by the natural left to
    * right order of the tree.  Null values, if any, are inserted into the
    * list like any other value.  Pre-leaves are nodes of height 1.
    *
-   * @return a {@code List} of the data in the tree's pre-leaves.
+   * @return a <code>List</code> of the data in the tree's pre-leaves.
    */
   public List<Label> preTerminalYield() {
     return preTerminalYield(new ArrayList<Label>());

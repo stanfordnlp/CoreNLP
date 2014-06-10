@@ -531,7 +531,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // helped stop things going haywire a couple of times (it stops the
         // creation of a unit cycle that probably leaves something else
         // disconnected) [cdm Jan 2010]
-        if (td.dep() == dep && td.reln() != REFERENT && td.gov() != ant) {
+        if (td.dep() == dep && td.reln() != RELATIVE && td.reln() != REFERENT && td.gov() != ant) {
           if (DEBUG)
             System.err.print("referent: changing " + td);
           td.setDep(ant);
@@ -755,7 +755,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     // governor p NP and p NP case ... a lot of special code cdm jan 2006
 
     for (TypedDependency td1 : list) {
-      if (td1.reln() != PREPOSITIONAL_MODIFIER) {
+      if (td1.reln() != PREPOSITIONAL_MODIFIER && td1.reln() != RELATIVE) {
         continue;
       }
       if (td1.reln() == KILL) {
@@ -1062,7 +1062,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       // find all other typedDeps having our dep as gov
       Set<TypedDependency> possibles = map.get(td1Dep);
 
-      if (possibles != null && (td1.reln() == PREPOSITIONAL_MODIFIER || td1.reln() == POSSESSION_MODIFIER || td1.reln() == CONJUNCT)) {
+      if (possibles != null && (td1.reln() == PREPOSITIONAL_MODIFIER || td1.reln() == RELATIVE || td1.reln() == POSSESSION_MODIFIER || td1.reln() == CONJUNCT)) {
 
         // look for the "second half"
         boolean pobj = true;// default for prep relation is prep_
@@ -1174,6 +1174,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     GrammaticalRelation reln;
     if (agent) {
       reln = AGENT;
+    } else if (pc.reln() == RELATIVE) {
+      reln = RELATIVE;
     } else {
       // for prepositions, use the preposition
       // for pobj: we collapse into "prep"; for pcomp: we collapse into "prepc"
