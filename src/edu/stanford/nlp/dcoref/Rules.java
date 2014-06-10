@@ -139,7 +139,6 @@ public class Rules {
     if (first.size() > 1 && second.size() > 1) {
       return false;
     }
-    if (first.size() == 0 && second.size() == 0) { return false; }
     List<CoreLabel> longer;
     List<CoreLabel> shorter;
     
@@ -149,11 +148,11 @@ public class Rules {
       longer = (firstWord.length() > secondWord.length()) ? first : second;
       shorter = (firstWord.length() > secondWord.length()) ? second : first;
     } else {
-      longer = (first.size() > 0 && first.size() > second.size()) ? first : second;
-      shorter = (second.size() > 0 && first.size() > second.size()) ? second : first;
+      longer = (first.size() > second.size()) ? first : second;
+      shorter = (first.size() > second.size()) ? second : first;
     }
 
-    String acronym = shorter.size() > 0 ? shorter.get(0).get(CoreAnnotations.TextAnnotation.class) : "<UNK>";
+    String acronym = shorter.get(0).get(CoreAnnotations.TextAnnotation.class);
     // This check is not strictly necessary, but it saves a chunk of
     // time iterating through the text of the longer mention
     for (int acronymPos = 0; acronymPos < acronym.length(); ++acronymPos) {
