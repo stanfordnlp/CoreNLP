@@ -1441,7 +1441,8 @@ public class EnglishGrammaticalRelations {
           // only allow a PP < PP one if there is not a conj, verb, or other pattern that matches pcomp under it.  Else pcomp
           "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
           "S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
-          "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ"
+          "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
+          "@NP < (@UCP=target <# @PP)",
         });
   public static class PrepositionalModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
