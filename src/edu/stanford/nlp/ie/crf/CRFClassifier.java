@@ -3645,7 +3645,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (String filename : testFiles.split(",")) {
         files.add(new File(filename));
       }
-      crf.classifyAndWriteAnswers(files, crf.defaultReaderAndWriter());
+      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter());
     }
 
     if (textFile != null) {
@@ -3657,7 +3657,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (String filename : textFiles.split(",")) {
         files.add(new File(filename));
       }
-      crf.classifyAndWriteAnswers(files);
+      crf.classifyFilesAndWriteAnswers(files);
     }
 
     if (crf.flags.readStdin) {
