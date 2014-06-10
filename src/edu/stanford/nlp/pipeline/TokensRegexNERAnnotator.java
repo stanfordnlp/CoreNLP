@@ -7,8 +7,10 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.ling.tokensregex.matcher.TrieMap;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.*;
-import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,20 +33,15 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class TokensRegexNERAnnotator implements Annotator {
-  protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokensRegexNERAnnotator");
-
   // TODO: Can remove entries and just have a MultiPatternMatcher probably
   private final boolean ignoreCase;
   private final List<Entry> entries;
   private final Map<TokenSequencePattern,Entry> patternToEntry = new IdentityHashMap<TokenSequencePattern,Entry>();
   private final MultiPatternMatcher<CoreMap>  multiPatternMatcher;
 
-  private final Set<String> myLabels;  // set of labels to always overwrite
+  private final Set<String> myLabels;
   private final Pattern validPosPattern;
   private final boolean verbose;
-
-  // Labels for which we don't use the default overwrite types (mylabels)
-  private final Set<String> noDefaultOverwriteLabels;
 
   enum PosMatchType {
     // all tokens must match the pos pattern
@@ -88,9 +85,8 @@ public class TokensRegexNERAnnotator implements Annotator {
             DEFAULT_POS_MATCH_TYPE.name()));
     boolean overwriteMyLabels = true;
 
-    this.noDefaultOverwriteLabels = CollectionUtils.asSet(PropertiesUtils.getStringArray(properties, name + ".noDefaultOverwriteLabels"));
-    this.ignoreCase = PropertiesUtils.getBool(properties, name + ".ignorecase", false);
-    this.verbose = PropertiesUtils.getBool(properties, name + ".verbose", false);
+    this.ignoreCase = Boolean.parseBoolean(properties.getProperty(name + ".ignorecase", "false"));
+    this.verbose = Boolean.parseBoolean(properties.getProperty(name + ".verbose", "false"));
 
     if (validPosRegex != null && !validPosRegex.equals("")) {
       validPosPattern = Pattern.compile(validPosRegex);
@@ -100,7 +96,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     BufferedReader rd = null;
     try {
       rd = IOUtils.readerFromString(mapping);
-      entries = readEntries(name, mapping, rd, noDefaultOverwriteLabels, ignoreCase, verbose);
+      entries = readEntries(name, mapping, rd, ignoreCase, verbose);
     } catch (IOException e) {
       throw new RuntimeIOException("Couldn't read TokensRegexNER from " + mapping, e);
     } finally {
@@ -267,17 +263,9 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
       }
       if (!overwriteOriginalNer) {
-        // check if old ner type was one that was specified as explicitly overwritable by this entry
-        if (entry.overwritableTypes.contains(startNer)) {
+        if (entry.overwritableTypes.contains(startNer) || myLabels.contains(startNer)) {
           overwriteOriginalNer = true;
-        } else {
-          // if this ner type doesn't belong to the labels for which we don't overwrite the default labels (noDefaultOverwriteLabels)
-          // we check mylabels to see if we can overwrite this entry
-          if (/*entry.overwritableTypes.isEmpty() || */!noDefaultOverwriteLabels.contains(entry.type)) {
-            overwriteOriginalNer = myLabels.contains(startNer);
-          }
         }
-
       }
     }
     return overwriteOriginalNer;
@@ -286,7 +274,7 @@ public class TokensRegexNERAnnotator implements Annotator {
   private static class Entry {
     public String[] regex; // the regex, tokenized by splitting on white space
     public String type; // the associated type
-    public Set<String> overwritableTypes; // what types can be overwritten by this entry
+    public Set<String> overwritableTypes;
     public double priority;
 
     public Entry(String[] regex, String type, Set<String> overwritableTypes, double priority) {
@@ -297,7 +285,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     }
 
     public String toString() {
-      return "Entry{" + StringUtils.join(regex) + ' ' + type + ' ' + overwritableTypes + ' ' + priority + '}';
+      return "Entry{" + regex + ' ' + type + ' ' + overwritableTypes + ' ' + priority + '}';
     }
   }
 
@@ -311,7 +299,6 @@ public class TokensRegexNERAnnotator implements Annotator {
   private static List<Entry> readEntries(String annotatorName,
                                          String mappingFilename,
                                          BufferedReader mapping,
-                                         Set<String> noDefaultOverwriteLabels,
                                          boolean ignoreCase, boolean verbose) throws IOException {
     List<Entry> entries = new ArrayList<Entry>();
     TrieMap<String,Entry> seenRegexes = new TrieMap<String,Entry>();
@@ -332,6 +319,17 @@ public class TokensRegexNERAnnotator implements Annotator {
       }
       String type = split[1].trim();
 
+      if (seenRegexes.containsKey(key)) {
+        Entry oldEntry = seenRegexes.get(key);
+        String[] types = oldEntry.type.split("\\s*,\\s*");
+        if (!CollectionUtils.asSet(types).contains(type)) {
+          if (verbose) {
+            System.err.println("Ignoring duplicate entry: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
+          }
+        }
+        continue;
+      }
+
       Set<String> overwritableTypes = Generics.newHashSet();
       double priority = 0.0;
 
@@ -347,47 +345,11 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
       }
 
-      Entry entry = null;
-      if (seenRegexes.containsKey(key)) {
-        Entry oldEntry = seenRegexes.get(key);
-        if (priority > oldEntry.priority) {
-          entry = new Entry(regexes, type, overwritableTypes, priority);
-          logger.warn("TokensRegexNERAnnotator " + annotatorName +
-                  ": Replace duplicate entry (higher priority): old=" + oldEntry + ", new=" + entry);
-        } else {
-          if (!oldEntry.type.equals(type)) {
-            if (verbose) {
-              logger.warn("TokensRegexNERAnnotator " + annotatorName +
-                      ": Ignoring duplicate entry: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
-            }
-          }
-          continue;
-        }
-      } else {
-        entry = new Entry(regexes, type, overwritableTypes, priority);
-      }
-
-      // Print some warning about the type
-      int commaPos = entry.type.indexOf(',');
-      if (commaPos > 0) {
-        // Strip the "," and just take first type
-        String newType = entry.type.substring(0, commaPos).trim();
-        logger.warn("TokensRegexNERAnnotator " + annotatorName +
-                ": Entry has multiple type " + entry + ", taking type to be " + newType);
-        entry.type = newType;
-      }
-
-      // Print some warning if label belongs to noDefaultOverwriteLabels but there is no overwritable types
-      if (entry.overwritableTypes.isEmpty() && noDefaultOverwriteLabels.contains(entry.type)) {
-        logger.warn("TokensRegexNERAnnotator " + annotatorName +
-                ": Entry doesn't have overwriteable types " + entry + ", but entry type is in noDefaultOverwriteLabels");
-      }
-
-      entries.add(entry);
-      seenRegexes.put(key, entry);
+      entries.add(new Entry(regexes, type, overwritableTypes, priority));
+      seenRegexes.put(key, entries.get(entries.size()-1));
     }
 
-    logger.log("TokensRegexNERAnnotator " + annotatorName +
+    System.err.println("TokensRegexAnnotator " + annotatorName +
             ": Read " + entries.size() + " unique entries out of " + lineCount + " from " + mappingFilename);
     // System.err.println(entries);
     return entries;
