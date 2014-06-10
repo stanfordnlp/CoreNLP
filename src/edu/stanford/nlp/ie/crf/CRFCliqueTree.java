@@ -219,21 +219,6 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
   // MARGINAL PROB OF TAG AT SINGLE POSITION
   //
 
-  public double[][] logProbTable() {
-    double[][] result = new double[length()][classIndex.size()];
-    for (int i = 0; i < length(); i++) {
-      result[i] = new double[classIndex.size()];
-      for (int j = 0; j < classIndex.size(); j++) {
-        result[i][j] = logProb(i, j);
-      }
-    }
-
-    return result;
-  }
-
-  /*
-  * TODO(mengqiu) this function is buggy, should make sure label converts properly into int[] in cases where it's not 0-order label
-  */
   public double logProbStartPos() {
     double u = factorTables[0].unnormalizedLogProbFront(backgroundIndex);
     return u - z;
