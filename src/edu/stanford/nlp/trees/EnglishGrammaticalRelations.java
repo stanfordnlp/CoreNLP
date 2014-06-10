@@ -664,8 +664,9 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "mark", "marker",
         MarkerGRAnnotation.class, COMPLEMENT, "SBAR(?:-TMP)?", tregexCompiler,
         new String[] {
-          "SBAR|SBAR-TMP < (IN|DT=target $++ S|FRAG)",
-     	    "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
+          "SBAR|SBAR-TMP <, (IN=target !< /^(?i:that|whether)$/) < S|FRAG",
+     	    "SBAR <, (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
+          "SBAR <, (IN|DT=target < That|Whether)"
         });
   public static class MarkerGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -786,7 +787,7 @@ public class EnglishGrammaticalRelations {
         AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
         new String[] {
           // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses, first case includes regular in order to purpose clauses
-          "VP < (@SBAR=target [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
+          "VP < (@SBAR=target [ <, (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)))",
@@ -794,8 +795,7 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)", // the last part should probably only be @SQ, but this captures some strays at no cost
           "VP < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))", // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
           "S|SQ < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))",
-          "S|SQ <, (PP=target <, RB < @S)",
-          "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
+          "S|SQ <, (PP=target <, RB)",
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
           // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // part of former purpcl [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
 
@@ -854,7 +854,7 @@ public class EnglishGrammaticalRelations {
           // are put inside the NP; 2nd is for case of relative
           // clauses with no relativizer (it doesn't distinguish
           // whether actually gapped).
-          "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
+          "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why)/))) !$-- NP|NML > @NP",
           "NP|WHNP|NML $++ RRC=target !$-- NP|WHNP|NML",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
         });
