@@ -85,7 +85,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public FeatureFactory<IN> featureFactory;
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
-  public int windowSize;
+  protected int windowSize;
   // different threads can add or query knownLCWords at the same time,
   // so we need a concurrent data structure
   protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
@@ -706,14 +706,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public abstract List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence);
 
   /**
-   * Classification is finished for the document.
-   * Do any cleanup (if information was stored as part of the document for global classification)
-   * @param document
-   */
-  public void finalizeClassification(final CoreMap document) {
-  }
-
-  /**
    * Train the classifier based on values in flags. It will use the first of
    * these variables that is defined: trainFiles (and baseTrainDir),
    * trainFileList, trainFile.
@@ -807,10 +799,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // TODO
     return new ObjectBankWrapper<IN>(flags, new ObjectBank<List<IN>>(new ResettableReaderIteratorFactory(string),
         readerAndWriter), knownLCWords);
-  }
-
-  public ObjectBank<List<IN>> makeObjectBankFromFile(String filename) {
-    return makeObjectBankFromFile(filename, defaultReaderAndWriter);
   }
 
   public ObjectBank<List<IN>> makeObjectBankFromFile(String filename,
