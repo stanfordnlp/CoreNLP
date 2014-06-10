@@ -40,6 +40,7 @@ import edu.stanford.nlp.dcoref.Dictionaries.Person;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.math.NumberMatchingRegex;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -94,7 +95,8 @@ public class Document implements Serializable {
    * Each mention occurrence with sentence # and position within sentence
    * (Nth mention, not Nth token)
    */
-  public Map<Mention, IntTuple> positions;
+  public Map<Mention, IntTuple> positions;              // mentions may be removed from this due to post processing
+  public Map<Mention, IntTuple> allPositions;           // all mentions (mentions will not be removed from this)
 
   public final Map<IntTuple, Mention> mentionheadPositions;
 
@@ -104,7 +106,7 @@ public class Document implements Serializable {
   /** UtteranceAnnotation -> String (speaker): mention ID or speaker string  */
   public Map<Integer, String> speakers;
 
-  /** mention ID pair  */
+  /** Pair of mention id, and the mention's speaker id  */
   public Set<Pair<Integer, Integer>> speakerPairs;
 
   public int maxUtter;
@@ -113,6 +115,9 @@ public class Document implements Serializable {
 
   /** Set of incompatible mention pairs */
   public Set<Pair<Integer, Integer>> incompatibles;
+
+  /** Map of speaker name/id to speaker info */
+  transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
 
   public Document() {
     positions = Generics.newHashMap();
@@ -158,15 +163,31 @@ public class Document implements Serializable {
     // find 'speaker mention' for each mention
     for(Mention m : allPredictedMentions.values()) {
       int utter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
-      try{
-        int speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
-        if (utter != 0) {
-          speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
-          speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
+      String speaker = m.headWord.get(CoreAnnotations.SpeakerAnnotation.class);
+      if (speaker != null) {
+        // Populate speaker info
+        SpeakerInfo speakerInfo = speakerInfoMap.get(speaker);
+        if (speakerInfo == null) {
+          speakerInfoMap.put(speaker, speakerInfo = new SpeakerInfo(speaker));
+          // span indicates this is the speaker
+          if (Rules.mentionMatchesSpeaker(m, speakerInfo, true)) {
+            m.speakerInfo = speakerInfo;
+          }
         }
-      } catch (Exception e){
-        // no mention found for the speaker
-        // nothing to do
+
+        if (NumberMatchingRegex.isDecimalInteger(speaker)) {
+          try{
+            int speakerMentionID = Integer.parseInt(speaker);
+            if (utter != 0) {
+              // Add pairs of mention id and the mention id of the speaker
+              speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
+//              speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
+            }
+          } catch (Exception e){
+            // no mention found for the speaker
+            // nothing to do
+          }
+        }
       }
       // set generic 'you' : e.g., you know in conversation
       if(docType!=DocType.ARTICLE && m.person==Person.YOU && m.endIndex < m.sentenceWords.size()-1
@@ -174,6 +195,21 @@ public class Document implements Serializable {
         m.generic = true;
       }
     }
+    // now that we have identified the speakers, first pass to check if mentions should cluster with the speakers
+    for(Mention m : allPredictedMentions.values()) {
+      if (m.speakerInfo == null) {
+        for (SpeakerInfo speakerInfo: speakerInfoMap.values()) {
+          if (speakerInfo.hasRealSpeakerName()) {
+            // do loose match - assumes that there isn't that many speakers....
+            if (Rules.mentionMatchesSpeaker(m, speakerInfo, false)) {
+              m.speakerInfo = speakerInfo;
+              break;
+            }
+          }
+        }
+      }
+    }
+
   }
 
   /** Document initialize */
@@ -181,6 +217,7 @@ public class Document implements Serializable {
     if(goldOrderedMentionsBySentence==null) assignOriginalID();
     setParagraphAnnotation();
     initializeCorefCluster();
+    this.allPositions = Generics.newHashMap(this.positions);
   }
 
   /** initialize positions and corefClusters (put each mention in each CorefCluster) */
@@ -215,6 +252,28 @@ public class Document implements Serializable {
         mentionheadPositions.put(headPosition, m);
       }
     }
+  }
+
+  public boolean isIncompatible(CorefCluster c1, CorefCluster c2) {
+    // Was any of the pairs of mentions marked as incompatible
+    for (Mention m:c1.corefMentions)  {
+      for (Mention a:c2.corefMentions) {
+        if (isIncompatible(m,a)) return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean isIncompatible(Mention m1, Mention m2) {
+    int mid1 = Math.min(m1.mentionID, m2.mentionID);
+    int mid2 = Math.max(m1.mentionID, m2.mentionID);
+    return incompatibles.contains(Pair.makePair(mid1,mid2));
+  }
+
+  public void addIncompatible(Mention m1, Mention m2) {
+    int mid1 = Math.min(m1.mentionID, m2.mentionID);
+    int mid2 = Math.max(m1.mentionID, m2.mentionID);
+    incompatibles.add(Pair.makePair(mid1,mid2));
   }
 
   /** Mark twin mentions in gold and predicted mentions */
@@ -512,7 +571,9 @@ public class Document implements Serializable {
 
   /** Speaker extraction */
   private void findSpeakers(Dictionaries dict) {
-    if(Constants.USE_GOLD_SPEAKER_TAGS) {
+    Boolean useMarkedDiscourseBoolean = annotation.get(CoreAnnotations.UseMarkedDiscourseAnnotation.class);
+    boolean useMarkedDiscourse = (useMarkedDiscourseBoolean != null)? useMarkedDiscourseBoolean: false;
+    if (Constants.USE_GOLD_SPEAKER_TAGS || useMarkedDiscourse) {
       for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
           int utterIndex = w.get(CoreAnnotations.UtteranceAnnotation.class);
@@ -709,6 +770,14 @@ public class Document implements Serializable {
       }
     }
     return speaker;
+  }
+
+  public SpeakerInfo getSpeakerInfo(String speaker) {
+    return speakerInfoMap.get(speaker);
+  }
+
+  public int numberOfSpeakers() {
+    return speakerInfoMap.size();
   }
 
   /** Check one mention is the speaker of the other mention */
