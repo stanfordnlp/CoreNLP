@@ -223,7 +223,7 @@
   { (/hours?|hrs?/) => HOUR }
   { (/minutes?|mins?/) => MINUTE }
   { (/seconds?|secs?/) => SECOND }
-  { (/milliseconds?|millisecs?/) => MILLIS }
+  { (/milliseconds?|millisecs?/) => MILLISECOND }
   { (/weeks?|wks?/) => WEEK }
   { (/fortnights?/) => FORTNIGHT }
   { (/quarters?/) => QUARTER }
