@@ -30,7 +30,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class ReadDataTagged {
 
-  private ArrayList<DataWordTag> v = new ArrayList<DataWordTag>();
+  private final ArrayList<DataWordTag> v = new ArrayList<DataWordTag>();
   private int numElements = 0;
   private int totalSentences = 0;
   private int totalWords = 0;
@@ -61,7 +61,7 @@ public class ReadDataTagged {
   /** Frees the memory that is stored in this object by dropping the word-tag data.
    */
   void release() {
-    v = null;
+    v.clear();
   }
 
 
