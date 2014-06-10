@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="DBNavigator.Module.ConnectionManager">
-    <connections />
-  </component>
   <component name="EclipseModuleManager">
     <libelement value="jar://$MODULE_DIR$/lib/ant-contrib-1.0b3.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/tomcat/el-api.jar!/" />
@@ -33,9 +30,9 @@
     <output url="file://$MODULE_DIR$/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/itest/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/itest/src" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/test/src" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/test/src" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library" exported="">
@@ -242,7 +239,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" scope="TEST" name="stanford-corenlp-models-current" level="project" />
   </component>
 </module>
 
