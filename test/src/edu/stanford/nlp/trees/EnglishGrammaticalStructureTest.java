@@ -89,6 +89,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "(NP-SBJ-1 (ADJP (ADJP (VBN Rusted) (RP out)) (CC and) (ADJP (JJ unsafe))) (NNS cars))",
          "( (S (NP-SBJ (PRP u)) (VP (VBP r) (VP (VBG holding) (NP (PRP it)) (ADVP (RB too) (RB tight))))))",
          "( (S (NP-SBJ (PRP You)) (VP (MD should) (VP (GW e) (VB mail) (NP (PRP her)) (ADVP-TMP (RB sometimes)))) (. .)))",
+         "( (S (NP-SBJ (NN Interest)) (VP (VBZ is) (ADJP-PRD (ADJP (NP-ADV (DT a) (JJ great) (NN deal)) (JJR higher)) (SBAR (IN than) (S (NP-SBJ (PRP it)) (VP (VBD was) (ADJP-PRD (-NONE- *?*)) (ADVP-TMP (NP (DT a) (NN year)) (RB ago))))))) (. .)))",
          // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
          // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -312,6 +313,18 @@ public class EnglishGrammaticalStructureTest extends TestCase {
             "root(ROOT-0, mail-4)\n" +
             "dobj(mail-4, her-5)\n" +
             "advmod(mail-4, sometimes-6)\n",
+        "nsubj(higher-6, Interest-1)\n" +
+            "cop(higher-6, is-2)\n" +
+            "det(deal-5, a-3)\n" +
+            "amod(deal-5, great-4)\n" +
+            "npadvmod(higher-6, deal-5)\n" +
+            "root(ROOT-0, higher-6)\n" +
+            "mark(was-9, than-7)\n" +
+            "nsubj(was-9, it-8)\n" +
+            "ccomp(higher-6, was-9)\n" +
+            "det(year-11, a-10)\n" +
+            "npadvmod(ago-12, year-11)\n" +
+            "advmod(was-9, ago-12)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
