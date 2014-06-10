@@ -7,6 +7,7 @@ import java.util.Properties;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
@@ -165,6 +166,10 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
       NumberSequenceClassifier.transferAnnotations(newWord, origWord);
 
     }
+  }
+
+  public void finalizeAnnotation(Annotation annotation) {
+    nsc.finalizeClassification(annotation);
   }
 }
 
