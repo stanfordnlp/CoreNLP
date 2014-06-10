@@ -654,7 +654,6 @@ ABNUM = Ph|tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
-/* est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa */
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Esq
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
@@ -685,6 +684,7 @@ ACRONYM = ({ACRO})\.
 /* --- ABBREV3 abbreviations are allowed only before numbers. ---
  * Otherwise, they aren't recognized as abbreviations (unless they also
  * appear in ABBREV1 or ABBREV2.
+ * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
  */
 /* Maybe also "op." for "op. cit." but also get a photo op. */
 ABBREV3 = (ca|figs?|prop|nos?|art|bldg|prop|pp|op)\.
