@@ -1,15 +1,18 @@
 package edu.stanford.nlp.ie.machinereading.common;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Generics;
 
 public class StringDictionary {
-  public class IndexAndCount {
-    public int mIndex;
 
+  public static class IndexAndCount {
+
+    public final int mIndex;
     public int mCount;
 
     IndexAndCount(int i, int c) {
@@ -19,7 +22,7 @@ public class StringDictionary {
   }
 
   /** Name of this dictionary */
-  private String mName;
+  private final String mName;
 
   /**
    * Access type: If true, create a dictionary entry if the entry does not exist
@@ -54,11 +57,11 @@ public class StringDictionary {
 
   public IndexAndCount getIndexAndCount(String s) {
     IndexAndCount ic = mDict.get(s);
-    if (mCreate == true) {
+    if (mCreate) {
       if (ic == null) {
         ic = new IndexAndCount(mDict.size(), 0);
         mDict.put(s, ic);
-        mInverse.put(new Integer(ic.mIndex), s);
+        mInverse.put(Integer.valueOf(ic.mIndex), s);
       }
       ic.mCount++;
     }
@@ -73,11 +76,11 @@ public class StringDictionary {
    */
   public int get(String s, boolean shouldThrow) {
     IndexAndCount ic = mDict.get(s);
-    if (mCreate == true) {
+    if (mCreate) {
       if (ic == null) {
         ic = new IndexAndCount(mDict.size(), 0);
         mDict.put(s, ic);
-        mInverse.put(new Integer(ic.mIndex), s);
+        mInverse.put(Integer.valueOf(ic.mIndex), s);
       }
       ic.mCount++;
     }
@@ -155,10 +158,9 @@ public class StringDictionary {
   public void load(String path, String prefix) throws java.io.IOException {
 
     String fileName = path + java.io.File.separator + prefix + "." + mName;
-    java.io.BufferedReader is = new java.io.BufferedReader(new java.io.FileReader(fileName));
+    BufferedReader is = IOUtils.readerFromString(fileName);
 
-    String line;
-    while ((line = is.readLine()) != null) {
+    for (String line; (line = is.readLine()) != null; ) {
       ArrayList<String> tokens = SimpleTokenize.tokenize(line);
       if (tokens.size() != 3) {
         throw new RuntimeException("Invalid dictionary line: " + line);
@@ -171,7 +173,7 @@ public class StringDictionary {
 
       IndexAndCount ic = new IndexAndCount(index, count);
       mDict.put(tokens.get(0), ic);
-      mInverse.put(new Integer(index), tokens.get(0));
+      mInverse.put(Integer.valueOf(index), tokens.get(0));
     }
 
     is.close();
