@@ -437,7 +437,7 @@ public class RedwoodConfiguration {
     String channelsToShow = get(props,"log.channels.show",null,used);
     String channelsToHide = get(props,"log.channels.hide",null,used);
     int channelWidth = Integer.parseInt(get(props, "log.channels.width", "10", used));
-    if (channelsToShow != null && channelsToHide != null) {
+    if (channelsToShow != null && channelsToHide != null && !channelsToShow.toLowerCase().equals("true")) {
       throw new IllegalArgumentException("Can't specify both log.channels.show and log.channels.hide");
     }
     // (set visibility)
