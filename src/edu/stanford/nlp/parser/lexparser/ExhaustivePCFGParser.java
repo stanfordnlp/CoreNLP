@@ -109,8 +109,13 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
    * (as regular expression) the state Pattern given.  See the
    * documentation of the ParserConstraint class for information on
    * specifying a ParserConstraint.
+   * <br>
+   * Implementation note: It would be cleaner to make this a
+   * Collections.emptyList, but that actually significantly slows down
+   * the processing in the case of empty lists.  Checking for null
+   * saves quite a bit of time.
    */
-  protected List<ParserConstraint> constraints = Collections.emptyList();
+  protected List<ParserConstraint> constraints = null;
 
   private CoreLabel getCoreLabel(int labelIndex) {
     if (originalCoreLabels[labelIndex] != null) {
@@ -849,9 +854,11 @@ oScore[split][end][br.rightChild] = totR;
     int end = start + diff;
 
     final List<ParserConstraint> constraints = getConstraints();
-    for (ParserConstraint c : constraints) {
-      if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
-        return;
+    if (constraints != null) {
+      for (ParserConstraint c : constraints) {
+        if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
+          return;
+        }
       }
     }
 
@@ -900,31 +907,33 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            boolean skip = false;
-            for (ParserConstraint c : constraints) {
-              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
-                skip = true;
-                break;
-              }
-              if ((start == c.start && split == c.end)) {
-                String tag = stateIndex.get(leftState);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
+            if (constraints != null) {
+              boolean skip = false;
+              for (ParserConstraint c : constraints) {
+                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
                   skip = true;
                   break;
                 }
-              }
-              if ((split == c.start && end == c.end)) {
-                String tag = stateIndex.get(rightChild);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
-                  skip = true;
-                  break;
+                if ((start == c.start && split == c.end)) {
+                  String tag = stateIndex.get(leftState);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    skip = true;
+                    break;
+                  }
+                }
+                if ((split == c.start && end == c.end)) {
+                  String tag = stateIndex.get(rightChild);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    skip = true;
+                    break;
+                  }
                 }
               }
-            }
-            if (skip) {
-              continue;
+              if (skip) {
+                continue;
+              }
             }
 
             float lS = iScore_start[split][leftState];
@@ -1027,33 +1036,35 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            boolean skip = false;
-            for (ParserConstraint c : constraints) {
-              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
-                skip = true;
-                break;
-              }
-              if ((start == c.start && split == c.end)) {
-                String tag = stateIndex.get(leftChild);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
-                  //if (!tag.startsWith(c.state+"^")) {
+            if (constraints != null) {
+              boolean skip = false;
+              for (ParserConstraint c : constraints) {
+                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
                   skip = true;
                   break;
                 }
-              }
-              if ((split == c.start && end == c.end)) {
-                String tag = stateIndex.get(rightState);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
-                  //if (!tag.startsWith(c.state+"^")) {
-                  skip = true;
-                  break;
+                if ((start == c.start && split == c.end)) {
+                  String tag = stateIndex.get(leftChild);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    //if (!tag.startsWith(c.state+"^")) {
+                    skip = true;
+                    break;
+                  }
+                }
+                if ((split == c.start && end == c.end)) {
+                  String tag = stateIndex.get(rightState);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    //if (!tag.startsWith(c.state+"^")) {
+                    skip = true;
+                    break;
+                  }
                 }
               }
-            }
-            if (skip) {
-              continue;
+              if (skip) {
+                continue;
+              }
             }
 
             float lS = iScore_start[split][leftChild];
@@ -1129,20 +1140,22 @@ oScore[split][end][br.rightChild] = totR;
       UnaryRule[] unaries = ug.closedRulesByChild(state);
       for (UnaryRule ur : unaries) {
 
-        boolean skip = false;
-        for (ParserConstraint c : constraints) {
-          if ((start == c.start && end == c.end)) {
-            String tag = stateIndex.get(ur.parent);
-            Matcher m = c.state.matcher(tag);
-            if (!m.matches()) {
-              //if (!tag.startsWith(c.state+"^")) {
-              skip = true;
-              break;
+        if (constraints != null) {
+          boolean skip = false;
+          for (ParserConstraint c : constraints) {
+            if ((start == c.start && end == c.end)) {
+              String tag = stateIndex.get(ur.parent);
+              Matcher m = c.state.matcher(tag);
+              if (!m.matches()) {
+                //if (!tag.startsWith(c.state+"^")) {
+                skip = true;
+                break;
+              }
             }
           }
-        }
-        if (skip) {
-          continue;
+          if (skip) {
+            continue;
+          }
         }
 
         int parentState = ur.parent;
