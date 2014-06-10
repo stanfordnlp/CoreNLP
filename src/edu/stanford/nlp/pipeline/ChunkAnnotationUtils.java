@@ -467,6 +467,11 @@ public class ChunkAnnotationUtils {
         }
       }
     }
+    // Set sentence indices
+    for (int i = 0; i < sentences.size(); i++) {
+      CoreMap sentence = sentences.get(i);
+      sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, i);
+    }
     return true;
   }
   /**
