@@ -1,5 +1,7 @@
 package edu.stanford.nlp.optimization;
 
+import edu.stanford.nlp.math.ArrayMath;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,11 +38,14 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
 
   protected boolean scaleUp = false;
 
+  private int[] shuffledArray = null;
+
   public enum SamplingMethod {
     NoneSpecified,
     RandomWithReplacement,
     RandomWithoutReplacement,
     Ordered,
+    Shuffled,
   }
 
   public void incrementRandom(int numTimes) {
@@ -156,9 +161,21 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
     }
 
     //-----------------------------
+    //Shuffled
+    //-----------------------------
+    if (sampleMethod == SamplingMethod.Shuffled) {
+      if (shuffledArray == null) {
+        shuffledArray = ArrayMath.range(0, this.dataDimension());
+      }
+      for(int i = 0; i<batchSize;i++){
+        thisBatch[i] = shuffledArray[(curElement + i) % this.dataDimension()] ;          //Take the next batchSize points in order
+      }
+      curElement = (curElement + batchSize) % this.dataDimension();       //watch out for overflow
+
+    //-----------------------------
     //RANDOM WITH REPLACEMENT
     //-----------------------------
-    if (sampleMethod == SamplingMethod.RandomWithReplacement) {
+    } else if (sampleMethod == SamplingMethod.RandomWithReplacement) {
       for(int i = 0; i<batchSize;i++){
         thisBatch[i] = randGenerator.nextInt(this.dataDimension());        //Just generate a random index
 //        System.err.println("numCalls = "+(numCalls++));

@@ -906,7 +906,7 @@ public class SeqClassifierFlags implements Serializable {
   public String embeddingWords = null;
   public String embeddingVectors = null;
   public boolean transitionEdgeOnly = false;
-  public double priorL1Lambda = 0;
+  public double priorLambda = 0;
   public boolean addCapitalFeatures = false;
   public int arbitraryInputLayerSize = -1;
   public boolean noEdgeFeature = false;
@@ -928,6 +928,12 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useNERPriorBIO = false;
   public String entityMatrix = null;
   public int multiThreadClassifier = 0;
+  public boolean printFactorTable = false;
+  public boolean useAdaGradFOBOS = false;
+  public double initRate = 0.1;
+  public boolean groupByFeatureTemplate = false;
+  public boolean groupByOutputClass = false;
+  public double priorAlpha = 0;
   
   public String splitWordRegex = null;
   
@@ -2216,8 +2222,8 @@ public class SeqClassifierFlags implements Serializable {
         embeddingVectors = val;
       } else if (key.equalsIgnoreCase("transitionEdgeOnly")) {
         transitionEdgeOnly = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorL1Lambda")) {
-        priorL1Lambda = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("priorLambda")) {
+        priorLambda = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("addCapitalFeatures")) {
         addCapitalFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("arbitraryInputLayerSize")) {
@@ -2260,6 +2266,18 @@ public class SeqClassifierFlags implements Serializable {
         multiThreadClassifier = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useGenericFeatures")) {
         useGenericFeatures = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("printFactorTable")) {
+        printFactorTable = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAdaGradFOBOS")) {
+        useAdaGradFOBOS = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("initRate")) {
+        initRate = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("groupByFeatureTemplate")) {
+        groupByFeatureTemplate = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("groupByOutputClass")) {
+        groupByOutputClass = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("priorAlpha")) {
+        priorAlpha = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("splitWordRegex")){
         splitWordRegex = val;
         // ADD VALUE ABOVE HERE
