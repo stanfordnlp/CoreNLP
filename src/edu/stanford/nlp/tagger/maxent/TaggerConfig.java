@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.Generics;
  *  @author Anna Rafferty
  *  @author Michel Galley
  */
-public class TaggerConfig extends Properties /* Inherits implementation of serializable! */ {
+public class TaggerConfig extends Properties /* Inherits implementation of Serializable! */ {
 
   private static final long serialVersionUID = -4136407850147157497L;
 

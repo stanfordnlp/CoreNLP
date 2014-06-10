@@ -614,6 +614,206 @@ public class IOUtils {
   }
 
   /**
+   * Given a reader, returns the lines from the reader as a iterable
+   * @param r  input reader
+   * @param includeEol whether to keep eol-characters in the returned strings
+   * @return iterable of lines (as strings)
+   */
+  public static final Iterable<String> getLineIterable( Reader r, boolean includeEol) {
+    if (includeEol) {
+      return new EolPreservingLineReaderIterable(r);
+    } else {
+      return new LineReaderIterable( (r instanceof BufferedReader)? (BufferedReader) r:new BufferedReader(r) );
+    }
+  }
+
+  public static final Iterable<String> getLineIterable( Reader r, int bufferSize, boolean includeEol) {
+    if (includeEol) {
+      return new EolPreservingLineReaderIterable(r, bufferSize);
+    } else {
+      return new LineReaderIterable( (r instanceof BufferedReader)? (BufferedReader) r:new BufferedReader(r, bufferSize) );
+    }
+  }
+
+  /**
+   * Line iterator that uses BufferedReader.readLine()
+   * EOL-characters are automatically discarded and not included in the strings returns
+   */
+  private static final class LineReaderIterable implements Iterable<String>
+  {
+    private final BufferedReader reader;
+
+    private LineReaderIterable( BufferedReader reader )
+    {
+      this.reader = reader;
+    }
+    @Override
+    public Iterator<String> iterator()
+    {
+      return new Iterator<String>() {
+        private String next = getNext();
+
+        private String getNext() {
+          try {
+            return reader.readLine();
+          } catch (IOException ex) {
+            throw new RuntimeIOException(ex);
+          }
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+          return this.next != null;
+        }
+        @Override
+        public String next()
+        {
+          String nextLine = this.next;
+          if (nextLine == null) {
+            throw new NoSuchElementException();
+          }
+          next = getNext();
+          return nextLine;
+        }
+
+        @Override
+        public void remove()
+        {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
+  }
+
+  /**
+   * Line iterator that preserves the eol-character exactly as read from reader.
+   * Line endings are: \r\n,\n,\r
+   * Lines returns by this iterator will include the eol-characters
+   **/
+  private static final class EolPreservingLineReaderIterable implements Iterable<String>
+  {
+    private final Reader reader;
+    private final int bufferSize;
+    private EolPreservingLineReaderIterable( Reader reader )
+    {
+      this(reader, SLURPBUFFSIZE);
+    }
+    private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
+    {
+      this.reader = reader;
+      this.bufferSize = bufferSize;
+    }
+    @Override
+    public Iterator<String> iterator()
+    {
+      return new Iterator<String>() {
+        private String next;
+        private boolean done = false;
+
+        private StringBuilder sb = new StringBuilder(80);
+        private char[] charBuffer = new char[bufferSize];
+        private int charBufferPos = -1;
+        private int charsInBuffer = 0;
+        boolean lastWasLF = false;
+
+        private String getNext() {
+          try {
+            while (true) {
+              if (charBufferPos < 0) {
+                charsInBuffer = reader.read(charBuffer);
+                if (charsInBuffer < 0) {
+                  // No more!!!
+                  if (sb.length() > 0) {
+                    String line = sb.toString();
+                    // resets the buffer
+                    sb.setLength(0);
+                    return line;
+                  } else {
+                    return null;
+                  }
+                }
+                charBufferPos = 0;
+              }
+
+              boolean eolReached = copyUntilEol();
+              if (eolReached) {
+                // eol reached
+                String line = sb.toString();
+                // resets the buffer
+                sb.setLength(0);
+                return line;
+              }
+            }
+          } catch (IOException ex) {
+            throw new RuntimeIOException(ex);
+          }
+        }
+
+        private boolean copyUntilEol() {
+          for (int i = charBufferPos; i < charsInBuffer; i++) {
+            if (charBuffer[i] == '\n') {
+              // line end
+              // copy into our string builder
+              sb.append(charBuffer, charBufferPos, i - charBufferPos + 1);
+              // advance character buffer pos
+              charBufferPos = i+1;
+              lastWasLF = false;
+              return true; // end of line reached
+            } else if (lastWasLF) {
+              // not a '\n' here - still need to terminate line (but don't include current character)
+              if (i > charBufferPos) {
+                sb.append(charBuffer, charBufferPos, i - charBufferPos);
+                // advance character buffer pos
+                charBufferPos = i;
+                lastWasLF = false;
+                return true; // end of line reached
+              }
+            }
+            if (charBuffer[i] == '\r') {
+              lastWasLF = true;
+            } else {
+              lastWasLF = false;
+            }
+          }
+          sb.append(charBuffer, charBufferPos, charsInBuffer - charBufferPos);
+          // reset character buffer pos
+          charBufferPos = -1;
+          return false;
+        }
+
+
+        @Override
+        public boolean hasNext()
+        {
+          if (done) return false;
+          if (next == null) {
+            next = getNext();
+          }
+          if (next == null) {
+            done = true;
+          }
+          return !done;
+        }
+        @Override
+        public String next()
+        {
+          if (!hasNext()) { throw new NoSuchElementException(); }
+          String res = next;
+          next = null;
+          return res;
+        }
+
+        @Override
+        public void remove()
+        {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
+  }
+
+  /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
    * automatically opens a GZIPInputStream to wrap the constructed
    * FileInputStream.
@@ -773,14 +973,16 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = new InputStreamReader(new FileInputStream(filename), encoding);
+    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
   /**
-   * Returns all the text in the given file with the given encoding. If the file
-   * cannot be read (non-existent, etc.), then and only then the method returns
-   * <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(String filename, String encoding) {
     try {
@@ -800,7 +1002,7 @@ public class IOUtils {
    * @return The text in the file.
    */
   public static String slurpFile(String filename) throws IOException {
-    return IOUtils.slurpReader(new FileReader(filename));
+    return slurpFile(filename, defaultEncoding);
   }
 
   /**
@@ -912,34 +1114,32 @@ public class IOUtils {
   }
 
   /**
-   * Returns all the text in the given File.
-   *
-   * @return The text in the file. May be an empty string if the file is empty.
-   *         If the file cannot be read (non-existent, etc.), then and only then
-   *         the method returns <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(File file) {
     try {
       return IOUtils.slurpReader(new FileReader(file));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
   /**
-   * Returns all the text in the given File.
-   *
-   * @return The text in the file. May be an empty string if the file is empty.
-   *         If the file cannot be read (non-existent, etc.), then and only then
-   *         the method returns <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(String filename) {
     try {
       return slurpFile(filename);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
