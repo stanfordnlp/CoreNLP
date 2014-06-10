@@ -32,6 +32,7 @@
 package edu.stanford.nlp.classify;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -161,11 +162,11 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
  * <tr><td> useAllSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from all pairs of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWP-<i>str1</i>-<i>str2</i></td></tr>
  * <tr><td> useAllSplitWordTriples</td><td>boolean</td><td>false</td><td>Make features from all triples of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWT-<i>str1</i>-<i>str2</i>-<i>str3</i></td></tr>
- * <tr><td> useSplitWordNGrams</td><td>boolean</td><td>false</td><td>Make features of adjacent word n-grams of lengths between minWordNGramLeng and maxWordNGramLeng inclusive.</td><td>SW#-<i>str1-str2-strN</i></td></tr>
+ * <tr><td> useSplitWordNGrams</td><td>boolean</td><td>false</td><td>Make features of adjacent word n-grams of lengths between minWordNGramLeng and maxWordNGramLeng inclusive. Note that these are word sequences, not character n-grams.</td><td>SW#-<i>str1-str2-strN</i></td></tr>
  * <tr><td> maxWordNGramLeng</td><td>int</td><td>-1</td><td>If this number is positive, word n-grams above this size will not be used in the model</td></tr>
  * <tr><td> minWordNGramLeng</td><td>int</td><td>1</td><td>Must be positive. word n-grams below this size will not be used in the model</td></tr>
  * <tr><td> wordNGramBoundaryRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then the ngram stops</td></tr>
- * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
+ * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
  * <tr><td> useSplitNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same - after the data string has been split into tokens.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#-<i>str</i></td></tr>
  * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes after splitting with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
  * <tr><td> useNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same.</td><td>#-<i>str</i></td></tr>
@@ -211,7 +212,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>useQN</td><td>boolean</td><td>true</td><td>Use Quasi-Newton optimization if true, otherwise use Conjugate Gradient optimization.  Recommended.</td></tr>
  * <tr><td>QNsize</td><td>int</td><td>15</td><td>Number of previous iterations of Quasi-Newton to store (this increases memory use, but speeds convergence by letting the Quasi-Newton optimization more effectively approximate the second derivative).</td></tr>
  * <tr><td>featureFormat</td><td>boolean</td><td>false</td><td>Assumes the input file isn't text strings but already featurized.  One column is treated as the class column (as defined by <code>goldAnswerColumn</code>, and all other columns are treated as features of the instance.  (If answers are not present, set <code>goldAnswerColumn</code> to a negative number.)</td></tr>
- * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight webpage</a> for more information)</td></tr>
+ * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight web page</a> for more information)</td></tr>
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
  * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization)</td></tr>
  * </table>
@@ -286,7 +287,11 @@ public class ColumnDataClassifier {
     }
   }
 
-  // NB: This is meant to do splitting strictly only on tabs, and to thus work with things that are exactly TSV files.  It shouldn't split on all whitespace, because it is useful to be able to have spaces inside fields for short text documents, and then to be able to split them into words with features like useSplitWords
+  // NB: This is meant to do splitting strictly only on tabs, and to thus
+  // work with things that are exactly TSV files.  It shouldn't split on
+  // all whitespace, because it is useful to be able to have spaces inside
+  // fields for short text documents, and then to be able to split them into
+  // words with features like useSplitWords.
   private static final Pattern tab = Pattern.compile("\\t");
 
   private static String[] makeSimpleLineInfo(String line, int lineNo) {
@@ -407,9 +412,6 @@ public class ColumnDataClassifier {
    */
   private void writeResultsSummary(int num, Counter<String> contingency, Collection<String> labels) {
     System.err.println();
-    NumberFormat nf = NumberFormat.getNumberInstance();
-    nf.setMinimumFractionDigits(3);
-    nf.setMaximumFractionDigits(3);
     System.err.print(num + " examples");
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null) {
       System.err.print(" and " + numGroups + " ranking groups");
@@ -474,6 +476,8 @@ public class ColumnDataClassifier {
   private static boolean currentHighestProbCorrect = false;
   private static boolean foundAnswerInGroup = false;
 
+  private static final NumberFormat nf = new DecimalFormat("0.000");
+
   /**
    * Write out an answer, and update statistics.
    */
@@ -483,11 +487,30 @@ public class ColumnDataClassifier {
     if (globalFlags.displayedColumn >= 0) {
       printedText = strs[globalFlags.displayedColumn];
     }
+    String results;
+    if (globalFlags.displayAllAnswers) {
+      // sort the labels by probability
+      TreeSet<Pair<Double,String>> sortedLabels = new TreeSet<Pair<Double,String>>();
+      for (String key : cntr.keySet()) {
+        sortedLabels.add(new Pair<Double,String>(cntr.probabilityOf(key), key));
+      }
+      StringBuilder builder = new StringBuilder();
+      for (Pair<Double,String> pair : sortedLabels.descendingSet()) {
+        if (builder.length() > 0) {
+          builder.append("\t");
+        }
+        builder.append(pair.first().toString()).append('\t').append(pair.second());
+      }
+      results = builder.toString();
+    } else {
+      results = clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+    }
+
     String line;
     if ("".equals(printedText)) {
-      line = goldAnswer + '\t' + clAnswer + '\t' + cntr.probabilityOf(clAnswer);
-    } else {
-      line = printedText + '\t' + goldAnswer + '\t' + clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+      line = goldAnswer + '\t' + results;
+     } else {
+      line = printedText + '\t' + goldAnswer + '\t' + results;
     }
     System.out.println(line);
     // NB: This next bit judges correctness by surface String equality, not our internal indices, so strs has to be right even for svmlightFormat
@@ -540,9 +563,6 @@ public class ColumnDataClassifier {
   private void finishRanking(Counter<String> contingency, double sim) {
     if (numInGroup > 0) {
       if (globalFlags.justify) {
-        NumberFormat nf = NumberFormat.getNumberInstance();
-        nf.setMinimumFractionDigits(3);
-        nf.setMaximumFractionDigits(3);
         System.err.print("Previous group of " + numInGroup + ": ");
         if (!foundAnswerInGroup) {
           System.err.print("no correct answer; ");
@@ -634,7 +654,8 @@ public class ColumnDataClassifier {
         }
       }
       writeAnswer(simpleLineInfo, answer, dist, contingency, cl, sim);
-    }
+    } // end for test example
+
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null)
       finishRanking(contingency, bestSim);
 
@@ -761,7 +782,7 @@ public class ColumnDataClassifier {
    * iff it is a counter
    */
     private static <F> void addFeature(Object features, F newFeature, double value) {
-      if(features instanceof Counter<?>) {
+      if (features instanceof Counter<?>) {
         ErasureUtils.<Counter<F>>uncheckedCast(features).setCount(newFeature, value);
       } else if(features instanceof Collection<?>) {
         ErasureUtils.<Collection<F>>uncheckedCast(features).add(newFeature);
@@ -848,25 +869,19 @@ public class ColumnDataClassifier {
           addFeature(featuresC,featureName,DEFAULT_VALUE);
         }
       }
-      if (flags.splitWordsRegexp != null || flags.splitWordsTokenizerRegexp != null ) {
+      if (flags.splitWordsPattern != null || flags.splitWordsTokenizerPattern != null ) {
         String[] bits;
-        if (flags.splitWordsTokenizerRegexp != null) {
+        if (flags.splitWordsTokenizerPattern != null) {
           bits = regexpTokenize(flags.splitWordsTokenizerPattern, flags.splitWordsIgnorePattern, cWord);
         } else {
-          bits = flags.splitWordsPattern.split(cWord);
-          if (flags.splitWordsIgnorePattern != null) {
-            List<String> keepBits = new ArrayList<String>(bits.length);
-            for (String bit:bits) {
-              if (!flags.splitWordsIgnorePattern.matcher(bit).matches()) {
-                keepBits.add(bit);
-              }
-            }
-            if (keepBits.size() != bits.length) {
-              bits = new String[keepBits.size()];
-              keepBits.toArray(bits);
-            }
-          }
+          bits = splitTokenize(flags.splitWordsPattern, flags.splitWordsIgnorePattern, cWord);
         }
+        if (flags.showTokenization) {
+          System.err.print("Tokenization: ");
+          System.err.println(Arrays.toString(bits));
+        }
+
+        // add features over splitWords
         for (int i = 0; i < bits.length; i++) {
           if (flags.useSplitWords) {
             addFeature(featuresC, "SW-" + bits[i], DEFAULT_VALUE);
@@ -920,17 +935,18 @@ public class ColumnDataClassifier {
               addFeature(featuresC, sb.toString(), DEFAULT_VALUE);
             }
           }
+          // this is equivalent to having boundary tokens in splitWordPairs -- they get a special feature
           if (flags.useSplitFirstLastWords) {
             if (i == 0) {
-              addFeature(featuresC,"SFW-" + bits[i],DEFAULT_VALUE);
+              addFeature(featuresC,"SFW-" + bits[i], DEFAULT_VALUE);
             } else if (i == bits.length - 1) {
-              addFeature(featuresC,"SLW-" + bits[i],DEFAULT_VALUE);
+              addFeature(featuresC,"SLW-" + bits[i], DEFAULT_VALUE);
             }
           }
           if (flags.useSplitNGrams || flags.useSplitPrefixSuffixNGrams) {
             Collection<String> featureNames = makeNGramFeatures(bits[i], flags, true, "S#");
             for(String featureName : featureNames)
-              addFeature(featuresC,featureName,DEFAULT_VALUE);
+              addFeature(featuresC, featureName, DEFAULT_VALUE);
           }
           if (flags.splitWordShape > edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE) {
             String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(bits[i], flags.splitWordShape);
@@ -939,6 +955,7 @@ public class ColumnDataClassifier {
           }
         }
       }
+
       if (flags.wordShape > WordShapeClassifier.NOWORDSHAPE) {
         String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(cWord, flags.wordShape);
         addFeature(featuresC,"SHAPE-" + shape,DEFAULT_VALUE);
@@ -956,13 +973,11 @@ public class ColumnDataClassifier {
     }  //end makeDatum
 
 
-
-
   /**
-   * Caches a hash of word -> all substring features.  A <i>lot</i> of memory!
+   * Caches a hash of word to all substring features.  A <i>lot</i> of memory!
    * If the String space is large, you shouldn't turn this on.
    */
-  private static Map<String,Collection<String>> wordToSubstrings = new ConcurrentHashMap<String,Collection<String>>();
+  private static final Map<String,Collection<String>> wordToSubstrings = new ConcurrentHashMap<String,Collection<String>>();
 
 
   private String intern(String s) {
@@ -973,7 +988,7 @@ public class ColumnDataClassifier {
   }
 
   /**
-   * Return a Collection of NGrams from the input.
+   * Return a Collection of NGrams from the input String.
    */
   private Collection<String> makeNGramFeatures(final String input, Flags flags, boolean useSplit, String featPrefix) {
     String toNGrams = input;
@@ -1231,7 +1246,7 @@ public class ColumnDataClassifier {
   }
 
 
-  private static String[] regexpTokenize(Pattern splitRegexp, Pattern ignoreRegexp, String inWord) {
+  private static String[] regexpTokenize(Pattern tokenizerRegexp, Pattern ignoreRegexp, String inWord) {
     List<String> al = new ArrayList<String>();
     String word = inWord;
     while (word.length() > 0) {
@@ -1243,14 +1258,14 @@ public class ColumnDataClassifier {
       if (mig != null && mig.lookingAt()) {
         word = word.substring(mig.end());
       } else {
-        Matcher m = splitRegexp.matcher(word);
+        Matcher m = tokenizerRegexp.matcher(word);
         if (m.lookingAt()) {
           // System.err.println("Matched " + m.end() + " chars: " +
           //		       word.substring(0, m.end()));
           al.add(word.substring(0, m.end()));
           word = word.substring(m.end());
         } else {
-          System.err.println("Warning: regexpTokenize pattern " + splitRegexp + " didn't match on " + word);
+          System.err.println("Warning: regexpTokenize pattern " + tokenizerRegexp + " didn't match on " + word);
           // System.err.println("Default matched 1 char: " +
           //		       word.substring(0, 1));
           al.add(word.substring(0, 1));
@@ -1259,10 +1274,23 @@ public class ColumnDataClassifier {
       }
     }
     String[] bits = al.toArray(new String[al.size()]);
-//    System.err.println("Split |" + inWord + "| as: ");
-//    for (int i = 0; i < bits.length; i++) {
-//      System.err.println("  |" + bits[i] + "|");
-//    }
+    return bits;
+  }
+
+  private static String[] splitTokenize(Pattern splitRegexp, Pattern ignoreRegexp, String cWord) {
+    String[] bits = splitRegexp.split(cWord);
+    if (ignoreRegexp != null) {
+      List<String> keepBits = new ArrayList<String>(bits.length);
+      for (String bit : bits) {
+        if ( ! ignoreRegexp.matcher(bit).matches()) {
+          keepBits.add(bit);
+        }
+      }
+      if (keepBits.size() != bits.length) {
+        bits = new String[keepBits.size()];
+        keepBits.toArray(bits);
+      }
+    }
     return bits;
   }
 
@@ -1460,28 +1488,22 @@ public class ColumnDataClassifier {
           myFlags[col].partialNGramRegexp = null;
         }
       } else if (key.equals("splitWordsRegexp")) {
-        myFlags[col].splitWordsRegexp = val;
         try {
-          myFlags[col].splitWordsPattern = Pattern.compile(myFlags[col].splitWordsRegexp);
+          myFlags[col].splitWordsPattern = Pattern.compile(val);
         } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWords regexp: " + myFlags[col].splitWordsRegexp);
-          myFlags[col].splitWordsRegexp = null;
+          System.err.println("Ill-formed splitWordsRegexp: " + val);
         }
       } else if (key.equals("splitWordsTokenizerRegexp")) {
-        myFlags[col].splitWordsTokenizerRegexp = val;
         try {
-          myFlags[col].splitWordsTokenizerPattern = Pattern.compile(myFlags[col].splitWordsTokenizerRegexp);
+          myFlags[col].splitWordsTokenizerPattern = Pattern.compile(val);
         } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWordsTokenizerRegexp: " + myFlags[col].splitWordsTokenizerRegexp);
-          myFlags[col].splitWordsTokenizerRegexp = null;
+          System.err.println("Ill-formed splitWordsTokenizerRegexp: " + val);
         }
       } else if (key.equals("splitWordsIgnoreRegexp")) {
-        myFlags[col].splitWordsIgnoreRegexp = val;
         try {
-          myFlags[col].splitWordsIgnorePattern = Pattern.compile(myFlags[col].splitWordsIgnoreRegexp);
+          myFlags[col].splitWordsIgnorePattern = Pattern.compile(val);
         } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWordsIgnoreRegexp: " + myFlags[col].splitWordsIgnoreRegexp);
-          myFlags[col].splitWordsIgnoreRegexp = null;
+          System.err.println("Ill-formed splitWordsIgnoreRegexp: " + val);
         }
 
       } else if (key.equals("useSplitWords")) {
@@ -1520,6 +1542,8 @@ public class ColumnDataClassifier {
         Flags.printTo = val;
       } else if (key.equals("trainFile")) {
         Flags.trainFile = val;
+      } else if (key.equals("displayAllAnswers")) {
+        Flags.displayAllAnswers = Boolean.parseBoolean(val);
       } else if (key.equals("testFile")) {
         myFlags[col].testFile = val;
       } else if (key.equals("trainFromSVMLight")) {
@@ -1723,7 +1747,7 @@ public class ColumnDataClassifier {
     if (globalFlags.displayedColumn >= 0) {
       System.err.printf("dataColumn%d ", globalFlags.displayedColumn);
     }
-    System.err.println("goldAnswer classifierAnswer P(classifierAnswer)");
+    System.err.println("goldAnswer classifierAnswer P(clAnswer) P(goldAnswer)");
 
     readAndTestExamples(classifier, testFile);
     // ((LinearClassifier) classifier).dumpSorted();
@@ -1760,16 +1784,13 @@ public class ColumnDataClassifier {
 
     boolean intern = false;
 
-    String splitWordsRegexp = null;
     Pattern splitWordsPattern = null;
-    String splitWordsTokenizerRegexp = null;
     Pattern splitWordsTokenizerPattern = null;
-    String splitWordsIgnoreRegexp = null;
     Pattern splitWordsIgnorePattern = null;
     boolean useSplitWords = false;
     boolean useSplitWordPairs = false;
     boolean useSplitFirstLastWords = false;
-    boolean useLowercaseSplitWords;
+    boolean useLowercaseSplitWords = false;
 
     int wordShape = edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE;
     int splitWordShape = WordShapeClassifier.NOWORDSHAPE;
@@ -1849,6 +1870,8 @@ public class ColumnDataClassifier {
     static String encoding = null;
     static String printSVMLightFormatTo;
 
+    static boolean displayAllAnswers = false;
+
     // Distinguishes whether this file has real valued features or if the more efficient non-RVF representation can be used.
     // This is set as a summary flag in globalFeatures based on whether anything uses real values.
     boolean usesRealValues;
@@ -1856,6 +1879,8 @@ public class ColumnDataClassifier {
 
     boolean useAllSplitWordPairs;
     boolean useAllSplitWordTriples;
+
+    boolean showTokenization = false;
 
     @Override
     public String toString() {
