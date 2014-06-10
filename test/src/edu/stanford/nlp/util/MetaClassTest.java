@@ -389,9 +389,6 @@ public class MetaClassTest{
     assertArrayEquals(new Integer[]{1,2,3}, ints4);
     Integer[] ints5 = MetaClass.cast("1   2   3", Integer[].class);
     assertArrayEquals(new Integer[]{1,2,3}, ints5);
-
-    Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
-    assertArrayEquals(new Integer[]{}, intsEmpty);
   }
 
   private static enum Fruits {
