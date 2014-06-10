@@ -1,12 +1,7 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -502,11 +497,15 @@ public class MetaClass {
 				}
 			}else{
 				//(case: normal)
-				if(chars[i] == '"'){ quoteCloseChar = '"';
-				} else if(chars[i] == '\''){ quoteCloseChar = '\'';
-				} else if(chars[i] == ','){
+				if(chars[i] == '"'){
+          quoteCloseChar = '"';
+				} else if(chars[i] == '\''){
+          quoteCloseChar = '\'';
+				} else if(chars[i] == ',' || chars[i] == ' ' || chars[i] == '\t' || chars[i] == '\n'){
 					//break
-					terms.add(current);
+          if (current.length() > 0) {
+					  terms.add(current);
+          }
 					current = new StringBuilder();
 				}else{
 					current.append(chars[i]);
@@ -562,10 +561,18 @@ public class MetaClass {
       return (E) new Boolean( Boolean.parseBoolean(value) );
     }else if(Integer.class.isAssignableFrom(clazz) || int.class.isAssignableFrom(clazz)){
       //(case: integer)
-      return (E) new Integer(Integer.parseInt(value));
+      try {
+        return (E) new Integer(Integer.parseInt(value));
+      } catch (NumberFormatException e) {
+        return (E) new Integer((int) Double.parseDouble(value));
+      }
     }else if(Long.class.isAssignableFrom(clazz) || long.class.isAssignableFrom(clazz)){
       //(case: long)
-      return (E) new Long(Long.parseLong(value));
+      try {
+        return (E) new Long(Long.parseLong(value));
+      } catch (NumberFormatException e) {
+        return (E) new Long((long) Double.parseDouble(value));
+      }
     }else if(Float.class.isAssignableFrom(clazz) || float.class.isAssignableFrom(clazz)){
       //(case: float)
       if(value == null){ return (E) new Float(Float.NaN); }
@@ -576,10 +583,18 @@ public class MetaClass {
       return (E) new Double(Double.parseDouble(value));
     }else if(Short.class.isAssignableFrom(clazz) || short.class.isAssignableFrom(clazz)){
       //(case: short)
-      return (E) new Short(Short.parseShort(value));
+      try {
+        return (E) new Short(Short.parseShort(value));
+      } catch (NumberFormatException e) {
+        return (E) new Short((short) Double.parseDouble(value));
+      }
     }else if(Byte.class.isAssignableFrom(clazz) || byte.class.isAssignableFrom(clazz)){
       //(case: byte)
-      return (E) new Byte(Byte.parseByte(value));
+      try {
+        return (E) new Byte(Byte.parseByte(value));
+      } catch (NumberFormatException e) {
+        return (E) new Byte((byte) Double.parseDouble(value));
+      }
     }else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)){
       //(case: char)
       return (E) new Character((char) Integer.parseInt(value));
@@ -640,6 +655,16 @@ public class MetaClass {
         }
       }
     } else {
+      try {
+        // (case: can parse from string)
+        Method decode = clazz.getMethod("fromString", String.class);
+        return (E) decode.invoke(MetaClass.create(clazz), value);
+      } catch (NoSuchMethodException e) {  // Silent errors for misc failures
+      } catch (InvocationTargetException e) {
+      } catch (IllegalAccessException e) {
+      } catch (ClassCastException e) {
+      }
+      // We could not cast this object
       return null;
     }
   }
