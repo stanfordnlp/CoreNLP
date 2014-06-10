@@ -1115,7 +1115,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // Set of files to exclude
     final String excludeFilesParam = properties.getProperty("excludeFiles");
-    final Set<String> excludeFiles = null;
+    final Set<String> excludeFiles = new HashSet<String>();
     if (excludeFilesParam != null) {
       Iterable<String> lines = IOUtils.readLines(excludeFilesParam);
       for (String line:lines) {
