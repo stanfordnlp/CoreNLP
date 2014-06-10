@@ -999,8 +999,9 @@ public class EnglishGrammaticalRelations {
           // the NP.  This eliminates numbers being used as ages,
           // which is the normal case for such a pattern.
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target !<: CD $- /^,$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target < (NP < /^NNS?|CD$/ $-- /^-LRB-$/ $+ /^-RRB-$/))",
-          // TODO: last pattern with NNP doesn't work because leftmost NNP is deemed head in a
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target < (NP < /^(?:NNS?|CD)$/ $-- /^-LRB-$/ $+ /^-RRB-$/))",
+          "@WHNP|NP < (@NP=target !<: CD <, /^-LRB-$/ <` /^-RRB-$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
+          // TODO: next pattern with NNP doesn't work because leftmost NNP is deemed head in a
           // structure like (NP (NNP Norway) (, ,) (NNP Verdens_Gang) (, ,))
           "NP|NP-TMP|NP-ADV < (NNP $+ (/^,$/ $+ NNP=target)) !< CC|CONJP",
          // find abbreviations
@@ -1182,6 +1183,8 @@ public class EnglishGrammaticalRelations {
         new String[] {
           // measure phrases pattern (don't allow VBG/VBN cases, as often participles)
           "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
+          // one word nouns like "cost efficient", "ice-free"
+          "@ADJP < (NN $++ /^JJ/) !< CC|CONJP",
           "@NP|WHNP < /^NP-ADV/=target",
           // this next one is for weird financial listings: 4.7% three months
           "@NP <1 (@NP <<# /^%$/) <2 (@NP=target <<# days|month|months) !<3 __",
