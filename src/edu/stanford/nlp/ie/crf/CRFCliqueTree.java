@@ -219,26 +219,6 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
   // MARGINAL PROB OF TAG AT SINGLE POSITION
   //
 
-  public double[][] logProbTable() {
-    double[][] result = new double[length()][classIndex.size()];
-    for (int i = 0; i < length(); i++) {
-      result[i] = new double[classIndex.size()];
-      for (int j = 0; j < classIndex.size(); j++) {
-        result[i][j] = logProb(i, j);
-      }
-    }
-
-    return result;
-  }
-
-  /*
-  * TODO(mengqiu) this function is buggy, should make sure label converts properly into int[] in cases where it's not 0-order label
-  */
-  public double logProbStartPos() {
-    double u = factorTables[0].unnormalizedLogProbFront(backgroundIndex);
-    return u - z;
-  }
-
   public double logProb(int position, int label) {
     double u = factorTables[position].unnormalizedLogProbEnd(label);
     return u - z;
@@ -544,22 +524,16 @@ public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
         featureValByCliqueSize = featureVals[i];
       factorTables[i] = getFactorTable(data[i], labelIndices, numClasses, cliquePotentialFunc, featureValByCliqueSize);
 
-      // System.err.println("before calibration,FT["+i+"] = " + factorTables[i].toProbString());
-
       if (i > 0) {
         messages[i - 1] = factorTables[i - 1].sumOutFront();
-        // System.err.println("forward message, message["+(i-1)+"] = " + messages[i-1].toProbString());
         factorTables[i].multiplyInFront(messages[i - 1]);
-        // System.err.println("after forward calibration, FT["+i+"] = " + factorTables[i].toProbString());
       }
     }
 
     for (int i = factorTables.length - 2; i >= 0; i--) {
       FactorTable summedOut = factorTables[i + 1].sumOutEnd();
       summedOut.divideBy(messages[i]);
-      // System.err.println("backward summedOut, summedOut= " + summedOut.toProbString());
       factorTables[i].multiplyInEnd(summedOut);
-      // System.err.println("after backward calibration, FT["+i+"] = " + factorTables[i].toProbString());
     }
 
     return new CRFCliqueTree<E>(factorTables, classIndex, backgroundSymbol);

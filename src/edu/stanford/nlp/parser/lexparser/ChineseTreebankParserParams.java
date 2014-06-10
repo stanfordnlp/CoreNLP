@@ -8,14 +8,13 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.WordSegmenter;
-import edu.stanford.nlp.process.WordSegmentingTokenizer;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.pennchinese.*;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.process.WordSegmenter;
 
 import java.io.IOException;
 import java.util.*;
@@ -36,7 +35,6 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
    * The variable ctlp stores the same thing as the tlp variable in
    * AbstractTreebankParserParams, but pre-cast to be a
    * ChineseTreebankLanguagePack.
-   * todo [cdm 2013]: Just change to method that casts
    */
   private ChineseTreebankLanguagePack ctlp;
   public boolean charTags = false;
@@ -100,6 +98,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
     if (op.lexOptions.uwModelTrainer == null) {
       op.lexOptions.uwModelTrainer = "edu.stanford.nlp.parser.lexparser.ChineseUnknownWordModelTrainer";
     }
+    ChineseLexicon clex = new ChineseLexicon(op, this, wordIndex, tagIndex);
     if (segmenterClass != null) {
       try {
         segmenter = ReflectionLoading.loadByReflection(segmenterClass, this,
@@ -109,10 +108,8 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
       }
     }
 
-    ChineseLexicon clex = new ChineseLexicon(op, this, wordIndex, tagIndex);
     if (segmenter != null) {
       lex = new ChineseLexiconAndWordSegmenter(clex, segmenter);
-      ctlp.setTokenizerFactory(WordSegmentingTokenizer.factory(segmenter));
     } else {
       lex = clex;
     }
