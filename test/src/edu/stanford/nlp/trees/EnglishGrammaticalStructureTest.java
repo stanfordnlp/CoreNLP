@@ -3,9 +3,10 @@ package edu.stanford.nlp.trees;
 import junit.framework.TestCase;
 
 
-/**
+/** Test cases for English typed dependencies (Stanford Dependencies)
  *
- * @author mcdm
+ *  @author mcdm
+ *  @author Christopher Manning
  */
 public class EnglishGrammaticalStructureTest extends TestCase {
 
@@ -105,8 +106,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (NP-SBJ-1 (VBN Freed) (JJ black) (NNS nationalists)) (VP (VP (VBD resumed) (NP (JJ political) (NN activity)) (PP-LOC (IN in) (NP (NNP South) (NNP Africa)))) (CC and) (VP (VBD vowed) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB fight) (PP-CLR (IN against) (NP (NN apartheid))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *)) (VP (VBG raising) (NP (NP (NNS fears)) (PP (IN of) (NP (DT a) (JJ possible) (JJ white) (NN backlash))))))) (. .)))",
          "( (S (S-NOM-SBJ (NP-SBJ-1 (-NONE- *)) (VP (VBG Being) (VP (VBN held) (S (NP-SBJ (-NONE- *-1)) (PP-PRD (ADVP (RB well)) (IN below) (NP (NN capacity))))))) (VP (VP (ADVP-MNR (RB greatly)) (VBZ irritates) (NP (PRP them))) (, ,) (CC and) (VP (VBZ has) (VP (VBN led) (PP-CLR (TO to) (NP (JJ widespread) (NN cheating)))))) (. .)))",
          "( (S (NP-SBJ (PRP They)) (VP (VBD acquired) (NP (NP (NNS stakes)) (PP (IN in) (NP (NP (VBG bottling) (NNS companies)) (UCP-LOC (PP (IN in) (NP (DT the) (NNP U.S.))) (CC and) (ADVP (RB overseas))))))) (. .)))",
-         // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
-         // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
 
     // the expected dependency answers (basic)
@@ -487,6 +486,54 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "pobj(in-7, U.S.-9)\n" +
                 "cc(in-7, and-10)\n" +
                 "conj(in-7, overseas-11)\n",
+    };
+
+    assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
+    TreeReaderFactory trf = new PennTreeReaderFactory();
+    for (int i = 0; i < testTrees.length; i++) {
+      String testTree = testTrees[i];
+      String testAnswer = testAnswers[i];
+
+      // specifying our own TreeReaderFactory is vital so that functional
+      // categories - that is -TMP and -ADV in particular - are not stripped off
+      Tree tree = Tree.valueOf(testTree, trf);
+      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+
+      assertEquals("Unexpected basic dependencies for tree " + testTree,
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
+    }
+
+  }
+
+  /**
+   * More tests that we can extract the basic grammatical relations correctly from
+   * some hard-coded trees.
+   */
+  public void testMoreBasicRelations() {
+    // the trees to test
+    String[] testTrees = {
+        // This is the say-complement case that we don't yet handle, but might someday.
+        // "( (SBAR (WHNP-9 (WDT Which)) (S (NP-SBJ (PRP I)) (ADVP-TMP (RB then)) (VP (VBD realized) (SBAR (-NONE- *0*) (S (NP-SBJ (PRP I)) (VP (VBD missed) (NP-9 (-NONE- *T*))))))) (. .)))",
+        "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN woman)) (SBAR (WHNP (WP whom)) (S (NP (PRP you)) (VP (VBD gave) (NP (DT the) (NN package)) (PP (TO to))))))) (. .)))",
+        "( (S (NP-SBJ (PRP i)) (VP (VBP m) (ADJP-PRD (JJ fat)))))",
+        // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
+        // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
+    };
+
+    // the expected dependency answers (basic)
+    String[] testAnswers = {
+        // "dobj(missed-6, Which-1)\n" + "nsubj(realized-4, I-2)\n" + "advmod(realized-4, then-3)\n" + "root(ROOT-0, realized-4)\n" + "nsubj(missed-6, I-5)\n" + "ccomp(realized-4, missed-6)\n",
+        "nsubj(saw-2, I-1)\n" +
+                "root(ROOT-0, saw-2)\n" +
+                "det(woman-4, the-3)\n" +
+                "dobj(saw-2, woman-4)\n" +
+                "pobj(to-10, whom-5)\n" +
+                "nsubj(gave-7, you-6)\n" +
+                "rcmod(woman-4, gave-7)\n" +
+                "det(package-9, the-8)\n" +
+                "dobj(gave-7, package-9)\n" +
+                "prep(gave-7, to-10)\n",
+        "nsubj(fat-3, i-1)\n" + "cop(fat-3, m-2)\n" + "root(ROOT-0, fat-3)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
@@ -503,7 +550,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       Tree tree = Tree.valueOf(testTree, trf);
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
 
-      assertEquals("Unexpected basic dependencies for tree "+testTree,
+      assertEquals("Unexpected basic dependencies for tree " + testTree,
           testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
     }
 
@@ -623,6 +670,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP$ whose) (NP (NN wife))) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
          "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN book)) (SBAR (WHNP (WDT which)) (S (NP (PRP you)) (VP (VBD bought)))))) (. .)))",
          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
+         "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN woman)) (SBAR (WHNP (WP whom)) (S (NP (PRP you)) (VP (VBD gave) (NP (DT the) (NN package)) (PP (TO to))))))) (. .)))",
 
     };
 
@@ -634,6 +682,17 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "ref(man-4, whose-5)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "ref(book-4, which-5)\n" + "dobj(bought-7, which-5)\n" + "nsubj(bought-7, you-6)\n" + "rcmod(book-4, bought-7)\n",
         "dep(used-5, What-1)\n" + "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
+        "nsubj(saw-2, I-1)\n" +
+                    "root(ROOT-0, saw-2)\n" +
+                    "det(woman-4, the-3)\n" +
+                    "dobj(saw-2, woman-4)\n" +
+                    "ref(woman-4, whom-5)\n" +
+                    "pobj(to-10, whom-5)\n" +
+                    "nsubj(gave-7, you-6)\n" +
+                    "rcmod(woman-4, gave-7)\n" +
+                    "det(package-9, the-8)\n" +
+                    "dobj(gave-7, package-9)\n" +
+                    "prep(gave-7, to-10)\n",
 
     };
 
