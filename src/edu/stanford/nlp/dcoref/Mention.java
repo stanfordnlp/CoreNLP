@@ -51,6 +51,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -135,6 +136,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   public Set<Mention> appositions = null;
   public Set<Mention> predicateNominatives = null;
   public Set<Mention> relativePronouns = null;
+
+  /** Set of other mentions in the same sentence that below to this list */
+  public Set<Mention> listMembers = null;
+  /** Set of other mentions in the same sentence that I am a member of */
+  public Set<Mention> belongToLists = null;
 
 
   @Override
@@ -377,10 +383,32 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   /** Check list member? True if this mention is inside the other mention and the other mention is a list */
   public boolean isListMemberOf(Mention m) {
+    if (this.equals(m)) return false;
+    if (m.mentionType == MentionType.LIST && this.mentionType == MentionType.LIST) return false; // Don't handle nested lists
     if (m.mentionType == MentionType.LIST) {
       return this.includedIn(m);
     }
     return false;
+  }
+
+  public void addListMember(Mention m) {
+    if(listMembers == null) listMembers = Generics.newHashSet();
+    listMembers.add(m);
+  }
+
+  public void addBelongsToList(Mention m) {
+    if(belongToLists == null) belongToLists = Generics.newHashSet();
+    belongToLists.add(m);
+  }
+
+  public boolean isMemberOfSameList(Mention m) {
+    Set<Mention> l1 = belongToLists;
+    Set<Mention> l2 = m.belongToLists;
+    if (l1 != null && l2 != null && CollectionUtils.containsAny(l1, l2)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   private boolean isListLike() {
@@ -392,30 +420,51 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 //      String w = originalSpan.get(1).word();
 //      firstLabelLike = (w.equals(":") || w.equals("-"));
 //    }
-    boolean first = true;
-    for (CoreLabel t:originalSpan) {
-      String tag = t.tag();
-      String ner = t.ner();
-      String w = t.word();
-      if (tag.equals("TO") || tag.equals("IN") || tag.startsWith("VB")) {
-        // prepositions and verbs are too hard for us
-        return false;
-      }
-      if (!first) {
-        if (w.equalsIgnoreCase("and") || w.equalsIgnoreCase("or")) {
+    String mentionSpanString = spanToString();
+    String subTreeSpanString = StringUtils.joinWords(mentionSubTree.yieldWords(), " ");
+    if (subTreeSpanString.equals(mentionSpanString)) {
+      // subtree represents this mention well....
+      List<Tree> children = mentionSubTree.getChildrenAsList();
+      for (Tree t:children) {
+        String label = t.value();
+        String ner = null;
+        if (t.isLeaf()) { ner = ((CoreLabel) t.getLeaves().get(0).label()).ner(); }
+        if ("CC".equals(label)) {
           // Check NER type
           if (ner == null || "O".equals(ner)) {
             return true;
           }
-        } else if (w.equals(",")) {
+        } else if (label.equals(",")) {
           if (ner == null || "O".equals(ner)) {
             commas++;
           }
-
         }
       }
-      first = false;
     }
+
+    if (commas <= 2) {
+      // look at the string for and/or
+      boolean first = true;
+      for (CoreLabel t:originalSpan) {
+        String tag = t.tag();
+        String ner = t.ner();
+        String w = t.word();
+        if (tag.equals("TO") || tag.equals("IN") || tag.startsWith("VB")) {
+          // prepositions and verbs are too hard for us
+          return false;
+        }
+        if (!first) {
+          if (w.equalsIgnoreCase("and") || w.equalsIgnoreCase("or")) {
+            // Check NER type
+            if (ner == null || "O".equals(ner)) {
+              return true;
+            }
+          }
+        }
+        first = false;
+      }
+    }
+
     return (commas > 2);
   }
 
@@ -459,7 +508,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       if(Constants.USE_GENDER_LIST){
         // Bergsma list
         if(gender == Gender.UNKNOWN)  {
-          if ("PERSON".equals(nerString)) {
+          if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
             // Try to get gender of the named entity
             // Start with first name until we get gender...
             List<CoreLabel> nerToks = nerTokens();
