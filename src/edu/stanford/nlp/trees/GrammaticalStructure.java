@@ -125,7 +125,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   /**
    * Create a grammatical structure from its string representation.
    *
-   * Like buildCoNLLXGrammaticalStructure,
+   * Like buildCoNNLXGrammaticStructure,
    * this method fakes up the parts of the tree structure that are not
    * used by the grammatical relation transformation operations.
    *
@@ -996,7 +996,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         if (tokenFields.isEmpty())
           continue; // skip excess empty lines
 
-        gsList.add(buildCoNLLXGrammaticalStructure(tokenFields, shortNameToGRel, factory));
+        gsList.add(buildCoNNLXGrammaticStructure(tokenFields, shortNameToGRel, factory));
         tokenFields = new ArrayList<List<String>>();
       }
     }
@@ -1005,7 +1005,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
   public static GrammaticalStructure
-  buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,
+  buildCoNNLXGrammaticStructure(List<List<String>> tokenFields,
                                 Map<String, GrammaticalRelation> shortNameToGRel,
                                 GrammaticalStructureFromDependenciesFactory factory) {
     List<TreeGraphNode> tgWordNodes =
