@@ -86,9 +86,8 @@ Trained on the *entire* ATB p1-3.
 When trained on the train part of the ATB p1-3 split done for the 2005
 JHU Summer Workshop (Diab split), using (augmented) Bies tags, it gets
 the following performance:
-96.26% on dev portion according to Diab split
+96.26% on test portion according to Diab split
 (80.14% on unknown words)
-
 
 French tagger
 ---------------------------
