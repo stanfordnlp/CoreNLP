@@ -86,7 +86,7 @@ head.ready(function() {
             'data': {
                 'action': 'convert',
                 'data': stanfordXML,
-                'protocl': 1,
+                'protocol': 1,
                 'src': 'stanford-' + type
             },
             'type': 'post',
