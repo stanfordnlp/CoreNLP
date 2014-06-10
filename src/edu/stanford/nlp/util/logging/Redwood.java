@@ -78,10 +78,6 @@ public class Redwood {
    */
   private static Stack<String> titleStack = new Stack<String>();
   /**
-   * List of known logging classes.  These get excluded from stack trace selection.
-   */
-  private static Set<String> loggingClasses;
-  /**
    * Signals that no more log messages should be accepted by Redwood
    */
   private static boolean isClosed = false;
@@ -193,7 +189,6 @@ public class Redwood {
         backlog.poll().run();
       }
       //(requeue, if applicable)
-      assert activeThread == currentThread || currentThread < 0L;
       if(currentThread < 0L && !backlog.isEmpty()){
         threadsWaiting.offer(activeThread);
         hopeless = false;
@@ -207,130 +202,8 @@ public class Redwood {
     assert control.isHeldByCurrentThread();
   }
 
-  /*
-      ---------------------------------------------------------
-      [PSEUDO]-PUBLIC FACING METHODS
-      ---------------------------------------------------------
-   */
-  /**
-   * Remove a handler from the list
-   * @param toRemove The handler to remove. Any handler object that
-   * matches this class will be removed.
-   * @return true if this handler was in the list.
-   */
-  protected static <E extends LogRecordHandler> boolean removeHandler(Class<E> toRemove) {
-    boolean rtn = false;
-    Iterator<LogRecordHandler> iter = handlers.iterator();
-    while(iter.hasNext()){
-      if(iter.next().getClass().equals(toRemove)){
-        rtn = true;
-        iter.remove();
-      }
-    }
-    return rtn;
-  }
-
-  protected static void spliceHandler(LogRecordHandler parent, LogRecordHandler toAdd, LogRecordHandler grandchild){
-    RecordHandlerTree p = handlers.find(parent);
-    if(p != null){
-      //(add child)
-      p.addChild(toAdd);
-      //(remove spliced child)
-      Iterator<RecordHandlerTree> iter = p.children();
-      RecordHandlerTree removed = null;
-      while(iter.hasNext()){
-        RecordHandlerTree cand = iter.next();
-        if(cand.head() == grandchild){
-          removed = cand;
-          iter.remove();
-        }
-      }
-      //(add grandchildren)
-      if(removed != null){
-        p.find(toAdd).addChildTree(removed);
-      }
-    } else {
-      throw new IllegalArgumentException("No such parent handler: " + parent);
-    }
-  }
-
-  protected static void spliceHandler(LogRecordHandler parent, LogRecordHandler toAdd, Class<? extends LogRecordHandler> grandchild){
-    RecordHandlerTree p = handlers.find(parent);
-    if(p != null){
-      //(add child)
-      p.addChild(toAdd);
-      //(remove spliced children)
-      Iterator<RecordHandlerTree> iter = p.children();
-      List<RecordHandlerTree> lst = new ArrayList<RecordHandlerTree>();
-      while(iter.hasNext()){
-        RecordHandlerTree cand = iter.next();
-        if(grandchild.isAssignableFrom(cand.head().getClass())){
-          lst.add(cand);
-          iter.remove();
-        }
-      }
-      //(add grandchildren)
-      for(RecordHandlerTree gc : lst){
-        p.find(toAdd).addChildTree(gc);
-      }
-    } else {
-      throw new IllegalArgumentException("No such parent handler: " + parent);
-    }
-  }
-
-  protected static void spliceHandler(Class<? extends LogRecordHandler> parent, LogRecordHandler toAdd, Class<? extends LogRecordHandler> grandchild){
-    List<LogRecordHandler> lst = new LinkedList<LogRecordHandler>();
-    //--Find Parents
-    for(LogRecordHandler term : handlers){
-      if(parent.isAssignableFrom(term.getClass())){
-        lst.add(term);
-      }
-    }
-    //--Add Handler
-    for(LogRecordHandler p : lst){
-      spliceHandler(p, toAdd, grandchild);
-    }
-  }
-
-  /**
-   * Append a Handler to a portion of the handler tree
-   * @param parent The parent to add the child to
-   * @param child The Handler to add.
-   */
-  protected static void appendHandler(LogRecordHandler parent, LogRecordHandler child){
-    RecordHandlerTree p = handlers.find(parent);
-    if(p != null){
-      p.addChild(child);
-    } else {
-      throw new IllegalArgumentException("No such parent handler: " + parent);
-    }
-  }
-
-  /**
-   * Append a Handler to every parent of the given class
-   * @param parent The class of the parents to add the child to
-   * @param child The Handler to add.
-   */
-  protected static void appendHandler(Class<? extends LogRecordHandler> parent, LogRecordHandler child){
-    List<LogRecordHandler> toAdd = new LinkedList<LogRecordHandler>();
-    //--Find Parents
-    for(LogRecordHandler term : handlers){
-      if(parent.isAssignableFrom(term.getClass())){
-        toAdd.add(term);
-      }
-    }
-    //--Add Handler
-    for(LogRecordHandler p : toAdd){
-      appendHandler(p, child);
-    }
-  }
-
-  /**
-   * Append a Handler to the end of the root of the Handler tree.
-   * @param child The Handler to add.
-   */
-  protected static void appendHandler(LogRecordHandler child){
-    handlers.addChild(child);
+  protected static RecordHandlerTree rootHandler() {
+    return handlers;
   }
 
   /**
@@ -382,23 +255,6 @@ public class Redwood {
     System.setErr(realSysErr);
   }
 
-
-  /**
-   * Add a class to the list of known logging classes.  Any stack trace element that starts with these class names is skipped.
-   * @param className The class to report as a logging class
-   */
-  protected static void addLoggingClass(String className) {
-    loggingClasses.add(className);
-  }
-
-  /**
-   * Removes all classes from the list of known logging classes
-   */
-  protected static void clearLoggingClasses(){
-    if(loggingClasses == null){ loggingClasses = Generics.newHashSet(); }
-    loggingClasses.clear();
-  }
-
   /*
       ---------------------------------------------------------
       TRUE PUBLIC FACING METHODS
@@ -422,7 +278,6 @@ public class Redwood {
     //--Create Record
     final Object content = args[args.length-1];
     final Object[] tags = new Object[args.length-1];
-    final StackTraceElement ste = getStackTrace();
     System.arraycopy(args,0,tags,0,args.length-1);
     final long timestamp = System.currentTimeMillis();
     //--Handle Record
@@ -431,7 +286,7 @@ public class Redwood {
       final Runnable log = new Runnable(){
         public void run(){
           assert !isThreaded || control.isHeldByCurrentThread();
-          Record toPass = new Record(content,tags,depth,ste,timestamp);
+          Record toPass = new Record(content,tags,depth,timestamp);
           handlers.process(toPass, MessageType.SIMPLE,depth, toPass.timesstamp);
           assert !isThreaded || control.isHeldByCurrentThread();
         }
@@ -440,7 +295,7 @@ public class Redwood {
       attemptThreadControl( threadId, log );
     } else {
       //(case: no threading)
-      Record toPass = new Record(content,tags,depth,ste,timestamp);
+      Record toPass = new Record(content,tags,depth,timestamp);
       handlers.process(toPass, MessageType.SIMPLE,depth, toPass.timesstamp);
     }
   }
@@ -463,14 +318,13 @@ public class Redwood {
     final int len = args.length == 0 ? 0 : args.length-1;
     final Object content = args.length == 0 ? "" : args[len];
     final Object[] tags = new Object[len];
-    final StackTraceElement ste = getStackTrace();
     final long timestamp = System.currentTimeMillis();
     System.arraycopy(args,0,tags,0,len);
     //--Create Task
     final Runnable startTrack = new Runnable(){
       public void run(){
         assert !isThreaded || control.isHeldByCurrentThread();
-        Record toPass = new Record(content,tags,depth,ste,timestamp);
+        Record toPass = new Record(content,tags,depth,timestamp);
         depth += 1;
         titleStack.push(args.length == 0 ? "" : args[len].toString());
         handlers.process(toPass, MessageType.START_TRACK, depth, toPass.timesstamp);
@@ -490,10 +344,10 @@ public class Redwood {
   
   /**
    * Helper method to start a track on the FORCE channel.
-   * @param arg
+   * @param name The track name to print
    */
-  public static void forceTrack(Object arg) {
-    startTrack(FORCE, arg);
+  public static void forceTrack(Object name) {
+    startTrack(FORCE, name);
   }
   
   /**
@@ -514,9 +368,9 @@ public class Redwood {
     Runnable endTrack = new Runnable(){
       public void run(){
         assert !isThreaded || control.isHeldByCurrentThread();
-        //(check name match)
         String expected = titleStack.pop();
-        if(!expected.equalsIgnoreCase(title)){
+        //(check name match)
+        if (!isThreaded && !expected.equalsIgnoreCase(title)){
           throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
         }
         //(decrement depth)
@@ -588,12 +442,12 @@ public class Redwood {
    */
   public static void endThreads(String check){
     //(error check)
+    isThreaded = false;
     if(currentThread != -1L){
       throw new IllegalStateException("endThreads() called, but thread " + currentThread + " has not finished (exception in thread?)");
     }
     //(end threaded environment)
     assert !control.isHeldByCurrentThread();
-    isThreaded = false;
     //(write remaining threads)
     boolean cleanPass = false;
     while(!cleanPass){
@@ -608,7 +462,6 @@ public class Redwood {
           currentThread = thread;
           //(clear buffer)
           while(currentThread >= 0){
-            if(currentThread != thread){ throw new IllegalStateException("Redwood control shifted away from flushing thread"); }
             if(backlog.isEmpty()){ throw new IllegalStateException("Forgot to call finishThread() on thread " + currentThread); }
             assert !control.isHeldByCurrentThread();
             backlog.poll().run();
@@ -644,89 +497,18 @@ public class Redwood {
   public static RedwoodChannels channels(Object... channelNames) {
     return new RedwoodChannels(channelNames);
   }
-  
-  /**
-   * Show only the given channel.
-   * @param channels The channels to show
-   */
-  public static void showOnlyChannels(Object... channels){
-    for(LogRecordHandler handler : handlers){
-      if(handler instanceof VisibilityHandler){
-        VisibilityHandler visHandler = (VisibilityHandler) handler;
-        visHandler.hideAll();
-        for (Object channel : channels) {
-          visHandler.alsoShow(channel);
-        }
-      }
-    }
-  }
 
-  /**
-   * Hide multiple channels.  All other channels will be shown.
-   * @param channels The channels to hide
-   */
-  public static void hideOnlyChannels(Object... channels){
-    for(LogRecordHandler handler : handlers){
-      if(handler instanceof VisibilityHandler){
-        VisibilityHandler visHandler = (VisibilityHandler) handler;
-        visHandler.showAll();
-        for (Object channel : channels) {
-          visHandler.alsoHide(channel);
-        }
-      }
-    }
-  }
-  
-  /**
-   * Show multiple channels.  All other channels will be unaffected.
-   * @param channels The channels to show
-   */
-  public static void showChannels(Object... channels){
-    // TODO this could share more code with the other show/hide(Only)Channels methods
-    for(LogRecordHandler handler : handlers){
-      if(handler instanceof VisibilityHandler){
-        VisibilityHandler visHandler = (VisibilityHandler) handler;
-        for (Object channel : channels) {
-          visHandler.alsoShow(channel);
-        }
-      }
-    }
-  }
-  
   /**
    * Hide multiple channels.  All other channels will be unaffected.
    * @param channels The channels to hide
    */
-  public static void hideChannels(Object... channels){
-    // TODO this could share more code with the other show/hide(Only)Channels methods
+  public static void hideChannelsEverywhere(Object... channels){
     for(LogRecordHandler handler : handlers){
       if(handler instanceof VisibilityHandler){
         VisibilityHandler visHandler = (VisibilityHandler) handler;
         for (Object channel : channels) {
           visHandler.alsoHide(channel);
         }
-      }
-    }
-  }
-  
-  /**
-   * Show all channels.
-   */
-  public static void showAllChannels(){
-    for(LogRecordHandler handler : handlers){
-      if(handler instanceof VisibilityHandler){
-        ((VisibilityHandler) handler).showAll();
-      }
-    }
-  }
-  
-  /**
-   * Hide all channels.
-   */
-  public static void hideAllChannels(){
-    for(LogRecordHandler handler : handlers){
-      if(handler instanceof VisibilityHandler){
-        ((VisibilityHandler) handler).hideAll();
       }
     }
   }
@@ -784,71 +566,18 @@ public class Redwood {
     else b.append(" seconds");
   }
 
-  /**
-   * Get the current stack trace element, skipping anything from known logging classes.
-   * @return The current stack trace for this thread
-   */
-  private static StackTraceElement getStackTrace() {
-    StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-
-    int i = 2; // we can skip the first two (first is getStackTrace(), second is this method)
-    while (i < stack.length) {
-      boolean isLoggingClass = false;
-      for (String loggingClass : loggingClasses) {
-        String className = stack[i].getClassName();
-        if (className.startsWith(loggingClass)) {
-          isLoggingClass = true;
-          break;
-        }
-      }
-      if (!isLoggingClass) {
-        break;
-      }
-
-      i += 1;
-    }
-
-    // if we didn't find anything, keep last element (probably shouldn't happen, but could if people add too many logging classes)
-    if (i >= stack.length) {
-      i = stack.length - 1;
-    }
-    return stack[i];
+  public static String formatTimeDifference(long diff){
+    StringBuilder b = new StringBuilder();
+    formatTimeDifference(diff, b);
+    return b.toString();
   }
 
-  /**
-   * Removes logging classes from a stack trace.
-   */
-  protected static List<StackTraceElement> filterStackTrace(StackTraceElement[] stack) {
-    List<StackTraceElement> filteredStack = new ArrayList<StackTraceElement>();
 
-    int i = 2; // we can skip the first two (first is getStackTrace(), second is this method)
-    while (i < stack.length) {
-      boolean isLoggingClass = false;
-      for (String loggingClass : loggingClasses) {
-        String className = stack[i].getClassName();
-        if (className.startsWith(loggingClass)) {
-          isLoggingClass = true;
-          break;
-        }
-      }
-      if (!isLoggingClass) {
-        filteredStack.add(stack[i]);
-      }
-
-      i += 1;
-    }
-
-    // if we didn't find anything, keep the full stack
-    if (filteredStack.size() == 0) {
-      return Arrays.asList(stack);
-    }
-    return filteredStack;
-  }
-
-  protected static boolean supportsAnsi(){
+  public static final boolean supportsAnsi;
+  static {
     String os = System.getProperty("os.name").toLowerCase();
     boolean isUnix = os.contains("unix") || os.contains("linux") || os.contains("solaris");
-    return Boolean.getBoolean("Ansi") || (isUnix); // TODO Java 1.6 add this: "|| (isUnix && System.console()!=null))"
+    supportsAnsi = Boolean.getBoolean("Ansi") || isUnix;
   }
 
   /**
@@ -871,10 +600,12 @@ public class Redwood {
     private boolean isRoot = false;
     private LogRecordHandler head;
     private ArrayList<RecordHandlerTree> children = new ArrayList<RecordHandlerTree>();
+
     public RecordHandlerTree(){ isRoot = true; }
     public RecordHandlerTree(LogRecordHandler head){
       this.head = head;
     }
+
     // -- Core Tree Methods --
     public LogRecordHandler head(){
       return head;
@@ -889,7 +620,7 @@ public class Redwood {
       }
       children.add(new RecordHandlerTree(handler));
     }
-    private void addChildTree(RecordHandlerTree tree){
+    protected void addChildTree(RecordHandlerTree tree){
       if(Redwood.depth != 0){
         throw new IllegalStateException("Cannot modify Redwood when within a track");
       }
@@ -972,7 +703,7 @@ public class Redwood {
     private void process(Record toPass, MessageType type, int newDepth, long timestamp){
       //--Handle Message
       //(records to pass on)
-      List<Record> toPassOn = null;
+      List<Record> toPassOn;
       if(head != null){
         //(case: not root)
         switch(type){
@@ -1055,8 +786,6 @@ public class Redwood {
     public final Object content;
     private final Object[] channels;
     public final int depth;
-    public final String callingClass;
-    public final String callingMethod;
     public final long timesstamp;
     //(known at creation)
     public final long thread = Thread.currentThread().getId();
@@ -1069,28 +798,11 @@ public class Redwood {
      * @param content An object (usually String) representing the log contents
      * @param channels A set of channels to publish this record to
      * @param depth The depth of the log message
-     * @param stackTraceElement The stack trace element to extract the calling class and method from
-     * @param timestamp The time this record was created
      */
-    protected Record(Object content, Object[] channels, int depth, StackTraceElement stackTraceElement, long timestamp) {
-      this(content, channels, depth, stackTraceElement.getClassName(), stackTraceElement.getMethodName(), timestamp);
-    }
-
-    /**
-     * Create a new Record, based on the content of the log, the channels, and
-     * the depth
-     * @param content An object (usually String) representing the log contents
-     * @param channels A set of channels to publish this record to
-     * @param depth The depth of the log message
-     * @param callingClass The class this record should claim to be called from
-     * @param callingMethod The method this record should claim to be called from
-     */
-    protected Record(Object content, Object[] channels, int depth, String callingClass, String callingMethod, long timestamp) {
+    protected Record(Object content, Object[] channels, int depth, long timestamp) {
       this.content = content;
       this.channels = channels;
       this.depth = depth;
-      this.callingClass = callingClass;
-      this.callingMethod = callingMethod;
       this.timesstamp = timestamp;
     }
 
@@ -1133,7 +845,7 @@ public class Redwood {
     
     @Override
     public String toString() {
-      return "Record [callingClass=" + callingClass + ", callingMethod=" + callingMethod + ", content=" + content + ", depth=" + depth
+      return "Record [content=" + content + ", depth=" + depth
           + ", channels=" + Arrays.toString(channels()) + ", thread=" + thread + ", timesstamp=" + timesstamp + "]";
     }
   }
@@ -1156,6 +868,7 @@ public class Redwood {
     public void print(Object[] channels, String line) {
       stream.print(line); stream.flush();
     }
+    @Override public boolean supportsAnsi() { return true; }
     public static ConsoleHandler out(){ return new ConsoleHandler(realSysOut); }
     public static ConsoleHandler err(){ return new ConsoleHandler(realSysErr); }
   }
@@ -1171,8 +884,7 @@ public class Redwood {
       try {
         printWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")));
       } catch (IOException e) {
-        RuntimeException re = new RuntimeException(e);
-        throw re;
+        throw new RuntimeException(e);
       }
     }
 
@@ -1189,6 +901,7 @@ public class Redwood {
    * (import static edu.stanford.nlp.util.logging.Redwood.Util.*;),
    * providing a wrapper for Redwood functions and adding utility shortcuts
    */
+  @SuppressWarnings("UnusedDeclaration")
   public static class Util {
     private static Object[] revConcat(Object[] B, Object... A) {
       Object[] C = new Object[A.length+B.length];
@@ -1234,17 +947,22 @@ public class Redwood {
     public static RuntimeException fail(){ return new RuntimeException(); }
 
     public static void startTrack(Object...objs){ Redwood.startTrack(objs); }
-    public static void start_track(Object...objs){ Redwood.startTrack(objs); }
-    public static void forceTrack(String title){ Redwood.startTrack(FORCE,title); }
-    public static void force_track(String title){ Redwood.startTrack(FORCE,title); }
+    public static void forceTrack(String title){ Redwood.startTrack(FORCE, title); }
     public static void endTrack(String check){ Redwood.endTrack(check); }
-    public static void end_Track(String check){ Redwood.endTrack(check); }
     public static void endTrack(){ Redwood.endTrack(); }
-    public static void end_track(){ Redwood.endTrack(); }
+    public static void endTrackIfOpen(String check) {
+      if (!Redwood.titleStack.empty() && Redwood.titleStack.peek().equals(check)) { Redwood.endTrack(check); }
+    }
+    public static void endTracksUntil(String check) {
+     while (!Redwood.titleStack.empty() && !Redwood.titleStack.peek().equals(check)) { Redwood.endTrack(Redwood.titleStack.peek()); }
+    }
+    public static void endTracksTo(String check) { endTracksUntil(check); endTrack(check); }
 
     public static void startThreads(String title){ Redwood.startThreads(title); }
     public static void finishThread(){ Redwood.finishThread(); }
     public static void endThreads(String check){ Redwood.endThreads(check); }
+
+    public static RedwoodChannels channels(Object... channels) { return new RedwoodChannels(channels); }
     
     /**
      * Wrap a collection of threads (Runnables) to be logged by Redwood.
@@ -1265,17 +983,9 @@ public class Redwood {
       //(variables)
       final AtomicBoolean haveStarted = new AtomicBoolean(false);
       final ReentrantLock metaInfoLock = new ReentrantLock();
-      int count = 0;
-      //(count runnables)
-      Iterator<Runnable> iterableRunnables = runnables.iterator();
-      while (iterableRunnables.hasNext()) {
-        count++;
-        iterableRunnables.next();
-      }
-      final int numToRun = count;
+      final AtomicInteger numPending = new AtomicInteger(0);
       //--Create Runnables
-      ArrayList<Runnable> rtn = new ArrayList<Runnable>(numToRun);
-      final AtomicInteger runnablesSeen = new AtomicInteger(0);
+      ArrayList<Runnable> rtn = new ArrayList<Runnable>();
       for(final Runnable runnable : runnables){
         rtn.add(new Runnable(){
           public void run(){
@@ -1299,8 +1009,8 @@ public class Redwood {
               //(signal end of thread)
               finishThread();
               //(signal end of threads)
-              int seen = runnablesSeen.getAndIncrement() + 1;
-              if(seen == numToRun){
+              int numStillPending = numPending.decrementAndGet();
+              if(numStillPending <= 0){
                 endThreads(title);
               }
             } catch(Throwable t){
@@ -1309,6 +1019,7 @@ public class Redwood {
             }
           }
         });
+        numPending.incrementAndGet();
       }
       //--Return
       return rtn;
@@ -1368,15 +1079,6 @@ public class Redwood {
         }
       }
     }
-    /**
-     * Print (to console) a margin with the channels of a given log message.
-     * Note that this does not affect File printing.
-     */
-    protected static void printChannels(){ printChannels(20); }
-    /**
-     * Do not print a margin with the channels corresponding to a log entry.
-     */
-    protected static void dontPrintChannels(){ printChannels(0); }
 
     public static Style BOLD      = Style.BOLD;
     public static Style DIM       = Style.DIM;
@@ -1432,10 +1134,10 @@ public class Redwood {
      * Log a message to the channels specified in this RedwoodChannels object.
      * @param obj The object to log
      */
-    public void log(Object obj) {
-      Object[] newArgs = new Object[channelNames.length+1];
+    public void log(Object... obj) {
+      Object[] newArgs = new Object[channelNames.length+obj.length];
       System.arraycopy(channelNames,0,newArgs,0,channelNames.length);
-      newArgs[channelNames.length] = obj;
+      System.arraycopy(obj,0,newArgs,channelNames.length,obj.length);
       Redwood.log(newArgs);
     }
 
@@ -1462,21 +1164,11 @@ public class Redwood {
     public void prettyLog(String description, Object obj) {
       PrettyLogger.log(this, description, obj);
     }
-    
-    /**
-     * Hides all of these channels.
-     */
-    public void hide() {
-      Redwood.hideChannels(channelNames);
-    }
-    
 
-    /**
-     * Shows all of these channels.
-     */
-    public void show() {
-      Redwood.showChannels(channelNames);
-    }
+    public void warn(Object...objs){ log(Util.revConcat(objs, WARN)); }
+    public void debug(Object...objs){ log(Util.revConcat(objs, DBG)); }
+    public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
+    public void fatal(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
   }
   
    /**
@@ -1499,7 +1191,9 @@ public class Redwood {
   /**
    * Various informal tests of Redwood functionality
    * @param args Unused
+   *
    */
+  // TODO(gabor) update this with the new RedwoodConfiguration
   public static void main(String[] args){
 
     // -- STRESS TEST THREADS --
@@ -1564,7 +1258,7 @@ public class Redwood {
     log(ERR,null);
 
     //--Repeated Records
-    RedwoodConfiguration.current().collapseExact().apply();
+//    RedwoodConfiguration.current().collapseExact().apply();
     //(simple case)
     forceTrack("Strict Equality");
     for(int i=0; i<100; i++){ log("this is a message"); }
@@ -1589,7 +1283,7 @@ public class Redwood {
     log(WARN,"The log message 'this should show up' should show up 6 (5+1) times above");
     endTrack("Repeated Tracks");
     //(tracks with invisible things)
-    Redwood.hideOnlyChannels(DBG);
+//    Redwood.hideOnlyChannels(DBG);
     forceTrack("Hidden Subtracks");
     for(int i=0; i<100; i++){
       startTrack("Only has debug messages");
@@ -1600,7 +1294,7 @@ public class Redwood {
     endTrack("Hidden Subtracks");
     //(fuzzy repeats)
     RedwoodConfiguration.standard().apply();
-    RedwoodConfiguration.current().collapseApproximate().apply();
+//    RedwoodConfiguration.current().collapseApproximate().apply();
     forceTrack("Fuzzy Equality");
     for(int i=0; i<100; i++){ log("iter " + i + " ended with value " + (-34587292534.0+Math.sqrt(i)*3000000000.0)); }
     endTrack("Fuzzy Equality");
@@ -1666,7 +1360,7 @@ public class Redwood {
     System.err.println("This is an error!");
 
     //--Neat Exit
-    RedwoodConfiguration.standard().collapseExact().apply();
+//    RedwoodConfiguration.standard().collapseExact().apply();
     //(on close)
     for(int i=0; i<100; i++){
 //      startTrack();
