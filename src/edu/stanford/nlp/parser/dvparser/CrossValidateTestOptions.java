@@ -22,10 +22,7 @@ public class CrossValidateTestOptions {
 
     List<String> unusedArgs = new ArrayList<String>();
     for (int argIndex = 0; argIndex < args.length; ) {
-      if (args[argIndex].equalsIgnoreCase("-dvmodel")) {
-        dvmodelFile = args[argIndex + 1];
-        argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-lexparser")) {
+      if (args[argIndex].equalsIgnoreCase("-lexparser")) {
         lexparserFile = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-testTreebank")) {
@@ -43,29 +40,19 @@ public class CrossValidateTestOptions {
     LexicalizedParser lexparser = LexicalizedParser.loadModel(lexparserFile, newArgs);
     System.err.println("... done");
 
-    System.err.println("Loading dv model from: " + dvmodelFile);
-    newArgs = unusedArgs.toArray(new String[unusedArgs.size()]);
-    DVParser dvparser = IOUtils.readObjectFromFile(dvmodelFile);
-    DVModel model = dvparser.getDVModel();
-    model.op.setOptions(newArgs);
-    System.err.println("... done");
-
     Treebank testTreebank = null;
     if (testTreebankPath != null) {
       System.err.println("Reading in trees from " + testTreebankPath);
       if (testTreebankFilter != null) {
         System.err.println("Filtering on " + testTreebankFilter);
       }
-      testTreebank = dvparser.getOp().tlpParams.memoryTreebank();;
+      testTreebank = lexparser.getOp().tlpParams.memoryTreebank();;
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       System.err.println("Read in " + testTreebank.size() + " trees for testing");
     }     
 
     double[] labelResults = new double[weights.length];
     double[] tagResults = new double[weights.length];
-
-    DVModelReranker reranker = new DVModelReranker(model);
-    lexparser.reranker = reranker;
 
     for (int i = 0; i < weights.length; ++i) {
       lexparser.getOp().baseParserWeight = weights[i];
