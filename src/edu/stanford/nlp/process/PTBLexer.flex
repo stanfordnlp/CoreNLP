@@ -945,7 +945,7 @@ gonna|gotta|lemme|gimme|wanna
                         }
 {DBLQUOT}/[A-Za-z0-9$]  { return handleQuotes(yytext(), true); }
 {DBLQUOT}               { return handleQuotes(yytext(), false); }
-0x7f                    { if (invertible) {
+\x7f                    { if (invertible) {
                             prevWordAfter.append(yytext());
                         } }
 {LESSTHAN}              { return getNext("<", yytext()); }
