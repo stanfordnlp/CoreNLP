@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -83,7 +82,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       Set<IntPair> mentionSpanSet = Generics.newHashSet();
       Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
 
-      extractPremarkedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNamedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNPorPRP(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractEnumerations(s, mentions, mentionSpanSet, namedEntitySpanSet);
@@ -98,38 +96,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     for (Mention m : mentions) {
       String pos = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
       if(m.originalSpan.size()==1 && pos.equals("NNS")) m.generic = true;
-    }
-  }
-
-  protected void extractPremarkedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
-    List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
-    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    int beginIndex = -1;
-    for(CoreLabel w : sent) {
-      MultiTokenTag t = w.get(CoreAnnotations.MentionTokenAnnotation.class);
-      if (t != null) {
-        // Part of a mention
-        if (t.isStart()) {
-          // Start of mention
-          beginIndex = w.get(CoreAnnotations.IndexAnnotation.class) - 1;
-        }
-        if (t.isEnd()) {
-          // end of mention
-          int endIndex = w.get(CoreAnnotations.IndexAnnotation.class);
-          if (beginIndex >= 0) {
-            IntPair mSpan = new IntPair(beginIndex, endIndex);
-            int mentionId = assignIds? ++maxID:-1;
-            Mention m = new Mention(mentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
-            mentions.add(m);
-            mentionSpanSet.add(mSpan);
-            beginIndex = -1;
-          } else {
-            SieveCoreferenceSystem.logger.warning("Start of marked mention not found in sentence: "
-                    + t + " at tokenIndex=" + (w.get(CoreAnnotations.IndexAnnotation.class)-1)+ " for "
-                    + s.get(CoreAnnotations.TextAnnotation.class));
-          }
-        }
-      }
     }
   }
 
@@ -173,21 +139,20 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
   }
 
-  private static final TregexPattern npOrPrpMentionPattern = TregexPattern.compile("/^(?:NP|PRP)/");
   protected void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     tree.indexLeaves();
     SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
 
-    TregexPattern tgrepPattern = npOrPrpMentionPattern;
+    final String mentionPattern = "/^(?:NP|PRP)/";
+    TregexPattern tgrepPattern = TregexPattern.compile(mentionPattern);
     TregexMatcher matcher = tgrepPattern.matcher(tree);
     while (matcher.find()) {
       Tree t = matcher.getMatch();
       List<Tree> mLeaves = t.getLeaves();
       int beginIdx = ((CoreLabel)mLeaves.get(0).label()).get(CoreAnnotations.IndexAnnotation.class)-1;
       int endIdx = ((CoreLabel)mLeaves.get(mLeaves.size()-1).label()).get(CoreAnnotations.IndexAnnotation.class);
-      if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
       IntPair mSpan = new IntPair(beginIdx, endIdx);
       if(!mentionSpanSet.contains(mSpan) && !insideNE(mSpan, namedEntitySpanSet)) {
         int mentionID = assignIds? ++maxID:-1;
@@ -198,13 +163,13 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
   }
   /** Extract enumerations (A, B, and C) */
-  private static final TregexPattern enumerationsMentionPattern = TregexPattern.compile("NP < (/^(?:NP|NNP|NML)/=m1 $.. (/^CC|,/ $.. /^(?:NP|NNP|NML)/=m2))");
   protected void extractEnumerations(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet){
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
 
-    TregexPattern tgrepPattern = enumerationsMentionPattern;
+    final String mentionPattern = "NP < (/^(?:NP|NNP|NML)/=m1 $.. (/^CC|,/ $.. /^(?:NP|NNP|NML)/=m2))";
+    TregexPattern tgrepPattern = TregexPattern.compile(mentionPattern);
     TregexMatcher matcher = tgrepPattern.matcher(tree);
     Map<IntPair, Tree> spanToMentionSubTree = Generics.newHashMap();
     while (matcher.find()) {
@@ -257,7 +222,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
                 + ": originalSpan=[" + StringUtils.joinWords(m.originalSpan, " ") + "], head=" + m.headWord);
         SieveCoreferenceSystem.logger.warning("Setting head string to entire mention");
         m.headIndex = m.startIndex;
-        m.headWord = m.originalSpan.size() > 0 ? m.originalSpan.get(0) : sent.get(m.startIndex);
+        m.headWord = m.originalSpan.get(0);
         m.headString = m.originalSpan.toString();
       }
     }
@@ -266,18 +231,16 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   protected Tree findSyntacticHead(Mention m, Tree root, List<CoreLabel> tokens) {
     // mention ends with 's
     int endIdx = m.endIndex;
-    if (m.originalSpan.size() > 0) {
-      String lastWord = m.originalSpan.get(m.originalSpan.size()-1).get(CoreAnnotations.TextAnnotation.class);
-        if((lastWord.equals("'s") || lastWord.equals("'"))
-            && m.originalSpan.size() != 1 ) endIdx--;
-    }
+    String lastWord = m.originalSpan.get(m.originalSpan.size()-1).get(CoreAnnotations.TextAnnotation.class);
+    if((lastWord.equals("'s") || lastWord.equals("'"))
+        && m.originalSpan.size() != 1 ) endIdx--;
 
     Tree exactMatch = findTreeWithSpan(root, m.startIndex, endIdx);
     //
     // found an exact match
     //
     if (exactMatch != null) {
-      return safeHead(exactMatch);
+      return safeHead(exactMatch, endIdx);
     }
 
     // no exact match found
@@ -308,10 +271,13 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, Pattern.compile(".*"));
     List<ParserConstraint> constraints = Collections.singletonList(constraint);
     Tree tree = parse(extentTokens, constraints);
-    convertToCoreLabels(tree);
+    convertToCoreLabels(tree);  // now unnecessary, as parser uses CoreLabels?
     tree.indexSpans(m.startIndex - ADDED_WORDS);  // remember it has ADDED_WORDS extra words at the beginning
     Tree subtree = findPartialSpan(tree, m.startIndex);
-    Tree extentHead = safeHead(subtree);
+    // There was a possible problem that with a crazy parse, extentHead could be one of the added words, not a real word!
+    // Now we make sure in findPartialSpan that it can't be before the real start, and in safeHead, we disallow something
+    // passed the right end (that is, just that final period).
+    Tree extentHead = safeHead(subtree, endIdx);
     assert(extentHead != null);
     // extentHead is a child in the local extent parse tree. we need to find the corresponding node in the main tree
     // Because we deleted dashes, it's index will be >= the index in the extent parse tree
@@ -320,6 +286,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     assert(realHead != null);
     return realHead;
   }
+
+  /** Find the tree that covers the portion of interest. */
   private static Tree findPartialSpan(final Tree root, final int start) {
     CoreLabel label = (CoreLabel) root.label();
     int startIndex = label.get(CoreAnnotations.BeginIndexAnnotation.class);
@@ -338,18 +306,30 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private static Tree funkyFindLeafWithApproximateSpan(Tree root, String token, int index, int approximateness) {
+    // System.err.println("Searching " + root + "\n  for " + token + " at position " + index + " (plus up to " + approximateness + ")");
     List<Tree> leaves = root.getLeaves();
     for (Tree leaf : leaves) {
       CoreLabel label = CoreLabel.class.cast(leaf.label());
-      int ind = label.get(CoreAnnotations.IndexAnnotation.class) - 1;
+      Integer indexInteger = label.get(CoreAnnotations.IndexAnnotation.class);
+      if (indexInteger == null) continue;
+      int ind = indexInteger - 1;
       if (token.equals(leaf.value()) && ind >= index && ind <= index + approximateness) {
         return leaf;
       }
     }
     // this shouldn't happen
     //    throw new RuntimeException("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
-    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
-    return leaves.get(leaves.size() - 1);
+    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Failed to find head token:\n" +
+                       "Tree is: " + root + "\n" +
+                       "token = |" + token + "|" + index + "|, approx=" + approximateness);
+    for (Tree leaf : leaves) {
+      if (token.equals(leaf.value())) {
+        // System.err.println("Found it at position " + ind + "; returning " + leaf);
+        return leaf;
+      }
+    }
+    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(leaves.size() - 2));
+    return leaves.get(leaves.size() - 2); // last except for the added period.
   }
 
   private static CoreLabel initCoreLabel(String token) {
@@ -369,13 +349,14 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     sent.set(CoreAnnotations.TokensAnnotation.class, tokens);
     sent.set(ParserAnnotations.ConstraintAnnotation.class, constraints);
     Annotation doc = new Annotation("");
-    List<CoreMap> sents = new ArrayList<CoreMap>(1);
+    List<CoreMap> sents = new ArrayList<CoreMap>();
     sents.add(sent);
     doc.set(CoreAnnotations.SentencesAnnotation.class, sents);
     getParser().annotate(doc);
     sents = doc.get(CoreAnnotations.SentencesAnnotation.class);
     return sents.get(0).get(TreeCoreAnnotations.TreeAnnotation.class);
   }
+
   private Annotator getParser() {
     if(parserProcessor == null){
       parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");
@@ -383,9 +364,11 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
     return parserProcessor;
   }
+
+  // This probably isn't needed now; everything is always a core label. But no-op.
   private static void convertToCoreLabels(Tree tree) {
     Label l = tree.label();
-    if(! (l instanceof CoreLabel)){
+    if (! (l instanceof CoreLabel)) {
       CoreLabel cl = new CoreLabel();
       cl.setValue(l.value());
       tree.setLabel(cl);
@@ -395,15 +378,37 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       convertToCoreLabels(kid);
     }
   }
-  private Tree safeHead(Tree top) {
+
+  private Tree safeHead(Tree top, int endIndex) {
     Tree head = top.headTerminal(headFinder);
-    if (head != null) return head;
+    // One obscure failure case is that the added period becomes the head. Disallow this.
+    if (head != null) {
+      Integer headIndexInteger = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class);
+      if (headIndexInteger != null) {
+        int headIndex = headIndexInteger - 1;
+        if (headIndex < endIndex) {
+          return head;
+        }
+      }
+    }
     // if no head found return the right-most leaf
     List<Tree> leaves = top.getLeaves();
-    if(leaves.size() > 0) return leaves.get(leaves.size() - 1);
+    int candidate = leaves.size() - 1;
+    while (candidate >= 0) {
+      head = leaves.get(candidate);
+      Integer headIndexInteger = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class);
+      if (headIndexInteger != null) {
+        int headIndex = headIndexInteger - 1;
+        if (headIndex < endIndex) {
+          return head;
+        }
+      }
+      candidate--;
+    }
     // fallback: return top
     return top;
   }
+
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
     CoreLabel l = (CoreLabel) tree.label();
     if (l != null && l.has(CoreAnnotations.BeginIndexAnnotation.class) && l.has(CoreAnnotations.EndIndexAnnotation.class)) {
@@ -448,7 +453,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       if(dict.nonWords.contains(m.headString)) remove.add(m);
 
       // quantRule : not starts with 'any', 'all' etc
-      if(m.originalSpan.size() > 0 && dict.quantifiers.contains(m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase())) remove.add(m);
+      if(dict.quantifiers.contains(m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase())) remove.add(m);
 
       // partitiveRule
       if(partitiveRule(m, sent, dict)) remove.add(m);
@@ -507,60 +512,52 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   /** Check whether pleonastic 'it'. E.g., It is possible that ... */
-  private static final TregexPattern[] pleonasticPatterns = getPleonasticPatterns();
   private static boolean isPleonastic(Mention m, Tree tree) {
     if ( ! m.spanToString().equalsIgnoreCase("it")) return false;
-    for (TregexPattern p : pleonasticPatterns) {
+    final String[] patterns = {
+        // cdm 2013: I spent a while on these patterns. I fixed a syntax error in five patterns ($.. split with space), so it now shouldn't exception in checkPleonastic. This gave 0.02% on CoNLL11 dev
+        // I tried some more precise patterns but they didn't help. Indeed, they tended to hurt vs. the higher recall patterns.
+
+        //"NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (VP < (VBN $.. /S|SBAR/))))", // overmatches
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@VP < (VBN < expected|hoped $.. @SBAR))))",  // this one seems more accurate, but ...
+        "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@VP < (VBN $.. @S|SBAR))))",  // in practice, go with this one (best results)
+
+        "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (ADJP $.. (/S|SBAR/))))",
+        "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (ADJP < (/S|SBAR/))))",
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@ADJP < (/^(?:JJ|VB)/ < /^(?i:(?:hard|tough|easi)(?:er|est)?|(?:im|un)?(?:possible|interesting|worthwhile|likely|surprising|certain)|disappointing|pointless|easy|fine|okay)$/) [ < @S|SBAR | $.. (@S|SBAR !< (IN !< for|For|FOR|that|That|THAT)) ] )))", // does worse than above 2 on CoNLL11 dev
+
+        "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (NP < /S|SBAR/)))",
+        "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (NP $.. ADVP $.. /S|SBAR/)))",
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@NP $.. @ADVP $.. @SBAR)))", // cleft examples, generalized to not need ADVP; but gave worse CoNLL12 dev numbers....
+
+        // these next 5 had buggy space in "$ ..", which I fixed
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (VP < (VBN $.. /S|SBAR/))))))",
+
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP $.. (/S|SBAR/))))))", // extraposed. OK 1/2 correct; need non-adverbial case
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP < (/S|SBAR/))))))", // OK: 3/3 good matches on dev; but 3/4 wrong on WSJ
+        // certain can be either but relatively likely pleonastic with it ... be
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (MD $.. (@VP < ((/^V.*/ < /^(?:be|become)/) $.. (@ADJP < (/^JJ/ < /^(?i:(?:hard|tough|easi)(?:er|est)?|(?:im|un)?(?:possible|interesting|worthwhile|likely|surprising|certain)|disappointing|pointless|easy|fine|okay))$/) [ < @S|SBAR | $.. (@S|SBAR !< (IN !< for|For|FOR|that|That|THAT)) ] )))))", // GOOD REPLACEMENT ; 2nd clause is for extraposed ones
+
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP < /S|SBAR/)))))",
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP $.. ADVP $.. /S|SBAR/)))))",
+
+        "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:seems|appears|means|follows)/) $.. /S|SBAR/))",
+
+        "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:turns|turned)/) $.. PRT $.. /S|SBAR/))"
+    };
+
+    for (String p : patterns) {
       if (checkPleonastic(m, tree, p)) {
-        SieveCoreferenceSystem.logger.fine("RuleBasedCorefMentionFinder: matched pleonastic pattern '" + p + "' for " + tree);
+        // System.err.printf("Found pleonastic: %s%n", tree);
         return true;
       }
     }
     return false;
   }
 
-  private static TregexPattern[] getPleonasticPatterns() {
-    final String[] patterns = {
-            // cdm 2013: I spent a while on these patterns. I fixed a syntax error in five patterns ($.. split with space), so it now shouldn't exception in checkPleonastic. This gave 0.02% on CoNLL11 dev
-            // I tried some more precise patterns but they didn't help. Indeed, they tended to hurt vs. the higher recall patterns.
-
-            //"NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (VP < (VBN $.. /S|SBAR/))))", // overmatches
-            // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@VP < (VBN < expected|hoped $.. @SBAR))))",  // this one seems more accurate, but ...
-            "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@VP < (VBN $.. @S|SBAR))))",  // in practice, go with this one (best results)
-
-            "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (ADJP $.. (/S|SBAR/))))",
-            "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (ADJP < (/S|SBAR/))))",
-            // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@ADJP < (/^(?:JJ|VB)/ < /^(?i:(?:hard|tough|easi)(?:er|est)?|(?:im|un)?(?:possible|interesting|worthwhile|likely|surprising|certain)|disappointing|pointless|easy|fine|okay)$/) [ < @S|SBAR | $.. (@S|SBAR !< (IN !< for|For|FOR|that|That|THAT)) ] )))", // does worse than above 2 on CoNLL11 dev
-
-            "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (NP < /S|SBAR/)))",
-            "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (NP $.. ADVP $.. /S|SBAR/)))",
-            // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@NP $.. @ADVP $.. @SBAR)))", // cleft examples, generalized to not need ADVP; but gave worse CoNLL12 dev numbers....
-
-            // these next 5 had buggy space in "$ ..", which I fixed
-            "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (VP < (VBN $.. /S|SBAR/))))))",
-
-            "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP $.. (/S|SBAR/))))))", // extraposed. OK 1/2 correct; need non-adverbial case
-            "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP < (/S|SBAR/))))))", // OK: 3/3 good matches on dev; but 3/4 wrong on WSJ
-            // certain can be either but relatively likely pleonastic with it ... be
-            // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (MD $.. (@VP < ((/^V.*/ < /^(?:be|become)/) $.. (@ADJP < (/^JJ/ < /^(?i:(?:hard|tough|easi)(?:er|est)?|(?:im|un)?(?:possible|interesting|worthwhile|likely|surprising|certain)|disappointing|pointless|easy|fine|okay))$/) [ < @S|SBAR | $.. (@S|SBAR !< (IN !< for|For|FOR|that|That|THAT)) ] )))))", // GOOD REPLACEMENT ; 2nd clause is for extraposed ones
-
-            "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP < /S|SBAR/)))))",
-            "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP $.. ADVP $.. /S|SBAR/)))))",
-
-            "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:seems|appears|means|follows)/) $.. /S|SBAR/))",
-
-            "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:turns|turned)/) $.. PRT $.. /S|SBAR/))"
-    };
-
-    TregexPattern[] tgrepPatterns = new TregexPattern[patterns.length];
-    for (int i = 0; i < tgrepPatterns.length; i++) {
-      tgrepPatterns[i] = TregexPattern.compile(patterns[i]);
-    }
-    return tgrepPatterns;
-  }
-
-  private static boolean checkPleonastic(Mention m, Tree tree, TregexPattern tgrepPattern) {
+  private static boolean checkPleonastic(Mention m, Tree tree, String pattern) {
     try {
+      TregexPattern tgrepPattern = TregexPattern.compile(pattern);
       TregexMatcher matcher = tgrepPattern.matcher(tree);
       while (matcher.find()) {
         Tree np1 = matcher.getNode("m1");
