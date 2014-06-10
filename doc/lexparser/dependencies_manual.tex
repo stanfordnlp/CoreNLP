@@ -104,14 +104,11 @@ An adjectival complement of a verb is an adjectival phrase which functions as th
 \end{tabbing}
 
 \noindent\textbf{\emph{advcl}: adverbial clause modifier}\\
-An adverbial clause modifier of a VP or S is a clause modifying the
-verb (temporal clause, consequence, conditional clause, purpose
-clause, etc.).
+An adverbial clause modifier of a VP or S is a clause modifying the verb (temporal clause, consequence, conditional clause, etc.).
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \> ``The accident happened as the night was falling" \> \> \emph{advcl}(happened, falling)\\
 \> ``If you know who did it, you should tell the teacher" \> \> \emph{advcl}(tell, know)\\
-\> ``He talked to him in order to secure the account" \>  \> \emph{advcl}(talked, secure)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{advmod}: adverbial modifier}\\
@@ -277,14 +274,6 @@ guidelines of the what the Penn Treebanks count as an INTJ.  They
 define this to include: interjections (\emph{oh}, \emph{uh-huh},
 \emph{Welcome}), fillers (\emph{um}, \emph{ah}), and discourse 
 markers (\emph{well}, \emph{like}, \emph{actually}, but not \emph{you know}).
-\begin{quote}
-\begin{dependency}
-   \begin{deptext}[column sep=0.25cm]
-      Iguazu \& is \& in \& Argentina \& :) \\
-   \end{deptext}
-   \depedge[edge unit distance=0.4ex]{2}{5}{discourse}
-\end{dependency}
-\end{quote}
 
 \noindent\textbf{\emph{dobj}: direct object}\\
 The direct object of a VP is the noun phrase which is the (accusative) object of the verb.
@@ -301,21 +290,6 @@ This relation captures an existential ``there". The main verb of the clause is t
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
 \> ``There is a ghost in the room" \>\> \emph{expl}(is, There)\\
 \end{tabbing}
-
-\noindent\textbf{\emph{goeswith}: goes with}\\
-This relation links two parts of a word that are separated in text
-that is not well edited. We follow the treebank: The GW part is the
-dependent and the head is in some sense the ``main'' part, often the
-second part.
-\begin{quote}
-\begin{dependency}
-   \begin{deptext}[column sep=0.2em]
-      They \& come \& here \& with \& out \& legal \& permission \\
-   \end{deptext}
-   \depedge[edge unit distance=2.5ex]{5}{4}{goeswith}
-\end{dependency}
-\end{quote}
-
 
 \noindent\textbf{\emph{infmod}: infinitival modifier}\\
 An infinitival modifier of an NP is an infinitive that serves to modify the meaning of the NP.
@@ -532,6 +506,13 @@ This is used for any piece of punctuation in a clause, if punctuation is being r
 \> ``Go home!" \> \> \emph{punct}(Go, !)\\
 \end{tabbing}
 
+\noindent\textbf{\emph{purpcl}: purpose clause modifier}\\
+A purpose clause modifier of a VP is a clause headed by ``(in order) to" specifying a purpose. At present the system only recognizes ones that have ``in order to'' as otherwise the system is unable to distinguish from the surface representations between these and open clausal complements (\emph{xcomp}). It can also recognize fronted ``to" purpose clauses in sentences.
+\begin{tabbing}
+\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
+\> ``He talked to him in order to secure the account" \>  \> \emph{purpcl}(talked, secure)\\
+\end{tabbing}
+
 \noindent\textbf{\emph{quantmod}: quantifier phrase modifier}\\
 A quantifier modifier is an element modifying the head of a QP constituent.  (These are modifiers in complex numeric quantifiers, not other types of ``quantification''.  Quantifiers like ``all'' become det.)
 \begin{tabbing}
@@ -613,8 +594,7 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
         \> \> \> \> \emph{dobj} - direct object \\
         \> \> \> \> \emph{iobj} - indirect object \\
         \> \> \> \> \emph{pobj} - object of preposition \\
-      \> \> \> \emph{mark} - marker (word introducing an \emph{advcl}
-      or \emph{ccomp})\\
+      \> \> \> \emph{mark} - marker (word introducing an \emph{advcl})\\
       \> \> \> \emph{rel} - relative (word introducing a \emph{rcmod})\\
 	\> \>  \emph{subj} - subject \\
 	      \> \> \> \emph{nsubj} - nominal subject \\
@@ -625,10 +605,11 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
  \> \emph{conj} - conjunct \\
  \> \emph{expl} - expletive (expletive ``there") \\
  \> \emph{mod} - modifier \\
-    \> \> \emph{amod} - adjectival modifier \\
-    \> \> \emph{appos} - appositional modifier \\
+  	\> \> \emph{amod} - adjectival modifier \\
+  	\> \> \emph{appos} - appositional modifier \\
     \> \> \emph{advcl} - adverbial clause modifier \\
-    \> \> \emph{det} - determiner \\
+    \> \> \emph{purpcl} - purpose clause modifier \\
+	\> \> \emph{det} - determiner \\
     \> \> \emph{predet} - predeterminer\\
     \> \> \emph{preconj} - preconjunct \\
     \> \> \emph{infmod} - infinitival modifier \\
@@ -1123,32 +1104,7 @@ The SD representation has also been used in other domains.  It is a common repre
 extracting opinions, sentiment, and relations
 \citep{Zhuang06cikm,Meena07sentiment,Banko07,Zouaq06tai,Zouaq07tel,chaumartin07knowledge,kessler08icwsm,Haghighi10,Hassan10,Joshi2010,Wu2010,Zouaq10}, as well as specific information (such as event, time or dialogue acts) \citep{Chambers11,McClosky12,Kluwer10}. The tool has been consistently used by several groups in the \textsc{Pascal}/NIST challenges targeting textual entailment \citep{adams-EtAl:2007:WTEP,blake:2007:WTEP,chambers-EtAl:2007:WTEP,harmeling:2007:WTEP,wang-neumann:2007:WTEP,Malakasiotis09,Mehdad09,Shivare2010,Glinos2010,Kouylekov2010,Pakray2011a}. It is also used for a variety of other tasks, such as coreference resolution, disagreement detection and word sense induction \citep{Chen12,Abbott11,Lau12}, as well as part of the preprocessing for machine translation systems by several groups \citep{xu09using,genzel10automatically,singh10statistical}.
 
-The Stanford dependency representation has also served as a model for
-developing dependency schemes in other languages. Recently schemes
-based on the Stanford dependency representation have been proposed for
-Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10},
-Persian \citep{Seraji12}, and French \citep{Maarouf12}. Recently, it
-has been used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
-
-\section{Recent changes}
-
-This section summarizes recent changes. This may help if you see old
-versions of the dependencies, or need to update your code.
-
-\begin{description}
-\item[abbrev] was removed as a relation.  It is now a particular case
-  of an \emph{appos}.
-\item[compl] was removed as a relation. It is now a particular case of
-  \emph{mark}. This follows HPSG-like usage, where the complementizer
-  is a mark on the clause.
-\item[discourse] was introduced. The lack of a dependency type for
-  interjections was an omission even in the early versions, but it
-  became more essential as we expanded our consideration of informal
-  text types.
-\item[goeswith] was introduced. It is useful on badly edited text.
-\item[purpcl] was removed as a relation. It is now a particular case
-  of an \emph{advcl}.
-\end{description}
+The Stanford dependency representation has also served as a model for developing dependency schemes in other languages. Recently schemes based on the Stanford dependency representation have been proposed for Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10}, Persian \citep{Seraji12}, and French \citep{Maarouf12}. Recently, it has been used to evaluate parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
 
 
 \bibliographystyle{plainnat}

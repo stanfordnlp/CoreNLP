@@ -86,13 +86,12 @@ public class EnglishGrammaticalRelations {
     "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter)$/";
   private static final String timeWordLotRegex =
     "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter|lot)$/";
-  // r is for texting r = are
   private static final String copularWordRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|seem|seems|seemed|seeming|appear|appears|appeared|stay|stays|stayed|remain|remains|remained|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
+    "/^(?i:am|is|are|be|being|'s|'re|'m|was|were|been|s|ai|seem|seems|seemed|seeming|appear|appears|appeared|stay|stays|stayed|remain|remains|remained|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
   private static final String passiveAuxWordRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
+    "/^(?i:am|is|are|be|being|'s|'re|'m|was|were|been|s|ai|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
   private static final String beAuxiliaryRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai)$/";
+    "/^(?i:am|is|are|be|being|'s|'re|'m|was|were|been|s|ai)$/";
   private static final String haveRegex =
     "/^(?i:have|had|has|having)$/";
   private static final String stopKeepRegex =
@@ -594,7 +593,7 @@ public class EnglishGrammaticalRelations {
           // to find "...", he said or "...?" he asked.
           "S|SINV < (S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|:)$/ !< (VP < TO|VBG|VBN))",
           "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
-          "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
+          "ADJP < (SBAR=target < (IN !< than) < (S < (VP !< TO)))", "ADJP < (SBAR=target < (S < (VP !< TO)))",// ADJP is things like "sure (that) he'll lose"
           // That ... he know
           "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
           // JJ catches a couple of funny NPs with heads like "enough"
@@ -785,9 +784,9 @@ public class EnglishGrammaticalRelations {
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "advcl", "adverbial clause modifier",
         AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
-        new String[] {
-          // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses, first case includes regular in order to purpose clauses
-          "VP < (@SBAR=target [ <, (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
+        new String[] {   // !$+ (NN < order) has been added so that "in order to" is not marked as an advcl
+          // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses.
+          "VP < (@SBAR=target [ <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)))",
@@ -795,20 +794,16 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)", // the last part should probably only be @SQ, but this captures some strays at no cost
           "VP < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))", // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
           "S|SQ < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))",
-          "S|SQ <, (PP=target <, RB)",
-          "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
-          // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // part of former purpcl [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
-
+          "S|SQ <, (PP=target <, RB)"
         });
   public static class AdvClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
-  /*
-   * The "purpose clause modifier" grammatical relation has been discontinued
-   * It is now just seen as a special case of an advcl.  A purpose clause
+  /**
+   * The "purpose clause modifier" grammatical relation.  A purpose clause
    * modifier of a VP is a clause headed by "(in order) to" specifying a
    * purpose.  Note: at present we only recognize ones that have
-   * "in order to" or are fronted.  Otherwise we can't use our surface representations to
+   * "in order to" or are fronted.  Otherwise we can't use our surface representations
    * distinguish these from xcomp's. We can also recognize "to" clauses
    * introduced by "be VBN".
    * <p/>
@@ -816,6 +811,15 @@ public class EnglishGrammaticalRelations {
    * "He talked to the president in order to secure the account" &rarr;
    * <code>purpcl</code>(talked, secure)
    */
+  public static final GrammaticalRelation PURPOSE_CLAUSE_MODIFIER =
+    new GrammaticalRelation(Language.English, "purpcl", "purpose clause modifier",
+        PurposeClauseModifierGRAnnotation.class, MODIFIER, "VP|S", tregexCompiler,
+        new String[] {
+          "VP < (/^SBAR/=target < (IN < in) < (NN < order) < (S < (VP < TO)))",
+          // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
+          "@S < (@S=target < (VP < TO) $+ (/^,$/ $+ @NP))",
+        });
+  public static class PurposeClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
   /**
@@ -1453,25 +1457,8 @@ public class EnglishGrammaticalRelations {
           "@S < (@S $.. @S=target) !< @CC|CONJP",
 
         });
+
   public static class ParataxisGRAnnotation extends GrammaticalRelationAnnotation { }
-
-  /**
-   * The "goes with" grammatical relation.  This corresponds to use of the GW (goes with) part-of-speech tag
-   * in the recent Penn Treebanks. It marks partial words that should be combined with some other word. <p>
-   * <p/>
-   * Example: <br/>
-   * "They come here with out legal permission." &rarr;
-   * <code>goeswith</code>(out, with)
-   */
-  public static final GrammaticalRelation GOES_WITH =
-    new GrammaticalRelation(Language.English, "goeswith", "goes with",
-        GoesWithGRAnnotation.class, MODIFIER, ".*", tregexCompiler,
-        new String[] {
-          "__ < GW=target",
-        });
-  public static class GoesWithGRAnnotation extends GrammaticalRelationAnnotation { }
-
-
 
   /**
    * The "semantic dependent" grammatical relation has been
@@ -1580,11 +1567,11 @@ public class EnglishGrammaticalRelations {
       CONTROLLING_SUBJECT,
       AGENT,
       NUMBER_MODIFIER,
+      PURPOSE_CLAUSE_MODIFIER,
       QUANTIFIER_MODIFIER,
       NP_ADVERBIAL_MODIFIER,
       PARATAXIS,
       DISCOURSE_ELEMENT,
-      GOES_WITH,
     }));
   /* Cache frequently used views of the values list */
   private static final List<GrammaticalRelation> unmodifiableValues =
