@@ -346,28 +346,6 @@ public class StringUtils {
     return (Arrays.asList(str.split(regex)));
   }
 
-  public static String[] splitOnChar(String input, char delimiter) {
-    // State
-    String[] out = new String[input.length() + 1];
-    int nextIndex = 0;
-    int lastDelimiterIndex = -1;
-    char[] chars = input.toCharArray();
-    // Split
-    for ( int i = 0; i <= chars.length; ++i ) {
-      if (i >= chars.length || chars[i] == delimiter) {
-        char[] tokenChars = new char[i - (lastDelimiterIndex + 1)];
-        System.arraycopy(chars, lastDelimiterIndex + 1, tokenChars, 0, tokenChars.length);
-        out[nextIndex] = new String(tokenChars);
-        nextIndex += 1;
-        lastDelimiterIndex = i;
-      }
-    }
-    // Clean Result
-    String[] trimmedOut = new String[nextIndex];
-    System.arraycopy(out, 0, trimmedOut, 0, trimmedOut.length);
-    return trimmedOut;
-  }
-
 
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
@@ -683,10 +661,11 @@ public class StringUtils {
    * the String[] value for that flag.
    *
    * @param args           the argument array to be parsed
-   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer}
+   * @param flagsToNumArgs a {@link Map} of flag names to {@link Integer
    *                       values specifying the number of arguments
    *                       for that flag (default min 0, max 1).
-   * @return a {@link Map} of flag names to flag argument {@link String}
+   * @return a {@link Map} of flag names to flag argument {@link
+   *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args, Map<String, Integer> flagsToNumArgs) {
     Map<String, String[]> result = Generics.newHashMap();
@@ -1834,6 +1813,7 @@ public class StringUtils {
    */
   public static Properties argsToPropertiesWithResolve(String[] args) {
     TreeMap<String, String> result = new TreeMap<String, String>();
+    Map<String, String> existingArgs = new TreeMap<String, String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -1841,13 +1821,29 @@ public class StringUtils {
           key = key.substring(2); // strip off 2 hyphens
         else
           key = key.substring(1); // strip off the hyphen
-        if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-          result.putAll(propFileToTreeMap(args[i + 1]));
-          i++;
-        }
 
+        int max = 1;
+        int min = 0;
+        List<String> flagArgs = new ArrayList<String>();
+        // cdm oct 2007: add length check to allow for empty string argument!
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+          flagArgs.add(args[i + 1]);
+        }
+        if (flagArgs.isEmpty()) {
+          existingArgs.put(key, "true");
+        } else {
+          
+          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
+            result.putAll(propFileToTreeMap(join(flagArgs," "), existingArgs));
+            i++;
+            existingArgs.clear();
+          } else
+            existingArgs.put(key, join(flagArgs, " "));
+        }
       }
     }
+    result.putAll(existingArgs);
+    
     for (Entry<String, String> o : result.entrySet()) {
       String val = resolveVars(o.getValue(), result);
       result.put(o.getKey(), val);
@@ -1866,8 +1862,10 @@ public class StringUtils {
    * @return The corresponding TreeMap where the ordering is the same as in the
    *         props file
    */
-  public static TreeMap<String, String> propFileToTreeMap(String filename) {
+  public static TreeMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
+    
     TreeMap<String, String> result = new TreeMap<String, String>();
+    result.putAll(existingArgs);
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();
       if (l.isEmpty() || l.startsWith("#"))
@@ -1884,6 +1882,10 @@ public class StringUtils {
   
   /**
    * n grams for already splitted string. the ngrams are joined with a single space
+   * @param s string
+   * @param minSize
+   * @param maxSize
+   * @return
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
@@ -1896,6 +1898,10 @@ public class StringUtils {
   
   /**
    * The string is split on whitespace and the ngrams are joined with a single space
+   * @param s string
+   * @param minSize
+   * @param maxSize
+   * @return
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
