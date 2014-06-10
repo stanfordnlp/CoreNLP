@@ -52,31 +52,6 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     return curTrie;
   }
 
-  public TrieMap<K,V> putChildTrie(Iterable<K> key, TrieMap<K,V> child) {
-    TrieMap<K,V> parentTrie = null;
-    TrieMap<K, V> curTrie = this;
-    Iterator<K> keyIter = key.iterator();
-    // go through each element
-    while (keyIter.hasNext()) {
-      K element = keyIter.next();
-      boolean isLast = !keyIter.hasNext();
-      if (curTrie.children == null) {
-        curTrie.children = Generics.newConcurrentHashMap();
-      }
-      parentTrie = curTrie;
-      curTrie = curTrie.children.get(element);
-      if (isLast) {
-        parentTrie.children.put(element, child);
-      } else if(curTrie == null){
-        parentTrie.children.put(element, curTrie = new TrieMap<K,V>());
-      }
-    }
-    if (parentTrie == null) {
-      throw new IllegalArgumentException("Cannot put a child trie with no keys");
-    }
-    return curTrie;
-  }
-
   public V getValue() {
     return value;
   }
@@ -146,7 +121,6 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     TrieMap<K, V> curTrie = this;
     // go through each element
     for(Object element : key){
-      if (curTrie.children == null) return null;
       curTrie = curTrie.children.get(element);
       if(curTrie == null){
         return null;
