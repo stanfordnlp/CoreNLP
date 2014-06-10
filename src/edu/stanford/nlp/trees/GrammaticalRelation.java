@@ -95,11 +95,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     public Class<Set<TreeGraphNode>> getType() {  return (Class) Set.class; }
   }
 
-  private static Map<Class<? extends GrammaticalRelationAnnotation>, GrammaticalRelation>
+  private static final Map<Class<? extends GrammaticalRelationAnnotation>, GrammaticalRelation>
     annotationsToRelations = Generics.newHashMap();
-  private static Map<GrammaticalRelation, Class<? extends GrammaticalRelationAnnotation>>
+  private static final Map<GrammaticalRelation, Class<? extends GrammaticalRelationAnnotation>>
     relationsToAnnotations = Generics.newHashMap();
-  private static EnumMap<Language, Map<String, GrammaticalRelation>>
+  private static final EnumMap<Language, Map<String, GrammaticalRelation>>
     stringsToRelations = new EnumMap<Language, Map<String, GrammaticalRelation>>(Language.class);
 
   /**
@@ -339,18 +339,15 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     children.add(child);
   }
 
-  /** Given a <code>Tree</code> node <code>t</code>, attempts to
-   *  return a list of nodes to which node <code>t</code> has this
-   *  grammatical relation.
+  /** Given a {@code Tree} node {@code t}, attempts to
+   *  return a list of nodes to which node {@code t} has this
+   *  grammatical relation, with {@code t} as the governor.
    *
-   *  @param t Target for finding governors of t related by this GR
+   *  @param t Target for finding dependents of t related by this GR
    *  @param root The root of the Tree
-   *  @return Governor nodes to which t bears this GR
+   *  @return A Collection of dependent nodes to which t bears this GR
    */
   public Collection<Tree> getRelatedNodes(Tree t, Tree root) {
-    if (root.value() == null) {
-      root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
-    }
     Set<Tree> nodeList = new ArraySet<Tree>();
     for (TregexPattern p : targetPatterns) {    // cdm: I deleted: && nodeList.isEmpty()
       TregexMatcher m = p.matcher(root);
