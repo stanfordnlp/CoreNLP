@@ -56,8 +56,8 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     String line;
 
     // read the coref graph (new format)
-    Map<Integer, CorefChain> chains = loadCorefChains(reader);
-    if(chains != null) doc.set(CorefCoreAnnotations.CorefChainAnnotation.class, chains);
+    //Map<Integer, CorefChain> chains = loadCorefChains(reader);
+    //if(chains != null) doc.set(CorefCoreAnnotations.CorefChainAnnotation.class, chains);
 
     // read the coref graph (old format)
     line = reader.readLine().trim();

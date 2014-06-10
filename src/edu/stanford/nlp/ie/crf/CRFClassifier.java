@@ -3685,7 +3685,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     }
   }
-
+  
   public Map<String, Counter<String>> topWeights() {
     Map<String, Counter<String>> w = new HashMap<String, Counter<String>>();
     for (String feature : featureIndex) {
@@ -3702,5 +3702,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
     return w;
   }
+
 
 } // end class CRFClassifier
