@@ -136,27 +136,14 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
      * N-gram features. N is upto 2.
      */
     if (flags.useWord1) {
-      // features.add(charc +"c");
-      // features.add(charc1+"c1");
-      // features.add(charp +"p");
-      // features.add(charp +charc  +"pc");
-      // if(flags.useAs || flags.useMsr || flags.usePk || flags.useHk){ //msr, as
-      //   features.add(charc +charc1 +"cc1");
-      //   features.add(charp + charc1 +"pc1");
-      // }
-
-      features.add(charc +"::c");
-      features.add(charc1+"::c1");
-      features.add(charp +"::p");
-      features.add(charp2 +"::p2");
-      // trying to restore the features that Huishin described in SIGHAN 2005 paper
-      features.add(charc +charc1  +"::cn");
-      features.add(charp +charc  +"::pc");
-      features.add(charp +charc1  +"::pn");
-      features.add(charp2 +charp  +"::p2p");
-      features.add(charp2 +charc  +"::p2c");
-      features.add(charc2 +charc  +"::n2c");
-
+      features.add(charc +"c");
+      features.add(charc1+"c1");
+      features.add(charp +"p");
+      features.add(charp +charc  +"pc");
+      if(flags.useAs || flags.useMsr || flags.usePk || flags.useHk){ //msr, as
+        features.add(charc +charc1 +"cc1");
+        features.add(charp + charc1 +"pc1");
+      }
       features.add("|word1");
     }
 
@@ -195,26 +182,14 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
      */
 
     if (flags.useWord2) {
-      // features.add(charc +"c");
-      // features.add(charc1+"c1");
-      // features.add(charp +"p");
-      // features.add(charp +charc  +"pc");
-      // if( flags.useMsr ){
-      //   features.add(charc +charc1 +"cc1");
-      //   features.add(charp + charc1 +"pc1");
-      // }
-
-      features.add(charc +"::c");
-      features.add(charc1+"::c1");
-      features.add(charp +"::p");
-      features.add(charp2 +"::p2");
-      // trying to restore the features that Huishin described in SIGHAN 2005 paper
-      features.add(charc +charc1  +"::cn");
-      features.add(charp +charc  +"::pc");
-      features.add(charp +charc1  +"::pn");
-      features.add(charp2 +charp  +"::p2p");
-      features.add(charp2 +charc  +"::p2c");
-      features.add(charc2 +charc  +"::n2c");
+      features.add(charc +"c");
+      features.add(charc1+"c1");
+      features.add(charp +"p");
+      features.add(charp +charc  +"pc");
+      if( flags.useMsr ){
+        features.add(charc +charc1 +"cc1");
+        features.add(charp + charc1 +"pc1");
+      }
 
       features.add("|word2");
     }
