@@ -881,6 +881,11 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useSequentialScanSampling = false;
   public int maxAllowedChromaticSize = 8;
 
+  /** Whether to drop out some fraction of features in the input during
+   *  training (and then to scale the weights at test time).
+   */
+  public double inputDropOut = 0.0;
+
   /**
    * Whether or not to keep blank sentences when processing.  Useful
    * for systems such as the segmenter if you want to line up each
@@ -929,7 +934,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean groupByFeatureTemplate = false;
   public boolean groupByOutputClass = false;
   public double priorAlpha = 0;
-
+  
   public String splitWordRegex = null;
   public boolean groupByInput = false;
   public boolean groupByHiddenUnit = false;
@@ -1260,8 +1265,6 @@ public class SeqClassifierFlags implements Serializable {
         }
       } else if (key.equalsIgnoreCase("useSum")) {
         useSum = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("verbose")) {
-        verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("verboseMode")) {
         verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("tolerance")) {
@@ -2216,6 +2219,8 @@ public class SeqClassifierFlags implements Serializable {
         useSequentialScanSampling = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("maxAllowedChromaticSize")) {
         maxAllowedChromaticSize = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("inputDropOut")) {
+        inputDropOut = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("keepEmptySentences")) {
         keepEmptySentences = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useBilingualNERPrior")) {
