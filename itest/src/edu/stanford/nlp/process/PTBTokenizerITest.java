@@ -42,9 +42,12 @@ public class PTBTokenizerITest extends TestCase {
        (PTBTokenizerITest.class.getResourceAsStream(filename), charset));
     } catch (NullPointerException npe) {
       Map<String,String> env = System.getenv();
+      String path = "projects/core/data/edu/stanford/nlp/process" + File.separator + filename;
       String loc = env.get("JAVANLP_HOME");
-      reader = new BufferedReader
-        (new InputStreamReader(new FileInputStream(loc + File.separator + "projects/core/data/edu/stanford/nlp/process" + File.separator + filename), charset));
+      if (loc != null) {
+        path = loc + File.separator + path;
+      }
+      reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), charset));
     }
     return reader;
   }
