@@ -391,6 +391,8 @@ public class MetaClassTest {
     assertArrayEquals(new Integer[]{1,2,3}, ints4);
     Integer[] ints5 = MetaClass.cast("1   2   3", Integer[].class);
     assertArrayEquals(new Integer[]{1,2,3}, ints5);
+    Integer[] ints6 = MetaClass.cast("\n1 \n\n  2   3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints6);
 
     Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
     assertArrayEquals(new Integer[]{}, intsEmpty);
@@ -462,6 +464,10 @@ public class MetaClassTest {
     assertEquals("1", c.get("a"));
     assertEquals("2", c.get("b"));
 
+    Map<String, String> d = MetaClass.cast("\n\na->\n1\n\n\nb->2", Map.class);
+    assertEquals(2, d.size());
+    assertEquals("1", d.get("a"));
+    assertEquals("2", d.get("b"));
   }
 
   @Test

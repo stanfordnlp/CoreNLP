@@ -553,9 +553,9 @@ public class MetaClass {
     StringBuilder current = new StringBuilder();
     //(start/stop overhead)
     int start = 0; int end = chars.length;
-    if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded array: " + encoded); }
-    if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
-    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
+    if(chars[0] == '('){ start += 1; end -= 1; if(chars[end] != ')') throw new IllegalArgumentException("Unclosed paren in encoded map: " + encoded); }
+    if(chars[0] == '['){ start += 1; end -= 1; if(chars[end] != ']') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
+    if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
     //(finite state automata)
     for(int i=start; i<end; i++){
       if(chars[i] == '\\'){
@@ -576,6 +576,8 @@ public class MetaClass {
           quoteCloseChar = '"';
         } else if(chars[i] == '\''){
           quoteCloseChar = '\'';
+        } else if (chars[i] == '\n' && current.length() == 0) {
+          current.append("");  // do nothing
         } else if(chars[i] == ',' || chars[i] == ';' || chars[i] == '\t' || chars[i] == '\n'){
           // case: end a value
           if (onKey) { throw new IllegalArgumentException("Encountered key without value"); }
