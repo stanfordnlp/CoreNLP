@@ -1460,12 +1460,13 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     Writer w = null;
     try {
       reader = new BufferedReader(new InputStreamReader(new FileInputStream(config.getFile()), config.getEncoding()));
+
       String outFile = config.getOutputFile();
       if (outFile.length() > 0) {
         w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile),
                                                       config.getEncoding()));
       } else {
-        w = new PrintWriter(System.out);
+        w = new BufferedWriter(new OutputStreamWriter(System.out, config.getEncoding()));
       }
       w.write("<?xml version=\"1.0\" encoding=\"" +
               config.getEncoding() + "\"?>\n");
