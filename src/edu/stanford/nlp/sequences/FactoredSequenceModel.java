@@ -9,32 +9,27 @@ import java.util.Arrays;
 /**
  * @author grenager
  *         Date: Dec 14, 2004
- *         nmramesh
+ * @author nmramesh
  *         Date: May 12, 2010
  */
 public class FactoredSequenceModel implements SequenceModel {
 
-  SequenceModel model1;
-  SequenceModel model2;
-  double model1Wt = 1.0;
-  double model2Wt = 1.0;
-  
-  SequenceModel[] models = null;
-  double[] wts = null; 
+  // todo: The current version has variables for a 2 model version and arrays for an n-model version.  Unify.
+  private SequenceModel model1;
+  private SequenceModel model2;
+  private double model1Wt = 1.0;
+  private double model2Wt = 1.0;
 
-  /**
-   * Computes the distribution over values of the element at position pos in the sequence,
-   * conditioned on the values of the elements in all other positions of the provided sequence.
-   *
-   * @param sequence the sequence containing the rest of the values to condition on
-   * @param pos      the position of the element to give a distribution for
-   * @return an array of type double, representing a probability distribution; must sum to 1.0
-   */
+  private SequenceModel[] models = null;
+  private double[] wts = null;
+
+  /** {@inheritDoc} */
+  @Override
   public double[] scoresOf(int[] sequence, int pos) {
     if(models != null){
       double[] dist = ArrayMath.multiply(models[0].scoresOf(sequence, pos),wts[0]);
       if (BisequenceEmpiricalNERPrior.DEBUG) {
-        if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) { 
+        if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) {
           double[] distDebug = Arrays.copyOf(dist, dist.length);
           ArrayMath.logNormalize(distDebug);
           ArrayMath.expInPlace(distDebug);
@@ -50,7 +45,7 @@ public class FactoredSequenceModel implements SequenceModel {
         ArrayMath.addMultInPlace(dist,dist_i,wts[i]);
 
         if (BisequenceEmpiricalNERPrior.DEBUG) {
-          if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) { 
+          if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) {
             System.err.println("model " + i + ":");
             double[] distDebug = Arrays.copyOf(dist_i, dist.length);
             ArrayMath.logNormalize(distDebug);
@@ -63,7 +58,7 @@ public class FactoredSequenceModel implements SequenceModel {
       }
       return dist;
     }
-    
+
     double[] dist1 = model1.scoresOf(sequence, pos);
     double[] dist2 = model2.scoresOf(sequence, pos);
 
@@ -74,17 +69,14 @@ public class FactoredSequenceModel implements SequenceModel {
     return dist;
   }
 
+  /** {@inheritDoc} */
+  @Override
   public double scoreOf(int[] sequence, int pos) {
     return scoresOf(sequence, pos)[sequence[pos]];
   }
 
-  /**
-   * Computes the score assigned by this model to the provided sequence. Typically this will be a
-   * probability in log space (since the probabilities are small).
-   *
-   * @param sequence the sequence to compute a score for
-   * @return the score for the sequence
-   */
+  /** {@inheritDoc} */
+  @Override
   public double scoreOf(int[] sequence) {
     if(models != null){
       double score = 0;
@@ -96,25 +88,32 @@ public class FactoredSequenceModel implements SequenceModel {
     return model1Wt*model1.scoreOf(sequence) + model2Wt*model2.scoreOf(sequence);
   }
 
-  /**
-   * @return the length of the sequence
-   */
+  /** {@inheritDoc} */
+  @Override
   public int length() {
     if(models != null)
       return models[0].length();
     return model1.length();
   }
 
+  /** {@inheritDoc} */
+  @Override
   public int leftWindow() {
     if(models != null)
       return models[0].leftWindow();
     return model1.leftWindow();
   }
 
+  /** {@inheritDoc} */
+  @Override
   public int rightWindow() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    if(models != null)
+      return models[0].rightWindow();
+    return model1.rightWindow();
   }
 
+  /** {@inheritDoc} */
+  @Override
   public int[] getPossibleValues(int position) {
     if(models != null)
       return models[0].getPossibleValues(position);
@@ -122,7 +121,7 @@ public class FactoredSequenceModel implements SequenceModel {
   }
 
   /**
-   * using this constructor results in a weighted addition of the two models' scores. 
+   * using this constructor results in a weighted addition of the two models' scores.
    * @param model1
    * @param model2
    * @param wt1 weight of model1
@@ -133,7 +132,7 @@ public class FactoredSequenceModel implements SequenceModel {
     this.model1Wt = wt1;
     this.model2Wt = wt2;
   }
-  
+
   public FactoredSequenceModel(SequenceModel model1, SequenceModel model2) {
     //if (model1.leftWindow() != model2.leftWindow()) throw new RuntimeException("Two models must have same window size");
     if (model1.getPossibleValues(0).length != model2.getPossibleValues(0).length) throw new RuntimeException("Two models must have the same number of classes");
@@ -141,7 +140,7 @@ public class FactoredSequenceModel implements SequenceModel {
     this.model1 = model1;
     this.model2 = model2;
   }
-  
+
   public FactoredSequenceModel(SequenceModel[] models, double[] weights){
     this.models = models;
     this.wts = weights;
@@ -149,10 +148,10 @@ public class FactoredSequenceModel implements SequenceModel {
   for(int i = 1; i < models.length; i++){
     if (models[0].getPossibleValues(0).length != models[i].getPossibleValues(0).length) throw new RuntimeException("All models must have the same number of classes");
     if(models[0].length() != models[i].length())
-      throw new RuntimeException("All models must have the same sequence length");      
-    
+      throw new RuntimeException("All models must have the same sequence length");
+
     }
     */
   }
-  
+
 }
