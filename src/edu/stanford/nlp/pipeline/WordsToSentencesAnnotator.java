@@ -31,8 +31,6 @@ public class WordsToSentencesAnnotator implements Annotator {
 
   private final boolean VERBOSE;
 
-  private boolean countLineNumbers = false;
-
   public WordsToSentencesAnnotator() {
     this(false);
   }
@@ -82,17 +80,6 @@ public class WordsToSentencesAnnotator implements Annotator {
     wts.setOneSentence(isOneSentence);
   }
 
-  /**
-   * If setCountLineNumbers is set to true, we count line numbers by
-   * telling the underlying splitter to return empty lists of tokens
-   * and then treating those empty lists as empty lines.  We don't
-   * actually include empty sentences in the annotation, though.
-   */
-  public void setCountLineNumbers(boolean countLineNumbers) {
-    this.countLineNumbers = countLineNumbers;
-    wts.setAllowEmptySentences(countLineNumbers);
-  }
-
   @Override
   public void annotate(Annotation annotation) {
     if (VERBOSE) {
@@ -107,18 +94,10 @@ public class WordsToSentencesAnnotator implements Annotator {
 
       // assemble the sentence annotations
       int tokenOffset = 0;
-      int lineNumber = 0;
       List<CoreMap> sentences = new ArrayList<CoreMap>();
       for (List<CoreLabel> sentenceTokens: this.wts.process(tokens)) {
-        if (countLineNumbers) {
-          ++lineNumber;
-        }
         if (sentenceTokens.isEmpty()) {
-          if (!countLineNumbers) {
-            throw new RuntimeException("unexpected empty sentence: " + sentenceTokens);
-          } else {
-            continue;
-          }
+          throw new RuntimeException("unexpected empty sentence: " + sentenceTokens);
         }
 
         // get the sentence text from the first and last character offsets
@@ -136,10 +115,6 @@ public class WordsToSentencesAnnotator implements Annotator {
         tokenOffset += sentenceTokens.size();
         sentence.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset);
         sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
-
-        if (countLineNumbers) {
-          sentence.set(CoreAnnotations.LineNumberAnnotation.class, lineNumber);
-        }
 
         // add the sentence to the list
         sentences.add(sentence);
