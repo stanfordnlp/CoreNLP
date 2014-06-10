@@ -26,8 +26,6 @@
 //http://www-nlp.stanford.edu/software/tagger.shtml
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.InDataStreamFile;
-import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.maxent.Feature;
 
 
@@ -47,7 +45,7 @@ public class TaggerFeature extends Feature {
   private final TTags ttags;
   private final TaggerExperiments domain;
 
-  protected TaggerFeature(int start, int end, FeatureKey key, 
+  protected TaggerFeature(int start, int end, FeatureKey key,
                           TTags ttags, TaggerExperiments domain) {
     this.start = start;
     this.end = end;
@@ -102,32 +100,6 @@ public class TaggerFeature extends Feature {
       }
     }
     return 0;
-  }
-
-
-  @Override
-  public void save(OutDataStreamFile rF) {
-    try {
-      rF.writeInt(start);
-      rF.writeInt(end);
-      key.save(rF);
-      rF.writeInt(yTag);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Override
-  public void read(InDataStreamFile rF) {
-    try {
-      start = rF.readInt();
-      end = rF.readInt();
-      key = new FeatureKey();
-      key.read(rF);
-      yTag = rF.readInt();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
 
