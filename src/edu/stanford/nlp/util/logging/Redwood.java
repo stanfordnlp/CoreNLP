@@ -1245,8 +1245,6 @@ public class Redwood {
     public static void startThreads(String title){ Redwood.startThreads(title); }
     public static void finishThread(){ Redwood.finishThread(); }
     public static void endThreads(String check){ Redwood.endThreads(check); }
-
-    public static RedwoodChannels channels(Object... channels) { return new RedwoodChannels(channels); }
     
     /**
      * Wrap a collection of threads (Runnables) to be logged by Redwood.
@@ -1434,10 +1432,10 @@ public class Redwood {
      * Log a message to the channels specified in this RedwoodChannels object.
      * @param obj The object to log
      */
-    public void log(Object... obj) {
-      Object[] newArgs = new Object[channelNames.length+obj.length];
+    public void log(Object obj) {
+      Object[] newArgs = new Object[channelNames.length+1];
       System.arraycopy(channelNames,0,newArgs,0,channelNames.length);
-      System.arraycopy(obj,0,newArgs,channelNames.length,obj.length);
+      newArgs[channelNames.length] = obj;
       Redwood.log(newArgs);
     }
 
@@ -1464,12 +1462,7 @@ public class Redwood {
     public void prettyLog(String description, Object obj) {
       PrettyLogger.log(this, description, obj);
     }
-
-    public void warn(Object...objs){ log(Util.revConcat(objs, WARN)); }
-    public void debug(Object...objs){ log(Util.revConcat(objs, DBG)); }
-    public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
-    public void fatal(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
-
+    
     /**
      * Hides all of these channels.
      */
