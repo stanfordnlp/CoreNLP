@@ -27,6 +27,7 @@ import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Scored;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
 /**

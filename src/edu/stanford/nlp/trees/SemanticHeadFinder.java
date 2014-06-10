@@ -111,12 +111,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
-    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
+    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
     // WHNP clauses should have the same sort of head as an NP
     // but it a WHNP has a NP and a WHNP under it, the WHNP should be the head.  E.g.,  (WHNP (WHNP (WP$ whose) (JJ chief) (JJ executive) (NN officer))(, ,) (NP (NNP James) (NNP Gatward))(, ,))
     nonTerminalInfo.put("WHNP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP"}, {"left", "WHNP", "NP"}, {"rightdis", "$", "ADJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}, {"left", "WHPP", "WHADJP", "WP$", "WDT"}});
     //WHADJP
-    nonTerminalInfo.put("WHADJP", new String[][]{{"left", "ADJP", "JJ", "JJR", "WP"}, {"right", "RB"}, {"right"}});
+    nonTerminalInfo.put("WHADJP", new String[][]{{"left", "ADJP", "JJ", "JJR"}, {"right", "RB"}, {"right"}});
     //WHADJP
     nonTerminalInfo.put("WHADVP", new String[][]{{"rightdis", "WRB", "WHADVP", "RB", "JJ"}}); // if not WRB or WHADVP, probably has flat NP structure, allow JJ for "how long" constructions
     // QP: we don't want the first CD to be the semantic head (e.g., "three billion": head should be "billion"), so we go from right to left
