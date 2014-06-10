@@ -138,6 +138,24 @@ public class CollectionUtils {
     }
     return diff;
   }
+  
+  /**
+   * Returns all objects in list1 that are not in list2
+   *
+   * @param <T> Type of items in the collection
+   * @param list1 First collection
+   * @param list2 Second collection
+   * @return The collection difference list1 - list2
+   */
+  public static <T> Set<T> diffAsSet(Collection<T> list1, Collection<T> list2) {
+    Set<T> diff = new HashSet<T>();
+    for (T t : list1) {
+      if (!list2.contains(t)) {
+        diff.add(t);
+      }
+    }
+    return diff;
+  }
 
   // Utils for loading and saving Collections to/from text files
 
@@ -886,5 +904,36 @@ public class CollectionUtils {
       }
     }
     return transformed;
+  }
+  
+  /**
+   * get all values corresponding to the indices (if they exist in the map)
+   * @param map
+   * @param indices
+   * @return
+   */
+  public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices){
+    List<V> result = new ArrayList<V>();
+    for(T i: indices)
+      if(map.containsKey(i)){
+        result.add(map.get(i));
+      }
+    return result;
+  }
+  
+  public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
+   T max = null;;
+   int i = 0;
+   int maxindex = -1;
+   for(T t: list)
+   {
+     if(max == null || t.compareTo(max) > 0)
+     {
+       max = t;
+       maxindex = i;
+     }
+     i++;
+   }
+   return maxindex;
   }
 }
