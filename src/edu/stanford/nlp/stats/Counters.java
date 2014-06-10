@@ -2920,7 +2920,7 @@ public class Counters {
   public static<E> Counter<E> getFCounter(Counter<E> precision, Counter<E> recall, double beta){
     Counter<E> fscores = new ClassicCounter<E>();
     for(E k: precision.keySet()){
-      fscores.setCount(k, precision.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
+      fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
     }
     return fscores;
   }
