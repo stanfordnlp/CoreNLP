@@ -1,8 +1,5 @@
 package edu.stanford.nlp.wordseg;
 
-import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITE;
-import static edu.stanford.nlp.trees.international.pennchinese.ChineseUtils.WHITEPLUS;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -50,7 +47,6 @@ import edu.stanford.nlp.fsm.DFSATransition;
 public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer>, Serializable {
 
   private static final long serialVersionUID = 3260295150250263237L;
-
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MORE = false;
@@ -121,6 +117,8 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         return null;
       }
 
+      // System.err.println("input: " + line);
+
       //Matcher tagMatcher = tagPattern.matcher(line);
       //line = tagMatcher.replaceAll("");
       line = line.trim();
@@ -189,6 +187,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
         String nonspaceLine = nonspaceLineSB.toString();
         addDictionaryFeatures(cdict2, CoreAnnotations.D2_LBeginAnnotation.class, CoreAnnotations.D2_LMiddleAnnotation.class, CoreAnnotations.D2_LEndAnnotation.class, nonspaceLine, lwi);
       }
+      // System.err.println("output: " + lwi.size());
       return lwi;
     }
   }
