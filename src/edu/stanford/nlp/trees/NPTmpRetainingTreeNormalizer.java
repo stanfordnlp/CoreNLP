@@ -561,7 +561,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
     public TreeReader newTreeReader(Reader in) {
       return new PennTreeReader(in, new LabeledScoredTreeFactory(),
               new NPTmpRetainingTreeNormalizer(NPTmpRetainingTreeNormalizer.TEMPORAL_ACL03PCFG,
-                      true, 0, true));
+                      false, 0, true));
     }
 
   }
