@@ -10,7 +10,7 @@ import edu.stanford.nlp.trees.Tree;
  * interface is convenient for eval types that do not want the p/r/f1
  * tools built in to AbstractEval.
  * <br>
- * {@see edu.stanford.nlp.parser.metrics.BestOfTopKEval} for a similar
+ * @See {edu.stanford.nlp.parser.metrics.BestOfTopKEval} for a similar
  * data type that works on multiple trees.
  * <br>
  * @author John Bauer
