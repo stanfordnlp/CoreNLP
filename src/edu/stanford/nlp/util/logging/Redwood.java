@@ -571,9 +571,7 @@ public class Redwood {
   static {
     String os = System.getProperty("os.name").toLowerCase();
     boolean isUnix = os.contains("unix") || os.contains("linux") || os.contains("solaris");
-    System.out.println(">>>> isUnix: " + isUnix);
-    System.out.println(">>>> Console: " + System.console());
-    supportsAnsi = Boolean.getBoolean("Ansi") || (isUnix && System.console()!=null);
+    supportsAnsi = Boolean.getBoolean("Ansi") || isUnix;
   }
 
   /**
@@ -864,6 +862,7 @@ public class Redwood {
     public void print(Object[] channels, String line) {
       stream.print(line); stream.flush();
     }
+    @Override public boolean supportsAnsi() { return true; }
     public static ConsoleHandler out(){ return new ConsoleHandler(realSysOut); }
     public static ConsoleHandler err(){ return new ConsoleHandler(realSysErr); }
   }
