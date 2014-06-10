@@ -64,21 +64,21 @@ public class RulesTest extends TestCase {
     g4.headWord.set(CoreAnnotations.SpeakerAnnotation.class, "johnz");
     
 
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g1, m1));
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g1, m2));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m3));
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g1, m4));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m5));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m6));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m7));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g1, m8));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m1));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m2));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m3));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m4));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m5));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m6));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m7));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g1, m8));
 
-    assertTrue(Rules.mentionMatchesSpeakerAnnotation(g2, m1));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g3, m1));
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(g4, m1));
+    assertTrue(Rules.antecedentMatchesMentionSpeakerAnnotation(g2, m1));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g3, m1));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(g4, m1));
     
     // not symmetrical
     // also, shouldn't blow up if the annotation isn't set
-    assertFalse(Rules.mentionMatchesSpeakerAnnotation(m1, g1));
+    assertFalse(Rules.antecedentMatchesMentionSpeakerAnnotation(m1, g1));
   }
 }
