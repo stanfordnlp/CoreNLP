@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -1647,6 +1648,100 @@ public class IOUtils {
       return new PrintWriter(new OutputStreamWriter(stream, encoding), autoFlush);
     }
   }
+
+  /**
+   * A raw file copy function -- this is not public since no error checks are made as to the
+   * consistency of the filed being copied. Use instead:
+   * @see IOUtils#cp(java.io.File, java.io.File, boolean)
+   * @param source The source file. This is guaranteed to exist, and is guaranteed to be a file.
+   * @param target The target file.
+   * @throws IOException Throws an exception if the copy fails.
+   */
+  private static void copyFile(File source, File target) throws IOException {
+    FileChannel sourceChannel = new FileInputStream( source ).getChannel();
+    FileChannel targetChannel = new FileOutputStream( target ).getChannel();
+    sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
+    sourceChannel.close();
+    targetChannel.close();
+  }
+
+  /**
+   * <p>An implementation of cp, as close to the Unix command as possible.
+   * Both directories and files are valid for either the source or the target;
+   * if the target exists, the semantics of Unix cp are [intended to be] obeyed.</p>
+   *
+   * @param source The source file or directory.
+   * @param target The target to write this file or directory to.
+   * @param recursive If true, recursively copy directory contents
+   * @throws IOException If either the copy fails (standard IO Exception), or the command is invalid
+   *                     (e.g., copying a directory without the recursive flag)
+   */
+  public static void cp(File source, File target, boolean recursive) throws IOException {
+    // Error checks
+    if (source.isDirectory() && !recursive) {
+      // cp a b -- a is a directory
+      throw new IOException("cp: omitting directory: " + source);
+    }
+    if (!target.getParentFile().exists()) {
+      // cp a b/c/d/e -- b/c/d doesn't exist
+      throw new IOException("cp: cannot copy to directory: " + recursive + " (parent doesn't exist)");
+    }
+    if (!target.getParentFile().isDirectory()) {
+      // cp a b/c/d/e -- b/c/d is a regular file
+      throw new IOException("cp: cannot copy to directory: " + recursive + " (parent isn't a directory)");
+    }
+    // Get true target
+    File trueTarget;
+    if (target.exists() && target.isDirectory()) {
+      trueTarget = new File(target.getPath() + File.separator + source.getName());
+    } else {
+      trueTarget = target;
+    }
+    // Copy
+    if (source.isFile()) {
+      // Case: copying a file
+      copyFile(source, trueTarget);
+    } else if (source.isDirectory()) {
+      // Case: copying a directory
+      File[] children = source.listFiles();
+      if (children == null) { throw new IOException("cp: could not list files in source: " + source); }
+
+      if (target.exists()) {
+        // Case: cp -r a b -- b exists
+        if (!target.isDirectory()) {
+          // cp -r a b -- b is a regular file
+          throw new IOException("cp: cannot copy directory into regular file: " + target);
+        }
+        if (trueTarget.exists() && !trueTarget.isDirectory()) {
+          // cp -r a b -- b/a is not a directory
+          throw new IOException("cp: overwriting a file with a directory: " + trueTarget);
+        }
+        if (!trueTarget.exists() && !trueTarget.mkdir()) {
+          // cp -r a b -- b/a cannot be created
+          throw new IOException("cp: could not create directory: " + trueTarget);
+        }
+      } else {
+        // Case: cp -r a b -- b does not exist
+        assert trueTarget == target;
+        if (!trueTarget.mkdir()) {
+          // cp -r a b -- canot create b as a directory
+          throw new IOException("cp: could not create target directory: " + trueTarget);
+        }
+      }
+      // Actually do the copy
+      for (File child : children) {
+        File childTarget = new File(trueTarget.getPath() + File.separator + child.getName());
+        cp(child, childTarget, recursive);
+      }
+    } else {
+      throw new IOException("cp: unknown file type: " + source);
+    }
+  }
+
+  /**
+   * @see IOUtils#cp(java.io.File, java.io.File, boolean)
+   */
+  public static void cp(File source, File target) throws IOException { cp(source, target, false); }
 
 
 }
