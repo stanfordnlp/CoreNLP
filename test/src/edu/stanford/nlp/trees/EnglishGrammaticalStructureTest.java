@@ -92,17 +92,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (NP-SBJ (NN Interest)) (VP (VBZ is) (ADJP-PRD (ADJP (NP-ADV (DT a) (JJ great) (NN deal)) (JJR higher)) (SBAR (IN than) (S (NP-SBJ (PRP it)) (VP (VBD was) (ADJP-PRD (-NONE- *?*)) (ADVP-TMP (NP (DT a) (NN year)) (RB ago))))))) (. .)))",
          "( (S (NP-SBJ (DT The) (NN strike)) (VP (MD may) (VP (VB have) (VP (VBN ended) (SBAR-TMP (ADVP (RB almost)) (IN before) (S (NP-SBJ (PRP it)) (VP (VBD began)))))))))",
          "( (S (SBAR-ADV (IN Although) (S (VP (VBN set) (PP-LOC (IN in) (NP (NNP Japan)))))) (, ,) (NP-SBJ-2 (NP (DT the) (NN novel) (POS 's)) (NN texture)) (VP (VBZ is) (ADJP (JJ American))) (. .)))",
-         "( (S-IMP (INTJ (UH please)) (NP-SBJ (-NONE- *PRO*)) (VP (VB specify) (NP (WDT which) (NML (NNP royal) (CC or) (NNP carnival)) (NN ship))) (NFP -LRB-:)))",
-         "(NP (DT those) (RRC (ADVP-TMP (RB still)) (PP-LOC (IN under) (NP (NNP GASB) (NNS rules)))))",
-         "(NP (NP (DT the) (NN auction) (NN house)) (RRC (RRC (VP (VBN founded) (NP (-NONE- *)) (PP-LOC (IN in) (NP (NNP London))) (NP-TMP (CD 1744)))) (CC and) (RRC (ADVP-TMP (RB now)) (PP (IN under) (NP (NP (DT the) (NN umbrella)) (PP (IN of) (NP (NP (NNP Sotheby) (POS 's)) (NNPS Holdings) (NNP Inc.))))))))",
-         // tough movement example
-         "(S (NP-SBJ (NNS morcillas)) (VP (VBP are) (ADVP (RB basically)) (ADJP-PRD (JJ impossible) (SBAR (WHNP-1 (-NONE- *0*)) (S (NP-SBJ (-NONE- *PRO*)) (VP (TO to) (VP (VB find) (NP-1 (-NONE- *T*)) (PP-LOC (IN in) (NP (NNP California))))))))))",
-         // S parataxis
-         "( (S (S (NP-SBJ (-NONE- *)) (VP (VBP Do) (RB n't) (VP (VB wait)))) (: --) (S (NP-SBJ (-NONE- *)) (VP (VBP act) (ADVP-TMP (RB now)))) (. !)))",
-         // Two tricky conjunctions with punctuation and/or interjections
-         "( (S (NP-SBJ (DT The) (NNPS Parks) (NNP Council)) (VP (VBD wrote) (NP (DT the) (NNP BPCA)) (SBAR (IN that) (S (NP-SBJ (DT this) (ADJP (`` ``) (RB too) (`` `) (JJ private) ('' ') (: ...) (JJ exclusive) (, ,) ('' '') (JJ complex) (CC and) (JJ expensive)) (`` ``) (VBN enclosed) (NN garden)) (: ...) (VP (VBZ belongs) (PP-LOC-CLR (IN in) (NP (NP (RB almost) (DT any) (NN location)) (CC but) (NP (DT the) (NN waterfront)))))))) (. .) ('' '')))",
-         "( (S (`` ``) (CC And) (NP-SBJ (PRP you)) (VP (MD ca) (RB n't) (VP (VB have) (S (NP-SBJ (NP (NNS taxpayers)) (VP (VBG coming) (PP-DIR (IN into) (NP (DT an) (NN audit))))) (VP (VBG hearing) (NP (`` `) (UH oohs) (: ') (CC and) (`` `) (UH ahs)))))) (. .) ('' ') ('' '')))",
-         "( (S (NP-SBJ-1 (VBN Freed) (JJ black) (NNS nationalists)) (VP (VP (VBD resumed) (NP (JJ political) (NN activity)) (PP-LOC (IN in) (NP (NNP South) (NNP Africa)))) (CC and) (VP (VBD vowed) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB fight) (PP-CLR (IN against) (NP (NN apartheid))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *)) (VP (VBG raising) (NP (NP (NNS fears)) (PP (IN of) (NP (DT a) (JJ possible) (JJ white) (NN backlash))))))) (. .)))",
          // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
          // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -357,109 +346,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
             "nsubj(American-11, texture-9)\n" +
             "cop(American-11, is-10)\n" +
             "root(ROOT-0, American-11)\n",
-        "discourse(specify-2, please-1)\n" +
-            "root(ROOT-0, specify-2)\n" +
-            "det(ship-7, which-3)\n" +
-            "nn(ship-7, royal-4)\n" +
-            "cc(royal-4, or-5)\n" +
-            "conj(royal-4, carnival-6)\n" +
-            "dobj(specify-2, ship-7)\n" +
-            "discourse(specify-2, -LRB-:-8)\n",
-        "root(ROOT-0, those-1)\n" +
-                "advmod(under-3, still-2)\n" +
-                "rcmod(those-1, under-3)\n" +
-                "nn(rules-5, GASB-4)\n" +
-                "pobj(under-3, rules-5)\n",
-        "det(house-3, the-1)\n" +
-                "nn(house-3, auction-2)\n" +
-                "root(ROOT-0, house-3)\n" +
-                "rcmod(house-3, founded-4)\n" +
-                "prep(founded-4, in-5)\n" +
-                "pobj(in-5, London-6)\n" +
-                "tmod(founded-4, 1744-7)\n" +
-                "cc(founded-4, and-8)\n" +
-                "advmod(under-10, now-9)\n" +
-                "conj(founded-4, under-10)\n" +
-                "det(umbrella-12, the-11)\n" +
-                "pobj(under-10, umbrella-12)\n" +
-                "prep(umbrella-12, of-13)\n" +
-                "poss(Inc.-17, Sotheby-14)\n" +
-                "possessive(Sotheby-14, 's-15)\n" +
-                "nn(Inc.-17, Holdings-16)\n" +
-                "pobj(of-13, Inc.-17)\n",
-        "nsubj(impossible-4, morcillas-1)\n" +
-                "cop(impossible-4, are-2)\n" +
-                "advmod(impossible-4, basically-3)\n" +
-                "root(ROOT-0, impossible-4)\n" +
-                "aux(find-6, to-5)\n" +
-                "ccomp(impossible-4, find-6)\n" +
-                "prep(find-6, in-7)\n" +
-                "pobj(in-7, California-8)\n",
-        "aux(wait-3, Do-1)\n" +
-                "neg(wait-3, n't-2)\n" +
-                "root(ROOT-0, wait-3)\n" +
-                "parataxis(wait-3, act-5)\n" +
-                "advmod(act-5, now-6)\n",
-        "det(Council-3, The-1)\n" +
-                "nn(Council-3, Parks-2)\n" +
-                "nsubj(wrote-4, Council-3)\n" +
-                "root(ROOT-0, wrote-4)\n" +
-                "det(BPCA-6, the-5)\n" +
-                "dobj(wrote-4, BPCA-6)\n" +
-                "mark(belongs-25, that-7)\n" +
-                "det(garden-23, this-8)\n" +
-                "advmod(private-12, too-10)\n" +
-                "amod(garden-23, private-12)\n" +
-                "conj(private-12, exclusive-15)\n" +
-                "conj(private-12, complex-18)\n" +
-                "cc(private-12, and-19)\n" +
-                "conj(private-12, expensive-20)\n" +
-                "amod(garden-23, enclosed-22)\n" +
-                "nsubj(belongs-25, garden-23)\n" +
-                "ccomp(wrote-4, belongs-25)\n" +
-                "prep(belongs-25, in-26)\n" +
-                "advmod(location-29, almost-27)\n" +
-                "det(location-29, any-28)\n" +
-                "pobj(in-26, location-29)\n" +
-                "cc(location-29, but-30)\n" +
-                "det(waterfront-32, the-31)\n" +
-                "conj(location-29, waterfront-32)\n",
-        "cc(have-6, And-2)\n" +
-                "nsubj(have-6, you-3)\n" +
-                "aux(have-6, ca-4)\n" +
-                "neg(have-6, n't-5)\n" +
-                "root(ROOT-0, have-6)\n" +
-                "nsubj(hearing-12, taxpayers-7)\n" +
-                "partmod(taxpayers-7, coming-8)\n" +
-                "prep(coming-8, into-9)\n" +
-                "det(audit-11, an-10)\n" +
-                "pobj(into-9, audit-11)\n" +
-                "ccomp(have-6, hearing-12)\n" +
-                "dobj(hearing-12, oohs-14)\n" +
-                "cc(oohs-14, and-16)\n" +
-                "conj(oohs-14, ahs-18)\n",
-        "amod(nationalists-3, Freed-1)\n" +
-                "amod(nationalists-3, black-2)\n" +
-                "nsubj(resumed-4, nationalists-3)\n" +
-                "root(ROOT-0, resumed-4)\n" +
-                "amod(activity-6, political-5)\n" +
-                "dobj(resumed-4, activity-6)\n" +
-                "prep(resumed-4, in-7)\n" +
-                "nn(Africa-9, South-8)\n" +
-                "pobj(in-7, Africa-9)\n" +
-                "cc(resumed-4, and-10)\n" +
-                "conj(resumed-4, vowed-11)\n" +
-                "aux(fight-13, to-12)\n" +
-                "xcomp(vowed-11, fight-13)\n" +
-                "prep(fight-13, against-14)\n" +
-                "pobj(against-14, apartheid-15)\n" +
-                "partmod(resumed-4, raising-17)\n" +
-                "dobj(raising-17, fears-18)\n" +
-                "prep(fears-18, of-19)\n" +
-                "det(backlash-23, a-20)\n" +
-                "amod(backlash-23, possible-21)\n" +
-                "amod(backlash-23, white-22)\n" +
-                "pobj(of-19, backlash-23)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
