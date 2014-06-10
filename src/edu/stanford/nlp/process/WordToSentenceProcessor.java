@@ -8,6 +8,7 @@ import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -170,14 +171,23 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       }
 
       boolean forcedEnd = false;
+      boolean inMultiTokenExpr = false;
       if (o instanceof CoreMap) {
-        Boolean forcedEndValue =
-          ((CoreMap)o).get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
+        CoreMap cm = (CoreMap) o;
+        Boolean forcedEndValue = cm.get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
         if (forcedEndValue != null)
           forcedEnd = forcedEndValue;
+        else {
+          MultiTokenTag mt = cm.get(CoreAnnotations.MentionTokenAnnotation.class);
+          if (mt != null && !mt.isEnd()) {
+            // In the middle of a multi token mention, make sure sentence is not ended here
+            inMultiTokenExpr = true;
+          }
+        }
       }
 
-      if (DEBUG) {
+
+        if (DEBUG) {
         EncodingPrintWriter.err.println("Word is " + word, "UTF-8");
       }
       if (sentenceRegionBeginPattern != null && ! insideRegion) {
@@ -196,7 +206,12 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         }
       } else {
         boolean newSent = false;
-        if (matchesSentenceBoundaryToDiscard(word)) {
+        if (inMultiTokenExpr) {
+          currentSentence.add(o);
+          if (DEBUG) {
+            System.err.println("  is in multi token expr; added to current");
+          }
+        } else if (matchesSentenceBoundaryToDiscard(word)) {
           newSent = true;
         } else if (sentenceRegionEndPattern != null && sentenceRegionEndPattern.matcher(word).matches()) {
           insideRegion = false;
