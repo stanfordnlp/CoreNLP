@@ -39,11 +39,11 @@ public class StanfordCoreNLPITest extends TestCase {
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
     // We can assume the models are in the classpath
     /*
-    props.setProperty("pos.model", "/u/nlp/data/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger");
-    props.setProperty("ner.model.3class", "/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz");
-    props.setProperty("ner.model.7class", "/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz");
-    props.setProperty("ner.model.MISCclass", "/u/nlp/data/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz");
-    props.setProperty("parse.model", "/u/nlp/data/lexparser/englishPCFG.ser.gz");
+    props.setProperty("pos.classify", "/u/nlp/data/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger");
+    props.setProperty("ner.classify.3class", "/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz");
+    props.setProperty("ner.classify.7class", "/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz");
+    props.setProperty("ner.classify.MISCclass", "/u/nlp/data/ner/goodClassifiers/english.conll.4class.distsim.crf.ser.gz");
+    props.setProperty("parse.classify", "/u/nlp/data/lexparser/englishPCFG.ser.gz");
     */
     props.putAll(System.getProperties());
     

@@ -4,7 +4,7 @@ import edu.stanford.nlp.math.ArrayMath;
 import java.util.Arrays;
 
 /**
- * This class will sample an output from a sequence model.  It
+ * This class will sample an output from a sequence classify.  It
  * assumes that the scores are (unnormalized) log-probabilities.  It works by sampling
  * each variable in order, conditioned on the previous variables.
  *
@@ -82,7 +82,7 @@ public class SequenceSampler implements BestSequenceFinder {
   }
 
   /**
-   * Runs the Viterbi algorithm on the sequence model given by the TagScorer
+   * Runs the Viterbi algorithm on the sequence classify given by the TagScorer
    * in order to find the best sequence.
    * @return an array containing the int tags of the best sequence
    */

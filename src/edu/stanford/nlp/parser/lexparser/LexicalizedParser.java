@@ -61,9 +61,9 @@ import java.lang.reflect.Method;
 /**
  * This class provides the top-level API and command-line interface to a set
  * of reasonably good treebank-trained parsers.  The name reflects the main
- * factored parsing model, which provides a lexicalized PCFG parser
+ * factored parsing classify, which provides a lexicalized PCFG parser
  * implemented as a product
- * model of a plain PCFG parser and a lexicalized dependency parser.
+ * classify of a plain PCFG parser and a lexicalized dependency parser.
  * But you can also run either component parser alone.  In particular, it
  * is often useful to do unlexicalized PCFG parsing by using just that
  * component parser.
@@ -788,7 +788,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       Timing.tick("done.");
       if (tuneTreebank != null) {
         System.err.print("Tuning Dependency Model...");
-        dg.setLexicon(lex); // MG2008: needed if using PwGt model
+        dg.setLexicon(lex); // MG2008: needed if using PwGt classify
         dg.tune(tuneTreebank);
         Timing.tick("done.");
       }
@@ -1129,7 +1129,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
         tagDelimiter = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-loadFromSerializedFile") ||
-                 args[argIndex].equalsIgnoreCase("-model")) {
+                 args[argIndex].equalsIgnoreCase("-classify")) {
         // load the parser from a binary serialized file
         // the next argument must be the path to the parser file
         serializedInputFileOrUrl = args[argIndex + 1];

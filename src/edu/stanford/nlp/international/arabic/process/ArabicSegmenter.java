@@ -37,13 +37,13 @@ import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 /**
- * Arabic word segmentation model based on conditional random fields (CRF).
- * This is a re-implementation (with extensions) of the model described in
+ * Arabic word segmentation classify based on conditional random fields (CRF).
+ * This is a re-implementation (with extensions) of the classify described in
  * (Green and DeNero, 2012).
  * <p>
  * This package includes a JFlex-based orthographic normalization package
  * that runs on the input prior to processing by the CRF-based segmentation
- * model. The normalization options are configurable, but must be consistent for
+ * classify. The normalization options are configurable, but must be consistent for
  * both training and test data.
  *
  * @author Spence Green
@@ -449,7 +449,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   }
 
   /**
-   * Train a new segmenter or load an trained model from file.
+   * Train a new segmenter or load an trained classify from file.
    *
    * @param options
    * @return
@@ -471,7 +471,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
         System.err.println("Serialized segmenter to: " + segmenter.flags.serializeTo);
       }
     } else {
-      System.err.println("No training file or trained model specified!");
+      System.err.println("No training file or trained classify specified!");
       System.err.println(usage());
       System.exit(-1);
     }

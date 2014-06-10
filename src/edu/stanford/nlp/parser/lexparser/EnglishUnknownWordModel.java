@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Timing;
 
 /**
- * This is a basic unknown word model for English.  It supports 5 different
+ * This is a basic unknown word classify for English.  It supports 5 different
  * types of feature modeling; see {@link #getSignature(String, int)}.
  *
  * <i>Implementation note: the contents of this class tend to overlap somewhat
@@ -123,7 +123,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
     // double c_W = ((BaseLexicon) l).getCount(iTW);
     // iTW.tag = tag;
 
-    // unknown word model for P(T|S)
+    // unknown word classify for P(T|S)
 
     int wordSig = getSignatureIndex(iTW.word, loc, word);
     IntTaggedWord temp = new IntTaggedWord(wordSig, iTW.tag);

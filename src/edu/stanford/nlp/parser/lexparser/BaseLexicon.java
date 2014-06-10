@@ -343,7 +343,7 @@ public class BaseLexicon implements Lexicon {
 
   /**
    * Trains this lexicon on the Collection of trees.
-   * Also trains the unknown word model pointed to by this lexicon.
+   * Also trains the unknown word classify pointed to by this lexicon.
    */
   public void train(Collection<Tree> trees, double weight) {
     // scan data
@@ -554,7 +554,7 @@ public class BaseLexicon implements Lexicon {
 
     if (seen) {
 
-      // known word model for P(T|W)
+      // known word classify for P(T|W)
       if (DEBUG_LEXICON_SCORE) {
         System.err.println("Lexicon.score " + wordIndex.get(iTW.word) + "/" + tagIndex.get(iTW.tag) + " as known word.");
       }
@@ -717,7 +717,7 @@ public class BaseLexicon implements Lexicon {
    * Populates data in this Lexicon from the character stream given by the
    * Reader r.
    * TODO: this doesn't appear to correctly read in the
-   * UnknownWordModel in the case of a model more complicated than the
+   * UnknownWordModel in the case of a classify more complicated than the
    * unSeenCounter
    */
   public void readData(BufferedReader in) throws IOException {

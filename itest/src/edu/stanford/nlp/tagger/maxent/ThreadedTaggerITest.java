@@ -48,7 +48,7 @@ public class ThreadedTaggerITest extends TestCase {
     throws Exception
   {
     Properties props = new Properties();
-    props.setProperty("model", tagger1);
+    props.setProperty("classify", tagger1);
     props.setProperty("verboseResults", "false");
     props.setProperty("testFile", testFile);
     TestThreadedTagger.runThreadedTest(props);

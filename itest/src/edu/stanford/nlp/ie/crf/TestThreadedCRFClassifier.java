@@ -100,7 +100,7 @@ public class TestThreadedCRFClassifier {
          props.getProperty("crf" + Integer.toString(i)) != null; ++i) {
       String model = props.getProperty("crf" + Integer.toString(i));
       CRFClassifier crf = loadClassifier(model, props);
-      System.out.println("Loaded model " + model);
+      System.out.println("Loaded classify " + model);
       modelNames.add(model);
       classifiers.add(crf);
 

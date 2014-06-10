@@ -54,7 +54,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * This is a pipeline that takes in a string and returns various analyzed
  * linguistic forms.
  * The String is tokenized via a tokenizer (such as PTBTokenizerAnnotator), and
- * then other sequence model style annotation can be used to add things like
+ * then other sequence classify style annotation can be used to add things like
  * lemmas, POS tags, and named entities.  These are returned as a list of CoreLabels.
  * Other analysis components build and store parse trees, dependency graphs, etc.
  * <p>
@@ -496,7 +496,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       public String signature() {
         // keep track of all relevant properties for this annotator here!
         return "pos.maxlen:" + properties.getProperty("pos.maxlen", "") +
-                "pos.model:" + properties.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL);
+                "pos.classify:" + properties.getProperty("pos.classify", DefaultPaths.DEFAULT_POS_MODEL);
       }
     });
 
@@ -534,8 +534,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           models.addAll(Arrays.asList(modelNames.split(",")));
         }
         if (models.isEmpty()) {
-          // Allow for no real NER model - can just use numeric classifiers or SUTime
-          // Will have to explicitly unset ner.model.3class, ner.model.7class, ner.model.MISCclass
+          // Allow for no real NER classify - can just use numeric classifiers or SUTime
+          // Will have to explicitly unset ner.classify.3class, ner.classify.7class, ner.classify.MISCclass
           // So unlikely that people got here by accident
           System.err.println("WARNING: no NER models specified");
         }
@@ -561,16 +561,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       @Override
       public String signature() {
         // keep track of all relevant properties for this annotator here!
-        return "ner.model:" +
+        return "ner.classify:" +
                 properties.getProperty("ner.model", "") +
-                "ner.model.3class:" +
-                properties.getProperty("ner.model.3class",
+                "ner.classify.3class:" +
+                properties.getProperty("ner.classify.3class",
                         DefaultPaths.DEFAULT_NER_THREECLASS_MODEL) +
-                "ner.model.7class:" +
-                properties.getProperty("ner.model.7class",
+                "ner.classify.7class:" +
+                properties.getProperty("ner.classify.7class",
                         DefaultPaths.DEFAULT_NER_MUC_MODEL) +
-                "ner.model.MISCclass:" +
-                properties.getProperty("ner.model.MISCclass",
+                "ner.classify.MISCclass:" +
+                properties.getProperty("ner.classify.MISCclass",
                         DefaultPaths.DEFAULT_NER_CONLL_MODEL) +
                 NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY + ":" +
                 properties.getProperty(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
@@ -636,7 +636,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        String model = properties.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL);
+        String model = properties.getProperty("truecase.classify", DefaultPaths.DEFAULT_TRUECASE_MODEL);
         String bias = properties.getProperty("truecase.bias", TrueCaseAnnotator.DEFAULT_MODEL_BIAS);
         String mixed = properties.getProperty("truecase.mixedcasefile", DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
         return new TrueCaseAnnotator(model, bias, mixed, false);
@@ -645,8 +645,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       @Override
       public String signature() {
         // keep track of all relevant properties for this annotator here!
-        return "truecase.model:" +
-                properties.getProperty("truecase.model",
+        return "truecase.classify:" +
+                properties.getProperty("truecase.classify",
                         DefaultPaths.DEFAULT_TRUECASE_MODEL) +
                 "truecase.bias:" +
                 properties.getProperty("truecase.bias",
@@ -686,8 +686,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       public Annotator create() {
         // these paths now extracted inside c'tor
         // String gazetteer = properties.getProperty("nfl.gazetteer", DefaultPaths.DEFAULT_NFL_GAZETTEER);
-        // String entityModel = properties.getProperty("nfl.entity.model", DefaultPaths.DEFAULT_NFL_ENTITY_MODEL);
-        // String relationModel = properties.getProperty("nfl.relation.model", DefaultPaths.DEFAULT_NFL_RELATION_MODEL);
+        // String entityModel = properties.getProperty("nfl.entity.classify", DefaultPaths.DEFAULT_NFL_ENTITY_MODEL);
+        // String relationModel = properties.getProperty("nfl.relation.classify", DefaultPaths.DEFAULT_NFL_RELATION_MODEL);
         final String className = "edu.stanford.nlp.pipeline.NFLAnnotator";
         return ReflectionLoading.loadByReflection(className, properties);
       }
@@ -701,8 +701,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 "nfl.relations.use.max.recall:" +
                 properties.getProperty("nfl.relations.use.max.recall",
                         "false") +
-                "nfl.relations.use.model.merging:" +
-                properties.getProperty("nfl.relations.use.model.merging",
+                "nfl.relations.use.classify.merging:" +
+                properties.getProperty("nfl.relations.use.classify.merging",
                         "false") +
                 "nfl.relations.use.basic.inference:" +
                 properties.getProperty("nfl.relations.use.basic.inference",
@@ -710,11 +710,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 "nfl.gazetteer:" +
                 properties.getProperty("nfl.gazetteer",
                         DefaultPaths.DEFAULT_NFL_GAZETTEER) +
-                "nfl.entity.model:" +
-                properties.getProperty("nfl.entity.model",
+                "nfl.entity.classify:" +
+                properties.getProperty("nfl.entity.classify",
                         DefaultPaths.DEFAULT_NFL_ENTITY_MODEL) +
-                "nfl.relation.model:" +
-                properties.getProperty("nfl.relation.model",
+                "nfl.relation.classify:" +
+                properties.getProperty("nfl.relation.classify",
                         DefaultPaths.DEFAULT_NFL_RELATION_MODEL);
       }
     });
@@ -736,7 +736,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           String model = properties.getProperty("parse.model");
           String parserExecutable = properties.getProperty("parse.executable");
           if (model == null || parserExecutable == null) {
-            throw new RuntimeException("Both parse.model and parse.executable properties must be specified if parse.type=charniak");
+            throw new RuntimeException("Both parse.classify and parse.executable properties must be specified if parse.type=charniak");
           }
           int maxLen = 399;
           if (maxLenStr != null) {
@@ -758,7 +758,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         if(type.equalsIgnoreCase("stanford")){
           return ParserAnnotator.signature("parser", properties);
         } else if(type.equalsIgnoreCase("charniak")) {
-          return "parse.model:" +
+          return "parse.classify:" +
                   properties.getProperty("parse.model", "") +
                   "parse.executable:" +
                   properties.getProperty("parse.executable", "") +
@@ -941,7 +941,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       os.println();
       os.println("General options: (all parsers)");
       os.println("\tparse.type - selects the parser to use");
-      os.println("\tparse.model - path to model file for parser");
+      os.println("\tparse.classify - path to classify file for parser");
       os.println("\tparse.maxlen - maximum sentence length");
       os.println();
       os.println("Stanford Parser-specific options:");
@@ -986,32 +986,32 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     os.println("\n\tIf annotator \"pos\" is defined:");
     os.println("\t\"pos.maxlen\" - maximum length of sentence to POS tag");
-    os.println("\t\"pos.model\" - path towards the POS tagger model");
+    os.println("\t\"pos.classify\" - path towards the POS tagger classify");
 
     os.println("\n\tIf annotator \"ner\" is defined:");
-    os.println("\t\"ner.model.3class\" - path towards the three-class NER model");
-    os.println("\t\"ner.model.7class\" - path towards the seven-class NER model");
-    os.println("\t\"ner.model.MISCclass\" - path towards the NER model with a MISC class");
+    os.println("\t\"ner.classify.3class\" - path towards the three-class NER classify");
+    os.println("\t\"ner.classify.7class\" - path towards the seven-class NER classify");
+    os.println("\t\"ner.classify.MISCclass\" - path towards the NER classify with a MISC class");
 
     os.println("\n\tIf annotator \"truecase\" is defined:");
-    os.println("\t\"truecase.model\" - path towards the true-casing model; default: " + DefaultPaths.DEFAULT_TRUECASE_MODEL);
-    os.println("\t\"truecase.bias\" - class bias of the true case model; default: " + TrueCaseAnnotator.DEFAULT_MODEL_BIAS);
+    os.println("\t\"truecase.classify\" - path towards the true-casing classify; default: " + DefaultPaths.DEFAULT_TRUECASE_MODEL);
+    os.println("\t\"truecase.bias\" - class bias of the true case classify; default: " + TrueCaseAnnotator.DEFAULT_MODEL_BIAS);
     os.println("\t\"truecase.mixedcasefile\" - path towards the mixed case file; default: " + DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
 
     os.println("\n\tIf annotator \"nfl\" is defined:");
     os.println("\t\"nfl.gazetteer\" - path towards the gazetteer for the NFL domain");
-    os.println("\t\"nfl.relation.model\" - path towards the NFL relation extraction model");
+    os.println("\t\"nfl.relation.classify\" - path towards the NFL relation extraction classify");
 
     os.println("\n\tIf annotator \"parse\" is defined:");
-    os.println("\t\"parse.model\" - path towards the PCFG parser model");
+    os.println("\t\"parse.classify\" - path towards the PCFG parser classify");
 
     /* XXX: unstable, do not use for now
     os.println("\n\tIf annotator \"srl\" is defined:");
     os.println("\t\"srl.verb.args\" - path to the file listing verbs and their core arguments (\"verbs.core_args\")");
-    os.println("\t\"srl.model.id\" - path prefix for the role identification model (adds \".model.gz\" and \".fe\" to this prefix)");
-    os.println("\t\"srl.model.cls\" - path prefix for the role classification model (adds \".model.gz\" and \".fe\" to this prefix)");
-    os.println("\t\"srl.model.jic\" - path to the directory containing the joint model's \"model.gz\", \"fe\" and \"je\" files");
-    os.println("\t                  (if not specified, the joint model will not be used)");
+    os.println("\t\"srl.classify.id\" - path prefix for the role identification classify (adds \".classify.gz\" and \".fe\" to this prefix)");
+    os.println("\t\"srl.classify.cls\" - path prefix for the role classification classify (adds \".classify.gz\" and \".fe\" to this prefix)");
+    os.println("\t\"srl.classify.jic\" - path to the directory containing the joint classify's \"classify.gz\", \"fe\" and \"je\" files");
+    os.println("\t                  (if not specified, the joint classify will not be used)");
     */
 
     os.println("\nCommand line properties:");

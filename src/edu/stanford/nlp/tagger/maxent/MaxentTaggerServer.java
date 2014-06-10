@@ -230,7 +230,7 @@ public class MaxentTaggerServer {
   } // end static class NERClient
 
 
-  private static final String USAGE = "Usage: MaxentTaggerServer [-model file|-client] -port portNumber [other MaxentTagger options]";
+  private static final String USAGE = "Usage: MaxentTaggerServer [-classify file|-client] -port portNumber [other MaxentTagger options]";
 
   /**
    * Starts this server on the specified port.  The classifier used can be
@@ -239,7 +239,7 @@ public class MaxentTaggerServer {
    * resource name, which must correspond to the name of a resource in the
    * /classifiers/ directory of the jar file.
    * <p>
-   * Usage: <code>java edu.stanford.nlp.tagger.maxent.MaxentTaggerServer [-model file|-client] -port portNumber [other MaxentTagger options]</code>
+   * Usage: <code>java edu.stanford.nlp.tagger.maxent.MaxentTaggerServer [-classify file|-client] -port portNumber [other MaxentTagger options]</code>
    *
    * @param args Command-line arguments (described above)
    * @throws Exception If file or Java class problems with serialized classifier

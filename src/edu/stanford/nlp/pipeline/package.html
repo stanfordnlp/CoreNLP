@@ -133,24 +133,24 @@ where the following properties are defined:
 		The following annotators are supported: tokenize, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, nfl
 
 	If annotator "pos" is defined:
-	"pos.model" - path towards the POS tagger model
+	"pos.classify" - path towards the POS tagger classify
 
 	If annotator "ner" is defined:
-	"ner.model.3class" - path towards the three-class NER model
-	"ner.model.7class" - path towards the seven-class NER model
-	"ner.model.MISCclass" - path towards the NER model with a MISC class
+	"ner.classify.3class" - path towards the three-class NER classify
+	"ner.classify.7class" - path towards the seven-class NER classify
+	"ner.classify.MISCclass" - path towards the NER classify with a MISC class
 
 	If annotator "truecase" is defined:
-	"truecase.model" - path towards the true-casing model; default: StanfordCoreNLPModels/truecase/noUN.ser.gz
-	"truecase.bias" - class bias of the true case model; default: INIT_UPPER:-0.7,UPPER:-0.7,O:0
+	"truecase.classify" - path towards the true-casing classify; default: StanfordCoreNLPModels/truecase/noUN.ser.gz
+	"truecase.bias" - class bias of the true case classify; default: INIT_UPPER:-0.7,UPPER:-0.7,O:0
 	"truecase.mixedcasefile" - path towards the mixed case file; default: StanfordCoreNLPModels/truecase/MixDisambiguation.list
 
 	If annotator "nfl" is defined:
 	"nfl.gazetteer" - path towards the gazetteer for the NFL domain
-	"nfl.relation.model" - path towards the NFL relation extraction model
+	"nfl.relation.classify" - path towards the NFL relation extraction classify
 
 	If annotator "parse" is defined:
-	"parser.model" - path towards the PCFG parser model
+	"parser.classify" - path towards the PCFG parser classify
 
 Command line properties:
 	"file" - run the pipeline on the contents of this file, or on the contents of the files in this directory
@@ -171,14 +171,14 @@ properties file and pass this file to <code>StanfordCoreNLP</code> using the <co
 my <code>pipe.properties</code> file contains the following:
 <pre>
 annotators=tokenize,ssplit,pos,lemma,ner,parse,coref
-pos.model=models/left3words-wsj-0-18.tagger
-ner.model.3class=models/ner-en-3class.crf.gz
-ner.model.7class=models/muc.7class.crf.gz
-ner.model.distsim=models/conll.distsim.crf.ser.gz
+pos.classify=models/left3words-wsj-0-18.tagger
+ner.classify.3class=models/ner-en-3class.crf.gz
+ner.classify.7class=models/muc.7class.crf.gz
+ner.classify.distsim=models/conll.distsim.crf.ser.gz
 #nfl.gazetteer = models/NFLgazetteer.txt
-#nfl.relation.model = models/nfl_relation_model.ser
-parser.model=models/englishPCFG.ser.gz
-coref.model=models/coref/corefClassifierAll.March2009.ser.gz
+#nfl.relation.classify = models/nfl_relation_model.ser
+parser.classify=models/englishPCFG.ser.gz
+coref.classify=models/coref/corefClassifierAll.March2009.ser.gz
 coref.name.dir=models/coref
 wordnet.dir=models/wordnet-3.0-prolog
 </pre>
@@ -566,8 +566,8 @@ Currently, we support the following options for the "annotators" property:
 <li> ner - Runs a combination of NER models using OldNERCombinerAnnotator</li>
 <li> truecase - Detects the true case of words in free text</li>
 <li> parse - Runs the PCFG parser using ParserAnnotator</li>
-<li> coref - Implements pronominal anaphora resolution using a statistical model</li>
-<li> dcoref - Implements pronominal anaphora resolution using a deterministic model</li>
+<li> coref - Implements pronominal anaphora resolution using a statistical classify</li>
+<li> dcoref - Implements pronominal anaphora resolution using a deterministic classify</li>
 <li> nfl - Implements entity and relation mention extraction for the NFL domain</li>
 </ul>
 

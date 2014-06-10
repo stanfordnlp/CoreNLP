@@ -11,9 +11,9 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * This class trains a Good-Turing model for unknown words from a
+ * This class trains a Good-Turing classify for unknown words from a
  * collection of trees.  It builds up a map of statistics which can be
- * used by any UnknownWordModel which wants to use the GT model.
+ * used by any UnknownWordModel which wants to use the GT classify.
  *
  * Authors:
  *

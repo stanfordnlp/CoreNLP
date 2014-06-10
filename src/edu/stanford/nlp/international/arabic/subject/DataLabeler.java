@@ -24,8 +24,8 @@ public final class DataLabeler {
     String nl = System.getProperty("line.separator");
     classUsage.append(" -v               : Verbose mode (print matched trees)").append(nl);
     classUsage.append(" -g               : Use gold pre-terminal analyses (raw trees)").append(nl);
-    classUsage.append(" -f <model_file>  : Flat test mode (specify Stanford POS tagger model)").append(nl);
-    classUsage.append(" -t <model_file>  : Tree test mode (specify Stanford POS tagger model)").append(nl);
+    classUsage.append(" -f <model_file>  : Flat test mode (specify Stanford POS tagger classify)").append(nl);
+    classUsage.append(" -t <model_file>  : Tree test mode (specify Stanford POS tagger classify)").append(nl);
     classUsage.append(" -c               : Collapse NN* and VB* into single tags").append(nl);
     classUsage.append(" -p <tag_map>     : Specify location of LDC tag maps in this file (one per line)").append(nl);
     classUsage.append(" -l num           : Specify a maximum length for labeled subjects").append(nl);

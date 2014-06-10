@@ -54,17 +54,17 @@ public interface ParserQuery {
   boolean parseSkipped();
 
   /**
-   * The model had to fall back to a simpler model on the previous parse
+   * The classify had to fall back to a simpler classify on the previous parse
    */
   boolean parseFallback();
 
   /**
-   * The model ran out of memory on the most recent parse
+   * The classify ran out of memory on the most recent parse
    */
   boolean parseNoMemory();
 
   /**
-   * The model could not parse the most recent sentence for some reason
+   * The classify could not parse the most recent sentence for some reason
    */
   boolean parseUnparsable();
 

@@ -86,7 +86,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
   }
 
   /**
-   * Runs the Viterbi algorithm on the sequence model given by the TagScorer
+   * Runs the Viterbi algorithm on the sequence classify given by the TagScorer
    * in order to find the best sequence.
    * @param ts The SequenceModel to be used for scoring
    * @return An array containing the int tags of the best sequence

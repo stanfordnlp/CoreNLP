@@ -69,8 +69,8 @@ import java.text.DecimalFormat;
  * <ul>
  * <li> A bi-directional dependency network tagger in models/bidirectional-distsim-wsj-0-18.tagger.
  *      Its accuracy was 97.32% on Penn Treebank WSJ secs. 22-24.</li>
- * <li> A model using only left sequence information and similar but less
- *      unknown words and lexical features as the previous model in
+ * <li> A classify using only left sequence information and similar but less
+ *      unknown words and lexical features as the previous classify in
  *      models/left3words-wsj-0-18.tagger. This tagger runs a lot faster.
  *      Its accuracy was 96.92% on Penn Treebank WSJ secs. 22-24.</li>
  * </ul>
@@ -112,15 +112,15 @@ import java.text.DecimalFormat;
  *
  * Tagging, testing, and training can all also be done via the command line.
  * <h3>Training from the command line</h3>
- * To train a model from the command line, first generate a property file:
+ * To train a classify from the command line, first generate a property file:
  * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops </pre>
  *
  * This gets you a default properties file with descriptions of each parameter you can set in
- * your trained model.  You can modify the properties file , or use the default options.  To train, run:
+ * your trained classify.  You can modify the properties file , or use the default options.  To train, run:
  * <pre>java -mx1g edu.stanford.nlp.tagger.maxent.MaxentTagger -props myPropertiesFile.props </pre>
  *
  *  with the appropriate properties file specified; any argument you give in the properties file can also
- *  be specified on the command line.  You must have specified a model using -model, either in the properties file
+ *  be specified on the command line.  You must have specified a classify using -classify, either in the properties file
  *  or on the command line, as well as a file containing tagged words using -trainFile.
  *
  * Useful flags for controlling the amount of output are -verbose, which prints extra debugging information,
@@ -131,12 +131,12 @@ import java.text.DecimalFormat;
  *
  * Usage:
  * For tagging (plain text):
- * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -model &lt;modelFile&gt; -textFile &lt;textfile&gt; </pre>
+ * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -classify &lt;modelFile&gt; -textFile &lt;textfile&gt; </pre>
  * For testing (evaluating against tagged text):
- * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -model &lt;modelFile&gt; -testFile &lt;testfile&gt; </pre>
+ * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -classify &lt;modelFile&gt; -testFile &lt;testfile&gt; </pre>
  * You can use the same properties file as for training
  * if you pass it in with the "-props" argument. The most important
- * arguments for tagging (besides "model" and "file") are "tokenize"
+ * arguments for tagging (besides "classify" and "file") are "tokenize"
  * and "tokenizerFactory". See below for more details.
  * <br>
  * Note that the tagger assumes input has not yet been tokenized and
@@ -150,7 +150,7 @@ import java.text.DecimalFormat;
  * </p>
  * <table border="1">
  * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Relevant Phase(s)</b></td><td><b>Description</b></td></tr>
- * <tr><td>model</td><td>String</td><td>N/A</td><td>All</td><td>Path and filename where you would like to save the model (training) or where the model should be loaded from (testing, tagging).</td></tr>
+ * <tr><td>classify</td><td>String</td><td>N/A</td><td>All</td><td>Path and filename where you would like to save the classify (training) or where the classify should be loaded from (testing, tagging).</td></tr>
  * <tr><td>trainFile</td><td>String</td><td>N/A</td><td>Train</td>
      <td>
        Path to the file holding the training data; specifying this option puts the tagger in training mode.  Only one of 'trainFile','testFile','textFile', and 'convertToSingleFile' may be specified.<br>
@@ -166,14 +166,14 @@ import java.text.DecimalFormat;
    </tr>
  * <tr><td>testFile</td><td>String</td><td>N/A</td><td>Test</td><td>Path to the file holding the test data; specifying this option puts the tagger in testing mode.  Only one of 'trainFile','testFile','textFile', and 'convertToSingleFile' may be specified.  The same format as trainFile applies, but only one file can be specified.</td></tr>
  * <tr><td>textFile</td><td>String</td><td>N/A</td><td>Tag</td><td>Path to the file holding the text to tag; specifying this option puts the tagger in tagging mode.  Only one of 'trainFile','testFile','textFile', and 'convertToSingleFile' may be specified.  No file reading options may be specified for textFile</td></tr>
- * <tr><td>convertToSingleFile</td><td>String</td><td>N/A</td><td>N/A</td><td>Provided only for backwards compatibility, this option allows you to convert a tagger trained using a previous version of the tagger to the new single-file format.  The value of this flag should be the path for the new model file, 'model' should be the path prefix to the old tagger (up to but not including the ".holder"), and you should supply the properties configuration for the old tagger with -props (before these two arguments).</td></tr>
+ * <tr><td>convertToSingleFile</td><td>String</td><td>N/A</td><td>N/A</td><td>Provided only for backwards compatibility, this option allows you to convert a tagger trained using a previous version of the tagger to the new single-file format.  The value of this flag should be the path for the new classify file, 'classify' should be the path prefix to the old tagger (up to but not including the ".holder"), and you should supply the properties configuration for the old tagger with -props (before these two arguments).</td></tr>
  * <tr><td>genprops</td><td>boolean</td><td>N/A</td><td>N/A</td><td>Use this option to output a default properties file, containing information about each of the possible configuration options.</td></tr>
  * <tr><td>tagSeparator</td><td>char</td><td>/</td><td>All</td><td>Separator character that separates word and part of speech tags, such as out/IN or out_IN.  For training and testing, this is the separator used in the train/test files.  For tagging, this is the character that will be inserted between words and tags in the output.</td></tr>
  * <tr><td>encoding</td><td>String</td><td>UTF-8</td><td>All</td><td>Encoding of the read files (training, testing) and the output text files.</td></tr>
  * <tr><td>tokenize</td><td>boolean</td><td>true</td><td>Tag,Test</td><td>Whether or not the file needs to be tokenized.  If this is false, the tagger assumes that white space separates words if and only if they should be tagged as separate tokens, and that the input is strictly one sentence per line.</td></tr>
  * <tr><td>tokenizerFactory</td><td>String</td><td>edu.stanford.nlp.<br>process.PTBTokenizer</td><td>Tag,Test</td><td>Fully qualified class name of the tokenizer to use.  edu.stanford.nlp.process.PTBTokenizer does basic English tokenization.</td></tr>
  * <tr><td>tokenizerOptions</td><td>String</td><td></td><td>Tag,Test</td><td>Known options for the particular tokenizer used. A comma-separated list. For PTBTokenizer, options of interest include <code>americanize=false</code> and <code>asciiQuotes</code> (for German). Note that any choice of tokenizer options that conflicts with the tokenization used in the tagger training data will likely degrade tagger performance.</td></tr>
- * <tr><td>arch</td><td>String</td><td>generic</td><td>Train</td><td>Architecture of the model, as a comma-separated list of options, some with a parenthesized integer argument written k here: this determines what features are used to build your model.  See {@link ExtractorFrames} and {@link ExtractorFramesRare} for more information.</td></tr>
+ * <tr><td>arch</td><td>String</td><td>generic</td><td>Train</td><td>Architecture of the classify, as a comma-separated list of options, some with a parenthesized integer argument written k here: this determines what features are used to build your classify.  See {@link ExtractorFrames} and {@link ExtractorFramesRare} for more information.</td></tr>
  * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from edu.stanford.nlp.util.Function&lt;String, String&gt;.  Can be blank.</td></tr>
  * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tagset), 'polish' (very rudimentary), 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
  * <tr><td>openClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered open-class.  All tags encountered that are not in this list are considered closed-class.  E.g. format: "NN VB"</td></tr>
@@ -233,31 +233,31 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   }
 
   /**
-   * Constructor for a tagger using a model stored in a particular file.
-   * The <code>modelFile</code> is a filename for the model data.
+   * Constructor for a tagger using a classify stored in a particular file.
+   * The <code>modelFile</code> is a filename for the classify data.
    * The tagger data is loaded when the
    * constructor is called (this can be slow).
    * This constructor first constructs a TaggerConfig object, which loads
    * the tagger options from the modelFile.
    *
-   * @param modelFile filename of the trained model
+   * @param modelFile filename of the trained classify
    * @throws IOException if IO problem
    * @throws ClassNotFoundException when there are errors loading a tagger
    */
   public MaxentTagger(String modelFile) throws IOException, ClassNotFoundException {
-    this(modelFile, StringUtils.argsToProperties(new String[] {"-model", modelFile}), true);
+    this(modelFile, StringUtils.argsToProperties(new String[] {"-classify", modelFile}), true);
   }
 
   /**
-   * Constructor for a tagger using a model stored in a particular file,
+   * Constructor for a tagger using a classify stored in a particular file,
    * with options taken from the supplied TaggerConfig.
-   * The <code>modelFile</code> is a filename for the model data.
+   * The <code>modelFile</code> is a filename for the classify data.
    * The tagger data is loaded when the
    * constructor is called (this can be slow).
    * This version assumes that the tagger options in the modelFile have
    * already been loaded into the TaggerConfig (if that is desired).
    *
-   * @param modelFile filename of the trained model
+   * @param modelFile filename of the trained classify
    * @param config The configuration for the tagger
    * @throws IOException if IO problem
    * @throws ClassNotFoundException when there are errors loading a tagger
@@ -272,7 +272,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * Initializer that loads the tagger.
    *
    * @param modelFile Where to initialize the tagger from.
-   *        Most commonly, this is the filename of the trained model,
+   *        Most commonly, this is the filename of the trained classify,
    *        for example, <code>
    *   /u/nlp/data/pos-tagger/wsj3t0-18-left3words/left3words-wsj-0-18.tagger
    *        </code>.  However, if it starts with "https?://" it will
@@ -280,7 +280,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    *        directly from the classpath, as in loading from
    *        edu/stanford/nlp/models/pos-tagger/wsj3t0-18-bidirectional/bidirectional-distsim-wsj-0-18.tagger
    * @param config TaggerConfig based on command-line arguments
-   * @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
+   * @param printLoading Whether to print a message saying what classify file is being loaded and how long it took when finished.
    * @throws IOException if IO problem
    * @throws ClassNotFoundException when there are errors loading a tagger
    */
@@ -330,7 +330,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   private int rareWordThresh = RARE_WORD_THRESH;
 
   /**
-   * Determines which features are included in the model.  The model
+   * Determines which features are included in the classify.  The classify
    * includes features that occurred strictly more times than this number
    * (standardly, &gt; 5) in the training data.  Here I look only at the
    * history (not the tag), so the history appearing this often is enough.
@@ -346,7 +346,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   int curWordMinFeatureThresh = CUR_WORD_MIN_FEATURE_THRESH;
 
   /**
-   * Determines which rare word features are included in the model.
+   * Determines which rare word features are included in the classify.
    * The features for rare words have a strictly higher support than
    * this number are included. Traditional default is 10.
    */
@@ -630,7 +630,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       LambdaSolve.save_lambdas(file, prob.lambda);
   }
 
-  /** This reads the complete tagger from a single model stored in a file, at a URL,
+  /** This reads the complete tagger from a single classify stored in a file, at a URL,
    *  or as a resource
    *  in a jar file, and inits the tagger using a
    *  combination of the properties passed in and parameters from the file.
@@ -642,8 +642,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    *  it seemed better to leave working code alone [cdm 2008].
    *
    *  @param config The tagger config
-   *  @param modelFileOrUrl The name of the model file. This routine opens and closes it.
-   *  @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
+   *  @param modelFileOrUrl The name of the classify file. This routine opens and closes it.
+   *  @param printLoading Whether to print a message saying what classify file is being loaded and how long it took when finished.
    *  @throws IOException If I/O errors, etc.
    *  @throws ClassNotFoundException especially for incompatible tagger formats
    */
@@ -652,7 +652,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     DataInputStream rf = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(modelFileOrUrl));
 
     // if (VERBOSE) {
-    //   System.err.println(" length of model holder " + new File(modelFileOrUrl).length());
+    //   System.err.println(" length of classify holder " + new File(modelFileOrUrl).length());
     // }
 
     readModelAndInit(config, rf, printLoading);
@@ -661,7 +661,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
 
 
-  /** This reads the complete tagger from a single model file, and inits
+  /** This reads the complete tagger from a single classify file, and inits
    *  the tagger using a combination of the properties passed in and
    *  parameters from the file.
    *  <p>
@@ -672,7 +672,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    *
    *  @param config The tagger config
    *  @param rf DataInputStream to read from.  It's the caller's job to open and close this stream.
-   *  @param printLoading Whether to print a message saying what model file is being loaded and how long it took when finished.
+   *  @param printLoading Whether to print a message saying what classify file is being loaded and how long it took when finished.
    *  @throws IOException If I/O errors
    *  @throws ClassNotFoundException If serialization errors
    */
@@ -682,13 +682,13 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     if (printLoading) {
       String source = null;
       if (config != null) {
-        // TODO: "model"
-        source = config.getProperty("model");
+        // TODO: "classify"
+        source = config.getProperty("classify");
       }
       if (source == null) {
         source = "data stream";
       }
-      t.doing("Reading POS tagger model from " + source);
+      t.doing("Reading POS tagger classify from " + source);
     }
     TaggerConfig taggerConfig = TaggerConfig.readConfig(rf);
     if (config != null) {
@@ -1010,7 +1010,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   /**
    * Reads in the training corpus from a filename and trains the tagger
    *
-   * @param config Configuration parameters for training a model (filename, etc.
+   * @param config Configuration parameters for training a classify (filename, etc.
    * @throws IOException If IO problem
    */
   private static void trainAndSaveModel(TaggerConfig config) throws IOException {
@@ -1043,7 +1043,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     }
 
     if (prob.checkCorrectness()) {
-      System.err.println("Model is correct [empirical expec = model expec]");
+      System.err.println("Model is correct [empirical expec = classify expec]");
     } else {
       System.err.println("Model is not correct");
     }
@@ -1054,7 +1054,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
 
   /**
-   * Trains a tagger model.
+   * Trains a tagger classify.
    *
    * @param config Properties giving parameters for the training run
    */

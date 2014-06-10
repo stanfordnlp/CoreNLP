@@ -105,7 +105,7 @@ public class TestOptions implements Serializable {
   public boolean forceTagBeginnings = false;
 
   /**
-   * POS tagger model used when preTag is enabled.
+   * POS tagger classify used when preTag is enabled.
    */
   public String taggerSerializedFile = DEFAULT_PRE_TAGGER;
 

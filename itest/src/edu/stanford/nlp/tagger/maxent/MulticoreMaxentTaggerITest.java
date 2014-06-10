@@ -31,7 +31,7 @@ public class MulticoreMaxentTaggerITest extends TestCase {
         singleTagger = new MaxentTagger(MaxentTagger.DEFAULT_JAR_PATH);
       }
       if (multiTagger == null) {
-        multiTagger = new MaxentTagger(MaxentTagger.DEFAULT_JAR_PATH, StringUtils.argsToProperties(new String[] {"-model", MaxentTagger.DEFAULT_JAR_PATH, "-nthreads", "4"}));
+        multiTagger = new MaxentTagger(MaxentTagger.DEFAULT_JAR_PATH, StringUtils.argsToProperties(new String[] {"-classify", MaxentTagger.DEFAULT_JAR_PATH, "-nthreads", "4"}));
       }
     }
   }

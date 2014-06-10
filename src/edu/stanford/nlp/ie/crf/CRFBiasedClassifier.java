@@ -16,20 +16,20 @@ import java.util.*;
 
 /**
  * CRFBiasedClassifier is used to adjust the precision-recall tradeoff
- * of any CRF model implemented using CRFClassifier. This adjustment is
+ * of any CRF classify implemented using CRFClassifier. This adjustment is
  * performed after CRF training.  The method is described in (Minkov,
  * Wang, Tomasic, and Cohen, 2006): "NER Systems that Suit User's
  * Preferences: Adjusting the Recall-Precision Trade-off for Entity
- * Extraction".  CRFBiasedClassifier can import any model serialized
+ * Extraction".  CRFBiasedClassifier can import any classify serialized
  * with {@link CRFClassifier} and supports most command-line parameters
  * available in {@link CRFClassifier}.  In addition to this,
  * CRFBiasedClassifier also interprets the parameter -classBias, as in:
  * <p/><code>
- * java -server -mx500m edu.stanford.nlp.ie.crf.CRFBiasedClassifier -loadClassifier model.gz -testFile test.txt -classBias A:0.5,B:1.5
+ * java -server -mx500m edu.stanford.nlp.ie.crf.CRFBiasedClassifier -loadClassifier classify.gz -testFile test.txt -classBias A:0.5,B:1.5
  * </code>
  * <p/>The command above sets a bias of 0.5 towards class A and a bias of
  * 1.5 towards class B. These biases (which internally are treated as
- * feature weights in the log-linear model underpinning the CRF
+ * feature weights in the log-linear classify underpinning the CRF
  * classifier) can take any real value. As the weight of A tends to plus
  * infinity, the classifier will only predict A labels, and as it tends
  * towards minus infinity, it will never predict A labels.
