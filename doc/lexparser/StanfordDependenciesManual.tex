@@ -357,12 +357,6 @@ The mark is a dependent of the subordinate clause head.
 \end{dependency}
 \end{quote}
 
-
-\begin{tabbing}
-\\
-\end{tabbing}
-
-
 \noindent\textbf{\emph{mwe}: multi-word expression}\\
 The multi-word expression (modifier) relation is used for certain multi-word idioms
 that behave like a single function word.  It is used for a closed set
@@ -557,14 +551,14 @@ A referent of the head of an NP is the relative word introducing the relative cl
 
 \noindent\textbf{\emph{rel}: relative}\\
 A relative of a relative clause is the head word of the WH-phrase introducing it.
+This analysis is used only for relative words which are not easily
+resolvable to a role in the relative clause. Relative words which act
+as the subject or object of a relative clause are analyzed as a
+\emph{nsubj} or \emph{dobj}.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \> ``I saw the man whose wife you love" \> \> \emph{rel}(love, wife)
 \end{tabbing}
-This analysis is used only for relative words which are not easily
-resolvable to a role in the relative clause. Relative words which act
-as the subject or object of a relative clause are analyzed as a
-\emph{nsubj} or \emph{dobj}.\\
 
 \noindent\textbf{\emph{root}: root}\\
 The root grammatical relation points to the root of the sentence. A fake node ``ROOT'' is used as the governor. The ROOT node is indexed with ``0'', since the indexation of real words in the sentence starts at 1.
@@ -1167,6 +1161,6 @@ versions of the dependencies, or need to update your code.
 
 
 \bibliographystyle{plainnat}
-\bibliography{dependencies_manual}
+\bibliography{StanfordDependenciesManual}
 
 \end{document}

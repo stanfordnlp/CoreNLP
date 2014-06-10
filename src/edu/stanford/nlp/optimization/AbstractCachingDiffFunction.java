@@ -17,7 +17,7 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
   int fEvaluations; // = 0;
   protected double[] derivative; // = null;
   protected double value; // = 0.0;
-  Random generator = new Random(2147483647L);
+  protected Random generator = new Random(2147483647L);
 
   public boolean gradientCheck() {
     return gradientCheck(100, 50, initial());
@@ -131,6 +131,10 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
 
   public double lastValue() {
     return value;
+  }
+
+  public double[] getDerivative() {
+    return derivative;
   }
 
 }
