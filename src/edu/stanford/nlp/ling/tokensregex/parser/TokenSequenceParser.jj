@@ -99,6 +99,7 @@ TOKEN:
 |	< STR: "\"" ("\\\""|~["\n","\r", "\""])* "\"" >
 |   < NUMCMP: "<=" | ">=" | ">" | "<" | "==" | "!=" >
 |   < STRREGEXCMP: "=~" | "!=" >
+|   < STRSIMPLE: (["A"-"Z","a"-"z","0"-"9", "_"] )+ >
 }
 
 
@@ -860,7 +861,9 @@ NodePattern CoreMapWordPattern(Env env) : {
 	Token value = null;
 } {
 	(
-        ( value = <STR> | value = <REGEX>  | value = <IDENTIFIER> )
+        ( value = <STR> | value = <REGEX>  | value = <IDENTIFIER>
+           | value = <NONNEGINT> | value = <INT> | value = <LONGINT>
+           | value = <REAL> | value = <STRSIMPLE> )
 		{ attributes.put("word", value.image); }
     )
   	{ pat = CoreMapNodePattern.valueOf(env, attributes);
