@@ -34,7 +34,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     return Collections.unmodifiableList(annotationPatterns);
   }
 
-  private static final Pattern LITERAL_PATTERN = Pattern.compile("[A-Za-z0-9]*");
+  private static final Pattern LITERAL_PATTERN = Pattern.compile("[A-Za-z0-9]+");
   public static NodePattern<String> newStringRegexPattern(String regex, int flags) {
     boolean isLiteral = ((flags & Pattern.LITERAL) != 0) || LITERAL_PATTERN.matcher(regex).matches();
     if (isLiteral) {
