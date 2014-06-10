@@ -1,6 +1,7 @@
 package edu.stanford.nlp.ie.machinereading.structure;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -141,5 +142,24 @@ public class Span implements Serializable, Iterable<Integer> {
       @Override
       public void remove() { throw new UnsupportedOperationException(); }
     };
+  }
+
+  public int size() {
+    return end - start;
+  }
+
+  public static boolean overlaps(Span spanA, Span spanB) {
+    return spanA.contains(spanB) ||
+            spanB.contains(spanA) ||
+            (spanA.end > spanB.end && spanA.start < spanB.end) ||
+            (spanB.end > spanA.end && spanB.start < spanA.end) ||
+            spanA.equals(spanB);
+  }
+
+  public static boolean overlaps(Span spanA, Collection<Span> spanB) {
+    for (Span candidate : spanB) {
+      if (overlaps(spanA, candidate)) { return true; }
+    }
+    return false;
   }
 }
