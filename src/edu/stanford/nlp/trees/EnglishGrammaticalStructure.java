@@ -136,7 +136,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After adding ref:", list);
     }
-
+      
     addXSubj(list);
     if (DEBUG) {
       printListSorted("After adding xsubj:", list);
@@ -223,7 +223,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       if (DEBUG) {
         printListSorted("After adding ref:", list);
       }
-
+      
       collapseReferent(list);
       if (DEBUG) {
         printListSorted("After collapse referent:", list);
@@ -542,7 +542,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
-  // TODO: is there some better pattern to look for?
+  // TODO: is there some better pattern to look for?  
   // We do not have tag information at this point
   private static final String RELATIVIZING_WORD_REGEX = "(?i:that|what|which|who|whom|whose)";
   private static final Pattern RELATIVIZING_WORD_PATTERN = Pattern.compile(RELATIVIZING_WORD_REGEX);
@@ -556,7 +556,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    */
   private static void addRef(Collection<TypedDependency> list) {
     List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
-
+    
     for (TypedDependency rcmod : list) {
       if (rcmod.reln() != RELATIVE_CLAUSE_MODIFIER) {
         // we only add ref dependencies across relative clauses
@@ -568,7 +568,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       TypedDependency leftChild = null;
       for (TypedDependency child : list) {
-        if (child.gov() == modifier &&
+        if (child.gov() == modifier && 
             RELATIVIZING_WORD_PATTERN.matcher(child.dep().label().value()).matches() &&
             (leftChild == null || child.dep().index() < leftChild.dep().index())) {
           leftChild = child;
@@ -582,7 +582,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           continue;
         }
         for (TypedDependency grandchild : list) {
-          if (grandchild.gov() == child.dep() &&
+          if (grandchild.gov() == child.dep() && 
               RELATIVIZING_WORD_PATTERN.matcher(grandchild.dep().label().value()).matches() &&
               (leftGrandchild == null || grandchild.dep().index() < leftGrandchild.dep().index())) {
             leftGrandchild = grandchild;
@@ -610,7 +610,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   /**
-   * Add xsubj dependencies when collapsing basic dependencies.
+   * Add xsubj dependencies when collapsing basic dependencies.  
    * <br>
    * In the general case, we look for an aux modifier under an xcomp
    * modifier, and assuming there aren't already associated nsubj
@@ -624,7 +624,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    */
   private static void addXSubj(Collection<TypedDependency> list) {
     List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
-
+    
     for (TypedDependency xcomp : list) {
       if (xcomp.reln() != XCLAUSAL_COMPLEMENT) {
         // we only add xsubj dependencies to some xcomp dependencies
@@ -633,7 +633,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       TreeGraphNode modifier = xcomp.dep();
       TreeGraphNode head = xcomp.gov();
-
+      
       boolean hasSubjectDaughter = false;
       boolean hasAux = false;
       List<TreeGraphNode> subjects = new ArrayList<TreeGraphNode>();
@@ -669,7 +669,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         newDeps.add(newDep);
       }
     }
-
+    
     for (TypedDependency newDep : newDeps) {
       if (!list.contains(newDep)) {
         newDep.setExtra();
@@ -1872,7 +1872,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   /**
-   * Find and remove any exact duplicates from a dependency list.
+   * Find and remove any exact duplicates from a dependency list.  
    * For example, the method that "corrects" nsubj dependencies can
    * turn them into nsubjpass dependencies.  If there is some other
    * source of nsubjpass dependencies, there may now be multiple
@@ -1886,17 +1886,17 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
 
-  public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName) throws IOException {
+  public static List<GrammaticalStructure> readCoNLLXGrammaticStructureCollection(String fileName) throws IOException {
     return readCoNLLXGrammaticStructureCollection(fileName, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
-  public static EnglishGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {
-    return (EnglishGrammaticalStructure) buildCoNLLXGrammaticalStructure(tokenFields, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+  public static EnglishGrammaticalStructure buildCoNNLXGrammaticStructure(List<List<String>> tokenFields) {
+    return (EnglishGrammaticalStructure) buildCoNNLXGrammaticStructure(tokenFields, EnglishGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
   public static class FromDependenciesFactory
-    implements GrammaticalStructureFromDependenciesFactory {
-    @Override
+    implements GrammaticalStructureFromDependenciesFactory
+  {
     public EnglishGrammaticalStructure build(List<TypedDependency> tdeps, TreeGraphNode root) {
       return new EnglishGrammaticalStructure(tdeps, root);
     }

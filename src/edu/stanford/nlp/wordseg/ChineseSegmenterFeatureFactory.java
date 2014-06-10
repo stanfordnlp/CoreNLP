@@ -162,19 +162,12 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
     String charc = c.get(CoreAnnotations.CharAnnotation.class);
-    if (charc == null) charc = "";
     String charc1 = c1.get(CoreAnnotations.CharAnnotation.class);
-    if (charc1 == null) charc1 = "";
     String charc2 = c2.get(CoreAnnotations.CharAnnotation.class);
-    if (charc2 == null) charc2 = "";
     String charc3 = c3.get(CoreAnnotations.CharAnnotation.class);
-    if (charc3 == null) charc3 = "";
     String charp = p.get(CoreAnnotations.CharAnnotation.class);
-    if (charp == null) charp = "";
     String charp2 = p2.get(CoreAnnotations.CharAnnotation.class);
-    if (charp2 == null) charp2 = "";
     String charp3 = p3.get(CoreAnnotations.CharAnnotation.class);
-    if (charp3 == null) charp3 = "";
 
 
     /*
@@ -205,7 +198,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     if (charc1.length()==0) { rcharc1='n'; } else { rcharc1=RadicalMap.getRadical(charc1.charAt(0));}
     if (charc2.length()==0) { rcharc2='n'; } else { rcharc2=RadicalMap.getRadical(charc2.charAt(0));}
     if (charc3.length()==0) { rcharc3='n'; } else { rcharc3=RadicalMap.getRadical(charc3.charAt(0));}
-    if (charp.length()==0) { rcharp='n'; } else { rcharp=RadicalMap.getRadical(charp.charAt(0));}
+    if (charp.length()==0)  { rcharp='n';  } else { rcharp=RadicalMap.getRadical(charp.charAt(0));  }
     if (charp2.length()==0) { rcharp2='n'; } else { rcharp2=RadicalMap.getRadical(charp2.charAt(0));}
     if (charp3.length()==0) { rcharp3='n'; } else { rcharp3=RadicalMap.getRadical(charp3.charAt(0));}
 
