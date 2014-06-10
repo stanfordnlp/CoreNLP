@@ -346,34 +346,7 @@ public class StringUtils {
     return (Arrays.asList(str.split(regex)));
   }
 
-  /**
-   * Splits a string into whitespace tokenized fields based on a delimiter. For example,
-   * "aa bb | bb cc | ccc ddd" would be split into "[aa,bb],[bb,cc],[ccc,ddd]" based on
-   * the delimiter "|". This method uses the old StringTokenizer class, which is up to
-   * 3x faster than the regex-based "split()" methods.
-   * 
-   * @param delimiter
-   * @return
-   */
-  public static List<List<String>> splitFieldsFast(String str, String delimiter) {
-    List<List<String>> fields = Generics.newArrayList();
-    StringTokenizer tokenizer = new StringTokenizer(str.trim());
-    List<String> currentField = Generics.newArrayList();
-    while(tokenizer.hasMoreTokens()) {
-      String token = tokenizer.nextToken();
-      if (token.equals(delimiter)) {
-        fields.add(currentField);
-        currentField = Generics.newArrayList();
-      } else {
-        currentField.add(token);
-      }
-    }
-    if (currentField.size() > 0) {
-      fields.add(currentField);
-    }
-    return fields;
-  }
-  
+
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
    *  like correctly split quoted strings or parenthesized arguments.
@@ -782,7 +755,7 @@ public class StringUtils {
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
           {
             try {
-              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
+              InputStream is = new BufferedInputStream(new FileInputStream(result.getProperty(key)));
               InputStreamReader reader = new InputStreamReader(is, "utf-8");
               result.remove(key); // location of this line is critical
               result.load(reader);
@@ -795,7 +768,7 @@ public class StringUtils {
             } catch (IOException e) {
               result.remove(key);
               System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
-              throw new RuntimeIOException(e);
+              throw new RuntimeException(e);
             }
           }
         }
