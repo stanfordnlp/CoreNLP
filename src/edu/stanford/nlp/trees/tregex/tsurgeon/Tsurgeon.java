@@ -37,7 +37,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -317,7 +316,7 @@ public class Tsurgeon {
       } else {
         hf = ReflectionLoading.loadByReflection(headFinderClassName, (Object[]) headFinderArgs);
       }
-      compiler = new TregexPatternCompiler(hf);      
+      compiler = new TregexPatternCompiler(hf);
     }
     Macros.addAllMacros(compiler, macroFilename, encoding);
     if (argsMap.containsKey(patternOperationOption)) {

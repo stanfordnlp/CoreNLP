@@ -583,15 +583,14 @@ public class DVParser {
       treebank = treebank.transform(transformer);
       System.err.println("Read in " + treebank.size() + " trees from " + trainTreebankPath);
 
+      CacheParseHypotheses cacher = new CacheParseHypotheses(dvparser.parser);
+      CacheParseHypotheses.CacheProcessor processor = new CacheParseHypotheses.CacheProcessor(cacher, lexparser, dvparser.op.trainOptions.dvKBest, transformer);
       for (Tree tree : treebank) {
         trainSentences.add(tree);
+        trainCompressedParses.put(tree, processor.process(tree).second);
         //System.out.println(tree);
       }
 
-      // TODO: don't get all the parses at once
-      IdentityHashMap<Tree, List<Tree>> trainParses = dvparser.getTopParses(trainSentences, transformer);
-      CacheParseHypotheses cacher = new CacheParseHypotheses(dvparser.parser);
-      trainCompressedParses.putAll(cacher.convertToBytes(trainParses));
       System.err.println("Finished parsing " + treebank.size() + " trees, getting " + dvparser.op.trainOptions.dvKBest + " hypotheses each");
     }
 
