@@ -234,7 +234,7 @@ public class TrieMapMatcher<K,V> {
     return findNonOverlapping(list, 0, list.size());
   }
 
-  public final static Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.lengthEndpointsComparator();
+  public final static Comparator<Match> MATCH_LENGTH_ENDPOINTS_COMPARATOR = Interval.<Match>lengthEndpointsComparator();
 
   /**
    * Given a sequence to search through (e.g. piece of text would be a sequence of words),
