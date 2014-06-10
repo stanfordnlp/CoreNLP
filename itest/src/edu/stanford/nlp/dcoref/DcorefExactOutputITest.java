@@ -14,7 +14,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
 
 import junit.framework.TestCase;
 
@@ -146,7 +145,7 @@ public class DcorefExactOutputITest extends TestCase {
           break;
         }
       }
-      assertTrue(found);
+      assertTrue("Could not find expected coref chain " + key + " in the results", found);
     }
 
     for (Integer key : chains.keySet()) {
@@ -158,7 +157,7 @@ public class DcorefExactOutputITest extends TestCase {
           break;
         }
       }
-      assertTrue(found);
+      assertTrue("Dcoref produced chain " + chain + " which was not in the expeted results", found);
     }
   }
 
