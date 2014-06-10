@@ -41,10 +41,13 @@ public class XMLOutputter {
   private static final Options DEFAULT_OPTIONS = new Options();
 
   public static class Options {
+    /** Should the document text be included as part of the XML output */
     public boolean includeText = false;
+    /** Should a small window of context be provided with each coreference mention */
     public int coreferenceContextSize = 0;
     public double relationsBeam = 0.0;
     public String encoding = "UTF-8";
+    /** How to print a constituent tree */
     public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
   }
 
@@ -345,7 +348,7 @@ public class XMLOutputter {
     String text = mention.mentionSpan;
     setSingleElement(mentionElem, "text", curNS, text);
     // Do you want context with your coreference?
-    if (sentences != null && DEFAULT_OPTIONS.coreferenceContextSize > 0) {
+    if (sentences != null && options.coreferenceContextSize > 0) {
       // If so use sentences to get so context from sentences
 
       List<CoreLabel> tokens = sentences.get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class);
