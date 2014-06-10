@@ -147,15 +147,15 @@ public class EnglishGrammaticalRelations {
     * "Kennedy has been killed" &rarr; <code>auxpass</code>(killed, been)
     */
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
- 	  new GrammaticalRelation(Language.English, "auxpass", "passive auxiliary",
+     new GrammaticalRelation(Language.English, "auxpass", "passive auxiliary",
               AuxPassiveGRAnnotation.class, AUX_MODIFIER, "VP|SQ|SINV", tregexCompiler,
- 	      new String[] {
-	        "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
+         new String[] {
+          "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
           "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < VBD|VBN))",
- 	        // add handling of tricky VP fronting cases...
- 	        "SINV < (VP=target < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
- 	        "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))",
- 	      });
+           // add handling of tricky VP fronting cases...
+           "SINV < (VP=target < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
+           "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))",
+         });
   public static class AuxPassiveGRAnnotation extends GrammaticalRelationAnnotation { }
 
   /**
@@ -190,15 +190,16 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * <i>Note:</i>Modified in 2010 to exclude the case of a CC/CONJP first in its phrase: it has to conjoin things.
    */
+  // todo: allow conj in RRC. 2 instances in WSJ.
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.English, "conj", "conjunct",
         ConjunctGRAnnotation.class, DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML", tregexCompiler,
         new String[] { // remember conjunction can be left or right headed....
           // this is more ugly, but the first 3 patterns are now duplicated and for clausal things, that daughter to the left of the CC/CONJP can't be a PP or RB or ADVP either
           // non-parenthetical or comma in suitable phrase with conjunction to left
-          "VP|S|SBAR|SBARQ|SINV|SQ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
+          "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
           // non-parenthetical or comma in suitable phrase with conj then adverb to left
-          "VP|S|SBAR|SBARQ|SINV|SQ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ (ADVP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
+          "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ (ADVP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
           // content phrase to the right of a comma or a parenthetical
           // The test at the end is to make sure that a conjunction or
           // comma etc actually show up between the target of the conj
@@ -834,16 +835,16 @@ public class EnglishGrammaticalRelations {
 
 
  /*
- 	* The "complementizer" grammatical relation is a discontinued grammatical relation. A
- 	* A complementizer of a clausal complement was the word introducing it.
+  * The "complementizer" grammatical relation is a discontinued grammatical relation. A
+  * A complementizer of a clausal complement was the word introducing it.
   * It only matched "that" or "whether". We've now merged this in with "mark" which plays a similar
   * role with other clausal modifiers.
   * <p/>
- 	* <p/>
+  * <p/>
   * Example: <br/>
   * "He says that you like to swim" &rarr;
   * <code>complm</code>(like, that)
- 	*/
+  */
 
 
   /**
@@ -860,7 +861,7 @@ public class EnglishGrammaticalRelations {
         MarkerGRAnnotation.class, MODIFIER, "SBAR(?:-TMP)?", tregexCompiler,
         new String[] {
           "SBAR|SBAR-TMP < (IN|DT=target $++ S|FRAG)",
-     	    "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
+           "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
         });
   public static class MarkerGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -994,7 +995,7 @@ public class EnglishGrammaticalRelations {
    * "Bill (John's cousin)" &rarr; <code>appos</code>(Bill, cousin).
    *
    * "The Australian Broadcasting Corporation (ABC)" &rarr;
- 	*  <code>appos</code>(Corporation, ABC)
+   *  <code>appos</code>(Corporation, ABC)
    */
   public static final GrammaticalRelation APPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.English, "appos", "appositional modifier",
@@ -1009,10 +1010,10 @@ public class EnglishGrammaticalRelations {
           // TODO: next pattern with NNP doesn't work because leftmost NNP is deemed head in a
           // structure like (NP (NNP Norway) (, ,) (NNP Verdens_Gang) (, ,))
           "NP|NP-TMP|NP-ADV < (NNP $+ (/^,$/ $+ NNP=target)) !< CC|CONJP",
-         // find abbreviations
-         // for biomedical English, the former NNP heuristic really doesn't work, because they use NN for all chemical entities
- 	       // while not unfoolable, this version produces less false positives and more true positives.
-         "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )"
+          // find abbreviations
+          // for biomedical English, the former NNP heuristic really doesn't work, because they use NN for all chemical entities
+          // while not unfoolable, this version produces less false positives and more true positives.
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )"
 
 
         });
