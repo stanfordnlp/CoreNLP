@@ -29,6 +29,7 @@
 package edu.stanford.nlp.ie;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
 
