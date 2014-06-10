@@ -194,7 +194,7 @@ public class CleanXmlAnnotator implements Annotator{
 
   private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
   private void addAnnotationPatterns(CollectionValuedMap<Class, Pair<Pattern,Pattern>> annotationPatterns, String conf, boolean attrOnly) {
-    String[] annoPatternStrings = conf == null ? new String[0] : conf.trim().split("\\s*,\\s*");
+    String[] annoPatternStrings = conf.trim().split("\\s*,\\s*");
     for (String annoPatternString:annoPatternStrings) {
       String[] annoPattern = annoPatternString.split("\\s*=\\s*", 2);
       if (annoPattern.length != 2) {
