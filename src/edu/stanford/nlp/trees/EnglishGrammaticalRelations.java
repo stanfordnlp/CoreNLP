@@ -675,7 +675,7 @@ public class EnglishGrammaticalRelations {
         RelativeGRAnnotation.class, COMPLEMENT, "SBAR", tregexCompiler,
         new String[] { 
           // Leave out time expressions such as "who yesterday cooked dinner"; those should be nsubj
-          "SBAR <, WHNP|WHPP|WHADJP=target > /^NP/ [ !<, /^WHNP/ | < (S < (VP $-- (/^NP(?!-TMP)/ !< (NN < " + timeWordRegex + ") !< /^-NONE-$/)))]"
+          "SBAR <, WHNP|WHPP|WHADJP=target > /^NP/ [ !<, /^WHNP/ | < (S < (VP $-- (/^NP(?!-TMP)/ !<# (NN < " + timeWordRegex + ") !< /^-NONE-$/)))]"
         });
   public static class RelativeGRAnnotation extends GrammaticalRelationAnnotation { }
 
