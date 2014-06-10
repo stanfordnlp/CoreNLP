@@ -320,13 +320,9 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     // this shouldn't happen
     //    throw new RuntimeException("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
     SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Failed to find head token:\n" +
-                       "Tree is: " + root + "\n" + 
+                       "Tree is: " + root + "\n" +
                        "token = |" + token + "|" + index + "|, approx=" + approximateness);
     for (Tree leaf : leaves) {
-      CoreLabel label = CoreLabel.class.cast(leaf.label());
-      Integer indexInteger = label.get(CoreAnnotations.IndexAnnotation.class);
-      if (indexInteger == null) continue; // not a word from the original tree
-      int ind = indexInteger - 1;
       if (token.equals(leaf.value())) {
         // System.err.println("Found it at position " + ind + "; returning " + leaf);
         return leaf;
