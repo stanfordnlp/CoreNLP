@@ -42,6 +42,7 @@ public class XMLOutputter {
 
   public static class Options {
     public boolean includeText = false;
+    public boolean includeCoreferenceContext = false;
     public double relationsBeam = 0.0;
     public String encoding = "UTF-8";
     public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
@@ -193,7 +194,10 @@ public class XMLOutputter {
     if (corefChains != null) {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       Element corefInfo = new Element("coreference", NAMESPACE_URI);
-      if (addCorefGraphInfo(corefInfo, sentences, corefChains, NAMESPACE_URI))
+      // Do you want context with your coreference?
+      // If so provide sentences to coreference so context from sentences can be added
+      List<CoreMap> corefSents = (options.includeCoreferenceContext)? sentences:null;
+      if (addCorefGraphInfo(corefInfo, corefSents, corefChains, NAMESPACE_URI))
         docElem.appendChild(corefInfo);
     }
 
@@ -340,10 +344,15 @@ public class XMLOutputter {
     setSingleElement(mentionElem, "head", curNS,
                      Integer.toString(mention.headIndex));
 
+    String text = mention.mentionSpan;
+    setSingleElement(mentionElem, "text", curNS, text);
     if (sentences != null) {
-      String text = StringUtils.joinWords(sentences.get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class),
-              " ", mention.startIndex - 1, mention.endIndex -1);
-      setSingleElement(mentionElem, "text", curNS, text);
+      List<CoreLabel> tokens = sentences.get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class);
+      int contextStart = Math.max(mention.startIndex - 1 - 5, 0);
+      int contextEnd = Math.min(mention.endIndex - 1 + 5, tokens.size());
+      String context = StringUtils.joinWords(tokens, " ", contextStart, mention.startIndex - 1)
+              + "[[" + mention.mentionSpan + "]]" + StringUtils.joinWords(tokens, " ", mention.endIndex - 1, contextEnd);
+      setSingleElement(mentionElem, "context", curNS, context);
     }
 
     chainElem.appendChild(mentionElem);
