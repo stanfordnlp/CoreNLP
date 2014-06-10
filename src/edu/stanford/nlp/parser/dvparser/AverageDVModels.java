@@ -44,7 +44,7 @@ public class AverageDVModels {
     return matrixNames;
   }
 
-  public static TwoDimensionalMap<String, String, SimpleMatrix> averageMatrices(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
+  public static TwoDimensionalMap<String, String, SimpleMatrix> averageBinaryMatrices(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
     TwoDimensionalMap<String, String, SimpleMatrix> averages = new TwoDimensionalMap<String, String, SimpleMatrix>();
     for (Pair<String, String> binary : getMatrixNames(maps)) {
       int count = 0;
@@ -67,7 +67,7 @@ public class AverageDVModels {
     return averages;
   }
 
-  public static Map<String, SimpleMatrix> averageMatrices(List<Map<String, SimpleMatrix>> maps) {
+  public static Map<String, SimpleMatrix> averageUnaryMatrices(List<Map<String, SimpleMatrix>> maps) {
     Map<String, SimpleMatrix> averages = Generics.newHashMap();
     for (String name : getMatrixNames(maps)) {
       int count = 0;
@@ -153,11 +153,11 @@ public class AverageDVModels {
           }
         });
 
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryTransformAverages = averageMatrices(binaryTransformMaps);
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryScoreAverages = averageMatrices(binaryScoreMaps);
-    Map<String, SimpleMatrix> unaryTransformAverages = averageMatrices(unaryTransformMaps);
-    Map<String, SimpleMatrix> unaryScoreAverages = averageMatrices(unaryScoreMaps);
-    Map<String, SimpleMatrix> wordAverages = averageMatrices(wordMaps);
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryTransformAverages = averageBinaryMatrices(binaryTransformMaps);
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryScoreAverages = averageBinaryMatrices(binaryScoreMaps);
+    Map<String, SimpleMatrix> unaryTransformAverages = averageUnaryMatrices(unaryTransformMaps);
+    Map<String, SimpleMatrix> unaryScoreAverages = averageUnaryMatrices(unaryScoreMaps);
+    Map<String, SimpleMatrix> wordAverages = averageUnaryMatrices(wordMaps);
 
     DVModel newModel = new DVModel(binaryTransformAverages, unaryTransformAverages,
                                    binaryScoreAverages, unaryScoreAverages,
