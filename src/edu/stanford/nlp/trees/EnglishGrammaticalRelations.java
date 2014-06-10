@@ -928,10 +928,17 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation NUMERIC_MODIFIER =
     new GrammaticalRelation(Language.English, "num", "numeric modifier",
-        NumericModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX", tregexCompiler,
+        NumericModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|ADJP|WHADJP|QP", tregexCompiler,
         new String[] {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
-          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: QP)"
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: QP)",
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
+          // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
+          // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.  
+          // Note that the earlier tregexes are usually enough to cover those phrases, such as when 
+          // the QP is by itself in an ADJP or NP, but sometimes it can have other siblings such
+          // as in the phrase "$ 100 million or more".  In that case, this next expression is needed.
+          "QP < QP=target < /^[$]$/"
         });
   public static class NumericModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
