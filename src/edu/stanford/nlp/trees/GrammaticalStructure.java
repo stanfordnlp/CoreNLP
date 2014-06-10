@@ -245,7 +245,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
           for (Tree u : egr.getRelatedNodes(t, root)) {
-            //System.out.println("Adding " + egr.getShortName() + " from " + t + " to " + u );
+            // System.out.println("Adding " + egr.getShortName() + " from " + t.value() + " to " + u.value() );
             tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
           }
         }
