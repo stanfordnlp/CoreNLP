@@ -30,6 +30,7 @@ public class PTBTokenizerTest extends TestCase {
     "1. Buy a new Chevrolet (37%-owned in the U.S..) . 15%",
     "I like you ;-) but do you care :(. I'm happy ^_^ but shy (x.x)!",
     "Diamond (``Not even the chair'') lives near Udaipur (84km). {1. A potential Palmer trade:}",
+    "No. I like No. 24 and no.47."
   };
 
   private String[][] ptbGold = {
@@ -56,6 +57,7 @@ public class PTBTokenizerTest extends TestCase {
       "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
     { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
       "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
+    { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
   };
 
   public void testPTBTokenizerWord() {

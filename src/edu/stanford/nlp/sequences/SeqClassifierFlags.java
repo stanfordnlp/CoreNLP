@@ -936,6 +936,8 @@ public class SeqClassifierFlags implements Serializable {
   public double priorAlpha = 0;
   
   public String splitWordRegex = null;
+  public boolean groupByInput = false;
+  public boolean groupByHiddenUnit = false;
   
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2280,6 +2282,10 @@ public class SeqClassifierFlags implements Serializable {
         priorAlpha = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("splitWordRegex")){
         splitWordRegex = val;
+      } else if (key.equalsIgnoreCase("groupByInput")){
+        groupByInput = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("groupByHiddenUnit")){
+        groupByHiddenUnit = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
