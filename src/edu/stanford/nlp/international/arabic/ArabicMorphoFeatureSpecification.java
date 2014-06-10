@@ -12,7 +12,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatures;
 /**
  * Extracts morphosyntactic features from BAMA/SAMA analyses. Compatible with both the
  * long tags in the ATB and the output of MADA.
- * 
+ *
  * @author Spence Green
  *
  */
@@ -20,28 +20,28 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
 
   private static final long serialVersionUID = 4448045447200922076L;
 
-  public static final String[] defVals = {"I", "D"};
-  public static final String[] caseVals = {"NOM","ACC","GEN"};
-  public static final String[] genVals = {"M","F"};
-  public static final String[] numVals = {"SG","DU","PL"};
-  public static final String[] perVals = {"1","2","3"};
-  public static final String[] possVals = {"POSS"};
-  public static final String[] voiceVals = {"ACT","PASS"};
-  public static final String[] moodVals = {"I","S","J"};
-  public static final String[] tenseVals = {"PAST","PRES","IMP"};
-  
+  private static final String[] defVals = {"I", "D"};
+  private static final String[] caseVals = {"NOM","ACC","GEN"};
+  private static final String[] genVals = {"M","F"};
+  private static final String[] numVals = {"SG","DU","PL"};
+  private static final String[] perVals = {"1","2","3"};
+  private static final String[] possVals = {"POSS"};
+  private static final String[] voiceVals = {"ACT","PASS"};
+  private static final String[] moodVals = {"I","S","J"};
+  private static final String[] tenseVals = {"PAST","PRES","IMP"};
+
   // Standard feature tuple (e.g., "3MS", "1P", etc.)
   private static final Pattern pFeatureTuple = Pattern.compile("(\\d\\p{Upper}\\p{Upper}?)");
-  
+
   // Demonstrative pronouns do not have number
   private static final Pattern pDemPronounFeatures = Pattern.compile("DEM_PRON(.+)");
-  
+
   //Verbal patterns
   private static final Pattern pVerbMood = Pattern.compile("MOOD|SUBJ");
   private static final Pattern pMood = Pattern.compile("_MOOD:([ISJ])");
   private static final Pattern pVerbTenseMarker = Pattern.compile("IV|PV|CV");
   private static final Pattern pNounNoMorph = Pattern.compile("PROP|QUANT");
-  
+
   @Override
   public List<String> getValues(MorphoFeatureType feat) {
     if(feat == MorphoFeatureType.DEF)
@@ -66,14 +66,14 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
     else
       throw new IllegalArgumentException("Arabic does not support feature type: " + feat.toString());
   }
-  
+
   /**
    * Hand-written rules to convert SAMA analyses to feature structures.
    */
   @Override
   public MorphoFeatures strToFeatures(String spec) {
     MorphoFeatures features = new ArabicMorphoFeatures();
-    
+
     // Check for the boundary symbol
     if(spec == null || spec.equals("")) {
       return features;
@@ -82,7 +82,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
     if(isActive(MorphoFeatureType.POSS) && spec.contains("POSS")) {
       features.addFeature(MorphoFeatureType.POSS,possVals[0]);
     }
-    
+
     //Nominals and pronominals. Mona ignores Pronominals in ERTS, but they seem to help...
     // NSUFF -- declinable nominals
     // VSUFF -- enclitic pronominals
@@ -95,7 +95,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
           features.addFeature(MorphoFeatureType.NGEN, genVals[1]);
         } else if(spec.contains("MASC") || !pNounNoMorph.matcher(spec).find()) {
           features.addFeature(MorphoFeatureType.NGEN, genVals[0]);
-        } 
+        }
       }
 
       // WSGDEBUG -- Number for nominals only
@@ -105,7 +105,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
         } else if(spec.contains("PL")) {
           features.addFeature(MorphoFeatureType.NNUM, numVals[2]);
         } else if (!pNounNoMorph.matcher(spec).find()){ // (spec.contains("SG"))
-          features.addFeature(MorphoFeatureType.NNUM, numVals[0]);        
+          features.addFeature(MorphoFeatureType.NNUM, numVals[0]);
         }
       }
 
@@ -116,7 +116,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
         } else if (!pNounNoMorph.matcher(spec).find()){
           features.addFeature(MorphoFeatureType.DEF, defVals[0]);
         }
-      }  
+      }
 
       // Proper nouns (probably a stupid feature)
       if (isActive(MorphoFeatureType.PROP)) {
@@ -124,7 +124,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
           features.addFeature(MorphoFeatureType.PROP,"");
         }
       }
-    
+
     } else if(spec.contains("PRON") || (spec.contains("VSUFF_DO") && !pVerbMood.matcher(spec).find())) {
       if(spec.contains("DEM_PRON")) {
         features.addFeature(MorphoFeatureType.DEF, defVals[0]);
@@ -137,10 +137,10 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
       } else {
         processInflectionalFeatures(features, spec);
       }
-      
+
     // Verbs (marked for tense)
     } else if(pVerbTenseMarker.matcher(spec).find()) {
-      
+
       // Tense feature
       if(isActive(MorphoFeatureType.TENSE)) {
         if(spec.contains("PV"))
@@ -150,10 +150,10 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
         else if(spec.contains("CV"))
           features.addFeature(MorphoFeatureType.TENSE, tenseVals[2]);
       }
-      
+
       // Inflectional features
       processInflectionalFeatures(features, spec);
-      
+
       if(isActive(MorphoFeatureType.MOOD)) {
         Matcher moodMatcher = pMood.matcher(spec);
         if(moodMatcher.find()) {
@@ -166,7 +166,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
             features.addFeature(MorphoFeatureType.MOOD, moodVals[2]);
         }
       }
-      
+
       if(isActive(MorphoFeatureType.VOICE)) {
         if(spec.contains("PASS")) {
           features.addFeature(MorphoFeatureType.VOICE, voiceVals[1]);
@@ -177,13 +177,12 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
     }
     return features;
   }
-  
+
   /**
    * Extract features from a standard phi feature specification.
-   * 
+   *
    * @param feats
    * @param spec
-   * @param isNominal
    */
   private void processInflectionalFeatures(MorphoFeatures feats, String spec) {
     // Extract the feature tuple
@@ -191,9 +190,9 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
     if (m.find()) {
       spec = m.group(1);
       processInflectionalFeaturesHelper(feats, spec);
-    } 
+    }
   }
-  
+
   private void processInflectionalFeaturesHelper(MorphoFeatures feats, String spec) {
     if(isActive(MorphoFeatureType.GEN)) {
       if(spec.contains("M"))
@@ -201,16 +200,16 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
       else if(spec.contains("F"))
         feats.addFeature(MorphoFeatureType.GEN, genVals[1]);
     }
-    
+
     if(isActive(MorphoFeatureType.NUM)) {
       if(spec.endsWith("S"))
-        feats.addFeature(MorphoFeatureType.NUM, numVals[0]);        
+        feats.addFeature(MorphoFeatureType.NUM, numVals[0]);
       else if(spec.endsWith("D"))
         feats.addFeature(MorphoFeatureType.NUM, numVals[1]);
       else if(spec.endsWith("P"))
         feats.addFeature(MorphoFeatureType.NUM, numVals[2]);
     }
-    
+
     if(isActive(MorphoFeatureType.PER)) {
       if(spec.contains("1"))
         feats.addFeature(MorphoFeatureType.PER, perVals[0]);
@@ -220,15 +219,15 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
         feats.addFeature(MorphoFeatureType.PER, perVals[2]);
     }
   }
-  
+
   /**
    * Converts features specifications to labels for tagging
-   * 
+   *
    * @author Spence Green
    *
    */
   public static class ArabicMorphoFeatures extends MorphoFeatures {
-    
+
     private static final long serialVersionUID = -4611776415583633186L;
 
     @Override
@@ -245,25 +244,25 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
       }
       return mFeats;
     }
-    
+
     @Override
     public String getTag(String basePartOfSpeech) {
-      StringBuilder sb = new StringBuilder();
+      StringBuilder sb = new StringBuilder(basePartOfSpeech);
       // Iterate over feature list so that features are added in the same order
       // for every feature spec.
-      for(MorphoFeatureType feat : MorphoFeatureType.values()) {
-        if(hasFeature(feat)) {
+      for (MorphoFeatureType feat : MorphoFeatureType.values()) {
+        if (hasFeature(feat)) {
           sb.append(String.format("-%s:%s",feat,fSpec.get(feat)));
         }
       }
-      return basePartOfSpeech + sb.toString();
+      return sb.toString();
     }
   }
-  
+
   /**
    * For debugging. Converts a set of long tags (BAMA analyses as in the ATB) to their morpho
    * feature specification. The input file should have one long tag per line.
-   * 
+   *
    * @param args
    */
   public static void main(String[] args) {
@@ -271,14 +270,14 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
       System.err.printf("Usage: java %s filename feats%n", ArabicMorphoFeatureSpecification.class.getName());
       System.exit(-1);
     }
-    
+
     MorphoFeatureSpecification fSpec = new ArabicMorphoFeatureSpecification();
     String[] feats = args[1].split(",");
     for(String feat : feats) {
       MorphoFeatureType fType = MorphoFeatureType.valueOf(feat);
       fSpec.activate(fType);
     }
-    
+
     File fName = new File(args[0]);
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fName)));
@@ -290,7 +289,7 @@ public class ArabicMorphoFeatureSpecification extends MorphoFeatureSpecification
       }
       br.close();
       System.out.printf("%nRead %d lines%n",nLine);
-      
+
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     } catch (IOException e) {
