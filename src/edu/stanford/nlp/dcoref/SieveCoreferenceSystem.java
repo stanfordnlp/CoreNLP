@@ -141,9 +141,8 @@ public class SieveCoreferenceSystem {
    * Array of sieve passes to be used in the system
    * Ordered from highest precision to lowest!
    */
-  /** Not final because may change when running optimize sieve ordering but otherwise should stay fixed */
   private /*final */DeterministicCorefSieve [] sieves;
-  private /*final*/ String [] sieveClassNames;
+  public /*final*/ String [] sieveClassNames;
 
   /**
    * Dictionaries of all the useful goodies (gender, animacy, number etc. lists)
@@ -153,28 +152,27 @@ public class SieveCoreferenceSystem {
   /**
    * Semantic knowledge: WordNet
    */
-  private final Semantics semantics;
+  public final Semantics semantics;
 
-  private LogisticClassifier<String, String> singletonPredictor;
-
-  // Below are member variables used for scoring (not thread safe)
+  public LogisticClassifier<String, String> singletonPredictor;
 
   /** Current sieve index */
-  private int currentSieve;
+  public int currentSieve;
 
   /** counter for links in passes (Pair<correct links, total links>)  */
-  private List<Pair<Integer, Integer>> linksCountInPass;
+  public List<Pair<Integer, Integer>> linksCountInPass;
+
 
   /** Scores for each pass */
-  private List<CorefScorer> scorePairwise;
-  private List<CorefScorer> scoreBcubed;
-  private List<CorefScorer> scoreMUC;
+  public List<CorefScorer> scorePairwise;
+  public List<CorefScorer> scoreBcubed;
+  public List<CorefScorer> scoreMUC;
 
   private List<CorefScorer> scoreSingleDoc;
 
   /** Additional scoring stats */
-  private int additionalCorrectLinksCount;
-  private int additionalLinksCount;
+  int additionalCorrectLinksCount;
+  int additionalLinksCount;
 
   public SieveCoreferenceSystem(Properties props) throws Exception {
     // initialize required fields
@@ -329,8 +327,6 @@ public class SieveCoreferenceSystem {
   public boolean doScore() { return doScore; }
   public Dictionaries dictionaries() { return dictionaries; }
   public Semantics semantics() { return semantics; }
-  public String sieveClassName(int sieveIndex)  {
-    return (sieveIndex >= 0 && sieveIndex < sieveClassNames.length)? sieveClassNames[sieveIndex]:null; }
 
   /**
    * Needs the following properties:
