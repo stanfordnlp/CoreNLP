@@ -291,7 +291,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   byte[][] fnumArr; // TODO: move this into TaggerExperiments. It could be a private method of that class with an accessor
   LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
-  // features to an array which maps from tag number to feature weight index in the lambdas array.
+  // feature to an array which maps from tag number to feature index.
   List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
   //PairsHolder pairs = new PairsHolder();
   Extractors extractors;
@@ -572,9 +572,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     extractorsRare.setGlobalHolder(this);
   }
 
-  /** Removes features that never have a non-zero weight for any tag from
-   *  the fAssociations' appropriate Map.
-   */
   private void removeDeadRules() {
     for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
       List<String> deadRules = new ArrayList();
