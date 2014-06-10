@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -960,7 +959,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
 
       if (flags.usePosition) {
-        featuresC.add(c.get(CoreAnnotations.PositionAnnotation.class) + "-POSITION");
+        featuresC.add(c.get(CoreAnnotations.PositionAnnotation.class) + "-POSITION");        
       }
       if (flags.useBeginSent) {
         String pos = c.get(CoreAnnotations.PositionAnnotation.class);
@@ -1584,20 +1583,20 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
     if (flags.useRadical && cWord.length() > 0) {
       if (cWord.length() == 1) {
-        featuresC.add(RadicalMap.getRadical(cWord.charAt(0)) +
+        featuresC.add(RadicalMap.getRadical(cWord.charAt(0)) + 
                       "-SINGLE-CHAR-RADICAL");
       } else {
-        featuresC.add(RadicalMap.getRadical(cWord.charAt(0)) +
+        featuresC.add(RadicalMap.getRadical(cWord.charAt(0)) + 
                       "-START-RADICAL");
         featuresC.add(RadicalMap.getRadical(cWord.charAt(cWord.length() - 1)) +
                       "-END-RADICAL");
       }
       for (int i = 0; i < cWord.length(); ++i) {
-        featuresC.add(RadicalMap.getRadical(cWord.charAt(i)) +
+        featuresC.add(RadicalMap.getRadical(cWord.charAt(i)) + 
                       "-RADICAL");
       }
     }
-
+    
     if(flags.splitWordRegex != null && !flags.splitWordRegex.isEmpty()){
       String[] ws = c.word().split(flags.splitWordRegex);
       for(String s: ws){
@@ -1660,10 +1659,10 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         featuresCpC.add(pWord.substring(0, len) + "-PREVIOUS-PREFIX");
       }
       for (int pos = pWord.length() - maxLen; pos < pWord.length(); ++pos) {
-        featuresCpC.add(pWord.substring(pos, pWord.length()) +
+        featuresCpC.add(pWord.substring(pos, pWord.length()) + 
                         "-PREVIOUS-SUFFIX");
       }
-
+      
       maxLen = cWord.length();
       if (flags.maxNGramLeng >= 0 && flags.maxNGramLeng < maxLen) {
         maxLen = flags.maxNGramLeng;
@@ -1672,7 +1671,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         featuresCpC.add(cWord.substring(0, len) + "-CURRENT-PREFIX");
       }
       for (int pos = cWord.length() - maxLen; pos < cWord.length(); ++pos) {
-        featuresCpC.add(cWord.substring(pos, cWord.length()) +
+        featuresCpC.add(cWord.substring(pos, cWord.length()) + 
                         "-CURRENT-SUFFIX");
       }
     }
@@ -2215,7 +2214,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.gazettes == null) { flags.gazettes = new ArrayList<String>(); }
       List<String> gazettes = flags.gazettes;
       for (String gazetteFile : gazettes) {
-        BufferedReader r = IOUtils.readerFromString(gazetteFile, flags.inputEncoding);
+        BufferedReader r = new BufferedReader(new FileReader(gazetteFile));
         readGazette(r);
         r.close();
       }
