@@ -324,7 +324,6 @@ public class RedwoodConfiguration {
    *   <li>log.channels.hide = [channels]: Hide these channels (comma-separated list)</li>
    *   <li>log.channels.show = [channels]: Show only these channels (comma-separated list)</li>
    *   <li>log.channels.width = [int]: If nonzero, the channels for each logging statement will be printed to their left</li>
-   *   <li>log.channels.debug = {true,false}: Turn the debugging channel on or off</li>
    * </ul>
    * @param props The properties to use in configuration
    * @return A new Redwood Configuration based on the passed properties, ignoring any existing custom configuration
@@ -438,7 +437,6 @@ public class RedwoodConfiguration {
     // (parse properties)
     String channelsToShow = get(props,"log.channels.show",null,used);
     String channelsToHide = get(props,"log.channels.hide",null,used);
-    boolean channelsDebug = Boolean.parseBoolean(get(props,"log.channels.debug","true",used));
     int channelWidth = Integer.parseInt(get(props, "log.channels.width", "10", used));
     if (channelsToShow != null && channelsToHide != null) {
       throw new IllegalArgumentException("Can't specify both log.channels.show and log.channels.hide");
@@ -452,9 +450,6 @@ public class RedwoodConfiguration {
       }
     } else if (channelsToHide != null) {
       config = config.printChannels(channelWidth).hideChannels(channelsToHide.split(","));
-    }
-    if (!channelsDebug) {
-      config = config.hideChannels(new Object[]{Redwood.Flag.DEBUG});
     }
     //--Error Check
     for(Object propAsObj : props.keySet()) {
