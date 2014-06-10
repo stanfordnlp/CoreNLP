@@ -15,12 +15,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * Table used to lookup multi-word phrases.
- * This class provides functions for looking up all instances of known phrases in a document in an efficient manner.
- *
- * Phrases can be added to the phrase table using
- *   @link{#readPhrases}
- *   #addPhrase
+ * Table used to lookup multi-word phrases
+ * (useful for looking up all instances of known phrases in a document)
  *
  * @author Angel Chang
  */
@@ -186,13 +182,8 @@ public class PhraseTable implements Serializable
 
   public boolean addPhrase(String phraseText, String tag)
   {
-    return addPhrase(phraseText, tag, null);
-  }
-
-  public boolean addPhrase(String phraseText, String tag, Object phraseData)
-  {
     WordList wordList = toNormalizedWordList(phraseText);
-    return addPhrase(phraseText, tag, wordList, phraseData);
+    return addPhrase(phraseText, tag, wordList);
   }
 
   public boolean addPhrase(List<String> tokens)
@@ -202,22 +193,17 @@ public class PhraseTable implements Serializable
 
   public boolean addPhrase(List<String> tokens, String tag)
   {
-    return addPhrase(tokens, tag, null);
-  }
-
-  public boolean addPhrase(List<String> tokens, String tag, Object phraseData)
-  {
     WordList wordList = new StringList(tokens);
-    return addPhrase(StringUtils.join(tokens, " "), tag, wordList, phraseData);
+    return addPhrase(StringUtils.join(tokens, " "), tag, wordList);
   }
 
   private int MAX_LIST_SIZE = 20;
-  private synchronized boolean addPhrase(String phraseText, String tag, WordList wordList, Object phraseData)
+  private synchronized boolean addPhrase(String phraseText, String tag, WordList wordList)
   {
     if (rootTree == null) {
       rootTree = new HashMap<String,Object>();
     }
-    return addPhrase(rootTree, phraseText, tag, wordList, phraseData, 0);
+    return addPhrase(rootTree, phraseText, tag, wordList, 0);
   }
 
   private synchronized void addPhrase(Map<String,Object> tree, Phrase phrase, int wordIndex)
@@ -242,8 +228,7 @@ public class PhraseTable implements Serializable
     }
   }
 
-  private synchronized boolean addPhrase(Map<String,Object> tree,
-                                         String phraseText, String tag, WordList wordList, Object phraseData, int wordIndex)
+  private synchronized boolean addPhrase(Map<String,Object> tree, String phraseText, String tag, WordList wordList, int wordIndex)
   {
     // Find place to insert this item
     boolean phraseAdded = false;  // True if this phrase was successfully added to the phrase table
@@ -254,7 +239,7 @@ public class PhraseTable implements Serializable
       Object node = tree.get(word);
       if (node == null) {
         // insert here
-        Phrase phrase = new Phrase(wordList, phraseText, tag, phraseData);
+        Phrase phrase = new Phrase(wordList, phraseText, tag);
         tree.put(word, phrase);
         phraseAdded = true;
         newPhraseAdded = true;
@@ -267,7 +252,7 @@ public class PhraseTable implements Serializable
           oldPhraseNewFormAdded = oldphrase.addForm(phraseText);
         } else {
           // create list with this phrase and other and put it here
-          Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
+          Phrase newphrase = new Phrase(wordList, phraseText, tag);
           List list = new ArrayList(2);
           list.add(oldphrase);
           list.add(newphrase);
@@ -306,7 +291,7 @@ public class PhraseTable implements Serializable
         }
         if (!phraseAdded && nMaps == 0) {
           // add to list
-          Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
+          Phrase newphrase = new Phrase(wordList, phraseText, tag);
           lookupList.add(newphrase);
           newPhraseAdded = true;
           phraseAdded = true;
@@ -344,7 +329,7 @@ public class PhraseTable implements Serializable
             oldPhraseNewFormAdded = oldphrase.addForm(phraseText);
           } else {
             // create list with this phrase and other and put it here
-            Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
+            Phrase newphrase = new Phrase(wordList, phraseText, tag);
             List list = new ArrayList(2);
             list.add(oldphrase);
             list.add(newphrase);
@@ -352,7 +337,7 @@ public class PhraseTable implements Serializable
             newPhraseAdded = true;
           }
         } else {
-          Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
+          Phrase newphrase = new Phrase(wordList, phraseText, tag);
           tree.put(PHRASE_END, newphrase);
           newPhraseAdded = true;
         }
@@ -792,28 +777,20 @@ public class PhraseTable implements Serializable
     }
   }
 
-  /**
-   * A phrase is a multiword expression
-   */
   public static class Phrase
   {
-    /**
-     * List of words in this phrase
-     */
     WordList wordList;
     String text;
     String tag;
-    Object data; // additional data associated with the phrase
-
     // Alternate forms that can be used for lookup elsewhere
     private Set<String> alternateForms;
 
-    public Phrase(WordList wordList, String text, String tag, Object data) {
+    public Phrase(WordList wordList, String text, String tag) {
       this.wordList = wordList;
       this.text = text;
       this.tag = tag;
-      this.data = data;
     }
+
 
     public boolean isLonger(Phrase phrase)
     {
@@ -860,9 +837,6 @@ public class PhraseTable implements Serializable
   public final static Comparator<PhraseMatch> PHRASEMATCH_LENGTH_ENDPOINTS_COMPARATOR =
           Comparators.chain(HasInterval.LENGTH_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
 
-  /**
-   * Represents a matched phrase
-   */
   public static class PhraseMatch implements HasInterval<Integer>
   {
     Phrase phrase;
