@@ -40,6 +40,9 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
     return result;
   }
 
+  /**
+   * Adds all the keys in the given TwoDimensionalMap.  Returns true iff at least one key is added.
+   */
   public boolean addAllKeys(TwoDimensionalMap<? extends K1, ? extends K2, ?> map) {
     boolean result = false;
     for (TwoDimensionalMap.Entry<? extends K1, ? extends K2, ?> entry : map) {
