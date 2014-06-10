@@ -368,9 +368,9 @@ public class Redwood {
     Runnable endTrack = new Runnable(){
       public void run(){
         assert !isThreaded || control.isHeldByCurrentThread();
-        String expected = titleStack.pop();
         //(check name match)
-        if (!isThreaded && !expected.equalsIgnoreCase(title)){
+        String expected = titleStack.pop();
+        if(!expected.equalsIgnoreCase(title)){
           throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
         }
         //(decrement depth)
