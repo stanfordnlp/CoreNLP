@@ -12,6 +12,10 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <center><h2>Stanford CoreNLP XML Output</h2></center>
     <hr size="3" color="#333333"/>
     <center><h3>Document</h3></center>
+
+    <table border="1" style="background-color:#f0f0f0;" align="center">
+    <tr><th>Document Info</th></tr>
+    <tr><td>
     <xsl:if test="root/document/docId">
         <br/>DocId: <xsl:value-of select="root/document/docId"/>
     </xsl:if>
@@ -24,7 +28,23 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <xsl:if test="root/document/docType">
         <br/>DocType: <xsl:value-of select="root/document/docType"/>
     </xsl:if>
-    <table border="1" style="background-color:#f0f0f0;" align="center">
+    <xsl:if test="root/document/author">
+        <br/>Author: <xsl:value-of select="root/document/author"/>
+    </xsl:if>
+    <xsl:if test="root/document/location">
+        <br/>Location: <xsl:value-of select="root/document/location"/>
+    </xsl:if>
+    </td></tr>
+
+    <xsl:if test="root/document/text">
+        <tr><th>Text</th></tr>
+        <tr><td>
+            <div class="preformatted">
+              <xsl:value-of select="root/document/text"/>
+            </div>
+        </td></tr>
+    </xsl:if>
+
     <tr><th>Sentences</th></tr>
     <xsl:for-each select="root/document/sentences/sentence">
       <tr><td>
@@ -97,6 +117,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <th>POS</th>
     <th>NER</th>
     <th>Normalized NER</th>
+    <th>Speaker</th>
   </tr>
   <xsl:for-each select="token">
     <tr>
@@ -108,6 +129,7 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
       <td><xsl:value-of select="POS"/></td>
       <td><xsl:value-of select="NER"/></td>
       <td><xsl:value-of select="NormalizedNER"/></td>
+      <td><xsl:value-of select="Speaker"/></td>
     </tr>
   </xsl:for-each>
   </table>
