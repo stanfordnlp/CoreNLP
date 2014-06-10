@@ -1,4 +1,4 @@
-STANFORD DEPENDENCIES.  Stanford Parser v2.0.4 - 2012-11-12
+STANFORD DEPENDENCIES.  Stanford Parser v2.0.5 - 2013-04-05
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
@@ -60,7 +60,7 @@ added 2:
     became essential as we expanded our consideration of informal
     text types. It is used for interjections, fillers, discourse markers
     and emoticons.
-  \item[goeswith] was added. In badly edited text, it is used to join the
+  - goeswith was added. In badly edited text, it is used to join the
     two parts of a word.
 
 A few other changes and improvements were also made, including improvements
