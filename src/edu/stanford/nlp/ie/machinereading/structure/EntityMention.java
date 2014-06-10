@@ -239,7 +239,7 @@ public class EntityMention extends ExtractionObject {
     + (typeProbabilities != null ? ", probs=" + probsToString() : "")
     + "]";
   }
-  
+
   static class CompByHead implements Comparator<EntityMention> {
     public int compare(EntityMention o1, EntityMention o2) {
       if(o1.getHeadTokenStart() < o2.getHeadTokenStart()){
