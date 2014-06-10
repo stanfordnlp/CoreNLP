@@ -274,7 +274,12 @@ public abstract class OutputHandler extends LogRecordHandler{
     } else if(record.content == null){
       content = new String[]{"null"};
     } else {
-      content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
+      String toStr = record.content.toString();
+      if (toStr == null) {
+        content = new String[]{"<null toString()>"};
+      } else {
+        content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
+      }
     }
     
     //--Handle Tracks
