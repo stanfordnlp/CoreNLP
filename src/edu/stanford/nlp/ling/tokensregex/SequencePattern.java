@@ -113,6 +113,11 @@ public class SequencePattern<T> {
     nodeSequencePattern.updateBindings(varGroupBindings);
   }
 
+  @Override
+  public String toString(){
+    return this.pattern();
+  }
+
   public String pattern() {
     return patternStr;
   }
@@ -156,6 +161,26 @@ public class SequencePattern<T> {
 
   public SequenceMatcher<T> getMatcher(List<? extends T> tokens) {
     return new SequenceMatcher<T>(this, tokens);
+  }
+
+  public <OUT> OUT findNodePattern(Function<NodePattern<T>, OUT> filter) {
+    Queue<State> todo = new LinkedList<State>();
+    Set<State> seen = new HashSet<State>();
+    todo.add(root);
+    seen.add(root);
+    while (!todo.isEmpty()) {
+      State state = todo.poll();
+      if (state instanceof NodePatternState) {
+        OUT res = filter.apply(((NodePatternState) state).pattern);
+        if (res != null) return res;
+      }
+      if (state.next != null) {
+        for (State s: state.next) {
+          if (!seen.contains(s)) { seen.add(s); todo.add(s); }
+        }
+      }
+    }
+    return null;
   }
 
   // Parses string to PatternExpr
@@ -659,7 +684,7 @@ public class SequencePattern<T> {
     }
   }
 
-  // Expression that represents a disjuction
+  // Expression that represents a disjunction
   public static class OrPatternExpr extends PatternExpr {
     List<PatternExpr> patterns;
 
@@ -963,6 +988,8 @@ public class SequencePattern<T> {
      * NOTE: Most of times next is just one state
      */
     Set<State> next;
+    boolean hasSavedValue;
+
     protected State() {}
 
     /**
@@ -1045,7 +1072,15 @@ public class SequencePattern<T> {
       next.add(nextState);
     }
 
-    public Object value() { return null; }
+    public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) {
+      if (hasSavedValue) {
+        HasInterval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
+        if (matchedInterval != null && matchedInterval instanceof ValuedInterval) {
+          return ((ValuedInterval) matchedInterval).getValue();
+        }
+      }
+      return null;
+    }
   }
 
   /**
@@ -1069,7 +1104,7 @@ public class SequencePattern<T> {
       this.value = value;
     }
 
-    public Object value() { return value; }
+    public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) { return value; }
   }
 
   /**
@@ -1131,25 +1166,25 @@ public class SequencePattern<T> {
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       if (consume) {
-        Interval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
+        HasInterval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
         int cur = matchedStates.curPosition;
         if (matchedInterval == null) {
           // Haven't tried to match this node before, try now
           // Get element and return if it matched or not
           List<? extends T> nodes = matchedStates.elements();
           // TODO: Fix type checking
-          Collection<Interval<Integer>> matched = pattern.match(nodes, cur);
+          Collection<HasInterval<Integer>> matched = pattern.match(nodes, cur);
           // TODO: Check intervals are valid?   Start at cur and ends after?
           if (matched != null && matched.size() > 0) {
             int nBranches = matched.size();
             int i = 0;
-            for (Interval<Integer> interval:matched) {
+            for (HasInterval<Integer> interval:matched) {
               i++;
               int bid2 = matchedStates.getBranchStates().getBranchId(bid, i, nBranches);
               matchedStates.getBranchStates().setMatchedInterval(bid2, this, interval);
               // If matched, need to add next states to the queue of states to be processed
               // keep in current state until end node reached
-              if (interval.getEnd()-1 <= cur) {
+              if (interval.getInterval().getEnd()-1 <= cur) {
                 matchedStates.addStates(bid2, next);
               } else {
                 matchedStates.addState(bid2, this);
@@ -1161,7 +1196,7 @@ public class SequencePattern<T> {
           }
         } else {
           // Previously matched this state - just need to step through until we get to end of matched interval
-          if (matchedInterval.getEnd()-1 <= cur) {
+          if (matchedInterval.getInterval().getEnd()-1 <= cur) {
             matchedStates.addStates(bid, next);
           } else {
             matchedStates.addState(bid, this);
@@ -1388,7 +1423,7 @@ public class SequencePattern<T> {
       if (consume) {
         return false;
       } else {
-        Object v = (prevState != null)? prevState.value():null;
+        Object v = (prevState != null)? prevState.value(bid, matchedStates):null;
         matchedStates.setGroupEnd(bid, captureGroupId, v);
         return super.match(bid, matchedStates, consume, prevState);
       }
@@ -1453,7 +1488,7 @@ public class SequencePattern<T> {
      * Returns true if there is a feasible combination of child branch ids that
      * causes all child expressions to be satisfied with
      * respect to the specified child expression
-     *   (assuming satisfiction with the specified branch and node index)
+     *   (assuming satisfaction with the specified branch and node index)
      * For other child expressions to have a compatible satisfiable branch,
      *   that branch must also terminate with the same node index as this one.
      * @param index - Index of the child expression
