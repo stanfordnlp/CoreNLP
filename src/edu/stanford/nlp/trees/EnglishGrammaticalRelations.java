@@ -204,7 +204,15 @@ public class EnglishGrammaticalRelations {
           // comma etc actually show up between the target of the conj
           // dependency and the head of the phrase.  Otherwise, a
           // different relationship is probably more appropriate.
-          "VP|S|SBAR|SBARQ|SINV|SQ=root < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ (/^S|SINV$|^(?:A|N|V|PP|PRP|J|W|R)/=target $-- (/^CC|CONJP|:|,$/ $-- (__ ># =root))) )",
+          // Note that this test looks for one of two things: a
+          // cc/conjp which does not have a , between it and the
+          // target or a , which does not appear to the right of a
+          // cc/conjp.  This test eliminates things such as
+          // parenthetics which come after a list, such as in the
+          // sentence "to see the market go down and dump everything,
+          // which ..." where "go down and dump everything, which..."
+          // is all in one VP node.
+          "VP|S|SBAR|SBARQ|SINV|SQ=root < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ (/^S|SINV$|^(?:A|N|V|PP|PRP|J|W|R)/=target [$-- (/^CC|CONJP$/ $-- (__ ># =root) !$++ (/^:|,$/ $++ =target)) | $-- (/^:|,$/ $-- (__ ># =root) [!$-- /^CC|CONJP$/ | $++ (=target < (/^,$/ $++ (__ ># =target)))])] ) )",
 
           // non-parenthetical or comma in suitable phrase with conjunction to left
           "/^(?:ADJP|JJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN)$/ $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
