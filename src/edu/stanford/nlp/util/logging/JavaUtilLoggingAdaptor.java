@@ -45,10 +45,6 @@ public class JavaUtilLoggingAdaptor {
       topLogger.addHandler(redwoodHandler);
       addedRedwoodHandler = true;
     }
-
-    // exclude ourselves from stacktraces
-    Redwood.addLoggingClass(JavaUtilLoggingAdaptor.class.getCanonicalName());
-    Redwood.addLoggingClass("java.util.logging");
   }
 
   /**
@@ -132,8 +128,8 @@ public class JavaUtilLoggingAdaptor {
       logger.log(Level.INFO, "Hello from the class logger");
 
       Redwood.log("Hello from Redwood!");
-      RedwoodConfiguration.empty().rootHandler(
-          RedirectOutputHandler.fromJavaUtilLogging(topLogger)).apply();
+      Redwood.rootHandler().addChild(
+        RedirectOutputHandler.fromJavaUtilLogging(topLogger));
       Redwood.log("Hello from Redwood -> Java!");
       Redwood.log("Hello from Redwood -> Java again!");
       logger.log(Level.INFO, "Hello again from the class logger");
