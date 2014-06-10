@@ -11,14 +11,16 @@ import java.util.Arrays;
 public class KBestSequenceFinder implements BestSequenceFinder {
 
   /**
-   * Runs the Viterbi algorithm on the sequence model given by the TagScorer
+   * Runs the Viterbi algorithm on the sequence model
    * in order to find the best sequence.
-   * @return an array containing the int tags of the best sequence
+   *
+   * @return An array containing the int tags of the best sequence
    */
+  @Override
   public int[] bestSequence(SequenceModel ts) {
     return Counters.argmax(kBestSequences(ts, 1));
   }
-  
+
   public ClassicCounter<int[]> kBestSequences(SequenceModel ts, int k) {
 
     // Set up tag options
@@ -27,11 +29,11 @@ public class KBestSequenceFinder implements BestSequenceFinder {
     int rightWindow = ts.rightWindow();
 
     assert (rightWindow == 0);
-    
+
     int padLength = length + leftWindow + rightWindow;
 
     int[][] tags = new int[padLength][];
-    int[] tagNum = new int[padLength];    
+    int[] tagNum = new int[padLength];
     for (int pos = 0; pos < padLength; pos++) {
       tags[pos] = ts.getPossibleValues(pos);
       tagNum[pos] = tags[pos].length;
@@ -55,7 +57,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
     }
 
     double[][] windowScore = new double[padLength][];
-    
+
     // Score all of each window's options
     for (int pos = leftWindow; pos < leftWindow + length; pos++) {
       windowScore[pos] = new double[productSizes[pos]];
@@ -81,7 +83,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
         }
       }
     }
-    
+
     // Set up score and backtrace arrays
     double[][][] score = new double[padLength][][];
     int[][][][] trace = new int[padLength][][][];
@@ -97,10 +99,10 @@ public class KBestSequenceFinder implements BestSequenceFinder {
         if (pos == leftWindow) {
           numWaysToMake[pos][product] = 1;
         } else if (pos > leftWindow) {
-          // loop over possible p redece ssor types
+          // loop over possible predecessor types
           int sharedProduct = product / tagNum[pos];
           int factor = productSizes[pos] / tagNum[pos];
-          
+
           numWaysToMake[pos][product] = 0;
           for (int newTagNum = 0; newTagNum < tagNum[pos - leftWindow - 1]; newTagNum++) {
             int predProduct = newTagNum * factor + sharedProduct;
@@ -115,7 +117,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
         trace[pos][product] = new int[numWaysToMake[pos][product]][2];
       }
     }
-    
+
     // Do forward Viterbi algorithm
 
     // loop over the classification spot
@@ -145,7 +147,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
               for (int k2 = 0; k2 < score[pos][product].length; k2++) {
                 if (predScore > score[pos][product][k2]) {
                   System.arraycopy(score[pos][product], k2, score[pos][product], k2+1, score[pos][product].length-(k2+1));
-                  System.arraycopy(trace[pos][product], k2, trace[pos][product], k2+1, trace[pos][product].length-(k2+1)); 
+                  System.arraycopy(trace[pos][product], k2, trace[pos][product], k2+1, trace[pos][product].length-(k2+1));
                   score[pos][product][k2] = predScore;
                   trace[pos][product][k2]= new int[2];
                   trace[pos][product][k2][0] = predProduct;
@@ -175,7 +177,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
             System.arraycopy(bestFinalScores, k1, bestFinalScores, k1+1, bestFinalScores.length-(k1+1));
             System.arraycopy(whichDerivation, k1, whichDerivation, k1+1, whichDerivation.length-(k1+1));
             System.arraycopy(bestCurrentProducts, k1, bestCurrentProducts, k1+1, bestCurrentProducts.length-(k1+1));
-            
+
             bestCurrentProducts[k2] = product;
             whichDerivation[k2] = k1;
             bestFinalScores[k2] = score[padLength - 1][product][k1];
@@ -186,7 +188,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
     }
     int[] lastProducts = new int[k];
     System.arraycopy(bestCurrentProducts, 0, lastProducts, 0, lastProducts.length);
-    
+
     for (int last = padLength - 1; last >= length - 1 && last >= 0; last--) {
       for (int k1 = 0; k1 < lastProducts.length; k1++) {
         kBest[k1][last] = tags[last][lastProducts[k1] % tagNum[last]];
@@ -210,8 +212,8 @@ public class KBestSequenceFinder implements BestSequenceFinder {
         //System.err.println(bestFinalScores[i]+"\t"+Arrays.toString(kBest[i]));
       }
     }
-    
+
     return kBestWithScores;
   }
-  
+
 }

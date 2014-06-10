@@ -38,12 +38,10 @@ public class TaggerFeatures extends Features {
 
   int[] xIndexed;
 
-  final TTags ttags;
   final TaggerExperiments domain;
 
-  TaggerFeatures(TTags ttags, TaggerExperiments domain) {
+  TaggerFeatures(TaggerExperiments domain) {
     super();
-    this.ttags = ttags;
     this.domain = domain;
   }
 
