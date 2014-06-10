@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -84,7 +83,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       Set<IntPair> mentionSpanSet = Generics.newHashSet();
       Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
 
-      extractPremarkedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNamedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNPorPRP(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractEnumerations(s, mentions, mentionSpanSet, namedEntitySpanSet);
@@ -99,38 +97,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     for (Mention m : mentions) {
       String pos = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
       if(m.originalSpan.size()==1 && pos.equals("NNS")) m.generic = true;
-    }
-  }
-
-  protected void extractPremarkedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
-    List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
-    SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
-    int beginIndex = -1;
-    for(CoreLabel w : sent) {
-      MultiTokenTag t = w.get(CoreAnnotations.MentionTokenAnnotation.class);
-      if (t != null) {
-        // Part of a mention
-        if (t.isStart()) {
-          // Start of mention
-          beginIndex = w.get(CoreAnnotations.IndexAnnotation.class) - 1;
-        }
-        if (t.isEnd()) {
-          // end of mention
-          int endIndex = w.get(CoreAnnotations.IndexAnnotation.class);
-          if (beginIndex >= 0) {
-            IntPair mSpan = new IntPair(beginIndex, endIndex);
-            int mentionId = assignIds? ++maxID:-1;
-            Mention m = new Mention(mentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
-            mentions.add(m);
-            mentionSpanSet.add(mSpan);
-            beginIndex = -1;
-          } else {
-            SieveCoreferenceSystem.logger.warning("Start of marked mention not found in sentence: "
-                    + t + " at tokenIndex=" + (w.get(CoreAnnotations.IndexAnnotation.class)-1)+ " for "
-                    + s.get(CoreAnnotations.TextAnnotation.class));
-          }
-        }
-      }
     }
   }
 
@@ -346,7 +312,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
     // this shouldn't happen
     //    throw new RuntimeException("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
-    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
+    System.err.println("RuleBasedCorefMentionFinder: ERROR: Failed to find head token");
     return leaves.get(leaves.size() - 1);
   }
 
@@ -541,7 +507,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
     for (String p : patterns) {
       if (checkPleonastic(m, tree, p)) {
-        SieveCoreferenceSystem.logger.fine("RuleBasedCorefMentionFinder: matched pleonastic pattern '" + p + "' for " + tree);
+        System.err.printf("XXXX %s%n", tree);
         return true;
       }
     }
