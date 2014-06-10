@@ -1,6 +1,7 @@
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.InDataStreamFile;
+import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.util.Generics;
@@ -40,7 +41,7 @@ public class TTags {
   /** When making a decision based on the training data as to whether a
    *  tag is closed, this is the threshold for how many tokens can be in
    *  a closed class - purposely conservative.
-   * TODO: make this an option you can set; need to pass in TaggerConfig object and then can say = config.getClosedTagThreshold());
+   * TODO: make this an option you can set
    */
   private final int closedTagThreshold = Integer.valueOf(TaggerConfig.CLOSED_CLASS_THRESHOLD);
 
@@ -154,7 +155,7 @@ public class TTags {
       isEnglish = false;
     } else if(language.equalsIgnoreCase("german")) {
       // The current version of the German tagger is built with the
-      // negra-tiger data set.  We use the STTS tag set.  In
+      // negra-tigra data set.  We use the STTS tag set.  In
       // particular, we use the version with the changes described in
       // appendix A-2 of
       // http://www.uni-potsdam.de/u/germanistik/ls_dgs/tiger1-intro.pdf
@@ -269,7 +270,9 @@ public class TTags {
   }
 
   protected int add(String tag) {
-    return index.indexOf(tag, true);
+    // todo [cdm 2013]: couldn't this just be 1 call to index.indexOf(tag, true) ?
+    index.add(tag);
+    return index.indexOf(tag);
   }
 
   public String getTag(int i) {
@@ -279,7 +282,7 @@ public class TTags {
   protected void save(String filename,
                       Map<String, Set<String>> tagTokens) {
     try {
-      DataOutputStream out = IOUtils.getDataOutputStream(filename);
+      DataOutputStream out = new OutDataStreamFile(filename);
       save(out, tagTokens);
       out.close();
     } catch (IOException e) {
@@ -308,7 +311,7 @@ public class TTags {
 
   protected void read(String filename) {
     try {
-      DataInputStream in = IOUtils.getDataInputStream(filename);
+      InDataStreamFile in = new InDataStreamFile(filename);
       read(in);
       in.close();
     } catch (IOException e) {
