@@ -195,4 +195,54 @@ public class PTBTokenizerTest extends TestCase {
     }
   }
 
+  private String[] sgmlInputs = {
+    "Significant improvements in peak FEV1 were demonstrated with tiotropium/olodaterol 5/2 μg (p = 0.008), 5/5 μg (p = 0.012), and 5/10 μg (p < 0.0001) versus tiotropium monotherapy [51].",
+    "Panasonic brand products are produced by Samsung Electronics Co. Ltd. Sanyo products aren't.",
+    "Oesophageal acid exposure (% time <pH 4) was similar in patients with or without complications (19.2% v 19.3% p>0.05).",
+    "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Strict//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">",
+    "Hi! <foo bar=\"baz xy = foo !$*) 422\" > <?PITarget PIContent?> <?PITarget PIContent> Hi!",
+    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<?xml-stylesheet type=\"text/xsl\" href=\"style.xsl\"?>\n<book xml:id=\"simple_book\" xmlns=\"http://docbook.org/ns/docbook\" version=\"5.0\">\n",
+    "<chapter xml:id=\"chapter_1\"><?php echo $a; ?>\n<!-- This is an SGML/XML comment \"Hi!\" -->\n<p> </p> <p-fix / >",
+  };
+
+  private String[][] sgmlGold = {
+    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium\\/olodaterol",
+            "5\\/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5\\/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
+            ",", "and", "5\\/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
+            "-LSB-", "51", "-RSB-", "." },
+    { "Panasonic", "brand", "products", "are", "produced", "by", "Samsung", "Electronics", "Co.", "Ltd.", ".",
+            "Sanyo", "products", "are", "n't", ".", },
+    { "Oesophageal", "acid", "exposure", "-LRB-", "%", "time", "<", "pH", "4", "-RRB-", "was", "similar", "in",
+            "patients", "with", "or", "without", "complications", "-LRB-", "19.2", "%", "v", "19.3", "%",
+            "p", ">", "0.05", "-RRB-", ".", },
+    { "<!DOCTYPE\u00A0html\u00A0PUBLIC\u00A0\"-//W3C//DTD\u00A0HTML\u00A04.01\u00A0Strict//EN\"\u00A0\"http://www.w3.org/TR/html4/strict.dtd\">" }, // spaces go to &nbsp; \u00A0
+    { "Hi", "!", "<foo\u00A0bar=\"baz\u00A0xy\u00A0=\u00A0foo\u00A0!$*)\u00A0422\"\u00A0>", "<?PITarget\u00A0PIContent?>", "<?PITarget\u00A0PIContent>", "Hi", "!" },
+    { "<?xml\u00A0version=\"1.0\"\u00A0encoding=\"UTF-8\"\u00A0?>", "<?xml-stylesheet\u00A0type=\"text/xsl\"\u00A0href=\"style.xsl\"?>",
+            "<book\u00A0xml:id=\"simple_book\"\u00A0xmlns=\"http://docbook.org/ns/docbook\"\u00A0version=\"5.0\">", },
+    { "<chapter\u00A0xml:id=\"chapter_1\">", "<?php\u00A0echo\u00A0$a;\u00A0?>", "<!--\u00A0This\u00A0is\u00A0an\u00A0SGML/XML\u00A0comment\u00A0\"Hi!\"\u00A0-->",
+            "<p>", "</p>", "<p-fix\u00A0/\u00A0>", },
+  };
+
+  public void testPTBTokenizerSGML() {
+    assert(sgmlInputs.length == sgmlGold.length);
+    for (int sent = 0; sent < sgmlInputs.length; sent++) {
+      PTBTokenizer<CoreLabel> ptbTokenizer =
+              new PTBTokenizer<CoreLabel>(new StringReader(sgmlInputs[sent]), new CoreLabelTokenFactory(), "");
+      for (int i = 0; ptbTokenizer.hasNext() || i < sgmlGold[sent].length; i++) {
+        if ( ! ptbTokenizer.hasNext()) {
+          fail("PTBTokenizer generated too few tokens for sentence " + sent + "! Missing " + sgmlGold[sent][i]);
+        }
+        CoreLabel w = ptbTokenizer.next();
+        try {
+          assertEquals("PTBTokenizer problem", sgmlGold[sent][i], w.value());
+        } catch (ArrayIndexOutOfBoundsException aioobe) {
+          fail("PTBTokenizer generated too many tokens for sentence " + sent + "! Added " + w.value());
+        }
+      }
+    }
+  }
+
+
+
+
 }
