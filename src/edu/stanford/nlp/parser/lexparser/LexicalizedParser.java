@@ -525,7 +525,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     try {
       Timing tim = new Timing();
       System.err.print("Loading parser from text file " + textFileOrUrl + ' ');
-      BufferedReader in = IOUtils.readReaderFromString(textFileOrUrl);
+      BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
       Timing.startTime();
 
       String line = in.readLine();

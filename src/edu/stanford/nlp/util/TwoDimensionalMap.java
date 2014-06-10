@@ -87,6 +87,7 @@ public class TwoDimensionalMap<K1, K2, V> implements Serializable, Iterable<TwoD
   }
 
   public Collection<V> values() {
+    // TODO: Should return a specialized class
     List<V> s = Generics.newArrayList();
     for (Map<K2, V> innerMap : map.values()) {
       s.addAll(innerMap.values());
