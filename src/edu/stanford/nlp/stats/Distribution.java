@@ -2,15 +2,7 @@ package edu.stanford.nlp.stats;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.util.Generics;
 
@@ -29,12 +21,13 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
 
   private static final long serialVersionUID = 6707148234288637809L;
 
+  // todo [cdm Apr 2013]: Make these 3 variables final and put into constructor
   private int numberOfKeys;
   private double reservedMass;
   protected Counter<E> counter;
   private static final int NUM_ENTRIES_IN_STRING = 20;
 
-  private static boolean verbose = false;
+  private static final boolean verbose = false;
 
   public Counter<E> getCounter() {
     return counter;
@@ -44,6 +37,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   /**
    * Exactly the same as sampleFrom(), needed for the Sampler interface.
    */
+  @Override
   public E drawSample() {
     return sampleFrom();
   }
@@ -52,6 +46,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
    * A method to draw a sample, providing an own random number generator.
    * Needed for the ProbabilityDistribution interface.
    */
+  @Override
   public E drawSample(Random random) {
     return sampleFrom(random);
   }
@@ -118,9 +113,9 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
 
 
   /**
-   * @param s a Set of keys.
+   * @param s a Collection of keys.
    */
-  public static <E> Distribution<E> getUniformDistribution(Set<E> s) {
+  public static <E> Distribution<E> getUniformDistribution(Collection<E> s) {
     Distribution<E> norm = new Distribution<E>();
     norm.counter = new ClassicCounter<E>();
     norm.numberOfKeys = s.size();
@@ -134,9 +129,9 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   }
 
   /**
-   * @param s a Set of keys.
+   * @param s a Collection of keys.
    */
-  public static <E> Distribution<E> getPerturbedUniformDistribution(Set<E> s, Random r) {
+  public static <E> Distribution<E> getPerturbedUniformDistribution(Collection<E> s, Random r) {
     Distribution<E> norm = new Distribution<E>();
     norm.counter = new ClassicCounter<E>();
     norm.numberOfKeys = s.size();
@@ -202,7 +197,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
    * @return a new Distribution
    */
   public static <E> Distribution<E> getDistributionFromLogValues(Counter<E> counter) {
-    ClassicCounter<E> c = new ClassicCounter<E>();
+    Counter<E> c = new ClassicCounter<E>();
     // go through once to get the max
     // shift all by max so as to minimize the possibility of underflow
     double max = Counters.max(counter); // Thang 17Feb12: max should operate on counter instead of c, fixed!
@@ -582,12 +577,10 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   }
 
   private static class DynamicDistribution<E> extends Distribution<E> {
-    /**
-     * 
-     */
+
     private static final long serialVersionUID = -6073849364871185L;
-    private Distribution<E> prior;
-    private double priorMultiplier;
+    private final Distribution<E> prior;
+    private final double priorMultiplier;
 
     public DynamicDistribution(Distribution<E> prior, double priorMultiplier) {
       super();
@@ -620,7 +613,8 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
       return prior.containsKey(key);
     }
 
-    public Object argMax() {
+    @Override
+    public E argmax() {
       return Counters.argmax(Counters.linearCombination(this.counter, 1.0, prior.counter, priorMultiplier));
     }
 
@@ -756,8 +750,7 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   }
 
   // no public constructor; use static methods instead
-  private Distribution() {
-  }
+  private Distribution() {}
 
   @Override
   public String toString() {
