@@ -2,7 +2,6 @@ package edu.stanford.nlp.international.arabic.process;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -11,6 +10,7 @@ import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Characters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 /**
@@ -38,7 +38,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
    * @param loc  The index at which to extract features.
    */
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Collection<String> features = new HashSet<String>();
+    Collection<String> features = Generics.newHashSet();
 
     if (clique == cliqueC) {
       addAllInterningAndSuffixing(features, featuresC(cInfo, loc), "C");

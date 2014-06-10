@@ -1,7 +1,6 @@
 
 package edu.stanford.nlp.util.logging;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
@@ -9,6 +8,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A class which encapsulates configuration settings for Redwood.
@@ -329,7 +330,7 @@ public class RedwoodConfiguration {
    * @return A new Redwood Configuration based on the passed properties, ignoring any existing custom configuration
    */
   public static RedwoodConfiguration parse(Properties props){
-    Set<String> used = new HashSet<String>();
+    Set<String> used = Generics.newHashSet();
     //--Construct Pipeline
     //(handlers)
     Redwood.ConsoleHandler console = get(props,"log.toStderr","false",used).equalsIgnoreCase("true") ? Redwood.ConsoleHandler.err() : Redwood.ConsoleHandler.out();

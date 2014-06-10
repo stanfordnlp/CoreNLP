@@ -27,12 +27,12 @@
 package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -44,6 +44,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -66,6 +67,7 @@ public class MentionExtractor {
 
   public CorefMentionFinder mentionFinder;
   protected StanfordCoreNLP stanfordProcessor;
+  protected LogisticClassifier<String, String> singletonPredictor;
 
   /** The maximum mention ID: for preventing duplicated mention ID assignment */
   protected int maxID = -1;
@@ -164,7 +166,7 @@ public class MentionExtractor {
       List<CoreLabel> sentence = words.get(sent);
       Tree tree = trees.get(sent);
       List<Mention> mentions = unorderedMentions.get(sent);
-      HashMap<String, List<Mention>> mentionsToTrees = new HashMap<String, List<Mention>>();
+      Map<String, List<Mention>> mentionsToTrees = Generics.newHashMap();
 
       // merge the parse tree of the entire sentence with the sentence words
       if(doMergeLabels) mergeLabels(tree, sentence);
@@ -208,7 +210,7 @@ public class MentionExtractor {
         mentionsForTree.add(mention);
 
         // generates all fields required for coref, such as gender, number, etc.
-        mention.process(dictionaries, semantics, this);
+        mention.process(dictionaries, semantics, this, singletonPredictor);
       }
 
       //
@@ -257,15 +259,15 @@ public class MentionExtractor {
 
   /** Find syntactic relations (e.g., appositives) in a sentence */
   private void findSyntacticRelations(Tree tree, List<Mention> orderedMentions) {
-    Set<Pair<Integer, Integer>> appos = new HashSet<Pair<Integer, Integer>>();
+    Set<Pair<Integer, Integer>> appos = Generics.newHashSet();
     findAppositions(tree, appos);
     markMentionRelation(orderedMentions, appos, "APPOSITION");
 
-    Set<Pair<Integer, Integer>> preNomi = new HashSet<Pair<Integer, Integer>>();
+    Set<Pair<Integer, Integer>> preNomi = Generics.newHashSet();
     findPredicateNominatives(tree, preNomi);
     markMentionRelation(orderedMentions, preNomi, "PREDICATE_NOMINATIVE");
 
-    Set<Pair<Integer, Integer>> relativePronounPairs = new HashSet<Pair<Integer, Integer>>();
+    Set<Pair<Integer, Integer>> relativePronounPairs = Generics.newHashSet();
     findRelativePronouns(tree, relativePronounPairs);
     markMentionRelation(orderedMentions, relativePronounPairs, "RELATIVE_PRONOUN");
   }

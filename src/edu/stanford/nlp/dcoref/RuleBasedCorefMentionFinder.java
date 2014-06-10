@@ -2,7 +2,6 @@ package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -54,8 +54,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       findHead(s, mentions);
 
       // todo [cdm 2013]: This block seems to do nothing - the two sets are never used
-      Set<IntPair> mentionSpanSet = new HashSet<IntPair>();
-      Set<IntPair> namedEntitySpanSet = new HashSet<IntPair>();
+      Set<IntPair> mentionSpanSet = Generics.newHashSet();
+      Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
       for(Mention m : mentions) {
         mentionSpanSet.add(new IntPair(m.startIndex, m.endIndex));
         if(!m.headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("O")) {
@@ -80,8 +80,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
       List<Mention> mentions = new ArrayList<Mention>();
       predictedMentions.add(mentions);
-      Set<IntPair> mentionSpanSet = new HashSet<IntPair>();
-      Set<IntPair> namedEntitySpanSet = new HashSet<IntPair>();
+      Set<IntPair> mentionSpanSet = Generics.newHashSet();
+      Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
 
       extractNamedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNPorPRP(s, mentions, mentionSpanSet, namedEntitySpanSet);
@@ -172,7 +172,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     final String mentionPattern = "NP < (/^(?:NP|NNP|NML)/=m1 $.. (/^CC|,/ $.. /^(?:NP|NNP|NML)/=m2))";
     TregexPattern tgrepPattern = TregexPattern.compile(mentionPattern);
     TregexMatcher matcher = tgrepPattern.matcher(tree);
-    Map<IntPair, Tree> spanToMentionSubTree = new HashMap<IntPair, Tree>();
+    Map<IntPair, Tree> spanToMentionSubTree = Generics.newHashMap();
     while (matcher.find()) {
       matcher.getMatch();
       Tree m1 = matcher.getNode("m1");
@@ -399,7 +399,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   protected static void removeSpuriousMentions(CoreMap s, List<Mention> mentions, Dictionaries dict) {
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
-    Set<Mention> remove = new HashSet<Mention>();
+    Set<Mention> remove = Generics.newHashSet();
 
 
     for(Mention m : mentions){

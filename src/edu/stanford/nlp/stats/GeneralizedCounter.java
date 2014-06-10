@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableDouble;
 
 /**
@@ -34,7 +34,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
   private static final Object[] zeroKey = new Object[0];
 
-  private Map<K,Object> map = new HashMap<K, Object>();
+  private Map<K,Object> map = Generics.newHashMap();
 
   private int depth;
   private double total;
@@ -247,7 +247,7 @@ public class GeneralizedCounter<K> implements Serializable {
    * equal to the depth of the GeneralizedCounter.
    */
   public Set<List<K>> keySet() {
-    return ErasureUtils.<Set<List<K>>>uncheckedCast(keySet(new HashSet<Object>(), zeroKey, true));
+    return ErasureUtils.<Set<List<K>>>uncheckedCast(keySet(Generics.newHashSet(), zeroKey, true));
   }
 
   /* this is (non-tail) recursive right now, haven't figured out a way
@@ -766,7 +766,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
     @Override
     public Set<K> keySet() {
-      return ErasureUtils.<Set<K>>uncheckedCast(GeneralizedCounter.this.keySet(new HashSet<Object>(), zeroKey, false));
+      return ErasureUtils.<Set<K>>uncheckedCast(GeneralizedCounter.this.keySet(Generics.newHashSet(), zeroKey, false));
     }
 
     @Override

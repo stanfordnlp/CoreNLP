@@ -94,11 +94,37 @@ public class Sentence {
    * @return The Sentence
    */
   public static List<CoreLabel> toCoreLabelList(String... words) {
-    List<CoreLabel> sent = new ArrayList<CoreLabel>();
+    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.length);
     for (String word : words) {
       CoreLabel cl = new CoreLabel();
       cl.setValue(word);
       cl.setWord(word);
+      sent.add(cl);
+    }
+    return sent;
+  }
+
+  /**
+   * Create a sentence as a List of <code>CoreLabel</code> objects from
+   * a List of other label objects.
+   *
+   * @param words The words to make it from
+   * @return The Sentence
+   */
+  public static List<CoreLabel> toCoreLabelList(List<? extends HasWord> words) {
+    List<CoreLabel> sent = new ArrayList<CoreLabel>(words.size());
+    for (HasWord word : words) {
+      CoreLabel cl = new CoreLabel();
+      if (word instanceof Label) {
+        cl.setValue(((Label) word).value());
+      }
+      cl.setWord(word.word());
+      if (word instanceof HasTag) {
+        cl.setTag(((HasTag) word).tag());
+      }
+      if (word instanceof HasLemma) {
+        cl.setLemma(((HasLemma) word).lemma());
+      }
       sent.add(cl);
     }
     return sent;

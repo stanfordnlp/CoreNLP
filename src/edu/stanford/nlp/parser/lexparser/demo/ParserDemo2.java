@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.Tokenizer;
@@ -54,13 +56,23 @@ class ParserDemo2 {
       Tree parse = lp.parse(sentence);
       parse.pennPrint();
       System.out.println();
-      System.out.println(parse.taggedYield());
-      System.out.println();
-
       GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
       List<TypedDependency> tdl = gs.typedDependenciesCCprocessed();
       System.out.println(tdl);
       System.out.println();
+
+      System.out.println("The words of the sentence:");
+      for (Label lab : parse.yield()) {
+        if (lab instanceof CoreLabel) {
+          System.out.println(((CoreLabel) lab).toString("{map}"));
+        } else {
+          System.out.println(lab);
+        }
+      }
+      System.out.println();
+      System.out.println(parse.taggedYield());
+      System.out.println();
+
     }
 
     String sent3 = "This is one last test!";

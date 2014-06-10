@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -74,6 +75,12 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     reader = new CoNLL2011DocumentReader(corpusPath, options);
 
     stanfordProcessor = loadStanfordProcessor(props);
+  }
+  
+  public CoNLLMentionExtractor(Dictionaries dict, Properties props, Semantics semantics,
+      LogisticClassifier<String, String> singletonModel) throws Exception {
+    this(dict, props, semantics);
+    singletonPredictor = singletonModel;
   }
 
   private final boolean collapse = true;

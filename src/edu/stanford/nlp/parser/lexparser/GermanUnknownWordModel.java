@@ -1,12 +1,11 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 /**
@@ -28,8 +27,8 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
                                 Index<String> wordIndex,
                                 Index<String> tagIndex,
                                 ClassicCounter<IntTaggedWord> unSeenCounter,
-                                HashMap<Label,ClassicCounter<String>> tagHash,
-                                HashMap<String,Float> unknownGT,
+                                Map<Label,ClassicCounter<String>> tagHash,
+                                Map<String,Float> unknownGT,
                                 Set<String> seenEnd) {
     super(op, lex, wordIndex, tagIndex, 
           unSeenCounter, tagHash, unknownGT, seenEnd);
@@ -46,9 +45,9 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
                                 Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex, 
          new ClassicCounter<IntTaggedWord>(),
-         new HashMap<Label,ClassicCounter<String>>(),
-         new HashMap<String,Float>(),
-         new HashSet<String>());
+         Generics.<Label,ClassicCounter<String>>newHashMap(),
+         Generics.<String,Float>newHashMap(),
+         Generics.<String>newHashSet());
   }
 
 

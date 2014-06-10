@@ -1,4 +1,4 @@
-package edu.stanford.nlp.process.treebank;
+package edu.stanford.nlp.trees.treebank;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +13,11 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * 
+ *
  * @author Spence Green
  *
  */
@@ -31,7 +31,7 @@ public class ConfigParser implements Iterable<Properties> {
   public static final String paramOutputPath = "OUTPUT_PATH"; // Where to output the results
   public static final String paramSplit = "SPLIT";          //A file listing filenames in a split
   public static final String paramEncode = "OUTPUT_ENCODING";      //Preferred output encoding [Buckwalter | UTF8]
-  public static final String paramMapping = "MAPPING";      //Path to an LDC-format POS tag mapping file 
+  public static final String paramMapping = "MAPPING";      //Path to an LDC-format POS tag mapping file
   public static final String paramDistrib = "DISTRIB";      //Add to distribution or not [true | false]
   public static final String paramType = "TYPE";            //Specify the Dataset type to use
   public static final String paramFlat = "FLAT";            //Output terminals only
@@ -48,7 +48,7 @@ public class ConfigParser implements Iterable<Properties> {
   public static final String paramMaxLen = "MAXLEN";        //Max yield of the trees in the data set
   public static final String paramMorph = "MORPH";          //Add the pre-terminal morphological analysis to the leaf (using the delimiter)
   public static final String paramTransform = "TVISITOR";   //Apply a custom TreeVisitor to each tree in the dataset
-  
+
   //Absolute parameters
   private static final Pattern matchName = Pattern.compile(paramName + DELIM);
   private static final Pattern matchSplit = Pattern.compile(paramSplit + DELIM);
@@ -68,7 +68,7 @@ public class ConfigParser implements Iterable<Properties> {
   private static final Pattern matchMaxLen = Pattern.compile(paramMaxLen + DELIM);
   private static final Pattern matchMorph = Pattern.compile(paramMorph + DELIM);
   private static final Pattern matchTransform = Pattern.compile(paramTransform + DELIM);
-  
+
   private static final Pattern matchEncode = Pattern.compile(paramEncode + DELIM);
   private static final Pattern matchEncodeArgs = Pattern.compile("Buckwalter|UTF8");
 
@@ -94,7 +94,7 @@ public class ConfigParser implements Iterable<Properties> {
 
     //For Pair<Pattern,Pattern>, the first pattern matches the parameter name
     //while the second (optionally) accepts the parameter values
-    patternsMap = new HashMap<String,Pair<Pattern,Pattern>>();
+    patternsMap = Generics.newHashMap();
     patternsMap.put(paramName, new Pair<Pattern,Pattern>(matchName,null));
     patternsMap.put(paramType, new Pair<Pattern,Pattern>(matchType,null));
     patternsMap.put(paramPath, new Pair<Pattern,Pattern>(matchPath,null));
@@ -186,9 +186,9 @@ public class ConfigParser implements Iterable<Properties> {
       reader.close();
 
     } catch (FileNotFoundException e) {
-      System.err.printf("%s: Cannot open file %s\n", this.getClass().getName(),configFile);
+      System.err.printf("%s: Cannot open file %s\n", this.getClass().getName(), configFile);
     } catch (IOException e) {
-      System.err.printf("%s: Error reading %s (line %d)\n", this.getClass().getName(),lineNum);
+      System.err.printf("%s: Error reading %s (line %d)\n", this.getClass().getName(), configFile, lineNum);
     }
   }
 

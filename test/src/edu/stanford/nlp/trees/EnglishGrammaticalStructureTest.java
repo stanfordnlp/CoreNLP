@@ -87,6 +87,8 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (NP-SBJ (CC Both) (NP (NNP Mr.) (NNP Parenteau)) (CC and) (NP (NNP Ms.) (NNP Doyon))) (, ,) (ADVP (RB however)) (, ,) (VP (VBD were) (VP (VBG bleeding) (ADVP (RB badly)))) (. .)))",
          // This pattern of ADJP < RP without an intervening PRT occurs in the Web Treebank...
          "(NP-SBJ-1 (ADJP (ADJP (VBN Rusted) (RP out)) (CC and) (ADJP (JJ unsafe))) (NNS cars))",
+         // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
+         // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
 
     // the expected dependency answers (basic)
@@ -296,6 +298,9 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "cc(Rusted-1, and-3)\n" +
                 "conj(Rusted-1, unsafe-4)\n" +
                 "root(ROOT-0, cars-5)\n",
+        // "nn(RULING-2, ABORTION-1)\n" +
+        //         "nsubjpass(UPHELD-3, RULING-2)\n" +
+        //         "root(ROOT-0, UPHELD-3)\n",
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);

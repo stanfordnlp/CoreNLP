@@ -2,6 +2,7 @@ package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.ling.*;
@@ -34,7 +35,7 @@ public class Trees {
     if (leftEdge(t, root, i)) {
       return i.intValue();
     } else {
-      throw new RuntimeException("Tree is not a descendent of root.");
+      throw new RuntimeException("Tree is not a descendant of root.");
 //      return -1;
     }
   }
@@ -67,7 +68,7 @@ public class Trees {
     if (rightEdge(t, root, i)) {
       return i.intValue();
     } else {
-      throw new RuntimeException("Tree is not a descendent of root.");
+      throw new RuntimeException("Tree is not a descendant of root.");
 //      return root.yield().size() + 1;
     }
   }
@@ -311,23 +312,29 @@ public class Trees {
     return -1;
   }
 
-  /** Return information about the objects in this Tree.
+  /** Returns a String reporting what kinds of Tree and Label nodes this
+   *  Tree contains.
+   *
    *  @param t The tree to examine.
-   *  @return A human-readable String
+   *  @return A human-readable String reporting what kinds of Tree and Label nodes this
+   *      Tree contains.
    */
-  public static String toDebugStructureString(Tree t) {
-    StringBuilder sb = new StringBuilder();
+  public static String toStructureDebugString(Tree t) {
     String tCl = StringUtils.getShortClassName(t);
     String tfCl = StringUtils.getShortClassName(t.treeFactory());
     String lCl = StringUtils.getShortClassName(t.label());
     String lfCl = StringUtils.getShortClassName(t.label().labelFactory());
-    Set<String> otherClasses = new HashSet<String>();
+    Set<String> otherClasses = Generics.newHashSet();
+    String leafLabels = null;
+    String tagLabels = null;
+    String phraseLabels = null;
+    String leaves = null;
+    String nodes = null;
     for (Tree st : t) {
       String stCl = StringUtils.getShortClassName(st);
       String stfCl = StringUtils.getShortClassName(st.treeFactory());
       String slCl = StringUtils.getShortClassName(st.label());
       String slfCl = StringUtils.getShortClassName(st.label().labelFactory());
-
       if ( ! tCl.equals(stCl)) {
         otherClasses.add(stCl);
       }
@@ -340,11 +347,53 @@ public class Trees {
       if ( ! lfCl.equals(slfCl)) {
         otherClasses.add(slfCl);
       }
-    }
+      if (st.isPhrasal()) {
+        if (nodes == null) {
+          nodes = stCl;
+        } else if ( ! nodes.equals(stCl)) {
+          nodes = "mixed";
+        }
+        if (phraseLabels == null) {
+          phraseLabels = slCl;
+        } else if ( ! phraseLabels.equals(slCl)) {
+          phraseLabels = "mixed";
+        }
+      } else if (st.isPreTerminal()) {
+        if (nodes == null) {
+          nodes = stCl;
+        } else if ( ! nodes.equals(stCl)) {
+          nodes = "mixed";
+        }
+        if (tagLabels == null) {
+          tagLabels = StringUtils.getShortClassName(slCl);
+        } else if ( ! tagLabels.equals(slCl)) {
+          tagLabels = "mixed";
+        }
+      } else if (st.isLeaf()) {
+        if (leaves == null) {
+          leaves = stCl;
+        } else if ( ! leaves.equals(stCl)) {
+          leaves = "mixed";
+        }
+        if (leafLabels == null) {
+          leafLabels = slCl;
+        } else if ( ! leafLabels.equals(slCl)) {
+          leafLabels = "mixed";
+        }
+      } else {
+        throw new IllegalStateException("Bad tree state: " + t);
+      }
+    } // end for Tree st : this
+    StringBuilder sb = new StringBuilder();
     sb.append("Tree with root of class ").append(tCl).append(" and factory ").append(tfCl);
-    sb.append(" with label class ").append(lCl).append(" and factory ").append(lfCl);
+    sb.append(" and root label class ").append(lCl).append(" and factory ").append(lfCl);
     if ( ! otherClasses.isEmpty()) {
-      sb.append(" with the following classes also found within the tree: ").append(otherClasses);
+      sb.append(" and the following classes also found within the tree: ").append(otherClasses);
+      return " with " + nodes + " interior nodes and " + leaves +
+        " leaves, and " + phraseLabels + " phrase labels, " +
+        tagLabels + " tag labels, and " + leafLabels + " leaf labels.";
+    } else {
+      sb.append(" (and uniform use of these Tree and Label classes throughout the tree).");
     }
     return sb.toString();
   }

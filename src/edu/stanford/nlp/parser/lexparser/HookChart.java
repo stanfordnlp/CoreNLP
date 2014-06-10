@@ -2,6 +2,8 @@ package edu.stanford.nlp.parser.lexparser;
 
 import java.util.*;
 
+import edu.stanford.nlp.util.Generics;
+
 /**
  * A HookChart is a chart data structure designed for use with the efficient
  * O(n^4) chart parsing mechanisms targetted at lexicalized parsing, which
@@ -11,15 +13,15 @@ import java.util.*;
  */
 class HookChart {
 
-  private Map<ChartIndex,List<Hook>> registeredPreHooks = new HashMap<ChartIndex,List<Hook>>();
-  private Map<ChartIndex,List<Hook>> registeredPostHooks = new HashMap<ChartIndex,List<Hook>>();
-  private Map<ChartIndex,List<Edge>> registeredEdgesByLeftIndex = new HashMap<ChartIndex,List<Edge>>();
-  private Map<ChartIndex,List<Edge>> registeredEdgesByRightIndex = new HashMap<ChartIndex,List<Edge>>();
+  private Map<ChartIndex,List<Hook>> registeredPreHooks = Generics.newHashMap();
+  private Map<ChartIndex,List<Hook>> registeredPostHooks = Generics.newHashMap();
+  private Map<ChartIndex,List<Edge>> registeredEdgesByLeftIndex = Generics.newHashMap();
+  private Map<ChartIndex,List<Edge>> registeredEdgesByRightIndex = Generics.newHashMap();
 
-  private Map<WeakChartIndex,List<Edge>> realEdgesByL = new HashMap<WeakChartIndex,List<Edge>>();
-  private Map<WeakChartIndex,List<Edge>> realEdgesByR = new HashMap<WeakChartIndex,List<Edge>>();
-  private Set<ChartIndex> builtLIndexes = new HashSet<ChartIndex>();
-  private Set<ChartIndex> builtRIndexes = new HashSet<ChartIndex>();
+  private Map<WeakChartIndex,List<Edge>> realEdgesByL = Generics.newHashMap();
+  private Map<WeakChartIndex,List<Edge>> realEdgesByR = Generics.newHashMap();
+  private Set<ChartIndex> builtLIndexes = Generics.newHashSet();
+  private Set<ChartIndex> builtRIndexes = Generics.newHashSet();
 
   private Interner interner = new Interner();
 

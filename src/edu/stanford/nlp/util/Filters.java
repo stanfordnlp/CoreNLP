@@ -93,7 +93,7 @@ public class Filters {
     private final boolean judgment;
 
     protected CollectionAcceptFilter(Collection<E> c, boolean judgment) {
-      this.args = new HashSet<E>(c);
+      this.args = Generics.newHashSet(c);
       this.judgment = judgment;
     }
 

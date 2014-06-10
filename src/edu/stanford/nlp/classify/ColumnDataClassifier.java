@@ -54,6 +54,7 @@ import edu.stanford.nlp.stats.Distribution;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
@@ -653,14 +654,14 @@ public class ColumnDataClassifier {
    */
   private Datum<String,String> makeDatum(String[] strs) {
     List<String> theFeatures = new ArrayList<String>();
-    Collection<String> globalFeatures = new HashSet<String>();
+    Collection<String> globalFeatures = Generics.newHashSet();
     if (globalFlags.useClassFeature) {
       globalFeatures.add("CLASS");
     }
     addAllInterningAndPrefixing(theFeatures, globalFeatures, "");
 
     for (int i = 0; i < flags.length; i++) {
-      Collection<String> featuresC = new HashSet<String>();//important that this is a hash set to prevent same feature from being added multiple times
+      Collection<String> featuresC = Generics.newHashSet();//important that this is a hash set to prevent same feature from being added multiple times
       makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
       addAllInterningAndPrefixing(theFeatures, featuresC, i + "-");
     }
@@ -1113,7 +1114,7 @@ public class ColumnDataClassifier {
     Set<String> limitFeatureLabels = null;
     if (globalFlags.limitFeaturesLabels != null) {
       String[] labels = globalFlags.limitFeaturesLabels.split(",");
-      limitFeatureLabels = new HashSet<String>();
+      limitFeatureLabels = Generics.newHashSet();
       for (String label:labels) {
         limitFeatureLabels.add(label.trim());
       }
@@ -1497,6 +1498,10 @@ public class ColumnDataClassifier {
         myFlags[col].maxWordNGramLeng = Integer.parseInt(val);
       } else if (key.equals("minWordNGramLeng")) {
         myFlags[col].minWordNGramLeng = Integer.parseInt(val);
+        if (myFlags[col].minWordNGramLeng < 1) {
+          System.err.println("minWordNGramLeng set to " + myFlags[col].minWordNGramLeng + ", resetting to 1");
+          myFlags[col].minWordNGramLeng = 1;
+        }
       } else if (key.equals("wordNGramBoundaryRegexp")) {
         myFlags[col].wordNGramBoundaryRegexp = val;
         try {

@@ -2,9 +2,8 @@ package edu.stanford.nlp.parser.lexparser;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.Label;
@@ -14,6 +13,7 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
@@ -69,12 +69,12 @@ public class BaseUnknownWordModel implements UnknownWordModel {
    *  signature is just the first character or its unicode type for things
    *  that aren't Chinese characters.
    */
-  protected final HashMap<Label,ClassicCounter<String>> tagHash;
+  protected final Map<Label,ClassicCounter<String>> tagHash;
 
   /** This is the set of all signatures that we have seen. */
   final private Set<String> seenEnd;
 
-  final HashMap<String,Float> unknownGT;
+  final Map<String,Float> unknownGT;
 
   /** All classes that implement UnknownWordModel must call the constructor that initializes this variable. */
   private final Lexicon lex;
@@ -84,8 +84,8 @@ public class BaseUnknownWordModel implements UnknownWordModel {
                               Index<String> wordIndex,
                               Index<String> tagIndex,
                               ClassicCounter<IntTaggedWord> unSeenCounter,
-                              HashMap<Label,ClassicCounter<String>> tagHash,
-                              HashMap<String,Float> unknownGT,
+                              Map<Label,ClassicCounter<String>> tagHash,
+                              Map<String,Float> unknownGT,
                               Set<String> seenEnd) {
     endLength = op.lexOptions.unknownSuffixSize;
     // TODO: refactor these terms into BaseUnknownWordModelTrainer
@@ -115,9 +115,9 @@ public class BaseUnknownWordModel implements UnknownWordModel {
                               Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex, 
          new ClassicCounter<IntTaggedWord>(),
-         new HashMap<Label,ClassicCounter<String>>(),
-         new HashMap<String,Float>(),
-         new HashSet<String>());
+         Generics.<Label,ClassicCounter<String>>newHashMap(),
+         Generics.<String,Float>newHashMap(),
+         Generics.<String>newHashSet());
   }
 
 

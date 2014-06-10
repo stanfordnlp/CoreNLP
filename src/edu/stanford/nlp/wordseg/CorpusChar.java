@@ -5,6 +5,7 @@ import java.io.*;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Check tag of each character from 5 different corpora. (4 official training corpora of Sighan bakeoff 2005, plus CTB)
@@ -15,20 +16,20 @@ import edu.stanford.nlp.io.RuntimeIOException;
 
  
 public class CorpusChar {
-  private HashMap <String, Set <String>> charMap;
+  private Map <String, Set <String>> charMap;
 
   public CorpusChar(String charlistFilename)  {
     charMap=readDict(charlistFilename); 
   }
 
-  HashMap<String, Set<String>> getCharMap() {
+  Map<String, Set<String>> getCharMap() {
     return charMap;
   }
   
   
-  private HashMap <String, Set <String>> char_dict;
+  private Map<String, Set <String>> char_dict;
 
-  private HashMap<String, Set<String>> readDict(String filename)  {
+  private Map<String, Set<String>> readDict(String filename)  {
 
     System.err.println("Loading character dictionary file from " + filename);
 
@@ -37,7 +38,7 @@ public class CorpusChar {
       BufferedReader DetectorReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
       String DetectorLine;
 
-      char_dict = new HashMap<String, Set <String>>();
+      char_dict = Generics.newHashMap();
       //System.err.println("DEBUG: in CorpusChar readDict");
       while ((DetectorLine = DetectorReader.readLine()) != null) {
         
@@ -47,7 +48,7 @@ public class CorpusChar {
         Set<String> chars=char_dict.get(tag);
 	 
         if(chars==null){
-          chars = new HashSet<String>();
+          chars = Generics.newHashSet();
           char_dict.put(tag,chars);
         } 
         //System.err.println("DEBUG: CorpusChar: "+filename+" "+fields[1]);
@@ -63,7 +64,7 @@ public class CorpusChar {
   }
 
   public String getTag(String a1, String a2) {
-    HashMap<String, Set<String>> h1=getCharMap();
+    Map<String, Set<String>> h1=getCharMap();
     Set<String> h2=h1.get(a1);
     if (h2 == null) return "0";
     if (h2.contains(a2)) 

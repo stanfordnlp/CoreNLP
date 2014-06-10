@@ -75,42 +75,46 @@ public class NERCombinerAnnotator implements Annotator {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       // classify tokens for each sentence
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-        List<CoreLabel> output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
-        if (VERBOSE) {
-          boolean first = true;
-          System.err.print("NERCombinerAnnotator direct output: [");
-          for (CoreLabel w : output) {
-            if (first) { first = false; } else { System.err.print(", "); }
-            System.err.print(w.toString());
-          }
-          System.err.println(']');
-        }
-
-        for (int i = 0; i < tokens.size(); ++i) {
-
-          // add the named entity tag to each token
-          String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
-          String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-          tokens.get(i).setNER(neTag);
-          if(normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
-          NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
-        }
-
-        if (VERBOSE) {
-          boolean first = true;
-          System.err.print("NERCombinerAnnotator output: [");
-          for (CoreLabel w : tokens) {
-            if (first) { first = false; } else { System.err.print(", "); }
-            System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
-          }
-          System.err.println(']');
-        }
+        doOneSentence(annotation, sentence);
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);
     }
     //timerStop("done.");
+  }
+
+  public CoreMap doOneSentence(Annotation annotation, CoreMap sentence) {
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+    if (VERBOSE) {
+      boolean first = true;
+      System.err.print("NERCombinerAnnotator direct output: [");
+      for (CoreLabel w : output) {
+        if (first) { first = false; } else { System.err.print(", "); }
+        System.err.print(w.toString());
+      }
+      System.err.println(']');
+    }
+
+    for (int i = 0; i < tokens.size(); ++i) {
+      // add the named entity tag to each token
+      String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
+      String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+      tokens.get(i).setNER(neTag);
+      if(normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
+      NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
+    }
+
+    if (VERBOSE) {
+      boolean first = true;
+      System.err.print("NERCombinerAnnotator output: [");
+      for (CoreLabel w : tokens) {
+        if (first) { first = false; } else { System.err.print(", "); }
+        System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+      }
+      System.err.println(']');
+    }
+    return sentence;
   }
 
   @Override

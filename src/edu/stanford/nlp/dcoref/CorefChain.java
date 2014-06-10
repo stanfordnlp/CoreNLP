@@ -31,7 +31,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +41,7 @@ import edu.stanford.nlp.dcoref.Dictionaries.Animacy;
 import edu.stanford.nlp.dcoref.Dictionaries.Gender;
 import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.IntTuple;
 
@@ -278,15 +278,15 @@ public class CorefChain implements Serializable {
       }
     }
   }
-  public CorefChain(CorefCluster c, HashMap<Mention, IntTuple> positions){
+  public CorefChain(CorefCluster c, Map<Mention, IntTuple> positions){
     chainID = c.clusterID;
     mentions = new ArrayList<CorefMention>();
-    mentionMap = new HashMap<IntPair, Set<CorefMention>>();
+    mentionMap = Generics.newHashMap();
     for (Mention m : c.getCorefMentions()) {
       CorefMention men = new CorefMention(m, positions.get(m));
       mentions.add(men);
       IntPair position = new IntPair(men.sentNum, men.headIndex);
-      if(!mentionMap.containsKey(position)) mentionMap.put(position, new HashSet<CorefMention>());
+      if(!mentionMap.containsKey(position)) mentionMap.put(position, Generics.<CorefMention>newHashSet());
       mentionMap.get(position).add(men);
       if(men.moreRepresentativeThan(representative)) representative = men;
     }

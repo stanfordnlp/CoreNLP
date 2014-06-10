@@ -32,24 +32,28 @@ import java.util.Iterator;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.HasLemma;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.KBestViterbiParser;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.TreePrint;
+import edu.stanford.nlp.trees.TreeTransformer;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.DeltaIndex;
-import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 
 
 public class LexicalizedParserQuery implements ParserQuery {
 
   private final Options op;
   private final TreeTransformer debinarizer;
+  private final TreeTransformer boundaryRemover;
 
   /** The PCFG parser. */
   private final ExhaustivePCFGParser pparser;
@@ -62,7 +66,7 @@ public class LexicalizedParserQuery implements ParserQuery {
 
   private final TreeTransformer subcategoryStripper;
 
-  // Whether or not the most complicated classify available successfully
+  // Whether or not the most complicated model available successfully
   // parsed the input sentence.
   private boolean parseSucceeded = false;
   // parseSkipped means that not only did we not succeed at parsing,
@@ -86,19 +90,15 @@ public class LexicalizedParserQuery implements ParserQuery {
 
   private List<? extends HasWord> originalSentence;
 
+  @Override
   public List<? extends HasWord> originalSentence() { return originalSentence; }
-
-  /** In case the words are transformed in some way, these are the
-   * original words */
-  private List<String> originalWords = null;
-  /** These are the original lemmas */
-  private List<String> originalLemmas = null;
 
   private boolean saidMemMessage = false;
 
   public boolean saidMemMessage() {
     return saidMemMessage;
   }
+
 
   LexicalizedParserQuery(LexicalizedParser parser) {
     this.op = parser.getOp();
@@ -113,6 +113,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     Index<String> tagIndex = parser.tagIndex;
 
     this.debinarizer = new Debinarizer(op.forceCNF);
+    this.boundaryRemover = new BoundaryRemover();
 
     if (op.doPCFG) {
       if (op.testOptions.iterativeCKY) {
@@ -200,16 +201,8 @@ public class LexicalizedParserQuery implements ParserQuery {
       throw new UnsupportedOperationException("Can't parse a zero-length sentence!");
     }
 
-    if (op.wordFunction != null) {
-      originalWords = new ArrayList<String>(sentence.size());
-      originalLemmas = new ArrayList<String>(sentence.size());
-      for (HasWord word : sentence) {
-        originalWords.add(word.word());
-        if (word instanceof HasLemma) {
-          originalLemmas.add(((HasLemma) word).lemma());
-        } else {
-          originalLemmas.add(null);
-        }
+    for (HasWord word : sentence) {
+      if (op.wordFunction != null) {
         word.setWord(op.wordFunction.apply(word.word()));
       }
     }
@@ -237,6 +230,10 @@ public class LexicalizedParserQuery implements ParserQuery {
       sentenceB.add(new TaggedWord(Lexicon.BOUNDARY, Lexicon.BOUNDARY_TAG));
     }
 
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
+
     if (op.doPCFG) {
       if (!pparser.parse(sentenceB)) {
         restoreOriginalWords(sentence);
@@ -247,6 +244,9 @@ public class LexicalizedParserQuery implements ParserQuery {
         // getBestPCFGParse(false).pennPrint(pwOut); // with scores on nodes
         treePrint.printTree(getBestPCFGParse(false), pwOut); // without scores on nodes
       }
+    }
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
     }
     if (op.doDep && ! op.testOptions.useFastFactored) {
       if ( ! dparser.parse(sentenceB)) {
@@ -260,6 +260,9 @@ public class LexicalizedParserQuery implements ParserQuery {
         treePrint.printTree(dparser.getBestParse(), pwOut);
       }
     }
+    if (Thread.interrupted()) {
+      throw new RuntimeInterruptedException();
+    }
     if (op.doPCFG && op.doDep) {
       if ( ! bparser.parse(sentenceB)) {
         restoreOriginalWords(sentence);
@@ -272,48 +275,36 @@ public class LexicalizedParserQuery implements ParserQuery {
     return true;
   }
 
-  private void restoreOriginalWords(List<? extends HasWord> sentence) {
-    if (originalWords == null) {
+
+  private <T extends HasWord> void restoreOriginalWords(List<T> sentence) {
+    if (originalSentence == null) {
       return;
     }
-    if (sentence.size() != originalWords.size()) {
-      return;
+    if (sentence.size() != originalSentence.size()) {
+      throw new IllegalStateException("originalWords and sentence of different sizes");
     }
-    if (originalWords.size() != originalLemmas.size()) {
-      throw new AssertionError("originalWords and originalLemmas of different sizes");
-    }
-    Iterator<String> wordsIterator = originalWords.iterator();
-    Iterator<String> lemmasIterator = originalLemmas.iterator();
-    for (HasWord word : sentence) {
-      word.setWord(wordsIterator.next());
-      String lemma = lemmasIterator.next();
-      if ((word instanceof HasLemma) && (lemma != null)) {
-        ((HasLemma) word).setLemma(lemma);
-      }
+    for (int i = 0; i < sentence.size(); i++) {
+      sentence.set(i, (T) originalSentence.get(i));
     }
   }
 
+  @Override
   public void restoreOriginalWords(Tree tree) {
-    if (originalWords == null || tree == null) {
+    if (originalSentence == null || tree == null) {
       return;
     }
     List<Tree> leaves = tree.getLeaves();
-    if (leaves.size() != originalWords.size()) {
-      return;
+    if (leaves.size() != originalSentence.size()) {
+      throw new IllegalStateException("originalWords and sentence of different sizes: " + originalSentence.size() + " vs. " + leaves.size() +
+                                      "\n Orig: " + Sentence.listToString(originalSentence) + 
+                                      "\n Pars: " + Sentence.listToString(leaves));
     }
-    if (originalWords.size() != originalLemmas.size()) {
-      throw new AssertionError("originalWords and originalLemmas of different sizes");
-    }
-    Iterator<String> wordsIterator = originalWords.iterator();
-    Iterator<String> lemmasIterator = originalLemmas.iterator();
+    Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();
     for (Tree leaf : leaves) {
-      leaf.setValue(wordsIterator.next());
-      String lemma = lemmasIterator.next();
-      if ((leaf.label() instanceof HasLemma) && (lemma != null)) {
-        ((HasLemma) leaf.label()).setLemma(lemma);
-      }
+      leaf.setLabel(wordsIterator.next());
     }
   }
+
 
   /**
    * Parse a (speech) lattice with the PCFG parser.
@@ -355,7 +346,7 @@ public class LexicalizedParserQuery implements ParserQuery {
    * parser.
    *
    * @return The best tree
-   * @throws NoSuchElementException If no previously successfully parsed
+   * @throws NoSuchParseException If no previously successfully parsed
    *                                sentence
    */
   public Tree getBestParse() {
@@ -383,7 +374,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     } else if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
       return getBestPCFGParse();
     } else if (dparser != null && dparser.hasParse()) { // && fallbackToDG
-      // Should we strip subcategorize like this?  Traditionally haven't...
+      // Should we strip subcategories like this?  Traditionally haven't...
       // return subcategoryStripper.transformTree(getBestDependencyParse(true));
       return getBestDependencyParse(true);
     } else {
@@ -457,7 +448,7 @@ public class LexicalizedParserQuery implements ParserQuery {
   }
 
   public Tree getBestPCFGParse(boolean stripSubcategories) {
-    if (pparser == null || parseSkipped) {
+    if (pparser == null || parseSkipped || parseUnparsable) {
       return null;
     }
     Tree binaryTree = pparser.getBestParse();
@@ -497,11 +488,17 @@ public class LexicalizedParserQuery implements ParserQuery {
   }
 
   public Tree getBestDependencyParse(boolean debinarize) {
-    Tree t = dparser != null ? dparser.getBestParse() : null;
-    if (debinarize && t != null) {
-      t = debinarizer.transformTree(t);
+    if (dparser == null || parseSkipped || parseUnparsable) {
+      return null;
     }
-    restoreOriginalWords(t);
+    Tree t = dparser.getBestParse();
+    if (t != null) {
+      if (debinarize) {
+        t = debinarizer.transformTree(t);
+      }
+      t = boundaryRemover.transformTree(t); // remove boundary .$$. which is otherwise still there from dparser.
+      restoreOriginalWords(t);
+    }
     return t;
   }
 
@@ -527,6 +524,7 @@ public class LexicalizedParserQuery implements ParserQuery {
    *              also return true.  getBestParse() will have a valid
    *              result iff this returns true.
    */
+  @Override
   public boolean parse(List<? extends HasWord> sentence) {
     try {
       if (!parseInternal(sentence)) {
@@ -619,14 +617,17 @@ public class LexicalizedParserQuery implements ParserQuery {
     return op.testOptions.treePrint(op.tlpParams);
   }
 
+  @Override
   public KBestViterbiParser getPCFGParser() {
     return pparser;
   }
 
+  @Override
   public KBestViterbiParser getDependencyParser() {
     return dparser;
   }
 
+  @Override
   public KBestViterbiParser getFactoredParser() {
     return bparser;
   }

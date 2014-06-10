@@ -10,6 +10,7 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.DataFilePaths;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.SystemUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -177,8 +178,8 @@ public class HeidelTimeAnnotator implements Annotator {
   
   private static List<CoreMap> toTimexCoreMaps(Element docElem, CoreMap originalDocument) {
     //--Collect Token Offsets
-    HashMap<Integer,Integer> beginMap = new HashMap<Integer,Integer>();
-    HashMap<Integer,Integer> endMap = new HashMap<Integer,Integer>();
+    Map<Integer,Integer> beginMap = Generics.newHashMap();
+    Map<Integer,Integer> endMap = Generics.newHashMap();
     boolean haveTokenOffsets = true;
     for(CoreMap sent : originalDocument.get(CoreAnnotations.SentencesAnnotation.class)){
       for(CoreLabel token : sent.get(CoreAnnotations.TokensAnnotation.class)){

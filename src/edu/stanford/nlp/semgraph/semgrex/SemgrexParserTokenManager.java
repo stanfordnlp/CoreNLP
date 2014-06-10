@@ -5,6 +5,7 @@ package edu.stanford.nlp.semgraph.semgrex;
 //imports
 import java.io.StringReader;
 import java.util.*;
+import edu.stanford.nlp.util.Generics;
 
 /** Token Manager. */
 class SemgrexParserTokenManager implements SemgrexParserConstants

@@ -2,7 +2,6 @@ package edu.stanford.nlp.semgraph.semgrex;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 public class NodePattern extends SemgrexPattern {
@@ -45,7 +45,7 @@ public class NodePattern extends SemgrexPattern {
                      List<Pair<Integer, String>> variableGroups) {
     this.reln = r;
     this.negDesc = negDesc;
-    attributes = new HashMap<String, Pattern>();
+    attributes = Generics.newHashMap();
     descString = "{";
     for (Map.Entry<String, String> entry : attrs.entrySet()) {
       if (!descString.equals("{"))

@@ -118,7 +118,7 @@ public class SemanticGraph implements Serializable {
    * it.  Therefore, it is expensive; call edgeIterable() if possible.
    */
   public Set<SemanticGraphEdge> getEdgeSet() {
-    Set<SemanticGraphEdge> edges = new HashSet<SemanticGraphEdge>();
+    Set<SemanticGraphEdge> edges = Generics.newHashSet();
     for (SemanticGraphEdge edge : edgeIterable()) {
       edges.add(edge);
     }
@@ -646,7 +646,7 @@ public class SemanticGraph implements Serializable {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
+    Set<IndexedWord> descendantSet = Generics.newHashSet();
     descendantsHelper(vertex, descendantSet);
     return descendantSet;
   }
@@ -1128,7 +1128,7 @@ public class SemanticGraph implements Serializable {
   }
 
   public Set<IndexedWord> getLeafVertices() {
-    Set<IndexedWord> result = new HashSet<IndexedWord>();
+    Set<IndexedWord> result = Generics.newHashSet();
     Set<IndexedWord> vertices = vertexSet();
     for (IndexedWord v : vertices) {
       if (outDegree(v) == 0) {
@@ -1146,10 +1146,10 @@ public class SemanticGraph implements Serializable {
    * @return true if the graph contains no cycles.
    */
   public boolean isDag() {
-    Set<IndexedWord> unused = new HashSet<IndexedWord>(vertexSet());
+    Set<IndexedWord> unused = Generics.newHashSet(vertexSet());
     while (!unused.isEmpty()) {
       IndexedWord arbitrary = unused.iterator().next();
-      boolean result = isDagHelper(arbitrary, unused, new HashSet<IndexedWord>());
+      boolean result = isDagHelper(arbitrary, unused, Generics.<IndexedWord>newHashSet());
       if (result) {
         return false;
       }
@@ -1229,12 +1229,12 @@ public class SemanticGraph implements Serializable {
     }
 
     StringBuilder sb = new StringBuilder();
-    Set<IndexedWord> used = new HashSet<IndexedWord>();
+    Set<IndexedWord> used = Generics.newHashSet();
     for (IndexedWord root : rootNodes) {
       sb.append("-> ").append(root).append(" (root)\n");
       recToString(root, sb, 1, used);
     }
-    Set<IndexedWord> nodes = new HashSet<IndexedWord>(vertexSet());
+    Set<IndexedWord> nodes = Generics.newHashSet(vertexSet());
     nodes.removeAll(used);
     while (!nodes.isEmpty()) {
       IndexedWord node = nodes.iterator().next();
@@ -1493,7 +1493,7 @@ public class SemanticGraph implements Serializable {
 
   public String toCompactString(boolean showTags) {
     StringBuilder sb = new StringBuilder();
-    Set<IndexedWord> used = new HashSet<IndexedWord>();
+    Set<IndexedWord> used = Generics.newHashSet();
     Collection<IndexedWord> roots = getRoots();
     if (roots.isEmpty()) {
       if (size() == 0) {
@@ -1634,7 +1634,7 @@ public class SemanticGraph implements Serializable {
 
   public SemanticGraph() {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
   }
 
   /**
@@ -1647,14 +1647,13 @@ public class SemanticGraph implements Serializable {
     Collection<IndexedWord> oldRoots =
       new ArrayList<IndexedWord>(g.getRoots());
     Set<IndexedWord> vertexes = g.vertexSet();
-    HashMap<IndexedWord, IndexedWord> prevToNewMap =
-      new HashMap<IndexedWord, IndexedWord>();
+    Map<IndexedWord, IndexedWord> prevToNewMap = Generics.newHashMap();
     for (IndexedWord vertex : vertexes) {
       IndexedWord newVertex = new IndexedWord(vertex);
       addVertex(newVertex);
       prevToNewMap.put(vertex, newVertex);
     }
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
     for (IndexedWord oldRoot : oldRoots) {
       roots.add(prevToNewMap.get(oldRoot));
     }
@@ -1675,14 +1674,14 @@ public class SemanticGraph implements Serializable {
     Collection<IndexedWord> oldRoots =
       new ArrayList<IndexedWord>(g.getRoots());
     if (prevToNewMap == null)
-      prevToNewMap = new HashMap<IndexedWord, IndexedWord>();
+      prevToNewMap = Generics.newHashMap();
     Set<IndexedWord> vertexes = g.vertexSet();
     for (IndexedWord vertex : vertexes) {
       IndexedWord newVertex = new IndexedWord(vertex);
       addVertex(newVertex);
       prevToNewMap.put(vertex, newVertex);
     }
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
     for (IndexedWord oldRoot : oldRoots) {
       roots.add(prevToNewMap.get(oldRoot));
     }
@@ -1714,7 +1713,7 @@ public class SemanticGraph implements Serializable {
     Morphology morphology = (lemmatize) ? new Morphology() : null;
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
 
     for (TypedDependency d : dependencies) {
       TreeGraphNode gov = d.gov();
@@ -1807,7 +1806,7 @@ public class SemanticGraph implements Serializable {
   private static class SemanticGraphParsingTask extends StringParsingTask<SemanticGraph> {
 
     private SemanticGraph sg;
-    private Set<Integer> indexesUsed = new HashSet<Integer>();
+    private Set<Integer> indexesUsed = Generics.newHashSet();
 
     public SemanticGraphParsingTask(String s) {
       super(s);

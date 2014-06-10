@@ -333,7 +333,7 @@ public class SemanticGraphFactory {
    */
   // XXX why is this a List rather than a Set (i.e. are the duplicates useful)?
   public static Set<IndexedWord> getVerticesFromEdgeSet(Iterable<SemanticGraphEdge> edges) {
-    Set<IndexedWord> retSet = new HashSet<IndexedWord>();
+    Set<IndexedWord> retSet = Generics.newHashSet();
     for (SemanticGraphEdge edge : edges) {
       retSet.add(edge.getGovernor());
       retSet.add(edge.getDependent());
@@ -414,7 +414,7 @@ public class SemanticGraphFactory {
    */
   public static SemanticGraph makeFromGraphs(Collection<SemanticGraph> sgList) {
     SemanticGraph sg = new SemanticGraph();
-    Collection<IndexedWord> newRoots = new HashSet<IndexedWord>();
+    Collection<IndexedWord> newRoots = Generics.newHashSet();
     for (SemanticGraph currSg : sgList) {
       newRoots.addAll(currSg.getRoots());
       for (IndexedWord currVertex : currSg.vertexSet())
@@ -437,7 +437,7 @@ public class SemanticGraphFactory {
   public static SemanticGraph deepCopyFromGraphs(List<SemanticGraph> graphs,
                                                  List<Integer> lengths) {
     SemanticGraph newGraph = new SemanticGraph();
-    Map<Integer, IndexedWord> newWords = new HashMap<Integer, IndexedWord>();
+    Map<Integer, IndexedWord> newWords = Generics.newHashMap();
     List<IndexedWord> newRoots = new ArrayList<IndexedWord>();
     int vertexOffset = 0;
     for (int i = 0; i < graphs.size(); ++i) {

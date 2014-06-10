@@ -1,9 +1,9 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
 import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.util.Generics;
 
 import java.util.Map;
-import java.util.HashMap;
 
 /** a class that takes care of the stuff necessary for variable strings.
  *
@@ -16,7 +16,7 @@ class VariableStrings {
   private IntCounter<Object> numVarsSet;
 
   public VariableStrings() {
-    varsToStrings = new HashMap<Object,String>();
+    varsToStrings = Generics.newHashMap();
     numVarsSet = new IntCounter<Object>();
   }
 

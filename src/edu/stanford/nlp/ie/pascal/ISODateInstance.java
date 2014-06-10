@@ -3,13 +3,14 @@ package edu.stanford.nlp.ie.pascal;
 import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -296,9 +297,9 @@ public class ISODateInstance {
 
 
   /**
-   * HashMap for mapping a relativeDate String to a pair with the field that should be modified and the amount to modify it *
+   * Map for mapping a relativeDate String to a pair with the field that should be modified and the amount to modify it *
    */
-  public static final HashMap<String, Pair<DateField, Integer>> relativeDateMap = new HashMap<String, Pair<DateField, Integer>>();
+  public static final Map<String, Pair<DateField, Integer>> relativeDateMap = Generics.newHashMap();
 
   static {
     //Add entries to the relative datemap
@@ -309,7 +310,7 @@ public class ISODateInstance {
 
   }
 
-  public static final HashMap<Integer, Integer> daysPerMonth = new HashMap<Integer, Integer>();
+  public static final Map<Integer, Integer> daysPerMonth = Generics.newHashMap();
 
   static {
     //Add month entries

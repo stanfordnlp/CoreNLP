@@ -1,13 +1,14 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -28,11 +29,11 @@ public class UnknownGTTrainer {
   ClassicCounter<String> tagCount = new ClassicCounter<String>();
   ClassicCounter<String> r1 = new ClassicCounter<String>(); // for each tag, # of words seen once
   ClassicCounter<String> r0 = new ClassicCounter<String>(); // for each tag, # of words not seen
-  Set<String> seenWords = new HashSet<String>();
+  Set<String> seenWords = Generics.newHashSet();
   
   double tokens = 0;
   
-  HashMap<String,Float> unknownGT = new HashMap<String,Float>();
+  Map<String,Float> unknownGT = Generics.newHashMap();
   
   public void train(Collection<Tree> trees) {
     train(trees, 1.0);

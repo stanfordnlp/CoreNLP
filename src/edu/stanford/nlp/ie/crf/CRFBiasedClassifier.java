@@ -9,6 +9,7 @@ import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -55,7 +56,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
     PaddedList<IN> pInfo = new PaddedList<IN>(info, pad);
 
     List<List<String>> features = new ArrayList<List<String>>();
-    Collection<Clique> done = new HashSet<Clique>();
+    Collection<Clique> done = Generics.newHashSet();
     for (int i = 0; i < windowSize; i++) {
       List<String> featuresC = new ArrayList<String>();
       List<Clique> windowCliques = featureFactory.getCliques(i, 0);

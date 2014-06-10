@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
 import edu.stanford.nlp.util.Function;
@@ -20,6 +19,7 @@ import edu.stanford.nlp.process.PTBTokenizer;
 
 /**
  * DocumentReader for MUC format.
+ *
  * @author Jenny Finkel
  */
 public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
@@ -29,7 +29,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
    */
   private static final long serialVersionUID = -8334720781758500037L;
   private SeqClassifierFlags flags;
-  private IteratorFromReaderFactory factory;
+  private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
   public void init(SeqClassifierFlags flags) {
     this.flags = flags;
@@ -42,9 +42,9 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
 
   static class MUCDocumentParser implements Function<String, List<CoreLabel>> {
 
-    private static Pattern sgml = Pattern.compile("<([^>\\s]*)[^>]*>");
-    private static Pattern beginEntity = Pattern.compile("<(ENAMEX|TIMEX|NUMEX) TYPE=\"([a-z]+)\"[^>]*>", Pattern.CASE_INSENSITIVE);
-    private static Pattern endEntity = Pattern.compile("</(ENAMEX|TIMEX|NUMEX)>");
+    private static final Pattern sgml = Pattern.compile("<([^>\\s]*)[^>]*>");
+    private static final Pattern beginEntity = Pattern.compile("<(ENAMEX|TIMEX|NUMEX) TYPE=\"([a-z]+)\"[^>]*>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern endEntity = Pattern.compile("</(ENAMEX|TIMEX|NUMEX)>");
 
     public List<CoreLabel> apply(String doc) {
 
@@ -61,7 +61,7 @@ public class MUCDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreL
       PTBTokenizer ptb = PTBTokenizer.newPTBTokenizer(new BufferedReader(new StringReader(doc)), false, true);
       List<CoreLabel> words = ptb.tokenize();
 
-      List<CoreLabel> result = new ArrayList();
+      List<CoreLabel> result = new ArrayList<CoreLabel>();
 
       CoreLabel prev = null;
       String prevString = "";

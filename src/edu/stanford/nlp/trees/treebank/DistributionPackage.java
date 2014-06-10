@@ -1,4 +1,4 @@
-package edu.stanford.nlp.process.treebank;
+package edu.stanford.nlp.trees.treebank;
 
 import java.io.*;
 import java.util.List;
@@ -9,7 +9,7 @@ import edu.stanford.nlp.io.FileSystem;
 /**
  * Adds data files to a tar'd / gzip'd distribution package. Data sets marked with the DISTRIB parameter
  * in {@link ConfigParser} are added to the archive.
- * 
+ *
  * @author Spence Green
  */
 public class DistributionPackage {
@@ -23,7 +23,7 @@ public class DistributionPackage {
 
   /**
    * Adds a listing of files to the distribution archive
-   * 
+   *
    * @param fileList List of full file paths
    */
   public void addFiles(List<String> fileList) {
@@ -32,7 +32,7 @@ public class DistributionPackage {
 
   /**
    * Create the distribution and name the file according to the specified parameter.
-   * 
+   *
    * @param distribName The name of distribution
    * @return True if the distribution is built. False otherwise.
    */

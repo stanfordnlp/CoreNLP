@@ -441,8 +441,8 @@ public class IOUtils {
    * @return The BufferedReader
    * @throws IOException If there is an I/O problem
    */
-  public static BufferedReader readReaderFromString(String textFileOrUrl,
-                                                    String encoding) throws IOException {
+  public static BufferedReader readerFromString(String textFileOrUrl,
+                                                String encoding) throws IOException {
     InputStream is = getInputStreamFromURLOrClasspathOrFileSystem(textFileOrUrl);
     if (encoding == null) {
       return new BufferedReader(new InputStreamReader(is));
@@ -501,7 +501,7 @@ public class IOUtils {
    *          InputStream.
    * @return An Iterable containing the lines from the file.
    */
-  public static Iterable<String> readLines(final File file, 
+  public static Iterable<String> readLines(final File file,
                                            final Class<? extends InputStream> fileInputStreamWrapper) {
     return readLines(file, fileInputStreamWrapper, null);
   }
@@ -973,7 +973,7 @@ public class IOUtils {
       } else {
         String[] cells = StringUtils.splitOnCharWithQuoting(line,',',quoteChar,escapeChar);
         assert(cells.length == labels.length);
-        Map<String,String> cellMap = new HashMap<String,String>();
+        Map<String,String> cellMap = Generics.newHashMap();
         for (int i=0; i<labels.length; i++) cellMap.put(labels[i],cells[i]);
         rows.add(cellMap);
       }
@@ -1171,7 +1171,7 @@ public class IOUtils {
   {
     BufferedReader br = IOUtils.getBufferedFileReader(infile);
     String line;
-    Set<String> set = new HashSet<String>();
+    Set<String> set = Generics.newHashSet();
     while ((line = br.readLine()) != null) {
       line = line.trim();
       if (line.length() > 0) {
@@ -1210,7 +1210,7 @@ public class IOUtils {
 
   public static Map<String,String> readMap(String filename) throws IOException
   {
-    Map<String,String> map = new HashMap<String,String>();
+    Map<String,String> map = Generics.newHashMap();
     try {
       BufferedReader br = IOUtils.getBufferedFileReader(filename);
       String line;

@@ -3,8 +3,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage{latexsym}
 \usepackage{amsmath}
-\usepackage{natbib}
 \usepackage{graphicx}
+\usepackage{tikz-dependency}
+\usepackage{natbib}
 \bibpunct{(}{)}{,}{a}{}{;}
 
 \setlength{\textwidth}{16cm}
@@ -161,6 +162,14 @@ An auxiliary of a clause is a non-main verb of the clause, e.g.\@ modal auxiliar
 \> ``Reagan has died"  \> \>  \emph{aux}(died, has)\\
  \> ``He should leave'' \> \> \emph{aux}(leave, should)\\
 \end{tabbing}
+\begin{dependency}
+   \begin{deptext}[column sep=0.2cm]
+      Reagan \&[.5cm] has \& died \\
+   \end{deptext}
+   \depedge{3}{2}{aux}
+   \depedge{3}{1}{nsubj}
+   \deproot{3}{root}
+\end{dependency}
 
 \noindent \textbf{\emph{auxpass}: passive auxiliary}\\
 A passive auxiliary of a clause is a non-main verb of the clause which contains the passive information.

@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.crf.NERGUI;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.ling.CoreAnnotations;
 
 /**
@@ -30,7 +31,7 @@ public class NERServlet extends HttpServlet
   private boolean spacing;
   private String defaultClassifier;
   private List<String> classifiers = new ArrayList<String>();
-  private HashMap<String, CRFClassifier> ners;
+  private Map<String, CRFClassifier> ners;
 
   private static final int MAXIMUM_QUERY_LENGTH = 3000;
   
@@ -59,7 +60,7 @@ public class NERServlet extends HttpServlet
       log(classifier);
     }
 
-    ners = new HashMap<String, CRFClassifier>();
+    ners = Generics.newHashMap();
     for (String classifier : classifiers) {
       CRFClassifier model = null;
       String filename = "/WEB-INF/data/models/" + classifier;

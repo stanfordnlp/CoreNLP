@@ -5,6 +5,7 @@ import edu.stanford.nlp.parser.ViterbiParserWithOptions;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
@@ -78,10 +79,10 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     // Construct a map from tree nodes to the set of typed
     // dependencies in which the node appears as governor.
-    Map<TreeGraphNode, Set<TypedDependency>> map = new HashMap<TreeGraphNode, Set<TypedDependency>>();
+    Map<TreeGraphNode, Set<TypedDependency>> map = Generics.newHashMap();
     for (TypedDependency typedDep : list) {
       if (!map.containsKey(typedDep.gov())) {
-        map.put(typedDep.gov(), new HashSet<TypedDependency>());
+        map.put(typedDep.gov(), Generics.<TypedDependency>newHashSet());
       }
       map.get(typedDep.gov()).add(typedDep);
     }

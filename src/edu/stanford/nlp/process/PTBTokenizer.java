@@ -37,10 +37,11 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**
@@ -59,7 +60,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
  * LexedTokenFactory, and can specify the treatment of tokens by mainly boolean
  * options given in a comma separated String options
  * (e.g., "invertible,normalizeParentheses=true").
- * If the String is <code>null</code> or empty, you get the traditional
+ * If the String is {@code null} or empty, you get the traditional
  * PTB3 normalization behaviour (i.e., you get ptb3Escaping=true).  If you
  * want no normalization, then you should pass in the String
  * "ptb3Escaping=false".  The known option names are:
@@ -162,21 +163,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    *          {@link Word}
    */
   public static PTBTokenizer<Word> newPTBTokenizer(Reader r) {
-    return newPTBTokenizer(r, false);
-  }
-
-  /**
-   * Constructs a new PTBTokenizer that optionally returns newlines
-   * as their own token. NLs come back as Words whose text is
-   * the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
-   *
-   * @param r The Reader to read tokens from
-   * @param tokenizeNLs Whether to return newlines as separate tokens
-   *         (otherwise they normally disappear as whitespace)
-   * @return A PTBTokenizer which returns Word tokens
-   */
-  public static PTBTokenizer<Word> newPTBTokenizer(Reader r, boolean tokenizeNLs) {
-    return new PTBTokenizer<Word>(r, tokenizeNLs, false, false, new WordTokenFactory());
+    return new PTBTokenizer<Word>(r, new WordTokenFactory(), "");
   }
 
 
@@ -356,7 +343,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       writer.close();
     } else {
       for (int j = 0; j < sz; j++) {
-        Reader r = IOUtils.readReaderFromString(inputFileList.get(j), charset);
+        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
         BufferedWriter writer;
         if (outputFileList == null) {
           writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
@@ -419,7 +406,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     } else {
       for (int j = 0; j < numFiles; j++) {
-        Reader r = IOUtils.readReaderFromString(inputFileList.get(j), charset);
+        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
         BufferedWriter out = (outputFileList == null) ?
           new BufferedWriter(new OutputStreamWriter(System.out, charset)) :
             new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
@@ -489,16 +476,16 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     return PTBTokenizerFactory.newTokenizerFactory();
   }
 
-  // todo: Remove this factory
-  public static <T extends HasWord> TokenizerFactory<T> factory(boolean tokenizeNLs, LexedTokenFactory<T> factory) {
-    return new PTBTokenizerFactory<T>(tokenizeNLs, false, false, factory);
-  }
-
   /** @return A PTBTokenizerFactory that vends CoreLabel tokens. */
   public static TokenizerFactory<CoreLabel> factory(boolean tokenizeNLs, boolean invertible) {
     return PTBTokenizerFactory.newPTBTokenizerFactory(tokenizeNLs, invertible);
   }
 
+
+  /** @return A PTBTokenizerFactory that vends CoreLabel tokens with default tokenization. */
+  public static TokenizerFactory<CoreLabel> coreLabelFactory() {
+    return PTBTokenizerFactory.newPTBTokenizerFactory(new CoreLabelTokenFactory(), "");
+  }
 
   /** Get a TokenizerFactory that does Penn Treebank tokenization.
    *  This is now the recommended factory method to use.
@@ -523,7 +510,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    */
   public static class PTBTokenizerFactory<T extends HasWord> implements TokenizerFactory<T> {
 
-    protected LexedTokenFactory<T> factory;
+    protected final LexedTokenFactory<T> factory;
     protected String options;
 
 
@@ -538,18 +525,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      */
     public static TokenizerFactory<Word> newTokenizerFactory() {
       return newPTBTokenizerFactory(new WordTokenFactory(), "");
-    }
-
-    /**
-     * Constructs a new PTBTokenizer that optionally returns carriage returns
-     * as their own token.
-     *
-     * @param tokenizeNLs If true, newlines come back as Words whose text is
-     *    the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
-     * @return A TokenizerFactory that returns Word objects
-     */
-    public static PTBTokenizerFactory<Word> newPTBTokenizerFactory(boolean tokenizeNLs) {
-      return new PTBTokenizerFactory<Word>(tokenizeNLs, false, false, new WordTokenFactory());
     }
 
     /**
@@ -594,6 +569,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     // Constructors
 
+    // This one is historical
     private PTBTokenizerFactory(boolean tokenizeNLs, boolean invertible, boolean suppressEscaping, LexedTokenFactory<T> factory) {
       this.factory = factory;
       StringBuilder optionsSB = new StringBuilder();
@@ -611,7 +587,11 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       this.options = optionsSB.toString();
     }
 
-
+    /** Make a factory for PTBTokenizers.
+     *
+     *  @param tokenFactory A factory for the token type that the tokenizer will return
+     *  @param options Options to the tokenizer (see the class documentation for details)
+     */
     private PTBTokenizerFactory(LexedTokenFactory<T> tokenFactory, String options) {
       this.factory = tokenFactory;
       this.options = options;
@@ -649,7 +629,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Command-line option specification.
    */
   private static Map<String,Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
+    Map<String,Integer> optionArgDefs = Generics.newHashMap();
     optionArgDefs.put("options", 1);
     optionArgDefs.put("ioFileList", 0);
     optionArgDefs.put("lowerCase", 0);

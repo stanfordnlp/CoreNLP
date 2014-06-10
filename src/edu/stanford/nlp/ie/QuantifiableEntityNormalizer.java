@@ -10,6 +10,7 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.EditDistance;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -62,7 +63,7 @@ public class QuantifiableEntityNormalizer {
 
   static {
 
-    quantifiable = new HashSet<String>();
+    quantifiable = Generics.newHashSet();
     quantifiable.add("MONEY");
     quantifiable.add("TIME");
     quantifiable.add("DATE");
@@ -71,12 +72,12 @@ public class QuantifiableEntityNormalizer {
     quantifiable.add("ORDINAL");
     quantifiable.add("DURATION");
 
-    collapseBeforeParsing = new HashSet<String>();
+    collapseBeforeParsing = Generics.newHashSet();
     collapseBeforeParsing.add("PERSON");
     collapseBeforeParsing.add("ORGANIZATION");
     collapseBeforeParsing.add("LOCATION");
 
-    timeUnitWords = new HashSet<String>();
+    timeUnitWords = Generics.newHashSet();
     timeUnitWords.add("second");
     timeUnitWords.add("seconds");
     timeUnitWords.add("minute");
@@ -92,7 +93,7 @@ public class QuantifiableEntityNormalizer {
     timeUnitWords.add("year");
     timeUnitWords.add("years");
 
-    currencyWords = new HashMap<String,Character>();
+    currencyWords = Generics.newHashMap();
     currencyWords.put("dollars?", '$');
     currencyWords.put("cents?", '$');
     currencyWords.put("pounds?", '\u00A3');
@@ -109,7 +110,7 @@ public class QuantifiableEntityNormalizer {
     currencyWords.put("\u20A9", '\u20A9');  // Won
     currencyWords.put("yuan", '\u5143');   // Yuan
 
-    moneyMultipliers = new HashMap<String,Double>();
+    moneyMultipliers = Generics.newHashMap();
     moneyMultipliers.put("trillion", 1000000000000.0);  // can't be an integer
     moneyMultipliers.put("billion",1000000000.0);
     moneyMultipliers.put("bn",1000000000.0);
@@ -121,7 +122,7 @@ public class QuantifiableEntityNormalizer {
     moneyMultipliers.put(" m ",1000000.0);
     moneyMultipliers.put(" k ",1000.0);
 
-    moneyMultipliers2 = new HashMap<String,Integer>();
+    moneyMultipliers2 = Generics.newHashMap();
     moneyMultipliers2.put("[0-9](m)(?:[^a-zA-Z]|$)", 1000000);
     moneyMultipliers2.put("[0-9](b)(?:[^a-zA-Z]|$)", 1000000000);
 

@@ -1,8 +1,10 @@
 package edu.stanford.nlp.ie.machinereading.common;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
+import edu.stanford.nlp.util.Generics;
 
 public class StringDictionary {
   public class IndexAndCount {
@@ -26,16 +28,16 @@ public class StringDictionary {
   private boolean mCreate;
 
   /** The actual dictionary */
-  private HashMap<String, IndexAndCount> mDict;
+  private Map<String, IndexAndCount> mDict;
 
   /** Inverse mapping from integer keys to the string values */
-  private HashMap<Integer, String> mInverse;
+  private Map<Integer, String> mInverse;
 
   public StringDictionary(String name) {
     mName = name;
     mCreate = false;
-    mDict = new HashMap<String, IndexAndCount>();
-    mInverse = new HashMap<Integer, String>();
+    mDict = Generics.newHashMap();
+    mInverse = Generics.newHashMap();
   }
 
   public void setMode(boolean mode) {

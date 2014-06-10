@@ -652,7 +652,7 @@ public class SUTimeMain {
 
   private static Map<String,List<TimexAttributes>> readTimexAttrExts(String extentsFile, String attrsFile) throws IOException
   {
-    Map<String,List<TimexAttributes>> timexMap = new HashMap<String, List<TimexAttributes>>();
+    Map<String,List<TimexAttributes>> timexMap = Generics.newHashMap();
     BufferedReader extBr = IOUtils.getBufferedFileReader(extentsFile);
     String line;
     String lastDocId = null;

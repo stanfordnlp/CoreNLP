@@ -121,7 +121,7 @@ public class StringUtils {
    */
   public static Map<String, String> mapStringToMap(String map) {
     String[] m = map.split("[,;]");
-    Map<String, String> res = new HashMap<String, String>();
+    Map<String, String> res = Generics.newHashMap();
     for (String str : m) {
       int index = str.lastIndexOf('=');
       String key = str.substring(0, index);
@@ -184,7 +184,7 @@ public class StringUtils {
     Set<String> ret = null;
     if (str != null) {
       String[] fields = str.split(delimiter);
-      ret = new HashSet<String>(fields.length);
+      ret = Generics.newHashSet(fields.length);
       for (String field:fields) {
         field = field.trim();
         ret.add(field);
@@ -630,7 +630,7 @@ public class StringUtils {
    *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args) {
-    return argsToMap(args, new HashMap<String, Integer>());
+    return argsToMap(args, Generics.<String, Integer>newHashMap());
   }
 
   /**
@@ -668,7 +668,7 @@ public class StringUtils {
    *         String} arrays.
    */
   public static Map<String, String[]> argsToMap(String[] args, Map<String, Integer> flagsToNumArgs) {
-    Map<String, String[]> result = new HashMap<String, String[]>();
+    Map<String, String[]> result = Generics.newHashMap();
     List<String> remainingArgs = new ArrayList<String>();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
@@ -1014,7 +1014,7 @@ public class StringUtils {
    * @return A Map from keys to possible values (String or null)
    */
   public static Map<String, Object> parseCommandLineArguments(String[] args, boolean parseNumbers) {
-    Map<String, Object> result = new HashMap<String, Object>();
+    Map<String, Object> result = Generics.newHashMap();
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.charAt(0) == '-') {
@@ -1326,6 +1326,9 @@ public class StringUtils {
    *         <code>ArrayList</code>
    */
   public static String getShortClassName(Object o) {
+    if (o == null) {
+      return "null";
+    }
     String name = o.getClass().getName();
     int index = name.lastIndexOf('.');
     if (index >= 0) {
@@ -1786,7 +1789,7 @@ public class StringUtils {
     StringBuffer sb = new StringBuffer();
     while (m.find()) {
       String varName = null == m.group(1) ? m.group(2) : m.group(1);
-      String vrValue = null;
+      String vrValue;
       //either in the props file
       if (props.containsKey(varName)) {
         vrValue = (String) props.get(varName);
@@ -1845,9 +1848,9 @@ public class StringUtils {
     TreeMap<String, String> result = new TreeMap<String, String>();
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();
-      if (l.isEmpty())
+      if (l.isEmpty() || l.startsWith("#"))
         continue;
-      int index = l.indexOf("=");
+      int index = l.indexOf('=');
 
       if (index == -1)
         result.put(l, "true");
@@ -1856,5 +1859,31 @@ public class StringUtils {
     }
     return result;
   }
-
+  
+  /**
+   * n grams for already splitted string. the ngrams are joined with a single space
+   * @param s string
+   * @param minSize
+   * @param maxSize
+   * @return
+   */
+  public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
+    List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
+    Collection<String> ngrams = new ArrayList<String>();
+    for(List<String> n: ng)
+      ngrams.add(StringUtils.join(n," "));
+  
+    return ngrams;
+  }
+  
+  /**
+   * The string is split on whitespace and the ngrams are joined with a single space
+   * @param s string
+   * @param minSize
+   * @param maxSize
+   * @return
+   */
+  public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
+    return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
+  }
 }

@@ -1,16 +1,18 @@
 package edu.stanford.nlp.wordseg;
 
-import edu.stanford.nlp.util.PaddedList;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.Serializable;
-import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.sequences.Clique;
+import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PaddedList;
 
 /**
  * A Chinese segmenter Feature Factory for GALE project. (modified from Sighan Bakeoff 2005.)
@@ -59,7 +61,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
    * @param loc  The index at which to extract features.
    */
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Collection<String> features = new HashSet<String>();
+    Collection<String> features = Generics.newHashSet();
 
     if (clique == cliqueC) {
       addAllInterningAndSuffixing(features, featuresC(cInfo, loc), "C");

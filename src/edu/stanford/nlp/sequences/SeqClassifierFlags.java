@@ -929,6 +929,7 @@ public class SeqClassifierFlags implements Serializable {
   public String entityMatrix = null;
   public int multiThreadClassifier = 0;
   
+  public String splitWordRegex = null;
   
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2259,6 +2260,8 @@ public class SeqClassifierFlags implements Serializable {
         multiThreadClassifier = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useGenericFeatures")) {
         useGenericFeatures = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("splitWordRegex")){
+        splitWordRegex = val;
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');

@@ -196,7 +196,7 @@ public class AnnotationPipeline implements Annotator {
   }
 
   public Set<Requirement> requirementsSatisfied() {
-    Set<Requirement> satisfied = new HashSet<Requirement>();
+    Set<Requirement> satisfied = Generics.newHashSet();
     for (Annotator annotator : annotators) {
       satisfied.addAll(annotator.requirementsSatisfied());
     }

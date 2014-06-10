@@ -4,10 +4,11 @@ import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -59,10 +60,10 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
 
-  private final HashSet<String> verbalAuxiliaries;
-  private final HashSet<String> copulars;
-  private final HashSet<String> passiveAuxiliaries;
-  private final HashSet<String> verbalTags;
+  private final Set<String> verbalAuxiliaries;
+  private final Set<String> copulars;
+  private final Set<String> passiveAuxiliaries;
+  private final Set<String> verbalTags;
 
 
   public SemanticHeadFinder() {
@@ -89,19 +90,19 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     // make a distinction between auxiliaries and copula verbs to
     // get the NP has semantic head in sentences like "Bill is an honest man".  (Added "sha" for "shan't" May 2009
-    verbalAuxiliaries = new HashSet<String>();
+    verbalAuxiliaries = Generics.newHashSet();
     verbalAuxiliaries.addAll(Arrays.asList(auxiliaries));
 
-    passiveAuxiliaries = new HashSet<String>();
+    passiveAuxiliaries = Generics.newHashSet();
     passiveAuxiliaries.addAll(Arrays.asList(beGetVerbs));
 
     //copula verbs having an NP complement
-    copulars = new HashSet<String>();
+    copulars = Generics.newHashSet();
     if (cop) {
       copulars.addAll(Arrays.asList(copulaVerbs));
     } // a few times the apostrophe is missing on "'s"
 
-    verbalTags = new HashSet<String>();
+    verbalTags = Generics.newHashSet();
     // include Charniak tags so can do BLLIP right
     verbalTags.addAll(Arrays.asList(verbTags));
 
@@ -389,7 +390,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
 
   // now overally complex so it deals with coordinations.  Maybe change this class to use tregrex?
-  private boolean hasPassiveProgressiveAuxiliary(Tree[] kids, HashSet<String> verbalSet) {
+  private boolean hasPassiveProgressiveAuxiliary(Tree[] kids, Set<String> verbalSet) {
     if (DEBUG) {
       System.err.println("Checking for passive/progressive auxiliary");
     }
@@ -552,7 +553,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    * @return Returns true if one of the child trees is a preterminal verb headed
    *      by a word in verbalSet
    */
-  private boolean hasVerbalAuxiliary(Tree[] kids, HashSet<String> verbalSet) {
+  private boolean hasVerbalAuxiliary(Tree[] kids, Set<String> verbalSet) {
     if (DEBUG) {
       System.err.println("Checking for verbal auxiliary");
     }

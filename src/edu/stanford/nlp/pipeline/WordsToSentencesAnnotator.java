@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +10,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -59,7 +59,7 @@ public class WordsToSentencesAnnotator implements Annotator {
                                                    Collections.<String>emptySet(),
                                                    Collections.singleton(nlToken[0]));
     } else {
-      Set<String> nlTokens = new HashSet<String>(Arrays.asList(nlToken));
+      Set<String> nlTokens = Generics.newHashSet(Arrays.asList(nlToken));
       wts = new WordToSentenceProcessor<CoreLabel>("",
                                                    Collections.<String>emptySet(),
                                                    nlTokens);

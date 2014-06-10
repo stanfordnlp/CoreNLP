@@ -41,6 +41,7 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
@@ -253,15 +254,15 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
    * circumstances, the input will be treated as a single sentence to be
    * parsed.
    *
-   * @param in The input Sentence/List/String
+   * @param words The input sentence (a List of words)
    * @return A Tree that is the parse tree for the sentence.  If the parser
    *         fails, a new Tree is synthesized which attaches all words to the
    *         root.
    * @throws IllegalArgumentException If argument isn't a List or String
    */
   @Override
-  public Tree apply(List<? extends HasWord> lst) {
-    return parse(lst);
+  public Tree apply(List<? extends HasWord> words) {
+    return parse(words);
   }
 
   /**
@@ -329,7 +330,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
    * Will launch multiple threads which calls <code>parse</code> on
    * each of the <code>sentences</code> in order, returning the
    * resulting parse trees in the same order.
-   */ 
+   */
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
     MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<List<? extends HasWord>, Tree>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
         public Tree process(List<? extends HasWord> sentence) {
@@ -382,7 +383,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
 
   public LexicalizedParserQuery lexicalizedParserQuery() {
     return new LexicalizedParserQuery(this);
-  }  
+  }
 
   public static LexicalizedParser getParserFromFile(String parserFileOrUrl, Options op) {
     LexicalizedParser pd = getParserFromSerializedFile(parserFileOrUrl);
@@ -1052,7 +1053,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     }
 
     Options op = new Options();
-    ArrayList<String> optionArgs = new ArrayList<String>();
+    List<String> optionArgs = new ArrayList<String>();
     String encoding = null;
     // while loop through option arguments
     while (argIndex < args.length && args[argIndex].charAt(0) == '-') {
@@ -1171,7 +1172,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       } else {
         int oldIndex = argIndex;
         argIndex = op.setOptionOrWarn(args, argIndex);
-        for (int i = oldIndex; i < argIndex; ++i) {
+        for (int i = oldIndex; i < argIndex; i++) {
           optionArgs.add(args[i]);
         }
       }
@@ -1304,7 +1305,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       testTreebank.loadPath(testPath, testFilter);
     }
 
-    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(op.tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(op.tlpParams.sisterSplitters()));
 
     // at this point we should be sure that op.tlpParams is
     // set appropriately (from command line, or from grammar file),

@@ -8,7 +8,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.treebank.Mapper;
+import edu.stanford.nlp.trees.treebank.Mapper;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
@@ -94,11 +94,8 @@ public class LabelerController {
         System.err.printf("%s: Loading MaxEnt tagger...", this.getClass().getName());
         tagger = new MaxentTagger(TAGGER_MODEL);
         System.err.println("\nDone!");
-      } catch (IOException e) {
-        System.err.printf("%s: Could not load POS tagger classify %s\n", this.getClass().getName(), TAGGER_MODEL);
-        e.printStackTrace();
-      } catch (Exception e) {
-        System.err.printf("%s: Could not load POS tagger classify %s\n", this.getClass().getName(), TAGGER_MODEL);
+      } catch (RuntimeException e) {
+        System.err.printf("%s: Could not load POS tagger model %s\n", this.getClass().getName(), TAGGER_MODEL);
         e.printStackTrace();
       }
     }

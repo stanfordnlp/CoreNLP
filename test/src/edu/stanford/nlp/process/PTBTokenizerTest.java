@@ -22,6 +22,7 @@ public class PTBTokenizerTest extends TestCase {
     "Based in Eugene,Ore., PakTech needs a new distributor after Sydney-based Creative Pack Pty. Ltd. went into voluntary administration.",
     "The Iron Age (ca. 1300 – ca. 300 BC).",
     "Indo\u00ADnesian ship\u00ADing \u00AD",
+    "Gimme a phone, I'm gonna call."
   };
 
   private String[][] ptbGold = {
@@ -33,6 +34,7 @@ public class PTBTokenizerTest extends TestCase {
       "went", "into", "voluntary", "administration", "." },
     { "The", "Iron", "Age", "-LRB-", "ca.", "1300", "--", "ca.", "300", "BC", "-RRB-", "." },
     { "Indonesian", "shiping", "-" },
+    { "Gim", "me", "a", "phone", ",", "I", "'m", "gon", "na", "call", "." }
   };
 
   public void testPTBTokenizerWord() {

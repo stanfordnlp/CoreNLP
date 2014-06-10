@@ -1,23 +1,25 @@
-
 package edu.stanford.nlp.util.logging;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.stanford.nlp.util.Generics;
+
 /**
  *  A class to redirect the output of Redwood to another logging mechanism,
  *  e.g., java.util.logging.
+ *
+ *  @author Gabor Angeli
  */
 public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends OutputHandler {
 
   public final LoggerClass logger;
   public final Method loggingMethod;
-  private Map<Object, ChannelEquivalent> channelMapping = null;
-  private ChannelEquivalent defaultChannel;
+  private final Map<Object, ChannelEquivalent> channelMapping;
+  private final ChannelEquivalent defaultChannel;
 
   /**
    * Create a redirect handler, with a logging class, ignoring logging
@@ -27,12 +29,7 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
    *                         and logs that string using the |logger| class.
    */
   public RedirectOutputHandler(LoggerClass logger, Method loggingMethod) {
-    this.logger = logger;
-    this.loggingMethod = loggingMethod;
-  }
-
-  private boolean shouldLogChannels() {
-    return channelMapping != null;
+    this(logger, loggingMethod, null, null);
   }
 
   /**
@@ -51,6 +48,10 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
     this.loggingMethod = loggingMethod;
     this.channelMapping = channelMapping;
     this.defaultChannel = defaultChannel;
+  }
+
+  private boolean shouldLogChannels() {
+    return channelMapping != null;
   }
 
   @Override
@@ -101,12 +102,9 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
    * Ensure that we don't print duplicate channels when adapting to another logging framework.
    * @inheritDoc
    */
+  @Override
   protected boolean formatChannel(StringBuilder b, String channelStr, Object channel){
-    if (channelMapping != null && channelMapping.containsKey(channel)) {
-      return false;
-    } else {
-      return true;
-    }
+    return !(channelMapping != null && channelMapping.containsKey(channel));
   }
 
   //
@@ -114,7 +112,7 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
   //
 
   public static RedirectOutputHandler<Logger, Level> fromJavaUtilLogging(Logger logger) {
-    Map <Object, Level> channelMapping = new HashMap<Object, Level>();
+    Map <Object, Level> channelMapping = Generics.newHashMap();
     channelMapping.put(Redwood.WARN, Level.WARNING);
     channelMapping.put(Redwood.DBG, Level.FINE);
     channelMapping.put(Redwood.ERR, Level.SEVERE);
@@ -129,4 +127,5 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
       throw new IllegalStateException(e);
     }
   }
+
 }

@@ -28,6 +28,7 @@ import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.XMLUtils;
 
 /**
@@ -340,7 +341,7 @@ public class FrenchTreeReader implements TreeReader {
 
     TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
     int totalTrees = 0;
-    Set<String> morphAnalyses = new HashSet<String>();
+    Set<String> morphAnalyses = Generics.newHashSet();
     try {
       for(File file : fileList) {
         TreeReader tr = trf.newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(file),"UTF-8")));

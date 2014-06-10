@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Properties;
@@ -24,6 +23,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A sequence classifier that labels tokens with types based on a simple manual mapping from
@@ -82,7 +82,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
     entries = readEntries(mapping, ignoreCase);
     this.ignoreCase = ignoreCase;
     this.overwriteMyLabels = overwriteMyLabels;
-    myLabels = new HashSet<String>();
+    myLabels = Generics.newHashSet();
     if(this.overwriteMyLabels) {
       for(Entry entry: entries) myLabels.add(entry.type);
     }
@@ -197,7 +197,7 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
 
         String[] regexes = split[0].trim().split("\\s+");
         String type = split[1].trim();
-        Set<String> overwritableTypes = new HashSet<String>();
+        Set<String> overwritableTypes = Generics.newHashSet();
         overwritableTypes.add(flags.backgroundSymbol);
         overwritableTypes.add(null);
         double priority = 0;

@@ -137,18 +137,15 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param posTags
    * @param deps
    */
-  public static GrammaticalStructure fromStringReps(List<String> tokens,
-                                                    List<String> posTags, List<String> deps) {
+  public static GrammaticalStructure fromStringReps(List<String> tokens, List<String> posTags, List<String> deps) {
     if (tokens.size() != posTags.size()) {
       throw new RuntimeException(String.format(
               "tokens.size(): %d != pos.size(): %d\n", tokens.size(), posTags
                       .size()));
     }
 
-    List<TreeGraphNode> tgWordNodes = new ArrayList<TreeGraphNode>(tokens
-            .size());
-    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokens
-            .size());
+    List<TreeGraphNode> tgWordNodes = new ArrayList<TreeGraphNode>(tokens.size());
+    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokens.size());
 
     SemanticHeadFinder headFinder = new SemanticHeadFinder();
 
@@ -167,8 +164,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     TreeGraphNode root = new TreeGraphNode(new StringLabel("ROOT"));
 
-    root.setChildren(tgPOSNodes
-            .toArray(new TreeGraphNode[tgPOSNodes.size()]));
+    root.setChildren(tgPOSNodes.toArray(new TreeGraphNode[tgPOSNodes.size()]));
 
     root.setIndex(0);
 
@@ -184,8 +180,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
       if (depString.charAt(depString.length() - 1) != ')') throwDepFormatException(depString);
 
-      String args = depString.substring(firstBracket + 1,
-              depString.length() - 1);
+      String args = depString.substring(firstBracket + 1, depString.length() - 1);
 
       int argSep = args.indexOf(", ");
       if (argSep == -1) throwDepFormatException(depString);
@@ -203,9 +198,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
       GrammaticalRelation grel = new GrammaticalRelation(GrammaticalRelation.Language.Any, type, null, null, DEPENDENT);
 
-      TypedDependency tdep =
-              new TypedDependency(grel, (parentIdx == 0 ? root: tgWordNodes.get(parentIdx-1)),
-                      tgWordNodes.get(childIdx-1));
+      TypedDependency tdep = new TypedDependency(grel, (parentIdx == 0 ? root: tgWordNodes.get(parentIdx-1)), tgWordNodes.get(childIdx-1));
       tdeps.add(tdep);
     }
 
@@ -220,7 +213,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     super(root);
     this.puncFilter = Filters.acceptFilter();
     allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
-    dependencies = new HashSet<Dependency<Label, Label, Object>>();
+    dependencies = Generics.newHashSet();
     for (TypedDependency tdep : projectiveDependencies) {
       dependencies.add(new NamedDependency(tdep.gov().toString(), tdep.dep().toString(), tdep.reln()));
     }
@@ -849,13 +842,13 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     // need to see if more than one governor is not listed somewhere as a dependent
     // first take all the deps
-    Collection<TreeGraphNode> deps = new HashSet<TreeGraphNode>();
+    Collection<TreeGraphNode> deps = Generics.newHashSet();
     for (TypedDependency typedDep : list) {
       deps.add(typedDep.dep());
     }
 
     // go through the list and add typedDependency for which the gov is not a dep
-    Collection<TreeGraphNode> govs = new HashSet<TreeGraphNode>();
+    Collection<TreeGraphNode> govs = Generics.newHashSet();
     for (TypedDependency typedDep : list) {
       TreeGraphNode gov = typedDep.gov();
       if (!deps.contains(gov) && !govs.contains(gov)) {
@@ -902,7 +895,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
   public static String dependenciesToString(GrammaticalStructure gs, Collection<TypedDependency> deps, Tree tree, boolean conllx, boolean extraSep) {
     StringBuilder bf = new StringBuilder();
 
-    Map<Integer, Integer> indexToPos = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> indexToPos = Generics.newHashMap();
     indexToPos.put(0,0); // to deal with the special node "ROOT"
     List<Tree> gsLeaves = gs.root.getLeaves();
     for (int i = 0; i < gsLeaves.size(); i++) {

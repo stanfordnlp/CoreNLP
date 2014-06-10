@@ -645,11 +645,11 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 /* Fed. is tricky.  Usually sentence end, but not before "Governor" or "Natl. Mtg. Assn." */
 /* Make some states case sensitive, since they're also reasonably common words */
 ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
-/* Bhd is Malaysian companies! */
+/* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
-ABCOMP = Inc|Cos?|Corp|Pp?tys?|Ltd|Plc|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
-/* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. */
-ABNUM = Nos?|Prop|Ph|tel|est|ext|sq|ft
+ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
+/* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
+ABNUM = Nos?|Prop|Ph|tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
@@ -659,8 +659,11 @@ ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Esq
 /* This block becomes ABBREV2 and is usually followed by upper case words. */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
 ACRO = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
-ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Mt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det
+/* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
+ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft
 ABCOMP2 = Invt|Elec|Natl|M[ft]g
+
+/* See also special cases for ca. fig. prop. in the code below. */
 
 /* ABBREV1 abbreviations are normally followed by lower case words.
    If they're followed by an uppercase one, we assume there is also a
@@ -710,7 +713,8 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 %%
 
 cannot                  { yypushback(3) ; return getNext(); }
-gonna                   { yypushback(2) ; return getNext(); }
+gonna|gotta|lemme|gimme|wanna
+                        { yypushback(2) ; return getNext(); }
 {SGML}                  { final String origTxt = yytext();
                           String txt = origTxt;
                           if (normalizeSpace) {
@@ -832,8 +836,8 @@ gonna                   { yypushback(2) ; return getNext(); }
                           }
                           return getNext(s, yytext());
                         }
-/* Special case to get ca. before numbers */
-ca\./{SPACE}[:digit:]   { return getNext(); }
+/* Special case to get ca., fig. or Prop. before numbers */
+(ca|fig|prop)\./{SPACE}[:digit:]   { return getNext(); }
 /* Special case to get pty. ltd. or pty limited */
 pty\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV1}/{SENTEND}     {

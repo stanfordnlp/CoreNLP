@@ -79,15 +79,7 @@ public class POSTaggerAnnotator implements Annotator {
       timer.doing("Loading POS Model [" + loc + ']');
     }
     MaxentTagger tagger;
-    try {
-      tagger = new MaxentTagger(loc);
-    } catch (IOException e) {
-      RuntimeException runtimeException = new RuntimeException(e);
-      throw runtimeException;
-    } catch (ClassNotFoundException e) {
-      RuntimeException runtimeException = new RuntimeException(e);
-      throw runtimeException;
-    }
+    tagger = new MaxentTagger(loc);
     if (verbose) {
       timer.done();
     }

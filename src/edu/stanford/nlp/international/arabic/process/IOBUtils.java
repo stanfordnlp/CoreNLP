@@ -3,7 +3,6 @@ package edu.stanford.nlp.international.arabic.process;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -15,6 +14,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A class for converting strings to input suitable for processing by
@@ -47,7 +47,7 @@ public class IOBUtils {
   private static final Set<String> arAffixSet;
   static {
     String arabicAffixString = "ل ف و ما ه ها هم هن نا كم تن تم ى ي هما ك ب م س";
-    arAffixSet = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(arabicAffixString.split("\\s+"))));
+    arAffixSet = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(arabicAffixString.split("\\s+"))));
   }
 
   // Only static methods

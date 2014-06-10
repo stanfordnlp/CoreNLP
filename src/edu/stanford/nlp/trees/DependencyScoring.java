@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
 
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
@@ -35,8 +35,8 @@ public class DependencyScoring {
   
   
   private static List<Set<TypedDependency>> toSets(Collection<TypedDependency> depCollection) {
-    Set<TypedDependency> depSet = new HashSet<TypedDependency>();
-    Set<TypedDependency> unlabeledDepSet = new HashSet<TypedDependency>();
+    Set<TypedDependency> depSet = Generics.newHashSet();
+    Set<TypedDependency> unlabeledDepSet = Generics.newHashSet();
     for (TypedDependency dep : depCollection) {
       unlabeledDepSet.add(new TypedDependencyStringEquality(null, dep.gov(), dep.dep()));
       depSet.add(new TypedDependencyStringEquality(dep.reln(), dep.gov(), dep.dep()));
@@ -109,7 +109,7 @@ public class DependencyScoring {
   public static List<Collection<TypedDependency>> convertStringEquality(List<Collection<TypedDependency>> deps){
     List<Collection<TypedDependency>> convertedDeps = new ArrayList<Collection<TypedDependency>>();
     for(Collection<TypedDependency> depSet : deps){
-      Collection<TypedDependency> converted = new HashSet<TypedDependency>();
+      Collection<TypedDependency> converted = Generics.newHashSet();
       for(TypedDependency dep : depSet){
         converted.add(new TypedDependencyStringEquality(dep.reln(), dep.gov(), dep.dep()));
       }
@@ -275,8 +275,8 @@ public class DependencyScoring {
       List<Set<TypedDependency>> errl = toSets(system.get(i));
       errl.get(0).removeAll(goldDeps.get(i));
       errl.get(1).removeAll(goldDepsUnlabeled.get(i));
-      Map<String,String> childCorrectWithLabel = new HashMap<String,String>();
-      Map<String,String> childCorrectWithOutLabel = new HashMap<String,String>();
+      Map<String,String> childCorrectWithLabel = Generics.newHashMap();
+      Map<String,String> childCorrectWithOutLabel = Generics.newHashMap();
 
       for (TypedDependency goldDep: goldDeps.get(i)) {
           //System.out.print(goldDep);

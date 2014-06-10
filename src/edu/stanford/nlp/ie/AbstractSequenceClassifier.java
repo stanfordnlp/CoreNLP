@@ -222,7 +222,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   public Set<String> labels() {
-    return new HashSet<String>(classIndex.objectsList());
+    return Generics.newHashSet(classIndex.objectsList());
   }
 
   /**

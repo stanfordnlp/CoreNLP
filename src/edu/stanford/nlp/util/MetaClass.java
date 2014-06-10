@@ -274,7 +274,8 @@ public class MetaClass {
     public int hashCode() {
       return cl.hashCode();
     }
-  }
+
+  } // end static class ClassFactory
 
   private String classname;
 

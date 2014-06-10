@@ -1,7 +1,6 @@
 package edu.stanford.nlp.process;
 
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
-import edu.stanford.nlp.process.Tokenizer;
 
 import java.io.Reader;
 
@@ -11,9 +10,11 @@ import java.io.Reader;
  * in the java.io.Reader.  It's mainly a convenience, since you could cast
  * down anyway.
  *
- * <i>Note:</i> A TokenizerFactory should also provide a static method: <br><code>
- * public static TokenizerFactory&lt;? extends HasWord&gt; newTokenizerFactory();
- * </code><br>
+ * <i>IMPORTANT NOTE:</i><br/>
+ *
+ * A TokenizerFactory should also provide a static method: <br>
+ * {@code public static TokenizerFactory<? extends HasWord> newTokenizerFactory();}
+ * <br/>
  * This is expected by certain JavaNLP code which wants to produce a
  * TokenizerFactory by reflection.
  *

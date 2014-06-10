@@ -76,20 +76,20 @@ public class CoordinationTransformer implements TreeTransformer {
   private static final TregexPattern[][] matchPatterns = {
     {
       // UCP (JJ ...) -> ADJP
-      TregexPattern.safeCompile("UCP=ucp <, /^JJ|ADJP/", true),
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^JJ|ADJP/", true),
       // UCP (DT JJ ...) -> ADJP
-      TregexPattern.safeCompile("UCP=ucp <, (DT $+ /^JJ|ADJP/)", true)
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)", true)
     },
     {
       // UCP (N ...) -> NP
-      TregexPattern.safeCompile("UCP=ucp <, /^N/", true),
-      TregexPattern.safeCompile("UCP=ucp <, (DT $+ /^N/)", true)
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^N/", true),
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^N/)", true)
     }
   };
 
   private static final TsurgeonPattern[] operations = {
-    Tsurgeon.parseOperation("relabel ucp ADJP"),
-    Tsurgeon.parseOperation("relabel ucp NP"),
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADJP$1/"),
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/NP$1/"),
   };
 
   /**

@@ -13,7 +13,7 @@ import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 /**
- * This class will call an optimization method such as Conjugate Gradient or 
+ * This class will call an optimization method such as Conjugate Gradient or
  * Quasi-Newton  on a LambdaSolve object to find
  * optimal parameters, including imposing a Gaussian prior on those
  * parameters.
@@ -133,6 +133,20 @@ public class CGRunner {
     monitor.reportMonitoring(df.valueAt(result));
     System.err.println("after optimization value is " + df.valueAt(result));
   }
+
+  public void solveOWLQN2(double weight) {
+    LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
+    MonitorFunction monitor = new MonitorFunction(prob, df, filename);
+    Minimizer<DiffFunction> cgm = new QNMinimizer(monitor, 10);
+    ((QNMinimizer) cgm).useOWLQN(true, weight);
+
+    // all parameters are started at 0.0
+    double[] result = cgm.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    monitor.reportMonitoring(df.valueAt(result));
+    System.err.println("after optimization value is " + df.valueAt(result));
+  }
+
 
   /**
    * Solves the problem using CG.  The solution is stored in the

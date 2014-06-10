@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -45,16 +46,14 @@ public class EvaluateTreebank {
   private final TreeTransformer br;
 
   private final ParserQueryFactory pqFactory;
-    
-  private final boolean fallbackToPCFG;
 
-  private final Lexicon lex;
+  // private final Lexicon lex;
 
   private final boolean runningAverages, summary, tsv;
 
   // no annotation
   private final TreeAnnotatorAndBinarizer binarizerOnly;
-  
+
   AbstractEval pcfgLB = null;
   AbstractEval pcfgChildSpecific = null;
   LeafAncestorEval pcfgLA = null;
@@ -105,8 +104,7 @@ public class EvaluateTreebank {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
-    this.fallbackToPCFG = true;
-    this.lex = lex;
+    // this.lex = lex;
     this.pqFactory = pqFactory;
 
     if(op.testOptions.preTag) {
@@ -258,28 +256,28 @@ public class EvaluateTreebank {
   /**
    * Returns the input sentence for the parser.
    */
-  private ArrayList<? extends HasWord> getInputSentence(Tree t) {
+  private List<CoreLabel> getInputSentence(Tree t) {
     if (op.testOptions.forceTags) {
       if (op.testOptions.preTag) {
-        ArrayList<TaggedWord> s = tagger.apply(t.yieldWords());
+        List<TaggedWord> s = tagger.apply(t.yieldWords());
         if(op.testOptions.verbose) {
           System.err.println("Guess tags: "+Arrays.toString(s.toArray()));
           System.err.println("Gold tags: "+t.labeledYield().toString());
         }
-        return s;
+        return Sentence.toCoreLabelList(s);
       } else if(op.testOptions.noFunctionalForcing) {
         ArrayList<? extends HasWord> s = t.taggedYield();
-        for(HasWord word : s) {
+        for (HasWord word : s) {
           String tag = ((HasTag) word).tag();
           tag = tag.split("-")[0];
           ((HasTag) word).setTag(tag);
         }
-        return s;
+        return Sentence.toCoreLabelList(s);
       } else {
-        return t.taggedYield();
+        return Sentence.toCoreLabelList(t.taggedYield());
       }
     } else {
-      return t.yieldWords();
+      return Sentence.toCoreLabelList(t.yieldWords());
     }
   }
 
@@ -422,14 +420,15 @@ public class EvaluateTreebank {
           tree.pennPrint(pwErr);
           numSkippedEvals++;
           return;
-        
+
         } else if(treeFact.yield().size() != transGoldTree.yield().size()) {
           List<Label> fYield = treeFact.yield();
           List<Label> gYield = transGoldTree.yield();
-          pwErr.println("WARNING: Evaluation could not be performed due to guess/gold yield mismatch.");
-          pwErr.println("  sizes: g: " + gYield.size() + " p: " + fYield.size());
-          pwErr.println("  g: " + Sentence.listToString(gYield, true));
-          pwErr.println("  p: " + Sentence.listToString(gYield, true));
+          pwErr.println("WARNING: Evaluation could not be performed due to gold/parsed yield mismatch.");
+          pwErr.printf("  sizes: gold: %d (transf) %d (orig); parsed: %d (transf) %d (orig).%n", gYield.size(), goldTree.yield().size(),
+                       fYield.size(), tree.yield().size());
+          pwErr.println("  gold: " + Sentence.listToString(gYield, true));
+          pwErr.println("  pars: " + Sentence.listToString(fYield, true));
           numSkippedEvals++;
           return;
         }
@@ -485,6 +484,7 @@ public class EvaluateTreebank {
         }
 
         //Dependency eval
+        // todo: is treeDep really useful here, or should we really use depDAEval tree (debinarized) throughout? We use it for parse, and it sure seems like we could use it for tag eval, but maybe not factDA?
         Tree treeDep = pq.getBestDependencyParse(false);
         if (treeDep != null) {
           Tree goldTreeB = binarizerOnly.transformTree(goldTree);
@@ -598,7 +598,7 @@ public class EvaluateTreebank {
       for (Tree goldTree : testTreebank) {
         List<? extends HasWord> sentence = getInputSentence(goldTree);
         goldTrees.add(goldTree);
-        
+
         pwErr.println("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
         wrapper.put(sentence);
         while (wrapper.peek()) {
@@ -617,12 +617,12 @@ public class EvaluateTreebank {
       ParserQuery pq = pqFactory.parserQuery();
 
       for (Tree goldTree : testTreebank) {
-        final ArrayList<? extends HasWord> sentence = getInputSentence(goldTree);
-        
+        final List<CoreLabel> sentence = getInputSentence(goldTree);
+
         pwErr.println("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
-        
+
         pq.parseAndReport(sentence, pwErr);
-        
+
         processResults(pq, goldTree, pwErr, pwOut, pwFileOut, pwStats, treePrint);
       } // for tree iterator
     }
@@ -698,5 +698,5 @@ public class EvaluateTreebank {
   } // end testOnTreebank()
 
 
-  
+
 }

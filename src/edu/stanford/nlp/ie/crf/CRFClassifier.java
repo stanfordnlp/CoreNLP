@@ -180,7 +180,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     this.windowSize = crf.windowSize;
     this.featureFactory = crf.featureFactory;
     this.pad = crf.pad;
-    this.knownLCWords = (crf.knownLCWords != null) ? new HashSet<String>(crf.knownLCWords) : null;
+    this.knownLCWords = (crf.knownLCWords != null) ? Generics.<String>newHashSet(crf.knownLCWords) : null;
     this.featureIndex = (crf.featureIndex != null) ? new HashIndex<String>(crf.featureIndex.objectsList()) : null;
     if (crf.flags.nonLinearCRF) {
       this.nodeFeatureIndicesMap = (crf.nodeFeatureIndicesMap != null) ? new HashIndex<Integer>(crf.nodeFeatureIndicesMap.objectsList()) : null;
@@ -288,7 +288,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     int oldNumFeatures = weights.length;
 
     // Create a map of other crf labels to this crf labels
-    Map<CRFLabel, CRFLabel> crfLabelMap = new HashMap<CRFLabel, CRFLabel>();
+    Map<CRFLabel, CRFLabel> crfLabelMap = Generics.newHashMap();
     for (int i = 0; i < crf.labelIndices.size(); i++) {
       for (int j = 0; j < crf.labelIndices.get(i).size(); j++) {
         CRFLabel labels = crf.labelIndices.get(i).get(j);
@@ -743,9 +743,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    */
   protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob) {
 
-    HashSet<String>[] featureIndices = new HashSet[windowSize];
+    Set<String>[] featureIndices = new HashSet[windowSize];
     for (int i = 0; i < windowSize; i++) {
-      featureIndices[i] = new HashSet<String>();
+      featureIndices[i] = Generics.newHashSet();
     }
 
     labelIndices = new ArrayList<Index<CRFLabel>>(windowSize);
@@ -759,9 +759,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // classIndex.add("O");
     classIndex.add(flags.backgroundSymbol);
 
-    HashSet<String>[] seenBackgroundFeatures = new HashSet[2];
-    seenBackgroundFeatures[0] = new HashSet<String>();
-    seenBackgroundFeatures[1] = new HashSet<String>();
+    Set<String>[] seenBackgroundFeatures = new HashSet[2];
+    seenBackgroundFeatures[0] = Generics.newHashSet();
+    seenBackgroundFeatures[1] = Generics.newHashSet();
 
     int wordCount = 0;
 
@@ -929,7 +929,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // }
 
     // todo [cdm Aug 2012]: Since getCliques returns all cliques within its bounds, can't the for loop here be eliminated? But my first attempt to removed failed to produce identical results....
-    Collection<Clique> done = new HashSet<Clique>();
+    Collection<Clique> done = Generics.newHashSet();
     for (int i = 0; i < windowSize; i++) {
       List<String> featuresC = new ArrayList<String>();
       List<Clique> windowCliques = FeatureFactory.getCliques(i, 0);
@@ -2137,8 +2137,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     featureIndicesSetArray = new ArrayList<Set<Integer>>(numLopExpert);
     featureIndicesListArray =  new ArrayList<List<Integer>>(numLopExpert);
     for (int i = 0; i < numLopExpert; i++) {
-      featureIndicesSetArray.add(new HashSet<Integer>(interval));
-      featureIndicesListArray.add(new ArrayList<Integer>(interval));
+      featureIndicesSetArray.add(Generics.<Integer>newHashSet(interval));
+      featureIndicesListArray.add(Generics.<Integer>newArrayList(interval));
     }
     if (flags.randomLopFeatureSplit) {
       for (int fIndex = 0; fIndex < numFeatures; fIndex++) {
@@ -2175,9 +2175,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         //TODO(mengqiu) use GZIPInputStream
         System.err.println("Reading initial LOP weights from file " + flags.initialLopWeights + " ...");
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(flags.initialLopWeights))));
-        String line = null;
         List<double[]> listOfWeights = new ArrayList<double[]>(numLopExpert);
-        while ((line = br.readLine()) != null) {
+        for (String line; (line = br.readLine()) != null; ) {
           line = line.trim();
           String[] parts = line.split("\t");
           double[] wArr = new double[parts.length];
@@ -2214,7 +2213,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           newLopExpertWeights[numLopExpert] = trainWeightsUsingDoubleCRF(data, labels, evaluators, pruneFeatureItr, null);
         }
 
-        Set<Integer> newSet = new HashSet<Integer>(numFeatures);
+        Set<Integer> newSet = Generics.newHashSet(numFeatures);
         List<Integer> newList = new ArrayList<Integer>(numFeatures);
         for (int fIndex = 0; fIndex < numFeatures; fIndex++) {
           newSet.add(fIndex);
@@ -2371,7 +2370,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
-    Minimizer minimizer = null;
+    Minimizer<DiffFunction> minimizer = null;
     if (flags.useQN) {
       int QNmem;
       if (featurePruneIteration == 0) {
@@ -2731,7 +2730,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         throw new RuntimeException("format error in embeddings");
       }
       int embeddingSize = Integer.parseInt(toks[1]);
-      embeddings = new HashMap<String, double[]>(embeddingSize);
+      embeddings = Generics.newHashMap(embeddingSize);
       count = 0;
       while (count < embeddingSize) {
         line = br.readLine().trim();
@@ -3404,7 +3403,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
       System.err.println("Found a dictionary of size " + wordList.size());
       br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(crf.flags.embeddingVectors))));
-      crf.embeddings = new HashMap<String, double[]>();
+      crf.embeddings = Generics.newHashMap();
       double[] vector = null;
       int count = 0;
       while ((line = br.readLine()) != null) {
@@ -3509,6 +3508,23 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       p.println();
 
     }
+  }
+  
+  public Map<String, Counter<String>> topWeights() {
+    Map<String, Counter<String>> w = new HashMap<String, Counter<String>>();
+    for (String feature : featureIndex) {
+      int index = featureIndex.indexOf(feature);
+      // line.add(feature+"["+(-p)+"]");
+      // rowHeaders.add(feature + '[' + (-p) + ']');
+      double[] v = weights[index];
+      Index<CRFLabel> l = this.labelIndices.get(0);
+      for (CRFLabel label : l) {
+        if(!w.containsKey(label.toString(classIndex)))
+          w.put(label.toString(classIndex), new ClassicCounter<String>());
+        w.get(label.toString(classIndex)).setCount(feature, v[l.indexOf(label)]);
+      }
+    }
+    return w;
   }
 
 } // end class CRFClassifier

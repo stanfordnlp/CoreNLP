@@ -568,7 +568,7 @@ public class ArrayUtils {
   /** Return a set containing the same elements as the specified array.
    */
   public static <T> Set<T> asSet(T[] a) {
-    return new HashSet<T>(Arrays.asList(a));
+    return Generics.newHashSet(Arrays.asList(a));
   }
 
   public static void fill(double[][] d, double val) {

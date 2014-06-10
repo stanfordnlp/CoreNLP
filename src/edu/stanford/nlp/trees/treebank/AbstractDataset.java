@@ -1,4 +1,4 @@
-package edu.stanford.nlp.process.treebank;
+package edu.stanford.nlp.trees.treebank;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -18,9 +17,10 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.trees.TreeVisitor;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.DataFilePaths;
+import edu.stanford.nlp.util.Generics;
 
 /**
- * 
+ *
  * @author Spence Green
  *
  */
@@ -56,7 +56,7 @@ public abstract class AbstractDataset implements Dataset {
   protected String treeFileExtension = "tree";    //Current LDC releases use this extension
 
   /**
-   * Provides access for sub-classes to the data set parameters 
+   * Provides access for sub-classes to the data set parameters
    */
   protected Properties options;
 
@@ -69,20 +69,20 @@ public abstract class AbstractDataset implements Dataset {
     //Read the raw file as UTF-8 irrespective of output encoding
 //    treebank = new DiskTreebank(new ArabicTreeReaderFactory.ArabicRawTreeReaderFactory(true), "UTF-8");
 
-    configuredOptions = new HashSet<String>();
+    configuredOptions = Generics.newHashSet();
 
-    requiredOptions = new HashSet<String>();
+    requiredOptions = Generics.newHashSet();
     requiredOptions.add(ConfigParser.paramName);
     requiredOptions.add(ConfigParser.paramPath);
     requiredOptions.add(ConfigParser.paramEncode);
   }
-  
+
   public abstract void build();
-  
+
   private Mapper loadMapper(String className) {
     Mapper m = null;
     try {
-      Class c = ClassLoader.getSystemClassLoader().loadClass(className);  
+      Class c = ClassLoader.getSystemClassLoader().loadClass(className);
       m = (Mapper) c.newInstance();
     } catch (ClassNotFoundException e) {
       System.err.printf("%s: Mapper type %s does not exist\n", this.getClass().getName(), className);
@@ -176,10 +176,10 @@ public abstract class AbstractDataset implements Dataset {
     return true;
   }
 
-  private TreeVisitor loadTreeVistor(String value) {
+  private static TreeVisitor loadTreeVistor(String value) {
     try {
       Class c = ClassLoader.getSystemClassLoader().loadClass(value);
-    
+
       return (TreeVisitor) c.newInstance();
 
     } catch (ClassNotFoundException e) {
@@ -189,13 +189,13 @@ public abstract class AbstractDataset implements Dataset {
     } catch (IllegalAccessException e) {
       e.printStackTrace();
     }
-    
+
     return null;
   }
 
   protected Set<String> buildSplitMap(String path) {
     path = DataFilePaths.convert(path);
-    Set<String> fileSet = new HashSet<String>();
+    Set<String> fileSet = Generics.newHashSet();
     LineNumberReader reader = null;
     try {
       reader = new LineNumberReader(new FileReader(path));
@@ -226,14 +226,16 @@ public abstract class AbstractDataset implements Dataset {
   /*
    * Accepts a filename if it is present in <code>filterMap</code>. Rejects the filename otherwise.
    */
-  protected class SplitFilter implements FileFilter {
+  protected static class SplitFilter implements FileFilter {
     private final Set<String> filterSet;
     public SplitFilter(Set<String> sm) {
       filterSet = sm;
     }
 
+    @Override
     public boolean accept(File f) {
       return filterSet.contains(f.getName());
     }
   }
+
 }

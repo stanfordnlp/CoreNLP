@@ -4,6 +4,7 @@ import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -267,7 +268,7 @@ public class Options implements Serializable {
       i += 2;
     } else if (args[i].equalsIgnoreCase("-deleteSplitters") && (i+1 < args.length)) {
       String[] toDel = args[i+1].split(" *, *");
-      trainOptions.deleteSplitters = new HashSet<String>(Arrays.asList(toDel));
+      trainOptions.deleteSplitters = Generics.newHashSet(Arrays.asList(toDel));
       i += 2;
     } else if (args[i].equalsIgnoreCase("-postSplitWithBaseCategory")) {
       trainOptions.postSplitWithBaseCategory = true;

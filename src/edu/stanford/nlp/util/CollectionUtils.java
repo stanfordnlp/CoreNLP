@@ -86,11 +86,11 @@ public class CollectionUtils {
 
   /** Returns a new Set containing all the objects in the specified array. */
   public static <T> Set<T> asSet(T[] o) {
-    return new HashSet<T>(Arrays.asList(o));
+    return Generics.newHashSet(Arrays.asList(o));
   }
 
   public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
-    Set<T> intersect = new HashSet<T>();
+    Set<T> intersect = Generics.newHashSet();
     for (T t : set1) {
       if (set2.contains(t)) {
         intersect.add(t);
@@ -111,7 +111,7 @@ public class CollectionUtils {
   }
 
   public static <T> Set<T> unionAsSet(Collection<T> set1, Collection<T> set2) {
-    Set<T> union = new HashSet<T>();
+    Set<T> union = Generics.newHashSet();
     for (T t : set1) {
       union.add(t);
     }
@@ -160,7 +160,7 @@ public class CollectionUtils {
    *          String constructor.
    */
   public static <T> Collection<T> loadCollection(File file, Class<T> c, CollectionFactory<T> cf) throws Exception {
-    Constructor<T> m = c.getConstructor(new Class[] { Class.forName("java.lang.String") });
+    Constructor<T> m = c.getConstructor(new Class[] { String.class });
     Collection<T> result = cf.newCollection();
     BufferedReader in = new BufferedReader(new FileReader(file));
     String line = in.readLine();
@@ -224,8 +224,8 @@ public class CollectionUtils {
 
   public static <K, V> Map<K, V> getMapFromString(String s, Class<K> keyClass, Class<V> valueClass, MapFactory<K, V> mapFactory) throws ClassNotFoundException,
       NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-    Constructor<K> keyC = keyClass.getConstructor(new Class[] { Class.forName("java.lang.String") });
-    Constructor<V> valueC = valueClass.getConstructor(new Class[] { Class.forName("java.lang.String") });
+    Constructor<K> keyC = keyClass.getConstructor(new Class[] { String.class });
+    Constructor<V> valueC = valueClass.getConstructor(new Class[] { String.class });
     if (s.charAt(0) != '{')
       throw new RuntimeException("");
     s = s.substring(1); // get rid of first brace
@@ -538,7 +538,7 @@ public class CollectionUtils {
    * @return A set consisting of the items from the Iterable.
    */
   public static <T> Set<T> toSet(Iterable<T> items) {
-    Set<T> set = new HashSet<T>();
+    Set<T> set = Generics.newHashSet();
     addAll(set, items);
     return set;
   }
@@ -755,7 +755,7 @@ public class CollectionUtils {
    * for them for limited-use hashing.
    */
   public static <ObjType, Hashable> Collection<ObjType> uniqueNonhashableObjects(Collection<ObjType> objects, Function<ObjType, Hashable> customHasher) {
-    Map<Hashable, ObjType> hashesToObjects = new HashMap<Hashable, ObjType>();
+    Map<Hashable, ObjType> hashesToObjects = Generics.newHashMap();
     for (ObjType object : objects) {
       hashesToObjects.put(customHasher.apply(object), object);
     }
@@ -854,7 +854,7 @@ public class CollectionUtils {
    *
    */
   public static<T1, T2> Set<T2> transformAsSet(Collection<? extends T1> original, Function<T1, ? extends T2> f){
-    Set<T2> transformed = new HashSet<T2>();
+    Set<T2> transformed = Generics.newHashSet();
     for(T1 t: original){
       transformed.add(f.apply(t));
     }

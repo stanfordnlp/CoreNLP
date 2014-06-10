@@ -1,4 +1,4 @@
-// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/semgrex" projects/core/src/edu/stanford/nlp/semgrex/SemgrexParser.jj
+// javacc "-OUTPUT_DIRECTORY=projects/core/src/edu/stanford/nlp/semgraph/semgrex" projects/core/src/edu/stanford/nlp/semgraph/semgrex/SemgrexParser.jj
 
 options { UNICODE_INPUT = true;
           SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
@@ -6,12 +6,13 @@ options { UNICODE_INPUT = true;
 
 
 PARSER_BEGIN(SemgrexParser)
-package edu.stanford.nlp.semgrex;
+package edu.stanford.nlp.semgraph.semgrex;
 // all generated classes are in this package
 
 //imports
 import java.io.StringReader;
 import java.util.*;
+import edu.stanford.nlp.util.Generics;
 
 class SemgrexParser {
 
@@ -228,7 +229,7 @@ NodePattern Description(GraphRelation r) : {
 	boolean isEmpty = false;
 	Token attr = null;
 	Token value = null;
-	Map<String, String> attributes = new HashMap<String, String>();
+	Map<String, String> attributes = Generics.newHashMap();
 	NodePattern pat;
 } {
 	

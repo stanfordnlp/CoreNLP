@@ -251,8 +251,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // now construct the annotators from the given properties in the given order
     List<String> annoNames = Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+"));
-    HashSet<String> alreadyAddedAnnoNames = new HashSet<String>();
-    Set<Requirement> requirementsSatisfied = new HashSet<Requirement>();
+    Set<String> alreadyAddedAnnoNames = Generics.newHashSet();
+    Set<Requirement> requirementsSatisfied = Generics.newHashSet();
     for (String name : annoNames) {
       name = name.trim();
       if (name.isEmpty()) { continue; }
@@ -436,14 +436,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             String [] toks = bounds.split(",");
             // for(int i = 0; i < toks.length; i ++)
             //   System.err.println("BOUNDARY: " + toks[i]);
-            wts.setSentenceBoundaryToDiscard(new HashSet<String> (Arrays.asList(toks)));
+            wts.setSentenceBoundaryToDiscard(Generics.newHashSet (Arrays.asList(toks)));
           }
 
           // HTML boundaries
           bounds = properties.getProperty("ssplit.htmlBoundariesToDiscard");
           if (bounds != null){
             String [] toks = bounds.split(",");
-            wts.addHtmlSentenceBoundaryToDiscard(new HashSet<String> (Arrays.asList(toks)));
+            wts.addHtmlSentenceBoundaryToDiscard(Generics.newHashSet (Arrays.asList(toks)));
           }
 
           // Treat as one sentence
@@ -495,8 +495,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       @Override
       public String signature() {
         // keep track of all relevant properties for this annotator here!
-        return "pos.maxlen:" + properties.getProperty("pos.maxlen", "") +
-                "pos.classify:" + properties.getProperty("pos.classify", DefaultPaths.DEFAULT_POS_MODEL);
+        return ("pos.maxlen:" + properties.getProperty("pos.maxlen", "") +
+                "pos.model:" + properties.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL) +
+                "pos.nthreads:" + properties.getProperty("pos.nthreads", properties.getProperty("nthreads", "")));
       }
     });
 

@@ -9,7 +9,7 @@ import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
-import edu.stanford.nlp.process.treebank.Mapper;
+import edu.stanford.nlp.trees.treebank.Mapper;
 import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
@@ -50,7 +50,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
   private final TregexPattern prdVerbPattern;
   private final TregexPattern npSbjPattern;
   private final String rootLabel;
-  
+
   private final Mapper lexMapper = new DefaultLexicalMapper();
 
   public ArabicTreeNormalizer(boolean retainNPTmp, boolean markPRDverb, boolean changeNoLabels,
@@ -65,12 +65,12 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
     rootLabel = tlp.startSymbol();
 
     prdVerbPattern  = TregexPattern.compile("/^V[^P]/ > VP $ /-PRD$/=prd");
-    
+
     prdPattern = Pattern.compile("^[A-Z]+-PRD");
-    
+
     //Marks NP subjects that *do not* occur in verb-initial clauses
     npSbjPattern = TregexPattern.compile("/^NP-SBJ/ !> @VP");
-    
+
     emptyFilter = new ArabicEmptyFilter();
   }
 
@@ -129,7 +129,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
           else if(t.label() instanceof CoreLabel) {
             ((CoreLabel) t.label()).setValue(toks[0].trim().intern());
             ((CoreLabel) t.label()).setWord(toks[0].trim().intern());
-            
+
             Pair<String,String> lemmaMorph = MorphoFeatureSpecification.splitMorphString(toks[0], toks[1]);
             String lemma = lemmaMorph.first();
             String morphAnalysis = lemmaMorph.second();
@@ -142,9 +142,9 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
                 newLemma = lemma;
               }
               String newMorphAnalysis = newLemma + MorphoFeatureSpecification.LEMMA_MARK + morphAnalysis;
-              ((CoreLabel) t.label()).setOriginalText(newMorphAnalysis.intern());  
+              ((CoreLabel) t.label()).setOriginalText(newMorphAnalysis.intern());
             }
-            
+
           } else {
             System.err.printf("%s: Cannot store morph analysis in non-CoreLabel: %s%n",this.getClass().getName(),t.label().getClass().getName());
           }

@@ -39,6 +39,7 @@ public class TreePrint {
     "typedDependencies",
     "typedDependenciesCollapsed",
     "latexTree",
+    "xmlTree",
     "collocations",
     "semanticGraph",
     "conllStyleDependencies",
@@ -109,7 +110,7 @@ public class TreePrint {
    *
    * @param formatString A comma separated list of ways to print each Tree.
    *                For instance, "penn" or "words,typedDependencies".
-   *                Known formats are: oneline, penn, latexTree, words,
+   *                Known formats are: oneline, penn, latexTree, xmlTree, words,
    *                wordsAndTags, rootSymbolOnly, dependencies,
    *                typedDependencies, typedDependenciesCollapsed,
    *                collocations, semanticGraph, conllStyleDependencies,
@@ -453,6 +454,11 @@ public class TreePrint {
         pw.println(".]");
         pw.println("  </tree>");
       }
+      if (formats.containsKey("xmlTree")) {
+        pw.println("<tree style=\"xml\">");
+        outputTree.indentedXMLPrint(pw,false);
+        pw.println("</tree>");
+      }
       if (formats.containsKey("dependencies")) {
         Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory(),
                                                  CoreLabel.factory());
@@ -517,6 +523,9 @@ public class TreePrint {
         pw.println(".[");
         outputTree.indentedListPrint(pw,false);
         pw.println(".]");
+      }
+      if (formats.containsKey("xmlTree")) {
+        outputTree.indentedXMLPrint(pw,false);
       }
       if (formats.containsKey("dependencies")) {
         Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory());
@@ -594,7 +603,7 @@ public class TreePrint {
           System.err.println(t);
           System.err.println();
         } else {
-          Map<Integer,Integer> deps = new HashMap<Integer, Integer>();
+          Map<Integer,Integer> deps = Generics.newHashMap();
           for (Dependency<Label, Label, Object> dep : depsSet) {
             CoreLabel child = (CoreLabel)dep.dependent();
             CoreLabel parent = (CoreLabel)dep.governor();
@@ -762,7 +771,7 @@ public class TreePrint {
     String options = "";
     String tlpName = "edu.stanford.nlp.trees.PennTreebankLanguagePack";
     String hfName = null;
-    Map<String,Integer> flagMap = new HashMap<String,Integer>();
+    Map<String,Integer> flagMap = Generics.newHashMap();
     flagMap.put("-format", 1);
     flagMap.put("-options", 1);
     flagMap.put("-tLP", 1);

@@ -1,20 +1,20 @@
-package edu.stanford.nlp.process.treebank;
+package edu.stanford.nlp.trees.treebank;
 
-import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.international.arabic.pipeline.ATBArabicDataset;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
  * A data preparation pipeline for treebanks
  * <p>
- * A simple framework for preparing various kinds of treebank data. The original goal was to prepare the 
- * Penn Arabic Treebank (PATB) trees for parsing. This pipeline arose from the 
- * need to prepare various data sets in a uniform manner for the execution of experiments that require 
+ * A simple framework for preparing various kinds of treebank data. The original goal was to prepare the
+ * Penn Arabic Treebank (PATB) trees for parsing. This pipeline arose from the
+ * need to prepare various data sets in a uniform manner for the execution of experiments that require
  * multiple tools. The design objectives are:
  * <ul>
  *  <li>Support multiple data input and output types
@@ -38,7 +38,7 @@ import edu.stanford.nlp.util.StringUtils;
  *  <li>Specify the data set parameters in a plain text file
  *  <li>Run {@link TreebankPreprocessor} using the plain text file as the argument
  * </ol>
- * 
+ *
  * @author Spence Green
  *
  */
@@ -61,14 +61,14 @@ public final class TreebankPreprocessor {
     Dataset ds = null;
     String dsType = dsParams.getProperty(ConfigParser.paramType);
     dsParams.remove(ConfigParser.paramType);
-    
+
     try {
       if(dsType == null)
         ds = new ATBArabicDataset();
-      else { 
-        Class c = ClassLoader.getSystemClassLoader().loadClass(dsType);  
+      else {
+        Class c = ClassLoader.getSystemClassLoader().loadClass(dsType);
         ds = (Dataset) c.newInstance();
-      } 
+      }
     } catch (ClassNotFoundException e) {
       System.err.printf("Dataset type %s does not exist\n", dsType);
     } catch (InstantiationException e) {
@@ -89,7 +89,7 @@ public final class TreebankPreprocessor {
   private static String configFile = null;
   private static String outputPath = null;
 
-  public static final Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
+  public static final Map<String,Integer> optionArgDefs = Generics.newHashMap();
   static {
     optionArgDefs.put("-d", 1);
     optionArgDefs.put("-v", 0);
@@ -101,8 +101,8 @@ public final class TreebankPreprocessor {
 
     for(Map.Entry<String, String[]> opt : argsMap.entrySet()) {
       String key = opt.getKey();
-      if(key == null) {
-        continue;
+      if (key == null) {
+        // continue;
 
       } else if(key.equals("-d")) {
         MAKE_DISTRIB = true;
@@ -166,21 +166,21 @@ public final class TreebankPreprocessor {
         continue;
       }
 
-      boolean shouldDistribute = (dsParams.contains(ConfigParser.paramDistrib)) ? 
-          Boolean.parseBoolean(dsParams.getProperty(ConfigParser.paramDistrib)) : false;
+      boolean shouldDistribute = dsParams.contains(ConfigParser.paramDistrib) &&
+              Boolean.parseBoolean(dsParams.getProperty(ConfigParser.paramDistrib));
       dsParams.remove(ConfigParser.paramDistrib);
-      
+
       boolean lacksRequiredOptions = !(ds.setOptions(dsParams));
       if(lacksRequiredOptions) {
         System.out.printf("Skipping dataset %s as it lacks required parameters. Check the javadocs\n", nameOfDataset);
         continue;
       }
-      
+
       ds.build();
-      
+
       if(shouldDistribute)
         distrib.addFiles(ds.getFilenames());
-      
+
       if(VERBOSE)
         System.out.println(ds.toString() + "\n");
     }

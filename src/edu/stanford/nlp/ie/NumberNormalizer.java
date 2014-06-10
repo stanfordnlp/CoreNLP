@@ -109,7 +109,7 @@ public class NumberNormalizer {
   //       QuantifiableEntityNormalizer also has bn (for billion)
   //       should consolidate
   //       here we use Number representation instead of double...
-  private static final  Map<String,Number> word2NumMap = new HashMap<String,Number>();
+  private static final  Map<String,Number> word2NumMap = Generics.newHashMap();
   static
   {
     // Special words for numbers
@@ -159,7 +159,7 @@ public class NumberNormalizer {
   }
 
   // similar to QuantifiableEntityNormalizer.ordinalsToValues
-  private static final Map<String,Number> ordWord2NumMap = new HashMap<String,Number>();
+  private static final Map<String,Number> ordWord2NumMap = Generics.newHashMap();
   static {
     ordWord2NumMap.put("zeroth", 0);
     ordWord2NumMap.put("first", 1);

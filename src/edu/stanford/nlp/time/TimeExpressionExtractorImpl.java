@@ -130,7 +130,12 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
     // TODO: docDate may not have century....
 
-    SUTime.Time docDate = SUTime.parseDateTime(docDateStr);
+    SUTime.Time docDate = null;
+    try {
+      docDate = SUTime.parseDateTime(docDateStr);
+    } catch (Exception e) {
+      throw new RuntimeException("Could not parse date string: [" + docDateStr + "]", e);
+    }
     List<? extends MatchedExpression> matchedExpressions = expressionExtractor.extractExpressions(annotation);
     List<TimeExpression> timeExpressions = new ArrayList<TimeExpression>(matchedExpressions.size());
     for (MatchedExpression expr:matchedExpressions) {

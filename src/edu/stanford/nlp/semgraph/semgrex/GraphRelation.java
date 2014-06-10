@@ -3,7 +3,6 @@ package edu.stanford.nlp.semgraph.semgrex;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -393,7 +392,7 @@ abstract class GraphRelation implements Serializable {
               return;
             }
             searchStack = Generics.newStack();
-            seenNodes = new HashSet<IndexedWord>();
+            seenNodes = Generics.newHashSet();
             List<Pair<GrammaticalRelation, IndexedWord>> children = sg.childPairs(node);
             for (int i = children.size() - 1; i >= 0; i--) {
               searchStack.push(children.get(i));
@@ -456,7 +455,7 @@ abstract class GraphRelation implements Serializable {
         return false;
       List<Set<IndexedWord>> usedNodes = new ArrayList<Set<IndexedWord>>();
       for (int i = 0; i <= endDepth; ++i) {
-        usedNodes.add(new HashSet<IndexedWord>());
+        usedNodes.add(Generics.<IndexedWord>newHashSet());
       }
       return l1 != l2 && satisfyHelper(l1, l2, sg, 0, usedNodes);
     }
@@ -508,9 +507,9 @@ abstract class GraphRelation implements Serializable {
             }
             seenNodes = new ArrayList<Set<IndexedWord>>();
             for (int i = 0; i <= endDepth; ++i) {
-              seenNodes.add(new HashSet<IndexedWord>());
+              seenNodes.add(Generics.<IndexedWord>newHashSet());
             }
-            returnedNodes = new HashSet<IndexedWord>();
+            returnedNodes = Generics.newHashSet();
             currentDepth = 1;
             List<Pair<GrammaticalRelation, IndexedWord>> children = sg.childPairs(node);
             for (int i = children.size() - 1; i >= 0; i--) {
@@ -619,7 +618,7 @@ abstract class GraphRelation implements Serializable {
               return;
             }
             searchStack = Generics.newStack();
-            seenNodes = new HashSet<IndexedWord>();
+            seenNodes = Generics.newHashSet();
             List<Pair<GrammaticalRelation, IndexedWord>> parents = sg.parentPairs(node);
             for (int i = parents.size() - 1; i >= 0; i--) {
               searchStack.push(parents.get(i));
@@ -683,7 +682,7 @@ abstract class GraphRelation implements Serializable {
         return false;
       List<Set<IndexedWord>> usedNodes = new ArrayList<Set<IndexedWord>>();
       for (int i = 0; i <= endDepth; ++i) {
-        usedNodes.add(new HashSet<IndexedWord>());
+        usedNodes.add(Generics.<IndexedWord>newHashSet());
       }
       return l1 != l2 && satisfyHelper(l1, l2, sg, 0, usedNodes);
     }
@@ -735,9 +734,9 @@ abstract class GraphRelation implements Serializable {
             }
             seenNodes = new ArrayList<Set<IndexedWord>>();
             for (int i = 0; i <= endDepth; ++i) {
-              seenNodes.add(new HashSet<IndexedWord>());
+              seenNodes.add(Generics.<IndexedWord>newHashSet());
             }
-            returnedNodes = new HashSet<IndexedWord>();
+            returnedNodes = Generics.newHashSet();
             currentDepth = 1;
             List<Pair<GrammaticalRelation, IndexedWord>> parents = sg.parentPairs(node);
             for (int i = parents.size() - 1; i >= 0; i--) {

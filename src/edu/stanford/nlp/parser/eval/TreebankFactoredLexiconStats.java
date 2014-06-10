@@ -2,7 +2,6 @@ package edu.stanford.nlp.parser.eval;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalIntCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -87,7 +87,7 @@ public class TreebankFactoredLexiconStats {
     
     Counter<String> reducedTagLemmaCounter = new ClassicCounter<String>(500);
     
-    Map<String,Set<String>> wordLemmaMap = new HashMap<String,Set<String>>();
+    Map<String,Set<String>> wordLemmaMap = Generics.newHashMap();
     
     TwoDimensionalIntCounter<String,String> lemmaReducedTagCounter = new TwoDimensionalIntCounter<String,String>(30000);
     TwoDimensionalIntCounter<String,String> reducedTagTagCounter = new TwoDimensionalIntCounter<String,String>(500);
@@ -139,7 +139,7 @@ public class TreebankFactoredLexiconStats {
         if (wordLemmaMap.containsKey(word)) {
           wordLemmaMap.get(word).add(lemma);
         } else {
-          Set<String> lemmas = new HashSet<String>(1);
+          Set<String> lemmas = Generics.newHashSet(1);
           wordLemmaMap.put(word, lemmas);
         }
         lemmaReducedTagCounter.incrementCount(lemma, reducedTag);

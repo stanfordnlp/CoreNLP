@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -18,13 +17,14 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 public class TrueCaseAnnotator implements Annotator {
 
   @SuppressWarnings("unchecked")
   private CRFBiasedClassifier trueCaser;
   
-  private Map<String,String> mixedCaseMap = new HashMap<String,String>();
+  private Map<String,String> mixedCaseMap = Generics.newHashMap();
   
   private boolean VERBOSE = true;
   
@@ -120,7 +120,7 @@ public class TrueCaseAnnotator implements Annotator {
   }
   
   public static Map<String,String> loadMixedCaseMap(String mapFile) {
-    Map<String,String> map = new HashMap<String,String>();
+    Map<String,String> map = Generics.newHashMap();
     try {
       InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(mapFile);
       BufferedReader br = new BufferedReader(new InputStreamReader(is));

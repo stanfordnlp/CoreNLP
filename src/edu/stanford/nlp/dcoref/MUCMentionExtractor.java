@@ -28,13 +28,14 @@ package edu.stanford.nlp.dcoref;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -46,6 +47,7 @@ import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Extracts <COREF> mentions from a file annotated in MUC format
@@ -63,8 +65,14 @@ public class MUCMentionExtractor extends MentionExtractor {
     String fileName = props.getProperty(Constants.MUC_PROP);
     fileContents = IOUtils.slurpFile(fileName);
     currentOffset = 0;
-    tokenizerFactory = PTBTokenizer.factory(false, new CoreLabelTokenFactory(false));
-    stanfordProcessor = loadStanfordProcessor(props);
+    tokenizerFactory = PTBTokenizer.factory(new CoreLabelTokenFactory(false), "");
+    stanfordProcessor = loadStanfordProcessor(props);   
+  }
+  
+  public MUCMentionExtractor(Dictionaries dict, Properties props, Semantics semantics, 
+      LogisticClassifier<String, String> singletonModel) throws Exception {
+    this(dict, props, semantics);
+    singletonPredictor = singletonModel;
   }
 
   public void resetDocs() {
@@ -217,7 +225,7 @@ public class MUCMentionExtractor extends MentionExtractor {
     }
 
     // assign goldCorefClusterID
-    HashMap<Integer, Mention> idMention = new HashMap<Integer, Mention>();    // temporary use
+    Map<Integer, Mention> idMention = Generics.newHashMap();    // temporary use
     for(int i = 0 ; i < allGoldMentions.size(); i++){
       for(int j = 0 ; j < allGoldMentions.get(i).size(); j++){
         Mention m = allGoldMentions.get(i).get(j);
