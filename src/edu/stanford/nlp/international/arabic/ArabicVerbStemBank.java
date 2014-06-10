@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.international.arabic.pipeline.*;
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.treebank.Mapper;
 import edu.stanford.nlp.util.Generics;
 
@@ -27,10 +26,9 @@ public class ArabicVerbStemBank {
     lexMapper = new DefaultLexicalMapper();
   }
 
-  public synchronized static ArabicVerbStemBank getInstance() {
-    if(thisInstance == null) {
+  public static ArabicVerbStemBank getInstance() {
+    if(thisInstance == null)
       thisInstance = new ArabicVerbStemBank();
-    }
     return thisInstance;
   }
 
@@ -41,9 +39,10 @@ public class ArabicVerbStemBank {
   }
 
   public void load(String filename) {
+    int lineId = 0;
     try {
-      BufferedReader br = IOUtils.readerFromString(filename);
-      while (br.ready()) {
+      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filename)),"UTF-8"));
+      for(lineId = 1; br.ready(); lineId++) {
         String[] toks = br.readLine().split("\\t");
         List<String> toksList = Arrays.asList(toks);
 
