@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -16,6 +17,7 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
@@ -32,7 +34,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
 /**
- * A {@code GrammaticalStructure} is a {@link TreeGraph
+ * A <code>GrammaticalStructure</code> is a {@link TreeGraph
  * <code>TreeGraph</code>} (that is, a tree with additional labeled
  * arcs between nodes) for representing the grammatical relations in a
  * parse tree.  A new <code>GrammaticalStructure</code> is constructed
@@ -320,7 +322,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   /**
    * Get extra dependencies that do not depend on the tree structure,
-   * but rather only depend on the existing dependency structure.
+   * but rather only depend on the existing dependency structure.  
    * For example, the English xsubj dependency can be extracted that way.
    */
   protected void getExtras(List<TypedDependency> basicDep) {
@@ -431,7 +433,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return a <code>Set</code> of nodes which are dependents of
    *         node <code>t</code>, or else <code>null</code>
    */
-  public static Set<TreeGraphNode> getDependents(TreeGraphNode t) {
+  public Set<TreeGraphNode> getDependents(TreeGraphNode t) {
     Set<TreeGraphNode> deps = Generics.newTreeSet();
     for (Tree subtree : t) {
       TreeGraphNode node = (TreeGraphNode) subtree;

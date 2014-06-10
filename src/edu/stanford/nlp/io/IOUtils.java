@@ -422,30 +422,17 @@ public class IOUtils {
     return in;
   }
 
-  /**
-   * Open a BufferedReader to a file or URL specified by a String name. If the
-   * String starts with https?://, then it is first tried as a URL, otherwise it
-   * is next tried as a resource on the CLASSPATH, and then finally it is tried
-   * as a local file or other network-available file . If the String ends in .gz, it
-   * is interpreted as a gzipped file (and uncompressed). The file is then
-   * interpreted as a utf-8 text file.
-   *
-   * @param textFileOrUrl What to read from
-   * @return The BufferedReader
-   * @throws IOException If there is an I/O problem
-   */
-  public static BufferedReader readerFromString(String textFileOrUrl)
+  public static BufferedReader readReaderFromString(String textFileOrUrl)
           throws IOException {
     return new BufferedReader(new InputStreamReader(
-            getInputStreamFromURLOrClasspathOrFileSystem(textFileOrUrl), "UTF-8"));
+            getInputStreamFromURLOrClasspathOrFileSystem(textFileOrUrl)));
   }
 
   /**
    * Open a BufferedReader to a file or URL specified by a String name. If the
-   * String starts with https?://, then it is first tried as a URL, otherwise it
-   * is next tried as a resource on the CLASSPATH, and then finally it is tried
-   * as a local file or other network-available file . If the String ends in .gz, it
-   * is interpreted as a gzipped file (and uncompressed), else it is interpreted as
+   * String starts with https?://, then it is interpreted as a URL, otherwise it
+   * is interpreted as a local file. If the String ends in .gz, it is
+   * interpreted as a gzipped file (and uncompressed), else it is interpreted as
    * a regular text file in the given encoding.
    *
    * @param textFileOrUrl What to read from
