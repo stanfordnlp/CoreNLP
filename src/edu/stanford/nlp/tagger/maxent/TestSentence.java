@@ -15,6 +15,7 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.sequences.BestSequenceFinder;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
@@ -77,12 +78,13 @@ public class TestSentence implements SequenceModel {
     if (maxentTagger.config != null) {
       tagSeparator = maxentTagger.config.getTagSeparator();
       encoding = maxentTagger.config.getEncoding();
+      VERBOSE = maxentTagger.config.getVerbose();
     } else {
       tagSeparator = TaggerConfig.getDefaultTagSeparator();
       encoding = "utf-8";
+      VERBOSE = false;
     }
     history = new History(pairs, maxentTagger.extractors);
-    VERBOSE = maxentTagger.config.getVerbose();
   }
 
   public void setCorrectTags(List<? extends HasTag> sentence) {
@@ -382,8 +384,7 @@ public class TestSentence implements SequenceModel {
     double nDefault = maxentTagger.ySize - tags.length;
     double logScore = ArrayMath.logSum(scores);
     double logScoreInactiveTags = Math.log(nDefault*maxentTagger.defaultScore);
-    double logTotal =
-      ArrayMath.logSum(new double[] {logScore, logScoreInactiveTags});
+    double logTotal = SloppyMath.logAdd(logScore, logScoreInactiveTags);
     ArrayMath.addInPlace(scores, -logTotal);
 
     return scores;
@@ -702,7 +703,7 @@ public class TestSentence implements SequenceModel {
 
     String word = sent.get(pos - leftWindow());
     if (maxentTagger.dict.isUnknown(word)) {
-      Set<String> open = maxentTagger.tags.getOpenTags();
+      Set<String> open = maxentTagger.tags.getOpenTags();  // todo: really want array of String or int here
       arr1 = open.toArray(new String[open.size()]);
     } else {
       arr1 = maxentTagger.dict.getTags(word);
