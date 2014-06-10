@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -192,11 +194,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     scaleOpt = eScaling.DIAGONAL;
   }
 
-  public void useOWLQN(boolean use, double lambda) {
-    this.useOWLQN = use;
-    this.lambdaOWL = lambda;
-  }
-
   @Override
   public void setEvaluators(int iters, Evaluator[] evaluators) {
     this.evaluateIters = iters;
@@ -313,6 +310,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     private boolean quiet = false;
     private boolean memoryConscious = true;
     private PrintWriter outputFile = null;
+
+    private int noImproveItrCount = 0;
+    private double[] xBest;
 
     public Record() {
     }
@@ -455,16 +455,21 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       int evalsSize = evals.size();
 
       if (useEvalImprovement && evalsSize > terminateOnEvalImprovementNumOfEpoch) {
-        int begin = evalsSize - terminateOnEvalImprovementNumOfEpoch;
-        double baseline = evals.get(begin);
-        boolean improved = false;
-        for (int i = begin; i < evalsSize; i++) {
-          if (evals.get(i) > baseline) {
-            improved = true;
-            break;
+        int bestInd = -1;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < evalsSize; i++) {
+          if (evals.get(i) >= bestScore) {
+            bestScore = evals.get(i);
+            bestInd = i;
           }
         }
-        if (!improved)
+        if (bestInd == evalsSize-1) { // copy xBest
+          if (xBest == null)
+            xBest = Arrays.copyOf(xLast, xLast.length);
+          else
+            System.arraycopy( xLast, 0, xBest, 0, xLast.length );
+        }
+        if ((evalsSize - bestInd) >= terminateOnEvalImprovementNumOfEpoch)
           return eState.TERMINATE_EVALIMPROVE;
       }
 
@@ -509,6 +514,10 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
      */
     public double howLong() {
       return ((System.currentTimeMillis() - startTime)) / 1000.0;
+    }
+
+    public double[] getBest() {
+      return xBest;
     }
 
   }
@@ -1097,7 +1106,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
     if (evaluateIters > 0) {
       // do final evaluation
-      doEvaluation(x);
+      double evalScore = (useEvalImprovement ? doEvaluation(rec.getBest()) : doEvaluation(x));
+      sayln("final evalScore is: " + evalScore);
     }
 
     //
@@ -1124,6 +1134,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       System.err
           .println("QNMinimizer terminated due to no improvement on eval ");
       success = true;
+      x = rec.getBest();
       break;
     default:
       System.err.println("QNMinimizer terminated without converging");
@@ -1173,16 +1184,22 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     return dfunc.valueAt(x);
   }
 
+  public void useOWLQN(boolean use, double lambda) {
+    this.useOWLQN = use;
+    this.lambdaOWL = lambda;
+  }
+
   private static Set<Integer> initializeParamRange(Function func, double[] x) {
-    if (func instanceof HasL1ParamRange) {
-      return ((HasL1ParamRange)func).getL1ParamRange(x);
+    Set<Integer> paramRange = null;
+    if (func instanceof HasRegularizerParamRange) {
+      paramRange = ((HasRegularizerParamRange)func).getRegularizerParamRange(x);
     } else {
-      Set<Integer> paramRange = Generics.newHashSet(x.length);
+      paramRange = Generics.newHashSet(x.length);
       for (int i = 0; i < x.length; i++) {
         paramRange.add(i);
       }
-      return paramRange;
     }
+    return paramRange;
   }
 
   private static double[] projectOWL(double[] x, double[] orthant, Function func) {
