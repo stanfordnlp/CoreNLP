@@ -1,13 +1,15 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 import org.junit.*;
 
-import edu.stanford.nlp.util.MetaClass;
-
-public class MetaClassTest{
+public class MetaClassTest {
 	
 	private static final String CLASS =  MetaClassTest.class.getName();
 	
@@ -389,6 +391,9 @@ public class MetaClassTest{
     assertArrayEquals(new Integer[]{1,2,3}, ints4);
     Integer[] ints5 = MetaClass.cast("1   2   3", Integer[].class);
     assertArrayEquals(new Integer[]{1,2,3}, ints5);
+
+    Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
+    assertArrayEquals(new Integer[]{}, intsEmpty);
   }
 
   private static enum Fruits {
@@ -407,6 +412,25 @@ public class MetaClassTest{
     assertEquals(Fruits.grape, MetaClass.cast("grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("Grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("GRAPE", Fruits.class));
+  }
+
+  @Test
+  public void testCastCollection() {
+    Set<String> set = new HashSet<String>();
+    set.add("apple");
+    set.add("banana");
+    Set<String> castedSet = MetaClass.cast("[apple, banana]", Set.class);
+    Set<String> castedSet2 = MetaClass.cast("[apple ,    banana ]", Set.class);
+    Set<String> castedSet3 = MetaClass.cast("{apple ,    banana }", Set.class);
+    assertEquals(set, castedSet);
+    assertEquals(set, castedSet2);
+    assertEquals(set, castedSet3);
+
+    List<String> list = new LinkedList<String>();
+    list.add("apple");
+    list.add("banana");
+    List<String> castedList = MetaClass.cast("[apple, banana]", List.class);
+    assertEquals(list, castedList);
   }
 
   private static class FromStringable {
