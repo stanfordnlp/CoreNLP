@@ -14,8 +14,8 @@
     </license>
   </licenses>
   <scm>
-    <url>http://nlp.stanford.edu/software/stanford-corenlp-2013-06-20.tgz</url>
-    <connection>http://nlp.stanford.edu/software/stanford-corenlp-2013-06-20.tgz</connection>
+    <url>http://nlp.stanford.edu/software/stanford-corenlp-2013-06-09.tgz</url>
+    <connection>http://nlp.stanford.edu/software/stanford-corenlp-2013-06-09.tgz</connection>
   </scm>
   <developers>
     <developer>
