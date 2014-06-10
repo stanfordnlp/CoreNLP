@@ -7,6 +7,7 @@ public class ArrayMathTest extends TestCase {
   private double[] d2 = new double[3];
   private double[] d3 = new double[3];
   private double[] d4 = new double[3];
+  private double[] d5 = new double[4];
 
   @Override
   public void setUp() {
@@ -22,6 +23,17 @@ public class ArrayMathTest extends TestCase {
     d4[0] = 0.1;
     d4[1] = 0.2;
     d4[2] = 0.3;
+    d5[0] = 0.1;
+    d5[1] = 0.2;
+    d5[2] = 0.3;
+    d5[3] = 0.8;
+  }
+
+  public void testInnerProduct() {
+    double inner = ArrayMath.innerProduct(d4, d4);
+    assertEquals("Wrong inner product", 0.14, inner, 1e-6);
+    inner = ArrayMath.innerProduct(d5, d5);
+    assertEquals("Wrong inner product", 0.78, inner, 1e-6);
   }
 
   public void testNumRows() {

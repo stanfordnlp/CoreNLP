@@ -5,6 +5,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 
 import java.io.BufferedReader;
@@ -15,9 +17,27 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * Table used to lookup multi-word phrases
- * (useful for looking up all instances of known phrases in a document)
+ * Table used to lookup multi-word phrases.
+ * This class provides functions for looking up all instances of known phrases in a document in an efficient manner.
  *
+ * Phrases can be added to the phrase table using
+ * <ul>
+ *   <li>readPhrases</li>
+ *   <li>readPhrasesWithTagScores</li>
+ *   <li>addPhrase</li>
+ * </ul>
+ *
+ * You can lookup phrases in the table using
+ * <ul>
+ *   <li>get</li>
+ *   <li>lookup</li>
+ * </ul>
+ *
+ * You can find phrases occurring in a piece of text using
+ * <ul>
+ *   <li>findAllMatches</li>
+ *   <li>findNonOverlappingPhrases</li>
+ * </ul>
  * @author Angel Chang
  */
 public class PhraseTable implements Serializable
@@ -45,8 +65,29 @@ public class PhraseTable implements Serializable
     this.normalize = normalize;
     this.caseInsensitive = caseInsensitive;
     this.ignorePunctuation = ignorePunctuation;
-  }  
-  
+  }
+
+  public boolean isEmpty() {
+    return (nPhrases == 0);
+  }
+
+  public boolean containsKey(Object key) {
+    return get(key) != null;
+  }
+
+  public Phrase get(Object key) {
+    if (key instanceof String) {
+      return lookup((String) key);
+    } else if (key instanceof WordList) {
+      return lookup((WordList) key);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Clears this table
+   */
   public void clear()
   {
     rootTree = null;
@@ -61,12 +102,32 @@ public class PhraseTable implements Serializable
     normalizedCache = newNormalizedCache;
   }
 
+  /**
+   * Input functions to read in phrases to the table
+   */
+
   private static final Pattern tabPattern = Pattern.compile("\t");
+
+  /**
+   * Read in phrases from a file (assumed to be tab delimited)
+   * @param filename - Name of file
+   * @param checkTag - Indicates if there is a tag column (assumed to be 2nd column)
+   *                   If false, treats entire line as the phrase
+   * @throws IOException
+   */
   public void readPhrases(String filename, boolean checkTag) throws IOException
   {
     readPhrases(filename, checkTag, tabPattern);
   }
 
+  /**
+   * Read in phrases from a file.  Column delimiters are matched using regex
+   * @param filename - Name of file
+   * @param checkTag - Indicates if there is a tag column (assumed to be 2nd column)
+   *                   If false, treats entire line as the phrase
+   * @param delimiterRegex - Regex for identifying column delimiter
+   * @throws IOException
+   */
   public void readPhrases(String filename, boolean checkTag, String delimiterRegex) throws IOException
   {
     readPhrases(filename, checkTag, Pattern.compile(delimiterRegex));
@@ -89,6 +150,60 @@ public class PhraseTable implements Serializable
       } else {
         addPhrase(line);
       }
+    }
+    br.close();
+    timer.done();
+  }
+
+  /**
+   * Read in phrases where there is each pattern has a score of being associated with a certain tag.
+   * The file format is assumed to be
+   *   phrase\ttag1 count\ttag2 count...
+   * where the phrases and tags are delimited by tabs, and each tag and count is delimited by whitespaces
+   * @param filename
+   * @throws IOException
+   */
+  public void readPhrasesWithTagScores(String filename) throws IOException
+  {
+    readPhrasesWithTagScores(filename, tabPattern, whitespacePattern);
+  }
+
+  public void readPhrasesWithTagScores(String filename, String fieldDelimiterRegex,
+                                    String countDelimiterRegex) throws IOException
+  {
+    readPhrasesWithTagScores(filename, Pattern.compile(fieldDelimiterRegex), Pattern.compile(countDelimiterRegex));
+  }
+
+  public void readPhrasesWithTagScores(String filename, Pattern fieldDelimiterPattern, Pattern countDelimiterPattern) throws IOException
+  {
+    Timing timer = new Timing();
+    timer.doing("Reading phrases: " + filename);
+    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    String line;
+    int lineno = 0;
+    while ((line = br.readLine()) != null) {
+      String[] columns = fieldDelimiterPattern.split(line);
+      String phrase = columns[0];
+      // Pick map factory to use depending on number of tags we have
+      MapFactory<String,MutableDouble> mapFactory = (columns.length < 20)?
+              MapFactory.<String,MutableDouble>arrayMapFactory(): MapFactory.<String,MutableDouble>linkedHashMapFactory();
+      Counter<String> counts = new ClassicCounter<String>(mapFactory);
+      for (int i = 1; i < columns.length; i++) {
+        String[] tagCount = countDelimiterPattern.split(columns[i], 2);
+        if (tagCount.length == 2) {
+          try {
+            counts.setCount(tagCount[0], Double.parseDouble(tagCount[1]));
+          } catch (NumberFormatException ex) {
+            throw new RuntimeException("Error processing field " + i + ": '" + columns[i] +
+                    "' from (" + filename + ":" + lineno + "): " + line, ex);
+          }
+        } else {
+          throw new RuntimeException("Error processing field " + i + ": '" + columns[i] +
+                  "' from + (" + filename + ":" + lineno + "): " + line);
+        }
+      }
+      addPhrase(phrase, null, counts);
+      lineno++;
     }
     br.close();
     timer.done();
@@ -182,8 +297,13 @@ public class PhraseTable implements Serializable
 
   public boolean addPhrase(String phraseText, String tag)
   {
+    return addPhrase(phraseText, tag, null);
+  }
+
+  public boolean addPhrase(String phraseText, String tag, Object phraseData)
+  {
     WordList wordList = toNormalizedWordList(phraseText);
-    return addPhrase(phraseText, tag, wordList);
+    return addPhrase(phraseText, tag, wordList, phraseData);
   }
 
   public boolean addPhrase(List<String> tokens)
@@ -193,17 +313,22 @@ public class PhraseTable implements Serializable
 
   public boolean addPhrase(List<String> tokens, String tag)
   {
+    return addPhrase(tokens, tag, null);
+  }
+
+  public boolean addPhrase(List<String> tokens, String tag, Object phraseData)
+  {
     WordList wordList = new StringList(tokens);
-    return addPhrase(StringUtils.join(tokens, " "), tag, wordList);
+    return addPhrase(StringUtils.join(tokens, " "), tag, wordList, phraseData);
   }
 
   private int MAX_LIST_SIZE = 20;
-  private synchronized boolean addPhrase(String phraseText, String tag, WordList wordList)
+  private synchronized boolean addPhrase(String phraseText, String tag, WordList wordList, Object phraseData)
   {
     if (rootTree == null) {
       rootTree = new HashMap<String,Object>();
     }
-    return addPhrase(rootTree, phraseText, tag, wordList, 0);
+    return addPhrase(rootTree, phraseText, tag, wordList, phraseData, 0);
   }
 
   private synchronized void addPhrase(Map<String,Object> tree, Phrase phrase, int wordIndex)
@@ -228,7 +353,8 @@ public class PhraseTable implements Serializable
     }
   }
 
-  private synchronized boolean addPhrase(Map<String,Object> tree, String phraseText, String tag, WordList wordList, int wordIndex)
+  private synchronized boolean addPhrase(Map<String,Object> tree,
+                                         String phraseText, String tag, WordList wordList, Object phraseData, int wordIndex)
   {
     // Find place to insert this item
     boolean phraseAdded = false;  // True if this phrase was successfully added to the phrase table
@@ -239,7 +365,7 @@ public class PhraseTable implements Serializable
       Object node = tree.get(word);
       if (node == null) {
         // insert here
-        Phrase phrase = new Phrase(wordList, phraseText, tag);
+        Phrase phrase = new Phrase(wordList, phraseText, tag, phraseData);
         tree.put(word, phrase);
         phraseAdded = true;
         newPhraseAdded = true;
@@ -252,7 +378,7 @@ public class PhraseTable implements Serializable
           oldPhraseNewFormAdded = oldphrase.addForm(phraseText);
         } else {
           // create list with this phrase and other and put it here
-          Phrase newphrase = new Phrase(wordList, phraseText, tag);
+          Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
           List list = new ArrayList(2);
           list.add(oldphrase);
           list.add(newphrase);
@@ -291,7 +417,7 @@ public class PhraseTable implements Serializable
         }
         if (!phraseAdded && nMaps == 0) {
           // add to list
-          Phrase newphrase = new Phrase(wordList, phraseText, tag);
+          Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
           lookupList.add(newphrase);
           newPhraseAdded = true;
           phraseAdded = true;
@@ -329,7 +455,7 @@ public class PhraseTable implements Serializable
             oldPhraseNewFormAdded = oldphrase.addForm(phraseText);
           } else {
             // create list with this phrase and other and put it here
-            Phrase newphrase = new Phrase(wordList, phraseText, tag);
+            Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
             List list = new ArrayList(2);
             list.add(oldphrase);
             list.add(newphrase);
@@ -337,7 +463,7 @@ public class PhraseTable implements Serializable
             newPhraseAdded = true;
           }
         } else {
-          Phrase newphrase = new Phrase(wordList, phraseText, tag);
+          Phrase newphrase = new Phrase(wordList, phraseText, tag, phraseData);
           tree.put(PHRASE_END, newphrase);
           newPhraseAdded = true;
         }
@@ -777,20 +903,28 @@ public class PhraseTable implements Serializable
     }
   }
 
+  /**
+   * A phrase is a multiword expression
+   */
   public static class Phrase
   {
+    /**
+     * List of words in this phrase
+     */
     WordList wordList;
     String text;
     String tag;
+    Object data; // additional data associated with the phrase
+
     // Alternate forms that can be used for lookup elsewhere
     private Set<String> alternateForms;
 
-    public Phrase(WordList wordList, String text, String tag) {
+    public Phrase(WordList wordList, String text, String tag, Object data) {
       this.wordList = wordList;
       this.text = text;
       this.tag = tag;
+      this.data = data;
     }
-
 
     public boolean isLonger(Phrase phrase)
     {
@@ -819,6 +953,10 @@ public class PhraseTable implements Serializable
       return tag;
     }
 
+    public Object getData() {
+      return data;
+    }
+
     public Collection<String> getAlternateForms() {
       if (alternateForms == null) {
         List<String> forms = new ArrayList(1);
@@ -837,6 +975,9 @@ public class PhraseTable implements Serializable
   public final static Comparator<PhraseMatch> PHRASEMATCH_LENGTH_ENDPOINTS_COMPARATOR =
           Comparators.chain(HasInterval.LENGTH_COMPARATOR, HasInterval.ENDPOINTS_COMPARATOR);
 
+  /**
+   * Represents a matched phrase
+   */
   public static class PhraseMatch implements HasInterval<Integer>
   {
     Phrase phrase;
