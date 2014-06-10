@@ -437,7 +437,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
     new GrammaticalRelation(Language.English, "dobj", "direct object",
-        DirectObjectGRAnnotation.class, OBJECT, "SBARQ|VP|SBAR", tregexCompiler,
+        DirectObjectGRAnnotation.class, OBJECT, "VP|SBARQ?", tregexCompiler,
         new String[] {
           // case with an iobj before
           "VP < (NP $+ (NP|WHNP=target !< (/^NN/ < " + timeWordLotRegex + "))) !<(/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
