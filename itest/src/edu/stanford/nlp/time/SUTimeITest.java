@@ -1431,7 +1431,7 @@ public class SUTimeITest extends TestCase {
 
         StringBuilder sb = new StringBuilder();
         for (String s:refExprs) {
-          sb.append("It happened " + refMod + " " + s + ".");
+          sb.append("It happened " + refMod + " " + s + ". ");
         }
         String testText = sb.toString();
 
@@ -1547,7 +1547,7 @@ public class SUTimeITest extends TestCase {
         StringBuilder sb = new StringBuilder();
         for (String s:refExprs) {
           for (String tod:todExprs) {
-            sb.append("It happened " + refMod + " " + s + " " + tod + ".");
+            sb.append("It happened " + refMod + " " + s + " " + tod + ". ");
           }
         }
         String testText = sb.toString();
@@ -1655,7 +1655,7 @@ public class SUTimeITest extends TestCase {
 
       StringBuilder sb = new StringBuilder();
       for (String s:refExprs) {
-        sb.append("It happens " + refMod + " " + s + ".");
+        sb.append("It happens " + refMod + " " + s + ". ");
       }
       String testText = sb.toString();
 
@@ -1724,7 +1724,7 @@ public class SUTimeITest extends TestCase {
 
       StringBuilder sb = new StringBuilder();
       for (String s:refExprs) {
-        sb.append("It happens " + refMod + s + ".");
+        sb.append("It happens " + refMod + s + ". ");
       }
       String testText = sb.toString();
 
@@ -1792,9 +1792,9 @@ public class SUTimeITest extends TestCase {
       StringBuilder sb = new StringBuilder();
       for (String s:refExprs1) {
         for (String y:refExprs2) {
-          sb.append("It happens " + refMod + s + " " + y + ".");
-          sb.append("It happens " + refMod + s + " of " + y + ".");
-          sb.append("It happens " + refMod + y + " " + s + ".");
+          sb.append("It happens " + refMod + s + " " + y + ". ");
+          sb.append("It happens " + refMod + s + " of " + y + ". ");
+          sb.append("It happens " + refMod + y + " " + s + ". ");
         }
       }
       String testText = sb.toString();
