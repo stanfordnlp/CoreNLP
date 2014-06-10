@@ -368,18 +368,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String dateTags =
           properties.getProperty("clean.datetags",
                             CleanXmlAnnotator.DEFAULT_DATE_TAGS);
-        String utteranceTurnTags =
-                properties.getProperty("clean.turntags",
-                        CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS);
-        String speakerTags =
-                properties.getProperty("clean.speakertags",
-                        CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
-        CleanXmlAnnotator annotator = new CleanXmlAnnotator(xmlTags,
+        return new CleanXmlAnnotator(xmlTags,
             sentenceEndingTags,
             dateTags,
             allowFlawed);
-        annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
-        return annotator;
       }
 
       @Override
@@ -387,21 +379,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         // keep track of all relevant properties for this annotator here!
         return "clean.xmltags:" +
                 properties.getProperty("clean.xmltags",
-                  CleanXmlAnnotator.DEFAULT_XML_TAGS) +
+                CleanXmlAnnotator.DEFAULT_XML_TAGS) +
                 "clean.sentenceendingtags:" +
                 properties.getProperty("clean.sentenceendingtags",
-                  CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS) +
+                CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS) +
                 "clean.allowflawedxml:" +
                 properties.getProperty("clean.allowflawedxml", "") +
                 "clean.datetags:" +
                 properties.getProperty("clean.datetags",
-                  CleanXmlAnnotator.DEFAULT_DATE_TAGS) +
-                "clean.turntags:" +
-                properties.getProperty("clean.turntags",
-                  CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS) +
-                "clean.speakertags:" +
-                properties.getProperty("clean.speakertags",
-                  CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
+                CleanXmlAnnotator.DEFAULT_DATE_TAGS);
       }
     });
 
