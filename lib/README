@@ -80,11 +80,11 @@ lib/tomcat/jasper.jar, el-api.jar, servlet-api.jar, tomcat-juli.jar
 
 ORIGINAL JAR NAME: the same...
 
-VERSION: Tomcat 7.0.42
+VERSION: Tomcat 7.0.12
 
-RELEASE DATE: 2013-06 (?)
+RELEASE DATE: 2011-04-05 (?)
 
-SOURCE AVAILABLE: no
+SOURCE AVAILABLE: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
 
 DESCRIPTION: Various parts of tomcat needed to build .jsp files
 
@@ -93,7 +93,7 @@ URL: http://tomcat.apache.org/download-70.cgi
 USED BY:
 used to build .jsps
 
-LAST UPDATE: 2013-07-09
+LAST UPDATE: 2011-11-21
 
 LAST UPDATE BY: John Bauer
 
@@ -373,18 +373,6 @@ USED BY: edu.stanford.nlp.time
 LAST UPDATE: 2012-11-05
 LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------------
-ejml-0.19-nogui.jar
-ORIGINAL JAR NAME: ejml-0.19.jar
-VERSION: 0.19
-RELEASE DATE: 2012-03-23
-SOURCE AVAILABLE: yes
-DESCRIPTION: Another matrix library for Java (perhaps fastest for medium
-    size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
-URL: http://code.google.com/p/efficient-java-matrix-library/
-USED BY: Used in deep learning, especially RNN parser
-LAST UPDATE: 2012-07-17
-LAST UPDATE BY: Christopher Manning
------------------------------------------------------------------
 foo.jar
 
 ORIGINAL JAR NAME:
