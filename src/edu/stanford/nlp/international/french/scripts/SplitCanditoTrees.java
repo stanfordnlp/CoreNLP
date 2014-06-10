@@ -96,7 +96,9 @@ public final class SplitCanditoTrees {
   static Map<String, Tree> readTrees(String[] filenames)
     throws IOException
   {
-    final TreeReaderFactory trf = new FrenchXMLTreeReaderFactory();
+    // TODO: perhaps we can just pass in CC_TAGSET and get rid of replacePOSTags
+    // need to test that
+    final TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false); 
     Map<String, Tree> treeMap = Generics.newHashMap();
     for (String filename : filenames) {
       File file = new File(filename);

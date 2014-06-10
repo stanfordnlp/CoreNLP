@@ -16,7 +16,13 @@ public class FrenchXMLTreeReaderFactory implements TreeReaderFactory, Serializab
 
   private static final long serialVersionUID = 578942679136874L;
 
+  private final boolean ccTagset;
+
+  public FrenchXMLTreeReaderFactory(boolean ccTagset) {
+    this.ccTagset = ccTagset;
+  }
+
   public TreeReader newTreeReader(Reader in) {
-    return new FrenchXMLTreeReader(in);
+    return new FrenchXMLTreeReader(in, ccTagset);
   }
 }

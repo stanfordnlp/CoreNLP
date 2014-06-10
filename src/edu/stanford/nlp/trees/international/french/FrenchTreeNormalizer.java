@@ -2,7 +2,9 @@ package edu.stanford.nlp.trees.international.french;
 
 import java.util.Collections;
 
+import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
+import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
@@ -22,10 +24,16 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
 
   private final String rootLabel;
 
-  public FrenchTreeNormalizer() {
+  private final MorphoFeatureSpecification morpho = new FrenchMorphoFeatureSpecification();
+
+  private final boolean ccTagset;
+
+  public FrenchTreeNormalizer(boolean ccTagset) {
     super(new FrenchTreebankLanguagePack());
 
     rootLabel = tlp.startSymbol();
+
+    this.ccTagset = ccTagset;
 
     aOverAFilter = new FrenchAOverAFilter();
 
@@ -58,12 +66,51 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
     return super.normalizeNonterminal(category).intern();
   }
 
+  private static void replacePOSTag(Tree t, MorphoFeatureSpecification morpho) {
+    if (!t.isPreTerminal()) {
+      throw new IllegalArgumentException("Can only operate on preterminals");
+    }
+
+    if (!(t.label() instanceof CoreLabel)) {
+      throw new IllegalArgumentException("Only operates on CoreLabels");
+    }
+    CoreLabel label = (CoreLabel) t.label();
+
+    Tree child = t.children()[0];
+    if (!(child.label() instanceof CoreLabel)) {
+      throw new IllegalArgumentException("Only operates on CoreLabels");
+    }
+    CoreLabel childLabel = (CoreLabel) child.label();
+
+    // Morphological Analysis
+    String morphStr = childLabel.originalText();
+    if (morphStr == null || morphStr.equals("")) {
+      morphStr = label.value();
+      // POS subcategory
+      String subCat = childLabel.category();
+      if (subCat != null && subCat != "") {
+        morphStr += "-" + subCat + "--";
+      } else {
+        morphStr += "---";
+      }
+    }
+    MorphoFeatures feats = morpho.strToFeatures(morphStr);
+    if(feats.getAltTag() != null && !feats.getAltTag().equals("")) {
+      label.setValue(feats.getAltTag());
+      label.setTag(feats.getAltTag());
+    }
+  }
+
   /**
    * Sets POS for punctuation to the punctuation token (like the PTB).
    *
    * @param t
    */
   private String normalizePreterminal(Tree t) {
+    if (ccTagset) {
+      replacePOSTag(t, morpho);
+    }
+
     if(tlp.isPunctuationWord(t.firstChild().value()))
       return tlp.punctuationTags()[0].intern(); //Map to a common tag
 //      return t.firstChild().value();//Map to the punctuation item

@@ -15,10 +15,10 @@ import edu.stanford.nlp.trees.*;
 public class FrenchTreeReaderFactory implements TreeReaderFactory, Serializable {
 
   private static final long serialVersionUID = 8943534517L;
- 
+
   public FrenchTreeReaderFactory() { }
   
   public TreeReader newTreeReader(Reader in) {
-    return new PennTreeReader(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer(),new PennTreebankTokenizer(in));
+    return new PennTreeReader(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer(false), new PennTreebankTokenizer(in));
   }
 }
