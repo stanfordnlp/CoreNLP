@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
 
   private NumberSequenceClassifier nscOld = new NumberSequenceClassifier(false);
-  private NumberSequenceClassifier nscNew = new NumberSequenceClassifier(true);
+//  private NumberSequenceClassifier nscNew = new NumberSequenceClassifier(true);
 
 
   private String[][] w1 = {
@@ -56,6 +56,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
     }
   }
 
+  /*
   public void testCurrencyNew() {
     assert w1.length == t1.length;
     assert w1.length == i1.length;
@@ -66,6 +67,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
       assertEquals("Failed on " + w1[i][i1[i]], a1[i], cl.get(i1[i]).get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
+  */
 
   // notes:
   // SUTime is regarding 1929 or even 1132 by itself as a DATE.  Too broad?
@@ -179,6 +181,7 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
     }
   }
 
+  /*
   public void testCdNew() {
     assert w2.length == t2.length;
     assert w2.length == i2.length;
@@ -190,5 +193,6 @@ public class NumberSequenceClassifierExpectedOutputITest extends TestCase {
       assertEquals("Failed on " + w2[i][i2[i]], a2[i], cl.get(i2[i]).get(CoreAnnotations.AnswerAnnotation.class));
     }
   }
+  */
 
 }
