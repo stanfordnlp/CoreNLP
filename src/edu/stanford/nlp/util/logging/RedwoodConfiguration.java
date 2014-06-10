@@ -322,6 +322,7 @@ public class RedwoodConfiguration {
    *   <li>log.captureStderr = {true,false}: Capture stdout and route it through Redwood</li>
    *   <li>log.channels.hide = [channels]: Hide these channels (comma-separated list)</li>
    *   <li>log.channels.show = [channels]: Show only these channels (comma-separated list)</li>
+   *   <li>log.channels.debug = {true, false}: Show the debug channel
    *   <li>log.channels.width = [int]: If nonzero, the channels for each logging statement will be printed to their left</li>
    * </ul>
    * @param props The properties to use in configuration
@@ -449,6 +450,10 @@ public class RedwoodConfiguration {
       }
     } else if (channelsToHide != null) {
       config = config.printChannels(channelWidth).hideChannels(channelsToHide.split(","));
+    }
+    // (hide debug)
+    if (get(props, "log.channels.debug", "true", used).equalsIgnoreCase("false")) {
+      config = config.hideChannels(new Object[]{ Redwood.DBG });
     }
     //--Error Check
     for(Object propAsObj : props.keySet()) {
