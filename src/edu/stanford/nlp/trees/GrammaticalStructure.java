@@ -371,7 +371,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
       this.npf = f;
     }
 
-    @Override
     public boolean accept(Dependency<Label, Label, Object> d) {
       if (d == null) {
         return false;
@@ -395,7 +394,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
       this.npf = f;
     }
 
-    @Override
     public boolean accept(TypedDependency d) {
       if (d == null) return false;
 
@@ -804,14 +802,13 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param node The node to return dependents for
    * @return map of dependencies
    */
-  private static <GR extends GrammaticalRelationAnnotation> // separating this out helps some compilers
-  Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
+  private static Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> getAllDependents(TreeGraphNode node) {
     Map<Class<? extends GrammaticalRelationAnnotation>, Set<TreeGraphNode>> newMap = Generics.newHashMap();
 
     for (Class<?> o : node.label.keySet()) {
       if (GrammaticalRelationAnnotation.class.isAssignableFrom(o)) {
         // ignore any non-GrammaticalRelationAnnotation element
-        Class<GR> typedKey = ErasureUtils.uncheckedCast(o);
+        Class<? extends GrammaticalRelationAnnotation> typedKey = ErasureUtils.uncheckedCast(o);
         newMap.put(typedKey, node.label.get(typedKey));
       }
     }
@@ -863,7 +860,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
   private static final long serialVersionUID = 2286294455343892678L;
 
   private static class NameComparator<X> implements Comparator<X> {
-    @Override
     public int compare(X o1, X o2) {
       String n1 = o1.toString();
       String n2 = o2.toString();

@@ -245,12 +245,12 @@ public class TokenSequenceMatcherITest extends TestCase {
 
     // Test sequence with groups
     TokenSequencePattern p = TokenSequencePattern.compile(
-            new SequencePattern.SequencePatternExpr(
-                    new SequencePattern.GroupPatternExpr(
+                    new SequencePattern.SequencePatternExpr(
+                      new SequencePattern.GroupPatternExpr(
                             new SequencePattern.RepeatPatternExpr(
                                     getSequencePatternExpr("[A-Za-z]+"), 1, 2)),
-                    getNodePatternExpr("of"),
-                    new SequencePattern.GroupPatternExpr(
+                      getNodePatternExpr("of"),
+                      new SequencePattern.GroupPatternExpr(
                             new SequencePattern.RepeatPatternExpr(
                                     getSequencePatternExpr("[A-Za-z]+"), 1, 3))));
 
@@ -283,12 +283,12 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
 
     p = TokenSequencePattern.compile(
-            new SequencePattern.SequencePatternExpr(
-                    new SequencePattern.GroupPatternExpr(
+                    new SequencePattern.SequencePatternExpr(
+                      new SequencePattern.GroupPatternExpr(
                             new SequencePattern.RepeatPatternExpr(
                                     getNodePatternExpr("[A-Za-z]+"), 2, 2)),
-                    getNodePatternExpr("of"),
-                    new SequencePattern.GroupPatternExpr(
+                      getNodePatternExpr("of"),
+                      new SequencePattern.GroupPatternExpr(
                             new SequencePattern.RepeatPatternExpr(
                                     getNodePatternExpr("[A-Za-z]+"), 1, 3, false))));
 
@@ -720,7 +720,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     CoreMap doc = createDocument(testText1);
 
     // Test sequence with groups
-    TokenSequencePattern p = TokenSequencePattern.compile(" ( [ /[A-Za-z]+/ ]{1,2} )  [ /of/ ] ( [ /[A-Za-z]+/ ]{1,3} )");
+    TokenSequencePattern p = TokenSequencePattern.compile( " ( [ /[A-Za-z]+/ ]{1,2} )  [ /of/ ] ( [ /[A-Za-z]+/ ]{1,3} )");
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     boolean match = m.find();
     assertTrue(match);
@@ -812,26 +812,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertFalse(match);
 
-  }
-
-  public void testTokenSequenceMatcherGroupNames() throws IOException {
-    CoreMap doc = createDocument(testText1);
-
-    // Test sequence with group names
-    TokenSequencePattern p = TokenSequencePattern.compile( "(?$contextprev /.*/) (?$test [{tag:NNP} & /.*/]) (?$contextnext [/.*/])");
-
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("first Bishop of", m.group());
-
-    assertEquals("first", m.group(1));
-    assertEquals("Bishop", m.group(2));
-    assertEquals("of", m.group(3));
-    assertEquals("first", m.group("$contextprev"));
-    assertEquals("Bishop", m.group("$test"));
-    assertEquals("of", m.group("$contextnext"));
   }
 
   public void testTokenSequenceMatcherPosNNP() throws IOException {
