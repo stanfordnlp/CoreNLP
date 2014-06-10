@@ -40,13 +40,20 @@ public class TokensRegexNERAnnotator implements Annotator {
   }
 
   public TokensRegexNERAnnotator(String mapping, boolean ignoreCase) {
-    this("tokenregexner", getProperties("tokenregexner", mapping, ignoreCase));
+    this(mapping, ignoreCase, null);
   }
 
-  private static Properties getProperties(String name, String mapping, boolean ignoreCase) {
+  public TokensRegexNERAnnotator(String mapping, boolean ignoreCase, String validPosRegex) {
+    this("tokenregexner", getProperties("tokenregexner", mapping, ignoreCase, validPosRegex));
+  }
+
+  private static Properties getProperties(String name, String mapping, boolean ignoreCase, String validPosRegex) {
     Properties props = new Properties();
     props.setProperty(name + ".mapping", mapping);
     props.setProperty(name +".ignorecase", String.valueOf(ignoreCase));
+    if (validPosRegex != null) {
+      props.setProperty(name +".validpospattern", validPosRegex);
+    }
     return props;
   }
 
