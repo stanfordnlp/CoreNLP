@@ -31,7 +31,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
 
   private Timing timer = new Timing();
   private static long millisecondsAnnotating = 0;
-  private boolean VERBOSE = false;
+  private boolean VERBOSE = true;
   
   private static final String DEFAULT_SEG_LOC =
     "/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz";
@@ -43,7 +43,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
     "/u/nlp/data/gale/segtool/stanford-seg/releasedata";
 
   public ChineseSegmenterAnnotator() {
-    this(DEFAULT_SEG_LOC, false);
+    this(DEFAULT_SEG_LOC, true);
   }
 
   public ChineseSegmenterAnnotator(boolean verbose) {
@@ -96,7 +96,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
   }
   
   private void loadModel(String segLoc, Properties props) {
-    if (VERBOSE) {
+    if (VERBOSE) {    
       timer.start();
       System.err.print("Loading Segmentation Model ["+segLoc+"]...");
     }
@@ -195,9 +195,6 @@ public class ChineseSegmenterAnnotator implements Annotator {
     for (String w : words) {
       CoreLabel fl = sentChars.get(pos);
       fl.set(CoreAnnotations.ChineseSegAnnotation.class, "1");
-      if (w.length() == 0) {
-        continue;
-      }
       CoreLabel token = new CoreLabel();
       token.setWord(w);
       token.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class));

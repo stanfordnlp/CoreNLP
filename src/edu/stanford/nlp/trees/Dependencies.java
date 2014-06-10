@@ -3,6 +3,7 @@ package edu.stanford.nlp.trees;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Filter;
-import edu.stanford.nlp.util.Generics;
 
 /** Utilities for Dependency objects.
  *
@@ -116,7 +116,7 @@ public class Dependencies {
   }
   
   public static Map<TreeGraphNode,List<TypedDependency>> govToDepMap(List<TypedDependency> deps) {
-    Map<TreeGraphNode,List<TypedDependency>> govToDepMap = Generics.newHashMap();
+    Map<TreeGraphNode,List<TypedDependency>> govToDepMap = new HashMap<TreeGraphNode,List<TypedDependency>>();
     for (TypedDependency dep : deps) {
       TreeGraphNode gov = dep.gov();
       
@@ -131,7 +131,7 @@ public class Dependencies {
   }
   
   private static Set<List<TypedDependency>> getGovMaxChains(Map<TreeGraphNode,List<TypedDependency>> govToDepMap, TreeGraphNode gov, int depth) {
-    Set<List<TypedDependency>> depLists = Generics.newHashSet();
+    Set<List<TypedDependency>> depLists = new HashSet<List<TypedDependency>>();
     List<TypedDependency> children = govToDepMap.get(gov);
     
     if (depth > 0 && children != null) {

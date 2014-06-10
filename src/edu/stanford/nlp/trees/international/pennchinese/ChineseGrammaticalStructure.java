@@ -5,7 +5,6 @@ import edu.stanford.nlp.parser.ViterbiParserWithOptions;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
@@ -19,11 +18,11 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
  *
  * @author Galen Andrew
  * @author Pi-Chuan Chang
- * @author Daniel Cer - support for printing CoNLL-X format, encoding update,
- *                      and preliminary changes to make
- *                      ChineseGrammaticalStructure behave more like
- *                      EnglishGrammaticalStructure on the command line
- *                      (ultimately, both classes should probably use the same
+ * @author Daniel Cer - support for printing CoNLL-X format, encoding update, 
+ *                      and preliminary changes to make 
+ *                      ChineseGrammaticalStructure behave more like 
+ *                      EnglishGrammaticalStructure on the command line 
+ *                      (ultimately, both classes should probably use the same 
  *                      abstract main method).
  */
 public class ChineseGrammaticalStructure extends GrammaticalStructure {
@@ -79,10 +78,10 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     // Construct a map from tree nodes to the set of typed
     // dependencies in which the node appears as governor.
-    Map<TreeGraphNode, Set<TypedDependency>> map = Generics.newHashMap();
+    Map<TreeGraphNode, Set<TypedDependency>> map = new HashMap<TreeGraphNode, Set<TypedDependency>>();
     for (TypedDependency typedDep : list) {
       if (!map.containsKey(typedDep.gov())) {
-        map.put(typedDep.gov(), Generics.<TypedDependency>newHashSet());
+        map.put(typedDep.gov(), new HashSet<TypedDependency>());
       }
       map.get(typedDep.gov()).add(typedDep);
     }
@@ -153,7 +152,6 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       while ((t = tr.readTree()) != null) {
         tb.add(t);
       }
-      tr.close();
     } catch (IOException e) {
       throw new RuntimeException("File problem: " + e);
     }
@@ -162,11 +160,11 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   /**
    * Tests generation of Chinese grammatical relations from a file.
    * Default encoding is utf-8.
-   *
+   * 
    * TODO: remove this main method and use the one in the abstract class GrammaticalStructure. Making this
    * change is non-trivial due to some of the English specific assumptions in the code currently invoked by
-   * GrammaticalStructure#main.
-   *
+   * GrammaticalStructure#main. 
+   * 
    * Usage: <br> <code>
    * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -treeFile [treeFile] <br>
    * java edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure -sentFile [sentenceFile] </code>
@@ -180,40 +178,32 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     Treebank tb = new MemoryTreebank();
     Properties props = StringUtils.argsToProperties(args);
-
-    String encoding = props.getProperty("encoding", "utf-8");
-    try {
-      System.setOut(new PrintStream(System.out, true, encoding));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
     String treeFileName = props.getProperty("treeFile");
     String treeDirname = props.getProperty("treeDir");
     String sentFileName = props.getProperty("sentFile");
+    String encoding = props.getProperty("encoding", "utf-8");
     boolean conllx = props.getProperty("conllx") != null;
     boolean basic = props.getProperty("basic") != null;
-    boolean nonCollapsed = props.getProperty("nonCollapsed") != null;
     boolean collapsed = props.getProperty("collapsed") != null;
     boolean parseTree = props.getProperty("parseTree") != null;
     boolean keepPunct = props.getProperty("keepPunct") != null;
-
+    
     // force keepPunct, if conllx is turned on
     if (conllx) {
       keepPunct = true;
     }
-
+    
     String hf = props.getProperty("hf");
     String parserModel = props.getProperty("parserModel", "/u/nlp/data/lexparser/chineseFactored.ser.gz");
 
     if (!basic && !collapsed) {
       if (conllx) {
-        basic = true;     // default to basic dependencies for conllx
+        basic = true;     // default to basic dependencies for conllx 
       } else {
         collapsed = true; // otherwise, default to collapsed dependencies
       }
     }
-
+    
     try {
       if (hf != null) {
         shf = (HeadFinder)Class.forName(hf).newInstance();
@@ -229,10 +219,10 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       System.err.println("\nOptional flags:");
       System.err.println("\t-parseTree  : print phrase-structure parse tree");
       System.err.println("\t-basic : basic non-collapsed dependencies preserving a tree structure");
-      System.err.println("\t-collapsed : collapsed dependencies");
+      System.err.println("\t-collapsed : collapsed dependencies");      
       System.err.println("\t-conllx : conllx formatted dependencies, can be used with either basic\n\t or collaped dependencies, but basic is recommended");
 
-    } else {
+    } else { 
       if (treeDirname != null && treeFileName != null) {
         throw new RuntimeException("Only one of treeDirname or treeFileName should be set");
       }
@@ -282,16 +272,16 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-
-    for (Tree t : tb) {
+    
+    for (Tree t : tb) {      
       Filter<String> puncFilter;
-
+      
       if (keepPunct) {
-        puncFilter = Filters.acceptFilter();
+        puncFilter = Filters.acceptFilter();        
       } else {
         puncFilter = new ChineseTreebankLanguagePack().punctuationWordRejectFilter();
       }
-
+      
       GrammaticalStructure gs = new ChineseGrammaticalStructure(t, puncFilter);
 
       if (parseTree) {
@@ -306,21 +296,14 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       //System.out.println(gs);
 
       if (basic) {
-        if (collapsed || nonCollapsed) {
+        if (collapsed) {
           System.out.println("------------- basic dependencies ---------------");
-        }
-        printDependencies(gs, gs.typedDependencies(false), t, conllx, false);
-      }
-
-      if (nonCollapsed) {
-        if (basic || collapsed) {
-          System.out.println("------------- noncollapsed dependencies ---------------");
-        }
+        }        
         printDependencies(gs, gs.typedDependencies(true), t, conllx, false);
       }
 
       if (collapsed) {
-        if (basic || nonCollapsed) {
+        if (basic) {
           System.out.println("----------- collapsed dependencies -----------");
         }
         printDependencies(gs, gs.typedDependenciesCollapsed(true), t, conllx, false);
@@ -331,12 +314,12 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   }
 
 
-  public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName) throws IOException {
-    return readCoNLLXGrammaticalStructureCollection(fileName, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+  public static List<GrammaticalStructure> readCoNLLXGrammaticStructureCollection(String fileName) throws IOException {
+    return readCoNLLXGrammaticStructureCollection(fileName, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
-  public static ChineseGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {
-    return (ChineseGrammaticalStructure) buildCoNLLXGrammaticalStructure(tokenFields, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+  public static ChineseGrammaticalStructure buildCoNNLXGrammaticStructure(List<List<String>> tokenFields) {
+    return (ChineseGrammaticalStructure) buildCoNNLXGrammaticStructure(tokenFields, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
   public static class FromDependenciesFactory

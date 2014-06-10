@@ -158,22 +158,12 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
    */
   @SuppressWarnings("unchecked")
   public int compareTo(Pair<T1,T2> another) {
-    if (first() instanceof Comparable) {
-      int comp = ((Comparable<T1>) first()).compareTo(another.first());
-      if (comp != 0) {
-        return comp;
-      }
-    }
-
-    if (second() instanceof Comparable) {
+    int comp = ((Comparable<T1>) first()).compareTo(another.first());
+    if (comp != 0) {
+      return comp;
+    } else {
       return ((Comparable<T2>) second()).compareTo(another.second());
     }
-
-    if ((!(first() instanceof Comparable)) && (!(second() instanceof Comparable))) {
-      throw new AssertionError("Neither element of pair comparable");
-    }
-
-    return 0;
   }
 
   /**
@@ -288,44 +278,6 @@ public class Pair <T1,T2> implements Comparable<Pair<T1,T2>>, Serializable, Pret
     @Override
     public int compare(Pair<T1, T2> pair1, Pair<T1, T2> pair2) {
       return -((Comparable<T1>) pair1.first()).compareTo(pair2.first());
-    }
-  }
-  
-  /**
-   * Compares a <code>Pair</code> to another <code>Pair</code> according to the second object of the pair only
-   * This function will work providing
-   * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
-   * <code>ClassCastException</code>
-   * @author jonathanberant
-   *
-   * @param <T1>
-   * @param <T2>
-   */
-  public static class BySecondPairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public int compare(Pair<T1, T2> pair1, Pair<T1, T2> pair2) {
-      return ((Comparable<T2>) pair1.second()).compareTo(pair2.second());
-    }
-  }
-  
-  /**
-   * Compares a <code>Pair</code> to another <code>Pair</code> according to the second object of the pair only in decreasing order
-   * This function will work providing
-   * the first element of the <code>Pair</code> is comparable, otherwise will throw a 
-   * <code>ClassCastException</code>
-   * @author jonathanberant
-   *
-   * @param <T1>
-   * @param <T2>
-   */
-  public static class BySecondReversePairComparator<T1,T2> implements Comparator<Pair<T1,T2>> {
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public int compare(Pair<T1, T2> pair1, Pair<T1, T2> pair2) {
-      return -((Comparable<T2>) pair1.second()).compareTo(pair2.second());
     }
   }
   

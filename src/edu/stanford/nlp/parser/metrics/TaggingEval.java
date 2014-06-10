@@ -3,6 +3,8 @@ package edu.stanford.nlp.parser.metrics;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -78,18 +79,18 @@ public class TaggingEval extends AbstractEval {
 
   @Override
   protected Set<HasTag> makeObjects(Tree tree) {
-    return (tree == null) ? Generics.<HasTag>newHashSet() : Generics.<HasTag>newHashSet(tree.taggedLabeledYield());
+    return (tree == null) ? new HashSet<HasTag>() : new HashSet<HasTag>(tree.taggedLabeledYield());
   }
 
   private static Map<String,Set<Label>> makeObjectsByCat(Tree t) {
-    Map<String,Set<Label>> catMap = Generics.newHashMap();
+    Map<String,Set<Label>> catMap = new HashMap<String,Set<Label>>();
     List<CoreLabel> tly = t.taggedLabeledYield();
 
     for(CoreLabel label : tly) {
       if(catMap.containsKey(label.value()))
         catMap.get(label.value()).add(label);
       else {
-        Set<Label> catSet = Generics.newHashSet();
+        Set<Label> catSet = new HashSet<Label>();
         catSet.add(label);
         catMap.put(label.value(), catSet);
       }
@@ -110,7 +111,7 @@ public class TaggingEval extends AbstractEval {
     if(doCatLevelEval) {
       final Map<String,Set<Label>> guessCats = makeObjectsByCat(guess);
       final Map<String,Set<Label>> goldCats = makeObjectsByCat(gold);
-      final Set<String> allCats = Generics.newHashSet();
+      final Set<String> allCats = new HashSet<String>();
       allCats.addAll(guessCats.keySet());
       allCats.addAll(goldCats.keySet());
 
@@ -119,9 +120,9 @@ public class TaggingEval extends AbstractEval {
         Set<Label> thisGoldCats = goldCats.get(cat);
 
         if (thisGuessCats == null)
-          thisGuessCats = Generics.newHashSet();
+          thisGuessCats = new HashSet<Label>();
         if (thisGoldCats == null)
-          thisGoldCats = Generics.newHashSet();
+          thisGoldCats = new HashSet<Label>();
 
         double currentPrecision = precision(thisGuessCats, thisGoldCats);
         double currentRecall = precision(thisGoldCats, thisGuessCats);
@@ -181,7 +182,7 @@ public class TaggingEval extends AbstractEval {
 
     if(doCatLevelEval) {
       final NumberFormat nf = new DecimalFormat("0.00");
-      final Set<String> cats = Generics.newHashSet();
+      final Set<String> cats = new HashSet<String>();
       final Random rand = new Random();
       cats.addAll(precisions.keySet());
       cats.addAll(recalls.keySet());
@@ -238,7 +239,7 @@ public class TaggingEval extends AbstractEval {
     usage.append("  -e         : Input encoding.\n");
   }
 
-  public static final Map<String,Integer> optionArgDefs = Generics.newHashMap();
+  public static final Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
   static {
     optionArgDefs.put("-v", 0);
     optionArgDefs.put("-l", 1);

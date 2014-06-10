@@ -15,8 +15,8 @@
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="false"/>
   <property name="compile.optimize"    value="true"/>
-  <property name="compile.source"      value="1.7" />
-  <property name="compile.target"      value="1.7" />
+  <property name="compile.source"      value="1.6" />
+  <property name="compile.target"      value="1.6" />
   <property name="compile.encoding"    value="utf-8" />
 
   <target name="classpath" description="Sets the classpath">
@@ -34,27 +34,6 @@
     <delete dir="${build.path}"/>
   </target>
 
-  <target name="javacceverything" depends="classpath"
-          description="javacc everything that can be javacced">
-    <taskdef resource="net/sf/antcontrib/antlib.xml">
-      <classpath>
-        <pathelement location="${project.core}/lib/ant-contrib-1.0b3.jar"/>
-      </classpath>
-    </taskdef>
-
-    <echo message="${ant.project.name}" />
-    <for param="javacc.target">
-      <path>
-        <fileset dir="${source.path}">
-          <include name="**/*.jj"/>
-        </fileset>
-      </path>
-      <sequential>
-        <javacc target="@{javacc.target}" javacchome="${basedir}/lib" />
-      </sequential>
-    </for>
-  </target>
-
   <target name="flexeverything" depends="classpath"
           description="JFlex everything that can be JFlexed">
     <taskdef resource="net/sf/antcontrib/antlib.xml">
@@ -63,9 +42,9 @@
       </classpath>
     </taskdef>
 
-    <taskdef classname="jflex.anttask.JFlexTask" name="jflex">
+    <taskdef classname="JFlex.anttask.JFlexTask" name="jflex">
       <classpath>
-        <pathelement location="${project.core}/lib/jflex-1.5.1.jar"/>
+        <pathelement location="${project.core}/lib/JFlex.jar"/>
       </classpath>
     </taskdef>
 
@@ -109,7 +88,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="classpath,compile"
+  <target name="test" depends="classpath"
           description="Run core unit tests">
     <echo message="${ant.project.name}" />
     <junit fork="true" maxmemory="1g" printsummary="off" outputtoformatters="false" forkmode="perBatch" haltonfailure="true">
@@ -126,7 +105,7 @@
     </junit>
   </target>
 
-  <target name="itest" depends="classpath,compile"
+  <target name="itest" depends="classpath"
           description="Run core integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
@@ -144,7 +123,7 @@
     </junit>
   </target>
 
-  <target name="slowitest" depends="classpath,compile"
+  <target name="slowitest" depends="classpath"
           description="Run really slow integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
@@ -168,7 +147,7 @@
           description="Clean and re-compile." />
 
   <!-- This file contains the .jsp build target -->
-  <import file="commonbuildjsp.xml" />
+  <import file="../../commonbuildjsp.xml" />
 
   <!-- This runs the specified class, using a separate Java VM -->
   <!-- Specify class to run via "run.class," arg, i.e., -->
@@ -279,16 +258,16 @@
         <include name="javanlp-core.jar"/>
       </lib>
       <lib dir="${basedir}/lib">
-        <include name="commons-lang3-3.1.jar"/>
-        <include name="xom-1.2.10.jar"/>
+        <include name="commons-lang-2.5.jar"/>
+        <include name="xom-1.2.7.jar"/>
         <include name="joda-time.jar"/>
-        <include name="jollyday-0.4.7.jar"/>
+        <include name="jollyday.jar"/>
       </lib>
       <zipfileset prefix="WEB-INF/data"
-                  file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger"/>
+                  file="/u/nlp/data/pos-tagger/english/english-left3words-distsim.tagger"/>
       <zipfileset prefix="WEB-INF/data/rules"
                   file="${source.path}/edu/stanford/nlp/time/rules/*"/>
-      <zipfileset prefix="WEB-INF/data/holidays"
+      <zipfileset prefix="WEB-INF/classes/holidays"
                     file="${source.path}/edu/stanford/nlp/time/holidays/*"/>
       <zipfileset file="${data.path}/webapps/favicon.ico"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/header.jsp"/>
@@ -333,7 +312,7 @@
         <include name="javanlp-core.jar"/>
       </lib>
       <lib dir="${basedir}/lib">
-        <include name="commons-lang3-3.1.jar"/>
+        <include name="commons-lang-2.5.jar"/>
       </lib>
       <zipfileset file="${source.path}/edu/stanford/nlp/ie/ner/webapp/ner.jsp"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/ie/ner/webapp/header.jsp"/>
@@ -363,7 +342,7 @@
         <include name="javanlp-core.jar"/>
       </lib>
       <lib dir="${basedir}/lib">
-        <include name="commons-lang3-3.1.jar"/>
+        <include name="commons-lang-2.5.jar"/>
         <include name="xom-1.2.8.jar"/>
         <include name="xalan.jar"/>
         <include name="serializer.jar"/>

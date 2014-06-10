@@ -9,7 +9,6 @@ import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Adds a new dependent node, based off of a prototype IndexedWord, with the given relation.
@@ -142,7 +141,7 @@ public class AddDep extends SsurgeonEdit {
   public static IndexedWord fromCheapString(String rawArg) {
     String arg = rawArg.substring(1, rawArg.length()-1);
     String[] tuples=arg.split(ATOM_DELIMITER);
-    Map<String,String> args = Generics.newHashMap();
+    Map<String,String> args = new HashMap<String,String>();
     for (String tuple : tuples) {
       String[] vals = tuple.split(TUPLE_DELIMITER);
       String key = vals[0];

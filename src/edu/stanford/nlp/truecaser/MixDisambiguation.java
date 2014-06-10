@@ -1,12 +1,12 @@
 package edu.stanford.nlp.truecaser;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.FileReader;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * This utility takes the tokens in a data file and picks the most
@@ -17,8 +17,8 @@ import edu.stanford.nlp.util.Generics;
  */
 public class MixDisambiguation {
 
-  private static Map<String, Counter<String>> map = Generics.newHashMap();
-  private static Map<String, String> highest = Generics.newHashMap();
+  private static Map<String, Counter<String>> map = new HashMap<String, Counter<String>>();
+  private static Map<String, String> highest = new HashMap<String, String>();
 
   private MixDisambiguation() {} // static class
 

@@ -74,37 +74,4 @@ public class StringUtilsTest extends TestCase {
     assertEquals(3, StringUtils.editDistance("", "bar"));
     assertEquals(3, StringUtils.editDistance("foo", ""));
   }
-
-  public void testSplitOnChar() {
-    assertEquals(3, StringUtils.splitOnChar("hello\tthere\tworld", '\t').length);
-    assertEquals(2, StringUtils.splitOnChar("hello\tworld", '\t').length);
-    assertEquals(1, StringUtils.splitOnChar("hello", '\t').length);
-
-    assertEquals("hello", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[0]);
-    assertEquals("there", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[1]);
-    assertEquals("world", StringUtils.splitOnChar("hello\tthere\tworld", '\t')[2]);
-
-    assertEquals(1, StringUtils.splitOnChar("hello\tthere\tworld\n", ' ').length);
-    assertEquals("hello\tthere\tworld\n", StringUtils.splitOnChar("hello\tthere\tworld\n", ' ')[0]);
-
-    assertEquals(5, StringUtils.splitOnChar("a\tb\tc\td\te", '\t').length);
-    assertEquals(5, StringUtils.splitOnChar("\t\t\t\t", '\t').length);
-    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[0]);
-    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[1]);
-    assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[4]);
-
-  }
-
-  public void testNormalize() {
-    assertEquals("can't", StringUtils.normalize("can't"));
-    assertEquals("Beyonce", StringUtils.normalize("Beyoncé"));
-    assertEquals("krouzek", StringUtils.normalize("kroužek"));
-    assertEquals("office", StringUtils.normalize("o\uFB03ce"));
-    assertEquals("DZ", StringUtils.normalize("Ǆ"));
-    assertEquals("1⁄4", StringUtils.normalize("¼"));
-    assertEquals("한국어", StringUtils.normalize("한국어"));
-    assertEquals("조선말", StringUtils.normalize("조선말"));
-    assertEquals("が", StringUtils.normalize("が"));
-    assertEquals("か", StringUtils.normalize("か"));
-  }
 }

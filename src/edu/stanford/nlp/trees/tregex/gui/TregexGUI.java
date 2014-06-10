@@ -35,11 +35,11 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -76,14 +76,10 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
-import javax.swing.UIManager;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
-import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.tregex.gui.MatchesPanel.MatchesPanelListener;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ReflectionLoading;
 
 /**
  * Main class for creating a tregex gui.  Manages the components and holds the menu bar.
@@ -110,13 +106,11 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   private JFileChooser chooser; // = null;
   private static File chooserFile;
 
-  final TreeTransformer transformer;
 
   //preferences, about panel so that we don't have to remake each time
   private JDialog preferenceDialog; // = null;
   private JDialog aboutBox; // = null;
 
-  private static final String TRANSFORMER = "transformer";
 
   private JMenuBar getMenu() {
     JMenuBar mbar = new JMenuBar();
@@ -184,30 +178,29 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   }
 
   private void setShortcutKeys() {
-    if (isMacOSX()) {
+    if(isMacOSX())
       setMacShortcutKeys();
-    } else {
+    else
       setWindowsShortcutKeys();
-    }
   }
 
   private void setMacShortcutKeys() {
-    preferences.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, InputEvent.META_MASK));
-    loadFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.META_MASK));
-    saveMatches.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.META_MASK));
-    saveHistory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.SHIFT_MASK+InputEvent.META_MASK));
-    quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.META_MASK));
-    copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.META_MASK));
+    preferences.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, Event.META_MASK));
+    loadFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.META_MASK));
+    saveMatches.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.META_MASK));
+    saveHistory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.SHIFT_MASK+Event.META_MASK));
+    quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Event.META_MASK));
+    copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Event.META_MASK));
 
   }
 
   private void setWindowsShortcutKeys() {
     // preferences.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, Event.CTRL_MASK)); // cdm: just skip this, I don't think Windows ever uses comma like this
-    loadFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
-    saveMatches.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
-    saveHistory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.SHIFT_MASK+InputEvent.CTRL_MASK));
-    quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK)); // cdm: maybe should be Control or Alt F4
-    copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+    loadFiles.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK));
+    saveMatches.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK));
+    saveHistory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.SHIFT_MASK+Event.CTRL_MASK));
+    quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Event.CTRL_MASK)); // cdm: maybe should be Control or Alt F4
+    copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, Event.CTRL_MASK));
 
   }
 
@@ -281,19 +274,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     return fullTopPanel;
   }
 
-  private TregexGUI(Properties props, List<String> initialFiles) {
+  public TregexGUI() {
     super("Tregex");
     TregexGUI.instance = this;
     setDefaultLookAndFeelDecorated(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    String transformerClass = props.getProperty(TRANSFORMER, null);
-    if (transformerClass == null) {
-      transformer = null;
-    } else {
-      transformer = ReflectionLoading.loadByReflection(transformerClass);
-    }
-    
+
     initAboutBox();
     Container content = getContentPane();
     content.setBackground(Color.lightGray);
@@ -327,15 +314,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     // center it
     setBounds(begX, begY, screenSize.width, screenSize.height);
     pack();
-
-    if (initialFiles.size() > 0) {
-      File[] files = new File[initialFiles.size()];
-      for (int i = 0; i < initialFiles.size(); ++i) {
-        files[i] = new File(initialFiles.get(i));
-      }
-      startFileLoadingThread(new EnumMap<FilterType,String>(FilterType.class), files);
-    }
-
     setVisible(true);
   }
 
@@ -587,7 +565,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 //    hasNumLessThan("Has number less than: ");
     isInRange("Has number in range: ");
 
-    private final String text;
+    private String text;
     private FilterType(String string) {
       text = string;
     }
@@ -784,33 +762,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
   /**
    * Main method for launching a new tregex gui object
-   * <br>
-   * If the argument <code>-transformer class</code> is given, that
-   * class is used as a TreeTransformer when loading in trees.
-   * <br>
-   * All other arguments will be interpreted as filenames to preload.
+   * @param args There are no command-line arguments used
    */
   public static void main(String[] args) {
     if (isMacOSX()) {
       setMacProperties();
-    } else {
-      try {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
     }
-    Properties props = new Properties();
-    List<String> filenames = Generics.newArrayList();
-    for (int argIndex = 0; argIndex < args.length; ) {
-      if (args[argIndex].equalsIgnoreCase("-" + TRANSFORMER)) {
-        props.setProperty(TRANSFORMER, args[argIndex + 1]);
-        argIndex += 2;
-      } else {
-        filenames.add(args[argIndex++]);
-      }
-    }
-    new TregexGUI(props, filenames);
+    new TregexGUI();
   }
 
 

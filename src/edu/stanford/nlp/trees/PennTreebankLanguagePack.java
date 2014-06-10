@@ -1,6 +1,6 @@
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.util.Filter;
@@ -11,7 +11,7 @@ import edu.stanford.nlp.util.Filter;
  * parsing the English Penn Treebank.
  *
  * @author Christopher Manning
- * @version 1.2
+ * @version 1.1
  */
 public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
@@ -22,15 +22,15 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
 
-  private static final String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
+  private static String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
 
-  private static final String[] pennSFPunctTags = {"."};
+  private static String[] pennSFPunctTags = {"."};
 
-  private static final String[] collinsPunctTags = {"''", "``", ".", ":", ","};
+  private static String[] collinsPunctTags = {"''", "``", ".", ":", ","};
 
-  private static final String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
+  private static String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
 
-  private static final String[] pennSFPunctWords = {".", "!", "?"};
+  private static String[] pennSFPunctWords = {".", "!", "?"};
 
 
   /**
@@ -41,12 +41,12 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * printing out lexicalized dependencies.  Note that ] ought to be
    * unnecessary, since it would end the annotation, not start it.
    */
-  private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
+  private static char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
 
   /**
    * This is valid for "BobChrisTreeNormalizer" conventions only.
    */
-  private static final String[] pennStartSymbols = {"ROOT", "TOP"};
+  private static String[] pennStartSymbols = {"ROOT", "TOP"};
 
 
   /**
@@ -88,7 +88,6 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    *
    * @return The sentence final punctuation tags
    */
-  @Override
   public String[] sentenceFinalPunctuationWords() {
     return pennSFPunctWords;
   }
@@ -140,15 +139,14 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * @return A tokenizer
    */
   @Override
-  public TokenizerFactory<CoreLabel> getTokenizerFactory() {
-    return PTBTokenizer.coreLabelFactory();
+  public TokenizerFactory<Word> getTokenizerFactory() {
+    return PTBTokenizer.factory();
   }
 
   /**
    * Returns the extension of treebank files for this treebank.
    * This is "mrg".
    */
-  @Override
   public String treebankFileExtension() {
     return "mrg";
   }
@@ -180,19 +178,12 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
     return new EnglishGrammaticalStructureFactory(puncFilter, hf);
   }
 
-  @Override
-  public boolean supportsGrammaticalStructures() {
-    return true;
-  }
-
   /** {@inheritDoc} */
-  @Override
   public HeadFinder headFinder() {
     return new ModCollinsHeadFinder(this);
   }
 
   /** {@inheritDoc} */
-  @Override
   public HeadFinder typedDependencyHeadFinder() {
     return new SemanticHeadFinder(this, true);
   }

@@ -32,9 +32,7 @@ import junit.framework.TestCase;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -43,7 +41,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -149,7 +146,6 @@ public class LexicalizedParserITest extends TestCase {
     for (String word : words) {
       CoreLabel label = new CoreLabel();
       label.setWord(word);
-      label.setValue(word);
       sentence.add(label);
     }
     return sentence;
@@ -180,19 +176,6 @@ public class LexicalizedParserITest extends TestCase {
                         "(ROOT (S (NP (PRP$ My) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))");
   }
 
-  public void testParseMultiple() {
-    List<List<CoreLabel>> sentences = new ArrayList<List<CoreLabel>>();
-    sentences.add(Sentence.toCoreLabelList("The", "Flyers", "lost", "again", "last", "night", "."));
-    sentences.add(Sentence.toCoreLabelList("If", "this", "continues", ",", "they", "will", "miss", "the", "playoffs", "."));
-    sentences.add(Sentence.toCoreLabelList("Hopefully", "they", "can", "turn", "it", "around", "."));
-    sentences.add(Sentence.toCoreLabelList("Winning", "on", "Wednesday", "would", "be", "a", "good", "first", "step", "."));
-    sentences.add(Sentence.toCoreLabelList("Their", "next", "opponent", "is", "quite", "bad", "."));
-    
-    List<Tree> results1 = englishParser.parseMultiple(sentences);
-    List<Tree> results2 = englishParser.parseMultiple(sentences, 3);
-    
-    assertEquals(results1, results2);
-  }
 
   /**
    * Test what happens if you put a constraint on the parse

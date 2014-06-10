@@ -9,7 +9,6 @@ import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -54,7 +53,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     }
 
     private static final Map<String, OutputStyle> shortNames =
-      Generics.newHashMap();
+      new HashMap<String, OutputStyle>();
     static {
       for (OutputStyle style : OutputStyle.values())
         shortNames.put(style.shortName, style);
@@ -75,7 +74,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   }
 
   private static final Pattern sgml = Pattern.compile("<[^>]*>");
-  private final WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
+  private final WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>();
 
   private SeqClassifierFlags flags; // = null;
   private TokenizerFactory<IN> tokenizerFactory;

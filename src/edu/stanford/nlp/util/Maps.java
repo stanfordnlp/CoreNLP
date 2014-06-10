@@ -12,13 +12,12 @@ import java.util.Map.Entry;
 
 /**
  * Utilities for Maps, including inverting, composing, and support for list/set values.
- *
+ * <p/>
  * @author Dan Klein (klein@cs.stanford.edu)
+ * Date: Oct 22, 2003
+ * Time: 8:56:16 PM
  */
 public class Maps {
-
-  private Maps() {}
-
   /**
    * Adds the value to the HashSet given by map.get(key), creating a new HashMap if needed.
    *
@@ -56,7 +55,7 @@ public class Maps {
    * @return The composed map
    */
   public static <X, Y, Z> Map<X, Z> compose(Map<X, Y> map1, Map<Y, Z> map2) {
-    Map<X, Z> composedMap = Generics.newHashMap();
+    Map<X, Z> composedMap = new HashMap<X, Z>();
     for (X key : map1.keySet()) {
       composedMap.put(key, map2.get(map1.get(key)));
     }
@@ -69,7 +68,7 @@ public class Maps {
    * @return The inverted map
    */
   public static <X, Y> Map<Y, X> invert(Map<X, Y> map) {
-    Map<Y, X> invertedMap = Generics.newHashMap();
+    Map<Y, X> invertedMap = new HashMap<Y, X>();
     for (Map.Entry<X, Y> entry : map.entrySet()) {
       X key = entry.getKey();
       Y value = entry.getValue();
@@ -84,7 +83,7 @@ public class Maps {
    * @return The inverted set
    */
   public static <X, Y> Map<Y, Set<X>> invertSet(Map<X, Y> map) {
-    Map<Y, Set<X>> invertedMap = Generics.newHashMap();
+    Map<Y, Set<X>> invertedMap = new HashMap<Y, Set<X>>();
     for (Map.Entry<X, Y> entry : map.entrySet()) {
       X key = entry.getKey();
       Y value = entry.getValue();
@@ -94,7 +93,7 @@ public class Maps {
   }
 
   /**
-   * Sorts a list of entries.  This method is here since the entries might come from a Counter.
+   * Sorts a list of entries.  This menthod is here since the entries might come from a Counter.
    */
   public static <K extends Comparable<? super K>, V> List<Map.Entry<K, V>> sortedEntries(Collection<Map.Entry<K, V>> entries) {
     List<Entry<K,V>> entriesList = new ArrayList<Map.Entry<K, V>>(entries);
@@ -138,7 +137,7 @@ public class Maps {
     toStringSorted(map, builder);
     return builder.toString();
   }
-
+  
   /**
    * Removes keys from the map
    */
@@ -159,28 +158,13 @@ public class Maps {
     }
   }
 
-  /**
-   * get all values corresponding to the indices (if they exist in the map)
-   * @param map
-   * @param indices
-   * @return
-   */
-  public static<T,V> Map<T, V> getAll(Map<T, V> map, Collection<T> indices){
-    Map<T,V> result = new HashMap<T,V>();
-    for(T i: indices)
-      if(map.containsKey(i)){
-        result.put(i, map.get(i));
-      }
-    return result;
-  }
-
   public static void main(String[] args) {
-    Map<String, String> map1 = Generics.newHashMap();
+    Map<String, String> map1 = new HashMap<String, String>();
     map1.put("a", "1");
     map1.put("b", "2");
     map1.put("c", "2");
     map1.put("d", "4");
-    Map<String, String> map2 = Generics.newHashMap();
+    Map<String, String> map2 = new HashMap<String, String>();
     map2.put("1", "x");
     map2.put("2", "y");
     map2.put("3", "z");
@@ -189,8 +173,8 @@ public class Maps {
     System.out.println("invertSet(map1): " + Maps.invertSet(map1));
     System.out.println("map2: " + map2);
     System.out.println("compose(map1,map2): " + Maps.compose(map1, map2));
-    Map<String, Set<String>> setValues = Generics.newHashMap();
-    Map<String, List<String>> listValues = Generics.newHashMap();
+    Map<String, Set<String>> setValues = new HashMap<String, Set<String>>();
+    Map<String, List<String>> listValues = new HashMap<String, List<String>>();
     Maps.putIntoValueArrayList(listValues, "a", "1");
     Maps.putIntoValueArrayList(listValues, "a", "1");
     Maps.putIntoValueArrayList(listValues, "a", "2");

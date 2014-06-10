@@ -2,15 +2,12 @@
 package edu.stanford.nlp.util.logging;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Stack;
 
-import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.util.logging.Redwood.Record;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * An abstract handler incorporating the logic of outputing a log message,
@@ -64,14 +61,14 @@ public abstract class OutputHandler extends LogRecordHandler{
    * The color to use for track beginning and ends
    */
   protected Color trackColor = Color.NONE;
-  protected Map<String,Color> channelColors = null;
+  protected HashMap<String,Color> channelColors = null;
   protected boolean addRandomColors = false;
 
   /**
    * The style to use for track beginning and ends
    */
   protected Style trackStyle = Style.NONE;
-  protected Map<String,Style> channelStyles = null;
+  protected HashMap<String,Style> channelStyles = null;
 
   /**
    * Print a string to an output without the trailing newline.
@@ -92,9 +89,9 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   public void colorChannel(String channel, Color color){
     if(this.channelColors == null){
-      this.channelColors = Generics.newHashMap();
+      this.channelColors = new HashMap<String,Color>();
     }
-    this.channelColors.put(channel.toLowerCase(Locale.ENGLISH),color);
+    this.channelColors.put(channel.toLowerCase(),color);
   }
 
   /**
@@ -104,14 +101,14 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   public void styleChannel(String channel, Style style){
     if(this.channelStyles == null){
-      this.channelStyles = Generics.newHashMap();
+      this.channelStyles = new HashMap<String,Style>();
     }
-    this.channelStyles.put(channel.toLowerCase(Locale.ENGLISH),style);
+    this.channelStyles.put(channel.toLowerCase(),style);
   }
 
   public void setColorChannels(boolean colorChannels){
     this.addRandomColors = colorChannels;
-    if(colorChannels){ this.channelColors = Generics.newHashMap(); }
+    if(colorChannels){ this.channelColors = new HashMap<String,Color>(); }
   }
 
   /**
@@ -124,26 +121,14 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   protected StringBuilder style(StringBuilder b, String line, Color color, Style style){
     if(color != Color.NONE || style != Style.NONE){
-      if (Redwood.supportsAnsi && this.supportsAnsi()) {
-        b.append(color.ansiCode);
-        b.append(style.ansiCode);
-      }
+      b.append(color.ansiCode);
+      b.append(style.ansiCode);
       b.append(line);
-      if (Redwood.supportsAnsi && this.supportsAnsi()) {
-        b.append("\033[0m");
-      }
+      b.append("\033[0m");
     } else {
       b.append(line);
     }
     return b;
-  }
-
-  /**
-   * Specify whether this output handler supports ansi output
-   * @return False by default, unless overwritten.
-   */
-  protected boolean supportsAnsi() {
-    return false;
   }
 
   /**
@@ -159,7 +144,7 @@ public abstract class OutputHandler extends LogRecordHandler{
       //(regular concat)
       b.append(channelStr);
     } else {
-      String channelToString = channel.toString().toLowerCase(Locale.ENGLISH);
+      String channelToString = channel.toString().toLowerCase();
       //(default: no style)
       Color color = Color.NONE;
       Style style = Style.NONE;
@@ -171,7 +156,7 @@ public abstract class OutputHandler extends LogRecordHandler{
           color = candColor;
         } else if(addRandomColors){
           //((case: random colors))
-          color = Color.values()[SloppyMath.pythonMod(channelToString.hashCode(), (Color.values().length-3))+3];
+          color = Color.values()[(Math.abs(channelToString.hashCode()) % (Color.values().length-3))+3];
           if(channelToString.equals(Redwood.ERR.toString().toLowerCase())){
             color = Color.RED;
           } else if(channelToString.equals(Redwood.WARN.toString().toLowerCase())){
@@ -230,10 +215,9 @@ public abstract class OutputHandler extends LogRecordHandler{
   }
 
   /** {@inheritDoc} */
-  @Override
   public List<Record> handle(Record record) {
     StringBuilder b = new StringBuilder();
-
+    
     //--Special case for Exceptions
     String[] content;
     if (record.content instanceof Throwable) {
@@ -277,14 +261,9 @@ public abstract class OutputHandler extends LogRecordHandler{
     } else if(record.content == null){
       content = new String[]{"null"};
     } else {
-      String toStr = record.content.toString();
-      if (toStr == null) {
-        content = new String[]{"<null toString()>"};
-      } else {
-        content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
-      }
+      content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
     }
-
+    
     //--Handle Tracks
     updateTracks(record.depth);
     if(this.missingOpenBracket){
@@ -387,7 +366,7 @@ public abstract class OutputHandler extends LogRecordHandler{
   public List<Record> signalEndTrack(int newDepth, long timeOfEnd) {
     //(pop info)
     TrackInfo childInfo = this.info;
-    if (childInfo == null) {
+    if(childInfo == null){
       throw new IllegalStateException("OutputHandler received endTrack() without matching startTrack() --" +
           "are your handlers mis-configured?");
     }
@@ -400,10 +379,10 @@ public abstract class OutputHandler extends LogRecordHandler{
     //(handle track)
     if(this.queuedTracks.isEmpty()){
       StringBuilder b = new StringBuilder();
-      if (!this.missingOpenBracket) {
+      if(!this.missingOpenBracket){
         //(write margin)
-        for(int i=0; i<this.leftMargin; i++) {
-          b.append(' ');
+        for(int i=0; i<this.leftMargin; i++){
+          b.append(" ");
         }
         //(null content)
         writeContent(newDepth, "", b);
@@ -412,17 +391,17 @@ public abstract class OutputHandler extends LogRecordHandler{
       }
       this.missingOpenBracket = false;
       //(write matching line)
-      if (childInfo.numElementsPrinted > this.minLineCountForTrackNameReminder) {
-        b.append("<< ").append(childInfo.name).append(' ');
+      if(childInfo != null && childInfo.numElementsPrinted > this.minLineCountForTrackNameReminder){
+        b.append("<< ").append(childInfo.name).append(" ");
       }
       //(write time)
-      if (timeOfEnd-childInfo.beginTime > 100) {
-        b.append('[');
+      if(childInfo != null && timeOfEnd-childInfo.beginTime > 100){
+        b.append("[");
         Redwood.formatTimeDifference(timeOfEnd-childInfo.beginTime,b);
-        b.append(']');
+        b.append("]");
       }
       //(print)
-      b.append('\n');
+      b.append("\n");
       print(null, this.style(new StringBuilder(), b.toString(), trackColor, trackStyle).toString());
     } else {
       this.queuedTracks.removeLast();
@@ -434,7 +413,7 @@ public abstract class OutputHandler extends LogRecordHandler{
    * Relevant information about printing the start, and particularly
    * the end, of a track
    */
-  private static class TrackInfo {
+  private static class TrackInfo{
     public final long beginTime;
     public final String name;
     protected int numElementsPrinted = 0;

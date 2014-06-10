@@ -9,11 +9,11 @@ package edu.stanford.nlp.trees.tregex;
 // all generated classes are in this package
 
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.trees.HeadFinder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +33,7 @@ class TregexParser {
   // keep track of which variables we've seen, so that we can reject
   // some nonsense patterns such as ones that reset variables or link
   // to variables that haven't been set
-  private Set<String> knownVariables = Generics.newHashSet();
+  private Set<String> knownVariables = new HashSet<String>();
 
   public TregexParser(java.io.Reader stream,
                       Function<String, String> basicCatFunction,
@@ -59,11 +59,10 @@ SKIP:
 
 TOKEN:
 {
-  < RELATION: "<<" | ">>" | "<" | ">" | "$" | ".." | "." | ",," | "," | "<<," | "<<-" | ">>," | ">>-" | "<," | ">," | "<-" | ">-" | "<`" | ">`" | "<<`" | ">>`" | "<:" | ">:" | "<<:" | ">>:" | "$++" | "$--" | "$+" | "$-" | "<#" | "<<#" | ">#" | ">>#" | "==" | "$." | "$.." | "$," | "$,," | ":" | "<=" >
-| < MULTI_RELATION: "<..." >
+  < RELATION: "<<" | ">>" | "<" | ">" | "$" | ".." | "." | ",," | "," | "<<," | "<<-" | ">>," | ">>-" | "<," | ">," | "<-" | ">-" | "<`" | ">`" | "<<`" | ">>`" | "<:" | ">:" | "<<:" | ">>:" | "$++" | "$--" | "$+" | "$-" | "<#" | "<<#" | ">#" | ">>#" | "==" | "$." | "$.." | "$," | "$,," | ":" >
 | < REL_W_STR_ARG: "<+" | ">+" | ".+" | ",+" >
 | < NUMBER: ("-")? ( ["0"-"9"] )+ >
-| < IDENTIFIER: ~[" ","0"-"9","\n","\r","(","/","|","@","!","#","%","&",")","=","?","[","]",">","<","~","_",".",",","$",":","{","}",";"] ( ~[" ","\n","\r","(","/","@","!","#","%","&",")","=","?","[","]",">","<","~",".",",","$",":"] )* >
+| < IDENTIFIER: ~[" ","0"-"9","\n","\r","(","/","|","@","!","#","%","&",")","=","?","[","]",">","<","~","_",".",",","$",":"] ( ~[" ","\n","\r","(","/","@","!","#","%","&",")","=","?","[","]",">","<","~",".",",","$",":"] )* >
 | < BLANK: "__" >
 | < REGEX: "/" ("\\/"|~["\n","\r","/"])* "/" >
 | < VARNAME: ( ["a"-"z","A"-"Z"] )+ >
@@ -77,35 +76,21 @@ TOKEN:
 // first expr is return val- passed up the tree after a production
 TregexPattern Root() : {
   TregexPattern node;
-  List<TregexPattern> nodes = Generics.newArrayList();
   // a local variable
 } {
+  ( node = SubNode(Relation.ROOT) "\n" )
   // RHS can be preceded with local variable "=" which means
   // this lv gets the return val of the production
-  ( ( node = SubNode(Relation.ROOT) ) 
-    // a code block can be placed after any bracketed expression
-    // it will be executed after that expression is matched
-    // that's where we have to return something if the production isn't void
-    {
-      nodes.add(node);
-    }
-    ( LOOKAHEAD(2) "|" node = SubNode(Relation.ROOT) {
-      nodes.add(node);
-    } )* )
-  ( "\n" )
-  { 
-    if (nodes.size() == 1) {
-      return nodes.get(0);
-    } else {
-      return new CoordinationPattern(nodes, false);
-    }
-  }
+  { return node; }
+  // a code block can be placed after any bracketed expression
+  // it will be executed after that expression is matched
+  // that's where we have to return something if the production isn't void
 }
 
 // passing arguments down the tree - in this case the relation that
 // pertains to this node gets passed all the way down to the Description node
-DescriptionPattern Node(Relation r) : {
-  DescriptionPattern node;
+TregexPattern Node(Relation r) : {
+  TregexPattern node;
 } {
   ( "(" node = SubNode(r) ")"
   | node = ModDescription(r) )
@@ -204,15 +189,15 @@ TregexPattern ChildrenDisj() : {
   // variables, we want to separate those done in different parts of the
   // disjunction.  Variables set in one part won't be set in the next
   // part if it gets there, since disjunctions exit once known.
-  Set<String> originalKnownVariables = Generics.newHashSet(knownVariables);
+  Set<String> originalKnownVariables = new HashSet<String>(knownVariables);
   // However, we want to keep track of all the known variables, so that after
   // the disjunction is over, we know them all.
-  Set<String> allKnownVariables = Generics.newHashSet(knownVariables);
+  Set<String> allKnownVariables = new HashSet<String>(knownVariables);
 } {
   ( ( child = ChildrenConj() ) {
       children.add(child);
       allKnownVariables.addAll(knownVariables); }
-    ( LOOKAHEAD(2) { knownVariables = Generics.newHashSet(originalKnownVariables); }
+    ( { knownVariables = new HashSet<String>(originalKnownVariables); }
       ( "|" child = ChildrenConj() ) {
       children.add(child);
       allKnownVariables.addAll(knownVariables); } )* )
@@ -249,7 +234,7 @@ TregexPattern ModChild() : {
     | ( "!"
         { startUnderNeg = underNegation;
           underNegation = true; }
-        child = ModChild()
+        child = Child()
           { underNegation = startUnderNeg; }
       )
       { child.negate(); }
@@ -261,7 +246,6 @@ TregexPattern Child() : {
   TregexPattern child;
 } {
   ( "[" child = ChildrenDisj() "]"
-    | "(" child = ChildrenDisj() ")"
     | child = Relation() )
   { return child; }
 }
@@ -271,12 +255,10 @@ TregexPattern Relation() : {
   // the easiest way to check if an optional production was used
   // is to set the token to null and then check it later
   Relation r;
-  DescriptionPattern child;
-  List<DescriptionPattern> children = Generics.newArrayList();
+  TregexPattern child;
 } {
-  ( ( ( t = <RELATION> ( numArg = <NUMBER> )?
+  ( ( t = <RELATION> ( numArg = <NUMBER> )?
       | t = <REL_W_STR_ARG> ( "(" ( negation = "!" )? ( cat = "@" )? ( strArg = <REGEX> | strArg = <IDENTIFIER> | strArg = <BLANK> ) ")"
-                              | "[" ( negation = "!" )? ( cat = "@" )? ( strArg = <REGEX> | strArg = <IDENTIFIER> | strArg = <BLANK> ) "]"
                               | ( negation = "!" )? strArg = <REGEX> ) )
     { if (strArg != null) {
         String negStr = negation == null ? "": "!";
@@ -294,19 +276,7 @@ TregexPattern Relation() : {
         r = Relation.getRelation(t.image, basicCatFunction, headFinder);
       } }
     child = Node(r) )
-    { return child; }
-  |
-  // For a MULTI_RELATION, we assume that
-  // Relation.constructMultiRelation will be able to give 
-  // each of the inner children the appropriate relation.
-  // By passing null, we can reuse the existing machinery
-  // without knowing too much about the inner workings of
-  // the MULTI_RELATION in the parser.
-  ( ( ( t = <MULTI_RELATION> "{" )
-      ( ( child = Node(null) { children.add(child); } )
-        ( ";" child = Node(null) { children.add(child); } )* )?
-      "}" )
-    { return Relation.constructMultiRelation(t.image, children, basicCatFunction, headFinder); } ) )
+  { return child; }
 }
 
 // care needs to be taken to insure that the resulting grammar is LL1
@@ -314,10 +284,3 @@ TregexPattern Relation() : {
 // t = <REL_W_STR_ARG> "(" ( negation = "!" )? ( strArg = <REGEX> | strArg = <IDENTIFIER> ) ")"
 // | t = <REL_W_STR_ARG> ( negation = "!" )? strArg = <REGEX>
 // because the parser does not know which rule to use if it sees a <REL_W_STR_ARG> token
-//
-// However, in some places it is not, specifically when allowing
-// disjunctions at the root level.  If the next token is a relation, 
-// then the disjunction must have applied to the previous relation, and 
-// otherwise it applies to the root labels.  This can be distinguished
-// by setting lookahead at the decision points.
-

@@ -6,12 +6,8 @@ import edu.stanford.nlp.trees.*;
 
 
 /**
- * The {@code CTBTreeReaderFactory} is a factory for creating a
- * TreeReader suitable for the Penn Chinese Treebank (CTB).
- * It knows how to ignore the SGML tags in those files.
- * The default reader doesn't delete empty nodes, but an
- * additional static class is provided whose default constructor
- * does give a TreeReader that deletes empty nodes in trees.
+ * The <code>CTBTreeReaderFactory</code> is a factory for creating a
+ * TreeReader suitable for the Penn CTB.
  *
  * @author Christopher Manning
  */
@@ -34,13 +30,12 @@ public class CTBTreeReaderFactory implements TreeReaderFactory {
   }
 
   /**
-   * Create a new {@code TreeReader} using the provided
-   * {@code Reader}.
+   * Create a new <code>TreeReader</code> using the provided
+   * <code>Reader</code>.
    *
-   * @param in The {@code Reader} to build on
+   * @param in The <code>Reader</code> to build on
    * @return The new TreeReader
    */
-  @Override
   public TreeReader newTreeReader(Reader in) {
     if (discardFrags) {
       return new FragDiscardingPennTreeReader(in, new LabeledScoredTreeFactory(), tn, new CHTBTokenizer(in));
@@ -48,14 +43,4 @@ public class CTBTreeReaderFactory implements TreeReaderFactory {
       return new PennTreeReader(in, new LabeledScoredTreeFactory(), tn, new CHTBTokenizer(in));
     }
   }
-
-
-  public static class NoEmptiesCTBTreeReaderFactory extends CTBTreeReaderFactory {
-
-    public NoEmptiesCTBTreeReaderFactory() {
-      super(new BobChrisTreeNormalizer());
-    }
-
-  } // end static class NoEmptiesCTBTreeReaderFactory
-
 }

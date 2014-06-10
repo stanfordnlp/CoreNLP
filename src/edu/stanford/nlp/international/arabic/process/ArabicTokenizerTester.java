@@ -7,7 +7,7 @@ import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.trees.treebank.Mapper;
+import edu.stanford.nlp.process.treebank.Mapper;
 
 /**
  * Compares the output of the JFlex-based ArabicTokenizer to DefaultLexicalMapper, which

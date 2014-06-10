@@ -11,14 +11,11 @@ import javax.swing.tree.TreePath;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.trees.DiskTreebank;
-import edu.stanford.nlp.trees.TransformingTreebank;
-import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreeReaderFactory;
-import edu.stanford.nlp.trees.TreeTransformer;
+import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.gui.FileTreeNode.FileTreeNodeListener;
 import edu.stanford.nlp.trees.tregex.gui.TregexGUI.FilterType;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Component for managing the data for files containing trees.
@@ -30,7 +27,7 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
 
   private final List<TreeModelListener> listeners;
   private final FileTreeNode root;
-  private final Map<FileTreeNode, List<FileTreeNode>> treeStructure;
+  private final HashMap<FileTreeNode, List<FileTreeNode>> treeStructure;
 
   public static final String DEFAULT_ENCODING = "UTF-8";
   public static final String DEFAULT_CHINESE_ENCODING = "GB18030";
@@ -45,7 +42,7 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
    this.root = root;
    root.addListener(this);
    listeners = new ArrayList<TreeModelListener>();
-   treeStructure = Generics.newHashMap();
+   treeStructure = new HashMap<FileTreeNode, List<FileTreeNode>>();
    treeStructure.put(root, new ArrayList<FileTreeNode>());
 
    //other data
@@ -150,10 +147,6 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
     for(FileTreeNode fileNode : newFiles) {
       Treebank treebank = new DiskTreebank(trf, curEncoding);
       treebank.loadPath(fileNode.getFile(), null, true);
-      TreeTransformer transformer = TregexGUI.getInstance().transformer;
-      if (transformer != null) {
-        treebank = new TransformingTreebank(treebank, transformer);
-      }
       fileNode.setTreebank(treebank);
     }
     // System.out.println("Loadable files are: " + newFiles);

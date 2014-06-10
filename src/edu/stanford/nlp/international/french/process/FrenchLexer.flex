@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
@@ -13,7 +12,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
 /**
  *  A tokenizer for French. Adapted from PTBTokenizer, but with extra
  *  rules for French orthography.
-
+ 
  *  @author Spence Green
  */
 
@@ -95,7 +94,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
    * @param tf The LexedTokenFactory that will be invoked to convert
    *    each substring extracted by the lexer into some kind of Object
    *    (such as a Word or CoreLabel).
-   * @param props Options to the tokenizer (see constructor Javadoc)
+   * @param options Options to the tokenizer (see constructor Javadoc)
    */
   public FrenchLexer(Reader r, LexedTokenFactory<?> tf, Properties props) {
     this(r);
@@ -119,6 +118,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
+        escapeForwardSlashAsterisk = val;
       } else if ("normalizeAmpersandEntity".equals(key)) {
         normalizeAmpersandEntity = val;
       } else if ("normalizeFractions".equals(key)) {
@@ -187,10 +187,9 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   private boolean normalizeOtherBrackets;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
-  private boolean ptb3Dashes;
-  private boolean escapeForwardSlashAsterisk = false;
-  private boolean strictTreebank3;
-
+  private boolean ptb3Dashes = true;
+  private boolean escapeForwardSlashAsterisk;
+  private boolean strictTreebank3 = false;
 
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
@@ -214,7 +213,6 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   public static final String ptb3EllipsisStr = "...";
   public static final String unicodeEllipsisStr = "\u2026";
   public static final String NEWLINE_TOKEN = "*NL*";
-  public static final String COMPOUND_ANNOTATION = "comp";
 
 
   private Object normalizeFractions(final String in) {
@@ -288,7 +286,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   }
 
   private Object getNext() {
-    final String txt = yytext();
+    final String txt = removeSoftHyphens(yytext());
     return getNext(txt, txt);
   }
 
@@ -297,27 +295,19 @@ import edu.stanford.nlp.process.LexedTokenFactory;
    *  @param originalText The original String that got transformed into txt
    */
   private Object getNext(String txt, String originalText) {
-    return getNext(txt, originalText, null);
-  }
-
-  private Object getNext(String txt, String originalText, String annotation) {
     txt = removeSoftHyphens(txt);
-    Label w = (Label) tokenFactory.makeToken(txt, yychar, yylength());
-    if (invertible || annotation != null) {
-      CoreLabel word = (CoreLabel) w;
-      if (invertible) {
-        String str = prevWordAfter.toString();
-        prevWordAfter.setLength(0);
-        word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
-        word.set(CoreAnnotations.BeforeAnnotation.class, str);
-        prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-        prevWord = word;
-      }
-      if (annotation != null) {
-        word.set(CoreAnnotations.ParentAnnotation.class, annotation);
-      }
-    }
-    return w;
+    if (invertible) {
+      String str = prevWordAfter.toString();
+      prevWordAfter.setLength(0);
+      CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
+      word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
+      word.set(CoreAnnotations.BeforeAnnotation.class, str);
+      prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+      prevWord = word;
+      return word;
+    } else {
+      return tokenFactory.makeToken(txt, yychar, yylength());
+   }
   }
 
   private Object getNormalizedAmpNext() {
@@ -475,7 +465,7 @@ cannot			{ yypushback(3) ; return getNext(); }
                           return getNext(asciiQuotes(origTxt), origTxt);
 			}
 {WORD}/{OBJPRON}        { return getNext(); }
-
+			
 {OBJPRON}               { final String origTxt = yytext();
                           return getNext(asciiDash(origTxt), origTxt);
                         }
@@ -487,7 +477,7 @@ cannot			{ yypushback(3) ; return getNext(); }
 
 {COMPOUND} |
 {COMPOUND2}             { final String origTxt = yytext();
-                          return getNext(asciiDash(origTxt), origTxt, COMPOUND_ANNOTATION);
+                          return getNext(asciiDash(origTxt), origTxt);
 			}
 
 {WORD}			{ return getNext(); }
@@ -674,8 +664,8 @@ cannot			{ yypushback(3) ; return getNext(); }
               return getNext();
           }
         }
-<<EOF>> { if (invertible) {
-            prevWordAfter.append(yytext());
+<<EOF>> { if (invertible) { 
+            prevWordAfter.append(yytext()); 
             String str = prevWordAfter.toString();
             prevWordAfter.setLength(0);
             prevWord.set(CoreAnnotations.AfterAnnotation.class, str);

@@ -10,8 +10,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.XMLUtils;
 
 public class LatticeXMLReader implements Iterable<Lattice> {
@@ -87,7 +85,7 @@ public class LatticeXMLReader implements Iterable<Lattice> {
           nodes.add(nodeName);
         }
 
-        Map<Integer,Integer> nodeMap = Generics.newHashMap();
+        Map<Integer,Integer> nodeMap = new HashMap<Integer,Integer>();
         int realNodeIdx = 0;
         int lastBoundaryNode = -1;
         for(int nodeName : nodes) {

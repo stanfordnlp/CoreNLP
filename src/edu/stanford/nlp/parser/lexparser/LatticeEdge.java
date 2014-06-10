@@ -3,8 +3,6 @@ package edu.stanford.nlp.parser.lexparser;
 import java.util.*;
 import java.io.Serializable;
 
-import edu.stanford.nlp.util.Generics;
-
 public class LatticeEdge implements Serializable {
 
 	public final String word;
@@ -21,7 +19,7 @@ public class LatticeEdge implements Serializable {
 		this.start = start;
 		this.end = end;
 		
-		attrs = Generics.newHashMap();
+		attrs = new HashMap<String,String>();
 	}
 
 	public void setAttr(String key, String value) { attrs.put(key, value); }

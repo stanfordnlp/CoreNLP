@@ -44,19 +44,7 @@ public class Timing {
   public void start() {
     start = System.currentTimeMillis();
   }
-  
-  /**
-   * Start timer & print a message.
-   */
-  // Thang Mar14
-  public void start(String msg, PrintStream stream) {
-    start = System.currentTimeMillis();
-    stream.println(msg);
-  }
-  public void start(String msg) {
-    start(msg, System.err);
-  }
-  
+
   // report =========================================================
 
   /**
@@ -104,17 +92,12 @@ public class Timing {
     return elapsed;
   }
 
-  /** Returns the number of seconds passed since the timer started in the form "d.d". */
   public String toSecondsString() {
     return toSecondsString(report());
   }
 
   public static String toSecondsString(long elapsed) {
     return nf.format(((double) elapsed) / 1000);
-  }
-
-  public static String toMilliSecondsString(long elapsed) {
-    return nf.format(elapsed);
   }
 
 
@@ -166,18 +149,6 @@ public class Timing {
     this.start();
     return elapsed;
   }
-
-  /**
-   * Print the timing done message with elapsed time in x.y seconds.
-   * Restart the timer too.
-   */
-  // Thang Mar14
-  public void end(String msg) {
-    long elapsed = System.currentTimeMillis() - start;
-    System.err.println(msg + " done [" + nf.format(((double) elapsed) / 1000) + " sec].");
-    this.start();
-  }
-
 
   // stop ===========================================================
 

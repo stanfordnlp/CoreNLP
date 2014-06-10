@@ -1,5 +1,5 @@
 // Stanford Parser -- a probabilistic lexicalized NL CFG parser
-// Copyright (c) 2002 - 2014 The Board of Trustees of
+// Copyright (c) 2002 - 2011 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
@@ -32,13 +32,8 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.parser.common.ArgUtils;
-import edu.stanford.nlp.parser.common.ParserGrammar;
-import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParserUtils;
-import edu.stanford.nlp.parser.metrics.Eval;
-import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Function;
@@ -46,14 +41,11 @@ import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
-import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
-import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 import java.io.*;
 import java.util.*;
@@ -89,7 +81,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser extends ParserGrammar implements Serializable {
+public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, ParserQueryFactory, Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -98,22 +90,13 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public Index<String> stateIndex, wordIndex, tagIndex;
 
   private Options op;
-
-  @Override
   public Options getOp() { return op; }
 
   public Reranker reranker = null;
 
-  @Override
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
 
-  @Override
   public TreebankLanguagePack treebankLanguagePack() { return getTLPParams().treebankLanguagePack(); }
-
-  @Override
-  public String[] defaultCoreNLPFlags() {
-    return getTLPParams().defaultCoreNLPFlags();
-  }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
   public static final String DEFAULT_PARSER_LOC = ((System.getenv("NLP_PARSER") != null) ?
@@ -155,13 +138,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public static LexicalizedParser loadModel(String parserFileOrUrl,
                                             String ... extraFlags) {
     return loadModel(parserFileOrUrl, new Options(), extraFlags);
-  }
-
-  public static LexicalizedParser loadModel(String parserFileOrUrl,
-                                            List<String> extraFlags) {
-    String[] flags = new String[extraFlags.size()];
-    extraFlags.toArray(flags);
-    return loadModel(parserFileOrUrl, flags);
   }
 
   /**
@@ -232,9 +208,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return parser;
   }
 
-  public static LexicalizedParser copyLexicalizedParser(LexicalizedParser parser) {
-    return new LexicalizedParser(parser.lex, parser.bg, parser.ug, parser.dg, parser.stateIndex, parser.wordIndex, parser.tagIndex, parser.op);
-  }
 
   public LexicalizedParser(Lexicon lex, BinaryGrammar bg, UnaryGrammar ug, DependencyGrammar dg, Index<String> stateIndex, Index<String> wordIndex, Index<String> tagIndex, Options op) {
     this.lex = lex;
@@ -278,31 +251,23 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * circumstances, the input will be treated as a single sentence to be
    * parsed.
    *
-   * @param words The input sentence (a List of words)
+   * @param in The input Sentence/List/String
    * @return A Tree that is the parse tree for the sentence.  If the parser
    *         fails, a new Tree is synthesized which attaches all words to the
    *         root.
    * @throws IllegalArgumentException If argument isn't a List or String
    */
   @Override
-  public Tree apply(List<? extends HasWord> words) {
-    return parse(words);
+  public Tree apply(List<? extends HasWord> lst) {
+    return parse(lst);
   }
 
-  /**
-   * Will parse the text in <code>sentence</code> as if it represented
-   * a single sentence by first processing it with a tokenizer.
-   */
   public Tree parse(String sentence) {
     TokenizerFactory<? extends HasWord> tf = op.tlpParams.treebankLanguagePack().getTokenizerFactory();
     Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
     return parse(tokenizer.tokenize());
   }
 
-  /**
-   * Will process a list of strings into a list of HasWord and return
-   * the parse tree associated with that list.
-   */
   public Tree parseStrings(List<String> lst) {
     List<Word> words = new ArrayList<Word>();
     for (String word : lst) {
@@ -311,10 +276,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return parse(words);
   }
 
-  /**
-   * Parses the list of HasWord.  If the parse fails for some reason,
-   * an X tree is returned instead of barfing.
-   */
   public Tree parse(List<? extends HasWord> lst) {
     try {
       ParserQuery pq = parserQuery();
@@ -330,43 +291,16 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       System.err.println("Recovering using fall through strategy: will construct an (X ...) tree.");
     }
     // if can't parse or exception, fall through
-    return ParserUtils.xTree(lst);
-  }
-
-  public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {
-    List<Tree> trees = new ArrayList<Tree>();
-    for (List<? extends HasWord> sentence : sentences) {
-      trees.add(parse(sentence));
+    // TODO: merge with ParserAnnotatorUtils
+    TreeFactory lstf = new LabeledScoredTreeFactory();
+    List<Tree> lst2 = new ArrayList<Tree>();
+    for (HasWord obj : lst) {
+      String s = obj.word();
+      Tree t = lstf.newLeaf(s);
+      Tree t2 = lstf.newTreeNode("X", Collections.singletonList(t));
+      lst2.add(t2);
     }
-    return trees;
-  }
-
-  /**
-   * Will launch multiple threads which calls <code>parse</code> on
-   * each of the <code>sentences</code> in order, returning the
-   * resulting parse trees in the same order.
-   */
-  public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
-    MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<List<? extends HasWord>, Tree>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
-        public Tree process(List<? extends HasWord> sentence) {
-          return parse(sentence);
-        }
-        public ThreadsafeProcessor<List<? extends HasWord>, Tree> newInstance() {
-          return this;
-        }
-      });
-    List<Tree> trees = new ArrayList<Tree>();
-    for (List<? extends HasWord> sentence : sentences) {
-      wrapper.put(sentence);
-      while (wrapper.peek()) {
-        trees.add(wrapper.poll());
-      }
-    }
-    wrapper.join();
-    while (wrapper.peek()) {
-      trees.add(wrapper.poll());
-    }
-    return trees;
+    return lstf.newTreeNode("X", lst2);
   }
 
   /** Return a TreePrint for formatting parsed output trees.
@@ -376,9 +310,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return op.testOptions.treePrint(op.tlpParams);
   }
 
-  /**
-   * Similar to parse(), but instead of returning an X tree on failure, returns null.
-   */
   public Tree parseTree(List<? extends HasWord> sentence) {
     ParserQuery pq = parserQuery();
     if (pq.parse(sentence)) {
@@ -388,21 +319,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     }
   }
 
-  public List<Eval> getExtraEvals() {
-    if (reranker != null) {
-      return reranker.getEvals();
-    } else {
-      return Collections.emptyList();
-    }
-  }
-
-
-  public List<ParserQueryEval> getParserQueryEvals() {
-    return Collections.emptyList();
-  }
-
-
-  @Override
   public ParserQuery parserQuery() {
     if (reranker == null) {
       return new LexicalizedParserQuery(this);
@@ -413,7 +329,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
 
   public LexicalizedParserQuery lexicalizedParserQuery() {
     return new LexicalizedParserQuery(this);
-  }
+  }  
 
   public static LexicalizedParser getParserFromFile(String parserFileOrUrl, Options op) {
     LexicalizedParser pd = getParserFromSerializedFile(parserFileOrUrl);
@@ -555,7 +471,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     try {
       Timing tim = new Timing();
       System.err.print("Loading parser from text file " + textFileOrUrl + ' ');
-      BufferedReader in = IOUtils.readerFromString(textFileOrUrl);
+      BufferedReader in = IOUtils.readReaderFromString(textFileOrUrl);
       Timing.startTime();
 
       String line = in.readLine();
@@ -655,152 +571,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       op.testOptions.display();
     }
     op.tlpParams.display();
-  }
-
-  public static TreeAnnotatorAndBinarizer buildTrainBinarizer(Options op) {
-    TreebankLangParserParams tlpParams = op.tlpParams;
-    if (!op.trainOptions.leftToRight) {
-      return new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), !op.trainOptions.predictSplits, op);
-    } else {
-      return new TreeAnnotatorAndBinarizer(tlpParams.headFinder(), new LeftHeadFinder(), tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), !op.trainOptions.predictSplits, op);
-    }
-  }
-
-  public static CompositeTreeTransformer buildTrainTransformer(Options op) {
-    TreeAnnotatorAndBinarizer binarizer = buildTrainBinarizer(op);
-    return buildTrainTransformer(op, binarizer);
-  }
-
-  public static CompositeTreeTransformer buildTrainTransformer(Options op, TreeAnnotatorAndBinarizer binarizer) {
-    TreebankLangParserParams tlpParams = op.tlpParams;
-    TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
-    CompositeTreeTransformer trainTransformer =
-      new CompositeTreeTransformer();
-    if (op.trainOptions.preTransformer != null) {
-      trainTransformer.addTransformer(op.trainOptions.preTransformer);
-    }
-    if (op.trainOptions.collinsPunc) {
-      CollinsPuncTransformer collinsPuncTransformer =
-        new CollinsPuncTransformer(tlp);
-      trainTransformer.addTransformer(collinsPuncTransformer);
-    }
-
-    trainTransformer.addTransformer(binarizer);
-
-    if (op.wordFunction != null) {
-      TreeTransformer wordFunctionTransformer =
-        new TreeLeafLabelTransformer(op.wordFunction);
-      trainTransformer.addTransformer(wordFunctionTransformer);
-    }
-    return trainTransformer;
-  }
-
-  /** @return a pair of binaryTrainTreebank,binaryTuneTreebank.
-   */
-  public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
-      Treebank secondaryTreebank,
-      Treebank tuneTreebank,
-      Options op) {
-    // setup tree transforms
-    TreebankLangParserParams tlpParams = op.tlpParams;
-    TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
-
-    if (op.testOptions.verbose) {
-      PrintWriter pwErr = tlpParams.pw(System.err);
-      pwErr.print("Training ");
-      pwErr.println(trainTreebank.textualSummary(tlp));
-      if (secondaryTreebank != null) {
-        pwErr.print("Secondary training ");
-        pwErr.println(secondaryTreebank.textualSummary(tlp));
-      }
-    }
-
-    System.err.print("Binarizing trees...");
-
-    TreeAnnotatorAndBinarizer binarizer = buildTrainBinarizer(op);
-    CompositeTreeTransformer trainTransformer = buildTrainTransformer(op, binarizer);
-
-    Treebank wholeTreebank;
-    if (secondaryTreebank == null) {
-      wholeTreebank = trainTreebank;
-    } else {
-      wholeTreebank = new CompositeTreebank(trainTreebank, secondaryTreebank);
-    }
-
-    if (op.trainOptions.selectiveSplit) {
-      op.trainOptions.splitters = ParentAnnotationStats.getSplitCategories(wholeTreebank, op.trainOptions.tagSelectiveSplit, 0, op.trainOptions.selectiveSplitCutOff, op.trainOptions.tagSelectiveSplitCutOff, tlp);
-      removeDeleteSplittersFromSplitters(tlp, op);
-      if (op.testOptions.verbose) {
-        List<String> list = new ArrayList<String>(op.trainOptions.splitters);
-        Collections.sort(list);
-        System.err.println("Parent split categories: " + list);
-      }
-    }
-
-    if (op.trainOptions.selectivePostSplit) {
-      // Do all the transformations once just to learn selective splits on annotated categories
-      TreeTransformer myTransformer = new TreeAnnotator(tlpParams.headFinder(), tlpParams, op);
-      wholeTreebank = wholeTreebank.transform(myTransformer);
-      op.trainOptions.postSplitters = ParentAnnotationStats.getSplitCategories(wholeTreebank, true, 0, op.trainOptions.selectivePostSplitCutOff, op.trainOptions.tagSelectivePostSplitCutOff, tlp);
-      if (op.testOptions.verbose) {
-        System.err.println("Parent post annotation split categories: " + op.trainOptions.postSplitters);
-      }
-    }
-    if (op.trainOptions.hSelSplit) {
-      // We run through all the trees once just to gather counts for hSelSplit!
-      int ptt = op.trainOptions.printTreeTransformations;
-      op.trainOptions.printTreeTransformations = 0;
-      binarizer.setDoSelectiveSplit(false);
-      for (Tree tree : wholeTreebank) {
-        trainTransformer.transformTree(tree);
-      }
-      binarizer.setDoSelectiveSplit(true);
-      op.trainOptions.printTreeTransformations = ptt;
-    }
-    // we've done all the setup now. here's where the train treebank is transformed.
-    trainTreebank = trainTreebank.transform(trainTransformer);
-    if (secondaryTreebank != null) {
-      secondaryTreebank = secondaryTreebank.transform(trainTransformer);
-    }
-    if (op.trainOptions.printAnnotatedStateCounts) {
-      binarizer.printStateCounts();
-    }
-    if (op.trainOptions.printAnnotatedRuleCounts) {
-      binarizer.printRuleCounts();
-    }
-
-    if (tuneTreebank != null) {
-      tuneTreebank = tuneTreebank.transform(trainTransformer);
-    }
-
-    Timing.tick("done.");
-    if (op.testOptions.verbose) {
-      binarizer.dumpStats();
-    }
-
-    return new Triple<Treebank, Treebank, Treebank>(trainTreebank, secondaryTreebank, tuneTreebank);
-  }
-
-  private static void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp, Options op) {
-    if (op.trainOptions.deleteSplitters != null) {
-      List<String> deleted = new ArrayList<String>();
-      for (String del : op.trainOptions.deleteSplitters) {
-        String baseDel = tlp.basicCategory(del);
-        boolean checkBasic = del.equals(baseDel);
-        for (Iterator<String> it = op.trainOptions.splitters.iterator(); it.hasNext(); ) {
-          String elem = it.next();
-          String baseElem = tlp.basicCategory(elem);
-          boolean delStr = checkBasic && baseElem.equals(baseDel) || elem.equals(del);
-          if (delStr) {
-            it.remove();
-            deleted.add(elem);
-          }
-        }
-      }
-      if (op.testOptions.verbose) {
-        System.err.println("Removed from vertical splitters: " + deleted);
-      }
-    }
   }
 
 
@@ -1187,10 +957,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * files are written (when the -writeOutputFiles option is specified).
    * If not specified, output files are written in the same directory as the
    * input files.
-   * <LI><code>-nthreads</code> Parsing files and testing on treebanks
-   * can use multiple threads.  This option tells the parser how many
-   * threads to use.  A negative number indicates to use as many
-   * threads as the machine has cores.
    * </UL>
    * See also the package documentation for more details and examples of use.
    *
@@ -1233,24 +999,30 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     }
 
     Options op = new Options();
-    List<String> optionArgs = new ArrayList<String>();
+    ArrayList<String> optionArgs = new ArrayList<String>();
     String encoding = null;
     // while loop through option arguments
     while (argIndex < args.length && args[argIndex].charAt(0) == '-') {
       if (args[argIndex].equalsIgnoreCase("-train") ||
           args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         train = true;
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-train");
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-test");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         treebankPath = treebankDescription.first();
         trainFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-train2")) {
+        // TODO: we could use the fully expressive -train options if
+        // we add some mechanism for returning leftover options from
+        // ArgUtils.getTreebankDescription
         // train = true;     // cdm july 2005: should require -train for this
-        Triple<String, FileFilter, Double> treebankDescription = ArgUtils.getWeightedTreebankDescription(args, argIndex, "-train2");
-        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
-        secondaryTreebankPath = treebankDescription.first();
-        secondaryTrainFilter = treebankDescription.second();
-        secondaryTreebankWeight = treebankDescription.third();
+        int numSubArgs = ArgUtils.numSubArgs(args, argIndex);
+        argIndex++;
+        if (numSubArgs < 2) {
+          throw new RuntimeException("Error: -train2 <treebankPath> [<ranges>] <weight>.");
+        }
+        secondaryTreebankPath = args[argIndex++];
+        secondaryTrainFilter = (numSubArgs == 3) ? new NumberRangesFileFilter(args[argIndex++], true) : null;
+        secondaryTreebankWeight = Double.parseDouble(args[argIndex++]);
       } else if (args[argIndex].equalsIgnoreCase("-tLPP") && (argIndex + 1 < args.length)) {
         try {
           op.tlpParams = (TreebankLangParserParams) Class.forName(args[argIndex + 1]).newInstance();
@@ -1346,11 +1118,43 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       } else {
         int oldIndex = argIndex;
         argIndex = op.setOptionOrWarn(args, argIndex);
-        for (int i = oldIndex; i < argIndex; i++) {
+        for (int i = oldIndex; i < argIndex; ++i) {
           optionArgs.add(args[i]);
         }
       }
     } // end while loop through arguments
+
+    // set up tokenizerFactory with options if provided
+    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
+      try {
+        if (tokenizerFactoryClass != null) {
+          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
+          Method factoryMethod;
+          if (tokenizerOptions != null) {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
+          } else {
+            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
+            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
+          }
+        } else {
+          // have options but no tokenizer factory; default to PTB
+          tokenizerFactory = PTBTokenizer.PTBTokenizerFactory.newWordTokenizerFactory(tokenizerOptions);
+        }
+      } catch (IllegalAccessException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      }
+    }
 
     // all other arguments are order dependent and
     // are processed in order below
@@ -1425,41 +1229,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       }
     }
 
-    // set up tokenizerFactory with options if provided
-    if (tokenizerFactoryClass != null || tokenizerOptions != null) {
-      try {
-        if (tokenizerFactoryClass != null) {
-          Class<TokenizerFactory<? extends HasWord>> clazz = ErasureUtils.uncheckedCast(Class.forName(tokenizerFactoryClass));
-          Method factoryMethod;
-          if (tokenizerOptions != null) {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newWordTokenizerFactory", String.class);
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null, tokenizerOptions));
-          } else {
-            factoryMethod = clazz.getMethod(tokenizerMethod != null ? tokenizerMethod : "newTokenizerFactory");
-            tokenizerFactory = ErasureUtils.uncheckedCast(factoryMethod.invoke(null));
-          }
-        } else {
-          // have options but no tokenizer factory.  use the parser
-          // langpack's factory and set its options
-          tokenizerFactory = lp.op.langpack().getTokenizerFactory();
-          tokenizerFactory.setOptions(tokenizerOptions);
-        }
-      } catch (IllegalAccessException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (NoSuchMethodException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (ClassNotFoundException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      }
-    }
-
-
     // the following has to go after reading parser to make sure
     // op and tlpParams are the same for train and test
     // THIS IS BUTT UGLY BUT IT STOPS USER SPECIFIED ENCODING BEING
@@ -1482,7 +1251,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       testTreebank.loadPath(testPath, testFilter);
     }
 
-    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(op.tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(op.tlpParams.sisterSplitters()));
 
     // at this point we should be sure that op.tlpParams is
     // set appropriately (from command line, or from grammar file),

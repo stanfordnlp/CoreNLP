@@ -37,11 +37,10 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 
 
 /**
@@ -60,7 +59,7 @@ import edu.stanford.nlp.util.StringUtils;
  * LexedTokenFactory, and can specify the treatment of tokens by mainly boolean
  * options given in a comma separated String options
  * (e.g., "invertible,normalizeParentheses=true").
- * If the String is {@code null} or empty, you get the traditional
+ * If the String is <code>null</code> or empty, you get the traditional
  * PTB3 normalization behaviour (i.e., you get ptb3Escaping=true).  If you
  * want no normalization, then you should pass in the String
  * "ptb3Escaping=false".  The known option names are:
@@ -75,58 +74,47 @@ import edu.stanford.nlp.util.StringUtils;
  *     perhaps CharacterOffsetBeginAnnotation and CharacterOffsetEndAnnotation to record
  *     token begin/after end character offsets, if they were specified to be recorded
  *     in TokenFactory construction.  (Like the String class, begin and end
- *     are done so end - begin gives the token length.) Default is false.
+ *     are done so end - begin gives the token length.)
  * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
- *     be treated as part of whitespace). Default is false.
+ *     be treated as part of whitespace).
  * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
  *     (like parentheses becoming -LRB-, -RRB-).  This is a macro flag that
- *     sets or clears all the options below. (Default setting of the various
- *     properties below that this flag controls is equivalent to it being set
- *     to true.)
+ *     sets or clears all the options below.
  * <li>americanize: Whether to rewrite common British English spellings
  *     as American English spellings. (This is useful if your training
  *     material uses American English spelling, such as the Penn Treebank.)
- *     Default is true.
  * <li>normalizeSpace: Whether any spaces in tokens (phone numbers, fractions
  *     get turned into U+00A0 (non-breaking space).  It's dangerous to turn
  *     this off for most of our Stanford NLP software, which assumes no
- *     spaces in tokens. Default is true.
+ *     spaces in tokens.
  * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
- *      ampersand. Default is true.
+ *      ampersand.
  * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
  *     to turn common currency characters into $, #, or "cents", reflecting
  *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
- *     Default is true.
  * <li>normalizeFractions: Whether to map certain common composed
  *     fraction characters to spelled out letter forms like "1/2".
- *     Default is true.
  * <li>normalizeParentheses: Whether to map round parentheses to -LRB-,
- *     -RRB-, as in the Penn Treebank. Default is true.
+ *     -RRB-, as in the Penn Treebank.
  * <li>normalizeOtherBrackets: Whether to map other common bracket characters
  *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank.
- *     Default is true.
  * <li>asciiQuotes Whether to map all quote characters to the traditional ' and ".
- *     Default is false.
  * <li>latexQuotes: Whether to map quotes to ``, `, ', '', as in Latex
  *     and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
  *     If true, this takes precedence over the setting of unicodeQuotes;
- *     if both are false, no mapping is done.  Default is true.
+ *     if both are false, no mapping is done.
  * <li>unicodeQuotes: Whether to map quotes to the range U+2018 to U+201D,
  *     the preferred unicode encoding of single and double quotes.
- *     Default is false.
- * <li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the
- *     old PTB3 WSJ coding of an ellipsis. If true, this takes precedence
- *     over the setting of unicodeEllipsis; if both are false, no mapping
- *     is done. Default is true.
+ * <li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the old PTB3 WSJ coding
+ *     of an ellipsis. If true, this takes precedence over the setting of
+ *     unicodeEllipsis; if both are false, no mapping is done.
  * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
- *     U+2026, the Unicode ellipsis character. Default is false.
+ *     U+2026, the Unicode ellipsis character
  * <li>ptb3Dashes: Whether to turn various dash characters into "--",
- *     the dominant encoding of dashes in the PTB3 WSJ. Default is true.
- * <li>keepAssimilations: true to tokenize "gonna", false to tokenize
- *                        "gon na".  Default is true.
+ *     the dominant encoding of dashes in the PTB3 WSJ
  * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
  *     of / and * as the old PTB3 WSJ does for some reason (something to do
- *     with Lisp readers??). Default is true.
+ *     with Lisp readers??).
  * <li>untokenizable: What to do with untokenizable characters (ones not
  *     known to the tokenizer).  Six options combining whether to log a
  *     warning for none, the first, or all, and whether to delete them or
@@ -137,14 +125,13 @@ import edu.stanford.nlp.util.StringUtils;
  *      WSJ tokenization in two cases.  Setting this improves compatibility
  *      for those cases.  They are: (i) When an acronym is followed by a
  *      sentence end, such as "U.K." at the end of a sentence, the PTB3
- *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
- *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
+ *      has tokens of "U.K" and "." (except for the sole exception of "U.S.",
+ *      when it returns tokens of "U.S." and "."), while by default
+ *      PTBTokenizer duplicates the period in all cases,
+ *      returning tokens of "U.K." and ".", and (ii) PTBTokenizer
  *      will return numbers with a whole number and a fractional part like
- *      "5 7/8" as a single token, with a non-breaking space in the middle,
+ *      "5 7/8" as a single token (with a non-breaking space in the middle),
  *      while the PTB3 separates them into two tokens "5" and "7/8".
- *      (Exception: for only "U.S." the treebank does have the two tokens
- *      "U.S." and "." like our default; strictTreebank3 now does that too.)
- *      The default is false.
  * </ol>
  * <p>
  * A single instance of a PTBTokenizer is not thread safe, as it uses
@@ -163,7 +150,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // the underlying lexer
-  private final PTBLexer lexer;
+  private PTBLexer lexer;
 
 
   /**
@@ -175,7 +162,21 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    *          {@link Word}
    */
   public static PTBTokenizer<Word> newPTBTokenizer(Reader r) {
-    return new PTBTokenizer<Word>(r, new WordTokenFactory(), "");
+    return newPTBTokenizer(r, false);
+  }
+
+  /**
+   * Constructs a new PTBTokenizer that optionally returns newlines
+   * as their own token. NLs come back as Words whose text is
+   * the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
+   *
+   * @param r The Reader to read tokens from
+   * @param tokenizeNLs Whether to return newlines as separate tokens
+   *         (otherwise they normally disappear as whitespace)
+   * @return A PTBTokenizer which returns Word tokens
+   */
+  public static PTBTokenizer<Word> newPTBTokenizer(Reader r, boolean tokenizeNLs) {
+    return new PTBTokenizer<Word>(r, tokenizeNLs, false, false, new WordTokenFactory());
   }
 
 
@@ -183,7 +184,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that makes CoreLabel tokens.
    * It optionally returns carriage returns
    * as their own token. CRs come back as Words whose text is
-   * the value of {@code PTBLexer.NEWLINE_TOKEN}.
+   * the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
    *
    * @param r The Reader to read tokens from
    * @param tokenizeNLs Whether to return newlines as separate tokens
@@ -202,7 +203,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that optionally returns carriage returns
    * as their own token, and has a custom LexedTokenFactory.
    * If asked for, CRs come back as Words whose text is
-   * the value of {@code PTBLexer.cr}.  This constructor translates
+   * the value of <code>PTBLexer.cr</code>.  This constructor translates
    * between the traditional boolean options of PTBTokenizer and the new
    * options String.
    *
@@ -355,7 +356,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       writer.close();
     } else {
       for (int j = 0; j < sz; j++) {
-        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
+        Reader r = IOUtils.readReaderFromString(inputFileList.get(j), charset);
         BufferedWriter writer;
         if (outputFileList == null) {
           writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
@@ -411,14 +412,14 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     long numTokens = 0;
     int numFiles = inputFileList.size();
     if (numFiles == 0) {
-      Reader stdin = IOUtils.readerFromStdin(charset);
+      Reader stdin = new BufferedReader(new InputStreamReader(System.in, charset));
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
       numTokens += tokReader(stdin, writer, parseInsidePattern, options, preserveLines, dump, lowerCase);
       IOUtils.closeIgnoringExceptions(writer);
 
     } else {
       for (int j = 0; j < numFiles; j++) {
-        Reader r = IOUtils.readerFromString(inputFileList.get(j), charset);
+        Reader r = IOUtils.readReaderFromString(inputFileList.get(j), charset);
         BufferedWriter out = (outputFileList == null) ?
           new BufferedWriter(new OutputStreamWriter(System.out, charset)) :
             new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFileList.get(j)), charset));
@@ -435,12 +436,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   private static int tokReader(Reader r, BufferedWriter writer, Pattern parseInsidePattern, String options, boolean preserveLines, boolean dump, boolean lowerCase) throws IOException {
     int numTokens = 0;
+    boolean printing = parseInsidePattern == null; // start off printing, unless you're looking for a start entity
     boolean beginLine = true;
-    boolean printing = (parseInsidePattern == null); // start off printing, unless you're looking for a start entity
-    Matcher m = null;
-    if (parseInsidePattern != null) {
-      m = parseInsidePattern.matcher(""); // create once as performance hack
-    }
     for (PTBTokenizer<CoreLabel> tokenizer = new PTBTokenizer<CoreLabel>(r, new CoreLabelTokenFactory(), options); tokenizer.hasNext(); ) {
       CoreLabel obj = tokenizer.next();
       // String origStr = obj.get(CoreAnnotations.TextAnnotation.class).replaceFirst("\n+$", ""); // DanC added this to fix a lexer bug, hopefully now corrected
@@ -452,7 +449,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       } else {
         str = origStr;
       }
-      if (m != null && m.reset(origStr).matches()) {
+      Matcher m;
+      if (parseInsidePattern != null && (m = parseInsidePattern.matcher(origStr)).matches()) {
         printing = m.group(1).isEmpty(); // turn on printing if no end element slash, turn it off it there is
       } else if (printing) {
         if (dump) {
@@ -488,16 +486,16 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     return PTBTokenizerFactory.newTokenizerFactory();
   }
 
+  // todo: Remove this factory
+  public static <T extends HasWord> TokenizerFactory<T> factory(boolean tokenizeNLs, LexedTokenFactory<T> factory) {
+    return new PTBTokenizerFactory<T>(tokenizeNLs, false, false, factory);
+  }
+
   /** @return A PTBTokenizerFactory that vends CoreLabel tokens. */
   public static TokenizerFactory<CoreLabel> factory(boolean tokenizeNLs, boolean invertible) {
     return PTBTokenizerFactory.newPTBTokenizerFactory(tokenizeNLs, invertible);
   }
 
-
-  /** @return A PTBTokenizerFactory that vends CoreLabel tokens with default tokenization. */
-  public static TokenizerFactory<CoreLabel> coreLabelFactory() {
-    return PTBTokenizerFactory.newPTBTokenizerFactory(new CoreLabelTokenFactory(), "");
-  }
 
   /** Get a TokenizerFactory that does Penn Treebank tokenization.
    *  This is now the recommended factory method to use.
@@ -522,7 +520,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    */
   public static class PTBTokenizerFactory<T extends HasWord> implements TokenizerFactory<T> {
 
-    protected final LexedTokenFactory<T> factory;
+    protected LexedTokenFactory<T> factory;
     protected String options;
 
 
@@ -540,11 +538,20 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
 
     /**
+     * Constructs a new PTBTokenizer that optionally returns carriage returns
+     * as their own token.
+     *
+     * @param tokenizeNLs If true, newlines come back as Words whose text is
+     *    the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
+     * @return A TokenizerFactory that returns Word objects
+     */
+    public static PTBTokenizerFactory<Word> newPTBTokenizerFactory(boolean tokenizeNLs) {
+      return new PTBTokenizerFactory<Word>(tokenizeNLs, false, false, new WordTokenFactory());
+    }
+
+    /**
      * Constructs a new PTBTokenizer that returns Word objects and
      * uses the options passed in.
-     * THIS METHOD IS INVOKED BY REFLECTION BY SOME OF THE JAVANLP
-     * CODE TO LOAD A TOKENIZER FACTORY.  IT SHOULD BE PRESENT IN A
-     * TokenizerFactory.
      *
      * @param options A String of options
      * @return A TokenizerFactory that returns Word objects
@@ -584,7 +591,6 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     // Constructors
 
-    // This one is historical
     private PTBTokenizerFactory(boolean tokenizeNLs, boolean invertible, boolean suppressEscaping, LexedTokenFactory<T> factory) {
       this.factory = factory;
       StringBuilder optionsSB = new StringBuilder();
@@ -602,11 +608,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       this.options = optionsSB.toString();
     }
 
-    /** Make a factory for PTBTokenizers.
-     *
-     *  @param tokenFactory A factory for the token type that the tokenizer will return
-     *  @param options Options to the tokenizer (see the class documentation for details)
-     */
+
     private PTBTokenizerFactory(LexedTokenFactory<T> tokenFactory, String options) {
       this.factory = tokenFactory;
       this.options = options;
@@ -644,7 +646,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Command-line option specification.
    */
   private static Map<String,Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = Generics.newHashMap();
+    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
     optionArgDefs.put("options", 1);
     optionArgDefs.put("ioFileList", 0);
     optionArgDefs.put("lowerCase", 0);
@@ -737,7 +739,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     if (inputOutputFileList && parsedArgs != null) {
       outputFileList = new ArrayList<String>();
       for (String fileName : parsedArgs) {
-        BufferedReader r = IOUtils.readerFromString(fileName, charset);
+        BufferedReader r = new BufferedReader(
+          new InputStreamReader(new FileInputStream(fileName), charset));
         for (String inLine; (inLine = r.readLine()) != null; ) {
           String[] fields = inLine.split("\\s+");
           inputFileList.add(fields[0]);

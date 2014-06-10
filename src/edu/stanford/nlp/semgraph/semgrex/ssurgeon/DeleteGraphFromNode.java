@@ -7,7 +7,6 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * This destroys the subgraph starting from the given node.  Use this when
@@ -57,7 +56,7 @@ public class DeleteGraphFromNode extends SsurgeonEdit {
   }
 
   protected static Set<IndexedWord> crawl(IndexedWord vertex, SemanticGraph sg) {
-    Set<IndexedWord> seen = Generics.newHashSet();
+    Set<IndexedWord> seen = new HashSet<IndexedWord>();
     crawl(vertex, sg, seen);
     return seen;
   }

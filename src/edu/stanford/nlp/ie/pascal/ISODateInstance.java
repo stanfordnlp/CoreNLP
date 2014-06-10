@@ -3,14 +3,13 @@ package edu.stanford.nlp.ie.pascal;
 import edu.stanford.nlp.ie.QuantifiableEntityNormalizer;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -297,9 +296,9 @@ public class ISODateInstance {
 
 
   /**
-   * Map for mapping a relativeDate String to a pair with the field that should be modified and the amount to modify it *
+   * HashMap for mapping a relativeDate String to a pair with the field that should be modified and the amount to modify it *
    */
-  public static final Map<String, Pair<DateField, Integer>> relativeDateMap = Generics.newHashMap();
+  public static final HashMap<String, Pair<DateField, Integer>> relativeDateMap = new HashMap<String, Pair<DateField, Integer>>();
 
   static {
     //Add entries to the relative datemap
@@ -310,7 +309,7 @@ public class ISODateInstance {
 
   }
 
-  public static final Map<Integer, Integer> daysPerMonth = Generics.newHashMap();
+  public static final HashMap<Integer, Integer> daysPerMonth = new HashMap<Integer, Integer>();
 
   static {
     //Add month entries
@@ -554,9 +553,9 @@ public class ISODateInstance {
     String yearOther = date2.substring(0, 4);
     if (year.contains("*") || yearOther.contains("*")) {
       after = after && checkWildcardCompatibility(year, yearOther);
-    } else if (Integer.parseInt(year) > Integer.parseInt(yearOther)) {
+    } else if (Integer.valueOf(year) > Integer.valueOf(yearOther)) {
       return true;
-    } else if (Integer.parseInt(year) < Integer.parseInt(yearOther)) {
+    } else if (Integer.valueOf(year) < Integer.valueOf(yearOther)) {
       return false;
     }
 
@@ -564,7 +563,7 @@ public class ISODateInstance {
       if (year.contains("*") || yearOther.contains("*")) {
         return after;
       } else {
-        return after && (Integer.parseInt(year) != Integer.parseInt(yearOther));
+        return after && (!Integer.valueOf(year).equals(Integer.valueOf(yearOther)));
       }
     }
     //then check months
@@ -572,9 +571,9 @@ public class ISODateInstance {
     String monthOther = date2.substring(4, 6);
     if (month.contains("*") || monthOther.contains("*")) {
       after = after && checkWildcardCompatibility(month, monthOther);
-    } else if (Integer.parseInt(month) > Integer.parseInt(monthOther)) {
+    } else if (Integer.valueOf(month) > Integer.valueOf(monthOther)) {
       return true;
-    } else if (Integer.parseInt(month) < Integer.parseInt(monthOther)) {
+    } else if (Integer.valueOf(month) < Integer.valueOf(monthOther)) {
       return false;
     }
 
@@ -582,7 +581,7 @@ public class ISODateInstance {
       if (month.contains("*") || monthOther.contains("*")) {
         return after;
       } else {
-        return after && (Integer.parseInt(month) != Integer.parseInt(monthOther));
+        return after && (!Integer.valueOf(month).equals(Integer.valueOf(monthOther)));
       }
     }
 
@@ -591,9 +590,9 @@ public class ISODateInstance {
     String dayOther = date2.substring(6, 8);
     if (day.contains("*") || dayOther.contains("*")) {
       after = after && checkWildcardCompatibility(day, dayOther);
-    } else if (Integer.parseInt(day) > Integer.parseInt(dayOther)) {
+    } else if (Integer.valueOf(day) > Integer.valueOf(dayOther)) {
       return true;
-    } else if (Integer.parseInt(day) <= Integer.parseInt(dayOther)) {
+    } else if (Integer.valueOf(day) <= Integer.valueOf(dayOther)) {
       return false;
     }
 
@@ -921,7 +920,7 @@ public class ISODateInstance {
   }
 
   /**
-   * Note: This method copied from {@code DateInstance}; not sure how we tell that it
+   * This method copied from {@link DateInstance}; not sure how we tell that it
    * is MMDD versus DDMM (sometimes it will be ambiguous).
    *
    */
@@ -997,10 +996,10 @@ public class ISODateInstance {
       }
       if (inputDate.charAt(inputDate.length() - 1) == 's') {//decade or century marker
         if (extract.charAt(2) == '0') {//e.g., 1900s -> 1900/1999
-          String endDate = Integer.toString((Integer.parseInt(extract) + 99));
+          String endDate = Integer.toString((Integer.valueOf(extract) + 99));
           extract = extract + '/' + endDate;
         } else {//e.g., 1920s -> 1920/1929
-          String endDate = Integer.toString((Integer.parseInt(extract) + 9));
+          String endDate = Integer.toString((Integer.valueOf(extract) + 9));
           extract = extract + '/' + endDate;
         }
       }

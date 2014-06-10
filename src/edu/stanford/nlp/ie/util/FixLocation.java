@@ -4,7 +4,6 @@ import java.util.*;
 import java.io.*;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * A script that goes through a data file and looks for instances
@@ -72,7 +71,7 @@ public class FixLocation {
     } catch (Exception e) {}
   }
 
-  private static Map<String,String> cache = Generics.newHashMap();
+  private static Map<String,String> cache = new HashMap<String,String>();
   
   public static void query(String[][] cols, int pos) throws Exception {	
     String pre = "";

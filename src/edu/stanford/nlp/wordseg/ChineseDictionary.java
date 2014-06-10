@@ -9,7 +9,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.process.ChineseDocumentToSentenceProcessor;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import java.util.zip.GZIPInputStream;
 
@@ -49,7 +48,7 @@ public class ChineseDictionary {
   private static Set<String>[] loadDictionary(String serializePath) {
     Set<String>[] dict = new HashSet[MAX_LEXICON_LENGTH+1];
     for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
-      dict[i] = Generics.newHashSet();
+      dict[i] = new HashSet<String>();
     }
 
     System.err.print("loading dictionaries from " + serializePath + "...");
@@ -103,15 +102,13 @@ public class ChineseDictionary {
     System.err.println();
 
     for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
-      words_[i] = Generics.newHashSet();
+      words_[i] = new HashSet<String>();
     }
 
     this.cdtos_ = cdtos;
 
     for(String dict : dicts) {
       if(dict.endsWith("ser.gz")) {
-        // TODO: the way this is written would not work if we allow
-        // dictionaries to have different settings of MAX_LEXICON_LENGTH
         Set<String>[] dictwords = loadDictionary(dict);
         for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
           words_[i].addAll(dictwords[i]);
@@ -190,7 +187,7 @@ public class ChineseDictionary {
     String output = "/u/nlp/data/gale/segtool/stanford-seg/classifiers/dict-chris6.ser.gz";
 
 
-    Map<String,Integer> flagMap = Generics.newHashMap();
+    Map<String,Integer> flagMap = new HashMap<String,Integer>();
     flagMap.put("-inputDicts", 1);
     flagMap.put("-output", 1);
     Map<String,String[]> argsMap = StringUtils.argsToMap(args,flagMap);

@@ -1,34 +1,8 @@
-// Stanford Dependencies - Code for producing and using Stanford dependencies.
-// Copyright © 2005-2014 The Board of Trustees of
-// The Leland Stanford Junior University. All Rights Reserved.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// For more information, bug reports, fixes, contact:
-//    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
-//    USA
-//    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/stanford-dependencies.shtml
-
 package edu.stanford.nlp.trees.international.pennchinese;
 
+import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
-import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,10 +15,9 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
 
 /**
- * ChineseGrammaticalRelations is a
+ * <code>ChineseGrammaticalRelations</code> is a
  * set of {@link GrammaticalRelation} objects for the Chinese language.
  * Examples are from CTB_001.fid
- *
  * @author Galen Andrew
  * @author Pi-Chuan Chang
  * @author Huihsin Tseng
@@ -61,10 +34,7 @@ public class ChineseGrammaticalRelations {
   private ChineseGrammaticalRelations() {
   }
 
-  // By setting the HeadFinder to null, we find out right away at
-  // runtime if we have incorrectly set the HeadFinder for the
-  // dependency tregexes
-  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler((HeadFinder) null);
+  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler(new ChineseSemanticHeadFinder());
 
   public static List<GrammaticalRelation> values() {
     return Collections.unmodifiableList(Arrays.asList(values));
@@ -73,7 +43,7 @@ public class ChineseGrammaticalRelations {
   public static GrammaticalRelation valueOf(String s) {
     return GrammaticalRelation.valueOf(s, values());
   }
-
+  
   /**
    * The "predicate" grammatical relation.
    */
@@ -122,10 +92,11 @@ public class ChineseGrammaticalRelations {
    * </pre>
    * </code>
    */
+
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.Chinese,
       "conj", "conjunct",
-      PreconjunctGRAnnotation.class, DEPENDENT, "FRAG|INC|IP|VP|NP|ADJP|PP|ADVP|UCP", tregexCompiler,
+      PreconjunctGRAnnotation.class, DEPENDENT, "VP|NP|ADJP|PP|ADVP|UCP", tregexCompiler,
       new String[]{
         "NP|ADJP|PP|ADVP|UCP < (!PU=target $+ CC)",
         // Split the first rule to the second rule to avoid the duplication:
@@ -161,10 +132,7 @@ public class ChineseGrammaticalRelations {
         "NP <( NP=target $+ ((PU < 、) $+ NP) )",
         "NP <( NN|NR|NT|PN=target $+ ((PU < ，|、) $+ NN|NR|NT|PN) )",
         "VP < (CC $+ VV=target)",
-        // Original version of this did not have the outer layer of
-        // the FRAG|INC|IP|VP.  This caused a bug where the basic
-        // dependencies could have cycles.
-        "FRAG|INC|IP|VP < (VP  < VV|VC|VRD|VCD|VE|VA < NP|QP|LCP  $ IP|VP|VRD|VCD|VE|VC|VA=target)  ",
+        "  VP  < VV|VC|VRD|VCD|VE|VA < NP|QP|LCP  $ IP|VP|VRD|VCD|VE|VC|VA=target  ",
          "IP|VP < ( IP|VP < NP|QP|LCP $ IP|VP=target )",
       });
   public static class PreconjunctGRAnnotation
@@ -222,10 +190,14 @@ public class ChineseGrammaticalRelations {
    * typed dependencies.
    */
   public static final GrammaticalRelation PUNCTUATION =
-    new GrammaticalRelation(Language.Chinese, "punct", "punctuation",
-        PunctuationGRAnnotation.class, DEPENDENT, ".*", tregexCompiler,
-        "__ < PU=target");
-  public static class PunctuationGRAnnotation extends GrammaticalRelationAnnotation { }
+    new GrammaticalRelation(Language.Chinese,
+      "punct", "punctuation",
+      PunctuationGRAnnotation.class, DEPENDENT, ".*", tregexCompiler,
+      new String[]{
+        "__ < PU=target"
+      });
+  public static class PunctuationGRAnnotation
+    extends GrammaticalRelationAnnotation { }
 
 
   /**
@@ -234,7 +206,8 @@ public class ChineseGrammaticalRelations {
   public static final GrammaticalRelation SUBJECT =
     new GrammaticalRelation(Language.Chinese, "subj", "subject",
                             SubjectGRAnnotation.class, ARGUMENT);
-  public static class SubjectGRAnnotation extends GrammaticalRelationAnnotation { }
+   public static class SubjectGRAnnotation
+     extends GrammaticalRelationAnnotation { }
 
   /**
    * The "nominal subject" grammatical relation.  A nominal subject is
@@ -256,12 +229,16 @@ public class ChineseGrammaticalRelations {
    * </pre>
    * </code>
    */
-  public static final GrammaticalRelation NOMINAL_SUBJECT =
-    new GrammaticalRelation(Language.Chinese, "nsubj", "nominal subject",
-        NominalSubjectGRAnnotation.class, SUBJECT, "IP|VP", tregexCompiler,
-        "IP <( ( NP|QP=target!< NT ) $++ ( /^VP|VCD|IP/  !< VE !<VC !<SB !<LB  ))",
-        "NP !$+ VP < ( (  NP|DP|QP=target !< NT ) $+ ( /^VP|VCD/ !<VE !< VC !<SB !<LB))");
-  public static class NominalSubjectGRAnnotation extends GrammaticalRelationAnnotation { }
+ public static final GrammaticalRelation NOMINAL_SUBJECT =
+   new GrammaticalRelation(Language.Chinese,
+     "nsubj", "nominal subject",
+     NominalSubjectGRAnnotation.class, SUBJECT, "IP|VP", tregexCompiler,
+     new String[]{
+       " IP <( ( NP|QP=target!< NT ) $++ ( /^VP|VCD|IP/  !< VE !<VC !<SB !<LB  ))",
+       " NP !$+ VP < ( (  NP|DP|QP=target !< NT ) $+ ( /^VP|VCD/ !<VE !< VC !<SB !<LB))"
+     });
+  public static class NominalSubjectGRAnnotation
+    extends GrammaticalRelationAnnotation { }
 
 
   /**
@@ -673,8 +650,7 @@ public class ChineseGrammaticalRelations {
     new GrammaticalRelation(Language.Chinese, "mmod", "modal verb",
                             ModalGRAnnotation.class, MODIFIER, "VP", tregexCompiler,
                             new String[]{
-			      "VP < ( VV=target !< /^没有$/ $+ VP|VRD )"
-
+                              "VP < ( VV=target $+ VP|VRD )"
                             });
   public static class ModalGRAnnotation
     extends GrammaticalRelationAnnotation { }
@@ -770,19 +746,19 @@ public class ChineseGrammaticalRelations {
 
   /**
    * The "relative clause modifier" grammatical relation.
-   * (CP (IP (VP (NP (NT 以前))
+   *(CP (IP (VP (NP (NT 以前))
    *             (ADVP (AD 不))
    *             (ADVP (AD 曾))
    *             (VP (VV 遇到) (AS 过))))
    *         (DEC 的))
-   * (NP
-   *   (NP
-   *     (ADJP (JJ 新))
-   *     (NP (NN 情况)))
-   *   (PU 、)
-   *   (NP
-   *     (ADJP (JJ 新))
-   *     (NP (NN 问题)))))))
+   *       (NP
+   *         (NP
+   *           (ADJP (JJ 新))
+   *           (NP (NN 情况)))
+   *         (PU 、)
+   *         (NP
+   *           (ADJP (JJ 新))
+   *           (NP (NN 问题)))))))
    * (PU 。)))
    * the new problem that has not been encountered.
    * <code> rcmod </code> (问题, 遇到)
@@ -791,12 +767,11 @@ public class ChineseGrammaticalRelations {
     new GrammaticalRelation(Language.Chinese, "rcmod", "relative clause modifier",
                             RelativeClauseModifierGRAnnotation.class,
                             MODIFIER, "NP", tregexCompiler,
-                            new String[] {
-                              // TODO: we should figure out various
-                              // ways to improve this pattern to
-                              // improve both its precision and recall
+                            new String[]{
                               "NP  $++ (CP=target ) > NP ",
-                              " NP  < ( CP=target $++ NP  )"
+                              "NP  $++ (CP=target <: IP) > NP  ",
+                              "NP  $++ (CP=target)",
+                              " NP  << ( CP=target $++ NP  )"
                             });
   public static class RelativeClauseModifierGRAnnotation
     extends GrammaticalRelationAnnotation { }
@@ -912,8 +887,7 @@ public class ChineseGrammaticalRelations {
       AdverbialModifierGRAnnotation.class, MODIFIER,
       "VP|ADJP|IP|CP|PP|NP|QP", tregexCompiler,
       new String[]{
-	"VP|ADJP|IP|CP|PP|NP < (ADVP=target !< (AD < /^(\\u4e0d|\\u6CA1|\\u6CA1\\u6709)$/))",
-
+        "VP|ADJP|IP|CP|PP|NP < ADVP=target",
         "VP|ADJP < AD|CS=target",
         "QP < (ADVP=target $+ QP)",
         "QP < ( QP $+ ADVP=target)"
@@ -960,9 +934,8 @@ public class ChineseGrammaticalRelations {
       "neg", "negation modifier",
       NegationModifierGRAnnotation.class, ADVERBIAL_MODIFIER, "VP|ADJP|IP", tregexCompiler,
       new String[]{
-	"VP|ADJP|IP < (AD|VV=target < /^(\\u4e0d|\\u6CA1|\\u6CA1\\u6709)$/)",
-	"VP|ADJP|IP < (ADVP|VV=target < (AD < /^(\\u4e0d|\\u6CA1|\\u6CA1\\u6709)$/))"
-
+        "VP|ADJP|IP < (AD=target < /\\u4e0d/)",
+        "VP|ADJP|IP < (ADVP=target < (AD < /\\u4e0d/))"
       });
   public static class NegationModifierGRAnnotation
     extends GrammaticalRelationAnnotation { }
@@ -1335,7 +1308,7 @@ public class ChineseGrammaticalRelations {
     VERB_COMPOUND,
     XCLAUSAL_COMPLEMENT,
   };
-
+  
   // Map from Chinese GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
   public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
@@ -1344,5 +1317,5 @@ public class ChineseGrammaticalRelations {
       shortNameToGRel.put(gr.getShortName(), gr);
     }
   }
-
+  
 }

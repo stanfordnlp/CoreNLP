@@ -238,7 +238,4 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
                                                HeadFinder hf);
 
   boolean supportsBasicDependencies();
-
-  /** When run inside StanfordCoreNLP, which flags should be used by default */
-  String[] defaultCoreNLPFlags();
 }

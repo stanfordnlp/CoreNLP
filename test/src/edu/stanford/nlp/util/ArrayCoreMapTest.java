@@ -10,7 +10,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
  * Test various operations of the ArrayCoreMap: equals, toString, etc.
  */
 public class ArrayCoreMapTest extends TestCase {
-
   public void testCreate() {
     ArrayCoreMap foo = new ArrayCoreMap();
     assertEquals(0, foo.size());
@@ -214,7 +213,7 @@ public class ArrayCoreMapTest extends TestCase {
     foo.set(CoreAnnotations.ParagraphsAnnotation.class, p1);
 
     foo.toString();
-    int fh = foo.hashCode();
+    foo.hashCode();
 
     ArrayCoreMap bar = new ArrayCoreMap();
     bar.set(CoreAnnotations.TextAnnotation.class, "foo");
@@ -228,11 +227,10 @@ public class ArrayCoreMapTest extends TestCase {
     bar.set(CoreAnnotations.ParagraphsAnnotation.class, p2);
 
     bar.toString();
-    int bh = bar.hashCode();
+    bar.hashCode();
 
     assertEquals(foo, bar);
     assertEquals(bar, foo);
-    assertEquals(fh, bh);
 
     ArrayCoreMap baz = new ArrayCoreMap();
     baz.set(CoreAnnotations.TextAnnotation.class, "foo");
@@ -279,16 +277,4 @@ public class ArrayCoreMapTest extends TestCase {
     barfooParagraph.add(bar);
     assertEquals(baz, biff);
   }
-
-  public void testCopyConstructor() {
-    ArrayCoreMap biff = new ArrayCoreMap();
-    biff.set(CoreAnnotations.TextAnnotation.class, "foo");
-    biff.set(CoreAnnotations.PartOfSpeechAnnotation.class, "B");
-    biff.set(CoreAnnotations.LemmaAnnotation.class, "fozzle");
-    ArrayCoreMap boff = new ArrayCoreMap(biff);
-    assertEquals(3, boff.size());
-    assertEquals(biff, boff);
-    assertEquals("fozzle", boff.get(CoreAnnotations.LemmaAnnotation.class));
-  }
-
 }

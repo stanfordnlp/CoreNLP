@@ -59,4 +59,35 @@ public interface LogFilter {
       return record.content.equals(message);
     }
   }
+  
+  /**
+   * Propagate records which originate from a specific method.
+   */
+  public static class HasCallingMethod implements LogFilter {
+    private String callingMethod;
+
+    public HasCallingMethod(String source) {
+      this.callingMethod = source;
+    }
+
+    public boolean matches(Record record) {
+      return this.callingMethod.equals(record.callingMethod);
+    }
+  }
+
+  /**
+   * Propagate records which originate from a specific calling class.  When specifying the calling class,
+   * it is sufficient to just specify a suffix of it.
+   */
+  public static class HasCallingClass implements LogFilter {
+    private String callingClassSuffix;
+
+    public HasCallingClass(String sourceSuffix) {
+      this.callingClassSuffix = sourceSuffix;
+    }
+
+    public boolean matches(Record record) {
+      return record.callingClass.endsWith(this.callingClassSuffix);
+    }
+  }
 }

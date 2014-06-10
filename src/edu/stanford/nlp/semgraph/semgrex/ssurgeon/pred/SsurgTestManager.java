@@ -2,8 +2,6 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred;
 
 import java.util.*;
 
-import edu.stanford.nlp.util.Generics;
-
 /**
  * This manages the set of available custom Node and Edge tests.  
  * This is a singleton, so use <code>inst</code> to
@@ -12,7 +10,7 @@ import edu.stanford.nlp.util.Generics;
  *
  */
 public class SsurgTestManager {
-  Map<String, Class<?>> nodeTests = Generics.newHashMap();
+  Map<String, Class<?>> nodeTests = new HashMap<String, Class<?>>();
   
   private SsurgTestManager() { init();}
   private static SsurgTestManager instance  = null;

@@ -1,18 +1,18 @@
 package edu.stanford.nlp.ling;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 
 /**
- * A CoreLabel represents a single word with ancillary information
+ * A CoreLabel represents a single word with ancilliary information
  * attached using CoreAnnotations.  If the proper annotations are set,
  * the CoreLabel also provides convenient methods to access tags,
  * lemmas, etc.
@@ -91,7 +91,6 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    *
    * @param label Basis for this label
    */
-  @SuppressWarnings("unchecked")
   public CoreLabel(Label label) {
     super(0);
     if (label instanceof CoreMap) {
@@ -132,9 +131,9 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   public static interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
   //Unchecked is below because eclipse can't handle the level of type inference if we correctly parameterize GenericAnnotation with String
   @SuppressWarnings("unchecked")
-  public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
+  public static HashMap<String, Class<? extends GenericAnnotation>> genericKeys = new HashMap<String, Class<? extends GenericAnnotation>>();
   @SuppressWarnings("unchecked")
-  public static final Map<Class<? extends GenericAnnotation>, String> genericValues = Generics.newHashMap();
+  public static HashMap<Class<? extends GenericAnnotation>, String> genericValues = new HashMap<Class<? extends GenericAnnotation>, String>();
 
 
   @SuppressWarnings("unchecked")
@@ -574,9 +573,9 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
     if (format.equals("value")) {
       buf.append(value());
     } else if (format.equals("{map}")) {
-      Map map2 = new TreeMap();
+      Map map2 = new TreeMap(asClassComparator);
       for(Class key : this.keySet()) {
-        map2.put(key.getName(), get(key));
+        map2.put(key, get(key));
       }
       buf.append(map2);
     } else if (format.equals("value{map}")) {
@@ -589,17 +588,6 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
       buf.append(map2);
     } else if (format.equals("value-index")) {
       buf.append(value());
-      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-      if (index != null) {
-        buf.append('-').append((index).intValue());
-      }
-      buf.append(toPrimes());
-    } else if (format.equals("value-tag-index")) {
-      buf.append(value());
-      String tag = tag();
-      if (tag != null) {
-        buf.append(TAG_SEPARATOR).append(tag);
-      }
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
         buf.append('-').append((index).intValue());

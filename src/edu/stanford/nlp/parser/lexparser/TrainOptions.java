@@ -288,230 +288,45 @@ public class TrainOptions implements Serializable {
    */
   public int trainingThreads = 1;
 
-  /**
-   * When training the DV parsing method, how many of the top K trees
-   * to analyze from the underlying parser
-   */
-  static public final int DEFAULT_K_BEST = 100;
-  public int dvKBest = DEFAULT_K_BEST;
-
-  /**
-   * When training a parsing method where the training has a (max)
-   * number of iterations, how many iterations to loop
-   */
-  static public final int DEFAULT_TRAINING_ITERATIONS = 40;
-  public int trainingIterations = DEFAULT_TRAINING_ITERATIONS;
-
-  /**
-   * When training using batches of trees, such as in the DVParser,
-   * how many trees to use in one batch
-   */
-  static public final int DEFAULT_BATCH_SIZE = 25;
-  public int batchSize = DEFAULT_BATCH_SIZE;
-  /**
-   * regularization constant
-   */
-  public static final double DEFAULT_REGCOST = 0.0001;
-  public double regCost = DEFAULT_REGCOST;
-
-  /**
-   * When training the DV parsing method, how many iterations to loop
-   * for one batch of trees
-   */
-  static public final int DEFAULT_QN_ITERATIONS_PER_BATCH = 1;
-  public int qnIterationsPerBatch = DEFAULT_QN_ITERATIONS_PER_BATCH;
-
-  /**
-   * When training the DV parsing method, how many estimates to keep
-   * for the qn approximation.
-   */
-  public int qnEstimates = 15;
-
-  /**
-   * When training the DV parsing method, the tolerance to use if we
-   * want to stop qn early
-   */
-  public double qnTolerance = 15;
-
-  /**
-   * If larger than 0, the parser may choose to output debug information
-   * every X seconds, X iterations, or some other similar metric
-   */
-  public int debugOutputFrequency = 0;
-
-  public long randomSeed = 0;
-
-  public static final double DEFAULT_LEARNING_RATE = 0.1;
-  /**
-   * How fast to learn (can mean different things for different algorithms)
-   */
-  public double learningRate = DEFAULT_LEARNING_RATE;
-
-  public static final double DEFAULT_DELTA_MARGIN = 0.1;
-  /**
-   * How much to penalize the wrong trees for how different they are
-   * from the gold tree when training
-   */
-  public double deltaMargin = DEFAULT_DELTA_MARGIN;
-
-  /**
-   * Whether or not to build an unknown word vector specifically for numbers
-   */
-  public boolean unknownNumberVector = true;
-
-  /**
-   * Whether or not to handle unknown dashed words by taking the last part
-   */
-  public boolean unknownDashedWordVectors = true;
-
-  /**
-   * Whether or not to build an unknown word vector for words with caps in them
-   */
-  public boolean unknownCapsVector = true;
-
-  /**
-   * Make the dv model as simple as possible
-   */
-  public boolean dvSimplifiedModel = false;
-
-  /**
-   * Whether or not to build an unknown word vector to match Chinese years
-   */
-  public boolean unknownChineseYearVector = true;
-
-  /**
-   * Whether or not to build an unknown word vector to match Chinese numbers
-   */
-  public boolean unknownChineseNumberVector = true;
-
-  /**
-   * Whether or not to build an unknown word vector to match Chinese percentages
-   */
-  public boolean unknownChinesePercentVector = true;
-
-  public static final double DEFAULT_SCALING_FOR_INIT = 0.5;
-  /**
-   * How much to scale certain parameters when initializing models.
-   * For example, the DVParser uses this to rescale its initial
-   * matrices.
-   */
-  public double scalingForInit = DEFAULT_SCALING_FOR_INIT;
-
-  public int maxTrainTimeSeconds = 0;
-
-  public static final String DEFAULT_UNK_WORD = "*UNK*";
-  /**
-   * Some models will use external data sources which contain
-   * information about unknown words.  This variable is a way to
-   * provide the name of the unknown word in the external data source.
-   */
-  public String unkWord = DEFAULT_UNK_WORD;
-
-  /**
-   * Whether or not to lowercase word vectors
-   */
-  public boolean lowercaseWordVectors = false;
-
-  public enum TransformMatrixType {
-    DIAGONAL, RANDOM, OFF_DIAGONAL, RANDOM_ZEROS
-  }
-
-  public TransformMatrixType transformMatrixType = TransformMatrixType.DIAGONAL;
-
-  /**
-   * Specifically for the DVModel, uses words on either side of a
-   * context when combining constituents.  Gives perhaps a microscopic
-   * improvement in performance but causes a large slowdown.
-   */
-  public boolean useContextWords = false;
-
-  /**
-   * Do we want a model that uses word vectors (such as the DVParser)
-   * to train those word vectors when training the model?
-   * <br>
-   * Note: models prior to 2014-02-13 may have incorrect values in
-   * this field, as it was originally a compile time constant
-   */
-  public boolean trainWordVectors = true;
-
-  public static final int DEFAULT_STALLED_ITERATION_LIMIT = 12;
-  /**
-   * How many iterations to allow training to stall before taking the
-   * best model, if training in an iterative manner
-   */
-  public int stalledIterationLimit = DEFAULT_STALLED_ITERATION_LIMIT;
-  
-  /** Horton-Strahler number/dimension (Maximilian Schlund) */
-  public boolean markStrahler;
-
   public void display() {
     System.err.println(toString());
   }
 
   @Override
   public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append("Train parameters:\n");
-    result.append(" smooth=" + smoothing + "\n");
-    result.append(" PA=" + PA + "\n");
-    result.append(" GPA=" + gPA + "\n");
-    result.append(" selSplit=" + selectiveSplit + "\n");
-    result.append(" (" + selectiveSplitCutOff + ((deleteSplitters != null) ? ("; deleting " + deleteSplitters): "") + ")" + "\n");
-    result.append(" mUnary=" + markUnary + "\n");
-    result.append(" mUnaryTags=" + markUnaryTags + "\n");
-    result.append(" sPPT=" + splitPrePreT + "\n");
-    result.append(" tagPA=" + tagPA + "\n");
-    result.append(" tagSelSplit=" + tagSelectiveSplit + " (" + tagSelectiveSplitCutOff + ")" + "\n");
-    result.append(" rightRec=" + rightRec + "\n");
-    result.append(" leftRec=" + leftRec + "\n");
-    result.append(" collinsPunc=" + collinsPunc + "\n");
-    result.append(" markov=" + markovFactor + "\n");
-    result.append(" mOrd=" + markovOrder + "\n");
-    result.append(" hSelSplit=" + hSelSplit + " (" + HSEL_CUT + ")" + "\n");
-    result.append(" compactGrammar=" + compactGrammar() + "\n");
-    result.append(" postPA=" + postPA + "\n");
-    result.append(" postGPA=" + postGPA + "\n");
-    result.append(" selPSplit=" + selectivePostSplit + " (" + selectivePostSplitCutOff + ")" + "\n");
-    result.append(" tagSelPSplit=" + tagSelectivePostSplit + " (" + tagSelectivePostSplitCutOff + ")" + "\n");
-    result.append(" postSplitWithBase=" + postSplitWithBaseCategory + "\n");
-    result.append(" fractionBeforeUnseenCounting=" + fractionBeforeUnseenCounting + "\n");
-    result.append(" openClassTypesThreshold=" + openClassTypesThreshold + "\n");
-    result.append(" preTransformer=" + preTransformer + "\n");
-    result.append(" taggedFiles=" + taggedFiles + "\n");
-    result.append(" predictSplits=" + predictSplits + "\n");
-    result.append(" splitCount=" + splitCount + "\n");
-    result.append(" splitRecombineRate=" + splitRecombineRate + "\n");
-    result.append(" simpleBinarizedLabels=" + simpleBinarizedLabels + "\n");
-    result.append(" noRebinarization=" + noRebinarization + "\n");
-    result.append(" trainingThreads=" + trainingThreads + "\n");
-    result.append(" dvKBest=" + dvKBest + "\n");
-    result.append(" trainingIterations=" + trainingIterations + "\n");
-    result.append(" batchSize=" + batchSize + "\n");
-    result.append(" regCost=" + regCost + "\n");
-    result.append(" qnIterationsPerBatch=" + qnIterationsPerBatch + "\n");
-    result.append(" qnEstimates=" + qnEstimates + "\n");
-    result.append(" qnTolerance=" + qnTolerance + "\n");
-    result.append(" debugOutputFrequency=" + debugOutputFrequency + "\n");
-    result.append(" randomSeed=" + randomSeed + "\n");
-    result.append(" learningRate=" + learningRate + "\n");
-    result.append(" deltaMargin=" + deltaMargin + "\n");
-    result.append(" unknownNumberVector=" + unknownNumberVector + "\n");
-    result.append(" unknownDashedWordVectors=" + unknownDashedWordVectors + "\n");
-    result.append(" unknownCapsVector=" + unknownCapsVector + "\n");
-    result.append(" unknownChineseYearVector=" + unknownChineseYearVector + "\n");
-    result.append(" unknownChineseNumberVector=" + unknownChineseNumberVector + "\n");
-    result.append(" unknownChinesePercentVector=" + unknownChinesePercentVector + "\n");
-    result.append(" dvSimplifiedModel=" + dvSimplifiedModel + "\n");
-    result.append(" scalingForInit=" + scalingForInit + "\n");
-    result.append(" maxTrainTimeSeconds=" + maxTrainTimeSeconds + "\n");
-    result.append(" unkWord=" + unkWord + "\n");
-    result.append(" lowercaseWordVectors=" + lowercaseWordVectors + "\n");
-    result.append(" transformMatrixType=" + transformMatrixType + "\n");
-    result.append(" useContextWords=" + useContextWords + "\n");
-    result.append(" trainWordVectors=" + trainWordVectors + "\n");
-    result.append(" stalledIterationLimit=" + stalledIterationLimit + "\n");
-    result.append(" markStrahler=" + markStrahler + "\n");
-    return result.toString();
+    return("Train parameters:" + 
+           " smooth=" + smoothing + 
+           " PA=" + PA + 
+           " GPA=" + gPA + 
+           " selSplit=" + selectiveSplit + 
+           " (" + selectiveSplitCutOff + ((deleteSplitters != null) ? ("; deleting " + deleteSplitters): "") + ")" + 
+           " mUnary=" + markUnary + 
+           " mUnaryTags=" + markUnaryTags + 
+           " sPPT=" + splitPrePreT + 
+           " tagPA=" + tagPA + 
+           " tagSelSplit=" + tagSelectiveSplit + " (" + tagSelectiveSplitCutOff + ")" + 
+           " rightRec=" + rightRec + 
+           " leftRec=" + leftRec + 
+           " collinsPunc=" + collinsPunc + 
+           " markov=" + markovFactor + 
+           " mOrd=" + markovOrder + 
+           " hSelSplit=" + hSelSplit + " (" + HSEL_CUT + ")" + 
+           " compactGrammar=" + compactGrammar() + 
+           " postPA=" + postPA + 
+           " postGPA=" + postGPA + 
+           " selPSplit=" + selectivePostSplit + " (" + selectivePostSplitCutOff + ")" + 
+           " tagSelPSplit=" + tagSelectivePostSplit + " (" + tagSelectivePostSplitCutOff + ")" + 
+           " postSplitWithBase=" + postSplitWithBaseCategory + 
+           " fractionBeforeUnseenCounting=" + fractionBeforeUnseenCounting + 
+           " openClassTypesThreshold=" + openClassTypesThreshold + 
+           " preTransformer=" + preTransformer + 
+           " taggedFiles=" + taggedFiles + 
+           " predictSplits=" + predictSplits + 
+           " splitCount=" + splitCount + 
+           " splitRecombineRate=" + splitRecombineRate + 
+           " simpleBinarizedLabels=" + simpleBinarizedLabels + 
+           " noRebinarization=" + noRebinarization + 
+           " trainingThreads=" + trainingThreads);
   }
 
   public static void printTrainTree(PrintWriter pw, String message, Tree t) {
@@ -533,4 +348,5 @@ public class TrainOptions implements Serializable {
   }
 
   private static final long serialVersionUID = 72571349843538L;
+
 } // end class Train

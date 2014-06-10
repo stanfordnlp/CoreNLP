@@ -28,7 +28,6 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphUtils;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.*;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * This is the primary class for loading and saving out Ssurgeon patterns.
@@ -181,7 +180,7 @@ public class Ssurgeon {
   //
   // Resource management
   //
-  private Map<String, SsurgeonWordlist> wordListResources = Generics.newHashMap();
+  private Map<String, SsurgeonWordlist> wordListResources = new HashMap<String, SsurgeonWordlist>();
   
   /**
    * Places the given word list resource under the given ID.  

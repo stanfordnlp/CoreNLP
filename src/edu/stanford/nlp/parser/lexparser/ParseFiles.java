@@ -16,10 +16,8 @@ import java.util.List;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
-import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
 import edu.stanford.nlp.trees.Tree;
@@ -63,19 +61,19 @@ public class ParseFiles {
 
   final Options op;
 
-  final LexicalizedParser pqFactory;
+  final ParserQueryFactory pqFactory;
 
   final TreePrint treePrint;
 
   /** Parse the files with names given in the String array args elements from
    *  index argIndex on.  Convenience method which builds and invokes a ParseFiles object.  
    */
-  static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
+  static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, ParserQueryFactory pqFactory) {
     ParseFiles pf = new ParseFiles(op, treePrint, pqFactory);
     pf.parseFiles(args, argIndex, tokenized, tokenizerFactory, elementDelimiter, sentenceDelimiter, escaper, tagDelimiter);
   }
 
-  public ParseFiles(Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
+  public ParseFiles(Options op, TreePrint treePrint, ParserQueryFactory pqFactory) {
     this.op = op;
     this.pqFactory = pqFactory;
     this.treePrint = treePrint;
@@ -182,39 +180,26 @@ public class ParseFiles {
       pwErr.println("Parsing file: " + filename);
       int num = 0;
       int numProcessed = 0;
-      if (op.testOptions.testingThreads != 1) {
-        MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
 
-        for (List<HasWord> sentence : documentPreprocessor) {
-          num++;
-          numSents++;
-          int len = sentence.size();
-          numWords += len;
-          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
+      for (List<HasWord> sentence : documentPreprocessor) {
+        num++;
+        numSents++;
+        int len = sentence.size();
+        numWords += len;
+        pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
 
-          wrapper.put(sentence);
-          while (wrapper.peek()) {
-            ParserQuery pq = wrapper.poll();
-            processResults(pq, numProcessed++, pwo);
-          }
-        }
-
-        wrapper.join();
+        wrapper.put(sentence);
         while (wrapper.peek()) {
           ParserQuery pq = wrapper.poll();
           processResults(pq, numProcessed++, pwo);
         }
-      } else {
-        ParserQuery pq = pqFactory.parserQuery();
-        for (List<HasWord> sentence : documentPreprocessor) {
-          num++;
-          numSents++;
-          int len = sentence.size();
-          numWords += len;
-          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
-          pq.parseAndReport(sentence, pwErr);
-          processResults(pq, numProcessed++, pwo);
-        }
+      }
+
+      wrapper.join();
+      while (wrapper.peek()) {
+        ParserQuery pq = wrapper.poll();
+        processResults(pq, numProcessed++, pwo);
       }
 
       treePrint.printFooter(pwo);

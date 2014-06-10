@@ -109,7 +109,7 @@ public class NumberNormalizer {
   //       QuantifiableEntityNormalizer also has bn (for billion)
   //       should consolidate
   //       here we use Number representation instead of double...
-  private static final  Map<String,Number> word2NumMap = Generics.newHashMap();
+  private static final  Map<String,Number> word2NumMap = new HashMap<String,Number>();
   static
   {
     // Special words for numbers
@@ -159,7 +159,7 @@ public class NumberNormalizer {
   }
 
   // similar to QuantifiableEntityNormalizer.ordinalsToValues
-  private static final Map<String,Number> ordWord2NumMap = Generics.newHashMap();
+  private static final Map<String,Number> ordWord2NumMap = new HashMap<String,Number>();
   static {
     ordWord2NumMap.put("zeroth", 0);
     ordWord2NumMap.put("first", 1);
@@ -391,8 +391,6 @@ public class NumberNormalizer {
 
   private static final Env env = getNewEnv();
 
-  private static final TokenSequencePattern numberPattern = TokenSequencePattern.compile(
-          env, "$NUMTERM ( [/,/ & $BEFORE_WS]? [$POSINTTERM & $BEFORE_WS]  )* ( [/,/ & $BEFORE_WS]? [/and/ & $BEFORE_WS] [$POSINTTERM & $BEFORE_WS]+ )? ");
   /**
    * Find and mark numbers (does not need NumberSequenceClassifier)
    * Each token is annotated with the numeric value and type
@@ -446,11 +444,14 @@ public class NumberNormalizer {
     }
     // TODO: Should we allow "," in written out numbers?
     // TODO: Handle "-" that is not with token?
-    TokenSequenceMatcher matcher = numberPattern.getMatcher(tokens);
+    TokenSequencePattern pattern = TokenSequencePattern.compile(
+            env, "$NUMTERM ( [/,/ & $BEFORE_WS]? [$POSINTTERM & $BEFORE_WS]  )* ( [/,/ & $BEFORE_WS]? [/and/ & $BEFORE_WS] [$POSINTTERM & $BEFORE_WS]+ )? ");
+//            env, "$NUMTERM ( $POSINTTERM /,/? )* ( /and/ $POSINTTERM+ )? ");
+    TokenSequenceMatcher matcher = pattern.getMatcher(tokens);
     List<CoreMap> numbers = new ArrayList<CoreMap>();
     while (matcher.find()) {
       @SuppressWarnings("unused")
-      List<CoreMap> matchedTokens = matcher.groupNodes();
+      List<? extends CoreMap> matchedTokens = matcher.groupNodes();
       int numStart = matcher.start();
       int possibleNumEnd = -1;
       int lastUnitPos = -1;
@@ -651,7 +652,6 @@ public class NumberNormalizer {
    * @param annotation - annotation where numbers have already been identified
    * @return list of CoreMap representing the identified number ranges
    */
-  private static final TokenSequencePattern rangePattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
   public static List<CoreMap> findNumberRanges(CoreMap annotation)
   {
     List<CoreMap> numerizedTokens = annotation.get(CoreAnnotations.NumerizedTokensAnnotation.class);
@@ -677,9 +677,10 @@ public class NumberNormalizer {
       }
     }
     List<CoreMap> numberRanges = new ArrayList<CoreMap>();
-    TokenSequenceMatcher matcher = rangePattern.getMatcher(numerizedTokens);
+    TokenSequencePattern pattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
+    TokenSequenceMatcher matcher = pattern.getMatcher(numerizedTokens);
     while (matcher.find()) {
-      List<CoreMap> matched = matcher.groupNodes();
+      List<? extends CoreMap> matched = matcher.groupNodes();
       if (matched.size() == 1) {
         numberRanges.add(matched.get(0));
       } else {

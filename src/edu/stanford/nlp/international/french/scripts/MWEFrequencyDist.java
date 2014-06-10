@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +21,6 @@ import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Prints a frequency distribution of MWEs in French.
@@ -40,11 +40,11 @@ public final class MWEFrequencyDist {
     
     final File treeFile = new File(args[0]);
     TwoDimensionalCounter<String,String> mweLabelToString = new TwoDimensionalCounter<String,String>();
-    Set<String> uniquePOSSequences = Generics.newHashSet();
+    Set<String> uniquePOSSequences = new HashSet<String>();
     
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory();
+      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
       TreeReader tr = trf.newTreeReader(br);
 
       final TregexPattern pMWE = TregexPattern.compile("/^MW/");

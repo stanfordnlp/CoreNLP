@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
@@ -25,9 +24,9 @@ class AuxiliaryTree {
     this.tree = tree;
     this.foot = findFootNode(tree);
     if (foot == null && mustHaveFoot) {
-      throw new TsurgeonParseException("Error -- no foot node found for " + originalTreeString);
+      throw new RuntimeException("Error -- no foot node found for " + originalTreeString);
     }
-    namesToNodes = Generics.newHashMap();
+    namesToNodes = new HashMap<String,Tree>();
     nodesToNames = new IdentityHashMap<Tree,String>();
     initializeNamesNodesMaps(tree);
   }
@@ -53,7 +52,7 @@ class AuxiliaryTree {
    * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonPattern that called copy.
    */
   public AuxiliaryTree copy(TsurgeonPattern p) {
-    Map<String,Tree> newNamesToNodes = Generics.newHashMap();
+    Map<String,Tree> newNamesToNodes = new HashMap<String,Tree>();
     Pair<Tree,Tree> result = copyHelper(tree,newNamesToNodes);
     //if(! result.first().dominates(result.second()))
       //System.err.println("Error -- aux tree copy doesn't dominate foot copy.");
@@ -138,7 +137,7 @@ class AuxiliaryTree {
       Tree thisFoundDtr = findFootNodeHelper(child);
       if (thisFoundDtr != null) {
         if (foundDtr != null) {
-          throw new TsurgeonParseException("Error -- two foot nodes in subtree" + t.toString());
+          throw new RuntimeException("Error -- two foot nodes in subtree" + t.toString());
         } else {
           foundDtr = thisFoundDtr;
         }
