@@ -21,7 +21,8 @@ import java.util.Set;
  * @author John Bauer
  */
 public class NERFeatureFactoryITest extends TestCase {
-  public void checkFeatures(Set<String> features, String ... expected) {
+
+  private static void checkFeatures(Set<String> features, String ... expected) {
     assertEquals(expected.length, features.size());
     for (String feature : expected) {
       assertTrue(features.contains(feature));
@@ -48,4 +49,5 @@ public class NERFeatureFactoryITest extends TestCase {
     features = new HashSet<String>(factory.featuresC(paddedSentence, 6));
     checkFeatures(features, "has-WORD");
   }
+
 }
