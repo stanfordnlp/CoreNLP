@@ -533,8 +533,7 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "pcomp", "prepositional complement",
         PrepositionalComplementGRAnnotation.class, COMPLEMENT, "PP(?:-TMP)?", tregexCompiler,
         new String[] {
-          "@PP|WHPP < (IN|VBG|VBN|TO $+ @SBAR|S|PP|ADVP=target)", // no intervening NP; VBN is for "compared with"
-          "@PP|WHPP < (RB $+ @SBAR|S=target)", // RB is for weird tagging like "after/RB adjusting for inflation"
+          "@PP|WHPP < (IN|VBG|VBN|TO|RB $+ @SBAR|S|PP|ADVP=target)", // no intervening NP; VBN is for "compared with"
           "@PP|WHPP !< IN|TO < (SBAR=target <, (IN $+ S))",
         });
   public static class PrepositionalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
