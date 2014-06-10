@@ -291,7 +291,9 @@ public class RedwoodConfiguration {
         }
         @Override
         public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-          if (handlers.length > 0) {
+          if (handlers.length == 0) {
+            destination.apply(config, root);
+          } else {
             root.addChildTree(buildChain(config, handlers, 0));
           }
         }
