@@ -299,9 +299,9 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
 
   // Compares two match results.
   // Use to order match results by:
-   //   score
+   //   score (highest first)
   //    length (longest first),
-  //       and then begining token offset (smaller offset first)
+  //       and then beginning token offset (smaller offset first)
   //    original order (smaller first)
   public final static Comparator<MatchResult> SCORE_LENGTH_ORDER_OFFSET_COMPARATOR =
           Comparators.chain(SCORE_COMPARATOR, LENGTH_COMPARATOR, ORDER_COMPARATOR, OFFSET_COMPARATOR);
