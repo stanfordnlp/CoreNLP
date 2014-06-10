@@ -157,7 +157,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     List<IN> currentSentence = new ArrayList<IN>();
     List<IN> lastSentence = null;
     boolean insideRegion = false;
-    boolean inWaitForForcedEnd = false;
     for (IN o: words) {
       String word;
       if (o instanceof HasWord) {
@@ -176,11 +175,8 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       if (o instanceof CoreMap) {
         CoreMap cm = (CoreMap) o;
         Boolean forcedEndValue = cm.get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
-        Boolean forcedUntilEndValue = cm.get(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);
         if (forcedEndValue != null)
           forcedEnd = forcedEndValue;
-        else if (forcedUntilEndValue != null && forcedUntilEndValue)
-          inWaitForForcedEnd = true;
         else {
           MultiTokenTag mt = cm.get(CoreAnnotations.MentionTokenAnnotation.class);
           if (mt != null && !mt.isEnd()) {
@@ -194,7 +190,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         if (DEBUG) {
         EncodingPrintWriter.err.println("Word is " + word, "UTF-8");
       }
-      if (!forcedEnd && sentenceRegionBeginPattern != null && ! insideRegion) {
+      if (sentenceRegionBeginPattern != null && ! insideRegion) {
         if (sentenceRegionBeginPattern.matcher(word).matches()) {
           insideRegion = true;
         }
@@ -203,19 +199,14 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         }
         continue;
       }
-      if (!forcedEnd && sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
+      if (sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
         lastSentence.add(o);
         if (DEBUG) {
           System.err.println("  added to last");
         }
       } else {
         boolean newSent = false;
-        if (inWaitForForcedEnd && !forcedEnd) {
-          currentSentence.add(o);
-          if (DEBUG) {
-            System.err.println("  is in wait for forced end; added to current");
-          }
-        } else if (inMultiTokenExpr && !forcedEnd) {
+        if (inMultiTokenExpr) {
           currentSentence.add(o);
           if (DEBUG) {
             System.err.println("  is in multi token expr; added to current");
@@ -233,7 +224,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
           newSent = true;
         } else if (forcedEnd) {
           currentSentence.add(o);
-          inWaitForForcedEnd = false;
           newSent = true;
           if (DEBUG) {
             System.err.println("  annotated to be the end of a sentence");

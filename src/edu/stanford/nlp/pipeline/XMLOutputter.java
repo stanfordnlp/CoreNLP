@@ -75,16 +75,6 @@ public class XMLOutputter {
       setSingleElement(docElem, "docDate", NAMESPACE_URI, docDate);
     }
 
-    String docSourceType = annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
-    if(docSourceType != null){
-      setSingleElement(docElem, "docSourceType", NAMESPACE_URI, docSourceType);
-    }
-
-    String docType = annotation.get(CoreAnnotations.DocTypeAnnotation.class);
-    if(docType != null){
-      setSingleElement(docElem, "docType", NAMESPACE_URI, docType);
-    }
-
     Element sentencesElem = new Element("sentences", NAMESPACE_URI);
     docElem.appendChild(sentencesElem);
 

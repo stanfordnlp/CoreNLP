@@ -2,20 +2,14 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.MultiTokenTag;
-import edu.stanford.nlp.ling.tokensregex.EnvLookup;
-import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -43,13 +37,6 @@ public class CleanXmlAnnotator implements Annotator{
   private final Pattern sentenceEndingTagMatcher;
 
   public static final String DEFAULT_SENTENCE_ENDERS = "";
-
-  /**
-   * This tells us what tags denote single sentences (tokens inside should not be sentence split on)
-   */
-  private Pattern singleSentenceTagMatcher = null;
-
-  public static final String DEFAULT_SINGLE_SENTENCE_TAGS = null;
 
   /**
    * This tells us which XML tags wrap document date
@@ -87,34 +74,6 @@ public class CleanXmlAnnotator implements Annotator{
   private Pattern speakerTagMatcher = null;
 
   public static final String DEFAULT_SPEAKER_TAGS = "speaker";
-
-  /**
-   * A map of annotation keys (i.e. docid) along with a pattern indicating the tag to match, and the attribute to match
-   */
-  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
-  public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
-
-  /**
-   * This tells us what the poster tag is
-   */
-  private Pattern posterTagMatcher = null;
-
-  public static final String DEFAULT_POSTER_TAGS = "poster";
-
-  /**
-   * This tells us what the post tag is
-   */
-  private Pattern postTagMatcher = null;
-
-  public static final String DEFAULT_POST_TAGS = "post";
-  public static final String DEFAULT_POST_ANNOTATIONS_PATTERNS = "postid=post[id],postdate=post[date]|postdate,author=post[author]|poster";
-
-  /**
-   * This tells us what the postdate tag is
-   */
-  private Pattern postdateTagMatcher = null;
-
-  public static final String DEFAULT_POSTDATE_TAGS = "postdate";
 
   /**
    * This setting allows handling of flawed XML.  For example,
@@ -167,10 +126,6 @@ public class CleanXmlAnnotator implements Annotator{
     }
   }
 
-  public void setSingleSentenceTagMatcher(String tags) {
-    singleSentenceTagMatcher = toCaseInsensitivePattern(tags);
-  }
-
   public void setDocIdTagMatcher(String docIdTags) {
     docIdTagMatcher = toCaseInsensitivePattern(docIdTags);
   }
@@ -182,31 +137,6 @@ public class CleanXmlAnnotator implements Annotator{
   public void setDiscourseTags(String utteranceTurnTags, String speakerTags) {
     utteranceTurnTagMatcher = toCaseInsensitivePattern(utteranceTurnTags);
     speakerTagMatcher = toCaseInsensitivePattern(speakerTags);
-  }
-
-  private static final Pattern TAG_ATTR_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
-  public void addTagAnnotationPatterns(String conf) {
-    String[] annoPatternStrings = conf.trim().split("\\s*,\\s*");
-    for (String annoPatternString:annoPatternStrings) {
-      String[] annoPattern = annoPatternString.split("\\s*=\\s*", 2);
-      if (annoPattern.length != 2) {
-        throw new IllegalArgumentException("Invalid annotation to tag pattern: " + annoPatternString);
-      }
-      String annoKeyString = annoPattern[0];
-      String pattern = annoPattern[1];
-      Class annoKey = EnvLookup.lookupAnnotationKey(null, annoKeyString);
-      if (annoKey == null) {
-        throw new IllegalArgumentException("Cannot resolve annotation key " + annoKeyString);
-      }
-      Matcher m = TAG_ATTR_PATTERN.matcher(pattern);
-      if (m.matches()) {
-        Pattern tagPattern = toCaseInsensitivePattern(m.group(1));
-        Pattern attrPattern = toCaseInsensitivePattern(m.group(2));
-        docAnnotationPatterns.add(annoKey, Pair.makePair(tagPattern, attrPattern));
-      } else {
-        throw new IllegalArgumentException("Invalid tag pattern: " + pattern + " for annotation key " + annoKeyString);
-      }
-    }
   }
 
   public void annotate(Annotation annotation) {
@@ -256,11 +186,6 @@ public class CleanXmlAnnotator implements Annotator{
     // we keep track of this so we can look at the last tag after
     // we're outside the loop
 
-    // Keeps track of what we still need to doc level annotations
-    // we still need to look for
-    Set<Class> toAnnotate = new HashSet<Class>();
-    toAnnotate.addAll(docAnnotationPatterns.keySet());
-
     int utteranceIndex = 0;
     boolean inUtterance = false;
     boolean inSpeakerTag = false;
@@ -270,7 +195,6 @@ public class CleanXmlAnnotator implements Annotator{
     List<CoreLabel> docTypeTokens = new ArrayList<CoreLabel>();
     List<CoreLabel> docIdTokens = new ArrayList<CoreLabel>();
 
-    boolean markSingleSentence = true;
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
       XMLUtils.XMLTag tag = XMLUtils.parseTag(word);
@@ -287,10 +211,6 @@ public class CleanXmlAnnotator implements Annotator{
           if (inUtterance) {
             token.set(CoreAnnotations.UtteranceAnnotation.class, utteranceIndex);
             if (currentSpeaker != null) token.set(CoreAnnotations.SpeakerAnnotation.class, currentSpeaker);
-          }
-          if (markSingleSentence) {
-            token.set(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class, true);
-            markSingleSentence = false;
           }
         }
         // if we removed any text, and the tokens are "invertible" and
@@ -349,31 +269,6 @@ public class CleanXmlAnnotator implements Annotator{
       }
 
       // At this point, we know we have a tag
-
-      // Check if we want to annotate anything using the tags's attributes
-      if (!toAnnotate.isEmpty() && tag.attributes != null) {
-        Set<Class> foundAnnotations = new HashSet<Class>();
-        for (Class key:toAnnotate) {
-          for (Pair<Pattern,Pattern> pattern: docAnnotationPatterns.get(key)) {
-            Pattern tagPattern = pattern.first;
-            Pattern attrPattern = pattern.second;
-            if (tagPattern.matcher(tag.name).matches()) {
-              boolean matched = false;
-              for (Map.Entry<String,String> entry:tag.attributes.entrySet()) {
-                if (attrPattern.matcher(entry.getKey()).matches()) {
-                  annotation.set(key, entry.getValue());
-                  foundAnnotations.add(key);
-                  matched = true;
-                  break;
-                }
-              }
-              if (matched) break;
-            }
-          }
-        }
-        toAnnotate.removeAll(foundAnnotations);
-      }
-
 
       // we are removing a token and its associated text...
       // keep track of that
@@ -434,20 +329,6 @@ public class CleanXmlAnnotator implements Annotator{
           currentSpeaker = null;
         }
         speakerTokens.clear();
-      }
-
-      if (singleSentenceTagMatcher != null && singleSentenceTagMatcher.matcher(tag.name).matches()) {
-        if (tag.isEndTag) {
-          // Mark previous token as forcing sentence end
-          if (newTokens.size() > 0) {
-            CoreLabel previous = newTokens.get(newTokens.size() - 1);
-            previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-          }
-          markSingleSentence = false;
-        } else if (!tag.isSingleTag) {
-          // Enforce rest of the tokens to be single token until ForceSentenceEnd is seen
-          markSingleSentence = true;
-        }
       }
 
       if (xmlTagMatcher == null)
