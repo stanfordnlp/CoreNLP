@@ -484,10 +484,29 @@ public class ColumnDataClassifier {
       printedText = strs[globalFlags.displayedColumn];
     }
     String line;
-    if ("".equals(printedText)) {
-      line = goldAnswer + '\t' + clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+    String results;
+    if (globalFlags.displayAllAnswers) {
+      // sort the labels by probability
+      TreeSet<Pair<Double,String>> sortedLabels = new TreeSet<Pair<Double,String>>();
+      for (String key : cntr.keySet()) {
+        sortedLabels.add(new Pair<Double,String>(cntr.probabilityOf(key), key));
+      }
+      StringBuilder builder = new StringBuilder();
+      for (Pair<Double,String> pair : sortedLabels.descendingSet()) {
+        if (builder.length() > 0) {
+          builder.append("\t");
+        }
+        builder.append(pair.first().toString() + "\t" + pair.second().toString());
+      }
+      results = builder.toString();
     } else {
-      line = printedText + '\t' + goldAnswer + '\t' + clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+      results = clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+    }
+    
+    if ("".equals(printedText)) {
+      line = goldAnswer + '\t' + results;
+     } else {
+      line = printedText + '\t' + goldAnswer + '\t' + results;
     }
     System.out.println(line);
     // NB: This next bit judges correctness by surface String equality, not our internal indices, so strs has to be right even for svmlightFormat
@@ -1520,6 +1539,8 @@ public class ColumnDataClassifier {
         Flags.printTo = val;
       } else if (key.equals("trainFile")) {
         Flags.trainFile = val;
+      } else if (key.equals("displayAllAnswers")) {
+        Flags.displayAllAnswers = Boolean.parseBoolean(val);
       } else if (key.equals("testFile")) {
         myFlags[col].testFile = val;
       } else if (key.equals("trainFromSVMLight")) {
@@ -1848,6 +1869,8 @@ public class ColumnDataClassifier {
     static boolean testFromSVMLight = false; //test file is in SVMLight format
     static String encoding = null;
     static String printSVMLightFormatTo;
+
+    static boolean displayAllAnswers = false;
 
     // Distinguishes whether this file has real valued features or if the more efficient non-RVF representation can be used.
     // This is set as a summary flag in globalFeatures based on whether anything uses real values.
