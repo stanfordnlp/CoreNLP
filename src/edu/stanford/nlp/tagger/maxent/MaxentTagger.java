@@ -291,7 +291,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   byte[][] fnumArr; // TODO: move this into TaggerExperiments. It could be a private method of that class with an accessor
   LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
-  // feature to an array which maps from tag number to feature index.
+  // features to an array which maps from tag number to feature weight index in the lambdas array.
   List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
   //PairsHolder pairs = new PairsHolder();
   Extractors extractors;
@@ -572,7 +572,36 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     extractorsRare.setGlobalHolder(this);
   }
 
+  /** Removes features that never have a non-zero weight for any tag from
+   *  the fAssociations' appropriate Map.
+   */
+  private void removeDeadRules() {
+    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
+      List<String> deadRules = new ArrayList();
+      Map<String, int[]> featureMap = fAssociations.get(extractor);
+      for (String value : featureMap.keySet()) {
+        int[] fAssociations = featureMap.get(value);
 
+        boolean found = false;
+        for (int index = 0; index < ySize; ++index) {
+          int fNum = fAssociations[index];
+          if (fNum > -1) {
+            if (getLambdaSolve().lambda[fNum] != 0.0) {
+              found = true;
+              break;
+            }
+          }
+        }
+        if (!found) {
+          deadRules.add(value);
+        }
+      }
+
+      for (String rule : deadRules) {
+        featureMap.remove(rule);
+      }
+    }
+  }
 
   protected void saveModel(String filename) {
     try {
@@ -1047,6 +1076,12 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     } else {
       System.err.println("Model is not correct");
     }
+
+    // Some of the rules may have been optimized so they don't have
+    // any effect on the final scores.  Eliminating those rules
+    // entirely saves space and runtime
+    maxentTagger.removeDeadRules();
+
     maxentTagger.saveModel(modelName);
     System.err.println("Extractors list:");
     System.err.println(maxentTagger.extractors.toString() + "\nrare" + maxentTagger.extractorsRare.toString());
