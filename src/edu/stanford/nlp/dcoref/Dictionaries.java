@@ -2,10 +2,8 @@ package edu.stanford.nlp.dcoref;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -20,6 +18,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 public class Dictionaries {
+
   public enum MentionType { PRONOMINAL, NOMINAL, PROPER }
 
   public enum Gender { MALE, FEMALE, NEUTRAL, UNKNOWN }
@@ -55,7 +54,7 @@ public class Dictionaries {
       "tell", "testify", "think", "threaten", "told", "uncover", "underline",
       "underscore", "urge", "voice", "vow", "warn", "welcome",
       "wish", "wonder", "worry", "write"));
-  
+
   public final Set<String> reportNoun = Generics.newHashSet(Arrays.asList(
       "acclamation", "account", "accusation", "acknowledgment", "address", "addressing",
       "admission", "advertisement", "advice", "advisory", "affidavit", "affirmation", "alert",
@@ -159,17 +158,17 @@ public class Dictionaries {
   public final Set<String> quantifiers2 = Generics.newHashSet(Arrays.asList("all", "both", "neither", "either"));
   public final Set<String> determiners = Generics.newHashSet(Arrays.asList("the", "this", "that", "these", "those", "his", "her", "my", "your", "their", "our"));
   public final Set<String> negations = Generics.newHashSet(Arrays.asList("n't","not", "nor", "neither", "never", "no", "non", "any", "none", "nobody", "nothing", "nowhere", "nearly","almost",
-      "if", "false", "fallacy", "unsuccessfully", "unlikely", "impossible", "improbable", "uncertain", "unsure", "impossibility", "improbability", "cancellation", "breakup", "lack", 
+      "if", "false", "fallacy", "unsuccessfully", "unlikely", "impossible", "improbable", "uncertain", "unsure", "impossibility", "improbability", "cancellation", "breakup", "lack",
       "long-stalled", "end", "rejection", "failure", "avoid", "bar", "block", "break", "cancel", "cease", "cut", "decline", "deny", "deprive", "destroy", "excuse",
       "fail", "forbid", "forestall", "forget", "halt", "lose", "nullify", "prevent", "refrain", "reject", "rebut", "remain", "refuse", "stop", "suspend", "ward"));
   public final Set<String> neg_relations = Generics.newHashSet(Arrays.asList("prep_without", "prepc_without", "prep_except", "prepc_except", "prep_excluding", "prepx_excluding",
       "prep_if", "prepc_if", "prep_whether", "prepc_whether", "prep_away_from", "prepc_away_from", "prep_instead_of", "prepc_instead_of"));
   public final Set<String> modals = Generics.newHashSet(Arrays.asList("can", "could", "may", "might", "must", "should", "would", "seem",
       "able", "apparently", "necessarily", "presumably", "probably", "possibly", "reportedly", "supposedly",
-      "inconceivable", "chance", "impossibility", "improbability", "encouragement", "improbable", "impossible", 
-      "likely", "necessary", "probable", "possible", "uncertain", "unlikely", "unsure", "likelihood", "probability", 
+      "inconceivable", "chance", "impossibility", "improbability", "encouragement", "improbable", "impossible",
+      "likely", "necessary", "probable", "possible", "uncertain", "unlikely", "unsure", "likelihood", "probability",
       "possibility", "eventual", "hypothetical" , "presumed", "supposed", "reported", "apparent"));
-  
+
   public final Set<String> personPronouns = Generics.newHashSet();
   public final Set<String> allPronouns = Generics.newHashSet();
 
@@ -196,7 +195,7 @@ public class Dictionaries {
   public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<Counter<Pair<String, String>>>(4);
   public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<Pair<String, String>>();
   public final Map<String,Counter<String>> NE_signatures = Generics.newHashMap();
-  
+
   private void setPronouns() {
     for(String s: animatePronouns){
       personPronouns.add(s);
@@ -213,7 +212,7 @@ public class Dictionaries {
   public void loadStateAbbreviation(String statesFile) {
     BufferedReader reader = null;
     try {
-      reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(statesFile)));
+      reader = IOUtils.readerFromString(statesFile);
       while(reader.ready()){
         String[] tokens = reader.readLine().split("\t");
         statesAbbreviation.put(tokens[1], tokens[0]);
@@ -229,7 +228,7 @@ public class Dictionaries {
   private void loadDemonymLists(String demonymFile) {
     BufferedReader reader = null;
     try {
-      reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(demonymFile)));
+      reader = IOUtils.readerFromString(demonymFile);
       while(reader.ready()){
         String[] line = reader.readLine().split("\t");
         if(line[0].startsWith("#")) continue;
@@ -250,7 +249,7 @@ public class Dictionaries {
   }
 
   private static void getWordsFromFile(String filename, Set<String> resultSet, boolean lowercase) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(filename)));
+    BufferedReader reader = IOUtils.readerFromString(filename);
     while(reader.ready()) {
       if(lowercase) resultSet.add(reader.readLine().toLowerCase());
       else resultSet.add(reader.readLine());
@@ -295,7 +294,7 @@ public class Dictionaries {
 
   private void loadCountriesLists(String file) {
     try{
-      BufferedReader reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(file)));
+      BufferedReader reader = IOUtils.readerFromString(file);
       while(reader.ready()) {
         String line = reader.readLine();
         countries.add(line.split("\t")[1].toLowerCase());
@@ -308,7 +307,7 @@ public class Dictionaries {
 
   private void loadGenderNumber(String file){
     try {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(file)));
+      BufferedReader reader = IOUtils.readerFromString(file);
       String line;
       while ((line = reader.readLine())!=null){
         String[] split = line.split("\t");
@@ -330,7 +329,7 @@ public class Dictionaries {
   private void loadExtraGender(String file){
     BufferedReader reader = null;
     try {
-      reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(file)));
+      reader = IOUtils.readerFromString(file);
       while(reader.ready()) {
         String[] split = reader.readLine().split("\t");
         if(split[1].equals("MALE")) maleWords.add(split[0]);
@@ -342,24 +341,24 @@ public class Dictionaries {
       IOUtils.closeIgnoringExceptions(reader);
     }
   }
-  
-  private void loadCorefDict(String[] file, 
-      ArrayList<Counter<Pair<String, String>>> dict) {  
+
+  private static void loadCorefDict(String[] file,
+      ArrayList<Counter<Pair<String, String>>> dict) {
 
     for(int i = 0; i < 4; i++){
       dict.add(new ClassicCounter<Pair<String, String>>());
 
       BufferedReader reader = null;
       try {
-        reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(file[i])));
+        reader = IOUtils.readerFromString(file[i]);
         // Skip the first line (header)
         reader.readLine();
 
-        while(reader.ready()) {          
-          String[] split = reader.readLine().split("\t");         
-          dict.get(i).setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[2]));                  
-        }   
-        
+        while(reader.ready()) {
+          String[] split = reader.readLine().split("\t");
+          dict.get(i).setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[2]));
+        }
+
       } catch (IOException e) {
         throw new RuntimeException(e);
       } finally {
@@ -367,40 +366,40 @@ public class Dictionaries {
       }
     }
   }
-  
-  private void loadCorefDictPMI(String file, Counter<Pair<String, String>> dict) {  
+
+  private static void loadCorefDictPMI(String file, Counter<Pair<String, String>> dict) {
 
       BufferedReader reader = null;
       try {
-        reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(file)));
+        reader = IOUtils.readerFromString(file);
         // Skip the first line (header)
         reader.readLine();
-   
-        while(reader.ready()) {       
-          String[] split = reader.readLine().split("\t");         
-          dict.setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[3]));                  
-        }   
-        
+
+        while(reader.ready()) {
+          String[] split = reader.readLine().split("\t");
+          dict.setCount(new Pair<String, String>(split[0], split[1]), Double.parseDouble(split[3]));
+        }
+
       } catch (IOException e) {
         throw new RuntimeException(e);
       } finally {
         IOUtils.closeIgnoringExceptions(reader);
       }
   }
-  
-  private void loadSignatures(String file, Map<String,Counter<String>> sigs) {
+
+  private static void loadSignatures(String file, Map<String,Counter<String>> sigs) {
     BufferedReader reader = null;
     try {
-      reader = new BufferedReader(new InputStreamReader(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(file)));
+      reader = IOUtils.readerFromString(file);
 
-      while(reader.ready()) {       
+      while(reader.ready()) {
         String[] split = reader.readLine().split("\t");
         Counter<String> cntr = new ClassicCounter<String>();
         sigs.put(split[0], cntr);
         for (int i = 1; i < split.length; i=i+2) {
           cntr.setCount(split[i], Double.parseDouble(split[i+1]));
         }
-      }     
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {
@@ -510,7 +509,7 @@ public class Dictionaries {
     loadStatesLists(states);
     loadExtraGender(extraGender);
     setPronouns();
-    if(loadCorefDict){ 
+    if(loadCorefDict){
       loadCorefDict(corefDictFiles, corefDict);
       loadCorefDictPMI(corefDictPMIFile, corefDictPMI);
       loadSignatures(signaturesFile, NE_signatures);
@@ -520,4 +519,5 @@ public class Dictionaries {
   public Dictionaries() {
     this(new Properties());
   }
+
 }

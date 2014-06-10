@@ -13,6 +13,8 @@ package edu.stanford.nlp.optimization;
 public abstract class AbstractStochasticCachingDiffUpdateFunction
         extends AbstractStochasticCachingDiffFunction {
 
+  protected boolean skipValCalc = false;
+
   /**
    * Gets a random sample (this is sampling with replacement).
    *
@@ -63,6 +65,27 @@ public abstract class AbstractStochasticCachingDiffUpdateFunction
   public double calculateStochasticUpdate(double[] x, double xScale, int batchSize, double gain) {
     getBatch(batchSize);
     return calculateStochasticUpdate(x, xScale, thisBatch, gain);
+  }
+
+  /**
+   * Performs stochastic gradient updates based
+   * on samples indexed by batch and do not apply regularization.
+   *
+   * @param x unscaled weights
+   * @param batch indices of which samples to compute function over
+   */
+  public abstract void calculateStochasticGradient(double[] x, int[] batch);
+
+  /**
+   * Performs stochastic gradient updates based
+   * on samples indexed by batch and do not apply regularization.
+   *
+   * @param x unscaled weights
+   * @param batchSize number of samples to pick next
+   */
+  public void calculateStochasticGradient(double[] x, int batchSize) {
+    getBatch(batchSize);
+    calculateStochasticGradient(x, thisBatch);
   }
 
 }
