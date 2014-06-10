@@ -190,10 +190,9 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * <i>Note:</i>Modified in 2010 to exclude the case of a CC/CONJP first in its phrase: it has to conjoin things.
    */
-  // todo: allow conj in RRC. 2 instances in WSJ.
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.English, "conj", "conjunct",
-        ConjunctGRAnnotation.class, DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML", tregexCompiler,
+        ConjunctGRAnnotation.class, DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML|RRC", tregexCompiler,
         new String[] { // remember conjunction can be left or right headed....
           // this is more ugly, but the first 3 patterns are now duplicated and for clausal things, that daughter to the left of the CC/CONJP can't be a PP or RB or ADVP either
           // non-parenthetical or comma in suitable phrase with conjunction to left

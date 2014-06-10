@@ -94,6 +94,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (SBAR-ADV (IN Although) (S (VP (VBN set) (PP-LOC (IN in) (NP (NNP Japan)))))) (, ,) (NP-SBJ-2 (NP (DT the) (NN novel) (POS 's)) (NN texture)) (VP (VBZ is) (ADJP (JJ American))) (. .)))",
          "( (S-IMP (INTJ (UH please)) (NP-SBJ (-NONE- *PRO*)) (VP (VB specify) (NP (WDT which) (NML (NNP royal) (CC or) (NNP carnival)) (NN ship))) (NFP -LRB-:)))",
          "(NP (DT those) (RRC (ADVP-TMP (RB still)) (PP-LOC (IN under) (NP (NNP GASB) (NNS rules)))))",
+         "(NP (NP (DT the) (NN auction) (NN house)) (RRC (RRC (VP (VBN founded) (NP (-NONE- *)) (PP-LOC (IN in) (NP (NNP London))) (NP-TMP (CD 1744)))) (CC and) (RRC (ADVP-TMP (RB now)) (PP (IN under) (NP (NP (DT the) (NN umbrella)) (PP (IN of) (NP (NP (NNP Sotheby) (POS 's)) (NNPS Holdings) (NNP Inc.))))))))",
          // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
          // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -361,6 +362,23 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "rcmod(those-1, under-3)\n" +
                 "nn(rules-5, GASB-4)\n" +
                 "pobj(under-3, rules-5)\n",
+        "det(house-3, the-1)\n" +
+                "nn(house-3, auction-2)\n" +
+                "root(ROOT-0, house-3)\n" +
+                "rcmod(house-3, founded-4)\n" +
+                "prep(founded-4, in-5)\n" +
+                "pobj(in-5, London-6)\n" +
+                "tmod(founded-4, 1744-7)\n" +
+                "cc(founded-4, and-8)\n" +
+                "advmod(under-10, now-9)\n" +
+                "conj(founded-4, under-10)\n" +
+                "det(umbrella-12, the-11)\n" +
+                "pobj(under-10, umbrella-12)\n" +
+                "prep(umbrella-12, of-13)\n" +
+                "poss(Inc.-17, Sotheby-14)\n" +
+                "possessive(Sotheby-14, 's-15)\n" +
+                "nn(Inc.-17, Holdings-16)\n" +
+                "pobj(of-13, Inc.-17)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
