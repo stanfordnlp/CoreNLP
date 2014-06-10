@@ -773,14 +773,16 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = new InputStreamReader(new FileInputStream(filename), encoding);
+    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
   /**
-   * Returns all the text in the given file with the given encoding. If the file
-   * cannot be read (non-existent, etc.), then and only then the method returns
-   * <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(String filename, String encoding) {
     try {
@@ -800,7 +802,7 @@ public class IOUtils {
    * @return The text in the file.
    */
   public static String slurpFile(String filename) throws IOException {
-    return IOUtils.slurpReader(new FileReader(filename));
+    return slurpFile(filename, defaultEncoding);
   }
 
   /**
@@ -912,34 +914,32 @@ public class IOUtils {
   }
 
   /**
-   * Returns all the text in the given File.
-   *
-   * @return The text in the file. May be an empty string if the file is empty.
-   *         If the file cannot be read (non-existent, etc.), then and only then
-   *         the method returns <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(File file) {
     try {
       return IOUtils.slurpReader(new FileReader(file));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
   /**
-   * Returns all the text in the given File.
-   *
-   * @return The text in the file. May be an empty string if the file is empty.
-   *         If the file cannot be read (non-existent, etc.), then and only then
-   *         the method returns <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(String filename) {
     try {
       return slurpFile(filename);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 

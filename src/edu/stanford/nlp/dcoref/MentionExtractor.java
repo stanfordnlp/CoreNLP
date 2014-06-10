@@ -328,6 +328,11 @@ public class MentionExtractor {
   private static void markMentionRelation(List<Mention> orderedMentions, Set<Pair<Integer, Integer>> foundPairs, String flag) {
     for(Mention m1 : orderedMentions){
       for(Mention m2 : orderedMentions){
+        // Ignore if m2 and m1 are in list relationship
+        if (m1.isListMemberOf(m2) || m2.isListMemberOf(m1)) {
+          SieveCoreferenceSystem.logger.finer("Not checking '" + m1 + "' and '" + m2 + "' for " + flag + ": in list relationship");
+          continue;
+        }
         for(Pair<Integer, Integer> foundPair: foundPairs){
           if((foundPair.first == m1.headIndex && foundPair.second == m2.headIndex)){
             if(flag.equals("APPOSITION")) m2.addApposition(m1);
@@ -389,7 +394,9 @@ public class MentionExtractor {
 
   public static void initializeUtterance(List<CoreLabel> tokens) {
     for(CoreLabel l : tokens){
-      l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
+      if (l.get(CoreAnnotations.UtteranceAnnotation.class) == null) {
+        l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
+      }
     }
   }
 }
