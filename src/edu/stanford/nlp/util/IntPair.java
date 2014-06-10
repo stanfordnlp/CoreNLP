@@ -16,10 +16,16 @@ public class IntPair extends IntTuple {
   }
 
 
+  /**
+   * Return the first element of the pair
+   */
   public int getSource() {
     return get(0);
   }
 
+  /**
+   * Return the second element of the pair
+   */
   public int getTarget() {
     return get(1);
   }
