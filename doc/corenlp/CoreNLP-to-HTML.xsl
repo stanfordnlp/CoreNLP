@@ -12,12 +12,6 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
     <center><h2>Stanford CoreNLP XML Output</h2></center>
     <hr size="3" color="#333333"/>
     <center><h3>Document</h3></center>
-    <xsl:if test="root/document/docId">
-        <br/>DocId: <xsl:value-of select="root/document/docId"/>
-    </xsl:if>
-    <xsl:if test="root/document/docDate">
-        <br/>DocDate: <xsl:value-of select="root/document/docDate"/>
-    </xsl:if>
     <table border="1" style="background-color:#f0f0f0;" align="center">
     <tr><th>Sentences</th></tr>
     <xsl:for-each select="root/document/sentences/sentence">
@@ -131,20 +125,14 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
   <ol>
   <xsl:for-each select="coreference">
     <li>
-        <table border="0">
-        <tr>
-            <th>Sentence</th>
-            <th>Head</th>
-            <th>Text</th>
-        </tr>
-        <xsl:for-each select="mention">
-            <tr>
-                <td><xsl:value-of select="sentence"/></td>
-                <td><xsl:value-of select="head"/> <xsl:if test="@representative"> (gov) </xsl:if></td>
-                <td><xsl:value-of select="text"/></td>
-            </tr>
-        </xsl:for-each>
-        </table>
+    <ul>
+    <xsl:for-each select="mention">
+      <li> sentence <xsl:value-of select="sentence"/>,
+           headword <xsl:value-of select="head"/> 
+           <xsl:if test="@representative"> (gov) </xsl:if>
+      </li>
+    </xsl:for-each>
+    </ul>
     </li>
   </xsl:for-each>
   </ol>
