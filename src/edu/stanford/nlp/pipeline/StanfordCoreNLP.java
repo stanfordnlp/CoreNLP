@@ -36,6 +36,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.trees.GrammaticalStructureFactory;
+import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -79,7 +81,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, SERIALIZED }
+  enum OutputFormat { TEXT, XML, SERIALIZED };
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -92,6 +94,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private TreePrint constituentTreePrinter;
   /** Formats the dependency parse trees for human-readable display */
   private TreePrint dependencyTreePrinter;
+  /** Converts the constituent tree to a set of dependencies (for display) */
+  private GrammaticalStructureFactory gsf;
 
   /** Stores the overall number of words processed */
   private int numWords;
@@ -230,6 +234,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
+    this.gsf = new PennTreebankLanguagePack().grammaticalStructureFactory();
 
     if (props == null) {
       // if undefined, find the properties file in the classpath
@@ -368,26 +373,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String dateTags =
           properties.getProperty("clean.datetags",
                             CleanXmlAnnotator.DEFAULT_DATE_TAGS);
-        String docIdTags =
-                properties.getProperty("clean.docIdtags",
-                        CleanXmlAnnotator.DEFAULT_DOCID_TAGS);
-        String docTypeTags =
-                properties.getProperty("clean.docTypetags",
-                        CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS);
-        String utteranceTurnTags =
-                properties.getProperty("clean.turntags",
-                        CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS);
-        String speakerTags =
-                properties.getProperty("clean.speakertags",
-                        CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
-        CleanXmlAnnotator annotator = new CleanXmlAnnotator(xmlTags,
+        return new CleanXmlAnnotator(xmlTags,
             sentenceEndingTags,
             dateTags,
             allowFlawed);
-        annotator.setDocIdTagMatcher(docIdTags);
-        annotator.setDocTypeTagMatcher(docTypeTags);
-        annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
-        return annotator;
       }
 
       @Override
@@ -395,27 +384,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         // keep track of all relevant properties for this annotator here!
         return "clean.xmltags:" +
                 properties.getProperty("clean.xmltags",
-                  CleanXmlAnnotator.DEFAULT_XML_TAGS) +
+                CleanXmlAnnotator.DEFAULT_XML_TAGS) +
                 "clean.sentenceendingtags:" +
                 properties.getProperty("clean.sentenceendingtags",
-                  CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS) +
+                CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS) +
                 "clean.allowflawedxml:" +
                 properties.getProperty("clean.allowflawedxml", "") +
                 "clean.datetags:" +
                 properties.getProperty("clean.datetags",
-                  CleanXmlAnnotator.DEFAULT_DATE_TAGS) +
-                "clean.docidtags:" +
-                properties.getProperty("clean.docid",
-                        CleanXmlAnnotator.DEFAULT_DOCID_TAGS) +
-                "clean.doctypetags:" +
-                properties.getProperty("clean.doctype",
-                        CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS) +
-                "clean.turntags:" +
-                properties.getProperty("clean.turntags",
-                  CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS) +
-                "clean.speakertags:" +
-                properties.getProperty("clean.speakertags",
-                  CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
+                CleanXmlAnnotator.DEFAULT_DATE_TAGS);
       }
     });
 
@@ -443,9 +420,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           } else {
             wts = WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
           }
-
-          wts.setCountLineNumbers(true);
-
           return wts;
         } else {
           WordsToSentencesAnnotator wts;
@@ -1136,12 +1110,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             case SERIALIZED: defaultExtension = ".ser.gz"; break;
             default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
             }
-            AnnotationSerializer serializer = null;
-            String serializerClass = properties.getProperty("serializer");
-            if (serializerClass != null) {
-              serializer = ReflectionLoading.loadByReflection(serializerClass);
-            }
-
             String extension = properties.getProperty("outputExtension", defaultExtension);
             // ensure we don't make filenames with doubled extensions like .xml.xml
             if (!outputFilename.endsWith(extension)) {
@@ -1176,7 +1144,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 // and class not found exceptions go through.
               } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
-              }
+              } 
             }
             //(read file)
             if (annotation == null) {
@@ -1185,17 +1153,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               annotation = new Annotation(text);
             }
 
-            forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
+            annotate(annotation);
 
-            startTrack("Annotating file " + file.getAbsoluteFile());
-            try {
-              annotate(annotation);
-            } catch (Exception ex) {
-              warn("Error annotating " + file.getAbsoluteFile(), ex);
-              throw new RuntimeException(ex);
-            } finally {
-              endTrack("Annotating file " + file.getAbsoluteFile());
-            }
+            forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + outputFilename);
 
             //--Output File
             switch (outputFormat) {
@@ -1212,13 +1172,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
               break;
             }
             case SERIALIZED: {
-              if (serializer != null) {
-                OutputStream fos = IOUtils.getFileOutputStream(outputFilename);
-                serializer.save(annotation, fos);
-                fos.close();
-              } else {
-                IOUtils.writeObjectToFile(annotation, outputFilename);
-              }
+              IOUtils.writeObjectToFile(annotation, outputFilename);
               break;
             }
             default:
