@@ -491,7 +491,8 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path) {
-    return readLines(path, null);
+    if(path.endsWith(".gz")) return readLines(new File(path), GZIPInputStream.class);
+    return readLines(new File(path));
   }
 
   /**
@@ -505,7 +506,7 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path, String encoding) {
-    return new GetLinesIterable(path, null, encoding);
+    return readLines(new File(path), null, encoding);
   }
 
   /**
@@ -553,99 +554,63 @@ public class IOUtils {
   public static Iterable<String> readLines(final File file,
                                            final Class<? extends InputStream> fileInputStreamWrapper,
                                            final String encoding) {
-    return new GetLinesIterable(file, fileInputStreamWrapper, encoding);
-  }
 
-  static class GetLinesIterable implements Iterable<String> {
-    final File file;
-    final String path;
-    final Class<? extends InputStream> fileInputStreamWrapper;
-    final String encoding;
+    return new Iterable<String>() {
+      public Iterator<String> iterator() {
+        return new Iterator<String>() {
 
-    // TODO: better programming style would be to make this two
-    // separate classes, but we don't expect to make more versions of
-    // this class anyway
-    GetLinesIterable(final File file, 
-                     final Class<? extends InputStream> fileInputStreamWrapper,
-                     final String encoding) {
-      this.file = file;
-      this.path = null;
-      this.fileInputStreamWrapper = fileInputStreamWrapper;
-      this.encoding = encoding;
-    }
+          protected BufferedReader reader = this.getReader();
+          protected String line = this.getLine();
 
-    GetLinesIterable(final String path, 
-                     final Class<? extends InputStream> fileInputStreamWrapper,
-                     final String encoding) {
-      this.file = null;
-      this.path = path;
-      this.fileInputStreamWrapper = fileInputStreamWrapper;
-      this.encoding = encoding;
-    }
-    
-    private InputStream getStream() throws IOException {
-      if (file != null) {
-        return new FileInputStream(file);
-      } else if (path != null) {
-        return getInputStreamFromURLOrClasspathOrFileSystem(path);
-      } else {
-        throw new AssertionError("No known path to read");
-      }
-    }
-
-    public Iterator<String> iterator() {
-      return new Iterator<String>() {
-        
-        protected BufferedReader reader = this.getReader();
-        protected String line = this.getLine();
-        
-        public boolean hasNext() {
-          return this.line != null;
-        }
-        
-        public String next() {
-          String nextLine = this.line;
-          if (nextLine == null) {
-            throw new NoSuchElementException();
+          public boolean hasNext() {
+            return this.line != null;
           }
-          line = getLine();
-          return nextLine;
-        }
-        
-        protected String getLine() {
-          try {
-            String result = this.reader.readLine();
-            if (result == null) {
-              this.reader.close();
+
+          public String next() {
+            String nextLine = this.line;
+            if (nextLine == null) {
+              throw new NoSuchElementException();
             }
-            return result;
-          } catch (IOException e) {
-            throw new RuntimeIOException(e);
+            line = getLine();
+            return nextLine;
           }
-        }
-        
-        protected BufferedReader getReader() {
-          try {
-            InputStream stream = getStream();
-            if (fileInputStreamWrapper != null) {
-              stream = fileInputStreamWrapper.getConstructor(InputStream.class).newInstance(stream);
+
+          protected String getLine() {
+            try {
+              String result = this.reader.readLine();
+              if (result == null) {
+                this.reader.close();
+              }
+              return result;
+            } catch (IOException e) {
+              throw new RuntimeIOException(e);
             }
-            if (encoding == null) {
-              return new BufferedReader(new InputStreamReader(stream));
-            } else {
-              return new BufferedReader(new InputStreamReader(stream, encoding));
-            }
-          } catch (Exception e) {
-            throw new RuntimeIOException(e);
           }
-        }
-        
-        @Override
+
+          protected BufferedReader getReader() {
+            try {
+              InputStream stream = new FileInputStream(file);
+              if (fileInputStreamWrapper != null) {
+                stream = fileInputStreamWrapper.getConstructor(
+                        InputStream.class).newInstance(stream);
+              }
+              if (encoding == null) {
+                return new BufferedReader(new InputStreamReader(stream));
+              } else {
+                return new BufferedReader(new InputStreamReader(stream, encoding));
+              }
+            } catch (Exception e) {
+              throw new RuntimeIOException(e);
+            }
+          }
+
+          @Override
           public void remove() {
-          throw new UnsupportedOperationException();
-        }
-      };
-    }
+            throw new UnsupportedOperationException();
+          }
+        };
+      }
+    };
   }
 
   /**
@@ -808,16 +773,14 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
+    Reader r = new InputStreamReader(new FileInputStream(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
   /**
-   * Returns all the text in the given file with the given
-   * encoding. If the file cannot be read (non-existent, etc.), then
-   * the method throws an unchecked RuntimeIOException.  If the caller
-   * is willing to tolerate missing files, they should catch that
-   * exception.
+   * Returns all the text in the given file with the given encoding. If the file
+   * cannot be read (non-existent, etc.), then and only then the method returns
+   * <code>null</code>.
    */
   public static String slurpFileNoExceptions(String filename, String encoding) {
     try {
@@ -837,7 +800,7 @@ public class IOUtils {
    * @return The text in the file.
    */
   public static String slurpFile(String filename) throws IOException {
-    return slurpFile(filename, defaultEncoding);
+    return IOUtils.slurpReader(new FileReader(filename));
   }
 
   /**
@@ -949,32 +912,34 @@ public class IOUtils {
   }
 
   /**
-   * Returns all the text in the given file with the given
-   * encoding. If the file cannot be read (non-existent, etc.), then
-   * the method throws an unchecked RuntimeIOException.  If the caller
-   * is willing to tolerate missing files, they should catch that
-   * exception.
+   * Returns all the text in the given File.
+   *
+   * @return The text in the file. May be an empty string if the file is empty.
+   *         If the file cannot be read (non-existent, etc.), then and only then
+   *         the method returns <code>null</code>.
    */
   public static String slurpFileNoExceptions(File file) {
     try {
       return IOUtils.slurpReader(new FileReader(file));
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
     }
   }
 
   /**
-   * Returns all the text in the given file with the given
-   * encoding. If the file cannot be read (non-existent, etc.), then
-   * the method throws an unchecked RuntimeIOException.  If the caller
-   * is willing to tolerate missing files, they should catch that
-   * exception.
+   * Returns all the text in the given File.
+   *
+   * @return The text in the file. May be an empty string if the file is empty.
+   *         If the file cannot be read (non-existent, etc.), then and only then
+   *         the method returns <code>null</code>.
    */
   public static String slurpFileNoExceptions(String filename) {
     try {
       return slurpFile(filename);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
     }
   }
 
