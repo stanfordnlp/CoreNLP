@@ -263,7 +263,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     if (flags.useOutDict2){
       if (outDict == null) {
         System.err.println("reading "+flags.outDict2+" as a seen lexicon");
-        outDict = new CorpusDictionary(flags.outDict2);
+        outDict = new CorpusDictionary(flags.outDict2, true);
       }
       features.add(outDict.getW(charp+charc)+"outdict");       // -1 0
       features.add(outDict.getW(charc+charc1)+"outdict");      // 0 1
