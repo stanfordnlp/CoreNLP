@@ -621,7 +621,7 @@ public class EvaluateTreebank {
         
         pwErr.println("Parsing [len. " + sentence.size() + "]: " + Sentence.listToString(sentence));
         
-        pq.parseWithFallback(sentence, pwErr);
+        pq.parseAndReport(sentence, pwErr);
         
         processResults(pq, goldTree, pwErr, pwOut, pwFileOut, pwStats, treePrint);
       } // for tree iterator

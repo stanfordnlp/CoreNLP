@@ -180,26 +180,39 @@ public class ParseFiles {
       pwErr.println("Parsing file: " + filename);
       int num = 0;
       int numProcessed = 0;
-      MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
+      if (op.testOptions.testingThreads != 1) {
+        MulticoreWrapper<List<? extends HasWord>, ParserQuery> wrapper = new MulticoreWrapper<List<? extends HasWord>, ParserQuery>(op.testOptions.testingThreads, new ParsingThreadsafeProcessor(pqFactory, pwErr));
 
-      for (List<HasWord> sentence : documentPreprocessor) {
-        num++;
-        numSents++;
-        int len = sentence.size();
-        numWords += len;
-        pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
+        for (List<HasWord> sentence : documentPreprocessor) {
+          num++;
+          numSents++;
+          int len = sentence.size();
+          numWords += len;
+          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
 
-        wrapper.put(sentence);
+          wrapper.put(sentence);
+          while (wrapper.peek()) {
+            ParserQuery pq = wrapper.poll();
+            processResults(pq, numProcessed++, pwo);
+          }
+        }
+
+        wrapper.join();
         while (wrapper.peek()) {
           ParserQuery pq = wrapper.poll();
           processResults(pq, numProcessed++, pwo);
         }
-      }
-
-      wrapper.join();
-      while (wrapper.peek()) {
-        ParserQuery pq = wrapper.poll();
-        processResults(pq, numProcessed++, pwo);
+      } else {
+        ParserQuery pq = pqFactory.parserQuery();
+        for (List<HasWord> sentence : documentPreprocessor) {
+          num++;
+          numSents++;
+          int len = sentence.size();
+          numWords += len;
+          pwErr.println("Parsing [sent. " + num + " len. " + len + "]: " + Sentence.listToString(sentence, true));
+          pq.parseAndReport(sentence, pwErr);
+          processResults(pq, numProcessed++, pwo);
+        }
       }
 
       treePrint.printFooter(pwo);

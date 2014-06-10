@@ -436,8 +436,12 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   private static int tokReader(Reader r, BufferedWriter writer, Pattern parseInsidePattern, String options, boolean preserveLines, boolean dump, boolean lowerCase) throws IOException {
     int numTokens = 0;
-    boolean printing = parseInsidePattern == null; // start off printing, unless you're looking for a start entity
     boolean beginLine = true;
+    boolean printing = (parseInsidePattern == null); // start off printing, unless you're looking for a start entity
+    Matcher m = null;
+    if (parseInsidePattern != null) {
+      m = parseInsidePattern.matcher(""); // create once as performance hack
+    }
     for (PTBTokenizer<CoreLabel> tokenizer = new PTBTokenizer<CoreLabel>(r, new CoreLabelTokenFactory(), options); tokenizer.hasNext(); ) {
       CoreLabel obj = tokenizer.next();
       // String origStr = obj.get(CoreAnnotations.TextAnnotation.class).replaceFirst("\n+$", ""); // DanC added this to fix a lexer bug, hopefully now corrected
@@ -449,8 +453,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       } else {
         str = origStr;
       }
-      Matcher m;
-      if (parseInsidePattern != null && (m = parseInsidePattern.matcher(origStr)).matches()) {
+      if (m != null && m.reset(origStr).matches()) {
         printing = m.group(1).isEmpty(); // turn on printing if no end element slash, turn it off it there is
       } else if (printing) {
         if (dump) {

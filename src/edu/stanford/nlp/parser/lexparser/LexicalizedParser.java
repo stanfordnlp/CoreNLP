@@ -46,6 +46,8 @@ import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 import java.io.*;
 import java.util.*;
@@ -262,12 +264,20 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     return parse(lst);
   }
 
+  /**
+   * Will parse the text in <code>sentence</code> as if it represented
+   * a single sentence by first processing it with a tokenizer.
+   */
   public Tree parse(String sentence) {
     TokenizerFactory<? extends HasWord> tf = op.tlpParams.treebankLanguagePack().getTokenizerFactory();
     Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
     return parse(tokenizer.tokenize());
   }
 
+  /**
+   * Will process a list of strings into a list of HasWord and return
+   * the parse tree associated with that list.
+   */
   public Tree parseStrings(List<String> lst) {
     List<Word> words = new ArrayList<Word>();
     for (String word : lst) {
@@ -276,6 +286,10 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     return parse(words);
   }
 
+  /**
+   * Parses the list of HasWord.  If the parse fails for some reason,
+   * an X tree is returned instead of barfing.
+   */
   public Tree parse(List<? extends HasWord> lst) {
     try {
       ParserQuery pq = parserQuery();
@@ -303,6 +317,42 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     return lstf.newTreeNode("X", lst2);
   }
 
+  public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {
+    List<Tree> trees = new ArrayList<Tree>();
+    for (List<? extends HasWord> sentence : sentences) {
+      trees.add(parse(sentence));
+    }
+    return trees;
+  }
+
+  /**
+   * Will launch multiple threads which calls <code>parse</code> on
+   * each of the <code>sentences</code> in order, returning the
+   * resulting parse trees in the same order.
+   */ 
+  public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
+    MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<List<? extends HasWord>, Tree>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
+        public Tree process(List<? extends HasWord> sentence) {
+          return parse(sentence);
+        }
+        public ThreadsafeProcessor<List<? extends HasWord>, Tree> newInstance() {
+          return this;
+        }
+      });
+    List<Tree> trees = new ArrayList<Tree>();
+    for (List<? extends HasWord> sentence : sentences) {
+      wrapper.put(sentence);
+      while (wrapper.peek()) {
+        trees.add(wrapper.poll());
+      }
+    }
+    wrapper.join();
+    while (wrapper.peek()) {
+      trees.add(wrapper.poll());
+    }
+    return trees;
+  }
+
   /** Return a TreePrint for formatting parsed output trees.
    *  @return A TreePrint for formatting parsed output trees.
    */
@@ -310,6 +360,9 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     return op.testOptions.treePrint(op.tlpParams);
   }
 
+  /**
+   * Similar to parse(), but instead of returning an X tree on failure, returns null.
+   */
   public Tree parseTree(List<? extends HasWord> sentence) {
     ParserQuery pq = parserQuery();
     if (pq.parse(sentence)) {

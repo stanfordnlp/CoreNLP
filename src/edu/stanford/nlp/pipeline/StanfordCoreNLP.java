@@ -486,10 +486,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       @Override
       public Annotator create() {
         try {
-          String maxLenStr = properties.getProperty("pos.maxlen");
-          int maxLen = Integer.MAX_VALUE;
-          if(maxLenStr != null) maxLen = Integer.parseInt(maxLenStr);
-          return new POSTaggerAnnotator(properties.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL), false, maxLen);
+          return new POSTaggerAnnotator("pos", properties);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }

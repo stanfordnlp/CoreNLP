@@ -728,7 +728,8 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-splitRecombineRate")) {
       trainOptions.splitRecombineRate = Double.parseDouble(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-trainingThreads")) {
+    } else if (args[i].equalsIgnoreCase("-trainingThreads") ||
+               args[i].equalsIgnoreCase("-nThreads")) {
       trainOptions.trainingThreads = Integer.parseInt(args[i + 1]);
       testOptions.testingThreads = Integer.parseInt(args[i + 1]);
       i += 2;

@@ -61,11 +61,6 @@
 	<lib name="AppleJavaExtensions.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/AppleJavaExtensions.jar!/"/>
 	</lib>
-	<lib name="fastutil.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/fastutil-5.1.4-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/fastutil-5.1.4-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/fastutil.jar!/"/>
-	</lib>
 	<lib name="JFlex.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/jflex-1.4.3-src.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jflex-1.4.3-src.zip!/"/>

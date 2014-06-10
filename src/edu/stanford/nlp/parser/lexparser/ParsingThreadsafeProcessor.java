@@ -15,6 +15,11 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 class ParsingThreadsafeProcessor implements ThreadsafeProcessor<List<? extends HasWord>, ParserQuery> {
   ParserQueryFactory pqFactory;
   PrintWriter pwErr;
+
+  ParsingThreadsafeProcessor(ParserQueryFactory pqFactory) {
+    this(pqFactory, null);
+  }
+
   ParsingThreadsafeProcessor(ParserQueryFactory pqFactory, PrintWriter pwErr) {
     this.pqFactory = pqFactory;
     this.pwErr = pwErr;
@@ -23,7 +28,11 @@ class ParsingThreadsafeProcessor implements ThreadsafeProcessor<List<? extends H
   @Override
   public ParserQuery process(List<? extends HasWord> sentence) {
     ParserQuery pq = pqFactory.parserQuery();
-    pq.parseWithFallback(sentence, pwErr);
+    if (pwErr != null) {
+      pq.parseAndReport(sentence, pwErr);
+    } else {
+      pq.parse(sentence);
+    }
     return pq;
   }
 

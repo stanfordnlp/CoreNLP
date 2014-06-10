@@ -10,8 +10,8 @@ import edu.stanford.nlp.util.ScoredObject;
 
 public interface ParserQuery {
   boolean parse(List<? extends HasWord> sentence);
-
-  void parseWithFallback(List<? extends HasWord> sentence, PrintWriter pwErr);
+  
+  boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr);
 
   double getPCFGScore();
 

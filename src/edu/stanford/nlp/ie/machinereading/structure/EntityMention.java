@@ -222,6 +222,14 @@ public class EntityMention extends ExtractionObject {
 
     return sb.toString();
   }
+
+  public String getKbpId() {
+    int kbpPos = this.getObjectId().indexOf("KBP");
+    assert (kbpPos > 0);
+    String id = this.getObjectId().substring(kbpPos + 3);
+    return id;
+  }
+
   
   @Override
   public String toString() {

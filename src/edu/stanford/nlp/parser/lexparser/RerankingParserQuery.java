@@ -35,32 +35,44 @@ public class RerankingParserQuery implements ParserQuery {
     this.rerankerKBest = op.rerankerKBest;
   }
 
+  @Override
   public boolean saidMemMessage() {
     return parserQuery.saidMemMessage();
   }
 
+  @Override
   public void setConstraints(List<ParserConstraint> constraints) {
     parserQuery.setConstraints(constraints);
   }
 
+  @Override
   public boolean parse(List<? extends HasWord> sentence) {
-    // TODO: do we actually want to return the LPQ's result, or do we
-    // only care if we get a result of some kind?
-    boolean result = parserQuery.parse(sentence);
-    List<ScoredObject<Tree>> bestKParses = parserQuery.getKBestPCFGParses(rerankerKBest);
-    scoredTrees = rerank(sentence, bestKParses);
-    return result;
-  }
-
-  public void parseWithFallback(List<? extends HasWord> sentence, PrintWriter pwErr) {
-    parserQuery.parseWithFallback(sentence, pwErr);
-    Tree result = parserQuery.getBestParse();
-    if (result == null) {
-      return;
+    boolean success = parserQuery.parse(sentence);
+    if (!success) {
+      return false;
     }
 
     List<ScoredObject<Tree>> bestKParses = parserQuery.getKBestPCFGParses(rerankerKBest);
+    if (bestKParses.size() == 0) {
+      return false;
+    }
     scoredTrees = rerank(sentence, bestKParses);
+    return true;
+  }
+
+  @Override
+  public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
+    boolean success = parserQuery.parseAndReport(sentence, pwErr);
+    if (!success) {
+      return false;
+    }
+
+    List<ScoredObject<Tree>> bestKParses = parserQuery.getKBestPCFGParses(rerankerKBest);
+    if (bestKParses.size() == 0) {
+      return false;
+    }
+    scoredTrees = rerank(sentence, bestKParses);
+    return true;
   }
 
   List<ScoredObject<Tree>> rerank(List<? extends HasWord> sentence, List<ScoredObject<Tree>> bestKParses) {
@@ -80,6 +92,7 @@ public class RerankingParserQuery implements ParserQuery {
     return reranked;
   }
 
+  @Override
   public Tree getBestParse() {
     if (scoredTrees == null || scoredTrees.size() == 0) {
       return null;
@@ -87,10 +100,12 @@ public class RerankingParserQuery implements ParserQuery {
     return scoredTrees.get(0).object();
   }
 
+  @Override
   public Tree getBestPCFGParse() {
     return getBestParse();
   }
 
+  @Override
   public double getPCFGScore() {
     if (scoredTrees == null || scoredTrees.size() == 0) {
       throw new AssertionError();
@@ -98,16 +113,19 @@ public class RerankingParserQuery implements ParserQuery {
     return scoredTrees.get(0).score();
   }
 
+  @Override
   public Tree getBestDependencyParse(boolean debinarize) {
     // TODO: barf?
     return null;
   }
 
+  @Override
   public Tree getBestFactoredParse() {
     // TODO: barf?
     return null;
   }
 
+  @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
     if (scoredTrees == null || scoredTrees.size() == 0) {
       throw new AssertionError();
@@ -121,14 +139,17 @@ public class RerankingParserQuery implements ParserQuery {
     return equalTrees;
   }
 
+  @Override
   public void restoreOriginalWords(Tree tree) {
     parserQuery.restoreOriginalWords(tree);
   }
 
+  @Override
   public boolean hasFactoredParse() {
     return false;
   }
 
+  @Override
   public List<ScoredObject<Tree>> getKBestPCFGParses(int kbestPCFG) {
     List<ScoredObject<Tree>> trees = Generics.newArrayList();
     for (int treePos = 0; treePos < scoredTrees.size() && treePos < kbestPCFG; ++treePos) {
@@ -137,19 +158,23 @@ public class RerankingParserQuery implements ParserQuery {
     return trees;
   }
 
+  @Override
   public List<ScoredObject<Tree>> getKGoodFactoredParses(int kbest) {
     // TODO: barf?
     return null;
   }
 
+  @Override
   public KBestViterbiParser getPCFGParser() {
     return null;
   }
 
+  @Override
   public KBestViterbiParser getFactoredParser() {
     return null;
   }
 
+  @Override
   public KBestViterbiParser getDependencyParser() {
     return null;
   }
@@ -158,6 +183,7 @@ public class RerankingParserQuery implements ParserQuery {
   /**
    * Parsing succeeded without any horrible errors or fallback
    */
+  @Override
   public boolean parseSucceeded() {
     return parserQuery.parseSucceeded();
   }
@@ -165,6 +191,7 @@ public class RerankingParserQuery implements ParserQuery {
   /**
    * The sentence was skipped, probably because it was too long or of length 0
    */
+  @Override
   public boolean parseSkipped() {
     return parserQuery.parseSkipped();
   }
@@ -172,6 +199,7 @@ public class RerankingParserQuery implements ParserQuery {
   /**
    * The model had to fall back to a simpler model on the previous parse
    */
+  @Override
   public boolean parseFallback() {
     return parserQuery.parseFallback();
   }
@@ -179,6 +207,7 @@ public class RerankingParserQuery implements ParserQuery {
   /**
    * The model ran out of memory on the most recent parse
    */
+  @Override
   public boolean parseNoMemory() {
     return parserQuery.parseNoMemory();
   }
@@ -186,10 +215,12 @@ public class RerankingParserQuery implements ParserQuery {
   /**
    * The model could not parse the most recent sentence for some reason
    */
+  @Override
   public boolean parseUnparsable() {
     return parserQuery.parseUnparsable();
   }
 
+  @Override
   public List<? extends HasWord> originalSentence() { 
     return parserQuery.originalSentence();
   }

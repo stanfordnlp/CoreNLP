@@ -32,8 +32,7 @@ import java.util.regex.Pattern;
  */
 public class Americanize implements Function<HasWord,HasWord> {
 
-  private static boolean DEFAULT_CAPITALIZE_TIMEX = true;
-
+  /** Whether to capitalize month and day names. The default is true. */
   private final boolean capitalizeTimex;
 
   public static final int DONT_CAPITALIZE_TIMEX = 1;
@@ -44,21 +43,17 @@ public class Americanize implements Function<HasWord,HasWord> {
   private static final int MINIMUM_LENGTH_PATTERN_MATCH = 6;
 
   public Americanize() {
-    capitalizeTimex = DEFAULT_CAPITALIZE_TIMEX;
+    this(0);
   }
 
   /** Make an object for Americanizing spelling.
    *
    * @param flags An integer representing bit flags. At present the only
    *      recognized flag is DONT_CAPITALIZE_TIMEX = 1 which suppresses
-   *      capitalization of days of the week and months
+   *      capitalization of days of the week and months.
    */
   public Americanize(int flags) {
-    if ((flags & DONT_CAPITALIZE_TIMEX) != 0) {
-      capitalizeTimex = false;
-    } else {
-      capitalizeTimex = DEFAULT_CAPITALIZE_TIMEX;
-    }
+    capitalizeTimex = (flags & DONT_CAPITALIZE_TIMEX) == 0;
   }
 
 
@@ -90,7 +85,7 @@ public class Americanize implements Function<HasWord,HasWord> {
    * @return The American spelling of the word.
    */
   public static String americanize(String str) {
-    return americanize(str, DEFAULT_CAPITALIZE_TIMEX);
+    return americanize(str, true);
   }
 
 
@@ -129,6 +124,7 @@ public class Americanize implements Function<HasWord,HasWord> {
       return str;
     }
     // first do one disjunctive regex and return unless matches. Faster!
+    // (But still allocates matcher each time; avoiding this would make this class not threadsafe....)
     if ( ! disjunctivePattern.matcher(str).find()) {
       return str;
     }
@@ -167,7 +163,8 @@ public class Americanize implements Function<HasWord,HasWord> {
         foo.append('|');
       }
       foo.append("(?:");
-      foo.append(patStrings[i]);
+      // Remove groups from String before appending for speed
+      foo.append(patStrings[i].replaceAll("[()]", ""));
       foo.append(')');
     }
     disjunctivePattern = Pattern.compile(foo.toString());
@@ -232,7 +229,7 @@ public class Americanize implements Function<HasWord,HasWord> {
 
   @Override
   public String toString() {
-    return ("Americanize[capitalizeTimex is " + DEFAULT_CAPITALIZE_TIMEX +
+    return ("Americanize[capitalizeTimex is " + capitalizeTimex +
             "; " + "mapping has " + mapping.size() + " mappings; " +
             "timexMapping has " + timexMapping.size() + " mappings]");
   }
@@ -253,7 +250,8 @@ public class Americanize implements Function<HasWord,HasWord> {
       String line;
       while((line = buf.readLine()) != null) {
         for(String w : line.split("\\s+")) {
-          System.out.print(Americanize.americanize(w)+" ");
+          System.out.print(Americanize.americanize(w));
+          System.out.print(' ');
         }
         System.out.println();
       }

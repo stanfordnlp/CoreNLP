@@ -75,6 +75,8 @@ public class LexicalizedParserQuery implements ParserQuery {
   private boolean parseNoMemory = false;
   // Horrible error
   private boolean parseUnparsable = false;
+  // If something ran out of memory, where the error occurred
+  private String whatFailed = null;
 
   public boolean parseSucceeded() { return parseSucceeded; }
   public boolean parseSkipped() { return parseSkipped; }
@@ -176,10 +178,6 @@ public class LexicalizedParserQuery implements ParserQuery {
    * <li>If a token implements HasTag and the tag() value is not
    * null or the empty String, then the parser is strongly advised to assign
    * a part of speech tag that <i>begins</i> with this String.</li>
-   * <li>Otherwise toString() is called on the token, and the returned
-   * value is used as the word to be parsed.  In particular, if the
-   * token is already a String, this means that the String is used as
-   * the word to be parsed.</li>
    * </ul>
    *
    * @param sentence The sentence to parse
@@ -188,12 +186,13 @@ public class LexicalizedParserQuery implements ParserQuery {
    *                                       of zero length or the parse
    *                                       otherwise fails for resource reasons
    */
-  public boolean parse(List<? extends HasWord> sentence) {
+  private boolean parseInternal(List<? extends HasWord> sentence) {
     parseSucceeded = false;
     parseNoMemory = false;
     parseUnparsable = false;
     parseSkipped = false;
     parseFallback = false;
+    whatFailed = null;
     originalSentence = sentence;
     int length = sentence.size();
     if (length == 0) {
@@ -330,6 +329,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     parseUnparsable = false;
     parseSkipped = false;
     parseFallback = false;
+    whatFailed = null;
     originalSentence = null;
     if (lr.getNumStates() > op.testOptions.maxLength + 1) {  // + 1 for boundary symbol
       parseSkipped = true;
@@ -487,6 +487,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     parseUnparsable = false;
     parseSkipped = false;
     parseFallback = false;
+    whatFailed = null;
     originalSentence = sentence;
     pparser.parse(sentence);
   }
@@ -505,60 +506,109 @@ public class LexicalizedParserQuery implements ParserQuery {
   }
 
   /**
-   * TODO: separate out the parsing and the output calls?
+   * Parse a sentence represented as a List of tokens.
+   * The text must already have been tokenized and
+   * normalized into tokens that are appropriate to the treebank
+   * which was used to train the parser.  The tokens can be of
+   * multiple types, and the list items need not be homogeneous as to type
+   * (in particular, only some words might be given tags):
+   * <ul>
+   * <li>If a token implements HasWord, then the word to be parsed is
+   * given by its word() value.</li>
+   * <li>If a token implements HasTag and the tag() value is not
+   * null or the empty String, then the parser is strongly advised to assign
+   * a part of speech tag that <i>begins</i> with this String.</li>
+   * </ul>
+   *
+   * @param sentence The sentence to parse
+   * @return true Iff the sentence was accepted by the grammar.  If
+   *              the main grammar fails, but the PCFG succeeds, then
+   *              this still returns true, but parseFallback() will
+   *              also return true.  getBestParse() will have a valid
+   *              result iff this returns true.
    */
-  public void parseWithFallback(List<? extends HasWord> sentence, PrintWriter pwErr) {
+  public boolean parse(List<? extends HasWord> sentence) {
     try {
-      if ( ! parse(sentence)) {
-        pwErr.print("Sentence couldn't be parsed by grammar.");
+      if (!parseInternal(sentence)) {
         if (pparser != null && pparser.hasParse() && fallbackToPCFG) {
-          pwErr.println("... falling back to PCFG parse.");
           parseFallback = true;
+          return true;
         } else {
-          pwErr.println();
           parseUnparsable = true;
+          return false;
         }
       } else {
-        //if (bparser != null) pwErr.println("FactoredParser parse score is " + bparser.getBestScore());
+        return true;
       }
-
     } catch (OutOfMemoryError e) {
       if (op.testOptions.maxLength != -0xDEADBEEF) {
         // this means they explicitly asked for a length they cannot handle.
         // Throw exception.  Avoid string concatenation before throw it.
-        pwErr.print("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
-        pwErr.println(op.testOptions.maxLength);
+        System.err.print("NOT ENOUGH MEMORY TO PARSE SENTENCES OF LENGTH ");
+        System.err.println(op.testOptions.maxLength);
         throw e;
-
+      }
+      if (pparser.hasParse() && fallbackToPCFG) {
+        try {
+          whatFailed = "dependency";
+          if (dparser.hasParse()) {
+            whatFailed = "factored";
+          }
+          parseFallback = true;
+          return true;
+        } catch (OutOfMemoryError oome) {
+          oome.printStackTrace();
+          parseNoMemory = true;
+          pparser.nudgeDownArraySize();
+          return false;
+        }
       } else {
+        parseNoMemory = true;
+        return false;
+      }
+    } catch (UnsupportedOperationException uoe) {
+      parseSkipped = true;
+      return false;
+    }
+  }
+
+  /**
+   * Implements the same parsing with fallback that parse() does, but
+   * also outputs status messages for failed parses to pwErr.
+   */
+  public boolean parseAndReport(List<? extends HasWord> sentence, PrintWriter pwErr) {
+    boolean result = parse(sentence);
+    if (result) {
+      if (whatFailed != null) {
+        // Something failed, probably because of memory problems.
+        // However, we still got a PCFG parse, at least.
         if ( ! saidMemMessage) {
           ParserUtils.printOutOfMemory(pwErr);
           saidMemMessage = true;
         }
-        if (pparser.hasParse() && fallbackToPCFG) {
-          try {
-            String what = "dependency";
-            if (dparser.hasParse()) {
-              what = "factored";
-            }
-            pwErr.println("Sentence too long for " + what + " parser.  Falling back to PCFG parse...");
-            parseFallback = true;
-          } catch (OutOfMemoryError oome) {
-            oome.printStackTrace();
-            parseNoMemory = true;
-            pwErr.println("No memory to gather PCFG parse. Skipping...");
-            pparser.nudgeDownArraySize();
-          }
-        } else {
-          pwErr.println("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
-          parseNoMemory = true;
-        }
-        pwErr.println();
+        pwErr.println("Sentence too long for " + whatFailed + " parser.  Falling back to PCFG parse...");
+      } else if (parseFallback) {
+        // We had to fall back for some other reason.
+        pwErr.println("Sentence couldn't be parsed by grammar.... falling back to PCFG parse.");
       }
-    } catch (UnsupportedOperationException uoe) {
+    } else if (parseUnparsable) {
+      // No parse at all, completely failed.
+      pwErr.println("Sentence couldn't be parsed by grammar.");
+    } else if (parseNoMemory) {
+      // Ran out of memory, either with or without a possible PCFG parse.
+      if (!saidMemMessage) {
+        ParserUtils.printOutOfMemory(pwErr);
+        saidMemMessage = true;
+      }
+      if (pparser.hasParse() && fallbackToPCFG) {
+        pwErr.println("No memory to gather PCFG parse. Skipping...");
+      } else {
+        pwErr.println("Sentence has no parse using PCFG grammar (or no PCFG fallback).  Skipping...");
+      }
+    } else if (parseSkipped) {
       pwErr.println("Sentence too long (or zero words).");
-      parseSkipped = true;
     }
+    return result;
   }
 
 
