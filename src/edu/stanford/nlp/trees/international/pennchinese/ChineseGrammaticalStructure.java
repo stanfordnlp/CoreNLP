@@ -316,7 +316,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
 
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName) throws IOException {
-    return readCoNLLXGrammaticalStructureCollection(fileName, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
+    return readCoNLLXGrammaticStructureCollection(fileName, ChineseGrammaticalRelations.shortNameToGRel, new FromDependenciesFactory());
   }
 
   public static ChineseGrammaticalStructure buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields) {
