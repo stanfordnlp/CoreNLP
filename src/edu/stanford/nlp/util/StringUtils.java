@@ -1950,21 +1950,6 @@ public class StringUtils {
   }
   
   /**
-   * n grams for already splitted string. the ngrams are joined with a single space
-   */
-  public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
-    List<String> wordsStr = new ArrayList<String>();
-    for(CoreLabel l : words)
-      wordsStr.add(l.word());
-    List<List<String>> ng = CollectionUtils.getNGrams(wordsStr, minSize, maxSize);
-    Collection<String> ngrams = new ArrayList<String>();
-    for(List<String> n: ng)
-      ngrams.add(StringUtils.join(n," "));
-  
-    return ngrams;
-  }
-  
-  /**
    * The string is split on whitespace and the ngrams are joined with a single space
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
