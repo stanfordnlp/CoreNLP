@@ -59,7 +59,10 @@ public class AnnotationLookup {
     MORPHO_GEN_KEY(CoreAnnotations.MorphoGenAnnotation.class,"gen"),
     MORPHO_CASE_KEY(CoreAnnotations.MorphoCaseAnnotation.class,"case"),
     WORDNET_SYN_KEY(CoreAnnotations.WordnetSynAnnotation.class,"wordnetsyn"),
-    PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto");
+    PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto"),
+    DOCTYPE_KEY(CoreAnnotations.DocTypeAnnotation.class,"doctype"),
+    DOCDATE_KEY(CoreAnnotations.DocDateAnnotation.class,"docdate"),
+    DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype");
 
     public final Class coreKey;
     public final String oldKey;

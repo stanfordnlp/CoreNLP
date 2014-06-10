@@ -8,6 +8,7 @@ import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -156,6 +157,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     List<IN> currentSentence = new ArrayList<IN>();
     List<IN> lastSentence = null;
     boolean insideRegion = false;
+    boolean inWaitForForcedEnd = false;
     for (IN o: words) {
       String word;
       if (o instanceof HasWord) {
@@ -170,17 +172,29 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       }
 
       boolean forcedEnd = false;
+      boolean inMultiTokenExpr = false;
       if (o instanceof CoreMap) {
-        Boolean forcedEndValue =
-          ((CoreMap)o).get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
+        CoreMap cm = (CoreMap) o;
+        Boolean forcedEndValue = cm.get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
+        Boolean forcedUntilEndValue = cm.get(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);
         if (forcedEndValue != null)
           forcedEnd = forcedEndValue;
+        else if (forcedUntilEndValue != null && forcedUntilEndValue)
+          inWaitForForcedEnd = true;
+        else {
+          MultiTokenTag mt = cm.get(CoreAnnotations.MentionTokenAnnotation.class);
+          if (mt != null && !mt.isEnd()) {
+            // In the middle of a multi token mention, make sure sentence is not ended here
+            inMultiTokenExpr = true;
+          }
+        }
       }
 
-      if (DEBUG) {
+
+        if (DEBUG) {
         EncodingPrintWriter.err.println("Word is " + word, "UTF-8");
       }
-      if (sentenceRegionBeginPattern != null && ! insideRegion) {
+      if (!forcedEnd && sentenceRegionBeginPattern != null && ! insideRegion) {
         if (sentenceRegionBeginPattern.matcher(word).matches()) {
           insideRegion = true;
         }
@@ -189,14 +203,24 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         }
         continue;
       }
-      if (sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
+      if (!forcedEnd && sentenceBoundaryFollowers.contains(word) && lastSentence != null && currentSentence.isEmpty()) {
         lastSentence.add(o);
         if (DEBUG) {
           System.err.println("  added to last");
         }
       } else {
         boolean newSent = false;
-        if (matchesSentenceBoundaryToDiscard(word)) {
+        if (inWaitForForcedEnd && !forcedEnd) {
+          currentSentence.add(o);
+          if (DEBUG) {
+            System.err.println("  is in wait for forced end; added to current");
+          }
+        } else if (inMultiTokenExpr && !forcedEnd) {
+          currentSentence.add(o);
+          if (DEBUG) {
+            System.err.println("  is in multi token expr; added to current");
+          }
+        } else if (matchesSentenceBoundaryToDiscard(word)) {
           newSent = true;
         } else if (sentenceRegionEndPattern != null && sentenceRegionEndPattern.matcher(word).matches()) {
           insideRegion = false;
@@ -209,6 +233,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
           newSent = true;
         } else if (forcedEnd) {
           currentSentence.add(o);
+          inWaitForForcedEnd = false;
           newSent = true;
           if (DEBUG) {
             System.err.println("  annotated to be the end of a sentence");
