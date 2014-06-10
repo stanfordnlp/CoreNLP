@@ -150,22 +150,16 @@ public class MetaClass {
         }
       }
       // (filter:type)
-      for (int paramIndex = 0; paramIndex < params.length; paramIndex++) { // for
-                                          // each
-                                          // parameter...
+      for (int paramIndex = 0; paramIndex < params.length; paramIndex++) { // for each parameter...
         Class<?> target = params[paramIndex];
-        for (int conIndex = 0; conIndex < potentials.length; conIndex++) { // for
-                                          // each
-                                          // constructor...
-          if (potentials[conIndex] != null) { // if the constructor is
-                            // in the pool...
+        for (int conIndex = 0; conIndex < potentials.length; conIndex++) { // for each constructor...
+          if (potentials[conIndex] != null) { // if the constructor is in the pool...
             Class<?> cand = constructorParams[conIndex][paramIndex];
             int dist = superDistance(target, cand);
             if (dist >= 0) { // and if the constructor matches...
               distances[conIndex] += dist; // keep it
             } else {
-              potentials[conIndex] = null; // else, remove it from
-                              // the pool
+              potentials[conIndex] = null; // else, remove it from the pool
               distances[conIndex] = -1;
             }
           }
@@ -482,6 +476,7 @@ public class MetaClass {
    * @return A String array corresponding to the encoded array
    */
 	private static String[] decodeArray(String encoded){
+    if (encoded.length() == 0) return new String[]{};
 		char[] chars = encoded.trim().toCharArray();
 
 		//--Parse the String
