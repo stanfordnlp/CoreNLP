@@ -1,9 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -22,7 +19,6 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  * Wrapper for the maxent part of speech tagger.
  *
  * @author Anna Rafferty
- *
  */
 public class POSTaggerAnnotator implements Annotator {
 
@@ -143,4 +139,5 @@ public class POSTaggerAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(POS_REQUIREMENT);
   }
+
 }
