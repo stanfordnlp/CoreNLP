@@ -40,7 +40,7 @@ public class CGRunner {
 
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer.
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient.
    * Uses a Gaussian prior with a sigma<sup>2</sup> of 0.5.
    *
    * @param prob     The problem to solve
@@ -51,7 +51,7 @@ public class CGRunner {
   }
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer,
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient,
    * specifying a value for sigma<sup>2</sup>.
    *
    * @param prob             The problem to solve
@@ -67,7 +67,7 @@ public class CGRunner {
   }
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer.
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient.
    *
    * @param prob             The problem to solve
    * @param filename         Used (with extension) to save intermediate results.
@@ -89,12 +89,12 @@ public class CGRunner {
 
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer.
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient.
    *
    * @param prob             The problem to solve
    * @param filename         Used (with extension) to save intermediate results.
    * @param tol              Tolerance of errors (passed to CG)
-   * @param sigmaSquareds    The prior sigma<sup>2</sup> for each feature: this doubled will be
+   * @param sigmaSquareds    The prior sigma<sup>2</sup> for eah feature: this doubled will be
    *                         used to divide the lambda<sup>2</sup> values as the
    *                         prior penalty. This array must have size the number of features.
    *                         If it is null, no regularization will be performed.
@@ -110,8 +110,8 @@ public class CGRunner {
 
 
   /**
-    * Solves the problem using a quasi-newton method (L-BFGS).  The solution
-    * is stored in the {@code lambda} array of {@code prob}.
+    * Solves the problem using QN.  The solution is stored in the
+    * <code>lambda</code> array of <code>prob</code>.
     */
   public void solve() {
     solveQN();
@@ -119,8 +119,8 @@ public class CGRunner {
 
 
    /**
-   * Solves the problem using a quasi-newton method (L-BFGS).  The solution
-   * is stored in the {@code lambda} array of {@code prob}.
+   * Solves the problem using QN.  The solution is stored in the
+   * <code>lambda</code> array of <code>prob</code>.
    */
   public void solveQN() {
     LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
@@ -149,8 +149,8 @@ public class CGRunner {
 
 
   /**
-   * Solves the problem using conjugate gradient (CG).  The solution
-   * is stored in the {@code lambda} array of {@code prob}.
+   * Solves the problem using CG.  The solution is stored in the
+   * <code>lambda</code> array of <code>prob</code>.
    */
   public void solveCG() {
     LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
@@ -165,8 +165,8 @@ public class CGRunner {
   }
 
   /**
-   * Solves the problem using OWLQN.  The solution
-   * is stored in the {@code lambda} array of {@code prob}.  Note that the
+   * Solves the problem using OWLQN.  The solution is stored in the
+   * <code>lambda</code> array of <code>prob</code>.  Note that the
    * likelihood function will be a penalized L2 likelihood function unless you
    * have turned this off via setting the priorSigmaS to 0.0.
    *
@@ -212,7 +212,6 @@ public class CGRunner {
       }
     }
 
-    @Override
     public int domainDimension() {
       return model.lambda.length;
     }
@@ -226,7 +225,6 @@ public class CGRunner {
     }
 
 
-    @Override
     public double valueAt(double[] lambda) {
       valueAtCalls++;
       model.lambda = lambda;
@@ -246,7 +244,6 @@ public class CGRunner {
     }
 
 
-    @Override
     public double[] derivativeAt(double[] lambda) {
       boolean eq = true;
       for (int j = 0; j < lambda.length; j++) {
@@ -297,8 +294,7 @@ public class CGRunner {
       this.filename = filename;
     }
 
-    @Override
-    @SuppressWarnings({"ConstantConditions", "PointlessBooleanExpression"})
+    @SuppressWarnings({"ConstantConditions"})
     public double valueAt(double[] lambda) {
       double likelihood = lf.likelihood();
       // this line is printed in the middle of the normal line of QN minimization, so put println at beginning
@@ -321,7 +317,6 @@ public class CGRunner {
       return "Iter. " + iterations + ": " + "neg. log cond. likelihood = " + likelihood + " [" + lf.numCalls() + " calls to valueAt]";
     }
 
-    @Override
     public int domainDimension() {
       return lf.domainDimension();
     }

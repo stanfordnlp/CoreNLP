@@ -27,6 +27,7 @@ import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Scored;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
 /**
@@ -490,11 +491,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    */
   private int constituentsNodes(int left) {
     if (isPreTerminal()) {
-      if (label() instanceof CoreLabel) {
+      if(label() instanceof CoreLabel)
         ((CoreLabel) label()).set(CoreAnnotations.SpanAnnotation.class, new IntPair(left, left));
-      } else {
-        throw new UnsupportedOperationException("Can only set spans on trees which use CoreLabel");
-      }
       return (left + 1);
     }
     int position = left;
@@ -505,11 +503,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       position = kid.constituentsNodes(position);
 
     //Parent span
-    if (label() instanceof CoreLabel) {
+    if(label() instanceof CoreLabel)
       ((CoreLabel) label()).set(CoreAnnotations.SpanAnnotation.class, new IntPair(left, position - 1));
-    } else {
-      throw new UnsupportedOperationException("Can only set spans on trees which use CoreLabel");
-    }
 
     return position;
   }
