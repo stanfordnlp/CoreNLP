@@ -133,4 +133,44 @@ public class IOUtilsTest extends TestCase {
     }
     return set;
   }
+
+  /**
+   * Tests that slurpFile can get files from within the classpath
+   */
+  public void testSlurpFile() {
+    String contents;
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txt", "utf-8");
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+
+    assertEquals("This is a test sentence.", contents.trim());
+
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txt");
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+
+    assertEquals("This is a test sentence.", contents.trim());
+
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txtzzz");
+      throw new AssertionError("Should not have found unknown file");
+    } catch (IOException e) {
+      // yay
+    }
+
+    contents = IOUtils.slurpFileNoExceptions("edu/stanford/nlp/io/test.txt");
+    assertEquals("This is a test sentence.", contents.trim());
+
+
+    try {
+      contents = IOUtils.slurpFileNoExceptions("edu/stanford/nlp/io/test.txtzzz");
+      throw new AssertionError("Should not have found unknown file");
+    } catch (RuntimeIOException e) {
+      // yay
+    }
+  }
 }
