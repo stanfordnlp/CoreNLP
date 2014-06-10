@@ -122,14 +122,26 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   protected StringBuilder style(StringBuilder b, String line, Color color, Style style){
     if(color != Color.NONE || style != Style.NONE){
-      b.append(color.ansiCode);
-      b.append(style.ansiCode);
+      if (Redwood.supportsAnsi && this.supportsAnsi()) {
+        b.append(color.ansiCode);
+        b.append(style.ansiCode);
+      }
       b.append(line);
-      b.append("\033[0m");
+      if (Redwood.supportsAnsi && this.supportsAnsi()) {
+        b.append("\033[0m");
+      }
     } else {
       b.append(line);
     }
     return b;
+  }
+
+  /**
+   * Specify whether this output handler supports ansi output
+   * @return False by default, unless overwritten.
+   */
+  protected boolean supportsAnsi() {
+    return false;
   }
 
   /**
@@ -262,7 +274,12 @@ public abstract class OutputHandler extends LogRecordHandler{
     } else if(record.content == null){
       content = new String[]{"null"};
     } else {
-      content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
+      String toStr = record.content.toString();
+      if (toStr == null) {
+        content = new String[]{"<null toString()>"};
+      } else {
+        content = record.content.toString().split("\n"); //would be nice to get rid of this 'split()' call at some point
+      }
     }
     
     //--Handle Tracks
