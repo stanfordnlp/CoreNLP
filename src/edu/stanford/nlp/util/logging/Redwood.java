@@ -1323,6 +1323,11 @@ public class Redwood {
      * @param numThreads The number of threads to run on
      */
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
+      // (short circuit if single thread)
+      if (numThreads == 1) {
+        for (Runnable toRun : runnables) { toRun.run(); }
+        return;
+      }
       //(create executor)
       ExecutorService exec = Executors.newFixedThreadPool(numThreads);
       //(add threads)
