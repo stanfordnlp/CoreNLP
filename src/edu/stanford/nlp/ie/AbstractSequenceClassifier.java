@@ -935,7 +935,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   {
     BufferedReader is = new BufferedReader(new InputStreamReader(System.in, flags.inputEncoding));
     for (String line; (line = is.readLine()) != null; ) {
-      ObjectBank<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
+      Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
+      if (flags.keepEmptySentences && documents.size() == 0) {
+        documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
+      }
       classifyAndWriteAnswers(documents, readerWriter);
     }
   }
@@ -995,14 +998,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter);
   }
 
-  public void classifyAndWriteAnswers(Collection<File> testFiles)
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
     throws IOException
   {
-    classifyAndWriteAnswers(testFiles, plainTextReaderAndWriter);
+    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter);
   }
 
-  public void classifyAndWriteAnswers(Collection<File> testFiles,
-                                      DocumentReaderAndWriter<IN> readerWriter)
+  public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
+                                           DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
@@ -1010,7 +1013,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter);
   }
 
-  private void classifyAndWriteAnswers(ObjectBank<List<IN>> documents,
+  private void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                        DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
