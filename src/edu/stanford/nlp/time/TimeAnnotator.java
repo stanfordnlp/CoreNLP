@@ -175,6 +175,7 @@ public class TimeAnnotator implements Annotator {
     timexExtractor = new TimeExpressionExtractorImpl(name, props);
   }
 
+  @Override
   public void annotate(Annotation annotation) {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
     String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);

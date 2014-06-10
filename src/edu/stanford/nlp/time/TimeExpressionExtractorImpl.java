@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.NumberNormalizer;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
-import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
@@ -18,6 +17,7 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("unchecked")
 public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
+
   protected static final Logger logger = Logger.getLogger(TimeExpressionExtractorImpl.class.getName());
 
   // Patterns for extracting time expressions
@@ -41,11 +41,13 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     init(name, props);
   }
 
+  @Override
   public void init(String name, Properties props)
   {
     init(new Options(name, props));
   }
 
+  @Override
   public void init(Options options)
   {
     this.options = options;
@@ -65,6 +67,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     this.expressionExtractor.setLogger(logger);
   }
 
+  @Override
   public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, String docDate)
   {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
@@ -105,7 +108,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
           logger.log(Level.WARNING, "Failed to get attributes from " + text + ", timeIndex " + timeIndex, e);
           continue;
         }
-        Timex timex;
+        Timex timex = null;
         try {
           timex = Timex.fromMap(text, timexAttributes);
         } catch (Exception e) {
@@ -130,7 +133,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
     // TODO: docDate may not have century....
 
-    SUTime.Time docDate = null;
+    SUTime.Time docDate; // = null;  // NO need, as throws RuntimeException if not initialized.
     try {
       docDate = SUTime.parseDateTime(docDateStr);
     } catch (Exception e) {
@@ -138,7 +141,7 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     }
     List<? extends MatchedExpression> matchedExpressions = expressionExtractor.extractExpressions(annotation);
     List<TimeExpression> timeExpressions = new ArrayList<TimeExpression>(matchedExpressions.size());
-    for (MatchedExpression expr:matchedExpressions) {
+    for (MatchedExpression expr : matchedExpressions) {
       if (expr instanceof TimeExpression) {
         timeExpressions.add((TimeExpression) expr);
       } else {
@@ -146,9 +149,9 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       }
     }
     // Some resolving is done even if docDate null...
-    if ( /*docDate != null && */ timeExpressions != null) {
-      resolveTimeExpressions(annotation, timeExpressions, docDate);
-    }
+    // if ( /*docDate != null && */ timeExpressions != null) {
+    resolveTimeExpressions(annotation, timeExpressions, docDate);
+    // }
     if (options.restrictToTimex3) {
       // Keep only TIMEX3 compatible timeExpressions
       List<TimeExpression> kept = new ArrayList<TimeExpression>(timeExpressions.size());
@@ -195,9 +198,9 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
     }
     Collections.sort(timeExpressions, MatchedExpression.EXPR_TOKEN_OFFSETS_NESTED_FIRST_COMPARATOR);
     // Some resolving is done even if docDate null...
-    if ( /*docDate != null && */ timeExpressions != null) {
-      resolveTimeExpressions(annotation, timeExpressions, docDate);
-    }
+    // if ( /*docDate != null && */ timeExpressions != null) {
+    resolveTimeExpressions(annotation, timeExpressions, docDate);
+    // }
     return timeExpressions;
   }
 
