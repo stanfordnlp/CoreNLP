@@ -225,7 +225,7 @@ public class TaggerExperiments extends Experiments {
               fnumArr[x][y]++;
             }
             TaggerFeature tF = new TaggerFeature(current, current + numElements - 1, fK,
-                                                 maxentTagger.tags, this);
+                                                 maxentTagger.getTagIndex(fK.tag), this);
             tFeature.addPositions(current, current + numElements - 1, fK);
             current = current + numElements;
             feats.add(tF);
@@ -239,7 +239,7 @@ public class TaggerExperiments extends Experiments {
             }
             // this is the second time to write these values
             TaggerFeature tF = new TaggerFeature(positions[0], positions[1], fK,
-                                                 maxentTagger.tags, this);
+                                                 maxentTagger.getTagIndex(fK.tag), this);
             feats.add(tF);
             if (VERBOSE) {
               System.err.println("  added feature with key " + fK.toString() + " has support " + xValues.length);
