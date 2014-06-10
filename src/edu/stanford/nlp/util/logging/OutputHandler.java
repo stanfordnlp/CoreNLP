@@ -122,14 +122,26 @@ public abstract class OutputHandler extends LogRecordHandler{
    */
   protected StringBuilder style(StringBuilder b, String line, Color color, Style style){
     if(color != Color.NONE || style != Style.NONE){
-      b.append(color.ansiCode);
-      b.append(style.ansiCode);
+      if (Redwood.supportsAnsi && this.supportsAnsi()) {
+        b.append(color.ansiCode);
+        b.append(style.ansiCode);
+      }
       b.append(line);
-      b.append("\033[0m");
+      if (Redwood.supportsAnsi && this.supportsAnsi()) {
+        b.append("\033[0m");
+      }
     } else {
       b.append(line);
     }
     return b;
+  }
+
+  /**
+   * Specify whether this output handler supports ansi output
+   * @return False by default, unless overwritten.
+   */
+  protected boolean supportsAnsi() {
+    return false;
   }
 
   /**

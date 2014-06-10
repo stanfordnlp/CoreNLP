@@ -29,7 +29,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
@@ -288,8 +287,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   Dictionary dict = new Dictionary();
   TTags tags;
 
-  byte[][] fnumArr; // TODO: move this into TaggerExperiments. It could be a private method of that class with an accessor
-  LambdaSolveTagger prob;
+  private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
   List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
@@ -309,7 +307,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   static final boolean OCCURRING_TAGS_ONLY = Boolean.valueOf(TaggerConfig.OCCURRING_TAGS_ONLY);
   static final boolean POSSIBLE_TAGS_ONLY = Boolean.valueOf(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
-  double defaultScore;
+  private double defaultScore;
+  private double[] defaultScores = null;
 
   int leftContext;
   int rightContext;
@@ -454,6 +453,11 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
         defaultScore = config.getDefaultScore();
     }
 
+    // just in case, reset the defaultScores array so it will be
+    // recached later when needed.  can't initialize it now in case we
+    // don't know ysize yet
+    defaultScores = null;
+
     if (config == null || config.getMode() == TaggerConfig.Mode.TRAIN) {
       // initialize the extractors based on the arch variable
       // you only need to do this when training; otherwise they will be
@@ -469,6 +473,29 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     initted = true;
   }
 
+
+  private synchronized void initDefaultScores() {
+    if (defaultScores == null) {
+      defaultScores = new double[ySize + 1];
+      for (int i = 0; i < ySize + 1; ++i) {
+        defaultScores[i] = Math.log(i * defaultScore);
+      }
+    }
+  }
+
+  /**
+   * Caches a math log operation to save a tiny bit of time
+   */
+  double getInactiveTagDefaultScore(int nDefault) {
+    if (defaultScores == null) {
+      initDefaultScores();
+    }
+    return defaultScores[nDefault];
+  }
+
+  boolean hasApproximateScoring() {
+    return defaultScore > 0.0;
+  }
 
   /**
    * Figures out what tokenizer factory might be described by the
@@ -576,11 +603,10 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    *  the fAssociations' appropriate Map.
    */
   private void removeDeadRules() {
-    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
-      List<String> deadRules = new ArrayList();
-      Map<String, int[]> featureMap = fAssociations.get(extractor);
-      for (String value : featureMap.keySet()) {
-        int[] fAssociations = featureMap.get(value);
+    for (Map<String, int[]> fAssociation : fAssociations) {
+      List<String> deadRules = new ArrayList<String>();
+      for (String value : fAssociation.keySet()) {
+        int[] fAssociations = fAssociation.get(value);
 
         boolean found = false;
         for (int index = 0; index < ySize; ++index) {
@@ -598,7 +624,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
 
       for (String rule : deadRules) {
-        featureMap.remove(rule);
+        fAssociation.remove(rule);
       }
     }
   }
@@ -632,8 +658,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
     }
 
-    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
-      Map<String, int[]> featureMap = fAssociations.get(extractor);
+    for (Map<String, int[]> featureMap : fAssociations) {
       for (String value : featureMap.keySet()) {
         int[] fAssociations = featureMap.get(value);
         for (int index = 0; index < ySize; ++index) {
@@ -649,7 +674,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
   protected void saveModel(String filename) {
     try {
-      OutDataStreamFile file = new OutDataStreamFile(filename);
+      DataOutputStream file = IOUtils.getDataOutputStream(filename);
       saveModel(file);
       file.close();
     } catch (IOException ioe) {
@@ -1093,10 +1118,11 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
     TaggerExperiments samples = new TaggerExperiments(config, maxentTagger);
     TaggerFeatures feats = samples.getTaggerFeatures();
+    byte[][] fnumArr = samples.getFnumArr();
     System.err.println("Samples from " + config.getFile());
     System.err.println("Number of features: " + feats.size());
     Problem p = new Problem(samples, feats);
-    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, maxentTagger.fnumArr);
+    LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, fnumArr);
     maxentTagger.prob = prob;
 
     if (config.getSearch().equals("owlqn")) {
@@ -1209,6 +1235,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       tagSeparator = config.getTagSeparator();
     }
 
+    @Override
     public String apply(String o) {
       StringWriter taggedResults = new StringWriter();
 
