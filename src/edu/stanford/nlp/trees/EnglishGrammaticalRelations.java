@@ -449,7 +449,7 @@ public class EnglishGrammaticalRelations {
           // this next pattern used to assume no empty NPs. Corrected.  If you adjust this pattern, also adjust the corresponding one for attr!
           "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
           // matches direct object in relative clauses "I saw the book that you bought"
-          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN) !< (S < (VP < TO))))",
+          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP))",
 
           // matches direct object in relative clauses "I saw the book that you said you bought"
           "SBAR !< WHNP|WHADVP < (S < (@NP $++ (VP !$++ NP))) > (VP > (S < NP $- WHNP=target))",
@@ -651,34 +651,6 @@ public class EnglishGrammaticalRelations {
           "(VP < (S=target < (VP < VBG ) !< NP !$- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)]) !$-- /^:$/))",
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
-
-
-  /**
-   * The "relative" grammatical relation.  A
-   * relative of a relative clause is the head word of the WH-phrase
-   * introducing it.
-   * <p/>
-   * <p/>
-   * Examples: <br/>
-   * "I saw the man that you love" &rarr;
-   * <code>rel</code>(love, that) <br/>
-   * "I saw the man whose wife you love" &rarr;
-   * <code>rel</code>(love, wife) <br/>
-   * <p/>
-   * Note that this is designed to *not* match cases when there is no overt
-   * subject NP.  They are instead matched by the nsubj rule.  Effectively
-   * this gives us an HPSG-like relative clause analysis, where subject
-   * relatives are analyzed as regular subject structures.  And "why" (WHADVP)
-   * cases are treated as advmod not as rel.
-   */
-  public static final GrammaticalRelation RELATIVE =
-    new GrammaticalRelation(Language.English, "rel", "relative",
-        RelativeGRAnnotation.class, COMPLEMENT, "SBAR", tregexCompiler,
-        new String[] {
-          // Leave out time expressions such as "who yesterday cooked dinner"; those should be nsubj
-          "SBAR <, WHNP|WHPP|WHADJP=target > /^NP/ [ !<, /^WHNP/ | < (S < (VP $-- (/^NP(?!-TMP)/ !<# (NN < " + timeWordRegex + ") !< /^-NONE-$/)))]"
-        });
-  public static class RelativeGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
   /**
@@ -1442,7 +1414,7 @@ public class EnglishGrammaticalRelations {
           "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
           "S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
           "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
-          "@NP < (@UCP|PRN=target <# @PP)",
+          "@NP < (@UCP=target <# @PP)",
         });
   public static class PrepositionalModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1590,7 +1562,6 @@ public class EnglishGrammaticalRelations {
       CLAUSAL_COMPLEMENT,
       XCLAUSAL_COMPLEMENT,
       MARKER,
-      RELATIVE,
       REFERENT,
       EXPLETIVE,
       ADJECTIVAL_COMPLEMENT,
