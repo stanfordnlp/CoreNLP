@@ -227,7 +227,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   @Override
   public Lexicon lex(Options op, Index<String> wordIndex, Index<String> tagIndex) {
     if(op.lexOptions.uwModelTrainer == null) {
-      //use default unknown word model for English
+      //use default unknown word classify for English
       op.lexOptions.uwModelTrainer = "edu.stanford.nlp.parser.lexparser.EnglishUnknownWordModelTrainer";
     }
     return new BaseLexicon(op, wordIndex, tagIndex);

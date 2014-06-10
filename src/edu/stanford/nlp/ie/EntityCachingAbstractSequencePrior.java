@@ -68,7 +68,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
   }
 
   /**
-   * get the number of classes in the sequence model.
+   * get the number of classes in the sequence classify.
    */
   public int getNumClasses() {
     return classIndex.size();

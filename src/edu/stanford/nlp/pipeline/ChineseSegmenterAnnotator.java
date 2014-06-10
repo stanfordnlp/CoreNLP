@@ -70,7 +70,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
       if (key.startsWith(name + ".")) {
         // skip past name and the subsequent "."
         String modelKey = key.substring(name.length() + 1);
-        if (modelKey.equals("model")) {
+        if (modelKey.equals("classify")) {
           model = props.getProperty(key);
         } else {
           modelProps.setProperty(modelKey, props.getProperty(key));
@@ -79,7 +79,7 @@ public class ChineseSegmenterAnnotator implements Annotator {
     }
     this.VERBOSE = PropertiesUtils.getBool(props, name + ".verbose", true);
     if (model == null) {
-      throw new RuntimeException("Expected a property " + name + ".model");
+      throw new RuntimeException("Expected a property " + name + ".classify");
     }
     loadModel(model, modelProps);
   }

@@ -47,7 +47,7 @@ public class FrenchUnknownWordModel extends BaseUnknownWordModel {
   public float score(IntTaggedWord iTW, int loc, double c_Tseen, double total, double smooth, String word) {
     double pb_W_T; // always set below
 
-    //  unknown word model for P(T|S)
+    //  unknown word classify for P(T|S)
 
     int wordSig = getSignatureIndex(iTW.word, loc, word);
     IntTaggedWord temp = new IntTaggedWord(wordSig, iTW.tag);

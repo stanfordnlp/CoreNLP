@@ -313,7 +313,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
   @Override
   public void calculate(double[] x) {
 
-    double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
+    double prob = 0.0; // the log prob of the sequence given the classify, which is the negation of value at this point
     double[][][] E = empty2D();
     double[] eScales = new double[numLopExpert];
 
@@ -336,7 +336,7 @@ public class CRFLogConditionalObjectiveFunctionForLOP extends AbstractCachingDif
       CliquePotentialFunction cliquePotentialFunc = new LinearCliquePotentialFunction(combinedWeights2D);
       CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex, backgroundSymbol, cliquePotentialFunc, null);
 
-      // compute the log probability of the document given the model with the parameters x
+      // compute the log probability of the document given the classify with the parameters x
       int[] given = new int[window - 1];
       Arrays.fill(given, classIndex.indexOf(backgroundSymbol));
       if (docLabels.length > docData.length) { // only true for self-training

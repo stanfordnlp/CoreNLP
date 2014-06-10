@@ -62,7 +62,7 @@ public class LexicalizedParserQuery implements ParserQuery {
 
   private final TreeTransformer subcategoryStripper;
 
-  // Whether or not the most complicated model available successfully
+  // Whether or not the most complicated classify available successfully
   // parsed the input sentence.
   private boolean parseSucceeded = false;
   // parseSkipped means that not only did we not succeed at parsing,

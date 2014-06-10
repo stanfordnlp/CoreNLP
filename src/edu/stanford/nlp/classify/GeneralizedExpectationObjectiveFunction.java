@@ -19,7 +19,7 @@ import java.util.Set;
 
 /**
  * Implementation of Generalized Expectation Objective function for
- * an I.I.D. log-linear model. See Mann and McCallum, ACL 2008.
+ * an I.I.D. log-linear classify. See Mann and McCallum, ACL 2008.
  * IMPORTANT: the current implementation is only correct as long as
  * the labeled features passed to GE are binary.
  * However, other features are allowed to be real valued.
@@ -218,7 +218,7 @@ public class GeneralizedExpectationObjectiveFunction<L,F> extends AbstractCachin
     this.classifier = new LinearClassifier<L,F>(null,labeledDataset.featureIndex,labeledDataset.labelIndex);
     computeEmpiricalStatistics(geFeatures);
     //empirical distributions don't change with iterations, so compute them only once.
-    //model distributions will have to be recomputed every iteration though.
+    //classify distributions will have to be recomputed every iteration though.
   }
 
 }

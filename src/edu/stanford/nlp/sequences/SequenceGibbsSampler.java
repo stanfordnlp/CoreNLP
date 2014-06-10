@@ -15,7 +15,7 @@ import java.io.PrintStream;
 // TODO: change so that it uses the scoresOf() method properly
 
 /**
- * A Gibbs sampler for sequence models. Given a sequence model implementing the SequenceModel
+ * A Gibbs sampler for sequence models. Given a sequence classify implementing the SequenceModel
  * interface, this class is capable of
  * sampling sequences from the distribution over sequences that it defines. It can also use
  * this sampling procedure to find the best sequence.
@@ -108,7 +108,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
     double bestScore = Double.NEGATIVE_INFINITY;
     double score = Double.NEGATIVE_INFINITY;
     // if (!returnLastFoundSequence) {
-    //   score = model.scoreOf(sequence);
+    //   score = classify.scoreOf(sequence);
     // }
 
     Set<Integer> positionsChanged = null;
@@ -137,7 +137,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
       if (returnLastFoundSequence) {
         best = sequence;
       } else {
-        // score = model.scoreOf(sequence);
+        // score = classify.scoreOf(sequence);
         //System.err.println(i+" "+score+" "+Arrays.toString(sequence));
         if (score>bestScore) {
           best = sequence;
@@ -160,7 +160,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
 
   /**
    * Collects numSamples samples of sequences, from the distribution over sequences defined
-   * by the sequence model passed on construction.
+   * by the sequence classify passed on construction.
    * All samples collected are sampleInterval samples apart, in an attempt to reduce
    * autocorrelation.
    * @return a List containing the sequence samples, as arrays of type int, and their scores
@@ -172,7 +172,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
 
   /**
    * Collects numSamples samples of sequences, from the distribution over sequences defined
-   * by the sequence model passed on construction.
+   * by the sequence classify passed on construction.
    * All samples collected are sampleInterval samples apart, in an attempt to reduce
    * autocorrelation.
    * @return a Counter containing the sequence samples, as arrays of type int, and their scores
@@ -359,7 +359,7 @@ public class SequenceGibbsSampler implements BestSequenceFinder {
     ArrayMath.expInPlace(distribution);
     if (BisequenceEmpiricalNERPrior.DEBUG) {
       if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(pos) != -1) { 
-        System.err.println("final model:");
+        System.err.println("final classify:");
         for (int j = 0; j < distribution.length; j++)
           System.err.println("\t" + distribution[j]);
         System.err.println();

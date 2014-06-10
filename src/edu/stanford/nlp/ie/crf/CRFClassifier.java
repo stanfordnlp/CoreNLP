@@ -49,7 +49,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Class for Sequence Classification using a Conditional Random Field model.
+ * Class for Sequence Classification using a Conditional Random Field classify.
  * The code has functionality for different document formats, but when
  * using the standard {@link edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter} for training
  * or testing models, input files are expected to
@@ -71,7 +71,7 @@ import java.util.zip.GZIPOutputStream;
  * reader/writer will be used as for -textFile.
  * </p>
  * <b>Typical command-line usage</b>
- * <p>For running a trained model with a provided serialized classifier on a
+ * <p>For running a trained classify with a provided serialized classifier on a
  * text file: <p>
  * <code>
  * java -mx500m edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier
@@ -85,7 +85,7 @@ import java.util.zip.GZIPOutputStream;
  * java -mx1g edu.stanford.nlp.ie.crf.CRFClassifier -prop propFile
  * </code>
  * <p>
- * To train and test a simple NER model from the command line:<br>
+ * To train and test a simple NER classify from the command line:<br>
  * <code>java -mx1000m edu.stanford.nlp.ie.crf.CRFClassifier
  * -trainFile trainFile -testFile testFile -macro &gt; output </code>
  * </p>
@@ -1419,7 +1419,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @param priorListeners
    *          an array of prior listeners
    * @param modelWts
-   *          an array of model weights: IMPORTANT: this includes the weight of
+   *          an array of classify weights: IMPORTANT: this includes the weight of
    *          CRF classifier as well at position 0, and therefore is longer than
    *          priorListeners/priorModels array by 1.
    * @return A list of INs with
@@ -1439,7 +1439,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if ((priorModels.length + 1) != modelWts.length)
       throw new RuntimeException(
-          "modelWts array should be longer than the priorModels array by 1 unit since it also includes the weight of the CRF model at position 0.");
+          "modelWts array should be longer than the priorModels array by 1 unit since it also includes the weight of the CRF classify at position 0.");
 
     // System.err.println("Testing using Gibbs sampling.");
     Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(sentence);
@@ -2996,7 +2996,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * Serialize the model to a human readable format. It's not yet complete. It
+   * Serialize the classify to a human readable format. It's not yet complete. It
    * should now work for Chinese segmenter though. TODO: check things in
    * serializeClassifier and add other necessary serialization back
    *

@@ -34,7 +34,7 @@ public class LabelerController {
   private static int subjectLenLimit = Integer.MAX_VALUE;
 
   //wsg: The sentence boundary should be a blank line so that the CRF treats each
-  //sentence as a separate "document." This greatly reduces the model's memory
+  //sentence as a separate "document." This greatly reduces the classify's memory
   //requirement (per Jenny's advice).
   private final String sentBoundary = "";
 
@@ -95,10 +95,10 @@ public class LabelerController {
         tagger = new MaxentTagger(TAGGER_MODEL);
         System.err.println("\nDone!");
       } catch (IOException e) {
-        System.err.printf("%s: Could not load POS tagger model %s\n", this.getClass().getName(), TAGGER_MODEL);
+        System.err.printf("%s: Could not load POS tagger classify %s\n", this.getClass().getName(), TAGGER_MODEL);
         e.printStackTrace();
       } catch (Exception e) {
-        System.err.printf("%s: Could not load POS tagger model %s\n", this.getClass().getName(), TAGGER_MODEL);
+        System.err.printf("%s: Could not load POS tagger classify %s\n", this.getClass().getName(), TAGGER_MODEL);
         e.printStackTrace();
       }
     }

@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 /**
  * This class is meant for training SVMs ({@link SVMLightClassifier}s).  It actually calls SVM Light. or
  * SVM Struct for multiclass SVMs, on the command line, reads in the produced
- * model file and creates a Linear Classifier.  A Platt model is also trained
+ * classify file and creates a Linear Classifier.  A Platt classify is also trained
  * (unless otherwise specified) on top of the SVM so that probabilities can
  * be produced.
  *
@@ -75,7 +75,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
 
   /**
    * Specify whether or not to train an overlying platt (sigmoid)
-   * model for producing meaningful probabilities.
+   * classify for producing meaningful probabilities.
    */
   public void setUseSigmoid(boolean useSigmoid) {
     this.useSigmoid = useSigmoid;
@@ -83,7 +83,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
 
   /**
    * Get whether or not to train an overlying platt (sigmoid)
-   * model for producing meaningful probabilities.
+   * classify for producing meaningful probabilities.
    */
   public boolean getUseSigma() {
     return useSigmoid;
@@ -99,7 +99,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
   }
 
   /**
-   * Reads in a model file in svm light format.  It needs to know if its multiclass or not
+   * Reads in a classify file in svm light format.  It needs to know if its multiclass or not
    * because it affects the number of header lines.  Maybe there is another way to tell and we
    * can remove this flag?
    */
@@ -152,7 +152,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     }
     catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException("Error reading SVM model (line " + modelLineCount + " in file " + modelFile.getAbsolutePath() + ")");
+      throw new RuntimeException("Error reading SVM classify (line " + modelLineCount + " in file " + modelFile.getAbsolutePath() + ")");
     }
   }
 
@@ -219,7 +219,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
   }
 
   /**
-   * Builds a sigmoid model to turn the classifier outputs into probabilities.
+   * Builds a sigmoid classify to turn the classifier outputs into probabilities.
    */
   private LinearClassifier<L, L> fitSigmoid(SVMLightClassifier<L, F> classifier, GeneralDataset<L, F> dataset) {
     RVFDataset<L, L> plattDataset = new RVFDataset<L, L>();
@@ -400,8 +400,8 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     boolean multiclass = (dataset.numClasses() > 2);
     try {
 
-      // this is the file that the model will be saved to
-      File modelFile = File.createTempFile("svm-", ".model");
+      // this is the file that the classify will be saved to
+      File modelFile = File.createTempFile("svm-", ".classify");
       if (deleteTempFilesOnExit) {
         modelFile.deleteOnExit();
       }
@@ -463,7 +463,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
         SystemUtils.run(new ProcessBuilder(whitespacePattern.split(evalCmd)),
                 new PrintWriter(System.err), new PrintWriter(System.err));
       }
-      // read in the model file
+      // read in the classify file
       Pair<Double, ClassicCounter<Integer>> weightsAndThresh = readModel(modelFile, multiclass);
       double threshold = weightsAndThresh.first();
       ClassicCounter<Pair<F, L>> weights = convertWeights(weightsAndThresh.second(), featureIndex, labelIndex, multiclass);

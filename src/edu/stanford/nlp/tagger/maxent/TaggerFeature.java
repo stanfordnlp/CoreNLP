@@ -32,7 +32,7 @@ import edu.stanford.nlp.maxent.Feature;
 
 
 /**
- * Holds a Tagger Feature for the loglinear model.
+ * Holds a Tagger Feature for the loglinear classify.
  * Tagger Features are binary valued, and indexed in a particular way.
  *
  * @author Kristina Toutanova

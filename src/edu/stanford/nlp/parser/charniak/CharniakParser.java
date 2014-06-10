@@ -22,7 +22,7 @@ public class CharniakParser {
   private static final String CHARNIAK_DIR = "/u/nlp/packages/bllip-parser/";
   // note: this is actually the parser+reranker (will use 2 CPUs)
   private static final String CHARNIAK_BIN = CHARNIAK_DIR + "reranking-parser.sh";
-  // this is the self-trained WSJ+NANC model (see McClosky, Charniak, and Johnson (NAACL 2010))
+  // this is the self-trained WSJ+NANC classify (see McClosky, Charniak, and Johnson (NAACL 2010))
   private static final String CHARNIAK_PARSING_MODEL = "/u/nlp/packages/bllip-parser-models/selftrained/parser/";
 
   private final CharniakScoredParsesReaderWriter scoredParsesReaderWriter = new CharniakScoredParsesReaderWriter();
