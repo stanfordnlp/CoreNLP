@@ -995,6 +995,9 @@ public class SeqClassifierFlags implements Serializable {
   public int multiThreadPerceptron = 1;
   public boolean lazyUpdate = false;
   public int featureCountThresh = 0;
+  public transient String serializeWeightsTo = null;
+  public boolean geDebug = false;
+  public boolean doFeatureDiscovery = false;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2463,6 +2466,12 @@ public class SeqClassifierFlags implements Serializable {
         lazyUpdate = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("featureCountThresh")){
         featureCountThresh = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("serializeWeightsTo")) {
+        serializeWeightsTo = val;
+      } else if (key.equalsIgnoreCase("geDebug")){
+        geDebug = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("doFeatureDiscovery")){
+        doFeatureDiscovery = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
