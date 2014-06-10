@@ -66,19 +66,25 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
   }
 
   public List<CoreMap> extractTimeExpressionCoreMaps(CoreMap annotation, CoreMap docAnnotation) {
-    SUTime.TimeIndex timeIndex = docAnnotation.get(TimeExpression.TimeIndexAnnotation.class);
-    if (timeIndex == null) {
-      docAnnotation.set(TimeExpression.TimeIndexAnnotation.class, timeIndex = new SUTime.TimeIndex());
-    }
-    String docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if(docDate == null){
-      Calendar cal = docAnnotation.get(CoreAnnotations.CalendarAnnotation.class);
-      if(cal == null){
-        logger.log(Level.WARNING, "No document date specified");
-      } else {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
-        docDate = dateFormat.format(cal.getTime());
+    SUTime.TimeIndex timeIndex = null;
+    String docDate = null;
+    if (docAnnotation != null) {
+      timeIndex = docAnnotation.get(TimeExpression.TimeIndexAnnotation.class);
+      if (timeIndex == null) {
+        docAnnotation.set(TimeExpression.TimeIndexAnnotation.class, timeIndex = new SUTime.TimeIndex());
       }
+      docDate = docAnnotation.get(CoreAnnotations.DocDateAnnotation.class);
+      if(docDate == null){
+        Calendar cal = docAnnotation.get(CoreAnnotations.CalendarAnnotation.class);
+        if(cal == null){
+          logger.log(Level.WARNING, "No document date specified");
+        } else {
+          SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
+          docDate = dateFormat.format(cal.getTime());
+        }
+      }
+    } else {
+      timeIndex = new SUTime.TimeIndex();
     }
     if ("".equals(docDate)) {
       docDate = null;
