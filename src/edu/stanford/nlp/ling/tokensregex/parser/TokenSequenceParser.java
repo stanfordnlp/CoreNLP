@@ -70,7 +70,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case IDENTIFIER:
       case REGEXVAR:
-      case 21:
+      case 22:
         ;
         break;
       default:
@@ -108,38 +108,38 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   Expression result;
   Token ruleTypeToken;
     if (jj_2_4(2)) {
-      jj_consume_token(21);
-      stringRegex = StringRegex(env);
       jj_consume_token(22);
-      result = Expression(env);
+      stringRegex = StringRegex(env);
       jj_consume_token(23);
+      result = Expression(env);
+      jj_consume_token(24);
     {if (true) return SequenceMatchRules.createExtractionRule(env, null, stringRegex, result);}
     } else if (jj_2_5(2)) {
-      jj_consume_token(21);
-      jj_consume_token(24);
-      expr = SeqRegex(env);
-      jj_consume_token(25);
       jj_consume_token(22);
-      result = Expression(env);
+      jj_consume_token(25);
+      expr = SeqRegex(env);
+      jj_consume_token(26);
       jj_consume_token(23);
+      result = Expression(env);
+      jj_consume_token(24);
     {if (true) return SequenceMatchRules.createExtractionRule(env, null, TokenSequencePattern.compile(expr), result);}
     } else if (jj_2_6(2)) {
-      jj_consume_token(21);
-      jj_consume_token(26);
-      jj_consume_token(24);
-      expr = SeqRegex(env);
-      jj_consume_token(25);
       jj_consume_token(22);
-      result = Expression(env);
+      jj_consume_token(27);
+      jj_consume_token(25);
+      expr = SeqRegex(env);
+      jj_consume_token(26);
       jj_consume_token(23);
+      result = Expression(env);
+      jj_consume_token(24);
     {if (true) return SequenceMatchRules.createTokenPatternRule(env, expr, result);}
     } else if (jj_2_7(2)) {
-      jj_consume_token(21);
-      jj_consume_token(27);
-      stringRegex = StringRegex(env);
       jj_consume_token(22);
-      result = Expression(env);
+      jj_consume_token(28);
+      stringRegex = StringRegex(env);
       jj_consume_token(23);
+      result = Expression(env);
+      jj_consume_token(24);
     {if (true) return SequenceMatchRules.createTextPatternRule(env, stringRegex, result);}
     } else {
       jj_consume_token(-1);
@@ -152,11 +152,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   AssignableExpression var;
   Expression result;
     var = AssignableExpression(env);
-    jj_consume_token(28);
+    jj_consume_token(29);
     result = Expression(env);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 29:
-      jj_consume_token(29);
+    case 30:
+      jj_consume_token(30);
       break;
     default:
       jj_la1[1] = jj_gen;
@@ -195,9 +195,9 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
 
   final public int Index() throws ParseException {
   Token t;
-    jj_consume_token(30);
-    t = IntegerToken();
     jj_consume_token(31);
+    t = IntegerToken();
+    jj_consume_token(32);
     {if (true) return Integer.valueOf(t.image);}
     throw new Error("Missing return statement in function");
   }
@@ -207,7 +207,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   Expression param;
   List<Expression> params = new ArrayList<Expression>();
     typeToken = jj_consume_token(IDENTIFIER);
-    jj_consume_token(24);
+    jj_consume_token(25);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IDENTIFIER:
     case REGEXVAR:
@@ -220,22 +220,22 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     case REAL:
     case REGEX:
     case STR:
-    case 21:
-    case 24:
-    case 37:
+    case 22:
+    case 25:
+    case 38:
       param = Expression(env);
                                  params.add(param);
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 32:
+        case 33:
           ;
           break;
         default:
           jj_la1[2] = jj_gen;
           break label_2;
         }
-        jj_consume_token(32);
+        jj_consume_token(33);
         param = Expression(env);
                                        params.add(param);
       }
@@ -244,7 +244,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       jj_la1[3] = jj_gen;
       ;
     }
-    jj_consume_token(25);
+    jj_consume_token(26);
     {if (true) return new Expressions.FunctionCallExpression(typeToken.image, params);}
     throw new Error("Missing return statement in function");
   }
@@ -258,10 +258,10 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     case REAL:
     case REGEX:
     case STR:
-    case 24:
+    case 25:
       expr = BasicValue(env);
       break;
-    case 21:
+    case 22:
       expr = CompositeFieldValue(env);
       break;
     default:
@@ -275,13 +275,13 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
 
   final public Expressions.CompositeValue CompositeFieldValue(Env env) throws ParseException {
     Map<String, Expression> attributes = new ArrayMap<String,Expression>();
-    jj_consume_token(21);
+    jj_consume_token(22);
     FieldValue(env, attributes);
     label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 29:
-      case 32:
+      case 30:
+      case 33:
         ;
         break;
       default:
@@ -289,11 +289,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_3;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 32:
-        jj_consume_token(32);
+      case 33:
+        jj_consume_token(33);
         break;
-      case 29:
-        jj_consume_token(29);
+      case 30:
+        jj_consume_token(30);
         break;
       default:
         jj_la1[6] = jj_gen;
@@ -302,7 +302,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       }
       FieldValue(env, attributes);
     }
-    jj_consume_token(23);
+    jj_consume_token(24);
           {if (true) return new Expressions.CompositeValue(/*"COMPOSITE", */ attributes, false);}
     throw new Error("Missing return statement in function");
   }
@@ -311,7 +311,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         String fieldname = null;
         Expression expr = null;
     fieldname = RelaxedString();
-    jj_consume_token(33);
+    jj_consume_token(34);
     expr = Expression(env);
               if (fieldname != null && expr != null)  {
                 if (attributes.containsKey(fieldname)) {
@@ -348,10 +348,10 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       tok = jj_consume_token(REAL);
                        {if (true) return new Expressions.PrimitiveValue<Number>("REAL", Double.valueOf(tok.image));}
       break;
-    case 24:
-      jj_consume_token(24);
-      seqRegex = SeqRegex(env);
+    case 25:
       jj_consume_token(25);
+      seqRegex = SeqRegex(env);
+      jj_consume_token(26);
           TokenSequencePattern seqPattern = new TokenSequencePattern(null, seqRegex);
           {if (true) return new Expressions.PrimitiveValue<TokenSequencePattern>("TOKEN_REGEX", seqPattern);}
       break;
@@ -418,7 +418,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   Expression param;
   List<Expression> params = new ArrayList<Expression>();
     typeToken = jj_consume_token(IDENTIFIER);
-    jj_consume_token(24);
+    jj_consume_token(25);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IDENTIFIER:
     case REGEXVAR:
@@ -431,22 +431,22 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     case REAL:
     case REGEX:
     case STR:
-    case 21:
-    case 24:
-    case 37:
+    case 22:
+    case 25:
+    case 38:
       param = Expression(env);
                                  params.add(param);
       label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 32:
+        case 33:
           ;
           break;
         default:
           jj_la1[10] = jj_gen;
           break label_4;
         }
-        jj_consume_token(32);
+        jj_consume_token(33);
         param = Expression(env);
                                        params.add(param);
       }
@@ -455,7 +455,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       jj_la1[11] = jj_gen;
       ;
     }
-    jj_consume_token(25);
+    jj_consume_token(26);
     {if (true) return new Expressions.MethodCallExpression(typeToken.image, parent, params);}
     throw new Error("Missing return statement in function");
   }
@@ -470,8 +470,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 30:
-      case 34:
+      case 31:
+      case 35:
         ;
         break;
       default:
@@ -482,12 +482,12 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         i = Index();
       expr = new Expressions.IndexedExpression(expr, i);
       } else if (jj_2_14(2)) {
-        jj_consume_token(30);
+        jj_consume_token(31);
         fieldExpr = Expression(env);
        expr = new Expressions.FieldExpression(expr, fieldExpr);
-        jj_consume_token(31);
+        jj_consume_token(32);
       } else if (jj_2_15(2)) {
-        jj_consume_token(34);
+        jj_consume_token(35);
         s = RelaxedString();
        expr = new Expressions.FieldExpression(expr, s);
       } else {
@@ -509,8 +509,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_6:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 30:
-      case 34:
+      case 31:
+      case 35:
         ;
         break;
       default:
@@ -521,15 +521,15 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         i = Index();
       expr = new Expressions.IndexedExpression(expr, i);
       } else if (jj_2_17(3)) {
-        jj_consume_token(30);
+        jj_consume_token(31);
         fieldExpr = Expression(env);
        expr = new Expressions.FieldExpression(expr, fieldExpr);
-        jj_consume_token(31);
+        jj_consume_token(32);
       } else if (jj_2_18(3)) {
-        jj_consume_token(34);
+        jj_consume_token(35);
         expr = MethodCallExpression(env, expr);
       } else if (jj_2_19(3)) {
-        jj_consume_token(34);
+        jj_consume_token(35);
         s = RelaxedString();
        expr = new Expressions.FieldExpression(expr, s);
       } else {
@@ -544,24 +544,24 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   final public Expression ListExpression(Env env) throws ParseException {
   List<Expression> exprs = new ArrayList<Expression>();
   Expression expr;
-    jj_consume_token(24);
+    jj_consume_token(25);
     expr = Expression(env);
        exprs.add(expr);
     label_7:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 32:
+      case 33:
         ;
         break;
       default:
         jj_la1[14] = jj_gen;
         break label_7;
       }
-      jj_consume_token(32);
+      jj_consume_token(33);
       expr = Expression(env);
        exprs.add(expr);
     }
-    jj_consume_token(25);
+    jj_consume_token(26);
     {if (true) return new Expressions.ListExpression(Expressions.TYPE_LIST, exprs);}
     throw new Error("Missing return statement in function");
   }
@@ -607,10 +607,10 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     case REGEXMRGROUP:
       expr = BasicCondExpression(env);
       break;
-    case 24:
-      jj_consume_token(24);
-      expr = CondExpression(env);
+    case 25:
       jj_consume_token(25);
+      expr = CondExpression(env);
+      jj_consume_token(26);
       break;
     default:
       jj_la1[16] = jj_gen;
@@ -631,8 +631,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 35:
       case 36:
+      case 37:
         ;
         break;
       default:
@@ -640,11 +640,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_8;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 35:
-        op = jj_consume_token(35);
-        break;
       case 36:
         op = jj_consume_token(36);
+        break;
+      case 37:
+        op = jj_consume_token(37);
         break;
       default:
         jj_la1[18] = jj_gen;
@@ -682,20 +682,20 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   List<Pair<Expression, Expression>> cases
     = new ArrayList<Pair<Expression, Expression>>();
   Expression elseExpr = null;
-    jj_consume_token(37);
-    jj_consume_token(21);
+    jj_consume_token(38);
+    jj_consume_token(22);
     label_9:
     while (true) {
       cond = CondExpression(env);
-      jj_consume_token(22);
+      jj_consume_token(23);
       expr = Expression(env);
             cases.add(new Pair<Expression, Expression>(cond, expr));
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 32:
-        jj_consume_token(32);
+      case 33:
+        jj_consume_token(33);
         break;
-      case 29:
-        jj_consume_token(29);
+      case 30:
+        jj_consume_token(30);
         break;
       default:
         jj_la1[19] = jj_gen;
@@ -708,7 +708,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       case REGEXGROUP:
       case REGEXMRVAR:
       case REGEXMRGROUP:
-      case 24:
+      case 25:
         ;
         break;
       default:
@@ -717,16 +717,16 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       }
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 38:
-      jj_consume_token(38);
-      jj_consume_token(22);
+    case 39:
+      jj_consume_token(39);
+      jj_consume_token(23);
       elseExpr = Expression(env);
       break;
     default:
       jj_la1[21] = jj_gen;
       ;
     }
-    jj_consume_token(23);
+    jj_consume_token(24);
      {if (true) return new Expressions.CaseExpression(cases, elseExpr);}
     throw new Error("Missing return statement in function");
   }
@@ -782,21 +782,26 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_10:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 30:
+      case 31:
         node = BracketedNode(env);
                                         expr = new SequencePattern.NodePatternExpr(node);
         break;
       case IDENTIFIER:
+      case NONNEGINT:
+      case INT:
+      case LONGINT:
+      case REAL:
       case REGEX:
       case STR:
+      case STRSIMPLE:
         node = CoreMapWordPattern(env);
                                              expr = new SequencePattern.NodePatternExpr(node);
         break;
-      case 49:
+      case 50:
         multiNode = MultiNodePattern(env);
                                                 expr = new SequencePattern.MultiNodePatternExpr(multiNode);
         break;
-      case 24:
+      case 25:
         expr = SeqRegexGroup(env);
         break;
       case REGEXVAR:
@@ -811,10 +816,10 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         throw new ParseException();
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 21:
-      case 39:
+      case 22:
       case 40:
       case 41:
+      case 42:
         expr = SeqRegexRepeatTimes(env, expr);
         break;
       default:
@@ -826,11 +831,16 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       case IDENTIFIER:
       case REGEXVAR:
       case BACKREF:
+      case NONNEGINT:
+      case INT:
+      case LONGINT:
+      case REAL:
       case REGEX:
       case STR:
-      case 24:
-      case 30:
-      case 49:
+      case STRSIMPLE:
+      case 25:
+      case 31:
+      case 50:
         ;
         break;
       default:
@@ -839,8 +849,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       }
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 22:
-      jj_consume_token(22);
+    case 23:
+      jj_consume_token(23);
       value = Expression(env);
       break;
     default:
@@ -864,39 +874,39 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
    int max = -1;
    boolean greedy = true;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 39:
-      value = jj_consume_token(39);
-                          min = 0; max = -1;
-      break;
     case 40:
       value = jj_consume_token(40);
-                          min = 0; max = 1;
+                          min = 0; max = -1;
       break;
     case 41:
       value = jj_consume_token(41);
+                          min = 0; max = 1;
+      break;
+    case 42:
+      value = jj_consume_token(42);
                           min = 1; max = -1;
       break;
     default:
       jj_la1[27] = jj_gen;
       if (jj_2_22(3)) {
-        jj_consume_token(21);
+        jj_consume_token(22);
         value = jj_consume_token(NONNEGINT);
-        jj_consume_token(23);
+        jj_consume_token(24);
                                           min = Integer.parseInt(value.image); max = min;
       } else if (jj_2_23(4)) {
-        jj_consume_token(21);
+        jj_consume_token(22);
         value = jj_consume_token(NONNEGINT);
-        jj_consume_token(32);
-        jj_consume_token(23);
+        jj_consume_token(33);
+        jj_consume_token(24);
                                               min = Integer.parseInt(value.image); max = -1;
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 21:
-          jj_consume_token(21);
+        case 22:
+          jj_consume_token(22);
           value = jj_consume_token(NONNEGINT);
-          jj_consume_token(32);
+          jj_consume_token(33);
           v2 = jj_consume_token(NONNEGINT);
-          jj_consume_token(23);
+          jj_consume_token(24);
                                                                 min = Integer.parseInt(value.image); max = Integer.parseInt(v2.image);
           break;
         default:
@@ -907,8 +917,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       }
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 40:
-      jj_consume_token(40);
+    case 41:
+      jj_consume_token(41);
              greedy = false;
       break;
     default:
@@ -927,8 +937,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_11:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 36:
-      case 42:
+      case 37:
+      case 43:
         ;
         break;
       default:
@@ -936,11 +946,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_11;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 42:
-        jj_consume_token(42);
+      case 43:
+        jj_consume_token(43);
         break;
-      case 36:
-        jj_consume_token(36);
+      case 37:
+        jj_consume_token(37);
         break;
       default:
         jj_la1[31] = jj_gen;
@@ -965,10 +975,10 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_12:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 35:
       case 36:
-      case 42:
+      case 37:
       case 43:
+      case 44:
         ;
         break;
       default:
@@ -976,17 +986,17 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_12;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 44:
+        op = jj_consume_token(44);
+        break;
       case 43:
         op = jj_consume_token(43);
         break;
-      case 42:
-        op = jj_consume_token(42);
-        break;
-      case 35:
-        op = jj_consume_token(35);
-        break;
       case 36:
         op = jj_consume_token(36);
+        break;
+      case 37:
+        op = jj_consume_token(37);
         break;
       default:
         jj_la1[33] = jj_gen;
@@ -1023,17 +1033,17 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   boolean capturing = true;
   String varname = null;
   Token var;
-    jj_consume_token(24);
+    jj_consume_token(25);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 40:
-    case 44:
+    case 41:
+    case 45:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 44:
-        jj_consume_token(44);
+      case 45:
+        jj_consume_token(45);
                 capturing = false;
         break;
-      case 40:
-        jj_consume_token(40);
+      case 41:
+        jj_consume_token(41);
         var = jj_consume_token(REGEXVAR);
                                 varname = var.image;
         break;
@@ -1048,7 +1058,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       ;
     }
     expr = SeqRegex(env);
-    jj_consume_token(25);
+    jj_consume_token(26);
                 if (varname != null) {
                    {if (true) return new SequencePattern.GroupPatternExpr(expr, varname);}
                 } else {
@@ -1060,15 +1070,15 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   final public NodePattern BracketedNode(Env env) throws ParseException {
   NodePattern node;
     if (jj_2_24(2)) {
-      jj_consume_token(30);
       jj_consume_token(31);
+      jj_consume_token(32);
               node = NodePattern.ANY_NODE;
     } else {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 30:
-        jj_consume_token(30);
-        node = NodeDisjConj(env);
+      case 31:
         jj_consume_token(31);
+        node = NodeDisjConj(env);
+        jj_consume_token(32);
         break;
       default:
         jj_la1[36] = jj_gen;
@@ -1103,17 +1113,17 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   final public NodePattern Node(Env env) throws ParseException {
   NodePattern node;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 30:
+    case 31:
       node = BracketedNode(env);
       break;
     case IDENTIFIER:
     case REGEXVAR:
     case REGEX:
     case STR:
-    case 21:
-    case 24:
-    case 45:
+    case 22:
+    case 25:
     case 46:
+    case 47:
       node = NodeGroup(env);
       break;
     default:
@@ -1133,8 +1143,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_13:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 36:
-      case 42:
+      case 37:
+      case 43:
         ;
         break;
       default:
@@ -1142,11 +1152,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_13;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 42:
-        jj_consume_token(42);
+      case 43:
+        jj_consume_token(43);
         break;
-      case 36:
-        jj_consume_token(36);
+      case 37:
+        jj_consume_token(37);
         break;
       default:
         jj_la1[39] = jj_gen;
@@ -1171,8 +1181,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_14:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 35:
-      case 43:
+      case 36:
+      case 44:
         ;
         break;
       default:
@@ -1180,11 +1190,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_14;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 43:
-        jj_consume_token(43);
+      case 44:
+        jj_consume_token(44);
         break;
-      case 35:
-        jj_consume_token(35);
+      case 36:
+        jj_consume_token(36);
         break;
       default:
         jj_la1[41] = jj_gen;
@@ -1211,10 +1221,10 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     label_15:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 35:
       case 36:
-      case 42:
+      case 37:
       case 43:
+      case 44:
         ;
         break;
       default:
@@ -1222,17 +1232,17 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_15;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 44:
+        op = jj_consume_token(44);
+        break;
       case 43:
         op = jj_consume_token(43);
         break;
-      case 42:
-        op = jj_consume_token(42);
-        break;
-      case 35:
-        op = jj_consume_token(35);
-        break;
       case 36:
         op = jj_consume_token(36);
+        break;
+      case 37:
+        op = jj_consume_token(37);
         break;
       default:
         jj_la1[43] = jj_gen;
@@ -1269,14 +1279,14 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     if (jj_2_25(2)) {
       node = NodeBasic(env);
     } else if (jj_2_26(2)) {
-      jj_consume_token(24);
-      node = NodeDisjConj(env);
       jj_consume_token(25);
+      node = NodeDisjConj(env);
+      jj_consume_token(26);
     } else if (jj_2_27(2)) {
-      jj_consume_token(45);
-      jj_consume_token(24);
-      node = NodeDisjConj(env);
+      jj_consume_token(46);
       jj_consume_token(25);
+      node = NodeDisjConj(env);
+      jj_consume_token(26);
         node = new NodePattern.NegateNodePattern(node);
     } else {
       jj_consume_token(-1);
@@ -1289,8 +1299,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   final public NodePattern NodeBasic(Env env) throws ParseException {
         NodePattern child;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 45:
-      jj_consume_token(45);
+    case 46:
+      jj_consume_token(46);
       child = CoreMapNode(env);
           {if (true) return new NodePattern.NegateNodePattern(child);}
       break;
@@ -1298,8 +1308,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     case REGEXVAR:
     case REGEX:
     case STR:
-    case 21:
-    case 46:
+    case 22:
+    case 47:
       child = CoreMapNode(env);
           {if (true) return child;}
       break;
@@ -1319,16 +1329,16 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     case IDENTIFIER:
     case REGEX:
     case STR:
-    case 21:
+    case 22:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 21:
-        jj_consume_token(21);
+      case 22:
+        jj_consume_token(22);
         AttrValue(env, attributes);
         label_16:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-          case 29:
-          case 32:
+          case 30:
+          case 33:
             ;
             break;
           default:
@@ -1336,11 +1346,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
             break label_16;
           }
           switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-          case 32:
-            jj_consume_token(32);
+          case 33:
+            jj_consume_token(33);
             break;
-          case 29:
-            jj_consume_token(29);
+          case 30:
+            jj_consume_token(30);
             break;
           default:
             jj_la1[46] = jj_gen;
@@ -1349,7 +1359,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
           }
           AttrValue(env, attributes);
         }
-        jj_consume_token(23);
+        jj_consume_token(24);
         break;
       case IDENTIFIER:
       case REGEX:
@@ -1381,10 +1391,10 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       pat = CoreMapVarNodePattern(env);
             {if (true) return pat;}
       break;
-    case 46:
-      jj_consume_token(46);
-      pat = CoreMapExprNodePattern(env);
+    case 47:
       jj_consume_token(47);
+      pat = CoreMapExprNodePattern(env);
+      jj_consume_token(48);
             {if (true) return pat;}
       break;
     default:
@@ -1402,8 +1412,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         String str = null;
     attr = jj_consume_token(IDENTIFIER);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 33:
-      jj_consume_token(33);
+    case 34:
+      jj_consume_token(34);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case STR:
         value = jj_consume_token(STR);
@@ -1423,8 +1433,8 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         throw new ParseException();
       }
       break;
-    case 48:
-      tok = jj_consume_token(48);
+    case 49:
+      tok = jj_consume_token(49);
       value = jj_consume_token(IDENTIFIER);
       break;
     case NUMCMP:
@@ -1475,6 +1485,21 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     case IDENTIFIER:
       value = jj_consume_token(IDENTIFIER);
       break;
+    case NONNEGINT:
+      value = jj_consume_token(NONNEGINT);
+      break;
+    case INT:
+      value = jj_consume_token(INT);
+      break;
+    case LONGINT:
+      value = jj_consume_token(LONGINT);
+      break;
+    case REAL:
+      value = jj_consume_token(REAL);
+      break;
+    case STRSIMPLE:
+      value = jj_consume_token(STRSIMPLE);
+      break;
     default:
       jj_la1[53] = jj_gen;
       jj_consume_token(-1);
@@ -1491,29 +1516,29 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     MultiNodePattern mp;
     Token v1, v2;
     int min = 1, max = -1;
-    jj_consume_token(49);
+    jj_consume_token(50);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 21:
+    case 22:
       if (jj_2_28(3)) {
-        jj_consume_token(21);
+        jj_consume_token(22);
         v1 = jj_consume_token(NONNEGINT);
-        jj_consume_token(23);
+        jj_consume_token(24);
        min = Integer.parseInt(v1.image);
        max = Integer.parseInt(v1.image);
       } else if (jj_2_29(4)) {
-        jj_consume_token(21);
+        jj_consume_token(22);
         v1 = jj_consume_token(NONNEGINT);
-        jj_consume_token(32);
-        jj_consume_token(23);
+        jj_consume_token(33);
+        jj_consume_token(24);
        min = Integer.parseInt(v1.image);
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case 21:
-          jj_consume_token(21);
+        case 22:
+          jj_consume_token(22);
           v1 = jj_consume_token(NONNEGINT);
-          jj_consume_token(32);
+          jj_consume_token(33);
           v2 = jj_consume_token(NONNEGINT);
-          jj_consume_token(23);
+          jj_consume_token(24);
        min = Integer.parseInt(v1.image);
        max = Integer.parseInt(v2.image);
           break;
@@ -1562,7 +1587,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
   SequenceMatchAction<CoreMap> action = null;
     expr = SeqRegex(env);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 50:
+    case 51:
       action = Action(env);
       break;
     default:
@@ -1575,7 +1600,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
 
   final public SequenceMatchAction<CoreMap> Action(Env env) throws ParseException {
    SequenceMatchAction<CoreMap> action;
-    jj_consume_token(50);
+    jj_consume_token(51);
     action = AnnotateAction(env);
     {if (true) return action;}
     throw new Error("Missing return statement in function");
@@ -1583,24 +1608,24 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
 
   final public SequenceMatchAction<CoreMap> AnnotateAction(Env env) throws ParseException {
   Map<String, String> attributes;
-    jj_consume_token(51);
-    jj_consume_token(24);
+    jj_consume_token(52);
+    jj_consume_token(25);
     //  group = <NONNEGINT> ","
       attributes = SetAttrValues(env);
-    jj_consume_token(25);
+    jj_consume_token(26);
     {if (true) return new CoreMapSequenceMatchAction.AnnotateAction<CoreMap>( /*group,*/ attributes);}
     throw new Error("Missing return statement in function");
   }
 
   final public Map<String,String> SetAttrValues(Env env) throws ParseException {
     Map<String, String> attributes = new ArrayMap<String,String>();
-    jj_consume_token(21);
+    jj_consume_token(22);
     SetAttrValue(env, attributes);
     label_17:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 29:
-      case 32:
+      case 30:
+      case 33:
         ;
         break;
       default:
@@ -1608,11 +1633,11 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         break label_17;
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 32:
-        jj_consume_token(32);
+      case 33:
+        jj_consume_token(33);
         break;
-      case 29:
-        jj_consume_token(29);
+      case 30:
+        jj_consume_token(30);
         break;
       default:
         jj_la1[58] = jj_gen;
@@ -1621,7 +1646,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       }
       SetAttrValue(env, attributes);
     }
-    jj_consume_token(23);
+    jj_consume_token(24);
           {if (true) return attributes;}
     throw new Error("Missing return statement in function");
   }
@@ -1631,7 +1656,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         Token value = null;
         String str = null;
     attr = jj_consume_token(IDENTIFIER);
-    jj_consume_token(28);
+    jj_consume_token(29);
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case IDENTIFIER:
     case STR:
@@ -1974,15 +1999,15 @@ String VarName() : {
   }
 
   private boolean jj_3_23() {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(22)) return true;
     if (jj_scan_token(NONNEGINT)) return true;
-    if (jj_scan_token(32)) return true;
-    if (jj_scan_token(23)) return true;
+    if (jj_scan_token(33)) return true;
+    if (jj_scan_token(24)) return true;
     return false;
   }
 
   private boolean jj_3R_110() {
-    if (jj_scan_token(41)) return true;
+    if (jj_scan_token(42)) return true;
     return false;
   }
 
@@ -1992,14 +2017,14 @@ String VarName() : {
   }
 
   private boolean jj_3_22() {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(22)) return true;
     if (jj_scan_token(NONNEGINT)) return true;
-    if (jj_scan_token(23)) return true;
+    if (jj_scan_token(24)) return true;
     return false;
   }
 
   private boolean jj_3R_109() {
-    if (jj_scan_token(40)) return true;
+    if (jj_scan_token(41)) return true;
     return false;
   }
 
@@ -2009,7 +2034,7 @@ String VarName() : {
   }
 
   private boolean jj_3R_108() {
-    if (jj_scan_token(39)) return true;
+    if (jj_scan_token(40)) return true;
     return false;
   }
 
@@ -2019,7 +2044,7 @@ String VarName() : {
   }
 
   private boolean jj_3_19() {
-    if (jj_scan_token(34)) return true;
+    if (jj_scan_token(35)) return true;
     if (jj_3R_29()) return true;
     return false;
   }
@@ -2032,13 +2057,13 @@ String VarName() : {
   private boolean jj_3R_116() {
     Token xsp;
     xsp = jj_scanpos;
+    if (jj_scan_token(44)) {
+    jj_scanpos = xsp;
     if (jj_scan_token(43)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(42)) {
+    if (jj_scan_token(36)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(35)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(36)) return true;
+    if (jj_scan_token(37)) return true;
     }
     }
     }
@@ -2051,7 +2076,7 @@ String VarName() : {
   }
 
   private boolean jj_3_18() {
-    if (jj_scan_token(34)) return true;
+    if (jj_scan_token(35)) return true;
     if (jj_3R_30()) return true;
     return false;
   }
@@ -2100,9 +2125,9 @@ String VarName() : {
   }
 
   private boolean jj_3_17() {
-    if (jj_scan_token(30)) return true;
-    if (jj_3R_28()) return true;
     if (jj_scan_token(31)) return true;
+    if (jj_3R_28()) return true;
+    if (jj_scan_token(32)) return true;
     return false;
   }
 
@@ -2143,8 +2168,13 @@ String VarName() : {
   }
 
   private boolean jj_3R_102() {
-    if (jj_scan_token(22)) return true;
+    if (jj_scan_token(23)) return true;
     if (jj_3R_28()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_83() {
+    if (jj_3R_59()) return true;
     return false;
   }
 
@@ -2158,25 +2188,20 @@ String VarName() : {
     return false;
   }
 
-  private boolean jj_3R_83() {
-    if (jj_3R_59()) return true;
-    return false;
-  }
-
   private boolean jj_3R_19() {
     if (jj_3R_34()) return true;
-    if (jj_scan_token(28)) return true;
+    if (jj_scan_token(29)) return true;
     if (jj_3R_28()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_104() {
-    if (jj_3R_105()) return true;
     return false;
   }
 
   private boolean jj_3R_82() {
     if (jj_scan_token(REGEXVAR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_104() {
+    if (jj_3R_105()) return true;
     return false;
   }
 
@@ -2191,8 +2216,8 @@ String VarName() : {
   }
 
   private boolean jj_3_7() {
-    if (jj_scan_token(21)) return true;
-    if (jj_scan_token(27)) return true;
+    if (jj_scan_token(22)) return true;
+    if (jj_scan_token(28)) return true;
     if (jj_3R_21()) return true;
     return false;
   }
@@ -2203,7 +2228,7 @@ String VarName() : {
   }
 
   private boolean jj_3_15() {
-    if (jj_scan_token(34)) return true;
+    if (jj_scan_token(35)) return true;
     if (jj_3R_29()) return true;
     return false;
   }
@@ -2214,9 +2239,9 @@ String VarName() : {
   }
 
   private boolean jj_3_6() {
-    if (jj_scan_token(21)) return true;
-    if (jj_scan_token(26)) return true;
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(22)) return true;
+    if (jj_scan_token(27)) return true;
+    if (jj_scan_token(25)) return true;
     return false;
   }
 
@@ -2231,14 +2256,14 @@ String VarName() : {
   }
 
   private boolean jj_3_5() {
-    if (jj_scan_token(21)) return true;
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(22)) return true;
+    if (jj_scan_token(25)) return true;
     if (jj_3R_50()) return true;
     return false;
   }
 
   private boolean jj_3_14() {
-    if (jj_scan_token(30)) return true;
+    if (jj_scan_token(31)) return true;
     if (jj_3R_28()) return true;
     return false;
   }
@@ -2284,9 +2309,9 @@ String VarName() : {
   }
 
   private boolean jj_3_4() {
-    if (jj_scan_token(21)) return true;
-    if (jj_3R_21()) return true;
     if (jj_scan_token(22)) return true;
+    if (jj_3R_21()) return true;
+    if (jj_scan_token(23)) return true;
     return false;
   }
 
@@ -2331,7 +2356,7 @@ String VarName() : {
   }
 
   private boolean jj_3R_113() {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(22)) return true;
     if (jj_scan_token(NONNEGINT)) return true;
     return false;
   }
@@ -2341,16 +2366,16 @@ String VarName() : {
     return false;
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_19()) return true;
+  private boolean jj_3_29() {
+    if (jj_scan_token(22)) return true;
+    if (jj_scan_token(NONNEGINT)) return true;
+    if (jj_scan_token(33)) return true;
+    if (jj_scan_token(24)) return true;
     return false;
   }
 
-  private boolean jj_3_29() {
-    if (jj_scan_token(21)) return true;
-    if (jj_scan_token(NONNEGINT)) return true;
-    if (jj_scan_token(32)) return true;
-    if (jj_scan_token(23)) return true;
+  private boolean jj_3_2() {
+    if (jj_3R_19()) return true;
     return false;
   }
 
@@ -2373,9 +2398,18 @@ String VarName() : {
   }
 
   private boolean jj_3_28() {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(22)) return true;
     if (jj_scan_token(NONNEGINT)) return true;
-    if (jj_scan_token(23)) return true;
+    if (jj_scan_token(24)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_98() {
+    if (jj_scan_token(50)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_106()) jj_scanpos = xsp;
+    if (jj_3R_97()) return true;
     return false;
   }
 
@@ -2384,18 +2418,9 @@ String VarName() : {
     return false;
   }
 
-  private boolean jj_3R_98() {
-    if (jj_scan_token(49)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_106()) jj_scanpos = xsp;
-    if (jj_3R_97()) return true;
-    return false;
-  }
-
   private boolean jj_3R_30() {
     if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(25)) return true;
     return false;
   }
 
@@ -2431,7 +2456,22 @@ String VarName() : {
     jj_scanpos = xsp;
     if (jj_scan_token(17)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(7)) return true;
+    if (jj_scan_token(7)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(13)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(14)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(15)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(16)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(21)) return true;
+    }
+    }
+    }
+    }
+    }
     }
     }
     return false;
@@ -2468,7 +2508,7 @@ String VarName() : {
 
   private boolean jj_3R_42() {
     if (jj_3R_59()) return true;
-    if (jj_scan_token(22)) return true;
+    if (jj_scan_token(23)) return true;
     return false;
   }
 
@@ -2498,8 +2538,8 @@ String VarName() : {
   }
 
   private boolean jj_3R_26() {
-    if (jj_scan_token(37)) return true;
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(38)) return true;
+    if (jj_scan_token(22)) return true;
     Token xsp;
     if (jj_3R_42()) return true;
     while (true) {
@@ -2510,22 +2550,22 @@ String VarName() : {
   }
 
   private boolean jj_3R_103() {
-    if (jj_scan_token(30)) return true;
-    if (jj_3R_33()) return true;
     if (jj_scan_token(31)) return true;
+    if (jj_3R_33()) return true;
+    if (jj_scan_token(32)) return true;
     return false;
   }
 
   private boolean jj_3R_69() {
-    if (jj_scan_token(24)) return true;
-    if (jj_3R_50()) return true;
     if (jj_scan_token(25)) return true;
+    if (jj_3R_50()) return true;
+    if (jj_scan_token(26)) return true;
     return false;
   }
 
   private boolean jj_3_24() {
-    if (jj_scan_token(30)) return true;
     if (jj_scan_token(31)) return true;
+    if (jj_scan_token(32)) return true;
     return false;
   }
 
@@ -2597,7 +2637,7 @@ String VarName() : {
   }
 
   private boolean jj_3R_115() {
-    if (jj_scan_token(40)) return true;
+    if (jj_scan_token(41)) return true;
     if (jj_scan_token(REGEXVAR)) return true;
     return false;
   }
@@ -2612,8 +2652,13 @@ String VarName() : {
     return false;
   }
 
+  private boolean jj_3R_45() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
   private boolean jj_3R_114() {
-    if (jj_scan_token(44)) return true;
+    if (jj_scan_token(45)) return true;
     return false;
   }
 
@@ -2628,13 +2673,8 @@ String VarName() : {
   }
 
   private boolean jj_3R_74() {
-    if (jj_scan_token(46)) return true;
+    if (jj_scan_token(47)) return true;
     if (jj_3R_83()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_45() {
-    if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
 
@@ -2654,28 +2694,28 @@ String VarName() : {
   }
 
   private boolean jj_3R_99() {
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(25)) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_107()) jj_scanpos = xsp;
     if (jj_3R_50()) return true;
-    if (jj_scan_token(25)) return true;
+    if (jj_scan_token(26)) return true;
     return false;
   }
 
   private boolean jj_3R_71() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_scan_token(35)) {
+    if (jj_scan_token(36)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(36)) return true;
+    if (jj_scan_token(37)) return true;
     }
     return false;
   }
 
   private boolean jj_3R_35() {
     if (jj_3R_29()) return true;
-    if (jj_scan_token(33)) return true;
+    if (jj_scan_token(34)) return true;
     if (jj_3R_28()) return true;
     return false;
   }
@@ -2705,12 +2745,6 @@ String VarName() : {
     return false;
   }
 
-  private boolean jj_3R_80() {
-    if (jj_scan_token(21)) return true;
-    if (jj_3R_87()) return true;
-    return false;
-  }
-
   private boolean jj_3R_46() {
     Token xsp;
     xsp = jj_scanpos;
@@ -2718,6 +2752,12 @@ String VarName() : {
     jj_scanpos = xsp;
     if (jj_scan_token(19)) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3R_80() {
+    if (jj_scan_token(22)) return true;
+    if (jj_3R_87()) return true;
     return false;
   }
 
@@ -2755,7 +2795,7 @@ String VarName() : {
   }
 
   private boolean jj_3R_79() {
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(25)) return true;
     if (jj_3R_59()) return true;
     return false;
   }
@@ -2766,7 +2806,7 @@ String VarName() : {
   }
 
   private boolean jj_3R_20() {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(22)) return true;
     if (jj_3R_35()) return true;
     return false;
   }
@@ -2784,13 +2824,13 @@ String VarName() : {
   private boolean jj_3R_94() {
     Token xsp;
     xsp = jj_scanpos;
+    if (jj_scan_token(44)) {
+    jj_scanpos = xsp;
     if (jj_scan_token(43)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(42)) {
+    if (jj_scan_token(36)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(35)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(36)) return true;
+    if (jj_scan_token(37)) return true;
     }
     }
     }
@@ -2819,7 +2859,7 @@ String VarName() : {
   }
 
   private boolean jj_3R_47() {
-    if (jj_scan_token(45)) return true;
+    if (jj_scan_token(46)) return true;
     if (jj_3R_60()) return true;
     return false;
   }
@@ -2861,13 +2901,13 @@ String VarName() : {
   }
 
   private boolean jj_3R_52() {
-    if (jj_scan_token(32)) return true;
+    if (jj_scan_token(33)) return true;
     return false;
   }
 
   private boolean jj_3_27() {
-    if (jj_scan_token(45)) return true;
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(46)) return true;
+    if (jj_scan_token(25)) return true;
     return false;
   }
 
@@ -2900,7 +2940,7 @@ String VarName() : {
   }
 
   private boolean jj_3_26() {
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(25)) return true;
     if (jj_3R_33()) return true;
     return false;
   }
@@ -2912,11 +2952,11 @@ String VarName() : {
 
   private boolean jj_3R_22() {
     if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(25)) return true;
     Token xsp;
     xsp = jj_scanpos;
     if (jj_3R_36()) jj_scanpos = xsp;
-    if (jj_scan_token(25)) return true;
+    if (jj_scan_token(26)) return true;
     return false;
   }
 
@@ -2934,38 +2974,38 @@ String VarName() : {
   }
 
   private boolean jj_3R_41() {
-    if (jj_scan_token(32)) return true;
+    if (jj_scan_token(33)) return true;
     if (jj_3R_28()) return true;
     return false;
   }
 
   private boolean jj_3R_112() {
-    if (jj_scan_token(40)) return true;
+    if (jj_scan_token(41)) return true;
     return false;
   }
 
   private boolean jj_3R_111() {
-    if (jj_scan_token(21)) return true;
+    if (jj_scan_token(22)) return true;
     if (jj_scan_token(NONNEGINT)) return true;
     return false;
   }
 
   private boolean jj_3R_27() {
-    if (jj_scan_token(30)) return true;
-    if (jj_3R_43()) return true;
     if (jj_scan_token(31)) return true;
+    if (jj_3R_43()) return true;
+    if (jj_scan_token(32)) return true;
     return false;
   }
 
   private boolean jj_3R_25() {
-    if (jj_scan_token(24)) return true;
+    if (jj_scan_token(25)) return true;
     if (jj_3R_28()) return true;
     Token xsp;
     while (true) {
       xsp = jj_scanpos;
       if (jj_3R_41()) { jj_scanpos = xsp; break; }
     }
-    if (jj_scan_token(25)) return true;
+    if (jj_scan_token(26)) return true;
     return false;
   }
 
@@ -2988,10 +3028,10 @@ String VarName() : {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x200180,0x20000000,0x0,0x127ef80,0x127e000,0x20000000,0x20000000,0x107e000,0x180,0xf80,0x0,0x127ef80,0x40000000,0x40000000,0x0,0x180000,0x1000f80,0x0,0x0,0x20000000,0x1000f80,0x0,0x5e000,0x41061180,0x200000,0x41061180,0x400000,0x0,0x200000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x40000000,0x41260180,0x0,0x0,0x0,0x0,0x0,0x0,0x260180,0x20000000,0x20000000,0x60080,0x260080,0x260180,0x60180,0x16100,0x80000,0x60080,0x200000,0x200000,0x0,0x20000000,0x20000000,0x56080,0x16000,0x6000,0x180000,0x40080,0x40080,};
+      jj_la1_0 = new int[] {0x400180,0x40000000,0x0,0x247ef80,0x247e000,0x40000000,0x40000000,0x207e000,0x180,0xf80,0x0,0x247ef80,0x80000000,0x80000000,0x0,0x180000,0x2000f80,0x0,0x0,0x40000000,0x2000f80,0x0,0x5e000,0x8227f180,0x400000,0x8227f180,0x800000,0x0,0x400000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x82460180,0x0,0x0,0x0,0x0,0x0,0x0,0x460180,0x40000000,0x40000000,0x60080,0x460080,0x460180,0x60180,0x16100,0x80000,0x27e080,0x400000,0x400000,0x0,0x40000000,0x40000000,0x56080,0x16000,0x6000,0x180000,0x40080,0x40080,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x1,0x20,0x0,0x1,0x1,0x0,0x0,0x0,0x1,0x20,0x4,0x4,0x1,0x0,0x0,0x18,0x18,0x1,0x0,0x40,0x0,0x20000,0x380,0x20000,0x0,0x380,0x0,0x100,0x410,0x410,0xc18,0xc18,0x1100,0x1100,0x0,0x6000,0x410,0x410,0x808,0x808,0xc18,0xc18,0x6000,0x1,0x1,0x0,0x0,0x4000,0x0,0x0,0x10002,0x0,0x0,0x0,0x40000,0x1,0x1,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x0,0x0,0x2,0x40,0x0,0x2,0x2,0x0,0x0,0x0,0x2,0x40,0x8,0x8,0x2,0x0,0x0,0x30,0x30,0x2,0x0,0x80,0x0,0x40000,0x700,0x40000,0x0,0x700,0x0,0x200,0x820,0x820,0x1830,0x1830,0x2200,0x2200,0x0,0xc000,0x820,0x820,0x1010,0x1010,0x1830,0x1830,0xc000,0x2,0x2,0x0,0x0,0x8000,0x0,0x0,0x20004,0x0,0x0,0x0,0x80000,0x2,0x2,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[29];
   private boolean jj_rescan = false;
@@ -3177,7 +3217,7 @@ String VarName() : {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[52];
+    boolean[] la1tokens = new boolean[53];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -3194,7 +3234,7 @@ String VarName() : {
         }
       }
     }
-    for (int i = 0; i < 52; i++) {
+    for (int i = 0; i < 53; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

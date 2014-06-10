@@ -512,9 +512,7 @@ public class Document implements Serializable {
 
   /** Speaker extraction */
   private void findSpeakers(Dictionaries dict) {
-    Boolean useMarkedDiscourseBoolean = annotation.get(CoreAnnotations.UseMarkedDiscourseAnnotation.class);
-    boolean useMarkedDiscourse = (useMarkedDiscourseBoolean != null)? useMarkedDiscourseBoolean: false;
-    if (Constants.USE_GOLD_SPEAKER_TAGS || useMarkedDiscourse) {
+    if(Constants.USE_GOLD_SPEAKER_TAGS) {
       for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
           int utterIndex = w.get(CoreAnnotations.UtteranceAnnotation.class);
