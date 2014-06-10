@@ -50,6 +50,11 @@
       <artifactId>jollyday</artifactId>
       <version>0.4.7</version>
     </dependency>
+    <dependency>
+      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
+      <artifactId>ejml</artifactId>
+      <version>0.19</version>
+    </dependency>
   </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
