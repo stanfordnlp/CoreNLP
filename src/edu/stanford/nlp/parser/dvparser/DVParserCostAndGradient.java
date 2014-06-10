@@ -212,6 +212,12 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
 
   static final double TRAIN_LAMBDA = 1.0;
 
+/**
+ *   
+ * @param tree
+ * @param lambda this is the multiplier for the margin, set to 0 for testing!
+ * @return
+ */
   public List<DeepTree> getAllHighestScoringTreesTest(List<Tree> trees){
 	  List<DeepTree> allBestTrees = new ArrayList<DeepTree>();
 	  for (Tree tree : trees) {
