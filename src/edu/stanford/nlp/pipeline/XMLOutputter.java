@@ -85,10 +85,6 @@ public class XMLOutputter {
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         Element sentElem = new Element("sentence", NAMESPACE_URI);
         sentElem.addAttribute(new Attribute("id", Integer.toString(sentCount)));
-        Integer lineNumber = sentence.get(CoreAnnotations.LineNumberAnnotation.class);
-        if (lineNumber != null) {
-          sentElem.addAttribute(new Attribute("line", Integer.toString(lineNumber)));
-        }
         sentCount ++;
 
         // add the word table with all token-level annotations

@@ -28,7 +28,6 @@ public class IntTuple implements Serializable, Comparable<IntTuple> {
     elements = new int[num];
   }
 
-  @Override
   public int compareTo(IntTuple o) {
     int commonLen = Math.min(o.length(), length());
     for (int i = 0; i < commonLen; i++) {
