@@ -383,7 +383,7 @@ public class TTags {
    * object allocations wherever possible for maximum runtime speed. But
    * intuitively it's just: For English (only),
    * if the VBD tag is present but not VBN, add it, and vice versa;
-   * if the VB tag is present but not VBN, add it, and vice versa.
+   * if the VB tag is present but not VBP, add it, and vice versa.
    *
    * @param tags Known possible tags for the word
    * @return A superset of tags
