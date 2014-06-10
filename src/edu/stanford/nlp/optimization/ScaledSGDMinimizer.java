@@ -7,6 +7,7 @@ import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Pair;
 
@@ -127,6 +128,14 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
   }
 
 
+  public ScaledSGDMinimizer(SeqClassifierFlags flags){
+    bSize = flags.stochasticBatchSize;
+    gain = flags.initialGain;
+    this.numPasses = flags.SGDPasses;
+    this.outputIterationsToFile = flags.outputIterationsToFile;
+  }
+
+
   public ScaledSGDMinimizer(double SGDGain, int batchSize, int sgdPasses){
     this(SGDGain,batchSize,sgdPasses, 1,false);
   }
@@ -135,7 +144,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     this(SGDGain,batchSize,sgdPasses, method,false);
   }
 
-  public ScaledSGDMinimizer(double SGDGain, int batchSize, int sgdPasses, int method, boolean outputToFile) {
+  public ScaledSGDMinimizer(double SGDGain, int batchSize, int sgdPasses, int method,boolean outputToFile){
     bSize = batchSize;
     gain = SGDGain;
     this.numPasses = sgdPasses;
@@ -285,6 +294,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
   private double getRoot(Function<Double,Double> func, double lower, double upper){
     double mid = 0.5*(lower + upper);
+    double fval = 0.0;
     double TOL = 1e-8;
     double skew = 0.4;
     int count = 0;
@@ -293,7 +303,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
       say("LOWER AND UPPER SUPPLIED TO GET ROOT DO NOT BOUND THE ROOT.");
     }
 
-    double fval = func.apply(mid);
+    fval = func.apply(mid);
     while( Math.abs(fval) > TOL ){
       count += 1;
       if( fval > 0 ){
@@ -343,16 +353,16 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
   }
 
-  public static class Weights implements Serializable {
+  public static class weight implements Serializable{
     public double [] w;
     public double [] d;
     private static final long serialVersionUID = 814182172645533781L;
 
-    public Weights(double[] wt){
+    public weight(double[] wt){
       w = wt;
     }
 
-    public Weights(double[] wt,double[] di){
+    public weight(double[] wt,double[] di){
       w = wt;
       d = di;
     }
@@ -369,7 +379,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     System.err.println("Serializing weights to " + serializePath + "...");
 
     try {
-      Weights out = new Weights(weights,diag);
+      weight out = new weight(weights,diag);
       IOUtils.writeObjectToFile(out, serializePath);
     } catch (Exception e) {
       System.err.println("Error serializing to " + serializePath);
@@ -383,9 +393,9 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
     System.err.println("Loading weights from " + loadPath + "...");
     double[] wt;
-    Weights w;
+    weight w;
 
-    w = IOUtils.readObjectFromFile(loadPath);
+    w = (weight) IOUtils.readObjectFromFile(loadPath);
     wt = w.w;
 
     return wt;
@@ -396,9 +406,9 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
     System.err.println("Loading weights from " + loadPath + "...");
     double[] diag;
-    Weights w;
+    weight w;
 
-    w = IOUtils.readObjectFromFile(loadPath);
+    w = (weight) IOUtils.readObjectFromFile(loadPath);
     diag = w.d;
 
     return diag;

@@ -191,12 +191,6 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
                 " is smaller than requested tuning sample size=" + tuningSamples + "!!!");
       }
       sayln("Using sample size=" + tuneSampleSize);
-      if (bSize > totalSamples) {
-        System.err.println("WARNING: Total number of samples=" + totalSamples +
-                " is smaller than requested batch size=" + bSize + "!!!");
-        bSize = totalSamples;
-        sayln("Using batch size=" + bSize);
-      }
     }
 
     x = new double[initial.length];
