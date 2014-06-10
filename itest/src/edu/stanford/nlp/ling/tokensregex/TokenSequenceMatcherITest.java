@@ -1201,8 +1201,14 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("as Bishop of London in", matched.get(3).group());
   }
 
-//  public void testcompile() {
-//    String s = "(?$se diarrhea|fainting|/excessive/ /tiredness/|/fast/ /heartbeat/|tongue|/sore/ /throat/|hoarseness|fever|/muscle/ /aches/|/swelling/ /of/ /the/ /face/|eyes|/difficulty/ /breathing/ /or/ /swallowing/|/or/ /legs/|cough|vomiting|/dizziness/ /or/ /lightheadedness/|rash|headache|lips|arms) []{0,15} (?$dt moexipril)";
-//    TokenSequencePattern p =TokenSequencePattern.compile(s);
-//  }
+  public void testcompile() {
+    String s = "(?$se diarrhea|fainting|/excessive/ /tiredness/|/fast/ /heartbeat/|tongue|/sore/ /throat/|hoarseness|fever|/muscle/ /aches/|/swelling/ /of/ /the/ /face/|eyes|/difficulty/ /breathing/ /or/ /swallowing/|/or/ /legs/|cough|vomiting|/dizziness/ /or/ /lightheadedness/|rash|headache|lips|arms) []{0,15} (?$dt advil)";
+    TokenSequencePattern p =TokenSequencePattern.compile(s);
+    CoreMap doc = createDocument("fainting and advil");
+    // Test sequence with groups
+    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    boolean match = m.find();
+    System.out.println(m.group("$se"));
+    assertTrue(match);
+  }
 }
