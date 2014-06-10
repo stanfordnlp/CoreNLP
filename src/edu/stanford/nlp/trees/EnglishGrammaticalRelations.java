@@ -449,7 +449,7 @@ public class EnglishGrammaticalRelations {
           // this next pattern used to assume no empty NPs. Corrected.  If you adjust this pattern, also adjust the corresponding one for attr!
           "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
           // matches direct object in relative clauses "I saw the book that you bought"
-          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP))",
+          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN) !< (S < (VP < TO))))",
 
           // matches direct object in relative clauses "I saw the book that you said you bought"
           "SBAR !< WHNP|WHADVP < (S < (@NP $++ (VP !$++ NP))) > (VP > (S < NP $- WHNP=target))",
@@ -652,6 +652,21 @@ public class EnglishGrammaticalRelations {
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
+
+  /**
+   * The RELATIVE grammatical relation is only here as a temporary
+   * relation.  This tregex triggering indicates either a dobj or a
+   * pobj should be here.  We figure this out in a post-processing
+   * step by looking at the surrounding dependencies.
+   */
+  public static final GrammaticalRelation RELATIVE =
+    new GrammaticalRelation(Language.English, "rel", "relative",
+        RelativeGRAnnotation.class, COMPLEMENT, "SBAR", tregexCompiler,
+        new String[] {
+          // matches direct object in relative clauses "I saw the book that you bought"
+          "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN) | < (S < (VP < TO)) ] ))",
+        });
+  public static class RelativeGRAnnotation extends GrammaticalRelationAnnotation { }
 
   /**
    * The "referent" grammatical relation.  A
@@ -1562,6 +1577,7 @@ public class EnglishGrammaticalRelations {
       CLAUSAL_COMPLEMENT,
       XCLAUSAL_COMPLEMENT,
       MARKER,
+      RELATIVE,
       REFERENT,
       EXPLETIVE,
       ADJECTIVAL_COMPLEMENT,
