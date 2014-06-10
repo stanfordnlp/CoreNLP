@@ -7,6 +7,8 @@
 
 package edu.stanford.nlp.maxent;
 
+import edu.stanford.nlp.io.InDataStreamFile;
+import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
@@ -26,7 +28,6 @@ import java.util.ArrayList;
  */
 public class Experiments {
 
-  // todo [cdm 2013]: It might be better to change this to an IntPair[]
   /**
    * vArray has dimensions [numTraining][2] and holds the x and y for each training sample.
    * Its length is the number of data points.
@@ -52,7 +53,7 @@ public class Experiments {
   // Changing them to non-static member variables did not break the
   // POS tagger, at least.  A few other places that use this code at a
   // fairly low level are:
-  //
+  // 
   // periphery/src/edu/stanford/nlp/redwoods/Utilities.java and
   //  ProblemSolverHSPG.java.
   // periphery/.../classify/internal/ILogisticRegressionFactory.java
@@ -408,5 +409,70 @@ public class Experiments {
     }
 
   }
+
+
+  /** Currently unused */
+  @SuppressWarnings({"UnusedDeclaration","unused"})
+  private void save(String filename) {
+    try {
+      OutDataStreamFile rF = new OutDataStreamFile(filename);
+      rF.writeInt(xSize);
+      rF.writeInt(ySize);
+      rF.writeInt(vArray.length);
+      for (int i = 0; i < xSize; i++) {
+        rF.writeInt(px[i]);
+      }
+      for (int j = 0; j < ySize; j++) {
+        rF.writeInt(py[j]);
+      }
+      for (int i = 0; i < xSize; i++) {
+        for (int j = 0; j < dim; j++) {
+          rF.writeInt(pxy[i][j]);
+        }
+      }
+
+      rF.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /** Currently unused */
+  @SuppressWarnings("unused")
+  private void read(String filename) {
+    try {
+      InDataStreamFile rF = new InDataStreamFile(filename);
+      xSize = rF.readInt();
+      ySize = rF.readInt();
+      int number = rF.readInt();
+      px = new int[xSize];
+      py = new int[ySize];
+      pxy = new int[xSize][ySize];
+      for (int i = 0; i < xSize; i++) {
+        px[i] = rF.readInt();
+      }
+      for (int j = 0; j < ySize; j++) {
+        py[j] = rF.readInt();
+      }
+      for (int i = 0; i < xSize; i++) {
+        for (int j = 0; j < dim; j++) {
+          pxy[i][j] = rF.readInt();
+        }
+      }
+      rF.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+
+  /*
+  public static void main(String[] args) {
+    int[] hPos = {0, 1, 2, -1, -2};
+    boolean[] isTag = {false, false, false, true, true};
+    TaggerExperiments gophers = new TaggerExperiments("trainhuge.txt",null);
+    gophers.ptilde();
+  }
+  */
 
 }

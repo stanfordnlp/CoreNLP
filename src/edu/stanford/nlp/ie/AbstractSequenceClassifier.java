@@ -96,7 +96,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     return defaultReaderAndWriter;
   }
 
-  private final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
+  private AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
