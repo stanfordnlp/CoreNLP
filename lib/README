@@ -384,6 +384,18 @@ URL: http://code.google.com/p/efficient-java-matrix-library/
 USED BY: Used in deep learning, especially RNN parser
 LAST UPDATE: 2012-07-17
 LAST UPDATE BY: Christopher Manning
+-----------------------------------------------------------------------
+javacc.jar
+ORIGINAL JAR NAME: javacc.jar
+VERSION: 6.0
+RELEASE DATE: August 2013
+SOURCE AVAILABLE: no
+DESCRIPTION: JavaCC is a parser/scanner generator for java
+             compiles .jj and .jjt files to .java
+URL: https://java.net/projects/javacc
+USED BY: tregex, tsurgeon, semgrex
+LAST UPDATE: 2013-08-28
+LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------
 foo.jar
 
