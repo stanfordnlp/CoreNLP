@@ -205,7 +205,6 @@ public class PTBTokenizerTest extends TestCase {
     "Hi! <foo bar=\"baz xy = foo !$*) 422\" > <?PITarget PIContent?> <?PITarget PIContent> Hi!",
     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<?xml-stylesheet type=\"text/xsl\" href=\"style.xsl\"?>\n<book xml:id=\"simple_book\" xmlns=\"http://docbook.org/ns/docbook\" version=\"5.0\">\n",
     "<chapter xml:id=\"chapter_1\"><?php echo $a; ?>\n<!-- This is an SGML/XML comment \"Hi!\" -->\n<p> </p> <p-fix / >",
-    "<a href=\"http:\\\\it's\\here\"> <quote orig_author='some \"dude'/>"
   };
 
   private String[][] sgmlGold = {
@@ -223,9 +222,7 @@ public class PTBTokenizerTest extends TestCase {
     { "<?xml\u00A0version=\"1.0\"\u00A0encoding=\"UTF-8\"\u00A0?>", "<?xml-stylesheet\u00A0type=\"text/xsl\"\u00A0href=\"style.xsl\"?>",
             "<book\u00A0xml:id=\"simple_book\"\u00A0xmlns=\"http://docbook.org/ns/docbook\"\u00A0version=\"5.0\">", },
     { "<chapter\u00A0xml:id=\"chapter_1\">", "<?php\u00A0echo\u00A0$a;\u00A0?>", "<!--\u00A0This\u00A0is\u00A0an\u00A0SGML/XML\u00A0comment\u00A0\"Hi!\"\u00A0-->",
-            "<p>", "</p>", "<p-fix\u00A0/\u00A0>"},
-    { "<a href=\"http:\\\\it's\\here\">", "<quote orig_author='some \"dude'/>"
-    },
+            "<p>", "</p>", "<p-fix\u00A0/\u00A0>", },
   };
 
   public void testPTBTokenizerSGML() {
