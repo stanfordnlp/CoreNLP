@@ -1,4 +1,4 @@
-Stanford Classifier v3.2.0 - 2013-06-19
+Stanford Classifier v2.1.8 - 2013-04-04
 -------------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -75,8 +75,6 @@ LICENSE
 -------------------------
 CHANGES
 -------------------------
-
-2013-06-19    3.2.0     Update for compatibility 
 
 2013-04-04    2.1.8     Update to maintain compatibility 
 
