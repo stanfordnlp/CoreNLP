@@ -637,40 +637,6 @@ public class EnglishGrammaticalRelations {
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
- /*
- 	* The "complementizer" grammatical relation is a discontinued grammatical relation. A
- 	* A complementizer of a clausal complement was the word introducing it.
-  * It only matched "that" or "whether". We've now merged this in with "mark" which plays a similar
-  * role with other clausal modifiers.
-  * <p/>
- 	* <p/>
-  * Example: <br/>
-  * "He says that you like to swim" &rarr;
-  * <code>complm</code>(like, that)
- 	*/
-
-
-
-  /**
-   * The "marker" grammatical relation.  A marker is the word introducing a finite clause subordinate to another clause.
-   * For a complement clause, this will typically be "that" or "whether".
-   * For an adverbial clause, the marker is typically a preposition like "while" or "although".
-   * <p/>
-   * Example: <br/>
-   * "U.S. forces have been engaged in intense fighting after insurgents launched simultaneous attacks" &rarr;
-   * <code>mark</code>(launched, after)
-   */
-  public static final GrammaticalRelation MARKER =
-    new GrammaticalRelation(Language.English, "mark", "marker",
-        MarkerGRAnnotation.class, COMPLEMENT, "SBAR(?:-TMP)?", tregexCompiler,
-        new String[] {
-          "SBAR|SBAR-TMP <, (IN=target !< /^(?i:that|whether)$/) < S|FRAG",
-     	    "SBAR <, (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
-          "SBAR <, (IN|DT=target < That|Whether)"
-        });
-  public static class MarkerGRAnnotation extends GrammaticalRelationAnnotation { }
-
-
   /**
    * The "relative" grammatical relation.  A
    * relative of a relative clause is the head word of the WH-phrase
@@ -787,7 +753,7 @@ public class EnglishGrammaticalRelations {
         AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
         new String[] {
           // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses, first case includes regular in order to purpose clauses
-          "VP < (@SBAR=target [ <, (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
+          "VP < (@SBAR=target [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)))",
@@ -795,7 +761,8 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)", // the last part should probably only be @SQ, but this captures some strays at no cost
           "VP < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))", // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
           "S|SQ < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))",
-          "S|SQ <, (PP=target <, RB)",
+          "S|SQ <, (PP=target <, RB < @S)",
+          "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
           // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // part of former purpcl [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
 
@@ -859,6 +826,38 @@ public class EnglishGrammaticalRelations {
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
         });
   public static class RelativeClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
+
+
+ /*
+ 	* The "complementizer" grammatical relation is a discontinued grammatical relation. A
+ 	* A complementizer of a clausal complement was the word introducing it.
+  * It only matched "that" or "whether". We've now merged this in with "mark" which plays a similar
+  * role with other clausal modifiers.
+  * <p/>
+ 	* <p/>
+  * Example: <br/>
+  * "He says that you like to swim" &rarr;
+  * <code>complm</code>(like, that)
+ 	*/
+
+
+  /**
+   * The "marker" grammatical relation.  A marker is the word introducing a finite clause subordinate to another clause.
+   * For a complement clause, this will typically be "that" or "whether".
+   * For an adverbial clause, the marker is typically a preposition like "while" or "although".
+   * <p/>
+   * Example: <br/>
+   * "U.S. forces have been engaged in intense fighting after insurgents launched simultaneous attacks" &rarr;
+   * <code>mark</code>(launched, after)
+   */
+  public static final GrammaticalRelation MARKER =
+    new GrammaticalRelation(Language.English, "mark", "marker",
+        MarkerGRAnnotation.class, MODIFIER, "SBAR(?:-TMP)?", tregexCompiler,
+        new String[] {
+          "SBAR|SBAR-TMP < (IN|DT=target $++ S|FRAG)",
+     	    "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
+        });
+  public static class MarkerGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
   /**
@@ -1015,8 +1014,13 @@ public class EnglishGrammaticalRelations {
 
 
   /**
-   * The "discourse element" grammatical relation. Discourse elements are interjections, emoticons,
-   * elements that pertain to the discourse.
+   * The "discourse element" grammatical relation. This is used for interjections and
+   * other discourse particles and elements (which are not clearly linked to the structure
+   * of the sentence, except in an expressive way). We generally follow the
+   * guidelines of what the Penn Treebanks count as an INTJ.  They
+   * define this to include: interjections (oh, uh-huh, Welcome), fillers (um, ah),
+   * and discourse markers (well, like, actually, but not: you know).
+   * We also use it for emoticons.
    */
    public static final GrammaticalRelation DISCOURSE_ELEMENT =
     new GrammaticalRelation(Language.English, "discourse", "discourse element",
