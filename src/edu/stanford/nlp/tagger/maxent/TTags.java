@@ -40,7 +40,7 @@ public class TTags {
   /** When making a decision based on the training data as to whether a
    *  tag is closed, this is the threshold for how many tokens can be in
    *  a closed class - purposely conservative.
-   * TODO: make this an option you can set; need to pass in TaggerConfig object and then can say = config.getClosedTagThreshold());
+   * TODO: make this an option you can set
    */
   private final int closedTagThreshold = Integer.valueOf(TaggerConfig.CLOSED_CLASS_THRESHOLD);
 
@@ -154,7 +154,7 @@ public class TTags {
       isEnglish = false;
     } else if(language.equalsIgnoreCase("german")) {
       // The current version of the German tagger is built with the
-      // negra-tiger data set.  We use the STTS tag set.  In
+      // negra-tigra data set.  We use the STTS tag set.  In
       // particular, we use the version with the changes described in
       // appendix A-2 of
       // http://www.uni-potsdam.de/u/germanistik/ls_dgs/tiger1-intro.pdf
