@@ -1834,7 +1834,7 @@ public class StringUtils {
         } else {
           
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-            result.putAll(propFileToTreeMap(args[i + 1], existingArgs));
+            result.putAll(propFileToTreeMap(join(flagArgs," "), existingArgs));
             i++;
             existingArgs.clear();
           } else
