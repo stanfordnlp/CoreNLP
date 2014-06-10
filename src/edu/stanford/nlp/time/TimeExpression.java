@@ -23,15 +23,6 @@ import java.util.List;
 public class TimeExpression extends MatchedExpression {
 
   /**
-   * The CoreMap key for storing a SUTime.TimeIndex (for looking up Timex Id).
-   */
-  public static class TimeIndexAnnotation implements CoreAnnotation<SUTime.TimeIndex> {
-    public Class<SUTime.TimeIndex> getType() {
-      return SUTime.TimeIndex.class;
-    }
-  }
-
-  /**
    * The CoreMap key for storing a TimeExpression annotation.
    */
   public static class Annotation implements CoreAnnotation<TimeExpression> {
