@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import org.junit.*;
@@ -394,6 +391,8 @@ public class MetaClassTest {
     assertArrayEquals(new Integer[]{1,2,3}, ints4);
     Integer[] ints5 = MetaClass.cast("1   2   3", Integer[].class);
     assertArrayEquals(new Integer[]{1,2,3}, ints5);
+    Integer[] ints6 = MetaClass.cast("\n1 \n\n  2   3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints6);
 
     Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
     assertArrayEquals(new Integer[]{}, intsEmpty);
@@ -446,6 +445,29 @@ public class MetaClassTest {
       E v = MetaClass.castWithoutKnowingType(value);
       return new Pointer<E>(v);
     }
+  }
+
+  @Test
+  public void testCastMap() {
+    Map<String, String> a = MetaClass.cast("{ a -> 1, b -> 2 }", Map.class);
+    assertEquals(2, a.size());
+    assertEquals("1", a.get("a"));
+    assertEquals("2", a.get("b"));
+
+    Map<String, String> b = MetaClass.cast("a => 1, b -> 2", Map.class);
+    assertEquals(2, b.size());
+    assertEquals("1", b.get("a"));
+    assertEquals("2", b.get("b"));
+
+    Map<String, String> c = MetaClass.cast("[a->1;b->2]", Map.class);
+    assertEquals(2, c.size());
+    assertEquals("1", c.get("a"));
+    assertEquals("2", c.get("b"));
+
+    Map<String, String> d = MetaClass.cast("\n\na->\n1\n\n\nb->2", Map.class);
+    assertEquals(2, d.size());
+    assertEquals("1", d.get("a"));
+    assertEquals("2", d.get("b"));
   }
 
   @Test
