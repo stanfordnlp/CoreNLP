@@ -237,9 +237,16 @@ public class PropertiesUtils {
   public static String[] getStringArray(Properties props, String key) {
     String[] results = MetaClass.cast(props.getProperty(key), String [].class);
     if (results == null) {
-      results =new String[] {};
+      results = new String[]{};
     }
-    
+    return results;
+  }
+
+  public static String[] getStringArray(Properties props, String key, String[] defaults) {
+    String[] results = MetaClass.cast(props.getProperty(key), String [].class);
+    if (results == null) {
+      results = defaults;
+    }
     return results;
   }
 }
