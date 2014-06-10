@@ -1,12 +1,10 @@
 package edu.stanford.nlp.ling.tokensregex;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Token Sequence Pattern for regular expressions for sequences over tokens (as the more general <code>CoreMap</code>).
@@ -226,9 +224,23 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   public TokenSequenceMatcher getMatcher(List<? extends CoreMap> tokens) {
     return new TokenSequenceMatcher(this, tokens);
   }
-  
+
   @Override
   public String toString(){
     return this.pattern();
+  }
+
+  public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(Collection<TokenSequencePattern> patterns) {
+    return new MultiPatternMatcher<CoreMap>(
+            new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
+                    new CoreMapNodePatternTrigger(patterns)
+            ), patterns);
+  }
+
+  public static MultiPatternMatcher<CoreMap> getMultiPatternMatcher(TokenSequencePattern... patterns) {
+    return new MultiPatternMatcher<CoreMap>(
+            new MultiPatternMatcher.BasicSequencePatternTrigger<CoreMap>(
+                    new CoreMapNodePatternTrigger(patterns)
+            ), patterns);
   }
 }
