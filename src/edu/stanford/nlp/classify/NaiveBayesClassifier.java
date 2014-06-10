@@ -165,5 +165,4 @@ public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifi
     }
   }
 
-
 }
