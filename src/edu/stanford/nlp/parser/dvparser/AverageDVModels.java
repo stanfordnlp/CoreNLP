@@ -90,12 +90,6 @@ public class AverageDVModels {
     return averages;
   }
 
-  /**
-   * Command line arguments for this program:
-   * <br>
-   * -output: the model file to output
-   * -input: a list of model files to input
-   */
   public static void main(String[] args) {
     String outputModelFilename = null;
     List<String> inputModelFilenames = Generics.newArrayList();
