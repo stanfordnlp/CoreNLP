@@ -203,6 +203,10 @@ public class Rules {
   }
 
   public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent){
+    return entityAttributesAgree(mentionCluster, potentialAntecedent, false);
+  }
+
+  public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent, boolean ignoreGender){
     
     boolean hasExtraAnt = false;
     boolean hasExtraThis = false;
@@ -225,14 +229,16 @@ public class Rules {
     hasExtraAnt = false;
     hasExtraThis = false;
 
-    if(!mentionCluster.genders.contains(Gender.UNKNOWN)){
-      for(Gender g : potentialAntecedent.genders){
-        if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) hasExtraAnt = true;
+    if (!ignoreGender) {
+      if(!mentionCluster.genders.contains(Gender.UNKNOWN)){
+        for(Gender g : potentialAntecedent.genders){
+          if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) hasExtraAnt = true;
+        }
       }
-    }
-    if(!potentialAntecedent.genders.contains(Gender.UNKNOWN)){
-      for(Gender g : mentionCluster.genders){
-        if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) hasExtraThis = true;
+      if(!potentialAntecedent.genders.contains(Gender.UNKNOWN)){
+        for(Gender g : mentionCluster.genders){
+          if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) hasExtraThis = true;
+        }
       }
     }
     if(hasExtraAnt && hasExtraThis) return false;
@@ -306,39 +312,6 @@ public class Rules {
         if(dict.allPronouns.contains(antSpan)) continue;
         if(mSpan.equals(antSpan)) matched = true;
         if(mSpan.equals(antSpan+" 's") || antSpan.equals(mSpan+" 's")) matched = true;
-      }
-    }
-    return matched;
-  }
-
-  private static boolean isNamedMention(Mention m, Dictionaries dict, Set<Mention> roleSet) {
-//    if(roleSet.contains(m)) return false;
-//    if(m.isPronominal()) {
-//      return false;
-//    }
-//    String mSpan = m.spanToString().toLowerCase();
-//    if(dict.allPronouns.contains(mSpan)) {
-//      return false;
-//    }
-//    return true;
-    return m.mentionType == MentionType.PROPER;
-  }
-
-  public static boolean entityNameMatch(MentionMatcher mentionMatcher, CorefCluster mentionCluster, CorefCluster potentialAntecedent,
-                                        Document document,
-                                        Dictionaries dict, Set<Mention> roleSet){
-    Boolean matched = false;
-    Mention mainMention = mentionCluster.getRepresentativeMention();
-    Mention antMention = potentialAntecedent.getRepresentativeMention();
-    // Check if the representative mentions are compatible
-    if (isNamedMention(mainMention, dict, roleSet) && isNamedMention(antMention, dict, roleSet)) {
-      matched = mentionMatcher.isCompatible(mainMention, antMention);
-      if (matched != null) {
-        if (!matched) {
-          document.addIncompatible(mainMention, antMention);
-        }
-      } else {
-        matched = false;
       }
     }
     return matched;
