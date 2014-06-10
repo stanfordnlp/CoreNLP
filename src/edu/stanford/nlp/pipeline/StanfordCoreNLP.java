@@ -81,7 +81,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, SERIALIZED }
+  enum OutputFormat { TEXT, XML, SERIALIZED };
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -420,9 +420,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           } else {
             wts = WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
           }
-
-          wts.setCountLineNumbers(true);
-
           return wts;
         } else {
           WordsToSentencesAnnotator wts;
@@ -1147,7 +1144,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 // and class not found exceptions go through.
               } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
-              }
+              } 
             }
             //(read file)
             if (annotation == null) {
