@@ -626,8 +626,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   public double[] getInformationGains() {
 
-//    assert size > 0;
-//    data = trimToSize(data);  // Don't need to trim to size, and trimming is dangerous the dataset is empty (you can't add to it thereafter)
+    data = trimToSize(data);
     labels = trimToSize(labels);
 
     // counts the number of times word X is present
