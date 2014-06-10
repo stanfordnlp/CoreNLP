@@ -287,27 +287,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   Dictionary dict = new Dictionary();
   TTags tags;
 
-  /**
-   * Will return the index of a tag, adding it if it doesn't already exist
-   */
-  public int addTag(String tag) {
-    return tags.add(tag);
-  }
-  /**
-   * Will return the index of a tag if known, -1 if not already known
-   */
-  public int getTagIndex(String tag) {
-    return tags.getIndex(tag);
-  }
-
-  public int numTags() {
-    return tags.getSize();
-  }
-
-  public String getTag(int index) {
-    return tags.getTag(index);
-  }
-
   private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
@@ -328,8 +307,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   static final boolean OCCURRING_TAGS_ONLY = Boolean.valueOf(TaggerConfig.OCCURRING_TAGS_ONLY);
   static final boolean POSSIBLE_TAGS_ONLY = Boolean.valueOf(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
-  private double defaultScore;
-  private double[] defaultScores = null;
+  double defaultScore;
 
   int leftContext;
   int rightContext;
@@ -474,11 +452,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
         defaultScore = config.getDefaultScore();
     }
 
-    // just in case, reset the defaultScores array so it will be
-    // recached later when needed.  can't initialize it now in case we
-    // don't know ysize yet
-    defaultScores = null;
-
     if (config == null || config.getMode() == TaggerConfig.Mode.TRAIN) {
       // initialize the extractors based on the arch variable
       // you only need to do this when training; otherwise they will be
@@ -494,29 +467,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     initted = true;
   }
 
-
-  private synchronized void initDefaultScores() {
-    if (defaultScores == null) {
-      defaultScores = new double[ySize + 1];
-      for (int i = 0; i < ySize + 1; ++i) {
-        defaultScores[i] = Math.log(i * defaultScore);
-      }
-    }
-  }
-
-  /**
-   * Caches a math log operation to save a tiny bit of time
-   */
-  double getInactiveTagDefaultScore(int nDefault) {
-    if (defaultScores == null) {
-      initDefaultScores();
-    }
-    return defaultScores[nDefault];
-  }
-
-  boolean hasApproximateScoring() {
-    return defaultScore > 0.0;
-  }
 
   /**
    * Figures out what tokenizer factory might be described by the

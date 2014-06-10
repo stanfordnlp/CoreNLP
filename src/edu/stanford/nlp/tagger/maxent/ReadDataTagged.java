@@ -115,8 +115,8 @@ public class ReadDataTagged {
         String tag = tags.get(i);
         String word = words.get(i);
         pairs.add(new WordTag(word,tag));
-        int y = maxentTagger.addTag(tag);
-        DataWordTag dat = new DataWordTag(h, y, tag);
+        int y = maxentTagger.tags.add(tag);
+        DataWordTag dat = new DataWordTag(h, y, maxentTagger.tags);
         v.add(dat);
 
         IntCounter<String> tagCounts = wordTagCounts.get(word);
