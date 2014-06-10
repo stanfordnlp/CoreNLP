@@ -243,10 +243,10 @@ public class PrettyLogger {
     } else {
       int index = 0;
       for (T item : iterable) {
-        if (dispatchable(item)) {
+        if (dispatchable(item) && item != iterable) {
           log(channels, "Index " + index, item);
         } else {
-          channels.logf("Index %d: %s", index, item);
+          channels.logf("Index %d: %s", index, item == iterable ? "...<infinite loop>" : item);
         }
         index++;
       }
