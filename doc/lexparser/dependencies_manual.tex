@@ -25,7 +25,8 @@
 %Revised for Stanford Parser v. 1.6.2 in February 2010
 %Revised for Stanford Parser v.~1.6.5 in November 2010
 %Revised for Stanford Parser v.\ 1.6.9 in September 2011
-Revised for Stanford Parser v.\ 2.0.4 in November 2012
+% Revised for Stanford Parser v.\ 2.0.4 in November 2012
+Revised for the Stanford Parser v.\ 2.0.5 in March 2013
 }
 
 \begin{document}
@@ -95,13 +96,6 @@ relations (depending slightly on the options discussed in section~\ref{types}). 
 
 \bigskip
 
-\noindent\textbf{\emph{abbrev}: abbreviation modifier}\\
-An abbreviation modifier of an NP is a parenthesized NP that serves to abbreviate the NP (or to define an abbreviation).
-\begin{tabbing}
-	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\>  ``The Australian Broadcasting Corporation (ABC)" \> \> \emph{abbrev}(Corporation, ABC)\\
-\end{tabbing}
-
 \noindent\textbf{\emph{acomp}: adjectival complement}\\
 An adjectival complement of a verb is an adjectival phrase which functions as the complement (like an object of the verb).
 \begin{tabbing}
@@ -110,11 +104,14 @@ An adjectival complement of a verb is an adjectival phrase which functions as th
 \end{tabbing}
 
 \noindent\textbf{\emph{advcl}: adverbial clause modifier}\\
-An adverbial clause modifier of a VP or S is a clause modifying the verb (temporal clause, consequence, conditional clause, etc.).
+An adverbial clause modifier of a VP or S is a clause modifying the
+verb (temporal clause, consequence, conditional clause, purpose
+clause, etc.).
 \begin{tabbing}
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \> ``The accident happened as the night was falling" \> \> \emph{advcl}(happened, falling)\\
 \> ``If you know who did it, you should tell the teacher" \> \> \emph{advcl}(tell, know)\\
+\> ``He talked to him in order to secure the account" \>  \> \emph{advcl}(talked, secure)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{advmod}: adverbial modifier}\\
@@ -127,6 +124,9 @@ An adverbial modifier of a word is a (non-clausal) adverb or adverbial phrase (A
 
 \noindent\textbf{\emph{agent}: agent}\\
 An agent is the complement of a passive verb which is introduced by the preposition ``by" and does the action.
+This relation only appears in the collapsed dependencies, where it can
+replace \emph{prep\_by}, where appropriate. It does not appear in
+basic dependencies output.
 \begin{tabbing}
 \hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
 \>  ``The man has been killed by the police" \> \> \emph{agent}(killed, police)\\
@@ -141,12 +141,32 @@ An adjectival modifier of an NP is any adjectival phrase that serves to modify t
 \end{tabbing}
 
 \noindent\textbf{\emph{appos}: appositional modifier}\\
-An appositional modifier of an NP is an NP immediately to the right of the first NP that serves to define or modify that NP. It includes parenthesized examples.
-\begin{tabbing}
-\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Sam, my brother" \> \> \emph{appos}(Sam, brother)\\
-\>  ``Bill (John's cousin)" \> \> \emph{appos}(Bill, cousin)\\
-\end{tabbing}
+An appositional modifier of an NP is an NP immediately to the right of
+the first NP that serves to define or modify that NP. It includes
+parenthesized examples, as well as defining abbreviations in one of
+these structures
+\begin{quote}
+\begin{dependency}
+   \begin{deptext}[column sep=0.2em]
+      Sam \&, \& my \& brother \& , \& arrived \\
+   \end{deptext}
+   \depedge[edge unit distance=0.5ex]{1}{4}{appos}
+\end{dependency}
+\hspace*{1in}
+\begin{dependency}
+   \begin{deptext}[column sep=0.2em]
+      Bill\& ( \& John \& 's \& cousin \& ) \\
+   \end{deptext}
+   \depedge[edge unit distance=0.5ex]{1}{5}{appos}
+\end{dependency}
+
+\begin{dependency}
+   \begin{deptext}[column sep=0.2em]
+      The \& Australian \& Broadcasting \& Corporation \& ( \& ABC \& ) \\
+   \end{deptext}
+   \depedge[edge unit distance=1ex]{4}{6}{appos}
+\end{dependency}
+\end{quote}
 
 \noindent\textbf{\emph{attr}: attributive}\\
 An attributive is a complement of a copular verb such as ``to be", ``to seem", ``to appear". Currently, the converter only recognizes WHNP complements.
@@ -157,19 +177,21 @@ An attributive is a complement of a copular verb such as ``to be", ``to seem", `
 
 \noindent \textbf{\emph{aux}: auxiliary}\\
 An auxiliary of a clause is a non-main verb of the clause, e.g.\@ modal auxiliary, ``be" and ``have" in a composed tense.
-\begin{tabbing}
-\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\> ``Reagan has died"  \> \>  \emph{aux}(died, has)\\
- \> ``He should leave'' \> \> \emph{aux}(leave, should)\\
-\end{tabbing}
+\begin{quote}
 \begin{dependency}
-   \begin{deptext}[column sep=0.2cm]
-      Reagan \&[.5cm] has \& died \\
+   \begin{deptext}[column sep=0.25cm]
+      Reagan \& has \& died \\
    \end{deptext}
    \depedge{3}{2}{aux}
-   \depedge{3}{1}{nsubj}
-   \deproot{3}{root}
 \end{dependency}
+\hspace*{1in}
+\begin{dependency}
+   \begin{deptext}[column sep=0.25cm]
+      He \& should \& leave \\
+   \end{deptext}
+   \depedge{3}{2}{aux}
+\end{dependency}
+\end{quote}
 
 \noindent \textbf{\emph{auxpass}: passive auxiliary}\\
 A passive auxiliary of a clause is a non-main verb of the clause which contains the passive information.
@@ -199,13 +221,6 @@ A clausal complement of a verb or adjective is a dependent clause with an intern
 \>  ``He says that you like to swim" \> \> \emph{ccomp}(says, like)\\
 \hspace{1cm} \> ``I am certain that he did it" \> \>  \emph{ccomp}(certain, did)\\
 \hspace{1cm} \> ``I admire the fact that you are honest'' \>\> \emph{ccomp}(fact, honest)\\
-\end{tabbing}
-
-\noindent\textbf{\emph{complm}: complementizer}\\
-A complementizer of a clausal complement (\emph{ccomp}) is the word introducing it. It will be the subordinating conjunction ``that'' or ``whether''.
-\begin{tabbing}
-\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``He says that you like to swim" \> \> \emph{complm}(like, that)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{conj}: conjunct}\\
@@ -254,6 +269,23 @@ A determiner is the relation between the head of an NP and its determiner.
 \> ``Which book do you prefer?" \> \> \emph{det}(book, which)\\
 \end{tabbing}
 
+\noindent\textbf{\emph{discourse}: discourse element}\\
+This is used for interjections and other discourse particles and
+elements (which are not clearly linked to the structure of the
+sentence, except in an expressive way). We generally follow the
+guidelines of the what the Penn Treebanks count as an INTJ.  They
+define this to include: interjections (\emph{oh}, \emph{uh-huh},
+\emph{Welcome}), fillers (\emph{um}, \emph{ah}), and discourse 
+markers (\emph{well}, \emph{like}, \emph{actually}, but not \emph{you know}).
+\begin{quote}
+\begin{dependency}
+   \begin{deptext}[column sep=0.25cm]
+      Iguazu \& is \& in \& Argentina \& :) \\
+   \end{deptext}
+   \depedge[edge unit distance=0.4ex]{2}{5}{discourse}
+\end{dependency}
+\end{quote}
+
 \noindent\textbf{\emph{dobj}: direct object}\\
 The direct object of a VP is the noun phrase which is the (accusative) object of the verb.
 \begin{tabbing}
@@ -262,12 +294,28 @@ The direct object of a VP is the noun phrase which is the (accusative) object of
 \hspace{1cm} \> ``They win the lottery" \> \>  \emph{dobj}(win, lottery)\\
 \end{tabbing}
 
+
 \noindent\textbf{\emph{expl}: expletive}\\
 This relation captures an existential ``there". The main verb of the clause is the governor.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
 \> ``There is a ghost in the room" \>\> \emph{expl}(is, There)\\
 \end{tabbing}
+
+\noindent\textbf{\emph{goeswith}: goes with}\\
+This relation links two parts of a word that are separated in text
+that is not well edited. We follow the treebank: The GW part is the
+dependent and the head is in some sense the ``main'' part, often the
+second part.
+\begin{quote}
+\begin{dependency}
+   \begin{deptext}[column sep=0.2em]
+      They \& come \& here \& with \& out \& legal \& permission \\
+   \end{deptext}
+   \depedge[edge unit distance=2.5ex]{5}{4}{goeswith}
+\end{dependency}
+\end{quote}
+
 
 \noindent\textbf{\emph{infmod}: infinitival modifier}\\
 An infinitival modifier of an NP is an infinitive that serves to modify the meaning of the NP.
@@ -285,11 +333,34 @@ The indirect object of a VP is the noun phrase which is the (dative) object of t
 \end{tabbing}
 
 \noindent\textbf{\emph{mark}: marker}\\
-A marker of an adverbial clausal complement (\emph{advcl}) is the word introducing it. It will be a subordinating conjunction different from ``that'' or ``whether'': e.g.\@ ``because'', ``when'', ``although'', etc.
+A marker is the word introducing a finite clause subordinate to another clause.
+For a complement clause, this will typically be ``that'' or ``whether''.
+For an adverbial clause, the marker is typically a preposition like ``while'' or ``although''.
+\begin{quote}
+\begin{dependency}
+   \begin{deptext}[column sep=0.2em]
+      Forces \& engaged \& in \& fighting \& after \& insurgents \&  attacked
+% \& \hspace*{3em}\emph{mark}(attacked, after)
+\\
+   \end{deptext}
+   \depedge[edge unit distance=1ex]{7}{5}{mark}
+\end{dependency}
+
+\begin{dependency}
+   \begin{deptext}[column sep=0.2em]
+      He \& says \& that \& you \& like \& to \& swim
+%  \& \&  \hspace*{3em} \emph{complm}(like, that) 
+\\
+   \end{deptext}
+   \depedge[edge unit distance=0.5ex]{7}{3}{mark}
+\end{dependency}
+\end{quote}
+
+
 \begin{tabbing}
-\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
- \> ``Forces engaged in fighting after insurgents attacked" \> \> \emph{mark}(attacked, after)\\
+\\
 \end{tabbing}
+
 
 \noindent\textbf{\emph{mwe}: multi-word expression}\\
 The multi-word expression (modifier) relation is used for certain multi-word idioms
@@ -461,13 +532,6 @@ This is used for any piece of punctuation in a clause, if punctuation is being r
 \> ``Go home!" \> \> \emph{punct}(Go, !)\\
 \end{tabbing}
 
-\noindent\textbf{\emph{purpcl}: purpose clause modifier}\\
-A purpose clause modifier of a VP is a clause headed by ``(in order) to" specifying a purpose. At present the system only recognizes ones that have ``in order to'' as otherwise the system is unable to distinguish from the surface representations between these and open clausal complements (\emph{xcomp}). It can also recognize fronted ``to" purpose clauses in sentences.
-\begin{tabbing}
-\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{1cm}\=  \kill
-\> ``He talked to him in order to secure the account" \>  \> \emph{purpcl}(talked, secure)\\
-\end{tabbing}
-
 \noindent\textbf{\emph{quantmod}: quantifier phrase modifier}\\
 A quantifier modifier is an element modifying the head of a QP constituent.  (These are modifiers in complex numeric quantifiers, not other types of ``quantification''.  Quantifiers like ``all'' become det.)
 \begin{tabbing}
@@ -545,12 +609,12 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
 	  \> \> \> \emph{attr} - attributive \\
 	  \> \> \> \emph{ccomp} - clausal complement with internal subject \\
       \> \> \> \emph{xcomp} -  clausal complement with external subject\\
-      \> \> \> \emph{complm} - complementizer \\
       \> \> \> \emph{obj} - object \\
         \> \> \> \> \emph{dobj} - direct object \\
         \> \> \> \> \emph{iobj} - indirect object \\
         \> \> \> \> \emph{pobj} - object of preposition \\
-      \> \> \> \emph{mark} - marker (word introducing an \emph{advcl})\\
+      \> \> \> \emph{mark} - marker (word introducing an \emph{advcl}
+      or \emph{ccomp})\\
       \> \> \> \emph{rel} - relative (word introducing a \emph{rcmod})\\
 	\> \>  \emph{subj} - subject \\
 	      \> \> \> \emph{nsubj} - nominal subject \\
@@ -561,12 +625,10 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
  \> \emph{conj} - conjunct \\
  \> \emph{expl} - expletive (expletive ``there") \\
  \> \emph{mod} - modifier \\
- 	\> \> \emph{abbrev} - abbreviation modifier \\
-  	\> \> \emph{amod} - adjectival modifier \\
-  	\> \> \emph{appos} - appositional modifier \\
+    \> \> \emph{amod} - adjectival modifier \\
+    \> \> \emph{appos} - appositional modifier \\
     \> \> \emph{advcl} - adverbial clause modifier \\
-    \> \> \emph{purpcl} - purpose clause modifier \\
-	\> \> \emph{det} - determiner \\
+    \> \> \emph{det} - determiner \\
     \> \> \emph{predet} - predeterminer\\
     \> \> \emph{preconj} - preconjunct \\
     \> \> \emph{infmod} - infinitival modifier \\
@@ -779,7 +841,7 @@ The design philosophy of SD has been to maximize dependencies between content wo
 
 \bigskip
 
-{\footnotesize
+{\scriptsize
 \noindent
 \begin{tabular} {@{}llll@{}} \hline
 	\textbf{basic} & \textbf{collapsed} & \textbf{propagation} &\textbf{collapsed tree} \\ \hline
@@ -867,19 +929,18 @@ In practice, two classes can be used to get the typed dependencies of a sentence
 \subsubsection*{$\star$ \textbf{edu.stanford.nlp.parser.lexparser.LexicalizedParser}}
 
 If you need to parse texts and want to get different formatting options for the parse tree, you should use this class. To get the dependencies, add \texttt{typedDependencies} in the \texttt{-outputFormat} option. By default, this will give you collapsed dependencies with propagation of conjunct dependencies. If you want another representation, specify it in the \texttt{-outputFormatOptions} using the following commands according to the type of dependency representation you want:
-\begin{tabbing}
-\hspace{0.3cm} \= \texttt{nonCollapsedDependenciesSeparated} \= \hspace{.3cm} \= \kill
-\> \texttt{basicDependencies} \>\> basic dependencies\\
-\> \texttt{collapsedDependencies} \>\> collapsed dependencies (not necessarily a tree structure)\\
-\> \texttt{CCPropagatedDependencies} \>\>  collapsed dependencies with propagation of conjunct \\
-\>                                  \> \> dependencies (not necessarily a tree structure) \\
-\>                             \> \> [this representation is the default, if no option is specified]\\
-\> \texttt{treeDependencies} \>\> collapsed dependencies that preserve a tree structure\\
-\> \texttt{nonCollapsedDependencies} \>\> non-collapsed dependencies: basic dependencies as well as\\
-\>									\>\> the extra ones which do not preserve a tree structure\\
-\> \texttt{nonCollapsedDependenciesSeparated} \>\> non-collapsed dependencies where the basic dependencies\\
-\> 										      \>\> are separated from the extra ones (by ``======")\\
-\end{tabbing}
+
+\begin{description}
+\item[\texttt{basicDependencies}] Basic dependencies.
+\item[\texttt{collapsedDependencies}] Collapsed dependencies (not necessarily a tree structure).
+\item[\texttt{CCPropagatedDependencies}] Collapsed dependencies with propagation of conjunct 
+dependencies (not necessarily a tree structure).  [This representation is the default, if no option is specified.]
+\item[\texttt{treeDependencies}] Collapsed dependencies that preserve a tree structure.
+\item[\texttt{nonCollapsedDependencies}]  Non-collapsed dependencies: basic dependencies as well as
+ the extra ones which do not preserve a tree structure.
+\item[\texttt{nonCollapsedDependenciesSeparated}] Non-collapsed dependencies where the basic dependencies
+are separated from the extra ones (by ``======").
+\end{description}
 
 \noindent You should also use the \texttt{-retainTmpSubcategories}
 option to get best performance in recognizing temporal
@@ -899,8 +960,8 @@ representation of the sentences.
 \begin{quote}
 \hspace*{-0.375in}%
 Java example: \\
-\small\texttt{LexicalizedParser lp = \\
-\hspace*{0.2in}LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz",\\
+\small\texttt{LexicalizedParser lp = LexicalizedParser.loadModel(\\
+\hspace*{1.5in}"edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz",\\
 \hspace*{1.5in}"-maxLength", "80", "-retainTmpSubcategories"); \\
 TreebankLanguagePack tlp = new PennTreebankLanguagePack(); \\
 GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();}
@@ -1062,7 +1123,32 @@ The SD representation has also been used in other domains.  It is a common repre
 extracting opinions, sentiment, and relations
 \citep{Zhuang06cikm,Meena07sentiment,Banko07,Zouaq06tai,Zouaq07tel,chaumartin07knowledge,kessler08icwsm,Haghighi10,Hassan10,Joshi2010,Wu2010,Zouaq10}, as well as specific information (such as event, time or dialogue acts) \citep{Chambers11,McClosky12,Kluwer10}. The tool has been consistently used by several groups in the \textsc{Pascal}/NIST challenges targeting textual entailment \citep{adams-EtAl:2007:WTEP,blake:2007:WTEP,chambers-EtAl:2007:WTEP,harmeling:2007:WTEP,wang-neumann:2007:WTEP,Malakasiotis09,Mehdad09,Shivare2010,Glinos2010,Kouylekov2010,Pakray2011a}. It is also used for a variety of other tasks, such as coreference resolution, disagreement detection and word sense induction \citep{Chen12,Abbott11,Lau12}, as well as part of the preprocessing for machine translation systems by several groups \citep{xu09using,genzel10automatically,singh10statistical}.
 
-The Stanford dependency representation has also served as a model for developing dependency schemes in other languages. Recently schemes based on the Stanford dependency representation have been proposed for Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10}, Persian \citep{Seraji12}, and French \citep{Maarouf12}. Recently, it has been used to evaluate parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
+The Stanford dependency representation has also served as a model for
+developing dependency schemes in other languages. Recently schemes
+based on the Stanford dependency representation have been proposed for
+Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10},
+Persian \citep{Seraji12}, and French \citep{Maarouf12}. Recently, it
+has been used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
+
+\section{Recent changes}
+
+This section summarizes recent changes. This may help if you see old
+versions of the dependencies, or need to update your code.
+
+\begin{description}
+\item[abbrev] was removed as a relation.  It is now a particular case
+  of an \emph{appos}.
+\item[compl] was removed as a relation. It is now a particular case of
+  \emph{mark}. This follows HPSG-like usage, where the complementizer
+  is a mark on the clause.
+\item[discourse] was introduced. The lack of a dependency type for
+  interjections was an omission even in the early versions, but it
+  became more essential as we expanded our consideration of informal
+  text types.
+\item[goeswith] was introduced. It is useful on badly edited text.
+\item[purpcl] was removed as a relation. It is now a particular case
+  of an \emph{advcl}.
+\end{description}
 
 
 \bibliographystyle{plainnat}
