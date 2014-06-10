@@ -366,6 +366,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         String sentenceEndingTags =
           properties.getProperty("clean.sentenceendingtags",
                             CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS);
+        String singleSentenceTags =
+                properties.getProperty("clean.singlesentencetags",
+                        CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS);
         String allowFlawedString = properties.getProperty("clean.allowflawedxml");
         boolean allowFlawed = CleanXmlAnnotator.DEFAULT_ALLOW_FLAWS;
         if (allowFlawedString != null)
@@ -392,6 +395,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             sentenceEndingTags,
             dateTags,
             allowFlawed);
+        annotator.setSingleSentenceTagMatcher(singleSentenceTags);
         annotator.setDocIdTagMatcher(docIdTags);
         annotator.setDocTypeTagMatcher(docTypeTags);
         annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
@@ -408,6 +412,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 "clean.sentenceendingtags:" +
                 properties.getProperty("clean.sentenceendingtags",
                   CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS) +
+                "clean.sentenceendingtags:" +
+                properties.getProperty("clean.singlesentencetags",
+                        CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS) +
                 "clean.allowflawedxml:" +
                 properties.getProperty("clean.allowflawedxml", "") +
                 "clean.datetags:" +
@@ -424,7 +431,10 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                   CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS) +
                 "clean.speakertags:" +
                 properties.getProperty("clean.speakertags",
-                  CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
+                  CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS) +
+                "clean.docAnnotations:" +
+                properties.getProperty("clean.docAnnotations",
+                  CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
       }
     });
 
@@ -1424,7 +1434,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     else if(props.containsKey("filelist")){
       String fileName = props.getProperty("filelist");
-      Collection<File> files = readFileList(fileName);
+      Collection<File> inputfiles = readFileList(fileName);
+      Collection<File> files = new ArrayList<File>(inputfiles.size());
+      for (File file:inputfiles) {
+        if (file.isDirectory()) {
+          files.addAll(new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true));
+        } else {
+          files.add(file);
+        }
+      }
       pipeline.processFiles(null, files, numThreads);
     }
 
