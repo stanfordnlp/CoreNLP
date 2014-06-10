@@ -203,10 +203,6 @@ public class Rules {
   }
 
   public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent){
-    return entityAttributesAgree(mentionCluster, potentialAntecedent, false);
-  }
-
-  public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent, boolean ignoreGender){
     
     boolean hasExtraAnt = false;
     boolean hasExtraThis = false;
@@ -229,16 +225,14 @@ public class Rules {
     hasExtraAnt = false;
     hasExtraThis = false;
 
-    if (!ignoreGender) {
-      if(!mentionCluster.genders.contains(Gender.UNKNOWN)){
-        for(Gender g : potentialAntecedent.genders){
-          if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) hasExtraAnt = true;
-        }
+    if(!mentionCluster.genders.contains(Gender.UNKNOWN)){
+      for(Gender g : potentialAntecedent.genders){
+        if(g!=Gender.UNKNOWN && !mentionCluster.genders.contains(g)) hasExtraAnt = true;
       }
-      if(!potentialAntecedent.genders.contains(Gender.UNKNOWN)){
-        for(Gender g : mentionCluster.genders){
-          if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) hasExtraThis = true;
-        }
+    }
+    if(!potentialAntecedent.genders.contains(Gender.UNKNOWN)){
+      for(Gender g : mentionCluster.genders){
+        if(g!=Gender.UNKNOWN && !potentialAntecedent.genders.contains(g)) hasExtraThis = true;
       }
     }
     if(hasExtraAnt && hasExtraThis) return false;
@@ -329,7 +323,6 @@ public class Rules {
       Dictionaries dict,
       Set<Mention> roleSet){
     if(roleSet.contains(mention)) return false;
-    if(mention.mentionType == MentionType.LIST || ant.mentionType == MentionType.LIST) return false;
     if(mention.isPronominal() || ant.isPronominal()
         || dict.allPronouns.contains(mention.spanToString().toLowerCase())
         || dict.allPronouns.contains(ant.spanToString().toLowerCase())) return false;
@@ -590,11 +583,13 @@ public class Rules {
       int mUtter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(mUtter - 1)) {
         String previousSpeaker = document.speakers.get(mUtter - 1);
-        int previousSpeakerCorefClusterID = getSpeakerClusterId(document, previousSpeaker);
-        if (previousSpeakerCorefClusterID < 0) {
+        int previousSpeakerID;
+        try {
+          previousSpeakerID = Integer.parseInt(previousSpeaker);
+        } catch (Exception e) {
           return true;
         }
-        if (ant.corefClusterID != previousSpeakerCorefClusterID && ant.person != Person.I) {
+        if (ant.corefClusterID != document.allPredictedMentions.get(previousSpeakerID).corefClusterID && ant.person != Person.I) {
           return true;
         }
       } else {
@@ -604,11 +599,13 @@ public class Rules {
       int aUtter = ant.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(aUtter - 1)) {
         String previousSpeaker = document.speakers.get(aUtter - 1);
-        int previousSpeakerCorefClusterID = getSpeakerClusterId(document, previousSpeaker);
-        if (previousSpeakerCorefClusterID < 0) {
+        int previousSpeakerID;
+        try {
+          previousSpeakerID = Integer.parseInt(previousSpeaker);
+        } catch (Exception e) {
           return true;
         }
-        if (m.corefClusterID != previousSpeakerCorefClusterID && m.person != Person.I) {
+        if (m.corefClusterID != document.allPredictedMentions.get(previousSpeakerID).corefClusterID && m.person != Person.I) {
           return true;
         }
       } else {
@@ -628,40 +625,21 @@ public class Rules {
       return false;
     }
 
-    // Speakers are the same if the speaker strings are the same (most common case?)
-    if (mSpeakerStr.equals(antSpeakerStr)) {
-      return true;
-    } else {
-      // Speakers are also the same if they map to the same cluster id...
-      int mSpeakerClusterID = getSpeakerClusterId(document, mSpeakerStr);
-      int antSpeakerClusterID = getSpeakerClusterId(document, antSpeakerStr);
-      if (mSpeakerClusterID >= 0 && antSpeakerClusterID >= 0) {
-        return (mSpeakerClusterID == antSpeakerClusterID);
-      } else {
-        return false;
-      }
-    }
-  }
-
-  /**
-   * Given the name of a speaker, returns the coref cluster id it belows to (-1 if no cluster)
-   * @param document
-   * @param speakerString
-   * @return
-   */
-  public static int getSpeakerClusterId(Document document, String speakerString) {
-    int speakerClusterId = -1;
-    if (speakerString != null && NumberMatchingRegex.isDecimalInteger(speakerString)) {
+    int mSpeakerID;
+    int antSpeakerID;
+    if (NumberMatchingRegex.isDecimalInteger(mSpeakerStr) && NumberMatchingRegex.isDecimalInteger(antSpeakerStr)) {
       try {
-        int speakerMentionId = Integer.parseInt(speakerString);
-        Mention mention = document.allPredictedMentions.get(speakerMentionId);
-        if (mention != null) {
-          speakerClusterId = mention.corefClusterID;
-        }
+        mSpeakerID = Integer.parseInt(mSpeakerStr);
+        antSpeakerID = Integer.parseInt(ant.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
       } catch (Exception e) {
+        return (m.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals(ant.headWord.get(CoreAnnotations.SpeakerAnnotation.class)));
       }
+    } else {
+      return (m.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals(ant.headWord.get(CoreAnnotations.SpeakerAnnotation.class)));
     }
-    return speakerClusterId;
+    int mSpeakerClusterID = document.allPredictedMentions.get(mSpeakerID).corefClusterID;
+    int antSpeakerClusterID = document.allPredictedMentions.get(antSpeakerID).corefClusterID;
+    return (mSpeakerClusterID == antSpeakerClusterID);
   }
 
   public static boolean entitySubjectObject(Mention m1, Mention m2) {
