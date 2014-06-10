@@ -24,7 +24,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * @author John Bauer
  */
 public class AverageDVModels {
-  public static TwoDimensionalSet<String, String> getMatrixNames(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
+  public static TwoDimensionalSet<String, String> getBinaryMatrixNames(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
     TwoDimensionalSet<String, String> matrixNames = new TwoDimensionalSet<String, String>();
     for (TwoDimensionalMap<String, String, SimpleMatrix> map : maps) {
       for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : map) {
@@ -34,7 +34,7 @@ public class AverageDVModels {
     return matrixNames;
   }
 
-  public static Set<String> getMatrixNames(List<Map<String, SimpleMatrix>> maps) {
+  public static Set<String> getUnaryMatrixNames(List<Map<String, SimpleMatrix>> maps) {
     Set<String> matrixNames = Generics.newHashSet();
     for (Map<String, SimpleMatrix> map : maps) {
       for (Map.Entry<String, SimpleMatrix> entry : map.entrySet()) {
@@ -46,7 +46,7 @@ public class AverageDVModels {
 
   public static TwoDimensionalMap<String, String, SimpleMatrix> averageBinaryMatrices(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
     TwoDimensionalMap<String, String, SimpleMatrix> averages = new TwoDimensionalMap<String, String, SimpleMatrix>();
-    for (Pair<String, String> binary : getMatrixNames(maps)) {
+    for (Pair<String, String> binary : getBinaryMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
       for (TwoDimensionalMap<String, String, SimpleMatrix> map : maps) {
@@ -69,7 +69,7 @@ public class AverageDVModels {
 
   public static Map<String, SimpleMatrix> averageUnaryMatrices(List<Map<String, SimpleMatrix>> maps) {
     Map<String, SimpleMatrix> averages = Generics.newHashMap();
-    for (String name : getMatrixNames(maps)) {
+    for (String name : getUnaryMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
       for (Map<String, SimpleMatrix> map : maps) {
