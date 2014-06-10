@@ -28,8 +28,7 @@ public class PTBTokenizerTest extends TestCase {
     "I can't believe they wanna keep 40% of that.\"\n``Whatcha think?''\n\"I don't --- think so...,\"",
     "You `paid' US$170,000?!\nYou should've paid only$16.75.",
     "1. Buy a new Chevrolet (37%-owned in the U.S..) . 15%",
-    "I like you ;-) but do you care :(. I'm happy ^_^ but shy (x.x)!",
-    "Diamond (``Not even the chair'') lives near Udaipur (84km). {1. A potential Palmer trade:}",
+    "I like you ;-) but do you care )8<. I'm happy (^_^) but shy x.x!",
   };
 
   private String[][] ptbGold = {
@@ -52,10 +51,8 @@ public class PTBTokenizerTest extends TestCase {
     { "1", ".", "Buy", "a", "new", "Chevrolet",
       "-LRB-", "37", "%", "-", "owned", "in", "the", "U.S.", ".", "-RRB-", ".", "15", "%" },
           // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
-    { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
-      "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
-    { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
-      "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
+    { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  "-RRB-8<", ".",
+      "I", "'m", "happy", "-LRB-^_^-RRB-", "but", "shy", "x.x", "!" },
   };
 
   public void testPTBTokenizerWord() {
