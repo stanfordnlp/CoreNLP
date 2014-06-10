@@ -832,41 +832,15 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       return featureGrouping;
     else {
       List<Set<Integer>> groups = new ArrayList<Set<Integer>>();
-      if (flags.groupByInput) {
-        for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
+      for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
+        for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
           Set<Integer> newSet = new HashSet<Integer>();
-          for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
-            for (int hiddenUnitIndex = 0; hiddenUnitIndex < numHiddenUnits; hiddenUnitIndex++) {
-              int firstLayerIndex = hiddenUnitIndex * numClasses + outputClassIndex;
-              int oneDIndex = firstLayerIndex * numNodeFeatures + nodeFeatureIndex + edgeParamCount;
-              newSet.add(oneDIndex);
-            }
+          for (int hiddenUnitIndex = 0; hiddenUnitIndex < numHiddenUnits; hiddenUnitIndex++) {
+            int firstLayerIndex = hiddenUnitIndex * numClasses + outputClassIndex;
+            int oneDIndex = firstLayerIndex * numNodeFeatures + nodeFeatureIndex + edgeParamCount;
+            newSet.add(oneDIndex);
           }
           groups.add(newSet);
-        }
-      } else if (flags.groupByHiddenUnit) {
-        for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
-          for (int hiddenUnitIndex = 0; hiddenUnitIndex < numHiddenUnits; hiddenUnitIndex++) {
-            Set<Integer> newSet = new HashSet<Integer>();
-            for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
-              int firstLayerIndex = hiddenUnitIndex * numClasses + outputClassIndex;
-              int oneDIndex = firstLayerIndex * numNodeFeatures + nodeFeatureIndex + edgeParamCount;
-              newSet.add(oneDIndex);
-            }
-            groups.add(newSet);
-          }
-        }
-      } else {
-        for (int nodeFeatureIndex = 0; nodeFeatureIndex < numNodeFeatures; nodeFeatureIndex++) { // for each node feature, we enforce the sparsity
-          for (int outputClassIndex = 0; outputClassIndex < numClasses; outputClassIndex++) {
-            Set<Integer> newSet = new HashSet<Integer>();
-            for (int hiddenUnitIndex = 0; hiddenUnitIndex < numHiddenUnits; hiddenUnitIndex++) {
-              int firstLayerIndex = hiddenUnitIndex * numClasses + outputClassIndex;
-              int oneDIndex = firstLayerIndex * numNodeFeatures + nodeFeatureIndex + edgeParamCount;
-              newSet.add(oneDIndex);
-            }
-            groups.add(newSet);
-          }
         }
       }
 
