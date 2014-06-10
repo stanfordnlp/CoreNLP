@@ -49,6 +49,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     int padLength = length + leftWindow + rightWindow;
     if (linearConstraints != null && linearConstraints.length != padLength)
       throw new RuntimeException("linearConstraints.length (" +  linearConstraints.length + ") does not match padLength (" + padLength + ") of SequenceModel" + ", length=="+length+", leftW="+leftWindow+", rightW="+rightWindow);
+
     int[][] tags = new int[padLength][];
     int[] tagNum = new int[padLength];
     if (DEBUG) { System.err.println("Doing bestSequence length " + length + "; leftWin " + leftWindow + "; rightWin " + rightWindow + "; padLength " + padLength); }
