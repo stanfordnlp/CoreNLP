@@ -66,7 +66,7 @@ class ListInstances {
 
   /*
   Methods unused: commented for now.
-  public void save(DataOutputStream rf) {
+  public void save(OutDataStreamFile rf) {
     try {
       rf.writeInt(v.size());
       int[] arr = getInstances();
@@ -78,7 +78,7 @@ class ListInstances {
     }
   }
 
-  public void read(DataInputStream rf) {
+  public void read(InDataStreamFile rf) {
     try {
       int len = rf.readInt();
       for (int i = 0; i < len; i++) {
@@ -182,7 +182,7 @@ public class TemplateHash {
   }
 
   /* Methods unused. Commented for now.
-  public void save(DataOutputStream rf) {
+  public void save(OutDataStreamFile rf) {
     try {
       Pair[] keys = new Pair[tempHash.keySet().size()];
       tempHash.keySet().toArray(keys);
