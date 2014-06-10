@@ -1265,6 +1265,8 @@ public class SeqClassifierFlags implements Serializable {
         }
       } else if (key.equalsIgnoreCase("useSum")) {
         useSum = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("verbose")) {
+        verboseMode = Boolean.parseBoolean(val);        
       } else if (key.equalsIgnoreCase("verboseMode")) {
         verboseMode = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("tolerance")) {

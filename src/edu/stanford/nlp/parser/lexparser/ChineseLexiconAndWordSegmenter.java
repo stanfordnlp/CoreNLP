@@ -8,7 +8,6 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.process.WordSegmentingTokenizer;
 import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack;
@@ -39,7 +38,6 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
   public ChineseLexiconAndWordSegmenter(ChineseLexicon lex, WordSegmenter seg) {
     chineseLexicon = lex;
     wordSegmenter = seg;
-    ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(seg));
   }
 
   public List<HasWord> segment(String s) {
@@ -145,11 +143,6 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   public void writeData(Writer w) throws IOException {
     chineseLexicon.writeData(w);
-  }
-
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-    in.defaultReadObject();
-    ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(wordSegmenter));
   }
 
   // the data & functions below are for standalone segmenter. -pichuan

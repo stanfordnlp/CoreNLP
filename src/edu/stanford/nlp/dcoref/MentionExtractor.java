@@ -389,7 +389,9 @@ public class MentionExtractor {
 
   public static void initializeUtterance(List<CoreLabel> tokens) {
     for(CoreLabel l : tokens){
-      l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
+      if (l.get(CoreAnnotations.UtteranceAnnotation.class) == null) {
+        l.set(CoreAnnotations.UtteranceAnnotation.class, 0);
+      }
     }
   }
 }
