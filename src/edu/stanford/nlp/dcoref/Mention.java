@@ -450,7 +450,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         }
       }
 
-      final String enumerationPattern = "NP < (NP=tmp $.. (/,|CC/ $.. NP))";
+      String enumerationPattern = "NP < (NP=tmp $.. (/,|CC/ $.. NP))";
 
       TregexPattern tgrepPattern = TregexPattern.compile(enumerationPattern);
       TregexMatcher m = tgrepPattern.matcher(this.mentionSubTree);

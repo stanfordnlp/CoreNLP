@@ -50,8 +50,7 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * Extracts {@literal <COREF>} mentions from a file annotated in MUC format.
- *
+ * Extracts <COREF> mentions from a file annotated in MUC format
  * @author Jenny Finkel, Mihai Surdeanu, Karthik Raghunathan
  */
 public class MUCMentionExtractor extends MentionExtractor {
@@ -67,22 +66,20 @@ public class MUCMentionExtractor extends MentionExtractor {
     fileContents = IOUtils.slurpFile(fileName);
     currentOffset = 0;
     tokenizerFactory = PTBTokenizer.factory(new CoreLabelTokenFactory(false), "");
-    stanfordProcessor = loadStanfordProcessor(props);
+    stanfordProcessor = loadStanfordProcessor(props);   
   }
-
-  public MUCMentionExtractor(Dictionaries dict, Properties props, Semantics semantics,
+  
+  public MUCMentionExtractor(Dictionaries dict, Properties props, Semantics semantics, 
       LogisticClassifier<String, String> singletonModel) throws Exception {
     this(dict, props, semantics);
     singletonPredictor = singletonModel;
   }
 
-  @Override
   public void resetDocs() {
     super.resetDocs();
     currentOffset = 0;
   }
 
-  @Override
   public Document nextDoc() throws Exception {
     List<List<CoreLabel>> allWords = new ArrayList<List<CoreLabel>>();
     List<Tree> allTrees = new ArrayList<Tree>();
@@ -179,8 +176,8 @@ public class MUCMentionExtractor extends MentionExtractor {
           mention.startIndex = sentence.size();
 
           // extract GOLD info about this coref chain. needed for eval
-          Pattern idPattern = Pattern.compile("ID=\"(.*?)\"");
-          Pattern refPattern = Pattern.compile("REF=\"(.*?)\"");
+          Pattern idPattern = Pattern.compile("ID=\\\"(.*?)\\\"");
+          Pattern refPattern = Pattern.compile("REF=\\\"(.*?)\\\"");
 
           Matcher m = idPattern.matcher(w);
           m.find();
@@ -229,23 +226,26 @@ public class MUCMentionExtractor extends MentionExtractor {
 
     // assign goldCorefClusterID
     Map<Integer, Mention> idMention = Generics.newHashMap();    // temporary use
-    for (List<Mention> goldMentions : allGoldMentions) {
-      for (Mention m : goldMentions) {
+    for(int i = 0 ; i < allGoldMentions.size(); i++){
+      for(int j = 0 ; j < allGoldMentions.get(i).size(); j++){
+        Mention m = allGoldMentions.get(i).get(j);
         idMention.put(m.mentionID, m);
       }
     }
-    for (List<Mention> goldMentions : allGoldMentions) {
-      for (Mention m : goldMentions) {
-        if (m.goldCorefClusterID == -1) {
-          if (m.originalRef == -1) m.goldCorefClusterID = m.mentionID;
+    for(int i = 0 ; i < allGoldMentions.size(); i++){
+      for(int j = 0 ; j < allGoldMentions.get(i).size(); j++){
+        Mention m = allGoldMentions.get(i).get(j);
+        if(m.goldCorefClusterID==-1){
+          if(m.originalRef==-1) m.goldCorefClusterID = m.mentionID;
           else {
+            Mention m2;
             int ref = m.originalRef;
-            while (true) {
-              Mention m2 = idMention.get(ref);
-              if (m2.goldCorefClusterID != -1) {
+            while(true){
+              m2 = idMention.get(ref);
+              if(m2.goldCorefClusterID!=-1) {
                 m.goldCorefClusterID = m2.goldCorefClusterID;
                 break;
-              } else if (m2.originalRef == -1) {
+              } else if(m2.originalRef == -1){
                 m2.goldCorefClusterID = m2.mentionID;
                 m.goldCorefClusterID = m2.goldCorefClusterID;
                 break;
@@ -257,6 +257,7 @@ public class MUCMentionExtractor extends MentionExtractor {
         }
       }
     }
+
 
     docAnno.set(CoreAnnotations.SentencesAnnotation.class, allSentences);
     stanfordProcessor.annotate(docAnno);
