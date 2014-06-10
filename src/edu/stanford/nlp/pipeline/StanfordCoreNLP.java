@@ -420,9 +420,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           } else {
             wts = WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
           }
-
-          wts.setCountLineNumbers(true);
-
           return wts;
         } else {
           WordsToSentencesAnnotator wts;

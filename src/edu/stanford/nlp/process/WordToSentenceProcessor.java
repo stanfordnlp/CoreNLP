@@ -83,7 +83,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   private boolean isOneSentence;
 
-  private boolean allowEmptySentences = false;
 
   public void setSentenceBoundaryToDiscard(Set<String> regexSet) {
     sentenceBoundaryToDiscard = new ArrayList<Pattern>(regexSet.size());
@@ -98,14 +97,6 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
 
   public void setOneSentence(boolean oneSentence) {
     isOneSentence = oneSentence;
-  }
-
-  public boolean allowEmptySentences() {
-    return allowEmptySentences;
-  }
-
-  public void setAllowEmptySentences(boolean allowEmptySentences) {
-    this.allowEmptySentences = allowEmptySentences;
   }
 
   public void addHtmlSentenceBoundaryToDiscard(Set<String> set) {
@@ -220,7 +211,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
             System.err.println("  added to current");
           }
         }
-        if (newSent && (!currentSentence.isEmpty() || allowEmptySentences())) {
+        if (newSent && ! currentSentence.isEmpty()) {
           if (DEBUG) {
             System.err.println("  beginning new sentence");
           }
