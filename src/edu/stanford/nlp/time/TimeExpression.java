@@ -43,7 +43,7 @@ public class TimeExpression extends MatchedExpression {
   }
 
   //int tid;     // Time ID
-  SUTime.Temporal origTemporal;  // todo [2013]: never read. Can delete? (Set in TimeExpressionExtractorImpl)
+  SUTime.Temporal origTemporal;  // never read. Can delete?
   //int anchorTimeId = -1;
 
   public TimeExpression(MatchedExpression expr)
@@ -134,7 +134,6 @@ public class TimeExpression extends MatchedExpression {
     }
     return null;
   }
-
   public void setTemporal(SUTime.Temporal temporal) {
     this.value = new Expressions.PrimitiveValue<SUTime.Temporal>("Temporal", temporal);
   }
