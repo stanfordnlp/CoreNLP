@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
+@Deprecated
 public class TimeExpressionExtractors {
   private static final Logger logger = TimeExpressionExtractorImpl.logger;
   static interface TemporalExtractor extends Function<CoreMap, SUTime.Temporal>

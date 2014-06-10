@@ -100,6 +100,10 @@ public class Timing {
     return nf.format(((double) elapsed) / 1000);
   }
 
+  public static String toMilliSecondsString(long elapsed) {
+    return nf.format(elapsed);
+  }
+
 
   // restart ========================================================
 
