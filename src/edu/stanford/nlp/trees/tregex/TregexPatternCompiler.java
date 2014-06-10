@@ -94,9 +94,26 @@ public class TregexPatternCompiler {
     this.basicCatFunction = basicCatFunction;
   }
 
+  // todo [cdm 2013]: Provide an easy way to do Matcher.quoteReplacement(): This would be quite useful, since the replacement will often contain $ or \
+
+  /** Define a macro for rewriting a pattern in any tregex expression compiled
+   *  by this compiler. The semantics of this is that all instances of the
+   *  original in the pattern are replaced by the replacement, using exactly
+   *  the semantics of String.replaceAll(original, replacement) and the
+   *  result will then be compiled by the compiler. As such, note that a
+   *  macro can replace any part of a tregex expression, in a syntax
+   *  insensitive way.  Here's an example:
+   *  {@code tpc.addMacro("FINITE_BE_AUX", "/^(?i:am|is|are|was|were)$/");}
+   *
+   *  @param original The String to match; becomes the first argument of a
+   *                  String.replaceAll()
+   *  @param replacement The replacement String; becomes the second argument
+   *                  of a String.replaceAll()
+   */
   public void addMacro(String original, String replacement) {
     macros.add(new Pair<String, String>(original, replacement));
   }
+
 
   /**
    * Create a TregexPattern from this tregex string using the headFinder and
