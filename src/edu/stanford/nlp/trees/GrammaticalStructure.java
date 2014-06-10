@@ -312,6 +312,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
     }
 
+    postProcessDependencies(basicDep);
+
     if (getExtra) {
       getExtras(basicDep);
       getTreeDeps(root(), basicDep, f); // adds stuff to basicDep
@@ -319,6 +321,16 @@ public abstract class GrammaticalStructure extends TreeGraph {
     Collections.sort(basicDep);
 
     return basicDep;
+  }
+
+  /**
+   * Post process the dependencies in whatever way this language
+   * requires.  For example, English might replace "rel" dependencies
+   * with either dobj or pobj depending on the surrounding
+   * dependencies.
+   */
+  protected void postProcessDependencies(List<TypedDependency> basicDep) {
+    // no post processing by default
   }
 
   /**
