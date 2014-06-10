@@ -785,7 +785,9 @@ public class EnglishGrammaticalRelations {
           // the last part should probably only be @SQ, but this captures some strays at no cost
           "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)",
           // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
-          "S|SQ|VP < (SBAR|SBAR-TMP=target <, (WHADVP|WHNP < (WRB !< /^(?i:how)$/)) !< (S < (VP < TO)))",
+          // note that we allow adverb phrases to come before the WHADVP, which allows for phrases such as "even when"
+          // ":" indicates something that should be a parataxis
+          "S|SQ|VP < (SBAR|SBAR-TMP=target < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
           // "S|SQ < (PP=target <, RB < @S)", // caught as prep and pcomp.
           "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
