@@ -68,7 +68,16 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     } else if (clique == cliqueCpC) {
       addAllInterningAndSuffixing(features, featuresCpC(cInfo, loc), "CpC");
       addAllInterningAndSuffixing(features, featuresCnC(cInfo, loc-1), "CnC");
-    }
+    } 
+    // else if (clique == cliqueCpCp2C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2C(cInfo, loc), "CpCp2C");
+    // } else if (clique == cliqueCpCp2Cp3C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2Cp3C(cInfo, loc), "CpCp2Cp3C");
+    // } else if (clique == cliqueCpCp2Cp3Cp4C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2Cp3Cp4C(cInfo, loc), "CpCp2Cp3Cp4C");
+    // } else if (clique == cliqueCpCp2Cp3Cp4Cp5C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2Cp3Cp4Cp5C(cInfo, loc), "CpCp2Cp3Cp4Cp5C");
+    // }
 
     return features;
   }
@@ -115,7 +124,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
 
 
-  protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
+  public Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
@@ -165,7 +174,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
   private static CorpusDictionary outDict = null;
 
-  protected Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
+  public Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
@@ -416,7 +425,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
   }
 
 
-  protected Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
+  public Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);

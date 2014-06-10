@@ -437,7 +437,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation DIRECT_OBJECT =
     new GrammaticalRelation(Language.English, "dobj", "direct object",
-        DirectObjectGRAnnotation.class, OBJECT, "VP|SBARQ?", tregexCompiler,
+        DirectObjectGRAnnotation.class, OBJECT, "SBARQ|VP|SBAR", tregexCompiler,
         new String[] {
           // case with an iobj before
           "VP < (NP $+ (NP|WHNP=target !< (/^NN/ < " + timeWordLotRegex + "))) !<(/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
@@ -516,7 +516,7 @@ public class EnglishGrammaticalRelations {
           "PRT >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
           "(PP <: IN|TO) >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
           "(PP <: IN|TO) $- (NP $-- (VBZ|VBD) !$++ VP) >+(SQ) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/)",
-          
+
           // to deal with preposition stranding in relative clause (works well but doesn't preserve the tree structure!)
           "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
           "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
@@ -545,7 +545,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "pcomp", "prepositional complement",
-        PrepositionalComplementGRAnnotation.class, COMPLEMENT, "(?:WH)?PP(?:-TMP)?", tregexCompiler,
+        PrepositionalComplementGRAnnotation.class, COMPLEMENT, "PP(?:-TMP)?", tregexCompiler,
         new String[] {
           "@PP|WHPP < (IN|VBG|VBN|TO $+ @SBAR|S|PP|ADVP=target)", // no intervening NP; VBN is for "compared with"
           "@PP|WHPP < (RB $+ @SBAR|S=target)", // RB is for weird tagging like "after/RB adjusting for inflation"
@@ -598,7 +598,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "ccomp", "clausal complement",
-        ClausalComplementGRAnnotation.class, COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP(?:-.*)?", tregexCompiler,
+        ClausalComplementGRAnnotation.class, COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP", tregexCompiler,
         new String[] { // note if you add more words in the pattern, be sure to add them in the ADV_CLAUSE_MODIFIER too!
           "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP)",
           "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",
@@ -648,7 +648,7 @@ public class EnglishGrammaticalRelations {
           "VP < (S=target !$- (NN < order) <: NP) > VP",
           // stop eating
           // note that we eliminate parentheticals and clauses that could match a partmod
-          "(VP < (S=target < (VP < VBG ) !< NP !$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)]) !$-- /^:$/))",
+          "(VP < (S=target < (VP < VBG ) !< NP !$- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)]) !$-- /^:$/))",
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -674,7 +674,7 @@ public class EnglishGrammaticalRelations {
   public static final GrammaticalRelation RELATIVE =
     new GrammaticalRelation(Language.English, "rel", "relative",
         RelativeGRAnnotation.class, COMPLEMENT, "SBAR", tregexCompiler,
-        new String[] { 
+        new String[] {
           // Leave out time expressions such as "who yesterday cooked dinner"; those should be nsubj
           "SBAR <, WHNP|WHPP|WHADJP=target > /^NP/ [ !<, /^WHNP/ | < (S < (VP $-- (/^NP(?!-TMP)/ !<# (NN < " + timeWordRegex + ") !< /^-NONE-$/)))]"
         });
@@ -1086,7 +1086,7 @@ public class EnglishGrammaticalRelations {
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
           // to get "John, knowing ..., announced "
           "S|SINV < (S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] )",
-          "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])$- (/^,$/ [$- @NP  |$- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
+          "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
         });
