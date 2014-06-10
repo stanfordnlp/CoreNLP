@@ -300,14 +300,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     return tags.getIndex(tag);
   }
 
-  public int numTags() {
-    return tags.getSize();
-  }
-
-  public String getTag(int index) {
-    return tags.getTag(index);
-  }
-
   private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.

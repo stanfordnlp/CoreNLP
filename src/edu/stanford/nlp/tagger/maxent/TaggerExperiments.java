@@ -381,10 +381,10 @@ public class TaggerExperiments extends Experiments {
       } //do not add the feature
       //iterate over tags in dictionary
       if (maxentTagger.alltags) {
-        int numTags = maxentTagger.numTags();
+        int numTags = maxentTagger.tags.getSize();
         for (int j = 0; j < numTags; j++) {
 
-          String tag1 = maxentTagger.getTag(j);
+          String tag1 = maxentTagger.tags.getTag(j);
 
           FeatureKey key = new FeatureKey(i, s, tag1);
 
@@ -422,10 +422,10 @@ public class TaggerExperiments extends Experiments {
         continue;
       } //do not add the feature
       if (maxentTagger.alltags) {
-        int numTags = maxentTagger.numTags();
+        int numTags = maxentTagger.tags.getSize();
         for (int j = 0; j < numTags; j++) {
 
-          String tag1 = maxentTagger.getTag(j);
+          String tag1 = maxentTagger.tags.getTag(j);
 
           FeatureKey key = new FeatureKey(i, s, tag1);
 
