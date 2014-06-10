@@ -1123,6 +1123,7 @@ public class SieveCoreferenceSystem {
             src.set(1,j);
 
             IntTuple ant = positions.get(antecedent);
+            if(ant==null) continue;
             //correct=(chosen==goldLinks.contains(new Pair<IntTuple, IntTuple>(src,ant)));
             boolean coreferent = golds.containsKey(m.mentionID)
             && golds.containsKey(antecedent.mentionID)
