@@ -100,8 +100,6 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
       //System.err.println("feature not seen ");
       return 0.0;
     }
-    assert iFeature < weights.length;
-    assert iLabel < weights[iFeature].length;
     return weights[iFeature][iLabel];
   }
 
@@ -236,7 +234,6 @@ public class LinearClassifier<L, F> implements ProbabilisticClassifier<L, F>, RV
    *  Doesn't consider a value for each feature.
    */
   private double scoreOf(int[] feats, L label) {
-    assert labelIndex.indexOf(label, false) >= 0;
     int iLabel = labelIndex.indexOf(label);
     double score = 0.0;
     for (int feat : feats) {
