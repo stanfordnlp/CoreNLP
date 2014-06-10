@@ -962,14 +962,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean pctSegmenterScaleByCRF = false;
   public double pctSegmenterScale = 0.0;
   public boolean separateASCIIandRange = true;
-  public double dropoutRate = 0.0;
-  public double dropoutScale = 1.0;
-  public int multiThreadGrad = 1;
-  public int maxQNItr = 0;
-  public boolean dropoutApprox = false;
-  public String unsupDropoutFile = null;
-  public double unsupDropoutScale = 1.0;
-  public int startEvaluateIters = 0;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2372,22 +2364,6 @@ public class SeqClassifierFlags implements Serializable {
         pctSegmenterScale = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("separateASCIIandRange")){
         separateASCIIandRange = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("dropoutRate")){
-        dropoutRate = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("dropoutScale")){
-        dropoutScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("multiThreadGrad")){
-        multiThreadGrad = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("maxQNItr")){
-        maxQNItr = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("dropoutApprox")){
-        dropoutApprox = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("unsupDropoutFile")){
-        unsupDropoutFile = val;
-      } else if (key.equalsIgnoreCase("unsupDropoutScale")){
-        unsupDropoutScale = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("startEvaluateIters")){
-        startEvaluateIters = Integer.parseInt(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
