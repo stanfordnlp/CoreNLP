@@ -104,6 +104,7 @@
       <classpath>
         <fileset dir="${basedir}">
           <include name="*.jar"/>
+          <exclude name="stanford-corenlp*"/>
         </fileset>
       </classpath>
       <!-- <compilerarg value="-Xlint"/> -->

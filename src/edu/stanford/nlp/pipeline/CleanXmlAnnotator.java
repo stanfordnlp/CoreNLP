@@ -9,8 +9,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.MultiTokenTag;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
 
@@ -44,22 +42,6 @@ public class CleanXmlAnnotator implements Annotator{
   private final Pattern dateTagMatcher;
 
   public static final String DEFAULT_DATE_TAGS = "datetime|date";
-
-  /**
-   * This tells us when an utterance turn starts
-   * (used in dcoref)
-   */
-  private Pattern utteranceTurnTagMatcher = null;
-
-  public static final String DEFAULT_UTTERANCE_TURN_TAGS = "turn";
-
-  /**
-   * This tells us what the speaker tag is
-   * (used in dcoref)
-   */
-  private Pattern speakerTagMatcher = null;
-
-  public static final String DEFAULT_SPEAKER_TAGS = "speaker";
 
   /**
    * This setting allows handling of flawed XML.  For example,
@@ -101,20 +83,6 @@ public class CleanXmlAnnotator implements Annotator{
       dateTagMatcher = Pattern.compile(dateTags, Pattern.CASE_INSENSITIVE);
     } else {
       dateTagMatcher = null;
-    }
-  }
-
-  public void setDiscourseTags(String utteranceTurnTags, String speakerTags) {
-    if(utteranceTurnTags != null){
-      utteranceTurnTagMatcher = Pattern.compile(utteranceTurnTags, Pattern.CASE_INSENSITIVE);
-    } else {
-      utteranceTurnTagMatcher = null;
-    }
-
-    if(speakerTags != null){
-      speakerTagMatcher = Pattern.compile(speakerTags, Pattern.CASE_INSENSITIVE);
-    } else {
-      speakerTagMatcher = null;
     }
   }
 
@@ -164,16 +132,9 @@ public class CleanXmlAnnotator implements Annotator{
     // we keep track of this so we can look at the last tag after
     // we're outside the loop
 
-    int utteranceIndex = 0;
-    boolean inUtterance = false;
-    boolean inSpeakerTag = false;
-    String currentSpeaker = null;
-    List<CoreLabel> speakerTokens = new ArrayList<CoreLabel>();
-
     for (CoreLabel token : tokens) {
       String word = token.word().trim();
       XMLUtils.XMLTag tag = XMLUtils.parseTag(word);
-
       // If it's not a tag, we do manipulations such as unescaping
       if (tag == null) {
         // TODO: put this into the lexer instead of here
@@ -183,10 +144,6 @@ public class CleanXmlAnnotator implements Annotator{
             xmlTagMatcher == null ||
             xmlTagMatcher.matcher("").matches()) {
           newTokens.add(token);
-          if (inUtterance) {
-            token.set(CoreAnnotations.UtteranceAnnotation.class, utteranceIndex);
-            if (currentSpeaker != null) token.set(CoreAnnotations.SpeakerAnnotation.class, currentSpeaker);
-          }
         }
         // if we removed any text, and the tokens are "invertible" and
         // therefore keep track of their before/after text, append
@@ -224,10 +181,6 @@ public class CleanXmlAnnotator implements Annotator{
           dateTokens.add(token);
         }
 
-        if (inSpeakerTag) {
-          speakerTokens.add(token);
-        }
-
         continue;
       }
 
@@ -255,44 +208,6 @@ public class CleanXmlAnnotator implements Annotator{
           newTokens.size() > 0) {
         CoreLabel previous = newTokens.get(newTokens.size() - 1);
         previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-      }
-
-      if (utteranceTurnTagMatcher != null && utteranceTurnTagMatcher.matcher(tag.name).matches()) {
-        if (newTokens.size() > 0) {
-          // Utterance turn is also sentence ending
-          CoreLabel previous = newTokens.get(newTokens.size() - 1);
-          previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-        }
-        inUtterance = !(tag.isEndTag || tag.isSingleTag);
-        if (inUtterance) {
-          utteranceIndex++;
-        }
-        if (!inUtterance) {
-          currentSpeaker = null;
-        }
-      }
-
-      if (speakerTagMatcher != null && speakerTagMatcher.matcher(tag.name).matches()) {
-        if (newTokens.size() > 0) {
-          // Speaker is not really part of sentence
-          CoreLabel previous = newTokens.get(newTokens.size() - 1);
-          previous.set(CoreAnnotations.ForcedSentenceEndAnnotation.class, true);
-        }
-        inSpeakerTag = !(tag.isEndTag || tag.isSingleTag);
-        if (tag.isEndTag) {
-          // TODO: Should try to get original text back?
-          currentSpeaker = StringUtils.joinWords(speakerTokens, " ");
-          MultiTokenTag.Tag mentionTag = new MultiTokenTag.Tag(currentSpeaker, "Speaker", speakerTokens.size());
-          int i = 0;
-          for (CoreLabel t:speakerTokens) {
-            t.set(CoreAnnotations.SpeakerAnnotation.class, currentSpeaker);
-            t.set(CoreAnnotations.MentionTokenAnnotation.class, new MultiTokenTag(mentionTag, i));
-            i++;
-          }
-        } else {
-          currentSpeaker = null;
-        }
-        speakerTokens.clear();
       }
 
       if (xmlTagMatcher == null)
@@ -360,6 +275,7 @@ public class CleanXmlAnnotator implements Annotator{
 
     return newTokens;
   }
+
 
   @Override
   public Set<Requirement> requires() {

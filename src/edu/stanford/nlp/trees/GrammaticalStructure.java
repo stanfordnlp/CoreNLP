@@ -1522,7 +1522,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     boolean basic = props.getProperty("basic") != null;
     boolean collapsed = props.getProperty("collapsed") != null;
     boolean CCprocessed = props.getProperty("CCprocessed") != null;
-    boolean tree = props.getProperty("collapsedTree") != null;
+    boolean collapsedTree = props.getProperty("collapsedTree") != null;
     boolean nonCollapsed = props.getProperty("nonCollapsed") != null;
     boolean extraSep = props.getProperty("extraSep") != null;
     boolean parseTree = props.getProperty("parseTree") != null;
@@ -1637,7 +1637,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         }
 
         if (basic) {
-          if (collapsed || CCprocessed || tree || nonCollapsed) {
+          if (collapsed || CCprocessed || collapsedTree || nonCollapsed) {
             System.out.println("------------- basic dependencies ---------------");
           }
           if (altDepPrinter == null) {
@@ -1648,21 +1648,21 @@ public abstract class GrammaticalStructure extends TreeGraph {
         }
 
         if (nonCollapsed) {
-          if (basic || CCprocessed || collapsed || tree) {
+          if (basic || CCprocessed || collapsed || collapsedTree) {
             System.out.println("----------- non-collapsed dependencies (basic + extra) -----------");
           }
           printDependencies(gs, gs.allTypedDependencies(), t, conllx, extraSep);
         }
 
         if (collapsed) {
-          if (basic || CCprocessed || tree || nonCollapsed) {
+          if (basic || CCprocessed || collapsedTree || nonCollapsed) {
             System.out.println("----------- collapsed dependencies -----------");
           }
           printDependencies(gs, gs.typedDependenciesCollapsed(true), t, conllx, false);
         }
 
         if (CCprocessed) {
-          if (basic || collapsed || tree || nonCollapsed) {
+          if (basic || collapsed || collapsedTree || nonCollapsed) {
             System.out.println("---------- CCprocessed dependencies ----------");
           }
           List<TypedDependency> deps = gs.typedDependenciesCCprocessed(true);
@@ -1676,7 +1676,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
           printDependencies(gs, deps, t, conllx, false);
         }
 
-        if (tree) {
+        if (collapsedTree) {
           if (basic || CCprocessed || collapsed || nonCollapsed) {
             System.out.println("----------- collapsed dependencies tree -----------");
           }
@@ -1684,7 +1684,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         }
 
         // default use: CCprocessed (to parallel what happens within the parser)
-        if (!basic && !collapsed && !CCprocessed && !tree && !nonCollapsed) {
+        if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed) {
           // System.out.println("----------- CCprocessed dependencies -----------");
           printDependencies(gs, gs.typedDependenciesCCprocessed(true), t, conllx, false);
         }
