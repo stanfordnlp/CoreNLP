@@ -19,7 +19,7 @@ import edu.stanford.nlp.util.Pair;
 
 public class Dictionaries {
 
-  public enum MentionType { PRONOMINAL, NOMINAL, PROPER, LIST }
+  public enum MentionType { PRONOMINAL, NOMINAL, PROPER }
 
   public enum Gender { MALE, FEMALE, NEUTRAL, UNKNOWN }
 
