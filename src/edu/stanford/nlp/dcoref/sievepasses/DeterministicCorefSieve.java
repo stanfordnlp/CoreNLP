@@ -49,7 +49,6 @@ import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.dcoref.SieveOptions;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Pair;
 
 /**
  *  Base class for a Coref Sieve.
@@ -88,15 +87,15 @@ public abstract class DeterministicCorefSieve  {
     if(Constants.USE_DISCOURSE_SALIENCE)  {
       SieveCoreferenceSystem.logger.finest("DOING COREF FOR:\t" + m1.spanToString());
       if(m1.appositions == null && m1.predicateNominatives == null
-          && (m1.spanToString().toLowerCase().startsWith("a ") || m1.spanToString().toLowerCase().startsWith("an "))
+          && (m1.lowercaseNormalizedSpanString().startsWith("a ") || m1.lowercaseNormalizedSpanString().startsWith("an "))
           && !flags.USE_EXACTSTRINGMATCH)  {
         skip = true; // A noun phrase starting with an indefinite article - unlikely to have an antecedent (e.g. "A commission" was set up to .... )
       }
-      if(dict.indefinitePronouns.contains(m1.spanToString().toLowerCase()))  {
+      if(dict.indefinitePronouns.contains(m1.lowercaseNormalizedSpanString()))  {
         skip = true; // An indefinite pronoun - unlikely to have an antecedent (e.g. "Some" say that... )
       }
       for(String indef : dict.indefinitePronouns){
-        if(m1.spanToString().toLowerCase().startsWith(indef + " ")) {
+        if(m1.lowercaseNormalizedSpanString().startsWith(indef + " ")) {
           skip = true; // A noun phrase starting with an indefinite adjective - unlikely to have an antecedent (e.g. "Another opinion" on the topic is...)
           break;
         }
@@ -111,17 +110,14 @@ public abstract class DeterministicCorefSieve  {
   }
 
   public boolean checkEntityMatch(
-      CorefCluster mentionCluster,
-      CorefCluster potentialAntecedent,
-      Mention mention,
-      Mention ant,
-      Dictionaries dict,
-      Set<Mention> roleSet)
+          Document document,
+          CorefCluster mentionCluster,
+          CorefCluster potentialAntecedent,
+          Dictionaries dict,
+          Set<Mention> roleSet)
   {
     return false;
   }
-
-
   /**
    * Checks if two clusters are coreferent according to our sieve pass constraints
    * @param document
@@ -137,9 +133,18 @@ public abstract class DeterministicCorefSieve  {
 
     boolean ret = false;
     Mention mention = mentionCluster.getRepresentativeMention();
+    if (flags.USE_INCOMPATIBLES) {
+      // Check our list of incompatible mentions and don't cluster them together
+      // Allows definite no's from previous sieves to propagate down
+      if (document.isIncompatible(mentionCluster, potentialAntecedent)) {
+        SieveCoreferenceSystem.logger.finest("INCOMPATIBLE clusters: not match: " +ant.spanToString()+"("+ant.mentionID +
+                ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
+        return false;
+      }
+    }
     if(flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3
         && mention2.person!=Person.I && mention2.person!=Person.YOU) return false;
-    if(mention2.spanToString().toLowerCase().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) return false;
+    if(mention2.lowercaseNormalizedSpanString().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) return false;
     if(mention2.person==Person.YOU && document.docType==DocType.ARTICLE
         && mention2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0")) return false;
     if(document.conllDoc != null) {
@@ -149,62 +154,88 @@ public abstract class DeterministicCorefSieve  {
     }
 
     if(flags.USE_DISCOURSEMATCH) {
-      String mString = mention.spanToString().toLowerCase();
-      String antString = ant.spanToString().toLowerCase();
+      String mString = mention.lowercaseNormalizedSpanString();
+      String antString = ant.lowercaseNormalizedSpanString();
+
+      // mention and ant both belong to the same speaker cluster
+      if (mention.speakerInfo != null && mention.speakerInfo == ant.speakerInfo) {
+        SieveCoreferenceSystem.logger.finest("discourse match: maps to same speaker: " + mention.spanToString() + "\tmatched\t" + ant.spanToString());
+        return true;
+      }
+
       // (I - I) in the same speaker's quotation.
-      if(dict.firstPersonPronouns.contains(mString) && mention.number==Number.SINGULAR
-          && dict.firstPersonPronouns.contains(antString) && ant.number==Number.SINGULAR
+      if (mention.number==Number.SINGULAR && dict.firstPersonPronouns.contains(mString)
+          && ant.number==Number.SINGULAR && dict.firstPersonPronouns.contains(antString)
           && Rules.entitySameSpeaker(document, mention, ant)){
+        SieveCoreferenceSystem.logger.finest("discourse match: 1st person same speaker: " + mention.spanToString() + "\tmatched\t" + ant.spanToString());
         return true;
       }
       // (speaker - I)
-      if(Rules.entityIsSpeaker(document, mention, ant, dict) &&
-          ((dict.firstPersonPronouns.contains(mString) && mention.number==Number.SINGULAR)
-              || (dict.firstPersonPronouns.contains(antString) && ant.number==Number.SINGULAR))) {
+      if ((mention.number==Number.SINGULAR && dict.firstPersonPronouns.contains(mString))
+              && Rules.antecedentIsMentionSpeaker(document, mention, ant, dict)) {
+        SieveCoreferenceSystem.logger.finest("discourse match: 1st person mention speaker match antecedent: " + mention.spanToString() + "\tmatched\t" + ant.spanToString());
+        if (mention.speakerInfo == null && ant.speakerInfo != null) { mention.speakerInfo = ant.speakerInfo; }
         return true;
       }
-      if(Rules.entitySameSpeaker(document, mention, ant)
-          && dict.secondPersonPronouns.contains(mString)
-          && dict.secondPersonPronouns.contains(antString)) {
+      // (I - speaker)
+      if ((ant.number==Number.SINGULAR && dict.firstPersonPronouns.contains(antString))
+              && Rules.antecedentIsMentionSpeaker(document, ant, mention, dict)) {
+        SieveCoreferenceSystem.logger.finest("discourse match: 1st person antecedent speaker match mention: " + mention.spanToString() + "\tmatched\t" + ant.spanToString());
+        if (ant.speakerInfo == null && mention.speakerInfo != null) { ant.speakerInfo = mention.speakerInfo; }
+        return true;
+      }
+      // Can be iffy if more than two speakers... but still should be okay most of the time
+      if (dict.secondPersonPronouns.contains(mString)
+          && dict.secondPersonPronouns.contains(antString)
+          && Rules.entitySameSpeaker(document, mention, ant)) {
+        SieveCoreferenceSystem.logger.finest("discourse match: 2nd person same speaker: " + mention.spanToString() + "\tmatched\t" + ant.spanToString());
         return true;
       }
       // previous I - you or previous you - I in two person conversation
-      if(((mention.person==Person.I && ant.person==Person.YOU
+      if (((mention.person==Person.I && ant.person==Person.YOU
           || (mention.person==Person.YOU && ant.person==Person.I))
           && (mention.headWord.get(CoreAnnotations.UtteranceAnnotation.class)-ant.headWord.get(CoreAnnotations.UtteranceAnnotation.class) == 1)
           && document.docType==DocType.CONVERSATION)) {
-        SieveCoreferenceSystem.logger.finest("discourse match: between two person");
+        SieveCoreferenceSystem.logger.finest("discourse match: between two person: " + mention.spanToString() + "\tmatched\t" + ant.spanToString());
         return true;
       }
-      if(dict.reflexivePronouns.contains(mention.headString) && Rules.entitySubjectObject(mention, ant)){
-        SieveCoreferenceSystem.logger.finest("reflexive pronoun: "+ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID==ant.goldCorefClusterID));
+      if (dict.reflexivePronouns.contains(mention.headString) && Rules.entitySubjectObject(mention, ant)){
+        SieveCoreferenceSystem.logger.finest("discourse match: reflexive pronoun: " + ant.spanToString() + "(" + ant.mentionID + ") :: " + mention.spanToString() + "(" + mention.mentionID + ") -> " + (mention.goldCorefClusterID == ant.goldCorefClusterID));
         return true;
       }
     }
-    if(Constants.USE_DISCOURSE_CONSTRAINTS && !flags.USE_EXACTSTRINGMATCH && !flags.USE_RELAXED_EXACTSTRINGMATCH
+    if (Constants.USE_DISCOURSE_CONSTRAINTS && !flags.USE_EXACTSTRINGMATCH && !flags.USE_RELAXED_EXACTSTRINGMATCH
         && !flags.USE_APPOSITION && !flags.USE_WORDS_INCLUSION) {
       for(Mention m : mentionCluster.getCorefMentions()) {
         for(Mention a : potentialAntecedent.getCorefMentions()){
-          if(Rules.entityIsSpeaker(document, m, a, dict) && m.person!=Person.I && a.person!=Person.I) {
-            SieveCoreferenceSystem.logger.finest("Incompatibles: not match(speaker): " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-            document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
-            return false;
-          }
+          // angelx - not sure about the logic here, disable (code was also refactored from original)
+//          if(m.person!=Person.I && a.person!=Person.I &&
+//            (Rules.antecedentIsMentionSpeaker(document, m, a, dict) || Rules.antecedentIsMentionSpeaker(document, a, m, dict))) {
+//            SieveCoreferenceSystem.logger.finest("Incompatibles: not match(speaker): " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
+//            document.addIncompatible(m, a);
+//            return false;
+//          }
           int dist = Math.abs(m.headWord.get(CoreAnnotations.UtteranceAnnotation.class) - a.headWord.get(CoreAnnotations.UtteranceAnnotation.class));
           if(document.docType!=DocType.ARTICLE && dist==1 && !Rules.entitySameSpeaker(document, m, a)) {
+            String mSpeaker = document.speakers.get(m.headWord.get(CoreAnnotations.UtteranceAnnotation.class));
+            String aSpeaker = document.speakers.get(a.headWord.get(CoreAnnotations.UtteranceAnnotation.class));
             if(m.person==Person.I && a.person==Person.I) {
-              SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor I: " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
+              SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor I: " + ant.spanToString() + "(" + ant.mentionID + "," + aSpeaker + ") :: "
+                      + mention.spanToString() + "(" + mention.mentionID + "," + mSpeaker + ") -> " + (mention.goldCorefClusterID != ant.goldCorefClusterID));
+              document.addIncompatible(m, a);
               return false;
             }
             if(m.person==Person.YOU && a.person==Person.YOU) {
-              SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor YOU: " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
+              SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor YOU: " + ant.spanToString() + "(" + ant.mentionID + "," + aSpeaker + ") :: "
+                      + mention.spanToString() + "(" + mention.mentionID + "," + mSpeaker +  ") -> " + (mention.goldCorefClusterID != ant.goldCorefClusterID));
+              document.addIncompatible(m, a);
               return false;
             }
+            // This is weak since we can refer to both speakers
             if(m.person==Person.WE && a.person==Person.WE) {
-              SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor WE: " +ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
+              SieveCoreferenceSystem.logger.finest("Incompatibles: neighbor WE: " + ant.spanToString() + "(" + ant.mentionID + "," + aSpeaker + ") :: "
+                      + mention.spanToString() + "(" + mention.mentionID + "," + mSpeaker +  ") -> " + (mention.goldCorefClusterID != ant.goldCorefClusterID));
+              document.addIncompatible(m, a);
               return false;
             }
           }
@@ -215,7 +246,7 @@ public abstract class DeterministicCorefSieve  {
           for(Mention a : potentialAntecedent.getCorefMentions()){
             if(Rules.entitySubjectObject(m, a)) {
               SieveCoreferenceSystem.logger.finest("Incompatibles: subject-object: "+ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-              document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, a.mentionID), Math.max(m.mentionID, a.mentionID)));
+              document.addIncompatible(m, a);
               return false;
             }
           }
@@ -223,47 +254,58 @@ public abstract class DeterministicCorefSieve  {
       }
     }
 
+    // Incompatibility constraints - do before match checks
     if(flags.USE_iwithini && Rules.entityIWithinI(mention, ant, dict)) {
-      document.incompatibles.add(new Pair<Integer, Integer>(Math.min(mention.mentionID, ant.mentionID), Math.max(mention.mentionID, ant.mentionID)));
+      SieveCoreferenceSystem.logger.finest("Incompatibles: iwithini: "+ant.spanToString()+"("+ant.mentionID + ") :: "+ mention.spanToString()+"("+mention.mentionID + ") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
+      document.addIncompatible(mention, ant);
       return false;
     }
+
+    // Match checks
     if(flags.USE_EXACTSTRINGMATCH && Rules.entityExactStringMatch(mentionCluster, potentialAntecedent, dict, roleSet)){
       return true;
     }
+    if (flags.USE_NAME_MATCH && checkEntityMatch(document, mentionCluster, potentialAntecedent, dict, roleSet)) {
+      ret = true;
+    }
+
     if(flags.USE_RELAXED_EXACTSTRINGMATCH && Rules.entityRelaxedExactStringMatch(mentionCluster, potentialAntecedent, mention, ant, dict, roleSet)){
       return true;
     }
     if(flags.USE_APPOSITION && Rules.entityIsApposition(mentionCluster, potentialAntecedent, mention, ant)) {
-      SieveCoreferenceSystem.logger.finest("Apposition: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finest("Apposition: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
     if(flags.USE_PREDICATENOMINATIVES && Rules.entityIsPredicateNominatives(mentionCluster, potentialAntecedent, mention, ant)) {
-      SieveCoreferenceSystem.logger.finest("Predicate nominatives: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finest("Predicate nominatives: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
 
     if(flags.USE_ACRONYM && Rules.entityIsAcronym(mentionCluster, potentialAntecedent)) {
-      SieveCoreferenceSystem.logger.finest("Acronym: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finest("Acronym: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
     if(flags.USE_RELATIVEPRONOUN && Rules.entityIsRelativePronoun(mention, ant)){
-      SieveCoreferenceSystem.logger.finest("Relative pronoun: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finest("Relative pronoun: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
     if(flags.USE_DEMONYM && mention.isDemonym(ant, dict)){
-      SieveCoreferenceSystem.logger.finest("Demonym: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      SieveCoreferenceSystem.logger.finest("Demonym: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
 
     if(flags.USE_ROLEAPPOSITION && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
-      return true;
+      SieveCoreferenceSystem.logger.finest("Role Appositive: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
+      ret = true;
     }
     if(flags.USE_INCLUSION_HEADMATCH && Rules.entityHeadsAgree(mentionCluster, potentialAntecedent, mention, ant, dict)){
+      SieveCoreferenceSystem.logger.finest("Entity heads agree: "+mention.spanToString()+"\tvs\t"+ant.spanToString());
       ret = true;
     }
     if(flags.USE_RELAXED_HEADMATCH && Rules.entityRelaxedHeadsAgreeBetweenMentions(mentionCluster, potentialAntecedent, mention, ant) ){
       ret = true;
     }
+
     if(flags.USE_WORDS_INCLUSION && ret && ! Rules.entityWordsIncluded(mentionCluster, potentialAntecedent, mention, ant)) {
       return false;
     }
@@ -309,7 +351,6 @@ public abstract class DeterministicCorefSieve  {
           && !mention.isPronominal() && !ant.isPronominal()){
         SieveCoreferenceSystem.logger.finest("not synonym in WN");
         SieveCoreferenceSystem.logger.finest("False Negatives:: " + ant.spanToString() +" <= "+mention.spanToString());
-
       }
     }
 
@@ -368,13 +409,13 @@ public abstract class DeterministicCorefSieve  {
 
       if((m.isPronominal() || dict.allPronouns.contains(m.toString())) && Rules.entityAttributesAgree(mentionCluster, potentialAntecedent)){
 
-        if(dict.demonymSet.contains(ant.spanToString().toLowerCase()) && dict.notOrganizationPRP.contains(m.headString)){
-          document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, ant.mentionID), Math.max(m.mentionID, ant.mentionID)));
+        if(dict.demonymSet.contains(ant.lowercaseNormalizedSpanString()) && dict.notOrganizationPRP.contains(m.headString)){
+          document.addIncompatible(m, ant);
           return false;
         }
         if(Constants.USE_DISCOURSE_CONSTRAINTS && Rules.entityPersonDisagree(document, mentionCluster, potentialAntecedent, dict)){
           SieveCoreferenceSystem.logger.finest("Incompatibles: Person Disagree: "+ant.spanToString()+"("+ant.mentionID+") :: "+mention.spanToString()+"("+mention.mentionID+") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
-          document.incompatibles.add(new Pair<Integer, Integer>(Math.min(m.mentionID, ant.mentionID), Math.max(m.mentionID, ant.mentionID)));
+          document.addIncompatible(m, ant);
           return false;
         }
         return true;
