@@ -729,7 +729,10 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "acomp", "adjectival complement",
         AdjectivalComplementGRAnnotation.class, COMPLEMENT, "VP", tregexCompiler,
         new String[] {
-          "VP [ < (ADJP=target !$-- NP) |  < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) ]",
+          // ADJP=target used to be limited by !$-- NP, but that
+          // stopped the converter from finding the right dependency
+          // in cases such as "driving prices lower"
+          "VP [ < ADJP=target |  < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) ]",
         });
   public static class AdjectivalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
