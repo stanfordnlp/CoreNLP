@@ -200,6 +200,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     TreeTransformer transformer1 = new TreeTransformer() {
+      @Override
       public Tree transformTree(Tree t) {
         if (doSGappedStuff) {
           String lab = t.label().value();
@@ -214,11 +215,10 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
       }
     };
     Filter<Tree> subtreeFilter = new Filter<Tree>() {
-      /**
-       *
-       */
+
       private static final long serialVersionUID = -7250433816896327901L;
 
+      @Override
       public boolean accept(Tree t) {
         Tree[] kids = t.children();
         Label l = t.label();
@@ -235,11 +235,10 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
       }
     };
     Filter<Tree> nodeFilter = new Filter<Tree>() {
-      /**
-       *
-       */
+
       private static final long serialVersionUID = 9000955019205336311L;
 
+      @Override
       public boolean accept(Tree t) {
         if (t.isLeaf() || t.isPreTerminal()) {
           return true;
@@ -258,6 +257,7 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
       }
     };
     TreeTransformer transformer2 = new TreeTransformer() {
+      @Override
       public Tree transformTree(Tree t) {
         if (temporalAnnotation == TEMPORAL_ANY_TMP_PERCOLATED) {
           String lab = t.label().value();
@@ -539,11 +539,29 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
     }
   }
 
-  /** Implementation of TreeReaderFactory, mainly for convenience of constructing by reflection */
+  /** Implementation of TreeReaderFactory, mainly for convenience of
+   *  constructing by reflection.
+   */
   public static class NPTmpRetainingTreeReaderFactory implements TreeReaderFactory {
 
+    @Override
     public TreeReader newTreeReader(Reader in) {
       return new PennTreeReader(in, new LabeledScoredTreeFactory(), new NPTmpRetainingTreeNormalizer());
+    }
+
+  }
+
+  /** Implementation of TreeReaderFactory, mainly for convenience of
+   *  constructing by reflection. This one corresponds to what's currently
+   *  used in englishPCFG accurate unlexicalized parser.
+   */
+  public static class NPTmpAdvRetainingTreeReaderFactory implements TreeReaderFactory {
+
+    @Override
+    public TreeReader newTreeReader(Reader in) {
+      return new PennTreeReader(in, new LabeledScoredTreeFactory(),
+              new NPTmpRetainingTreeNormalizer(NPTmpRetainingTreeNormalizer.TEMPORAL_ACL03PCFG,
+                      false, 0, true));
     }
 
   }

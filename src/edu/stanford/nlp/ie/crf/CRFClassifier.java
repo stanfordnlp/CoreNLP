@@ -1731,14 +1731,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       sb.append(wi.get(CoreAnnotations.TextAnnotation.class));
       sb.append("\t");
       FactorTable table = factorTables[i];
-      double totalMass = table.totalMass();
       for (int j = 0; j < table.size(); j++) {
         int[] arr = table.toArray(j);
         sb.append(classIndex.get(arr[0]));
         sb.append(":");
         sb.append(classIndex.get(arr[1]));
         sb.append(":");
-        sb.append(table.getValue(j) - totalMass);
+        sb.append(cliqueTree.logProb(i, arr));
         sb.append(" ");
       }
       sb.append("\n");
