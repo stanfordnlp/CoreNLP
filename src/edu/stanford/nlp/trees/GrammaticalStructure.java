@@ -89,6 +89,9 @@ public abstract class GrammaticalStructure extends TreeGraph {
     super(t); // makes a Tree with TreeGraphNode nodes
     // add head word and tag to phrase nodes
     root.percolateHeads(hf);
+    if (root.value() == null) {
+      root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
+    }
     // add dependencies, using heads
     this.puncFilter = puncFilter;
     NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
