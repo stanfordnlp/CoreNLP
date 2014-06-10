@@ -44,7 +44,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     TrieMap<K, V> curTrie = this;
     // go through each element
     for(Object element : key){
-      curTrie = (curTrie.children != null)? curTrie.children.get(element):null;
+      curTrie = curTrie.children.get(element);
       if(curTrie == null){
         return null;
       }
@@ -143,8 +143,16 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   }
 
   public V get(Iterable key) {
-    TrieMap<K, V> curTrie = getChildTrie(key);
-    return (curTrie != null)? curTrie.value:null;
+    TrieMap<K, V> curTrie = this;
+    // go through each element
+    for(Object element : key){
+      if (curTrie.children == null) return null;
+      curTrie = curTrie.children.get(element);
+      if(curTrie == null){
+        return null;
+      }
+    }
+    return curTrie.value;
   }
 
   public V get(K[] key) {
