@@ -1,15 +1,8 @@
-/**
- * Title:       Stanford JavaNLP.
- * Description: A Maximum Entropy Toolkit.
- * Copyright:   Copyright (c) 2000. Kristina Toutanova, Stanford University
- * Company:     Stanford University, All Rights Reserved.
- */
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.maxent.Feature;
 import edu.stanford.nlp.maxent.Problem;
 import edu.stanford.nlp.maxent.iis.LambdaSolve;
-import edu.stanford.nlp.util.MutableDouble;
 
 import java.text.NumberFormat;
 import java.io.DataInputStream;
@@ -31,12 +24,12 @@ public class LambdaSolveTagger extends LambdaSolve {
   //private static final boolean VERBOSE = false;
 
 
-  LambdaSolveTagger(Problem p1, double eps1, double nerr1, byte[][] fnumArr) {
+  LambdaSolveTagger(Problem p1, double eps1, byte[][] fnumArr) {
     p = p1;
     eps = eps1;
-    newtonerr = nerr1;
+    // newtonerr = nerr1;
     lambda = new double[p1.fSize];
-    lambda_converged = new boolean[p1.fSize];
+    // lambda_converged = new boolean[p1.fSize];
     probConds = new double[p1.data.xSize][p1.data.ySize];  // cdm 2008: Memory hog. Is there anything we can do to avoid this square array allocation?
     this.fnumArr = fnumArr;
     zlambda = new double[p1.data.xSize];
@@ -46,7 +39,7 @@ public class LambdaSolveTagger extends LambdaSolve {
   }
 
 
-  /** Unused.
+  /* Unused.
   @SuppressWarnings({"UnusedDeclaration"})
   private void readOldLambdas(String filename, String oldfilename) {
     double[] lambdaold;
@@ -64,10 +57,12 @@ public class LambdaSolveTagger extends LambdaSolve {
   }
   */
 
+  /* --- unused
   LambdaSolveTagger(String filename) {
     this.readL(filename);
     super.setBinary();
   }
+  --- */
 
   LambdaSolveTagger(DataInputStream dataStream) {
     lambda = read_lambdas(dataStream);
@@ -98,12 +93,12 @@ public class LambdaSolveTagger extends LambdaSolve {
   }
 
 
-  /**
+  /* --- unused
+   *
    * Iteration for lambda[index].
    *
    * @return true if this lambda hasn't converged.
-   */
-  @SuppressWarnings({"UnusedDeclaration"})
+   *
   boolean iterate(int index, double err, MutableDouble ret) {
     double deltaL = 0.0;
     deltaL = newton(deltaL, index, err);
@@ -114,13 +109,14 @@ public class LambdaSolveTagger extends LambdaSolve {
     ret.set(deltaL);
     return (Math.abs(deltaL) >= eps);
   }
+  --- */
 
-
-  /*
+  /* --- unused:
+   *
    * Finds the root of an equation by Newton's method. This is my
    * implementation. It might be improved if we looked at some official
    * library for numerical methods.
-   */
+   *
   double newton(double lambda0, int index, double err) {
     double lambdaN = lambda0;
     int i = 0;
@@ -151,13 +147,13 @@ public class LambdaSolveTagger extends LambdaSolve {
       }
     } while (true);
   }
+  --- */
 
-
-  /**
+ /* --- unused:
+   *
    * This method updates the conditional probabilities in the model, resulting from the
    * update of lambda[index] to lambda[index]+deltaL .
-   */
-
+   *
   void updateConds(int index, double deltaL) {
     //  for each x that (x,y)=true / exists y
     //  recalculate pcond(y,x) for all y
@@ -177,8 +173,9 @@ public class LambdaSolveTagger extends LambdaSolve {
       zlambda[x] = zlambdaX;
     }
   }
+  --- */
 
-  /* unused:
+  /* --- unused:
   double pcondCalc(int y, int x) {
     double zlambdaX;
     zlambdaX = 0.0;
@@ -205,7 +202,7 @@ public class LambdaSolveTagger extends LambdaSolve {
     }
     return s;
   }
-  */
+  --- */
 
   double g(double lambdaP, int index) {
     double s = 0.0;
@@ -219,6 +216,7 @@ public class LambdaSolveTagger extends LambdaSolve {
     return s;
   }
 
+  /* --- unused
   double gprime(double lambdaP, int index) {
     double s = 0.0;
     for (int i = 0; i < p.functions.get(index).len(); i++) {
@@ -228,7 +226,7 @@ public class LambdaSolveTagger extends LambdaSolve {
     }
     return s;
   }
-
+  --- */
 
   double fExpected(Feature f) {
     TaggerFeature tF = (TaggerFeature) f;
@@ -282,7 +280,7 @@ public class LambdaSolveTagger extends LambdaSolve {
     return flag;
   }
 
-
+  /* --- unused
   double ZAlfa(double alfa, Feature f, int x) {
     double s = 0.0;
     for (int y = 0; y < p.data.ySize; y++) {
@@ -290,8 +288,9 @@ public class LambdaSolveTagger extends LambdaSolve {
     }
     return s;
   }
+  --- */
 
-  /*
+  /* ---
   private static double[] read_lambdas(String modelFilename) {
     if (VERBOSE) {
       System.err.println(" entering read");
@@ -325,7 +324,8 @@ public class LambdaSolveTagger extends LambdaSolve {
       e.printStackTrace();
     }
     return null;
-  }*/
+  }
+  --- */
 
 }
 
