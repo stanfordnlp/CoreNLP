@@ -5,12 +5,9 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.*;
-import edu.stanford.nlp.ling.tokensregex.matcher.TrieMap;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,32 +32,15 @@ public class TokensRegexNERAnnotator implements Annotator {
   private final Pattern validPosPattern;
   private final boolean verbose;
 
-  public TokensRegexNERAnnotator(String mapping) {
-    this(mapping, false);
-  }
-
-  public TokensRegexNERAnnotator(String mapping, boolean ignoreCase) {
-    this(mapping, ignoreCase, null);
-  }
-
-  public TokensRegexNERAnnotator(String mapping, boolean ignoreCase, String validPosRegex) {
-    this("tokenregexner", getProperties("tokenregexner", mapping, ignoreCase, validPosRegex));
-  }
-
-  private static Properties getProperties(String name, String mapping, boolean ignoreCase, String validPosRegex) {
-    Properties props = new Properties();
-    props.setProperty(name + ".mapping", mapping);
-    props.setProperty(name +".ignorecase", String.valueOf(ignoreCase));
-    if (validPosRegex != null) {
-      props.setProperty(name +".validpospattern", validPosRegex);
-    }
-    return props;
-  }
+//  public TokensRegexNERAnnotator(String mapping) {
+//    this(mapping, false);
+//  }
+//
+//  public TokensRegexNERAnnotator(String mapping, boolean ignoreCase) {
+//  }
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
-    String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol",
-            SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC");
-    String[] backgroundSymbols = backgroundSymbol.split("\\s*,\\s*");
+    String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol", SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
     String mapping = properties.getProperty(name + ".mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
     String validPosRegex = properties.getProperty(name + ".validpospattern");
     boolean overwriteMyLabels = true;
@@ -76,7 +56,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     BufferedReader rd = null;
     try {
       rd = IOUtils.readerFromString(mapping);
-      entries = readEntries(name, mapping, rd, ignoreCase, verbose);
+      entries = readEntries(rd);
     } catch (IOException e) {
       throw new RuntimeIOException("Couldn't read TokensRegexNER from " + mapping, e);
     } finally {
@@ -85,8 +65,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     multiPatternMatcher = createPatternMatcher();
     myLabels = Generics.newHashSet();
     // Can always override background or none.
-    for (String s:backgroundSymbols)
-      myLabels.add(s);
+    myLabels.add(backgroundSymbol);
     myLabels.add(null);
     if (overwriteMyLabels) {
       for (Entry entry: entries) myLabels.add(entry.type);
@@ -153,26 +132,23 @@ public class TokensRegexNERAnnotator implements Annotator {
 
       String startNer = tokens.get(start).ner();
       String endNer = tokens.get(end-1).ner();
-      if (startNer != null && !myLabels.contains(startNer)) {
-        while (prevNerEndIndex >= 0) {
-          // go backwards to find different entity type
-          String ner = tokens.get(prevNerEndIndex).ner();
-          if (ner == null || !ner.equals(startNer)) {
-            break;
-          }
-          prevNerEndIndex--;
+      while (prevNerEndIndex >= 0) {
+        // go backwards to find different entity type
+        String ner = tokens.get(prevNerEndIndex).ner();
+        if (ner == null || !ner.equals(startNer)) {
+          break;
         }
+        prevNerEndIndex--;
       }
-      if (endNer != null && !myLabels.contains(endNer)) {
-        while (nextNerStartIndex < tokens.size()) {
-          // go backwards to find different entity type
-          String ner = tokens.get(nextNerStartIndex).ner();
-          if (ner == null || !ner.equals(endNer)) {
-            break;
-          }
-          nextNerStartIndex++;
+      while (nextNerStartIndex < tokens.size()) {
+        // go backwards to find different entity type
+        String ner = tokens.get(nextNerStartIndex).ner();
+        if (ner == null || !ner.equals(endNer)) {
+          break;
         }
+        nextNerStartIndex++;
       }
+
       boolean overwriteOriginalNer = false;
       if (prevNerEndIndex != (start-1) && nextNerStartIndex != end) {
         // Cutting across already recognized NEs don't disturb
@@ -198,15 +174,10 @@ public class TokensRegexNERAnnotator implements Annotator {
         for (int i = start; i < end; i++) {
           tokens.get(i).set(CoreAnnotations.NamedEntityTagAnnotation.class, entry.type);
         }
-      } else {
-        if (verbose) {
-          System.err.println("Not annotating  '" + m.group() + "': " +
-                  StringUtils.joinFields(m.groupNodes(), CoreAnnotations.NamedEntityTagAnnotation.class)
-                  + " with " + entry.type + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
-        }
       }
     }
   }
+
 
   private static class Entry {
     public String[] regex; // the regex, tokenized by splitting on white space
@@ -233,12 +204,9 @@ public class TokensRegexNERAnnotator implements Annotator {
    *  @param mapping The Reader containing RegexNER mappings. It's lines are counted from 1
    *  @return a sorted list of Entries
    */
-  private static List<Entry> readEntries(String annotatorName,
-                                         String mappingFilename,
-                                         BufferedReader mapping,
-                                         boolean ignoreCase, boolean verbose) throws IOException {
+  private static List<Entry> readEntries(BufferedReader mapping) throws IOException {
     List<Entry> entries = new ArrayList<Entry>();
-    TrieMap<String,Entry> seenRegexes = new TrieMap<String,Entry>();
+
     int lineCount = 0;
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
@@ -247,26 +215,7 @@ public class TokensRegexNERAnnotator implements Annotator {
         throw new IllegalArgumentException("Provided mapping file is in wrong format");
 
       String[] regexes = split[0].trim().split("\\s+");
-      String[] key = regexes;
-      if (ignoreCase) {
-        key = new String[regexes.length];
-        for (int i = 0; i < regexes.length; i++) {
-          key[i] = regexes[i].toLowerCase();
-        }
-      }
       String type = split[1].trim();
-
-      if (seenRegexes.containsKey(key)) {
-        Entry oldEntry = seenRegexes.get(key);
-        String[] types = oldEntry.type.split("\\s*,\\s*");
-        if (!CollectionUtils.asSet(types).contains(type)) {
-          if (verbose) {
-            System.err.println("Ignoring duplicate entry: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
-          }
-        }
-        continue;
-      }
-
       Set<String> overwritableTypes = Generics.newHashSet();
       double priority = 0.0;
 
@@ -277,17 +226,14 @@ public class TokensRegexNERAnnotator implements Annotator {
         try {
           priority = Double.parseDouble(split[3].trim());
         } catch(NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid line " + lineCount
-                  + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
+          throw new IllegalArgumentException("ERROR: Invalid line " + lineCount + " in regexner file " + mapping + ": \"" + line + "\"!", e);
         }
       }
 
       entries.add(new Entry(regexes, type, overwritableTypes, priority));
-      seenRegexes.put(key, entries.get(entries.size()-1));
     }
 
-    System.err.println("TokensRegexAnnotator " + annotatorName +
-            ": Read " + entries.size() + " unique entries out of " + lineCount + " from " + mappingFilename);
+    // System.err.println("Read these entries:");
     // System.err.println(entries);
     return entries;
   }
