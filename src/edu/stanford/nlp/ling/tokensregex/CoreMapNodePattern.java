@@ -1,7 +1,10 @@
 package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.ArrayMap;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,25 +16,13 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class CoreMapNodePattern extends NodePattern<CoreMap> {
-  // TODO: Change/Augment from list of class to pattern to list of conditions for matching
-  //       (so we can have more flexible matches)
-  private final List<Pair<Class, NodePattern>> annotationPatterns;
+  // TODO: Change/Augment from map of class to pattern to list of conditions for matching
+  //       (so we can do matches over multiple fields)
+  private final Map<Class, NodePattern> annotationPatterns;
 
 
-  public CoreMapNodePattern(List<Pair<Class, NodePattern>> annotationPatterns) {
+  public CoreMapNodePattern(Map<Class, NodePattern> annotationPatterns) {
     this.annotationPatterns = annotationPatterns;
-  }
-
-  public CoreMapNodePattern(Pair<Class, NodePattern>... annotationPatterns) {
-    this.annotationPatterns = Arrays.asList(annotationPatterns);
-  }
-
-  public CoreMapNodePattern(Class key, NodePattern pattern) {
-    this(Pair.makePair(key,pattern));
-  }
-
-  public List<Pair<Class, NodePattern>> getAnnotationPatterns() {
-    return Collections.unmodifiableList(annotationPatterns);
   }
 
   public static CoreMapNodePattern valueOf(String textAnnotationPattern) {
@@ -39,8 +30,8 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
   }
 
   public static CoreMapNodePattern valueOf(Env env, String textAnnotationPattern) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class, NodePattern>>(1));
-    p.add(CoreAnnotations.TextAnnotation.class,
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayMap<Class, NodePattern>(1));
+    p.annotationPatterns.put(CoreAnnotations.TextAnnotation.class,
             new StringAnnotationRegexPattern(textAnnotationPattern, (env != null)? env.defaultStringPatternFlags: 0));
     return p;
   }
@@ -50,7 +41,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
   }
 
   public static CoreMapNodePattern valueOf(Env env, Map<String, String> attributes) {
-    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayList<Pair<Class,NodePattern>>(attributes.size()));
+    CoreMapNodePattern p = new CoreMapNodePattern(new ArrayMap<Class,NodePattern>(attributes.size()));
     for (String attr:attributes.keySet()) {
       String value = attributes.get(attr);
       Class c = EnvLookup.lookupAnnotationKey(env, attr);
@@ -58,25 +49,25 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
         if (value.startsWith("\"") && value.endsWith("\"")) {
           value = value.substring(1, value.length()-1);
           value = value.replaceAll("\\\\\"", "\""); // Unescape quotes...
-          p.add(c, new StringAnnotationPattern(value));
+          p.annotationPatterns.put(c, new StringAnnotationPattern(value));
         } else if (value.startsWith("/") && value.endsWith("/")) {
           value = value.substring(1, value.length()-1);
           value = value.replaceAll("\\\\/", "/"); // Unescape forward slash
 //          p.annotationPatterns.put(c, new StringAnnotationRegexPattern(value, (env != null)? env.defaultStringPatternFlags: 0));
-          p.add(c, new StringAnnotationRegexPattern((env != null)? env.getStringPattern(value): Pattern.compile(value)));
+          p.annotationPatterns.put(c, new StringAnnotationRegexPattern((env != null)? env.getStringPattern(value): Pattern.compile(value)));
         } else if (value.startsWith("::")) {
           if (value.equals("::IS_NIL") || value.equals("::NOT_EXISTS")) {
-            p.add(c, new NilAnnotationPattern());
+            p.annotationPatterns.put(c, new NilAnnotationPattern());
           } else if (value.equals("::EXISTS") || value.equals("::NOT_NIL")) {
-            p.add(c, new NotNilAnnotationPattern());
+            p.annotationPatterns.put(c, new NotNilAnnotationPattern());
           } else if (value.equals("::IS_NUM")) {
-            p.add(c, new NumericAnnotationPattern(0, NumericAnnotationPattern.CmpType.IS_NUM));
+            p.annotationPatterns.put(c, new NumericAnnotationPattern(0, NumericAnnotationPattern.CmpType.IS_NUM));
           } else {
             boolean ok = false;
             if (env != null) {
               Object custom = env.get(value);
               if (custom != null) {
-                p.add(c, (NodePattern) custom);
+                p.annotationPatterns.put(c, (NodePattern) custom);
                 ok = true;
               }
             }
@@ -86,24 +77,24 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
           }
         } else if (value.startsWith("<=")) {
           Double v = Double.parseDouble(value.substring(2));
-          p.add(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.LE));
+          p.annotationPatterns.put(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.LE));
         } else if (value.startsWith(">=")) {
           Double v = Double.parseDouble(value.substring(2));
-          p.add(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.GE));
+          p.annotationPatterns.put(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.GE));
         } else if (value.startsWith("==")) {
           Double v = Double.parseDouble(value.substring(2));
-          p.add(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.EQ));
+          p.annotationPatterns.put(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.EQ));
         } else if (value.startsWith("!=")) {
           Double v = Double.parseDouble(value.substring(2));
-          p.add(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.NE));
+          p.annotationPatterns.put(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.NE));
         } else if (value.startsWith(">")) {
           Double v = Double.parseDouble(value.substring(1));
-          p.add(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.GT));
+          p.annotationPatterns.put(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.GT));
         } else if (value.startsWith("<")) {
           Double v = Double.parseDouble(value.substring(1));
-          p.add(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.LT));
+          p.annotationPatterns.put(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.LT));
         } else if (value.matches("[A-Za-z0-9_+-.]+")) {
-          p.add(c, new StringAnnotationPattern(value));
+          p.annotationPatterns.put(c, new StringAnnotationPattern(value));
         } else {
           throw new IllegalArgumentException("Invalid value " + value + " for key: " + attr);
         }
@@ -114,17 +105,13 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     return p;
   }
 
-  private void add(Class c, NodePattern pattern) {
-    annotationPatterns.add(Pair.makePair(c, pattern));
-  }
-
   @Override
   public boolean match(CoreMap token)
   {
     boolean matched = true;
-    for (Pair<Class,NodePattern> entry:annotationPatterns) {
-      NodePattern annoPattern = entry.second;
-      Object anno = token.get(entry.first);
+    for (Map.Entry<Class,NodePattern> entry:annotationPatterns.entrySet()) {
+      NodePattern annoPattern = entry.getValue();
+      Object anno = token.get(entry.getKey());
       if (!annoPattern.match(anno)) {
         matched = false;
         break;
@@ -146,14 +133,13 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
   // Does matching, returning match results
   protected boolean match(CoreMap token, Map<Class,Object> matchResults)
   {
-
     boolean matched = true;
-    for (Pair<Class,NodePattern> entry:annotationPatterns) {
-      NodePattern annoPattern = entry.second;
-      Object anno = token.get(entry.first);
+    for (Map.Entry<Class,NodePattern> entry:annotationPatterns.entrySet()) {
+      NodePattern annoPattern = entry.getValue();
+      Object anno = token.get(entry.getKey());
       Object matchResult = annoPattern.matchWithResult(anno);
       if (matchResult != null) {
-        matchResults.put(entry.first, matchResult);
+        matchResults.put(entry.getKey(), matchResult);
       } else {
         matched = false;
         break;
@@ -164,11 +150,11 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    for (Pair<Class,NodePattern> entry:annotationPatterns) {
+    for (Class k:annotationPatterns.keySet()) {
       if (sb.length() > 0) {
         sb.append(", ");
       }
-      sb.append(entry.first).append(entry.second);
+      sb.append(k).append(annotationPatterns.get(k));
     }
     return sb.toString();
   }
@@ -292,44 +278,6 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
 
     public String toString() {
       return ":" + target;
-    }
-  }
-
-  public static class StringInSetAnnotationPattern extends NodePattern<String> {
-    Set<String> targets;
-    boolean ignoreCase;
-
-    public StringInSetAnnotationPattern(Set<String> targets, boolean ignoreCase) {
-      this.ignoreCase = ignoreCase;
-      // if ignoreCase is true - convert targets to lowercase
-      this.targets = new HashSet<String>(targets.size());
-      if (ignoreCase) {
-        for (String target:targets) {
-          this.targets.add(target.toLowerCase());
-        }
-      } else {
-        this.targets.addAll(targets);
-      }
-    }
-
-    public StringInSetAnnotationPattern(Set<String> targets) {
-      this(targets, false);
-    }
-
-    public Set<String> getTargets() {
-      return targets;
-    }
-
-    public boolean match(String str) {
-      if (ignoreCase) {
-        return targets.contains(str.toLowerCase());
-      } else {
-        return targets.contains(str);
-      }
-    }
-
-    public String toString() {
-      return ":" + targets;
     }
   }
 
