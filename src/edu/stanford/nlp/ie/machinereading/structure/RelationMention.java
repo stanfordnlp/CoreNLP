@@ -306,27 +306,4 @@ public class RelationMention extends ExtractionObject {
   public static boolean isUnrelatedLabel(String label) {
     return label.startsWith(UNRELATED);
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof RelationMention)) return false;
-    if (!super.equals(o)) return false;
-
-    RelationMention that = (RelationMention) o;
-
-    if (argNames != null ? !argNames.equals(that.argNames) : that.argNames != null) return false;
-    if (args != null ? !args.equals(that.args) : that.args != null) return false;
-    if (signature != null ? !signature.equals(that.signature) : that.signature != null) return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = argNames != null ? argNames.hashCode() : 0;
-    result = 31 * result + (args != null ? args.hashCode() : 0);
-    result = 31 * result + (signature != null ? signature.hashCode() : 0);
-    return result;
-  }
 }
