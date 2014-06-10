@@ -53,6 +53,7 @@ public class Constants {
 
   /** Default sieve passes */
   public static final String SIEVEPASSES = "MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, RelaxedHeadMatch, PronounMatch";
+//  public static final String SIEVEPASSES = "MarkRole, DiscourseMatch, ExactStringMatch, NameMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, RelaxedHeadMatch, PronounMatch";
 
   /** Use gender list (Bergsma and Lin, 2006; Ji and Lin, 2009) */
   public static final boolean USE_GENDER_LIST = true;
