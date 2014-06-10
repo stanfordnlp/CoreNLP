@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
-import edu.stanford.nlp.dcoref.Semantics;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -76,7 +75,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
 
     stanfordProcessor = loadStanfordProcessor(props);
   }
-  
+
   public CoNLLMentionExtractor(Dictionaries dict, Properties props, Semantics semantics,
       LogisticClassifier<String, String> singletonModel) throws Exception {
     this(dict, props, semantics);
@@ -128,14 +127,13 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     }
 
     String preSpeaker = null;
-    String curSpeaker = null;
     int utterance = -1;
     for (CoreLabel token:anno.get(CoreAnnotations.TokensAnnotation.class)) {
       if (!token.containsKey(CoreAnnotations.SpeakerAnnotation.class))  {
         token.set(CoreAnnotations.SpeakerAnnotation.class, "");
       }
-      curSpeaker = token.get(CoreAnnotations.SpeakerAnnotation.class);
-      if(!curSpeaker.equals(preSpeaker)) {
+      String curSpeaker = token.get(CoreAnnotations.SpeakerAnnotation.class);
+      if (!curSpeaker.equals(preSpeaker)) {
         utterance++;
         preSpeaker = curSpeaker;
       }
@@ -174,7 +172,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     return doc;
   }
 
-  public List<List<Mention>> makeCopy(List<List<Mention>> mentions) {
+  public static List<List<Mention>> makeCopy(List<List<Mention>> mentions) {
     List<List<Mention>> copy = new ArrayList<List<Mention>>(mentions.size());
     for (List<Mention> sm:mentions) {
       List<Mention> sm2 = new ArrayList<Mention>(sm.size());
