@@ -70,6 +70,7 @@ public class BaseLexicon implements Lexicon {
   protected boolean smartMutation;
 
   protected final Index<String> wordIndex;
+  
   protected final Index<String> tagIndex;
 
 
