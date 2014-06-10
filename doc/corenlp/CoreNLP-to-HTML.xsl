@@ -125,20 +125,14 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
   <ol>
   <xsl:for-each select="coreference">
     <li>
-        <table border="0">
-        <tr>
-            <th>Sentence</th>
-            <th>Head</th>
-            <th>Text</th>
-        </tr>
-        <xsl:for-each select="mention">
-            <tr>
-                <td><xsl:value-of select="sentence"/></td>
-                <td><xsl:value-of select="head"/> <xsl:if test="@representative"> (gov) </xsl:if></td>
-                <td><xsl:value-of select="text"/></td>
-            </tr>
-        </xsl:for-each>
-        </table>
+    <ul>
+    <xsl:for-each select="mention">
+      <li> sentence <xsl:value-of select="sentence"/>,
+           headword <xsl:value-of select="head"/> 
+           <xsl:if test="@representative"> (gov) </xsl:if>
+      </li>
+    </xsl:for-each>
+    </ul>
     </li>
   </xsl:for-each>
   </ol>
