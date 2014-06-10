@@ -14,7 +14,6 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
   double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
   double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
   SeqClassifierFlags flags;
-  double[] layerOneCache, hiddenLayerCache;
 
   private static double sigmoid(double x) {
     return 1 / (1 + Math.exp(-x));
@@ -27,10 +26,9 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
     this.flags = flags;
   }
 
-  public double[] hiddenLayerOutput(double[][] inputLayerWeights, int[] nodeCliqueFeatures, SeqClassifierFlags aFlag, double[] featureVal) {
+  public static double[] hiddenLayerOutput(double[][] inputLayerWeights, int[] nodeCliqueFeatures, SeqClassifierFlags aFlag, double[] featureVal) {
     int layerOneSize = inputLayerWeights.length;
-    if (layerOneCache == null || layerOneSize != layerOneCache.length)
-      layerOneCache = new double[layerOneSize];
+    double[] layerOne = new double[layerOneSize];
     for (int i = 0; i < layerOneSize; i++) {
       double[] ws = inputLayerWeights[i];
       double lOneW = 0;
@@ -41,22 +39,22 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
           dotProd *= featureVal[m];
         lOneW += dotProd;
       }
-      layerOneCache[i] = lOneW;
+      layerOne[i] = lOneW;
     }
-    if (!aFlag.useHiddenLayer)
-      return layerOneCache;
-      
     // transform layer one through hidden
-    if (hiddenLayerCache == null || layerOneSize != hiddenLayerCache.length)
-      hiddenLayerCache = new double[layerOneSize];
+    double[] hiddenLayer = new double[layerOneSize];
     for (int i = 0; i < layerOneSize; i++) {
-      if (aFlag.useSigmoid) {
-        hiddenLayerCache[i] = sigmoid(layerOneCache[i]);
+      if (aFlag.useHiddenLayer) {
+        if (aFlag.useSigmoid) {
+          hiddenLayer[i] = sigmoid(layerOne[i]);
+        } else {
+          hiddenLayer[i] = Math.tanh(layerOne[i]);
+        }
       } else {
-        hiddenLayerCache[i] = Math.tanh(layerOneCache[i]);
+        hiddenLayer[i] = layerOne[i];
       }
     }
-    return hiddenLayerCache;
+    return hiddenLayer;
   }
 
   @Override
