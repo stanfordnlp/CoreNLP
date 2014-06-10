@@ -854,7 +854,7 @@ public class EnglishGrammaticalRelations {
           // are put inside the NP; 2nd is for case of relative
           // clauses with no relativizer (it doesn't distinguish
           // whether actually gapped).
-          "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
+          "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why)/))) !$-- NP|NML > @NP",
           "NP|WHNP|NML $++ RRC=target !$-- NP|WHNP|NML",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
         });
