@@ -233,19 +233,6 @@ public class StringUtils {
     }, start, end);
   }
 
-  public static String joinFields(List<? extends CoreMap> l, final Class field, String glue, int start, int end) {
-    return join(l, glue, new Function<CoreMap, String>() {
-      public String apply(CoreMap in) {
-        Object val = in.get(field);
-        return (val != null)? val.toString():"";
-      }
-    }, start, end);
-  }
-
-  public static String joinFields(List<? extends CoreMap> l, final Class field) {
-    return joinFields(l, field, " ", 0, l.size());
-  }
-
   /**
    * Joins all the tokens together (more or less) according to their original whitespace.
    * It assumes all whitespace was " "
@@ -357,28 +344,6 @@ public class StringUtils {
    */
   public static List<String> split(String str, String regex) {
     return (Arrays.asList(str.split(regex)));
-  }
-
-  public static String[] splitOnChar(String input, char delimiter) {
-    // State
-    String[] out = new String[input.length() + 1];
-    int nextIndex = 0;
-    int lastDelimiterIndex = -1;
-    char[] chars = input.toCharArray();
-    // Split
-    for ( int i = 0; i <= chars.length; ++i ) {
-      if (i >= chars.length || chars[i] == delimiter) {
-        char[] tokenChars = new char[i - (lastDelimiterIndex + 1)];
-        System.arraycopy(chars, lastDelimiterIndex + 1, tokenChars, 0, tokenChars.length);
-        out[nextIndex] = new String(tokenChars);
-        nextIndex += 1;
-        lastDelimiterIndex = i;
-      }
-    }
-    // Clean Result
-    String[] trimmedOut = new String[nextIndex];
-    System.arraycopy(out, 0, trimmedOut, 0, trimmedOut.length);
-    return trimmedOut;
   }
 
 
