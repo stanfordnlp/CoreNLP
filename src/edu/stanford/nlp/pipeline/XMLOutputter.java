@@ -42,6 +42,7 @@ public class XMLOutputter {
 
   public static class Options {
     public boolean includeText = false;
+    public int coreferenceContextSize = 0;
     public double relationsBeam = 0.0;
     public String encoding = "UTF-8";
     public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
@@ -193,7 +194,7 @@ public class XMLOutputter {
     if (corefChains != null) {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       Element corefInfo = new Element("coreference", NAMESPACE_URI);
-      if (addCorefGraphInfo(corefInfo, sentences, corefChains, NAMESPACE_URI))
+      if (addCorefGraphInfo(options, corefInfo, sentences, corefChains, NAMESPACE_URI))
         docElem.appendChild(corefInfo);
     }
 
@@ -302,7 +303,7 @@ public class XMLOutputter {
    * Generates the XML content for the coreference chain object
    */
   private static boolean addCorefGraphInfo
-    (Element corefInfo, List<CoreMap> sentences, Map<Integer, CorefChain> corefChains, String curNS)
+    (Options options, Element corefInfo, List<CoreMap> sentences, Map<Integer, CorefChain> corefChains, String curNS)
   {
     boolean foundCoref = false;
     for (CorefChain chain : corefChains.values()) {
@@ -311,18 +312,19 @@ public class XMLOutputter {
       foundCoref = true;
       Element chainElem = new Element("coreference", curNS);
       CorefChain.CorefMention source = chain.getRepresentativeMention();
-      addCorefMention(chainElem, curNS, sentences, source, true);
+      addCorefMention(options, chainElem, curNS, sentences, source, true);
       for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
         if (mention == source)
           continue;
-        addCorefMention(chainElem, curNS, sentences, mention, false);
+        addCorefMention(options, chainElem, curNS, sentences, mention, false);
       }
       corefInfo.appendChild(chainElem);
     }
     return foundCoref;
   }
 
-  private static void addCorefMention(Element chainElem, String curNS,
+  private static void addCorefMention(Options options,
+                                      Element chainElem, String curNS,
                                       List<CoreMap> sentences,
                                       CorefChain.CorefMention mention,
                                       boolean representative) {
@@ -340,10 +342,19 @@ public class XMLOutputter {
     setSingleElement(mentionElem, "head", curNS,
                      Integer.toString(mention.headIndex));
 
-    if (sentences != null) {
-      String text = StringUtils.joinWords(sentences.get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class),
-              " ", mention.startIndex - 1, mention.endIndex -1);
-      setSingleElement(mentionElem, "text", curNS, text);
+    String text = mention.mentionSpan;
+    setSingleElement(mentionElem, "text", curNS, text);
+    // Do you want context with your coreference?
+    if (sentences != null && DEFAULT_OPTIONS.coreferenceContextSize > 0) {
+      // If so use sentences to get so context from sentences
+
+      List<CoreLabel> tokens = sentences.get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class);
+      int contextStart = Math.max(mention.startIndex - 1 - 5, 0);
+      int contextEnd = Math.min(mention.endIndex - 1 + 5, tokens.size());
+      String leftContext = StringUtils.joinWords(tokens, " ", contextStart, mention.startIndex - 1);
+      String rightContext = StringUtils.joinWords(tokens, " ", mention.endIndex - 1, contextEnd);
+      setSingleElement(mentionElem, "leftContext", curNS, leftContext);
+      setSingleElement(mentionElem, "rightContext", curNS, rightContext);
     }
 
     chainElem.appendChild(mentionElem);
