@@ -428,8 +428,8 @@ public class SemanticGraph implements Serializable {
         List<IndexedWord> children = getChildList(vertex);
         boolean match = false;
         for (IndexedWord child : children) {
-          String lemma = (child.get(CoreAnnotations.LemmaAnnotation.class) == null ? "" : child.get(CoreAnnotations.LemmaAnnotation.class));
-          if (lemma.equals("")) {
+          String lemma = child.get(CoreAnnotations.LemmaAnnotation.class);
+          if (lemma == null || lemma.equals("")) {
             lemma = child.word().toLowerCase();
           }
           if (lemma.equals(word)) {
