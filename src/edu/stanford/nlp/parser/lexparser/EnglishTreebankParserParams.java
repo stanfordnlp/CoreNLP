@@ -2258,7 +2258,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   {
     try {
       return EnglishGrammaticalStructure.
-              readCoNLLXGrammaticalStructureCollection(filename);
+        readCoNLLXGrammaticStructureCollection(filename);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
