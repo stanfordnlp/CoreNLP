@@ -108,25 +108,17 @@ public class CGRunner {
     this.priorSigmaS = -1.0; // not used
   }
 
-  private void printOptimizationResults(LikelihoodFunction df, MonitorFunction monitor) {
-    double negLogLike = df.valueAt(prob.lambda);
-    System.err.printf("After optimization neg (penalized) log cond likelihood: %1.2f%n", negLogLike);
-    if (monitor != null) {
-      monitor.reportMonitoring(negLogLike);
-    }
-    int numNonZero = 0;
-    for (int i = 0; i < prob.lambda.length; i++) {
-      if (prob.lambda[i] != 0.0) {
-        // 0.0 == -0.0 in IEEE math!
-        numNonZero++;
-      }
-    }
-    System.err.printf("Non-zero parameters: %d/%d (%1.2f%%)%n", numNonZero, prob.lambda.length,
-        (100.0 * numNonZero) / prob.lambda.length);
+
+  /**
+    * Solves the problem using a quasi-newton method (L-BFGS).  The solution
+    * is stored in the {@code lambda} array of {@code prob}.
+    */
+  public void solve() {
+    solveQN();
   }
 
 
-  /**
+   /**
    * Solves the problem using a quasi-newton method (L-BFGS).  The solution
    * is stored in the {@code lambda} array of {@code prob}.
    */
@@ -136,8 +128,10 @@ public class CGRunner {
     Minimizer<DiffFunction> cgm = new QNMinimizer(monitor, 10);
 
     // all parameters are started at 0.0
-    prob.lambda = cgm.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, monitor);
+    double[] result = cgm.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    monitor.reportMonitoring(df.valueAt(result));
+    System.err.println("after optimization value is " + df.valueAt(result));
   }
 
   public void solveOWLQN2(double weight) {
@@ -147,9 +141,12 @@ public class CGRunner {
     ((QNMinimizer) cgm).useOWLQN(true, weight);
 
     // all parameters are started at 0.0
-    prob.lambda = cgm.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, monitor);
+    double[] result = cgm.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    monitor.reportMonitoring(df.valueAt(result));
+    System.err.println("after optimization value is " + df.valueAt(result));
   }
+
 
   /**
    * Solves the problem using conjugate gradient (CG).  The solution
@@ -161,8 +158,10 @@ public class CGRunner {
     Minimizer<DiffFunction> cgm = new CGMinimizer(monitor);
 
     // all parameters are started at 0.0
-    prob.lambda = cgm.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, monitor);
+    double[] result = cgm.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    monitor.reportMonitoring(df.valueAt(result));
+    System.err.println("after optimization value is " + df.valueAt(result));
   }
 
   /**
@@ -178,10 +177,10 @@ public class CGRunner {
   public void solveL1(double weight) {
     LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
     Minimizer<DiffFunction> owl = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", weight);
-    prob.lambda = owl.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, null);
+    double[] result = owl.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    System.err.println("after optimization value is " + df.valueAt(result));
   }
-
 
   /**
    * This class implements the DiffFunction interface for Minimizer
