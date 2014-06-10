@@ -664,9 +664,8 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "mark", "marker",
         MarkerGRAnnotation.class, COMPLEMENT, "SBAR(?:-TMP)?", tregexCompiler,
         new String[] {
-          "SBAR|SBAR-TMP <, (IN=target !< /^(?i:that|whether)$/) < S|FRAG",
-     	    "SBAR <, (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
-          "SBAR <, (IN|DT=target < That|Whether)"
+          "SBAR|SBAR-TMP < (IN|DT=target $++ S|FRAG)",
+     	    "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
         });
   public static class MarkerGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -787,7 +786,7 @@ public class EnglishGrammaticalRelations {
         AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
         new String[] {
           // second disjunct matches inverted "had he investigated" cases, 3rd case is "so that" purpose clauses, first case includes regular in order to purpose clauses
-          "VP < (@SBAR=target [ <, (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
+          "VP < (@SBAR=target [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (IN < that) < (RB|IN < so) ] )",
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV <, (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)))",
