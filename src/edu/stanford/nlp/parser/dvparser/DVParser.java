@@ -321,7 +321,6 @@ public class DVParser {
     System.err.println("Using unknown percent vector for Chinese words: " + op.trainOptions.unknownChinesePercentVector);
     System.err.println("Initial matrices scaled by: " + op.trainOptions.scalingForInit);
     System.err.println("Training will use " + op.trainOptions.trainingThreads + " thread(s)");
-    System.err.println("Context words are " + ((op.trainOptions.useContextWords) ? "on" : "off"));
     System.err.println("Model will " + ((op.trainOptions.dvSimplifiedModel) ? "" : "not ") + "be simplified");
 
     this.dvModel = new DVModel(op, parser.stateIndex, parser.ug, parser.bg);
