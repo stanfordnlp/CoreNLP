@@ -231,7 +231,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
-
+    
     if (props == null) {
       // if undefined, find the properties file in the classpath
       props = loadPropertiesFromClasspath();
