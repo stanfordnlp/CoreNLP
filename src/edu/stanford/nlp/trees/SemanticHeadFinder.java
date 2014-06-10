@@ -53,17 +53,23 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
   private static final boolean DEBUG = false;
 
+  /* A few times the apostrophe is missing on "'s", so we have "s" */
   /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc. */
   private static final String[] auxiliaries = {"will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "has", "have", "had", "having", "get", "gets", "getting", "got", "gotten", "do", "does", "did", "to", "'ve", "ve", "'d", "d", "'ll", "ll", "na" };
   private static final String[] beGetVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "'re", "'s", "s", "get", "getting", "gets", "got"};
   private static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "'re", "'s", "s", "seem", "seems", "seemed", "appear", "appears", "appeared", "stay", "stays", "stayed", "remain", "remains", "remained", "resemble", "resembles", "resembled", "become", "becomes", "became"};
 
+  // include Charniak tags so can do BLLIP right
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
+  // These ones are always auxiliaries, even if the word is "too", "my", or whatever else appears in web text.
+  private static final String[] unambiguousAuxTags = {"TO", "MD", "AUX", "AUXG"};
+
 
   private final Set<String> verbalAuxiliaries;
   private final Set<String> copulars;
   private final Set<String> passiveAuxiliaries;
   private final Set<String> verbalTags;
+  private final Set<String> unambiguousAuxiliaryTags;
 
 
   public SemanticHeadFinder() {
@@ -90,33 +96,31 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     // make a distinction between auxiliaries and copula verbs to
     // get the NP has semantic head in sentences like "Bill is an honest man".  (Added "sha" for "shan't" May 2009
-    verbalAuxiliaries = Generics.newHashSet();
-    verbalAuxiliaries.addAll(Arrays.asList(auxiliaries));
+    verbalAuxiliaries = Generics.newHashSet(Arrays.asList(auxiliaries));
 
-    passiveAuxiliaries = Generics.newHashSet();
-    passiveAuxiliaries.addAll(Arrays.asList(beGetVerbs));
+    passiveAuxiliaries = Generics.newHashSet(Arrays.asList(beGetVerbs));
 
     //copula verbs having an NP complement
     copulars = Generics.newHashSet();
     if (cop) {
       copulars.addAll(Arrays.asList(copulaVerbs));
-    } // a few times the apostrophe is missing on "'s"
+    }
 
-    verbalTags = Generics.newHashSet();
-    // include Charniak tags so can do BLLIP right
-    verbalTags.addAll(Arrays.asList(verbTags));
+    verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
+    unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
+
 
   }
 
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
-    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR"}, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
+    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
     // WHNP clauses should have the same sort of head as an NP
     // but it a WHNP has a NP and a WHNP under it, the WHNP should be the head.  E.g.,  (WHNP (WHNP (WP$ whose) (JJ chief) (JJ executive) (NN officer))(, ,) (NP (NNP James) (NNP Gatward))(, ,))
     nonTerminalInfo.put("WHNP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP"}, {"left", "WHNP", "NP"}, {"rightdis", "$", "ADJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}, {"left", "WHPP", "WHADJP", "WP$", "WDT"}});
     //WHADJP
-    nonTerminalInfo.put("WHADJP", new String[][]{{"left", "ADJP", "JJ", "JJR"}, {"right", "RB"}, {"right"}});
+    nonTerminalInfo.put("WHADJP", new String[][]{{"left", "ADJP", "JJ", "JJR", "WP"}, {"right", "RB"}, {"right"}});
     //WHADJP
     nonTerminalInfo.put("WHADVP", new String[][]{{"rightdis", "WRB", "WHADVP", "RB", "JJ"}}); // if not WRB or WHADVP, probably has flat NP structure, allow JJ for "how long" constructions
     // QP: we don't want the first CD to be the semantic head (e.g., "three billion": head should be "billion"), so we go from right to left
@@ -208,7 +212,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       }
 
       // looks for auxiliaries
-      if (hasVerbalAuxiliary(kids, verbalAuxiliaries) || hasPassiveProgressiveAuxiliary(kids, passiveAuxiliaries)) {
+      if (hasVerbalAuxiliary(kids, verbalAuxiliaries, true) || hasPassiveProgressiveAuxiliary(kids)) {
         // String[] how = new String[] {"left", "VP", "ADJP", "NP"};
         // Including NP etc seems okay for copular sentences but is
         // problematic for other auxiliaries, like 'he has an answer'
@@ -220,7 +224,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
         }
         if (pti != null) {
           return pti;
-        } else {
+        // } else {
           // System.err.println("------");
           // System.err.println("SemanticHeadFinder failed to reassign head for");
           // t.pennPrint(System.err);
@@ -229,7 +233,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       }
 
       // looks for copular verbs
-      if (hasVerbalAuxiliary(kids, copulars) && ! isExistential(t, parent) && ! isWHQ(t, parent)) {
+      if (hasVerbalAuxiliary(kids, copulars, false) && ! isExistential(t, parent) && ! isWHQ(t, parent)) {
         String[] how;
         if (motherCat.equals("SQ")) {
           how = new String[]{"right", "VP", "ADJP", "NP", "WHADJP", "WHNP"};
@@ -275,6 +279,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     Tree hd = super.determineNonTrivialHead(t, parent);
 
+    /* ----
+    // This should now be handled at the AbstractCollinsHeadFinder level, so see if we can comment this out
     // Heuristically repair punctuation heads
     Tree[] hdChildren = hd.children();
     if (hdChildren != null && hdChildren.length > 0 &&
@@ -288,13 +294,14 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
            if (!tlp.isPunctuationWord(tChildren[i].children()[0].label().value())) {
              hd = tChildren[i];
              if (DEBUG) {
-               System.err.printf("New head: %s %s", hd.label(), hd.children()[0].label());
+               System.err.printf("New head of %s is %s%n", hd.label(), hd.children()[0].label());
              }
              break;
            }
          }
       }
     }
+    */
 
     if (DEBUG) {
       System.err.println("Determined head (case 3) for " + t.value() + " is: " + hd);
@@ -387,9 +394,52 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     return toReturn;
   }
 
+  private boolean isVerbalAuxiliary(Tree preterminal, Set<String> verbalSet, boolean allowJustTagMatch) {
+    if (preterminal.isPreTerminal()) {
+      Label kidLabel = preterminal.label();
+      String tag = null;
+      if (kidLabel instanceof HasTag) {
+        tag = ((HasTag) kidLabel).tag();
+      }
+      if (tag == null) {
+        tag = preterminal.value();
+      }
+      Label wordLabel = preterminal.firstChild().label();
+      String word = null;
+      if (wordLabel instanceof HasWord) {
+        word = ((HasWord) wordLabel).word();
+      }
+      if (word == null) {
+        word = wordLabel.value();
+      }
 
-  // now overally complex so it deals with coordinations.  Maybe change this class to use tregrex?
-  private boolean hasPassiveProgressiveAuxiliary(Tree[] kids, Set<String> verbalSet) {
+      if (DEBUG) {
+        System.err.println("Checking " + preterminal.value() + " head is " + word + '/' + tag);
+      }
+      String lcWord = word.toLowerCase();
+      if (allowJustTagMatch && unambiguousAuxiliaryTags.contains(tag) || verbalTags.contains(tag) && verbalSet.contains(lcWord)) {
+        if (DEBUG) {
+          System.err.println("isAuxiliary found desired type of aux");
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if this tree is a preterminal that is a verbal auxiliary.
+   *
+   * @param t A tree to examine for being an auxiliary.
+   * @return Whether it is a verbal auxiliary (be, do, have, get)
+   */
+  public boolean isVerbalAuxiliary(Tree t) {
+    return isVerbalAuxiliary(t, verbalAuxiliaries, true);
+  }
+
+
+  // now overly complex so it deals with coordinations.  Maybe change this class to use tregrex?
+  private boolean hasPassiveProgressiveAuxiliary(Tree[] kids) {
     if (DEBUG) {
       System.err.println("Checking for passive/progressive auxiliary");
     }
@@ -399,34 +449,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       if (DEBUG) {
         System.err.println("  checking in " + kid);
       }
-      if (kid.isPreTerminal()) {
-        Label kidLabel = kid.label();
-        String tag = null;
-        if (kidLabel instanceof HasTag) {
-          tag = ((HasTag) kidLabel).tag();
-        }
-        if (tag == null) {
-          tag = kid.value();
-        }
-        Label wordLabel = kid.firstChild().label();
-        String word = null;
-        if (wordLabel instanceof HasWord) {
-          word = ((HasWord) wordLabel).word();
-        }
-        if (word == null) {
-          word = wordLabel.value();
-        }
-
-        if (DEBUG) {
-          System.err.println("Checking " + kid.value() + " head is " + word + '/' + tag);
-        }
-        String lcWord = word.toLowerCase();
-        if (verbalTags.contains(tag) && verbalSet.contains(lcWord)) {
-          if (DEBUG) {
-            System.err.println("hasPassiveProgressiveAuxiliary found passive aux");
-          }
+      if (isVerbalAuxiliary(kid, passiveAuxiliaries, false)) {
           foundPassiveAux = true;
-        }
       } else if (kid.isPhrasal()) {
         Label kidLabel = kid.label();
         String cat = null;
@@ -529,18 +553,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     return false;
   }
 
-  /**
-   * Reinserted so samples.GetSubcats compiles ... should rework if
-   * this is going to stay.
-   *
-   * @param t A tree to examine for being an auxiliary.
-   * @return Whether it is a verbal auxiliary (be, do, have, get)
-   */
-  public boolean isVerbalAuxiliary(Tree t) {
-    Tree[] trees = { t };
-    return hasVerbalAuxiliary(trees, verbalAuxiliaries);
-  }
-
 
   /** This looks to see whether any of the children is a preterminal headed by a word
    *  which is within the set verbalSet (which in practice is either
@@ -549,10 +561,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    *
    * @param kids The child trees
    * @param verbalSet The set of words
+   * @param allowTagOnlyMatch If true, it's sufficient to match on an unambiguous auxiliary tag.
+   *                          Make true iff verbalSet is "all auxiliaries"
    * @return Returns true if one of the child trees is a preterminal verb headed
    *      by a word in verbalSet
    */
-  private boolean hasVerbalAuxiliary(Tree[] kids, Set<String> verbalSet) {
+  private boolean hasVerbalAuxiliary(Tree[] kids, Set<String> verbalSet, boolean allowTagOnlyMatch) {
     if (DEBUG) {
       System.err.println("Checking for verbal auxiliary");
     }
@@ -560,34 +574,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       if (DEBUG) {
         System.err.println("  checking in " + kid);
       }
-      if (kid.isPreTerminal()) {
-        Label kidLabel = kid.label();
-        String tag = null;
-        if (kidLabel instanceof HasTag) {
-          tag = ((HasTag) kidLabel).tag();
-        }
-        if (tag == null) {
-          tag = kid.value();
-        }
-        Label wordLabel = kid.firstChild().label();
-        String word = null;
-        if (wordLabel instanceof HasWord) {
-          word = ((HasWord) wordLabel).word();
-        }
-        if (word == null) {
-          word = wordLabel.value();
-        }
-
-        if (DEBUG) {
-          System.err.println("Checking " + kid.value() + " head is " + word + '/' + tag);
-        }
-        String lcWord = word.toLowerCase();
-        if (verbalTags.contains(tag) && verbalSet.contains(lcWord)) {
-          if (DEBUG) {
-            System.err.println("hasVerbalAuxiliary returns true");
-          }
-          return true;
-        }
+      if (isVerbalAuxiliary(kid, verbalSet, allowTagOnlyMatch)) {
+        return true;
       }
     }
     if (DEBUG) {
