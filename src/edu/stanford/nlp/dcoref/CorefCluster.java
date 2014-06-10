@@ -164,7 +164,7 @@ public class CorefCluster implements Serializable{
     }
     for(Mention m : forSortedPrint.values()){
       if(m.goldCorefClusterID==-1){
-        logger.finer("mention-> id:"+m.mentionID+"\toriginalRef: "+m.originalRef+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex);
+        logger.finer("mention-> id:"+m.mentionID+"\toriginalRef: "+m.originalRef+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex+"\tType: "+m.mentionType);
       } else{
         logger.finer("mention-> id:"+m.mentionID+"\toriginalClusterID: "+m.goldCorefClusterID+"\t"+m.spanToString() +"\tsentNum: "+m.sentNum+"\tstartIndex: "+m.startIndex +"\toriginalRef: "+m.originalRef+"\tType: "+m.mentionType);
       }
