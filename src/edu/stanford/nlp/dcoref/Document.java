@@ -217,28 +217,6 @@ public class Document implements Serializable {
     }
   }
 
-  public boolean isIncompatible(CorefCluster c1, CorefCluster c2) {
-    // Was any of the pairs of mentions marked as incompatible
-    for (Mention m:c1.corefMentions)  {
-      for (Mention a:c2.corefMentions) {
-        if (isIncompatible(m,a)) return true;
-      }
-    }
-    return false;
-  }
-
-  public boolean isIncompatible(Mention m1, Mention m2) {
-    int mid1 = Math.min(m1.mentionID, m2.mentionID);
-    int mid2 = Math.max(m1.mentionID, m2.mentionID);
-    return incompatibles.contains(Pair.makePair(mid1,mid2));
-  }
-
-  public void addIncompatible(Mention m1, Mention m2) {
-    int mid1 = Math.min(m1.mentionID, m2.mentionID);
-    int mid2 = Math.max(m1.mentionID, m2.mentionID);
-    incompatibles.add(Pair.makePair(mid1,mid2));
-  }
-
   /** Mark twin mentions in gold and predicted mentions */
   protected void findTwinMentions(boolean strict){
     if(strict) findTwinMentionsStrict();

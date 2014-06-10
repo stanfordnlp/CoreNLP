@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.ReaderInputStream;
 
 import java.io.*;
@@ -19,15 +18,12 @@ public abstract class AbstractInputStreamAnnotationCreator implements Annotation
 
   @Override
   public Annotation createFromFile(String filename) throws IOException {
-    InputStream stream = new BufferedInputStream(new FileInputStream(filename));
-    Annotation anno = create(stream);
-    IOUtils.closeIgnoringExceptions(stream);
-    return anno;
+    return create(new BufferedInputStream(new FileInputStream(filename)));
   }
 
   @Override
   public Annotation createFromFile(File file) throws IOException {
-    return createFromFile(file.getAbsoluteFile());
+    return create(new BufferedInputStream(new FileInputStream(file)));
   }
 
   @Override

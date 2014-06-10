@@ -442,12 +442,12 @@ public class Redwood {
    */
   public static void endThreads(String check){
     //(error check)
-    isThreaded = false;
     if(currentThread != -1L){
       throw new IllegalStateException("endThreads() called, but thread " + currentThread + " has not finished (exception in thread?)");
     }
     //(end threaded environment)
     assert !control.isHeldByCurrentThread();
+    isThreaded = false;
     //(write remaining threads)
     boolean cleanPass = false;
     while(!cleanPass){
@@ -564,12 +564,6 @@ public class Redwood {
     b.append(sec).append(".").append(mili);
     if(min > 0) b.append(" minutes");
     else b.append(" seconds");
-  }
-
-  public static String formatTimeDifference(long diff){
-    StringBuilder b = new StringBuilder();
-    formatTimeDifference(diff, b);
-    return b.toString();
   }
 
 
@@ -976,9 +970,15 @@ public class Redwood {
       //(variables)
       final AtomicBoolean haveStarted = new AtomicBoolean(false);
       final ReentrantLock metaInfoLock = new ReentrantLock();
-      final AtomicInteger numPending = new AtomicInteger(0);
+      int count = 0;
+      //(count runnables)
+      for (Runnable runnable1 : runnables) {
+        count++;
+      }
+      final int numToRun = count;
       //--Create Runnables
-      ArrayList<Runnable> rtn = new ArrayList<Runnable>();
+      ArrayList<Runnable> rtn = new ArrayList<Runnable>(numToRun);
+      final AtomicInteger runnablesSeen = new AtomicInteger(0);
       for(final Runnable runnable : runnables){
         rtn.add(new Runnable(){
           public void run(){
@@ -1002,8 +1002,8 @@ public class Redwood {
               //(signal end of thread)
               finishThread();
               //(signal end of threads)
-              int numStillPending = numPending.decrementAndGet();
-              if(numStillPending <= 0){
+              int seen = runnablesSeen.getAndIncrement() + 1;
+              if(seen == numToRun){
                 endThreads(title);
               }
             } catch(Throwable t){
@@ -1012,7 +1012,6 @@ public class Redwood {
             }
           }
         });
-        numPending.incrementAndGet();
       }
       //--Return
       return rtn;
