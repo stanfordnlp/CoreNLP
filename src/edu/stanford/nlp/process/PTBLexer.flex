@@ -601,7 +601,9 @@ SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]*([ ]+([A-Za-z][A-Za-z0
 FOO = ([ ]+[A-Za-z][A-Za-z0-9:.-]*)*
 SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]* *)>
  */
-SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9:\.\-]*|[A-Za-z][A-Za-z0-9:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
+/* SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
+*/
+SGML = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\")))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
@@ -660,7 +662,8 @@ APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{AP
 APOWORD2 = y{APOS}
 FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
-EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)*([^ \t\n\f\r\"<>|().\u00A0]+)
+/* &lt;,< should match &gt;,>, but that's too complicated */
+EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)*([^ \t\n\f\r\"<>|().\u00A0]+)(&gt;|>)?
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
@@ -685,7 +688,7 @@ ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
 ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
 /* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
-ABNUM = Ph|tel|est|ext|sq
+ABNUM = tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
@@ -706,9 +709,9 @@ ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs
 ABCOMP2 = Invt|Elec|Natl|M[ft]g
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
- *  We assume they aren't used sentence finally.
+ *  We assume they aren't used sentence finally. Ph is in there for Ph. D
  */
-ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|{ACRO}|{ABCOMP2}
+ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -945,7 +948,7 @@ gonna|gotta|lemme|gimme|wanna
                         }
 {DBLQUOT}/[A-Za-z0-9$]  { return handleQuotes(yytext(), true); }
 {DBLQUOT}               { return handleQuotes(yytext(), false); }
-\x7f                    { if (invertible) {
+0x7f                    { if (invertible) {
                             prevWordAfter.append(yytext());
                         } }
 {LESSTHAN}              { return getNext("<", yytext()); }
