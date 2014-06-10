@@ -48,6 +48,7 @@ public class CorefCoreAnnotations {
    * destination), where each pointer stores a sentence offset and a
    * token offset. All offsets start at 0.
    */
+  @Deprecated
   public static class CorefGraphAnnotation implements CoreAnnotation<List<Pair<IntTuple, IntTuple>>> {
     public Class<List<Pair<IntTuple, IntTuple>>> getType() {
       return ErasureUtils.uncheckedCast(List.class);
