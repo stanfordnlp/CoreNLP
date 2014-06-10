@@ -90,12 +90,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   // so we need a concurrent data structure
   protected Set<String> knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
 
+  private boolean VERBOSE = true;
   private DocumentReaderAndWriter<IN> defaultReaderAndWriter;
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
   }
 
-  private final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
+  private AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
@@ -935,10 +936,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   {
     BufferedReader is = new BufferedReader(new InputStreamReader(System.in, flags.inputEncoding));
     for (String line; (line = is.readLine()) != null; ) {
-      Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
-      if (flags.keepEmptySentences && documents.size() == 0) {
-        documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
-      }
+      ObjectBank<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
       classifyAndWriteAnswers(documents, readerWriter);
     }
   }
@@ -998,14 +996,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter);
   }
 
-  public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
+  public void classifyAndWriteAnswers(Collection<File> testFiles)
     throws IOException
   {
-    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter);
+    classifyAndWriteAnswers(testFiles, plainTextReaderAndWriter);
   }
 
-  public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
-                                           DocumentReaderAndWriter<IN> readerWriter)
+  public void classifyAndWriteAnswers(Collection<File> testFiles,
+                                      DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
@@ -1013,7 +1011,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter);
   }
 
-  private void classifyAndWriteAnswers(Collection<List<IN>> documents,
+  private void classifyAndWriteAnswers(ObjectBank<List<IN>> documents,
                                        DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
@@ -1042,7 +1040,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         doc = classify(doc);
 
         int completedNo = threadCompletionCounter.incrementAndGet();
-        if (flags.verboseMode) System.err.println(completedNo + " examples completed");
+        if (VERBOSE) System.err.println(completedNo + " examples completed");
         return doc;
       }
       @Override
