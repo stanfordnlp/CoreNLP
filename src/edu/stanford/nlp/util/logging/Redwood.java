@@ -970,9 +970,15 @@ public class Redwood {
       //(variables)
       final AtomicBoolean haveStarted = new AtomicBoolean(false);
       final ReentrantLock metaInfoLock = new ReentrantLock();
-      final AtomicInteger numPending = new AtomicInteger(0);
+      int count = 0;
+      //(count runnables)
+      for (Runnable runnable1 : runnables) {
+        count++;
+      }
+      final int numToRun = count;
       //--Create Runnables
-      ArrayList<Runnable> rtn = new ArrayList<Runnable>();
+      ArrayList<Runnable> rtn = new ArrayList<Runnable>(numToRun);
+      final AtomicInteger runnablesSeen = new AtomicInteger(0);
       for(final Runnable runnable : runnables){
         rtn.add(new Runnable(){
           public void run(){
@@ -996,8 +1002,8 @@ public class Redwood {
               //(signal end of thread)
               finishThread();
               //(signal end of threads)
-              int numStillPending = numPending.decrementAndGet();
-              if(numStillPending <= 0){ // should never actually be less than
+              int seen = runnablesSeen.getAndIncrement() + 1;
+              if(seen == numToRun){
                 endThreads(title);
               }
             } catch(Throwable t){
@@ -1006,7 +1012,6 @@ public class Redwood {
             }
           }
         });
-        numPending.incrementAndGet();
       }
       //--Return
       return rtn;
