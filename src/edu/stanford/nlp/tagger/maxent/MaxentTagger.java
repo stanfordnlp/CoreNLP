@@ -572,33 +572,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     extractorsRare.setGlobalHolder(this);
   }
 
-  private void removeDeadRules() {
-    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
-      List<String> deadRules = new ArrayList();
-      Map<String, int[]> featureMap = fAssociations.get(extractor);
-      for (String value : featureMap.keySet()) {
-        int[] fAssociations = featureMap.get(value);
 
-        boolean found = false;
-        for (int index = 0; index < ySize; ++index) {
-          int fNum = fAssociations[index];
-          if (fNum > -1) {
-            if (getLambdaSolve().lambda[fNum] != 0.0) {
-              found = true;
-              break;
-            }
-          }
-        }
-        if (!found) {
-          deadRules.add(value);
-        }
-      }
-
-      for (String rule : deadRules) {
-        featureMap.remove(rule);
-      }
-    }
-  }
 
   protected void saveModel(String filename) {
     try {
@@ -1073,12 +1047,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     } else {
       System.err.println("Model is not correct");
     }
-
-    // Some of the rules may have been optimized so they don't have
-    // any effect on the final scores.  Eliminating those rules
-    // entirely saves space and runtime
-    maxentTagger.removeDeadRules();
-
     maxentTagger.saveModel(modelName);
     System.err.println("Extractors list:");
     System.err.println(maxentTagger.extractors.toString() + "\nrare" + maxentTagger.extractorsRare.toString());
