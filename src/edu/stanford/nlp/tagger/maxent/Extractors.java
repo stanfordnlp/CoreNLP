@@ -130,7 +130,7 @@ public class Extractors implements Serializable {
   }
 
 
-  public int getSize() {
+  public int size() {
     return v.length;
   }
 
