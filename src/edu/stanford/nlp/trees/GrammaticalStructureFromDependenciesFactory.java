@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * An interface for a factory that builds a GrammaticalStructure from
  * a list of TypedDependencies and a TreeGraphNode.  This is useful
- * when building a GrammaticalStructure from a connl data file, for example.
+ * when building a GrammaticalStructure from a conll data file, for example.
  *
  * @author John Bauer
  */
