@@ -938,8 +938,6 @@ public class SeqClassifierFlags implements Serializable {
   public String splitWordRegex = null;
   public boolean groupByInput = false;
   public boolean groupByHiddenUnit = false;
-
-  public boolean useCWSWordFeatures = false;
   
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2288,8 +2286,6 @@ public class SeqClassifierFlags implements Serializable {
         groupByInput = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("groupByHiddenUnit")){
         groupByHiddenUnit = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useCWSWordFeatures")){
-        useCWSWordFeatures = Boolean.parseBoolean(val);
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
