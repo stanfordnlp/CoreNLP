@@ -72,24 +72,22 @@ import java.util.*;
  * @see SequenceMatcher
  */
 public class SequencePattern<T> {
-
   // TODO:
   //  1. Validate backref capture groupid
   //  2. Actions
-  //  3. Inconsistent templating with T [things like NodePatternState should be generic, say, type TT]
+  //  3. Inconsistent templating with T
   //  4. Match sequence begin/end
-  private final String patternStr;
-  private final PatternExpr patternExpr;
+  private String patternStr;
+  private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;
-  final State root;
-  final int totalGroups;
+  State root;
+  int totalGroups = 0;
 
   // binding of group number to variable name
-  final VarGroupBindings varGroupBindings;
+  VarGroupBindings varGroupBindings;
 
   // Priority associated with pattern
   double priority = 0.0;
-
 
   protected SequencePattern(SequencePattern.PatternExpr nodeSequencePattern) {
     this(null, nodeSequencePattern);
@@ -113,11 +111,6 @@ public class SequencePattern<T> {
     this.root = f.start;
     varGroupBindings = new VarGroupBindings(totalGroups+1);
     nodeSequencePattern.updateBindings(varGroupBindings);
-  }
-
-  @Override
-  public String toString() {
-    return this.pattern();
   }
 
   public String pattern() {
@@ -165,26 +158,6 @@ public class SequencePattern<T> {
     return new SequenceMatcher<T>(this, tokens);
   }
 
-  public <OUT> OUT findNodePattern(Function<NodePattern<T>, OUT> filter) {
-    Queue<State> todo = new LinkedList<State>();
-    Set<State> seen = new HashSet<State>();
-    todo.add(root);
-    seen.add(root);
-    while (!todo.isEmpty()) {
-      State state = todo.poll();
-      if (state instanceof NodePatternState) {
-        OUT res = filter.apply(((NodePatternState) state).pattern);
-        if (res != null) return res;
-      }
-      if (state.next != null) {
-        for (State s: state.next) {
-          if (!seen.contains(s)) { seen.add(s); todo.add(s); }
-        }
-      }
-    }
-    return null;
-  }
-
   // Parses string to PatternExpr
   public static interface Parser<T> {
     public SequencePattern.PatternExpr parseSequence(Env env, String s) throws Exception;
@@ -195,8 +168,7 @@ public class SequencePattern<T> {
   // Binding of variable names to groups
   // matches the group indices
   static class VarGroupBindings {
-
-    final String[] varnames;  // Assumes number of groups low
+    String[] varnames;  // Assumes number of groups low
 
     protected VarGroupBindings(int size) {
       varnames = new String[size];
@@ -213,7 +185,6 @@ public class SequencePattern<T> {
   }
 
   public static final NodesMatchChecker<Object> NODES_EQUAL_CHECKER = new NodesMatchChecker<Object>() {
-    @Override
     public boolean matches(Object o1, Object o2) {
       return o1.equals(o2);
     }
@@ -224,16 +195,14 @@ public class SequencePattern<T> {
   public static final PatternExpr SEQ_END_PATTERN_EXPR = new SequenceEndPatternExpr();
 
   /**
-   * Represents a sequence pattern expressions (before translating into NFA).
+   * Represents a sequence pattern expressions (before translating into NFA)
    */
-  public abstract static class PatternExpr {
-
+  public static abstract class PatternExpr {
     protected abstract Frag build();
 
     /**
      * Assigns group ids to groups embedded in this patterns starting with at the specified number,
-     * returns the next available group id.
-     *
+     * returns the next available group id
      * @param start Group id to start with
      * @return The next available group id
      */
@@ -256,31 +225,26 @@ public class SequencePattern<T> {
     protected PatternExpr optimize() { return this; }
   }
 
-  /** Represents one element to be matched. */
+  // Represents one element to be matched
   public static class NodePatternExpr extends PatternExpr {
-
-    final NodePattern nodePattern;
+    NodePattern nodePattern;
 
     public NodePatternExpr(NodePattern nodePattern) {
       this.nodePattern = nodePattern;
     }
 
-    @Override
     protected Frag build()
     {
       State s = new NodePatternState(nodePattern);
       return new Frag(s);
     }
 
-    @Override
     protected PatternExpr copy()
     {
       return new NodePatternExpr(nodePattern);
     }
 
-    @Override
     protected int assignGroupIds(int start) { return start; }
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {}
 
     public String toString() {
@@ -288,30 +252,25 @@ public class SequencePattern<T> {
     }
   }
 
-  /** Represents a pattern that can match multiple nodes. */
+  // Represents a pattern that can match multiple nodes
   public static class MultiNodePatternExpr extends PatternExpr {
-
-    private final MultiNodePattern multiNodePattern;
+    MultiNodePattern multiNodePattern;
 
     public MultiNodePatternExpr(MultiNodePattern nodePattern) {
       this.multiNodePattern = nodePattern;
     }
 
-    @Override
     protected Frag build() {
       State s = new MultiNodePatternState(multiNodePattern);
       return new Frag(s);
     }
 
-    @Override
     protected PatternExpr copy()
     {
       return new MultiNodePatternExpr(multiNodePattern);
     }
 
-    @Override
     protected int assignGroupIds(int start) { return start; }
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {}
 
     public String toString() {
@@ -319,10 +278,9 @@ public class SequencePattern<T> {
     }
   }
 
-  /** Represents one element to be matched. */
+  // Represents one element to be matched
   public static class SpecialNodePatternExpr extends PatternExpr {
-
-    private final String name;
+    String name;
     Factory<State> stateFactory;
 
     public SpecialNodePatternExpr(String name) {
@@ -334,22 +292,18 @@ public class SequencePattern<T> {
       this.stateFactory = stateFactory;
     }
 
-    @Override
     protected Frag build()
     {
       State s = stateFactory.create();
       return new Frag(s);
     }
 
-    @Override
     protected PatternExpr copy()
     {
       return new SpecialNodePatternExpr(name, stateFactory);
     }
 
-    @Override
     protected int assignGroupIds(int start) { return start; }
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {}
 
     public String toString() {
@@ -363,7 +317,6 @@ public class SequencePattern<T> {
       this.stateFactory = this;
     }
 
-    @Override
     public State create() {
       return new SeqStartState();
     }
@@ -375,7 +328,6 @@ public class SequencePattern<T> {
       this.stateFactory = this;
     }
 
-    @Override
     public State create() {
       return new SeqEndState();
     }
@@ -383,8 +335,7 @@ public class SequencePattern<T> {
 
   // Represents a sequence of patterns to be matched
   public static class SequencePatternExpr extends PatternExpr {
-
-    final List<PatternExpr> patterns;
+    List<PatternExpr> patterns;
 
     public SequencePatternExpr(List<PatternExpr> patterns) {
       this.patterns = patterns;
@@ -410,7 +361,6 @@ public class SequencePattern<T> {
       return frag;
     }
 
-    @Override
     protected int assignGroupIds(int start) {
       int nextId = start;
       for (PatternExpr pattern : patterns) {
@@ -419,7 +369,6 @@ public class SequencePattern<T> {
       return nextId;
     }
 
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {
       for (PatternExpr pattern : patterns) {
         pattern.updateBindings(bindings);
@@ -453,9 +402,8 @@ public class SequencePattern<T> {
   // Expression that indicates a back reference
   // Need to match a previously matched group somehow
   public static class BackRefPatternExpr extends PatternExpr {
-
-    private NodesMatchChecker matcher; // How a match is determined
-    private int captureGroupId = -1;  // Indicates the previously matched group this need to match
+    NodesMatchChecker matcher; // How a match is determined
+    int captureGroupId = -1;  // Indicates the previously matched group this need to match
 
     public BackRefPatternExpr(NodesMatchChecker matcher, int captureGroupId) {
       if (captureGroupId <= 0) { throw new IllegalArgumentException("Invalid captureGroupId=" + captureGroupId); }
@@ -463,21 +411,17 @@ public class SequencePattern<T> {
       this.matcher = matcher;
     }
 
-    @Override
     protected Frag build()
     {
       State s = new BackRefState(matcher, captureGroupId);
       return new Frag(s);
     }
 
-    @Override
     protected int assignGroupIds(int start) {
       return start;
     }
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {}
 
-    @Override
     protected PatternExpr copy()
     {
       return new BackRefPatternExpr(matcher, captureGroupId);
@@ -486,19 +430,18 @@ public class SequencePattern<T> {
     public String toString() {
       StringBuilder sb = new StringBuilder();
       if (captureGroupId >= 0) {
-        sb.append('\\').append(captureGroupId);
+        sb.append("\\").append(captureGroupId);
       } else {
-        sb.append('\\');
+        sb.append("\\");
       }
-      sb.append('{').append(matcher).append('}');
+      sb.append("{").append(matcher).append("}");
       return sb.toString();
     }
   }
 
   public static class ValuePatternExpr extends PatternExpr {
-
-    private final PatternExpr expr;
-    private final Object value;
+    PatternExpr expr;
+    Object value;
 
     public ValuePatternExpr(PatternExpr expr, Object value) {
       this.expr = expr;
@@ -533,25 +476,27 @@ public class SequencePattern<T> {
     }
   }
 
-  /** Expression that represents a group. */
+  // Expression that represents a group
   public static class GroupPatternExpr extends PatternExpr {
-
-    private final PatternExpr pattern;
-    private final boolean capture; // Do capture or not?  If do capture, an capture group id will be assigned
-    private int captureGroupId; // -1 if this pattern is not part of a capture group or capture group not yet assigned,
+    PatternExpr pattern;
+    boolean capture = false; // Do capture or not?  If do capture, an capture group id will be assigned
+    int captureGroupId = -1; // -1 if this pattern is not part of a capture group or capture group not yet assigned,
                              // otherwise, capture group number
-    private final String varname;  // Alternate variable with which to refer to this group
+    String varname;  // Alternate variable with which to refer to this group
 
     public GroupPatternExpr(PatternExpr pattern) {
       this(pattern, true);
     }
 
     public GroupPatternExpr(PatternExpr pattern, boolean capture) {
-      this(pattern, capture, -1, null);
+      this.pattern = pattern;
+      this.capture = capture;
     }
 
     public GroupPatternExpr(PatternExpr pattern, String varname) {
-      this(pattern, true, -1, varname);
+      this.pattern = pattern;
+      this.capture = true;
+      this.varname = varname;
     }
 
     private GroupPatternExpr(PatternExpr pattern, boolean capture, int captureGroupId, String varname) {
@@ -561,7 +506,6 @@ public class SequencePattern<T> {
       this.varname = varname;
     }
 
-    @Override
     protected Frag build()
     {
       Frag f = pattern.build();
@@ -570,7 +514,6 @@ public class SequencePattern<T> {
       return frag;
     }
 
-    @Override
     protected int assignGroupIds(int start) {
       int nextId = start;
       if (capture) {
@@ -579,7 +522,6 @@ public class SequencePattern<T> {
       }
       return pattern.assignGroupIds(nextId);
     }
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {
       if (varname != null) {
         bindings.set(captureGroupId, varname);
@@ -587,13 +529,11 @@ public class SequencePattern<T> {
       pattern.updateBindings(bindings);
     }
 
-    @Override
     protected PatternExpr copy()
     {
       return new GroupPatternExpr(pattern.copy(), capture, captureGroupId, varname);
     }
 
-    @Override
     protected PatternExpr optimize()
     {
       return new GroupPatternExpr(pattern.optimize(), capture, captureGroupId, varname);
@@ -601,44 +541,42 @@ public class SequencePattern<T> {
 
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      sb.append('(');
+      sb.append("(");
       if (!capture) {
         sb.append("?: ");
       } else if (varname != null) {
-        sb.append('?').append(varname).append(' ');
+        sb.append("?").append(varname).append(" ");
       }
       sb.append(pattern);
-      sb.append(')');
+      sb.append(")");
       return sb.toString();
     }
   }
 
   // Expression that represents a pattern that repeats for a number of times
   public static class RepeatPatternExpr extends PatternExpr {
-
-    private final PatternExpr pattern;
-    private final int minMatch;
-    private final int maxMatch;
-    private final boolean greedyMatch;
+    PatternExpr pattern;
+    int minMatch = 1;
+    int maxMatch = 1;
+    boolean greedyMatch = true;
 
     public RepeatPatternExpr(PatternExpr pattern, int minMatch, int maxMatch) {
-      this(pattern, minMatch, maxMatch, true);
-    }
-
-    public RepeatPatternExpr(PatternExpr pattern, int minMatch, int maxMatch, boolean greedy) {
+      this.pattern = pattern;
+      this.minMatch = minMatch;
+      this.maxMatch = maxMatch;
       if (minMatch < 0) {
         throw new IllegalArgumentException("Invalid minMatch=" + minMatch);
       }
       if (maxMatch >= 0 && minMatch > maxMatch) {
         throw new IllegalArgumentException("Invalid minMatch=" + minMatch + ", maxMatch=" + maxMatch);
       }
-      this.pattern = pattern;
-      this.minMatch = minMatch;
-      this.maxMatch = maxMatch;
+    }
+
+    public RepeatPatternExpr(PatternExpr pattern, int minMatch, int maxMatch, boolean greedy) {
+      this(pattern, minMatch, maxMatch);
       this.greedyMatch = greedy;
     }
 
-    @Override
     protected Frag build()
     {
       Frag f = pattern.build();
@@ -694,21 +632,17 @@ public class SequencePattern<T> {
       }
     }
 
-    @Override
     protected int assignGroupIds(int start) {
       return pattern.assignGroupIds(start);
     }
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {
       pattern.updateBindings(bindings);
     }
 
-    @Override
     protected PatternExpr copy()
     {
       return new RepeatPatternExpr(pattern.copy(), minMatch, maxMatch, greedyMatch);
     }
-    @Override
     protected PatternExpr optimize()
     {
       return new RepeatPatternExpr(pattern.optimize(), minMatch, maxMatch, greedyMatch);
@@ -717,18 +651,17 @@ public class SequencePattern<T> {
     public String toString() {
       StringBuilder sb = new StringBuilder();
       sb.append(pattern);
-      sb.append('{').append(minMatch).append(',').append(maxMatch).append('}');
+      sb.append("{").append(minMatch).append(",").append(maxMatch).append("}");
       if (!greedyMatch) {
-        sb.append('?');
+        sb.append("?");
       }
       return sb.toString();
     }
   }
 
-  // Expression that represents a disjunction
+  // Expression that represents a disjuction
   public static class OrPatternExpr extends PatternExpr {
-
-    private final List<PatternExpr> patterns;
+    List<PatternExpr> patterns;
 
     public OrPatternExpr(List<PatternExpr> patterns) {
       this.patterns = patterns;
@@ -738,7 +671,6 @@ public class SequencePattern<T> {
       this.patterns = Arrays.asList(patterns);
     }
 
-    @Override
     protected Frag build()
     {
       Frag frag = new Frag();
@@ -764,7 +696,6 @@ public class SequencePattern<T> {
       return frag;
     }
 
-    @Override
     protected int assignGroupIds(int start) {
       int nextId = start;
       // assign group ids of child expressions
@@ -773,7 +704,6 @@ public class SequencePattern<T> {
       }
       return nextId;
     }
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {
       // update bindings of child expressions
       for (PatternExpr pattern : patterns) {
@@ -781,7 +711,6 @@ public class SequencePattern<T> {
       }
     }
 
-    @Override
     protected PatternExpr copy()
     {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
@@ -796,8 +725,7 @@ public class SequencePattern<T> {
     }
 
     // minimize size of or clauses to trigger optimization
-    private static final int OPTIMIZE_MIN_SIZE = 5;
-    @Override
+    private final static int OPTIMIZE_MIN_SIZE = 5;
     protected PatternExpr optimize()
     {
       if (patterns.size() <= OPTIMIZE_MIN_SIZE) {
@@ -922,7 +850,7 @@ public class SequencePattern<T> {
       return new OrPatternExpr(finalOptimizedPatterns);
     }
 
-    private static Pair<Class,CoreMapNodePattern.StringAnnotationPattern> _getStringAnnotation_(PatternExpr p) {
+    private Pair<Class,CoreMapNodePattern.StringAnnotationPattern> _getStringAnnotation_(PatternExpr p) {
       if (p instanceof NodePatternExpr) {
         NodePattern nodePattern = ((NodePatternExpr) p).nodePattern;
         if (nodePattern instanceof CoreMapNodePattern) {
@@ -942,8 +870,7 @@ public class SequencePattern<T> {
 
   // Expression that represents a conjunction
   public static class AndPatternExpr extends PatternExpr {
-
-    private final List<PatternExpr> patterns;
+    List<PatternExpr> patterns;
 
     public AndPatternExpr(List<PatternExpr> patterns) {
       this.patterns = patterns;
@@ -953,7 +880,6 @@ public class SequencePattern<T> {
       this.patterns = Arrays.asList(patterns);
     }
 
-    @Override
     protected Frag build()
     {
       ConjStartState conjStart = new ConjStartState(patterns.size());
@@ -979,7 +905,6 @@ public class SequencePattern<T> {
       return frag;
     }
 
-    @Override
     protected int assignGroupIds(int start) {
       int nextId = start;
       // assign group ids of child expressions
@@ -989,7 +914,6 @@ public class SequencePattern<T> {
       return nextId;
     }
 
-    @Override
     protected void updateBindings(VarGroupBindings bindings) {
       // update bindings of child expressions
       for (PatternExpr pattern : patterns) {
@@ -997,7 +921,6 @@ public class SequencePattern<T> {
       }
     }
 
-    @Override
     protected PatternExpr copy()
     {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
@@ -1007,7 +930,6 @@ public class SequencePattern<T> {
       return new AndPatternExpr(newPatterns);
     }
 
-    @Override
     protected PatternExpr optimize()
     {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
@@ -1030,7 +952,7 @@ public class SequencePattern<T> {
   /**
    * An accepting matching state
    */
-  protected static final State MATCH_STATE = new MatchState();
+  protected final static State MATCH_STATE = new MatchState();
 
   /**
    * Represents a state in the NFA corresponding to a regular expression for matching a sequence
@@ -1038,11 +960,9 @@ public class SequencePattern<T> {
   static class State {
     /**
      * Set of next states from this current state
-     * NOTE: Most of the time, next is just one state
+     * NOTE: Most of times next is just one state
      */
     Set<State> next;
-    boolean hasSavedValue;
-
     protected State() {}
 
     /**
@@ -1125,22 +1045,13 @@ public class SequencePattern<T> {
       next.add(nextState);
     }
 
-    public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) {
-      if (hasSavedValue) {
-        HasInterval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
-        if (matchedInterval != null && matchedInterval instanceof ValuedInterval) {
-          return ((ValuedInterval) matchedInterval).getValue();
-        }
-      }
-      return null;
-    }
+    public Object value() { return null; }
   }
 
   /**
    * Final accepting state
    */
   private static class MatchState extends State {
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState) {
       // Always add this state back (effectively looping forever in this matching state)
       matchedStates.addState(bid, this);
@@ -1152,27 +1063,25 @@ public class SequencePattern<T> {
    * State with associated value
    */
   private static class ValueState extends State {
-    final Object value;
+    Object value;
 
     private ValueState(Object value) {
       this.value = value;
     }
 
-    @Override
-    public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) { return value; }
+    public Object value() { return value; }
   }
 
   /**
    * State for matching one element/node
    */
   private static class NodePatternState extends State {
-    final NodePattern pattern;
+    NodePattern pattern;
 
     protected NodePatternState(NodePattern p) {
       this.pattern = p;
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       if (consume) {
@@ -1214,36 +1123,33 @@ public class SequencePattern<T> {
    * State for matching multiple elements/nodes
    */
   private static class MultiNodePatternState extends State {
-
-    private final MultiNodePattern pattern;
-
+    MultiNodePattern pattern;
     protected MultiNodePatternState(MultiNodePattern p) {
       this.pattern = p;
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       if (consume) {
-        HasInterval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
+        Interval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
         int cur = matchedStates.curPosition;
         if (matchedInterval == null) {
           // Haven't tried to match this node before, try now
           // Get element and return if it matched or not
           List<? extends T> nodes = matchedStates.elements();
           // TODO: Fix type checking
-          Collection<HasInterval<Integer>> matched = pattern.match(nodes, cur);
+          Collection<Interval<Integer>> matched = pattern.match(nodes, cur);
           // TODO: Check intervals are valid?   Start at cur and ends after?
           if (matched != null && matched.size() > 0) {
             int nBranches = matched.size();
             int i = 0;
-            for (HasInterval<Integer> interval:matched) {
+            for (Interval<Integer> interval:matched) {
               i++;
               int bid2 = matchedStates.getBranchStates().getBranchId(bid, i, nBranches);
               matchedStates.getBranchStates().setMatchedInterval(bid2, this, interval);
               // If matched, need to add next states to the queue of states to be processed
               // keep in current state until end node reached
-              if (interval.getInterval().getEnd()-1 <= cur) {
+              if (interval.getEnd()-1 <= cur) {
                 matchedStates.addStates(bid2, next);
               } else {
                 matchedStates.addState(bid2, this);
@@ -1255,7 +1161,7 @@ public class SequencePattern<T> {
           }
         } else {
           // Previously matched this state - just need to step through until we get to end of matched interval
-          if (matchedInterval.getInterval().getEnd()-1 <= cur) {
+          if (matchedInterval.getEnd()-1 <= cur) {
             matchedStates.addStates(bid, next);
           } else {
             matchedStates.addState(bid, this);
@@ -1276,11 +1182,10 @@ public class SequencePattern<T> {
    * State that matches a pattern that can occur multiple times
    */
   private static class RepeatState extends State {
-
-    private final State repeatStart;
-    private final int minMatch;
-    private final int maxMatch;
-    private final boolean greedyMatch;
+    State repeatStart;
+    int minMatch;
+    int maxMatch;
+    boolean greedyMatch;
 
     public RepeatState(State start, int minMatch, int maxMatch, boolean greedyMatch)
     {
@@ -1296,7 +1201,6 @@ public class SequencePattern<T> {
       }
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       // Get how many times this states has already been matched
@@ -1370,12 +1274,11 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State for matching previously matched group.
+   * State for matching previously matched group
    */
   static class BackRefState extends State {
-
-    private final NodesMatchChecker matcher;
-    private final int captureGroupId;
+    NodesMatchChecker matcher;
+    int captureGroupId;
 
     public BackRefState(NodesMatchChecker matcher, int captureGroupId)
     {
@@ -1402,7 +1305,6 @@ public class SequencePattern<T> {
       return false;
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       // Try to match previous node/nodes exactly
@@ -1443,8 +1345,7 @@ public class SequencePattern<T> {
    * State for matching the start of a group
    */
   static class GroupStartState extends State {
-
-    private final int captureGroupId;
+    int captureGroupId;
 
     public GroupStartState(int captureGroupId, State startState)
     {
@@ -1452,7 +1353,6 @@ public class SequencePattern<T> {
       add(startState);
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       // We only mark start when about to consume elements
@@ -1472,15 +1372,13 @@ public class SequencePattern<T> {
    * State for matching the end of a group
    */
   static class GroupEndState extends State {
-
-    private final int captureGroupId;
+    int captureGroupId;
 
     public GroupEndState(int captureGroupId)
     {
       this.captureGroupId = captureGroupId;
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       // Opposite of GroupStartState
@@ -1490,7 +1388,7 @@ public class SequencePattern<T> {
       if (consume) {
         return false;
       } else {
-        Object v = (prevState != null)? prevState.value(bid, matchedStates):null;
+        Object v = (prevState != null)? prevState.value():null;
         matchedStates.setGroupEnd(bid, captureGroupId, v);
         return super.match(bid, matchedStates, consume, prevState);
       }
@@ -1507,17 +1405,17 @@ public class SequencePattern<T> {
     /**
      * The branch id when the conjunction state is entered
      */
-    private final int startBid;
+    int startBid;
 
     /**
      * The node index when the conjunction state is entered
      */
-    private final int startPos;
+    int startPos;
 
     /**
      * The number of child expressions making up the conjunction
      */
-    private final int childCount;
+    int childCount;
 
     /**
      * For each child expression, we keep track of the
@@ -1525,7 +1423,7 @@ public class SequencePattern<T> {
      *    be satisfied (and their corresponding node index
      *     when the expression is satisfied)
      */
-    private final Set<Pair<Integer,Integer>>[] reachableChildBids;
+    Set<Pair<Integer,Integer>>[] reachableChildBids;
 
     private ConjMatchStateInfo(int startBid, int childCount, int startPos)
     {
@@ -1555,15 +1453,14 @@ public class SequencePattern<T> {
      * Returns true if there is a feasible combination of child branch ids that
      * causes all child expressions to be satisfied with
      * respect to the specified child expression
-     *   (assuming satisfaction with the specified branch and node index)
+     *   (assuming satisfiction with the specified branch and node index)
      * For other child expressions to have a compatible satisfiable branch,
      *   that branch must also terminate with the same node index as this one.
-     *
      * @param index - Index of the child expression
      * @param bid - Branch id that causes the indexed child to be satisfied
      * @param pos - Node index that causes the indexed child to be satisfied
      * @return whether there is a feasible combination that causes all
-     *          children to be satisfied with respect to specified child.
+     *          children to be satisfied with respect to specfied child.
      */
     private boolean isAllChildMatched(int index, int bid, int pos)
     {
@@ -1588,10 +1485,9 @@ public class SequencePattern<T> {
      * Returns array of child branch ids that
      * causes all child expressions to be satisfied with
      * respect to the specified child expression
-     *   (assuming satisfaction with the specified branch and node index).
+     *   (assuming satisfiction with the specified branch and node index)
      * For other child expressions to have a compatible satisfiable branch,
      *   that branch must also terminate with the same node index as this one.
-     *
      * @param index - Index of the child expression
      * @param bid - Branch id that causes the indexed child to be satisfied
      * @param pos - Node index that causes the indexed child to be satisfied
@@ -1623,9 +1519,10 @@ public class SequencePattern<T> {
 
     protected void updateKeepBids(Set<Integer> bids) {
       // TODO: Is there a point when we don't need to keep these bids anymore?
-      for (Set<Pair<Integer, Integer>> v : reachableChildBids) {
+      for (int i = 0; i < reachableChildBids.length; i++) {
+        Set<Pair<Integer,Integer>> v = reachableChildBids[i];
         if (v != null) {
-          for (Pair<Integer, Integer> p : v) {
+          for (Pair<Integer,Integer> p:v) {
             bids.add(p.first());
           }
         }
@@ -1644,15 +1541,13 @@ public class SequencePattern<T> {
    * State for matching a conjunction
    */
   static class ConjStartState extends State {
-
-    private final int childCount;  // Number of children that this conjunction consists of
+    int childCount;  // Number of children that this conjunction consists of
 
     public ConjStartState(int childCount)
     {
       this.childCount = childCount;
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       matchedStates.getBranchStates().setMatchStateInfo(bid, this,
@@ -1678,9 +1573,8 @@ public class SequencePattern<T> {
    * State for matching the end of a conjunction
    */
   static class ConjEndState extends State {
-
-    private final ConjStartState startState;
-    private final int childIndex;
+    ConjStartState startState;
+    int childIndex;
 
     public ConjEndState(ConjStartState startState, int childIndex)
     {
@@ -1688,7 +1582,6 @@ public class SequencePattern<T> {
       this.childIndex = childIndex;
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       // Opposite of ConjStartState
@@ -1724,7 +1617,6 @@ public class SequencePattern<T> {
     {
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       if (consume) {
@@ -1746,7 +1638,6 @@ public class SequencePattern<T> {
     {
     }
 
-    @Override
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       if (!consume) {
@@ -1760,7 +1651,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * Represents a incomplete NFS with start State and a set of unlinked out states.
+   * Represents a incomplete NFS with start State and a set of unlinked out states
    */
   private static class Frag {
     State start;
