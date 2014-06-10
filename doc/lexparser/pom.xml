@@ -39,13 +39,6 @@
     <maven.compiler.target>1.6</maven.compiler.target>
     <encoding>UTF-8</encoding>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>com.googlecode.efficient-java-matrix-library</groupId>
-      <artifactId>ejml</artifactId>
-      <version>0.19</version>
-    </dependency>
-  </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
