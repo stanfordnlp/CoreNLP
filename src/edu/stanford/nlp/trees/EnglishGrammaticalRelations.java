@@ -1207,14 +1207,14 @@ public class EnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "Last night, I swam in the pool" &rarr;
-   * <code>tmod</code>(swam, night)
+   * {@code tmod}(swam, night)
    */
   public static final GrammaticalRelation TEMPORAL_MODIFIER =
     new GrammaticalRelation(Language.English, "tmod", "temporal modifier",
-        TemporalModifierGRAnnotation.class, NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP", tregexCompiler,
+        TemporalModifierGRAnnotation.class, NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP|RRC", tregexCompiler,
         new String[] {
-          "VP|ADJP < NP-TMP=target",
-          "VP|ADJP < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old))",
+          "VP|ADJP|RRC < NP-TMP=target",
+          "VP|ADJP|RRC < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old))",
           // CDM Jan 2010: For constructions like "during the same period last year"
           "@PP < (IN|TO|VBG|FW $++ (@NP $+ NP-TMP=target))",
           "@PP < (IN|TO|VBG|FW $++ (@NP $+ (NP=target <# (/^NN/ < " + timeWordRegex + "))))",
