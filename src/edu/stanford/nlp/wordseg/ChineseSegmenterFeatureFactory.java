@@ -68,7 +68,16 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
     } else if (clique == cliqueCpC) {
       addAllInterningAndSuffixing(features, featuresCpC(cInfo, loc), "CpC");
       addAllInterningAndSuffixing(features, featuresCnC(cInfo, loc-1), "CnC");
-    }
+    } 
+    // else if (clique == cliqueCpCp2C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2C(cInfo, loc), "CpCp2C");
+    // } else if (clique == cliqueCpCp2Cp3C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2Cp3C(cInfo, loc), "CpCp2Cp3C");
+    // } else if (clique == cliqueCpCp2Cp3Cp4C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2Cp3Cp4C(cInfo, loc), "CpCp2Cp3Cp4C");
+    // } else if (clique == cliqueCpCp2Cp3Cp4Cp5C) {
+    //   addAllInterningAndSuffixing(features, featuresCpCp2Cp3Cp4Cp5C(cInfo, loc), "CpCp2Cp3Cp4Cp5C");
+    // }
 
     return features;
   }
@@ -115,7 +124,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
 
 
-  protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
+  public Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
@@ -136,14 +145,27 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
      * N-gram features. N is upto 2.
      */
     if (flags.useWord1) {
-      features.add(charc +"c");
-      features.add(charc1+"c1");
-      features.add(charp +"p");
-      features.add(charp +charc  +"pc");
-      if(flags.useAs || flags.useMsr || flags.usePk || flags.useHk){ //msr, as
-        features.add(charc +charc1 +"cc1");
-        features.add(charp + charc1 +"pc1");
-      }
+      // features.add(charc +"c");
+      // features.add(charc1+"c1");
+      // features.add(charp +"p");
+      // features.add(charp +charc  +"pc");
+      // if(flags.useAs || flags.useMsr || flags.usePk || flags.useHk){ //msr, as
+      //   features.add(charc +charc1 +"cc1");
+      //   features.add(charp + charc1 +"pc1");
+      // }
+
+      features.add(charc +"::c");
+      features.add(charc1+"::c1");
+      features.add(charp +"::p");
+      features.add(charp2 +"::p2");
+      // trying to restore the features that Huishin described in SIGHAN 2005 paper
+      features.add(charc +charc1  +"::cn");
+      features.add(charp +charc  +"::pc");
+      features.add(charp +charc1  +"::pn");
+      features.add(charp2 +charp  +"::p2p");
+      features.add(charp2 +charc  +"::p2c");
+      features.add(charc2 +charc  +"::n2c");
+
       features.add("|word1");
     }
 
@@ -152,7 +174,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
 
   private static CorpusDictionary outDict = null;
 
-  protected Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
+  public Collection<String> featuresCpC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
@@ -182,14 +204,26 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
      */
 
     if (flags.useWord2) {
-      features.add(charc +"c");
-      features.add(charc1+"c1");
-      features.add(charp +"p");
-      features.add(charp +charc  +"pc");
-      if( flags.useMsr ){
-        features.add(charc +charc1 +"cc1");
-        features.add(charp + charc1 +"pc1");
-      }
+      // features.add(charc +"c");
+      // features.add(charc1+"c1");
+      // features.add(charp +"p");
+      // features.add(charp +charc  +"pc");
+      // if( flags.useMsr ){
+      //   features.add(charc +charc1 +"cc1");
+      //   features.add(charp + charc1 +"pc1");
+      // }
+
+      features.add(charc +"::c");
+      features.add(charc1+"::c1");
+      features.add(charp +"::p");
+      features.add(charp2 +"::p2");
+      // trying to restore the features that Huishin described in SIGHAN 2005 paper
+      features.add(charc +charc1  +"::cn");
+      features.add(charp +charc  +"::pc");
+      features.add(charp +charc1  +"::pn");
+      features.add(charp2 +charp  +"::p2p");
+      features.add(charp2 +charc  +"::p2c");
+      features.add(charc2 +charc  +"::n2c");
 
       features.add("|word2");
     }
@@ -391,7 +425,7 @@ public class ChineseSegmenterFeatureFactory<IN extends CoreLabel> extends Featur
   }
 
 
-  protected Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
+  public Collection<String> featuresCnC(PaddedList<IN> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     CoreLabel c = cInfo.get(loc);
     CoreLabel c1 = cInfo.get(loc + 1);
