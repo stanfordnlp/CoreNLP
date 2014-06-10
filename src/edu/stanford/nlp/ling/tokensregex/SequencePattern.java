@@ -174,8 +174,10 @@ public class SequencePattern<T> {
         OUT res = filter.apply(((NodePatternState) state).pattern);
         if (res != null) return res;
       }
-      for (State s: state.next) {
-        if (!seen.contains(s)) { seen.add(s); todo.add(s); }
+      if (state.next != null) {
+        for (State s: state.next) {
+          if (!seen.contains(s)) { seen.add(s); todo.add(s); }
+        }
       }
     }
     return null;
