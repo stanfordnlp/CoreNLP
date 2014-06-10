@@ -87,8 +87,7 @@ public class MultiPatternMatcher<T> {
 
   /**
    * Given a sequence, applies each of our patterns over the sequence and returns
-   *   all non overlapping matches for each of the patterns.
-   * Unlike #findAllNonOverlapping, overlapping matches from different patterns are kept
+   *   for each pattern, the list of matched sequences
    * @param elements input sequence to match against
    * @return iterable of match results that are non-overlapping
    */

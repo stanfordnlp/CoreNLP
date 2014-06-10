@@ -483,9 +483,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     }
   }
 
-  /**
-   * Caches a math log operation to save a tiny bit of time
-   */
   double getInactiveTagDefaultScore(int nDefault) {
     if (defaultScores == null) {
       initDefaultScores();

@@ -6,7 +6,7 @@ import edu.stanford.nlp.util.StringUtils;
 import java.util.*;
 
 /**
- * Map that takes a iterable as key, and maps it to an value.
+ * Implementation of Trie using map.
  *
  * This implementation is not particularly memory efficient, but will have relatively
  *   fast lookup times for sequences where there are many possible keys (e.g. sequences over Strings)
@@ -31,10 +31,6 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   public TrieMap() {
   }
 
-  public TrieMap(int initialCapacity) {
-    // TODO: initial capacity implementation
-  }
-
   // Trie specific functions
   public TrieMap<K,V> getChildTrie(K key) {
     return (children != null)? children.get(key):null;
@@ -44,7 +40,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     TrieMap<K, V> curTrie = this;
     // go through each element
     for(Object element : key){
-      curTrie = (curTrie.children != null)? curTrie.children.get(element):null;
+      curTrie = curTrie.children.get(element);
       if(curTrie == null){
         return null;
       }
@@ -118,8 +114,15 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   }
 
   public V get(Iterable key) {
-    TrieMap<K, V> curTrie = getChildTrie(key);
-    return (curTrie != null)? curTrie.value:null;
+    TrieMap<K, V> curTrie = this;
+    // go through each element
+    for(Object element : key){
+      curTrie = curTrie.children.get(element);
+      if(curTrie == null){
+        return null;
+      }
+    }
+    return curTrie.value;
   }
 
   public V get(K[] key) {
@@ -272,4 +275,5 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
       });
     }
   }
+
 }
