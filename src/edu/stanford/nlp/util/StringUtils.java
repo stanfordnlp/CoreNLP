@@ -353,7 +353,7 @@ public class StringUtils {
   /**
    * Joins elements with a space.
    */
-  public static String join(Object[] elements) {
+  public static String join(Object... elements) {
     return (join(elements, " "));
   }
 
