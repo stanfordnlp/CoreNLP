@@ -2,6 +2,7 @@ package edu.stanford.nlp.util;
 
 import java.io.File;
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -31,6 +32,11 @@ public class MetaClass {
     private ClassCreationException(Throwable cause) {
       super(cause);
     }
+
+    private ClassCreationException(String msg, Throwable cause) {
+      super(msg, cause);
+    }
+
   }
 
   public static final class ConstructorNotFoundException extends ClassCreationException {
@@ -47,6 +53,12 @@ public class MetaClass {
     private ConstructorNotFoundException(Throwable cause) {
       super(cause);
     }
+
+    private ConstructorNotFoundException(String msg, Throwable cause) {
+      super(msg, cause);
+    }
+
+
   }
 
   public static final class ClassFactory<T> {
@@ -223,7 +235,7 @@ public class MetaClass {
         if(!accessible){ constructor.setAccessible(false); }
         return rtn;
       } catch (Exception e) {
-        throw new ClassCreationException(e);
+        throw new ClassCreationException("MetaClass couldn't create " + constructor + " with args " + Arrays.toString(params), e);
       }
     }
 
