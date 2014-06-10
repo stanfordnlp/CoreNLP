@@ -8,7 +8,6 @@ import edu.stanford.nlp.util.logging.Redwood;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -30,16 +29,16 @@ public class AnnotationPipeline implements Annotator {
 
   protected static final boolean TIME = true;
 
-  private List<Annotator> annotators;
-  private List<MutableInteger> accumulatedTime;
+  private final List<Annotator> annotators;
+  private List<MutableLong> accumulatedTime;
 
   public AnnotationPipeline(List<Annotator> annotators) {
     this.annotators = annotators;
     if (TIME) {
       int num = annotators.size();
-      accumulatedTime = new ArrayList<MutableInteger>(annotators.size());
+      accumulatedTime = new ArrayList<MutableLong>(num);
       for (int i = 0; i < num; i++) {
-        accumulatedTime.add(new MutableInteger());
+        accumulatedTime.add(new MutableLong());
       }
     }
   }
@@ -51,7 +50,7 @@ public class AnnotationPipeline implements Annotator {
   public void addAnnotator(Annotator annotator) {
     annotators.add(annotator);
     if (TIME) {
-      accumulatedTime.add(new MutableInteger());
+      accumulatedTime.add(new MutableLong());
     }
   }
 
@@ -60,8 +59,9 @@ public class AnnotationPipeline implements Annotator {
    * The annotation is modified in place
    * @param annotation The input annotation, usually a raw document
    */
+  @Override
   public void annotate(Annotation annotation) {
-    Iterator<MutableInteger> it = accumulatedTime.iterator();
+    Iterator<MutableLong> it = accumulatedTime.iterator();
     Timing t = new Timing();
     for (Annotator annotator : annotators) {
       if (TIME) {
@@ -70,7 +70,7 @@ public class AnnotationPipeline implements Annotator {
       annotator.annotate(annotation);
       if (TIME) {
         int elapsed = (int) t.stop();
-        MutableInteger m = it.next();
+        MutableLong m = it.next();
         m.incValue(elapsed);
       }
     }
@@ -103,6 +103,7 @@ public class AnnotationPipeline implements Annotator {
 	 */
   public void annotate(final Iterable<Annotation> annotations, int numThreads){
     annotate(annotations, numThreads, new Function<Annotation, Object>() {
+      @Override
       public Object apply(Annotation in) { return null; }
     });
   }
@@ -125,15 +126,19 @@ public class AnnotationPipeline implements Annotator {
     }
     // Java's equivalent to ".map{ lambda(annotation) => annotate(annotation) }
     Iterable<Runnable> threads = new Iterable<Runnable>(){
+      @Override
       public Iterator<Runnable> iterator() {
         final Iterator<Annotation> iter = annotations.iterator();
         return new Iterator<Runnable>(){
+          @Override
           public boolean hasNext() {
             return iter.hasNext();
           }
+          @Override
           public Runnable next() {
             final Annotation input = iter.next();
             return new Runnable(){
+              @Override
               public void run(){
                 //Jesus Christ, finally the body of the code
                 //(logging)
@@ -148,6 +153,7 @@ public class AnnotationPipeline implements Annotator {
               }
             };
           }
+          @Override
           public void remove() {
             iter.remove();
           }
@@ -164,7 +170,7 @@ public class AnnotationPipeline implements Annotator {
    */
   protected long getTotalTime() {
     long total = 0;
-    for (MutableInteger m: accumulatedTime) {
+    for (MutableLong m: accumulatedTime) {
       total += m.longValue();
     }
     return total;
@@ -173,7 +179,7 @@ public class AnnotationPipeline implements Annotator {
   /** Return a String that gives detailed human-readable information about
    *  how much time was spent by each annotator and by the entire annotation
    *  pipeline.  This String includes newline characters but does not end
-   *  with one, and so it is suitable to be printed out with a 
+   *  with one, and so it is suitable to be printed out with a
    *  <code>println()</code>.
    *
    *  @return Human readable information on time spent in processing.
@@ -182,10 +188,10 @@ public class AnnotationPipeline implements Annotator {
     StringBuilder sb = new StringBuilder();
     if (TIME) {
       sb.append("Annotation pipeline timing information:\n");
-      Iterator<MutableInteger> it = accumulatedTime.iterator();
+      Iterator<MutableLong> it = accumulatedTime.iterator();
       long total = 0;
       for (Annotator annotator : annotators) {
-        MutableInteger m = it.next();
+        MutableLong m = it.next();
         sb.append(StringUtils.getShortClassName(annotator)).append(": ");
         sb.append(Timing.toSecondsString(m.longValue())).append(" sec.\n");
         total += m.longValue();
@@ -195,6 +201,7 @@ public class AnnotationPipeline implements Annotator {
     return sb.toString();
   }
 
+  @Override
   public Set<Requirement> requirementsSatisfied() {
     Set<Requirement> satisfied = Generics.newHashSet();
     for (Annotator annotator : annotators) {
@@ -203,8 +210,9 @@ public class AnnotationPipeline implements Annotator {
     return satisfied;
   }
 
+  @Override
   public Set<Requirement> requires() {
-    if (annotators.size() == 0) {
+    if (annotators.isEmpty()) {
       return Collections.emptySet();
     }
     return annotators.get(0).requires();
