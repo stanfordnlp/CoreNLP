@@ -274,19 +274,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * This indicates that starting at this token, the sentence should not be ended until
-   * we see a ForcedSentenceEndAnnotation.  Used to force the ssplit annotator
-   * (eg the WordToSentenceProcessor) to keep tokens in the same sentence
-   * until ForcedSentenceEndAnnotation is seen.
-   */
-  public static class ForcedSentenceUntilEndAnnotation
-          implements CoreAnnotation<Boolean> {
-    public Class<Boolean> getType() {
-      return Boolean.class;
-    }
-  }
-
-  /**
    * This indicates the sentence should end at this token.  Used to
    * force the ssplit annotator (eg the WordToSentenceProcessor) to
    * start a new sentence at the next token.
@@ -908,18 +895,6 @@ public class CoreAnnotations {
     }
   }
 
-  public static class LinkAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  public static class MentionsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
-    }
-  }
-
   public static class EntityTypeAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
@@ -968,12 +943,6 @@ public class CoreAnnotations {
   }
 
   public static class SectionAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  public static class SectionDateAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
@@ -1339,10 +1308,6 @@ public class CoreAnnotations {
     }
   }
 
-  /**
-   * Used in CleanXMLAnnotator.  The value is a list of XML element names indicating
-   * the XML tag the token was nested inside.
-   */
   public static class XmlContextAnnotation implements CoreAnnotation<List<String>> {
 
     public Class<List<String>> getType() {
@@ -1405,22 +1370,6 @@ public class CoreAnnotations {
     }
   }
 
-  // Document type
-  // What kind of document is it: story, multi-part article, listing, email, etc
-  public static class DocTypeAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  // Document source type
-  // What kind of place did the document come from: newswire, discussion forum, web...
-  public static class DocSourceTypeAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
   // Numeric annotations
 
   // Per token annotation indicating whether the token represents a NUMBER or ORDINAL
@@ -1474,17 +1423,6 @@ public class CoreAnnotations {
       return ErasureUtils.<Class<List<CoreMap>>> uncheckedCast(List.class);
     }
   }
-
-  /**
-   * used in dcoref.
-   * to indicate that the it should use the discourse information annotated in the document
-   */
-  public static class UseMarkedDiscourseAnnotation implements CoreAnnotation<Boolean> {
-    public Class<Boolean> getType() {
-      return Boolean.class;
-    }
-  }
-
   /**
    * used in dcoref.
    * to store discourse information. (marking <TURN> or quotation)
@@ -1512,16 +1450,6 @@ public class CoreAnnotations {
   public static class ParagraphAnnotation implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {
       return Integer.class;
-    }
-  }
-
-  /**
-   * used in dcoref.
-   * to store premarked entity mentions.
-   */
-  public static class MentionTokenAnnotation implements CoreAnnotation<MultiTokenTag> {
-    public Class<MultiTokenTag> getType() {
-      return MultiTokenTag.class;
     }
   }
 
