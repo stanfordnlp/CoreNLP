@@ -173,7 +173,10 @@ xmlns:d="http://nlp.stanford.edu/CoreNLP/v1">
                 <td><xsl:value-of select="text"/></td>
                 <td><xsl:if test="leftContext or rightContext">
                     ...<xsl:value-of select="leftContext"/>
-                    <span style="background-color: #99ff99;"><xsl:value-of select="text"/></span>
+                    <span style="background-color: #99ff99;">
+                      <xsl:text> </xsl:text>
+                      <xsl:value-of select="text"/></span>
+                      <xsl:text> </xsl:text>
                     <xsl:value-of select="rightContext"/>...
                     </xsl:if>
                 </td>
