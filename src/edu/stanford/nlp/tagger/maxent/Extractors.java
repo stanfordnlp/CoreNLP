@@ -144,7 +144,7 @@ public class Extractors implements Serializable {
   /*
   public void save(String filename) {
     try {
-      OutDataStreamFile rf = new OutDataStreamFile(filename);
+      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
       rf.writeInt(v.length);
       for (Extractor extr : v) {
         rf.writeBytes(extr.toString());
