@@ -482,7 +482,6 @@ public class MetaClass {
    * @return A String array corresponding to the encoded array
    */
 	private static String[] decodeArray(String encoded){
-    if (encoded.length() == 0) return new String[]{};
 		char[] chars = encoded.trim().toCharArray();
 
 		//--Parse the String
