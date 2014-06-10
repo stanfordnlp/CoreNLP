@@ -110,7 +110,7 @@ public class CGRunner {
 
   private void printOptimizationResults(LikelihoodFunction df, MonitorFunction monitor) {
     double negLogLike = df.valueAt(prob.lambda);
-    System.err.printf("After optimization neg (penalized) log cond likelihood: %1.2f%n", negLogLike);
+    System.err.println("After optimization neg (penalized) log likelihood is: " + negLogLike);
     if (monitor != null) {
       monitor.reportMonitoring(negLogLike);
     }
@@ -121,8 +121,8 @@ public class CGRunner {
         numNonZero++;
       }
     }
-    System.err.printf("Non-zero parameters: %d/%d (%1.2f%%)%n", numNonZero, prob.lambda.length,
-        (100.0 * numNonZero) / prob.lambda.length);
+    System.err.printf("Non-zero parameters: %d/%d (%0.2f%%)%n", numNonZero, prob.lambda.length,
+        ((double) numNonZero) / prob.lambda.length);
   }
 
 
