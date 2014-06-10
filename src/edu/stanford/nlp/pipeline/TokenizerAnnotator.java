@@ -38,7 +38,7 @@ public abstract class TokenizerAnnotator implements Annotator {
   /**
    * Abstract: returns a tokenizer
    */
-  abstract public Tokenizer<CoreLabel> getTokenizer(Reader r);
+  abstract Tokenizer<CoreLabel> getTokenizer(Reader r);
 
   /**
    * Does the actual work of splitting TextAnnotation into CoreLabels,
