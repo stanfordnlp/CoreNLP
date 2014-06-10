@@ -1,6 +1,9 @@
 package edu.stanford.nlp.util;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -32,6 +35,27 @@ public class PropertiesUtils {
     return ! (value.equals("false") || value.equals("no") || value.equals("off"));
   }
 
+  // Convert from properties to string and from string to properties
+  public static String asString(Properties props) {
+    try {
+      StringWriter sw = new StringWriter();
+      props.store(sw, null);
+      return sw.toString();
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  public static Properties fromString(String str) {
+    try {
+      StringReader sr = new StringReader(str);
+      Properties props = new Properties();
+      props.load(sr);
+      return props;
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
 
   // printing -------------------------------------------------------------------
 
