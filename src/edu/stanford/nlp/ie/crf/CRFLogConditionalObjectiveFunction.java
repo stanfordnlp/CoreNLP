@@ -1528,7 +1528,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
       empiricalCountsForADoc(eHat4Update, ind);
       // TODO(mengqiu) broken, does not do E calculation
-      expectedCountsForADoc(weights, e4Update, ind);
+      expectedCountsForADoc(weights, ind);
 
       /* the commented out code below is to iterate over the batch docs instead of iterating over all
          parameters at the end, which is more efficient; but it would also require us to clearUpdateEs()
