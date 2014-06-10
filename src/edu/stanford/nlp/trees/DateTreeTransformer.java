@@ -27,7 +27,7 @@ import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 public class DateTreeTransformer implements TreeTransformer {
   static final String MONTH_REGEX = "January|February|March|April|May|June|July|August|September|October|November|December|Jan\\.|Feb\\.|Mar\\.|Apr\\.|Aug\\.|Sep\\.|Sept\\.|Oct\\.|Nov\\.|Dec\\.";
   TregexPattern tregexMonthYear = TregexPatternCompiler.defaultCompiler.compile("NP=root <1 (NP <: (NNP=month <: /" + MONTH_REGEX + "/)) <2 (NP=yearnp <: (CD=year <: __)) : =root <- =yearnp");
-  TregexPattern tregexMonthDayYear = TregexPatternCompiler.defaultCompiler.compile("NP=root <1 (NP=monthdayroot <1 (NNP=month <: /" + MONTH_REGEX +"/) <2 (CD=day <: __)) <2 (/^,$/=comma <: /^,$/) <3 (NP=yearroot <: (CD=year <: __)) : =root <- =yearroot : =root <1 (=monthdayroot <- =day)");
+  TregexPattern tregexMonthDayYear = TregexPatternCompiler.defaultCompiler.compile("NP=root <1 (NP=monthdayroot <1 (NNP=month <: /" + MONTH_REGEX +"/) <2 (CD=day <: __)) <2 (/^,$/=comma <: /^,$/) <3 (NP=yearroot <: (CD=year <: __)) : (=root <- =yearroot) : (=monthdayroot <- =day)");
 
   public Tree transformTree(Tree t) {
     TregexMatcher matcher = tregexMonthYear.matcher(t);
