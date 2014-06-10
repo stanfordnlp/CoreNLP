@@ -113,11 +113,6 @@ public class SequencePattern<T> {
     nodeSequencePattern.updateBindings(varGroupBindings);
   }
 
-  @Override
-  public String toString(){
-    return this.pattern();
-  }
-
   public String pattern() {
     return patternStr;
   }
@@ -968,8 +963,6 @@ public class SequencePattern<T> {
      * NOTE: Most of times next is just one state
      */
     Set<State> next;
-    boolean hasSavedValue;
-
     protected State() {}
 
     /**
@@ -1052,15 +1045,7 @@ public class SequencePattern<T> {
       next.add(nextState);
     }
 
-    public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) {
-      if (hasSavedValue) {
-        HasInterval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
-        if (matchedInterval != null && matchedInterval instanceof ValuedInterval) {
-          return ((ValuedInterval) matchedInterval).getValue();
-        }
-      }
-      return null;
-    }
+    public Object value() { return null; }
   }
 
   /**
@@ -1084,7 +1069,7 @@ public class SequencePattern<T> {
       this.value = value;
     }
 
-    public <T> Object value(int bid, SequenceMatcher.MatchedStates<T> matchedStates) { return value; }
+    public Object value() { return value; }
   }
 
   /**
@@ -1146,25 +1131,25 @@ public class SequencePattern<T> {
     protected <T> boolean match(int bid, SequenceMatcher.MatchedStates<T> matchedStates, boolean consume, State prevState)
     {
       if (consume) {
-        HasInterval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
+        Interval<Integer> matchedInterval = matchedStates.getBranchStates().getMatchedInterval(bid, this);
         int cur = matchedStates.curPosition;
         if (matchedInterval == null) {
           // Haven't tried to match this node before, try now
           // Get element and return if it matched or not
           List<? extends T> nodes = matchedStates.elements();
           // TODO: Fix type checking
-          Collection<HasInterval<Integer>> matched = pattern.match(nodes, cur);
+          Collection<Interval<Integer>> matched = pattern.match(nodes, cur);
           // TODO: Check intervals are valid?   Start at cur and ends after?
           if (matched != null && matched.size() > 0) {
             int nBranches = matched.size();
             int i = 0;
-            for (HasInterval<Integer> interval:matched) {
+            for (Interval<Integer> interval:matched) {
               i++;
               int bid2 = matchedStates.getBranchStates().getBranchId(bid, i, nBranches);
               matchedStates.getBranchStates().setMatchedInterval(bid2, this, interval);
               // If matched, need to add next states to the queue of states to be processed
               // keep in current state until end node reached
-              if (interval.getInterval().getEnd()-1 <= cur) {
+              if (interval.getEnd()-1 <= cur) {
                 matchedStates.addStates(bid2, next);
               } else {
                 matchedStates.addState(bid2, this);
@@ -1176,7 +1161,7 @@ public class SequencePattern<T> {
           }
         } else {
           // Previously matched this state - just need to step through until we get to end of matched interval
-          if (matchedInterval.getInterval().getEnd()-1 <= cur) {
+          if (matchedInterval.getEnd()-1 <= cur) {
             matchedStates.addStates(bid, next);
           } else {
             matchedStates.addState(bid, this);
@@ -1403,7 +1388,7 @@ public class SequencePattern<T> {
       if (consume) {
         return false;
       } else {
-        Object v = (prevState != null)? prevState.value(bid, matchedStates):null;
+        Object v = (prevState != null)? prevState.value():null;
         matchedStates.setGroupEnd(bid, captureGroupId, v);
         return super.match(bid, matchedStates, consume, prevState);
       }
