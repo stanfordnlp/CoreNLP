@@ -29,7 +29,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.io.PrintFile;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
@@ -603,9 +602,53 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     }
   }
 
+  /**
+   * Searching the lambda array for 0 entries, removes them.  This
+   * saves a large chunk of space in the tagger models which are build
+   * with L1 regularization.
+   * <br>
+   * After removing the zeros, go through the feature arrays and
+   * reindex the pointers into the lambda array.  This saves some time
+   * later on at runtime.
+   */
+  private void simplifyLambda() {
+    double[] lambda = getLambdaSolve().lambda;
+    int[] map = new int[lambda.length];
+    int current = 0;
+    for (int index = 0; index < lambda.length; ++index) {
+      if (lambda[index] == 0.0) {
+        map[index] = -1;
+      } else {
+        map[index] = current;
+        current++;
+      }
+    }
+
+    double[] condensedLambda = new double[current];
+    for (int i = 0; i < lambda.length; ++i) {
+      if (map[i] != -1) {
+        condensedLambda[map[i]] = lambda[i];
+      }
+    }
+
+    for (int extractor = 0; extractor < fAssociations.size(); ++extractor) {
+      Map<String, int[]> featureMap = fAssociations.get(extractor);
+      for (String value : featureMap.keySet()) {
+        int[] fAssociations = featureMap.get(value);
+        for (int index = 0; index < ySize; ++index) {
+          if (fAssociations[index] >= 0) {
+            fAssociations[index] = map[fAssociations[index]];
+          }
+        }
+      }
+    }
+
+    prob = new LambdaSolveTagger(condensedLambda);
+  }
+
   protected void saveModel(String filename) {
     try {
-      OutDataStreamFile file = new OutDataStreamFile(filename);
+      DataOutputStream file = IOUtils.getDataOutputStream(filename);
       saveModel(file);
       file.close();
     } catch (IOException ioe) {
@@ -1081,6 +1124,11 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     // any effect on the final scores.  Eliminating those rules
     // entirely saves space and runtime
     maxentTagger.removeDeadRules();
+
+    // If any of the features have been optimized to 0, we can remove
+    // them from the LambdaSolve.  This will save quite a bit of space
+    // depending on the optimization used
+    maxentTagger.simplifyLambda();
 
     maxentTagger.saveModel(modelName);
     System.err.println("Extractors list:");

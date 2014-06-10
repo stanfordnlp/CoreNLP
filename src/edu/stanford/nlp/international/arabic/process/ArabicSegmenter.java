@@ -78,6 +78,11 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final boolean isTokenized;
   private final String tokenizerOptions;
 
+  /** Make an Arabic Segmenter.
+   *
+   *  @param props Options for how to tokenize. See the main method of
+   *               {@see ArabicTokenizer} for details.
+   */
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
@@ -120,12 +125,11 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   }
 
   /**
-   * Creates an ArabicTokenizer from the user-specified options. The
-   * default is ArabicTokenizer.atbFactory(), which produces the
+   * Creates an ArabicTokenizer. The default tokenizer
+   * is ArabicTokenizer.atbFactory(), which produces the
    * same orthographic normalization as Green and Manning (2010).
    *
-   * @param props
-   * @return
+   * @return A TokenizerFactory that produces each Arabic token as a CoreLabel
    */
   private TokenizerFactory<CoreLabel> getTokenizerFactory() {
     TokenizerFactory<CoreLabel> tokFactory = null;

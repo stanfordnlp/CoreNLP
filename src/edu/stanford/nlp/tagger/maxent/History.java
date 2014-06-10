@@ -41,7 +41,7 @@ public class History {
   }
 
   /*
-  public void save(OutDataStreamFile rf) {
+  public void save(DataOutputStream rf) {
     try {
       rf.writeInt(start);
       rf.writeInt(end);
@@ -94,7 +94,7 @@ public class History {
     }
     System.out.println();
   }
-  
+
   protected void setTag(int pos, String tag) {
     pairs.setTag(pos + start, tag);
   }
