@@ -594,7 +594,7 @@ public class EnglishGrammaticalRelations {
           // to find "...", he said or "...?" he asked.
           "S|SINV < (S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|:)$/ !< (VP < TO|VBG|VBN))",
           "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
-          "ADJP < (SBAR=target < (IN !< than) < (S < (VP !< TO)))", "ADJP < (SBAR=target < (S < (VP !< TO)))",// ADJP is things like "sure (that) he'll lose"
+          "ADJP < (SBAR=target !< (IN < than|as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones
           // That ... he know
           "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
           // JJ catches a couple of funny NPs with heads like "enough"
