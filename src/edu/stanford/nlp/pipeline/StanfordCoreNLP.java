@@ -36,6 +36,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.trees.GrammaticalStructureFactory;
+import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -92,6 +94,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private TreePrint constituentTreePrinter;
   /** Formats the dependency parse trees for human-readable display */
   private TreePrint dependencyTreePrinter;
+  /** Converts the constituent tree to a set of dependencies (for display) */
+  private GrammaticalStructureFactory gsf;
 
   /** Stores the overall number of words processed */
   private int numWords;
@@ -230,6 +234,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
+    this.gsf = new PennTreebankLanguagePack().grammaticalStructureFactory();
 
     if (props == null) {
       // if undefined, find the properties file in the classpath

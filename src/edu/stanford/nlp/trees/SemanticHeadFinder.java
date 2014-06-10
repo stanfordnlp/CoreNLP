@@ -157,58 +157,22 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   }
 
 
-  private boolean shouldSkip(Tree t, boolean origWasInterjection) {
-    return t.isPreTerminal() && (tlp.isPunctuationTag(t.value()) || ! origWasInterjection && "UH".equals(t.value())) ||
-           "INTJ".equals(t.value()) && ! origWasInterjection;
-  }
-
-  private int findPreviousHead(int headIdx, Tree[] daughterTrees, boolean origWasInterjection) {
-    boolean seenSeparator = false;
-    int newHeadIdx = headIdx;
-    while (newHeadIdx >= 0) {
-      newHeadIdx = newHeadIdx - 1;
-      if (newHeadIdx < 0) {
-        return newHeadIdx;
-      }
-      String label = tlp.basicCategory(daughterTrees[newHeadIdx].value());
-      if (",".equals(label) || ":".equals(label)) {
-        seenSeparator = true;
-      } else if (daughterTrees[newHeadIdx].isPreTerminal() && (tlp.isPunctuationTag(label) || ! origWasInterjection && "UH".equals(label)) ||
-               "INTJ".equals(label) && ! origWasInterjection) {
-        // keep looping
-      } else {
-        if ( ! seenSeparator) {
-          newHeadIdx = -1;
-        }
-        break;
-      }
-    }
-    return newHeadIdx;
-  }
-
   /**
-   * Overwrite the postOperationFix method.  For "a, b and c" or similar: we want "a" to be the head.
+   * Overwrite the postOperationFix method.  For a, b and c: we want a to be the head
    */
   @Override
   protected int postOperationFix(int headIdx, Tree[] daughterTrees) {
     if (headIdx >= 2) {
       String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
       if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
-        boolean origWasInterjection = "UH".equals(tlp.basicCategory(daughterTrees[headIdx].value()));
         int newHeadIdx = headIdx - 2;
-        // newHeadIdx is now left of conjunction.  Now try going back over commas, etc. for 3+ conjuncts
-        // Don't allow INTJ unless conjoined with INTJ - important in informal genres "Oh and don't forget to call!"
-        while (newHeadIdx >= 0 && shouldSkip(daughterTrees[newHeadIdx], origWasInterjection)) {
+        // Don't allow INTJ - important in informal genres "Oh and don't forget to call!"
+        while (newHeadIdx >= 0 && (daughterTrees[newHeadIdx].isPreTerminal() && tlp.isPunctuationTag(daughterTrees[newHeadIdx].value()) ||
+                                   "INTJ".equals(daughterTrees[newHeadIdx].value()))) {
           newHeadIdx--;
         }
-        // We're now at newHeadIdx < 0 or have found a left head
-        // Now consider going back some number of punct that includes a , or : tagged thing and then find non-punct
-        while (newHeadIdx >= 2) {
-          int nextHead = findPreviousHead(newHeadIdx, daughterTrees, origWasInterjection);
-          if (nextHead < 0) {
-            break;
-          }
-          newHeadIdx = nextHead;
+        while (newHeadIdx >= 2 && tlp.isPunctuationTag(daughterTrees[newHeadIdx - 1].value())) {
+          newHeadIdx = newHeadIdx - 2;
         }
         if (newHeadIdx >= 0) {
           headIdx = newHeadIdx;

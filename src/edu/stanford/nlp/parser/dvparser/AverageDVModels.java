@@ -24,7 +24,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * @author John Bauer
  */
 public class AverageDVModels {
-  public static TwoDimensionalSet<String, String> getBinaryMatrixNames(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
+  public static TwoDimensionalSet<String, String> getMatrixNames(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
     TwoDimensionalSet<String, String> matrixNames = new TwoDimensionalSet<String, String>();
     for (TwoDimensionalMap<String, String, SimpleMatrix> map : maps) {
       for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : map) {
@@ -34,7 +34,7 @@ public class AverageDVModels {
     return matrixNames;
   }
 
-  public static Set<String> getUnaryMatrixNames(List<Map<String, SimpleMatrix>> maps) {
+  public static Set<String> getMatrixNames(List<Map<String, SimpleMatrix>> maps) {
     Set<String> matrixNames = Generics.newHashSet();
     for (Map<String, SimpleMatrix> map : maps) {
       for (Map.Entry<String, SimpleMatrix> entry : map.entrySet()) {
@@ -44,9 +44,9 @@ public class AverageDVModels {
     return matrixNames;
   }
 
-  public static TwoDimensionalMap<String, String, SimpleMatrix> averageBinaryMatrices(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
+  public static TwoDimensionalMap<String, String, SimpleMatrix> averageMatrices(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
     TwoDimensionalMap<String, String, SimpleMatrix> averages = new TwoDimensionalMap<String, String, SimpleMatrix>();
-    for (Pair<String, String> binary : getBinaryMatrixNames(maps)) {
+    for (Pair<String, String> binary : getMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
       for (TwoDimensionalMap<String, String, SimpleMatrix> map : maps) {
@@ -67,9 +67,9 @@ public class AverageDVModels {
     return averages;
   }
 
-  public static Map<String, SimpleMatrix> averageUnaryMatrices(List<Map<String, SimpleMatrix>> maps) {
+  public static Map<String, SimpleMatrix> averageMatrices(List<Map<String, SimpleMatrix>> maps) {
     Map<String, SimpleMatrix> averages = Generics.newHashMap();
-    for (String name : getUnaryMatrixNames(maps)) {
+    for (String name : getMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
       for (Map<String, SimpleMatrix> map : maps) {
@@ -153,11 +153,11 @@ public class AverageDVModels {
           }
         });
 
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryTransformAverages = averageBinaryMatrices(binaryTransformMaps);
-    TwoDimensionalMap<String, String, SimpleMatrix> binaryScoreAverages = averageBinaryMatrices(binaryScoreMaps);
-    Map<String, SimpleMatrix> unaryTransformAverages = averageUnaryMatrices(unaryTransformMaps);
-    Map<String, SimpleMatrix> unaryScoreAverages = averageUnaryMatrices(unaryScoreMaps);
-    Map<String, SimpleMatrix> wordAverages = averageUnaryMatrices(wordMaps);
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryTransformAverages = averageMatrices(binaryTransformMaps);
+    TwoDimensionalMap<String, String, SimpleMatrix> binaryScoreAverages = averageMatrices(binaryScoreMaps);
+    Map<String, SimpleMatrix> unaryTransformAverages = averageMatrices(unaryTransformMaps);
+    Map<String, SimpleMatrix> unaryScoreAverages = averageMatrices(unaryScoreMaps);
+    Map<String, SimpleMatrix> wordAverages = averageMatrices(wordMaps);
 
     DVModel newModel = new DVModel(binaryTransformAverages, unaryTransformAverages,
                                    binaryScoreAverages, unaryScoreAverages,

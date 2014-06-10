@@ -97,11 +97,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "(NP (NP (DT the) (NN auction) (NN house)) (RRC (RRC (VP (VBN founded) (NP (-NONE- *)) (PP-LOC (IN in) (NP (NNP London))) (NP-TMP (CD 1744)))) (CC and) (RRC (ADVP-TMP (RB now)) (PP (IN under) (NP (NP (DT the) (NN umbrella)) (PP (IN of) (NP (NP (NNP Sotheby) (POS 's)) (NNPS Holdings) (NNP Inc.))))))))",
          // tough movement example
          "(S (NP-SBJ (NNS morcillas)) (VP (VBP are) (ADVP (RB basically)) (ADJP-PRD (JJ impossible) (SBAR (WHNP-1 (-NONE- *0*)) (S (NP-SBJ (-NONE- *PRO*)) (VP (TO to) (VP (VB find) (NP-1 (-NONE- *T*)) (PP-LOC (IN in) (NP (NNP California))))))))))",
-         // S parataxis
          "( (S (S (NP-SBJ (-NONE- *)) (VP (VBP Do) (RB n't) (VP (VB wait)))) (: --) (S (NP-SBJ (-NONE- *)) (VP (VBP act) (ADVP-TMP (RB now)))) (. !)))",
-         // Two tricky conjunctions with punctuation and/or interjections
-         "( (S (NP-SBJ (DT The) (NNPS Parks) (NNP Council)) (VP (VBD wrote) (NP (DT the) (NNP BPCA)) (SBAR (IN that) (S (NP-SBJ (DT this) (ADJP (`` ``) (RB too) (`` `) (JJ private) ('' ') (: ...) (JJ exclusive) (, ,) ('' '') (JJ complex) (CC and) (JJ expensive)) (`` ``) (VBN enclosed) (NN garden)) (: ...) (VP (VBZ belongs) (PP-LOC-CLR (IN in) (NP (NP (RB almost) (DT any) (NN location)) (CC but) (NP (DT the) (NN waterfront)))))))) (. .) ('' '')))",
-         "( (S (`` ``) (CC And) (NP-SBJ (PRP you)) (VP (MD ca) (RB n't) (VP (VB have) (S (NP-SBJ (NP (NNS taxpayers)) (VP (VBG coming) (PP-DIR (IN into) (NP (DT an) (NN audit))))) (VP (VBG hearing) (NP (`` `) (UH oohs) (: ') (CC and) (`` `) (UH ahs)))))) (. .) ('' ') ('' '')))",
          // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
          // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
     };
@@ -399,44 +395,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, wait-3)\n" +
                 "parataxis(wait-3, act-5)\n" +
                 "advmod(act-5, now-6)\n",
-        "det(Council-3, The-1)\n" +
-                "nn(Council-3, Parks-2)\n" +
-                "nsubj(wrote-4, Council-3)\n" +
-                "root(ROOT-0, wrote-4)\n" +
-                "det(BPCA-6, the-5)\n" +
-                "dobj(wrote-4, BPCA-6)\n" +
-                "mark(belongs-25, that-7)\n" +
-                "det(garden-23, this-8)\n" +
-                "advmod(private-12, too-10)\n" +
-                "amod(garden-23, private-12)\n" +
-                "conj(private-12, exclusive-15)\n" +
-                "conj(private-12, complex-18)\n" +
-                "cc(private-12, and-19)\n" +
-                "conj(private-12, expensive-20)\n" +
-                "amod(garden-23, enclosed-22)\n" +
-                "nsubj(belongs-25, garden-23)\n" +
-                "ccomp(wrote-4, belongs-25)\n" +
-                "prep(belongs-25, in-26)\n" +
-                "advmod(location-29, almost-27)\n" +
-                "det(location-29, any-28)\n" +
-                "pobj(in-26, location-29)\n" +
-                "cc(location-29, but-30)\n" +
-                "det(waterfront-32, the-31)\n" +
-                "conj(location-29, waterfront-32)\n",
-        "cc(have-6, And-2)\n" +
-                "nsubj(have-6, you-3)\n" +
-                "aux(have-6, ca-4)\n" +
-                "neg(have-6, n't-5)\n" +
-                "root(ROOT-0, have-6)\n" +
-                "nsubj(hearing-12, taxpayers-7)\n" +
-                "partmod(taxpayers-7, coming-8)\n" +
-                "prep(coming-8, into-9)\n" +
-                "det(audit-11, an-10)\n" +
-                "pobj(into-9, audit-11)\n" +
-                "ccomp(have-6, hearing-12)\n" +
-                "dobj(hearing-12, oohs-14)\n" +
-                "cc(oohs-14, and-16)\n" +
-                "conj(oohs-14, ahs-18)\n",
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
