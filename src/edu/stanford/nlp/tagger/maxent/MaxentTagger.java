@@ -287,19 +287,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   Dictionary dict = new Dictionary();
   TTags tags;
 
-  /**
-   * Will return the index of a tag, adding it if it doesn't already exist
-   */
-  public int addTag(String tag) {
-    return tags.add(tag);
-  }
-  /**
-   * Will return the index of a tag if known, -1 if not already known
-   */
-  public int getTagIndex(String tag) {
-    return tags.getIndex(tag);
-  }
-
   private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
