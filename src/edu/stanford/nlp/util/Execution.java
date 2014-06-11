@@ -347,13 +347,17 @@ public class Execution {
         continue;
       }
 
+      boolean someOptionFilled = false;
+      boolean someOptionFound = false;
       for (Field f : fields) {
         Option o = f.getAnnotation(Option.class);
         if (o != null) {
+          someOptionFound = true;
           //(check if field is static)
           if ((f.getModifiers() & Modifier.STATIC) == 0 && instances == null) {
-            fatal("An instance object must be provided if an option is applied to a non-static field: " + c + "." + f);
+            continue;
           }
+          someOptionFilled = true;
           //(required marker)
           Pair<Boolean, Boolean> mark = Pair.makePair(false, false);
           if (o.required()) {
@@ -389,6 +393,10 @@ public class Execution {
           }
         }
       }
+      //(check to ensure that something got filled, if any @Option annotation was found)
+      if (someOptionFound && !someOptionFilled) {
+        warn("found @Option annotations in class, but didn't set any of them (all options were instance variables and no instance given?)");
+      }
     }
 
     //--Fill Options
@@ -406,7 +414,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)z
+        // (case: declared option)
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -597,7 +605,7 @@ public class Execution {
       log(FORCE, t);
       exitCode = 1;
     }
-    endTrack("main"); //ends main
+    endTracksTo("main");  // end main
     if (exit) {
       System.exit(exitCode);
     }
