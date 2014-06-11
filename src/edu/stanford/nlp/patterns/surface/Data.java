@@ -69,6 +69,7 @@ public class Data {
   }
 
   public static void loadDomainNGrams() {
+    assert(domainNGramsFile != null);
     if (domainNGramRawFreq == null || domainNGramRawFreq.size() == 0) {
       for (String line : IOUtils.readLines(domainNGramsFile)) {
         String[] t = line.split("\t");
