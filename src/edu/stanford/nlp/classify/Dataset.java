@@ -84,13 +84,43 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     this.size = size;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> split(double percentDev) {
-    return split(0, (int)(percentDev * size()));
+    int devSize = (int)(percentDev * size());
+    int trainSize = size() - devSize;
+
+    int[][] devData = new int[devSize][];
+    int[] devLabels = new int[devSize];
+
+    int[][] trainData = new int[trainSize][];
+    int[] trainLabels = new int[trainSize];
+
+    System.arraycopy(data, 0, devData, 0, devSize);
+    System.arraycopy(labels, 0, devLabels, 0, devSize);
+
+    System.arraycopy(data, devSize, trainData, 0, trainSize);
+    System.arraycopy(labels, devSize, trainLabels, 0, trainSize);
+
+    if (this instanceof WeightedDataset<?,?>) {
+      float[] trainWeights = new float[trainSize];
+      float[] devWeights = new float[devSize];
+
+      WeightedDataset<L, F> w = (WeightedDataset<L, F>)this;
+
+      System.arraycopy(w.weights, 0, devWeights, 0, devSize);
+      System.arraycopy(w.weights, devSize, trainWeights, 0, trainSize);
+
+      WeightedDataset<L, F> dev = new WeightedDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devSize, devWeights);
+      WeightedDataset<L, F> train = new WeightedDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainSize, trainWeights);
+
+      return new Pair<GeneralDataset<L, F>,GeneralDataset<L, F>>(train, dev);
+    }
+    Dataset<L, F> dev = new Dataset<L, F>(labelIndex, devLabels, featureIndex, devData, devSize);
+    Dataset<L, F> train = new Dataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainSize);
+
+    return new Pair<GeneralDataset<L, F>,GeneralDataset<L, F>>(train, dev);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Pair<GeneralDataset<L, F>,GeneralDataset<L, F>> split(int start, int end) {
     int devSize = end - start;
@@ -392,11 +422,6 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     System.err.println(toSummaryStatistics());
   }
 
-  /** A String that is multiple lines of text giving summary statistics.
-   *  (It does not end with a newline, though.)
-   *
-   *  @return A textual summary of the Dataset
-   */
   public String toSummaryStatistics() {
     StringBuilder sb = new StringBuilder();
     sb.append("numDatums: ").append(size).append('\n');
@@ -409,18 +434,10 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       }
     }
     sb.append("]\n");
-    sb.append("numFeatures (Phi(X) types): ").append(featureIndex.size()).append(" [");
-    int sz = Math.min(5, featureIndex.size());
-    for (int i = 0; i < sz; i++) {
-      if (i > 0) {
-        sb.append(", ");
-      }
-      sb.append(featureIndex.get(i));
-    }
-    if (sz < featureIndex.size()) {
-      sb.append(", ...");
-    }
-    sb.append(']');
+    sb.append("numFeatures (Phi(X) types): ").append(featureIndex.size()).append('\n');
+    // List l = new ArrayList(featureIndex);
+//     Collections.sort(l);
+//     sb.append(l);
     return sb.toString();
   }
 
@@ -508,14 +525,18 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     }
   }
 
-  /** {@inheritDoc} */
-  @Override
+  /**
+   * prints the sparse feature matrix using {@link #printSparseFeatureMatrix()}
+   * to {@link System#out System.out}.
+   */
   public void printSparseFeatureMatrix() {
     printSparseFeatureMatrix(new PrintWriter(System.out, true));
   }
 
-  /** {@inheritDoc} */
-  @Override
+  /**
+   * prints a sparse feature matrix representation of the Dataset.  Prints the actual
+   * {@link Object#toString()} representations of features.
+   */
   public void printSparseFeatureMatrix(PrintWriter pw) {
     String sep = "\t";
     for (int i = 0; i < size; i++) {
