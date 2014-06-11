@@ -1064,11 +1064,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                   + " because it is contained in or contains the already chosen pattern " + p);
               notchoose = true;
               break;
-            } else if (SurfacePattern.sameGenre(p, pat)) {
-              Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + p
-                  + " because it is contained in or contains the another chosen pattern in this iteration " + pat);
-              removeChosenPatFlag = true;
-            }
+            } else if (SurfacePattern.subsumes(p, pat)) {
+              //subsume is true even if equal context
+              //check if equal context
+              int rest = pat.equalContext(p);
+
+              // the contexts dont match
+              if (rest == Integer.MAX_VALUE)
+              {
+                Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + p
+                    + " because it is contained in or contains the another chosen pattern in this iteration " + pat);  
+                removeChosenPatFlag = true;
+              }
+              // if pat is less restrictive, remove p from chosen patterns and
+              // add pat!
+              else if (rest < 0) {
+                removeChosenPatFlag = true;
+              } else {
+                notchoose = true;
+                break;
+              }
+            } 
             
             if (pat.toStringSimple().contains("upon") && p.toStringSimple().contains("upon")) {
               System.out.println("For " + pat + " and " + p + ": samegenre is " + SurfacePattern.sameGenre(pat, p) + " and subsumes answer is "
@@ -1076,22 +1092,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               
             }
             
-            if (!removeChosenPatFlag) {
-              int rest = pat.equalContext(p);
-
-              // the contexts dont match
-              if (rest == Integer.MAX_VALUE)
-                continue;
-              // if pat is less restrictive, remove p from chosen patterns and
-              // add pat!
-              if (rest < 0) {
-                removeChosenPatFlag = true;
-              } else {
-                //removeIdentifiedPattern = null;
-                notchoose = true;
-                break;
-              }
-            }
             if (removeChosenPatFlag) {
               if(removeChosenPats == null)
                 removeChosenPats = new HashSet<SurfacePattern>();
