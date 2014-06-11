@@ -1,8 +1,10 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
@@ -19,6 +21,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
 public class ShiftReduceParser implements Serializable, ParserGrammar {
@@ -104,6 +107,14 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   public ScoredObject<Integer> findHighestScoringTransition(State state, Set<String> features, boolean requireLegal) {
+    Collection<ScoredObject<Integer>> transitions = findHighestScoringTransitions(state, features, requireLegal, 1);
+    if (transitions.size() == 0) {
+      return null;
+    }
+    return transitions.iterator().next();
+  }
+
+  public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, Set<String> features, boolean requireLegal, int numTransitions) {
     double[] scores = new double[featureWeights.length];
     for (String feature : features) {
       int featureNum = featureIndex.indexOf(feature);
@@ -115,19 +126,17 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       }
     }
 
-    int bestTransition = -1;
+    PriorityQueue<ScoredObject<Integer>> queue = new PriorityQueue<ScoredObject<Integer>>(numTransitions + 1, ScoredComparator.ASCENDING_COMPARATOR);
     for (int i = 0; i < scores.length; ++i) {
-      if ((bestTransition < 0 || scores[i] > scores[bestTransition]) && 
-          (!requireLegal || transitionIndex.get(i).isLegal(state))) {
-        bestTransition = i;
+      if (!requireLegal || transitionIndex.get(i).isLegal(state)) {
+        queue.add(new ScoredObject<Integer>(i, scores[i]));
+        if (queue.size() > numTransitions) {
+          queue.poll();
+        }
       }
     }
-    
-    if (bestTransition >= 0) {
-      return new ScoredObject<Integer>(bestTransition, scores[bestTransition]);
-    } else {
-      return new ScoredObject<Integer>(-1, Double.NEGATIVE_INFINITY);
-    }
+
+    return queue;
   }
 
   public static State initialStateFromGoldTagTree(Tree tree) {
