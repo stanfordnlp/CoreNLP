@@ -571,14 +571,6 @@ public class DVParser {
       TreeTransformer transformer = buildTrainTransformer(dvparser.getOp());
 
       Treebank treebank = dvparser.getOp().tlpParams.memoryTreebank();;
-      if (trainTreebankPath == null) {
-        if (System.getProperty("os.name").startsWith("Windows")){
-          trainTreebankPath = "D:\\projects\\deepSyn\\data\\trees\\wsj\\00\\wsj_0001.mrg";
-          //treebank.loadPath("foo.tree");
-        } else {
-          trainTreebankPath = "/afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/00/wsj_0001.mrg";
-        }
-      }
       treebank.loadPath(trainTreebankPath, trainTreebankFilter);
       treebank = treebank.transform(transformer);
       System.err.println("Read in " + treebank.size() + " trees from " + trainTreebankPath);
