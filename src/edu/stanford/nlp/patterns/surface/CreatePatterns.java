@@ -20,7 +20,6 @@ import java.util.concurrent.Future;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
-import edu.stanford.nlp.patterns.surface.SurfacePattern.Genre;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.StringUtils;
@@ -388,12 +387,12 @@ public class CreatePatterns {
           if (previousTokens.size() >= minWindow4Pattern) {
             if (twithoutPOS != null) {
               SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
-                  null, prevOriginalArr, null, Genre.PREV);
+                  null, prevOriginalArr, null);
               prevpatterns.add(pat);
             }
             if (twithPOS != null) {
               SurfacePattern patPOS = new SurfacePattern(prevContext, twithPOS,
-                  null, prevOriginalArr, null, Genre.PREV);
+                  null, prevOriginalArr, null);
               prevpatterns.add(patPOS);
             }
           }
@@ -435,12 +434,12 @@ public class CreatePatterns {
           nextOriginalArr =  nextOriginal.toArray(new String[0]);
           if (twithoutPOS != null) {
             SurfacePattern pat = new SurfacePattern(null, twithoutPOS,
-                nextContext, null,nextOriginalArr, Genre.NEXT);
+                nextContext, null,nextOriginalArr);
             nextpatterns.add(pat);
           }
           if (twithPOS != null) {
             SurfacePattern patPOS = new SurfacePattern(null, twithPOS,
-                nextContext, null, nextOriginalArr, Genre.NEXT);
+                nextContext, null, nextOriginalArr);
             nextpatterns.add(patPOS);
           }
 
@@ -457,13 +456,13 @@ public class CreatePatterns {
 
           if (twithoutPOS != null) {
             SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
-                nextContext, prevOriginalArr, nextOriginalArr, Genre.PREVNEXT);
+                nextContext, prevOriginalArr, nextOriginalArr);
             prevnextpatterns.add(pat);
           }
 
           if (twithPOS != null) {
             SurfacePattern patPOS = new SurfacePattern(prevContext, twithPOS,
-                nextContext, prevOriginalArr, nextOriginalArr, Genre.PREVNEXT);
+                nextContext, prevOriginalArr, nextOriginalArr);
             prevnextpatterns.add(patPOS);
           }
         }

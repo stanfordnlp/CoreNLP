@@ -287,11 +287,6 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     }
     if (constVars.usePatternEvalEditDistSame)
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word));
-    
-    if(constVars.usePatternEvalWordShape){
-      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word, label));
-    }
-    
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
@@ -396,11 +391,6 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     }
     if (constVars.usePhraseEvalEditDistSame)
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word));
-    
-    if(constVars.usePhraseEvalWordShape){
-      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word, label));
-    }
-    
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
