@@ -54,7 +54,7 @@ import java.util.Map;
  * @author Christopher Manning
  * @author Galen Andrew
  */
-public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Serializable */, CopulaHeadFinder {
+public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Serializable */ {
 
   private static final boolean DEBUG = false;
   protected final TreebankLanguagePack tlp;
@@ -101,14 +101,6 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
       defaultLeftRule[0] = "left";
       defaultRightRule[0] = "right";
     }
-  }
-
-  /**
-   * Generally will be false, except for SemanticHeadFinder
-   */
-  @Override
-  public boolean makesCopulaHead() {
-    return false;
   }
 
   /**
