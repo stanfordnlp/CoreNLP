@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+# Reads a dataset with available integrated files and
+# outputs data in the format required for training the
+# Stanford Arabic segmenter.
+
+set -e
+
+if [ "$#" -lt 3 ]; then
+    echo "Usage: `basename $0` <atb_base> <splits_dir> <output_prefix> [<domain>]"
+    exit 1
+fi
+
+ATB_BASE=$1
+SPLITS=$2
+OUTPUT=$3
+DOMAIN=$4
+
+BINDIR="`dirname $0`"
+
+for SPLIT in dev train test all
+do
+
+# Get absolute paths of integrated files
+  cat ${SPLITS}/${SPLIT} | xargs -r -n 1 find ${ATB_BASE}/*/data/integrated -name | \
+
+# Concatenate them
+  xargs -r cat > ${OUTPUT}-${SPLIT}.__integrated__
+
+# Run them through the parse_integrated script to output tags file
+  ${BINDIR}/parse_integrated ${OUTPUT}-${SPLIT}.__integrated__ > ${OUTPUT}-${SPLIT}.__tags__
+
+# Generate a gold segmentation file
+  ${BINDIR}/integrated_to_gold ${OUTPUT}-${SPLIT}.__integrated__ ${OUTPUT}-${SPLIT}.__segmentation__
+
+# Combine the gold segmentation file with tags to produce training data
+  ${BINDIR}/tag_segmentation.py ${OUTPUT}-${SPLIT}.__segmentation__ ${OUTPUT}-${SPLIT}.__tags__ > ${OUTPUT}-${SPLIT}.utf8.txt
+  
+  if [ "$DOMAIN" != "" ]; then
+    sed "s/^/$DOMAIN /" ${OUTPUT}-${SPLIT}.utf8.txt > ${OUTPUT}-withDomains-${SPLIT}.utf8.txt ;
+  fi
+
+  rm ${OUTPUT}-${SPLIT}.__tags__ ${OUTPUT}-${SPLIT}.__segmentation__ ${OUTPUT}-${SPLIT}.__integrated__
+
+done
