@@ -791,6 +791,9 @@ public class TregexTest extends TestCase {
 
     runTest("(NP < NN | < NNS)", "((NP NN) (NP foo) (NP NNS))",
             "(NP NN)", "(NP NNS)");
+    runTest("(NP (< NN | < NNS) & > S)",
+            "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
+            "(NP NN)", "(NP NNS)");
     runTest("(NP [< NN | < NNS] & > S)",
             "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
             "(NP NN)", "(NP NNS)");
