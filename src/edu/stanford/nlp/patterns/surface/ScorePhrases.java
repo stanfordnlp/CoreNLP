@@ -300,11 +300,9 @@ public class ScorePhrases {
         
         Counter<SurfacePattern> patternsLearnedThisIterConsistsOnlyGeneralized = new ClassicCounter<SurfacePattern>();
         Counter<SurfacePattern> patternsLearnedThisIterRest = new ClassicCounter<SurfacePattern>();
-        Set<String> specialWords = new HashSet<String>();
-        specialWords.add("OTHERSEM");
-        specialWords.add("FW");
-        specialWords.add("SW");
-        specialWords.addAll(constVars.answerClass.keySet());
+        Set<String> specialWords = constVars.invertedIndex.getSpecialWordsList();
+        List<String> extremelySmallStopWordsList = Arrays.asList(".",",","in","on","of","a","the","an");
+
         for(Entry<SurfacePattern, Double> en: patternsLearnedThisIter.entrySet()){
           SurfacePattern p = en.getKey();
           String[] n = p.getOriginalNext();
@@ -320,7 +318,7 @@ public class ScorePhrases {
           }
           if(rest == false && pr!=null){
             for(String e: pr){
-              if(!specialWords.contains(e)){
+              if(!specialWords.contains(e) && !extremelySmallStopWordsList.contains(e)){
                 rest = true;
                 break;
               }
@@ -331,8 +329,6 @@ public class ScorePhrases {
           else
             patternsLearnedThisIterConsistsOnlyGeneralized.setCount(en.getKey(), en.getValue());
         }
-
-        System.out.println("gen only patterns are " + patternsLearnedThisIterConsistsOnlyGeneralized );
         
         Map<String, Set<String>> sentidswithfilerest = constVars.invertedIndex.getFileSentIdsFromPats(patternsLearnedThisIterRest.keySet());
         

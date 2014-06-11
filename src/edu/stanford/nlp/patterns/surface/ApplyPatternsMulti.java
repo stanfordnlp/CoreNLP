@@ -106,7 +106,6 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
           phrase = phrase.trim();
           phraseLemma = phraseLemma.trim();
 
-          System.out.println("pattern " + matchedPat + " extracted " + phrase);
           allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), matchedPat, 1.0);
         }
       }

@@ -64,7 +64,6 @@ public class InvertedIndexByTokens {
         index.put(w, t);
       }
     }
-    System.out.println("size of inv index is " + index.size() + " and some elements are " + CollectionUtils.toList(index.keySet()).subList(0, 10));
   }
 
   public Map<String, Set<String>> getFileSentIds(String word) {
@@ -123,7 +122,10 @@ public class InvertedIndexByTokens {
 
     }
     relevantWords.removeAll(specialWords);
-    System.out.println("searching for " + relevantWords);
     return getFileSentIds(relevantWords);
+  }
+
+  public Set<String> getSpecialWordsList() {
+    return this.specialWords;
   }
 }
