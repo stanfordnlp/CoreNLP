@@ -59,6 +59,14 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
 
   private List<List<IN>> unsupDocs = null;
 
+  protected CRFClassifierWithDropout() {
+    super(new SeqClassifierFlags());
+  }
+
+  public CRFClassifierWithDropout(Properties props) {
+    super(props);
+  }
+
   public CRFClassifierWithDropout(SeqClassifierFlags flags) {
     super(flags);
   }
@@ -105,7 +113,9 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
       System.err.println("Time to read unsupervised dropout data: " + Timing.toSecondsString(elapsedMs) + " seconds, read " + unsupDropoutData.length + " files");
     }
 
-    return new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
+    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
       labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, unsupDropoutData);
+
+    return func;
   }
 } // end class CRFClassifier
