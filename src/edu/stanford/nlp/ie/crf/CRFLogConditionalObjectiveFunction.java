@@ -71,17 +71,9 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   @Override
   public double[] initial() {
-    return initial(rand);
-  }
-  public double[] initial(boolean useRandomSeed) {
-    Random randToUse = useRandomSeed ? new Random() : rand;
-    return initial(rand);
-  }
-
-  public double[] initial(Random randGen) {
     double[] initial = new double[domainDimension()];
     for (int i = 0; i < initial.length; i++) {
-      initial[i] = randGen.nextDouble() + smallConst;
+      initial[i] = rand.nextDouble() + smallConst;
       // initial[i] = generator.nextDouble() * largeConst;
       // initial[i] = -1+2*(i);
       // initial[i] = (i == 0 ? 1 : 0);
