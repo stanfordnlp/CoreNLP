@@ -608,8 +608,11 @@ abstract class GraphRelation implements Serializable {
     @Override
     Iterator<IndexedWord> searchNodeIterator(final IndexedWord node, final SemanticGraph sg) {
       return new SearchNodeIterator() {
-          Stack<Pair<GrammaticalRelation, IndexedWord>> searchStack;
-          Set<IndexedWord> seenNodes;
+          Stack<IndexedWord> searchStack;
+          Set<IndexedWord> searchedNodes;
+          Set<IndexedWord> matchedNodes;
+
+          Iterator<SemanticGraphEdge> neighborIterator;
           
           @Override
           public void initialize() {
@@ -617,15 +620,12 @@ abstract class GraphRelation implements Serializable {
               next = null;
               return;
             }
+            neighborIterator = null;
+            searchedNodes = Generics.newHashSet();
+            matchedNodes = Generics.newHashSet();
             searchStack = Generics.newStack();
-            seenNodes = Generics.newHashSet();
-            List<Pair<GrammaticalRelation, IndexedWord>> parents = sg.parentPairs(node);
-            for (int i = parents.size() - 1; i >= 0; i--) {
-              searchStack.push(parents.get(i));
-            }
-            if (!searchStack.isEmpty()) {
-              advance();
-            }
+            searchStack.push(node);
+            advance();
           }
 
           @Override
@@ -634,24 +634,25 @@ abstract class GraphRelation implements Serializable {
               next = null;
               return;
             }
-            Pair<GrammaticalRelation, IndexedWord> nextPair;
+
             while (!searchStack.isEmpty()) {
-              nextPair = searchStack.pop();
-              if (seenNodes.contains(nextPair.second())) {
-                continue;
+              if (neighborIterator == null || !neighborIterator.hasNext()) {
+                IndexedWord search = searchStack.pop();
+                neighborIterator = sg.incomingEdgeIterator(search);
               }
-              
-              seenNodes.add(nextPair.second());
-              List<Pair<GrammaticalRelation, IndexedWord>> parents = 
-                sg.parentPairs(nextPair.second());
-              for (int i = parents.size() - 1; i >= 0; i--) {
-                if (!seenNodes.contains(parents.get(i).second()))
-                  searchStack.push(parents.get(i));
-              }
-              if (type.accept(nextPair.first().toString())) {
-                next = nextPair.second();
-                relation = nextPair.first().toString();
-                return;
+
+              while (neighborIterator.hasNext()) {
+                SemanticGraphEdge edge = neighborIterator.next();
+                IndexedWord source = edge.getSource();
+                if (!searchedNodes.contains(source)) {
+                  searchStack.push(source);
+                  searchedNodes.add(source);
+                }
+                if (type.accept(edge.getRelation().toString()) && !matchedNodes.contains(source)) {
+                  matchedNodes.add(source);
+                  next = source;
+                  return;
+                }
               }
             }
             // oh well, fell through with no results
