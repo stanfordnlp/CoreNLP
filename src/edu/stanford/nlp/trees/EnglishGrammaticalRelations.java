@@ -495,20 +495,10 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !< (PP <: IN|TO) $-- (NP !< /^-NONE-$/))",
 
           // matches direct object in relative clauses with relative pronoun "I saw the book that you bought". Seems okay. If this is changed, also change the pattern for "rel"
-          // TODO: this can occasionally produce incorrect dependencies, such as the sentence 
-          // "with the way which his split-fingered fastball is behaving"
-          // eg take a tree where the verb doesn't have an object
           "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN|TO) !< (S < (VP < TO))))",
 
           // matches direct object for long dependencies in relative clause without explicit relative pronouns
-          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " + 
-            // avoid conflicts with rcmod.  TODO: we could look for
-            // empty nodes in this kind of structure and use that to
-            // find dobj, tmod, advmod, etc.  won't help the parser,
-            // of course, but will help when converting a treeback
-            // which contains empties
-            // Example: "with the way his split-fingered fastball is behaving"
-            "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
+          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target",
 
           // If there was an NP between the WHNP and the ADJP, we want
           // that NP to have the nsubj relation, and the WHNP is either
@@ -918,7 +908,7 @@ public class EnglishGrammaticalRelations {
           // useful dependencies rather than introduce some wrong
           // dependencies.
           "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML > @NP|WHNP",
-          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NML > @NP|WHNP",
+          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
           // for case of relative clauses with no relativizer
           // (it doesn't distinguish whether actually gapped).
