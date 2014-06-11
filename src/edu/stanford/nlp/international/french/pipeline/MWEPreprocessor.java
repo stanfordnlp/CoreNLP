@@ -149,7 +149,7 @@ public final class MWEPreprocessor {
     
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+      TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
       
       PrintWriter pw = new PrintWriter(new PrintStream(new FileOutputStream(new File(treeFile + ".fixed")),false,"UTF-8"));
@@ -228,7 +228,7 @@ public final class MWEPreprocessor {
     
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+      TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
       
       for(Tree t; (t = tr.readTree()) != null;) {

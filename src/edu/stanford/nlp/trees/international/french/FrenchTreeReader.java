@@ -344,7 +344,7 @@ public class FrenchTreeReader implements TreeReader {
     for(int i = 0; i < args.length; i++)
       fileList.add(new File(args[i]));
 
-    TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+    TreeReaderFactory trf = new FrenchTreeReaderFactory();
     int totalTrees = 0;
     Set<String> morphAnalyses = Generics.newHashSet();
     try {
