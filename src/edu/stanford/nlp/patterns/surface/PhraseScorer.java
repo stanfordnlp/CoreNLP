@@ -27,7 +27,7 @@ public abstract class PhraseScorer {
 
   @Option(name = "wordFreqNorm")
   Normalization wordFreqNorm = Normalization.valueOf("LOG");
-
+  
   /**
    * For phrases, some phrases are evaluated as a combination of their
    * individual words. Default is taking minimum of all the words. This flag
@@ -48,12 +48,11 @@ public abstract class PhraseScorer {
 
   Counter<String> learnedScores = new ClassicCounter<String>();
 
-  abstract Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
-      String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
       Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns)
-      throws IOException;
+      throws IOException, ClassNotFoundException;
 
   Counter<String> getLearnedScores() {
     return learnedScores;
@@ -164,5 +163,9 @@ public abstract class PhraseScorer {
     else
       return minScore;
   }
+
+  abstract public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
+      String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
+  
 
 }

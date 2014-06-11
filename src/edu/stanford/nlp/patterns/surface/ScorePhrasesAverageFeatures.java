@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
   
   @Override
-  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents, String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) {
     Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();
@@ -165,6 +166,14 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
       phraseScores.setCount(wEn.getKey(), avgScore);
     }
     return phraseScores;
+  }
+
+
+  @Override
+  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
+      String label, Set<String> terms, boolean forLearningPatterns)
+      throws IOException {
+    throw new RuntimeException("not implemented");
   }
 
 
