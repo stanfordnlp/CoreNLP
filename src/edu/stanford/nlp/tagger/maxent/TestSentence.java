@@ -42,7 +42,7 @@ public class TestSentence implements SequenceModel {
 
   protected final boolean VERBOSE;
   protected static final String naTag = "NA";
-  protected static final String[] naTagArr = { naTag };
+  private static final String[] naTagArr = { naTag };
   protected static final boolean DBG = false;
   protected static final int kBestSize = 1;
 
