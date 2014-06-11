@@ -1949,7 +1949,8 @@ public class StringUtils {
         } else {
 
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-            result.putAll(propFileToTreeMap(join(flagArgs," "), existingArgs));
+            for(String flagArg: flagArgs)
+              result.putAll(propFileToTreeMap(flagArg, existingArgs));
             i++;
             existingArgs.clear();
           } else
