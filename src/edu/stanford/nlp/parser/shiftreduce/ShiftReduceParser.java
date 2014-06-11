@@ -187,10 +187,13 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     return new ShiftReduceParserQuery(this);
   }
 
+
+  /**
+   * Iterate over the feature weight map.
+   * For each feature, remove all transitions with score of 0.
+   * Any feature with no transitions left is then removed
+   */
   public void condenseFeatures() {
-    // iterate over feature weight map
-    // for each feature, remove all transitions with score of 0
-    // any feature with no transitions left is then removed
     Iterator<String> featureIt = featureWeights.keySet().iterator();
     while (featureIt.hasNext()) {
       String feature = featureIt.next();
@@ -209,14 +212,18 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
 
+  /**
+   * Output some random facts about the parser
+   */
   public void outputStats() {
+    System.err.println("Number of known features: " + featureWeights.size());
+
     int numWeights = 0;
     for (String feature : featureWeights.keySet()) {
       numWeights += featureWeights.get(feature).size();
     }
     System.err.println("Number of non-zero weights: " + numWeights);
 
-    System.err.println("Number of known features: " + featureWeights.size());
     int wordLength = 0;
     for (String feature : featureWeights.keySet()) {
       wordLength += feature.length();
@@ -477,7 +484,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       }
       trainingTimer.done("Iteration " + iteration);
       System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
-      System.err.println("Number of weight vectors: " + featureWeights.size());
+      outputStats();
 
 
       double labelF1 = 0.0;
