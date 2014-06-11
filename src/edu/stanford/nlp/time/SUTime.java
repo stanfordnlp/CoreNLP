@@ -454,10 +454,6 @@ public class SUTime {
       return this;
     }
 
-    public Temporal setTimeZone(int offsetHours) {
-      return setTimeZone(DateTimeZone.forOffsetHours(offsetHours));
-    }
-
     // public abstract Temporal add(Duration offset);
     public Temporal next() {
       Duration per = getPeriod();
@@ -2431,15 +2427,11 @@ public class SUTime {
 
     public PartialTime(Time t, Partial p) {
       super(t);
-      if (t instanceof PartialTime) {
-        this.dateTimeZone = ((PartialTime) t).dateTimeZone;
-      }
       this.base = p;
     }
 
     public PartialTime(PartialTime pt) {
       super(pt);
-      this.dateTimeZone = pt.dateTimeZone;
       this.base = pt.base;
     }
 

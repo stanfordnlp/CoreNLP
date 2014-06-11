@@ -126,15 +126,6 @@ public class SentimentPipeline {
     }
   }
 
-  public static void help() {
-    System.err.println("Known command line arguments:");
-    System.err.println("  -sentimentModel <model>: Which model to use");
-    System.err.println("  -parserModel <model>: Which parser to use");
-    System.err.println("  -file <filename>: Which file to process");
-    System.err.println("  -stdin: Process stdin instead of a file");
-    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, or ROOT ");
-  }
-
   public static void main(String[] args) throws IOException {
     String parserModel = null;
     String sentimentModel = null;
@@ -161,9 +152,6 @@ public class SentimentPipeline {
         String format = args[argIndex + 1];
         output = Output.valueOf(format.toUpperCase());
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-help")) {
-        help();
-        System.exit(0);
       } else {
         System.err.println("Unknown argument " + args[argIndex + 1]);
         throw new IllegalArgumentException("Unknown argument " + args[argIndex + 1]);

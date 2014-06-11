@@ -176,7 +176,7 @@ Expression Expression(Env env) : {
 } {
   (
     LOOKAHEAD(4)
-    expr = NestedFunctionCallExpression(env) |
+    expr = FunctionCallExpression(env) |
     LOOKAHEAD(4)
     expr = NestedVarExpression(env) |
     LOOKAHEAD(4)
@@ -378,38 +378,6 @@ Expression NestedVarExpression(Env env) : {
   { return expr;   }
 }
 
-Expression NestedFunctionCallExpression(Env env) : {
-  Expression expr;
-  Expression fieldExpr;
-  String s;
-  Token tok;
-  int i;
-} {
-  ( expr = FunctionCallExpression(env)
-   (
-     LOOKAHEAD(3)
-     i = Index()
-    { expr = new Expressions.IndexedExpression(expr, i);   }
-     |
-     LOOKAHEAD(3)
-     "["
-     fieldExpr = Expression(env)
-     { expr = new Expressions.FieldExpression(expr, fieldExpr); }
-     "]"
-     |
-     LOOKAHEAD(3)
-     "."
-     expr = MethodCallExpression(env, expr)
-     |
-     LOOKAHEAD(3)
-     "."
-     s = RelaxedString()
-     { expr = new Expressions.FieldExpression(expr, s); }
-    )*
-  )
-  { return expr;   }
-}
-
 Expression ListExpression(Env env) : {
   List<Expression> exprs = new ArrayList<Expression>();
   Expression expr;
@@ -446,7 +414,7 @@ Expression BasicCondExpression(Env env) : {
   }
   |
   LOOKAHEAD(3)
-    expr1 = NestedFunctionCallExpression(env)
+    expr1 = FunctionCallExpression(env)
     { return new Expressions.ConditionalExpression(expr1); }
 }
 
