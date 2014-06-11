@@ -201,9 +201,7 @@ class CoordinationPattern extends TregexPattern {
         for (int resetChild = 0; resetChild < currChild; ++resetChild) {
           // clean up variables that may have been set in previously
           // accepted nodes
-          if (children[resetChild] != null) {
-            children[resetChild].resetChildIter();
-          }
+          children[resetChild].resetChildIter();
         }
         return myNode.isOptional();
       }
