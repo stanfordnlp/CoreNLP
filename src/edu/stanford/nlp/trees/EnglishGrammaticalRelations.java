@@ -540,7 +540,7 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "VP < (NP=target !< /\\$/ !<# (/^NN/ < " + timeWordRegex + ") $+ (NP !<# (/^NN/ < " + timeWordRegex + ")))",
           // this next one was meant to fix common mistakes of our parser, but is perhaps too dangerous to keep
-          "VP < (NP=target < (NP !< /\\$/ $++ (NP !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))",
+          "VP < (NP=target < (NP !< /\\$/ $++ (NP !<: DT !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))",
         });
   public static class IndirectObjectGRAnnotation extends GrammaticalRelationAnnotation { }
 
