@@ -663,7 +663,9 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // example, the English dependencies, when CC processed, have more
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
+    // TODO: this might not be necessary any more
     if (includeExtras) {
+      getExtras(tdl);
       getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
     }
     collapseDependencies(tdl, false, includeExtras);
@@ -693,7 +695,9 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // example, the English dependencies, when CC processed, have more
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
+    // TODO: this might not be necessary any more
     if (includeExtras) {
+      getExtras(tdl);
       getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
     }
     collapseDependencies(tdl, true, includeExtras);

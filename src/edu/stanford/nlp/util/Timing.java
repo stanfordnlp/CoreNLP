@@ -154,6 +154,18 @@ public class Timing {
     return elapsed;
   }
 
+  /** 
+   * Print the timing done message with elapsed time in x.y seconds.
+   * Restart the timer too.
+   */
+  // Thang Mar14
+  public void end(String msg) {
+    long elapsed = System.currentTimeMillis() - start;
+    System.err.println(msg + " done [" + nf.format(((double) elapsed) / 1000) + " sec].");
+    this.start();
+  }
+
+
   // stop ===========================================================
 
   /**
