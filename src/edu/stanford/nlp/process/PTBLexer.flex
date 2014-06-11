@@ -176,8 +176,8 @@ import edu.stanford.nlp.util.StringUtils;
    *     unicodeEllipsis; if both are false, no mapping is done.
    * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
    *     U+2026, the Unicode ellipsis character
-   * <li>splitAssimilations: true to tokenize "gonna", false to tokenize
-   *                         "gon na".  True by default.
+   * <li>splitAssimilations: true to tokenize "gon na", false to tokenize
+   *                         "gonna".  True by default.
    * <li>ptb3Dashes: Whether to turn various dash characters into "--",
    *     the dominant encoding of dashes in the PTB3 WSJ
    * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
