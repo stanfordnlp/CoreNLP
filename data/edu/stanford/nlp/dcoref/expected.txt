@@ -8,7 +8,7 @@ METRIC ceafm:Coreference: Recall: (10896 / 18308) 59.51%  Precision: (10896 / 18
 METRIC ceafe:Coreference: Recall: (3812.24 / 7769) 49.06% Precision: (3812.24 / 8273) 46.08%  F1: 47.52%
 METRIC blanc:Coreference links: Recall: (25257 / 54427) 46.4% Precision: (25257 / 40569) 62.25% F1: 53.17%
 Non-coreference links: Recall: (923682 / 938994) 98.36% Precision: (923682 / 952852) 96.93% F1: 97.64%
-BLANC: Recall: (0.72 / 1) 72.38%  Precision: (0.8 / 1) 79.6% F1: 75.41%
+BLANC: Recall: (0.72 / 1) 72.38%  Precision: (0.8 / 1) 79.59% F1: 75.41%
 
 Final conll score ((muc+bcub+ceafe)/3) = 59.73
 Final score (pairwise) Precision = 0.57
