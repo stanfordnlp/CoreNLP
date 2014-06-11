@@ -516,6 +516,22 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   private void setGender(Dictionaries dict, int[] genderNumberCount) {
     gender = Gender.UNKNOWN;
+    if(genderNumberCount!=null && this.number!=Number.PLURAL){
+      double male = genderNumberCount[0];
+      double female = genderNumberCount[1];
+      double neutral = genderNumberCount[2];
+
+      if (male * 0.5 > female + neutral && male > 2) {
+        this.gender = Gender.MALE;
+        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
+      } else if (female * 0.5 > male + neutral && female > 2) {
+        this.gender = Gender.FEMALE;
+        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
+      } else if (neutral * 0.5 > male + female && neutral > 2) {
+        this.gender = Gender.NEUTRAL;
+        SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
+      }
+    }
     if (mentionType == MentionType.PRONOMINAL) {
       if (dict.malePronouns.contains(headString)) {
         gender = Gender.MALE;
@@ -523,7 +539,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         gender = Gender.FEMALE;
       }
     } else {
-      // Bergsma list
+      // Bergsma or user provided list
       if(gender == Gender.UNKNOWN)  {
         if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
           // Try to get gender of the named entity
@@ -531,28 +547,30 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
           List<CoreLabel> nerToks = nerTokens();
           for (CoreLabel t:nerToks) {
             String name = t.word().toLowerCase();
+            if(dict.maleWords.contains(name)) {
+              gender = Gender.MALE;
+              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  name + "\tspan:" + spanToString());
+              break;
+            }
+            else if(dict.femaleWords.contains(name))  {
+              gender = Gender.FEMALE;
+              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  name + "\tspan:" + spanToString());
+              break;
+            }
           }
         } else {
-          if(dict.neutralWords.contains(headString))   {
+          if(dict.maleWords.contains(headString)) {
+            gender = Gender.MALE;
+            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
+          }
+          else if(dict.femaleWords.contains(headString))  {
+            gender = Gender.FEMALE;
+            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
+          }
+          else if(dict.neutralWords.contains(headString))   {
             gender = Gender.NEUTRAL;
             SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
           }
-        }
-      }
-      if(genderNumberCount!=null && this.number!=Number.PLURAL){
-        double male = genderNumberCount[0];
-        double female = genderNumberCount[1];
-        double neutral = genderNumberCount[2];
-
-        if (male * 0.5 > female + neutral && male > 2) {
-          this.gender = Gender.MALE;
-          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
-        } else if (female * 0.5 > male + neutral && female > 2) {
-          this.gender = Gender.FEMALE;
-          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
-        } else if (neutral * 0.5 > male + female && neutral > 2) {
-          this.gender = Gender.NEUTRAL;
-          SieveCoreferenceSystem.logger.finer("[Gender number count] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
         }
       }
     }
@@ -589,6 +607,17 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
 
     if(mentionType != MentionType.PRONOMINAL) {
+      if(number == Number.UNKNOWN){
+        if(dict.singularWords.contains(headString)) {
+          number = Number.SINGULAR;
+          SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tSINGULAR:\t" + headString);
+        }
+        else if(dict.pluralWords.contains(headString))  {
+          number = Number.PLURAL;
+          SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tPLURAL:\t" + headString);
+        }
+      }
+
       final String enumerationPattern = "NP < (NP=tmp $.. (/,|CC/ $.. NP))";
 
       TregexPattern tgrepPattern = TregexPattern.compile(enumerationPattern);
