@@ -135,4 +135,6 @@ public class RNNOptions implements Serializable {
       return trainOptions.setOption(args, argIndex);
     }
   }
+
+  private static final long serialVersionUID = 1;
 }

@@ -33,13 +33,24 @@ public class RNNTrainOptions implements Serializable {
   }
 
   /** Regularization cost for the transform matrices and tensors */
-  public double regTransform = 0.15;
+  public double regTransform = 0.001;
   
   /** Regularization cost for the classification matrices */
   public double regClassification = 0.0001;
 
   /** Regularization cost for the word vectors */
-  public double regWordVector = 0.1;
+  public double regWordVector = 0.001;
+
+  /**
+   * The value to set the learning rate for each parameter when initializing adagrad.
+   */
+  public double initialAdagradWeight = 0.0;
+
+  /** 
+   * How many epochs between resets of the adagrad learning rates.
+   * Set to 0 to never reset.
+   */
+  public int adagradResetFrequency = 1;
 
   @Override
   public String toString() {
@@ -64,6 +75,8 @@ public class RNNTrainOptions implements Serializable {
     result.append("regTransform=" + regTransform + "\n");
     result.append("regClassification=" + regClassification + "\n");
     result.append("regWordVector=" + regWordVector + "\n");
+    result.append("initialAdagradWeight=" + initialAdagradWeight + "\n");
+    result.append("adagradResetFrequency=" + adagradResetFrequency + "\n");
     return result.toString();
   }
 
@@ -95,6 +108,12 @@ public class RNNTrainOptions implements Serializable {
     } else if (args[argIndex].equalsIgnoreCase("-regWordVector")) {
       regWordVector = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-initialAdagradWeight")) {
+      initialAdagradWeight = Double.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-adagradResetFrequency")) {
+      adagradResetFrequency = Integer.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-classWeights")) {
       String classWeightString = args[argIndex + 1];
       String[] pieces = classWeightString.split(",");
@@ -107,4 +126,6 @@ public class RNNTrainOptions implements Serializable {
       return argIndex;
     }
   }
+
+  private static final long serialVersionUID = 1;
 }
