@@ -85,6 +85,7 @@ public class ParserPanel extends JPanel {
 
   private static TreebankLanguagePack tlp;
   private String encoding = "UTF-8";
+  private boolean segmentWords = false;
 
   // one second in milliseconds
   private static final int ONE_SECOND = 1000;
@@ -303,11 +304,13 @@ public class ParserPanel extends JPanel {
         treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
         break;
       case UNTOKENIZED_CHINESE:
+        segmentWords = true;
         tlp = new ChineseTreebankLanguagePack();
         encoding = "UTF-8"; // we support that not GB18030 currently....
         setChineseFont();
         break;
       case TOKENIZED_CHINESE:
+        segmentWords = false;
         tlp = new ChineseTreebankLanguagePack();
         encoding = "UTF-8"; // we support that not GB18030 currently....
         setChineseFont();
