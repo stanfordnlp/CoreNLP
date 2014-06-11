@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
@@ -35,12 +34,14 @@ public class SentimentTraining {
       theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
     } 
 
-    model.vectorToParams(theta);    
+    model.vectorToParams(theta);
+    
   }
 
   public static void train(SentimentModel model, String modelPath, List<Tree> trainingTrees, List<Tree> devTrees) {
     Timing timing = new Timing();
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
+    long nextDebugCycle = model.op.trainOptions.debugOutputSeconds * 1000;
     int debugCycle = 0;
     double bestAccuracy = 0.0;
 
@@ -85,14 +86,12 @@ public class SentimentTraining {
           break;
         }
 
-        if (batch == 0 && epoch > 0 && epoch % model.op.trainOptions.debugOutputEpochs == 0) {
-          double score = 0.0;
-          if (devTrees != null) {
-            Evaluate eval = new Evaluate(model);
-            eval.eval(devTrees);
-            eval.printSummary();
-            score = eval.exactNodeAccuracy() * 100.0;
-          }
+        if (nextDebugCycle > 0 && totalElapsed > nextDebugCycle) {
+
+          Evaluate eval = new Evaluate(model);
+          eval.eval(devTrees);
+          eval.printSummary();
+          double score = eval.exactNodeAccuracy() * 100.0;
 
           // output an intermediate model
           if (modelPath != null) {
@@ -107,12 +106,16 @@ public class SentimentTraining {
             model.saveSerialized(tempPath);
           }
 
+          // TODO: output a summary of what's happened so far
+
           ++debugCycle;
+          nextDebugCycle = timing.report() + model.op.trainOptions.debugOutputSeconds * 1000;
         }
       }
       long totalElapsed = timing.report();
       
       if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
+        // no need to debug output, we're done now
         System.err.println("Max training time exceeded, exiting");
         break;
       }
@@ -133,8 +136,6 @@ public class SentimentTraining {
     boolean runGradientCheck = false;
     boolean runTraining = false;
 
-    boolean filterUnknown = false;
-
     String modelPath = null;
 
     for (int argIndex = 0; argIndex < args.length; ) {
@@ -153,9 +154,6 @@ public class SentimentTraining {
       } else if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];
         argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {
-        filterUnknown = true;
-        argIndex++;
       } else {
         int newArgIndex = op.setOption(args, argIndex);
         if (newArgIndex == argIndex) {
@@ -167,21 +165,7 @@ public class SentimentTraining {
 
     // read in the trees
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(trainPath);
-    System.err.println("Read in " + trainingTrees.size() + " training trees");
-    if (filterUnknown) {
-      trainingTrees = SentimentUtils.filterUnknownRoots(trainingTrees);
-      System.err.println("Filtered training trees: " + trainingTrees.size());
-    }
-
-    List<Tree> devTrees = null;
-    if (devPath != null) {
-      devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
-      System.err.println("Read in " + devTrees.size() + " dev trees");
-      if (filterUnknown) {
-        devTrees = SentimentUtils.filterUnknownRoots(devTrees);
-        System.err.println("Filtered dev trees: " + devTrees.size());
-      }
-    }
+    List<Tree> devTrees = SentimentUtils.readTreesWithGoldLabels(devPath);
 
     // TODO: binarize the trees, then collapse the unary chains.
     // Collapsed unary chains always have the label of the top node in
