@@ -91,7 +91,7 @@ public class TreeShapedStack<T> {
     } else if (size() == 1) {
       return data.toString();
     } else {
-      return data.toString() + ", " + previous.internalToString();
+      return previous.internalToString() + ", " + data.toString();
     }
   }
 
