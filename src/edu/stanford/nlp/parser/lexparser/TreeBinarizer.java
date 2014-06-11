@@ -127,8 +127,13 @@ public class TreeBinarizer implements TreeTransformer {
         if (tlp.isStartSymbol(topCat)) {
           return markovOutsideBinarizeLocalTree(t, head, headLoc, topCat, new LinkedList<Tree>(), true);
         }
-        String headStr = t.getChild(headLoc).label().value();
-        String subLabelStr = "@" + topCat + ": " + headStr + " ]";
+        String subLabelStr;
+        if (simpleLabels) {
+          subLabelStr = "@" + topCat;
+        } else {
+          String headStr = t.getChild(headLoc).label().value();
+          subLabelStr = "@" + topCat + ": " + headStr + " ]";
+        }
         Label subLabel = new CategoryWordTag(subLabelStr, word, tag);
         Tree subTree = tf.newTreeNode(subLabel, t.getChildrenAsList());
         newChildren.add(markovOutsideBinarizeLocalTree(subTree, head, headLoc, topCat, new LinkedList<Tree>(), true));
@@ -145,9 +150,14 @@ public class TreeBinarizer implements TreeTransformer {
         ll.removeLast();
       }
       // generate a right
-      String headStr = t.getChild(headLoc).label().value();
-      String rightStr = (len > markovOrder - 1 ? "... " : "") + join(ll);
-      String subLabelStr = "@" + topCat + ": " + headStr + " " + rightStr;
+      String subLabelStr;
+      if (simpleLabels) {
+        subLabelStr = "@" + topCat;
+      } else {
+        String headStr = t.getChild(headLoc).label().value();
+        String rightStr = (len > markovOrder - 1 ? "... " : "") + join(ll);
+        subLabelStr = "@" + topCat + ": " + headStr + " " + rightStr;
+      }
       Label subLabel = new CategoryWordTag(subLabelStr, word, tag);
       Tree subTree = tf.newTreeNode(subLabel, t.getChildrenAsList().subList(0, len - 1));
       newChildren.add(markovOutsideBinarizeLocalTree(subTree, head, headLoc, topCat, ll, true));
@@ -160,9 +170,14 @@ public class TreeBinarizer implements TreeTransformer {
         ll.removeFirst();
       }
       // generate a left
-      String headStr = t.getChild(headLoc).label().value();
-      String leftStr = join(ll) + (headLoc > markovOrder - 1 ? " ..." : "");
-      String subLabelStr = "@" + topCat + ": " + leftStr + " " + headStr + " ]";
+      String subLabelStr;
+      if (simpleLabels) {
+        subLabelStr = "@" + topCat;
+      } else {
+        String headStr = t.getChild(headLoc).label().value();
+        String leftStr = join(ll) + (headLoc > markovOrder - 1 ? " ..." : "");
+        subLabelStr = "@" + topCat + ": " + leftStr + " " + headStr + " ]";
+      }
       Label subLabel = new CategoryWordTag(subLabelStr, word, tag);
       Tree subTree = tf.newTreeNode(subLabel, t.getChildrenAsList().subList(1, t.numChildren()));
       newChildren.add(t.getChild(0));
@@ -432,7 +447,12 @@ public class TreeBinarizer implements TreeTransformer {
       // eat a left word
       Tree leftChild = t.getChild(leftProcessed);
       String childLeftStr = leftStr + " " + leftChild.label().value();
-      String childLabelStr = "@" + finalCat + " :" + childLeftStr + " ..." + rightStr;
+      String childLabelStr;
+      if (simpleLabels) {
+        childLabelStr = "@" + finalCat;
+      } else {
+        childLabelStr = "@" + finalCat + " :" + childLeftStr + " ..." + rightStr;
+      }
       Tree rightChild = outsideBinarizeLocalTree(t, childLabelStr, finalCat, headNum, head, leftProcessed + 1, childLeftStr, rightProcessed, rightStr);
       newChildren.add(leftChild);
       newChildren.add(rightChild);
@@ -441,7 +461,12 @@ public class TreeBinarizer implements TreeTransformer {
       // eat a right word
       Tree rightChild = t.getChild(t.numChildren() - rightProcessed - 1);
       String childRightStr = " " + rightChild.label().value() + rightStr;
-      String childLabelStr = "@" + finalCat + " :" + leftStr + " ..." + childRightStr;
+      String childLabelStr;
+      if (simpleLabels) {
+        childLabelStr = "@" + finalCat;
+      } else {
+        childLabelStr = "@" + finalCat + " :" + leftStr + " ..." + childRightStr;
+      }
       Tree leftChild = outsideBinarizeLocalTree(t, childLabelStr, finalCat, headNum, head, leftProcessed, leftStr, rightProcessed + 1, childRightStr);
       newChildren.add(leftChild);
       newChildren.add(rightChild);
