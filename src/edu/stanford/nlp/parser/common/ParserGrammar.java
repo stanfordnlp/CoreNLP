@@ -5,9 +5,12 @@ import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Timing;
 // TODO: it would be nice to move these to common, but that would
 // wreck all existing models
@@ -27,8 +30,13 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
  *
  * @author John Bauer
  */
-public abstract class ParserGrammar {
+public abstract class ParserGrammar implements Function<List<? extends HasWord>, Tree> {
   public abstract ParserQuery parserQuery();
+
+  /**
+   * A convenience method which wraps the ParserQuery and returns a Tree
+   */
+  public abstract Tree apply(List<? extends HasWord> words);
 
   /**
    * Returns a list of extra Eval objects to use when scoring the parser.
