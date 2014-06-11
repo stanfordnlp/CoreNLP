@@ -3,6 +3,8 @@ package edu.stanford.nlp.patterns.surface;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
@@ -28,11 +30,11 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   protected String[] nextContext;
   // String prevContextStr = "", nextContextStr = "";
   protected PatternToken token;
-  protected String[] originalPrev;
-  protected String[] originalNext;
+  // protected String[] originalPrev;
+  // protected String[] originalNext;
   // protected String originalPrevStr = "";
   // protected String originalNextStr = "";
-  //protected String toString;
+  // protected String toString;
   protected int hashcode;
   protected Genre genre;
 
@@ -46,7 +48,8 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   public static boolean insertModifierWildcard = false;
 
-  public SurfacePattern(String[] prevContext, PatternToken token, String[] nextContext, String[] originalPrev, String[] originalNext, Genre genre) {
+  public SurfacePattern(String[] prevContext, PatternToken token, String[] nextContext, Genre genre){
+    // String[] originalPrev, String[] originalNext, Genre genre) {
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
@@ -57,11 +60,11 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     // nextContextStr = StringUtils.join(nextContext, " ");
 
     this.setToken(token);
-    this.setOriginalPrev(originalPrev);
-    this.setOriginalNext(originalNext);
+    // this.setOriginalPrev(originalPrev);
+    // this.setOriginalNext(originalNext);
     this.genre = genre;
 
-    //toString = toString(null);
+    // toString = toString(null);
     hashcode = toString().hashCode();
   }
 
@@ -133,25 +136,25 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   public int equalContext(SurfacePattern p) {
     if (p.equals(this))
       return 0;
-    
+
     if (Arrays.equals(this.prevContext, p.getPrevContext()) && Arrays.equals(this.nextContext, p.getNextContext())) {
       int this_restriction = 0, p_restriction = 0;
-      
+
       if (this.getToken().useTag)
         this_restriction++;
       if (p.getToken().useTag)
         p_restriction++;
-      
+
       if (this.getToken().useNER)
         this_restriction++;
       if (p.getToken().useNER)
         p_restriction++;
-      
+
       if (this.getToken().useTargetParserParentRestriction)
         this_restriction++;
       if (p.getToken().useTargetParserParentRestriction)
         p_restriction++;
-      
+
       this_restriction -= this.getToken().numWordsCompound;
       p_restriction -= this.getToken().numWordsCompound;
       return this_restriction - p_restriction;
@@ -164,23 +167,23 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     if (!(b instanceof SurfacePattern))
       return false;
     SurfacePattern p = (SurfacePattern) b;
-    //if (toString().equals(p.toString()))
-    
+    // if (toString().equals(p.toString()))
+
     if (!token.equals(p.token))
-        return false;
-    
-    if((this.prevContext == null && p.prevContext != null)||(this.prevContext != null && p.prevContext == null))
-      return false;
-    
-    if((this.nextContext == null && p.nextContext != null)||(this.nextContext != null && p.nextContext == null))
-      return false;
-    
-    if(this.prevContext!=null && !Arrays.equals(this.prevContext, p.prevContext))
       return false;
 
-    if(this.nextContext!=null && !Arrays.equals(this.nextContext, p.nextContext))
+    if ((this.prevContext == null && p.prevContext != null) || (this.prevContext != null && p.prevContext == null))
       return false;
-    
+
+    if ((this.nextContext == null && p.nextContext != null) || (this.nextContext != null && p.nextContext == null))
+      return false;
+
+    if (this.prevContext != null && !Arrays.equals(this.prevContext, p.prevContext))
+      return false;
+
+    if (this.nextContext != null && !Arrays.equals(this.nextContext, p.nextContext))
+      return false;
+
     return true;
   }
 
@@ -199,8 +202,55 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     return getPrevContextStr() + "##" + getToken().toStringToWrite() + "##" + getNextContextStr();
   }
 
+  public String[] getSimplerTokensPrev() {
+    return getSimplerTokens(prevContext);
+  }
+
+  public String[] getSimplerTokensNext() {
+    return getSimplerTokens(nextContext);
+  }
+
+  Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)" + Pattern.quote("\\E")+"/\\s*" + Pattern.quote("}")
+      + "\\s*" + Pattern.quote("]"));
+  Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
+      + Pattern.quote("]"));
+
+  public String[] getSimplerTokens(String[] p) {
+    if (p == null)
+      return null;
+
+    String[] sim = new String[p.length];
+    for (int i = 0; i < p.length; i++) {
+      p[i] = p[i].trim();
+      Matcher m = p1.matcher(p[i]);
+      if (m.matches()) {
+        sim[i] = m.group(2);
+      } else {
+        Matcher m2 = p2.matcher(p[i]);
+        if (m2.matches()) {
+          sim[i] = m2.group(2);
+        } else if(p[i].startsWith("$FILLER"))
+          sim[i] = "FW";
+        else if(p[i].startsWith("$STOP"))
+          sim[i] = "SW";
+        else
+          throw new RuntimeException("Cannot understand " + p[i]);
+      } 
+    }
+    return sim;
+
+  }
+
   public String toStringSimple() {
-    return getOriginalPrevStr() + " <b>" + getToken().toStringToWrite() + "</b> " + getOriginalNextStr();
+
+    String[] simprev = getSimplerTokensPrev();
+    String[] simnext = getSimplerTokensNext();
+    String prevstr = simprev == null ? "" : StringUtils.join(simprev, " ");
+    String nextstr = simnext == null ? "" : StringUtils.join(simnext, " ");
+
+    String sim =  prevstr.trim() + " <b>" + getToken().toStringToWrite() + "</b> " + nextstr.trim();
+    System.out.println("simple is " + sim);
+    return sim;
   }
 
   public String[] getPrevContext() {
@@ -227,51 +277,52 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     this.token = token;
   }
 
-  private String getOriginalPrevStr() {
-    String originalPrevStr = "";
-    if (originalPrev != null)
-      originalPrevStr = StringUtils.join(originalPrev, " ");
-
-    return originalPrevStr;
-  }
+  // private String getOriginalPrevStr() {
+  // String originalPrevStr = "";
+  // if (originalPrev != null)
+  // originalPrevStr = StringUtils.join(originalPrev, " ");
+  //
+  // return originalPrevStr;
+  // }
 
   // public void setOriginalPrevStr(String originalPrevStr) {
   // this.originalPrevStr = originalPrevStr;
   // }
 
-  public String getOriginalNextStr() {
-    String originalNextStr = "";
-    if (originalNext != null)
-      originalNextStr = StringUtils.join(originalNext, " ");
-    return originalNextStr;
-  }
+  // public String getOriginalNextStr() {
+  // String originalNextStr = "";
+  // if (originalNext != null)
+  // originalNextStr = StringUtils.join(originalNext, " ");
+  // return originalNextStr;
+  // }
 
   // public void setOriginalNextStr(String originalNextStr) {
   // this.originalNextStr = originalNextStr;
   // }
 
-  public String[] getOriginalPrev() {
-    return originalPrev;
-  }
-
-  public void setOriginalPrev(String[] originalPrev) {
-    this.originalPrev = originalPrev;
-  }
-
-  public String[] getOriginalNext() {
-    return originalNext;
-  }
-
-  public void setOriginalNext(String[] originalNext) {
-    this.originalNext = originalNext;
-  }
+  // public String[] getOriginalPrev() {
+  // return originalPrev;
+  // }
+  //
+  // public void setOriginalPrev(String[] originalPrev) {
+  // this.originalPrev = originalPrev;
+  // }
+  //
+  // public String[] getOriginalNext() {
+  // return originalNext;
+  // }
+  //
+  // public void setOriginalNext(String[] originalNext) {
+  // this.originalNext = originalNext;
+  // }
 
   public static boolean sameGenre(SurfacePattern p1, SurfacePattern p2) {
     return p1.getGenre().equals(p2.getGenre());
   }
 
   /**
-   * True if array1 contains array2. Also true if both array1 and array2 are null
+   * True if array1 contains array2. Also true if both array1 and array2 are
+   * null
    * 
    * @param array1
    * @param array2
@@ -282,8 +333,8 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     if ((array1 == null && array2 == null)) {
       return true;
     }
-    
-    //only one of them is null
+
+    // only one of them is null
     if (array1 == null || array2 == null) {
       return false;
     }
@@ -296,7 +347,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
       if (array1[i].equals(array2[0])) {
         boolean found = true;
         for (int j = 0; j < array2.length; j++) {
-          if (array1.length <= i + j || ! array2[j].equals(array1[i + j])) {
+          if (array1.length <= i + j || !array2[j].equals(array1[i + j])) {
             found = false;
             break;
           }
@@ -312,21 +363,22 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   /**
    * True p1 subsumes p2 (p1 has longer context than p2)
+   * 
    * @param p1
    * @param p2
    * @return
    */
-  public static boolean subsumes(SurfacePattern p1, SurfacePattern p2){
-    
+  public static boolean subsumes(SurfacePattern p1, SurfacePattern p2) {
+
     if (subsumesArray(p1.getNextContext(), p2.getNextContext()) && subsumesArray(p1.getPrevContext(), p2.getPrevContext())) {
       return true;
     }
     return false;
   }
-  
+
   // true if one pattern subsumes another
   public static boolean subsumesEitherWay(SurfacePattern p1, SurfacePattern p2) {
-    if(subsumes(p1, p2) || subsumes(p2, p1)){
+    if (subsumes(p1, p2) || subsumes(p2, p1)) {
       return true;
     }
     return false;
@@ -344,15 +396,15 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   @Override
   public int compareTo(SurfacePattern o) {
     int numthis = 0;
-    numthis += this.prevContext != null? this.prevContext.length : 0;
-    numthis += this.nextContext != null? this.nextContext.length : 0;
-    int numthat =0;
-    numthat += o.prevContext != null? o.prevContext.length : 0;
-    numthat += o.nextContext != null? o.nextContext.length : 0;
-    
-    if(numthis > numthat){
+    numthis += this.prevContext != null ? this.prevContext.length : 0;
+    numthis += this.nextContext != null ? this.nextContext.length : 0;
+    int numthat = 0;
+    numthat += o.prevContext != null ? o.prevContext.length : 0;
+    numthat += o.nextContext != null ? o.nextContext.length : 0;
+
+    if (numthis > numthat) {
       return 1;
-    } else if(numthis < numthat){
+    } else if (numthis < numthat) {
       return -1;
     } else
       return this.toString().compareTo(o.toString());

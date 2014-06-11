@@ -125,7 +125,7 @@ public class InvertedIndexByTokens implements Serializable{
     Set<String> relevantWords = new HashSet<String>();
     for (SurfacePattern p : pats) {
       Set<String> relwordsThisPat = new HashSet<String>();
-      String[] next = p.getOriginalNext();
+      String[] next = p.getSimplerTokensNext();
       if (next != null)
         for (String s : next) {
           s = s.trim();
@@ -134,7 +134,7 @@ public class InvertedIndexByTokens implements Serializable{
           if (!s.isEmpty())
             relwordsThisPat.add(s);
         }
-      String[] prev = p.getOriginalPrev();
+      String[] prev = p.getSimplerTokensPrev();
       if (prev != null)
         for (String s : prev) {
           s = s.trim();

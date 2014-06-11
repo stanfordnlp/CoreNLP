@@ -388,12 +388,12 @@ public class CreatePatterns {
           if (previousTokens.size() >= minWindow4Pattern) {
             if (twithoutPOS != null) {
               SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
-                  null, prevOriginalArr, null, Genre.PREV);
+                  null, Genre.PREV);
               prevpatterns.add(pat);
             }
             if (twithPOS != null) {
               SurfacePattern patPOS = new SurfacePattern(prevContext, twithPOS,
-                  null, prevOriginalArr, null, Genre.PREV);
+                  null, Genre.PREV);
               prevpatterns.add(patPOS);
             }
           }
@@ -435,12 +435,12 @@ public class CreatePatterns {
           nextOriginalArr =  nextOriginal.toArray(new String[0]);
           if (twithoutPOS != null) {
             SurfacePattern pat = new SurfacePattern(null, twithoutPOS,
-                nextContext, null,nextOriginalArr, Genre.NEXT);
+                nextContext, Genre.NEXT);
             nextpatterns.add(pat);
           }
           if (twithPOS != null) {
             SurfacePattern patPOS = new SurfacePattern(null, twithPOS,
-                nextContext, null, nextOriginalArr, Genre.NEXT);
+                nextContext, Genre.NEXT);
             nextpatterns.add(patPOS);
           }
 
@@ -457,13 +457,13 @@ public class CreatePatterns {
 
           if (twithoutPOS != null) {
             SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
-                nextContext, prevOriginalArr, nextOriginalArr, Genre.PREVNEXT);
+                nextContext, Genre.PREVNEXT);
             prevnextpatterns.add(pat);
           }
 
           if (twithPOS != null) {
             SurfacePattern patPOS = new SurfacePattern(prevContext, twithPOS,
-                nextContext, prevOriginalArr, nextOriginalArr, Genre.PREVNEXT);
+                nextContext, Genre.PREVNEXT);
             prevnextpatterns.add(patPOS);
           }
         }

@@ -248,8 +248,8 @@ public class ScorePhrases {
 
     for(Entry<SurfacePattern, Double> en: patterns.entrySet()){
       SurfacePattern p = en.getKey();
-      String[] n = p.getOriginalNext();
-      String[] pr = p.getOriginalPrev();
+      String[] n = p.getSimplerTokensNext();
+      String[] pr = p.getSimplerTokensPrev();
       boolean rest = false;
       if(n!=null){
         for(String e: n){
