@@ -29,7 +29,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   private static final long serialVersionUID = -1866362375001969402L;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = System.getProperty("EnglishGrammaticalStructure", null) != null;
 
   /**
    * Construct a new <code>GrammaticalStructure</code> from an existing parse
