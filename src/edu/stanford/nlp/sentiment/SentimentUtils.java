@@ -5,6 +5,8 @@ import java.util.List;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -46,12 +48,19 @@ public class SentimentUtils {
     return trees;
   }
 
+  static final Filter<Tree> UNKNOWN_ROOT_FILTER = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      int gold = RNNCoreAnnotations.getGoldClass(tree);
+      return gold != -1;
+    }
+  };
+
+  public static List<Tree> filterUnknownRoots(List<Tree> trees) {
+    return CollectionUtils.filterAsList(trees, UNKNOWN_ROOT_FILTER);
+  }
+
   public static String sentimentString(SentimentModel model, int sentiment) {
     String[] classNames = model.op.classNames;
-    if (classNames == null) {
-      // TODO: remove if we reserialize all existing models with the default
-      classNames = RNNOptions.DEFAULT_CLASS_NAMES;
-    }
     if (sentiment < 0 || sentiment > classNames.length) {
       return "Unknown sentiment label " + sentiment;
     }
