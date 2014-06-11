@@ -85,7 +85,7 @@ public class AbishekFrenchHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("MWET", new String[][] {{"left", "ET", "N"}, {"left"}});
 
     //TODO: wsg2011: For phrasal nodes that lacked a label.
-    nonTerminalInfo.put(FrenchTreeReader.MISSING_PHRASAL, new String[][]{{"left"}});
+    nonTerminalInfo.put(FrenchXMLTreeReader.MISSING_PHRASAL, new String[][]{{"left"}});
 
   }
 

@@ -17,6 +17,6 @@ public class FrenchXMLTreeReaderFactory implements TreeReaderFactory, Serializab
   private static final long serialVersionUID = 578942679136874L;
 
   public TreeReader newTreeReader(Reader in) {
-    return new FrenchTreeReader(in);
+    return new FrenchXMLTreeReader(in);
   }
 }
