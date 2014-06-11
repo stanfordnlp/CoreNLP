@@ -76,11 +76,30 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After DateTreeTransformer:        " + fixedDates);
     }
-    Tree ret = removeXOverX(fixedDates);
+    Tree removedXX = removeXOverX(fixedDates);
     if (VERBOSE) {
-      System.err.println("After removeXoverX:               " + ret);
+      System.err.println("After removeXoverX:               " + removedXX);
     }
-    return ret;
+    Tree conjp = combineConjp(removedXX);
+    if (VERBOSE) {
+      System.err.println("After combineConjp:               " + conjp);
+    }
+    return conjp;
+  }
+
+  private static TregexPattern findFlatConjpTregex =
+    // TODO: add and yet, and so, but then again, etc
+    TregexPattern.compile("/^S/ < (/^S/ $++ (CC=start $+ (RB $+ /^S/) " + 
+                          "(< but $+ (RB=end < then)) ))"); // TODO: what should be the head of "but then"?
+
+  private static TsurgeonPattern addConjpTsurgeon =
+    Tsurgeon.parseOperation("createSubtree CONJP start end");
+
+  public Tree combineConjp(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(findFlatConjpTregex, addConjpTsurgeon, t);
   }
 
   // Matches to be questions if the question starts with WHNP, such as
