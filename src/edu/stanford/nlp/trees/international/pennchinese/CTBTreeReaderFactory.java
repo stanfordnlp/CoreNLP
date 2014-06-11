@@ -43,5 +43,4 @@ public class CTBTreeReaderFactory implements TreeReaderFactory {
       return new PennTreeReader(in, new LabeledScoredTreeFactory(), tn, new CHTBTokenizer(in));
     }
   }
-
 }
