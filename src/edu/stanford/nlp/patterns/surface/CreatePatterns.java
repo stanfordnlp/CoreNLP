@@ -100,7 +100,7 @@ public class CreatePatterns {
   public boolean useStopWordsBeforeTerm = false;
 
 
-  String channelNameLogger = "createpatterns";
+  //String channelNameLogger = "createpatterns";
 
   ConstantsAndVariables constVars;
 
@@ -210,14 +210,14 @@ public class CreatePatterns {
       if (addPatWithoutPOS) {
         twithoutPOS = new PatternToken(tag, false,
             constVars.numWordsCompound > 1, constVars.numWordsCompound,
-            nerTag, constVars.useTargetNERRestriction);
+            nerTag, constVars.useTargetNERRestriction, constVars.useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 
       PatternToken twithPOS = null;
       if (usePOS4Pattern) {
         twithPOS = new PatternToken(tag, true,
             constVars.numWordsCompound > 1, constVars.numWordsCompound,
-            nerTag, constVars.useTargetNERRestriction);
+            nerTag, constVars.useTargetNERRestriction, constVars.useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
       
       if (usePreviousContext) {
@@ -512,19 +512,26 @@ public class CreatePatterns {
     if (constVars.numThreads == 1)
       num = keyset.size();
     else
-      num = keyset.size() / (constVars.numThreads - 1);
+      num = keyset.size() / (constVars.numThreads);
     ExecutorService executor = Executors
         .newFixedThreadPool(constVars.numThreads);
-    Redwood.log(Redwood.DBG, channelNameLogger,
-        "keyset size is " + keyset.size());
+    
+    Redwood.log(Redwood.DBG, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
     List<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
-      Redwood.log(Redwood.FORCE, channelNameLogger, "assigning from " + i * num
+      
+      int from = i * num;
+      int to = -1;
+      if(i == constVars.numThreads -1)
+        to = keyset.size();
+      else
+       to =Math.min(keyset.size(), (i + 1) * num);
+      
+      Redwood.log(Redwood.DBG, "assigning from " + i * num
           + " till " + Math.min(keyset.size(), (i + 1) * num));
 
       Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> task = null;
-      List<String> ids = keyset.subList(i * num,
-          Math.min(keyset.size(), (i + 1) * num));
+      List<String> ids = keyset.subList(from ,to);
       task = new CreatePatternsThread(label, sents, ids);
 
       Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> submit = executor
@@ -538,6 +545,8 @@ public class CreatePatterns {
       patternsForEachToken.putAll(future.get());
     }
     executor.shutdown();
+    Redwood.log(Redwood.DBG, "Done computing all patterns");
+    
     return patternsForEachToken;
   }
 
