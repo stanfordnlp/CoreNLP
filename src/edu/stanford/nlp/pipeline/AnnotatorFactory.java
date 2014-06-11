@@ -38,4 +38,15 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
    * the same annotator type but with different parameters.
    */
   public abstract String signature();
+
+  static String baseSignature(Properties props, String name) {
+    String prefix = name + ".";
+    StringBuilder signature = new StringBuilder();
+    for (String key : props.stringPropertyNames()) {
+      if (key.startsWith(prefix)) {
+        signature.append(key + "=" + props.getProperty(key) + "\n");
+      }
+    }
+    return signature.toString();
+  }
 }
