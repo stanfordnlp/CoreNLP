@@ -907,7 +907,7 @@ public class EnglishGrammaticalRelations {
           // clauses with no relativizer (it doesn't distinguish
           // whether actually gapped).
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
-          "@NP|WHNP <# NP|WHNP|NML|DT|S < RRC=target",
+          "@NP|WHNP < RRC=target <# NP|WHNP|NML|DT|S",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
         });
   public static class RelativeClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
@@ -1445,7 +1445,7 @@ public class EnglishGrammaticalRelations {
         PossessionModifierGRAnnotation.class, MODIFIER, "(?:WH)?(NP|ADJP|INTJ|PRN|NAC|NX|NML)(?:-.*)?", tregexCompiler,
         new String[] {
           // possessive pronouns like "my", "whose"; [cdm 2010: Simplified; extra checks seemed unneeded (INTJ for "oh my god", though maybe it should really have internal NP....)
-          "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-.*)?$/ < /^(?:W|PR)P\\$$/=target",
+          "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-.*)?$/ < /^(?:WP\\$|PRP\\$)$/=target",
           // todo: possessive pronoun under ADJP needs more work for one case of (ADJP his or her own)
           // basic NP possessive: we want to allow little conjunctions in head noun (NP (NP ... POS) NN CC NN) but not falsely match when there are conjoined NPs.  See tests.
           "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
