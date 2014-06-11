@@ -356,13 +356,10 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    *  @param root The root of the Tree
    *  @return A Collection of dependent nodes to which t bears this GR
    */
-  public Collection<Tree> getRelatedNodes(Tree t, Tree root, HeadFinder headFinder) {
+  public Collection<Tree> getRelatedNodes(Tree t, Tree root) {
     Set<Tree> nodeList = new ArraySet<Tree>();
     for (TregexPattern p : targetPatterns) {    // cdm: I deleted: && nodeList.isEmpty()
-      // Initialize the TregexMatcher with the HeadFinder so that we
-      // can use the same HeadFinder through the entire process of
-      // building the dependencies
-      TregexMatcher m = p.matcher(root, headFinder);
+      TregexMatcher m = p.matcher(root);
       while (m.findAt(t)) {
         nodeList.add(m.getNode("target"));
         if (DEBUG) {
