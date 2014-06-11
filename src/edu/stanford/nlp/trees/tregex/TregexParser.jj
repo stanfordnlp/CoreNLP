@@ -76,15 +76,29 @@ TOKEN:
 // first expr is return val- passed up the tree after a production
 TregexPattern Root() : {
   TregexPattern node;
+  List<TregexPattern> nodes = Generics.newArrayList();
   // a local variable
 } {
-  ( node = SubNode(Relation.ROOT) "\n" )
   // RHS can be preceded with local variable "=" which means
   // this lv gets the return val of the production
-  { return node; }
-  // a code block can be placed after any bracketed expression
-  // it will be executed after that expression is matched
-  // that's where we have to return something if the production isn't void
+  ( ( node = SubNode(Relation.ROOT) ) 
+    // a code block can be placed after any bracketed expression
+    // it will be executed after that expression is matched
+    // that's where we have to return something if the production isn't void
+    {
+      nodes.add(node);
+    }
+    ( LOOKAHEAD(2) "|" node = SubNode(Relation.ROOT) {
+      nodes.add(node);
+    } )* )
+  ( "\n" )
+  { 
+    if (nodes.size() == 1) {
+      return nodes.get(0);
+    } else {
+      return new CoordinationPattern(nodes, false);
+    }
+  }
 }
 
 // passing arguments down the tree - in this case the relation that
@@ -197,7 +211,7 @@ TregexPattern ChildrenDisj() : {
   ( ( child = ChildrenConj() ) {
       children.add(child);
       allKnownVariables.addAll(knownVariables); }
-    ( { knownVariables = Generics.newHashSet(originalKnownVariables); }
+    ( LOOKAHEAD(2) { knownVariables = Generics.newHashSet(originalKnownVariables); }
       ( "|" child = ChildrenConj() ) {
       children.add(child);
       allKnownVariables.addAll(knownVariables); } )* )
@@ -234,7 +248,7 @@ TregexPattern ModChild() : {
     | ( "!"
         { startUnderNeg = underNegation;
           underNegation = true; }
-        child = Child()
+        child = ModChild()
           { underNegation = startUnderNeg; }
       )
       { child.negate(); }
@@ -246,6 +260,7 @@ TregexPattern Child() : {
   TregexPattern child;
 } {
   ( "[" child = ChildrenDisj() "]"
+    | "(" child = ChildrenDisj() ")"
     | child = Relation() )
   { return child; }
 }
@@ -259,6 +274,7 @@ TregexPattern Relation() : {
 } {
   ( ( t = <RELATION> ( numArg = <NUMBER> )?
       | t = <REL_W_STR_ARG> ( "(" ( negation = "!" )? ( cat = "@" )? ( strArg = <REGEX> | strArg = <IDENTIFIER> | strArg = <BLANK> ) ")"
+                              | "[" ( negation = "!" )? ( cat = "@" )? ( strArg = <REGEX> | strArg = <IDENTIFIER> | strArg = <BLANK> ) "]"
                               | ( negation = "!" )? strArg = <REGEX> ) )
     { if (strArg != null) {
         String negStr = negation == null ? "": "!";
