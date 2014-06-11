@@ -751,10 +751,10 @@ public class Rules {
   }
 
   /**
-   * Given the name of a speaker, returns the coref cluster id it belows to (-1 if no cluster)
-   * @param document
-   * @param speakerString
-   * @return
+   * Given the name of a speaker, returns the coref cluster id it belongs to (-1 if no cluster)
+   * @param document The document to search in
+   * @param speakerString The name to search for
+   * @return cluster id 
    */
   public static int getSpeakerClusterId(Document document, String speakerString) {
     int speakerClusterId = -1;

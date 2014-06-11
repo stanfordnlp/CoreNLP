@@ -25,14 +25,16 @@ import java.util.Properties;
  */
 public class CoordinationTransformer implements TreeTransformer {
 
-  private static final boolean VERBOSE = false;
+  private static final boolean VERBOSE = System.getProperty("CoordinationTransformer", null) != null;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
   private final TreeTransformer qp = new QPTreeTransformer();         //to restructure the QP constituents
   private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns
 
+  private final HeadFinder headFinder;
 
   // default constructor
-  public CoordinationTransformer() {
+  public CoordinationTransformer(HeadFinder hf) {
+    this.headFinder = hf;
   }
 
   /**
@@ -56,35 +58,127 @@ public class CoordinationTransformer implements TreeTransformer {
     }
     Tree tt = UCPtransform(tx);
     if (VERBOSE) {
-      System.err.println("After UCPTransformer:             " + t);
+      System.err.println("After UCPTransformer:             " + tt);
     }
     Tree ttt = CCtransform(tt);
     if (VERBOSE) {
-      System.err.println("After CCTransformer:              " + t);
+      System.err.println("After CCTransformer:              " + ttt);
     }
     Tree tttt = qp.transformTree(ttt);
     if (VERBOSE) {
-      System.err.println("After QPTreeTransformer:          " + t);
+      System.err.println("After QPTreeTransformer:          " + tttt);
     }
-    Tree ret = dates.transformTree(tttt);
+    Tree flatSQ = SQflatten(tttt);
     if (VERBOSE) {
-      System.err.println("After DateTreeTransformer:        " + t);
+      System.err.println("After SQ flattening:              " + flatSQ);
     }
-    return ret;
+    Tree fixedDates = dates.transformTree(flatSQ);
+    if (VERBOSE) {
+      System.err.println("After DateTreeTransformer:        " + fixedDates);
+    }
+    Tree removedXX = removeXOverX(fixedDates);
+    if (VERBOSE) {
+      System.err.println("After removeXoverX:               " + removedXX);
+    }
+    Tree conjp = combineConjp(removedXX);
+    if (VERBOSE) {
+      System.err.println("After combineConjp:               " + conjp);
+    }
+    Tree movedRB = moveRB(conjp);
+    if (VERBOSE) {
+      System.err.println("After moveRB:                     " + movedRB);
+    }
+    return movedRB;
   }
 
+  private static TregexPattern findFlatConjpTregex =
+    // TODO: add more patterns, perhaps ignore case
+    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " + 
+                          "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
+                          "  (< and $+ (RB=end < so)) | " + 
+                          "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
+
+  private static TsurgeonPattern addConjpTsurgeon =
+    Tsurgeon.parseOperation("createSubtree CONJP start end");
+
+  public Tree combineConjp(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(findFlatConjpTregex, addConjpTsurgeon, t);
+  }
+
+  private static TregexPattern moveRBTregex = 
+    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^([,]|CC|CONJP)$/ $+ (RB=adv $+ /^(S|PP|VP)/=dest [ < not | < then ] ))) ");
+
+  private static TsurgeonPattern moveRBTsurgeon =
+    Tsurgeon.parseOperation("move adv >0 dest");
+
+  public Tree moveRB(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(moveRBTregex, moveRBTsurgeon, t);
+  }
+
+  // Matches to be questions if the question starts with WHNP, such as
+  // Who, What, if there is an SQ after the WH question.
+  //
+  // TODO: maybe we want to catch more complicated tree structures
+  // with something in between the WH and the actual question.
+  private static TregexPattern flattenSQTregex = 
+    TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " + 
+                          // match against "is running" if the verb is under just a VBG
+                          " !< (/^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
+                          // match against "is running" if the verb is under a VP - VBG
+                          " !< (/^V/ < /^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
+                          // match against "What is on the test?"
+                          " !< (PP $- =verb) " + 
+                          // match against "is there"
+                          " !<, (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ (NP < (EX < there)))))");
+
+  private static TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
+  
+  /**
+   * Removes the SQ structure under a WHNP question, such as "Who am I
+   * to judge?".  We do this so that it is easier to pick out the head
+   * and then easier to connect that head to all of the other words in
+   * the question in this situation.  In the specific case of making
+   * the copula head, we don't do this so that the existing headfinder
+   * code can easily find the "am" or other copula verb.
+   */
+  public Tree SQflatten(Tree t) {
+    if (headFinder != null && (headFinder instanceof CopulaHeadFinder)) {
+      if (((CopulaHeadFinder) headFinder).makesCopulaHead()) {
+        return t;
+      }
+    }
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
+  }
+
+  private static TregexPattern removeXOverXTregex = 
+    TregexPattern.compile("__=repeat <: (~repeat < __)");
+
+  private static TsurgeonPattern removeXOverXTsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
+
+  public static Tree removeXOverX(Tree t) {
+    return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);    
+  }
 
   private static final TregexPattern[][] matchPatterns = {
     {
       // UCP (JJ ...) -> ADJP
-      TregexPattern.safeCompile("/^UCP/=ucp <, /^JJ|ADJP/", true),
+      TregexPattern.compile("/^UCP/=ucp <, /^JJ|ADJP/"),
       // UCP (DT JJ ...) -> ADJP
-      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)", true)
+      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)")
     },
     {
       // UCP (N ...) -> NP
-      TregexPattern.safeCompile("/^UCP/=ucp <, /^N/", true),
-      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^N/)", true)
+      TregexPattern.compile("/^UCP/=ucp <, /^N/"),
+      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^N/)")
     }
   };
 
@@ -465,7 +559,7 @@ public class CoordinationTransformer implements TreeTransformer {
 
   public static void main(String[] args) {
 
-    CoordinationTransformer transformer = new CoordinationTransformer();
+    CoordinationTransformer transformer = new CoordinationTransformer(null);
     Treebank tb = new MemoryTreebank();
     Properties props = StringUtils.argsToProperties(args);
     String treeFileName = props.getProperty("treeFile");
