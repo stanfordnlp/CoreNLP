@@ -53,6 +53,9 @@ public class ScorePhrases {
 
   Map<String, Boolean> writtenInJustification = new HashMap<String, Boolean>();
 
+  @Option(name = "outDir")
+  String outDir = null;
+
   ConstantsAndVariables constVars = null;
 
   @Option(name = "phraseScorerClass")
@@ -361,9 +364,8 @@ public class ScorePhrases {
               + Counters.toSortedString(finalwords, finalwords.size(),
                   "%1$s:%2$.2f", "\t"));
 
-      if (constVars.outDir != null && !constVars.outDir.isEmpty()) {
-        String outputdir = constVars.outDir + "/" + identifier +"/"+ label;
-        IOUtils.ensureDir(new File(outputdir));
+      if (outDir != null && !outDir.isEmpty()) {
+        IOUtils.ensureDir(new File(outDir + "/" + identifier +"/"+ label));
         TwoDimensionalCounter<String, String> reasonForWords = new TwoDimensionalCounter<String, String>();
         for (String word : finalwords.keySet()) {
           for (SurfacePattern l : wordsPatExtracted.getCounter(word).keySet()) {
@@ -372,8 +374,8 @@ public class ScorePhrases {
             }
           }
         }
-        Redwood.log(Redwood.FORCE, "Saving output in " + outputdir);
-        String filename = outputdir + "/words.json";
+        String filename = outDir + "/" + identifier + "/" + label
+            + "/words" + ".json";
 
         // the json object is an array corresponding to each iteration - of list
         // of objects,
