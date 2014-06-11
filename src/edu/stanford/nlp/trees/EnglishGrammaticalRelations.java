@@ -466,9 +466,9 @@ public class EnglishGrammaticalRelations {
           // basic direct object cases: last non-temporal NP of (non-copula) clause.  This case is good.
           // You can't exclude "lot" in this case since people can "sell a lot" though it sometimes wrongly matches what should be an advmod like "He's done a lot" (even for the second instance, the one case admitted on PTB3 WSJ is good).
           "VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " + 
-          // The next qualification eliminates parentheticals that
-          // come after the actual dobj
-          " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
+              // The next qualification eliminates parentheticals that
+              // come after the actual dobj
+              " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
 
           // This matches rare cases of misparses, such as "What
           // disease causes cancer?" where the "causes" does not get a
