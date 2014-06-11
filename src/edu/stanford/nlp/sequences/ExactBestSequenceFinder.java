@@ -13,9 +13,11 @@ import java.util.Arrays;
  */
 public class ExactBestSequenceFinder implements BestSequenceFinder {
 
-  private static final boolean useOld = false;
   private static final boolean DEBUG = false;
 
+  public static Pair<int[], Double> bestSequenceWithLinearConstraints(SequenceModel ts, double[][] linearConstraints) {
+    return bestSequence(ts, linearConstraints);
+  }
 
   /**
    * Runs the Viterbi algorithm on the sequence model given by the TagScorer
@@ -26,22 +28,10 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
    */
   @Override
   public int[] bestSequence(SequenceModel ts) {
-    if (useOld) {
-      return bestSequenceOld(ts);
-    } else {
-      return bestSequenceNew(ts);
-    }
+    return bestSequence(ts, null).first();
   }
 
-  public static Pair<int[], Double> bestSequenceWithLinearConstraints(SequenceModel ts, double[][] linearConstraints) {
-    return bestSequenceNew(ts, linearConstraints);
-  }
-
-  private static int[] bestSequenceNew(SequenceModel ts) {
-    return bestSequenceNew(ts, null).first();
-  }
-
-  private static Pair<int[], Double> bestSequenceNew(SequenceModel ts, double[][] linearConstraints) {
+  private static Pair<int[], Double> bestSequence(SequenceModel ts, double[][] linearConstraints) {
     // Set up tag options
     int length = ts.length();
     int leftWindow = ts.leftWindow();
@@ -190,110 +180,4 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     }
     return new Pair<int[], Double>(tempTags, bestFinalScore);
   }
-
-  private static int[] bestSequenceOld(SequenceModel ts) {
-
-    // Set up tag options
-    int length = ts.length();
-    int leftWindow = ts.leftWindow();
-    int rightWindow = ts.rightWindow();
-    int padLength = length+leftWindow+rightWindow;
-    int[][] tags = new int[padLength][];
-    int[] tagNum = new int[padLength];
-    for (int pos = 0; pos < padLength; pos++) {
-      tags[pos] = ts.getPossibleValues(pos);
-      tagNum[pos] = tags[pos].length;
-    }
-
-    int[] tempTags = new int[padLength];
-
-    // Set up product space sizes
-    int[] productSizes = new int[padLength];
-
-    int curProduct = 1;
-    for (int i=0; i<leftWindow+rightWindow; i++)
-      curProduct *= tagNum[i];
-    for (int pos = leftWindow+rightWindow; pos < padLength; pos++) {
-      if (pos > leftWindow+rightWindow)
-	      curProduct /= tagNum[pos-leftWindow-rightWindow-1]; // shift off
-      curProduct *= tagNum[pos]; // shift on
-      productSizes[pos-rightWindow] = curProduct;
-    }
-
-    // Score all of each window's options
-    double[][] windowScore = new double[padLength][];
-    for (int pos=leftWindow; pos<leftWindow+length; pos++) {
-      windowScore[pos] = new double[productSizes[pos]];
-      Arrays.fill(tempTags,tags[0][0]);
-      for (int product=0; product<productSizes[pos]; product++) {
-        int p = product;
-        for (int curPos = pos+rightWindow; curPos >= pos-leftWindow; curPos--) {
-          tempTags[curPos] = tags[curPos][p % tagNum[curPos]];
-          p /= tagNum[curPos];
-        }
-        windowScore[pos][product] = ts.scoreOf(tempTags, pos);
-      }
-    }
-
-    // Set up score and backtrace arrays
-    double[][] score = new double[padLength][];
-    int[][] trace = new int[padLength][];
-    for (int pos=0; pos<padLength; pos++) {
-      score[pos] = new double[productSizes[pos]];
-      trace[pos] = new int[productSizes[pos]];
-    }
-
-    // Do forward Viterbi algorithm
-
-    // loop over the classification spot
-    //System.err.println();
-    for (int pos=leftWindow; pos<length+leftWindow; pos++) {
-      //System.err.print(".");
-      // loop over window product types
-      for (int product=0; product<productSizes[pos]; product++) {
-        // check for initial spot
-        if (pos==leftWindow) {
-          // no predecessor type
-          score[pos][product] = windowScore[pos][product];
-          trace[pos][product] = -1;
-        } else {
-          // loop over possible predecessor types
-          score[pos][product] = Double.NEGATIVE_INFINITY;
-          trace[pos][product] = -1;
-          int sharedProduct = product / tagNum[pos+rightWindow];
-          int factor = productSizes[pos] / tagNum[pos+rightWindow];
-          for (int newTagNum=0; newTagNum<tagNum[pos-leftWindow-1]; newTagNum++) {
-            int predProduct = newTagNum*factor+sharedProduct;
-            double predScore = score[pos-1][predProduct]+windowScore[pos][product];
-            if (predScore > score[pos][product]) {
-              score[pos][product] = predScore;
-              trace[pos][product] = predProduct;
-            }
-          }
-        }
-      }
-    }
-
-    // Project the actual tag sequence
-    double bestFinalScore = Double.NEGATIVE_INFINITY;
-    int bestCurrentProduct = -1;
-    for (int product=0; product<productSizes[leftWindow+length-1]; product++) {
-      if (score[leftWindow+length-1][product] > bestFinalScore) {
-        bestCurrentProduct = product;
-        bestFinalScore = score[leftWindow+length-1][product];
-      }
-    }
-    int lastProduct = bestCurrentProduct;
-    for (int last=padLength-1; last>=length-1; last--) {
-      tempTags[last] = tags[last][lastProduct % tagNum[last]];
-      lastProduct /= tagNum[last];
-    }
-    for (int pos=leftWindow+length-2; pos>=leftWindow; pos--) {
-      int bestNextProduct = bestCurrentProduct;
-      bestCurrentProduct = trace[pos+1][bestNextProduct];
-      tempTags[pos-leftWindow] = tags[pos-leftWindow][bestCurrentProduct / (productSizes[pos]/tagNum[pos-leftWindow])];
-    }
-    return tempTags;
-  }
-
 }
