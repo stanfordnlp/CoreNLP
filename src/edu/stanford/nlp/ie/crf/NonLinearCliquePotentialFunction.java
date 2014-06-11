@@ -60,8 +60,7 @@ public class NonLinearCliquePotentialFunction implements CliquePotentialFunction
   }
 
   @Override
-  public double computeCliquePotential(int cliqueSize, int labelIndex, 
-      int[] cliqueFeatures, double[] featureVal, int posInSent) {
+  public double computeCliquePotential(int cliqueSize, int labelIndex, int[] cliqueFeatures, double[] featureVal) {
     double output = 0.0;
     if (cliqueSize > 1) { // linear potential for edge cliques
       for (int m = 0; m < cliqueFeatures.length; m++) {
