@@ -29,7 +29,8 @@
 %Revised for Stanford Parser v.\ 1.6.9 in September 2011
 % Revised for Stanford Parser v.\ 2.0.4 in November 2012
 % Revised for the Stanford Parser v.\ 2.0.5 in March 2013
-Revised for the Stanford Parser v.\ 3.2 in June 2013
+% Revised for the Stanford Parser v.\ 3.2 in June 2013
+Revised for the Stanford Parser v.\ 3.3 in November 2013
 }
 
 \begin{document}
@@ -141,6 +142,8 @@ An adjectival modifier of an NP is any adjectival phrase that serves to modify t
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
 \> ``Sam eats red meat" \> \> \emph{amod}(meat, red)\\
+\> ``Sam took out  a 3 million dollar loan" \> \> \emph{amod}(loan, dollar)\\
+\> ``Sam took out  a \$ 3 million loan" \> \> \emph{amod}(loan, \$)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{appos}: appositional modifier}\\
@@ -170,13 +173,6 @@ these structures.
    \depedge[edge unit distance=1ex]{4}{6}{appos}
 \end{dependency}
 \end{quote}
-
-\noindent\textbf{\emph{attr}: attributive}\\
-An attributive is a complement of a copular verb such as ``to be", ``to seem", ``to appear". Currently, the converter only recognizes WHNP complements.
-\begin{tabbing}
-\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``What is that?'' \> \>  \emph{attr}(is, What)\\
-\end{tabbing}
 
 \noindent \textbf{\emph{aux}: auxiliary}\\
 An auxiliary of a clause is a non-main verb of the clause, e.g., a
@@ -424,17 +420,22 @@ A passive nominal subject is a noun phrase which is the syntactic subject of a p
 \end{tabbing}
 
 \noindent\textbf{\emph{num}: numeric modifier}\\
-A numeric modifier of a noun is any number phrase that serves to modify the meaning of the noun.
+A numeric modifier of a noun is any number phrase that serves to
+modify the meaning of the noun with a quantity.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Sam eats 3 sheep" \> \>  \emph{num}(sheep, 3)\\
+\>  ``Sam ate 3 sheep" \> \>  \emph{num}(sheep, 3)\\
+\>  ``Sam spent forty dollars" \> \>  \emph{num}(dollars, 40)\\
+\>  ``Sam spent \$ 40" \> \>  \emph{num}(\$, 40)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{number}: element of compound number}\\
-An element of compound number is a part of a number phrase or currency amount.
+An element of compound number is a part of a number phrase or currency
+amount. We regard a number as a specialized kind of multi-word expression.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``I lost \$ 3.2 billion" \> \> \emph{number}(\$, billion)\\
+\>  ``I have four thousand sheep" \> \> \emph{number}(thousand, four)\\
+\>  ``I lost \$ 3.2 billion" \> \> \emph{number}(billion, 3.2)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{parataxis}: parataxis}\\
@@ -602,7 +603,6 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
    \> \> \emph{agent} - agent\\
     \> \> \emph{comp} - complement \\
 	  \> \> \> \emph{acomp} - adjectival complement \\
-	  \> \> \> \emph{attr} - attributive \\
 	  \> \> \> \emph{ccomp} - clausal complement with internal subject \\
       \> \> \> \emph{xcomp} -  clausal complement with external subject\\
       \> \> \> \emph{obj} - object \\
@@ -1096,7 +1096,7 @@ dependencies, but altering their definitions.  This is a separate download.  It 
 \subsubsection*{$\star$ \textbf{Other parsers}}
 
 A number of dependency parsers have now been trained to parse directly
-to the basic Stanford Dependencies, including MaltParser and
+to the basic Stanford Dependencies, including MaltParser, DeSR, and
 MSTParser.  Several of these parsers distribute models trained for
 Stanford Dependencies parsing, including MaltParser and the Easy First
 Parser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.
@@ -1169,6 +1169,11 @@ versions of the dependencies, or need to update your code.
   \emph{Wh-}phrase. Now, the converter resolves the grammatical
   relation (\emph{nsubj}, \emph{dobj}, or \emph{pobj}) for simple
   cases, and the rest are left unresolved as a \emph{dep} relation.
+\item[attr] has been removed as a relation. \emph{attr} was a relation intended
+for the complement of a copular verb such as ``to be'', ``to seem'', ``to appear''.
+Mainly, it was used for WHNP complements.  (The relation \emph{attr}
+was meant to stand for ``attributive'' but that was arguably a misuse
+of the word.)
 \end{description}
 
 

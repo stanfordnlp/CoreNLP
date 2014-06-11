@@ -336,6 +336,21 @@ public class ValueFunctions {
     }
   };
 
+  private static String join(Object[] args, String glue) {
+    String res = null;
+    if (args.length == 1) {
+      // Only one element - check if it is a list or array and do join on that
+      if (args[0] instanceof Iterable) {
+        res = StringUtils.join((Iterable) args[0], glue);
+      } else {
+        res = StringUtils.join(args, glue);
+      }
+    } else {
+      res = StringUtils.join(args, glue);
+    }
+    return res;
+  }
+
   public abstract static class StringFunction extends NamedValueFunction {
     protected String resultTypeName = Expressions.TYPE_STRING;
     protected int nargs = 2;
@@ -394,7 +409,7 @@ public class ValueFunctions {
   public static final ValueFunction CONCAT_FUNCTION = new StringFunction("CONCAT", -1) {
     @Override
     public String compute(String... in) {
-      return StringUtils.join(in, "");
+      return join(in, "");
     }
   };
 
@@ -465,7 +480,7 @@ public class ValueFunctions {
       for (int i = 1; i < in.size(); i++) {
         args[i-1] = in.get(i).get();
       }
-      String res = StringUtils.join(args, glue);
+      String res = join(args, glue);
       return new Expressions.PrimitiveValue(Expressions.TYPE_STRING, res);
     }
   };
