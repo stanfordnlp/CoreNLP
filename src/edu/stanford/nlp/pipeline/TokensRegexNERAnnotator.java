@@ -391,12 +391,12 @@ public class TokensRegexNERAnnotator implements Annotator {
   }
 
   private static class Entry {
-    public String tokensRegex;
-    public String[] regex; // the regex, tokenized by splitting on white space
-    public String type; // the associated type
-    public Set<String> overwritableTypes; // what types can be overwritten by this entry
-    public double priority;
-    public int annotateGroup;
+    public final String tokensRegex;
+    public final String[] regex; // the regex, tokenized by splitting on white space
+    public final String type; // the associated type
+    public final Set<String> overwritableTypes; // what types can be overwritten by this entry
+    public final double priority;
+    public final int annotateGroup;
 
     public Entry(String tokensRegex, String[] regex, String type, Set<String> overwritableTypes, double priority, int annotateGroup) {
       this.tokensRegex = tokensRegex;
@@ -408,7 +408,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     }
 
     public String toString() {
-      return "Entry{" + ((tokensRegex != null)? tokensRegex:StringUtils.join(regex)) + ' ' + type + ' ' + overwritableTypes + ' ' + priority + '}';
+      return "Entry{" + ((tokensRegex != null) ? tokensRegex: StringUtils.join(regex)) + ' ' + type + ' ' + overwritableTypes + ' ' + priority + '}';
     }
   }
 
@@ -467,9 +467,9 @@ public class TokensRegexNERAnnotator implements Annotator {
     for (String line; (line = mapping.readLine()) != null; ) {
       lineCount ++;
       String[] split = line.split("\t");
-      if (split.length < 2 || split.length > 5)
-        throw new IllegalArgumentException("Provided mapping file is in wrong format");
-
+      if (split.length < 2 || split.length > 5) {
+        throw new IllegalArgumentException("Provided mapping file is in wrong format. This line is bad: " + line);
+      }
       String regex = split[0].trim();
       String tokensRegex = null;
       String[] regexes = null;
@@ -493,7 +493,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       double priority = 0.0;
 
       if (split.length >= 3) {
-        overwritableTypes.addAll(Arrays.asList(split[2].trim().split(",")));
+        overwritableTypes.addAll(Arrays.asList(split[2].trim().split("\\s*,\\s*")));
       }
       if (split.length >= 4) {
         try {
@@ -516,7 +516,18 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
       }
 
+      // Print some warning about the type
+      int commaPos = type.indexOf(',');
+      if (commaPos > 0) {
+        // Strip the "," and just take first type
+        String newType = type.substring(0, commaPos).trim();
+        logger.warn("TokensRegexNERAnnotator " + annotatorName +
+                ": Entry has multiple types: " + line + ".  Taking type to be " + newType);
+        type = newType;
+      }
+
       Entry entry = new Entry(tokensRegex, regexes, type, overwritableTypes, priority, annotateGroup);
+
       if (seenRegexes.containsKey(key)) {
         Entry oldEntry = seenRegexes.get(key);
         if (priority > oldEntry.priority) {
@@ -528,19 +539,14 @@ public class TokensRegexNERAnnotator implements Annotator {
               logger.warn("TokensRegexNERAnnotator " + annotatorName +
                       ": Ignoring duplicate entry: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
             }
+          // } else {
+          //   if (verbose) {
+          //     logger.warn("TokensRegexNERAnnotator " + annotatorName +
+          //             ": Duplicate entry [ignored]: " + split[0] + ", old type = " + oldEntry.type + ", new type = " + type);
+          //   }
           }
           continue;
         }
-      }
-
-      // Print some warning about the type
-      int commaPos = entry.type.indexOf(',');
-      if (commaPos > 0) {
-        // Strip the "," and just take first type
-        String newType = entry.type.substring(0, commaPos).trim();
-        logger.warn("TokensRegexNERAnnotator " + annotatorName +
-                ": Entry has multiple type " + entry + ", taking type to be " + newType);
-        entry.type = newType;
       }
 
       // Print some warning if label belongs to noDefaultOverwriteLabels but there is no overwritable types
@@ -572,4 +578,5 @@ public class TokensRegexNERAnnotator implements Annotator {
     // to satisfy different requirements
     return Collections.emptySet();
   }
+
 }

@@ -397,17 +397,6 @@ USED BY: tregex, tsurgeon, semgrex
 LAST UPDATE: 2013-08-28
 LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------
-protobuf.jar
-ORIGINAL JAR NAME: <compiled from source>
-VERSION: 4.1
-RELEASE DATE: April 2011
-SOURCE AVAILABLE: yes
-DESCRIPTION: Google's protocol buffer library
-URL: https://code.google.com/p/protobuf/
-USED BY: CoreMapProtos (and associated serializers)
-LAST UPDATE: 2013-09-24
-LAST UPDATE BY: Gabor Angeli
------------------------------------------------------------------
 foo.jar
 
 ORIGINAL JAR NAME:
