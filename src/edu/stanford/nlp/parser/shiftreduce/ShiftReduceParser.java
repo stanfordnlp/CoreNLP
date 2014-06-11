@@ -768,9 +768,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       if (serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
         String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
         saveModel(tempName);
-        // TODO: we could save a cutoff version of the model,
-        // especially if we also get a dev set number for it, but that
-        // might be overkill
+
+        if (featureFrequencies != null) {
+          ShiftReduceParser copy = this.deepCopy();
+          copy.filterFeatures(featureFrequencies.keysAbove(op.trainOptions().featureFrequencyCutoff));
+          tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".cutoff.ser.gz";
+          copy.saveModel(tempName);          
+        }
       }
     }
 
@@ -805,9 +809,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       }
     }
 
-    // TODO: perhaps we should filter the features and then get dev
-    // set scores.  That way we can merge the models which are best
-    // after filtering.
     if (featureFrequencies != null) {
       filterFeatures(featureFrequencies.keysAbove(op.trainOptions().featureFrequencyCutoff));
     }
@@ -865,9 +866,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   //     http://aclweb.org/anthology-new/W/W09/W09-3825.pdf
   //   Fast and Accurate Shift-Reduce Constituent Parsing (Zhu et al)
   //   A Dynamic Oracle for Arc-Eager Dependency Parsing (Goldberg and Nivre) (a rough constituency oracle is implemented)
-  //   Learning Sparser Perceptron Models (Goldberg and Elhadad) (unpublished)
   // Sources with stuff to implement:
   //   http://honnibal.wordpress.com/2013/12/18/a-simple-fast-algorithm-for-natural-language-dependency-parsing/
+  //   Learning Sparser Perceptron Models (Goldberg and Elhadad) (unpublished)
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
