@@ -406,7 +406,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)
+        // (case: declared option)z
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -597,7 +597,7 @@ public class Execution {
       log(FORCE, t);
       exitCode = 1;
     }
-    endTracksTo("main");  // end main
+    endTrack("main"); //ends main
     if (exit) {
       System.exit(exitCode);
     }
