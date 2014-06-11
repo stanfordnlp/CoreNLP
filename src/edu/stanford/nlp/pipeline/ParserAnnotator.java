@@ -193,7 +193,7 @@ public class ParserAnnotator implements Annotator {
       }
       System.err.println();
     }
-    LexicalizedParser result = LexicalizedParser.loadModel(parserLoc, flags);
+    ParserGrammar result = ParserGrammar.loadModel(parserLoc, flags);
     // lp.setOptionFlags(new String[]{"-outputFormat", "penn,typedDependenciesCollapsed", "-retainTmpSubcategories"});
     // treePrint = lp.getTreePrint();
 
