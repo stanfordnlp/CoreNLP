@@ -13,64 +13,56 @@ interface TsurgeonParserConstants {
   /** RegularExpression Id. */
   int OPEN_BRACKET = 5;
   /** RegularExpression Id. */
-  int IF = 6;
+  int DELETE = 6;
   /** RegularExpression Id. */
-  int EXISTS = 7;
+  int PRUNE = 7;
   /** RegularExpression Id. */
-  int DELETE = 8;
+  int RELABEL = 8;
   /** RegularExpression Id. */
-  int PRUNE = 9;
+  int EXCISE = 9;
   /** RegularExpression Id. */
-  int RELABEL = 10;
+  int INSERT = 10;
   /** RegularExpression Id. */
-  int EXCISE = 11;
+  int MOVE = 11;
   /** RegularExpression Id. */
-  int INSERT = 12;
+  int REPLACE = 12;
   /** RegularExpression Id. */
-  int MOVE = 13;
+  int CREATE_SUBTREE = 13;
   /** RegularExpression Id. */
-  int REPLACE = 14;
+  int ADJOIN = 14;
   /** RegularExpression Id. */
-  int CREATE_SUBTREE = 15;
+  int ADJOIN_TO_HEAD = 15;
   /** RegularExpression Id. */
-  int ADJOIN = 16;
+  int ADJOIN_TO_FOOT = 16;
   /** RegularExpression Id. */
-  int ADJOIN_TO_HEAD = 17;
+  int COINDEX = 17;
   /** RegularExpression Id. */
-  int ADJOIN_TO_FOOT = 18;
+  int CLOSE_BRACKET = 18;
   /** RegularExpression Id. */
-  int COINDEX = 19;
+  int SELECTION = 19;
   /** RegularExpression Id. */
-  int NAME = 20;
+  int GENERAL_RELABEL = 20;
   /** RegularExpression Id. */
-  int CLOSE_BRACKET = 21;
+  int IDENTIFIER = 21;
   /** RegularExpression Id. */
-  int SELECTION = 22;
+  int LOCATION_RELATION = 22;
   /** RegularExpression Id. */
-  int GENERAL_RELABEL = 23;
+  int REGEX = 23;
   /** RegularExpression Id. */
-  int IDENTIFIER = 24;
+  int QUOTEX = 24;
   /** RegularExpression Id. */
-  int LOCATION_RELATION = 25;
+  int HASH_INTEGER = 25;
   /** RegularExpression Id. */
-  int REGEX = 26;
+  int TREE_NODE_TERMINAL_LABEL = 26;
   /** RegularExpression Id. */
-  int QUOTEX = 27;
+  int TREE_NODE_NONTERMINAL_LABEL = 27;
   /** RegularExpression Id. */
-  int HASH_INTEGER = 28;
-  /** RegularExpression Id. */
-  int TREE_NODE_TERMINAL_LABEL = 29;
-  /** RegularExpression Id. */
-  int TREE_NODE_NONTERMINAL_LABEL = 30;
-  /** RegularExpression Id. */
-  int CLOSE_PAREN = 31;
+  int CLOSE_PAREN = 28;
 
   /** Lexical state. */
-  int OPERATION = 0;
+  int DEFAULT = 0;
   /** Lexical state. */
-  int CONDITIONAL = 1;
-  /** Lexical state. */
-  int DEFAULT = 2;
+  int OPERATION = 1;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -80,8 +72,6 @@ interface TsurgeonParserConstants {
     "\"\\t\"",
     "\"\\n\"",
     "\"[\"",
-    "\"if\"",
-    "\"exists\"",
     "\"delete\"",
     "\"prune\"",
     "\"relabel\"",
@@ -94,7 +84,6 @@ interface TsurgeonParserConstants {
     "\"adjoinH\"",
     "\"adjoinF\"",
     "\"coindex\"",
-    "<NAME>",
     "\"]\"",
     "<SELECTION>",
     "<GENERAL_RELABEL>",
