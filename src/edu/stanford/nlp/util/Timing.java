@@ -104,6 +104,7 @@ public class Timing {
     return elapsed;
   }
 
+  /** Returns the number of seconds passed since the timer started in the form "d.d". */
   public String toSecondsString() {
     return toSecondsString(report());
   }
@@ -166,7 +167,7 @@ public class Timing {
     return elapsed;
   }
 
-  /** 
+  /**
    * Print the timing done message with elapsed time in x.y seconds.
    * Restart the timer too.
    */
