@@ -2179,7 +2179,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           seedWords4Label.add(line);
         }
         seedWords.put(label, seedWords4Label);
-        System.out.println("Number of seed words for label " + label + " is "
+        Redwood.log(Redwood.FORCE, "Number of seed words for label " + label + " is "
             + seedWords4Label.size());
       }
 
@@ -2254,10 +2254,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             "splitOnPunct", "true"));
         List<File> allFiles = GetPatternsFromDataMultiClass
             .getAllFiles(evalFileWithGoldLabels);
+        int numFile =0;
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
           for (File f : allFiles) {
-            Redwood.log(Redwood.DBG, "Annotating text in " + f);
+            numFile++;
+            Redwood.log(Redwood.DBG, "Annotating text in " + f  + ". Num file " + numFile);
             List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
                 new BufferedReader(new FileReader(f)), seedWords.keySet(),
                 setClassForTheseLabels, true, splitOnPunct, lowercase,
