@@ -32,9 +32,6 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.parser.common.ArgUtils;
-import edu.stanford.nlp.parser.common.ParserGrammar;
-import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
@@ -88,7 +85,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable, ParserGrammar {
+public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -97,16 +94,12 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
   public Index<String> stateIndex, wordIndex, tagIndex;
 
   private Options op;
-
-  @Override
   public Options getOp() { return op; }
 
   public Reranker reranker = null;
 
-  @Override
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
 
-  @Override
   public TreebankLanguagePack treebankLanguagePack() { return getTLPParams().treebankLanguagePack(); }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
@@ -399,7 +392,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     }
   }
 
-  @Override
   public ParserQuery parserQuery() {
     if (reranker == null) {
       return new LexicalizedParserQuery(this);
@@ -1237,7 +1229,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       if (args[argIndex].equalsIgnoreCase("-train") ||
           args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         train = true;
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-train");
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-test");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         treebankPath = treebankDescription.first();
         trainFilter = treebankDescription.second();

@@ -497,7 +497,7 @@ class DescriptionPattern extends TregexPattern {
     }
 
     private void removeNamedNodes() {
-      if ((myNode.descriptionMode != null || myNode.isLink) &&
+      if ((myNode.descPattern != null || myNode.isLink) &&
           myNode.name != null) {
         namesToNodes.remove(myNode.name);
       }
