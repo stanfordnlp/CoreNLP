@@ -210,7 +210,7 @@ public class EnglishGrammaticalRelations {
           // This case is separated out from the previous case to
           // avoid conflicts with advcl when you have phrases such as
           // "but only because ..."
-          "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- @SBAR $+ @SBAR=target)",
+          "SBAR < (CC|CONJP $-- @SBAR $+ @SBAR=target)",
           // non-parenthetical or comma in suitable phrase with conj then adverb to left
           "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ (ADVP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
           // content phrase to the right of a comma or a parenthetical
