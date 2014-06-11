@@ -141,7 +141,8 @@ public class SentimentPipeline {
   /**
    * Outputs a tree using the output style requested
    */
-  static void outputTree(PrintStream out, Tree tree, List<Output> outputFormats) {
+  static void outputTree(PrintStream out, CoreMap sentence, List<Output> outputFormats) {
+    Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
     for (Output output : outputFormats) {
       switch (output) {
       case PENNTREES: {
@@ -159,7 +160,7 @@ public class SentimentPipeline {
       }
       case ROOT: {
         int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
-        out.println("  " + SentimentUtils.sentimentString(sentiment));
+        out.println("  " + sentence.get(SentimentCoreAnnotations.ClassName.class));
         break;
       }
       case PROBABILITIES: {
@@ -306,9 +307,8 @@ public class SentimentPipeline {
       pipeline.annotate(annotation);
 
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
         System.out.println(sentence);
-        outputTree(System.out, tree, outputFormats);
+        outputTree(System.out, sentence, outputFormats);
       }
     } else if (fileList != null) {
       // Process multiple files.  The pipeline will do tokenization,
@@ -322,9 +322,8 @@ public class SentimentPipeline {
         FileOutputStream fout = new FileOutputStream(file + ".out");
         PrintStream pout = new PrintStream(fout);
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
           pout.println(sentence);
-          outputTree(pout, tree, outputFormats);
+          outputTree(pout, sentence, outputFormats);
         }
         pout.flush();
         fout.close();
@@ -344,8 +343,7 @@ public class SentimentPipeline {
         if (line.length() > 0) {
           Annotation annotation = pipeline.process(line);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-            Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
-            outputTree(System.out, tree, outputFormats);
+            outputTree(System.out, sentence, outputFormats);
           }
         } else {
           // Output blank lines for blank lines so the tool can be
