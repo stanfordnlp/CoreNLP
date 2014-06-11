@@ -78,7 +78,7 @@ public class TrainParser {
       transformer.addTransformer(basicTransformer);
       
       System.err.println("Loading training trees from " + trainTreebankPath);
-      Treebank trainTreebank = op.tlpParams.memoryTreebank();;
+      Treebank trainTreebank = op.tlpParams.memoryTreebank();
       trainTreebank.loadPath(trainTreebankPath, trainTreebankFilter);
       trainTreebank = trainTreebank.transform(transformer);
       System.err.println("Read in " + trainTreebank.size() + " trees from " + trainTreebankPath);
@@ -163,6 +163,8 @@ public class TrainParser {
         throw new RuntimeIOException(e);
       }
     }
+
+    //parser.outputStats();
 
     if (testTreebankPath != null) {
       System.err.println("Loading test trees from " + testTreebankPath);
