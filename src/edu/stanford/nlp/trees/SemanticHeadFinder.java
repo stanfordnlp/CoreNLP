@@ -251,6 +251,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     TregexPattern.compile("CONJP < (CC <: /^(?i:and)$/ [ ($+ (RB=head <: /^(?i:yet)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:yet)$/))) ])"),
   };
 
+  static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
+
   /** 
    * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
    * For example, in the sentence "It is hands down the best dessert ...", 
@@ -265,6 +267,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
         return false;
       if (label.value().contains("-TMP") || label.value().contains("-ADV"))
         return false;
+      if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
+        return false;
+      }
       return true;
     }
   };
@@ -312,6 +317,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       // if none of the above patterns match, use the standard method
     }
 
+    Tree[] tmpFilteredChildren = null;
+
     // do VPs with auxiliary as special case
     if ((motherCat.equals("VP") || motherCat.equals("SQ") || motherCat.equals("SINV"))) {
       Tree[] kids = t.children();
@@ -331,7 +338,10 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
         // problematic for other auxiliaries, like 'he has an answer'
         // But maybe doing ADJP is fine!
         String[] how = { "left", "VP", "ADJP" };
-        Tree pti = traverseLocate(kids, how, false);
+        if (tmpFilteredChildren == null) {
+          tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
+        }
+        Tree pti = traverseLocate(tmpFilteredChildren, how, false);
         if (DEBUG) {
           System.err.println("Determined head (case 1) for " + t.value() + " is: " + pti);
         }
@@ -354,8 +364,10 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
           how = new String[]{"left", "VP", "ADJP", "NP", "WHADJP", "WHNP"};
         }
         // Avoid undesirable heads by filtering them from the list of potential children
-        Tree[] filteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
-        Tree pti = traverseLocate(filteredChildren, how, false);
+        if (tmpFilteredChildren == null) {
+          tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
+        }
+        Tree pti = traverseLocate(tmpFilteredChildren, how, false);
         // In SQ, only allow an NP to become head if there is another one to the left (then it's probably predicative)
         if (motherCat.equals("SQ") && pti != null && pti.label() != null && pti.label().value().startsWith("NP")) {
             boolean foundAnotherNp = false;
