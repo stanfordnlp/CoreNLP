@@ -14,10 +14,11 @@ import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.ejml.simple.*;
+import org.ejml.simple.SimpleMatrix;
 import org.ejml.data.DenseMatrix64F;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.rnn.RNNUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryGrammar;
 import edu.stanford.nlp.parser.lexparser.BinaryRule;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -511,37 +512,18 @@ public class DVModel implements Serializable {
     int chineseNumberCount = 0;
     int chinesePercentCount = 0;
 
-    System.err.println("Reading in the word vector file: " + op.lexOptions.wordVectorFile);
-    int dimOfWords = 0;
-    boolean warned = false;
-    for (String line : IOUtils.readLines(op.lexOptions.wordVectorFile, "utf-8")) {
-      String[]  lineSplit = line.split("\\s+");
-      String word = lineSplit[0];
+    Map<String, SimpleMatrix> rawWordVectors = RNNUtils.readRawWordVectors(op.lexOptions.wordVectorFile, op.lexOptions.numHid);
+
+    for (String word : rawWordVectors.keySet()) {
+      SimpleMatrix vector = rawWordVectors.get(word);
+
       if (op.wordFunction != null) {
         word = op.wordFunction.apply(word);
       }
-      dimOfWords = lineSplit.length - 1;
+
       if (op.lexOptions.numHid <= 0) {
-        op.lexOptions.numHid = dimOfWords;
-        System.err.println("Dimensionality of numHid not set.  The length of the word vectors in the given file appears to be " + dimOfWords);
+        op.lexOptions.numHid = vector.getNumElements();
       }
-      // the first entry is the word itself
-      // the other entries will all be entries in the word vector
-      if (dimOfWords > op.lexOptions.numHid) {
-        if (!warned) {
-          warned = true;
-          System.err.println("WARNING: Dimensionality of numHid parameter and word vectors do not match, deleting word vector dimensions to fit!");
-        }
-        dimOfWords = op.lexOptions.numHid;
-      } else if (dimOfWords < op.lexOptions.numHid) {
-        throw new RuntimeException("Word vectors file has dimension too small for requested numHid of " + op.lexOptions.numHid);
-      }
-      double vec[][] = new double[dimOfWords][1];
-      for (int i = 1; i <= dimOfWords; i++) {
-        vec[i-1][0] = Double.parseDouble(lineSplit[i]);
-      }
-      SimpleMatrix vector = new SimpleMatrix(vec);
-      wordVectors.put(word, vector);
 
       // TODO: factor out all of these identical blobs
       if (op.trainOptions.unknownNumberVector &&
@@ -670,58 +652,18 @@ public class DVModel implements Serializable {
   }
 
 
-  public static double[] paramsToVector(double scale, int totalSize, Iterator<SimpleMatrix> ... matrices) {
-    double[] theta = new double[totalSize];
-    int index = 0;
-    for (Iterator<SimpleMatrix> matrixIterator : matrices) {
-      while (matrixIterator.hasNext()) {
-        SimpleMatrix matrix = matrixIterator.next();
-        int numElements = matrix.getNumElements();
-        for (int i = 0; i < numElements; ++i) {
-          theta[index] = matrix.get(i) * scale;
-          ++index;
-        }
-      }
-    }
-    if (index != totalSize) {
-      throw new AssertionError("Did not entirely fill the theta vector: expected " + totalSize + " used " + index);
-    }
-    return theta;
-  }
-
-
-  public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
-    double[] theta = new double[totalSize];
-    int index = 0;
-    for (Iterator<SimpleMatrix> matrixIterator : matrices) {
-      while (matrixIterator.hasNext()) {
-        SimpleMatrix matrix = matrixIterator.next();
-        int numElements = matrix.getNumElements();
-        //System.out.println(Integer.toString(numElements)); // to know what matrices are
-        for (int i = 0; i < numElements; ++i) {
-          theta[index] = matrix.get(i);
-          ++index;
-        }
-      }
-    }
-    if (index != totalSize) {
-      throw new AssertionError("Did not entirely fill the theta vector: expected " + totalSize + " used " + index);
-    }
-    return theta;
-  }
-
   @SuppressWarnings("unchecked")
   public double[] paramsToVector(double scale) {
     int totalSize = totalParamSize();
     if (TRAIN_WORD_VECTORS) {
-      return paramsToVector(scale, totalSize,
-                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                            binaryScore.valueIterator(), unaryScore.values().iterator(),
-                            wordVectors.values().iterator());
+      return RNNUtils.paramsToVector(scale, totalSize,
+                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                     binaryScore.valueIterator(), unaryScore.values().iterator(),
+                                     wordVectors.values().iterator());
     } else {
-      return paramsToVector(scale, totalSize,
-                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                            binaryScore.valueIterator(), unaryScore.values().iterator());
+      return RNNUtils.paramsToVector(scale, totalSize,
+                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                     binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
 
@@ -730,45 +672,28 @@ public class DVModel implements Serializable {
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
     if (TRAIN_WORD_VECTORS) {
-      return paramsToVector(totalSize,
-                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                            binaryScore.valueIterator(), unaryScore.values().iterator(),
-                            wordVectors.values().iterator());
+      return RNNUtils.paramsToVector(totalSize,
+                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                     binaryScore.valueIterator(), unaryScore.values().iterator(),
+                                     wordVectors.values().iterator());
     } else {
-      return paramsToVector(totalSize,
-                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                            binaryScore.valueIterator(), unaryScore.values().iterator());
-    }
-  }
-
-  public static void vectorToParams(double[] theta, Iterator<SimpleMatrix> ... matrices) {
-    int index = 0;
-    for (Iterator<SimpleMatrix> matrixIterator : matrices) {
-      while (matrixIterator.hasNext()) {
-        SimpleMatrix matrix = matrixIterator.next();
-        int numElements = matrix.getNumElements();
-        for (int i = 0; i < numElements; ++i) {
-          matrix.set(i, theta[index]);
-          ++index;
-        }
-      }
-    }
-    if (index != theta.length) {
-      throw new AssertionError("Did not entirely use the theta vector");
+      return RNNUtils.paramsToVector(totalSize,
+                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                     binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
 
   @SuppressWarnings("unchecked")
   public void vectorToParams(double[] theta) {
     if (TRAIN_WORD_VECTORS) {
-      vectorToParams(theta,
-                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                     binaryScore.valueIterator(), unaryScore.values().iterator(),
-                     wordVectors.values().iterator());
+      RNNUtils.vectorToParams(theta,
+                              binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                              binaryScore.valueIterator(), unaryScore.values().iterator(),
+                              wordVectors.values().iterator());
     } else {
-      vectorToParams(theta,
-                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                     binaryScore.valueIterator(), unaryScore.values().iterator());
+      RNNUtils.vectorToParams(theta,
+                              binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                              binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
 
