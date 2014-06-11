@@ -1446,7 +1446,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     Reader reader = null;
     Writer w = null;
     try {
-      // todo [cdm dec 13]: change to use the IOUtils read-from-anywhere routines
       reader = new BufferedReader(new InputStreamReader(new FileInputStream(config.getFile()), config.getEncoding()));
 
       String outFile = config.getOutputFile();
