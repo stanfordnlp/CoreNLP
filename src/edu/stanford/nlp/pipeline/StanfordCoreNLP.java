@@ -474,6 +474,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
+        System.err.println(signature());
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
@@ -534,25 +535,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       public String signature() {
         // keep track of all relevant properties for this annotator here!
         StringBuilder os = new StringBuilder();
-        os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
-                properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-        if (Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
-                "false"))) {
-          os.append("tokenize.whitespace:" +
-                  properties.getProperty("tokenize.whitespace", "false"));
+        if (Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"))) {
+          os.append(NEWLINE_SPLITTER_PROPERTY + "=" + properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false") + "\n");
+          os.append("tokenize.whitespace=" + properties.getProperty("tokenize.whitespace", "false") + "\n");
         } else {
-          os.append("ssplit.isOneSentence:" +
-                  properties.getProperty("ssplit.isOneSentence", "false"));
-          if ( ! Boolean.valueOf(properties.getProperty("ssplit.isOneSentence", "false"))) {
-            os.append("ssplit.boundaryTokenRegex:" +
-                    properties.getProperty("ssplit.boundaryTokenRegex", ""));
-            os.append("ssplit.boundariesToDiscard:" +
-                    properties.getProperty("ssplit.boundariesToDiscard", ""));
-            os.append("ssplit.htmlBoundariesToDiscard:" +
-                    properties.getProperty("ssplit.htmlBoundariesToDiscard", ""));
-            os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
-                    properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
-          }
+          os.append(baseSignature(properties, STANFORD_SSPLIT));
         }
         return os.toString();
       }
