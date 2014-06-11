@@ -195,7 +195,7 @@ public class Options implements Serializable {
    *      processing this option, or the value i unchanged if a valid option couldn't
    *      be processed starting at position i.
    */
-  protected int setOptionFlag(String[] args, int i) {
+  private int setOptionFlag(String[] args, int i) {
     if (args[i].equalsIgnoreCase("-PCFG")) {
       doDep = false;
       doPCFG = true;
@@ -783,8 +783,8 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-maxTrainTimeSeconds")) {
       trainOptions.maxTrainTimeSeconds = Integer.parseInt(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-dvSeed") || args[i].equalsIgnoreCase("-randomSeed")) {
-      trainOptions.randomSeed = Long.parseLong(args[i + 1]);
+    } else if (args[i].equalsIgnoreCase("-dvSeed")) {
+      trainOptions.dvSeed = Long.parseLong(args[i + 1]);
       i += 2;      
     } else if (args[i].equalsIgnoreCase("-wordVectorFile")) {
       lexOptions.wordVectorFile = args[i + 1];
