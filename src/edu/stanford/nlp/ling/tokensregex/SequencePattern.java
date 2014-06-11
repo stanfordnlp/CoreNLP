@@ -839,7 +839,7 @@ public class SequencePattern<T> {
         if (opt instanceof NodePatternExpr) {
           Pair<Class, CoreMapNodePattern.StringAnnotationPattern> pair = _getStringAnnotation_(opt);
           if (pair != null) {
-            Boolean ignoreCase = pair.second.ignoreCase();
+            Boolean ignoreCase = pair.second.ignoreCase;
             String target = pair.second.target;
             Pair<Class,Boolean> key = Pair.makePair(pair.first, ignoreCase);
             Pair<Collection<PatternExpr>, Set<String>> saved = stringPatterns.get(key);
@@ -862,14 +862,14 @@ public class SequencePattern<T> {
               if (pair != null) {
                 if (key != null) {
                   // check key
-                  if (key.first.equals(pair.first) && key.second.equals(pair.second.ignoreCase())) {
+                  if (key.first.equals(pair.first) && key.second.equals(pair.second.ignoreCase)) {
                     // okay
                   } else {
                     isStringSeq = false;
                     break;
                   }
                 } else {
-                  key = Pair.makePair(pair.first, pair.second.ignoreCase());
+                  key = Pair.makePair(pair.first, pair.second.ignoreCase);
                   strings = new ArrayList<String>();
                 }
                 strings.add(pair.second.target);
@@ -899,10 +899,9 @@ public class SequencePattern<T> {
       for (Pair<Class,Boolean> key:stringPatterns.keySet()) {
         Pair<Collection<PatternExpr>, Set<String>> saved = stringPatterns.get(key);
         Set<String> set = saved.second;
-        int flags = (key.second)? NodePattern.CASE_INSENSITIVE:0;
         if (set.size() > OPTIMIZE_MIN_SIZE) {
           PatternExpr optimized = new NodePatternExpr(
-                  new CoreMapNodePattern(key.first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, flags)));
+                  new CoreMapNodePattern(key.first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, key.second)));
           finalOptimizedPatterns.add(optimized);
           for (PatternExpr p:saved.first) {
             alreadyOptimized.put(p, true);

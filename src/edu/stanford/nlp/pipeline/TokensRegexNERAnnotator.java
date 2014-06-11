@@ -56,9 +56,9 @@ import java.util.regex.Pattern;
  *       <br/>  Example: Old NER phrase: The ABC Company, Found Phrase: ABC => Old NER labels are not replaced.
  *       <br/>If the found expression has inconsistent NER tags among the tokens, then the NER labels are replaced. </li>
  *       <br/>  Example: Old NER phrase: The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG
- *   <li>How <code>validpospattern</code> is handled for POS tags is specified by <code>PosMatchType</code></li>
+ *   <li>How <code>validpospattern</code> is handled for POS tags is specfied by <code>PosMatchType</code></li>
  *   <li>By default, there is no <code>validPosPattern</code></li>
- *   <li>By default, both O and MISC is always replaced</li>
+ *   <li>By default, MISC is always replaced</li>
  * </ul>
  *
  * <p>
@@ -83,7 +83,7 @@ import java.util.regex.Pattern;
  *   </tr>
  *   <tr><td><code>noDefaultOverwriteLabels</code></td>
  *      <td>Comma separated list of output types for which default NER labels are not overwritten.
- *          For these types, only if the matched expression has NER type matching the
+ *          For this types, only if the matched expression has NER type matching the
  *          specified overwriteableType for the regex will the NER type be overwritten.</td>
  *      <td><code></code></td></tr>
  *   <tr><td><code>ignoreCase</code></td><td><code>Boolean</code></td>
@@ -98,6 +98,7 @@ import java.util.regex.Pattern;
 public class TokensRegexNERAnnotator implements Annotator {
   protected static final Redwood.RedwoodChannels logger = Redwood.channels("TokenRegexNER");
 
+  // TODO: Can remove entries and just have a MultiPatternMatcher probably
   private final boolean ignoreCase;
   private final List<Entry> entries;
   private final Map<TokenSequencePattern,Entry> patternToEntry = new IdentityHashMap<TokenSequencePattern,Entry>();
@@ -119,19 +120,6 @@ public class TokensRegexNERAnnotator implements Annotator {
     MATCH_ONE_TOKEN_PHRASE_ONLY }
   private final PosMatchType posMatchType;
   public static final PosMatchType DEFAULT_POS_MATCH_TYPE = PosMatchType.MATCH_AT_LEAST_ONE_TOKEN;
-  public static final String DEFAULT_BACKGROUND_SYMBOL = SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC";
-
-  public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
-          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Comma separated list of mapping files to use."),
-          new PropertiesUtils.Property("ignorecase", "false", "Whether to ignore case or not when matching patterns."),
-          new PropertiesUtils.Property("validpospattern", "", "Regular expression pattern for matching POS tags."),
-          new PropertiesUtils.Property("posmatchtype", DEFAULT_POS_MATCH_TYPE.name(), "How should 'validpospattern' be used to match the POS of the tokens."),
-          new PropertiesUtils.Property("noDefaultOverwriteLabels", "", "Comma separated list of output types for which default NER labels are not overwritten.\n" +
-                  " For these types, only if the matched expression has NER type matching the\n" +
-                  " specified overwriteableType for the regex will the NER type be overwritten."),
-          new PropertiesUtils.Property("backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL, "Comma separated list of NER labels to always replace."),
-          new PropertiesUtils.Property("verbose", "false", ""),
-  };
 
   public TokensRegexNERAnnotator(String mapping) {
     this(mapping, false);
@@ -158,7 +146,8 @@ public class TokensRegexNERAnnotator implements Annotator {
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
     String prefix = (name != null && !name.isEmpty())? name + ".":"";
-    String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol", DEFAULT_BACKGROUND_SYMBOL);
+    String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol",
+            SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC");
     String[] backgroundSymbols = backgroundSymbol.split("\\s*,\\s*");
     String mappingFiles = properties.getProperty(prefix + "mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
     String[] mappings = mappingFiles.split("\\s*[,;]\\s*");
@@ -218,10 +207,8 @@ public class TokensRegexNERAnnotator implements Annotator {
   private MultiPatternMatcher<CoreMap> createPatternMatcher() {
     // Convert to tokensregex pattern
     int patternFlags = ignoreCase? Pattern.CASE_INSENSITIVE:0;
-    int stringMatchFlags = ignoreCase? NodePattern.CASE_INSENSITIVE:0;
     Env env = TokenSequencePattern.getNewEnv();
     env.setDefaultStringPatternFlags(patternFlags);
-    env.setDefaultStringMatchFlags(stringMatchFlags);
     NodePattern<String> posTagPattern = (validPosPattern != null && PosMatchType.MATCH_ALL_TOKENS.equals(posMatchType))?
             new CoreMapNodePattern.StringAnnotationRegexPattern(validPosPattern):null;
     List<TokenSequencePattern> patterns = new ArrayList<TokenSequencePattern>(entries.size());
@@ -473,27 +460,17 @@ public class TokensRegexNERAnnotator implements Annotator {
       if (split.length >= 3) {
         overwritableTypes.addAll(Arrays.asList(split[2].trim().split(",")));
       }
-      if (split.length >= 4) {
+      if (split.length == 4) {
         try {
           priority = Double.parseDouble(split[3].trim());
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid priority in line " + lineCount
-                  + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
-        }
-      }
-      int annotateGroup = 0;
-      // Get annotate group from input....
-      if (split.length >= 5) {
-        // Which group to take (allow for context)
-        String context = split[4].trim();
-        try {
-          annotateGroup = Integer.parseInt(context);
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("ERROR: Invalid group in line " + lineCount
+        } catch(NumberFormatException e) {
+          throw new IllegalArgumentException("ERROR: Invalid line " + lineCount
                   + " in regexner file " + mappingFilename + ": \"" + line + "\"!", e);
         }
       }
 
+      // TODO: Get annotate group from input....
+      int annotateGroup = 0;
       Entry entry = new Entry(tokensRegex, regexes, type, overwritableTypes, priority, annotateGroup);
       if (seenRegexes.containsKey(key)) {
         Entry oldEntry = seenRegexes.get(key);
