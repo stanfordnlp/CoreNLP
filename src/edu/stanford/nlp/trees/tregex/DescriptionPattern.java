@@ -48,6 +48,9 @@ class DescriptionPattern extends TregexPattern {
 
   private final Function<String, String> basicCatFunction;
 
+  /** Used to detect regex expressions which can be simplified to exact matches */
+  private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/|/\\^\\[(.)\\]\\$/");
+
   public DescriptionPattern(Relation rel, boolean negDesc, String desc,
                             String name, boolean useBasicCat,
                             Function<String, String> basicCatFunction,
@@ -64,6 +67,24 @@ class DescriptionPattern extends TregexPattern {
         descPattern = null;
         exactMatch = null;
         stringFilter = null;
+      } else if (SINGLE_WORD_PATTERN.matcher(desc).matches()) {
+        // Expressions are written like this to put special characters
+        // in the tregex matcher, but a regular expression is less
+        // efficient than a simple string match
+        descriptionMode = DescriptionMode.EXACT;
+        descPattern = null;
+        Matcher matcher = SINGLE_WORD_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        exactMatch = matchedGroup;
+        stringFilter = null;
+        //System.err.println("DescriptionPattern: converting " + desc + " to " + exactMatch);
       } else if (desc.matches("/.*/")) {
         descriptionMode = DescriptionMode.PATTERN;
         descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
