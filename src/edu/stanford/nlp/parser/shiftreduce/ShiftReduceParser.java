@@ -9,8 +9,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParserQueryFactory;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
@@ -20,7 +20,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 
-public class ShiftReduceParser implements Serializable, ParserQueryFactory {
+public class ShiftReduceParser implements Serializable, ParserGrammar {
   final Index<Transition> transitionIndex;
   final Index<String> featureIndex;
   final double[][] featureWeights;
