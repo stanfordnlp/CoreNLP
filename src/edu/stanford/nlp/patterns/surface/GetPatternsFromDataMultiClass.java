@@ -378,21 +378,26 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
           
           totalNumSents+= sentsf.size();
-          Redwood.log(Redwood.DBG, "Labeling sents from " + f + " with " + sentsf.size() + " sentences");
+          
           if(createInvIndex)
             constVars.invertedIndex.add(sentsf, f.getName(), constVars.useLemmaContextTokens);
           
-          if (labelUsingSeedSets) {
-            for (String l : seedSets.keySet()) {
-              Redwood.log(Redwood.DBG, "Labeling data using seed set for " + l);
-  
-              runLabelSeedWords(sentsf, constVars.answerClass.get(l), l, seedSets.get(l));
-              if (constVars.getOtherSemanticClasses() != null)
-                runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClasses());
-              Redwood.log(Redwood.DBG, "Saving the labeled seed sents to the same file " + f);
-              IOUtils.writeObjectToFile(sentsf, f);
-            }
+          
+          
+          Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size() + " sentences, either by labeling with the seed set or just setting the right classes");
+          for (String l : constVars.answerClass.keySet()) {
+            
+            Set<String> seed = seedSets==null || !labelUsingSeedSets ? new HashSet<String>(): (seedSets.containsKey(l) ? seedSets.get(l) : new HashSet<String>());
+            
+            runLabelSeedWords(sentsf, constVars.answerClass.get(l), l, seed);
+            
+            Set<String> otherseed = constVars.getOtherSemanticClasses() ==null || !labelUsingSeedSets ? new HashSet<String>(): constVars.getOtherSemanticClasses();
+            if (constVars.getOtherSemanticClasses() != null)
+                runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed);
+            
           }
+          Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + f);
+          IOUtils.writeObjectToFile(sentsf, f);
         }
       }
     } else {
@@ -402,19 +407,23 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if(createInvIndex)
         constVars.invertedIndex.add(Data.sents, "1", constVars.useLemmaContextTokens);
       
-      if (labelUsingSeedSets) {
-        for (String l : seedSets.keySet()) {
-          Redwood.log(Redwood.DBG, "Labeling data using seed set for " + l);
-
-          runLabelSeedWords(Data.sents, constVars.answerClass.get(l), l, seedSets.get(l));
-          if (constVars.getOtherSemanticClasses() != null)
-            runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClasses());
-        }
+      Redwood.log(Redwood.DBG, "Initializing sents " + Data.sents.size() + " sentences, either by labeling with the seed set or just setting the right classes");
+      for (String l : constVars.answerClass.keySet()) {
+        
+        Set<String> seed = seedSets==null || !labelUsingSeedSets ? new HashSet<String>(): (seedSets.containsKey(l) ? seedSets.get(l) : new HashSet<String>());
+        
+        runLabelSeedWords(Data.sents, constVars.answerClass.get(l), l, seed);
+        
+        Set<String> otherseed = constVars.getOtherSemanticClasses() ==null || !labelUsingSeedSets ? new HashSet<String>(): constVars.getOtherSemanticClasses();
+        if (constVars.getOtherSemanticClasses() != null)
+            runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed);        
       }
+
 
     }
     
     if(constVars.saveInvertedIndexDir != null){
+      IOUtils.ensureDir(new File(constVars.saveInvertedIndexDir));
       constVars.invertedIndex.saveIndex(constVars.saveInvertedIndexDir);
     }
     
@@ -715,11 +724,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     else
       num = keyset.size() / (constVars.numThreads - 1);
     ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-    Redwood.log(Redwood.DBG, "keyset size is " + keyset.size());
+    Redwood.log(ConstantsAndVariables.extremedebug, "keyset size is " + keyset.size());
     List<Future<Map<String, List<CoreLabel>>>> list = new ArrayList<Future<Map<String, List<CoreLabel>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
       List<String> keys = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
-      Redwood.log(Redwood.DBG, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
+      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
 
       Callable<Map<String, List<CoreLabel>>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label);
       Future<Map<String, List<CoreLabel>>> submit = executor.submit(task);
@@ -1337,7 +1346,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   // TODO: this right now doesn't work for matchPatterns because of
   // DictAnnotationDTorSC. we are not setting DT, SC thing in the test sentences
-  // (may be this comment is not relevant anymore.)
+  // Update: (may be this comment is not relevant anymore.)
+  
   public void labelWords(String label, Map<String, List<CoreLabel>> sents, Set<String> identifiedWords, Set<SurfacePattern> patterns, String outFile,
       CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat) throws IOException {
 
@@ -1405,14 +1415,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
       }
 
-      if (patternsForEachToken.containsKey(sentEn.getKey())) {
+      if (patternsForEachToken != null && patternsForEachToken.containsKey(sentEn.getKey())) {
         for (int index : contextWordsRecalculatePats)
           this.patternsForEachToken.get(sentEn.getKey()).put(index, createPats.getContext(sentEn.getValue(), index));
       }
     }
 
     if (outFile != null) {
-      Redwood.log(constVars.minimaldebug, "Writing results to " + outFile);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "Writing results to " + outFile);
       IOUtils.writeObjectToFile(sents, outFile);
     }
   }
@@ -1564,9 +1574,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       System.out.println(en.getKey() + ":\t\t" + en.getValue().keySet() + "\n\n");
     }
 
-    if (constVars.markedOutputTextFile != null) {
-      this.writeLabeledData(constVars.markedOutputTextFile);
-    }
 
     // close all the writers
     for (String label : constVars.getLabelDictionary().keySet()) {
@@ -1647,25 +1654,26 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   void writePatternsToFile(Counter<SurfacePattern> pattern, BufferedWriter outFile) throws IOException {
-    // JsonObjectBuilder obj = Json.createObjectBuilder();
-    // IOUtils.ensureDir(new File(outFile).getParentFile());
     for (Entry<SurfacePattern, Double> en : pattern.entrySet())
       outFile.write(en.getKey().toString() + "\t" + en.getValue() + "\n");
-    // IOUtils.writeStringToFile(obj.build().toString(), outFile, "UTF-8");
-
+  }
+  
+  void writeWordsToFile(Counter<String> words, BufferedWriter outFile) throws IOException {
+    for(Entry<String, Double> en :  words.entrySet())
+      outFile.write(en.getKey()+"\t"+en.getValue()+"\n");
   }
 
-  // Counter<String> readPatternsFromFile(String file) throws
-  // JsonSyntaxException, JsonIOException, FileNotFoundException {
-  // Gson gson = new GsonBuilder().create();
-  // Type typeOfT = new TypeToken<Map<String, Double>>() {
-  // }.getType();
-  //
-  // Counter<String> patterns = new ClassicCounter<String>();
-  // patterns.addAll(Counters.fromMap((Map<String, Double>) gson.fromJson(new
-  // BufferedReader(new FileReader(file)), typeOfT)));
-  // return patterns;
-  // }
+
+  
+  Counter<String> readLearnedWordsFromFile(File file) {
+    Counter<String> words = new ClassicCounter<String>();
+    for (String line : IOUtils.readLines(file)) {
+      String[] t = line.split("\t");
+      words.setCount(t[0], Double.parseDouble(t[1]));
+    }
+    return words;
+  }
+  
 
   public Counter<String> getLearnedWords(String label) {
     return this.learnedWords.get(label);
@@ -1675,6 +1683,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return this.learnedPatterns.get(label);
   }
 
+  public void setLearnedWords(Counter<String> words, String label) {
+    this.learnedWords.put(label, words);
+  }
+
+  public void setLearnedPatterns(Counter<SurfacePattern> patterns, String label) {
+    this.learnedPatterns.put(label, patterns);
+  }
+  
   /**
    * COPIED from CRFClassifier: Count the successes and failures of the model on
    * the given document. Fills numbers in to counters for true positives, false
@@ -2289,10 +2305,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       boolean learn = Boolean.parseBoolean(props.getProperty("learn", "true"));
 
       boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets", "true"));
-      GetPatternsFromDataMultiClass g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
+
+     GetPatternsFromDataMultiClass  g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
+      
       g.constVars.saveSentencesSerDir = saveSentencesSerDir;
       Execution.fillOptions(g, props);
-      if (learn) {
 
         // Redwood.log(ConstantsAndVariables.minimaldebug,
         // "Total number of training sentences " + Data.sents.size());
@@ -2302,9 +2319,66 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         String wordsOutputFile = props.getProperty("wordsOutputFile");
 
         String patternOutFile = props.getProperty("patternOutFile");
-
-        g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile, patternOutFile, ignorePatterns);
-
+       
+        //If you want to reuse patterns and words learned previously (may be on another dataset etc)
+        boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
+        String patternsWordsDir = props.getProperty("patternsWordsDir");
+               
+        if (loadSavedPatternsWordsDir) {
+          for (String label : g.constVars.getLabelDictionary().keySet()) {
+            assert (new File(patternsWordsDir+"/"+label).exists());
+            File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
+            if(patf.exists()){
+              Counter<SurfacePattern> patterns = IOUtils.readObjectFromFile(patf);
+              g.setLearnedPatterns(patterns, label);
+              Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
+            }
+            File wordf = new File(patternsWordsDir + "/" + label + "/phrases.txt");
+            if(wordf.exists()){
+            Counter<String> words = g.readLearnedWordsFromFile(wordf);
+            g.setLearnedWords(words, label);
+            Redwood.log(Redwood.DBG, "Loaded " + words.size() + " from " + patf);            
+            }
+            CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat = null;
+            
+            if (g.constVars.restrictToMatched) {
+              TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
+              g.scorePhrases.applyPats(g.getLearnedPatterns(label), label, false, wordsandLemmaPatExtracted, matchedTokensByPat);
+            }
+            
+            if (g.constVars.batchProcessSents) {
+              for (File f : Data.sentsFiles) {
+                Redwood.log(Redwood.DBG, "labeling sentences from " + f + " with the already learned words");
+                Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
+                assert sentsf != null : "Why are sents null";
+                g.labelWords(label, sentsf, g.getLearnedWords(label).keySet(), g.getLearnedPatterns(label).keySet(), sentsOutFile, matchedTokensByPat);
+                IOUtils.writeObjectToFile(sentsf, f);
+              }
+            } else
+              g.labelWords(label, Data.sents, g.getLearnedWords(label).keySet(), g.getLearnedPatterns(label).keySet(), sentsOutFile,
+                  matchedTokensByPat);
+          }
+        }
+        
+        if (learn) 
+          g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile, patternOutFile, ignorePatterns);
+        
+        if (g.constVars.markedOutputTextFile != null) {
+          g.writeLabeledData(g.constVars.markedOutputTextFile);
+        }
+        
+        boolean savePatternsWordsDir = Boolean.parseBoolean(props.getProperty("savePatternsWordsDir"));
+        
+        if(savePatternsWordsDir){
+          for(String label : g.constVars.getLabelDictionary().keySet()){
+            IOUtils.ensureDir(new File(patternsWordsDir+"/"+label));
+            IOUtils.writeObjectToFile(g.getLearnedPatterns(label), patternsWordsDir+"/"+label+"/patterns.ser");
+            BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir+"/"+label+"/phrases.txt"));
+            g.writeWordsToFile(g.getLearnedWords(label), w);
+            w.close();
+          }
+        }
+        
         if (evaluate) {
           // The format of goldEntitiesEvalFiles is assumed same as
           // seedwordsfiles: label,file;label2,file2;...
@@ -2350,7 +2424,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                 .println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
 
         }
-      }
+      
     } catch (OutOfMemoryError e) {
       System.out
           .println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you wanna allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
