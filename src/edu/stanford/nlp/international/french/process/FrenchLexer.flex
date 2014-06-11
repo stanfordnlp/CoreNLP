@@ -286,7 +286,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   }
 
   private Object getNext() {
-    final String txt = yytext();
+    final String txt = removeSoftHyphens(yytext());
     return getNext(txt, txt);
   }
 
