@@ -133,7 +133,13 @@ public abstract class PhraseScorer {
       wordShape = WordShapeClassifier.wordShape(word, constVars.wordShaper);
       constVars.getWordShapeCache().put(word, wordShape);
     }
-    double score = constVars.getWordShapesForLabels().get(label).getCount(wordShape) / (constVars.getWordShapesForLabels().get(label).totalCount() + 1);
+    double thislabel = 0, alllabels =0;
+    for(Entry<String, Counter<String>> en: constVars.getWordShapesForLabels().entrySet()){
+      if(en.getKey().equals(label))
+        thislabel = en.getValue().getCount(wordShape);
+      alllabels += en.getValue().getCount(wordShape);
+    }
+    double score = thislabel/ (alllabels + 1);
     return score;
   }
   

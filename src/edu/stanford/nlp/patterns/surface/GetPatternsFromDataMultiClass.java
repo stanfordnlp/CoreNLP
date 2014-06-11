@@ -1646,8 +1646,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       patterns.addAll(getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns));
       learnedPatterns.get(label).addAll(patterns);
 
-      System.out.println("All learned patterns right now are "
-          + Counters.toSortedString(learnedPatterns.get(label), learnedPatterns.get(label).size(), "%1$s:%2$f", "\n"));
 
       if (sentsOutFile != null)
         sentsOutFile = sentsOutFile + "_" + i + "iter.ser";

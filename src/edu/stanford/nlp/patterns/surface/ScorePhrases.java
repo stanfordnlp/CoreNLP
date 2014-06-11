@@ -533,11 +533,12 @@ public class ScorePhrases {
         writtenInJustification.put(label, true);
       }
       if (constVars.justify) {
+        Redwood.log(Redwood.DBG, "\nJustification for phrases:\n");
         for (String word : finalwords.keySet()) {
           Redwood.log(
-              Redwood.DBG,
+              Redwood.DBG, "Phrase " + 
               word
-                  + "\t"
+                  + " extracted because of patterns: \t"
                   + Counters.toSortedString(wordsPatExtracted.getCounter(word),
                       wordsPatExtracted.getCounter(word).size(), "%1$s:%2$f",
                       "\n"));
