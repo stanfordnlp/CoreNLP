@@ -123,8 +123,6 @@ public class ModCollinsHeadFinder extends CollinsHeadFinder {
 
     /* HJT: Adding the following to deal with oddly formed data in (for example) the Brown corpus */
     nonTerminalInfo.put("ROOT", new String[][]{{"left", "S", "SQ", "SINV", "SBAR", "FRAG"}});
-    // Just to handle trees which have TOP instead of ROOT at the root
-    nonTerminalInfo.put("TOP", nonTerminalInfo.get("ROOT"));
     nonTerminalInfo.put("TYPO", new String[][]{{"left", "NN", "NP", "NML", "NNP", "NNPS", "TO",
       "VBD", "VBN", "MD", "VBZ", "VB", "VBG", "VBP", "VP", "ADJP", "JJP", "FRAG"}}); // for Brown (Roger)
     nonTerminalInfo.put("ADV", new String[][]{{"right", "RB", "RBR", "RBS", "FW",
