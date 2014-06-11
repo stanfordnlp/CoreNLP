@@ -340,19 +340,6 @@ public class Counters {
   }
 
   /**
-   * For all keys (u,v) in arg1 and arg2, sets return[u,v] to be summation of both
-   * @param <T1>
-   * @param <T2>
-   *                
-   */                
-  public static <T1, T2> TwoDimensionalCounter<T1, T2> add(TwoDimensionalCounter<T1, T2> arg1, TwoDimensionalCounter<T1, T2> arg2) {
-    TwoDimensionalCounter<T1, T2> add = new TwoDimensionalCounter<T1, T2>();
-    Counters.addInPlace(add , arg1);
-    Counters.addInPlace(add , arg2);
-    return add;
-  }
-
-   /**
    * For all keys (u,v) in arg, sets target[u,v] to be target[u,v] + scale *
    * arg[u,v]
    *
@@ -770,19 +757,6 @@ public class Counters {
       counter.remove(key);
   }
 
-  /**
-   * Removes all entries with keys (first key set) in the given collection
-   *
-   * @param <E>
-   * @param counter
-   * @param removeKeysCollection
-   */
-  public static <E, F> void removeKeys(TwoDimensionalCounter<E, F> counter, Collection<E> removeKeysCollection) {
-
-    for (E key : removeKeysCollection)
-      counter.remove(key);
-  }
-  
   /**
    * Returns the set of keys whose counts are at or above the given threshold.
    * This set may have 0 elements but will not be null.
@@ -1252,16 +1226,6 @@ public class Counters {
     }
     return dotProd;
   }
-  
-
-  public static <E> Counter<E> add(Counter<E> c1, Collection<E> c2) {
-    Counter<E> result = c1.getFactory().create();
-    addInPlace(result, c1);
-    for (E key : c2) {
-      result.incrementCount(key, 1);
-    }
-    return result;
-  }
 
   public static <E> Counter<E> add(Counter<E> c1, Counter<E> c2) {
     Counter<E> result = c1.getFactory().create();
@@ -1351,22 +1315,7 @@ public class Counters {
     }
     return result;
   }
-  
-  /**
-   * Returns c1 divided by c2. Safe - will not calculate scores for keys that are zero or that do not exist in c2
-   *
-   * @return c1 divided by c2.
-   */
-  public static <E> Counter<E> divisionNonNaN(Counter<E> c1, Counter<E> c2) {
-    Counter<E> result = c1.getFactory().create();
-    for (E key : Sets.union(c1.keySet(), c2.keySet())) {
-      if(c2.getCount(key) != 0)
-        result.setCount(key, c1.getCount(key) / c2.getCount(key));
-    }
-    return result;
-  }
 
-  
   /**
    * Calculates the entropy of the given counter (in bits). This method
    * internally uses normalized counts (so they sum to one), but the value
@@ -2286,8 +2235,6 @@ public class Counters {
     return result;
   }
 
-  static final Random RAND = new Random();
-
   /**
    * Does not assumes c is normalized.
    *
@@ -2303,7 +2250,6 @@ public class Counters {
     // } else {
     //   throw new RuntimeException("Results won't be stable since Counters keys are comparable.");
     // }
-    if (rand == null) rand = RAND;
     double r = rand.nextDouble() * c.totalCount();
     double total = 0.0;
 
