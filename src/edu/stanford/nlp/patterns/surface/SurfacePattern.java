@@ -232,6 +232,15 @@ public class SurfacePattern implements Serializable {
     return subsume;
   }
 
+  public static boolean sameRestrictions(SurfacePattern p1, SurfacePattern p2) {
+    PatternToken token1 = p1.token;
+    PatternToken token2 = p2.token;
+    if(token1.equals(token2))
+        return true;
+    else
+      return false;
+  }
+
   // public static SurfacePattern parse(String s) {
   // String[] t = s.split("##", -1);
   // String prev = t[0];
