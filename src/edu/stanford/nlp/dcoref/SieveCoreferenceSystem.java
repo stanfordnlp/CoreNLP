@@ -76,7 +76,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.NewlineLogFormatter;
-
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Multi-pass Sieve coreference resolution system (see EMNLP 2010 paper).
@@ -343,7 +343,6 @@ public class SieveCoreferenceSystem {
     initializeAndRunCoref(props);
   }
 
-  /** Returns the name of the log file that this method writes. */
   public static String initializeAndRunCoref(Properties props) throws Exception {
     String timeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
 
@@ -1037,17 +1036,19 @@ public class SieveCoreferenceSystem {
     return res;
   }
   public static void runConllEval(String conllMentionEvalScript,
-      String goldFile, String predictFile, String evalFile, String errFile) throws IOException {
+      String goldFile, String predictFile, String evalFile, String errFile) throws IOException
+      {
     ProcessBuilder process = new ProcessBuilder(conllMentionEvalScript, "all", goldFile, predictFile);
     PrintWriter out = new PrintWriter(new FileOutputStream(evalFile));
     PrintWriter err = new PrintWriter(new FileOutputStream(errFile));
     SystemUtils.run(process, out, err);
     out.close();
     err.close();
-  }
+      }
 
   public static String getConllEvalSummary(String conllMentionEvalScript,
-      String goldFile, String predictFile) throws IOException {
+      String goldFile, String predictFile) throws IOException
+      {
     ProcessBuilder process = new ProcessBuilder(conllMentionEvalScript, "all", goldFile, predictFile, "none");
     StringOutputStream errSos = new StringOutputStream();
     StringOutputStream outSos = new StringOutputStream();
@@ -1058,11 +1059,11 @@ public class SieveCoreferenceSystem {
     err.close();
     String summary = outSos.toString();
     String errStr = errSos.toString();
-    if ( ! errStr.isEmpty()) {
+    if (errStr.length() > 0) {
       summary += "\nERROR: " + errStr;
     }
     return summary;
-  }
+      }
 
   /** Print logs for error analysis */
   public void printTopK(Logger logger, Document document, Semantics semantics) {
