@@ -29,7 +29,6 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.international.french.DybroFrenchHeadFinder;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
-import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -563,7 +562,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
   }
 
   public TreeReaderFactory treeReaderFactory() {
-    return (readPennFormat) ? new FrenchTreeReaderFactory() : new FrenchXMLTreeReaderFactory();
+    return new FrenchTreeReaderFactory(readPennFormat);
   }
 
   public List<HasWord> defaultTestSentence() {

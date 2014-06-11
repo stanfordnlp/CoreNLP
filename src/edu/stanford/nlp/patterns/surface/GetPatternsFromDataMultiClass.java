@@ -78,8 +78,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * 
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
- * (or txt) and ser, where the serialized file is of the type <code>Map&lt;String,
- * List&lt;CoreLabel&gt;&gt;</code>.
+ * (or txt) and ser, where the serialized file is of the type Map<String,
+ * List<CoreLabel>>.
  * <p>
  * <code>file</code>: (Required) Input file(s) (default assumed text). Can be
  * one or more of (concatenated by comma or semi-colon): file, directory, files
@@ -96,9 +96,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * 
  * <p>
  * To use a properties file, see
- * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties
+ * projects/core/data/edu/stanford/nlp/patterns/surface/data/example.properties
  * as an example for the flags and their brief descriptions. Run the code as:
- * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props projects/core/data/edu/stanford/nlp/patterns/surface/example.properties</code>
+ * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props projects/core/data/edu/stanford/nlp/patterns/surface/data/example.properties</code>
  * 
  * <p>
  * IMPORTANT: Many flags are described in the classes
@@ -2169,24 +2169,24 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   public static List<File> getAllFiles(String file) {
-    
     List<File> allFiles = new ArrayList<File>();
     for (String tokfile : file.split("[,;]")) {
       File filef = new File(tokfile);
+      String path = ".*";
+      File dir = null;
       if (filef.isDirectory()) {
-        String path = ".*";
-        File dir = filef;
-        for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
-          Redwood.log(Redwood.DBG, "Reading file " + f);
-          allFiles.add(f);
-        }
+        dir = filef;
       } else {
-        Redwood.log(Redwood.DBG, "Reading file " + filef);
-        allFiles.add(filef);
+        dir = filef.getParentFile();
+        path = "^" + filef.getAbsolutePath() + "$";
       }
 
       // RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
       // File[] files = dir.listFiles(fileFilter);
+      for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
+        System.out.println("Reading file " + f);
+        allFiles.add(f);
+      }
     }
 
     return allFiles;
@@ -2525,12 +2525,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
 
         if (evalsents.size() == 0 && goldEntitiesEvalFiles == null)
-          System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
+          System.err
+              .println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
 
       }
 
     } catch (OutOfMemoryError e) {
-      System.out.println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you wanna allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
+      System.out
+          .println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you wanna allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
       e.printStackTrace();
     } catch (Exception e) {
       e.printStackTrace();

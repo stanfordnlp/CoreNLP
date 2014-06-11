@@ -152,16 +152,12 @@ public abstract class FeatureFactory implements Serializable {
     return (CoreLabel) node.label();
   }
 
-  public static CoreLabel getQueueLabel(State state, int offset) {
-    return getQueueLabel(state.sentence, state.tokenPosition, offset);
-  }
-
-  public static CoreLabel getQueueLabel(List<Tree> sentence, int tokenPosition, int offset) {
-    if (tokenPosition + offset < 0 || tokenPosition + offset >= sentence.size()) { 
+  public static CoreLabel getQueueLabel(List<Tree> sentence, int tokenPosition, int nodeNum) {
+    if (tokenPosition + nodeNum < 0 || tokenPosition + nodeNum >= sentence.size()) { 
       return null;
     }
 
-    Tree node = sentence.get(tokenPosition + offset);
+    Tree node = sentence.get(tokenPosition + nodeNum);
     if (!(node.label() instanceof CoreLabel)) {
       throw new IllegalArgumentException("Can only featurize CoreLabel trees");
     }
