@@ -153,7 +153,7 @@ public class WordToSentenceProcessorTest extends TestCase {
                     WordToSentenceProcessor.DEFAULT_BOUNDARY_FOLLOWERS,
                     WordToSentenceProcessor.DEFAULT_SENTENCE_BOUNDARIES_TO_DISCARD,
                     Generics.newHashSet(Arrays.asList("p")),
-                    "chapter|preface", WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, null, null, false, false);
+                    "chapter|preface", WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER, false, false);
     String input1 = "<title>Chris rules!</title><preface><p>Para one</p><p>Para two</p></preface>" +
             "<chapter><p>Text we like. Two sentences \n\n in it.</p></chapter><coda>Some more text here</coda>";
     checkResult(wtsRegion, input1,
