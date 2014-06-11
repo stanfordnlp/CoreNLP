@@ -1106,6 +1106,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     String encoding = pipeline.getEncoding();
     BufferedReader r = new BufferedReader(IOUtils.encodedInputStreamReader(System.in, encoding));
     System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
+    final OutputFormat outputFormat = OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     while (true) {
       System.err.print("NLP> ");
       String line = r.readLine();
@@ -1114,7 +1115,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       }
       if (line.length() > 0) {
         Annotation anno = pipeline.process(line);
-        pipeline.prettyPrint(anno, System.out);
+        switch (outputFormat) {
+        case XML:
+          pipeline.xmlPrint(anno, System.out);
+          break;
+        case TEXT:
+          pipeline.prettyPrint(anno, System.out);
+          break;
+        default:
+          throw new IllegalArgumentException("Cannot output in format " + outputFormat + " from the interactive shell");
+        }
       }
     }
   }
