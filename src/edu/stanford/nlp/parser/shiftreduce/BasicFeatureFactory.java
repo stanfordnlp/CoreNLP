@@ -74,36 +74,37 @@ public class BasicFeatureFactory implements FeatureFactory {
     return (CoreLabel) node.label();
   }
 
+  static final String NULL = "*NULL*";
+
   public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String conFeature, String wordFeature, String tagFeature) {
-    if (label != null) {
-      features.add(conFeature + label.value());
-      features.add(wordFeature + label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value() + "-" + label.value());
-      features.add(tagFeature + label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value() + "-" + label.value());
-    }
+    String constituent = (label == null) ? NULL : label.value();
+    String tag = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+    String word = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+
+    features.add(conFeature + constituent);
+    features.add(wordFeature + word + "-" + constituent);
+    features.add(tagFeature + tag + "-" + constituent);
   }
 
   public static void addUnaryQueueFeatures(Set<String> features, CoreLabel label, String wtFeature) {
-    if (label != null) {
-      // TODO: check to see if this is slow because of the string concat
-      features.add(wtFeature + label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value() + "-" + label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value());
-    }
+    String tag = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+    String word = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+
+    // TODO: check to see if this is slow because of the string concat
+    features.add(wtFeature + tag + "-" + word);
   }
 
   public static void addBinaryFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2) {
-    if (label1 == null || label2 == null) {
-      return;
-    }
-
     String value1 = null;
     switch(feature1) {
     case HEADWORD:
-      value1 = label1.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
       break;
     case HEADTAG:
-      value1 = label1.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      value1 = (label1 == null) ? NULL : label1.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
       break;
     case VALUE:
-      value1 = label1.value();
+      value1 = (label1 == null) ? NULL : label1.value();
       break;
     default:
       throw new IllegalArgumentException("Unexpected feature type: " + feature1);
@@ -112,13 +113,13 @@ public class BasicFeatureFactory implements FeatureFactory {
     String value2 = null;
     switch(feature2) {
     case HEADWORD:
-      value2 = label2.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
       break;
     case HEADTAG:
-      value2 = label2.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      value2 = (label2 == null) ? NULL : label2.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
       break;
     case VALUE:
-      value2 = label2.value();
+      value2 = (label2 == null) ? NULL : label2.value();
       break;
     default:
       throw new IllegalArgumentException("Unexpected feature type: " + feature2);
