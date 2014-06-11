@@ -458,6 +458,9 @@ public class SeqClassifierFlags implements Serializable {
   public int featureCountThreshold = 0;
   public double featureWeightThreshold = 0.0;
 
+  // Inference label dictionary cutoff
+  public int labelDictionaryCutoff = -1;
+  
   // feature factory
   public String featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
   public Object[] featureFactoryArgs = new Object[0];
@@ -1003,10 +1006,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useNoisyLabel = false;
   public String errorMatrix = null;
   public boolean printTrainLabels = false;
-
-  // Inference label dictionary cutoff
-  public int labelDictionaryCutoff = -1;
-
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1604,6 +1603,8 @@ public class SeqClassifierFlags implements Serializable {
         splitOnHead = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("featureCountThreshold")) {
         featureCountThreshold = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
+        labelDictionaryCutoff = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useWord")) {
         useWord = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("memoryThrift")) {
@@ -2496,8 +2497,6 @@ public class SeqClassifierFlags implements Serializable {
         errorMatrix = val;
       } else if (key.equalsIgnoreCase("printTrainLabels")){
         printTrainLabels = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
-        labelDictionaryCutoff = Integer.parseInt(val);
 
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
