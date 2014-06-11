@@ -15,7 +15,6 @@ import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.metrics.TreeSpanScoring;
-import edu.stanford.nlp.rnn.RNNUtils;
 import edu.stanford.nlp.trees.DeepTree;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
@@ -41,12 +40,10 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     this.op = op;
   }
 
-  // TODO: factor out (for example, put in RNNUtils)
   public static double sigmoid(double x) {
     return 1.0 / (1.0 + Math.exp(-x));
   }
 
-  // TODO: factor out (for example, put in RNNUtils)
   // for now, tanh
   public static SimpleMatrix elementwiseApplyNonlinearity(SimpleMatrix input) {
     SimpleMatrix output = new SimpleMatrix(input);
@@ -58,7 +55,6 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     return output;
   }
 
-  // TODO: factor out (for example, put in RNNUtils)
   // derivative of tanh
   public static SimpleMatrix nonlinearityVectorToDerivative(SimpleMatrix input) {
     SimpleMatrix output = new SimpleMatrix(input.numRows(), input.numCols());
@@ -71,7 +67,6 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
    * Concatenates several column vectors into one large column
    * vector, adds a 1.0 at the end as a bias term
    */
-  // TODO: factor out (for example, put in RNNUtils)
   public static SimpleMatrix concatenateWithBias(SimpleMatrix ... vectors) {
     int size = 0;
     for (SimpleMatrix vector : vectors) {
@@ -93,7 +88,6 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
   /**
    * Concatenates several column vectors into one large column vector
    */
-  // TODO: factor out (for example, put in RNNUtils)
   public static SimpleMatrix concatenate(SimpleMatrix ... vectors) {
     int size = 0;
     for (SimpleMatrix vector : vectors) {
@@ -383,27 +377,27 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
     double[] localDerivativeGood;
     double[] localDerivativeB;
     if (DVModel.TRAIN_WORD_VECTORS) {
-      localDerivativeGood = RNNUtils.paramsToVector(theta.length,
-                                                    binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
-                                                    binaryScoreDerivativesG.valueIterator(),
-                                                    unaryScoreDerivativesG.values().iterator(),
-                                                    wordVectorDerivativesG.values().iterator());
+      localDerivativeGood = DVModel.paramsToVector(theta.length,
+                                                   binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
+                                                   binaryScoreDerivativesG.valueIterator(),
+                                                   unaryScoreDerivativesG.values().iterator(),
+                                                   wordVectorDerivativesG.values().iterator());
 
-      localDerivativeB = RNNUtils.paramsToVector(theta.length,
-                                                 binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
-                                                 binaryScoreDerivativesB.valueIterator(),
-                                                 unaryScoreDerivativesB.values().iterator(),
-                                                 wordVectorDerivativesB.values().iterator());
+      localDerivativeB = DVModel.paramsToVector(theta.length,
+                                                binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
+                                                binaryScoreDerivativesB.valueIterator(),
+                                                unaryScoreDerivativesB.values().iterator(),
+                                                wordVectorDerivativesB.values().iterator());
     } else {
-      localDerivativeGood = RNNUtils.paramsToVector(theta.length,
-                                                    binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
-                                                    binaryScoreDerivativesG.valueIterator(),
-                                                    unaryScoreDerivativesG.values().iterator());
+      localDerivativeGood = DVModel.paramsToVector(theta.length,
+                                                   binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
+                                                   binaryScoreDerivativesG.valueIterator(),
+                                                   unaryScoreDerivativesG.values().iterator());
 
-      localDerivativeB = RNNUtils.paramsToVector(theta.length,
-                                                 binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
-                                                 binaryScoreDerivativesB.valueIterator(),
-                                                 unaryScoreDerivativesB.values().iterator());
+      localDerivativeB = DVModel.paramsToVector(theta.length,
+                                                binaryW_dfsB.valueIterator(), unaryW_dfsB.values().iterator(),
+                                                binaryScoreDerivativesB.valueIterator(),
+                                                unaryScoreDerivativesB.values().iterator());
     }
 
     // correct - highest
