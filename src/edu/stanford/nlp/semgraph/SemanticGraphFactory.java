@@ -159,8 +159,7 @@ public class SemanticGraphFactory {
   }
 
 
-  // TODO: these booleans would be more readable as enums similar to Mode.
-  // Then the arguments would make more sense
+  // todo: improve the interface here: we don't really have a whole set of booleans; really basic, collapse, tree, and ccProcess are an enum; only the later ones crosscut.
   public static SemanticGraph makeFromTree(GrammaticalStructure gs,
                                            Mode mode,
                                            boolean includeExtras,
