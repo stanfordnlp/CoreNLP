@@ -1908,11 +1908,13 @@ public class StringUtils {
       String vrValue;
       //either in the props file
       if (props.containsKey(varName)) {
-        vrValue = (String) props.get(varName);
+        vrValue = ((String) props.get(varName));
+        vrValue = Matcher.quoteReplacement(vrValue);
       } else {
         //or as the environment variable
         vrValue = System.getenv(varName);
       }
+      System.out.println(varName+":"+ sb + " and " + vrValue);
       m.appendReplacement(sb, null == vrValue ? "" : vrValue);
     }
     m.appendTail(sb);
@@ -1929,6 +1931,7 @@ public class StringUtils {
   public static Properties argsToPropertiesWithResolve(String[] args) {
     TreeMap<String, String> result = new TreeMap<String, String>();
     Map<String, String> existingArgs = new TreeMap<String, String>();
+    
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -1944,13 +1947,15 @@ public class StringUtils {
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
+        
         if (flagArgs.isEmpty()) {
           existingArgs.put(key, "true");
         } else {
 
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
-            result.putAll(propFileToTreeMap(join(flagArgs," "), existingArgs));
-            i++;
+            for(String flagArg: flagArgs)
+              result.putAll(propFileToTreeMap(flagArg, existingArgs));
+            
             existingArgs.clear();
           } else
             existingArgs.put(key, join(flagArgs, " "));
