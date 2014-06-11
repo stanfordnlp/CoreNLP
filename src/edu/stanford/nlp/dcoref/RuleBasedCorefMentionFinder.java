@@ -298,7 +298,10 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     if (wordMatch != null) {
       Tree head = safeHead(wordMatch, endIdx);
       if (head != null) {
-        return head;
+        int index = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class)-1;
+        if (index >= m.startIndex && index < endIdx) {
+          return head;
+        }
       }
     }
 
