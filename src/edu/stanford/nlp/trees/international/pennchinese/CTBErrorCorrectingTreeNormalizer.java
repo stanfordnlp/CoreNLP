@@ -191,6 +191,12 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
           if (subtree.firstChild().value().matches("\u4ed6")) {
             EncodingPrintWriter.err.println("Correcting error: \"\u4ed6\" under PU tag; tag changed to PN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
             subtree.setValue("PN");
+          } else if (subtree.firstChild().value().equals("里")) {
+            EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to LC: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            subtree.setValue("LC");
+          } else if (subtree.firstChild().value().equals("是")) {
+            EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to VC: " + subtree, ChineseTreebankLanguagePack.ENCODING);
+            subtree.setValue("VC");
           } else if (subtree.firstChild().value().matches("tw|\u534A\u7A74\u5F0F")) {
             EncodingPrintWriter.err.println("Correcting error: \"" + subtree.firstChild().value() + "\" under PU tag; tag changed to NN: " + subtree, ChineseTreebankLanguagePack.ENCODING);
             subtree.setValue("NN");
