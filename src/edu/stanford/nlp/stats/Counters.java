@@ -1192,6 +1192,9 @@ public class Counters {
     return result;
   }
 
+  /**
+   * increments every key in the counter by value
+   */
   public static <E> Counter<E> add(Counter<E> c1, double value) {
     Counter<E> result = c1.getFactory().create();
     for (E key : c1.keySet()) {
@@ -2923,5 +2926,11 @@ public class Counters {
       fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
     }
     return fscores;
+  }
+  
+  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
+    for(E key: counter.keySet()){
+      counter.setCount(key, func.apply(counter.getCount(key)));
+    }
   }
 }
