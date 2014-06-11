@@ -43,6 +43,10 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2014-01-04    3.3.1     Bugfix release 
+
+2013-11-12    3.3.0     Add sentiment model, minor sutime improvements 
+
 2013-06-19    3.2.0     New RNN parser model, more efficient tagger 
 
 2013-04-04    1.3.5     Speed improvements, coref improvements, 

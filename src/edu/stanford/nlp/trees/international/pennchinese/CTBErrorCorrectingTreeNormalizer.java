@@ -161,11 +161,17 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
     // and presumably should be "NN"
     // a couple of other random errors are corrected here
     for (Tree subtree : newTree) {
-      if (subtree.value().equals("ROOT") && subtree.firstChild().isLeaf() && "CP".equals(subtree.firstChild().value())) {
-        EncodingPrintWriter.err.println("Correcting error: seriously messed up tree in CTB6: " + newTree, ChineseTreebankLanguagePack.ENCODING);
-        List<Tree> children = subtree.getChildrenAsList();
-        children = children.subList(1,children.size() - 1);
-        subtree.setChildren(children);
+      if (subtree.value().equals("CP") && subtree.numChildren() == 1) {
+        Tree subsubtree = subtree.firstChild();
+        if (subsubtree.value().equals("ROOT")) {
+          if (subsubtree.firstChild().isLeaf() && "CP".equals(subsubtree.firstChild().value())) {
+            EncodingPrintWriter.err.println("Correcting error: seriously messed up tree in CTB6: " + newTree, ChineseTreebankLanguagePack.ENCODING);
+            List<Tree> children = subsubtree.getChildrenAsList();
+            children = children.subList(1,children.size());
+            subtree.setChildren(children);
+            EncodingPrintWriter.err.println("  Corrected as:                                     " + newTree, ChineseTreebankLanguagePack.ENCODING); // spaced to align with above
+          }
+        }
       }
       if (subtree.isPreTerminal()) {
         if (subtree.value().matches("NP")) {
@@ -207,5 +213,14 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
     }
     return newTree;
   }
+
+  /** So you can create one of these easily by reflection. */
+  public static class CTBErrorCorrectingTreeReaderFactory extends CTBTreeReaderFactory {
+
+    public CTBErrorCorrectingTreeReaderFactory() {
+      super(new CTBErrorCorrectingTreeNormalizer(false, false, false, false));
+    }
+
+  } // end class CTBErrorCorrectingTreeReaderFactory
 
 } // end class CTBErrorCorrectingTreeNormalizer
