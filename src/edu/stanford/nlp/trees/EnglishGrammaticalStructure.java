@@ -83,7 +83,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    */
   public EnglishGrammaticalStructure(Tree t, Filter<String> puncFilter, HeadFinder hf, boolean threadSafe) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super((new CoordinationTransformer()).transformTree(t), EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, hf, puncFilter);
+    super((new CoordinationTransformer(hf)).transformTree(t), EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, hf, puncFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -191,6 +191,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       boolean foundPrep = false;
       for (TypedDependency prep : list) {
+
+        // todo: It would also be good to add a rule here to prefer ccomp nsbubj over dobj if there is a ccomp with no subj
+        // then we could get right: Which eco-friendly options do you think there will be on the new Lexus?
+
         if (prep.reln() != PREPOSITIONAL_MODIFIER) {
           continue;
         }
@@ -243,7 +247,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Alters a list in place by removing all the KILL relations
    */
-  private static void filterKill(List<TypedDependency> deps) {
+  private static void filterKill(Collection<TypedDependency> deps) {
     List<TypedDependency> filtered = Generics.newArrayList();
     for (TypedDependency dep : deps) {
       if (dep.reln() != KILL) {
@@ -373,14 +377,14 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * Does some hard coding to deal with relation in CONJP. For now we deal with:
-   * but not, if not, instead of, rather than, but rather GO TO negcc as well as, not to
-   * mention, but also, & GO TO and.
+   * but not, if not, instead of, rather than, but rather GO TO negcc <br>
+   * as well as, not to mention, but also, & GO TO and.
    *
    * @param conj The head dependency of the conjunction marker
    * @return A GrammaticalRelation made from a normalized form of that
    *         conjunction.
    */
-  protected static GrammaticalRelation conjValue(String conj) {
+  private static GrammaticalRelation conjValue(String conj) {
     String newConj = conj.toLowerCase();
     if (newConj.equals("not") || newConj.equals("instead") || newConj.equals("rather")) {
       newConj = "negcc";
@@ -848,7 +852,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     // dependencies in which the node appears as governor.
     // cdm: could use CollectionValuedMap here!
     Map<TreeGraphNode, SortedSet<TypedDependency>> map = Generics.newHashMap();
-    List<TreeGraphNode> partmod = new ArrayList<TreeGraphNode>();
+    List<TreeGraphNode> vmod = new ArrayList<TreeGraphNode>();
 
     for (TypedDependency typedDep : list) {
       if (!map.containsKey(typedDep.gov())) {
@@ -856,11 +860,25 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
       map.get(typedDep.gov()).add(typedDep);
 
-      if (typedDep.reln() == PARTICIPIAL_MODIFIER) {
-        partmod.add(typedDep.dep());
+      if (typedDep.reln() == VERBAL_MODIFIER) {
+        // look for aux deps which indicate this was a to-be verb
+        boolean foundAux = false;
+        for (TypedDependency auxDep : list) {
+          if (auxDep.reln() != AUX_MODIFIER) {
+            continue;
+          }
+          if (auxDep.gov() != typedDep.dep() || !auxDep.dep().value().equalsIgnoreCase("to")) {
+            continue;
+          }
+          foundAux = true;
+          break;
+        }
+        if (!foundAux) {
+          vmod.add(typedDep.dep());
+        }
       }
     }
-    // System.err.println("here's the partmod list: " + partmod);
+    // System.err.println("here's the vmod list: " + vmod);
 
     // Do preposition conjunction interaction for
     // governor p NP and p NP case ... a lot of special code cdm jan 2006
@@ -982,7 +1000,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // null &&
         // OK, we have a conjunction over parallel PPs: Fred flew to Greece and
         // to Serbia.
-        GrammaticalRelation reln = determinePrepRelation(map, partmod, td1, td1, prepDep.second());
+        GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, prepDep.second());
 
         TypedDependency tdNew = new TypedDependency(reln, td1.gov(), prepDep.first().dep());
         newTypedDeps.add(tdNew);
@@ -1079,7 +1097,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       // conj_and(jumped, jumped)
       // prep_through(jumped, hoop)
 
-      GrammaticalRelation reln = determinePrepRelation(map, partmod, td1, td1, prepDep.second());
+      GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, prepDep.second());
       TypedDependency tdNew = new TypedDependency(reln, td1.gov(), prepDep.first().dep());
       newTypedDeps.add(tdNew);
       if (DEBUG) {
@@ -1117,7 +1135,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // between the copy and the dependent of the prepOtherDep node
         TypedDependency tdNew3;
 
-        GrammaticalRelation reln2 = determinePrepRelation(map, partmod, conjDep, td1, pobj);
+        GrammaticalRelation reln2 = determinePrepRelation(map, vmod, conjDep, td1, pobj);
         tdNew3 = new TypedDependency(reln2, copy, prepOtherDep.dep());
         newTypedDeps.add(tdNew3);
 
@@ -1201,7 +1219,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
                 pobj = false;
               }
 
-              GrammaticalRelation reln = determinePrepRelation(map, partmod, td1, td1, pobj);
+              GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, pobj);
               TypedDependency td3 = new TypedDependency(reln, td1.gov(), td2.dep());
               if (DEBUG) {
                 System.err.println("PP adding: " + td3 + " deleting: " + td1 + ' ' + td2);
@@ -1259,10 +1277,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    *  preposition to do a name for. topPrep may be the same or different.
    *  Among the daughters of its gov is where to look for an auxpass.
    */
-  private static GrammaticalRelation determinePrepRelation(Map<TreeGraphNode, ? extends Set<TypedDependency>> map, List<TreeGraphNode> partmod, TypedDependency pc, TypedDependency topPrep, boolean pobj) {
+  private static GrammaticalRelation determinePrepRelation(Map<TreeGraphNode, ? extends Set<TypedDependency>> map, List<TreeGraphNode> vmod, TypedDependency pc, TypedDependency topPrep, boolean pobj) {
     // handling the case of an "agent":
     // the governor of a "by" preposition must have an "auxpass" dependency
-    // or be the dependent of a "partmod" relation
+    // or be the dependent of a "vmod" relation
     // if it is the case, the "agent" variable becomes true
     boolean agent = false;
     String preposition = pc.dep().value().toLowerCase();
@@ -1276,8 +1294,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           }
         }
       }
-      // look if we have a partmod
-      if (!partmod.isEmpty() && partmod.contains(topPrep.gov())) {
+      // look if we have a vmod
+      if (!vmod.isEmpty() && vmod.contains(topPrep.gov())) {
         agent = true;
       }
     }
@@ -1495,6 +1513,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
     for (String[] mwp : MULTIWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1603,6 +1622,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
     // first, loop over the prepositions for NP annotation
     for (String[] mwp : THREEWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1702,6 +1722,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
     // second, loop again looking at flat annotation
     for (String[] mwp : THREEWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp0 = null;
       TreeGraphNode mwp1 = null;
@@ -1842,6 +1863,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
     for (String[] mwp : MULTIWORD_PREPS) {
+      newTypedDeps.clear();
 
       TreeGraphNode mwp1 = null;
       TreeGraphNode governor = null;
@@ -1860,10 +1882,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       // now search for prep(gov, mwp1)
       for (TypedDependency td1 : list) {
-        if (td1.dep() == mwp1 && td1.reln() == PREPOSITIONAL_MODIFIER) {// we
-          // found
-          // prep(gov,
-          // mwp1)
+        if (td1.dep() == mwp1 && td1.reln() == PREPOSITIONAL_MODIFIER) {
+          // we found prep(gov, mwp1)
           prep = td1;
           governor = prep.gov();
         }
@@ -1919,6 +1939,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list List of words to get rid of multiword conjunctions from
    */
   private static void eraseMultiConj(Collection<TypedDependency> list) {
+    List<TypedDependency> newDeps = Generics.newArrayList();
+
     // find typed deps of form cc(gov, x)
     for (TypedDependency td1 : list) {
       if (td1.reln() == COORDINATION) {
@@ -1927,20 +1949,24 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         for (TypedDependency td2 : list) {
           if (td2.gov().equals(x) && (td2.reln() == DEPENDENT || td2.reln() == MULTI_WORD_EXPRESSION || td2.reln() == COORDINATION ||
                   td2.reln() == ADVERBIAL_MODIFIER || td2.reln() == NEGATION_MODIFIER || td2.reln() == AUX_MODIFIER)) {
-            td2.setReln(KILL);
+            if ((td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("also")) ||
+                (td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("not")) ||
+                (td1.dep().value().equalsIgnoreCase("but") && td2.dep().value().equalsIgnoreCase("rather"))) {
+              newDeps.add(new TypedDependency(COORDINATION, td1.gov(), td2.dep()));
+              td1.setReln(KILL);
+              td2.setReln(KILL);
+            } else {
+              td2.setReln(KILL);
+            }
           }
         }
       }
     }
 
-    // now remove typed dependencies with reln "kill"
-    for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {
-      TypedDependency td = iter.next();
-      if (td.reln() == KILL) {
-        if (DEBUG) {
-          System.err.println("Removing rest of multiword conj: " + td);
-        }
-        iter.remove();
+    filterKill(list);
+    for (TypedDependency dep : newDeps) {
+      if (!list.contains(dep)) {
+        list.add(dep);
       }
     }
   }
