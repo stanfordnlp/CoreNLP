@@ -649,22 +649,97 @@ public class EnglishGrammaticalStructureTest extends TestCase {
   public void testToBeRelations() {
     // the trees to test
     String[] testTrees = {
-            "(ROOT (S (NP (NNP Sue)) (VP (VBZ is) (VP (VBG speaking))) (. .)))",
-            "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBZ is)  (VP (VBG speaking))) (. ?)))",
-            "(ROOT (S (VP (VB Be) (VP (VBG caring))) (. !)))",
+      "(ROOT (S (NP (NNP Sue)) (VP (VBZ is) (VP (VBG speaking))) (. .)))",
+      "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBZ is)  (VP (VBG speaking))) (. ?)))",
+      "(ROOT (S (VP (VB Be) (ADJP (JJ honest))) (. .)))",
+      "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBZ is) (NP (PRP he) ) (VP (VBG doing)))))",
+      "(ROOT (SBARQ (WHNP (WP What) ) (SQ (VBP am) (NP (PRP I) ) (VP (VBG doing) (PP (IN in) (NP (NNP Jackson) (NNP Hole) )))) (. ?) ))",
+      "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBP am) (NP (PRP I)) (S (VP (TO to) (VP (VB judge))))) (. ?)))",
+      "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (NP (DT an) (JJ honest) (NN man))) (. .)))",
+      "(ROOT (SBARQ (WHNP (WP what) (NN dignity) ) (SQ (VBZ is) (NP (RB there)) (PP (IN in) (NP (DT that) ))) (. ?)))",
+      "(ROOT (S (NP (NN Hand-holding) ) (VP (VBZ is) (VP (VBG becoming) (NP (DT an) (NN investment-banking) (NN job) (NN requirement) ))) (. .) ))",
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (ADJP (JJ wrong) (PP (IN with) (S (VP (VBG expecting) (NP (NN pizza))))))) (. ?)))",
+      "(ROOT (SBARQ (WHNP (WP Who) ) (SQ (VBZ is) (VP (VBG going) (S (VP (TO to) (VP (VB carry) (NP (DT the) (NN water) )))))) (. ?)))",
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBP am) (NP (PRP I)) (VP (VBG doing) (S (VP (VBG dating) (NP (PRP her)))))) (. ?)))",
+      "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT that))) (. ?)))"
     };
 
     // the expected dependency answers (basic)
     String[] testAnswers = {
-        // "dobj(missed-6, Which-1)\n" + "nsubj(realized-4, I-2)\n" + "advmod(realized-4, then-3)\n" + "root(ROOT-0, realized-4)\n" + "nsubj(missed-6, I-5)\n" + "ccomp(realized-4, missed-6)\n",
         "nsubj(speaking-3, Sue-1)\n" +
                 "aux(speaking-3, is-2)\n" +
                 "root(ROOT-0, speaking-3)\n",
         "nsubj(speaking-3, Who-1)\n" +
                 "aux(speaking-3, is-2)\n" +
                 "root(ROOT-0, speaking-3)\n",
-        "aux(caring-2, Be-1)\n" +
-                "root(ROOT-0, caring-2)\n",
+        "cop(honest-2, Be-1)\n" +
+                "root(ROOT-0, honest-2)\n",
+        
+        "dobj(doing-4, What-1)\n" +
+                "aux(doing-4, is-2)\n" +
+                "nsubj(doing-4, he-3)\n" +
+                "root(ROOT-0, doing-4)\n",
+
+        "dobj(doing-4, What-1)\n" +
+                "aux(doing-4, am-2)\n" +
+                "nsubj(doing-4, I-3)\n" +
+                "root(ROOT-0, doing-4)\n" +
+                "prep(doing-4, in-5)\n" +
+                "nn(Hole-7, Jackson-6)\n" +
+                "pobj(in-5, Hole-7)\n",
+
+        "attr(am-2, Who-1)\n" +
+                "root(ROOT-0, am-2)\n" +
+                "nsubj(am-2, I-3)\n" +
+                "aux(judge-5, to-4)\n" +
+                "dep(am-2, judge-5)\n",
+
+        "nsubj(man-5, Bill-1)\n" +
+                "cop(man-5, is-2)\n" +
+                "det(man-5, an-3)\n" +
+                "amod(man-5, honest-4)\n" +
+                "root(ROOT-0, man-5)\n",
+
+        "det(dignity-2, what-1)\n" +
+                "attr(is-3, dignity-2)\n" +
+                "root(ROOT-0, is-3)\n" +
+                "nsubj(is-3, there-4)\n" +
+                "prep(is-3, in-5)\n" +
+                "pobj(in-5, that-6)\n",
+
+        "nsubj(becoming-3, Hand-holding-1)\n" +
+                "aux(becoming-3, is-2)\n" +
+                "root(ROOT-0, becoming-3)\n" +
+                "det(requirement-7, an-4)\n" +
+                "nn(requirement-7, investment-banking-5)\n" +
+                "nn(requirement-7, job-6)\n" +
+                "attr(becoming-3, requirement-7)\n",
+
+        "attr(wrong-3, What-1)\n" +
+                "cop(wrong-3, is-2)\n" +
+                "root(ROOT-0, wrong-3)\n" +
+                "prep(wrong-3, with-4)\n" +
+                "pcomp(with-4, expecting-5)\n" +
+                "dobj(expecting-5, pizza-6)\n",
+
+        "nsubj(going-3, Who-1)\n" +
+                "aux(going-3, is-2)\n" +
+                "root(ROOT-0, going-3)\n" +
+                "aux(carry-5, to-4)\n" +
+                "xcomp(going-3, carry-5)\n" +
+                "det(water-7, the-6)\n" +
+                "dobj(carry-5, water-7)\n",
+
+        "dobj(doing-4, What-1)\n" +
+                "aux(doing-4, am-2)\n" +
+                "nsubj(doing-4, I-3)\n" +
+                "root(ROOT-0, doing-4)\n" +
+                "xcomp(doing-4, dating-5)\n" +
+                "dobj(dating-5, her-6)\n",
+
+        "attr(is-2, What-1)\n" +
+                "root(ROOT-0, is-2)\n" +
+                "nsubj(is-2, that-3)\n"
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
