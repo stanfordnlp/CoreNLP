@@ -1587,16 +1587,11 @@ public class StringUtils {
   }
 
   /**
-   * Returns a text table containing the matrix of objects passed in.
+   * Returns a text table containing the matrix of Strings passed in.
    * The first dimension of the matrix should represent the rows, and the
-   * second dimension the columns. Each object is printed in a cell with toString().
-   * The printing may be padded with spaces on the left and then on the right to
-   * ensure that the String form is of length at least padLeft or padRight.
-   * If tsv is true, a tab is put between columns.
-   *
-   * @return A String form of the table
+   * second dimension the columns.
    */
-  public static String makeTextTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
+  public static String makeAsciiTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
     StringBuilder buff = new StringBuilder();
     // top row
     buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
