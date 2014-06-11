@@ -28,6 +28,7 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -664,13 +665,24 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return new TokensRegexNERAnnotator("regexner", properties);
+        String mapping = properties.getProperty("regexner.mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
+        String ignoreCase = properties.getProperty("regexner.ignorecase", "false");
+        String validPosPattern = properties.getProperty("regexner.validpospattern", RegexNERSequenceClassifier.DEFAULT_VALID_POS);
+        return new RegexNERAnnotator(mapping, Boolean.valueOf(ignoreCase), validPosPattern);
       }
 
       @Override
       public String signature() {
         // keep track of all relevant properties for this annotator here!
-        return PropertiesUtils.getSignature("regexner", properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
+        return "regexner.mapping:" +
+                properties.getProperty("regexner.mapping",
+                        DefaultPaths.DEFAULT_REGEXNER_RULES) +
+                "regexner.ignorecase:" +
+                properties.getProperty("regexner.ignorecase",
+                        "false") +
+                "regexner.validpospattern:" +
+                properties.getProperty("regexner.validpospattern",
+                        RegexNERSequenceClassifier.DEFAULT_VALID_POS);
       }
     });
 
