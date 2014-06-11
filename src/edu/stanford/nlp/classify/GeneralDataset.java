@@ -54,6 +54,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   public int[][] getDataArray() {
+    if (size == 0) {
+      return new int[0][]; // If we trim the data to size 0, we can never grow it again...
+    }
     data = trimToSize(data);
     return data;
   }
@@ -486,12 +489,5 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
     };
   }
-   
-  public ClassicCounter<L> numDatumsPerLabel(){
-    ClassicCounter<L> numDatums = new ClassicCounter<L>();
-    for(int i : labels){
-      numDatums.incrementCount(labelIndex.get(i));
-    }
-    return numDatums;
-  }
+
 }
