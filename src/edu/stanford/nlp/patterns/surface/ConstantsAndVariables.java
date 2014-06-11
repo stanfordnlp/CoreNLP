@@ -1,6 +1,5 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,10 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.patterns.surface.LearnImportantFeatures;
+import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
+import edu.stanford.nlp.patterns.surface.LearnImportantFeatures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CollectionUtils;
@@ -32,6 +33,134 @@ import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables {
+
+  /**
+   * Maximum number of iterations to run
+   */
+  @Option(name = "numIterationsForPatterns")
+  public Integer numIterationsForPatterns = 10;
+
+  /**
+   * Maximum number of patterns learned in each iteration
+   */
+  @Option(name = "numPatterns")
+  public int numPatterns = 10;
+
+  /**
+   * The output directory where the justifications of learning patterns and
+   * phrases would be saved. These are needed for visualization
+   */
+  @Option(name = "outDir")
+  public String outDir = null;
+
+  /**
+   * Cached file of all patterns for all tokens
+   */
+  @Option(name = "allPatternsFile")
+  public String allPatternsFile = null;
+
+  /**
+   * If all patterns should be computed. Otherwise patterns are read from
+   * allPatternsFile
+   */
+  @Option(name = "computeAllPatterns")
+  public boolean computeAllPatterns = true;
+
+  // @Option(name = "removeRedundantPatterns")
+  // public boolean removeRedundantPatterns = true;
+
+  /**
+   * Pattern Scoring mechanism. See {@link PatternScoring} for options.
+   */
+  @Option(name = "patternScoring")
+  public PatternScoring patternScoring = PatternScoring.PosNegUnlabOdds;
+
+  /**
+   * Threshold for learning a pattern
+   */
+  @Option(name = "thresholdSelectPattern")
+  public double thresholdSelectPattern = 1.0;
+
+//  /**
+//   * Do not learn patterns that do not extract any unlabeled tokens (kind of
+//   * useless)
+//   */
+//  @Option(name = "discardPatternsWithNoUnlabSupport")
+//  public boolean discardPatternsWithNoUnlabSupport = true;
+
+  /**
+   * Currently, does not work correctly. TODO: make this work. Ideally this
+   * would label words only when they occur in the context of any learned
+   * pattern
+   */
+  @Option(name = "restrictToMatched")
+  public boolean restrictToMatched = false;
+
+  /**
+   * Label words that are learned so that in further iterations we have more
+   * information
+   */
+  @Option(name = "usePatternResultAsLabel")
+  public boolean usePatternResultAsLabel = true;
+
+  /**
+   * Debug flag for learning patterns
+   */
+  @Option(name = "learnPatternsDebug")
+  public boolean learnPatternsDebug = false;
+
+  /**
+   * Do not learn patterns in which the neighboring words have the same label.
+   */
+  @Option(name = "ignorePatWithLabeledNeigh")
+  public boolean ignorePatWithLabeledNeigh = false;
+
+  /**
+   * Save this run as ...
+   */
+  @Option(name = "identifier")
+  public String identifier = "getpatterns";
+
+  /**
+   * Use the actual dictionary matching phrase(s) instead of the token word or
+   * lemma in calculating the stats
+   */
+  @Option(name = "useMatchingPhrase")
+  public boolean useMatchingPhrase = false;
+
+  /**
+   * Reduce pattern threshold (=0.8*current_value) to extract as many patterns
+   * as possible (still restricted by <code>numPatterns</code>)
+   */
+  @Option(name = "tuneThresholdKeepRunning")
+  public boolean tuneThresholdKeepRunning = false;
+
+  /**
+   * Maximum number of words to learn
+   */
+  @Option(name = "maxExtractNumWords")
+  public int maxExtractNumWords = Integer.MAX_VALUE;
+
+  /**
+   * Debug log output
+   */
+  @Option(name = "extremedebug")
+  public boolean extremedebug = false;
+
+  /**
+   * use the seed dictionaries and the new words learned for the other labels in
+   * the previous iterations as negative
+   */
+  @Option(name = "useOtherLabelsWordsasNegative")
+  public boolean useOtherLabelsWordsasNegative = true;
+
+  /**
+   * If not null, write the output like
+   * "w1 w2 <label1> w3 <label2>w4</label2> </label1> w5 ... " if w3 w4 have
+   * label1 and w4 has label 2
+   */
+  @Option(name = "markedOutputTextFile")
+  String markedOutputTextFile = null;
 
   /**
    * Use lemma instead of words for the context tokens
@@ -50,6 +179,12 @@ public class ConstantsAndVariables {
    */
   @Option(name = "useTargetNERRestriction")
   public boolean useTargetNERRestriction = false;
+  
+  /**
+   * Adds the parent's tag from the parse tree to the target phrase in the patterns
+   */
+  @Option(name = "useTargetParserParentRestriction")
+  public boolean useTargetParserParentRestriction = false;
 
   /**
    * If the NER tag of the context tokens is not the background symbol,
@@ -57,7 +192,7 @@ public class ConstantsAndVariables {
    */
   @Option(name = "useContextNERRestriction")
   public boolean useContextNERRestriction = false;
-  
+
   /**
    * Number of words to learn in each iteration
    */
@@ -69,9 +204,6 @@ public class ConstantsAndVariables {
 
   @Option(name = "thresholdNumPatternsApplied")
   public double thresholdNumPatternsApplied = 2;
-
-  @Option(name = "restrictToMatched")
-  public boolean restrictToMatched = false;
 
   @Option(name = "wordScoring")
   public WordScoring wordScoring = WordScoring.WEIGHTEDNORM;
@@ -199,12 +331,21 @@ public class ConstantsAndVariables {
   private boolean alreadySetUp = false;
 
   /**
-   * 
+   * Cluster file, in which each line is word/phrase<tab>clusterid
    */
   @Option(name = "wordClassClusterFile")
   String wordClassClusterFile = null;
 
   private Map<String, Integer> wordClassClusters = null;
+
+  /**
+   * General cluster file, if you wanna use it somehow, in which each line is
+   * word/phrase<tab>clusterid
+   */
+  @Option(name = "generalWordClassClusterFile")
+  String generalWordClassClusterFile = null;
+
+  private Map<String, Integer> generalWordClassClusters = null;
 
   @Option(name = "includeExternalFeatures")
   public boolean includeExternalFeatures = false;
@@ -224,14 +365,11 @@ public class ConstantsAndVariables {
   @Option(name = "sqrtPatScore")
   public boolean sqrtPatScore = false;
 
-
   /**
-   * Remove patterns that have number of words in the denominator of the
-   * patternscoring measure less than this.
+   * Remove patterns that have number of unlabeled words is less than this.
    */
-  @Option(name = "minUnlabNegPhraseSupportForPat")
-  public int minUnlabNegPhraseSupportForPat = 0;
-  
+  @Option(name = "minUnlabPhraseSupportForPat")
+  public int minUnlabPhraseSupportForPat = 0;
 
   /**
    * Remove patterns that have number of positive words less than this.
@@ -239,7 +377,6 @@ public class ConstantsAndVariables {
   @Option(name = "minPosPhraseSupportForPat")
   public int minPosPhraseSupportForPat = 1;
 
-  
   /**
    * Cached files
    */
@@ -270,7 +407,6 @@ public class ConstantsAndVariables {
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
-  
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS
   };
@@ -318,6 +454,9 @@ public class ConstantsAndVariables {
    */
   @Option(name = "usePhraseEvalEditDistOther")
   public boolean usePhraseEvalEditDistOther = false;
+  
+  @Option(name = "usePhraseEvalWordShape")
+  public boolean usePhraseEvalWordShape = false;
 
   /**
    * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
@@ -387,6 +526,7 @@ public class ConstantsAndVariables {
 
   String backgroundSymbol = "O";
 
+  
   Properties props;
 
   @SuppressWarnings("rawtypes")
@@ -438,8 +578,7 @@ public class ConstantsAndVariables {
 
         }
       }
-      
-      
+
       System.out.println("Size of othersemantic class variables is "
           + otherSemanticClasses.size());
     } else {
@@ -463,7 +602,9 @@ public class ConstantsAndVariables {
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
       if (matchLowerCaseContext)
         env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-      env.get(label).bind("OTHERSEM", PatternsAnnotations.OtherSemanticLabel.class);
+      env.get(label).bind("OTHERSEM",
+          PatternsAnnotations.OtherSemanticLabel.class);
+      env.get(label).bind("grandparentparsetag", CoreAnnotations.GrandparentAnnotation.class);
     }
 
     if (wordClassClusterFile != null) {
@@ -473,6 +614,15 @@ public class ConstantsAndVariables {
         wordClassClusters.put(t[0], Integer.parseInt(t[1]));
       }
     }
+
+    if (generalWordClassClusterFile != null) {
+      setGeneralWordClassClusters(new HashMap<String, Integer>());
+      for (String line : IOUtils.readLines(generalWordClassClusterFile)) {
+        String[] t = line.split("\t");
+        getGeneralWordClassClusters().put(t[0], Integer.parseInt(t[1]));
+      }
+    }
+
     alreadySetUp = true;
   }
 
@@ -707,6 +857,15 @@ public class ConstantsAndVariables {
         return w1;
     }
     return null;
+  }
+
+  public Map<String, Integer> getGeneralWordClassClusters() {
+    return generalWordClassClusters;
+  }
+
+  public void setGeneralWordClassClusters(
+      Map<String, Integer> generalWordClassClusters) {
+    this.generalWordClassClusters = generalWordClassClusters;
   }
 
 }
