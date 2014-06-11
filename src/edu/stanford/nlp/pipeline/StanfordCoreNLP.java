@@ -612,8 +612,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           models.addAll(Arrays.asList(modelNames.split(",")));
         }
         if (models.isEmpty()) {
-          // Allow for no real NER model - can just use numeric classifiers or SUTime.
-          // Have to unset ner.model, so unlikely that people got here by accident.
+          // Allow for no real NER model - can just use numeric classifiers or SUTime
+          // Will have to explicitly unset ner.model.3class, ner.model.7class, ner.model.MISCclass
+          // So unlikely that people got here by accident
           System.err.println("WARNING: no NER models specified");
         }
         NERClassifierCombiner nerCombiner;
