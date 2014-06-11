@@ -234,5 +234,16 @@ public class State implements Scored {
     result.append("  " + ((finished) ? "" : "not ") + "finished\n");
     return result.toString();
   }
+
+  /**
+   * Whether or not the transitions that built the two states are
+   * equal.  Doesn't check anything else.  Useful for training using
+   * an agenda, for example, when you know the underlying information
+   * such as the words are the same and all you care about checking is
+   * the transition sequence
+   */
+  public boolean areTransitionsEqual(State other) {
+    return transitions.equals(other.transitions);
+  }
 }
 
