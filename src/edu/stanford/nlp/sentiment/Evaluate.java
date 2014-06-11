@@ -276,6 +276,8 @@ public class Evaluate {
     String treePath = null;
     boolean filterUnknown = false;
 
+    List<String> remainingArgs = Generics.newArrayList();
+
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];
@@ -287,16 +289,28 @@ public class Evaluate {
         filterUnknown = true;
         argIndex++;
       } else {
-        System.err.println("Unknown argument " + args[argIndex]);
-        System.exit(2);
+        remainingArgs.add(args[argIndex]);
+        argIndex++;
       }
+    }
+
+    String[] newArgs = new String[remainingArgs.size()];
+    remainingArgs.toArray(newArgs);
+
+    SentimentModel model = SentimentModel.loadSerialized(modelPath);
+    for (int argIndex = 0; argIndex < newArgs.length; ) {
+      int newIndex = model.op.setOption(newArgs, argIndex);
+      if (argIndex == newIndex) {
+        System.err.println("Unknown argument " + newArgs[argIndex]);
+        throw new IllegalArgumentException("Unknown argument " + newArgs[argIndex]);
+      }
+      argIndex = newIndex;
     }
 
     List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(treePath);
     if (filterUnknown) {
       trees = SentimentUtils.filterUnknownRoots(trees);
     }
-    SentimentModel model = SentimentModel.loadSerialized(modelPath);
 
     Evaluate eval = new Evaluate(model);
     eval.eval(trees);
