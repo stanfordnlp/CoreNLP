@@ -195,7 +195,7 @@ public class Options implements Serializable {
    *      processing this option, or the value i unchanged if a valid option couldn't
    *      be processed starting at position i.
    */
-  protected int setOptionFlag(String[] args, int i) {
+  private int setOptionFlag(String[] args, int i) {
     if (args[i].equalsIgnoreCase("-PCFG")) {
       doDep = false;
       doPCFG = true;
