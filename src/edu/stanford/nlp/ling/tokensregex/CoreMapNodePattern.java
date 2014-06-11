@@ -40,7 +40,8 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     boolean isLiteral = ((flags & Pattern.LITERAL) != 0) || LITERAL_PATTERN.matcher(regex).matches();
     if (isLiteral) {
       boolean caseInsensitive = (flags & Pattern.CASE_INSENSITIVE) != 0;
-      return new StringAnnotationPattern(regex, caseInsensitive);
+      int stringMatchFlags = (caseInsensitive)? CASE_INSENSITIVE:0;
+      return new StringAnnotationPattern(regex, stringMatchFlags);
     } else {
       return new StringAnnotationRegexPattern(regex, flags);
     }
@@ -84,12 +85,10 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
         if (value.startsWith("\"") && value.endsWith("\"")) {
           value = value.substring(1, value.length()-1);
           value = value.replaceAll("\\\\\"", "\""); // Unescape quotes...
-          p.add(c, new StringAnnotationPattern(value));
+          p.add(c, new StringAnnotationPattern(value, env.defaultStringMatchFlags));
         } else if (value.startsWith("/") && value.endsWith("/")) {
           value = value.substring(1, value.length()-1);
           value = value.replaceAll("\\\\/", "/"); // Unescape forward slash
-//          p.annotationPatterns.put(c, new StringAnnotationRegexPattern(value, (env != null)? env.defaultStringPatternFlags: 0));
-//          p.add(c, new StringAnnotationRegexPattern((env != null)? env.getStringPattern(value): Pattern.compile(value)));
           String regex = (env != null)? env.expandStringRegex(value): value;
           int flags = (env != null)? env.defaultStringPatternFlags: 0;
           p.add(c, newStringRegexPattern(regex, flags));
@@ -132,7 +131,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
           Double v = Double.parseDouble(value.substring(1));
           p.add(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.LT));
         } else if (value.matches("[A-Za-z0-9_+-.]+")) {
-          p.add(c, new StringAnnotationPattern(value));
+          p.add(c, new StringAnnotationPattern(value, env.defaultStringMatchFlags));
         } else {
           throw new IllegalArgumentException("Invalid value " + value + " for key: " + attr);
         }
@@ -294,13 +293,34 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
   }
 
-  public static class StringAnnotationPattern extends NodePattern<String> {
-    String target;
-    boolean ignoreCase;
+  public static abstract class AbstractStringAnnotationPattern extends NodePattern<String> {
+    int flags;
 
-    public StringAnnotationPattern(String str, boolean ignoreCase) {
+    public boolean ignoreCase() {
+      return (flags & CASE_INSENSITIVE) != 0;
+    }
+
+    public boolean normalize() {
+      return (flags & NORMALiZE) != 0;
+    }
+
+    public String getNormalized(String str) {
+      if (normalize()) {
+        str = StringUtils.normalize(str);
+      }
+      if (ignoreCase()) {
+        str = str.toLowerCase();
+      }
+      return str;
+    }
+  }
+
+  public static class StringAnnotationPattern extends AbstractStringAnnotationPattern {
+    String target;
+
+    public StringAnnotationPattern(String str, int flags) {
       this.target = str;
-      this.ignoreCase = ignoreCase;
+      this.flags = flags;
     }
 
     public StringAnnotationPattern(String str) {
@@ -312,7 +332,10 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
 
     public boolean match(String str) {
-      if (ignoreCase) {
+      if (normalize()) {
+        str = getNormalized(str);
+      }
+      if (ignoreCase()) {
         return target.equalsIgnoreCase(str);
       } else {
         return target.equals(str);
@@ -324,25 +347,20 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
   }
 
-  public static class StringInSetAnnotationPattern extends NodePattern<String> {
+  public static class StringInSetAnnotationPattern extends AbstractStringAnnotationPattern {
     Set<String> targets;
-    boolean ignoreCase;
 
-    public StringInSetAnnotationPattern(Set<String> targets, boolean ignoreCase) {
-      this.ignoreCase = ignoreCase;
-      // if ignoreCase is true - convert targets to lowercase
+    public StringInSetAnnotationPattern(Set<String> targets, int flags) {
+      this.flags = flags;
+      // if ignoreCase/normalize is true - convert targets to lowercase/normalized
       this.targets = new HashSet<String>(targets.size());
-      if (ignoreCase) {
-        for (String target:targets) {
-          this.targets.add(target.toLowerCase());
-        }
-      } else {
-        this.targets.addAll(targets);
+      for (String target:targets) {
+        this.targets.add(getNormalized(target));
       }
     }
 
     public StringInSetAnnotationPattern(Set<String> targets) {
-      this(targets, false);
+      this(targets, 0);
     }
 
     public Set<String> getTargets() {
@@ -350,11 +368,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
 
     public boolean match(String str) {
-      if (ignoreCase) {
-        return targets.contains(str.toLowerCase());
-      } else {
-        return targets.contains(str);
-      }
+      return targets.contains(getNormalized(str));
     }
 
     public String toString() {
