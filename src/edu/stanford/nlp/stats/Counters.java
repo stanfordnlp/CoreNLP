@@ -2803,6 +2803,25 @@ public class Counters {
   }
 
   /**
+   * Check if this counter is a uniform distribution.
+   * That is, it should sum to 1.0, and every value should be equal to every other value.
+   * @param distribution The distribution to check.
+   * @param tolerance The tolerance for floating point error, in both the equality and total count checks.
+   * @param <E> The type of the counter.
+   * @return True if this counter is the uniform distribution over its domain.
+   */
+  public static <E> boolean isUniformDistribution(Counter<E> distribution, double tolerance) {
+    double value = Double.NaN;
+    double totalCount = 0.0;
+    for (double val : distribution.values()) {
+      if (Double.isNaN(value)) { value = val; }
+      if (Math.abs(val - value) > tolerance) { return false; }
+      totalCount += val;
+    }
+    return Math.abs(totalCount - 1.0) < tolerance;
+  }
+
+  /**
    * Default comparator for breaking ties in argmin and argmax.
    * //TODO: What type should this be?
    * // Unused, so who cares?
