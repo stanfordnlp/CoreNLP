@@ -471,8 +471,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
    *         node <code>t</code>, or else <code>null</code>
    */
   public static Set<TreeGraphNode> getDependents(TreeGraphNode t) {
-    Set<TreeGraphNode> deps = Generics.newTreeSet();
-    for (Tree subtree : t) {
+    Set<TreeGraphNode> deps = Generics.newHashSet();
+    for (Tree subtree : t.treeGraph().root()) {
       TreeGraphNode node = (TreeGraphNode) subtree;
       TreeGraphNode gov = getGovernor(node);
       if (gov != null && gov == t) {
