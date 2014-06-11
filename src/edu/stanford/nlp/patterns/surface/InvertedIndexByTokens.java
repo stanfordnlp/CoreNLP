@@ -25,17 +25,17 @@ import edu.stanford.nlp.util.FileBackedCache;
  */
 public class InvertedIndexByTokens {
 
-  Map<String, Hashtable<String, Set<String>>> index;
+  Map<StringwithConsistentHashCode, Hashtable<String, Set<String>>> index;
   boolean convertToLowercase;
   boolean filebacked;
   Set<String> stopWords, specialWords;
 
   public InvertedIndexByTokens(File invertedIndexDir, boolean lc, boolean filebacked, Set<String> stopWords, Set<String> specialWords) {
     if (filebacked)
-      index = new FileBackedCache<String, Hashtable<String, Set<String>>>(invertedIndexDir, 10);
+      index = new FileBackedCache<StringwithConsistentHashCode, Hashtable<String, Set<String>>>(invertedIndexDir, 10);
     else
       // memory mapped
-      index = new HashMap<String, Hashtable<String, Set<String>>>();
+      index = new HashMap<StringwithConsistentHashCode, Hashtable<String, Set<String>>>();
     this.convertToLowercase = lc;
     this.stopWords = stopWords;
     if (this.stopWords == null)
@@ -54,8 +54,8 @@ public class InvertedIndexByTokens {
 
         if (convertToLowercase)
           w = w.toLowerCase();
-
-        Hashtable<String, Set<String>> t = index.get(w);
+        StringwithConsistentHashCode ws =new StringwithConsistentHashCode(w);
+        Hashtable<String, Set<String>> t = index.get(ws);
         if (t == null)
           t = new Hashtable<String, Set<String>>();
         Set<String> sentids = t.get(filename);
@@ -63,19 +63,19 @@ public class InvertedIndexByTokens {
           sentids = new HashSet<String>();
         sentids.add(sEn.getKey());
         t.put(filename, sentids);
-        index.put(w, t);
+        index.put(ws, t);
       }
     }
   }
 
   public Map<String, Set<String>> getFileSentIds(String word) {
-    return index.get(word);
+    return index.get(new StringwithConsistentHashCode(word));
   }
 
   public Map<String, Set<String>> getFileSentIds(Set<String> words) {
     Hashtable<String, Set<String>> sentids = new Hashtable<String, Set<String>>();
     for (String w : words) {
-      Hashtable<String, Set<String>> st = index.get(w);
+      Hashtable<String, Set<String>> st = index.get(new StringwithConsistentHashCode(w));
       if (st == null)
         throw new RuntimeException("How come the index does not have sentences for " + w);
       for (Map.Entry<String, Set<String>> en : st.entrySet()) {
