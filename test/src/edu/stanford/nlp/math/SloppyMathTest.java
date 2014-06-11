@@ -81,5 +81,15 @@ public class SloppyMathTest extends TestCase {
     } catch (IllegalArgumentException e) { }
   }
 
+  public void testPythonMod() {
+    assertEquals(0, SloppyMath.pythonMod(9, 3));
+    assertEquals(0, SloppyMath.pythonMod(-9, 3));
+    assertEquals(0, SloppyMath.pythonMod(9, -3));
+    assertEquals(0, SloppyMath.pythonMod(-9, -3));
+    assertEquals(2, SloppyMath.pythonMod(8, 3));
+    assertEquals(1, SloppyMath.pythonMod(-8, 3));
+    assertEquals(-1, SloppyMath.pythonMod(8, -3));
+    assertEquals(-2, SloppyMath.pythonMod(-8, -3));
+  }
 }
 
