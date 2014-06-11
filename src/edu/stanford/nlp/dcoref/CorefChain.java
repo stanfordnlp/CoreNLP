@@ -283,17 +283,12 @@ public class CorefChain implements Serializable {
   }
   public CorefChain(CorefCluster c, Map<Mention, IntTuple> positions){
     chainID = c.clusterID;
-    // Collect mentions
     mentions = new ArrayList<CorefMention>();
     mentionMap = Generics.newHashMap();
     CorefMention represents = null;
     for (Mention m : c.getCorefMentions()) {
       CorefMention men = new CorefMention(m, positions.get(m));
       mentions.add(men);
-    }
-    Collections.sort(mentions, new MentionComparator());
-    // Find representative mention
-    for (CorefMention men : mentions) {
       IntPair position = new IntPair(men.sentNum, men.headIndex);
       if (!mentionMap.containsKey(position)) mentionMap.put(position, Generics.<CorefMention>newHashSet());
       mentionMap.get(position).add(men);
@@ -302,6 +297,7 @@ public class CorefChain implements Serializable {
       }
     }
     representative = represents;
+    Collections.sort(mentions, new MentionComparator());
   }
 
   /** Constructor required by CustomAnnotationSerializer */
