@@ -11,8 +11,16 @@ import edu.stanford.nlp.util.TreeShapedStack;
 public class BinaryTransition implements Transition {
   public final String label;
 
-  public BinaryTransition(String label) {
+  /** Which side the head is on */
+  public final Side side;
+
+  public enum Side {
+    LEFT, RIGHT
+  }
+
+  public BinaryTransition(String label, Side side) {
     this.label = label;
+    this.side = side;
   }
 
   /**
@@ -59,16 +67,31 @@ public class BinaryTransition implements Transition {
       return false;
     }
     String otherLabel = ((BinaryTransition) o).label;
-    return label.equals(otherLabel);
+    Side otherSide = ((BinaryTransition) o).side;
+    return otherSide.equals(side) && label.equals(otherLabel);
   }
 
   @Override
   public int hashCode() {
-    return 97197711 ^ label.hashCode();
+    switch(side) {
+    case LEFT:
+      return 97197711 ^ label.hashCode();
+    case RIGHT:
+      return 97197711 ^ label.hashCode();
+    default:
+      throw new IllegalArgumentException("Unknown side " + side);
+    }
   }
 
   @Override
   public String toString() {
-    return "Binary(" + label + ")";
+    switch(side) {
+    case LEFT:
+      return "LeftBinary(" + label + ")";
+    case RIGHT:
+      return "RightBinary(" + label + ")";
+    default:
+      throw new IllegalArgumentException("Unknown side " + side);
+    }
   }
 }

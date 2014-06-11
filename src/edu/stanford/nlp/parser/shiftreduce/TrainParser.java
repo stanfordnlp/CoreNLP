@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.parser.lexparser.ArgUtils;
+import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
+import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
@@ -54,8 +57,11 @@ public class TrainParser {
     treebank = treebank.transform(transformer);
     System.err.println("Read in " + treebank.size() + " trees from " + trainTreebankPath);
 
+    HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
     List<Tree> binarizedTrees = Generics.newArrayList();
     for (Tree tree : treebank) {
+      Trees.convertToCoreLabels(tree);
+      tree.percolateHeadAnnotations(binaryHeadFinder);
       binarizedTrees.add(tree);
     }
 
