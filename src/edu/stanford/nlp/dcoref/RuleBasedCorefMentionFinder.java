@@ -415,9 +415,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         return leaf;
       }
     }
-    int fallback = Math.max(0, leaves.size() - 2);
-    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(fallback));
-    return leaves.get(fallback); // last except for the added period.
+    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(leaves.size() - 2));
+    return leaves.get(leaves.size() - 2); // last except for the added period.
   }
 
   private static CoreLabel initCoreLabel(String token) {

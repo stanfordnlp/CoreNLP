@@ -29,13 +29,16 @@ public class IOBUtils {
   private enum TokenType { BeginMarker, EndMarker, BothMarker, NoMarker }
 
   // Label inventory
-  private static final String BeginSymbol = "BEGIN";
-  private static final String ContinuationSymbol = "CONT";
-  private static final String NosegSymbol = "NOSEG";
+  public static final String BeginSymbol = "BEGIN";
+  public static final String ContinuationSymbol = "CONT";
+  public static final String NosegSymbol = "NOSEG";
+  public static final String RewriteTahSymbol = "REWTA";
+  public static final String RewriteTareefSymbol = "REWAL";
+  private static final String RewriteSymbol = "REW";
+  private static final String ShaddaSymbol = "SHADDA";
+  
   private static final String BoundarySymbol = ".##.";
   private static final String BoundaryChar = ".#.";
-  private static final String RewriteTahSymbol = "REWTA";
-  private static final String RewriteTareefSymbol = "REWAL";
 
   // Patterns for tokens that should not be segmented.
   private static final Pattern isPunc = Pattern.compile("\\p{Punct}+");
@@ -66,19 +69,44 @@ public class IOBUtils {
   public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
                                             Character segMarker,
                                             boolean applyRewriteRules) {
+    return StringToIOB(tokenList, segMarker, applyRewriteRules, false);
+  }
+  
+  /**
+   * Convert a String to a list of characters suitable for labeling in an IOB
+   * segmentation model.
+   *
+   * @param tokenList
+   * @param segMarker
+   * @param applyRewriteRules add rewrite labels (for training data)
+   * @param stripRewrites revert training data to old Green & DeNero model (remove
+   *    rewrite labels but still rewrite to try to preserve raw text)
+   */
+  public static List<CoreLabel> StringToIOB(List<CoreLabel> tokenList,
+                                            Character segMarker,
+                                            boolean applyRewriteRules,
+                                            boolean stripRewrites) {
     List<CoreLabel> iobList = new ArrayList<CoreLabel>(tokenList.size()*7 + tokenList.size());
     final String strSegMarker = String.valueOf(segMarker);
 
     boolean addWhitespace = false;
-    int charIndex = 0;
     final int numTokens = tokenList.size();
     String lastToken = "";
+    String currentWord = "";
+    int wordStartIndex = 0;
     for (int i = 0; i < numTokens; ++i) {
       // What type of token is this
       CoreLabel cl = tokenList.get(i);
 
       if (addWhitespace) {
-        iobList.add(createDatum(cl, BoundaryChar, BoundarySymbol, charIndex++));
+        fillInWordStatistics(iobList, currentWord, wordStartIndex);
+        currentWord = "";
+        wordStartIndex = iobList.size() + 1;
+        
+        iobList.add(createDatum(cl, BoundaryChar, BoundarySymbol));
+        final CoreLabel boundaryDatum = iobList.get(iobList.size() - 1);
+        boundaryDatum.setIndex(0);
+        boundaryDatum.setWord("");
         addWhitespace = false;
       }
 
@@ -88,17 +116,40 @@ public class IOBUtils {
       assert token.length() != 0;
 
       if (shouldNotSegment(token)) {
-        iobList.add(createDatum(cl, token, NosegSymbol, charIndex++));
+        iobList.add(createDatum(cl, token, NosegSymbol));
         addWhitespace = true;
 
       } else {
         // Iterate over the characters in the token
-        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, charIndex, applyRewriteRules);
+        tokenToDatums(iobList, cl, token, tokType, tokenList.get(i), lastToken, applyRewriteRules, stripRewrites);
         addWhitespace = (tokType == TokenType.BeginMarker || tokType == TokenType.NoMarker);
       }
+      currentWord += token;
       lastToken = token;
     }
+    fillInWordStatistics(iobList, currentWord, wordStartIndex);
     return iobList;
+  }
+
+  /**
+   * Loops back through all the datums inserted for the most recent word
+   * and inserts statistics about the word they are a part of. This needs to
+   * be post hoc because the CoreLabel lists coming from testing data sets
+   * are pre-segmented (so treating each of those CoreLabels as a "word" lets
+   * us cheat and get 100% classification accuracy by just looking at whether
+   * we're at the beginning of a "word"). 
+   * 
+   * @param iobList
+   * @param currentWord
+   * @param wordStartIndex
+   */
+  private static void fillInWordStatistics(List<CoreLabel> iobList,
+      String currentWord, int wordStartIndex) {
+    for (int j = wordStartIndex; j < iobList.size(); j++) {
+      CoreLabel tok = iobList.get(j);
+      tok.setIndex(j - wordStartIndex);
+      tok.setWord(currentWord);
+    }
   }
 
   /**
@@ -109,7 +160,6 @@ public class IOBUtils {
    * @param tokType
    * @param tokenLabel
    * @param lastToken
-   * @param charIndex
    * @param applyRewriteRules
    */
   private static void tokenToDatums(List<CoreLabel> iobList,
@@ -118,8 +168,8 @@ public class IOBUtils {
                                 TokenType tokType, 
                                 CoreLabel tokenLabel,
                                 String lastToken,
-                                int charIndex,
-                                boolean applyRewriteRules) {
+                                boolean applyRewriteRules,
+                                boolean stripRewrites) {
 
     if (token.isEmpty()) return;
     String lastLabel = ContinuationSymbol;
@@ -132,32 +182,68 @@ public class IOBUtils {
       featureSpec.activate(MorphoFeatureType.NGEN);
       featureSpec.activate(MorphoFeatureType.NNUM);
       featureSpec.activate(MorphoFeatureType.DEF);
+      featureSpec.activate(MorphoFeatureType.TENSE);
       MorphoFeatures features = featureSpec.strToFeatures(tag);
 
       // Rule #1 : ت --> ة
       if (features.getValue(MorphoFeatureType.NGEN).equals("F") &&
           features.getValue(MorphoFeatureType.NNUM).equals("SG") &&
-          rawToken.endsWith("ت-")) {
-        lastLabel = RewriteTahSymbol;
+          rawToken.endsWith("ت-") &&
+          !stripRewrites) {
+        lastLabel = RewriteSymbol;
+      } else if (rawToken.endsWith("ة-")) {
+        assert token.endsWith("ة");
+        token = token.substring(0, token.length() - 1) + "ت";
+        lastLabel = RewriteSymbol;
       }
 
       // Rule #2 : لل --> ل ال
       if (lastToken.equals("ل") &&
           features.getValue(MorphoFeatureType.DEF).equals("D")) {
-        assert rawToken.startsWith("-ال") && token.startsWith("ا");
-        token = token.substring(1);
-        firstLabel = RewriteTareefSymbol;
+        if (rawToken.startsWith("-ال")) {
+          if (!token.startsWith("ا"))
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
+          token = token.substring(1);
+          if (!stripRewrites)
+            firstLabel = RewriteSymbol;
+        } else if (rawToken.startsWith("-ل")) {
+          if (!token.startsWith("ل"))
+            System.err.println("Bad REWAL: " + rawToken + " / " + token);
+          if (!stripRewrites)
+            firstLabel = RewriteSymbol;
+        } else {
+          System.err.println("Ignoring REWAL: " + rawToken + " / " + token);
+        }
+      }
+      
+      // Rule #3 : ي --> ى
+      // Rule #4 : ا --> ى
+      if (rawToken.endsWith("ى-")) {
+        if (features.getValue(MorphoFeatureType.TENSE) != null) {
+          // verb: ى becomes ا
+          token = token.substring(0, token.length() - 1) + "ا";
+        } else {
+          // assume preposition:
+          token = token.substring(0, token.length() - 1) + "ي";
+        }
+        if (!stripRewrites)
+          lastLabel = RewriteSymbol;
+      } else if (rawToken.equals("علي-") || rawToken.equals("-علي-")) {
+        if (!stripRewrites)
+          lastLabel = RewriteSymbol;
       }
     }
 
     // Create datums and add to iobList
+    if (token.isEmpty())
+      System.err.println("Rewriting resulted in empty token: " + tokenLabel.word());
     String firstChar = String.valueOf(token.charAt(0));
-    iobList.add(createDatum(cl, firstChar, firstLabel, charIndex++));
+    iobList.add(createDatum(cl, firstChar, firstLabel));
     final int numChars = token.length();
     for (int j = 1; j < numChars; ++j) {
       String thisChar = String.valueOf(token.charAt(j));
       String charLabel = (j == numChars-1) ? lastLabel : ContinuationSymbol;
-      iobList.add(createDatum(cl, thisChar, charLabel, charIndex++));
+      iobList.add(createDatum(cl, thisChar, charLabel));
     }
   }
 
@@ -195,10 +281,9 @@ public class IOBUtils {
    * @param cl
    * @param token
    * @param label
-   * @param index
    * @return
    */
-  private static CoreLabel createDatum(CoreLabel cl, String token, String label, int index) {
+  private static CoreLabel createDatum(CoreLabel cl, String token, String label) {
     CoreLabel newTok = new CoreLabel();
     newTok.set(CoreAnnotations.TextAnnotation.class, token);
     newTok.set(CoreAnnotations.CharAnnotation.class, token);
@@ -207,7 +292,6 @@ public class IOBUtils {
     if (cl != null && cl.containsKey(CoreAnnotations.DomainAnnotation.class))
       newTok.set(CoreAnnotations.DomainAnnotation.class,
                  cl.get(CoreAnnotations.DomainAnnotation.class));
-    newTok.setIndex(index);
     return newTok;
   }
 
@@ -329,25 +413,23 @@ public class IOBUtils {
       } else if (label.equals(BoundarySymbol)) {
         sb.append(" ");
 
-      } else if (label.equals(RewriteTahSymbol)) {
-        if (applyRewrites) {
-          sb.append("ة");
+      } else if (label.equals(RewriteSymbol) || label.equals("REWAL") || label.equals("REWTA")) {
+        if (token.equals("ت")) {
+          sb.append((applyRewrites ? "ة" : "ت") +
+                    (addSpace ? " " : ""));
+          if (addSuffixMarker) sb.append(suffixMarker);
+          else if (addPrefixMarker && !addSpace) sb.append(prefixMarker);
+        } else if (token.equals("ل")) {
+          sb.append((addPrefixMarker ? prefixMarker : "") +
+                    (addSpace ? " " : "") + 
+                    (applyRewrites ? "ال" : "ل"));
+        } else if (token.equals("ي") || token.equals("ا")) {
+          sb.append((applyRewrites ? "ى" : token) +
+                    (addSpace ? " " : ""));
         } else {
-          sb.append("ت");
+          // Nonsense rewrite predicted by the classifier--just assume CONT
+          sb.append(token);
         }
-        if (addSpace) sb.append(" ");
-        if (addSuffixMarker) sb.append(suffixMarker);
-        else if (addPrefixMarker && !addSpace) sb.append(prefixMarker);
-
-      } else if (label.equals(RewriteTareefSymbol)) {
-        if (addPrefixMarker) sb.append(prefixMarker);
-        if (addSpace) sb.append(" ");
-        if (applyRewrites) {
-          sb.append("ال");
-        } else {
-          sb.append("ل");
-        }
-
       } else {
         throw new RuntimeException("Unknown label: " + label);
       }
@@ -382,5 +464,11 @@ public class IOBUtils {
       sb.append(token);
     }
     return arAffixSet.contains(sb.toString());
+  }
+
+  public static void labelDomain(List<CoreLabel> tokenList, String domain) {
+    for (CoreLabel cl : tokenList) {
+      cl.set(CoreAnnotations.DomainAnnotation.class, domain);
+    }
   }
 }
