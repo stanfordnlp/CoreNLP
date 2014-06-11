@@ -1972,6 +1972,19 @@ public class SemanticGraph implements Serializable {
    */
   public Collection<TypedDependency> typedDependencies() {
     Collection<TypedDependency> dependencies = new ArrayList<TypedDependency>();
+    // FIXME: parts of the code (such as the dependencies) expect the
+    // TreeGraphNodes to be == equal, but that doesn't apply the way
+    // this method is written
+    TreeGraphNode root = null;
+    for (IndexedWord node : roots) {
+      if (root == null) {
+        IndexedWord rootLabel = new IndexedWord(node.docID(), node.sentIndex(), 0);
+        rootLabel.setValue("ROOT");
+        root = new TreeGraphNode(rootLabel);
+      }
+      TypedDependency dependency = new TypedDependency(ROOT, root, new TreeGraphNode(node));
+      dependencies.add(dependency);
+    }
     for (SemanticGraphEdge e : this.edgeIterable()){
       TreeGraphNode gov = new TreeGraphNode(e.getGovernor());
       TreeGraphNode dep = new TreeGraphNode(e.getDependent());
