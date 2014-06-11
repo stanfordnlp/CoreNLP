@@ -103,10 +103,10 @@ public class TimeFormatter {
       MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
       valueExtractor.valueExtractor =
               new SequenceMatchRules.CoreMapFunctionApplier< String, Value>(
-                      env, r.annotationField,
+                      r.annotationField,
                       extractor);
       r.extractRule = new SequenceMatchRules.CoreMapExtractRule< String, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new SequenceMatchRules.StringPatternExtractRule<MatchedExpression>(pattern,
                       new SequenceMatchRules.StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
       r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
@@ -119,7 +119,7 @@ public class TimeFormatter {
       MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
       valueExtractor.valueExtractor = extractor;
       r.extractRule = new SequenceMatchRules.CoreMapExtractRule<List<? extends CoreMap>, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new SequenceMatchRules.BasicSequenceExtractRule(valueExtractor));
       r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
     }
@@ -607,14 +607,9 @@ public class TimeFormatter {
     }
 
     private void updateTimeZoneNames(Locale locale) {
-      long hymillis = 182*24*60*60*1000;
       CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<String, DateTimeZone>();
       for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
         long time = System.currentTimeMillis();
-        tzMap.add(dtz.getShortName(time, locale).toLowerCase(), dtz);
-        tzMap.add(dtz.getName(time, locale).toLowerCase(), dtz);
-        // Add about half a year to get day light savings timezones...
-        time += hymillis;
         tzMap.add(dtz.getShortName(time, locale).toLowerCase(), dtz);
         tzMap.add(dtz.getName(time, locale).toLowerCase(), dtz);
 //      tzMap.add(dtz.getNameKey(time).toLowerCase(), dtz);

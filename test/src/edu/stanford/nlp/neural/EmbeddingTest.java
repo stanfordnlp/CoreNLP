@@ -23,46 +23,65 @@ public class EmbeddingTest {
   public void testLoadFromOneFile() {
     Embedding embedding = new Embedding(wordVectorFile);
     
+    SimpleMatrix vector;
     double[][] values = new double[1][5];
     
     // unknown
     values[0] = new double[]{0.1, 0.2, 0.3, 0.4, 0.5};
-    assertTrue(embedding.getUnknownWordVector().transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.getUnknownWordVector();
+    vector.reshape(1, 5);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
     
     // start
     values[0] = new double[]{0.6, 0.7, 0.8, 0.9, 1.0};
-    assertTrue(embedding.getStartWordVector().transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.getStartWordVector();
+    vector.reshape(1, 5);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
     
     // end
     values[0] = new double[]{1, 2, 3, 4, 5};
-    assertTrue(embedding.getEndWordVector().transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.getEndWordVector();
+    vector.reshape(1, 5);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
     
     // word
     values[0] = new double[]{6, 7, 8, 9, 10};
-    assertTrue(embedding.get("the").transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.get("the");
+    vector.reshape(1, 5);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
   }
 
   @Test
   public void testLoadFromTwoFile() {
     Embedding embedding = new Embedding(wordFile, vectorFile);
     
+    SimpleMatrix vector;
     double[][] values = new double[1][5];
     
     // unknown
     values[0] = new double[]{0.1, 0.2, 0.3, 0.4, 0.5};
-    assertTrue(embedding.getUnknownWordVector().transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.getUnknownWordVector();
+    vector.reshape(1, 5);
+    System.err.println(vector);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
     
     // start
     values[0] = new double[]{0.6, 0.7, 0.8, 0.9, 1.0};
-    assertTrue(embedding.getStartWordVector().transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.getStartWordVector();
+    vector.reshape(1, 5);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
     
     // end
     values[0] = new double[]{1, 2, 3, 4, 5};
-    assertTrue(embedding.getEndWordVector().transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.getEndWordVector();
+    vector.reshape(1, 5);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
     
     // word
     values[0] = new double[]{6, 7, 8, 9, 10};
-    assertTrue(embedding.get("the").transpose().isIdentical(new SimpleMatrix(values), 1e-5));
+    vector = embedding.get("the");
+    vector.reshape(1, 5);
+    assertTrue(vector.isIdentical(new SimpleMatrix(values), 1e-5));
   }
 
 }
