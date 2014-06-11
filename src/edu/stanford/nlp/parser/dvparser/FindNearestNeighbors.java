@@ -17,10 +17,10 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.parser.lexparser.ArgUtils;
+import edu.stanford.nlp.parser.common.ArgUtils;
+import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.RerankingParserQuery;
-import edu.stanford.nlp.parser.lexparser.ParserQuery;
 import edu.stanford.nlp.trees.DeepTree;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
