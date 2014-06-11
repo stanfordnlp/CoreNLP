@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
@@ -179,6 +180,12 @@ public class ConstantsAndVariables {
    */
   @Option(name = "useTargetNERRestriction")
   public boolean useTargetNERRestriction = false;
+  
+  /**
+   * Adds the parent's tag from the parse tree to the target phrase in the patterns
+   */
+  @Option(name = "useTargetParserParentRestriction")
+  public boolean useTargetParserParentRestriction = false;
 
   /**
    * If the NER tag of the context tokens is not the background symbol,
@@ -594,6 +601,7 @@ public class ConstantsAndVariables {
         env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
       env.get(label).bind("OTHERSEM",
           PatternsAnnotations.OtherSemanticLabel.class);
+      env.get(label).bind("grandparentparsetag", CoreAnnotations.GrandparentAnnotation.class);
     }
 
     if (wordClassClusterFile != null) {
