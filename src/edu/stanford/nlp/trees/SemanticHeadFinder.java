@@ -4,6 +4,8 @@ import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
@@ -51,7 +53,7 @@ import java.util.Set;
  */
 public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
   /* A few times the apostrophe is missing on "'s", so we have "s" */
   /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc.  "of" as non-standard for "have" */
@@ -71,13 +73,15 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   private final Set<String> verbalTags;
   private final Set<String> unambiguousAuxiliaryTags;
 
+  private final boolean makeCopulaHead;
+
 
   public SemanticHeadFinder() {
     this(new PennTreebankLanguagePack(), true);
   }
 
-  public SemanticHeadFinder(boolean cop) {
-    this(new PennTreebankLanguagePack(), cop);
+  public SemanticHeadFinder(boolean noCopulaHead) {
+    this(new PennTreebankLanguagePack(), noCopulaHead);
   }
 
 
@@ -85,12 +89,13 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    *
    * @param tlp The TreebankLanguagePack, used by the superclass to get basic
    *     category of constituents.
-   * @param cop If true, a copular verb (be, seem, appear, stay, remain, resemble, become)
+   * @param noCopulaHead If true, a copular verb 
+   *     (be, seem, appear, stay, remain, resemble, become)
    *     is not treated as head when it has an AdjP or NP complement.  If false,
    *     a copula verb is still always treated as a head.  But it will still
    *     be treated as an auxiliary in periphrastic tenses with a VP complement.
    */
-  public SemanticHeadFinder(TreebankLanguagePack tlp, boolean cop) {
+  public SemanticHeadFinder(TreebankLanguagePack tlp, boolean noCopulaHead) {
     super(tlp);
     ruleChanges();
 
@@ -102,20 +107,28 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     //copula verbs having an NP complement
     copulars = Generics.newHashSet();
-    if (cop) {
+    if (noCopulaHead) {
       copulars.addAll(Arrays.asList(copulaVerbs));
     }
 
+    // TODO: reverse the polarity of noCopulaHead
+    this.makeCopulaHead = !noCopulaHead;
+
     verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
+  }
 
-
+  @Override
+  public boolean makesCopulaHead() {
+    return makeCopulaHead;
   }
 
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
     nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
+    nonTerminalInfo.put("NX", nonTerminalInfo.get("NP"));
+    nonTerminalInfo.put("NML", nonTerminalInfo.get("NP"));
     // WHNP clauses should have the same sort of head as an NP
     // but it a WHNP has a NP and a WHNP under it, the WHNP should be the head.  E.g.,  (WHNP (WHNP (WP$ whose) (JJ chief) (JJ executive) (NN officer))(, ,) (NP (NNP James) (NNP Gatward))(, ,))
     nonTerminalInfo.put("WHNP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP"}, {"left", "WHNP", "NP"}, {"rightdis", "$", "ADJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}, {"left", "WHPP", "WHADJP", "WP$", "WDT"}});
@@ -140,7 +153,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});
 
     // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
-    nonTerminalInfo.put("CONJP", new String[][]{{"right", "VB", "JJ", "RB", "IN", "CC"}});
+    nonTerminalInfo.put("CONJP", new String[][]{{"right", "CC", "VB", "JJ", "RB", "IN" }});
 
     // FRAG: crap rule needs to be change if you want to parse glosses; but it is correct to have ADJP and ADVP before S because of weird parses of reduced sentences.
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
@@ -218,6 +231,19 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     return headIdx;
   }
 
+  // Note: so far, both of these patterns only work when the SQ
+  // structure has already been removed in CoordinationTransformer.
+  static final TregexPattern[] headOfCopulaTregex = {
+    // Matches phrases such as "what is wrong"
+    TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $++ ADJP=head))"),
+
+    // matches WHNP $+ VB<copula $+ NP
+    // for example, "Who am I to judge?"
+    // !$++ ADJP matches against "Why is the dog pink?"
+    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ NP !$++ ADJP))"),
+  };
+
+
   /**
    * Determine which daughter of the current parse tree is the
    * head.  It assumes that the daughters already have had their
@@ -233,6 +259,19 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     if (DEBUG) {
       System.err.println("At " + motherCat + ", my parent is " + parent);
+    }
+
+    if (motherCat.equals("SBARQ")) { 
+      if (!makeCopulaHead) {
+        for (TregexPattern pattern : headOfCopulaTregex) {
+          TregexMatcher matcher = pattern.matcher(t);
+          if (matcher.matchesAt(t)) {
+            return matcher.getNode("head");
+          }
+        }
+      }
+
+      // if none of the above patterns match, use the standard method
     }
 
     // do VPs with auxiliary as special case
