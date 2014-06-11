@@ -7,7 +7,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.parser.lexparser.ArgUtils;
+import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.Options;
