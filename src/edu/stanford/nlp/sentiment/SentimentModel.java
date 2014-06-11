@@ -3,6 +3,7 @@ package edu.stanford.nlp.sentiment;
 import java.io.Serializable;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -83,11 +84,16 @@ public class SentimentModel implements Serializable {
    */
   final RNNOptions op;
   
-  public SentimentModel(RNNOptions op, TwoDimensionalSet<String, String> binaryProductions, Set<String> unaryProductions) {
+  public SentimentModel(RNNOptions op, List<Tree> trainingTrees) {
     this.op = op;
+    // TODO: record for posterity the random seed if it was set to 0
     rand = (op.randomSeed != 0) ? new Random(op.randomSeed) : new Random(); 
 
-    readWordVectors();
+    if (op.randomWordVectors) {
+      initRandomWordVectors(trainingTrees);
+    } else {
+      readWordVectors();
+    }
     if (op.numHid > 0) {
       this.numHid = op.numHid;
     } else {
@@ -97,6 +103,24 @@ public class SentimentModel implements Serializable {
         break;
       }
       this.numHid = size;
+    }
+
+    TwoDimensionalSet<String, String> binaryProductions = TwoDimensionalSet.hashSet();
+    if (op.simplifiedModel) {
+      binaryProductions.add("", "");
+    } else {
+      // TODO
+      // figure out what binary productions we have in these trees
+      // Note: the current sentiment training data does not actually
+      // have any constituent labels
+    }
+
+    Set<String> unaryProductions = Generics.newHashSet();
+    if (op.simplifiedModel) {
+      unaryProductions.add("");
+    } else {
+      // TODO
+      // figure out what unary productions we have in these trees (preterminals only, after the collapsing)
     }
 
     this.numClasses = op.numClasses;
@@ -158,6 +182,29 @@ public class SentimentModel implements Serializable {
     // Leave the bias column with 0 values
     score.insertIntoThis(0, 0, SimpleMatrix.random(numClasses, numHid, -1.0/Math.sqrt((double)numHid),1.0/Math.sqrt((double)numHid),rand));
     return score.scale(op.trainOptions.scalingForInit);
+  }
+
+  void initRandomWordVectors(List<Tree> trainingTrees) {
+    if (op.numHid == 0) {
+      throw new RuntimeException("Cannot create random word vectors for an unknown numHid");
+    }
+    Set<String> words = Generics.newHashSet();
+    for (Tree tree : trainingTrees) {
+      List<Tree> leaves = tree.getLeaves();
+      for (Tree leaf : leaves) {
+        String word = leaf.label().value();
+        if (op.lowercaseWordVectors) {
+          word = word.toLowerCase();
+        }
+        words.add(word);
+      }
+    }
+    this.wordVectors = Generics.newTreeMap();
+    for (String word : words) {
+      // TODO: how do we initialize this?
+      SimpleMatrix vector = SimpleMatrix.random(1, numHid, -1.0/Math.sqrt((double)numHid),1.0/Math.sqrt((double)numHid),rand);
+      wordVectors.put(word, vector);
+    }
   }
 
   void readWordVectors() {
