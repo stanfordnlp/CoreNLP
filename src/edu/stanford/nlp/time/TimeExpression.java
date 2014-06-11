@@ -23,15 +23,6 @@ import java.util.List;
 public class TimeExpression extends MatchedExpression {
 
   /**
-   * The CoreMap key for storing a SUTime.TimeIndex (for looking up Timex Id).
-   */
-  public static class TimeIndexAnnotation implements CoreAnnotation<SUTime.TimeIndex> {
-    public Class<SUTime.TimeIndex> getType() {
-      return SUTime.TimeIndex.class;
-    }
-  }
-
-  /**
    * The CoreMap key for storing a TimeExpression annotation.
    */
   public static class Annotation implements CoreAnnotation<TimeExpression> {
@@ -52,7 +43,7 @@ public class TimeExpression extends MatchedExpression {
   }
 
   //int tid;     // Time ID
-  SUTime.Temporal origTemporal;  // todo [2013]: never read. Can delete? (Set in TimeExpressionExtractorImpl)
+  SUTime.Temporal origTemporal;  // never read. Can delete?
   //int anchorTimeId = -1;
 
   public TimeExpression(MatchedExpression expr)
@@ -143,7 +134,6 @@ public class TimeExpression extends MatchedExpression {
     }
     return null;
   }
-
   public void setTemporal(SUTime.Temporal temporal) {
     this.value = new Expressions.PrimitiveValue<SUTime.Temporal>("Temporal", temporal);
   }
