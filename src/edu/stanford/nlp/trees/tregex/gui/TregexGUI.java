@@ -275,7 +275,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     return fullTopPanel;
   }
 
-  public TregexGUI(String ... initialFiles) {
+  public TregexGUI() {
     super("Tregex");
     TregexGUI.instance = this;
     setDefaultLookAndFeelDecorated(true);
@@ -315,15 +315,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     // center it
     setBounds(begX, begY, screenSize.width, screenSize.height);
     pack();
-
-    if (initialFiles.length > 0) {
-      File[] files = new File[initialFiles.length];
-      for (int i = 0; i < initialFiles.length; ++i) {
-        files[i] = new File(initialFiles[i]);
-      }
-      startFileLoadingThread(new EnumMap<FilterType,String>(FilterType.class), files);
-    }
-
     setVisible(true);
   }
 
@@ -778,7 +769,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     if (isMacOSX()) {
       setMacProperties();
     }
-    new TregexGUI(args);
+    new TregexGUI();
   }
 
 
