@@ -59,11 +59,11 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
       logger.setLevel(Level.SEVERE);
     }
     NumberNormalizer.setVerbose(options.verbose);
-    if (options.grammarFilename == null) {
-      options.grammarFilename = Options.DEFAULT_GRAMMAR_FILES;
-      logger.warning("Time rules file is not specified: using default rules at " + options.grammarFilename);
+    if (options.grammarFilename != null) {
+      timexPatterns = new GenericTimeExpressionPatterns(options);
+    } else {
+      timexPatterns = new EnglishTimeExpressionPatterns(options);
     }
-    timexPatterns = new GenericTimeExpressionPatterns(options);
     this.expressionExtractor = timexPatterns.createExtractor();
     this.expressionExtractor.setLogger(logger);
   }
