@@ -165,8 +165,4 @@ public abstract class PhraseScorer {
       return minScore;
   }
 
-  abstract public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
-      String label, Set<String> terms, boolean forLearningPatterns) throws IOException;
-  
-
 }
