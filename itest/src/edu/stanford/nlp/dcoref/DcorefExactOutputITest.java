@@ -27,6 +27,13 @@ import junit.framework.TestCase;
  * results, we keep an internal class which represents them in a very
  * simple manner.  Also included are utility methods to rewrite the
  * expected results file if we change the sample input used.
+ * <br>
+ * Assuming the test file has not changed, the command line to rebuild
+ * the expected output is
+ * <br>
+ * <code>
+ * java edu.stanford.nlp.dcoref.DcorefExactOutputITest projects/core/data/edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.sgm projects/core/data/edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.expectedcoref
+ * </code>
  *
  * @author John Bauer
  */
