@@ -211,4 +211,8 @@ public class InvertedIndexByTokens implements Serializable{
   public int numAllEntries() {
     return this.numAllEntries;
   }
+
+  public Set<String> getKeySet() {
+    return index.keySet();
+  }
 }
