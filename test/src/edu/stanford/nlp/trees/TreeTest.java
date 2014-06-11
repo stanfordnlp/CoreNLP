@@ -77,4 +77,14 @@ public class TreeTest extends TestCase {
     assertEquals("ROOT", t.toString());
   }
 
+
+  public void testDominates() {
+    Tree t = Tree.valueOf("(A (B this) (C (D is) (E a) (F small)) (G test))");
+    assertFalse(t.dominates(t));
+
+    for (Tree child : t.children()) {
+      assertTrue(t.dominates(child));
+      assertFalse(child.dominates(t));
+    }
+  }
 }
