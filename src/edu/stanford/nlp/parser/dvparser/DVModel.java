@@ -18,7 +18,8 @@ import org.ejml.simple.SimpleMatrix;
 import org.ejml.data.DenseMatrix64F;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.rnn.RNNUtils;
+import edu.stanford.nlp.neural.Embedding;
+import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryGrammar;
 import edu.stanford.nlp.parser.lexparser.BinaryRule;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -512,7 +513,8 @@ public class DVModel implements Serializable {
     int chineseNumberCount = 0;
     int chinesePercentCount = 0;
 
-    Map<String, SimpleMatrix> rawWordVectors = RNNUtils.readRawWordVectors(op.lexOptions.wordVectorFile, op.lexOptions.numHid);
+    //Map<String, SimpleMatrix> rawWordVectors = NeuralUtils.readRawWordVectors(op.lexOptions.wordVectorFile, op.lexOptions.numHid);
+    Embedding rawWordVectors = new Embedding(op.lexOptions.wordVectorFile, op.lexOptions.numHid);
 
     for (String word : rawWordVectors.keySet()) {
       SimpleMatrix vector = rawWordVectors.get(word);
@@ -658,14 +660,14 @@ public class DVModel implements Serializable {
   public double[] paramsToVector(double scale) {
     int totalSize = totalParamSize();
     if (TRAIN_WORD_VECTORS) {
-      return RNNUtils.paramsToVector(scale, totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator(),
-                                     wordVectors.values().iterator());
+      return NeuralUtils.paramsToVector(scale, totalSize,
+                                        binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                        binaryScore.valueIterator(), unaryScore.values().iterator(),
+                                        wordVectors.values().iterator());
     } else {
-      return RNNUtils.paramsToVector(scale, totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator());
+      return NeuralUtils.paramsToVector(scale, totalSize,
+                                        binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                        binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
 
@@ -674,28 +676,28 @@ public class DVModel implements Serializable {
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
     if (TRAIN_WORD_VECTORS) {
-      return RNNUtils.paramsToVector(totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator(),
-                                     wordVectors.values().iterator());
+      return NeuralUtils.paramsToVector(totalSize,
+                                        binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                        binaryScore.valueIterator(), unaryScore.values().iterator(),
+                                        wordVectors.values().iterator());
     } else {
-      return RNNUtils.paramsToVector(totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator());
+      return NeuralUtils.paramsToVector(totalSize,
+                                        binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                        binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
 
   @SuppressWarnings("unchecked")
   public void vectorToParams(double[] theta) {
     if (TRAIN_WORD_VECTORS) {
-      RNNUtils.vectorToParams(theta,
-                              binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                              binaryScore.valueIterator(), unaryScore.values().iterator(),
-                              wordVectors.values().iterator());
+      NeuralUtils.vectorToParams(theta,
+                                 binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                 binaryScore.valueIterator(), unaryScore.values().iterator(),
+                                 wordVectors.values().iterator());
     } else {
-      RNNUtils.vectorToParams(theta,
-                              binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                              binaryScore.valueIterator(), unaryScore.values().iterator());
+      NeuralUtils.vectorToParams(theta,
+                                 binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                                 binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
 
