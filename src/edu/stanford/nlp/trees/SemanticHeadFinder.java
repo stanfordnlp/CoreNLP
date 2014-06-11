@@ -53,7 +53,7 @@ import java.util.Set;
  */
 public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
   /* A few times the apostrophe is missing on "'s", so we have "s" */
   /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc.  "of" as non-standard for "have" */
