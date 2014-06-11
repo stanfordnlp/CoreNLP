@@ -153,10 +153,6 @@ public class SequencePattern<T> {
     this.action = action;
   }
 
-  public int getTotalGroups() {
-    return totalGroups;
-  }
-
   // Compiles string (regex) to NFA for doing pattern simulation
   public static <T> SequencePattern<T> compile(Env env, String string)
   {
