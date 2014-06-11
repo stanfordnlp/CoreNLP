@@ -59,7 +59,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
 
 
@@ -375,8 +374,6 @@ public class ColumnDataClassifier {
    *  @return A Pair of a GeneralDataSet of Datums and a List of datums in String form.
    */
   private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(String filename, boolean inTestPhase) {
-    Timing tim = new Timing();
-    System.err.print("Reading dataset from " + filename + " ... ");
     GeneralDataset<String,String> dataset;
     List<String[]> lineInfos = null;
     if ((inTestPhase && Flags.testFromSVMLight) || (!inTestPhase && Flags.trainFromSVMLight)) {
@@ -419,7 +416,6 @@ public class ColumnDataClassifier {
       }
     }
 
-    System.err.println("done [" + tim.toSecondsString() + "s, " + dataset.size() + " items].");
     return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
   }
 
