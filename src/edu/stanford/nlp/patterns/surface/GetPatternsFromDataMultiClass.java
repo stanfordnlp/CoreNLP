@@ -2254,7 +2254,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           for (File f : allFiles) {
-            sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
+            if (!batchProcessSents) 
+              sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
+            else
+              Data.sentsFiles.add(f);
           }
         } else {
           throw new RuntimeException(
