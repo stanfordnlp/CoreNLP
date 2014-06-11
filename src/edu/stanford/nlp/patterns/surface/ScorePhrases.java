@@ -30,6 +30,7 @@ import javax.json.JsonValue;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
@@ -264,8 +265,14 @@ public class ScorePhrases {
         // num + " till " + Math.min(keyset.size(), (i + 1) * num));
 
         Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<String, Integer>>> task = null;
-        task = new ApplyPatterns(keyset.subList(i * num,
-            Math.min(keyset.size(), (i + 1) * num)), patternsLearnedThisIter,
+        Map<TokenSequencePattern, SurfacePattern> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , SurfacePattern>();
+        for(SurfacePattern p : patternsLearnedThisIter.keySet()){
+          TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString());
+          patternsLearnedThisIterConverted.put(pat, p);
+        }
+        
+        task = new ApplyPatternsMulti(keyset.subList(i * num,
+            Math.min(keyset.size(), (i + 1) * num)), patternsLearnedThisIterConverted,
             constVars.getCommonEngWords(),
             alreadyIdentifiedWords, constVars.restrictToMatched, label,
             constVars.removeStopWordsFromSelectedPhrases,
