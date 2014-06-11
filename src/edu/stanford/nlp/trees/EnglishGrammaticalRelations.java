@@ -908,7 +908,8 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "amod", "adjectival modifier",
         AdjectivalModifierGRAnnotation.class, MODIFIER, "NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP|ADJP", tregexCompiler,
         new String[] {
-          "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< QP !$- CC)",
+          // QP !< $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
+          "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< (QP !< /^[$]$/) !$- CC)",
                 // IN above is needed for "next" in "next week" etc., which is often tagged IN.
           "ADJP !< CC|CONJP < (JJ|NNP $ JJ|NNP=target)",
           // Cover the case of "John, 34, works at Stanford" - similar to an expression for appos
@@ -928,10 +929,18 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation NUMERIC_MODIFIER =
     new GrammaticalRelation(Language.English, "num", "numeric modifier",
-        NumericModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX", tregexCompiler,
+        NumericModifierGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|ADJP|WHADJP|QP", tregexCompiler,
         new String[] {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
-          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: QP)"
+          // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
+          // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
+          // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.
+          // Note that the earlier tregexes are usually enough to cover those phrases, such as when
+          // the QP is by itself in an ADJP or NP, but sometimes it can have other siblings such
+          // as in the phrase "$ 100 million or more".  In that case, this next expression is needed.
+          "QP < QP=target < /^[$]$/"
         });
   public static class NumericModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1028,15 +1037,16 @@ public class EnglishGrammaticalRelations {
           // which is the normal case for such a pattern.
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target !<: CD $- /^,$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target < (NP < /^(?:NN|CD)/ $-- /^-LRB-$/ $+ /^-RRB-$/))",
-          "@WHNP|NP < (@NP=target !<: CD <, /^-LRB-$/ <` /^-RRB-$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
+          // NP-ADV is a npadvmod, NP-TMP is a tmod
+          "@WHNP|NP < (NP=target !<: CD <, /^-LRB-$/ <` /^-RRB-$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
           // TODO: next pattern with NNP doesn't work because leftmost NNP is deemed head in a
           // structure like (NP (NNP Norway) (, ,) (NNP Verdens_Gang) (, ,))
           "NP|NP-TMP|NP-ADV < (NNP $+ (/^,$/ $+ NNP=target)) !< CC|CONJP",
           // find abbreviations
           // for biomedical English, the former NNP heuristic really doesn't work, because they use NN for all chemical entities
           // while not unfoolable, this version produces less false positives and more true positives.
-          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )"
-
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )",
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target <: NNP $- (/^(?:WH)?NP/ !< POS) !$ CC|CONJP)"
 
         });
   public static class AppositionalModifierGRAnnotation extends GrammaticalRelationAnnotation { }

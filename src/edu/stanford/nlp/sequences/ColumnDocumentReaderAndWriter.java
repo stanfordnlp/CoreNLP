@@ -45,7 +45,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public void init(String map) {
 //    this.flags = null;
     this.map = StringUtils.mapStringToArray(map);
-    factory = DelimitRegExIterator.getFactory("\n(\\s*\n)+", new ColumnDocParser());
+    factory = DelimitRegExIterator.getFactory("\n(?:\\s*\n)+", new ColumnDocParser());
   }
 
   @Override
