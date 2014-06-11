@@ -855,20 +855,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     else {
 
       for (File f : Data.sentsFiles) {
-        Redwood.log(Redwood.DBG, "Creating patterns and calculating sufficient statistics from " + f);
+        
+        Redwood.log(Redwood.DBG, constVars.computeAllPatterns?"Creating patterns and ":"" + "calculating sufficient statistics from " + f);
+        
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
+        
         Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> pats4File = null;
+        
         if (constVars.computeAllPatterns) {
           if (this.patternsForEachToken == null)
             this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
           pats4File = createPats.getAllPatterns(label, sents);
           this.patternsForEachToken.putAll(pats4File);
-        } else if (this.patternsForEachToken == null) {
-          // read only for the first time
-          this.patternsForEachToken = IOUtils.readObjectFromFile(constVars.allPatternsFile);
-          Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsFile);
+        } else{
+          if (this.patternsForEachToken == null) {
+            // read only for the first time
+            this.patternsForEachToken = IOUtils.readObjectFromFile(constVars.allPatternsFile);
+            Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsFile);
+          }  
           pats4File = this.patternsForEachToken;
         }
+        
         this.calculateSufficientStats(sents, pats4File, label, patternsandWords4Label, posnegPatternsandWords4Label, allPatternsandWords4Label,
             negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
       }
