@@ -22,7 +22,18 @@ public class Utils {
    * Compute cosine distance between two column vectors.
    */
   public static double cosine(SimpleMatrix vector1, SimpleMatrix vector2){
-    return vector1.transpose().mult(vector2).get(0)/(vector1.normF()*vector2.normF());
+    return dot(vector1, vector2)/(vector1.normF()*vector2.normF());
+  }
+  
+  /**
+   * Compute cosine distance between two column vectors.
+   */
+  public static double dot(SimpleMatrix vector1, SimpleMatrix vector2){
+    if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too 
+      return vector1.mult(vector2.transpose()).get(0); 
+    } else { // vector1: col vector, assume that vector2 is also a column vector.
+      return vector1.transpose().mult(vector2).get(0);
+    }
   }
   
   /**
