@@ -3,7 +3,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 import edu.stanford.nlp.parser.lexparser.Options;
 
 public class ShiftReduceOptions extends Options {
-  public int beamSize;
+  public int beamSize = 1;
 
   protected int setOptionFlag(String[] args, int i) {
     int j = super.setOptionFlag(args, i);
