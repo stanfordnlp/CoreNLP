@@ -231,11 +231,10 @@ TregexPattern ModChild() : {
   boolean startUnderNeg;
 } {
   ( child = Child()
-    | ( "(" child = ChildrenDisj() ")" )
     | ( "!"
         { startUnderNeg = underNegation;
           underNegation = true; }
-        child = ModChild()
+        child = Child()
           { underNegation = startUnderNeg; }
       )
       { child.negate(); }

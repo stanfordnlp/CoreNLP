@@ -92,7 +92,6 @@ class TregexParser implements TregexParserConstants {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case REL_W_STR_ARG:
-      case 12:
       case 14:
       case 22:
       case 23:{
@@ -123,7 +122,6 @@ if(child != null) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case REL_W_STR_ARG:
-      case 12:
       case 14:
       case 22:
       case 23:{
@@ -332,7 +330,6 @@ children.add(child);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case RELATION:
       case REL_W_STR_ARG:
-      case 12:
       case 14:
       case 21:
       case 22:
@@ -372,17 +369,11 @@ if (children.size() == 1)
       child = Child();
       break;
       }
-    case 12:{
-      jj_consume_token(12);
-      child = ChildrenDisj();
-      jj_consume_token(13);
-      break;
-      }
     case 14:{
       jj_consume_token(14);
 startUnderNeg = underNegation;
           underNegation = true;
-      child = ModChild();
+      child = Child();
 underNegation = startUnderNeg;
 child.negate();
       break;
@@ -548,7 +539,7 @@ if (strArg != null) {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0xcd380,0xc05030,0xc05030,0xcd380,0x4000,0x8000,0x380,0x10000,0x40000,0x40000,0xc0380,0x100000,0xe05030,0x200000,0xc05030,0x800030,0x40,0x4000,0x8000,0x380,0x4000,0x5200,0x30,};
+      jj_la1_0 = new int[] {0xcd380,0xc04030,0xc04030,0xcd380,0x4000,0x8000,0x380,0x10000,0x40000,0x40000,0xc0380,0x100000,0xe04030,0x200000,0xc04030,0x800030,0x40,0x4000,0x8000,0x380,0x4000,0x5200,0x30,};
    }
 
   /** Constructor with InputStream. */
