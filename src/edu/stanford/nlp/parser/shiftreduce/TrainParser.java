@@ -145,6 +145,8 @@ public class TrainParser {
         System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
       }
 
+      parser.condenseFeatures();
+
       if (serializedPath != null) {
         try {
           IOUtils.writeObjectToFile(parser, serializedPath);
