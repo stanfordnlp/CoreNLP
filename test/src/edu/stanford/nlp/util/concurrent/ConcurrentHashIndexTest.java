@@ -1,16 +1,16 @@
-package edu.stanford.nlp.util;
+package edu.stanford.nlp.util.concurrent;
 
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.stanford.nlp.util.Index;
 
 /**
- * @author Sebastian Riedel
+ * @author Spence Green
  */
-public class HashIndexTest extends TestCase  {
+public class ConcurrentHashIndexTest extends TestCase  {
 
   protected Index<String> index;
   protected Index<String> index2;
@@ -18,15 +18,15 @@ public class HashIndexTest extends TestCase  {
 
   @Override
   protected void setUp() {
-    index = new HashIndex<String>();
+    index = new ConcurrentHashIndex<String>();
     index.add("The");
     index.add("Beast");
-    index2 = new HashIndex<String>();
+    index2 = new ConcurrentHashIndex<String>();
     index2.add("Beauty");
     index2.add("And");
     index2.add("The");
     index2.add("Beast");
-    index3 = new HashIndex<String>();
+    index3 = new ConcurrentHashIndex<String>();
     index3.add("Markov");
     index3.add("The");
     index3.add("Beast");
@@ -74,44 +74,10 @@ public class HashIndexTest extends TestCase  {
     assertEquals("Beast", strs[1]);
     assertEquals(2, strs.length);
   }
-
-  public void testUnmodifiableViewEtc() {
-    List<String> list = new ArrayList<String>();
-    list.add("A");
-    list.add("B");
-    list.add("A");
-    list.add("C");
-    HashIndex<String> index4 = new HashIndex<String>(list);
-    HashIndex<String> index5 = new HashIndex<String>();
-    index5.addAll(list);
-    assertEquals("Equality failure", index4, index5);
-    index5.indexOf("D", true);
-    index5.indexOf("E", true);
-    index5.indexOf("F");
-    index5.addAll(list);
-    assertEquals(5, index5.size());
-    assertEquals(3, index4.size());
-    assertTrue(index4.contains("A"));
-    assertEquals(0, index4.indexOf("A"));
-    assertEquals(1, index4.indexOf("B"));
-    assertEquals(2, index4.indexOf("C"));
-    assertEquals("A", index4.get(0));
-    Index<String> index4u = index4.unmodifiableView();
-    assertEquals(3, index4u.size());
-    assertTrue(index4u.contains("A"));
-    assertEquals(0, index4u.indexOf("A"));
-    assertEquals(1, index4u.indexOf("B"));
-    assertEquals(2, index4u.indexOf("C"));
-    assertEquals("A", index4u.get(0));
-    assertEquals(-1, index4u.indexOf("D", true));
-    boolean okay = false;
-    try {
-      index4u.unlock();
-    } catch (UnsupportedOperationException uoe) {
-      okay = true;
-    } finally {
-      assertTrue(okay);
-    }
+  
+  public void testObjects() {
+    List<String> foo = (List<String>) index2.objects(new int[] {0, 3});
+    assertEquals("Beauty", foo.get(0));
+    assertEquals("Beast", foo.get(1));
   }
-
 }

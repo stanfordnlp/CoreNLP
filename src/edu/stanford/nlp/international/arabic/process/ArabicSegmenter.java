@@ -71,9 +71,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   // Number of decoding threads
   private static final String optThreads = "nthreads";
 
-  // Write TedEval files
-  private static final String optTedEval = "tedEval";
-
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
   private final TokenizerFactory<CoreLabel> tf;
@@ -81,7 +78,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final String suffixMarker;
   private final boolean isTokenized;
   private final String tokenizerOptions;
-  private final String tedEvalPrefix;
 
   /** Make an Arabic Segmenter.
    *
@@ -91,7 +87,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
-    tedEvalPrefix = props.getProperty(optTedEval, null);
     tf = getTokenizerFactory();
 
     prefixMarker = props.getProperty(optPrefix, "");
@@ -103,7 +98,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     props.remove(optPrefix);
     props.remove(optSuffix);
     props.remove(optThreads);
-    props.remove(optTedEval);
 
     // Currently, this class only supports one featureFactory.
     props.put("featureFactory", "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory");
@@ -122,7 +116,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     tokenizerOptions = other.tokenizerOptions;
     prefixMarker = other.prefixMarker;
     suffixMarker = other.suffixMarker;
-    tedEvalPrefix = other.tedEvalPrefix;
     flags = other.flags;
 
     // ArabicTokenizerFactory is *not* threadsafe. Make a new copy.
@@ -264,29 +257,13 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
                                                                                      hasTags, tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.testFile, docReader);
-    
-    PrintWriter tedEvalGoldTree = null, tedEvalParseTree = null;
-    PrintWriter tedEvalGoldSeg = null, tedEvalParseSeg = null;
-    if (tedEvalPrefix != null) {
-      try {
-        tedEvalGoldTree = new PrintWriter(tedEvalPrefix + "_gold.ftree");
-        tedEvalGoldSeg = new PrintWriter(tedEvalPrefix + "_gold.segmentation");
-        tedEvalParseTree = new PrintWriter(tedEvalPrefix + "_parse.ftree");
-        tedEvalParseSeg = new PrintWriter(tedEvalPrefix + "_parse.segmentation");
-      } catch (FileNotFoundException e) {
-        System.err.printf("%s: %s%n", ArabicSegmenter.class.getName(), e.getMessage());
-      }
-    }
 
     Counter<String> labelTotal = new ClassicCounter<String>();
     Counter<String> labelCorrect = new ClassicCounter<String>();
     int total = 0;
     int correct = 0;
     for (List<CoreLabel> line : lines) {
-      final String[] inputTokens = tedEvalSanitize(IOBUtils.IOBToString(line).replaceAll(":", "#pm#")).split(" ");
-      final String[] goldTokens = tedEvalSanitize(IOBUtils.IOBToString(line, ":")).split(" ");
       line = classifier.classify(line);
-      final String[] parseTokens = tedEvalSanitize(IOBUtils.IOBToString(line, ":")).split(" ");
       for (CoreLabel label : line) {
         // Do not evaluate labeling of whitespace
         String observation = label.get(CoreAnnotations.CharAnnotation.class);
@@ -300,23 +277,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
             labelCorrect.incrementCount(reference);
           }
         }
-      }
-      if (tedEvalParseSeg != null) {
-        assert inputTokens.length == parseTokens.length && inputTokens.length == goldTokens.length;
-        tedEvalGoldTree.printf("(root");
-        tedEvalParseTree.printf("(root");
-        for (int i = 0; i < inputTokens.length; i++) {
-          for (String segment : goldTokens[i].split(":"))
-            tedEvalGoldTree.printf(" (seg %s)", segment);
-          tedEvalGoldSeg.printf("%s\t%s%n", inputTokens[i], goldTokens[i]);
-          for (String segment : parseTokens[i].split(":"))
-            tedEvalParseTree.printf(" (seg %s)", segment);
-          tedEvalParseSeg.printf("%s\t%s%n", inputTokens[i], parseTokens[i]);
-        }
-        tedEvalGoldTree.printf(")%n");
-        tedEvalGoldSeg.println();
-        tedEvalParseTree.printf(")%n");
-        tedEvalParseSeg.println();
       }
     }
 
@@ -337,17 +297,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
       double acc = (nCorrect / nTotal) * 100.0;
       pwOut.printf(" %s\t%.2f%n", refLabel, acc);
     }
-    
-    if (tedEvalParseSeg != null) {
-      tedEvalGoldTree.close();
-      tedEvalGoldSeg.close();
-      tedEvalParseTree.close();
-      tedEvalParseSeg.close();
-    }
-  }
-
-  private String tedEvalSanitize(String str) {
-    return str.replaceAll("\\(", "#lp#").replaceAll("\\)", "#rp#");
   }
 
   /**
@@ -400,7 +349,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     sb.append("  -prefixMarker char   : Mark segmented prefixes with specified character.").append(nl);
     sb.append("  -suffixMarker char   : Mark segmented suffixes with specified character.").append(nl);
     sb.append("  -nthreads num        : Number of threads  (default: 1)").append(nl);
-    sb.append("  -tedEval prefix      : Output TedEval-compliant gold and parse files.").append(nl);
     sb.append(nl).append(" Otherwise, all flags correspond to those present in SeqClassifierFlags.java.").append(nl);
     return sb.toString();
   }
@@ -417,7 +365,6 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     optionArgDefs.put("prefixMarker", 1);
     optionArgDefs.put("suffixMarker", 1);
     optionArgDefs.put("nthreads", 1);
-    optionArgDefs.put("tedEval", 1);
     return optionArgDefs;
   }
 
