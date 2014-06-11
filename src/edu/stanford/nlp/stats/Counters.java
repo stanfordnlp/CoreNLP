@@ -758,6 +758,19 @@ public class Counters {
   }
 
   /**
+   * Removes all entries with keys (first key set) in the given collection
+   *
+   * @param <E>
+   * @param counter
+   * @param removeKeysCollection
+   */
+  public static <E, F> void removeKeys(TwoDimensionalCounter<E, F> counter, Collection<E> removeKeysCollection) {
+
+    for (E key : removeKeysCollection)
+      counter.remove(key);
+  }
+  
+  /**
    * Returns the set of keys whose counts are at or above the given threshold.
    * This set may have 0 elements but will not be null.
    *
@@ -1226,6 +1239,16 @@ public class Counters {
     }
     return dotProd;
   }
+  
+
+  public static <E> Counter<E> add(Counter<E> c1, Collection<E> c2) {
+    Counter<E> result = c1.getFactory().create();
+    addInPlace(result, c1);
+    for (E key : c2) {
+      result.incrementCount(key, 1);
+    }
+    return result;
+  }
 
   public static <E> Counter<E> add(Counter<E> c1, Counter<E> c2) {
     Counter<E> result = c1.getFactory().create();
@@ -1315,7 +1338,22 @@ public class Counters {
     }
     return result;
   }
+  
+  /**
+   * Returns c1 divided by c2. Safe - will not calculate scores for keys that are zero or that do not exist in c2
+   *
+   * @return c1 divided by c2.
+   */
+  public static <E> Counter<E> divisionNonNaN(Counter<E> c1, Counter<E> c2) {
+    Counter<E> result = c1.getFactory().create();
+    for (E key : Sets.union(c1.keySet(), c2.keySet())) {
+      if(c2.getCount(key) != 0)
+        result.setCount(key, c1.getCount(key) / c2.getCount(key));
+    }
+    return result;
+  }
 
+  
   /**
    * Calculates the entropy of the given counter (in bits). This method
    * internally uses normalized counts (so they sum to one), but the value
