@@ -103,10 +103,10 @@ public class TimeFormatter {
       MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
       valueExtractor.valueExtractor =
               new SequenceMatchRules.CoreMapFunctionApplier< String, Value>(
-                      env, r.annotationField,
+                      r.annotationField,
                       extractor);
       r.extractRule = new SequenceMatchRules.CoreMapExtractRule< String, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new SequenceMatchRules.StringPatternExtractRule<MatchedExpression>(pattern,
                       new SequenceMatchRules.StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
       r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
@@ -119,7 +119,7 @@ public class TimeFormatter {
       MatchedExpression.SingleAnnotationExtractor valueExtractor = SequenceMatchRules.createAnnotationExtractor(env,r);
       valueExtractor.valueExtractor = extractor;
       r.extractRule = new SequenceMatchRules.CoreMapExtractRule<List<? extends CoreMap>, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new SequenceMatchRules.BasicSequenceExtractRule(valueExtractor));
       r.filterRule = new SequenceMatchRules.AnnotationMatchedFilter(valueExtractor);
     }
@@ -607,16 +607,11 @@ public class TimeFormatter {
     }
 
     private void updateTimeZoneNames(Locale locale) {
-      long time1 = new SUTime.IsoDate(2013,1,1).getJodaTimeInstant().getMillis();
-      long time2 = new SUTime.IsoDate(2013,6,1).getJodaTimeInstant().getMillis();
       CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<String, DateTimeZone>();
       for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
-        // standard timezones
-        tzMap.add(dtz.getShortName(time1, locale).toLowerCase(), dtz);
-        tzMap.add(dtz.getName(time1, locale).toLowerCase(), dtz);
-        // Add about half a year to get day light savings timezones...
-        tzMap.add(dtz.getShortName(time2, locale).toLowerCase(), dtz);
-        tzMap.add(dtz.getName(time2, locale).toLowerCase(), dtz);
+        long time = System.currentTimeMillis();
+        tzMap.add(dtz.getShortName(time, locale).toLowerCase(), dtz);
+        tzMap.add(dtz.getName(time, locale).toLowerCase(), dtz);
 //      tzMap.add(dtz.getNameKey(time).toLowerCase(), dtz);
 //      tzMap.add(dtz.getID().toLowerCase(), dtz);
       }
