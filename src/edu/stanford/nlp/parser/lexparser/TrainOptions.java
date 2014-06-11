@@ -312,7 +312,7 @@ public class TrainOptions implements Serializable {
    */
   public static final double DEFAULT_REGCOST = 0.0001;
   public double regCost = DEFAULT_REGCOST;
-  
+
   /**
    * When training the DV parsing method, how many iterations to loop
    * for one batch of trees
@@ -345,7 +345,7 @@ public class TrainOptions implements Serializable {
    * How fast to learn (can mean different things for different algorithms)
    */
   public double learningRate = DEFAULT_LEARNING_RATE;
-  
+
   public static final double DEFAULT_DELTA_MARGIN = 0.1;
   /**
    * How much to penalize the wrong trees for how different they are
@@ -407,7 +407,7 @@ public class TrainOptions implements Serializable {
   public String unkWord = DEFAULT_UNK_WORD;
 
   /**
-   * Whether or not to lowercase word vectors 
+   * Whether or not to lowercase word vectors
    */
   public boolean lowercaseWordVectors = false;
 
@@ -432,7 +432,10 @@ public class TrainOptions implements Serializable {
    * this field, as it was originally a compile time constant
    */
   public boolean trainWordVectors = true;
-  
+
+  /** Horton-Strahler number/dimension (Maximilian Schlund) */
+  public boolean markStrahler;
+
   public void display() {
     System.err.println(toString());
   }
@@ -498,6 +501,7 @@ public class TrainOptions implements Serializable {
     result.append(" transformMatrixType=" + transformMatrixType + "\n");
     result.append(" useContextWords=" + useContextWords + "\n");
     result.append(" trainWordVectors=" + trainWordVectors + "\n");
+    result.append(" markStrahler=" + markStrahler + "\n");
     return result.toString();
   }
 
