@@ -41,6 +41,7 @@ public class ConfusionMatrix<U> {
   protected static DecimalFormat d = new DecimalFormat("#.#####");
   private int leftPadSize = 16;
   private int delimPadSize = 8;
+  private boolean useRealLabels = false;
 
   @Override
     public String toString() {
@@ -61,6 +62,10 @@ public class ConfusionMatrix<U> {
    */
   public void setDelimPadSize(int newPadSize) {
     this.delimPadSize = newPadSize;
+  }
+
+  public void setUseRealLabels(boolean useRealLabels) {
+    this.useRealLabels = useRealLabels;
   }
 
   /**
@@ -240,6 +245,14 @@ public class ConfusionMatrix<U> {
     return sum;
   }
   
+  public String getPlaceHolder(int index, U label) {
+    if (useRealLabels) {
+      return label.toString();
+    } else {
+      return CLASS_PREFIX + (index + 1); // class name
+    }
+  }
+
   /**
    * Prints the current confusion in table form to a string, with contingency
    * 
@@ -255,7 +268,7 @@ public class ConfusionMatrix<U> {
     // header row (top)
     ret.write(StringUtils.padLeft("Guess/Gold", leftPadSize));
     for (int i = 0; i < sortedLabels.size(); i++) {
-      String placeHolder = CLASS_PREFIX + (i + 1); // class name
+      String placeHolder = getPlaceHolder(i, sortedLabels.get(i));
       // placeholder
       ret.write(StringUtils.padLeft(placeHolder, delimPadSize));
     }
@@ -264,7 +277,7 @@ public class ConfusionMatrix<U> {
     
     // Write out contents
     for (int guessI = 0; guessI < sortedLabels.size(); guessI++) {
-      String placeHolder = CLASS_PREFIX + (guessI + 1);
+      String placeHolder = getPlaceHolder(guessI, sortedLabels.get(guessI));
       ret.write(StringUtils.padLeft(placeHolder, leftPadSize));
       U guess = sortedLabels.get(guessI);
       for (int goldI = 0; goldI < sortedLabels.size(); goldI++) {
@@ -286,11 +299,13 @@ public class ConfusionMatrix<U> {
     // Print out key, along with contingencies
     ret.write("\n\n");
     for (int labelI = 0; labelI < sortedLabels.size(); labelI++) {
-      String placeHolder = CLASS_PREFIX + (labelI + 1);
       U classLabel = sortedLabels.get(labelI);
+      String placeHolder = getPlaceHolder(labelI, classLabel);
       ret.write(StringUtils.padLeft(placeHolder, leftPadSize));
-      ret.write(" = ");
-      ret.write(classLabel.toString());
+      if (!useRealLabels) {
+        ret.write(" = ");
+        ret.write(classLabel.toString());
+      }
       ret.write(StringUtils.padLeft("", delimPadSize));
       Contingency contingency = getContingency(classLabel);
       ret.write(contingency.toString());

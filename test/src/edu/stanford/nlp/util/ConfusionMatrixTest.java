@@ -21,15 +21,39 @@ public class ConfusionMatrixTest extends TestCase {
 
   public void test1() {
     String expected = "      Guess/Gold      C1      C2      C3    Marg. (Guess)\n" +
-      "              C1       2       0       0       2\n" +
-      "              C2       1       0       0       1\n" +
-      "              C3       0       0       1       1\n" +
-      "    Marg. (Gold)       3       0       1\n\n" +
-      "              C1 = a        prec=1, recall=0.66667, spec=1, f1=0.8\n" +
-      "              C2 = b        prec=0, recall=n/a, spec=0.75, f1=n/a\n" +
-      "              C3 = c        prec=1, recall=1, spec=1, f1=1\n";
+                      "              C1       2       0       0       2\n" +
+                      "              C2       1       0       0       1\n" +
+                      "              C3       0       0       1       1\n" +
+                      "    Marg. (Gold)       3       0       1\n\n" +
+                      "              C1 = a        prec=1, recall=0.66667, spec=1, f1=0.8\n" +
+                      "              C2 = b        prec=0, recall=n/a, spec=0.75, f1=n/a\n" +
+                      "              C3 = c        prec=1, recall=1, spec=1, f1=1\n";
 
     ConfusionMatrix<String> conf = new ConfusionMatrix<String>();
+    conf.add("a","a");
+    conf.add("a","a");
+    conf.add("b","a");
+    conf.add("c","c");
+    String result = conf.printTable();
+    if (echo) {
+      System.err.println(result);
+    } else {
+      assertEquals(expected, result);
+    }
+  }
+
+  public void test3() {
+    String expected = "      Guess/Gold       a       b       c    Marg. (Guess)\n" +
+                      "               a       2       0       0       2\n" +
+                      "               b       1       0       0       1\n" +
+                      "               c       0       0       1       1\n" +
+                      "    Marg. (Gold)       3       0       1\n\n" +
+                      "               a        prec=1, recall=0.66667, spec=1, f1=0.8\n" +
+                      "               b        prec=0, recall=n/a, spec=0.75, f1=n/a\n" +
+                      "               c        prec=1, recall=1, spec=1, f1=1\n";
+
+    ConfusionMatrix<String> conf = new ConfusionMatrix<String>();
+    conf.setUseRealLabels(true);
     conf.add("a","a");
     conf.add("a","a");
     conf.add("b","a");
@@ -44,11 +68,11 @@ public class ConfusionMatrixTest extends TestCase {
 	
   public void test2() {
     String expected = "      Guess/Gold      C1      C2    Marg. (Guess)\n" +
-      "              C1      10       5      15\n" +
-      "              C2       2       3       5\n" +
-      "    Marg. (Gold)      12       8\n\n" +
-      "              C1 = 1        prec=0.66667, recall=0.83333, spec=0.375, f1=0.74074\n" +
-      "              C2 = 2        prec=0.6, recall=0.375, spec=0.83333, f1=0.46154\n";
+                      "              C1      10       5      15\n" +
+                      "              C2       2       3       5\n" +
+                      "    Marg. (Gold)      12       8\n\n" +
+                      "              C1 = 1        prec=0.66667, recall=0.83333, spec=0.375, f1=0.74074\n" +
+                      "              C2 = 2        prec=0.6, recall=0.375, spec=0.83333, f1=0.46154\n";
 
     ConfusionMatrix<Integer> conf = new ConfusionMatrix<Integer>();
     conf.add(1,1, 10);
@@ -69,6 +93,8 @@ public class ConfusionMatrixTest extends TestCase {
     tester.test1();
     System.out.println("\nTest 2");
     tester.test2();
+    System.out.println("\nTest 3");
+    tester.test3();
   }
 
 }
