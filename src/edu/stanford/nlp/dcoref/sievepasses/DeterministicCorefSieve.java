@@ -471,41 +471,40 @@ public abstract class DeterministicCorefSieve  {
     return orderedAntecedents;
   }
 
-  /** Divides a sentence into clauses and sort the antecedents for pronoun matching  */
+  /** Divides a sentence into clauses and sorts the antecedents for pronoun matching. */
   private static List<Mention> sortMentionsForPronoun(List<Mention> l, Mention m1, boolean sameSentence) {
     List<Mention> sorted = new ArrayList<Mention>();
-    Tree tree = m1.contextParseTree;
-    Tree current = m1.mentionSubTree;
-    if(sameSentence){
-      while(true){
+    if (sameSentence) {
+      Tree tree = m1.contextParseTree;
+      Tree current = m1.mentionSubTree;
+      while (true) {
         current = current.ancestor(1, tree);
-        if(current.label().value().startsWith("S")){
-          for(Mention m : l){
-            if(!sorted.contains(m) && current.dominates(m.mentionSubTree)) sorted.add(m);
+        if (current.label().value().startsWith("S")) {
+          for (Mention m : l) {
+            if (!sorted.contains(m) && current.dominates(m.mentionSubTree)) {
+              sorted.add(m);
+            }
           }
         }
         if (current.label().value().equals("ROOT") || current.ancestor(1, tree)==null) break;
       }
-      if (l.size()!=sorted.size()) {
-        SieveCoreferenceSystem.logger.finest("sorting failed!!! -> parser error?? \tmentionID: "+m1.mentionID+" " + m1.spanToString());
-        sorted = l;
-      } else if ( ! l.equals(sorted)) {
-        if (SieveCoreferenceSystem.logger.getLevel().intValue() <= Level.FINEST.intValue()) {
+      if (SieveCoreferenceSystem.logger.isLoggable(Level.FINEST)) {
+        if (l.size()!=sorted.size()) {
+          SieveCoreferenceSystem.logger.finest("sorting failed!!! -> parser error?? \tmentionID: "+m1.mentionID+" " + m1.spanToString());
+          sorted = l;
+        } else if ( ! l.equals(sorted)) {
           SieveCoreferenceSystem.logger.finest("sorting succeeded & changed !! \tmentionID: "+m1.mentionID+" " + m1.spanToString());
           for (int i=0; i<l.size(); i++) {
             Mention ml = l.get(i);
             Mention msorted = sorted.get(i);
             SieveCoreferenceSystem.logger.finest("\t["+ml.spanToString()+"]\t["+msorted.spanToString()+"]");
           }
+        } else {
+          SieveCoreferenceSystem.logger.finest("no changed !! \tmentionID: "+m1.mentionID+" " + m1.spanToString());
         }
-      } else {
-        SieveCoreferenceSystem.logger.finest("no changed !! \tmentionID: "+m1.mentionID+" " + m1.spanToString());
       }
     }
     return sorted;
   }
 
 }
-
-
-
