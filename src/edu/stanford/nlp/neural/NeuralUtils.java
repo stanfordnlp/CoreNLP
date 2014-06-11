@@ -15,8 +15,8 @@ import org.ejml.simple.SimpleMatrix;
  * @author Richard Socher
  * @author Thang Luong
  */
-public class Utils {
-  private Utils() {} // static methods only
+public class NeuralUtils {
+  private NeuralUtils() {} // static methods only
 
   /**
    * Compute cosine distance between two column vectors.
@@ -26,7 +26,7 @@ public class Utils {
   }
   
   /**
-   * Compute cosine distance between two column vectors.
+   * Compute dot product between two column vectors.
    */
   public static double dot(SimpleMatrix vector1, SimpleMatrix vector2){
     if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too 
