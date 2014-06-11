@@ -447,7 +447,7 @@ public class BasicEntityExtractor implements Extractor {
     }
   }
 
-  static void saveCoNLLFiles(String dir, Annotation dataset, boolean useSubTypes, boolean alreadyBIO) throws IOException {
+  public static void saveCoNLLFiles(String dir, Annotation dataset, boolean useSubTypes, boolean alreadyBIO) throws IOException {
     List<CoreMap> sentences = dataset.get(CoreAnnotations.SentencesAnnotation.class);
 
     String docid = null;
