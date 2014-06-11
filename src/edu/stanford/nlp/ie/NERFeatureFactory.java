@@ -371,6 +371,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     super();
   }
 
+  @Override
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
     initGazette();
@@ -388,79 +389,61 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   @Override
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
     Collection<String> features = Generics.newHashSet();
-
-    boolean doFE = cInfo.get(0).containsKey(CoreAnnotations.DomainAnnotation.class);
-    String domain = (doFE ? cInfo.get(0).get(CoreAnnotations.DomainAnnotation.class) : null);
+    String domain = cInfo.get(0).get(CoreAnnotations.DomainAnnotation.class);
+    final boolean doFE = domain != null;
 
 //    System.err.println(doFE+"\t"+domain);
 
+    // there are two special cases below, because 2 cliques have 2 names
+    Collection<String> c;
+    String suffix;
     if (clique == cliqueC) {
       //200710: tried making this clique null; didn't improve performance (rafferty)
-      Collection<String> c = featuresC(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "C");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-C");
-      }
+      c = featuresC(cInfo, loc);
+      suffix = "C";
     } else if (clique == cliqueCpC) {
-      Collection<String> c = featuresCpC(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "CpC");
+      c = featuresCpC(cInfo, loc);
+      suffix = "CpC";
+      addAllInterningAndSuffixing(features, c, suffix);
       if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-CpC");
+        addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
       }
-
       c = featuresCnC(cInfo, loc-1);
-      addAllInterningAndSuffixing(features, c, "CnC");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-CnC");
-      }
+      suffix = "CnC";
     } else if (clique == cliqueCp2C) {
-      Collection<String> c = featuresCp2C(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "Cp2C");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-Cp2C");
-      }
+      c = featuresCp2C(cInfo, loc);
+      suffix = "Cp2C";
     } else if (clique == cliqueCp3C) {
-      Collection<String> c = featuresCp3C(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "Cp3C");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-Cp3C");
-      }
+      c = featuresCp3C(cInfo, loc);
+      suffix = "Cp3C";
     } else if (clique == cliqueCp4C) {
-      Collection<String> c = featuresCp4C(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "Cp4C");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-Cp4C");
-      }
+      c = featuresCp4C(cInfo, loc);
+      suffix = "Cp4C";
     } else if (clique == cliqueCp5C) {
-      Collection<String> c = featuresCp5C(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "Cp5C");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-Cp5C");
-      }
+      c = featuresCp5C(cInfo, loc);
+      suffix = "Cp5C";
     } else if (clique == cliqueCpCp2C) {
-      Collection<String> c = featuresCpCp2C(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "CpCp2C");
+      c = featuresCpCp2C(cInfo, loc);
+      suffix = "CpCp2C";
+      addAllInterningAndSuffixing(features, c, suffix);
       if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-CpCp2C");
+        addAllInterningAndSuffixing(features, c, domain+ '-' + suffix);
       }
-
       c = featuresCpCnC(cInfo, loc-1);
-      addAllInterningAndSuffixing(features, c, "CpCnC");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-CpCnC");
-      }
+      suffix = "CpCnC";
     } else if (clique == cliqueCpCp2Cp3C) {
-      Collection<String> c = featuresCpCp2Cp3C(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "CpCp2Cp3C");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-CpCp2Cp3C");
-      }
+      c = featuresCpCp2Cp3C(cInfo, loc);
+      suffix = "CpCp2Cp3C";
     } else if (clique == cliqueCpCp2Cp3Cp4C) {
-      Collection<String> c = featuresCpCp2Cp3Cp4C(cInfo, loc);
-      addAllInterningAndSuffixing(features, c, "CpCp2Cp3Cp4C");
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+"-CpCp2Cp3Cp4C");
-      }
+      c = featuresCpCp2Cp3Cp4C(cInfo, loc);
+      suffix = "CpCp2Cp3Cp4C";
+    } else {
+      throw new IllegalArgumentException("Unknown clique: " + clique);
+    }
+
+    addAllInterningAndSuffixing(features, c, suffix);
+    if (doFE) {
+      addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
     }
 
     // System.err.println(StringUtils.join(features,"\n")+"\n");
@@ -753,7 +736,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   private Set<String> maleNames; // = null;
   private Set<String> femaleNames; // = null;
 
-  private final Pattern titlePattern = Pattern.compile("(Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
+  private final Pattern titlePattern = Pattern.compile("(?:Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
 
 
   protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
@@ -1521,18 +1504,20 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
     //Stuff to add arbitrary features
     if (flags.useGenericFeatures) {
-      //see if we need to cach the keys
+      //see if we need to cache the keys
       if (genericAnnotationKeys == null) {
         makeGenericKeyCache(c);
       }
       //now look through the cached keys
       for (Class key : genericAnnotationKeys) {
         //System.err.println("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
-        if(c.get(key) != null && c.get(key) instanceof Collection){
-          for(Object ob: (Collection)c.get(key))
-          featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
-        }else
-        featuresC.add(c.get(key) + "-" + CoreLabel.genericValues.get(key));
+        if (c.get(key) != null && c.get(key) instanceof Collection) {
+          for (Object ob: (Collection)c.get(key)) {
+            featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
+          }
+        } else {
+          featuresC.add(c.get(key) + "-" + CoreLabel.genericValues.get(key));
+        }
       }
     }
 
@@ -1959,7 +1944,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     CoreLabel p2 = cInfo.get(loc - 2);
 
     String pWord = getWord(p);
-    String p2Word = getWord(p2);
+    // String p2Word = getWord(p2);
 
     Collection<String> featuresCpCp2C = new ArrayList<String>();
 
