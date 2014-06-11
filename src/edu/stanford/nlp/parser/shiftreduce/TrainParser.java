@@ -4,6 +4,8 @@ import java.io.FileFilter;
 import java.util.List;
 import java.util.Set;
 
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -11,8 +13,10 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.HeadFinder;
+import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
@@ -20,6 +24,29 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
 public class TrainParser {
+
+  static State initialStateFromTrainingTree(Tree tree) {
+    List<Tree> preterminals = Generics.newArrayList();
+    for (TaggedWord tw : tree.taggedYield()) {
+      CoreLabel word = new CoreLabel();
+      word.setValue(tw.word());
+      CoreLabel tag = new CoreLabel();
+      tag.setValue(tw.tag());
+      
+      LabeledScoredTreeNode wordNode = new LabeledScoredTreeNode(word);
+      LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tag);
+      tagNode.addChild(wordNode);
+
+      word.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
+      word.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
+      tag.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
+      tag.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
+
+      preterminals.add(tagNode);
+    }
+    return new State(preterminals);
+  }
+
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
@@ -65,15 +92,24 @@ public class TrainParser {
       binarizedTrees.add(tree);
     }
 
+    // TODO: allow different feature factories, such as for different languages
+    FeatureFactory featureFactory = new BasicFeatureFactory();
+
     Index<Transition> transitionIndex = new HashIndex<Transition>();
+    Index<String> featureIndex = new HashIndex<String>();
     for (Tree tree : binarizedTrees) {
       List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
       transitionIndex.addAll(transitions);
+
+      State state = initialStateFromTrainingTree(tree);
+      for (Transition transition : transitions) {
+        Set<String> features = featureFactory.featurize(state);
+        featureIndex.addAll(features);
+        state = transition.apply(state);
+      }
     }
 
     System.err.println(transitionIndex);
 
-    Index<String> featureIndex = new HashIndex<String>();
-    
   }
 }
