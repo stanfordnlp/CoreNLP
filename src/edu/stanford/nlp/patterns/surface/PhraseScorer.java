@@ -1,18 +1,19 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.Data;
+import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.logging.Redwood;
 
 public abstract class PhraseScorer {
   ConstantsAndVariables constVars;
@@ -27,7 +28,7 @@ public abstract class PhraseScorer {
 
   @Option(name = "wordFreqNorm")
   Normalization wordFreqNorm = Normalization.valueOf("LOG");
-
+  
   /**
    * For phrases, some phrases are evaluated as a combination of their
    * individual words. Default is taking minimum of all the words. This flag
@@ -48,12 +49,11 @@ public abstract class PhraseScorer {
 
   Counter<String> learnedScores = new ClassicCounter<String>();
 
-  abstract Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
-      String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
       Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns)
-      throws IOException;
+      throws IOException, ClassNotFoundException;
 
   Counter<String> getLearnedScores() {
     return learnedScores;
@@ -64,17 +64,23 @@ public abstract class PhraseScorer {
       Counter<SurfacePattern> allSelectedPatterns) {
     double total = 0;
 
+    Set<SurfacePattern> rem = new HashSet<SurfacePattern>();
     for (Entry<SurfacePattern, Double> en2 : patsThatExtractedThis.entrySet()) {
       double weight = 1.0;
       if (usePatternWeights) {
         weight = allSelectedPatterns.getCount(en2.getKey());
-        if (weight == 0)
-          throw new RuntimeException("How is weight zero for " + en2.getKey());
+        if (weight == 0){
+          Redwood.log(Redwood.FORCE, "Warning: Weight zero for " + en2.getKey() + ". May be pattern was removed when choosing other patterns (if subsumed by another pattern).");
+          rem.add(en2.getKey());  
+        }
       }
       total += weight;
     }
+    
+    Counters.removeKeys(patsThatExtractedThis, rem);
+    
     assert Data.processedDataFreq.containsKey(word) : "How come the processed corpus freq doesnt have "
-        + word;
+        + word + " .Size of processedDataFreq is " + Data.processedDataFreq.size()  + " and size of raw freq is " + Data.rawFreq.size();
     return total / Data.processedDataFreq.getCount(word);
   }
 
@@ -129,6 +135,22 @@ public abstract class PhraseScorer {
     }
   }
 
+  public double getWordShapeScore(String word, String label){
+    String wordShape = constVars.getWordShapeCache().get(word);
+    if(wordShape == null){
+      wordShape = WordShapeClassifier.wordShape(word, constVars.wordShaper);
+      constVars.getWordShapeCache().put(word, wordShape);
+    }
+    double thislabel = 0, alllabels =0;
+    for(Entry<String, Counter<String>> en: constVars.getWordShapesForLabels().entrySet()){
+      if(en.getKey().equals(label))
+        thislabel = en.getValue().getCount(wordShape);
+      alllabels += en.getValue().getCount(wordShape);
+    }
+    double score = thislabel/ (alllabels + 1);
+    return score;
+  }
+  
   public double getDictOddsScore(String word, String label) {
     double dscore;
     Counter<String> dictOddsWordWeights = constVars.dictOddsWeights.get(label);
@@ -164,5 +186,8 @@ public abstract class PhraseScorer {
     else
       return minScore;
   }
+
+  abstract public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
+  
 
 }

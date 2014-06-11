@@ -19,9 +19,9 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 /**
- * Various implementations of the Expression interface
+ * Various implementations of the Expression interface.
  * <p>
- *   Expressions (used for specifying "action", "result" in TokensRegex extraction rules)
+ *   Expressions (used for specifying "action", "result" in TokensRegex extraction rules).
  *   Expressions are made up of identifiers, literals (numbers, strings "I'm a string", TRUE, FALSE),
  *     function calls ( FUNC(args) ).
  * </p>
@@ -128,11 +128,11 @@ public class Expressions {
   public static final String TYPE_TOKENS = "TOKENS";
   public static final String TYPE_BOOLEAN = "BOOLEAN";
 
-  public final static String VAR_SELF = "_";
+  public static final String VAR_SELF = "_";
 
-  public final static Value<Boolean> TRUE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, true);
-  public final static Value<Boolean> FALSE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, false);
-  public final static Value NIL = new PrimitiveValue("NIL", null);
+  public static final Value<Boolean> TRUE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, true);
+  public static final Value<Boolean> FALSE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, false);
+  public static final Value NIL = new PrimitiveValue("NIL", null);
 
   public static Boolean convertValueToBoolean(Value v, boolean keepNull) {
     Boolean res = null;
@@ -306,7 +306,7 @@ public class Expressions {
    * A simple implementation of an expression that is represented by a java object of type T
    * @param <T> type of the expression object
    */
-  public static abstract class SimpleExpression<T> extends Expressions.TypedExpression {
+  public abstract static class SimpleExpression<T> extends Expressions.TypedExpression {
     T value;
 
     protected SimpleExpression(String typename, T value, String... tags) {
@@ -1301,8 +1301,8 @@ public class Expressions {
     public CompositeValue simplifyNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
       Map<String, Expression> res = Generics.newHashMap (m.size());
-      for (String s:m.keySet()) {
-        res.put(s, m.get(s).simplify(env));
+      for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
+        res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().simplify(env));
       }
       return new CompositeValue(res, true);
     }
@@ -1310,8 +1310,8 @@ public class Expressions {
     private CompositeValue evaluateNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
       Map<String, Expression> res = Generics.newHashMap (m.size());
-      for (String s:m.keySet()) {
-        res.put(s, m.get(s).evaluate(env, args));
+      for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
+        res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }
       return new CompositeValue(res, true);
     }
@@ -1321,8 +1321,8 @@ public class Expressions {
       if (v != null) return v;
       Map<String, Expression> m = value;
       Map<String, Expression> res = Generics.newHashMap (m.size());
-      for (String s:m.keySet()) {
-        res.put(s, m.get(s).evaluate(env, args));
+      for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
+        res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }
       disableCaching = !checkValue();
       return new CompositeValue(res, true);
