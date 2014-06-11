@@ -379,8 +379,6 @@ public class Dictionaries {
       BufferedReader reader = IOUtils.readerFromString(file);
       for (String line; (line = reader.readLine()) != null; ) {
         String[] split = line.split("\t");
-        String[] words = split[0].split(" ");
-        List<String> tokens = Arrays.asList(words);
         String[] countStr = split[1].split(" ");
         
         int male = Integer.parseInt(countStr[0]);
@@ -395,6 +393,13 @@ public class Dictionaries {
         } else if (neutral * 0.5 > male + female && neutral > 2) {
           gender = Gender.NEUTRAL;
         }
+
+        if (gender == Gender.UNKNOWN) {
+          continue;
+        }
+
+        String[] words = split[0].split(" ");
+        List<String> tokens = Arrays.asList(words);
 
         genderNumber.put(tokens, gender);
       }
