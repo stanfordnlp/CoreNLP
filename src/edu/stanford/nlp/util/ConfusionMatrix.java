@@ -204,7 +204,13 @@ public class ConfusionMatrix<U> {
       return Collections.emptyList();
     }
 
-    boolean comparable = (labels.iterator().next() instanceof Comparable);
+    boolean comparable = true;
+    for (U label : labels) {
+      if (!(label instanceof Comparable)) {
+        comparable = false;
+        break;
+      }
+    }
     if (comparable) {
       List<Comparable<Object>> sorted = Generics.newArrayList();
       for (U label : labels) {
