@@ -454,7 +454,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Redwood.log(Redwood.DBG, "Done creating inverted index of " + constVars.invertedIndex.size() + " tokens and labeling data with total of "
         + totalNumSents + " sentences");
 
-    if (constVars.externalFeatureWeightsFile != null) {
+    if(constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass){
+      
+      if (constVars.externalFeatureWeightsFile == null) {
+        File f = File.createTempFile("tempfeat", ".txt");
+        f.delete();
+        f.deleteOnExit();
+        constVars.externalFeatureWeightsFile = f.getAbsolutePath();
+      }
+      
       for (String label : seedSets.keySet()) {
         String externalFeatureWeightsFileLabel = constVars.externalFeatureWeightsFile + "_" + label;
         File f = new File(externalFeatureWeightsFileLabel);
