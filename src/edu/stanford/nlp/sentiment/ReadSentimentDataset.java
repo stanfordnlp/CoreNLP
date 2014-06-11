@@ -70,9 +70,6 @@ public class ReadSentimentDataset {
     // only one of these, so can be very general
     TregexPattern.compile("/^401$/ > (__ > __=top)"),
     TregexPattern.compile("by . (all > (__=all > __=allgp) . (means > (__=means > __=meansgp))) : (=allgp !== =meansgp)"),
-    // 20th century, 21st century
-    TregexPattern.compile("/^(?:20th|21st)$/ . Century=century"),
-
     // Fix any stranded unitary nodes
     TregexPattern.compile("__ <: (__=unitary < __)"),
     // relabel some nodes where punctuation changes the score for no apparent reason
@@ -97,7 +94,6 @@ public class ReadSentimentDataset {
     Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
     Tsurgeon.parseOperation("replace top (2 (2 401k) (2 statement))"),
     Tsurgeon.parseOperation("[move means $- all] [excise meansgp meansgp] [createSubtree 2 all means]"),
-    Tsurgeon.parseOperation("relabel century century"),
     // Fix any stranded unitary nodes
     Tsurgeon.parseOperation("[excise unitary unitary]"),
     //Tsurgeon.parseOperation("relabel node /^.*$/={child}/"),
