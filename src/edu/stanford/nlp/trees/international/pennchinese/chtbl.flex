@@ -14,16 +14,19 @@ import java.io.UnsupportedEncodingException;
 %%
 
 %class CHTBLexer
-// %standalone
+%standalone
 %unicode
 %int
 
 
 %{
-  private static final boolean DBG = false;
 
   public static final int IGNORE = 0;
   public static final int ACCEPT = 1;
+
+  public void pushback(int n) {
+    yypushback(n);
+  }
 
   public String match() {
     return yytext();
@@ -56,7 +59,7 @@ import java.io.UnsupportedEncodingException;
 %state DATEINHEADER
 %state PREAMBLE
 
-MISCXML = <[^>\r\n]+>
+MISCXML = <[^>]+>
 NONXML = [^<]+
 
 
@@ -64,8 +67,7 @@ HEADERBEGINS = <HEADER>
 HEADERENDS = <\/HEADER>
 DOCNOBEGINS = <DOCNO>|<DOCID>
 DOCNOENDS = <\/DOCNO>|<\/DOCID>
-/* DOCTYPEBEGINS = <DOCTYPE( +[A-Za-z][A-Za-z0-9]* *= *['\"].*['\"])* *> */
-DOCTYPEBEGINS = <DOCTYPE( [^>]+)>
+DOCTYPEBEGINS = <DOCTYPE>
 DOCTYPEENDS = <\/DOCTYPE>
 DATETIMEBEGINS = <DATE\/TIME>|<DATE>
 DATETIMEENDS = <\/DATE\/TIME>|<\/DATE>
@@ -100,7 +102,6 @@ LINEEND = \r|\n|\r\n|\u2028|\u2029|\u000B|\u000C|\u0085
 SPACE = [ \t]+
 
 PAREN = \(|\)
-
 // LABEL = [A-Za-z0-9*-=&]+
 // PUNCTMARK = [\u2000-\u206F]|[\,\.\?\!\"\'\`\$\~]|[\u00A1-\u00BF]|[\u2500-\u257F]
 // PUNCT = {PUNCTMARK}+
@@ -113,57 +114,55 @@ FULLDOCID = {DOCNOBEGINS}{NONXML}{DOCNOENDS}
 %%
 
 <YYINITIAL> {
-  {FULLDOCID}           { if (DBG) System.err.printf("Ignoring |%s|, staying in YYINITIAL%n", yytext());
-                          return IGNORE; }
-  {PREAMBLEBEGINS}      { if (DBG) System.err.printf("Ignoring |%s|, moving to PREAMBLE%n", yytext());
-                          yybegin(PREAMBLE); return IGNORE; }
-  {HEADERBEGINS}        { if (DBG) System.err.printf("Ignoring |%s|, moving to HEADER%n", yytext());
+  {FULLDOCID}           { return IGNORE; }
+  {PREAMBLEBEGINS}      { yybegin(PREAMBLE); return IGNORE; }
+  {HEADERBEGINS}         { //System.err.println("Transitioning to HEADER");
                           yybegin(HEADER); return IGNORE; }
-  {DOCNOBEGINS}         { if (DBG) System.err.printf("Ignoring |%s|, moving to DOCNO%n", yytext());
+  {DOCNOBEGINS}         { // System.err.println("Transitioning to DOCNO");
                           yybegin(DOCNO); return IGNORE; }
-  {DOCTYPEBEGINS}       { if (DBG) System.err.printf("Ignoring |%s|, moving to DOCTYPE%n", yytext());
+  {DOCTYPEBEGINS}       { //System.err.println("Transitioning to DOCTYPE");
                           yybegin(DOCTYPE); return IGNORE; }
-  {DATETIMEBEGINS}      { if (DBG) System.err.printf("Ignoring |%s|, moving to DATETIME%n", yytext());
+  {DATETIMEBEGINS}      { //System.err.println("Transitioning to DATETIME");
                           yybegin(DATETIME); return IGNORE; }
-  {SRCIDBEGINS}         { if (DBG) System.err.printf("Ignoring |%s|, moving to SRCID%n", yytext());
+  {SRCIDBEGINS}         { //System.err.println("Transitioning to SRCID");
                           yybegin(SRCID); return IGNORE; }
-  {MISCXML}             { if (DBG) System.err.printf("Ignoring |%s|, staying in YYINITIAL%n", yytext());
-                          return IGNORE; }
-  {PAREN}               { if (DBG) System.err.printf("Accepting |%s|, staying in YYINITIAL%n", yytext());
-                          return ACCEPT; }
-  {TERMINAL}            { if (DBG) System.err.printf("Accepting |%s|, staying in YYINITIAL%n", yytext());
-                          return ACCEPT; }
-  {LINEEND}             { return IGNORE; }
+  {MISCXML}             { return IGNORE; }
+/*  {CJK}                 { return ACCEPT; } subrange of TERMINAL */
+  {PAREN}                 { return ACCEPT; }
+/*  {LABEL}                 { return ACCEPT; } */
+/*  {PUNCT}                 { return ACCEPT; } subrange of TERMINAL */
+  {TERMINAL}              { return ACCEPT; }
+  {LINEEND}                   { return IGNORE; }
   {SPACE}                 { return IGNORE; }
   .                     { reportError(yytext()); }
 }
 
 <DOCNO> {
-  {DOCNOENDS}   { // System.err.println("Transitioning to YYINITIAL");
-                  yybegin(YYINITIAL); return IGNORE; }
-  {NONXML}      { return IGNORE; }
+  {DOCNOENDS} { // System.err.println("Transitioning to YYINITIAL");
+                yybegin(YYINITIAL); return IGNORE; }
+  {NONXML}           { return IGNORE; }
   .             { reportError(yytext()); }
 }
 
 <DOCTYPE> {
   {DOCTYPEENDS} { //System.err.println("Transitioning to YYINITIAL");
                   yybegin(YYINITIAL); return IGNORE; }
-  {NONXML}      { return IGNORE; }
+  {NONXML}           { return IGNORE; }
   .             { reportError(yytext()); }
 }
 
 <DATETIME> {
   {DATETIMEENDS} { //System.err.println("Transitioning to YYINITIAL");
                    yybegin(YYINITIAL); return IGNORE; }
-  {NONXML}       { return IGNORE; }
-  .              { reportError(yytext()); }
+  {NONXML}           { return IGNORE; }
+  .             { reportError(yytext()); }
 }
 
 <SRCID> {
   {SRCIDENDS} { //System.err.println("In SRCID; Transitioning to YYINITIAL");
                 yybegin(YYINITIAL); return IGNORE; }
-  {NONXML}    { return IGNORE; }
-  .           { reportError(yytext()); }
+  {NONXML}           { return IGNORE; }
+  .             { reportError(yytext()); }
 }
 
 
