@@ -9,13 +9,16 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.FileBackedCache;
 
 /**
  * Creates an inverted index of (word or lemma) => {file1 => {sentid1,
  * sentid2,.. }, file2 => {sentid1, sentid2, ...}}. It can be backed by
- * <code>FileBackedCache</code> if given the option (to save memory)
+ * <code>FileBackedCache</code> if given the option (to save memory).
+ * 
+ * IMPORTANT: If you are using FileBackedCache, you CANNOT save the index on disk and reload it - you should create the inverted index every time! 
+ * This is because Java 7 does not guarantee consistency of String.hashCode() across different JVM invocations (booooo). And FileBackedCache relies on 
+ * the output of the hashCode() function.
  * 
  * @author Sonal Gupta (sonalg@stanford.edu)
  * 
@@ -29,7 +32,7 @@ public class InvertedIndexByTokens {
 
   public InvertedIndexByTokens(File invertedIndexDir, boolean lc, boolean filebacked, Set<String> stopWords, Set<String> specialWords) {
     if (filebacked)
-      index = new FileBackedCache<String, Hashtable<String, Set<String>>>(invertedIndexDir);
+      index = new FileBackedCache<String, Hashtable<String, Set<String>>>(invertedIndexDir, 10);
     else
       // memory mapped
       index = new HashMap<String, Hashtable<String, Set<String>>>();
@@ -42,8 +45,7 @@ public class InvertedIndexByTokens {
 
   void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {
 
-    // Map<String, Hashtable<String, Set<String>>> tempindex = new
-    // HashMap<String, Hashtable<String, Set<String>>>();
+    
     for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
       for (CoreLabel l : sEn.getValue()) {
         String w = l.word();
