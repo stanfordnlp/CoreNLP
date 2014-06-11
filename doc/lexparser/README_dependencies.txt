@@ -1,4 +1,4 @@
-STANFORD DEPENDENCIES.  Stanford Parser v3.3.1
+STANFORD DEPENDENCIES.  Stanford Parser v3.3.0 - 2013-11-12
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
@@ -41,20 +41,6 @@ For more discussion of the design principles, please see:
 
 These papers can be cited as references for the English Stanford
 Dependencies.
-
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3.1
-
-A couple of fixes/improvements were made in the dependency conversion,
-and one change was made to the taxonomy of relations.
-
- - The partmod and infmod relations were deleted, and replaced with
-vmod for reduced, non-finite verbal modifiers. The distinction between
-these two relations can be recovered from the POS tag of the dependent.
- - A couple of improvements were made to the conversion, the largest
- one being recognizing pobj inside a PP not headed by something tagged
- as IN or TO.
 
 
 --------------------------------------
