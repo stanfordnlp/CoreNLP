@@ -54,12 +54,6 @@ public class Constants {
   /** Default sieve passes */
   public static final String SIEVEPASSES = "MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, RelaxedHeadMatch, PronounMatch";
 
-  /** Use gender list (Bergsma and Lin, 2006; Ji and Lin, 2009) */
-  public static final boolean USE_GENDER_LIST = true;
-
-  /** Use number list (Bergsma and Lin, 2006; Ji and Lin, 2009) */
-  public static final boolean USE_NUMBER_LIST = true;
-
   /** Use animacy list (Bergsma and Lin, 2006; Ji and Lin, 2009) */
   public static final boolean USE_ANIMACY_LIST = true;
 
@@ -70,11 +64,7 @@ public class Constants {
   public static final String DEMONYM_PROP = "dcoref.demonym";
   public static final String ANIMATE_PROP = "dcoref.animate";
   public static final String INANIMATE_PROP = "dcoref.inanimate";
-  public static final String MALE_PROP = "dcoref.male";
   public static final String NEUTRAL_PROP = "dcoref.neutral";
-  public static final String FEMALE_PROP = "dcoref.female";
-  public static final String PLURAL_PROP = "dcoref.plural";
-  public static final String SINGULAR_PROP = "dcoref.singular";
   public static final String SIEVES_PROP = "dcoref.sievePasses";
   public static final String MENTION_FINDER_PROP = "dcoref.mentionFinder";
   public static final String MENTION_FINDER_PROPFILE_PROP = "dcoref.mentionFinder.props";
@@ -91,11 +81,9 @@ public class Constants {
   public static final String POSTPROCESSING_PROP = "dcoref.postprocessing";
   public static final String MAXDIST_PROP = "dcoref.maxdist";
   public static final String REPLICATECONLL_PROP = "dcoref.replicate.conll";
-  public static final String BIG_GENDER_NUMBER_PROP = "dcoref.use.big.gender.number";
   public static final String GENDER_NUMBER_PROP = "dcoref.big.gender.number";
   public static final String COUNTRIES_PROP = "dcoref.countries";
   public static final String STATES_PROVINCES_PROP = "dcoref.states.provinces";
-  public static final String EXTRA_GENDER_PROP = "dcoref.extra.gender";
   public static final String OPTIMIZE_SIEVES_PROP = "dcoref.optimize.sieves";
   public static final String OPTIMIZE_SIEVES_KEEP_ORDER_PROP = "dcoref.optimize.sieves.keepOrder";
   public static final String OPTIMIZE_SIEVES_SCORE_PROP = "dcoref.optimize.sieves.score";
@@ -115,10 +103,6 @@ public class Constants {
   public static void printConstants(Logger logger) {
     if (Constants.USE_ANIMACY_LIST) logger.info("USE_ANIMACY_LIST on");
     else logger.info("USE_ANIMACY_LIST off");
-    if (Constants.USE_GENDER_LIST) logger.info("USE_GENDER_LIST on");
-    else logger.info("USE_GENDER_LIST off");
-    if (Constants.USE_NUMBER_LIST) logger.info("USE_NUMBER_LIST on");
-    else logger.info("USE_NUMBER_LIST off");
     if (Constants.USE_ANIMACY_LIST) logger.info("USE_ANIMACY_LIST on");
     else logger.info("USE_ANIMACY_LIST off");
     if (Constants.USE_DISCOURSE_SALIENCE) logger.info("use discourse salience");

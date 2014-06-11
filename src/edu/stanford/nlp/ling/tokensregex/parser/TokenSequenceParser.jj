@@ -810,6 +810,8 @@ NodePattern CoreMapNode(Env env) : {
 			( ("," | ";")  AttrValue(env, attributes)
 		    )*
 		"}"
+		    |  LOOKAHEAD(2)
+                AttrValue(env, attributes)
 		    | ( value = RelaxedStringToken() | value = <REGEX>  )
 		      { attributes.put("word", value.image); }
     )
