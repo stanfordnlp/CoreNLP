@@ -657,7 +657,7 @@
 			    $time => TemporalCompose(INTERSECT, $time[0].temporal.value, PM),
 	            $hour[0].numcompvalue < 12 => IsoTime(Add($hour[0].numcompvalue, 12), 0, NIL),
 	            (  ($hour[0].numcompvalue == 12) && ($context =~ ( []* /evening|night/)) )
-				   => TemporalCompose(OFFSET_EXACT, IsoTime(0, 0, NIL), DAY),
+				   => TemporalCompose(OFFSET, IsoTime(0, 0, NIL), DAY),
 				:else => IsoTime($hour[0].numcompvalue, 0, NIL)
 			}
   }
