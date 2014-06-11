@@ -443,8 +443,7 @@ public class SUTimeITest extends TestCase {
             "The accident was Saturday last week.\n" +
             "He went to Japan August last year.\n" +
             "He died in 567 bc.\n" +
-            "The temple was built in the late 5th century B.C. and collapsed in the 3rd century A.D.\n" +
-            "I think 1000 BC was a long time ago\n";
+            "The temple was built in the late 5th century B.C. and collapsed in the 3rd century A.D.\n";
 
     Iterator<Timex> expectedTimexes =
       Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" alt_value=\"P1W-#3 INTERSECT XXXX-04\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf0\" anchorTimeID=\"t2\">The third week of april</TIMEX3>"),
@@ -462,8 +461,7 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t18\" alt_value=\"THIS P1Y OFFSET P-1Y INTERSECT XXXX-08\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf5\" anchorTimeID=\"t19\">August last year</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t20\" value=\"-0566\" type=\"DATE\">567 bc</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t21\" value=\"-04XX\" type=\"DATE\" mod=\"LATE\">the late 5th century B.C.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t22\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t23\" value=\"-0999\" type=\"DATE\">1000 BC</TIMEX3>")
+                    Timex.fromXml("<TIMEX3 tid=\"t22\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>")
               ).iterator();
 
     Iterator<Timex> expectedTimexesResolved =
@@ -483,9 +481,7 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t14\" value=\"1998-08\" type=\"DATE\">August last year</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t15\" value=\"-0566\" type=\"DATE\">567 bc</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t16\" value=\"-04XX\" type=\"DATE\" mod=\"LATE\">the late 5th century B.C.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t17\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t18\" value=\"-0999\" type=\"DATE\">1000 BC</TIMEX3>")
-      ).iterator();
+                    Timex.fromXml("<TIMEX3 tid=\"t17\" value=\"02XX\" type=\"DATE\">the 3rd century A.D.</TIMEX3>")).iterator();
 
     // create document
     Annotation document = createDocument(testText);
@@ -561,99 +557,7 @@ public class SUTimeITest extends TestCase {
     assertFalse(expectedTimexes.hasNext());
   }
 
-  public void testSUTimeResolveTime() throws IOException {
-    String testText = "Mr Smith left ten minutes to three.\n" +
-      //        "He started working at five to eight.\n" +
-      "He went for lunch at twenty after twelve today.\n" +
-      "He arrived at half past noon Saturday.\n" +
-      "He is arriving at half past noon Saturday.\n" +
-      "It happened at eleven in the morning on Tuesday.\n" +
-      "The meeting is scheduled for 9 a.m. tomorrow.\n" +
-      "He arrived at a quarter past 6 yesterday.\n";
 
-    Iterator<Timex> expectedTimexes =
-      Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"T02:50\" type=\"TIME\">ten minutes to three</TIMEX3>"),
-        //                  Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"T07:55\" type=\"TIME\">five to eight</TIMEX3>"),     // TODO: Fix. For now, expression too vague, err on side of caution
-        Timex.fromXml("<TIMEX3 alt_value=\"THIS P1D INTERSECT T12:20\" anchorTimeID=\"t3\" temporalFunction=\"true\" tid=\"t2\" type=\"DATE\" valueFromFunction=\"tf0\">twenty after twelve today</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t4\" type=\"TIME\" value=\"XXXX-WXX-6T12:30\">half past noon Saturday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t5\" type=\"TIME\" value=\"XXXX-WXX-6T12:30\">half past noon Saturday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t6\" type=\"TIME\" value=\"XXXX-WXX-2T11:00\">eleven in the morning on Tuesday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P1D INTERSECT T09:00\" anchorTimeID=\"t8\" temporalFunction=\"true\" tid=\"t7\" type=\"DATE\" valueFromFunction=\"tf1\">9 a.m. tomorrow</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P-1D INTERSECT T06:15\" anchorTimeID=\"t10\" temporalFunction=\"true\" tid=\"t9\" type=\"DATE\" valueFromFunction=\"tf2\">a quarter past 6 yesterday</TIMEX3>")).iterator();
-
-    Iterator<Timex> expectedTimexesResolved1 =
-      Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"1998-04-17T02:50\" type=\"TIME\">ten minutes to three</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"1998-04-17T07:55\" type=\"TIME\">five to eight</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"1998-04-17T12:20\" type=\"TIME\">twenty after twelve today</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"1998-04-18T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),  // TODO: Should favor 04-11
-        Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"1998-04-18T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"1998-04-14T11:00\" type=\"TIME\">eleven in the morning on Tuesday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"1998-04-18T09:00\" type=\"TIME\">9 a.m. tomorrow</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"1998-04-16T06:15\" type=\"TIME\">a quarter past 6 yesterday</TIMEX3>")).iterator();
-
-    Iterator<Timex> expectedTimexesResolved2 =
-      Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"1998-04-17T02:50\" type=\"TIME\">ten minutes to three</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"1998-04-17T07:55\" type=\"TIME\">five to eight</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"1998-04-17T12:20\" type=\"TIME\">twenty after twelve today</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"1998-04-11T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"1998-04-18T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"1998-04-14T11:00\" type=\"TIME\">eleven in the morning on Tuesday</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P1D INTERSECT T09:00\" anchorTimeID=\"t7\" temporalFunction=\"true\" tid=\"t6\" type=\"DATE\" valueFromFunction=\"tf0\">9 a.m. tomorrow</TIMEX3>"),    // TODO: Fix me
-//        Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"1998-04-18T09:00\" type=\"TIME\">9 a.m. tomorrow</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P-1D INTERSECT T06:15\" anchorTimeID=\"t9\" temporalFunction=\"true\" tid=\"t8\" type=\"DATE\" valueFromFunction=\"tf1\">a quarter past 6 yesterday</TIMEX3>")).iterator();
-//      Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"1998-04-16T06:15\" type=\"TIME\">a quarter past 6 yesterday</TIMEX3>")).iterator();
-
-    Iterator<Timex> expectedTimexesResolved3 =
-      Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"1998-04T02:50\" type=\"TIME\">ten minutes to three</TIMEX3>"),
-//                    Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"1998-04T07:55\" type=\"TIME\">five to eight</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"1998-04T12:20\" type=\"TIME\">twenty after twelve today</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t3\" value=\"1998-WXX-6T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),   // TODO: The month is lost
-        Timex.fromXml("<TIMEX3 tid=\"t4\" value=\"1998-WXX-6T12:30\" type=\"TIME\">half past noon Saturday</TIMEX3>"),   // TODO: The month is lost
-        Timex.fromXml("<TIMEX3 tid=\"t5\" value=\"1998-WXX-2T11:00\" type=\"TIME\">eleven in the morning on Tuesday</TIMEX3>"),  // TODO: The month is lost
-        Timex.fromXml("<TIMEX3 tid=\"t6\" value=\"1998-04T09:00\" type=\"TIME\">9 a.m. tomorrow</TIMEX3>"),
-        Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"1998-04T06:15\" type=\"TIME\">a quarter past 6 yesterday</TIMEX3>")).iterator();
-
-    // create document
-    Annotation document = createDocument(testText);
-
-    // Time annotate
-    TimeAnnotator sutime = getTimeAnnotator();
-    sutime.annotate(document);
-
-    // Check answers
-    for (CoreMap timexAnn: document.get(TimeAnnotations.TimexAnnotations.class)) {
-      Timex expectedTimex = expectedTimexes.next();
-      testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
-    }
-    assertFalse(expectedTimexes.hasNext());
-
-    Annotation documentWithRefTime = createDocument(testText, "19980417");
-    sutime.annotate(documentWithRefTime);
-
-    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
-      Timex expectedTimex = expectedTimexesResolved1.next();
-      testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
-    }
-    assertFalse(expectedTimexes.hasNext());
-
-    documentWithRefTime = createDocument(testText, "19980417T11:00");
-    sutime.annotate(documentWithRefTime);
-
-    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
-      Timex expectedTimex = expectedTimexesResolved2.next();
-      testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
-    }
-    assertFalse(expectedTimexes.hasNext());
-
-    documentWithRefTime = createDocument(testText, "199804XX");
-    sutime.annotate(documentWithRefTime);
-
-    for (CoreMap timexAnn: documentWithRefTime.get(TimeAnnotations.TimexAnnotations.class)) {
-      Timex expectedTimex = expectedTimexesResolved3.next();
-      testTimex(testText, expectedTimex.text(), expectedTimex, timexAnn);
-    }
-    assertFalse(expectedTimexes.hasNext());
-  }
 
   public void testSUTimeRangeWithoutRange() throws IOException {
     String testText =
