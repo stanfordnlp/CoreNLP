@@ -58,6 +58,7 @@ public class SingletonPredictor {
   
   /**
    * Generate the training features from the CoNLL input file.
+   * @param Properties
    * @return Dataset of feature vectors
    * @throws Exception
    */
