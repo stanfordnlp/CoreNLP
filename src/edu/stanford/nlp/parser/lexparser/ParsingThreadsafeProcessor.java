@@ -13,14 +13,14 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  * @author John Bauer
  */
 class ParsingThreadsafeProcessor implements ThreadsafeProcessor<List<? extends HasWord>, ParserQuery> {
-  LexicalizedParser pqFactory;
+  ParserQueryFactory pqFactory;
   PrintWriter pwErr;
 
-  ParsingThreadsafeProcessor(LexicalizedParser pqFactory) {
+  ParsingThreadsafeProcessor(ParserQueryFactory pqFactory) {
     this(pqFactory, null);
   }
 
-  ParsingThreadsafeProcessor(LexicalizedParser pqFactory, PrintWriter pwErr) {
+  ParsingThreadsafeProcessor(ParserQueryFactory pqFactory, PrintWriter pwErr) {
     this.pqFactory = pqFactory;
     this.pwErr = pwErr;
   }
