@@ -61,7 +61,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
    */
   private static final Interner<File> canonicalFile = new Interner<File>();
   /** A map indicating whether the JVM holds a file lock on the given file */
-  private static final IdentityHashMap<File, FileSemaphore> fileLocks = Generics.newIdentityHashMap();
+  private static final IdentityHashMap<File, FileSemaphore> fileLocks = new IdentityHashMap<File, FileSemaphore>();
 
   //
   // Constructors
@@ -287,6 +287,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
    * Else, this requires a single disk access, of undeterminable size but roughly correlated with the
    * quality of the key's hash code.
    */
+  @SuppressWarnings("SuspiciousMethodCalls")
   @Override
   public T get(Object key) {
     SoftReference<T> likelyReferenceOrNull = mapping.get(key);
@@ -399,7 +400,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
   public Set<Entry<KEY, T>> entrySet() {
     readCache();
     Set<Entry<KEY, SoftReference<T>>> entries = mapping.entrySet();
-    Set<Entry<KEY, T>> rtn = Generics.newHashSet();
+    Set<Entry<KEY, T>> rtn = new HashSet<Entry<KEY, T>>();
     for (final Entry<KEY, SoftReference<T>> entry : entries) {
       T value = entry.getValue().get();
       if (value == null) value = get(entry.getKey());
@@ -418,7 +419,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         public T setValue(T value) {
           T oldValue = valueImpl;
           valueImpl = value;
-          return valueImpl;
+          return oldValue;
         }
       });
     }
@@ -503,7 +504,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
    * @return A collection of files on which the JVM holds a file lock.
    */
   public static Collection<File> locksHeld() {
-    ArrayList<File> files = Generics.newArrayList();
+    ArrayList<File> files = new ArrayList<File>();
     for (Entry<File, FileSemaphore> entry : fileLocks.entrySet()) {
       if (entry.getValue().isActive()) {
         files.add(entry.getKey());
@@ -563,6 +564,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
   }
 
   /** Appends a value to the block specified by the key */
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   private void appendBlock(KEY key, T value) {
     boolean haveTakenLock = false;
     Pair<? extends OutputStream, CloseAction> writer = null;
@@ -576,7 +578,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         // Write Object
         writer = newOutputStream(toWrite, exists);
         haveTakenLock = true;
-        writeNextObject(writer.first, Pair.makePair(key, value));
+        writeNextObject(writer.first, new Pair<KEY, T>(key, value));
         writer.second.apply();
         haveTakenLock = false;
       }
@@ -588,7 +590,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
   }
 
   /** Updates a block with the specified value; or deletes the block if the value is null */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
   private T updateBlockOrDelete(KEY key, T valueOrNull) {
     Pair<? extends InputStream, CloseAction> reader = null;
     Pair<? extends OutputStream, CloseAction> writer = null;
@@ -629,7 +631,10 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         // Return
         return existingValue;
       }
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (IOException e) {
+      err(e);
+      throw throwSafe(e);
+    } catch (ClassNotFoundException e) {
       err(e);
       throw throwSafe(e);
     } finally {
@@ -648,6 +653,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
   //
 
   /** Completely reads a block into local memory */
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   private Collection<Pair<KEY, T>> readBlock(File block) {
     boolean haveClosed = false;
     Pair<? extends InputStream, CloseAction> input = null;
@@ -678,18 +684,18 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
       if (!block.delete()) {
         throw new IllegalStateException("File corrupted, and cannot delete it: " + block.getPath());
       }
-      return Generics.newLinkedList();
+      return new LinkedList<Pair<KEY, T>>();
     } catch (EOFException e) {
       warn("Empty file (someone else is preparing to write to it?) " + block);
-      return Generics.newLinkedList();
+      return new LinkedList<Pair<KEY, T>>();
     } catch (IOException e) {
       // Case: General IO Error
       err("Could not read file: " + block + ": " + e.getMessage());
-      return Generics.newLinkedList();
+      return new LinkedList<Pair<KEY, T>>();
     } catch (ClassNotFoundException e) {
       // Case: Couldn't read class
       err("Could not read a class in file: " + block + ": " + e.getMessage());
-      return Generics.newLinkedList();
+      return new LinkedList<Pair<KEY, T>>();
     } catch (RuntimeException e) {
       // Case: Unknown error -- see if it's caused by StreamCorrupted
       if (e.getCause() != null && StreamCorruptedException.class.isAssignableFrom(e.getCause().getClass())) {
@@ -697,7 +703,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         if (!block.delete()) {
           throw new IllegalStateException("File corrupted, and cannot delete it: " + block.getPath());
         }
-        return Generics.newLinkedList();
+        return new LinkedList<Pair<KEY, T>>();
       } else {
         // No -- random error (pass up)
         throw e;
@@ -785,6 +791,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
     }
   }
 
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   protected FileSemaphore acquireFileLock(File f) throws IOException {
     assert canonicalFile.intern(f.getCanonicalFile()) == f;
     synchronized (f) {
@@ -923,7 +930,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
 
     // (1) Read everything into memory
     forceTrack("Reading Constituents");
-    Map<String, Map<KEY, T>> combinedMapping = Generics.newHashMap();
+    Map<String, Map<KEY, T>> combinedMapping = new HashMap<String, Map<KEY, T>>();
     try {
       // Accumulate constituents
       for (int i = 0; i < constituents.length; ++i) {
@@ -974,7 +981,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         // Write Objects
         Pair<? extends OutputStream, CloseAction> writer = destination.newOutputStream(toWrite, exists);
         for (Entry<KEY, T> entry : blockEntry.getValue().entrySet()) {
-          destination.writeNextObject(writer.first, Pair.makePair(entry.getKey(), entry.getValue()));
+          destination.writeNextObject(writer.first, new Pair<KEY, T>(entry.getKey(), entry.getValue()));
         }
         writer.second.apply();
       }
