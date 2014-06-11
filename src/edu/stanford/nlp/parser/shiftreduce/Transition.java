@@ -15,7 +15,11 @@ public interface Transition extends Serializable {
 
   /**
    * Applies this transition to get a new state.
-   * TODO: we need a way to include the score change, if any
    */
   public State apply(State state);
+
+  /**
+   * Applies this transition to get a new state.
+   */
+  public State apply(State state, double scoreDelta);
 }
