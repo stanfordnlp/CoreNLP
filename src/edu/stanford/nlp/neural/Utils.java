@@ -13,10 +13,18 @@ import org.ejml.simple.SimpleMatrix;
  *
  * @author John Bauer
  * @author Richard Socher
+ * @author Thang Luong
  */
 public class Utils {
   private Utils() {} // static methods only
 
+  /**
+   * Compute cosine distance between two column vectors.
+   */
+  public static double cosine(SimpleMatrix vector1, SimpleMatrix vector2){
+    return vector1.transpose().mult(vector2).get(0)/(vector1.normF()*vector2.normF());
+  }
+  
   /**
    * Given a sequence of Iterators over SimpleMatrix, fill in all of
    * the matrices with the entries in the theta vector.  Errors are

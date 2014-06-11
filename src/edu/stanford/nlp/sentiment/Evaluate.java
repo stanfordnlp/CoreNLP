@@ -193,6 +193,7 @@ public class Evaluate {
         for (int j = 0; j < classes[i].length; ++j) {
           for (int k = 0; k < classes[other].length; ++k) {
             incorrect[i] += confusion[classes[i][j]][classes[other][k]];
+            incorrect[i] += confusion[classes[other][j]][classes[i][k]];
           }
         }
       }
@@ -217,6 +218,7 @@ public class Evaluate {
         for (int j = 0; j < classes[i].length; ++j) {
           for (int k = 0; k < classes[other].length; ++k) {
             incorrect += confusion[classes[i][j]][classes[other][k]];
+            incorrect += confusion[classes[other][j]][classes[i][k]];
           }
         }
       }
@@ -251,16 +253,6 @@ public class Evaluate {
     //printLengthAccuracies();
   }
 
-  /**
-   * Expected arguments are <code> model treebank </code> <br>
-   *
-   * For example <br>
-   * <code> 
-   *  java edu.stanford.nlp.sentiment.Evaluate 
-   *   edu/stanford/nlp/models/sentiment/sentiment.ser.gz 
-   *   /u/nlp/data/sentiment/trees/dev.txt
-   * </code>
-   */
   public static void main(String[] args) {
     String modelPath = args[0];
     String treePath = args[1];
