@@ -401,7 +401,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
   }
 
   @Override
-  public OutputStream write(Annotation corpus, OutputStream os) throws IOException {
+  public OutputStream append(Annotation corpus, OutputStream os) throws IOException {
     if (!(os instanceof GZIPOutputStream)) {
       if(compress) os = new GZIPOutputStream(os);
     }
@@ -628,9 +628,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     if (loadFile != null && ! loadFile.equals("")) {
       CustomAnnotationSerializer ser = new CustomAnnotationSerializer(false, false);
       InputStream is = new FileInputStream(loadFile);
-      Pair<Annotation, InputStream> pair = ser.read(is);
-      pair.second.close();
-      Annotation anno = pair.first;
+      Annotation anno = ser.load(is);
       System.out.println(anno.toShorterString(new String[0]));
       is.close();
     } else if (file != null && ! file.equals("")) {
@@ -640,7 +638,8 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
 
       CustomAnnotationSerializer ser = new CustomAnnotationSerializer(false, false);
       PrintStream os = new PrintStream(new FileOutputStream(file + ".ser"));
-      ser.write(doc, os).close();
+      ser.save(doc, os);
+      os.close();
       System.err.println("Serialized annotation saved in " + file + ".ser");
     } else {
       System.err.println("usage: CustomAnnotationSerializer [-file file] [-loadFile file]");
