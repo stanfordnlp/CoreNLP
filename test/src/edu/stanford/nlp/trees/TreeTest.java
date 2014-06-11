@@ -20,12 +20,7 @@ public class TreeTest extends TestCase {
    */
   @SuppressWarnings("null")
   public void testTreeIterator() {
-    Tree t = null;
-    try {
-      t = Tree.valueOf("(ROOT (S (NP (DT The) (ADJP (RB very) (JJ proud)) (NN woman)) (VP (VBD yawned) (ADVP (RB loudly))) (. .)))");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    Tree t = Tree.valueOf("(ROOT (S (NP (DT The) (ADJP (RB very) (JJ proud)) (NN woman)) (VP (VBD yawned) (ADVP (RB loudly))) (. .)))");
     if (t == null) {
       fail("testTreeIterator failed to construct tree");
     }
@@ -61,4 +56,35 @@ public class TreeTest extends TestCase {
     assertTrue(l1 != l2);               // make sure labels are not ==
   }
 
+  public void testRemove() {
+    Tree t = Tree.valueOf("(ROOT (S (NP (DT The) (ADJP (RB very) (JJ proud)) (NN woman)) (VP (VBD yawned) (ADVP (RB loudly))) (. .)))");
+    Tree kid = t.firstChild();
+    try {
+      t.remove(kid);
+      fail("Tree remove should be unimplemented.");
+    } catch (Exception e) {
+      // we're good
+    }
+    try {
+      t.remove(kid);
+      fail("Tree removeAll should be unimplemented.");
+    } catch (Exception e) {
+      // we're good
+    }
+    kid.removeChild(0);
+    assertEquals("(ROOT (S (VP (VBD yawned) (ADVP (RB loudly))) (. .)))", t.toString());
+    t.removeChild(0);
+    assertEquals("ROOT", t.toString());
+  }
+
+
+  public void testDominates() {
+    Tree t = Tree.valueOf("(A (B this) (C (D is) (E a) (F small)) (G test))");
+    assertFalse(t.dominates(t));
+
+    for (Tree child : t.children()) {
+      assertTrue(t.dominates(child));
+      assertFalse(child.dominates(t));
+    }
+  }
 }

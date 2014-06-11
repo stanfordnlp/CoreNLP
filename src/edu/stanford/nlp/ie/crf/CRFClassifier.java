@@ -440,22 +440,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *         the third element is a double[][][] representing the feature values (optionally null)
    */
   public Triple<int[][][], int[], double[][][]> documentToDataAndLabels(List<IN> document) {
-    return documentToDataAndLabels(document, false);
-  }
-
-  /**
-   * Convert a document List into arrays storing the data features and labels.
-   * This is used at both training and test time.
-   *
-   * @param document Training documents
-   * @return A Triple, where the first element is an int[][][] representing the
-   *         data, the second element is an int[] representing the labels, the third
-   *         element is an (optional, could be null) double[][][] representing the
-   *         feature real values.
-   */
-  public Triple<int[][][], int[], double[][][]> documentToDataAndLabels(List<IN> document,
-                                                        boolean trainTime) {
-    boolean droppedFeature = false; // todo: remove me
     int docSize = document.size();
     // first index is position in the document also the index of the
     // clique/factor table
@@ -654,7 +638,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     int numDatums = 0;
 
     for (List<IN> doc : documents) {
-      Triple<int[][][], int[], double[][][]> docTriple = documentToDataAndLabels(doc, true);
+      Triple<int[][][], int[], double[][][]> docTriple = documentToDataAndLabels(doc);
       data.add(docTriple.first());
       labels.add(docTriple.second());
       if (flags.useEmbedding)
@@ -727,19 +711,27 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * This routine builds the <code>labelIndices</code> which give the
+   * This routine builds the {@code labelIndices} which give the
    * empirically legal label sequences (of length (order) at most
-   * <code>windowSize</code>) and the <code>classIndex</code>, which indexes
+   * {@code windowSize}) and the {@code classIndex}, which indexes
    * known answer classes.
    *
    * @param ob The training data: Read from an ObjectBank, each item in it is a
    *          {@code List<CoreLabel>}.
    */
   protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob) {
+    boolean useFeatureCountThresh = flags.featureCountThresh > 1;
 
     Set<String>[] featureIndices = new HashSet[windowSize];
+    Map<String, Integer>[] featureCountIndices = null;
     for (int i = 0; i < windowSize; i++) {
       featureIndices[i] = Generics.newHashSet();
+    }
+    if (useFeatureCountThresh) {
+      featureCountIndices = new HashMap[windowSize];
+      for (int i = 0; i < windowSize; i++) {
+        featureCountIndices[i] = Generics.newHashMap();
+      }
     }
 
     labelIndices = new ArrayList<Index<CRFLabel>>(windowSize);
@@ -749,7 +741,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     Index<CRFLabel> labelIndex = labelIndices.get(windowSize - 1);
 
-    classIndex = new HashIndex<String>();
+    if (classIndex == null)
+      classIndex = new HashIndex<String>();
     // classIndex.add("O");
     classIndex.add(flags.backgroundSymbol);
 
@@ -791,21 +784,52 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
             }
             if (background) {
               for (String f : cliqueFeatures) {
-                if (!featureIndices[k].contains(f)) {
-                  if (seenBackgroundFeatures[k].contains(f)) {
-                    seenBackgroundFeatures[k].remove(f);
-                    featureIndices[k].add(f);
-                  } else {
-                    seenBackgroundFeatures[k].add(f);
+                if (useFeatureCountThresh) {
+                  if (!featureCountIndices[k].containsKey(f)) {
+                    if (seenBackgroundFeatures[k].contains(f)) {
+                      seenBackgroundFeatures[k].remove(f);
+                      featureCountIndices[k].put(f, 1);
+                    } else {
+                      seenBackgroundFeatures[k].add(f);
+                    }
+                  }
+                } else {
+                  if (!featureIndices[k].contains(f)) {
+                    if (seenBackgroundFeatures[k].contains(f)) {
+                      seenBackgroundFeatures[k].remove(f);
+                      featureIndices[k].add(f);
+                    } else {
+                      seenBackgroundFeatures[k].add(f);
+                    }
                   }
                 }
               }
             } else {
               seenBackgroundFeatures[k].removeAll(cliqueFeatures);
-              featureIndices[k].addAll(cliqueFeatures);
+              if (useFeatureCountThresh) {
+                Map<String, Integer> fCountIndex = featureCountIndices[k];
+                for (String f: cliqueFeatures) {
+                  if (fCountIndex.containsKey(f))
+                    fCountIndex.put(f, fCountIndex.get(f)+1);
+                  else
+                    fCountIndex.put(f, 1);
+                }
+              } else {
+                featureIndices[k].addAll(cliqueFeatures);
+              }
             }
           } else {
-            featureIndices[k].addAll(cliqueFeatures);
+            if (useFeatureCountThresh) {
+              Map<String, Integer> fCountIndex = featureCountIndices[k];
+              for (String f: cliqueFeatures) {
+                if (fCountIndex.containsKey(f))
+                  fCountIndex.put(f, fCountIndex.get(f)+1);
+                else
+                  fCountIndex.put(f, 1);
+              }
+            } else {
+              featureIndices[k].addAll(cliqueFeatures);
+            }
           }
         }
       }
@@ -815,10 +839,29 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     }
 
+    if (useFeatureCountThresh) {
+      int numFeatures = 0;
+      for (int i = 0; i < windowSize; i++) {
+        numFeatures += featureCountIndices[i].size();
+      }
+      System.err.println("Before feature count thresholding, numFeatures = " + numFeatures);
+      for (int i = 0; i < windowSize; i++) {
+        for(Iterator<Map.Entry<String, Integer>> it = featureCountIndices[i].entrySet().iterator(); it.hasNext(); ) {
+          Map.Entry<String, Integer> entry = it.next();
+          if(entry.getValue() < flags.featureCountThresh) {
+            it.remove();
+          }
+        }
+        featureIndices[i].addAll(featureCountIndices[i].keySet());
+        featureCountIndices[i] = null;
+      }
+    }
+
     int numFeatures = 0;
     for (int i = 0; i < windowSize; i++) {
       numFeatures += featureIndices[i].size();
     }
+    System.err.println("numFeatures = " + numFeatures);
 
     featureIndex = new HashIndex<String>();
     map = new int[numFeatures];
@@ -828,8 +871,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       featureIndexToTemplateIndex = new HashMap<Integer, Integer>();
     }
 
-    Matcher m  = null;
-    String groupSuffix = null;
     for (int i = 0; i < windowSize; i++) {
       Index<Integer> featureIndexMap = new HashIndex<Integer>();
 
@@ -841,8 +882,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
         // grouping features by template
         if (flags.groupByFeatureTemplate) {
-          m = suffixPatt.matcher(str);
-          groupSuffix = "NoTemplate";
+          Matcher m = suffixPatt.matcher(str);
+          String groupSuffix = "NoTemplate";
           if (m.matches()) {
             groupSuffix = m.group(1);
           }
@@ -889,8 +930,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   protected static Index<CRFLabel> allLabels(int window, Index<String> classIndex) {
     int[] label = new int[window];
-    // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.)
-    // 4.12.5
+    // cdm 2005: array initialization isn't necessary: JLS (3rd ed.) 4.12.5
     // Arrays.fill(label, 0);
     int numClasses = classIndex.size();
     Index<CRFLabel> labelIndex = new HashIndex<CRFLabel>();
@@ -949,105 +989,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       windowCliques.removeAll(done);
       done.addAll(windowCliques);
       double[] featureValArr = null;
-      if (flags.useEmbedding && i == 0) {// only activated for node features
-        List<double[]> embeddingList = new ArrayList<double[]>();
-        int concatEmbeddingLen = 0;
-        String currentWord = null;
-        for (int currLoc = loc-2; currLoc <= loc+2; currLoc++) {
-          double[] embedding = null;
-          if (currLoc >=0 && currLoc < info.size()) {
-            currentWord = info.get(loc).get(CoreAnnotations.TextAnnotation.class);
-            String word = currentWord.toLowerCase();
-            word = word.replaceAll("(-)?\\d+(\\.\\d*)?", "0");
-            if (embeddings.containsKey(word))
-              embedding = embeddings.get(word);
-            else
-              embedding = embeddings.get("UNKNOWN");
-          } else {
-            embedding = embeddings.get("PADDING");
-          }
-
-          for (int e = 0; e < embedding.length; e++) {
-            featuresC.add("EMBEDDING-(" + (currLoc-loc) + ")-" + e);
-          }
-
-          if (flags.addCapitalFeatures) {
-            int numOfCapitalFeatures = 4;
-            double[] newEmbedding = new double[embedding.length + numOfCapitalFeatures];
-            int currLen = embedding.length;
-            System.arraycopy(embedding, 0, newEmbedding, 0, currLen);
-            for (int e = 0; e < numOfCapitalFeatures; e++)
-              featuresC.add("CAPITAL-(" + (currLoc-loc) + ")-" + e);
-
-            if (currLoc >=0 && currLoc < info.size()) { // skip PADDING
-              // check if word is all caps
-              if (currentWord.toUpperCase().equals(currentWord))
-                newEmbedding[currLen] = 1;
-              else {
-                currLen += 1;
-                // check if word is all lower
-                if (currentWord.toLowerCase().equals(currentWord))
-                  newEmbedding[currLen] = 1;
-                else {
-                  currLen += 1;
-                  // check first letter cap
-                  if (Character.isUpperCase(currentWord.charAt(0)))
-                    newEmbedding[currLen] = 1;
-                  else {
-                    currLen += 1;
-                    // check if at least one non-initial letter is cap
-                    String remainder = currentWord.substring(1);
-                    if (!remainder.toLowerCase().equals(remainder))
-                      newEmbedding[currLen] = 1;
-                  }
-                }
-              }
-            }
-            embedding = newEmbedding;
-          }
-
-          embeddingList.add(embedding);
-          concatEmbeddingLen += embedding.length;
-        }
-        double[] concatEmbedding = new double[concatEmbeddingLen];
-        int currPos = 0;
-        for (double[] em: embeddingList) {
-          System.arraycopy(em, 0, concatEmbedding, currPos, em.length);
-          currPos += em.length;
-        }
-
-        if (flags.prependEmbedding) {
-          int additionalFeatureCount = 0;
-          for (Clique c : windowCliques) {
-            Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
-            featuresC.addAll(fCol);
-            additionalFeatureCount += fCol.size();
-          }
-          featureValArr = new double[concatEmbedding.length + additionalFeatureCount];
-          System.arraycopy(concatEmbedding, 0, featureValArr, 0, concatEmbedding.length);
-          Arrays.fill(featureValArr, concatEmbedding.length, featureValArr.length, 1.0);
-        } else {
-          featureValArr = concatEmbedding;
-        }
-
-        if (flags.addBiasToEmbedding) {
-          featuresC.add("BIAS-FEATURE");
-          double[] newFeatureValArr = new double[featureValArr.length + 1];
-          System.arraycopy(featureValArr, 0, newFeatureValArr, 0, featureValArr.length);
-          newFeatureValArr[newFeatureValArr.length-1] = 1;
-          featureValArr = newFeatureValArr;
-        }
-
+      if (flags.useEmbedding && i == 0) { // only activated for node features
+        featureValArr = makeDatumUsingEmbedding(info, loc, featureFactory, pInfo, featuresC, windowCliques);
       } else {
         for (Clique c : windowCliques) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c)); //todo useless copy because of typing reasons
         }
       }
-    // [This is the version that didn't work.]
-    // List<Clique> windowCliques = FeatureFactory.getCliques(windowSize - 1, 0); // -1 as <= in getCliques()
-    // List<List<String>> features = new ArrayList<List<String>>(windowCliques.size());
-    // for (Clique c : windowCliques) {
-    //   List<String> featuresC = new ArrayList<String>(featureFactory.getCliqueFeatures(pInfo, loc, c)); //todo useless copy because of typing reasons
       features.add(featuresC);
       featureVals.add(featureValArr);
     }
@@ -1065,6 +1013,99 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // System.err.println(d);
     return d;
   }
+
+  private double[] makeDatumUsingEmbedding(List<IN> info, int loc, FeatureFactory<IN> featureFactory, PaddedList<IN> pInfo, List<String> featuresC, List<Clique> windowCliques) {
+    double[] featureValArr;
+    List<double[]> embeddingList = new ArrayList<double[]>();
+    int concatEmbeddingLen = 0;
+    String currentWord = null;
+    for (int currLoc = loc-2; currLoc <= loc+2; currLoc++) {
+      double[] embedding = null;
+      if (currLoc >=0 && currLoc < info.size()) {
+        currentWord = info.get(loc).get(CoreAnnotations.TextAnnotation.class);
+        String word = currentWord.toLowerCase();
+        word = word.replaceAll("(-)?\\d+(\\.\\d*)?", "0");
+        if (embeddings.containsKey(word))
+          embedding = embeddings.get(word);
+        else
+          embedding = embeddings.get("UNKNOWN");
+      } else {
+        embedding = embeddings.get("PADDING");
+      }
+
+      for (int e = 0; e < embedding.length; e++) {
+        featuresC.add("EMBEDDING-(" + (currLoc-loc) + ")-" + e);
+      }
+
+      if (flags.addCapitalFeatures) {
+        int numOfCapitalFeatures = 4;
+        double[] newEmbedding = new double[embedding.length + numOfCapitalFeatures];
+        int currLen = embedding.length;
+        System.arraycopy(embedding, 0, newEmbedding, 0, currLen);
+        for (int e = 0; e < numOfCapitalFeatures; e++)
+          featuresC.add("CAPITAL-(" + (currLoc-loc) + ")-" + e);
+
+        if (currLoc >=0 && currLoc < info.size()) { // skip PADDING
+          // check if word is all caps
+          if (currentWord.toUpperCase().equals(currentWord))
+            newEmbedding[currLen] = 1;
+          else {
+            currLen += 1;
+            // check if word is all lower
+            if (currentWord.toLowerCase().equals(currentWord))
+              newEmbedding[currLen] = 1;
+            else {
+              currLen += 1;
+              // check first letter cap
+              if (Character.isUpperCase(currentWord.charAt(0)))
+                newEmbedding[currLen] = 1;
+              else {
+                currLen += 1;
+                // check if at least one non-initial letter is cap
+                String remainder = currentWord.substring(1);
+                if (!remainder.toLowerCase().equals(remainder))
+                  newEmbedding[currLen] = 1;
+              }
+            }
+          }
+        }
+        embedding = newEmbedding;
+      }
+
+      embeddingList.add(embedding);
+      concatEmbeddingLen += embedding.length;
+    }
+    double[] concatEmbedding = new double[concatEmbeddingLen];
+    int currPos = 0;
+    for (double[] em: embeddingList) {
+      System.arraycopy(em, 0, concatEmbedding, currPos, em.length);
+      currPos += em.length;
+    }
+
+    if (flags.prependEmbedding) {
+      int additionalFeatureCount = 0;
+      for (Clique c : windowCliques) {
+        Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
+        featuresC.addAll(fCol);
+        additionalFeatureCount += fCol.size();
+      }
+      featureValArr = new double[concatEmbedding.length + additionalFeatureCount];
+      System.arraycopy(concatEmbedding, 0, featureValArr, 0, concatEmbedding.length);
+      Arrays.fill(featureValArr, concatEmbedding.length, featureValArr.length, 1.0);
+    } else {
+      featureValArr = concatEmbedding;
+    }
+
+    if (flags.addBiasToEmbedding) {
+      featuresC.add("BIAS-FEATURE");
+      double[] newFeatureValArr = new double[featureValArr.length + 1];
+      System.arraycopy(featureValArr, 0, newFeatureValArr, 0, featureValArr.length);
+      newFeatureValArr[newFeatureValArr.length-1] = 1;
+      featureValArr = newFeatureValArr;
+    }
+    return featureValArr;
+  }
+
 
   public static class TestSequenceModel implements SequenceModel {
 
@@ -1349,7 +1390,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         tagIndex.add(flags.backgroundSymbol);
       }
       if (entityMatrices == null)
-        entityMatrices = BisequenceEmpiricalNERPrior.readEntityMatrices(flags.entityMatrix, tagIndex);
+        entityMatrices = readEntityMatrices(flags.entityMatrix, tagIndex);
       */
       EntityCachingAbstractSequencePriorBIO<IN> prior = new EmpiricalNERPriorBIO<IN>(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
       priorModel = prior;
@@ -1639,20 +1680,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * Takes the file, reads it in, and prints out the factor table at each position.
-   *
-   * @param filename
-   *          The path to the specified file
-   */
-  public void printFactorTable(String filename, DocumentReaderAndWriter<IN> readerAndWriter) {
-    // only for the OCR data does this matter
-    flags.ocrTrain = false;
-
-    ObjectBank<List<IN>> docs = makeObjectBankFromFile(filename, readerAndWriter);
-    printFactorTableDocuments(docs);
-  }
-
-  /**
    * Takes a {@link List} of documents and prints the likelihood of each
    * possible label at each point.
    *
@@ -1664,6 +1691,20 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       printFirstOrderProbsDocument(doc);
       System.out.println();
     }
+  }
+
+  /**
+   * Takes the file, reads it in, and prints out the factor table at each position.
+   *
+   * @param filename
+   *          The path to the specified file
+   */
+  public void printFactorTable(String filename, DocumentReaderAndWriter<IN> readerAndWriter) {
+    // only for the OCR data does this matter
+    flags.ocrTrain = false;
+
+    ObjectBank<List<IN>> docs = makeObjectBankFromFile(filename, readerAndWriter);
+    printFactorTableDocuments(docs);
   }
 
   /**
@@ -1791,15 +1832,16 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
-  /**
-   * Train a classifier from documents.
-   *
-   * @param docs A Collection (perhaps ObjectBank) of documents
-   */
+  /** {@inheritDoc} */
   @Override
-  public void train(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
+  public void train(Collection<List<IN>> objectBankWrapper, DocumentReaderAndWriter<IN> readerAndWriter) {
     Timing timer = new Timing();
     timer.start();
+
+    Collection<List<IN>> docs = new ArrayList<List<IN>>();
+    for (List<IN> doc : objectBankWrapper) {
+      docs.add(doc);
+    }
 
     if (flags.numOfSlices > 0) {
       System.err.println("Taking " + flags.numOfSlices + " out of " + flags.totalDataSlice + " slices of data for training");
@@ -1812,9 +1854,37 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       docs = docsToShuffle.subList(0, cutOff);
     }
 
-    makeAnswerArraysAndTagIndex(docs);
+    List<List<IN>> unsupDocs = null;
+    if (flags.unsupDropoutFile != null) {
+      System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
+      timer.start();
+      unsupDocs = new ArrayList<List<IN>>();
+      ObjectBank<List<IN>> unsupObjBank = makeObjectBankFromFile(flags.unsupDropoutFile, readerAndWriter);
+      for (List<IN> doc : unsupObjBank) {
+        for (IN tok: doc) {
+          tok.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
+          tok.set(CoreAnnotations.GoldAnswerAnnotation.class, flags.backgroundSymbol);
+        }
+        unsupDocs.add(doc);
+      }
+    }
+
+    List<List<IN>> totalDocs = new ArrayList<List<IN>>();
+    totalDocs.addAll(docs);
+    if (flags.doFeatureDiscovery && unsupDocs != null)
+      totalDocs.addAll(unsupDocs);
+
+    makeAnswerArraysAndTagIndex(totalDocs);
     long elapsedMs = timer.stop();
     System.err.println("Time to convert docs to feature indices: " + Timing.toSecondsString(elapsedMs) + " seconds");
+
+    if (flags.serializeClassIndexTo != null) {
+      timer.start();
+      serializeClassIndex(flags.serializeClassIndexTo);
+      elapsedMs = timer.stop();
+      System.err.println("Time to export class index : " + Timing.toSecondsString(elapsedMs) + " seconds");
+    }
+
     if (flags.exportFeatures != null) {
       timer.start();
       CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
@@ -1886,9 +1956,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // save feature index to disk and read in later
       File featIndexFile = null;
 
-      // int[] temp = new int[]{114, 157, 273,520,531};
-      // for (int ii = 0; ii < featureIndex.size(); ii++)
-      //   System.err.println("featureIndex["+ii+"] = " + featureIndex.get(ii));
       // CRFLogConditionalObjectiveFunction.featureIndex = featureIndex;
       int numFeatures = featureIndex.size();
       if (flags.saveFeatureIndexToDisk) {
@@ -1933,6 +2000,16 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           labels = allLabels;
           featureVals = allFeatureVals;
         }
+      }
+
+      int[][][][] unsupDropoutData = null;
+      if (flags.unsupDropoutFile != null) {
+        List<Triple<int[][][], int[], double[][][]>> unsupDataAndLabels = documentsToDataAndLabelsList(unsupDocs);
+        unsupDropoutData = new int[unsupDataAndLabels.size()][][][];
+        for (int q=0; q<unsupDropoutData.length; q++)
+          unsupDropoutData[q] = unsupDataAndLabels.get(q).first();
+        elapsedMs = timer.stop();
+        System.err.println("Time to read unsupervised dropout data: " + Timing.toSecondsString(elapsedMs) + " seconds, read " + unsupDropoutData.length + " files");
       }
 
       if (flags.nonLinearCRF) {
@@ -2010,22 +2087,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         } else if (flags.numLopExpert > 1) {
           oneDimWeights = trainWeightsUsingLopCRF(numFeatures, data, labels, evaluators, i);
         } else {
-          int[][][][] unsupDropoutData = null;
-          if (flags.unsupDropoutFile != null) {
-            System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
-            timer.start();
-            ObjectBank<List<IN>> unsupObjBank = makeObjectBankFromFile(flags.unsupDropoutFile, readerAndWriter);
-            List<List<IN>> unsupDocs = new ArrayList<List<IN>>();
-            for (List<IN> doc : unsupObjBank) {
-              unsupDocs.add(doc);
-            }
-            List<Triple<int[][][], int[], double[][][]>> unsupDataAndLabels = documentsToDataAndLabelsList(unsupDocs);
-            unsupDropoutData = new int[unsupDataAndLabels.size()][][][];
-            for (int q=0; q<unsupDropoutData.length; q++)
-              unsupDropoutData[q] = unsupDataAndLabels.get(q).first();
-            elapsedMs = timer.stop();
-            System.err.println("Time to read unsupervised dropout data: " + Timing.toSecondsString(elapsedMs) + " seconds, read " + unsupDropoutData.length + " files");
-          }
           oneDimWeights = trainWeightsUsingDoubleCRF(data, labels, evaluators, i, featureVals, unsupDropoutData);
         }
         this.weights = to2D(oneDimWeights, labelIndices, map);
@@ -2132,40 +2193,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     featureIndex = newFeatureIndex;
   }
 
-  /*
-  protected int[][][][] pruneNodeFeaturesBySlice(int totalNumOfFeatureSlices, int numOfFeatureSlices, int[][][][] data) {
-
-    int[] oldFeatures = null;
-    int oldFeatureIndex = -1;
-
-    ArrayList<Integer> newFeatureList = new ArrayList<Integer>(1000);
-
-    int[][][][] newData = new int[data.length][][][];
-    for (int m = 0; m < data.length; m++) {
-      newData[m] = new int[data[m].length][][];
-      for (int i = 0; i < data[m].length; i++) {
-        newData[m][i] = new int[data[m][i].length][];
-        for (int j = 0; j < data[m][i].length; m++) {
-          oldFeatures = data[m][i][j];
-          newFeatureList.clear();
-          for (int k = 0; k < oldFeatures.length; k++) {
-            oldFeatureIndex = oldFeatures[k];
-            if (oldToNewFeatureIndexMap.containsKey(oldFeatureIndex)) {
-              newFeatureList.add(oldToNewFeatureIndexMap.get(oldFeatureIndex));
-            }
-          }
-          newData[m][i][j] = new int[newFeatureList.size()];
-          for (int k = 0; k < newFeatureList.size(); k++) {
-            newData[m][i][j][k] = newFeatureList.get(k);
-          }
-        }
-      }
-    }
-
-    return newData;
-  }
-  */
-
   protected int[][][][] createPartialDataForLOP(int lopIter, int[][][][] data) {
     int[] oldFeatures = null;
     int oldFeatureIndex = -1;
@@ -2196,42 +2223,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     return newData;
   }
-
-  /*
-  protected int[][] getFeatureBoundaryIndices(int numFeatures, int numLopExpert) {
-    // first find begin/end feature index for each expert
-    int interval = numFeatures / numLopExpert;
-    int[] beginFeatureIndices = new int[numLopExpert];
-    int[] begin1DParamIndices = new int[numLopExpert];
-    int[] endFeatureIndices = new int[numLopExpert];
-    int[] end1DParamIndices = new int[numLopExpert];
-    for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-      int beginIndex = lopIter * interval;
-      int endIndex = (lopIter+1) * interval;
-      if (lopIter == numLopExpert - 1) {
-        endIndex = numFeatures;
-      }
-      int begin1D = 0;
-      for (int fIndex = 0; fIndex < beginIndex; fIndex++) {
-        begin1D += labelIndices[map[fIndex]].size();
-      }
-      int end1D = begin1D;
-      for (int fIndex = beginIndex; fIndex < endIndex; fIndex++) {
-        end1D += labelIndices[map[fIndex]].size();
-      }
-      beginFeatureIndices[lopIter] = beginIndex;
-      endFeatureIndices[lopIter] = endIndex;
-      begin1DParamIndices[lopIter] = begin1D;
-      end1DParamIndices[lopIter] = end1D;
-    }
-    int[][] boundaryIndices = new int[4][];
-    boundaryIndices[0] = beginFeatureIndices;
-    boundaryIndices[1] = endFeatureIndices;
-    boundaryIndices[2] = begin1DParamIndices;
-    boundaryIndices[3] = end1DParamIndices;
-    return boundaryIndices;
-  }
-  */
 
   protected void getFeatureBoundaryIndices(int numFeatures, int numLopExpert) {
     // first find begin/end feature index for each expert
@@ -2368,8 +2359,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected double[] initWeightsUsingDoubleCRF(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr) {
-    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+    CRFLogConditionalObjectiveFunction func = null;
+    if ("DROPOUT".equalsIgnoreCase(flags.priorType)) {
+      func = new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
         labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
+    } else {
+      func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
+    }
     return func.initial();
   }
 
@@ -2415,9 +2412,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   protected double[] trainWeightsUsingDoubleCRF(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr, double[][][][] featureVals, int[][][][] unsupDropoutData) {
 
+    CRFLogConditionalObjectiveFunction func = null;
+    if ("DROPOUT".equalsIgnoreCase(flags.priorType)) {
+      func = new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
+    } else {
+      func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
+    }
 
-    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunction(data, labels,
-        windowSize, classIndex, labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, featureVals, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, unsupDropoutData);
     cliquePotentialFunctionHelper = func;
 
     // create feature grouping
@@ -2491,7 +2494,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       func.setFeatureGrouping(fg);
     }
 
-
     Minimizer minimizer = getMinimizer(pruneFeatureItr, evaluators);
 
     double[] initialWeights;
@@ -2532,11 +2534,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
 
-  protected Minimizer getMinimizer() {
+  public Minimizer getMinimizer() {
     return getMinimizer(0, null);
   }
 
-  protected Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
+  public Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
     Minimizer<DiffFunction> minimizer = null;
     if (flags.useQN) {
       int QNmem;
@@ -3307,6 +3309,124 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
+  public void serializeClassIndex(String serializePath) {
+    System.err.print("Serializing class index to " + serializePath + "...");
+
+    ObjectOutputStream oos = null;
+    try {
+      oos = IOUtils.writeStreamFromString(serializePath);
+      oos.writeObject(classIndex);
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  public static Index<String> loadClassIndexFromFile(String serializePath) {
+    System.err.print("Reading class index from " + serializePath + "...");
+
+    ObjectInputStream ois = null;
+    Index<String> c = null;
+    try {
+      ois = IOUtils.readStreamFromString(serializePath);
+      c = (Index<String>) ois.readObject();
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(ois);
+    }
+
+    return c;
+  }
+
+  public void serializeWeights(String serializePath) {
+    System.err.print("Serializing weights to " + serializePath + "...");
+
+    ObjectOutputStream oos = null;
+    try {
+      oos = IOUtils.writeStreamFromString(serializePath);
+      oos.writeObject(weights);
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  public static double[][] loadWeightsFromFile(String serializePath) {
+    System.err.print("Reading weights from " + serializePath + "...");
+
+    ObjectInputStream ois = null;
+    double[][] w = null;
+    try {
+      ois = IOUtils.readStreamFromString(serializePath);
+      w = (double[][]) ois.readObject();
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(ois);
+    }
+
+    return w;
+  }
+
+  public void serializeFeatureIndex(String serializePath) {
+    System.err.print("Serializing FeatureIndex to " + serializePath + "...");
+
+    ObjectOutputStream oos = null;
+    try {
+      oos = IOUtils.writeStreamFromString(serializePath);
+      oos.writeObject(featureIndex);
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  public static Index<String> loadFeatureIndexFromFile(String serializePath) {
+    System.err.print("Reading FeatureIndex from " + serializePath + "...");
+
+    ObjectInputStream ois = null;
+    Index<String> f = null;
+    try {
+      ois = IOUtils.readStreamFromString(serializePath);
+      f = (Index<String>) ois.readObject();
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(ois);
+    }
+
+    return f;
+  }
+
+
   /**
    * {@inheritDoc}
    */
@@ -3451,8 +3571,62 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         tagIndex.add(flags.backgroundSymbol);
       }
       if (entityMatrices == null)
-        entityMatrices = BisequenceEmpiricalNERPrior.readEntityMatrices(flags.entityMatrix, tagIndex);
+        entityMatrices = readEntityMatrices(flags.entityMatrix, tagIndex);
     }
+  }
+
+  public static Pair<double[][], double[][]> readEntityMatrices(String fileName, Index<String> tagIndex) {
+    int numTags = tagIndex.size();
+    double[][] matrix = new double[numTags-1][numTags-1];
+    for (int i = 0; i < numTags-1; i++)
+      matrix[i] = new double[numTags-1];
+    double[][] subMatrix = new double[numTags-1][numTags-1];
+    for (int i = 0; i < numTags-1; i++)
+      subMatrix[i] = new double[numTags-1];
+
+    try {
+      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileName))));
+      String line = null;
+      int lineCount = 0;
+      while ((line = br.readLine()) != null) {
+        line = line.trim();
+        String[] parts = line.split("\t");
+        for (String part: parts) {
+          String[] subparts = part.split(" ");
+          String[] subsubparts = subparts[0].split(":");
+          double counts = Double.parseDouble(subparts[1]);
+          if (counts == 0.0) // smoothing
+            counts = 1.0;
+          int tagIndex1 = tagIndex.indexOf(subsubparts[0]);
+          int tagIndex2 = tagIndex.indexOf(subsubparts[1]);
+          if (lineCount < numTags-1)
+            matrix[tagIndex1][tagIndex2] = counts;
+          else
+            subMatrix[tagIndex1][tagIndex2] = counts;
+        }
+        lineCount++;
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.exit(-1);
+    }
+    for (int i = 0; i < matrix.length; i++) {
+      double sum = ArrayMath.sum(matrix[i]);
+      for (int j = 0; j < matrix[i].length; j++)
+        matrix[i][j] = Math.log(matrix[i][j] / sum) / 2;
+    }
+    for (int i = 0; i < subMatrix.length; i++) {
+      double sum = ArrayMath.sum(subMatrix[i]);
+      for (int j = 0; j < subMatrix[i].length; j++)
+        subMatrix[i][j] = Math.log(subMatrix[i][j] / sum);
+    }
+
+    System.err.println("Matrix: ");
+    System.err.println(ArrayUtils.toString(matrix));
+    System.err.println("SubMatrix: ");
+    System.err.println(ArrayUtils.toString(subMatrix));
+
+    return new Pair<double[][], double[][]>(matrix, subMatrix);
   }
 
   /**
@@ -3604,6 +3778,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       System.err.println("Found " + count + " matching embeddings of dimension " + vector.length);
     }
 
+    if (crf.flags.loadClassIndexFrom != null) {
+      crf.classIndex = loadClassIndexFromFile(crf.flags.loadClassIndexFrom);
+    }
+
     if (loadPath != null) {
       crf.loadClassifierNoExceptions(loadPath, props);
     } else if (loadTextPath != null) {
@@ -3631,6 +3809,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (serializeTo != null) {
       crf.serializeClassifier(serializeTo);
+    }
+
+    if (crf.flags.serializeWeightsTo != null) {
+      crf.serializeWeights(crf.flags.serializeWeightsTo);
+    }
+
+    if (crf.flags.serializeFeatureIndexTo != null) {
+      crf.serializeFeatureIndex(crf.flags.serializeFeatureIndexTo);
     }
 
     if (serializeToText != null) {
