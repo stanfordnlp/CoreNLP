@@ -78,8 +78,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * 
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
- * (or txt) and ser, where the serialized file is of the type Map&lt;String,
- * List&lt;CoreLabel&gt;&gt;.
+ * (or txt) and ser, where the serialized file is of the type <code>Map&lt;String,
+ * List&lt;CoreLabel&gt;&gt;</code>.
  * <p>
  * <code>file</code>: (Required) Input file(s) (default assumed text). Can be
  * one or more of (concatenated by comma or semi-colon): file, directory, files
