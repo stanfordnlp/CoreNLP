@@ -59,7 +59,7 @@ public class SemanticGraph implements Serializable {
    */
   private Collection<IndexedWord> roots;
 
-  private final DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
+  private DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
 
   public int edgeCount() {
     return graph.getNumEdges();
@@ -1729,55 +1729,35 @@ public class SemanticGraph implements Serializable {
 
     roots = Generics.newHashSet();
 
-    // Precalculating the IndexedWords rather than creating them as we
-    // go saves a lot of time, as we can look up the already
-    // calculated words each time if we need them multiple times
-    Map<Integer, IndexedWord> indexToWord = Generics.newHashMap();
     for (TypedDependency d : dependencies) {
-      TreeGraphNode dep = d.dep();
       TreeGraphNode gov = d.gov();
+      TreeGraphNode dep = d.dep();
       GrammaticalRelation reln = d.reln();
 
-      int depIndex = dep.index();
-      if (!indexToWord.containsKey(depIndex)) {
-        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+      // attention: the Labels [gov|dep].label() contain the words and their
+      // indices!
+      // but the CoreLabels govLabel/depLabel throw away the index information
+      CoreLabel govLabel = new CoreLabel(gov.label());
+      CoreLabel depLabel = new CoreLabel(dep.label());
+
+      if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
+        IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), govLabel);
+        govVertex.setTag(gov.highestNodeWithSameHead().headTagNode().value());
+        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
+        depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
+        if (lemmatize) {
+          govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
+          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
+        }
+        addVertex(govVertex);
+        addVertex(depVertex);
+        addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
+      } else { //it's the root and we add it
+        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
         depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
         if (lemmatize) {
           depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
-        indexToWord.put(depIndex, depVertex);
-      }
-
-      if (reln == ROOT) {
-        continue;
-      }
-
-      int govIndex = gov.index();
-      if (!indexToWord.containsKey(govIndex)) {
-        IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), gov.label());
-        govVertex.setTag(gov.highestNodeWithSameHead().headTagNode().value());
-        if (lemmatize) {
-          govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
-        }
-        indexToWord.put(govIndex, govVertex);
-      }
-    }
-
-    for (TypedDependency d : dependencies) {
-      TreeGraphNode gov = d.gov();
-      TreeGraphNode dep = d.dep();
-      GrammaticalRelation reln = d.reln();
-
-      if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
-        IndexedWord govVertex = indexToWord.get(d.gov().index());
-        IndexedWord depVertex = indexToWord.get(d.dep().index());
-        // It is unnecessary to call addVertex, since addEdge will
-        // implicitly add vertices if needed
-        //addVertex(govVertex);
-        //addVertex(depVertex);
-        addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
-      } else { //it's the root and we add it
-        IndexedWord depVertex = indexToWord.get(d.dep().index());
 
         addVertex(depVertex);
         roots.add(depVertex);
