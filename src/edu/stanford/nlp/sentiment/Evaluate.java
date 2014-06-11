@@ -10,7 +10,6 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -161,15 +160,13 @@ public class Evaluate {
   }
 
   private static void printConfusionMatrix(String name, int[][] confusion) {
-    System.err.println(name + " confusion matrix");
-    ConfusionMatrix<Integer> confusionMatrix = new ConfusionMatrix<Integer>();
-    confusionMatrix.setUseRealLabels(true);
+    System.err.println(name + " confusion matrix: rows are gold label, columns predicted label");
     for (int i = 0; i < confusion.length; ++i) {
       for (int j = 0; j < confusion[i].length; ++j) {
-        confusionMatrix.add(j, i, confusion[i][j]);
+        System.err.print(StringUtils.padLeft(confusion[i][j], 10));
       }
+      System.err.println();
     }
-    System.err.println(confusionMatrix);
   }
 
   private static double[] approxAccuracy(int[][] confusion, int[][] classes) {
