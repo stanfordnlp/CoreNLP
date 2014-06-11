@@ -50,7 +50,7 @@ public class Embedding {
   
   public Embedding(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
-    this.embeddingSize = getEmbedingSize(wordVectors);
+    this.embeddingSize = getEmbeddingSize(wordVectors);
   }
   
   public Embedding(String wordVectorFile) {
@@ -87,6 +87,7 @@ public class Embedding {
     int dimOfWords = 0;
     boolean warned = false;
     
+    int numWords = 0;
     for (String line : IOUtils.readLines(wordVectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
       String word = lineSplit[0];
@@ -126,7 +127,10 @@ public class Embedding {
       }
       SimpleMatrix vector = new SimpleMatrix(vec);
       wordVectors.put(word, vector);
+
+      numWords++;
     }
+    System.err.println("  num words = " + numWords);
   }
 
   /**
@@ -143,7 +147,8 @@ public class Embedding {
     System.err.println("# Loading embedding ...\n  word file = " + wordFile + "\n  vector file = " + vectorFile);
     int dimOfWords = 0;
     boolean warned = false;
-    
+   
+    int numWords = 0;
     Iterator<String> wordIterator = IOUtils.readLines(wordFile, "utf-8").iterator();
     for (String line : IOUtils.readLines(vectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
@@ -186,7 +191,10 @@ public class Embedding {
       }
       SimpleMatrix vector = new SimpleMatrix(vec);
       wordVectors.put(word, vector);
+      numWords++;
     }
+    
+    System.err.println("  num words = " + numWords);
   }
   
   
@@ -238,14 +246,26 @@ public class Embedding {
  
   public void setWordVectors(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
-    this.embeddingSize = getEmbedingSize(wordVectors);
+    this.embeddingSize = getEmbeddingSize(wordVectors);
   }
   
-  private int getEmbedingSize(Map<String, SimpleMatrix> wordVectors){
+  private int getEmbeddingSize(Map<String, SimpleMatrix> wordVectors){
     if (!wordVectors.containsKey(UNKNOWN_WORD)){
-      System.err.println("! wordVectors used to initialize Embedding doesn't contain " + UNKNOWN_WORD);
-      System.exit(1);
-    }
+      // find if there's any other unk string
+      String unkStr = "";
+      if (wordVectors.containsKey("UNK")) { unkStr = "UNK"; }
+      if (wordVectors.containsKey("UUUNKKK")) { unkStr = "UUUNKKK"; }
+      if (wordVectors.containsKey("UNKNOWN")) { unkStr = "UNKNOWN"; }
+      
+      // set UNKNOWN_WORD
+      if (!unkStr.equals("")){
+        wordVectors.put(UNKNOWN_WORD, wordVectors.get(unkStr));
+      } else {
+        System.err.println("! wordVectors used to initialize Embedding doesn't contain " + UNKNOWN_WORD);
+        System.exit(1);
+      }
+    }  
+    
     return wordVectors.get(UNKNOWN_WORD).getNumElements();
   }
 }
