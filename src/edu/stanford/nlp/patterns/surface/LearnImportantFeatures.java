@@ -125,10 +125,13 @@ public class LearnImportantFeatures {
 
         boolean chooseThis = false;
 
-        if (l.get(answerClass).equals(answerLabel))
+        if (l.get(answerClass).equals(answerLabel)){
+          System.out.println("answerclass " + answerClass + " matched answerLabel " + answerLabel);
           chooseThis = true;
+          }
         else if ((!l.get(answerClass).equals("O") || negativeWords.contains(l
             .word().toLowerCase())) && getRandomBoolean(r, perSelectNeg)) {
+          System.out.println("answerclass " + answerClass + " did not match answerLabel " + answerLabel);
           chooseThis = true;
         } else if (getRandomBoolean(r, perSelectRand)) {
           numrand++;
@@ -138,6 +141,7 @@ public class LearnImportantFeatures {
         if (chooseThis) {
           chosen.add(new Pair(en.getKey(), i));
           RVFDatum<String, String> d = getDatum(sent, i);
+          System.out.println("label is " + d.label());
           dataset.add(d, en.getKey(), Integer.toString(i));
         }
       }
