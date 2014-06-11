@@ -194,7 +194,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    */
   @Option(name = "allPatternsFile")
   public String allPatternsFile = null;
-
+  
   /**
    * If all patterns should be computed. Otherwise patterns are read from
    * allPatternsFile
@@ -1071,13 +1071,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     // Baseline; ignore if not interested
     if (patternScoring.equals(PatternScoring.F1)) {
-
       Counter<SurfacePattern> specificity = new ClassicCounter<SurfacePattern>();
       Counter<SurfacePattern> sensitivity = new ClassicCounter<SurfacePattern>();
 
       if (p0Set.keySet().size() == 0)
-        throw new RuntimeException("how come p0set size is empty for " + p0
-            + "?");
+        throw new RuntimeException("how come p0set size is empty for " + p0 + "?");
 
       for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
           .entrySet()) {
@@ -1097,8 +1095,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Counters.retainNonZeros(specificity);
       Counters.retainNonZeros(sensitivity);
       Counter<SurfacePattern> add = Counters.add(sensitivity, specificity);
-      Counter<SurfacePattern> product = Counters.product(sensitivity,
-          specificity);
+      Counter<SurfacePattern> product = Counters
+          .product(sensitivity, specificity);
       Counters.retainNonZeros(product);
       Counters.retainKeys(product, add.keySet());
       Counter<SurfacePattern> finalPat = Counters.scale(
@@ -2678,8 +2676,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       g.extremedebug = Boolean.parseBoolean(props.getProperty("extremedebug"));
 
-      System.out.println("Already learned words are "
-          + g.getLearnedWords("onelabel"));
       g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile,
           patternOutFile, ignorePatterns);
 
