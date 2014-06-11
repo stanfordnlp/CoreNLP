@@ -37,6 +37,8 @@ public class TrainParser {
     FileFilter trainTreebankFilter = null;
     String testTreebankPath = null;
     FileFilter testTreebankFilter = null;
+    String devTreebankPath = null;
+    FileFilter devTreebankFilter = null;
 
     String serializedPath = null;
 
@@ -53,6 +55,11 @@ public class TrainParser {
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         testTreebankPath = treebankDescription.first();
         testTreebankFilter = treebankDescription.second();
+      } else if (args[argIndex].equalsIgnoreCase("-devTreebank")) {
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-devTreebank");
+        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
+        devTreebankPath = treebankDescription.first();
+        devTreebankFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-serializedPath")) {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
@@ -136,6 +143,14 @@ public class TrainParser {
 
       Random random = new Random(parser.op.trainOptions.randomSeed);
 
+      Treebank devTreebank = null;
+      if (devTreebankPath != null) {
+        System.err.println("Loading dev trees from " + devTreebankPath);
+        devTreebank = parser.op.tlpParams.memoryTreebank();
+        devTreebank.loadPath(devTreebankPath, devTreebankFilter);
+        System.err.println("Loaded " + devTreebank.size() + " trees");
+      }
+
       for (int i = 0; i < parser.op.trainOptions.trainingIterations; ++i) {
         int numCorrect = 0;
         int numWrong = 0;
@@ -164,6 +179,13 @@ public class TrainParser {
         }
         System.err.println("Iteration " + i + " complete");
         System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
+
+        if (devTreebank != null) {
+          EvaluateTreebank evaluator = new EvaluateTreebank(parser.op, null, parser);
+          evaluator.testOnTreebank(devTreebank);
+          double labelF1 = evaluator.getLBScore();
+          System.err.println("Label F1 after " + i + " iterations: " + labelF1);
+        }
       }
 
       parser.condenseFeatures();
