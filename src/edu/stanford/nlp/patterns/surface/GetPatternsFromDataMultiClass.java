@@ -367,7 +367,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     assert !(constVars.doNotApplyPatterns && (createPats.useStopWordsBeforeTerm || constVars.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
 
     String prefixFileForIndex = null;
-    if(constVars.usingTempDirForSents){
+    if(constVars.usingDirForSentsInIndex){
       prefixFileForIndex = constVars.saveSentencesSerDir;  
     }
     
@@ -388,7 +388,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
           if (createInvIndex){
             String filename = "";
-            if(constVars.usingTempDirForSents){
+            if(constVars.usingDirForSentsInIndex){
               filename = f.getName();
             }else
               filename = f.getAbsolutePath();
@@ -844,7 +844,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public Map<String, TwoDimensionalCounter<SurfacePattern, String>> allPatternsandWords = null;
   public Map<String, Counter<SurfacePattern>> currentPatternWeights = null;
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked"})
   public Counter<SurfacePattern> getPatterns(String label, Set<SurfacePattern> alreadyIdentifiedPatterns, SurfacePattern p0, Counter<String> p0Set,
       Set<SurfacePattern> ignorePatterns) throws InterruptedException, ExecutionException, IOException, ClassNotFoundException,
       InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -2246,7 +2246,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
 
       String saveSentencesSerDir = null;
-      boolean usingTempDirForSents = false;
+      boolean usingDirForSentsInIndex = true;
       // Read training file
       if (file != null) {
         saveSentencesSerDir = props.getProperty("saveSentencesSerDir");
@@ -2262,7 +2262,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           saveSentencesSerDir = saveSentencesSerDirFile.getAbsolutePath();
           saveSentencesSerDirFile.delete();
           saveSentencesSerDirFile.mkdir();
-          usingTempDirForSents = true;
         }
 
         List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
@@ -2287,7 +2286,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
 
         } else if (fileFormat.equalsIgnoreCase("ser")) {
-          usingTempDirForSents = false;
+          usingDirForSentsInIndex = false;
           for (File f : allFiles) {
             if (!batchProcessSents)
               sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
@@ -2356,7 +2355,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       GetPatternsFromDataMultiClass g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
       
-      g.constVars.usingTempDirForSents = usingTempDirForSents;
+      g.constVars.usingDirForSentsInIndex = usingDirForSentsInIndex;
       g.constVars.saveSentencesSerDir = saveSentencesSerDir;
       
       Execution.fillOptions(g, props);

@@ -579,7 +579,7 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name="saveSentencesSerDir")
   public String saveSentencesSerDir = null;
   
-  public boolean usingTempDirForSents = false;
+  public boolean usingDirForSentsInIndex = false;
   
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
