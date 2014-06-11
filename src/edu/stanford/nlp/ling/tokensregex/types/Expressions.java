@@ -841,9 +841,9 @@ public class Expressions {
   protected static final String NEWLINE = System.getProperty("line.separator");
   public static class FunctionCallExpression extends Expressions.TypedExpression {
     String function;
-    List<Expression> params;
+    List<? extends Expression> params;
 
-    public FunctionCallExpression(String function, List<Expression> params, String... tags) {
+    public FunctionCallExpression(String function, List<? extends Expression> params, String... tags) {
       super(TYPE_FUNCTION, tags);
       this.function = function;
       this.params = params;

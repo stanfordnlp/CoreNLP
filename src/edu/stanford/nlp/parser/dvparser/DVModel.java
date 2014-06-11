@@ -521,6 +521,8 @@ public class DVModel implements Serializable {
         word = op.wordFunction.apply(word);
       }
 
+      wordVectors.put(word, vector);
+
       if (op.lexOptions.numHid <= 0) {
         op.lexOptions.numHid = vector.getNumElements();
       }
