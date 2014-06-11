@@ -280,4 +280,15 @@ public class ArrayCoreMapTest extends TestCase {
     assertEquals(baz, biff);
   }
 
+  public void testCopyConstructor() {
+    ArrayCoreMap biff = new ArrayCoreMap();
+    biff.set(CoreAnnotations.TextAnnotation.class, "foo");
+    biff.set(CoreAnnotations.PartOfSpeechAnnotation.class, "B");
+    biff.set(CoreAnnotations.LemmaAnnotation.class, "fozzle");
+    ArrayCoreMap boff = new ArrayCoreMap(biff);
+    assertEquals(3, boff.size());
+    assertEquals(biff, boff);
+    assertEquals("fozzle", boff.get(CoreAnnotations.LemmaAnnotation.class));
+  }
+
 }
