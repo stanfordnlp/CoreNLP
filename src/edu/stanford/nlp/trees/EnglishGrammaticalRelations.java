@@ -190,6 +190,8 @@ public class EnglishGrammaticalRelations {
           "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
           // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
           "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
+          // "Such a great idea this was"
+          "SINV < (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
         });
 
   public static class CopulaGRAnnotation extends GrammaticalRelationAnnotation {
@@ -358,6 +360,8 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (SQ=target < (/^(?:VB|AUX)/ < " + copularWordRegex + ") !< VP)",
           // matches subj in SINV
           "SINV < (NP|WHNP=target [ $- VP|VBZ|VBD|VBP|VB|MD|AUX | $- (@RB|ADVP $- VP|VBZ|VBD|VBP|VB|MD|AUX) | !$- __ !$ @NP] )",
+          // Another SINV subj, such as "Such a great idea this was"
+          "SINV < (NP $++ (NP=target $++ (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
           //matches subj in xcomp like "He considered him a friend"
           "S < (NP=target $+ NP|ADJP) > VP",
           // matches subj in relative clauses
