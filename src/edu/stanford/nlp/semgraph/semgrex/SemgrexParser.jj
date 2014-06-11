@@ -16,11 +16,15 @@ import edu.stanford.nlp.util.Generics;
 
 class SemgrexParser {
 
-	// this is so we can tell, at any point during the parse
-	// whether we are under a negation, which we need to know
-  	// because labeling nodes under negation is illegal
-	private boolean underNegation = false;
-      	private boolean underNodeNegation = false;
+  // this is so we can tell, at any point during the parse
+  // whether we are under a negation, which we need to know
+  // because labeling nodes under negation is illegal
+  private boolean underNegation = false;
+  private boolean underNodeNegation = false;
+  // keep track of which variables we've already seen
+  // lets us make sure we don't name new nodes under a negation
+  private Set<String> knownVariables = Generics.newHashSet();
+  
 }
 
 PARSER_END(SemgrexParser)
@@ -34,7 +38,7 @@ SKIP:
 
 TOKEN:
 {
-	< RELATION: "<" | ">" | ">>" | "<<">
+	< RELATION: "<" | ">" | ">>" | "<<" | "==" >
 |	< ALIGNRELN: "@" >
 |	< IDENTIFIER: (~[" ", "\n", "\r", "(", "/", "|", "@", "!", "#", "%", "&", ")", "=", "?", "[", "]", ">", "<", "~", ".", ",", "$", ":", ";", "{", "}"])+ >
 |	< NUMBER: ( ["0"-"9"] )+ >
@@ -244,11 +248,19 @@ NodePattern Description(GraphRelation r) : {
 	|
 	(( attr = <EMPTY> "}") {
 	isEmpty = true; } )
-	| ( "}") ) 
+	| ( "}") )
 
 	(( ("=" { link = true; }) name = <IDENTIFIER> ) 
-		{if (underNegation)
-				throw new ParseException("No named semgrex nodes allowed in the scope of negation");} 
+            {
+              String nodeName = name.image;
+              if (underNegation) {
+                if (!knownVariables.contains(nodeName)) {
+                  throw new ParseException("Cannot add new variable names under negation.  Node '" + nodeName + "' not seen before");
+                }
+              } else {
+                knownVariables.add(nodeName);
+              }
+            }
 	  )? 
 	)
   	{ pat = new NodePattern(r, underNodeNegation, attributes, isRoot, isEmpty, name != null ? name.image : null); 
