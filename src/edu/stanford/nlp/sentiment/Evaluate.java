@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.IntCounter;
@@ -81,10 +81,12 @@ public class Evaluate {
         length += countLengthAccuracy(child);
       }
     }
-    if (gold.equals(predicted)) {
-      lengthLabelsCorrect.incrementCount(length);
-    } else {
-      lengthLabelsIncorrect.incrementCount(length);
+    if (gold >= 0) {
+      if (gold.equals(predicted)) {
+        lengthLabelsCorrect.incrementCount(length);
+      } else {
+        lengthLabelsIncorrect.incrementCount(length);
+      }
     }
     return length;
   }
@@ -98,23 +100,27 @@ public class Evaluate {
     }
     Integer gold = RNNCoreAnnotations.getGoldClass(tree);
     Integer predicted = RNNCoreAnnotations.getPredictedClass(tree);
-    if (gold.equals(predicted)) {
-      labelsCorrect++;
-    } else {
-      labelsIncorrect++;
+    if (gold >= 0) {
+      if (gold.equals(predicted)) {
+        labelsCorrect++;
+      } else {
+        labelsIncorrect++;
+      }
+      labelConfusion[gold][predicted]++;
     }
-    labelConfusion[gold][predicted]++;
   }
 
   private void countRoot(Tree tree) {
     Integer gold = RNNCoreAnnotations.getGoldClass(tree);
     Integer predicted = RNNCoreAnnotations.getPredictedClass(tree);
-    if (gold.equals(predicted)) {
-      rootLabelsCorrect++;
-    } else {
-      rootLabelsIncorrect++;
+    if (gold >= 0) {
+      if (gold.equals(predicted)) {
+        rootLabelsCorrect++;
+      } else {
+        rootLabelsIncorrect++;
+      }
+      rootLabelConfusion[gold][predicted]++;
     }
-    rootLabelConfusion[gold][predicted]++;
   }
 
   public double exactNodeAccuracy() {
@@ -147,6 +153,7 @@ public class Evaluate {
     }
   }
 
+  // TODO: this should stored in the model rather than hard coded here
   private static final int[] NEG_CLASSES = {0, 1};
   private static final int[] POS_CLASSES = {3, 4};
 
@@ -193,7 +200,6 @@ public class Evaluate {
         for (int j = 0; j < classes[i].length; ++j) {
           for (int k = 0; k < classes[other].length; ++k) {
             incorrect[i] += confusion[classes[i][j]][classes[other][k]];
-            incorrect[i] += confusion[classes[other][j]][classes[i][k]];
           }
         }
       }
@@ -218,7 +224,6 @@ public class Evaluate {
         for (int j = 0; j < classes[i].length; ++j) {
           for (int k = 0; k < classes[other].length; ++k) {
             incorrect += confusion[classes[i][j]][classes[other][k]];
-            incorrect += confusion[classes[other][j]][classes[i][k]];
           }
         }
       }
@@ -253,6 +258,16 @@ public class Evaluate {
     //printLengthAccuracies();
   }
 
+  /**
+   * Expected arguments are <code> model treebank </code> <br>
+   *
+   * For example <br>
+   * <code> 
+   *  java edu.stanford.nlp.sentiment.Evaluate 
+   *   edu/stanford/nlp/models/sentiment/sentiment.ser.gz 
+   *   /u/nlp/data/sentiment/trees/dev.txt
+   * </code>
+   */
   public static void main(String[] args) {
     String modelPath = args[0];
     String treePath = args[1];
