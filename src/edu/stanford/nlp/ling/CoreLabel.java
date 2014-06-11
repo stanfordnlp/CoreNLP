@@ -594,17 +594,6 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
         buf.append('-').append((index).intValue());
       }
       buf.append(toPrimes());
-    } else if (format.equals("value-tag-index")) {
-      buf.append(value());
-      String tag = tag();
-      if (tag != null) {
-        buf.append(TAG_SEPARATOR).append(tag);
-      }
-      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-      if (index != null) {
-        buf.append('-').append((index).intValue());
-      }
-      buf.append(toPrimes());
     } else if (format.equals("value-index{map}")) {
       buf.append(value());
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
