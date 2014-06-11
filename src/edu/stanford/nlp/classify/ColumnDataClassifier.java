@@ -622,7 +622,7 @@ public class ColumnDataClassifier {
     }
 
     Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
-    for (int i = 0; i < test.size; i++) {
+    for (int i = 0; i < test.size(); i++) {
       String[] simpleLineInfo = lineInfos.get(i);
       Datum<String,String> d;
       if (globalFlags.usesRealValues) {
@@ -690,7 +690,7 @@ public class ColumnDataClassifier {
     if (globalFlags.printFeatures != null) {
       closeFeaturePrinter();
     }
-    return writeResultsSummary(test.size, contingency, cl.labels());
+    return writeResultsSummary(test.size(), contingency, cl.labels());
   }
 
 
