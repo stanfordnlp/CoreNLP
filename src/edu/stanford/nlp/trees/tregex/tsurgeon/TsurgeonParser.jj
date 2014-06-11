@@ -28,7 +28,7 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants/*@eg
     System.out.println("Reading from standard input...");
     TsurgeonParser t = new TsurgeonParser(System.in);
     try {
-      TsurgeonPattern n = t.Root();
+      TsurgeonPattern n = new TsurgeonPatternRoot(t.Root());
       System.out.println(n.toString());
       System.out.println("Thank you.");
     } catch (Exception e) {
@@ -52,8 +52,7 @@ SKIP:
 }
 
 TOKEN:
-{
-  < DELETE: "delete" >
+{ < DELETE: "delete" >
 | < PRUNE:  "prune" >
 | < RELABEL: "relabel" >
 | < EXCISE: "excise" >
@@ -73,17 +72,18 @@ TOKEN:
 | < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
 | < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
 | < HASH_INTEGER: "#" (["0"-"9"])+ >
-| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","(",")",":"] )+ >
+| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","[","]","(",")",":"] )+ >
 | < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
 }
 
-TsurgeonPattern Root() :
+TsurgeonPattern[] Root() :
 {/*@bgen(jjtree) Root */
   SimpleNode jjtn000 = new SimpleNode(JJTROOT);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
 /*@egen*/
   TsurgeonPattern result;
+  List<TsurgeonPattern> results = null;
 }
 {/*@bgen(jjtree) Root */
   try {
@@ -94,7 +94,23 @@ TsurgeonPattern Root() :
     jjtc000 = false;
   }
 /*@egen*/
-  { return result; }/*@bgen(jjtree)*/
+  { return new TsurgeonPattern[] { result }; } |
+  ( "[" result = Operation() "]"
+    {
+      if (results == null) {
+        results = Generics.newArrayList();
+      }
+      results.add(result);
+    } )+/*@bgen(jjtree)*/
+  {
+    jjtree.closeNodeScope(jjtn000, true);
+    jjtc000 = false;
+  }
+/*@egen*/
+  {
+    TsurgeonPattern[] array = new TsurgeonPattern[results.size()];
+    return results.toArray(array);
+  }/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
