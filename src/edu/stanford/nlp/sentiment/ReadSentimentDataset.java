@@ -7,6 +7,7 @@ import java.util.Map;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.process.PTBEscapingProcessor;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.util.CollectionUtils;
@@ -14,8 +15,7 @@ import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 
 public class ReadSentimentDataset {
-  // TODO: we need to escape () in the tokens
-  public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores) {
+  public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
     for (Integer parent : parentPointers) {
       maxNode = Math.max(maxNode, parent);
@@ -65,6 +65,11 @@ public class ReadSentimentDataset {
         throw new RuntimeException("Could not find phrase id for phrase " + sentence);
       }
       subtrees[i].label().setValue(phraseId.toString());
+    }
+
+    for (int i = 0; i < sentence.size(); ++i) {
+      Tree leaf = subtrees[i].children()[0];
+      leaf.label().setValue(escaper.escapeString(leaf.label().value()));
     }
 
     return root;
@@ -137,15 +142,16 @@ public class ReadSentimentDataset {
     }
 
     int index = 0;
+    PTBEscapingProcessor escaper = new PTBEscapingProcessor();
     for (String line : IOUtils.readLines(parseFilename)) {
       String[] pieces = line.split("\\|");
       List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() { 
           public Integer apply(String arg) { return Integer.valueOf(arg) - 1; }
         });
-      Tree tree = convertTree(parentPointers, sentences.get(index), phraseIds, sentimentScores);
+      Tree tree = convertTree(parentPointers, sentences.get(index), phraseIds, sentimentScores, escaper);
       ++index;
 
-      System.err.println(tree);
+      System.out.println(tree);
     }
   }
 }
