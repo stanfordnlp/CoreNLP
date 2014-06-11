@@ -512,6 +512,7 @@ public class TimeFormatter {
           }
         }
       }
+      if (negative) offset = -offset;
       return offset;
     }
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
