@@ -19,8 +19,8 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.parser.common.NoSuchParseException;
-import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserQueryFactory;
 import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
@@ -50,7 +50,7 @@ public class EvaluateTreebank {
   private final TreeTransformer collinizer;
   private final TreeTransformer boundaryRemover;
 
-  private final ParserGrammar pqFactory;
+  private final ParserQueryFactory pqFactory;
 
   // private final Lexicon lex;
 
@@ -107,7 +107,7 @@ public class EvaluateTreebank {
     this(parser.getOp(), parser.lex, parser);
   }
 
-  public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory) {
+  public EvaluateTreebank(Options op, Lexicon lex, ParserQueryFactory pqFactory) {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();

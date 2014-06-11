@@ -18,8 +18,8 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.QNMinimizer;
-import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.lexparser.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -304,11 +304,11 @@ public class DVParser {
     this.parser = parser;
     this.op = parser.getOp();
 
-    if (op.trainOptions.randomSeed == 0) {
-      op.trainOptions.randomSeed = (new Random()).nextLong();
-      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.randomSeed);
+    if (op.trainOptions.dvSeed == 0) {
+      op.trainOptions.dvSeed = (new Random()).nextLong();
+      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.dvSeed);
     } else {
-      System.err.println("Random seed set to " + op.trainOptions.randomSeed);
+      System.err.println("Random seed set to " + op.trainOptions.dvSeed);
     }
 
     System.err.println("Word vector file: " + op.lexOptions.wordVectorFile);
