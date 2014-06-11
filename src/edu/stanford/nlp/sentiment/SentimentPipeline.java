@@ -2,8 +2,6 @@ package edu.stanford.nlp.sentiment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Properties;
@@ -104,24 +102,24 @@ public class SentimentPipeline {
   /**
    * Outputs a tree using the output style requested
    */
-  static void outputTree(PrintStream out, Tree tree, Output output) {
+  static void outputTree(Tree tree, Output output) {
     switch (output) {
     case PENNTREES: {
       Tree copy = tree.deepCopy();
       setSentimentLabels(copy);
-      out.println(copy);
+      System.out.println(copy);
       break;
     }
     case VECTORS: {
       Tree copy = tree.deepCopy();
       setIndexLabels(copy, 0);
-      out.println(copy);
+      System.out.println(copy);
       outputTreeVectors(tree, 0);
       break;
     }
     case ROOT:
       int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
-      out.println("  " + SentimentUtils.sentimentString(sentiment));
+      System.out.println("  " + SentimentUtils.sentimentString(sentiment));
       break;
     default:
       throw new IllegalArgumentException("Unknown output format " + output);
@@ -133,7 +131,6 @@ public class SentimentPipeline {
     System.err.println("  -sentimentModel <model>: Which model to use");
     System.err.println("  -parserModel <model>: Which parser to use");
     System.err.println("  -file <filename>: Which file to process");
-    System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
     System.err.println("  -stdin: Process stdin instead of a file");
     System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, or ROOT ");
   }
@@ -143,7 +140,6 @@ public class SentimentPipeline {
     String sentimentModel = null;
 
     String filename = null;
-    String fileList = null;
     boolean stdin = false;
 
     Output output = Output.ROOT;
@@ -157,9 +153,6 @@ public class SentimentPipeline {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-file")) {
         filename = args[argIndex + 1];
-        argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-fileList")) {
-        fileList = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-stdin")) {
         stdin = true;
@@ -186,15 +179,11 @@ public class SentimentPipeline {
       props.setProperty("parse.model", parserModel);
     }
 
-    int count = 0;
-    if (filename != null) count++;
-    if (fileList != null) count++;
-    if (stdin) count++;
-    if (count > 1) {
-      throw new IllegalArgumentException("Please only specify one of -file, -fileList or -stdin");
+    if (filename != null && stdin) {
+      throw new IllegalArgumentException("Please only specify one of -file or -stdin");
     }
-    if (count == 0) {
-      throw new IllegalArgumentException("Please specify either -file, -fileList or -stdin");
+    if (filename == null && !stdin) {
+      throw new IllegalArgumentException("Please specify either -file or -stdin");
     }
 
     if (stdin) {
@@ -213,27 +202,7 @@ public class SentimentPipeline {
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
         System.out.println(sentence);
-        outputTree(System.out, tree, output);
-      }
-    } else if (fileList != null) {
-      // Process multiple files.  The pipeline will do tokenization,
-      // which means it will split it into sentences as best as
-      // possible with the tokenizer.  Output will go to filename.out
-      // for each file.
-      for (String file : fileList.split(",")) {
-        String text = IOUtils.slurpFileNoExceptions(file);
-        Annotation annotation = new Annotation(text);
-        pipeline.annotate(annotation);
-
-        FileOutputStream fout = new FileOutputStream(file + ".out");
-        PrintStream pout = new PrintStream(fout);
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
-          pout.println(sentence);
-          outputTree(pout, tree, output);
-        }
-        pout.flush();
-        fout.close();
+        outputTree(tree, output);
       }
     } else {
       // Process stdin.  Each line will be treated as a single sentence.
@@ -251,7 +220,7 @@ public class SentimentPipeline {
           Annotation annotation = pipeline.process(line);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
-            outputTree(System.out, tree, output);
+            outputTree(tree, output);
           }
         } else {
           // Output blank lines for blank lines so the tool can be
