@@ -140,8 +140,7 @@ public class ParserAnnotator implements Annotator {
     }
 
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
-    boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
-    this.saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
+    this.saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", false);
   }
 
   public static String signature(String annotatorName, Properties props) {
