@@ -74,7 +74,6 @@ public class SUTimeServlet extends HttpServlet
       if (sb.length() > 0) {
         sb.append(",");
       }
-//      sb.append(rulesDir + File.pathSeparator + file);
       sb.append(rulesDir + "/" + file);
     }
     return sb.toString();
@@ -121,6 +120,8 @@ public class SUTimeServlet extends HttpServlet
       props.setProperty("sutime.rules", ruleFile);
       props.setProperty("sutime.binders", "1");
       props.setProperty("sutime.binder.1", "edu.stanford.nlp.time.JollyDayHolidays");
+      props.setProperty("sutime.binder.1.xml", getServletContext().getRealPath("/WEB-INF/data/holidays/Holidays_sutime.xml"));
+      props.setProperty("sutime.binder.1.pathtype", "file");
     }
     props.setProperty("sutime.teRelHeurLevel",
             relativeHeuristicLevel.toString());
