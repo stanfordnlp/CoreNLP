@@ -30,7 +30,11 @@ public class FilterHandler extends BooleanLogRecordHandler {
         return false;
       }
     }
-
-    return !disjunctiveMode;
+    
+    if (disjunctiveMode) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
