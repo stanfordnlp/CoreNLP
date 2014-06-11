@@ -392,6 +392,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             runLabelSeedWords(sentsf, constVars.answerClass.get(l), l, seed);
             
             Set<String> otherseed = constVars.getOtherSemanticClasses() ==null || !labelUsingSeedSets ? new HashSet<String>(): constVars.getOtherSemanticClasses();
+            if(constVars.addIndvWordsFromPhrasesExceptLastAsNeg){
+              for(String s: seed){
+                String [] t = s.split("\\s+");
+                for(int i = 0; i < t.length - 1; i++){
+                  if(!seed.contains(t[i])){
+                    otherseed.add(t[i]);
+                  }
+                }
+              }
+            }
             if (constVars.getOtherSemanticClasses() != null)
                 runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed);
             
@@ -1114,25 +1124,24 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (constVars.justify) {
       Redwood.log(Redwood.DBG, "Justification for Patterns:");
       for (SurfacePattern key : chosenPat.keySet()) {
-        Redwood.log(Redwood.DBG, "Pattern: " + key.toStringToWrite());
+        Redwood.log(Redwood.DBG, "\nPattern: " + key.toStringToWrite());
         Redwood.log(
             Redwood.DBG,
-
             "Positive Words:"
                 + Counters.toSortedString(patternsandWords4Label.getCounter(key), patternsandWords4Label.getCounter(key).size(), "%1$s:%2$f", ";"));
+        
         Redwood.log(
             Redwood.DBG,
-
             "Negative Words:"
                 + Counters.toSortedString(negPatternsandWords4Label.getCounter(key), negPatternsandWords4Label.getCounter(key).size(), "%1$s:%2$f",
                     ";"));
+        
         Redwood.log(
             Redwood.DBG,
-
-            "All Words: "
-                + Counters.toSortedString(allPatternsandWords4Label.getCounter(key), allPatternsandWords4Label.getCounter(key).size(), "%1$s:%2$f",
+            "Unlabeled Words:"
+                + Counters.toSortedString(unLabeledPatternsandWords4Label.getCounter(key), unLabeledPatternsandWords4Label.getCounter(key).size(), "%1$s:%2$f",
                     ";"));
-      }
+       }
     }
     allPatternsandWords.put(label, allPatternsandWords4Label);
     patternsandWords.put(label, patternsandWords4Label);
@@ -1215,7 +1224,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
         }
         if (token.get(answerClass4Label).equals(label)) {
-
+          //Positive
           boolean prevTokenLabel = i == 0 ? false : sent.get(i - 1).get(answerClass4Label).equals(label);
           boolean nextTokenLabel = i == sent.size() - 1 ? false : sent.get(i + 1).get(answerClass4Label).equals(label);
           if (!constVars.ignorePatWithLabeledNeigh || !prevTokenLabel) {
@@ -1241,6 +1250,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             }
           }
         } else {
+          //Negative or unlabeled
           boolean negToken = false;
           Map<Class, Object> ignore = constVars.ignoreWordswithClassesDuringSelection.get(label);
           for (Class igCl : ignore.keySet())
@@ -2178,7 +2188,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       Map<String, List<CoreLabel>> sents = null;
       boolean batchProcessSents = Boolean.parseBoolean(props.getProperty("batchProcessSents", "false"));
-      int numMaxSentencesPerBatchFile = Integer.parseInt(props.getProperty("numMaxSentencesPerBatchFile", "Integer.MAX_VALUE"));
+      int numMaxSentencesPerBatchFile = Integer.parseInt(props.getProperty("numMaxSentencesPerBatchFile", String.valueOf(Integer.MAX_VALUE)));
 
       if (!batchProcessSents)
         sents = new HashMap<String, List<CoreLabel>>();

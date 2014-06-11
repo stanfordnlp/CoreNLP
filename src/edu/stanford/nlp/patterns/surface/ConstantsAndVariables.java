@@ -20,6 +20,8 @@ import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
+import edu.stanford.nlp.process.WordShapeClassifier;
+import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.EditDistance;
 import edu.stanford.nlp.util.Pair;
@@ -126,7 +128,7 @@ public class ConstantsAndVariables implements Serializable{
    * lemma in calculating the stats
    */
   @Option(name = "useMatchingPhrase")
-  public boolean useMatchingPhrase = false;
+  public boolean useMatchingPhrase = true;
 
   /**
    * Reduce pattern threshold (=0.8*current_value) to extract as many patterns
@@ -294,7 +296,7 @@ public class ConstantsAndVariables implements Serializable{
   public int minLen4FuzzyForPattern = 6;
 
   /**
-   * Do not learn phrases that match this regex
+   * Do not learn phrases that match this regex.
    */
   @Option(name = "wordIgnoreRegex")
   public String wordIgnoreRegex = "[^a-zA-Z]*";
@@ -389,6 +391,12 @@ public class ConstantsAndVariables implements Serializable{
   public int minPosPhraseSupportForPat = 1;
 
   /**
+   * For example, if positive seed dict contains "cancer" and "breast cancer" then "breast" is included as negative 
+   */
+  @Option(name="addIndvWordsFromPhrasesExceptLastAsNeg")
+  public boolean addIndvWordsFromPhrasesExceptLastAsNeg = false;
+  
+  /**
    * Cached files
    */
   private ConcurrentHashMap<String, Double> editDistanceFromEnglishWords = new ConcurrentHashMap<String, Double>();
@@ -413,13 +421,17 @@ public class ConstantsAndVariables implements Serializable{
    */
   private ConcurrentHashMap<String, String> editDistanceFromThisClassMatches = new ConcurrentHashMap<String, String>();
 
+  private Map<String, Counter<String>> wordShapesForLabels = new HashMap<String, Counter<String>>();
+  
+
+
   String channelNameLogger = "settingUp";
 
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
   public enum ScorePhraseMeasures {
-    DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS
+    DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS, WORDSHAPE
   };
 
   
@@ -477,6 +489,13 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "usePatternEvalWordClass")
   public boolean usePatternEvalWordClass = false;
 
+  /**
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   */
+  @Option(name = "usePatternEvalWordShape")
+  public boolean usePatternEvalWordShape = false;
+  
   /**
    * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
@@ -564,7 +583,10 @@ public class ConstantsAndVariables implements Serializable{
   // public String wekaOptions = "";
 
   String backgroundSymbol = "O";
-
+  
+  int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
+  private Map<String, String> wordShapeCache = new HashMap<String, String>();
+  
   public InvertedIndexByTokens invertedIndex;
   
   public static String extremedebug = "extremePatDebug";
@@ -691,6 +713,13 @@ public class ConstantsAndVariables implements Serializable{
     alreadySetUp = true;
   }
 
+  public Map<String, Counter<String>> getWordShapesForLabels() {
+    return wordShapesForLabels;
+  }
+
+  public void setWordShapesForLabels(Map<String, Counter<String>> wordShapesForLabels) {
+    this.wordShapesForLabels = wordShapesForLabels;
+  }
   public void addGeneralizeClasses(Map<String, Class> gen) {
     this.generalizeClasses.putAll(gen);
   }
@@ -703,8 +732,32 @@ public class ConstantsAndVariables implements Serializable{
     return stopWords;
   }
 
+  public void addWordShapes(String label, Set<String> words){
+    if(!this.wordShapesForLabels.containsKey(label)){
+      this.wordShapesForLabels.put(label, new ClassicCounter<String>());
+    }
+    for(String w: words){
+      String ws = null;
+      if(wordShapeCache.containsKey(w))
+        ws = wordShapeCache.get(w);
+      else{
+       ws = WordShapeClassifier.wordShape(w, wordShaper);
+       wordShapeCache.put(w, ws);
+      }
+      
+      wordShapesForLabels.get(label).incrementCount(ws);
+      
+    }
+  }
+  
   public void setLabelDictionary(Map<String, Set<String>> seedSets) {
     this.labelDictionary = seedSets;
+    
+    if(usePhraseEvalWordShape || usePatternEvalWordShape){
+      this.wordShapesForLabels.clear();
+     for(Entry<String, Set<String>> en: seedSets.entrySet())
+       addWordShapes(en.getKey(), en.getValue()); 
+    }
   }
 
   public Map<String, Set<String>> getLabelDictionary() {
@@ -713,6 +766,9 @@ public class ConstantsAndVariables implements Serializable{
   
   public void addLabelDictionary(String label, Set<String> words) {
     this.labelDictionary.get(label).addAll(words);
+    
+    if(usePhraseEvalWordShape || usePatternEvalWordShape)
+      addWordShapes(label, words); 
   }
 
   public Set<String> getEnglishWords() {
@@ -941,6 +997,10 @@ public class ConstantsAndVariables implements Serializable{
   public void setGeneralWordClassClusters(
       Map<String, Integer> generalWordClassClusters) {
     this.generalWordClassClusters = generalWordClassClusters;
+  }
+
+  public Map<String, String> getWordShapeCache() {
+    return wordShapeCache;
   }
 
 }
