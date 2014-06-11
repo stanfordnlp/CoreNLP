@@ -1,7 +1,6 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -164,7 +163,7 @@ public class BasicFeatureFactory implements FeatureFactory {
     return (CoreLabel) node.label();
   }
 
-  public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String conFeature, String wordTagFeature, String tagFeature, String wordConFeature, String tagConFeature) {
+  public static void addUnaryStackFeatures(List<String> features, CoreLabel label, String conFeature, String wordTagFeature, String tagFeature, String wordConFeature, String tagConFeature) {
     if (label == null) {
       features.add(conFeature + NULL);
       return;
@@ -180,7 +179,7 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(tagConFeature + tag + "-" + constituent);
   }
 
-  public static void addUnaryQueueFeatures(Set<String> features, CoreLabel label, String wtFeature) {
+  public static void addUnaryQueueFeatures(List<String> features, CoreLabel label, String wtFeature) {
     String tag = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
     String word = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
 
@@ -188,18 +187,18 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(wtFeature + tag + "-" + word);
   }
 
-  public static void addUnaryFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature) {
+  public static void addUnaryFeature(List<String> features, String featureType, CoreLabel label, FeatureComponent feature) {
     String value = getFeatureFromCoreLabel(label, feature);
     features.add(featureType + value);
   }
 
-  public static void addBinaryFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2) {
+  public static void addBinaryFeature(List<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2) {
     String value1 = getFeatureFromCoreLabel(label1, feature1);
     String value2 = getFeatureFromCoreLabel(label2, feature2);
     features.add(featureType + value1 + "-" + value2);
   }
 
-  public static void addTrigramFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2, CoreLabel label3, FeatureComponent feature3) {
+  public static void addTrigramFeature(List<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2, CoreLabel label3, FeatureComponent feature3) {
     String value1 = getFeatureFromCoreLabel(label1, feature1);
     String value2 = getFeatureFromCoreLabel(label2, feature2);
     String value3 = getFeatureFromCoreLabel(label3, feature3);
@@ -207,7 +206,7 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(featureType + value1 + "-" + value2 + "-" + value3);
   }
 
-  public static void addPositionFeatures(Set<String> features, State state) {
+  public static void addPositionFeatures(List<String> features, State state) {
     if (state.tokenPosition >= state.sentence.size()) {
       features.add("QUEUE_FINISHED");
     }
@@ -216,14 +215,14 @@ public class BasicFeatureFactory implements FeatureFactory {
     }
   }
 
-  public static void addSeparatorFeature(Set<String> features, String featureType, State.HeadPosition separator) {
+  public static void addSeparatorFeature(List<String> features, String featureType, State.HeadPosition separator) {
     if (separator == null) {
       return;
     }
     features.add(featureType + separator);
   }
 
-  public static void addSeparatorFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature, State.HeadPosition separator) {
+  public static void addSeparatorFeature(List<String> features, String featureType, CoreLabel label, FeatureComponent feature, State.HeadPosition separator) {
     if (separator == null) {
       return;
     }
@@ -233,20 +232,20 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(featureType + value + "-" + separator);
   }
 
-  public static void addSeparatorFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature, boolean between) {
+  public static void addSeparatorFeature(List<String> features, String featureType, CoreLabel label, FeatureComponent feature, boolean between) {
     String value = getFeatureFromCoreLabel(label, feature);
 
     features.add(featureType + value + "-" + between);
   }
 
-  public static void addSeparatorFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2, boolean between) {
+  public static void addSeparatorFeature(List<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2, boolean between) {
     String value1 = getFeatureFromCoreLabel(label1, feature1);
     String value2 = getFeatureFromCoreLabel(label2, feature2);
 
     features.add(featureType + value1 + "-" + value2 + "-" + between);
   }
 
-  public static void addSeparatorFeatures(Set<String> features, CoreLabel s0Label, CoreLabel s1Label, State.HeadPosition s0Separator, State.HeadPosition s1Separator) {
+  public static void addSeparatorFeatures(List<String> features, CoreLabel s0Label, CoreLabel s1Label, State.HeadPosition s0Separator, State.HeadPosition s1Separator) {
     boolean between = false;
     if ((s0Separator != null && (s0Separator == State.HeadPosition.BOTH || s0Separator == State.HeadPosition.LEFT)) ||
         (s1Separator != null && (s1Separator == State.HeadPosition.BOTH || s1Separator == State.HeadPosition.RIGHT))) {
@@ -285,8 +284,8 @@ public class BasicFeatureFactory implements FeatureFactory {
     }
   }
 
-  public Set<String> featurize(State state) {
-    Set<String> features = Generics.newHashSet();
+  public List<String> featurize(State state) {
+    List<String> features = Generics.newArrayList();
 
     final TreeShapedStack<Tree> stack = state.stack;
     final List<Tree> sentence = state.sentence;
