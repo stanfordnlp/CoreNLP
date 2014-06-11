@@ -197,7 +197,7 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
           "〔", "〖", "〘", "〚", "｟", "〕", "〗", "〙", "〛", "｠" };  // ( and ) still must be escaped
   private static final String[] colon = {"：", "；", "∶", ":"};
   private static final String[] dash = {"…", "—", "——", "———", 
-          "－", "--", "---", "－－", "－－－", "──", "━", "━━", "—－",
+          "－", "--", "---", "－－", "──", "━", "━━", "—－",
           "-", "----", "~", "……", "～",
           "．．．" /* 3 full width dots as ellipsis */ };
   private static final String[] other = {"·", "／", "／", "＊", "＆", "/", "//", "*", "※", "●", "｜" };  // slashes are used in urls
