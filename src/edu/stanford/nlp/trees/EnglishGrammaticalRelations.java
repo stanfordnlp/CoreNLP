@@ -101,6 +101,8 @@ public class EnglishGrammaticalRelations {
     "/^(?i:have|had|has|having|'ve|ve|v|'d|d|hvae|hav|as)$/";
   private static final String stopKeepRegex =
     "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
+  private static final String selfRegex =
+    "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
 
   // By setting the HeadFinder to null, we find out right away at
   // runtime if we have incorrectly set the HeadFinder for the
@@ -540,7 +542,7 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "VP < (NP=target !< /\\$/ !<# (/^NN/ < " + timeWordRegex + ") $+ (NP !<# (/^NN/ < " + timeWordRegex + ")))",
           // this next one was meant to fix common mistakes of our parser, but is perhaps too dangerous to keep
-          "VP < (NP=target < (NP !< /\\$/ $++ (NP !<: DT !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))",
+          "VP < (NP=target < (NP !< /\\$/ $++ (NP !<: (PRP < " + selfRegex + ") !<: DT !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))",
         });
   public static class IndirectObjectGRAnnotation extends GrammaticalRelationAnnotation { }
 
