@@ -95,19 +95,30 @@ public class QPTreeTransformer implements TreeTransformer {
       // right subtrees with the CC in the middle so the headfinders
       // have an easier time interpreting the tree later on
       if (children.size() >= 3) {
-        boolean flat = true;
-        for (int i = 0; i < children.size(); ++i) {
-          if (!children.get(i).isPreTerminal()) {
-            flat = false;
-            break;
-          }
-        }
-        if (flat) {
+        boolean isFlat = isFlat(children);
+        if (isFlat) {
           for (int i = 1; i < children.size() - 1; ++i) {
             if (children.get(i).value().startsWith("CC")) {
               transformCC(t, children.subList(0, i), children.get(i), children.subList(i + 1, children.size()));
+              children = t.getChildrenAsList();
+              isFlat = false;
               break;
             }
+          }
+        }
+
+        if (isFlat) {
+          boolean isMoney = children.get(0).value().startsWith("$");
+          if (isMoney) {
+            for (int i = 1; i < children.size(); ++i) {
+              if (!children.get(i).value().startsWith("CD")) {
+                isMoney = false;
+                break;
+              }
+            }
+          }
+          if (isMoney) {
+            transformMoney(t, children);
           }
         }
       }
@@ -126,6 +137,14 @@ public class QPTreeTransformer implements TreeTransformer {
     }
   }
 
+  private static boolean isFlat(List<Tree> children) {
+    for (int i = 0; i < children.size(); ++i) {
+      if (!children.get(i).isPreTerminal()) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   private static void transformCC(Tree t, List<Tree> left, Tree conj, List<Tree> right) {
     TreeFactory tf = t.treeFactory();
@@ -135,6 +154,16 @@ public class QPTreeTransformer implements TreeTransformer {
     List<Tree> newChildren = new ArrayList<Tree>();
     newChildren.add(leftQP);
     newChildren.add(conj);
+    newChildren.add(rightQP);
+    t.setChildren(newChildren);
+  }
+
+  private static void transformMoney(Tree t, List<Tree> children) {
+    TreeFactory tf = t.treeFactory();
+    LabelFactory lf = t.label().labelFactory();
+    Tree rightQP = tf.newTreeNode(lf.newLabel("QP"), children.subList(1, children.size()));
+    List<Tree> newChildren = new ArrayList<Tree>();
+    newChildren.add(children.get(0));
     newChildren.add(rightQP);
     t.setChildren(newChildren);
   }
