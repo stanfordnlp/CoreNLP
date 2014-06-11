@@ -51,6 +51,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
@@ -384,7 +385,8 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     }
 
     public RetagProcessor newInstance() {
-      return new RetagProcessor(tagger);
+      // already threadsafe
+      return this;
     }
   }
 
@@ -405,6 +407,94 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
 
   private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
+
+  private static class Update {
+    final List<String> features;
+    final int goldTransition;
+    final int predictedTransition;
+    final double delta;
+
+    Update(List<String> features, int goldTransition, int predictedTransition, double delta) {
+      this.features = features;
+      this.goldTransition = goldTransition;
+      this.predictedTransition = predictedTransition;
+      this.delta = delta;
+    }
+  }
+
+  private Pair<Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates) {
+    int numCorrect = 0;
+    int numWrong = 0;
+
+    Tree tree = binarizedTrees.get(index);
+    List<Transition> transitions = transitionLists.get(index);
+
+    State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
+    for (Transition transition : transitions) {
+      int transitionNum = transitionIndex.indexOf(transition);
+      List<String> features = featureFactory.featurize(state);
+      int predictedNum = findHighestScoringTransition(state, features, false).object();
+      Transition predicted = transitionIndex.get(predictedNum);
+      if (transitionNum == predictedNum) {
+        numCorrect++;
+      } else {
+        numWrong++;
+        // TODO: allow weighted features, weighted training, etc
+        updates.add(new Update(features, transitionNum, predictedNum, 1.0));
+      }
+      state = transition.apply(state);
+    }
+
+    return Pair.makePair(numCorrect, numWrong);
+  }
+
+  private class TrainTreeProcessor implements ThreadsafeProcessor<Integer, Pair<Integer, Integer>> {
+    List<Tree> binarizedTrees;
+    List<List<Transition>> transitionLists;
+    List<Update> updates; // this needs to be a synchronized list
+    
+    public TrainTreeProcessor(List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates) {
+      this.binarizedTrees = binarizedTrees;
+      this.transitionLists = transitionLists;
+      this.updates = updates;
+    }
+
+    public Pair<Integer, Integer> process(Integer index) {
+      return trainTree(index, binarizedTrees, transitionLists, updates);
+    }
+
+    public TrainTreeProcessor newInstance() {
+      // already threadsafe
+      return this;
+    }
+  }
+
+  private Triple<List<Update>, Integer, Integer> trainBatch(List<Integer> indices, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper) {
+    int numCorrect = 0;
+    int numWrong = 0;
+    if (op.trainOptions.trainingThreads == 1) {
+      for (Integer index : indices) {
+        Pair<Integer, Integer> count = trainTree(index, binarizedTrees, transitionLists, updates);
+        numCorrect += count.first;
+        numWrong += count.second;
+      }
+    } else {
+      for (Integer index : indices) {
+        wrapper.put(index);
+      }
+      int count = 0;
+      while (count < indices.size()) {
+        wrapper.blockingGetResult();
+        while (wrapper.peek()) {
+          Pair<Integer, Integer> result = wrapper.poll();
+          numCorrect += result.first;
+          numWrong += result.second;
+          count++;
+        }
+      }
+    }
+    return new Triple<List<Update>, Integer, Integer>(updates, numCorrect, numWrong);
+  }
 
   private void trainAndSave(String trainTreebankPath, FileFilter trainTreebankFilter,
                             String devTreebankPath, FileFilter devTreebankFilter,
@@ -449,38 +539,37 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       indices.add(i);
     }
 
+    List<Update> updates = Generics.newArrayList();
+    MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper = null;
+    if (nThreads != 1) {
+      updates = Collections.synchronizedList(updates);
+      wrapper = new MulticoreWrapper<Integer, Pair<Integer, Integer>>(op.trainOptions.trainingThreads, new TrainTreeProcessor(binarizedTrees, transitionLists, updates));
+    }
+
     for (int iteration = 1; iteration <= op.trainOptions.trainingIterations; ++iteration) {
       Timing trainingTimer = new Timing();
       int numCorrect = 0;
       int numWrong = 0;
       Collections.shuffle(indices, random);
-      for (int i = 0; i < indices.size(); ++i) {
-        int index = indices.get(i);
-        Tree tree = binarizedTrees.get(index);
-        List<Transition> transitions = transitionLists.get(index);
-        State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
-        for (Transition transition : transitions) {
-          int transitionNum = transitionIndex.indexOf(transition);
-          List<String> features = featureFactory.featurize(state);
-          int predictedNum = findHighestScoringTransition(state, features, false).object();
-          Transition predicted = transitionIndex.get(predictedNum);
-          if (transitionNum == predictedNum) {
-            numCorrect++;
-          } else {
-            numWrong++;
-            for (String feature : features) {
-              List<ScoredObject<Integer>> weights = featureWeights.get(feature);
-              if (weights == null) {
-                weights = Generics.newArrayList();
-                featureWeights.put(feature, weights);
-              }
-              // TODO: allow weighted features, weighted training, etc
-              updateWeight(weights, transitionNum, 1.0);
-              updateWeight(weights, predictedNum, -1.0);
+      for (int start = 0; start < indices.size(); start += op.trainOptions.batchSize) {
+        int end = Math.min(start + op.trainOptions.batchSize, indices.size());
+        Triple<List<Update>, Integer, Integer> result = trainBatch(indices.subList(start, end), binarizedTrees, transitionLists, updates, wrapper);
+
+        numCorrect += result.second;
+        numWrong += result.third;
+
+        for (Update update : result.first) {
+          for (String feature : update.features) {
+            List<ScoredObject<Integer>> weights = featureWeights.get(feature);
+            if (weights == null) {
+              weights = Generics.newArrayList();
+              featureWeights.put(feature, weights);
             }
+            updateWeight(weights, update.goldTransition, update.delta);
+            updateWeight(weights, update.predictedTransition, -update.delta);
           }
-          state = transition.apply(state);
         }
+        updates.clear();
       }
       trainingTimer.done("Iteration " + iteration);
       System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
@@ -521,6 +610,10 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
           throw new RuntimeIOException(e);
         }
       }
+    }
+
+    if (wrapper != null) {
+      wrapper.join();
     }
 
     if (bestModels != null) {
