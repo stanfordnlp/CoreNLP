@@ -31,7 +31,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     String currentDir = System.getProperty("user.dir");
     System.err.println("Current dir using System:" +currentDir);
 
-    String expectedResults = IOUtils.slurpFile("data/edu/stanford/nlp/dcoref/expected.txt");
+    String expectedResults = IOUtils.slurpFile("edu/stanford/nlp/dcoref/expected.txt");
 
     String[] corefArgs = { "-props", "edu/stanford/nlp/dcoref/coref.properties",
                            "-" + Constants.LOG_PROP, baseLogFile,
