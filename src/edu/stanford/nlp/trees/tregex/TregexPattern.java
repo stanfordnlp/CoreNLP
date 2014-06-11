@@ -465,8 +465,7 @@ public abstract class TregexPattern implements Serializable {
     return patternString;
   }
 
-  /** Only used by the TregexPatternCompiler to set the pattern. Pseudo-final. */
-  void setPatternString(String patternString) {
+  public void setPatternString(String patternString) {
     this.patternString = patternString;
   }
 
