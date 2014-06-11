@@ -9,6 +9,4 @@ You can find releases of Stanford CoreNLP on [Maven Central](http://search.maven
 
 You can find more explanation and documentation of Stanford CoreNLP on [the Stanford CoreNLP homepage](http://nlp.stanford.edu/software/corenlp.shtml#Demo).
 
-The most recent models associated the code in this repository can be found [here](http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar).
-
 For information about making contributions to Stanford CoreNLP, see the file `CONTRIBUTING.md`.
