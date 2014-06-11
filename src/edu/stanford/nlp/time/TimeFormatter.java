@@ -183,7 +183,7 @@ public class TimeFormatter {
     Pattern textPattern;
 
     public CustomDateFormatExtractor(String timePattern, String localeString) {
-      Locale locale = (localeString != null)? Locale.forLanguageTag(localeString): Locale.getDefault();
+      Locale locale = (localeString != null)? new Locale(localeString): Locale.getDefault();
       this.timePattern = timePattern;
       builder = new FormatterBuilder();
       builder.locale = locale;
