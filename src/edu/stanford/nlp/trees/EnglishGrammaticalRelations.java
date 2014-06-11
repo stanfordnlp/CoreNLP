@@ -967,8 +967,10 @@ public class EnglishGrammaticalRelations {
           // Stanford..."  However, it seems better to eliminate some
           // useful dependencies rather than introduce some wrong
           // dependencies.
-          "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP|WHNP",
-          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP|WHNP",
+          // Note that we want to eliminate situations where we
+          // conflict with conj by looking for CC|CONJP to the right
+          // of the noun
+          "@NP|WHNP|NML=np $++ (SBAR=target [ <+(SBAR) WHPP|WHNP | <: (S !< (VP < TO)) ]) !$-- @NP|WHNP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP|WHNP : (=np !$++ (CC|CONJP $++ =target))",
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP",
           // for case of relative clauses with no relativizer
           // (it doesn't distinguish whether actually gapped).
