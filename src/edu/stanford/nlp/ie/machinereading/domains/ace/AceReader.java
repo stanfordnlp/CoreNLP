@@ -16,7 +16,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.ie.machinereading.GenericDataSetReader;
-import edu.stanford.nlp.ie.machinereading.BasicEntityExtractor;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceCharSeq;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceDocument;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceEntity;
@@ -490,9 +489,7 @@ public class AceReader extends GenericDataSetReader {
     AceReader r = new AceReader(new StanfordCoreNLP(props, false), false);
     r.setLoggerLevel(Level.INFO);
     r.parse("/scr/nlp/data/ACE2005/");
-    // Annotation a = r.parse("/user/mengqiu/scr/twitter/nlp/corpus_prep/standalone/ar/data");
-    // BasicEntityExtractor.saveCoNLLFiles("/tmp/conll", a, false, false);
-    System.err.println("done");
+    System.out.println("done");
   }
 
 }
