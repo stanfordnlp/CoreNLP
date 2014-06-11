@@ -197,11 +197,6 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
         bSize = totalSamples;
         sayln("Using batch size=" + bSize);
       }
-      if (bSize <= 0) {
-        System.err.println("WARNING: Requested batch size=" + bSize + " <= 0 !!!");
-        bSize = totalSamples;
-        sayln("Using batch size=" + bSize);
-      }
     }
 
     x = new double[initial.length];
