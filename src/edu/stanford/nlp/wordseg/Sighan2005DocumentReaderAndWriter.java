@@ -1,38 +1,35 @@
 package edu.stanford.nlp.wordseg;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.fsm.DFSA;
+import edu.stanford.nlp.fsm.DFSAState;
+import edu.stanford.nlp.fsm.DFSATransition;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.LineIterator;
-import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.process.ChineseDocumentToSentenceProcessor;
-import edu.stanford.nlp.util.Characters;
-import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.LatticeWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
+import edu.stanford.nlp.util.Characters;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.MutableInteger;
-import edu.stanford.nlp.fsm.DFSA;
-import edu.stanford.nlp.fsm.DFSAState;
-import edu.stanford.nlp.fsm.DFSATransition;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * DocumentReader for Chinese segmentation task. (Sighan bakeoff 2005)
@@ -44,7 +41,7 @@ import edu.stanford.nlp.fsm.DFSATransition;
  * @author Pi-Chuan Chang
  * @author Michel Galley (Viterbi seearch graph printing)
  */
-public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer>, Serializable {
+public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel>, LatticeWriter<CoreLabel, String, Integer> /* Serializable */ {
 
   private static final long serialVersionUID = 3260295150250263237L;
 
@@ -77,10 +74,12 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
   private SeqClassifierFlags flags;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
 
+  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
   }
 
+  @Override
   public void init(SeqClassifierFlags flags) {
     this.flags = flags;
     factory = LineIterator.getFactory(new CTBDocumentParser());
@@ -112,6 +111,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     public String[] map = StringUtils.mapStringToArray(defaultMap);
 
 
+    @Override
     public List<CoreLabel> apply(String line) {
       if (line == null) {
         return null;
@@ -279,6 +279,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     }
   }
 
+  @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter pw) {
     String ansStr = ChineseStringUtils.combineSegmentedSentence(doc, flags);
     pw.print(ansStr);
@@ -290,6 +291,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     return s.trim().intern();
   }
 
+  @Override
   public void printLattice(DFSA<String, Integer> tagLattice, List<CoreLabel> doc, PrintWriter out) {
     CoreLabel[] docArray = doc.toArray(new CoreLabel[doc.size()]);
     // Create answer lattice:
@@ -315,23 +317,23 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
    * between two digits. Consequently, the probabilities of all paths in answerLattice
    * may not sum to 1 (they do sum to 1 if no post processing applies).
    *
-   * @arg tSource Current node in Viterbi search graph.
-   * @arg aSource Current node in answer lattice.
-   * @arg answer Partial word starting at aSource.
-   * @arg nodeId Currently unused node identifier for answer graph.
-   * @arg pos Current position in docArray.
-   * @arg cost Current cost of answer.
-   * @arg stateLinks Maps nodes of the search graph to nodes in answer lattice
+   * @param tSource Current node in Viterbi search graph.
+   * @param aSource Current node in answer lattice.
+   * @param answer Partial word starting at aSource.
+   * @param nodeId Currently unused node identifier for answer graph.
+   * @param pos Current position in docArray.
+   * @param cost Current cost of answer.
+   * @param stateLinks Maps nodes of the search graph to nodes in answer lattice
    * (when paths of the search graph are recombined, paths of the answer lattice should be
    *  recombined as well, if at word boundary).
    */
   private void tagLatticeToAnswerLattice
          (DFSAState<String, Integer> tSource, DFSAState<String, Integer> aSource, StringBuilder answer,
           MutableInteger nodeId, int pos, double cost,
-          Map<DFSAState<String, Integer>,DFSAState<String, Integer>> stateLinks, 
+          Map<DFSAState<String, Integer>,DFSAState<String, Integer>> stateLinks,
           DFSA<String, Integer> answerLattice, CoreLabel[] docArray) {
     // Add "1" prediction after the end of the sentence, if applicable:
-    if(tSource.isAccepting() && tSource.continuingInputs().size() == 0) {
+    if(tSource.isAccepting() && tSource.continuingInputs().isEmpty()) {
       tSource.addTransition
         (new DFSATransition<String, Integer>("", tSource, new DFSAState<String, Integer>(-1, null), "1", "", 0));
     }
@@ -349,14 +351,13 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
     String answerConstraint = null;
     if(pos == 0) {
       double minCost = Double.POSITIVE_INFINITY;
-      DFSATransition<String, Integer> bestTransition = null;
-      for (Iterator<String> iter = inputs.iterator(); iter.hasNext();) {
-        String predictSpace = iter.next();
+      // DFSATransition<String, Integer> bestTransition = null;
+      for (String predictSpace : inputs) {
         DFSATransition<String, Integer> transition = tSource.transition(predictSpace);
         double transitionCost = transition.score();
-        if(transitionCost < minCost) {
-          if(predictSpace != null) {
-            System.err.printf("mincost (%s): %e -> %e\n", predictSpace.toString(), minCost, transitionCost);
+        if (transitionCost < minCost) {
+          if (predictSpace != null) {
+            System.err.printf("mincost (%s): %e -> %e%n", predictSpace, minCost, transitionCost);
             minCost = transitionCost;
             answerConstraint = predictSpace;
           }
@@ -368,46 +369,46 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       DFSATransition<String, Integer> transition = tSource.transition(predictSpace);
       DFSAState<String, Integer> tDest = transition.target();
       DFSAState<String, Integer> newASource = aSource;
-      //System.err.printf("tsource=%s tdest=%s asource=%s pos=%d predictSpace=%s\n", tSource, tDest, newASource, pos, predictSpace);
+      //System.err.printf("tsource=%s tdest=%s asource=%s pos=%d predictSpace=%s%n", tSource, tDest, newASource, pos, predictSpace);
       StringBuilder newAnswer = new StringBuilder(answer.toString());
       int answerLen = newAnswer.length();
       String prevChr = (answerLen > 0) ? newAnswer.substring(answerLen-1) : null;
       double newCost = cost;
       // Ignore paths starting with zero:
       if(answerConstraint != null && !answerConstraint.equals(predictSpace)) {
-        System.err.printf("Skipping transition %s at pos 0.\n",predictSpace.toString());
+        System.err.printf("Skipping transition %s at pos 0.%n", predictSpace);
         continue;
       }
       // Ignore paths not consistent with input segmentation:
       if(flags.keepAllWhitespaces && "0".equals(predictSpace) && "1".equals(origSpace)) {
-          System.err.printf("Skipping non-boundary at pos %d, since space in the input.\n",pos);
+          System.err.printf("Skipping non-boundary at pos %d, since space in the input.%n",pos);
           continue;
       }
       // Ignore paths adding segment boundaries between two latin characters, or between two digits:
       // (unless already present in original input)
       if("1".equals(predictSpace) && "0".equals(origSpace) && prevChr != null && curChr != null) {
         char p = prevChr.charAt(0), c = curChr.charAt(0);
-        if (ChineseStringUtils.isLetterASCII(p) && 
+        if (ChineseStringUtils.isLetterASCII(p) &&
             ChineseStringUtils.isLetterASCII(c)) {
-          System.err.printf("Not hypothesizing a boundary at pos %d, since between two ASCII letters (%s and %s).\n",
+          System.err.printf("Not hypothesizing a boundary at pos %d, since between two ASCII letters (%s and %s).%n",
             pos,prevChr,curChr);
           continue;
         }
         if(ChineseUtils.isNumber(p) && ChineseUtils.isNumber(c)) {
-          System.err.printf("Not hypothesizing a boundary at pos %d, since between two numeral characters (%s and %s).\n",
+          System.err.printf("Not hypothesizing a boundary at pos %d, since between two numeral characters (%s and %s).%n",
             pos,prevChr,curChr);
           continue;
         }
       }
       // If predictSpace==1, create a new transition in answer search graph:
-      if("1".equals(predictSpace)) {
-        if(newAnswer.toString().length() > 0) {
+      if ("1".equals(predictSpace)) {
+        if (newAnswer.toString().length() > 0) {
           // If answer destination node visited before, create a new edge and leave:
           if(stateLinks.containsKey(tSource)) {
             DFSAState<String, Integer> aDest = stateLinks.get(tSource);
             newASource.addTransition
               (new DFSATransition<String, Integer>("", newASource, aDest, newAnswer.toString(), "", newCost));
-            //System.err.printf("new transition: asource=%s adest=%s edge=%s\n", newASource, aDest, newAnswer.toString());
+            //System.err.printf("new transition: asource=%s adest=%s edge=%s%n", newASource, aDest, newAnswer);
             continue;
           }
           // If answer destination node not visited before, create it + new edge:
@@ -415,8 +416,8 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           DFSAState<String, Integer> aDest = new DFSAState<String, Integer>(nodeId.intValue(), answerLattice, 0.0);
           stateLinks.put(tSource,aDest);
           newASource.addTransition(new DFSATransition<String, Integer>("", newASource, aDest, newAnswer.toString(), "", newCost));
-          //System.err.printf("new edge: adest=%s\n", newASource, aDest, newAnswer.toString());
-          //System.err.printf("new transition: asource=%s adest=%s edge=%s\n\n\n", newASource, aDest, newAnswer.toString());
+          //System.err.printf("new edge: adest=%s%n", newASource, aDest, newAnswer);
+          //System.err.printf("new transition: asource=%s adest=%s edge=%s%n%n%n", newASource, aDest, newAnswer);
           // Reached an accepting state:
           if(tSource.isAccepting()) {
             aDest.setAccepting(true);
@@ -431,7 +432,7 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
       assert(curChr != null);
       newAnswer.append(curChr);
       newCost += transition.score();
-      if (newCost < flags.searchGraphPrune || 
+      if (newCost < flags.searchGraphPrune ||
           ChineseStringUtils.isLetterASCII(curChr.charAt(0)))
         tagLatticeToAnswerLattice(tDest, newASource, newAnswer, nodeId, pos+1, newCost, stateLinks, answerLattice, docArray);
     }
