@@ -2178,7 +2178,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       Map<String, List<CoreLabel>> sents = null;
       boolean batchProcessSents = Boolean.parseBoolean(props.getProperty("batchProcessSents", "false"));
-      int numMaxSentencesPerBatchFile = Integer.parseInt(props.getProperty("numMaxSentencesPerBatchFile", "Integer.MAX_VALUE"));
+      int numMaxSentencesPerBatchFile = Integer.parseInt(props.getProperty("numMaxSentencesPerBatchFile", String.valueOf(Integer.MAX_VALUE)));
 
       if (!batchProcessSents)
         sents = new HashMap<String, List<CoreLabel>>();
