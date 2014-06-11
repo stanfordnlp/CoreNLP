@@ -39,6 +39,12 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
    */
   public abstract String signature();
 
+  /**
+   * Can be used to get a signature by iterating over the properties
+   * that apply to the given name.  Some annotators may need to extend
+   * this if they use properties outside their normal set, such as
+   * ssplit using tokenize.whitespace
+   */
   static String baseSignature(Properties props, String name) {
     String prefix = name + ".";
     StringBuilder signature = new StringBuilder();
