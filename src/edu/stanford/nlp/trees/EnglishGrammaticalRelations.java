@@ -592,6 +592,8 @@ public class EnglishGrammaticalRelations {
           "(PP <: IN|TO) >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
           "(PP <: IN|TO) $- (NP $-- (VBZ|VBD) !$++ VP) >+(SQ) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/)",
 
+          // to deal with preposition stranding in relative clause (works well but doesn't preserve the tree structure!)
+          "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
           "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
           //"PP < (CC < less) < NP",
           "@PP < CC  < @NP=target !< @IN|TO|VBG|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
