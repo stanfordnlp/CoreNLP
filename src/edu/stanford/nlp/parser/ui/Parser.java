@@ -131,64 +131,11 @@ public class Parser extends javax.swing.JFrame {
 
     jMenu1.add(exitItem);
     jMenuBar1.add(jMenu1);
-    jMenu2.setText("Language");
-    untokEngItem.setSelected(true);
-    untokEngItem.setText("Untokenized English");
-    untokEngItem.setToolTipText("Parses untokenized English text.");
-    untokEngItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        untokEngItemActionPerformed(evt);
-      }
-    });
 
-    jMenu2.add(untokEngItem);
-    tokChineseItem.setText("Tokenized Simplified Chinese (UTF-8)");
-    tokChineseItem.setToolTipText("Parses pre-tokenized text.");
-    tokChineseItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        tokChineseItemActionPerformed(evt);
-      }
-    });
-
-    jMenu2.add(tokChineseItem);
-    untokChineseItem.setText("Untokenized Simplified Chinese (UTF-8)");
-    untokChineseItem.setToolTipText("Segments and parses untokenized text.");
-    untokChineseItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        untokChineseItemActionPerformed(evt);
-      }
-    });
-
-    jMenu2.add(untokChineseItem);
-    jMenuBar1.add(jMenu2);
     setJMenuBar(jMenuBar1);
 
     pack();
   }//GEN-END:initComponents
-
-  private void tokChineseItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_tokOtherItemActionPerformed
-  {//GEN-HEADEREND:event_tokOtherItemActionPerformed
-    untokEngItem.setSelected(false);
-    untokChineseItem.setSelected(false);
-    tokChineseItem.setSelected(true);
-    parserPanel.setLanguage(ParserPanel.TOKENIZED_CHINESE);
-  }//GEN-LAST:event_tokOtherItemActionPerformed
-
-  private void untokChineseItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_tokOtherItemActionPerformed
-  {//GEN-HEADEREND:event_tokOtherItemActionPerformed
-    untokEngItem.setSelected(false);
-    tokChineseItem.setSelected(false);
-    untokChineseItem.setSelected(true);
-    parserPanel.setLanguage(ParserPanel.UNTOKENIZED_CHINESE);
-  }//GEN-LAST:event_tokOtherItemActionPerformed
-
-  private void untokEngItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_untokEngItemActionPerformed
-  {//GEN-HEADEREND:event_untokEngItemActionPerformed
-    untokEngItem.setSelected(true);
-    tokChineseItem.setSelected(false);
-    untokChineseItem.setSelected(false);
-    parserPanel.setLanguage(ParserPanel.UNTOKENIZED_ENGLISH);
-  }//GEN-LAST:event_untokEngItemActionPerformed
 
   private void exitItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_exitItemActionPerformed
   {//GEN-HEADEREND:event_exitItemActionPerformed
