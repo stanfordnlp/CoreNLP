@@ -35,8 +35,8 @@ public class SentimentPipeline {
   }
 
   public static void main(String[] args) {
-    String parserModel = null;
-    String sentimentModel = null;
+    String parserModel = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
+    String sentimentModel = "edu/stanford/nlp/models/sentiment/sentiment.ser.gz";
 
     String filename = null;
 
@@ -52,12 +52,8 @@ public class SentimentPipeline {
 
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
-    if (sentimentModel != null) {
-      props.setProperty("sentiment.model", sentimentModel);
-    }
-    if (parserModel != null) {
-      props.setProperty("parse.model", parserModel);
-    }
+    props.setProperty("sentiment.model", sentimentModel);
+    props.setProperty("parse.binaryTrees", "true");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     String text = IOUtils.slurpFileNoExceptions(filename);
