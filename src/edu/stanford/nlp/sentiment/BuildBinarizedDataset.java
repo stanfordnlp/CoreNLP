@@ -167,8 +167,8 @@ public class BuildBinarizedDataset {
         setSpanLabel(collapsedUnary, span, spanToLabels.get(span));
       }
 
-      System.err.println(collapsedUnary);
-      //System.err.println();
+      System.out.println(collapsedUnary);
+      //System.out.println();
     }
   }
 }
