@@ -1930,8 +1930,8 @@ public class StringUtils {
    * variables. if the variable is not found then substitute it for empty string
    */
   public static Properties argsToPropertiesWithResolve(String[] args) {
-    TreeMap<String, String> result = new TreeMap<String, String>();
-    Map<String, String> existingArgs = new TreeMap<String, String>();
+    LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
+    Map<String, String> existingArgs = new LinkedHashMap<String, String>();
     
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
@@ -1983,9 +1983,9 @@ public class StringUtils {
    * @return The corresponding TreeMap where the ordering is the same as in the
    *         props file
    */
-  public static TreeMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
+  public static LinkedHashMap<String, String> propFileToTreeMap(String filename, Map<String, String> existingArgs) {
 
-    TreeMap<String, String> result = new TreeMap<String, String>();
+    LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
     result.putAll(existingArgs);
     for (String l : IOUtils.readLines(filename)) {
       l = l.trim();
