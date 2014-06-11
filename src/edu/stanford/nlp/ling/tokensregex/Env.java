@@ -50,7 +50,18 @@ public class Env {
    */
   public Map<String, Object> defaults = Generics.newHashMap();
 
+  /**
+   * Default flags to use for string regular expressions match
+   * @see java.util.regex.Pattern#compile(String,int)
+   */
   public int defaultStringPatternFlags = 0;
+
+  /**
+   * Default flags to use for string literal match
+   * @see NodePattern#CASE_INSENSITIVE
+   */
+  public int defaultStringMatchFlags = 0;
+
   public Class sequenceMatchResultExtractor;
   public Class stringMatchResultExtractor;
   public Class defaultTokensAnnotationKey;
@@ -184,6 +195,14 @@ public class Env {
 
   public void setDefaultStringPatternFlags(int defaultStringPatternFlags) {
     this.defaultStringPatternFlags = defaultStringPatternFlags;
+  }
+
+  public int getDefaultStringMatchFlags() {
+    return defaultStringMatchFlags;
+  }
+
+  public void setDefaultStringMatchFlags(int defaultStringMatchFlags) {
+    this.defaultStringMatchFlags = defaultStringMatchFlags;
   }
 
   private static final Pattern STRING_REGEX_VAR_NAME_PATTERN = Pattern.compile("\\$[A-Za-z0-9_]+");

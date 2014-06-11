@@ -2916,4 +2916,18 @@ public class Counters {
     }
     return list;
   }
+  
+  public static<E> Counter<E> getFCounter(Counter<E> precision, Counter<E> recall, double beta){
+    Counter<E> fscores = new ClassicCounter<E>();
+    for(E k: precision.keySet()){
+      fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
+    }
+    return fscores;
+  }
+  
+  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
+    for(E key: counter.keySet()){
+      counter.setCount(key, func.apply(counter.getCount(key)));
+    }
+  }
 }

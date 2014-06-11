@@ -2313,7 +2313,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * t.dominates(t) returns false.
    */
   public boolean dominates(Tree t) {
-    return !(dominationPath(t) == null);
+    List<Tree> dominationPath = dominationPath(t);
+    return dominationPath != null && dominationPath.size() > 1;
   }
 
   /**
@@ -2686,14 +2687,25 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    */
   private int indexLeaves(int startIndex, boolean overWrite) {
     if (isLeaf()) {
-      CoreLabel afl = (CoreLabel) label();
+
+      /*CoreLabel afl = (CoreLabel) label();
       Integer oldIndex = afl.get(CoreAnnotations.IndexAnnotation.class);
       if (!overWrite && oldIndex != null && oldIndex >= 0) {
         startIndex = oldIndex;
       } else {
         afl.set(CoreAnnotations.IndexAnnotation.class, startIndex);
-      }
-      startIndex++;
+      }*/
+
+      if(label() instanceof HasIndex) {
+        HasIndex hi = (HasIndex) label();
+        int oldIndex = hi.index();
+        if (!overWrite && oldIndex >= 0) {
+          startIndex = oldIndex;
+        } else {
+          hi.setIndex(startIndex);
+        }
+        startIndex++;
+      } 
     } else {
       for (Tree kid : children()) {
         startIndex = kid.indexLeaves(startIndex, overWrite);

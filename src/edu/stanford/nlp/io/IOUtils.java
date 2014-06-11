@@ -1566,11 +1566,19 @@ public class IOUtils {
    * and null is returned. Encoding can also be specified
    */
   public static List<String> linesFromFile(String filename,String encoding) {
+    return linesFromFile(filename, encoding, false);
+  }
+
+  public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
       BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
+      int i = 0; 
       while ((line = in.readLine()) != null) {
+        i++;
+        if(ignoreHeader && i == 1)
+          continue;
         lines.add(line);
       }
       in.close();
@@ -1581,7 +1589,7 @@ public class IOUtils {
       return null;
     }
   }
-
+  
   public static String backupName(String filename) {
     return backupFile(new File(filename)).toString();
   }

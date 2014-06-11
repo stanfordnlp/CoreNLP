@@ -650,7 +650,8 @@ public class ChineseGrammaticalRelations {
     new GrammaticalRelation(Language.Chinese, "mmod", "modal verb",
                             ModalGRAnnotation.class, MODIFIER, "VP", tregexCompiler,
                             new String[]{
-                              "VP < ( VV=target $+ VP|VRD )"
+			      "VP < ( VV=target !< /^没有$/ $+ VP|VRD )"
+			      
                             });
   public static class ModalGRAnnotation
     extends GrammaticalRelationAnnotation { }
@@ -887,7 +888,8 @@ public class ChineseGrammaticalRelations {
       AdverbialModifierGRAnnotation.class, MODIFIER,
       "VP|ADJP|IP|CP|PP|NP|QP", tregexCompiler,
       new String[]{
-        "VP|ADJP|IP|CP|PP|NP < ADVP=target",
+	"VP|ADJP|IP|CP|PP|NP < (ADVP=target !< (AD < /^(\\u4e0d|\\u6CA1|\\u6CA1\\u6709)$/))",
+       
         "VP|ADJP < AD|CS=target",
         "QP < (ADVP=target $+ QP)",
         "QP < ( QP $+ ADVP=target)"
@@ -934,8 +936,9 @@ public class ChineseGrammaticalRelations {
       "neg", "negation modifier",
       NegationModifierGRAnnotation.class, ADVERBIAL_MODIFIER, "VP|ADJP|IP", tregexCompiler,
       new String[]{
-        "VP|ADJP|IP < (AD=target < /\\u4e0d/)",
-        "VP|ADJP|IP < (ADVP=target < (AD < /\\u4e0d/))"
+	"VP|ADJP|IP < (AD|VV=target < /^(\\u4e0d|\\u6CA1|\\u6CA1\\u6709)$/)",
+	"VP|ADJP|IP < (ADVP|VV=target < (AD < /^(\\u4e0d|\\u6CA1|\\u6CA1\\u6709)$/))"
+
       });
   public static class NegationModifierGRAnnotation
     extends GrammaticalRelationAnnotation { }

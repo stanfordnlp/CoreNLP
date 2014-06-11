@@ -60,7 +60,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     return new SequencePattern.NodePatternExpr(CoreMapNodePattern.valueOf(textRegex));
   }
 
-  private static String testText = "the number were one, two and fifty.";
+  private static final String testText = "the number were one, two and fifty.";
   public void testTokenSequenceMatcherValue() throws IOException {
     CoreMap doc = createDocument(testText);
 
@@ -88,7 +88,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
-  private static String testText1 = "Mellitus was the first Bishop of London, the third Archbishop of Canterbury, and a member of the Gregorian mission  sent to England to convert the Anglo-Saxons. He arrived in 601 AD, and was consecrated as Bishop of London in 604.";
+  private static final String testText1 = "Mellitus was the first Bishop of London, the third Archbishop of Canterbury, and a member of the Gregorian mission  sent to England to convert the Anglo-Saxons. He arrived in 601 AD, and was consecrated as Bishop of London in 604.";
   public void testTokenSequenceMatcher1() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -437,7 +437,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     m.setFindType(SequenceMatcher.FindType.FIND_ALL);
     // Test finding of ALL matching sequences with conjunctions
-    // NOTE: Not all sequences are found for some reason - missing sequences starting with just Bishop....
+    // todo: Not all sequences are found for some reason - missing sequences starting with just Bishop....
     boolean match = m.find();
     assertTrue(match);
     assertEquals(3, m.groupCount());
@@ -471,7 +471,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     m.setFindType(SequenceMatcher.FindType.FIND_ALL);
     // Test finding of ALL matching sequences
-    // NOTE: when using FIND_ALL greedy/recluctant modifiers are not enforced
+    // NOTE: when using FIND_ALL greedy/reluctant modifiers are not enforced
     //       perhaps should add syntax where some of them are enforced...
     boolean match = m.find();
     assertTrue(match);
@@ -988,6 +988,19 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("Mellitus", m.group(1));
     assertEquals("Bishop", m.group(2));
     assertEquals("London", m.group(3));
+
+
+    nnpPattern = TokenSequencePattern.compile( " ( [ tag:\"NNP\" ] )" );
+    env.bind("$NNP", nnpPattern);
+    p = TokenSequencePattern.compile(env, " $NNP /is|was/ []*? $NNP+ \"of\" $NNP+ ");
+    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    match = m.find();
+    assertTrue(match);
+    assertEquals(3, m.groupCount());
+    assertEquals("Mellitus was the first Bishop of London", m.group());
+    assertEquals("Mellitus", m.group(1));
+    assertEquals("Bishop", m.group(2));
+    assertEquals("London", m.group(3));
   }
 
   public void testTokenSequenceMatcherNumber() throws IOException {
@@ -1085,6 +1098,21 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertTrue(match);
     assertEquals(0, m.groupCount());
     assertEquals("2002", m.group());
+    match = m.find();
+    assertFalse(match);
+  }
+
+  public void testTokenSequenceMatcherNested() throws IOException {
+    CoreMap doc = createDocument("A A A B B B B B B C C");
+
+    // Test sequence with groups
+    TokenSequencePattern p = TokenSequencePattern.compile( "( /B/+ )+");
+    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    boolean match = m.find();
+    assertTrue(match);
+    assertEquals(1, m.groupCount());
+    assertEquals("B B B B B B", m.group());
+    assertEquals("B B B B B B", m.group(1));
     match = m.find();
     assertFalse(match);
   }
@@ -1295,10 +1323,10 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
   //just to test if a pattern is compiling or not
-  public void testcompile() {
+  public void testCompile() {
     String s = "(?$se \"matching\" \"this\"|\"don't\")";
     CoreMap doc = createDocument("does this do matching this");
-    TokenSequencePattern p =TokenSequencePattern.compile(s);
+    TokenSequencePattern p = TokenSequencePattern.compile(s);
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     boolean match = m.find();
     assertTrue(match);
