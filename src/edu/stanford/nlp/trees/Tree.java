@@ -788,7 +788,13 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     Label label = label();
     if (label != null) {
       sb.append("<");
+      if (children.length > 0) {
+        sb.append("node value=\"");
+      } else {
+        sb.append("leaf value=\"");
+      }
       sb.append(XMLUtils.escapeXML(Sentence.wordToString(label, true)));
+      sb.append("\"");
       if (printScores) {
         sb.append(" score=");
         sb.append(score());
@@ -798,6 +804,12 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       } else {
         sb.append("/>");
       }
+    } else {
+      if (children.length > 0) {
+        sb.append("<node>");
+      } else {
+        sb.append("<leaf/>");
+      }
     }
     pw.println(sb.toString());
     if (children.length > 0) {
@@ -805,13 +817,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       for (Tree child : children) {
         child.indentedXMLPrint(newIndent, pad, pw, printScores);
       }
-      if (label != null) {
-        sb = new StringBuilder(indent);
-        sb.append("</");
-        sb.append(XMLUtils.escapeXML(Sentence.wordToString(label, true)));
-        sb.append(">");
-        pw.println(sb.toString());
-      }
+      pw.println(indent + "</node>");
     }
   }
 

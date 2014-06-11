@@ -24,8 +24,8 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.DataFilePaths;
@@ -47,7 +47,7 @@ public class FTBDataset extends AbstractDataset {
 
     //Need to use a MemoryTreebank so that we can compute gross corpus
     //stats for MWE pre-processing
-    treebank = new MemoryTreebank(new FrenchTreeReaderFactory(), FrenchTreebankLanguagePack.FTB_ENCODING);
+    treebank = new MemoryTreebank(new FrenchXMLTreeReaderFactory(), FrenchTreebankLanguagePack.FTB_ENCODING);
     treeFileExtension = "xml";
   }
 
