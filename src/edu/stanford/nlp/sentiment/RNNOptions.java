@@ -1,5 +1,7 @@
 package edu.stanford.nlp.sentiment;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Random;
 
@@ -66,11 +68,12 @@ public class RNNOptions implements Serializable {
 
   public RNNTrainOptions trainOptions = new RNNTrainOptions();
 
-  // TODO: most of the existing sentiment models are missing classNames and equivalenceClasses
   public static final String[] DEFAULT_CLASS_NAMES = { "Very negative", "Negative", "Neutral", "Positive", "Very positive" };
+  public static final String[] BINARY_DEFAULT_CLASS_NAMES = { "Negative", "Positive" };
   public String[] classNames = DEFAULT_CLASS_NAMES;
 
   public static final int[][] APPROXIMATE_EQUIVALENCE_CLASSES = { {0, 1}, {3, 4} };
+  public static final int[][] BINARY_APPROXIMATE_EQUIVALENCE_CLASSES = { {0}, {1} }; // almost an owl
   /**
    * The following option represents classes which can be treated as
    * equivalent when scoring.  There will be two separate scorings,
@@ -81,6 +84,17 @@ public class RNNOptions implements Serializable {
 
   public static final String[] DEFAULT_EQUIVALENCE_CLASS_NAMES = { "Negative", "Positive" };
   public String[] equivalenceClassNames = DEFAULT_EQUIVALENCE_CLASS_NAMES;
+
+  public RNNTestOptions testOptions = new RNNTestOptions();
+
+  // TODO: we can remove this if we reserialize all the models
+  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+
+    if (testOptions == null) {
+      testOptions = new RNNTestOptions();
+    }
+  }
 
   @Override
   public String toString() {
@@ -96,7 +110,6 @@ public class RNNOptions implements Serializable {
     result.append("useTensors=" + useTensors + "\n");
     result.append("simplifiedModel=" + simplifiedModel + "\n");
     result.append("combineClassification=" + combineClassification + "\n");
-    result.append(trainOptions.toString());
     result.append("classNames=" + StringUtils.join(classNames, ",") + "\n");
     result.append("equivalenceClasses=");
     if (equivalenceClasses != null) {
@@ -111,9 +124,11 @@ public class RNNOptions implements Serializable {
     result.append("\n");
     result.append("equivalenceClassNames=");
     if (equivalenceClassNames != null) {
-      result.append(StringUtils.join(equivalenceClassNames));
+      result.append(StringUtils.join(equivalenceClassNames, ","));
     }
     result.append("\n");
+    result.append(trainOptions.toString());
+    result.append(testOptions.toString());
     return result.toString();
   }
 
@@ -192,8 +207,19 @@ public class RNNOptions implements Serializable {
         equivalenceClassNames = null;
       }
       return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-binaryModel")) { // macro option
+      numClasses = 2;
+      classNames = BINARY_DEFAULT_CLASS_NAMES;
+      // TODO: should we just make this null?
+      equivalenceClasses = BINARY_APPROXIMATE_EQUIVALENCE_CLASSES;
+      trainOptions.setOption(args, argIndex); // in case the trainOptions use binaryModel as well
+      return argIndex + 1;
     } else {
-      return trainOptions.setOption(args, argIndex);
+      int newIndex = trainOptions.setOption(args, argIndex);
+      if (newIndex == argIndex) {
+        newIndex = testOptions.setOption(args, argIndex);
+      }
+      return newIndex;
     }
   }
 
