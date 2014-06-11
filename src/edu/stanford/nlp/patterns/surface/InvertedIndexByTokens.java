@@ -27,6 +27,8 @@ import edu.stanford.nlp.ling.CoreLabel;
  */
 public class InvertedIndexByTokens implements Serializable{
 
+  private static final long serialVersionUID = 1L;
+
   Map<String, Hashtable<String, Set<String>>> index;
   boolean convertToLowercase;
   // boolean filebacked;
@@ -34,8 +36,9 @@ public class InvertedIndexByTokens implements Serializable{
   // static int numfilesindiskbacked = 10000;
   int numAllEntries = 0;
   boolean batchProcessSents = false;
+  String filenamePrefix = null;
   
-  public InvertedIndexByTokens(File invertedIndexDir, boolean lc, Set<String> stopWords, Set<String> specialWords, boolean batchProcessSents) {
+  public InvertedIndexByTokens(File invertedIndexDir, boolean lc, Set<String> stopWords, Set<String> specialWords, boolean batchProcessSents, String dirName) {
     // if (filebacked)
     // index = new FileBackedCache<StringwithConsistentHashCode,
     // Hashtable<String, Set<String>>>(invertedIndexDir, numfilesindiskbacked);
@@ -49,10 +52,11 @@ public class InvertedIndexByTokens implements Serializable{
     if (this.stopWords == null)
       this.stopWords = new HashSet<String>();
     this.specialWords = specialWords;
+    this.filenamePrefix = dirName;
   }
 
   public InvertedIndexByTokens(Map<String, Hashtable<String, Set<String>>> index, boolean lc, Set<String> stopWords,
-      Set<String> specialWords, boolean batchProcessSents) {
+      Set<String> specialWords, boolean batchProcessSents, String dirName) {
     this.index = index;
     this.convertToLowercase = lc;
     this.batchProcessSents = batchProcessSents;
@@ -60,10 +64,14 @@ public class InvertedIndexByTokens implements Serializable{
     if (this.stopWords == null)
       this.stopWords = new HashSet<String>();
     this.specialWords = specialWords;
+    this.filenamePrefix = dirName;
   }
 
   void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {
-
+    
+    if(filenamePrefix != null)
+      filename = filenamePrefix+ (filenamePrefix.endsWith("/")?"":"/")+filename;
+    
     for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
       for (CoreLabel l : sEn.getValue()) {
         String w = l.word();
@@ -159,6 +167,7 @@ public class InvertedIndexByTokens implements Serializable{
     BufferedWriter w = new BufferedWriter(new FileWriter(dir + "/param.txt"));
     w.write(String.valueOf(convertToLowercase) + "\n");
     w.write(String.valueOf(this.batchProcessSents) + "\n");
+    w.write(this.filenamePrefix+"\n");
     w.close();
     IOUtils.writeObjectToFile(this.stopWords, dir + "/stopwords.ser");
     IOUtils.writeObjectToFile(this.specialWords, dir + "/specialwords.ser");
@@ -172,7 +181,11 @@ public class InvertedIndexByTokens implements Serializable{
       List<String> lines = IOUtils.linesFromFile(dir + "/param.txt");
       boolean lc = Boolean.parseBoolean(lines.get(0));
       boolean batchProcessSents = Boolean.parseBoolean(lines.get(1));
-
+      String filenameprefix = lines.get(2);
+      
+      if(filenameprefix.equals("null"))
+        filenameprefix = null;
+      
       Set<String> stopwords = IOUtils.readObjectFromFile(dir + "/stopwords.ser");
       Set<String> specialwords = IOUtils.readObjectFromFile(dir + "/specialwords.ser");
       Map<String, Hashtable<String, Set<String>>> index = null;
@@ -181,7 +194,7 @@ public class InvertedIndexByTokens implements Serializable{
       // else
       // index = new FileBackedCache<StringwithConsistentHashCode,
       // Hashtable<String, Set<String>>>(dir + "/cache", numfilesindiskbacked);
-      return new InvertedIndexByTokens(index, lc, stopwords, specialwords, batchProcessSents);
+      return new InvertedIndexByTokens(index, lc, stopwords, specialwords, batchProcessSents, filenameprefix);
     } catch (Exception e) {
       throw new RuntimeException("Cannot load the inverted index. " + e);
     }
@@ -197,5 +210,9 @@ public class InvertedIndexByTokens implements Serializable{
 
   public int numAllEntries() {
     return this.numAllEntries;
+  }
+
+  public Set<String> getKeySet() {
+    return index.keySet();
   }
 }
