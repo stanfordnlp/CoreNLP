@@ -178,20 +178,27 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       String word = tree.children()[0].label().value();
       word = model.getVocabWord(word);
 
-      SimpleMatrix deltaFromClass = model.getUnaryClassification(category).transpose().mult(deltaClass);
-      SimpleMatrix deltaFull = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).plus(deltaUp);
+      //SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
+      //SimpleMatrix deltaFromClass = model.getUnaryClassification(category).transpose().mult(deltaClass);
+      //SimpleMatrix deltaFull = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).plus(deltaUp);
+      //SimpleMatrix wordDerivative = deltaFull.elementMult(currentVectorDerivative);
+      //wordVectorD.put(word, wordVectorD.get(word).plus(wordDerivative));
 
       SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
-      SimpleMatrix wordDerivative = deltaFull.elementMult(currentVectorDerivative);
-      wordVectorD.put(word, wordVectorD.get(word).plus(wordDerivative));
+      SimpleMatrix deltaFromClass = model.getUnaryClassification(category).transpose().mult(deltaClass);
+      deltaFromClass = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).elementMult(currentVectorDerivative);
+      SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
+      wordVectorD.put(word, wordVectorD.get(word).plus(deltaFull));
     } else {
       // Otherwise, this must be a binary node
       String leftCategory = model.basicCategory(tree.children()[0].label().value());
       String rightCategory = model.basicCategory(tree.children()[1].label().value());
       binaryCD.put(leftCategory, rightCategory, binaryCD.get(leftCategory, rightCategory).plus(localCD));
       
+      SimpleMatrix currentVectorDerivative = RNNUtils.elementwiseApplyTanhDerivative(currentVector);
       SimpleMatrix deltaFromClass = model.getBinaryClassification(leftCategory, rightCategory).transpose().mult(deltaClass);
-      SimpleMatrix deltaFull = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).plus(deltaUp);
+      deltaFromClass = deltaFromClass.extractMatrix(0, model.op.numHid, 0, 1).elementMult(currentVectorDerivative);
+      SimpleMatrix deltaFull = deltaFromClass.plus(deltaUp);
       
       SimpleMatrix leftVector = RNNCoreAnnotations.getNodeVector(tree.children()[0]);
       SimpleMatrix rightVector = RNNCoreAnnotations.getNodeVector(tree.children()[1]);
