@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -12,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +43,7 @@ public class MulticoreWrapper<I,O> {
   private int lastReturnedId = -1;
   private final boolean orderResults;
 
-  private final PriorityQueue<QueueItem<O>> outputQueue;
+  private final PriorityBlockingQueue<QueueItem<O>> outputQueue;
   private final ThreadPoolExecutor threadPool;
   private final ExecutorCompletionService<JobResult<O>> queue;
   private final Queue<Integer> idleProcessors;
@@ -75,7 +75,7 @@ public class MulticoreWrapper<I,O> {
   public MulticoreWrapper(int numThreads, ThreadsafeProcessor<I,O> processor, boolean orderResults) {
     nThreads = numThreads <= 0 ? Runtime.getRuntime().availableProcessors() : numThreads;
     this.orderResults = orderResults;
-    outputQueue = new PriorityQueue<QueueItem<O>>(10*nThreads);
+    outputQueue = new PriorityBlockingQueue<QueueItem<O>>(10*nThreads);
     threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
     queue = new ExecutorCompletionService<JobResult<O>>(threadPool);
     processorList = new ArrayList<ThreadsafeProcessor<I,O>>(nThreads);
