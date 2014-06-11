@@ -142,7 +142,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       String nerString = w.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       if(!nerString.equals(preNE)) {
         int endIndex = w.get(CoreAnnotations.IndexAnnotation.class) - 1;
-        if(!preNE.equals("O") && !preNE.equals("QUANTITY") && !preNE.equals("CARDINAL") && !preNE.equals("PERCENT")) {
+        if(!preNE.matches("O|QUANTITY|CARDINAL|PERCENT|DATE|DURATION|TIME|SET")){
           if(w.get(CoreAnnotations.TextAnnotation.class).equals("'s")) endIndex++;
           IntPair mSpan = new IntPair(beginIndex, endIndex);
           // Need to check if beginIndex < endIndex because, for
@@ -161,7 +161,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       }
     }
     // NE at the end of sentence
-    if(!preNE.equals("O") && !preNE.equals("QUANTITY") && !preNE.equals("CARDINAL") && !preNE.equals("PERCENT")) {
+    if(!preNE.matches("O|QUANTITY|CARDINAL|PERCENT|DATE|DURATION|TIME|SET")) {
       IntPair mSpan = new IntPair(beginIndex, sent.size());
       if(!mentionSpanSet.contains(mSpan)) {
         int mentionId = assignIds? ++maxID:-1;

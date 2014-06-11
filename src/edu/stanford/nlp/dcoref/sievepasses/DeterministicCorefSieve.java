@@ -281,7 +281,7 @@ public abstract class DeterministicCorefSieve  {
       return true;
     }
 
-    if(flags.USE_ACRONYM && Rules.entityIsAcronym(mentionCluster, potentialAntecedent)) {
+    if(flags.USE_ACRONYM && Rules.entityIsAcronym(document, mentionCluster, potentialAntecedent)) {
       SieveCoreferenceSystem.logger.finest("Acronym: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }

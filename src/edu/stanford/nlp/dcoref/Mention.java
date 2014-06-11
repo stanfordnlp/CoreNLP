@@ -523,39 +523,19 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         gender = Gender.FEMALE;
       }
     } else {
-      if(Constants.USE_GENDER_LIST){
-        // Bergsma list
-        if(gender == Gender.UNKNOWN)  {
-          if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
-            // Try to get gender of the named entity
-            // Start with first name until we get gender...
-            List<CoreLabel> nerToks = nerTokens();
-            for (CoreLabel t:nerToks) {
-              String name = t.word().toLowerCase();
-              if(dict.maleWords.contains(name)) {
-                gender = Gender.MALE;
-                SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  name + "\tspan:" + spanToString());
-                break;
-              }
-              else if(dict.femaleWords.contains(name))  {
-                gender = Gender.FEMALE;
-                SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  name + "\tspan:" + spanToString());
-                break;
-              }
-            }
-          } else {
-            if(dict.maleWords.contains(headString)) {
-              gender = Gender.MALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
-            }
-            else if(dict.femaleWords.contains(headString))  {
-              gender = Gender.FEMALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
-            }
-            else if(dict.neutralWords.contains(headString))   {
-              gender = Gender.NEUTRAL;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
-            }
+      // Bergsma list
+      if(gender == Gender.UNKNOWN)  {
+        if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
+          // Try to get gender of the named entity
+          // Start with first name until we get gender...
+          List<CoreLabel> nerToks = nerTokens();
+          for (CoreLabel t:nerToks) {
+            String name = t.word().toLowerCase();
+          }
+        } else {
+          if(dict.neutralWords.contains(headString))   {
+            gender = Gender.NEUTRAL;
+            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
           }
         }
       }
@@ -609,19 +589,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
 
     if(mentionType != MentionType.PRONOMINAL) {
-      if(Constants.USE_NUMBER_LIST){
-        if(number == Number.UNKNOWN){
-          if(dict.singularWords.contains(headString)) {
-            number = Number.SINGULAR;
-            SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tSINGULAR:\t" + headString);
-          }
-          else if(dict.pluralWords.contains(headString))  {
-            number = Number.PLURAL;
-            SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tPLURAL:\t" + headString);
-          }
-        }
-      }
-
       final String enumerationPattern = "NP < (NP=tmp $.. (/,|CC/ $.. NP))";
 
       TregexPattern tgrepPattern = TregexPattern.compile(enumerationPattern);
