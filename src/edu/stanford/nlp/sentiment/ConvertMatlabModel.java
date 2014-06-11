@@ -107,8 +107,6 @@ public class ConvertMatlabModel {
 
     if (Wcat.numRows() == 2) {
       op.classNames = new String[] { "Negative", "Positive" };
-      op.equivalenceClasses = new int[][] { { 0 }, { 1 } }; // TODO: set to null once old models are updated
-      op.numClasses = 2;
     }
 
     wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));

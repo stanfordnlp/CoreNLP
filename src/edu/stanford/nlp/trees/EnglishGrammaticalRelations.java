@@ -136,11 +136,7 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "aux", "auxiliary",
         AuxModifierGRAnnotation.class, DEPENDENT, "VP|SQ|SINV|CONJP", tregexCompiler,
         new String[] {
-          // TODO: want to add "!< passiveAuxWordRegex" to avoid
-          // conflicts with auxpass.  Similarly, want to avoid
-          // conflicts between nsubj and nsubjpass.  One example is
-          // the tree with "charmingly" in the PTB
-          "VP < VP < (/^(?:TO|MD|VB.*|AUXG?|POS)$/=target)",
+          "VP < VP < /^(?:TO|MD|VB.*|AUXG?|POS)$/=target",
           "SQ|SINV < (/^(?:VB|MD|AUX)/=target $++ /^(?:VP|ADJP)/)",
           "CONJP < TO=target < VB", // (CONJP not to mention)
           // add handling of tricky VP fronting cases...
