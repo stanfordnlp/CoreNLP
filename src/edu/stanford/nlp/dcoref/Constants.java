@@ -60,6 +60,9 @@ public class Constants {
   /** Share attributes between coreferent mentions **/
   public static final boolean SHARE_ATTRIBUTES = true;
 
+  /** Whether or not the RuleBasedCorefMentionFinder can reparse a phrase to find its head */
+  public static final boolean ALLOW_REPARSING = true;
+
   public static final String STATES_PROP = "dcoref.states";
   public static final String DEMONYM_PROP = "dcoref.demonym";
   public static final String ANIMATE_PROP = "dcoref.animate";
@@ -91,6 +94,8 @@ public class Constants {
   public static final String RUN_DIST_CMD_WORK_DIR = "dcoref.dist.workdir";
   public static final String SCORE_FILE_PROP = "dcoref.score.output";
   public static final String SINGLETON_PROP = "dcoref.singleton.predictor";
+
+  public static final String ALLOW_REPARSING_PROP = "dcoref.allowReparsing";
 
   public static final int MONITOR_DIST_CMD_FINISHED_WAIT_MILLIS = 60000;
 
