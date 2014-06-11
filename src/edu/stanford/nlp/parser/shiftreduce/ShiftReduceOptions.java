@@ -28,7 +28,7 @@ public class ShiftReduceOptions extends Options {
   public String recordDebinarized = null;
 
   public enum TrainingErrorHandling {
-    EARLY_TERMINATION, GOLD;
+    EARLY_TERMINATION, GOLD, ORACLE;
   };
   public TrainingErrorHandling trainingErrorHandling = TrainingErrorHandling.GOLD;
 
