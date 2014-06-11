@@ -396,9 +396,20 @@ public class TestSentence implements SequenceModel {
     Extractors ex = maxentTagger.extractors, exR = maxentTagger.extractorsRare;
     String w = pairs.getWord(h.current);
     double[] lS, lcS;
-    if((lS = localScores.get(w)) == null) {
+    lS = localScores.get(w);
+    if (lS == null) {
       lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
       localScores.put(w,lS);
+    } else if (lS.length != tags.length) {
+      // This case can occur when a word was given a specific forced
+      // tag, and then later it shows up without the forced tag.
+      // TODO: if a word is given a forced tag, we should always get
+      // its features rather than use the cache, just in case the tag
+      // given is not the same tag as before
+      lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
+      if (tags.length > 1) {
+        localScores.put(w,lS);
+      }
     }
     if((lcS = localContextScores[h.current]) == null) {
       lcS = getHistories(tags, h, ex.localContext, rare ? exR.localContext : null);
