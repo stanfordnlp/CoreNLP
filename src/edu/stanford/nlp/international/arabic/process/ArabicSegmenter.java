@@ -57,19 +57,19 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   // passed to the constructor).
 
   // The input already been tokenized. Do not run the Arabic tokenizer.
-  private static final String optTokenized = "tokenized";
+  private final String optTokenized = "tokenized";
 
   // Tokenizer options
-  private static final String optTokenizer = "orthoOptions";
+  private final String optTokenizer = "orthoOptions";
 
   // Mark segmented prefixes with this String
-  private static final String optPrefix = "prefixMarker";
+  private final String optPrefix = "prefixMarker";
 
   // Mark segmented suffixes with this String
-  private static final String optSuffix = "suffixMarker";
+  private final String optSuffix = "suffixMarker";
 
   // Number of decoding threads
-  private static final String optThreads = "nthreads";
+  private final String optThreads = "nthreads";
 
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
@@ -491,5 +491,4 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     }
     return segmenter;
   }
-
 }
