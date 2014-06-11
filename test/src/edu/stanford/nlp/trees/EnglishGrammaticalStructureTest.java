@@ -1534,6 +1534,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "(NP (NNP Digital) (, ,) (NNP Hewlett) (, ,) (CC and) (NNP Sun))",
          "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (, ,) (CC and) (NP (NNP Coke) ) )",
          "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (CC and)  (NP (NNP Coke) ) )",
+         "(S (NP (NP (NN Activation)) (PP (IN of) (NP (NP (NN Akt)) (, ,) (NP (NN NFkappaB)) (, ,) (CC and) (NP (NN Stat3)) (CONJP (CC but) (RB not)) (NP (NN MAPK) (NNS pathways))))) (VP (VBP are) (NP (NP (NNS characteristics)) (VP (VBN associated) (PP (IN with) (NP (NP (JJ malignant) (NN transformation)) ))))))", // test but not -> negcc
     };
 
 
@@ -1718,6 +1719,20 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, Depot-2)\n" +
                 "conj_and(Depot-2, Sun-4)\n" +
                 "conj_and(Depot-2, Coke-6)\n",
+        "nsubj(characteristics-14, Activation-1)\n" +
+                "prep_of(Activation-1, Akt-3)\n" +
+                "prep_of(Activation-1, NFkappaB-5)\n" +
+                "conj_and(Akt-3, NFkappaB-5)\n" +
+                "prep_of(Activation-1, Stat3-8)\n" +
+                "conj_and(Akt-3, Stat3-8)\n" +
+                "nn(pathways-12, MAPK-11)\n" +
+                "prep_of(Activation-1, pathways-12)\n" +
+                "conj_negcc(Akt-3, pathways-12)\n" +
+                "cop(characteristics-14, are-13)\n" +
+                "root(ROOT-0, characteristics-14)\n" +
+                "vmod(characteristics-14, associated-15)\n" +
+                "amod(transformation-18, malignant-17)\n" +
+                "prep_with(associated-15, transformation-18)\n",
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
