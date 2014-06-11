@@ -10,9 +10,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * XML Utility functions for use with dealing with Timex expressions
@@ -98,111 +95,6 @@ public class XMLUtils {
     for (int i = 0; i < list.getLength(); i++) {
       Node n = list.item(i);
       e.removeChild(n);
-    }
-  }
-  static private void getMatchingNodes(Node node, Pattern[] nodePath, int cur, List<Node> res) {
-    if (cur < 0 || cur >= nodePath.length) return;
-    boolean last = (cur == nodePath.length-1);
-    Pattern pattern = nodePath[cur];
-    NodeList children = node.getChildNodes();
-    for (int i = 0; i < children.getLength(); i++) {
-      Node c = children.item(i);
-      if (pattern.matcher(c.getNodeName()).matches()) {
-        if (last) {
-          res.add(c);
-        } else {
-          getMatchingNodes(c, nodePath, cur+1, res);
-        }
-      }
-    }
-  }
-
-  static public List<Node> getNodes(Node node, Pattern... nodePath) {
-    List<Node> res = new ArrayList<Node>();
-    getMatchingNodes(node, nodePath, 0, res);
-    return res;
-  }
-
-  static public String getNodeText(Node node, Pattern... nodePath) {
-    List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
-      return nodes.get(0).getTextContent();
-    } else {
-      return null;
-    }
-  }
-
-  static public Node getNode(Node node, Pattern... nodePath) {
-    List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
-      return nodes.get(0);
-    } else {
-      return null;
-    }
-  }
-
-  static private void getMatchingNodes(Node node, String[] nodePath, int cur, List<Node> res) {
-    if (cur < 0 || cur >= nodePath.length) return;
-    boolean last = (cur == nodePath.length-1);
-    String name = nodePath[cur];
-    if (node.hasChildNodes()) {
-      NodeList children = node.getChildNodes();
-      for (int i = 0; i < children.getLength(); i++) {
-        Node c = children.item(i);
-        if (name.equals(c.getNodeName())) {
-          if (last) {
-            res.add(c);
-          } else {
-            getMatchingNodes(c, nodePath, cur+1, res);
-          }
-        }
-      }
-    }
-  }
-
-  static public List<Node> getNodes(Node node, String... nodePath) {
-    List<Node> res = new ArrayList<Node>();
-    getMatchingNodes(node, nodePath, 0, res);
-    return res;
-  }
-
-  static public List<String> getNodeTexts(Node node, String... nodePath) {
-    List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null) {
-      List<String> strs = new ArrayList<String>(nodes.size());
-      for (Node n:nodes) {
-        strs.add(n.getTextContent());
-      }
-      return strs;
-    } else {
-      return null;
-    }
-  }
-
-  static public String getNodeText(Node node, String... nodePath) {
-    List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
-      return nodes.get(0).getTextContent();
-    } else {
-      return null;
-    }
-  }
-
-  static public String getAttributeValue(Node node, String name) {
-    Node attr = getAttribute(node, name);
-    return (attr != null)? attr.getNodeValue():null;
-  }
-
-  static public Node getAttribute(Node node, String name) {
-    return node.getAttributes().getNamedItem(name);
-  }
-
-  static public Node getNode(Node node, String... nodePath) {
-    List<Node> nodes = getNodes(node, nodePath);
-    if (nodes != null && nodes.size() > 0) {
-      return nodes.get(0);
-    } else {
-      return null;
     }
   }
 }
