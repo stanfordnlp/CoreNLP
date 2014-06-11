@@ -363,7 +363,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     stopwords4Index.addAll(constVars.getStopWords());
     stopwords4Index.addAll(Arrays.asList("fw","FW","sw","SW","OTHERSEM","othersem"));
     
-    for (String label : seedSets.keySet()) {
+    for (String label : answerClass.keySet()) {
       wordsPatExtracted.put(label,
           new TwoDimensionalCounter<String, SurfacePattern>());
       stopwords4Index.add(label);
