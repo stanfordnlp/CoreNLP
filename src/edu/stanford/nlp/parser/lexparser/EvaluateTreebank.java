@@ -57,7 +57,8 @@ public class EvaluateTreebank {
 
   List<Eval> extraEvals = null;
 
-  private final boolean runningAverages, summary, tsv;
+  private final boolean summary;
+  private final boolean tsv;
 
   // no annotation
   private final TreeAnnotatorAndBinarizer binarizerOnly;
@@ -84,7 +85,7 @@ public class EvaluateTreebank {
   AbstractEval.ScoreEval factLL = null;
   AbstractEval kGoodLB = null;
 
-  private List<BestOfTopKEval> topKEvals = new ArrayList<BestOfTopKEval>();
+  private final List<BestOfTopKEval> topKEvals = new ArrayList<BestOfTopKEval>();
 
   private int kbestPCFG = 0;
 
@@ -124,7 +125,7 @@ public class EvaluateTreebank {
     collinizer = op.tlpParams.collinizer();
     boundaryRemover = new BoundaryRemover();
 
-    runningAverages = Boolean.parseBoolean(op.testOptions.evals.getProperty("runningAverages"));
+    boolean runningAverages = Boolean.parseBoolean(op.testOptions.evals.getProperty("runningAverages"));
     summary = Boolean.parseBoolean(op.testOptions.evals.getProperty("summary"));
     tsv = Boolean.parseBoolean(op.testOptions.evals.getProperty("tsv"));
 
@@ -252,8 +253,8 @@ public class EvaluateTreebank {
   private static void nanScores(Tree tree) {
     tree.setScore(Double.NaN);
     Tree[] kids = tree.children();
-    for (int i = 0; i < kids.length; i++) {
-      nanScores(kids[i]);
+    for (Tree kid : kids) {
+      nanScores(kid);
     }
   }
 
@@ -567,7 +568,7 @@ public class EvaluateTreebank {
    */
   public double testOnTreebank(Treebank testTreebank) {
     System.err.println("Testing on treebank");
-    Timing treebankTotalTtimer = new Timing();
+    Timing treebankTotalTimer = new Timing();
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = op.langpack();
@@ -637,7 +638,7 @@ public class EvaluateTreebank {
     }
 
     //Done parsing...print the results of the evaluations
-    treebankTotalTtimer.done("Testing on treebank");
+    treebankTotalTimer.done("Testing on treebank");
     if (saidMemMessage) {
       ParserUtils.printOutOfMemory(pwErr);
     }
