@@ -1,13 +1,15 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import org.junit.*;
 
-import edu.stanford.nlp.util.MetaClass;
-
-public class MetaClassTest{
+public class MetaClassTest {
 	
 	private static final String CLASS =  MetaClassTest.class.getName();
 	
@@ -389,12 +391,17 @@ public class MetaClassTest{
     assertArrayEquals(new Integer[]{1,2,3}, ints4);
     Integer[] ints5 = MetaClass.cast("1   2   3", Integer[].class);
     assertArrayEquals(new Integer[]{1,2,3}, ints5);
+    Integer[] ints6 = MetaClass.cast("\n1 \n\n  2   3", Integer[].class);
+    assertArrayEquals(new Integer[]{1,2,3}, ints6);
+
+    Integer[] intsEmpty = MetaClass.cast("", Integer[].class);
+    assertArrayEquals(new Integer[]{}, intsEmpty);
   }
 
   private static enum Fruits {
     APPLE,
     Orange,
-    grape;
+    grape
   }
 
   @Test
@@ -407,6 +414,68 @@ public class MetaClassTest{
     assertEquals(Fruits.grape, MetaClass.cast("grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("Grape", Fruits.class));
     assertEquals(Fruits.grape, MetaClass.cast("GRAPE", Fruits.class));
+  }
+
+  @Test
+  public void testCastCollection() {
+    Set<String> set = new HashSet<String>();
+    set.add("apple");
+    set.add("banana");
+    Set<String> castedSet = MetaClass.cast("[apple, banana]", Set.class);
+    Set<String> castedSet2 = MetaClass.cast("[apple ,    banana ]", Set.class);
+    Set<String> castedSet3 = MetaClass.cast("{apple ,    banana }", Set.class);
+    assertEquals(set, castedSet);
+    assertEquals(set, castedSet2);
+    assertEquals(set, castedSet3);
+
+    List<String> list = new LinkedList<String>();
+    list.add("apple");
+    list.add("banana");
+    List<String> castedList = MetaClass.cast("[apple, banana]", List.class);
+    assertEquals(list, castedList);
+  }
+
+  private static class Pointer<E> {
+    public E value;
+    public Pointer(E value) {
+      this.value = value;
+    }
+    @SuppressWarnings("UnusedDeclaration") // used via reflection
+    public static <E> Pointer<E> fromString(String value) {
+      E v = MetaClass.castWithoutKnowingType(value);
+      return new Pointer<E>(v);
+    }
+  }
+
+  @Test
+  public void testCastMap() {
+    Map<String, String> a = MetaClass.cast("{ a -> 1, b -> 2 }", Map.class);
+    assertEquals(2, a.size());
+    assertEquals("1", a.get("a"));
+    assertEquals("2", a.get("b"));
+
+    Map<String, String> b = MetaClass.cast("a => 1, b -> 2", Map.class);
+    assertEquals(2, b.size());
+    assertEquals("1", b.get("a"));
+    assertEquals("2", b.get("b"));
+
+    Map<String, String> c = MetaClass.cast("[a->1;b->2]", Map.class);
+    assertEquals(2, c.size());
+    assertEquals("1", c.get("a"));
+    assertEquals("2", c.get("b"));
+
+    Map<String, String> d = MetaClass.cast("\n\na->\n1\n\n\nb->2", Map.class);
+    assertEquals(2, d.size());
+    assertEquals("1", d.get("a"));
+    assertEquals("2", d.get("b"));
+  }
+
+  @Test
+  public void testCastRegression() {
+    // Generics ordering (integer should go relatively early)
+    Pointer<Integer> x1 = MetaClass.cast("1", Pointer.class);
+    assertEquals(1, x1.value.intValue());
+
   }
 
   private static class FromStringable {
@@ -433,6 +502,15 @@ public class MetaClassTest{
   public void testCastFromString() {
     assertEquals(new FromStringable("foo"), MetaClass.cast("foo", FromStringable.class));
     assertEquals(new FromStringable("bar"), MetaClass.cast("bar", FromStringable.class));
+  }
+
+  @Test
+  public void testCastStream() {
+    assertEquals(System.out, MetaClass.cast("stdout", OutputStream.class));
+    assertEquals(System.out, MetaClass.cast("out", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("stderr", OutputStream.class));
+    assertEquals(System.err, MetaClass.cast("err", OutputStream.class));
+    assertEquals(ObjectOutputStream.class, MetaClass.cast("err", ObjectOutputStream.class).getClass());
   }
 
 //	TODO(gabor) this would be kind of cool to implement
