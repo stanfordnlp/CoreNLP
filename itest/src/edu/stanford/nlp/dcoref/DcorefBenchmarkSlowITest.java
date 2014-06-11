@@ -105,28 +105,28 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     expectedResults.setCount(MUC_F1, 60.67);
     highResults.setCount(MUC_F1, 60.7);
 
-    lowResults.setCount(BCUBED_TP, 12450);
+    lowResults.setCount(BCUBED_TP, 12457);
     expectedResults.setCount(BCUBED_TP, 12457.63);
-    highResults.setCount(BCUBED_TP, 12460);
+    highResults.setCount(BCUBED_TP, 12458);
     lowResults.setCount(BCUBED_F1, 70.8);
     expectedResults.setCount(BCUBED_F1, 70.81);
     highResults.setCount(BCUBED_F1, 70.85);
 
-    lowResults.setCount(CEAFM_TP, 10920);
+    lowResults.setCount(CEAFM_TP, 10925);
     expectedResults.setCount(CEAFM_TP, 10927);
     highResults.setCount(CEAFM_TP, 10930);
     lowResults.setCount(CEAFM_F1, 59.4);
     expectedResults.setCount(CEAFM_F1, 59.44);
     highResults.setCount(CEAFM_F1, 59.5);
 
-    lowResults.setCount(CEAFE_TP, 3830);
+    lowResults.setCount(CEAFE_TP, 3833.7);
     expectedResults.setCount(CEAFE_TP, 3833.81);
-    highResults.setCount(CEAFE_TP, 3840);
+    highResults.setCount(CEAFE_TP, 3833.9);
     lowResults.setCount(CEAFE_F1, 47.4);
     expectedResults.setCount(CEAFE_F1, 47.46);
     highResults.setCount(CEAFE_F1, 47.5);
 
-    lowResults.setCount(BLANC_F1, 75.35);
+    lowResults.setCount(BLANC_F1, 75.3);
     expectedResults.setCount(BLANC_F1, 75.39);
     highResults.setCount(BLANC_F1, 75.4);
 
@@ -143,32 +143,32 @@ public class DcorefBenchmarkSlowITest extends TestCase {
         results.setCount(MENTION_F1, Double.parseDouble(m1.group(2)));
       }
       Matcher m2 = MUC_PATTERN.matcher(line);
-      if (m2.matches() ){
-        results.setCount(MUC_TP, Double.parseDouble(m2.group(1)));
-        results.setCount(MUC_F1, Double.parseDouble(m2.group(2)));
+      if (m1.matches() ){
+        results.setCount(MENTION_TP, Double.parseDouble(m2.group(1)));
+        results.setCount(MENTION_F1, Double.parseDouble(m2.group(2)));
       }
       Matcher m3 = BCUBED_PATTERN.matcher(line);
-      if (m3.matches() ){
-        results.setCount(BCUBED_TP, Double.parseDouble(m3.group(1)));
-        results.setCount(BCUBED_F1, Double.parseDouble(m3.group(2)));
+      if (m1.matches() ){
+        results.setCount(MENTION_TP, Double.parseDouble(m3.group(1)));
+        results.setCount(MENTION_F1, Double.parseDouble(m3.group(2)));
       }
       Matcher m4 = CEAFM_PATTERN.matcher(line);
-      if (m4.matches() ){
-        results.setCount(CEAFM_TP, Double.parseDouble(m4.group(1)));
-        results.setCount(CEAFM_F1, Double.parseDouble(m4.group(2)));
+      if (m1.matches() ){
+        results.setCount(MENTION_TP, Double.parseDouble(m4.group(1)));
+        results.setCount(MENTION_F1, Double.parseDouble(m4.group(2)));
       }
       Matcher m5 = CEAFE_PATTERN.matcher(line);
-      if (m5.matches() ){
-        results.setCount(CEAFE_TP, Double.parseDouble(m5.group(1)));
-        results.setCount(CEAFE_F1, Double.parseDouble(m5.group(2)));
+      if (m1.matches() ){
+        results.setCount(MENTION_TP, Double.parseDouble(m5.group(1)));
+        results.setCount(MENTION_F1, Double.parseDouble(m5.group(2)));
       }
       Matcher m6 = BLANC_PATTERN.matcher(line);
-      if (m6.matches() ){
-        results.setCount(BLANC_F1, Double.parseDouble(m6.group(1)));
+      if (m1.matches() ){
+        results.setCount(MENTION_TP, Double.parseDouble(m6.group(1)));
       }
       Matcher m7 = CONLL_PATTERN.matcher(line);
-      if (m7.matches() ){
-        results.setCount(CONLL_SCORE, Double.parseDouble(m7.group(1)));
+      if (m1.matches() ){
+        results.setCount(MENTION_TP, Double.parseDouble(m7.group(1)));
       }
     }
 
