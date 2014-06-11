@@ -18,7 +18,6 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 public class Dictionaries {
 
@@ -248,7 +247,7 @@ public class Dictionaries {
    *  Otherwise, null is returned.
    *
    *  @param name Is treated as a cased string. ME != me
-   */
+   */ 
   public String lookupCanonicalAmericanStateName(String name) {
     return statesAbbreviation.get(name);
   }
@@ -288,7 +287,7 @@ public class Dictionaries {
 
   /** Returns a set of demonyms for a country (or city or region).
    *  @param name Some string perhaps a country name like "Australia"
-   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }.
+   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }. 
    *     If none are known (including if the argument isn't a country/region name,
    *     then the empty set will be returned.
    */
@@ -300,9 +299,9 @@ public class Dictionaries {
     return result;
   }
 
-  /** Returns whether this mention (possibly multi-word) is the
+  /** Returns whether this mention (possibly multi-word) is the 
    *  adjectival form of a demonym, like "African" or "Iraqi".
-   *  True if it is an adjectival form, even if also a name for a
+   *  True if it is an adjectival form, even if also a name for a 
    *  person of that country (such as "Iraqi").
    */
   public boolean isAdjectivalDemonym(String token) {
@@ -359,7 +358,8 @@ public class Dictionaries {
   private void loadCountriesLists(String file) {
     try{
       BufferedReader reader = IOUtils.readerFromString(file);
-      for (String line; (line = reader.readLine()) != null; ) {
+      while(reader.ready()) {
+        String line = reader.readLine();
         countries.add(line.split("\t")[1].toLowerCase());
       }
       reader.close();
@@ -368,16 +368,15 @@ public class Dictionaries {
     }
   }
 
-  /**
-   * Load Bergsma and Lin (2006) gender and number list.
-   *
-   */
-  // todo: This is a complete memory hog. It takes at least 600MB and probably does pretty little. Either store more efficiently or just eliminate?
-  private void loadGenderNumber(String file, String neutralWordsFile) {
+  /** 
+   * load Bergsma and Lin (2006) gender and number list
+   * */
+  private void loadGenderNumber(String file, String neutralWordsFile){
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
       BufferedReader reader = IOUtils.readerFromString(file);
-      for (String line; (line = reader.readLine()) != null; ) {
+      String line;
+      while ((line = reader.readLine())!=null){
         String[] split = line.split("\t");
         List<String> tokens = new ArrayList<String>(Arrays.asList(split[0].split(" ")));
         String[] countStr = split[1].split(" ");
@@ -474,11 +473,10 @@ public class Dictionaries {
         props.getProperty(Constants.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
         props.getProperty(Constants.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
         props.getProperty(Constants.SIEVES_PROP, Constants.SIEVEPASSES).contains("CorefDictionaryMatch"),
-        PropertiesUtils.getStringArray(props, Constants.DICT_LIST_PROP,
-                                       new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
-                                                    DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
-        props.getProperty(Constants.DICT_PMI_PROP, DefaultPaths.DEFAULT_DCOREF_DICT1),
-        props.getProperty(Constants.SIGNATURES_PROP, DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES));
+        new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
+          DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4},
+        DefaultPaths.DEFAULT_DCOREF_DICT1,
+        DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES);
   }
 
   public static String signature(Properties props) {
