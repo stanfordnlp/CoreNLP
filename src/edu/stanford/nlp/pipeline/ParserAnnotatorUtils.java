@@ -10,7 +10,6 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
@@ -56,15 +55,11 @@ public class ParserAnnotatorUtils {
 
       Integer sentenceIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
       int index = (sentenceIndex == null) ? 0 : sentenceIndex;
-      
-      // TODO: get rid of the deepCopy() once we fix the GSF to not modify the input tree
-      Tree copy = tree.deepCopy();
-      GrammaticalStructure gs = gsf.newGrammaticalStructure(copy);
 
       // generate the dependency graph
-      SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gs, docID, index);
-      SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gs, docID, index);
-      SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gs, docID, index);
+      SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
+      SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
+      SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
       if (verbose) {
         System.err.println("SDs:");
         System.err.println(deps.toString("plain"));
