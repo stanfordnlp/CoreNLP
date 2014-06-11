@@ -862,7 +862,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       for (File f : Data.sentsFiles) {
 
-        Redwood.log(Redwood.DBG, constVars.computeAllPatterns ? "Creating patterns and " : "" + "calculating sufficient statistics from " + f);
+        Redwood.log(Redwood.DBG, (constVars.computeAllPatterns ? "Creating patterns and " : "") + "calculating sufficient statistics from " + f);
 
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
 
