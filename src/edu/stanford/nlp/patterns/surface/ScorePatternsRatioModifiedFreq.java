@@ -45,7 +45,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   }
 
   @Override
-  Counter<SurfacePattern> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+  Counter<SurfacePattern> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
     // TODO: changed
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
@@ -116,11 +116,12 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       TwoDimensionalCounter<SurfacePattern, String> patternsandWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
       Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat)
-      throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+      throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
     if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
       Data.loadGoogleNGrams();
     }
+    Data.computeRawFreqIfNull(constVars.numWordsCompound);
 
     Counter<SurfacePattern> patterns = new ClassicCounter<SurfacePattern>();
 

@@ -782,25 +782,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (this.patternsForEachToken == null) {
       if (constVars.computeAllPatterns) {
         Redwood.log(Redwood.DBG, "Computing all patterns");
-        if(!constVars.batchProcessSents){
         this.patternsForEachToken = createPats
             .getAllPatterns(label, Data.sents);
-        
-        }
-        //batch processing sentences
-        else{
-          this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
-         for(File f: Data.sentsFiles){
-           Redwood.log(Redwood.DBG, "Creating patterns from " + f);
-          Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-           this.patternsForEachToken.putAll(createPats
-          .getAllPatterns(label, sents));
-          }
-        }
+        // if (removeRedundantPatterns)
+        // removeRedundantPatterns(numThreads);
         if (constVars.allPatternsFile != null)
           IOUtils.writeObjectToFile(this.patternsForEachToken,
-              constVars.allPatternsFile+"/001.ser");
-        
+              constVars.allPatternsFile);
       } else {
         this.patternsForEachToken = IOUtils
             .readObjectFromFile(constVars.allPatternsFile);
@@ -1607,52 +1595,51 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             .get(label);
         IOUtils.ensureDir(new File(constVars.outDir + "/"
             + constVars.identifier + "/" + label));
-        if(constVars.writeMatchedTokensFiles){
-          String matchedtokensfilename = constVars.outDir + "/"
-              + constVars.identifier + "/" + label + "/tokensmatchedpatterns"
-              + ".json";
-          JsonObjectBuilder pats = Json.createObjectBuilder();
-          for (Entry<SurfacePattern, Collection<Triple<String, Integer, Integer>>> en : tokensMatchedPat
-              .entrySet()) {
-            CollectionValuedMap<String, Pair<Integer, Integer>> matchedStrs = new CollectionValuedMap<String, Pair<Integer, Integer>>();
-            for (Triple<String, Integer, Integer> en2 : en.getValue()) {
-              allMatchedSents.add(en2.first());
-              matchedStrs.add(en2.first(),
-                  new Pair<Integer, Integer>(en2.second(), en2.third()));
-            }
-  
-            JsonObjectBuilder senttokens = Json.createObjectBuilder();
-            for (Entry<String, Collection<Pair<Integer, Integer>>> sen : matchedStrs
-                .entrySet()) {
-              JsonArrayBuilder obj = Json.createArrayBuilder();
-              for (Pair<Integer, Integer> sen2 : sen.getValue()) {
-                JsonArrayBuilder startend = Json.createArrayBuilder();
-                startend.add(sen2.first());
-                startend.add(sen2.second());
-                obj.add(startend);
-              }
-              senttokens.add(sen.getKey(), obj);
-            }
-            pats.add(en.getKey().toStringSimple(), senttokens);
+
+        String matchedtokensfilename = constVars.outDir + "/"
+            + constVars.identifier + "/" + label + "/tokensmatchedpatterns"
+            + ".json";
+        JsonObjectBuilder pats = Json.createObjectBuilder();
+        for (Entry<SurfacePattern, Collection<Triple<String, Integer, Integer>>> en : tokensMatchedPat
+            .entrySet()) {
+          CollectionValuedMap<String, Pair<Integer, Integer>> matchedStrs = new CollectionValuedMap<String, Pair<Integer, Integer>>();
+          for (Triple<String, Integer, Integer> en2 : en.getValue()) {
+            allMatchedSents.add(en2.first());
+            matchedStrs.add(en2.first(),
+                new Pair<Integer, Integer>(en2.second(), en2.third()));
           }
-          IOUtils.writeStringToFile(pats.build().toString(),
-              matchedtokensfilename, "utf8");
-  
-          // Writing the sentence json file -- tokens for each sentence
+
           JsonObjectBuilder senttokens = Json.createObjectBuilder();
-          for (String sentId : allMatchedSents) {
-            JsonArrayBuilder sent = Json.createArrayBuilder();
-            for (CoreLabel l : Data.sents.get(sentId)) {
-              sent.add(l.word());
+          for (Entry<String, Collection<Pair<Integer, Integer>>> sen : matchedStrs
+              .entrySet()) {
+            JsonArrayBuilder obj = Json.createArrayBuilder();
+            for (Pair<Integer, Integer> sen2 : sen.getValue()) {
+              JsonArrayBuilder startend = Json.createArrayBuilder();
+              startend.add(sen2.first());
+              startend.add(sen2.second());
+              obj.add(startend);
             }
-            senttokens.add(sentId, sent);
+            senttokens.add(sen.getKey(), obj);
           }
-          String sentfilename = constVars.outDir + "/" + constVars.identifier
-              + "/sentences" + ".json";
-          IOUtils.writeStringToFile(senttokens.build().toString(), sentfilename,
-              "utf8");
+          pats.add(en.getKey().toStringSimple(), senttokens);
         }
+        IOUtils.writeStringToFile(pats.build().toString(),
+            matchedtokensfilename, "utf8");
+
+        // Writing the sentence json file -- tokens for each sentence
+        JsonObjectBuilder senttokens = Json.createObjectBuilder();
+        for (String sentId : allMatchedSents) {
+          JsonArrayBuilder sent = Json.createArrayBuilder();
+          for (CoreLabel l : Data.sents.get(sentId)) {
+            sent.add(l.word());
+          }
+          senttokens.add(sentId, sent);
         }
+        String sentfilename = constVars.outDir + "/" + constVars.identifier
+            + "/sentences" + ".json";
+        IOUtils.writeStringToFile(senttokens.build().toString(), sentfilename,
+            "utf8");
+      }
 
     }
 
@@ -1714,7 +1701,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         sentsOutFile = sentsOutFile + "_" + i + "iter.ser";
 
       Counter<String> scoreForAllWordsThisIteration = new ClassicCounter<String>();
-      identifiedWords.addAll(scorePhrases.learnNewPhrases(label, this.patternsForEachToken, patterns, learnedPatterns.get(label),
+      identifiedWords.addAll(scorePhrases.learnNewPhrases(label, Data.sents,
+          this.patternsForEachToken, patterns, learnedPatterns.get(label),
           matchedTokensByPat, scoreForAllWordsThisIteration, terms,
           wordsPatExtracted.get(label), currentPatternWeights.get(label),
           this.patternsandWords.get(label),
@@ -1723,20 +1711,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       if (constVars.usePatternResultAsLabel)
         if (constVars.getLabelDictionary().containsKey(label))
-        {
-          if(constVars.batchProcessSents){
-            for(File f: Data.sentsFiles){
-              Redwood.log(Redwood.DBG, "labeling sentences from " + f);
-              Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-              labelWords(label, sents, identifiedWords.keySet(),
-                  patterns.keySet(), sentsOutFile, matchedTokensByPat);
-              IOUtils.writeObjectToFile(sents, f);
-            }
-          }
-          else
-            labelWords(label, Data.sents, identifiedWords.keySet(),
+          labelWords(label, Data.sents, identifiedWords.keySet(),
               patterns.keySet(), sentsOutFile, matchedTokensByPat);
-          }
         else
           throw new RuntimeException("why is the answer label null?");
       learnedWords.get(label).addAll(identifiedWords);
@@ -2294,9 +2270,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
       }
 
-//      Map<String, List<CoreLabel>> sents = null;
-//      if(!batchProcessSents)
-//        sents = new HashMap<String, List<CoreLabel>>();
+      Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
 
       String file = props.getProperty("file");
 
@@ -2320,7 +2294,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (file != null) {
         List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
-          int numMaxSentencesPerBatchFile = Integer.parseInt(props.getProperty("numMaxSentencesPerBatchFile", "Integer.MAX_VALUE"));
           for (File f : allFiles) {
             Redwood.log(Redwood.DBG, "Annotating text in " + f);
             
@@ -2330,12 +2303,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                                   f.getName() + "-", useTargetParserParentRestriction,
                                   props.getProperty("numThreads")));
           }
-          String saveSentencesSerDir = props.getProperty("saveSentencesSerDir");
-          if (saveSentencesSerDir != null) {
-            IOUtils.writeObjectToFile(sents, saveSentencesSerDir+"/sents_001.ser");
-          }else
-            saveSentencesSerDir = 
-          
+
         } else if (fileFormat.equalsIgnoreCase("ser")) {
           for (File f : allFiles) {
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
@@ -2387,7 +2355,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (saveEvalSentencesSerFile != null) {
         IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFile);
       }
-
+      String saveSentencesSerFile = props.getProperty("saveSentencesSerFile");
+      if (saveSentencesSerFile != null) {
+        IOUtils.writeObjectToFile(sents, saveSentencesSerFile);
+      }
 
       Execution.fillOptions(g, props);
       if (learn) {

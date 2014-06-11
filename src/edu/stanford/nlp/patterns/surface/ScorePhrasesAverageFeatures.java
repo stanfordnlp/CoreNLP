@@ -32,7 +32,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
   
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents, String label, TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) {
     Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();

@@ -529,10 +529,7 @@ public class ConstantsAndVariables {
    */
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
-  
-  @Option(name="tempFileFolder")
-  public String tempFileFolder = null;
-  
+
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
@@ -725,12 +722,6 @@ public class ConstantsAndVariables {
   }
 
   double editDistMax = 100;
-
-  
-  public boolean batchProcessSents = false;
-
-  @Option(name="writeMatchedTokensFiles")
-  public boolean writeMatchedTokensFiles = false;
 
   public Pair<String, Double> getEditDistanceFromThisClass(String label,
       String ph, int minLen) {
