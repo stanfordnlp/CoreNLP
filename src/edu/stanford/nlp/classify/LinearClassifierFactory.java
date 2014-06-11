@@ -503,7 +503,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public void useStochasticGradientDescent(final double gainSGD, final int stochasticBatchSize){
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
       public Minimizer<DiffFunction> create() {
-        return new SGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
+        return new InefficientSGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
       }
     };
   }
@@ -515,7 +515,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public void useInPlaceStochasticGradientDescent(final int SGDPasses, final int tuneSampleSize, final double sigma) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
       public Minimizer<DiffFunction> create() {
-        return new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+        return new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
       }
     };
   }
@@ -523,7 +523,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public void useHybridMinimizerWithInPlaceSGD(final int SGDPasses, final int tuneSampleSize, final double sigma) {
     this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
       public Minimizer<DiffFunction> create() {
-        Minimizer<DiffFunction> firstMinimizer = new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+        Minimizer<DiffFunction> firstMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
         Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
         return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
       }
