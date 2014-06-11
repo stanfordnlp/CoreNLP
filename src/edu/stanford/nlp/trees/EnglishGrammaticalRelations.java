@@ -1345,12 +1345,13 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "tmod", "temporal modifier",
         TemporalModifierGRAnnotation.class, NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP|RRC", tregexCompiler,
         new String[] {
-          "VP|ADJP|RRC < NP-TMP=target",
-          "VP|ADJP|RRC < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old))",
+          // VP <# NP-TMP is for phrases which might be parsed as VP over an empty verb such as 
+          //  "Yesterday I went running, but I couldn't today"
+          "VP|ADJP|RRC [ < NP-TMP=target | < (VP=target <# NP-TMP !$ /^,|CC|CONJP$/) | < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old)) ]",
           // CDM Jan 2010: For constructions like "during the same period last year"
-          "@PP < (IN|TO|VBG|FW $++ (@NP $+ NP-TMP=target))",
-          "@PP < (IN|TO|VBG|FW $++ (@NP $+ (NP=target <# (/^NN/ < " + timeWordRegex + "))))",
-          "S < (NP-TMP=target $++ VP [ $++ NP | $-- NP] )",
+          // combining expressions into a single disjunction should improve speed a little
+          "@PP < (IN|TO|VBG|FW $++ (@NP [ $+ NP-TMP=target | $+ (NP=target <# (/^NN/ < " + timeWordRegex + ")) ]))",
+          "S < (NP-TMP=target $++ VP $ NP )",
           "S < (NP=target <# (/^NN/ < " + timeWordRegex + ") $++ (NP $++ VP))",
           // matches when relative clauses as temporal modifiers of verbs!
           "SBAR < (@WHADVP < (WRB < when)) < (S < (NP $+ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) ))) !$-- CC $-- NP > NP=target",
