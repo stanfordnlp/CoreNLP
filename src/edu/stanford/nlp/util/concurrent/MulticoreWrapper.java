@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MulticoreWrapper<I,O> {
 
-  private long maxSubmitBlockTime = 30000;
+  private long maxSubmitBlockTime = 0;
 
   private final int nThreads;
   private int lastSubmittedItemId = 0;
@@ -46,13 +45,12 @@ public class MulticoreWrapper<I,O> {
 
   private final PriorityQueue<QueueItem<O>> outputQueue;
   private final ThreadPoolExecutor threadPool;
-//  private final ExecutorCompletionService<Integer> queue;
-  private final LinkedBlockingQueue<Integer> idleProcessors;
+  private final ExecutorCompletionService<JobResult<O>> queue;
+  private final Queue<Integer> idleProcessors;
   private final List<ThreadsafeProcessor<I,O>> processorList;
-  private final JobCallback<O> callback;
   // keep track of which jobs are running so we can cancel them if
   // something goes wrong
-  private final Map<Integer, Future<Integer>> runningJobs;
+  private final Map<Integer, Future<JobResult<O>>> runningJobs;
 
   /**
    * Constructor.
@@ -79,22 +77,14 @@ public class MulticoreWrapper<I,O> {
     this.orderResults = orderResults;
     outputQueue = new PriorityQueue<QueueItem<O>>(10*nThreads);
     threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
-//    queue = new ExecutorCompletionService<Integer>(threadPool);
+    queue = new ExecutorCompletionService<JobResult<O>>(threadPool);
     processorList = new ArrayList<ThreadsafeProcessor<I,O>>(nThreads);
-    idleProcessors = new LinkedBlockingQueue<Integer>();
-    runningJobs = new HashMap<Integer, Future<Integer>>();
-    callback = new JobCallback<O>() {
-      @Override
-      public void call(QueueItem<O> result, int processorId) {
-        outputQueue.add(result);
-        idleProcessors.add(processorId);
-      }
-    };
+    idleProcessors = new ConcurrentLinkedQueue<Integer>();
+    runningJobs = new HashMap<Integer, Future<JobResult<O>>>();
 
     // Sanity check: Fixed thread pool so prevent timeouts.
     // Default should be false
     threadPool.allowCoreThreadTimeOut(false);
-    threadPool.prestartAllCoreThreads();
 
     // Setup the processors, one per thread
     processorList.add(processor);
@@ -139,70 +129,61 @@ public class MulticoreWrapper<I,O> {
    * 
    */
   public synchronized void put(I item) throws RejectedExecutionException {
-//    if (idleProcessors.peek() == null) blockingGetResult();
-    int procId;
-    try {
-      // TODO: null value if the query fails, so handle that.
-      procId = idleProcessors.poll(maxSubmitBlockTime, TimeUnit.MILLISECONDS);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return;
-    }
+    if (idleProcessors.peek() == null) blockingGetResult();
+    int procId = idleProcessors.poll();
     int itemId = lastSubmittedItemId++;
-    CallableJob<I,O> job = new CallableJob<I,O>(item, itemId, processorList.get(procId), procId,
-        callback);
-    Future<Integer> future = threadPool.submit(job);
-//    runningJobs.put(itemId, future);
+    CallableJob<I,O> job = new CallableJob<I,O>(item, itemId, processorList.get(procId), procId);
+    Future<JobResult<O>> future = queue.submit(job);
+    runningJobs.put(itemId, future);
   }
 
   /**
    * Block until process specified by processorId returns a result.
    */
-//  private void blockingGetResult() {
-//    try {
-//      // Blocking call
-//      Future<JobResult<O>> resultFuture;
-//      if (maxSubmitBlockTime > 0) {
-//        resultFuture = queue.poll(maxSubmitBlockTime, TimeUnit.MILLISECONDS);
-//      } else {
-//        resultFuture = queue.take();
-//      }
-//      if (resultFuture != null) {
-//        JobResult<O> result = resultFuture.get();
-//        QueueItem<O> output = new QueueItem<O>(result.output, result.inputItemId);
-//        outputQueue.add(output);
-//        idleProcessors.add(result.processorId);
-//        runningJobs.remove(result.inputItemId);
-//        return;
-//      }
-//    } catch (InterruptedException e) {
-//      threadPool.shutdownNow();
-//      throw new RuntimeException(e);
-//    } catch (ExecutionException e) {
-//      threadPool.shutdownNow();
-//      throw new RuntimeException(e);
-//    }
-//
-//    // oops, timed out or hit other error
-//    // first, remove everything from the queue
-//    // then put null entries into the output queue and hope the
-//    // consumer knows how to handle that
-//    for (Map.Entry<Integer, Future<JobResult<O>>> entry : runningJobs.entrySet()) {
-//      entry.getValue().cancel(true);
-//      QueueItem<O> output = new QueueItem<O>(null, entry.getKey());
-//      outputQueue.add(output);
-//    }
-//    runningJobs.clear();
-//    for (int i = 0; i < nThreads; ++i) {
-//      try {
-//        queue.take();
-//        idleProcessors.add(i);
-//      } catch (InterruptedException e) {
-//        throw new RuntimeException(e);
-//      }
-//    }
-//  }
+  private void blockingGetResult() {
+    try {
+      // Blocking call
+      Future<JobResult<O>> resultFuture;
+      if (maxSubmitBlockTime > 0) {
+        resultFuture = queue.poll(maxSubmitBlockTime, TimeUnit.MILLISECONDS);
+      } else {
+        resultFuture = queue.take();
+      }
+      if (resultFuture != null) {
+        JobResult<O> result = resultFuture.get();
+        QueueItem<O> output = new QueueItem<O>(result.output, result.inputItemId);
+        outputQueue.add(output);
+        idleProcessors.add(result.processorId);
+        runningJobs.remove(result.inputItemId);
+        return;
+      }
+    } catch (InterruptedException e) {
+      threadPool.shutdownNow();
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      threadPool.shutdownNow();
+      throw new RuntimeException(e);
+    }
+
+    // oops, timed out or hit other error
+    // first, remove everything from the queue
+    // then put null entries into the output queue and hope the
+    // consumer knows how to handle that
+    for (Map.Entry<Integer, Future<JobResult<O>>> entry : runningJobs.entrySet()) {
+      entry.getValue().cancel(true);
+      QueueItem<O> output = new QueueItem<O>(null, entry.getKey());
+      outputQueue.add(output);
+    }
+    runningJobs.clear();
+    for (int i = 0; i < nThreads; ++i) {
+      try {
+        queue.take();
+        idleProcessors.add(i);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
 
   /**
    * Blocks until all active processes finish.
@@ -210,15 +191,8 @@ public class MulticoreWrapper<I,O> {
   public void join() {
     // Make blocking calls to the last processes that are running
     if ( ! threadPool.isShutdown()) {
-      int numActiveThreads = nThreads - idleProcessors.size();
-      while(numActiveThreads > 0) {
-        try {
-          idleProcessors.take();
-        } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-        --numActiveThreads;
+      while(idleProcessors.size() != nThreads) {
+        blockingGetResult();
       }
       threadPool.shutdown();
     }
@@ -251,16 +225,23 @@ public class MulticoreWrapper<I,O> {
   }
 
   /**
-   * Internal class for a result when a CallableJob completes.
-   * 
+   * Internal class for the result of a CallableJob.
+   *
    * @author Spence Green
    *
    * @param <O>
    */
-  private static interface JobCallback<O> {
-    public void call(QueueItem<O> result, int processorId);
+  private static class JobResult<O> {
+    public final O output;
+    public final int inputItemId;
+    public final int processorId;
+    public JobResult(O result, int inputItemId, int processorId) {
+      this.output = result;
+      this.inputItemId = inputItemId;
+      this.processorId = processorId;
+    }
   }
-  
+
   /**
    * Internal class for adding a job to the thread pool.
    *
@@ -269,28 +250,22 @@ public class MulticoreWrapper<I,O> {
    * @param <I>
    * @param <O>
    */
-  private static class CallableJob<I,O> implements Callable<Integer> {
+  private static class CallableJob<I,O> implements Callable<JobResult<O>> {
     private final I item;
     private final int itemId;
     private final ThreadsafeProcessor<I,O> processor;
     private final int processorId;
-    private final JobCallback<O> callback;
-    
-    public CallableJob(I item, int itemId, ThreadsafeProcessor<I,O> processor, int processorId, 
-        JobCallback<O> callback) {
+
+    public CallableJob(I item, int itemId, ThreadsafeProcessor<I,O> processor, int processorId) {
       this.item = item;
       this.itemId = itemId;
       this.processor = processor;
       this.processorId = processorId;
-      this.callback = callback;
     }
 
     @Override
-    public Integer call() throws Exception {
-      O result = processor.process(item);
-      QueueItem<O> output = new QueueItem<O>(result, itemId);
-      callback.call(output, processorId);
-      return itemId;
+    public JobResult<O> call() throws Exception {
+      return new JobResult<O>(processor.process(item), itemId, processorId);
     }
   }
 
