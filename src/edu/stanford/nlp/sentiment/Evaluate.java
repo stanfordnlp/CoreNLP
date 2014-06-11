@@ -154,8 +154,16 @@ public class Evaluate {
     return approxAccuracy(labelConfusion, NEG_CLASSES, POS_CLASSES);
   }
 
+  public double approxNegPosCombinedAccuracy() {
+    return approxCombinedAccuracy(labelConfusion, NEG_CLASSES, POS_CLASSES);
+  }
+
   public double[] approxRootNegPosAccuracy() {
     return approxAccuracy(rootLabelConfusion, NEG_CLASSES, POS_CLASSES);
+  }
+
+  public double approxRootNegPosCombinedAccuracy() {
+    return approxCombinedAccuracy(rootLabelConfusion, NEG_CLASSES, POS_CLASSES);
   }
 
   private static void printConfusionMatrix(String name, int[][] confusion) {
@@ -194,6 +202,30 @@ public class Evaluate {
     return results;
   }
 
+  private static double approxCombinedAccuracy(int[][] confusion, int[] ... classes) {
+    int correct = 0;
+    int incorrect = 0;
+    for (int i = 0; i < classes.length; ++i) {
+      for (int j = 0; j < classes[i].length; ++j) {
+        for (int k = 0; k < classes[i].length; ++k) {
+          correct += confusion[classes[i][j]][classes[i][k]];
+        }
+      }
+      for (int other = 0; other < classes.length; ++other) {
+        if (other == i) {
+          continue;
+        }
+        for (int j = 0; j < classes[i].length; ++j) {
+          for (int k = 0; k < classes[other].length; ++k) {
+            incorrect += confusion[classes[i][j]][classes[other][k]];
+            incorrect += confusion[classes[other][j]][classes[i][k]];
+          }
+        }
+      }
+    }
+    return ((double) correct) / ((double) (correct + incorrect));
+  }
+
   public void printSummary() {
     System.err.println("EVALUATION SUMMARY");
     System.err.println("Tested " + (labelsCorrect + labelsIncorrect) + " labels");
@@ -211,10 +243,12 @@ public class Evaluate {
     double[] approxLabelAccuracy = approxNegPosAccuracy();
     System.err.println("Approximate negative label accuracy: " + NF.format(approxLabelAccuracy[0]));
     System.err.println("Approximate positive label accuracy: " + NF.format(approxLabelAccuracy[1]));
+    System.err.println("Combined approximate label accuracy: " + NF.format(approxNegPosCombinedAccuracy()));
 
     double[] approxRootLabelAccuracy = approxRootNegPosAccuracy();
     System.err.println("Approximate negative root label accuracy: " + NF.format(approxRootLabelAccuracy[0]));
     System.err.println("Approximate positive root label accuracy: " + NF.format(approxRootLabelAccuracy[1]));
+    System.err.println("Combined approximate root label accuracy: " + NF.format(approxRootNegPosCombinedAccuracy()));
 
     //printLengthAccuracies();
   }
