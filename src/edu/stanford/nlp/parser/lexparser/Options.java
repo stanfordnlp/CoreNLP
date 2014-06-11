@@ -340,6 +340,9 @@ public class Options implements Serializable {
       trainOptions.HSEL_CUT = Integer.parseInt(args[i + 1]);
       trainOptions.hSelSplit = trainOptions.HSEL_CUT > 0;
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-nohSelSplit")) {
+      trainOptions.hSelSplit = false;
+      i += 1;
     } else if (args[i].equalsIgnoreCase("-tagPA")) {
       trainOptions.tagPA = true;
       i += 1;
