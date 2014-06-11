@@ -138,12 +138,13 @@ public class Morphology implements Function {
    *      be changed to all lowercase.
    */
   private static String lemmatize(String word, String tag, Morpha lexer, boolean lowercase) {
-    boolean wordHasForbiddenChar = word.indexOf('_') >= 0 ||word.indexOf(' ') >= 0;
+    boolean wordHasForbiddenChar = word.indexOf('_') >= 0 || word.indexOf(' ') >= 0 || word.indexOf('\n') >= 0;
     String quotedWord = word;
     if (wordHasForbiddenChar) {
       // choose something unlikely. Classical Vedic!
       quotedWord = quotedWord.replaceAll("_", "\u1CF0");
       quotedWord = quotedWord.replaceAll(" ", "\u1CF1");
+      quotedWord = quotedWord.replaceAll("\n", "\u1CF2");
     }
     String wordtag = quotedWord + '_' + tag;
     if (DEBUG) System.err.println("Trying to normalize |" + wordtag + "|");
@@ -157,6 +158,7 @@ public class Morphology implements Function {
         if (DEBUG) System.err.println("Restoring forbidden chars");
         wordRes = wordRes.replaceAll("\u1CF0", "_");
         wordRes = wordRes.replaceAll("\u1CF1", " ");
+        wordRes = wordRes.replaceAll("\u1CF2", "\n");
       }
       return wordRes;
     } catch (IOException e) {
