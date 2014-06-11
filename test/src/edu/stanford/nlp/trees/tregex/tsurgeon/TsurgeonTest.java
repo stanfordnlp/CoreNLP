@@ -431,6 +431,18 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B foo) (C bar) (D baz))", "(A (B foo) (BC bar) (BD baz))");
   }
 
+  public void testIfExists() {
+    // This should successfully compile, assuming the keyword parsing is correct
+    TregexPattern tregex = TregexPattern.compile("A=foo [ << B=bar | << C=baz ]");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("if exists bar relabel bar BAR");
+    runTest(tregex, tsurgeon, "(A (B foo))", "(A (BAR foo))");
+
+    tsurgeon = Tsurgeon.parseOperation("[if exists bar relabel bar BAR] [if exists baz relabel baz BAZ]");
+    runTest(tregex, tsurgeon, "(A (B foo))", "(A (BAR foo))");
+    runTest(tregex, tsurgeon, "(A (C foo))", "(A (BAZ foo))");
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo))", "(A (BAR foo) (BAZ foo))");
+  }
+
   public void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
                       String input, String expected) {
     Tree result = Tsurgeon.processPattern(tregex, tsurgeon, 
