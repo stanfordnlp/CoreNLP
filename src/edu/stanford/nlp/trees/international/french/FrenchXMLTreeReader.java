@@ -77,8 +77,8 @@ public class FrenchXMLTreeReader implements TreeReader {
    *
    * @param in The <code>Reader</code>
    */
-  public FrenchXMLTreeReader(Reader in) {
-    this(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer());
+  public FrenchXMLTreeReader(Reader in, boolean ccTagset) {
+    this(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer(ccTagset));
   }
 
   /**
@@ -344,7 +344,7 @@ public class FrenchXMLTreeReader implements TreeReader {
     for(int i = 0; i < args.length; i++)
       fileList.add(new File(args[i]));
 
-    TreeReaderFactory trf = new FrenchXMLTreeReaderFactory();
+    TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false);
     int totalTrees = 0;
     Set<String> morphAnalyses = Generics.newHashSet();
     try {

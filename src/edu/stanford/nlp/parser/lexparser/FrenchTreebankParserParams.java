@@ -563,7 +563,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
   }
 
   public TreeReaderFactory treeReaderFactory() {
-    return (readPennFormat) ? new FrenchTreeReaderFactory() : new FrenchXMLTreeReaderFactory();
+    return (readPennFormat) ? new FrenchTreeReaderFactory() : new FrenchXMLTreeReaderFactory(false);
   }
 
   public List<HasWord> defaultTestSentence() {
