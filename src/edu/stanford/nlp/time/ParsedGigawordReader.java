@@ -3,6 +3,7 @@ package edu.stanford.nlp.time;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -44,7 +45,7 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
           new Function<File, BufferedReader>() {
             @Override
             public BufferedReader apply(File file) {
-              return IOUtils.readerFromFile(file);
+              return new BufferedReader(new InputStreamReader(IOUtils.openFile(file)));
             }
       }).iterator();
 
