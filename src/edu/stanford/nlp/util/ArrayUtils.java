@@ -708,12 +708,6 @@ public class ArrayUtils {
     return newI;
   }
 
-  public static long[] copy(long[] arr) {
-    if (arr == null) { return null; }
-    long[] newArr = new long[arr.length];
-    System.arraycopy(arr, 0, newArr, 0, arr.length);
-    return newArr;
-  }
 
   public static int[] copy(int[] i) {
     if (i == null) { return null; }
