@@ -331,10 +331,16 @@ public class TsurgeonTest extends TestCase {
       // good, we expected to fail if you try to replace the root node with two nodes
     }
 
+    // it is possible for numbers to work and words to not work if
+    // the tsurgeon parser is not correct
     tsurgeon = Tsurgeon.parseOperation("replace foo (BAR blah)");
     tregex = TregexPattern.compile("B=foo");
     runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR blah) (BAR blah) (C 2))");
   }
+
+  // public void testKeywords() {
+  //   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace foo replace");
+  // }
 
   /**
    * Test (part of) an actual tree that we use in the Chinese transforming reader
@@ -391,6 +397,19 @@ public class TsurgeonTest extends TestCase {
 
     // Test that it indexes at 2 instead of 1
     runTest(tregex, tsurgeon, "(A (B foo) (C-1 bar) (C baz))", "(A-2 (B-2 foo) (C-1 bar) (C-2 baz))");
+  }
+
+  /**
+   * Since tsurgeon uses a lot of keywords, those keywords would not
+   * be allowed in the operations unless you handle them correctly
+   * (for example, using lexical states).  This tests that this is
+   * done correctly.
+   */
+  public void testKeyword() {
+    // This should successfully compile, assuming the keyword parsing is correct
+    TregexPattern tregex = TregexPattern.compile("A=foo << B=bar << C=baz");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("relabel foo relabel");
+    runTest(tregex, tsurgeon, "(A (B foo) (C foo) (C bar))", "(relabel (B foo) (C foo) (C bar))");
   }
 
   public void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
