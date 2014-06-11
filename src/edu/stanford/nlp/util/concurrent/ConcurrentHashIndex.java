@@ -60,9 +60,11 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   public E get(int i) {
     Object[] arr = index2Item.get();
     if (i < size()) {
+      // arr.length guaranteed to be == to size() given the
+      // implementation of indexOf below.
       return (E) arr[i];
     }
-    throw new ArrayIndexOutOfBoundsException(String.format("Out of bounds: %d >= %d", i, arr.length));
+    throw new ArrayIndexOutOfBoundsException(String.format("Out of bounds: %d >= %d", i, size()));
   }
 
   @Override
