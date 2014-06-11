@@ -61,7 +61,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
                                String... loadPaths)
     throws FileNotFoundException
   {
-    super(ClassifierCombiner.extractCombinationModeSafe(nscProps), loadPaths);
+    super(loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
     this.useSUTime = useSUTime;
     this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
