@@ -75,7 +75,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
           Transition transition = parser.transitionIndex.get(predictedTransition.object());
           State newState = transition.apply(state, predictedTransition.score());
           // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
-          if (bestState == null || newState.score() < bestState.score()) {
+          if (bestState == null || bestState.score() < newState.score()) {
             bestState = newState;
           }
           beam.add(newState);
