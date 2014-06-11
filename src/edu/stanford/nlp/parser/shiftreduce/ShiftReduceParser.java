@@ -60,15 +60,15 @@ public class ShiftReduceParser implements Serializable, ParserQueryFactory {
       }
     }
 
-    int bestFeature = -1;
+    int bestTransition = -1;
     for (int i = 0; i < scores.length; ++i) {
-      if ((bestFeature < 0 || scores[i] > scores[bestFeature]) && 
+      if ((bestTransition < 0 || scores[i] > scores[bestTransition]) && 
           (!requireLegal || transitionIndex.get(i).isLegal(state))) {
-        bestFeature = i;
+        bestTransition = i;
       }
     }
     
-    return bestFeature;
+    return bestTransition;
   }
 
   public static State initialStateFromGoldTagTree(Tree tree) {
