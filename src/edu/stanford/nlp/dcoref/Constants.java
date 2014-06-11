@@ -98,6 +98,10 @@ public class Constants {
   public static final String RUN_DIST_CMD_WORK_DIR = "dcoref.dist.workdir";
   public static final String SCORE_FILE_PROP = "dcoref.score.output";
   public static final String SINGLETON_PROP = "dcoref.singleton.predictor";
+  public static final String SINGLETON_MODEL_PROP = "dcoref.singleton.model";
+  public static final String DICT_LIST_PROP = "dcoref.dictlist";
+  public static final String DICT_PMI_PROP = "dcoref.dictpmi";
+  public static final String SIGNATURES_PROP = "dcoref.signatures";
 
   public static final String ALLOW_REPARSING_PROP = "dcoref.allowReparsing";
 
