@@ -14,7 +14,7 @@ import java.util.*;
  *
  * @author Mengqiu Wang
  */
-public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>, HasEvaluators {
+public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer<T>, HasEvaluators {
 
   protected double[] x;
   protected double initRate;  // Initial stochastic iteration count
@@ -165,12 +165,12 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
   }
 
   @Override
-  public double[] minimize(Function function, double functionTolerance, double[] initial) {
+  public double[] minimize(DiffFunction function, double functionTolerance, double[] initial) {
     return minimize(function, functionTolerance, initial, -1);
   }
 
   @Override
-  public double[] minimize(Function f, double functionTolerance, double[] initial, int maxIterations) {
+  public double[] minimize(DiffFunction f, double functionTolerance, double[] initial, int maxIterations) {
     int totalSamples = 0;
     sayln("Using lambda=" + lambda);
     if (f instanceof AbstractStochasticCachingDiffUpdateFunction) {
