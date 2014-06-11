@@ -1,8 +1,6 @@
 package edu.stanford.nlp.util;
 
-import java.util.Collections;
 import java.util.EmptyStackException;
-import java.util.List;
 
 /**
  * Represents a stack where one prefix of the stack can branch in
@@ -64,35 +62,6 @@ public class TreeShapedStack<T> {
    */
   public int size() { 
     return size; 
-  }
-
-  /**
-   * Returns the current stack as a list
-   */
-  public List<T> asList() {
-    List<T> result = Generics.newArrayList(size);
-    TreeShapedStack<T> current = this;
-    for (int index = 0; index < size; ++index) {
-      result.add(current.data);
-      current = current.pop();
-    }
-    Collections.reverse(result);
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    return "[" + internalToString() + "]";
-  }
-
-  private String internalToString() {
-    if (size() == 0) {
-      return " ";
-    } else if (size() == 1) {
-      return data.toString();
-    } else {
-      return data.toString() + ", " + previous.internalToString();
-    }
   }
 
   final T data;

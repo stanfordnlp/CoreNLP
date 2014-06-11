@@ -36,7 +36,6 @@ import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.metrics.Eval;
-import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -398,12 +397,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
       return Collections.emptyList();
     }
   }
-
-
-  public List<ParserQueryEval> getParserQueryEvals() {
-    return Collections.emptyList();
-  }
-
 
   @Override
   public ParserQuery parserQuery() {
