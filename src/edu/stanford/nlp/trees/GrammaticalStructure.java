@@ -291,18 +291,15 @@ public abstract class GrammaticalStructure extends TreeGraph {
       // word.  In that case, we still want to add the root->word
       // dependency, but we won't find any roots using the getRoots()
       // method.  Instead we use the HeadFinder and the tree.
-      rootDep = root().headWordNode();
-      if (rootDep == null) {
-        List<Tree> leaves = Trees.leaves(root());
-        if (leaves.size() > 0) {
-          Tree leaf = leaves.get(0);
-          if (!(leaf instanceof TreeGraphNode)) {
-            throw new AssertionError("Leaves should be TreeGraphNodes");
-          }
-          rootDep = (TreeGraphNode) leaf;
-          if (rootDep.headWordNode() != null) {
-            rootDep = rootDep.headWordNode();
-          }
+      List<Tree> leaves = Trees.leaves(root());
+      if (leaves.size() > 0) {
+        Tree leaf = leaves.get(0);
+        if (!(leaf instanceof TreeGraphNode)) {
+          throw new AssertionError("Leaves should be TreeGraphNodes");
+        }
+        rootDep = (TreeGraphNode) leaf;
+        if (rootDep.headWordNode() != null) {
+          rootDep = rootDep.headWordNode();
         }
       }
     } else {
