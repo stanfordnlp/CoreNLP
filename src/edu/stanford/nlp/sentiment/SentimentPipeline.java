@@ -2,7 +2,9 @@ package edu.stanford.nlp.sentiment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -14,12 +16,15 @@ import java.util.Properties;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -41,6 +46,10 @@ public class SentimentPipeline {
 
   static enum Output {
     PENNTREES, VECTORS, ROOT, PROBABILITIES
+  }
+
+  static enum Input {
+    TEXT, TREES
   }
 
   /**
@@ -170,7 +179,33 @@ public class SentimentPipeline {
     System.err.println("  -file <filename>: Which file to process");
     System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
     System.err.println("  -stdin: Process stdin instead of a file");
-    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, or ROOT ");
+    System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees");
+    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, PROBABILITIES, or ROOT");
+  }
+
+  public static String getText(Input inputFormat, String filename) {
+    switch (inputFormat) {
+    case TEXT:
+      return IOUtils.slurpFileNoExceptions(filename);
+    case TREES:
+      try {
+        StringBuilder result = new StringBuilder();
+        FileInputStream fin = new FileInputStream(filename);
+        InputStreamReader isr = new InputStreamReader(fin, "utf-8");
+        PennTreeReader reader = new PennTreeReader(isr);
+        Tree tree;
+        while ((tree = reader.readTree()) != null) {
+          result.append(Sentence.listToString(tree.yield()));
+          result.append("\n");
+        }
+        System.err.println(result.toString());
+        return result.toString();
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    default:
+      throw new IllegalArgumentException("Unknown format " + inputFormat);
+    }
   }
 
   public static void main(String[] args) throws IOException {
@@ -182,6 +217,7 @@ public class SentimentPipeline {
     boolean stdin = false;
 
     List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
+    Input inputFormat = Input.TEXT;
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
@@ -199,6 +235,9 @@ public class SentimentPipeline {
       } else if (args[argIndex].equalsIgnoreCase("-stdin")) {
         stdin = true;
         argIndex++;
+      } else if (args[argIndex].equalsIgnoreCase("-input")) {
+        inputFormat = Input.valueOf(args[argIndex + 1].toUpperCase());
+        argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-output")) {
         String[] formats = args[argIndex + 1].split(",");
         outputFormats = new ArrayList<Output>();
@@ -237,6 +276,9 @@ public class SentimentPipeline {
 
     if (stdin) {
       props.setProperty("ssplit.eolonly", "true");
+    } else if (inputFormat == Input.TREES) {
+      props.setProperty("ssplit.eolonly", "true");
+      props.setProperty("tokenize.whitespace", "true");
     }
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
@@ -244,7 +286,7 @@ public class SentimentPipeline {
       // Process a file.  The pipeline will do tokenization, which
       // means it will split it into sentences as best as possible
       // with the tokenizer.
-      String text = IOUtils.slurpFileNoExceptions(filename);
+      String text = getText(inputFormat, filename);
       Annotation annotation = new Annotation(text);
       pipeline.annotate(annotation);
 
@@ -259,7 +301,7 @@ public class SentimentPipeline {
       // possible with the tokenizer.  Output will go to filename.out
       // for each file.
       for (String file : fileList.split(",")) {
-        String text = IOUtils.slurpFileNoExceptions(file);
+        String text = getText(inputFormat, file);
         Annotation annotation = new Annotation(text);
         pipeline.annotate(annotation);
 
