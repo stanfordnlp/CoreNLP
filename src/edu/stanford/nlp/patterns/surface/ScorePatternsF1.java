@@ -1,6 +1,7 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -30,6 +31,9 @@ public class ScorePatternsF1 extends ScorePatterns {
     this.p0Set =p0Set; 
   }
       
+  @Override
+  public void setUp(Properties props){}
+  
   @Override
   Counter<SurfacePattern> score() {
     Counter<SurfacePattern> specificity = new ClassicCounter<SurfacePattern>();
