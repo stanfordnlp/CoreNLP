@@ -103,7 +103,7 @@ public class DVModel implements Serializable {
   public DVModel(Options op, Index<String> stateIndex, UnaryGrammar unaryGrammar, BinaryGrammar binaryGrammar) {
     this.op = op;
 
-    rand = new Random(op.trainOptions.randomSeed);
+    rand = new Random(op.trainOptions.dvSeed);
 
     readWordVectors();
 
@@ -188,7 +188,7 @@ public class DVModel implements Serializable {
 
     this.identity = SimpleMatrix.identity(numRows);
 
-    this.rand = new Random(op.trainOptions.randomSeed);
+    this.rand = new Random(op.trainOptions.dvSeed);
   }
 
   /**
