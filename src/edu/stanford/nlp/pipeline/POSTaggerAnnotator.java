@@ -26,13 +26,10 @@ public class POSTaggerAnnotator implements Annotator {
 
   private final int maxSentenceLength;
 
-  private final int nThreads;
+  private int nThreads = 1;
 
-  /** Create a tagger annotator using the default English tagger from the models jar
-   *  (and non-verbose initialization).
-   */
   public POSTaggerAnnotator() {
-    this(false);
+    this(true);
   }
 
   public POSTaggerAnnotator(boolean verbose) {
@@ -40,28 +37,20 @@ public class POSTaggerAnnotator implements Annotator {
   }
 
   public POSTaggerAnnotator(String posLoc, boolean verbose) {
-    this(posLoc, verbose, Integer.MAX_VALUE, 1);
+    this(posLoc, verbose, Integer.MAX_VALUE);
   }
 
-  /** Create a POS tagger annotator.
-   *
-   *  @param posLoc Location of POS tagger model (may be file path, classpath resource, or URL
-   *  @param verbose Whether to show verbose information on model loading
-   *  @param maxSentenceLength Sentences longer than this length will be skipped in processing
-   *  @param numThreads The number of threads for the POS tagger annotator to use
-   */
-  public POSTaggerAnnotator(String posLoc, boolean verbose, int maxSentenceLength, int numThreads) {
-    this(loadModel(posLoc, verbose), maxSentenceLength, numThreads);
+  public POSTaggerAnnotator(String posLoc, boolean verbose, int maxSentenceLength) {
+    this(loadModel(posLoc, verbose), maxSentenceLength);
   }
 
   public POSTaggerAnnotator(MaxentTagger model) {
-    this(model, Integer.MAX_VALUE, 1);
+    this(model, Integer.MAX_VALUE);
   }
 
-  public POSTaggerAnnotator(MaxentTagger model, int maxSentenceLength, int numThreads) {
+  public POSTaggerAnnotator(MaxentTagger model, int maxSentenceLength) {
     this.pos = model;
     this.maxSentenceLength = maxSentenceLength;
-    this.nThreads = numThreads;
   }
 
   public POSTaggerAnnotator(String annotatorName, Properties props) {
@@ -81,7 +70,8 @@ public class POSTaggerAnnotator implements Annotator {
       timer = new Timing();
       timer.doing("Loading POS Model [" + loc + ']');
     }
-    MaxentTagger tagger = new MaxentTagger(loc);
+    MaxentTagger tagger;
+    tagger = new MaxentTagger(loc);
     if (verbose) {
       timer.done();
     }
@@ -131,7 +121,7 @@ public class POSTaggerAnnotator implements Annotator {
     if (tokens.size() <= maxSentenceLength) {
       List<TaggedWord> tagged = pos.apply(tokens);
 
-      for (int i = 0, sz = tokens.size(); i < sz; i++) {
+      for (int i = 0; i < tokens.size(); ++i) {
         tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
       }
     }
