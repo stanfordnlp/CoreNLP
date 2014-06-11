@@ -101,11 +101,9 @@ public class IntervalTreeTest extends TestCase {
     checkOverlapping(list, overlapping1, before);
 
     overlapping2 = tree.getOverlapping(included);
-    assertTrue(overlapping2.size() > overlapping1.size());
     checkOverlapping(list, overlapping2, included);
 
     overlapping3 = tree.getOverlapping(after);
-    assertTrue(overlapping2.size() > overlapping3.size());
     checkOverlapping(list, overlapping3, after);
   }
 
