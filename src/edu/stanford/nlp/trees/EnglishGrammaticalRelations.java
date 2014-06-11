@@ -102,7 +102,10 @@ public class EnglishGrammaticalRelations {
   private static final String stopKeepRegex =
     "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
 
-  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler(new SemanticHeadFinder());
+  // By setting the HeadFinder to null, we find out right away at
+  // runtime if we have incorrectly set the HeadFinder for the
+  // dependency tregexes
+  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler((HeadFinder) null);
 
   /**
    * The "predicate" grammatical relation.  The predicate of a
