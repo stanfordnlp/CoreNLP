@@ -1889,9 +1889,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (flags.testObjFunction) {
       StochasticDiffFunctionTester tester = new StochasticDiffFunctionTester(func);
       if (tester.testSumOfBatches(initialWeights, 1e-4)) {
-        System.err.println("Successfully tested stochastic objective function.");
+        System.err.println("Testing complete... exiting");
+        System.exit(1);
       } else {
-        throw new IllegalStateException("Testing of stochastic objective function failed.");
+        System.err.println("Testing failed....exiting");
+        System.exit(1);
       }
 
     }
@@ -1957,7 +1959,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     } else if (flags.useAdaGradFOBOS) {
       double lambda = 0.5 / (flags.sigma * flags.sigma);
-      minimizer = new SGDWithAdaGradAndFOBOS<DiffFunction>(
+      minimizer = new SGDWithAdaGradAndFOBOS(
         flags.initRate, lambda, flags.SGDPasses, flags.stochasticBatchSize,
         flags.priorType, flags.priorAlpha);
       ((SGDWithAdaGradAndFOBOS) minimizer).terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
@@ -1968,10 +1970,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
                                        flags.SGDPasses, flags.QNPasses, flags.SGD2QNhessSamples,
                                        flags.QNsize, flags.outputIterationsToFile);
     } else if (flags.useSMD) {
-      minimizer = new SMDMinimizer<DiffFunction>(flags.initialGain, flags.stochasticBatchSize, flags.stochasticMethod,
+      minimizer = new SMDMinimizer(flags.initialGain, flags.stochasticBatchSize, flags.stochasticMethod,
           flags.SGDPasses);
     } else if (flags.useSGD) {
-      minimizer = new InefficientSGDMinimizer<DiffFunction>(flags.initialGain, flags.stochasticBatchSize);
+      minimizer = new InefficientSGDMinimizer(flags.initialGain, flags.stochasticBatchSize);
     } else if (flags.useScaledSGD) {
       minimizer = new ScaledSGDMinimizer(flags.initialGain, flags.stochasticBatchSize, flags.SGDPasses,
           flags.scaledSGDMethod);
@@ -2178,9 +2180,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     }
 
-    for (Index<CRFLabel> index : labelIndices) {
-      for (int j = 0; j < index.size(); j++) {
-        int[] label = index.get(j).getLabel();
+    for (int i = 0; i < labelIndices.size(); i++) {
+      for (int j = 0; j < labelIndices.get(i).size(); j++) {
+        int[] label = labelIndices.get(i).get(j).getLabel();
         List<Integer> list = new ArrayList<Integer>();
         for (int l : label) {
           list.add(l);
@@ -2395,7 +2397,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   /**
    * Serialize the model to a human readable format. It's not yet complete. It
    * should now work for Chinese segmenter though. TODO: check things in
-   * serializeClassifier and add other necessary serialization back.
+   * serializeClassifier and add other necessary serialization back
    *
    * @param serializePath
    *          File to write text format of classifier to.
@@ -2412,6 +2414,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     }
   }
 
@@ -2426,6 +2430,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
@@ -2443,6 +2449,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     } finally {
       IOUtils.closeIgnoringExceptions(ois);
     }
@@ -2461,6 +2469,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
@@ -2478,6 +2488,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     } finally {
       IOUtils.closeIgnoringExceptions(ois);
     }
@@ -2496,6 +2508,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
@@ -2513,6 +2527,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     } finally {
       IOUtils.closeIgnoringExceptions(ois);
     }
@@ -2537,6 +2553,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } catch (Exception e) {
       System.err.println("Failed");
       e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
@@ -2545,8 +2563,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   /**
    * Serialize the classifier to the given ObjectOutputStream.
    * <br>
-   * (Since the classifier is a processor, we don't want to serialize the
-   * whole classifier but just the data that represents a classifier model.)
+   * TODO: with a little more effort we could just make the
+   * AbstractSequenceClassifier family implement Serializable
    */
   public void serializeClassifier(ObjectOutputStream oos) {
     try {
@@ -2592,8 +2610,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else {
       Index<CRFLabel>[] indexArray = (Index<CRFLabel>[]) o;
       labelIndices = new ArrayList<Index<CRFLabel>>(indexArray.length);
-      for (Index<CRFLabel> index : indexArray) {
-        labelIndices.add(index);
+      for (int i = 0; i < indexArray.length; ++i) {
+        labelIndices.add(indexArray[i]);
       }
     }
     classIndex = (Index<String>) ois.readObject();
@@ -2674,7 +2692,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     for (int i = 0; i < matrix.length; i++) {
       double sum = ArrayMath.sum(matrix[i]);
       for (int j = 0; j < matrix[i].length; j++) {
-        // log conditional probability
+        // log conditional probability  
         matrix[i][j] = Math.log(matrix[i][j] / sum);
       }
     }
@@ -2688,9 +2706,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     String[] matrixLines = new String[matrixSize];
     String[] subMatrixLines = new String[matrixSize];
     try {
-      BufferedReader br = IOUtils.readerFromString(fileName);
+      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileName))));
+      String line = null;
       int lineCount = 0;
-      for (String line; (line = br.readLine()) != null; ) {
+      while ((line = br.readLine()) != null) {
         line = line.trim();
         if (lineCount < matrixSize)
           matrixLines[lineCount] = line;
@@ -2699,7 +2718,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         lineCount++;
       }
     } catch (Exception ex) {
-      throw new RuntimeIOException(ex);
+      ex.printStackTrace();
+      System.exit(-1);
     }
 
     double[][] matrix = parseMatrix(matrixLines, tagIndex, matrixSize, true);
@@ -2833,7 +2853,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   private static CRFClassifier<CoreLabel> chooseCRFClassifier(SeqClassifierFlags flags) {
-    CRFClassifier<CoreLabel> crf; // initialized in if/else
+    CRFClassifier<CoreLabel> crf = null;
     if (flags.useFloat) {
       crf = new CRFClassifierFloat<CoreLabel>(flags);
     } else if (flags.nonLinearCRF) {
@@ -2869,9 +2889,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (crf.flags.useEmbedding && crf.flags.embeddingWords != null && crf.flags.embeddingVectors != null) {
       System.err.println("Reading Embedding Files");
       BufferedReader br = IOUtils.readerFromString(crf.flags.embeddingWords);
-
+      String line = null;
       List<String> wordList = new ArrayList<String>();
-      for (String line ; (line = br.readLine()) != null; ) {
+      while ((line = br.readLine()) != null) {
         wordList.add(line.trim());
       }
       System.err.println("Found a dictionary of size " + wordList.size());
@@ -2880,8 +2900,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       crf.embeddings = Generics.newHashMap();
       double[] vector = null;
       int count = 0;
-
-      for (String line ; (line = br.readLine()) != null; ) {
+      while ((line = br.readLine()) != null) {
         vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
         crf.embeddings.put(wordList.get(count++), vector);
       }
