@@ -2,6 +2,7 @@ package edu.stanford.nlp.rnn;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -230,5 +231,17 @@ public class RNNUtils {
     return result;
   }
 
+  /**
+   * Returns a vector with random Gaussian values, mean 0, std 1
+   */
+  public static SimpleMatrix randomGaussian(int numRows, int numCols, Random rand) {
+    SimpleMatrix result = new SimpleMatrix(numRows, numCols);
+    for (int i = 0; i < numRows; ++i) {
+      for (int j = 0; j < numCols; ++j) {
+        result.set(i, j, rand.nextGaussian());
+      }
+    }
+    return result;
+  }
 
 }
