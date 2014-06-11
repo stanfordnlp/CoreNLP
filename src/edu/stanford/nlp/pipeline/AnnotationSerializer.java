@@ -13,16 +13,7 @@ public abstract class AnnotationSerializer {
    * output stream; furthermore, implementations of this function must be prepared to handle
    * the same output stream being passed in as it returned on the previous write.
    */
-  public abstract OutputStream append(Annotation corpus, OutputStream os) throws IOException;
+  public abstract OutputStream write(Annotation corpus, OutputStream os) throws IOException;
   public abstract Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException;
 
-  public void save(Annotation corpus, OutputStream os) throws IOException {
-    append(corpus, os).close();
-  }
-
-  public Annotation load(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
-    Pair<Annotation, InputStream> pair = read(is);
-    pair.second.close();
-    return pair.first;
-  }
 }
