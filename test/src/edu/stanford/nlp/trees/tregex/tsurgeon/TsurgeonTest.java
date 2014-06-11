@@ -297,7 +297,7 @@ public class TsurgeonTest extends TestCase {
             "(barfoo (curlew 0) (avocet 1))");
   }
 
-  public void testReplaceNode() {
+  public void testReplace() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace foo blah");
     TregexPattern tregex = TregexPattern.compile("B=foo : C=blah");
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (C 1) (C 1))");
@@ -311,36 +311,6 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, 
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *-1)) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))",
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))");
-  }
-
-  public void testReplaceTree() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace foo (BAR 1)");
-    TregexPattern tregex = TregexPattern.compile("B=foo");
-    runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR 1) (BAR 1) (C 2))");
-
-    // test that a single replacement at the root is allowed
-    runTest(tregex, tsurgeon, "(B (C 1))", "(BAR 1)");
-
-    tsurgeon = Tsurgeon.parseOperation("replace foo (BAR 1) (BAZ 2)");
-    runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR 1) (BAZ 2) (BAR 1) (BAZ 2) (C 2))");
-
-    try {
-      runTest(tregex, tsurgeon, "(B 0)", "(B 0)");
-      throw new RuntimeException("Expected a failure");
-    } catch (TsurgeonRuntimeException e) {
-      // good, we expected to fail if you try to replace the root node with two nodes
-    }
-  }
-
-  /**
-   * Test (part of) an actual tree that we use in the Chinese transforming reader
-   */
-  public void testChineseReplaceTree() {
-    String input = "(IP (IP (PP (P 像) (NP (NP (NR 赖斯) (PU ，) (NR 赖斯)) (NP (PN 本身)))) (PU 她｛) (NP (NN ｂｒｅａｔｈ)) (PU ｝) (IJ 呃) (VP (VV 担任) (NP (NN 国务卿)) (VP (ADVP (AD 比较)) (VP (VA 晚))))))";
-    String expected = "(IP (IP (PP (P 像) (NP (NP (NR 赖斯) (PU ，) (NR 赖斯)) (NP (PN 本身)))) (PN 她) (PU ｛) (NP (NN ｂｒｅａｔｈ)) (PU ｝) (IJ 呃) (VP (VV 担任) (NP (NN 国务卿)) (VP (ADVP (AD 比较)) (VP (VA 晚))))))";
-    TregexPattern tregex = TregexPattern.compile("PU=punc < 她｛");
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace punc (PN 她) (PU ｛)");
-    runTest(tregex, tsurgeon, input, expected);
   }
 
   public void testInsertDelete() {

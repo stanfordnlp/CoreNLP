@@ -777,8 +777,8 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-qnTolerance")) {
       trainOptions.qnTolerance = Double.parseDouble(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-debugOutputFrequency")) {
-      trainOptions.debugOutputFrequency = Integer.parseInt(args[i + 1]);
+    } else if (args[i].equalsIgnoreCase("-debugOutputSeconds")) {
+      trainOptions.debugOutputSeconds = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-maxTrainTimeSeconds")) {
       trainOptions.maxTrainTimeSeconds = Integer.parseInt(args[i + 1]);
