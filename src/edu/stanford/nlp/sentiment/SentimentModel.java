@@ -188,6 +188,7 @@ public class SentimentModel implements Serializable {
       // figure out what binary productions we have in these trees
       // Note: the current sentiment training data does not actually
       // have any constituent labels
+      throw new UnsupportedOperationException("Not yet implemented");
     }
 
     Set<String> unaryProductions = Generics.newHashSet();
@@ -196,6 +197,7 @@ public class SentimentModel implements Serializable {
     } else {
       // TODO
       // figure out what unary productions we have in these trees (preterminals only, after the collapsing)
+      throw new UnsupportedOperationException("Not yet implemented");
     }
 
     this.numClasses = op.numClasses;

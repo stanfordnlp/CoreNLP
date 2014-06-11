@@ -1,0 +1,26 @@
+ENV.defaultStringPatternFlags = 2
+
+ner = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NamedEntityTagAnnotation" }
+tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
+
+$Disease = (
+  /cancer/|
+  /allergy/| 
+  /acne/|
+  /breast/ /cancer/
+)
+
+ENV.defaults["ruleType"] = "tokens"
+ENV.defaults["stage"] = 1
+{
+  pattern: ( $Disease ), 
+  action: ( Annotate($0, ner, "DISEASE")) 
+}
+
+ENV.defaults["stage"] = 2
+{
+  ruleType: "tokens",
+  pattern: ( ( [ { ner:PERSON } ]) /has/ ([ { ner:DISEASE } ]+) ),
+  result: Format("hasDisease(%s,%s)",$1.word, Join(" ",$2.word))
+}
+
