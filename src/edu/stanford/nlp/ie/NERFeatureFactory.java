@@ -361,7 +361,6 @@ import edu.stanford.nlp.util.Timing;
  * @author Christopher Manning
  * @author Shipra Dingare
  * @author Huy Nguyen
- * @author Mengqiu Wang
  */
 public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> {
 
@@ -371,7 +370,6 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     super();
   }
 
-  @Override
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
     initGazette();
@@ -389,61 +387,79 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   @Override
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
     Collection<String> features = Generics.newHashSet();
-    String domain = cInfo.get(0).get(CoreAnnotations.DomainAnnotation.class);
-    final boolean doFE = domain != null;
+
+    boolean doFE = cInfo.get(0).containsKey(CoreAnnotations.DomainAnnotation.class);
+    String domain = (doFE ? cInfo.get(0).get(CoreAnnotations.DomainAnnotation.class) : null);
 
 //    System.err.println(doFE+"\t"+domain);
 
-    // there are two special cases below, because 2 cliques have 2 names
-    Collection<String> c;
-    String suffix;
     if (clique == cliqueC) {
       //200710: tried making this clique null; didn't improve performance (rafferty)
-      c = featuresC(cInfo, loc);
-      suffix = "C";
+      Collection<String> c = featuresC(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-C");
+      }
     } else if (clique == cliqueCpC) {
-      c = featuresCpC(cInfo, loc);
-      suffix = "CpC";
-      addAllInterningAndSuffixing(features, c, suffix);
+      Collection<String> c = featuresCpC(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "CpC");
       if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
+        addAllInterningAndSuffixing(features, c, domain+"-CpC");
       }
-      c = featuresCnC(cInfo, loc-1);
-      suffix = "CnC";
-    } else if (clique == cliqueCp2C) {
-      c = featuresCp2C(cInfo, loc);
-      suffix = "Cp2C";
-    } else if (clique == cliqueCp3C) {
-      c = featuresCp3C(cInfo, loc);
-      suffix = "Cp3C";
-    } else if (clique == cliqueCp4C) {
-      c = featuresCp4C(cInfo, loc);
-      suffix = "Cp4C";
-    } else if (clique == cliqueCp5C) {
-      c = featuresCp5C(cInfo, loc);
-      suffix = "Cp5C";
-    } else if (clique == cliqueCpCp2C) {
-      c = featuresCpCp2C(cInfo, loc);
-      suffix = "CpCp2C";
-      addAllInterningAndSuffixing(features, c, suffix);
-      if (doFE) {
-        addAllInterningAndSuffixing(features, c, domain+ '-' + suffix);
-      }
-      c = featuresCpCnC(cInfo, loc-1);
-      suffix = "CpCnC";
-    } else if (clique == cliqueCpCp2Cp3C) {
-      c = featuresCpCp2Cp3C(cInfo, loc);
-      suffix = "CpCp2Cp3C";
-    } else if (clique == cliqueCpCp2Cp3Cp4C) {
-      c = featuresCpCp2Cp3Cp4C(cInfo, loc);
-      suffix = "CpCp2Cp3Cp4C";
-    } else {
-      throw new IllegalArgumentException("Unknown clique: " + clique);
-    }
 
-    addAllInterningAndSuffixing(features, c, suffix);
-    if (doFE) {
-      addAllInterningAndSuffixing(features, c, domain + '-' + suffix);
+      c = featuresCnC(cInfo, loc-1);
+      addAllInterningAndSuffixing(features, c, "CnC");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-CnC");
+      }
+    } else if (clique == cliqueCp2C) {
+      Collection<String> c = featuresCp2C(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "Cp2C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-Cp2C");
+      }
+    } else if (clique == cliqueCp3C) {
+      Collection<String> c = featuresCp3C(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "Cp3C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-Cp3C");
+      }
+    } else if (clique == cliqueCp4C) {
+      Collection<String> c = featuresCp4C(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "Cp4C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-Cp4C");
+      }
+    } else if (clique == cliqueCp5C) {
+      Collection<String> c = featuresCp5C(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "Cp5C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-Cp5C");
+      }
+    } else if (clique == cliqueCpCp2C) {
+      Collection<String> c = featuresCpCp2C(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "CpCp2C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-CpCp2C");
+      }
+
+      c = featuresCpCnC(cInfo, loc-1);
+      addAllInterningAndSuffixing(features, c, "CpCnC");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-CpCnC");
+      }
+    } else if (clique == cliqueCpCp2Cp3C) {
+      Collection<String> c = featuresCpCp2Cp3C(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "CpCp2Cp3C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-CpCp2Cp3C");
+      }
+    } else if (clique == cliqueCpCp2Cp3Cp4C) {
+      Collection<String> c = featuresCpCp2Cp3Cp4C(cInfo, loc);
+      addAllInterningAndSuffixing(features, c, "CpCp2Cp3Cp4C");
+      if (doFE) {
+        addAllInterningAndSuffixing(features, c, domain+"-CpCp2Cp3Cp4C");
+      }
     }
 
     // System.err.println(StringUtils.join(features,"\n")+"\n");
@@ -736,7 +752,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   private Set<String> maleNames; // = null;
   private Set<String> femaleNames; // = null;
 
-  private final Pattern titlePattern = Pattern.compile("(?:Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
+  private final Pattern titlePattern = Pattern.compile("(Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
 
 
   protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
@@ -1038,36 +1054,26 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         featuresC.add(pWord + '-' + nWord + "-SWORDS");
       }
 
-      // Thang Sep13: handle cases when get(CoreAnnotations.GazAnnotation.class) is null
-      String pGazAnnotationClass = (flags.useGazFeatures || flags.useMoreGazFeatures) ? p.get(CoreAnnotations.GazAnnotation.class) : null;
-      String nGazAnnotationClass = (flags.useGazFeatures || flags.useMoreGazFeatures) ? n.get(CoreAnnotations.GazAnnotation.class) : null;
       if (flags.useGazFeatures) {
-        
         if (!c.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
           featuresC.add(c.get(CoreAnnotations.GazAnnotation.class) + "-GAZ");
         }
-        // n
-        if (nGazAnnotationClass!=null && !nGazAnnotationClass.equals(flags.dropGaz)) {
-          featuresC.add(nGazAnnotationClass + "-NGAZ");
+        if (!n.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
+          featuresC.add(n.get(CoreAnnotations.GazAnnotation.class) + "-NGAZ");
         }
-        // p
-        if (pGazAnnotationClass!=null && !pGazAnnotationClass.equals(flags.dropGaz)) {
-          featuresC.add(pGazAnnotationClass + "-PGAZ");
+        if (!p.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
+          featuresC.add(p.get(CoreAnnotations.GazAnnotation.class) + "-PGAZ");
         }
       }
 
       if (flags.useMoreGazFeatures) {
         if (!c.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
           featuresC.add(c.get(CoreAnnotations.GazAnnotation.class) + '-' + cWord + "-CG-CW-GAZ");
-          
-          // c-n
-          if (nGazAnnotationClass!=null && !nGazAnnotationClass.equals(flags.dropGaz)) {
-            featuresC.add(c.get(CoreAnnotations.GazAnnotation.class) + '-' + nGazAnnotationClass + "-CNGAZ");
+          if (!n.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
+            featuresC.add(c.get(CoreAnnotations.GazAnnotation.class) + '-' + n.get(CoreAnnotations.GazAnnotation.class) + "-CNGAZ");
           }
-          
-          // p-c
-          if (pGazAnnotationClass!=null && !pGazAnnotationClass.equals(flags.dropGaz)) {
-            featuresC.add(pGazAnnotationClass + '-' + c.get(CoreAnnotations.GazAnnotation.class) + "-PCGAZ");
+          if (!p.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
+            featuresC.add(p.get(CoreAnnotations.GazAnnotation.class) + '-' + c.get(CoreAnnotations.GazAnnotation.class) + "-PCGAZ");
           }
         }
       }
@@ -1514,20 +1520,18 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
     //Stuff to add arbitrary features
     if (flags.useGenericFeatures) {
-      //see if we need to cache the keys
+      //see if we need to cach the keys
       if (genericAnnotationKeys == null) {
         makeGenericKeyCache(c);
       }
       //now look through the cached keys
       for (Class key : genericAnnotationKeys) {
         //System.err.println("Adding feature: " + CoreLabel.genericValues.get(key) + " with value " + c.get(key));
-        if (c.get(key) != null && c.get(key) instanceof Collection) {
-          for (Object ob: (Collection)c.get(key)) {
-            featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
-          }
-        } else {
-          featuresC.add(c.get(key) + "-" + CoreLabel.genericValues.get(key));
-        }
+        if(c.get(key) != null && c.get(key) instanceof Collection){
+          for(Object ob: (Collection)c.get(key))
+          featuresC.add(ob + "-" + CoreLabel.genericValues.get(key));
+        }else
+        featuresC.add(c.get(key) + "-" + CoreLabel.genericValues.get(key));
       }
     }
 
@@ -1954,7 +1958,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
     CoreLabel p2 = cInfo.get(loc - 2);
 
     String pWord = getWord(p);
-    // String p2Word = getWord(p2);
+    String p2Word = getWord(p2);
 
     Collection<String> featuresCpCp2C = new ArrayList<String>();
 

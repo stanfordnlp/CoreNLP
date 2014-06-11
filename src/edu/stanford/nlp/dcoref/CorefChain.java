@@ -265,7 +265,7 @@ public class CorefChain implements Serializable {
     private static final long serialVersionUID = 3657691243504173L;
   }
 
-  protected static class CorefMentionComparator implements Comparator<CorefMention> {
+  protected static class MentionComparator implements Comparator<CorefMention> {
     @Override
     public int compare(CorefMention m1, CorefMention m2) {
       if(m1.sentNum < m2.sentNum) return -1;
@@ -281,37 +281,14 @@ public class CorefChain implements Serializable {
       }
     }
   }
-
-  protected static class MentionComparator implements Comparator<Mention> {
-    @Override
-    public int compare(Mention m1, Mention m2) {
-      if(m1.sentNum < m2.sentNum) return -1;
-      else if(m1.sentNum > m2.sentNum) return 1;
-      else{
-        if(m1.startIndex < m2.startIndex) return -1;
-        else if(m1.startIndex > m2.startIndex) return 1;
-        else {
-          if(m1.endIndex > m2.endIndex) return -1;
-          else if(m1.endIndex < m2.endIndex) return 1;
-          else return 0;
-        }
-      }
-    }
-  }
-
   public CorefChain(CorefCluster c, Map<Mention, IntTuple> positions){
     chainID = c.clusterID;
-    // Collect mentions
     mentions = new ArrayList<CorefMention>();
     mentionMap = Generics.newHashMap();
     CorefMention represents = null;
     for (Mention m : c.getCorefMentions()) {
       CorefMention men = new CorefMention(m, positions.get(m));
       mentions.add(men);
-    }
-    Collections.sort(mentions, new CorefMentionComparator());
-    // Find representative mention
-    for (CorefMention men : mentions) {
       IntPair position = new IntPair(men.sentNum, men.headIndex);
       if (!mentionMap.containsKey(position)) mentionMap.put(position, Generics.<CorefMention>newHashSet());
       mentionMap.get(position).add(men);
@@ -320,6 +297,7 @@ public class CorefChain implements Serializable {
       }
     }
     representative = represents;
+    Collections.sort(mentions, new MentionComparator());
   }
 
   /** Constructor required by CustomAnnotationSerializer */
@@ -335,7 +313,7 @@ public class CorefChain implements Serializable {
         this.mentions.add(m);
       }
     }
-    Collections.sort(mentions, new CorefMentionComparator());
+    Collections.sort(mentions, new MentionComparator());
   }
 
   public String toString(){

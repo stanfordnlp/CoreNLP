@@ -245,7 +245,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
           for (Tree u : egr.getRelatedNodes(t, root)) {
-            //System.out.println("Adding " + egr.getShortName() + " from " + t + " to " + u );
+            // System.out.println("Adding " + egr.getShortName() + " from " + t.value() + " to " + u.value() );
             tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
           }
         }
@@ -1098,7 +1098,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
         continue;
       int parentId = Integer.parseInt(parentIdStr) - 1;
       String grelString = tokenFields.get(i).get(CoNLLX_RelnField);
-      if (grelString.equals("null") || grelString.equals("erased"))
+      if (grelString.equals("null"))
         continue;
       GrammaticalRelation grel = shortNameToGRel.get(grelString.toLowerCase());
       TypedDependency tdep;

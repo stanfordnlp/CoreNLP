@@ -112,11 +112,11 @@ public class MentionExtractor {
     Tree ht = t.headTerminal(headFinder);
     if(ht==null) return -1;  // temporary: a key which is matched to nothing
     CoreLabel l = (CoreLabel) ht.label();
-    return l.get(CoreAnnotations.IndexAnnotation.class);
+    return (int) l.get(CoreAnnotations.IndexAnnotation.class);
   }
-  private String treeToKey(Tree t) {
+  private String treeToKey(Tree t){
     int idx = getHeadIndex(t);
-    String key = Integer.toString(idx) + ':' + t.toString();
+    String key = Integer.toString(idx) + ":" + t.toString();
     return key;
   }
 
@@ -161,7 +161,7 @@ public class MentionExtractor {
     //
     // traverse all sentences and process each individual one
     //
-    for (int sent = 0, sz = words.size(); sent < sz; sent ++) {
+    for(int sent = 0; sent < words.size(); sent ++){
       List<CoreLabel> sentence = words.get(sent);
       Tree tree = trees.get(sent);
       List<Mention> mentions = unorderedMentions.get(sent);
@@ -174,7 +174,7 @@ public class MentionExtractor {
       // set the surface information and the syntactic info in each mention
       // startIndex and endIndex MUST be set before!
       //
-      for (Mention mention: mentions) {
+      for(Mention mention: mentions){
         mention.contextParseTree = tree;
         mention.sentenceWords = sentence;
         mention.originalSpan = new ArrayList<CoreLabel>(mention.sentenceWords.subList(mention.startIndex, mention.endIndex));
@@ -252,7 +252,7 @@ public class MentionExtractor {
     tree.indexLeaves();
   }
 
-  private static boolean inside(int i, Mention m) {
+  static boolean inside(int i, Mention m) {
     return i >= m.startIndex && i < m.endIndex;
   }
 
@@ -371,7 +371,6 @@ public class MentionExtractor {
       }
     }
   }
-
   /**
    * Finds the tree the matches this span exactly
    * @param tree Leaves must be indexed!
@@ -415,7 +414,7 @@ public class MentionExtractor {
       annoSb.append(", parse");
     }
     String annoStr = annoSb.toString();
-    SieveCoreferenceSystem.logger.info("MentionExtractor ignores specified annotators, using annotators=" + annoStr);
+    SieveCoreferenceSystem.logger.info("Ignoring specified annotators, using annotators=" + annoStr);
     pipelineProps.put("annotators", annoStr);
     return new StanfordCoreNLP(pipelineProps, false);
   }
@@ -427,5 +426,4 @@ public class MentionExtractor {
       }
     }
   }
-
 }

@@ -82,6 +82,8 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     singletonPredictor = singletonModel;
   }
 
+  private final boolean collapse = true;
+  private final boolean ccProcess = false;
   private final boolean includeExtras = false;
   private final boolean lemmatize = true;
   private final boolean threadSafe = true;
@@ -113,9 +115,9 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         // generate the dependency graph
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.COLLAPSED, includeExtras, lemmatize, threadSafe);
+              collapse, ccProcess, includeExtras, lemmatize, threadSafe);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.BASIC, includeExtras, lemmatize, threadSafe);
+              !collapse, ccProcess, includeExtras, lemmatize, threadSafe);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
         } catch(Exception e) {
