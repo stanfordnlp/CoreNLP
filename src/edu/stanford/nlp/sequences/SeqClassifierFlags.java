@@ -458,6 +458,9 @@ public class SeqClassifierFlags implements Serializable {
   public int featureCountThreshold = 0;
   public double featureWeightThreshold = 0.0;
 
+  // Inference label dictionary cutoff
+  public int labelDictionaryCutoff = -1;
+  
   // feature factory
   public String featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
   public Object[] featureFactoryArgs = new Object[0];
@@ -874,7 +877,6 @@ public class SeqClassifierFlags implements Serializable {
   public String embeddingWords = null;
   public String embeddingVectors = null;
   public boolean transitionEdgeOnly = false;
-  // L1-prior used in OWLQN
   public double priorLambda = 0;
   public boolean addCapitalFeatures = false;
   public int arbitraryInputLayerSize = -1;
@@ -998,16 +1000,11 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useCRFforUnsup = false;
   public boolean useGEforSup = false;
   public boolean useKnownLCWords = true;
-  // allow for multiple feature factories.  
+
+
+  // Thang Sep13: allow for multiple feature factories.  
   public String[] featureFactories = null; 
   public List<Object[]> featureFactoriesArgs = null;
-  public boolean useNoisyLabel = false;
-  public String errorMatrix = null;
-  public boolean printTrainLabels = false;
-
-  // Inference label dictionary cutoff
-  public int labelDictionaryCutoff = -1;
-
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1605,6 +1602,8 @@ public class SeqClassifierFlags implements Serializable {
         splitOnHead = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("featureCountThreshold")) {
         featureCountThreshold = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
+        labelDictionaryCutoff = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useWord")) {
         useWord = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("memoryThrift")) {
@@ -1620,7 +1619,7 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("backgroundSymbol")) {
         backgroundSymbol = val;
       } else if (key.equalsIgnoreCase("featureFactory")) {
-        // handle multiple feature factories.
+        // Thang Sep13: handle multiple feature factories.
         String[] tokens = val.split("\\s*,\\s*"); // multiple feature factories could be specified and are comma separated.
         int numFactories = tokens.length;
         if (numFactories==1){ // for compatible reason
@@ -2491,15 +2490,6 @@ public class SeqClassifierFlags implements Serializable {
         useGEforSup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useKnownLCWords")){
         useKnownLCWords = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNoisyLabel")){
-        useNoisyLabel = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("errorMatrix")) {
-        errorMatrix = val;
-      } else if (key.equalsIgnoreCase("printTrainLabels")){
-        printTrainLabels = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
-        labelDictionaryCutoff = Integer.parseInt(val);
-
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
