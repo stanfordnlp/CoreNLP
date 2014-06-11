@@ -56,66 +56,35 @@ public class CoordinationTransformer implements TreeTransformer {
     }
     Tree tt = UCPtransform(tx);
     if (VERBOSE) {
-      System.err.println("After UCPTransformer:             " + tt);
+      System.err.println("After UCPTransformer:             " + t);
     }
     Tree ttt = CCtransform(tt);
     if (VERBOSE) {
-      System.err.println("After CCTransformer:              " + ttt);
+      System.err.println("After CCTransformer:              " + t);
     }
     Tree tttt = qp.transformTree(ttt);
     if (VERBOSE) {
-      System.err.println("After QPTreeTransformer:          " + tttt);
+      System.err.println("After QPTreeTransformer:          " + t);
     }
-    Tree flatSQ = SQflatten(tttt);
+    Tree ret = dates.transformTree(tttt);
     if (VERBOSE) {
-      System.err.println("After SQ flattening:              " + flatSQ);
-    }
-    Tree ret = dates.transformTree(flatSQ);
-    if (VERBOSE) {
-      System.err.println("After DateTreeTransformer:        " + ret);
+      System.err.println("After DateTreeTransformer:        " + t);
     }
     return ret;
   }
 
-  // Matches to be questions if the question starts with WHNP, such as
-  // Who, What, if there is an SQ after the WH question.
-  //
-  // TODO: maybe we want to catch more complicated tree structures
-  // with something in between the WH and the actual question.
-  private static TregexPattern flattenSQTregex = 
-    TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " + 
-                          // match against "is running" if the verb is under just a VBG
-                          " !< (/^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
-                          // match against "is running" if the verb is under a VP - VBG
-                          " !< (/^V/ < /^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
-                          // match against "What is on the test?"
-                          " !< (PP $- =verb) " + 
-                          // match against "is there"
-                          " !<, (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ (NP < (EX < there)))))");
-
-  private static TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
-  
-  /**
-   * Removes the SQ structure under a WHNP question, such as "Who am I to judge?"
-   */
-  public static Tree SQflatten(Tree t) {
-    if (t == null) {
-      return null;
-    }
-    return Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
-  }
 
   private static final TregexPattern[][] matchPatterns = {
     {
       // UCP (JJ ...) -> ADJP
-      TregexPattern.compile("/^UCP/=ucp <, /^JJ|ADJP/"),
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^JJ|ADJP/", true),
       // UCP (DT JJ ...) -> ADJP
-      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)")
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)", true)
     },
     {
       // UCP (N ...) -> NP
-      TregexPattern.compile("/^UCP/=ucp <, /^N/"),
-      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^N/)")
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^N/", true),
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^N/)", true)
     }
   };
 
