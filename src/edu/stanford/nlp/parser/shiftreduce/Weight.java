@@ -109,7 +109,7 @@ public class Weight implements Serializable {
       }
       int index = unpackIndex(i);
       float score = unpackScore(i);
-      packed[j] = pack(index, score);
+      newPacked[j] = pack(index, score);
       ++j;
     }
     packed = newPacked;
