@@ -1,6 +1,7 @@
 package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -292,6 +294,14 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       return safeHead(exactMatch, endIdx);
     }
 
+    Tree wordMatch = findTreeWithSmallestSpan(root, m.startIndex, endIdx);
+    if (wordMatch != null) {
+      Tree head = safeHead(wordMatch, endIdx);
+      if (head != null) {
+        return head;
+      }
+    }
+
     // no exact match found
     // in this case, we parse the actual extent of the mention, embedded in a sentence
     // context, so as to make the parser work better :-)
@@ -456,6 +466,13 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
     // fallback: return top
     return top;
+  }
+
+  static Tree findTreeWithSmallestSpan(Tree tree, int start, int end) {
+    List<Tree> leaves = tree.getLeaves();
+    Tree startLeaf = leaves.get(start);
+    Tree endLeaf = leaves.get(end - 1);
+    return Trees.getLowestCommonAncestor(Arrays.asList(startLeaf, endLeaf), tree);
   }
 
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {
