@@ -25,7 +25,7 @@ import java.util.Properties;
  */
 public class CoordinationTransformer implements TreeTransformer {
 
-  private static final boolean VERBOSE = false;
+  private static final boolean VERBOSE = System.getProperty("CoordinationTransformer", null) != null;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
   private final TreeTransformer qp = new QPTreeTransformer();         //to restructure the QP constituents
   private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns
@@ -72,9 +72,13 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After SQ flattening:              " + flatSQ);
     }
-    Tree ret = dates.transformTree(flatSQ);
+    Tree fixedDates = dates.transformTree(flatSQ);
     if (VERBOSE) {
-      System.err.println("After DateTreeTransformer:        " + ret);
+      System.err.println("After DateTreeTransformer:        " + fixedDates);
+    }
+    Tree ret = removeXOverX(fixedDates);
+    if (VERBOSE) {
+      System.err.println("After removeXoverX:               " + ret);
     }
     return ret;
   }
@@ -115,6 +119,15 @@ public class CoordinationTransformer implements TreeTransformer {
       return null;
     }
     return Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
+  }
+
+  private static TregexPattern removeXOverXTregex = 
+    TregexPattern.compile("__=repeat <: (~repeat < __)");
+
+  private static TsurgeonPattern removeXOverXTsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
+
+  public static Tree removeXOverX(Tree t) {
+    return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);    
   }
 
   private static final TregexPattern[][] matchPatterns = {
