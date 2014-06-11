@@ -45,25 +45,12 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   private static final String DEFAULT_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
 
   /**
-   * NORMAL means that if one classifier uses PERSON, later classifiers can't also add PERSON, for example. <br>
-   * HIGH_RECALL allows later models to set PERSON as long as it doesn't clobber existing annotations.
-   */
-  static enum CombinationMode {
-    NORMAL, HIGH_RECALL
-  }
-
-  static final CombinationMode DEFAULT_COMBINATION_MODE = CombinationMode.NORMAL;
-  static final String COMBINATION_MODE_PROPERTY = "ner.combinationMode";
-  final CombinationMode combinationMode;
-
-  /**
    * @param p Properties File that specifies <code>loadClassifier</code>
    * and <code>loadAuxClassifier</code> properties or, alternatively, <code>loadClassifier[1-10]</code> properties.
    * @throws FileNotFoundException If classifier files not found
    */
   public ClassifierCombiner(Properties p) throws FileNotFoundException {
     super(p);
-    this.combinationMode = extractCombinationModeSafe(p);
     String loadPath1, loadPath2;
     List<String> paths = new ArrayList<String>();
 
@@ -106,21 +93,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    * @param loadPaths Paths to the base classifiers
    * @throws FileNotFoundException If classifier files not found
    */
-  public ClassifierCombiner(CombinationMode combinationMode, String... loadPaths) throws FileNotFoundException {
-    super(new Properties());
-    this.combinationMode = combinationMode;
-    List<String> paths = new ArrayList<String>(Arrays.asList(loadPaths));
-    loadClassifiers(paths);
-  }
-
-  /** Loads a series of base classifiers from the paths specified.
-   *
-   * @param loadPaths Paths to the base classifiers
-   * @throws FileNotFoundException If classifier files not found
-   */
   public ClassifierCombiner(String... loadPaths) throws FileNotFoundException {
     super(new Properties());
-    this.combinationMode = DEFAULT_COMBINATION_MODE;
     List<String> paths = new ArrayList<String>(Arrays.asList(loadPaths));
     loadClassifiers(paths);
   }
@@ -132,40 +106,10 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    */
   public ClassifierCombiner(AbstractSequenceClassifier<IN>... classifiers) {
     super(new Properties());
-    this.combinationMode = DEFAULT_COMBINATION_MODE;
     baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>(Arrays.asList(classifiers));
     flags.backgroundSymbol = baseClassifiers.get(0).flags.backgroundSymbol;
   }
 
-  /**
-   * Either finds COMBINATION_MODE_PROPERTY or returns a default value
-   */
-  public static CombinationMode extractCombinationMode(Properties p) {
-    String mode = p.getProperty(COMBINATION_MODE_PROPERTY);
-    if (mode == null) {
-      return DEFAULT_COMBINATION_MODE;
-    } else {
-      return CombinationMode.valueOf(mode.toUpperCase());
-    }
-  }
-
-  /**
-   * Either finds COMBINATION_MODE_PROPERTY or returns a default
-   * value.  If the value is not a legal value, a warning is printed.
-   */
-  public static CombinationMode extractCombinationModeSafe(Properties p) {
-    try {
-      return extractCombinationMode(p);
-    } catch (IllegalArgumentException e) {
-      System.err.print("Illegal value of " + COMBINATION_MODE_PROPERTY + ": " + p.getProperty(COMBINATION_MODE_PROPERTY));
-      System.err.print("  Legal values:");
-      for (CombinationMode mode : CombinationMode.values()) {
-        System.err.print("  " + mode);
-      }
-      System.err.println();
-      return CombinationMode.NORMAL;
-    }
-  }
 
   private void loadClassifiers(List<String> paths) throws FileNotFoundException {
     baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
@@ -229,22 +173,16 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     for(int i = 1; i < baseDocuments.size(); i ++)
       assert(baseDocuments.get(0).size() == baseDocuments.get(i).size());
 
-    String background = baseClassifiers.get(0).flags.backgroundSymbol;
-
     // baseLabels.get(i) points to the labels assigned by baseClassifiers.get(i)
     List<Set<String>> baseLabels = new ArrayList<Set<String>>();
     Set<String> seenLabels = Generics.newHashSet();
     for (AbstractSequenceClassifier<? extends CoreMap> baseClassifier : baseClassifiers) {
       Set<String> labs = baseClassifier.labels();
-      if (combinationMode != CombinationMode.HIGH_RECALL) {
-        labs.removeAll(seenLabels);
-      } else {
-        labs.remove(baseClassifier.flags.backgroundSymbol);
-        labs.remove(background);
-      }
+      labs.removeAll(seenLabels);
       seenLabels.addAll(labs);
       baseLabels.add(labs);
     }
+    String background = baseClassifiers.get(0).flags.backgroundSymbol;
 
     if (DEBUG) {
       for(int i = 0; i < baseLabels.size(); i ++)
