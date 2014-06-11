@@ -146,7 +146,11 @@ private int jjMoveStringLiteralDfa0_0(){
       case 10:
          return jjStopAtPos(0, 26);
       case 41:
+         return jjStopAtPos(0, 29);
+      case 91:
          return jjStopAtPos(0, 27);
+      case 93:
+         return jjStopAtPos(0, 28);
       case 97:
          return jjMoveStringLiteralDfa1_0(0x7000L);
       case 99:
@@ -697,9 +701,12 @@ private int jjMoveNfa_0(int startState, int curPos)
             switch(jjstateSet[--i])
             {
                case 0:
-                  if (kind > 24)
-                     kind = 24;
-                  { jjCheckNAdd(14); }
+                  if ((0xffffffffd7ffffffL & l) != 0L)
+                  {
+                     if (kind > 24)
+                        kind = 24;
+                     { jjCheckNAdd(14); }
+                  }
                   if ((0x7fffffe07fffffeL & l) != 0L)
                   {
                      if (kind > 18)
@@ -716,9 +723,12 @@ private int jjMoveNfa_0(int startState, int curPos)
                   }
                   break;
                case 55:
-                  if (kind > 24)
-                     kind = 24;
-                  { jjCheckNAdd(14); }
+                  if ((0xffffffffd7ffffffL & l) != 0L)
+                  {
+                     if (kind > 24)
+                        kind = 24;
+                     { jjCheckNAdd(14); }
+                  }
                   if ((0x17fffffe87ffffffL & l) != 0L)
                   {
                      if (kind > 18)
@@ -765,6 +775,8 @@ private int jjMoveNfa_0(int startState, int curPos)
                      kind = 22;
                   break;
                case 14:
+                  if ((0xffffffffd7ffffffL & l) == 0L)
+                     break;
                   if (kind > 24)
                      kind = 24;
                   { jjCheckNAdd(14); }
@@ -959,7 +971,8 @@ public static final String[] jjstrLiteralImages = {
 "\162\145\154\141\142\145\154", "\145\170\143\151\163\145", "\151\156\163\145\162\164", "\155\157\166\145", 
 "\162\145\160\154\141\143\145", "\143\162\145\141\164\145\123\165\142\164\162\145\145", 
 "\141\144\152\157\151\156", "\141\144\152\157\151\156\110", "\141\144\152\157\151\156\106", 
-"\143\157\151\156\144\145\170", null, null, null, null, null, null, null, null, null, null, "\12", "\51", };
+"\143\157\151\156\144\145\170", null, null, null, null, null, null, null, null, null, null, "\12", "\133", 
+"\135", "\51", };
 protected Token jjFillToken()
 {
    final Token t;
@@ -1137,7 +1150,7 @@ public static final String[] lexStateNames = {
    "DEFAULT",
 };
 static final long[] jjtoToken = {
-   0xffffff1L, 
+   0x3ffffff1L, 
 };
 static final long[] jjtoSkip = {
    0xeL, 
