@@ -568,6 +568,13 @@ Tree TreeNode() :
       jjtc000 = false;
     }
 /*@egen*/
+    { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }
+| ( label = <IDENTIFIER> )/*@bgen(jjtree)*/
+    {
+      jjtree.closeNodeScope(jjtn000, true);
+      jjtc000 = false;
+    }
+/*@egen*/
     { return treeFactory.newTreeNode(label.image,new ArrayList<Tree>()); }/*@bgen(jjtree)*/
  } catch (Throwable jjte000) {
    if (jjtc000) {

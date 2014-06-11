@@ -330,6 +330,10 @@ public class TsurgeonTest extends TestCase {
     } catch (TsurgeonRuntimeException e) {
       // good, we expected to fail if you try to replace the root node with two nodes
     }
+
+    tsurgeon = Tsurgeon.parseOperation("replace foo (BAR blah)");
+    tregex = TregexPattern.compile("B=foo");
+    runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR blah) (BAR blah) (C 2))");
   }
 
   /**
