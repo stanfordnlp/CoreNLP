@@ -296,10 +296,11 @@ public class TrainOptions implements Serializable {
   public int dvKBest = DEFAULT_K_BEST;
 
   /**
-   * When training the DV parsing method, how many iterations to loop
+   * When training a parsing method where the training has a (max)
+   * number of iterations, how many iterations to loop
    */
-  static public final int DEFAULT_DV_ITERATIONS = 20;
-  public int dvIterations = DEFAULT_DV_ITERATIONS;
+  static public final int DEFAULT_TRAINING_ITERATIONS = 20;
+  public int trainingIterations = DEFAULT_TRAINING_ITERATIONS;
 
   /**
    * When training the DV parsing method, how many trees to use in one batch
@@ -337,7 +338,7 @@ public class TrainOptions implements Serializable {
    */
   public int debugOutputFrequency = 0;
 
-  public long dvSeed = 0;
+  public long randomSeed = 0;
 
   public static final double DEFAULT_LEARNING_RATE = 0.1;
   /**
@@ -473,14 +474,14 @@ public class TrainOptions implements Serializable {
     result.append(" noRebinarization=" + noRebinarization + "\n");
     result.append(" trainingThreads=" + trainingThreads + "\n");
     result.append(" dvKBest=" + dvKBest + "\n");
-    result.append(" dvIterations=" + dvIterations + "\n");
+    result.append(" trainingIterations=" + trainingIterations + "\n");
     result.append(" dvBatchSize=" + dvBatchSize + "\n");
     result.append(" regCost=" + regCost + "\n");
     result.append(" qnIterationsPerBatch=" + qnIterationsPerBatch + "\n");
     result.append(" qnEstimates=" + qnEstimates + "\n");
     result.append(" qnTolerance=" + qnTolerance + "\n");
     result.append(" debugOutputFrequency=" + debugOutputFrequency + "\n");
-    result.append(" dvSeed=" + dvSeed + "\n");
+    result.append(" randomSeed=" + randomSeed + "\n");
     result.append(" learningRate=" + learningRate + "\n");
     result.append(" deltaMargin=" + deltaMargin + "\n");
     result.append(" unknownNumberVector=" + unknownNumberVector + "\n");
