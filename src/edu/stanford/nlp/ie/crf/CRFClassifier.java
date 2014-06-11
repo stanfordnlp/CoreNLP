@@ -1835,14 +1835,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @param docs A Collection (perhaps ObjectBank) of documents
    */
   @Override
-  public void train(Collection<List<IN>> objectBankWrapper, DocumentReaderAndWriter<IN> readerAndWriter) {
+  public void train(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
     Timing timer = new Timing();
     timer.start();
-
-    Collection<List<IN>> docs = new ArrayList<List<IN>>();
-    for (List<IN> doc : objectBankWrapper) {
-      docs.add(doc);
-    }
 
     if (flags.numOfSlices > 0) {
       System.err.println("Taking " + flags.numOfSlices + " out of " + flags.totalDataSlice + " slices of data for training");
@@ -1857,6 +1852,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     List<List<IN>> unsupDocs = null;
     if (flags.unsupDropoutFile != null) {
+      
       System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
       timer.start();
       unsupDocs = new ArrayList<List<IN>>();
@@ -3388,46 +3384,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return w;
   }
 
-  public void serializeFeatureIndex(String serializePath) {
-    System.err.print("Serializing FeatureIndex to " + serializePath + "...");
-
-    ObjectOutputStream oos = null;
-    try {
-      oos = IOUtils.writeStreamFromString(serializePath);
-      oos.writeObject(featureIndex);
-      System.err.println("done.");
-    } catch (Exception e) {
-      System.err.println("Failed");
-      e.printStackTrace();
-      // don't actually exit in case they're testing too
-      // System.exit(1);
-    } finally {
-      IOUtils.closeIgnoringExceptions(oos);
-    }
-  }
-
-  public static Index<String> loadFeatureIndexFromFile(String serializePath) {
-    System.err.print("Reading FeatureIndex from " + serializePath + "...");
-
-    ObjectInputStream ois = null;
-    Index<String> f = null;
-    try {
-      ois = IOUtils.readStreamFromString(serializePath);
-      f = (Index<String>) ois.readObject();
-      System.err.println("done.");
-    } catch (Exception e) {
-      System.err.println("Failed");
-      e.printStackTrace();
-      // don't actually exit in case they're testing too
-      // System.exit(1);
-    } finally {
-      IOUtils.closeIgnoringExceptions(ois);
-    }
-
-    return f;
-  }
-
-
   /**
    * {@inheritDoc}
    */
@@ -3782,6 +3738,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (crf.flags.loadClassIndexFrom != null) {
       crf.classIndex = loadClassIndexFromFile(crf.flags.loadClassIndexFrom);
     }
+      
 
     if (loadPath != null) {
       crf.loadClassifierNoExceptions(loadPath, props);
@@ -3814,10 +3771,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (crf.flags.serializeWeightsTo != null) {
       crf.serializeWeights(crf.flags.serializeWeightsTo);
-    }
-
-    if (crf.flags.serializeFeatureIndexTo != null) {
-      crf.serializeFeatureIndex(crf.flags.serializeFeatureIndexTo);
     }
 
     if (serializeToText != null) {

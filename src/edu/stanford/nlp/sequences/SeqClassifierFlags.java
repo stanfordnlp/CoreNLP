@@ -163,9 +163,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean retainEntitySubclassification = false;
   public boolean useGazettePhrases = false;
   public boolean makeConsistent = false;
-  public boolean useWordLabelCounts = false;
-  // boolean usePrevInstanceLabel = false;
-  // boolean useNextInstanceLabel = false;
   public boolean useViterbi = true;
 
   public int[] binnedLengths = null;
@@ -1014,9 +1011,6 @@ public class SeqClassifierFlags implements Serializable {
   public String unsupAlignFile = null;
   public String supFileEN = null;
   public String supFileCH = null;
-  public transient String serializeFeatureIndexTo = null;
-  public String loadFeatureIndexFromEN = null;
-  public String loadFeatureIndexFromCH = null;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2523,13 +2517,6 @@ public class SeqClassifierFlags implements Serializable {
         supFileEN = val;
       } else if (key.equalsIgnoreCase("supFileCH")){
         supFileCH = val;
-      } else if (key.equalsIgnoreCase("serializeFeatureIndexTo")){
-        serializeFeatureIndexTo = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromEN")){
-        loadFeatureIndexFromEN = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){
-        loadFeatureIndexFromCH = val;
-
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
