@@ -31,7 +31,7 @@ public class RelationExtractorAnnotator implements Annotator {
   private static boolean verbose = false;
 
   public RelationExtractorAnnotator(Properties props){
-    verbose = Boolean.parseBoolean(props.getProperty("sup.relation.verbose", "true"));
+    verbose = Boolean.parseBoolean(props.getProperty("sup.relation.verbose", "false"));
     String relationModel = props.getProperty("sup.relation.model", DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
     try {
       Extractor entityExtractor = new RothEntityExtractor();
