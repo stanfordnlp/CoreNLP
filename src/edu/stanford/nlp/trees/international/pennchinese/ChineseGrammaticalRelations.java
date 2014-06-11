@@ -3,7 +3,6 @@ package edu.stanford.nlp.trees.international.pennchinese;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
-import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,10 +34,7 @@ public class ChineseGrammaticalRelations {
   private ChineseGrammaticalRelations() {
   }
 
-  // By setting the HeadFinder to null, we find out right away at
-  // runtime if we have incorrectly set the HeadFinder for the
-  // dependency tregexes
-  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler((HeadFinder) null);
+  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler(new ChineseSemanticHeadFinder());
 
   public static List<GrammaticalRelation> values() {
     return Collections.unmodifiableList(Arrays.asList(values));
