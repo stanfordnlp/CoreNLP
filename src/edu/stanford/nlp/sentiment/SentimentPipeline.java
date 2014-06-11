@@ -6,9 +6,6 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 import org.ejml.simple.SimpleMatrix;
@@ -40,7 +37,7 @@ public class SentimentPipeline {
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
   static enum Output {
-    PENNTREES, VECTORS, ROOT, PROBABILITIES
+    PENNTREES, VECTORS, ROOT
   }
 
   /**
@@ -86,42 +83,20 @@ public class SentimentPipeline {
    * Outputs the vectors from the tree.  Counts the tree nodes the
    * same as setIndexLabels.
    */
-  static int outputTreeVectors(PrintStream out, Tree tree, int index) {
+  static int outputTreeVectors(Tree tree, int index) {
     if (tree.isLeaf()) {
       return index;
     }
 
-    out.print("  " + index + ":");
+    System.out.print("  " + index + ":");
     SimpleMatrix vector = RNNCoreAnnotations.getNodeVector(tree);
     for (int i = 0; i < vector.getNumElements(); ++i) {
-      out.print("  " + NF.format(vector.get(i)));
+      System.out.print("  " + NF.format(vector.get(i)));
     }
-    out.println();
+    System.out.println();
     index++;
     for (Tree child : tree.children()) {
-      index = outputTreeVectors(out, child, index);
-    }
-    return index;
-  }
-
-  /**
-   * Outputs the scores from the tree.  Counts the tree nodes the
-   * same as setIndexLabels.
-   */
-  static int outputTreeScores(PrintStream out, Tree tree, int index) {
-    if (tree.isLeaf()) {
-      return index;
-    }
-
-    out.print("  " + index + ":");
-    SimpleMatrix vector = RNNCoreAnnotations.getPredictions(tree);
-    for (int i = 0; i < vector.getNumElements(); ++i) {
-      out.print("  " + NF.format(vector.get(i)));
-    }
-    out.println();
-    index++;
-    for (Tree child : tree.children()) {
-      index = outputTreeScores(out, child, index);
+      index = outputTreeVectors(child, index);
     }
     return index;
   }
@@ -129,37 +104,27 @@ public class SentimentPipeline {
   /**
    * Outputs a tree using the output style requested
    */
-  static void outputTree(PrintStream out, Tree tree, List<Output> outputFormats) {
-    for (Output output : outputFormats) {
-      switch (output) {
-      case PENNTREES: {
-        Tree copy = tree.deepCopy();
-        setSentimentLabels(copy);
-        out.println(copy);
-        break;
-      }
-      case VECTORS: {
-        Tree copy = tree.deepCopy();
-        setIndexLabels(copy, 0);
-        out.println(copy);
-        outputTreeVectors(out, tree, 0);
-        break;
-      }
-      case ROOT: {
-        int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
-        out.println("  " + SentimentUtils.sentimentString(sentiment));
-        break;
-      }
-      case PROBABILITIES: {
-        Tree copy = tree.deepCopy();
-        setIndexLabels(copy, 0);
-        out.println(copy);
-        outputTreeScores(out, tree, 0);
-        break;
-      }
-      default:
-        throw new IllegalArgumentException("Unknown output format " + output);
-      }
+  static void outputTree(PrintStream out, Tree tree, Output output) {
+    switch (output) {
+    case PENNTREES: {
+      Tree copy = tree.deepCopy();
+      setSentimentLabels(copy);
+      out.println(copy);
+      break;
+    }
+    case VECTORS: {
+      Tree copy = tree.deepCopy();
+      setIndexLabels(copy, 0);
+      out.println(copy);
+      outputTreeVectors(tree, 0);
+      break;
+    }
+    case ROOT:
+      int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
+      out.println("  " + SentimentUtils.sentimentString(sentiment));
+      break;
+    default:
+      throw new IllegalArgumentException("Unknown output format " + output);
     }
   }
 
@@ -181,7 +146,7 @@ public class SentimentPipeline {
     String fileList = null;
     boolean stdin = false;
 
-    List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
+    Output output = Output.ROOT;
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
@@ -200,11 +165,8 @@ public class SentimentPipeline {
         stdin = true;
         argIndex++;
       } else if (args[argIndex].equalsIgnoreCase("-output")) {
-        String[] formats = args[argIndex + 1].split(",");
-        outputFormats = new ArrayList<Output>();
-        for (String format : formats) {
-          outputFormats.add(Output.valueOf(format.toUpperCase()));
-        }
+        String format = args[argIndex + 1];
+        output = Output.valueOf(format.toUpperCase());
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-help")) {
         help();
@@ -251,7 +213,7 @@ public class SentimentPipeline {
       for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
         System.out.println(sentence);
-        outputTree(System.out, tree, outputFormats);
+        outputTree(System.out, tree, output);
       }
     } else if (fileList != null) {
       // Process multiple files.  The pipeline will do tokenization,
@@ -268,7 +230,7 @@ public class SentimentPipeline {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
           pout.println(sentence);
-          outputTree(pout, tree, outputFormats);
+          outputTree(pout, tree, output);
         }
         pout.flush();
         fout.close();
@@ -289,7 +251,7 @@ public class SentimentPipeline {
           Annotation annotation = pipeline.process(line);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
-            outputTree(System.out, tree, outputFormats);
+            outputTree(System.out, tree, output);
           }
         } else {
           // Output blank lines for blank lines so the tool can be
