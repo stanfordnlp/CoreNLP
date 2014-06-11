@@ -302,18 +302,18 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    * when there is only one label
    */
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets, 
       String answerLabel) throws IOException, InstantiationException,
       IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException,
       InterruptedException, ExecutionException {
-    this(props, sents, seedSet, PatternsAnnotations.PatternLabel1.class,
+    this(props, sents, seedSet, labelUsingSeedSets, PatternsAnnotations.PatternLabel1.class,
         answerLabel);
   }
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets, 
       Class answerClass, String answerLabel) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException,
@@ -329,25 +329,25 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Map<String, Set<String>> seedSets = new HashMap<String, Set<String>>();
     seedSets.put(answerLabel, seedSet);
-    setUpConstructor(sents, seedSets, ansCl, generalizeClasses, ignoreClasses);
+    setUpConstructor(sents, seedSets, labelUsingSeedSets, ansCl, generalizeClasses, ignoreClasses);
 
   }
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets,
       String answerLabel, Map<String, Class> generalizeClasses,
       Map<Class, Object> ignoreClasses) throws IOException,
       InstantiationException, IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException,
       InterruptedException, ExecutionException {
-    this(props, sents, seedSet, PatternsAnnotations.PatternLabel1.class,
+    this(props, sents, seedSet, labelUsingSeedSets, PatternsAnnotations.PatternLabel1.class,
         answerLabel, generalizeClasses, ignoreClasses);
   }
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets, 
       Class answerClass, String answerLabel,
       Map<String, Class> generalizeClasses, Map<Class, Object> ignoreClasses)
       throws IOException, InstantiationException, IllegalAccessException,
@@ -363,12 +363,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Map<String, Set<String>> seedSets = new HashMap<String, Set<String>>();
     seedSets.put(answerLabel, seedSet);
-    setUpConstructor(sents, seedSets, ansCl, generalizeClasses, iC);
+    setUpConstructor(sents, seedSets, labelUsingSeedSets, ansCl, generalizeClasses, iC);
   }
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets)
+      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets, boolean labelUsingSeedSets)
       throws IOException, InstantiationException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException,
       NoSuchMethodException, SecurityException, ClassNotFoundException,
@@ -386,18 +386,18 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       i++;
     }
 
-    setUpConstructor(sents, seedSets, ansCl, gC, iC);
+    setUpConstructor(sents, seedSets, labelUsingSeedSets, ansCl, gC, iC);
   }
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
+      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets, boolean labelUsingSeedSets,
       Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass)
       throws IOException, InstantiationException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException,
       NoSuchMethodException, SecurityException, InterruptedException,
       ExecutionException {
-    this(props, sents, seedSets, answerClass, new HashMap<String, Class>(),
+    this(props, sents, seedSets, labelUsingSeedSets, answerClass, new HashMap<String, Class>(),
         new HashMap<String, Map<Class, Object>>());
   }
 
@@ -417,7 +417,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    */
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
+      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets, boolean labelUsingSeedSets,
       Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass,
       Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
@@ -430,13 +430,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       for (String label : seedSets.keySet())
         ignoreClasses.put(label, new HashMap<Class, Object>());
     }
-    setUpConstructor(sents, seedSets, answerClass, generalizeClasses,
+    setUpConstructor(sents, seedSets, labelUsingSeedSets, answerClass, generalizeClasses,
         ignoreClasses);
   }
 
   @SuppressWarnings("rawtypes")
   private void setUpConstructor(Map<String, List<CoreLabel>> sents,
-      Map<String, Set<String>> seedSets,
+      Map<String, Set<String>> seedSets, boolean labelUsingSeedSets, 
       Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass,
       Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
@@ -455,7 +455,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Execution.fillOptions(Data.class, props);
     Execution.fillOptions(constVars, props);
     constVars.answerClass = answerClass;
-    // constVars.answerLabels = answerLabel;
     constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
     constVars.addGeneralizeClasses(generalizeClasses);
     constVars.setLabelDictionary(seedSets);
@@ -475,29 +474,32 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     assert !(constVars.doNotApplyPatterns && (createPats.useStopWordsBeforeTerm || constVars.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
     // logFile = new PrintWriter(new FileWriter("patterns_log.txt"));
 
-    for (String l : seedSets.keySet()) {
-      runLabelSeedWords(constVars.answerClass.get(l), l, seedSets.get(l));
-    }
+    if (labelUsingSeedSets) {
+      for (String l : seedSets.keySet()) {
+        runLabelSeedWords(constVars.answerClass.get(l), l, seedSets.get(l));
+      }
 
     if (constVars.getOtherSemanticClasses() != null)
       runLabelSeedWords(PatternsAnnotations.OtherSemanticLabel.class,
           "OTHERSEM", constVars.getOtherSemanticClasses());
-
+    }
+    
     if (constVars.externalFeatureWeightsFile != null) {
       for (String label : seedSets.keySet()) {
         String externalFeatureWeightsFileLabel = constVars.externalFeatureWeightsFile
             + "_" + label;
         File f = new File(externalFeatureWeightsFileLabel);
         if (!f.exists()) {
-          System.err
-              .println("externalweightsfile for the label " + label + " does not exist: learning weights!");
+          System.err.println("externalweightsfile for the label " + label
+              + " does not exist: learning weights!");
           LearnImportantFeatures lmf = new LearnImportantFeatures();
           // if (answerClass.size() > 1 || this.labelDictionary.size() > 1)
           // throw new RuntimeException("not implemented");
           Execution.fillOptions(lmf, props);
           lmf.answerClass = answerClass.get(label);
           lmf.answerLabel = label;
-          System.out.println("Getting top features for " + label + " with class " + answerClass);
+          System.out.println("Getting top features for " + label
+              + " with class " + answerClass);
           lmf.setUp();
           lmf.getTopFeatures(Data.sents, constVars.perSelectRand,
               constVars.perSelectNeg, externalFeatureWeightsFileLabel);
@@ -2295,8 +2297,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       System.out.println("Processing # sents " + sents.size()
           + " from file(s) " + file);
-
-      g = new GetPatternsFromDataMultiClass(props, sents, seedWords);
+      boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets","true"));
+      g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
 
       Execution.fillOptions(g, props);
 
