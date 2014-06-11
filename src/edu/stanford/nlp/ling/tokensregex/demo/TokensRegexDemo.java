@@ -26,7 +26,7 @@ public class TokensRegexDemo {
     if (args.length > 0) {
       rules = args[0];
     } else {
-      rules = "C:/data/tokensregex/expr.rules";
+      rules = "edu/stanford/nlp/ling/tokensregex/demo/rules/expr.rules.txt";
     }
     if (args.length > 2) {
       out = new PrintWriter(args[2]);
@@ -78,6 +78,7 @@ public class TokensRegexDemo {
         }
       }
     }
+    out.flush();
   }
 
 }
