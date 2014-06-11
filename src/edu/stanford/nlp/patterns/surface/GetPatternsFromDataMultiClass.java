@@ -765,7 +765,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     // Now retrieve the result
 
     for (Future<Map<String, List<CoreLabel>>> future : list) {
-      sents.putAll(future.get());
+      try{
+        sents.putAll(future.get());
+      }catch(Exception e){
+        throw new RuntimeException(e);
+      }
     }
     executor.shutdown();
   }

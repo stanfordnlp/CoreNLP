@@ -533,7 +533,11 @@ public class CreatePatterns {
     // Now retrieve the result
 
     for (Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> future : list) {
-      patternsForEachToken.putAll(future.get());
+      try{
+        patternsForEachToken.putAll(future.get());
+      } catch(Exception e){
+        throw new RuntimeException(e);
+      }
     }
     executor.shutdown();
     Redwood.log(ConstantsAndVariables.extremedebug, "Done computing all patterns");

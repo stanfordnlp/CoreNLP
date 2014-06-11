@@ -228,11 +228,14 @@ public class ScorePhrases {
 
     // Now retrieve the result
     for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> future : list) {
-      Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
-          .get();
-
-      wordsandLemmaPatExtracted.addAll(result.first());
-      matchedTokensByPat.addAll(result.second());
+      try{
+        Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
+            .get();
+        wordsandLemmaPatExtracted.addAll(result.first());
+        matchedTokensByPat.addAll(result.second());
+      }catch(Exception e){
+        throw new RuntimeException(e);
+      }
     }
     executor.shutdown();
   }
