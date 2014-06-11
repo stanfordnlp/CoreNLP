@@ -118,6 +118,7 @@ public class SGDMinimizer<T extends Function> extends StochasticMinimizer<T> {
     final double[] grads = new double[dim];
 
     final DiffFunction f = new DiffFunction() {
+      @Override
       public double[] derivativeAt(double[] x) {
         double val = Math.PI * valuePow(x, Math.PI - 1);
         for (int i = 0; i < dim; i++) {
@@ -139,6 +140,7 @@ public class SGDMinimizer<T extends Function> extends StochasticMinimizer<T> {
         return Math.pow(val * 0.5, pow);
       }
 
+      @Override
       public int domainDimension() {
         return dim;
       }
