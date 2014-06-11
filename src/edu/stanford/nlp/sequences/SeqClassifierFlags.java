@@ -1001,22 +1001,6 @@ public class SeqClassifierFlags implements Serializable {
   public transient String loadWeightsFrom = null;
   public transient String loadClassIndexFrom = null;
   public transient String serializeClassIndexTo = null;
-  public boolean learnCHBasedOnEN = true;
-  public boolean learnENBasedOnCH = false;
-  public String loadWeightsFromEN = null;
-  public String loadWeightsFromCH = null;
-  public String serializeToEN = null;
-  public String serializeToCH = null;
-  public String testFileEN = null;
-  public String testFileCH = null;
-  public String unsupFileEN = null;
-  public String unsupFileCH = null;
-  public String unsupAlignFile = null;
-  public String supFileEN = null;
-  public String supFileCH = null;
-  public transient String serializeFeatureIndexTo = null;
-  public String loadFeatureIndexFromEN = null;
-  public String loadFeatureIndexFromCH = null;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2497,39 +2481,6 @@ public class SeqClassifierFlags implements Serializable {
         loadClassIndexFrom = val;
       } else if (key.equalsIgnoreCase("serializeClassIndexTo")) {
         serializeClassIndexTo = val;
-      } else if (key.equalsIgnoreCase("learnCHBasedOnEN")){
-        learnCHBasedOnEN = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("learnENBasedOnCH")){
-        learnENBasedOnCH = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("loadWeightsFromEN")){
-        loadWeightsFromEN = val;
-      } else if (key.equalsIgnoreCase("loadWeightsFromCH")){
-        loadWeightsFromCH = val;
-      } else if (key.equalsIgnoreCase("serializeToEN")){
-        serializeToEN = val;
-      } else if (key.equalsIgnoreCase("serializeToCH")){
-        serializeToCH = val;
-      } else if (key.equalsIgnoreCase("testFileEN")){
-        testFileEN = val;
-      } else if (key.equalsIgnoreCase("testFileCH")){
-        testFileCH = val;
-      } else if (key.equalsIgnoreCase("unsupFileEN")){
-        unsupFileEN = val;
-      } else if (key.equalsIgnoreCase("unsupFileCH")){
-        unsupFileCH = val;
-      } else if (key.equalsIgnoreCase("unsupAlignFile")){
-        unsupAlignFile = val;
-      } else if (key.equalsIgnoreCase("supFileEN")){
-        supFileEN = val;
-      } else if (key.equalsIgnoreCase("supFileCH")){
-        supFileCH = val;
-      } else if (key.equalsIgnoreCase("serializeFeatureIndexTo")){
-        serializeFeatureIndexTo = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromEN")){
-        loadFeatureIndexFromEN = val;
-      } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){
-        loadFeatureIndexFromCH = val;
-
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
