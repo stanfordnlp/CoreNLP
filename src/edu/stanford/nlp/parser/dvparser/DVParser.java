@@ -491,7 +491,8 @@ public class DVParser {
           "-unknownchineseyearvector",
           "-unkWord", "*UNK*",
           "-transformMatrixType", "DIAGONAL",
-          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT)
+          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT),
+          "-trainWordVectors", "true",
         } ));
     argsWithDefaults.addAll(Arrays.asList(args));
     args = argsWithDefaults.toArray(new String[argsWithDefaults.size()]);
