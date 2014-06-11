@@ -63,6 +63,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 
  // Normalize newlines to this token
  public static final String NEWLINE_TOKEN = "*NL*";
+ private static final String SYSTEM_NEWLINE = System.getProperty("line.separator");
 
  private Map<String,String> normMap;
  
@@ -280,7 +281,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
   }
 
   private Object getNewline() {
-    String nlString = tokenizeNL ? NEWLINE_TOKEN : System.getProperty("line.separator");
+    String nlString = tokenizeNL ? NEWLINE_TOKEN : SYSTEM_NEWLINE;
     return getNext(nlString, yytext());
   }
 
@@ -306,7 +307,8 @@ NUMBER = ({DIGITS}[_\-,\+/\\\.\u066B\u066C\u060C\u060D]*)+
 ARCHAR = [_\u060E-\u061A\u0621-\u065E\u066E-\u06D3\u06D5-\u06EF\u06FA-\u06FF]
 
 /* Null pronoun marker in the vocalized section of the ATB */
-NULLPRON = \-*\[\u0646\u064F\u0644\u0644\]\-*
+NULLPRONSEG = \-*\[\u0646\u064F\u0644\u0644\]\-
+NULLPRON = \-*\[\u0646\u064F\u0644\u0644\]
 
 /* An word is a sequence of Arabic ligatures, possibly preceded and/or
    succeeded by ATB segmentation markers "-", and possibly separated by
@@ -336,10 +338,16 @@ EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a
 {DIGITS}    |
 {PUNC}      { return getNext(false); }
 
-{NULLPRON}  { if ( ! removeProMarker) {
+{NULLPRONSEG}  { if (removeProMarker) {
+                if ( ! removeSegMarker) {
+                  return getNext("-", yytext());
+                }
+              } else {
                 return getNext(false);
               }
-	    }
+            }
+
+{NULLPRON} { if (! removeProMarker) return getNext(false); } 
 
 {ARWORD}    |
 {FORNWORD}  { return getNext(true); }

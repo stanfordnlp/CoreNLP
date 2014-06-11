@@ -1,4 +1,4 @@
-Stanford Arabic Segmenter - v3.3.1 - 2014-01-04
+Stanford Arabic Segmenter - v3.4.1 <<CHECK>> - 2014-05-03
 --------------------------------------
 
 (c) 2012  The Board of Trustees of The Leland Stanford Junior University.
@@ -80,6 +80,24 @@ The orthographic normalization options must match at both training and test time
 Consequently, if you want to apply an orthographic normalization that differs from the
 default, then you'll need to retrain ArabicSegmenter.
 
+SEGMENTING DIALECTAL TEXT
+
+As of version 3.4.1 <<CHECK>>, the segmenter supports Egyptian dialect using
+domain adaptation. [Hal Daumé III, Frustratingly Easy Domain Adaptation, ACL
+2007] To indicate that the provided text is in Egyptian dialect, add the
+command-line option:
+
+  -domain arz
+
+You can also construct a file that specifies a dialect for each
+newline-separated sentence, by adding "123" or "arz" at the beginning of each
+line followed by a tab character. This feature is enabled with the flag:
+
+  -withDomains
+
+See the bottom of the next section for information about training the
+segmenter on your own dialectal data.
+
 TRAINING THE SEGMENTER
 
 The current model is trained on parts1-3 of the ATB. This corpus contains newswire text
@@ -107,3 +125,12 @@ You can use this file to retrain the segmenter with this command:
 This command will produce the serialized model "my_trained_segmenter.ser.gz"
 that you can use for raw text processing as described in the "USAGE" section above.
 
+Adding the -withDomains flag lets you specify a domain (offset by a tab) at
+the beginning of each sentence in the training file. These domains can be
+arbitrary strings, as long as they don't contain tab or newline characters;
+thus, if you have data available for other dialects in ATB format, it is
+possible to train your own system that can support these dialects. For best
+results, include MSA data as well as your dialect data in your training.
+(Adding data from dialects other than your target dialect should not hurt
+performance, as long as they are marked as different domains--it may even
+help!)
