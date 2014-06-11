@@ -9,7 +9,6 @@ import java.util.Properties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Reads and stores configuration information for a POS tagger.
@@ -93,7 +92,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     defaultValues.put("learnClosedClassTags", LEARN_CLOSED_CLASS);
     defaultValues.put("verbose", VERBOSE);
     defaultValues.put("verboseResults", VERBOSE_RESULTS);
-    defaultValues.put("sgml", SGML);
     defaultValues.put("openClassTags", "");
     defaultValues.put("lang", LANG);
     defaultValues.put("tokenizerFactory", TOKENIZER_FACTORY);
