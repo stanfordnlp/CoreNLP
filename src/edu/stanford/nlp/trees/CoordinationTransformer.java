@@ -2,7 +2,6 @@ package edu.stanford.nlp.trees;
 
 
 import edu.stanford.nlp.ling.LabelFactory;
-import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
@@ -66,76 +65,51 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("Input to CoordinationTransformer: " + t);
     }
-    t = tn.transformTree(t);
+    Tree tx = tn.transformTree(t);
     if (VERBOSE) {
-      System.err.println("After DependencyTreeTransformer:  " + t);
+      System.err.println("After DependencyTreeTransformer:  " + tx);
     }
-    if (t == null) {
-      return t;
+    if (tx == null) {
+      return tx;
     }
-    t = UCPtransform(t);
+    Tree tt = UCPtransform(tx);
     if (VERBOSE) {
-      System.err.println("After UCPTransformer:             " + t);
+      System.err.println("After UCPTransformer:             " + tt);
     }
-    t = CCtransform(t);
+    Tree ttt = CCtransform(tt);
     if (VERBOSE) {
-      System.err.println("After CCTransformer:              " + t);
+      System.err.println("After CCTransformer:              " + ttt);
     }
-    t = qp.transformTree(t);
+    Tree tttt = qp.transformTree(ttt);
     if (VERBOSE) {
-      System.err.println("After QPTreeTransformer:          " + t);
+      System.err.println("After QPTreeTransformer:          " + tttt);
     }
-    t = SQflatten(t);
+    Tree flatSQ = SQflatten(tttt);
     if (VERBOSE) {
-      System.err.println("After SQ flattening:              " + t);
+      System.err.println("After SQ flattening:              " + flatSQ);
     }
-    t = dates.transformTree(t);
+    Tree fixedDates = dates.transformTree(flatSQ);
     if (VERBOSE) {
-      System.err.println("After DateTreeTransformer:        " + t);
+      System.err.println("After DateTreeTransformer:        " + fixedDates);
     }
-    t = removeXOverX(t);
+    Tree removedXX = removeXOverX(fixedDates);
     if (VERBOSE) {
-      System.err.println("After removeXoverX:               " + t);
+      System.err.println("After removeXoverX:               " + removedXX);
     }
-    t = combineConjp(t);
+    Tree conjp = combineConjp(removedXX);
     if (VERBOSE) {
-      System.err.println("After combineConjp:               " + t);
+      System.err.println("After combineConjp:               " + conjp);
     }
-    t = moveRB(t);
+    Tree movedRB = moveRB(conjp);
     if (VERBOSE) {
-      System.err.println("After moveRB:                     " + t);
+      System.err.println("After moveRB:                     " + movedRB);
     }
-    t = changeSbarToPP(t);
+    Tree changedSbar = changeSbarToPP(movedRB);
     if (VERBOSE) {
-      System.err.println("After changeSbarToPP:             " + t);
+      System.err.println("After changeSbarToPP:             " + movedRB);
     }
-    t = rearrangeNowThat(t);
-    if (VERBOSE) {
-      System.err.println("After rearrangeNowThat:           " + t);
-    }
-    return t;
+    return changedSbar;
   }
-
-  private static TregexPattern rearrangeNowThatTregex =
-    TregexPattern.compile("ADVP=advp <1 (RB < /^(?i:now)$/) <2 (SBAR=sbar <1 (IN < /^(?i:that)$/))");
-
-  private static TsurgeonPattern[] rearrangeNowThatTsurgeon = {
-    Tsurgeon.parseOperation("relabel advp SBAR"),
-    Tsurgeon.parseOperation("excise sbar sbar"),
-  };
-
-  public Tree rearrangeNowThat(Tree t) {
-    if (t == null) {
-      return t;
-    }
-    TregexMatcher matcher = rearrangeNowThatTregex.matcher(t);
-    while (matcher.find()) {
-      t = rearrangeNowThatTsurgeon[0].evaluate(t, matcher);
-      t = rearrangeNowThatTsurgeon[1].evaluate(t, matcher);
-    }
-    return t;
-  }
-
 
   private static TregexPattern changeSbarToPPTregex =
     TregexPattern.compile("NP < (NP $++ (SBAR=sbar < (IN < /^(?i:after|before|until|since|during)$/ $++ S)))");
@@ -180,9 +154,8 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern moveRBTregex[] = {
-    TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S|PP|VP|NP)/=dest) "),
-    TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^(,|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
-    TregexPattern.compile("/^FRAG/ < (ADVP|RB=adv $+ VP=dest)"),
+    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^([,]|CC|CONJP)$/ $+ (RB=adv [ < not | < then ] $+ /^(S|PP|VP)/=dest))) "),
+    TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^([,]|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
   };
 
   private static TsurgeonPattern moveRBTsurgeon =
@@ -245,21 +218,31 @@ public class CoordinationTransformer implements TreeTransformer {
     return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);    
   }
 
-  private static final TregexPattern[] matchPatterns = {
-    // UCP (JJ ...) -> ADJP
-    // UCP (DT JJ ...) -> ADJP
-    TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/=adjp | ( <1 DT <2 /^JJ|ADJP/=adjp ) |" + 
-                          // UCP (N ...) -> NP
-                                      " <, /^N/=np | ( <1 DT <2 /^N/=np ) | " +
-                          // UCP ADVP -> ADVP
-                          // Might want to look for ways to include RB for flatter structures,
-                          // but then we have to watch out for (RB not) for example
-                          " <, /^ADVP/=advp ]"),
+  private static final TregexPattern[][] matchPatterns = {
+    {
+      // UCP (JJ ...) -> ADJP
+      TregexPattern.compile("/^UCP/=ucp <, /^JJ|ADJP/"),
+      // UCP (DT JJ ...) -> ADJP
+      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)")
+    },
+    {
+      // UCP (N ...) -> NP
+      TregexPattern.compile("/^UCP/=ucp <, /^N/"),
+      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^N/)")
+    },
+    {
+      // UCP ADVP -> ADVP
+      // Might want to look for ways to include RB for flatter structures,
+      // but then we have to watch out for (RB not) for example
+      TregexPattern.compile("/^UCP/=ucp <, /^ADVP/")
+    },
   };
 
   private static final TsurgeonPattern[] operations = {
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADJP$1/"),
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/NP$1/"),
     // TODO: this turns UCP-TMP into ADVP instead of ADVP-TMP.  What do we actually want?
-    Tsurgeon.parseOperation("[if exists adjp relabel ucp /^UCP(.*)$/ADJP$1/] [if exists np relabel ucp /^UCP(.*)$/NP$1/] [if exists advp relabel ucp /^UCP(.*)$/ADVP/]"),
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADVP/"), 
   };
 
   /**
@@ -278,12 +261,12 @@ public class CoordinationTransformer implements TreeTransformer {
     }
     Tree firstChild = t.firstChild();
     if (firstChild != null) {
-      // TODO: precompile the patterns, check to see whether this or
-      // calling for each pattern is more efficient
       List<Pair<TregexPattern,TsurgeonPattern>> ops = Generics.newArrayList();
 
       for (int i = 0; i < operations.length; i++) {
-        ops.add(Generics.newPair(matchPatterns[i], operations[i]));
+        for (TregexPattern pattern : matchPatterns[i]) {
+          ops.add(Generics.newPair(pattern, operations[i]));
+        }
       }
 
       return Tsurgeon.processPatternsOnTree(ops, t);
@@ -607,7 +590,7 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t.isPreTerminal()) {
       if (t.value().startsWith("CC")) {
         Tree parent = t.parent(root);
-        if (parent != null && parent.value().startsWith("NP")) {
+        if (parent.value().startsWith("NP")) {
           List<Tree> children = parent.getChildrenAsList();
           //System.out.println(children);
           int ccIndex = children.indexOf(t);

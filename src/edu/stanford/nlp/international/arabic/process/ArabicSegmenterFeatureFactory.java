@@ -25,6 +25,9 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   private static final long serialVersionUID = -4560226365250020067L;
   
   private static final String DOMAIN_MARKER = "@";
+  private static final int MAX_BEFORE = 5;
+  private static final int MAX_AFTER = 9;
+  private static final int MAX_LENGTH = 10;
   
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
@@ -91,17 +94,28 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     // Character-level class features
     boolean seenPunc = false;
     boolean seenDigit = false;
-    for (int i = 0, limit = charc.length(); i < limit; ++i) {
+    for (int i = 0; i < charc.length(); ++i) {
       char charcC = charc.charAt(i);
-      seenPunc = seenPunc || Characters.isPunctuation(charcC);
-      seenDigit = seenDigit || Character.isDigit(charcC);
+      if ( ! seenPunc && Characters.isPunctuation(charcC)) {
+        seenPunc = true;
+        features.add("haspunc");        
+      }
+      if ( ! seenDigit && Character.isDigit(charcC)) {
+        seenDigit = true;
+        features.add("hasdigit");        
+      }
       String cuBlock = Characters.unicodeBlockStringOf(charcC);
       features.add(cuBlock + "-uBlock");
       String cuType = String.valueOf(Character.getType(charcC));
       features.add(cuType + "-uType");
     }
-    if (seenPunc) features.add("haspunc");        
-    if (seenDigit) features.add("hasdigit");        
+    
+    // Token-level features
+    String word = c.word();
+    int index = c.index();
+    features.add(Math.min(MAX_BEFORE, index) + "-before");
+    features.add(Math.min(MAX_AFTER, word.length() - charc.length() - index) + "-after");
+    features.add(Math.min(MAX_LENGTH, word.length()) + "-length");
 
     // Indicator transition feature
     features.add("cliqueC");
@@ -137,6 +151,20 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
 
     features.add(charc + charp + charp2 + "-cngram");
 
+    // "Wrapper" feature: identity of first and last two chars of the current word.
+    // This helps detect ma+_+sh in dialect, as well as avoiding segmenting possessive
+    // pronouns if the word starts with al-.
+    if (c.word().length() > 3) {
+      String start = c.word().substring(0, 2);
+      String end = c.word().substring(c.word().length() - 2);
+      if (c.index() == 2) {
+        features.add(start + "_" + end + "-begin-wrap");
+      }
+      if (c.index() == c.word().length() - 1) {
+        features.add(start + "_" + end + "-end-wrap");
+      }
+    }
+    
     // Indicator transition feature
     features.add("cliqueCp2C");
     
