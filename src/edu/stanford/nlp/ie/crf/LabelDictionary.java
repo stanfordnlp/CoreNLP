@@ -1,14 +1,15 @@
 package edu.stanford.nlp.ie.crf;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 
 /**
@@ -21,17 +22,18 @@ public class LabelDictionary implements Serializable {
 
   private static final long serialVersionUID = 6790400453922524056L;
 
+  private final boolean DEBUG = true;
+
   private final int DEFAULT_CAPACITY = 30000;
 
-  private final boolean DEBUG = true;
-  
   // Bookkeeping
   private Counter<String> observationCounts;
   private Map<String,Set<String>> observedLabels;
 
   // Final data structure
-  private Map<String,Set<Integer>> labelDictionary;
-  
+  private Index<String> observationIndex;
+  private int[][] labelDictionary;
+
   /**
    * Constructor.
    */
@@ -64,7 +66,7 @@ public class LabelDictionary implements Serializable {
    * @return
    */
   public boolean isConstrained(String observation) {
-    return labelDictionary.containsKey(observation);
+    return observationIndex.indexOf(observation) >= 0;
   }
 
   /**
@@ -73,39 +75,43 @@ public class LabelDictionary implements Serializable {
    * @param observation
    * @return The allowed label set, or null if the observation is unconstrained.
    */
-  public Set<Integer> getConstrainedSet(String observation) {
-    return labelDictionary.containsKey(observation) ? labelDictionary.get(observation) : null;
+  public int[] getConstrainedSet(String observation) {
+    int i = observationIndex.indexOf(observation);
+    return i >= 0 ? labelDictionary[i] : null;
   }
 
   /**
    * Setup the constrained label sets and free bookkeeping resources.
    * 
    * @param threshold
-   * @param classIndex 
+   * @param labelIndex 
    */
-  public void lock(int threshold, Index<String> classIndex) {
-    if (labelDictionary != null) throw new RuntimeException("Dictionary is already locked");
+  public void lock(int threshold, Index<String> labelIndex) {
+    if (labelDictionary != null) throw new RuntimeException("Label dictionary is already locked");
     if (DEBUG) {
       System.err.println("Label Dictionary Status:");
       System.err.printf("# Observations: %d%n", (int) observationCounts.totalCount());
     }
-    
-    labelDictionary = new HashMap<String,Set<Integer>>();
-    for (String observation : observationCounts.keySet()) {
-      if (observationCounts.getCount(observation) >= threshold) {
-        Set<Integer> allowedLabelIds = Generics.newHashSet();
-        Set<String> allowedLabels = observedLabels.get(observation);
-        for (String label : allowedLabels) {
-          allowedLabelIds.add(classIndex.indexOf(label));
-        }
-        labelDictionary.put(observation, allowedLabelIds);
-        if (DEBUG) {
-          System.err.printf("%s : %s%n", observation, allowedLabels.toString());
-        }
-      } 
+    Counters.retainAbove(observationCounts, threshold);
+    Set<String> constrainedObservations = observationCounts.keySet();
+    labelDictionary = new int[constrainedObservations.size()][];
+    observationIndex = new HashIndex<String>(constrainedObservations.size());
+    for (String observation : constrainedObservations) {
+      int i = observationIndex.indexOf(observation, true);
+      assert i < labelDictionary.length;
+      Set<String> allowedLabels = observedLabels.get(observation);
+      labelDictionary[i] = new int[allowedLabels.size()];
+      int j = 0;
+      for (String label : allowedLabels) {
+        labelDictionary[i][j++] = labelIndex.indexOf(label);
+      }
+      if (DEBUG) {
+        System.err.printf("%s : %s%n", observation, allowedLabels.toString());
+      }
     }
+    observationIndex.lock();
     if (DEBUG) {
-      System.err.printf("#constraints: %d%n", labelDictionary.keySet().size());
+      System.err.printf("#constraints: %d%n", labelDictionary.length);
     }
     // Free bookkeeping data structures
     observationCounts = null;
