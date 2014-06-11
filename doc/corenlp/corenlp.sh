@@ -5,7 +5,8 @@
 #    ./corenlp.sh -file filename
 #    ./corenlp.sh -file filename -outputFormat text 
 
-scriptdir=`dirname $0`
+scriptpath=$(readlink -e "$0")
+scriptdir=$(dirname "$scriptpath")
 
 echo java -mx3g -cp \"$scriptdir/*\" edu.stanford.nlp.pipeline.StanfordCoreNLP $*
 java -mx3g -cp "$scriptdir/*" edu.stanford.nlp.pipeline.StanfordCoreNLP $*
