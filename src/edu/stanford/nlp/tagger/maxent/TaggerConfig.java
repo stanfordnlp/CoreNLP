@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Reads and stores configuration information for a POS tagger.
@@ -54,13 +52,9 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   VERBOSE = "false",
   VERBOSE_RESULTS = "true",
   SGML = "false",
-  INIT_FROM_TREES = "false",
   LANG = "",
   TOKENIZER_FACTORY = "",
   XML_INPUT = "",
-  TREE_TRANSFORMER = "",
-  TREE_NORMALIZER = "",
-  TREE_RANGE = "",
   TAG_INSIDE = "",
   APPROXIMATE = "-1.0",
   TOKENIZER_OPTIONS = "",
@@ -142,19 +136,18 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     // Properties modelProps = new Properties();
     // TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
     if (! props.containsKey("trainFile")) {
-      String name = props.getProperty("model");
-      if (name == null) {
-        name = props.getProperty("dump");
-      }
-      if (name != null) {
-        try {
-          System.err.println("Loading default properties from tagger " + name);
-          DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
-          this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
-          in.close();
-        } catch (Exception e) {
-          throw new RuntimeIOException("No such trained tagger config file found: " + name);
+      try {
+        String name = props.getProperty("model");
+        if (name == null) {
+          name = props.getProperty("dump");
         }
+        System.err.println("Loading default properties from tagger " + name);
+        DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
+        this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
+        in.close();
+      } catch (Exception e) {
+        System.err.println("Error: No such trained tagger config file found.");
+        e.printStackTrace();
       }
     }
 
