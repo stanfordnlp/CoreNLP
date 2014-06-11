@@ -1425,13 +1425,9 @@ public class SemanticGraph implements Serializable {
    */
   public String toList() {
     StringBuilder buf = new StringBuilder();
-    for (IndexedWord root : getRoots()) {
-      buf.append("root(ROOT-0, ");
-      buf.append(toDepStyle(root)).append(")\n");
-    }
     for (SemanticGraphEdge edge : this.edgeListSorted()) {
       buf.append(edge.getRelation().toString()).append("(");
-      buf.append(toDepStyle(edge.getSource())).append(", ");
+      buf.append(toDepStyle(edge.getSource())).append(",");
       buf.append(toDepStyle(edge.getTarget())).append(")\n");
     }
     return buf.toString();
