@@ -35,7 +35,7 @@ public class IntervalTreeTest extends TestCase {
     Interval<Integer> included = Interval.toInterval(249210800, 249212000);
     Interval<Integer> after = Interval.toInterval(249213000, 249214000);
 
-    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<Integer, Interval<Integer>>();
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
     tree.add(a);
 
     List<Interval<Integer>> overlapping1 = tree.getOverlapping(before);
@@ -112,7 +112,7 @@ public class IntervalTreeTest extends TestCase {
   public void testIteratorRandom() throws Exception
   {
     int n = 1000;
-    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<Integer, Interval<Integer>>();
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
 
     Random rand = new Random();
     List<Interval<Integer>> list = new ArrayList<Interval<Integer>>(n+1);
@@ -139,7 +139,7 @@ public class IntervalTreeTest extends TestCase {
   public void testIteratorOrdered() throws Exception
   {
     int n = 1000;
-    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<Integer, Interval<Integer>>();
+    IntervalTree<Integer, Interval<Integer>> tree = new IntervalTree<>();
 
     List<Interval<Integer>> list = new ArrayList<Interval<Integer>>(n+1);
     for (int i = 0; i < n; i++) {
