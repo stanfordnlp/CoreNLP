@@ -202,10 +202,16 @@ public class Tsurgeon {
    * <p>
    *      <code>$+ &#60;name&#62;</code>     the left sister of the named node<br>
    *      <code>$- &#60;name&#62;</code>     the right sister of the named node<br>
-   *      <code>&gt;i</code> the i_th daughter of the named node<br>
-   *      <code>&gt;-i</code> the i_th daughter, counting from the right, of the named node.
+   *      <code>&gt;i &#60;name&#62;</code> the i_th daughter of the named node<br>
+   *      <code>&gt;-i &#60;name&#62;</code> the i_th daughter, counting from the right, of the named node.
    * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code> or <code>replace &#60;name1&#62; &#60;tree&#62;</code>
    *     deletes name1 and inserts tree or a copy of name2 in its place.
+   * <li><code>createSubtree &#60;new-label&#62; &#60;name1&#62; [&#60;name2&#62;]</code> 
+   *     Create a subtree out of all the nodes from
+   *     <code>&#60;name1&#62;</code> through
+   *     <code>&#60;name2&#62;</code> and puts the new subtree where
+   *     that span used to be.  To limit the operation to just one
+   *     node, elide <code>&#60;name2&#62;</code>.
    * <li><code>adjoin &#60;auxiliary_tree&#62; &lt;name&gt;</code> Adjoins the specified auxiliary tree into the named node.
    *     The daughters of the target node will become the daughters of the foot of the auxiliary tree.
    * <li><code>adjoinH &#60;auxiliary_tree&#62; &lt;name&gt;</code> Similar to adjoin, but preserves the target node
