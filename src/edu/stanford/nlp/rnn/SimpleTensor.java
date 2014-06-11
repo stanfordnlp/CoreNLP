@@ -1,4 +1,4 @@
-package edu.stanford.nlp.neural;
+package edu.stanford.nlp.rnn;
 
 import java.io.Serializable;
 import java.util.Arrays;
