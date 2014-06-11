@@ -24,16 +24,5 @@ public class SentimentCoreAnnotations {
       return Tree.class;
     }
   }
-
-
-  /**
-   * The final label given for a sentence.  Set by the
-   * SentimentAnnotator and used by various forms of text output
-   */
-  public static class ClassName implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
 }
 
