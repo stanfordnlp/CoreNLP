@@ -87,17 +87,4 @@ public class TreeTest extends TestCase {
       assertFalse(child.dominates(t));
     }
   }
-
-  public void testPennPrint() {
-    // a Label with a null value should print as "" not null.
-    Tree t = Tree.valueOf("( (SBARQ (WHNP (WP What)) (SQ (VBP are) (NP (DT the) (NNP Valdez) (NNS Principles))) (. ?)))",
-            new LabeledScoredTreeReaderFactory(new TreeNormalizer()));
-    assertNull("Root of tree should have null label if none in String", t.label().value());
-    String answer = "( (SBARQ\n" +
-            "    (WHNP (WP What))\n" +
-            "    (SQ (VBP are)\n" +
-            "      (NP (DT the) (NNP Valdez) (NNS Principles)))\n" +
-            "    (. ?)))\n";
-    assertEquals(answer, t.pennString());
-  }
 }
