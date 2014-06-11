@@ -777,7 +777,6 @@ public class ChineseGrammaticalRelations {
                             MODIFIER, "NP", tregexCompiler,
                             new String[]{
                               "NP  $++ (CP=target ) > NP ",
-                              "NP  $++ (CP=target)",
                               // don't match this rule for an NP if
                               // there is another, more specific NP
                               // which will also match the same rule
