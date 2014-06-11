@@ -391,7 +391,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   public boolean isAlphaBalanced(TreeNode<E,T> node, double alpha) {
     int leftSize = (node.left != null)? node.left.size:0;
     int rightSize = (node.right != null)? node.right.size:0;
-    int threshold = (int) (alpha*node.size) + 1;
+    int threshold = (int) alpha*node.size + 1;
     return (leftSize <= threshold) && (rightSize <= threshold);
   }
 
