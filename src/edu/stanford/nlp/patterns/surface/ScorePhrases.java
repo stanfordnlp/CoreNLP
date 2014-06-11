@@ -234,6 +234,7 @@ public class ScorePhrases {
         wordsandLemmaPatExtracted.addAll(result.first());
         matchedTokensByPat.addAll(result.second());
       }catch(Exception e){
+        executor.shutdownNow();
         throw new RuntimeException(e);
       }
     }

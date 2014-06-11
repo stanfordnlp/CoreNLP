@@ -48,7 +48,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   public static boolean insertModifierWildcard = false;
 
-  public SurfacePattern(String[] prevContext, PatternToken token, String[] nextContext, Genre genre){
+  public SurfacePattern(String[] prevContext, PatternToken token, String[] nextContext, Genre genre) {
     // String[] originalPrev, String[] originalNext, Genre genre) {
     prevContext = trim(prevContext);
     nextContext = trim(nextContext);
@@ -66,27 +66,21 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     // this.setOriginalNext(originalNext);
     this.genre = genre;
 
-    // toString = toString(null);
     hashcode = toString().hashCode();
 
   }
 
-  String[] trim(String[] p){
-    
-    if(p == null)
+  String[] trim(String[] p) {
+
+    if (p == null)
       return null;
-    
-    for(int i = 0 ; i < p.length; i++){
-      String trimmed = p[i].trim();
-      if(!trimmed.equals(p[i]))
-      {
-        System.out.println("trimmed is " + trimmed + " and p[i] is " + p[i]);
-      }
-      p[i] = trimmed;
+
+    for (int i = 0; i < p.length; i++) {
+      p[i] = p[i].trim();
     }
     return p;
   }
-  
+
   public static String getContextStr(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {
     String str = "";
 
@@ -229,8 +223,8 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     return getSimplerTokens(nextContext);
   }
 
-  static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)" + Pattern.quote("\\E")+"/\\s*" + Pattern.quote("}")
-      + "\\s*" + Pattern.quote("]"));
+  static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)"
+      + Pattern.quote("\\E") + "/\\s*" + Pattern.quote("}") + "\\s*" + Pattern.quote("]"));
   static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
       + Pattern.quote("]"));
 
@@ -240,12 +234,12 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
     String[] sim = new String[p.length];
     for (int i = 0; i < p.length; i++) {
-      
+
       assert p[i] != null : "How is the any one " + Arrays.toString(p) + " null!";
-      
-      if(p1 == null)
+
+      if (p1 == null)
         throw new RuntimeException("how is p1 null");
-      
+
       Matcher m = p1.matcher(p[i]);
 
       if (m.matches()) {
@@ -254,13 +248,13 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
         Matcher m2 = p2.matcher(p[i]);
         if (m2.matches()) {
           sim[i] = m2.group(2);
-        } else if(p[i].startsWith("$FILLER"))
+        } else if (p[i].startsWith("$FILLER"))
           sim[i] = "FW";
-        else if(p[i].startsWith("$STOP"))
+        else if (p[i].startsWith("$STOP"))
           sim[i] = "SW";
         else
-          throw new RuntimeException("Cannot understand " + p[i] + "  the thing ends with " + p[i].charAt(p[i].length() -1) + " character");
-      } 
+          throw new RuntimeException("Cannot understand " + p[i]);
+      }
     }
     return sim;
 
@@ -273,7 +267,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     String prevstr = simprev == null ? "" : StringUtils.join(simprev, " ");
     String nextstr = simnext == null ? "" : StringUtils.join(simnext, " ");
 
-    String sim =  prevstr.trim() + " <b>" + getToken().toStringToWrite() + "</b> " + nextstr.trim();
+    String sim = prevstr.trim() + " <b>" + getToken().toStringToWrite() + "</b> " + nextstr.trim();
     return sim;
   }
 
@@ -419,9 +413,9 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   @Override
   public int compareTo(SurfacePattern o) {
-    int numthis = this.getPreviousContextLen() +  this.getNextContextLen();
-    int numthat = o.getPreviousContextLen() +  o.getNextContextLen();
-    
+    int numthis = this.getPreviousContextLen() + this.getNextContextLen();
+    int numthat = o.getPreviousContextLen() + o.getNextContextLen();
+
     if (numthis > numthat) {
       return -1;
     } else if (numthis < numthat) {
@@ -430,22 +424,25 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
       return this.toString().compareTo(o.toString());
   }
 
-  public int getPreviousContextLen(){
-    if(this.prevContext == null)
+  public int getPreviousContextLen() {
+    if (this.prevContext == null)
       return 0;
-    else return this.prevContext.length;
+    else
+      return this.prevContext.length;
   }
-  
-  public int getNextContextLen(){
-    if(this.nextContext == null)
+
+  public int getNextContextLen() {
+    if (this.nextContext == null)
       return 0;
-    else return this.nextContext.length;
+    else
+      return this.nextContext.length;
   }
-  
+
   public static boolean sameLength(SurfacePattern p1, SurfacePattern p2) {
-    if(p1.getPreviousContextLen() == p2.getPreviousContextLen() && p1.getNextContextLen() == p2.getNextContextLen())
+    if (p1.getPreviousContextLen() == p2.getPreviousContextLen() && p1.getNextContextLen() == p2.getNextContextLen())
       return true;
-    else return false;
+    else
+      return false;
   }
 
   // public static SurfacePattern parse(String s) {
