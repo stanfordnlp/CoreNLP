@@ -45,6 +45,8 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   private final boolean inputHasTags;
   private final boolean inputHasDomainLabels;
+  private final String inputDomain;
+  private final boolean shouldStripRewrites;
 
   /**
    *
@@ -72,7 +74,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
                                        boolean hasTags,
                                        TokenizerFactory<CoreLabel> tokFactory) {
-    this(hasSegMarkers, hasTags, false, tokFactory);
+    this(hasSegMarkers, hasTags, false, "123", tokFactory);
   }
   
   /**
@@ -86,25 +88,51 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
                                        boolean hasTags,
                                        boolean hasDomainLabels,
+                                       String domain,
                                        TokenizerFactory<CoreLabel> tokFactory) {
+    this(hasSegMarkers, hasTags, hasDomainLabels, domain, false, tokFactory);
+  }
+  
+  /**
+  *
+  * @param hasSegMarkers if true, input has segmentation markers
+  * @param hasTags if true, input has morphological analyses separated by tagDelimiter.
+  * @param hasDomainLabels if true, input has a whitespace-terminated domain at the beginning
+  *     of each line of text
+  * @param stripRewrites if true, erase orthographical rewrites from the gold labels (for
+  *     comparison purposes)
+  * @param tokFactory a TokenizerFactory for the input
+  */
+  public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
+      boolean hasTags,
+      boolean hasDomainLabels,
+      String domain,
+      boolean stripRewrites,
+      TokenizerFactory<CoreLabel> tokFactory) {
     tf = tokFactory;
     inputHasTags = hasTags;
     inputHasDomainLabels = hasDomainLabels;
+    inputDomain = domain;
+    shouldStripRewrites = stripRewrites;
     segMarker = hasSegMarkers ? DEFAULT_SEG_MARKER : null;
     factory = LineIterator.getFactory(new SerializableFunction<String, List<CoreLabel>>() {
       private static final long serialVersionUID = 5243251505653686497L;
       public List<CoreLabel> apply(String in) {
+        List<CoreLabel> tokenList;
+        
         if (inputHasTags) {
-          String domain = "";
+          String lineDomain = "";
           if (inputHasDomainLabels) {
             String[] domainAndData = in.split("\\s+", 2);
             if (domainAndData.length < 2) {
               System.err.println("Missing domain label or text: ");
               System.err.println(in);
             } else {
-              domain = domainAndData[0];
+              lineDomain = domainAndData[0];
               in = domainAndData[1];
             }
+          } else {
+            lineDomain = inputDomain;
           }
           String[] toks = in.split("\\s+");
           List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
@@ -118,27 +146,40 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
               List<CoreLabel> lexList = tf.getTokenizer(new StringReader(word)).tokenize();
               if (lexList.size() == 0) {
                 continue;
+              
+              } else if (lexList.size() == 1) {
+                word = lexList.get(0).value();
+              
               } else if (lexList.size() > 1) {
-                System.err.printf("%s: Raw token generates multiple segments: %s%n", this.getClass().getName(), word);
+                String secondWord = lexList.get(1).value();
+                if (secondWord.equals(String.valueOf(segMarker))) {
+                  // Special case for the null marker in the vocalized section
+                  word = lexList.get(0).value() + segMarker;
+                } else {
+                  System.err.printf("%s: Raw token generates multiple segments: %s%n", this.getClass().getName(), word);
+                  word = lexList.get(0).value();
+                }
               }
-              word = lexList.get(0).value();
             }
             cl.setValue(word);
             cl.setWord(word);
             cl.setTag(wordTagPair[1]);
-            if (inputHasDomainLabels)
-              cl.set(CoreAnnotations.DomainAnnotation.class, domain);
+            cl.set(CoreAnnotations.DomainAnnotation.class, lineDomain);
             input.add(cl);
           }
-          return IOBUtils.StringToIOB(input, segMarker, true);
+          tokenList = IOBUtils.StringToIOB(input, segMarker, true, shouldStripRewrites);
 
         } else if (tf == null) {
-          return IOBUtils.StringToIOB(in, segMarker);
+          tokenList = IOBUtils.StringToIOB(in, segMarker);
 
         } else {
           List<CoreLabel> line = tf.getTokenizer(new StringReader(in)).tokenize();
-          return IOBUtils.StringToIOB(line, segMarker, false);
+          tokenList = IOBUtils.StringToIOB(line, segMarker, false);
         }
+        
+        if (!inputHasDomainLabels)
+          IOBUtils.labelDomain(tokenList, inputDomain);
+        return tokenList;
       }
     });
   }
@@ -179,10 +220,6 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     TokenizerFactory<CoreLabel> tokFactory = ArabicTokenizer.atbFactory();
     String atbVocOptions = "removeProMarker,removeMorphMarker";
     tokFactory.setOptions(atbVocOptions);
-    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(true,
-        true,
-        false,
-        tokFactory);
     
     BufferedReader reader = IOUtils.readerFromString(fileName);
     for (String line; (line = reader.readLine()) != null; ) {
@@ -197,10 +234,20 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
           List<CoreLabel> lexList = tokFactory.getTokenizer(new StringReader(word)).tokenize();
           if (lexList.size() == 0) {
             continue;
+          
+          } else if (lexList.size() == 1) {
+            word = lexList.get(0).value();
+          
           } else if (lexList.size() > 1) {
-            System.err.printf("%s: Raw token generates multiple segments: %s%n", ArabicDocumentReaderAndWriter.class.getName(), word);
+            String secondWord = lexList.get(1).value();
+            if (secondWord.equals(String.valueOf(DEFAULT_SEG_MARKER))) {
+              // Special case for the null marker in the vocalized section
+              word = lexList.get(0).value() + String.valueOf(DEFAULT_SEG_MARKER);
+            } else {
+              System.err.printf("%s: Raw token generates multiple segments: %s%n", ArabicDocumentReaderAndWriter.class.getName(), word);
+              word = lexList.get(0).value();
+            }
           }
-          word = lexList.get(0).value();
         }
         if ( ! isStart ) System.out.print(" ");
         System.out.print(word);
@@ -209,6 +256,10 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
       System.out.println();
     }
    
+//    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(true,
+//        true,
+//        false,
+//        tokFactory);
 //    Iterator<List<CoreLabel>> itr = docReader.getIterator(new InputStreamReader(new FileInputStream(new File(fileName))));
 //    while(itr.hasNext()) {
 //      List<CoreLabel> line = itr.next();

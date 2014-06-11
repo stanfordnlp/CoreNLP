@@ -10,12 +10,6 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionUtils;
 
-/**
- * Used if patternScoring flag is set to F1 with the seed pattern. See {@link PatternScoring} enum.
- * 
- * @author Sonal Gupta (sonalg@stanford.edu)
- *
- */
 
 public class ScorePatternsF1 extends ScorePatterns {
 
@@ -28,11 +22,11 @@ public class ScorePatternsF1 extends ScorePatterns {
       TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label, Properties props, Counter<String> p0Set, SurfacePattern p0){
+      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label, Counter<String> p0Set, SurfacePattern p0){
     super(constVars,
         patternScoring, label, patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
+        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
     this.p0 = p0;
     this.p0Set =p0Set; 
   }
