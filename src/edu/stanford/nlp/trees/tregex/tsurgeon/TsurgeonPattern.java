@@ -46,12 +46,6 @@ public abstract class TsurgeonPattern {
   final String label;
   final TsurgeonPattern[] children;
 
-  /**
-   * In some cases, the order of the children has special meaning.
-   * For example, in the case of ReplaceNode, the first child will
-   * evaluate to the node to be replaced, and the other(s) will
-   * evaluate to the replacement.
-   */
   TsurgeonPattern(String label, TsurgeonPattern[] children) {
     this.label = label;
     this.children = children;

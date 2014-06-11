@@ -4,7 +4,6 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Filter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 import java.io.IOException;
@@ -141,7 +140,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    return new SemanticHeadFinder(treebankLanguagePack(), !englishTest.makeCopulaHead);
+    return new SemanticHeadFinder(!englishTest.makeCopulaHead);
   }
 
 
