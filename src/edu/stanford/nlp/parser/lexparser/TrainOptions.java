@@ -296,10 +296,11 @@ public class TrainOptions implements Serializable {
   public int dvKBest = DEFAULT_K_BEST;
 
   /**
-   * When training the DV parsing method, how many iterations to loop
+   * When training a parsing method where the training has a (max)
+   * number of iterations, how many iterations to loop
    */
-  static public final int DEFAULT_DV_ITERATIONS = 20;
-  public int dvIterations = DEFAULT_DV_ITERATIONS;
+  static public final int DEFAULT_TRAINING_ITERATIONS = 40;
+  public int trainingIterations = DEFAULT_TRAINING_ITERATIONS;
 
   /**
    * When training using batches of trees, such as in the DVParser,
@@ -312,7 +313,7 @@ public class TrainOptions implements Serializable {
    */
   public static final double DEFAULT_REGCOST = 0.0001;
   public double regCost = DEFAULT_REGCOST;
-
+  
   /**
    * When training the DV parsing method, how many iterations to loop
    * for one batch of trees
@@ -338,14 +339,14 @@ public class TrainOptions implements Serializable {
    */
   public int debugOutputFrequency = 0;
 
-  public long dvSeed = 0;
+  public long randomSeed = 0;
 
   public static final double DEFAULT_LEARNING_RATE = 0.1;
   /**
    * How fast to learn (can mean different things for different algorithms)
    */
   public double learningRate = DEFAULT_LEARNING_RATE;
-
+  
   public static final double DEFAULT_DELTA_MARGIN = 0.1;
   /**
    * How much to penalize the wrong trees for how different they are
@@ -407,7 +408,7 @@ public class TrainOptions implements Serializable {
   public String unkWord = DEFAULT_UNK_WORD;
 
   /**
-   * Whether or not to lowercase word vectors
+   * Whether or not to lowercase word vectors 
    */
   public boolean lowercaseWordVectors = false;
 
@@ -433,9 +434,13 @@ public class TrainOptions implements Serializable {
    */
   public boolean trainWordVectors = true;
 
-  /** Horton-Strahler number/dimension (Maximilian Schlund) */
-  public boolean markStrahler;
-
+  public static final int DEFAULT_STALLED_ITERATION_LIMIT = 12;
+  /**
+   * How many iterations to allow training to stall before taking the
+   * best model, if training in an iterative manner
+   */
+  public int stalledIterationLimit = DEFAULT_STALLED_ITERATION_LIMIT;
+  
   public void display() {
     System.err.println(toString());
   }
@@ -477,14 +482,14 @@ public class TrainOptions implements Serializable {
     result.append(" noRebinarization=" + noRebinarization + "\n");
     result.append(" trainingThreads=" + trainingThreads + "\n");
     result.append(" dvKBest=" + dvKBest + "\n");
-    result.append(" dvIterations=" + dvIterations + "\n");
+    result.append(" trainingIterations=" + trainingIterations + "\n");
     result.append(" batchSize=" + batchSize + "\n");
     result.append(" regCost=" + regCost + "\n");
     result.append(" qnIterationsPerBatch=" + qnIterationsPerBatch + "\n");
     result.append(" qnEstimates=" + qnEstimates + "\n");
     result.append(" qnTolerance=" + qnTolerance + "\n");
     result.append(" debugOutputFrequency=" + debugOutputFrequency + "\n");
-    result.append(" dvSeed=" + dvSeed + "\n");
+    result.append(" randomSeed=" + randomSeed + "\n");
     result.append(" learningRate=" + learningRate + "\n");
     result.append(" deltaMargin=" + deltaMargin + "\n");
     result.append(" unknownNumberVector=" + unknownNumberVector + "\n");
@@ -501,7 +506,7 @@ public class TrainOptions implements Serializable {
     result.append(" transformMatrixType=" + transformMatrixType + "\n");
     result.append(" useContextWords=" + useContextWords + "\n");
     result.append(" trainWordVectors=" + trainWordVectors + "\n");
-    result.append(" markStrahler=" + markStrahler + "\n");
+    result.append(" stalledIterationLimit=" + stalledIterationLimit + "\n");
     return result.toString();
   }
 
