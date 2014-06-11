@@ -21,6 +21,7 @@ public class Match<K,V> implements HasInterval<Integer>
   int begin;
   /* End offset of the span */
   int end;
+  Object customMatchObject;  // Custom match object
   transient Interval<Integer> span;
 
   public Match() {}
@@ -46,6 +47,14 @@ public class Match<K,V> implements HasInterval<Integer>
 
   public int getEnd() {
     return end;
+  }
+
+  public Object getCustom() {
+    return customMatchObject;
+  }
+
+  public void setCustom(Object customMatchObject) {
+    this.customMatchObject = customMatchObject;
   }
 
   @Override
