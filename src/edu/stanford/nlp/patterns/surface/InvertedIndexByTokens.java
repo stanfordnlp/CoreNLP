@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -25,7 +24,7 @@ import edu.stanford.nlp.ling.CoreLabel;
  * @author Sonal Gupta (sonalg@stanford.edu)
  * 
  */
-public class InvertedIndexByTokens implements Serializable{
+public class InvertedIndexByTokens {
 
   Map<String, Hashtable<String, Set<String>>> index;
   boolean convertToLowercase;

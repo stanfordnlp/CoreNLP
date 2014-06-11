@@ -1,7 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,10 +28,7 @@ import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public class ConstantsAndVariables implements Serializable{
-
-  
-  private static final long serialVersionUID = 1L;
+public class ConstantsAndVariables {
 
   /**
    * Maximum number of iterations to run
@@ -269,7 +265,8 @@ public class ConstantsAndVariables implements Serializable{
    * Seed dictionary, set in the class that uses this class
    */
   private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
-  
+
+  @SuppressWarnings("rawtypes")
   public Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass = null;
 
   /**
@@ -709,10 +706,6 @@ public class ConstantsAndVariables implements Serializable{
 
   public Map<String, Set<String>> getLabelDictionary() {
     return this.labelDictionary;
-  }
-  
-  public void addLabelDictionary(String label, Set<String> words) {
-    this.labelDictionary.get(label).addAll(words);
   }
 
   public Set<String> getEnglishWords() {
