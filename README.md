@@ -8,3 +8,5 @@ The Stanford CoreNLP code is written in Java and licensed under the GNU General 
 You can find releases of Stanford CoreNLP on [Maven Central](http://search.maven.org/#browse%7C11864822).
 
 You can find more explanation and documentation of Stanford CoreNLP on [the Stanford CoreNLP homepage](http://nlp.stanford.edu/software/corenlp.shtml#Demo).
+
+For information about making contributions to Stanford CoreNLP, see the file `CONTRIBUTING.md`.
