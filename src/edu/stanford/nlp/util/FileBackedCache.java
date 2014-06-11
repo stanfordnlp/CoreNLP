@@ -61,7 +61,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
    */
   private static final Interner<File> canonicalFile = new Interner<File>();
   /** A map indicating whether the JVM holds a file lock on the given file */
-  private static final IdentityHashMap<File, FileSemaphore> fileLocks = new IdentityHashMap<File, FileSemaphore>();
+  private static final IdentityHashMap<File, FileSemaphore> fileLocks = Generics.newIdentityHashMap();
 
   //
   // Constructors
@@ -400,7 +400,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
   public Set<Entry<KEY, T>> entrySet() {
     readCache();
     Set<Entry<KEY, SoftReference<T>>> entries = mapping.entrySet();
-    Set<Entry<KEY, T>> rtn = new HashSet<Entry<KEY, T>>();
+    Set<Entry<KEY, T>> rtn = Generics.newHashSet();
     for (final Entry<KEY, SoftReference<T>> entry : entries) {
       T value = entry.getValue().get();
       if (value == null) value = get(entry.getKey());
@@ -504,7 +504,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
    * @return A collection of files on which the JVM holds a file lock.
    */
   public static Collection<File> locksHeld() {
-    ArrayList<File> files = new ArrayList<File>();
+    ArrayList<File> files = Generics.newArrayList();
     for (Entry<File, FileSemaphore> entry : fileLocks.entrySet()) {
       if (entry.getValue().isActive()) {
         files.add(entry.getKey());
@@ -578,7 +578,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         // Write Object
         writer = newOutputStream(toWrite, exists);
         haveTakenLock = true;
-        writeNextObject(writer.first, new Pair<KEY, T>(key, value));
+        writeNextObject(writer.first, Pair.makePair(key, value));
         writer.second.apply();
         haveTakenLock = false;
       }
@@ -684,18 +684,18 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
       if (!block.delete()) {
         throw new IllegalStateException("File corrupted, and cannot delete it: " + block.getPath());
       }
-      return new LinkedList<Pair<KEY, T>>();
+      return Generics.newLinkedList();
     } catch (EOFException e) {
       warn("Empty file (someone else is preparing to write to it?) " + block);
-      return new LinkedList<Pair<KEY, T>>();
+      return Generics.newLinkedList();
     } catch (IOException e) {
       // Case: General IO Error
       err("Could not read file: " + block + ": " + e.getMessage());
-      return new LinkedList<Pair<KEY, T>>();
+      return Generics.newLinkedList();
     } catch (ClassNotFoundException e) {
       // Case: Couldn't read class
       err("Could not read a class in file: " + block + ": " + e.getMessage());
-      return new LinkedList<Pair<KEY, T>>();
+      return Generics.newLinkedList();
     } catch (RuntimeException e) {
       // Case: Unknown error -- see if it's caused by StreamCorrupted
       if (e.getCause() != null && StreamCorruptedException.class.isAssignableFrom(e.getCause().getClass())) {
@@ -703,7 +703,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         if (!block.delete()) {
           throw new IllegalStateException("File corrupted, and cannot delete it: " + block.getPath());
         }
-        return new LinkedList<Pair<KEY, T>>();
+        return Generics.newLinkedList();
       } else {
         // No -- random error (pass up)
         throw e;
@@ -930,7 +930,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
 
     // (1) Read everything into memory
     forceTrack("Reading Constituents");
-    Map<String, Map<KEY, T>> combinedMapping = new HashMap<String, Map<KEY, T>>();
+    Map<String, Map<KEY, T>> combinedMapping = Generics.newHashMap();
     try {
       // Accumulate constituents
       for (int i = 0; i < constituents.length; ++i) {
@@ -981,7 +981,7 @@ public class FileBackedCache<KEY extends Serializable, T extends Serializable> i
         // Write Objects
         Pair<? extends OutputStream, CloseAction> writer = destination.newOutputStream(toWrite, exists);
         for (Entry<KEY, T> entry : blockEntry.getValue().entrySet()) {
-          destination.writeNextObject(writer.first, new Pair<KEY, T>(entry.getKey(), entry.getValue()));
+          destination.writeNextObject(writer.first, Pair.makePair(entry.getKey(), entry.getValue()));
         }
         writer.second.apply();
       }
