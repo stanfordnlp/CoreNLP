@@ -39,7 +39,7 @@ public class PatternToken implements Serializable {
     if(useTargetParserParentRestriction){
       if(grandparentParseTag == null){
         Redwood.log(ConstantsAndVariables.extremedebug,"Grand parent parse tag null ");
-        this.grandparentParseTag = "";
+        this.grandparentParseTag = "null";
       }
       else
         this.grandparentParseTag = grandparentParseTag;
