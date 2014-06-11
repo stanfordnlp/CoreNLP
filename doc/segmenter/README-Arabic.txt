@@ -90,7 +90,7 @@ command-line option:
   -domain arz
 
 You can also construct a file that specifies a dialect for each
-newline-separated sentence, by adding "atb" or "arz" at the beginning of each
+newline-separated sentence, by adding "123" or "arz" at the beginning of each
 line followed by a tab character. This feature is enabled with the flag:
 
   -withDomains

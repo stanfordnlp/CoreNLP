@@ -42,6 +42,8 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   private final boolean inputHasTags;
   private final boolean inputHasDomainLabels;
+  private final String inputDomain;
+  private final boolean shouldStripRewrites;
 
   /**
    *
@@ -69,7 +71,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
                                        boolean hasTags,
                                        TokenizerFactory<CoreLabel> tokFactory) {
-    this(hasSegMarkers, hasTags, false, tokFactory);
+    this(hasSegMarkers, hasTags, false, "123", tokFactory);
   }
   
   /**
@@ -83,8 +85,9 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
                                        boolean hasTags,
                                        boolean hasDomainLabels,
+                                       String domain,
                                        TokenizerFactory<CoreLabel> tokFactory) {
-    this(hasSegMarkers, hasTags, hasDomainLabels, false, tokFactory);
+    this(hasSegMarkers, hasTags, hasDomainLabels, domain, false, tokFactory);
   }
   
   /**
@@ -100,26 +103,33 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
       boolean hasTags,
       boolean hasDomainLabels,
-      final boolean stripRewrites,
+      String domain,
+      boolean stripRewrites,
       TokenizerFactory<CoreLabel> tokFactory) {
     tf = tokFactory;
     inputHasTags = hasTags;
     inputHasDomainLabels = hasDomainLabels;
+    inputDomain = domain;
+    shouldStripRewrites = stripRewrites;
     segMarker = hasSegMarkers ? DEFAULT_SEG_MARKER : null;
     factory = LineIterator.getFactory(new SerializableFunction<String, List<CoreLabel>>() {
       private static final long serialVersionUID = 5243251505653686497L;
       public List<CoreLabel> apply(String in) {
+        List<CoreLabel> tokenList;
+        
         if (inputHasTags) {
-          String domain = "";
+          String lineDomain = "";
           if (inputHasDomainLabels) {
             String[] domainAndData = in.split("\\s+", 2);
             if (domainAndData.length < 2) {
               System.err.println("Missing domain label or text: ");
               System.err.println(in);
             } else {
-              domain = domainAndData[0];
+              lineDomain = domainAndData[0];
               in = domainAndData[1];
             }
+          } else {
+            lineDomain = inputDomain;
           }
           String[] toks = in.split("\\s+");
           List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
@@ -141,19 +151,22 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
             cl.setValue(word);
             cl.setWord(word);
             cl.setTag(wordTagPair[1]);
-            if (inputHasDomainLabels)
-              cl.set(CoreAnnotations.DomainAnnotation.class, domain);
+            cl.set(CoreAnnotations.DomainAnnotation.class, lineDomain);
             input.add(cl);
           }
-          return IOBUtils.StringToIOB(input, segMarker, true, stripRewrites);
+          tokenList = IOBUtils.StringToIOB(input, segMarker, true, shouldStripRewrites);
 
         } else if (tf == null) {
-          return IOBUtils.StringToIOB(in, segMarker);
+          tokenList = IOBUtils.StringToIOB(in, segMarker);
 
         } else {
           List<CoreLabel> line = tf.getTokenizer(new StringReader(in)).tokenize();
-          return IOBUtils.StringToIOB(line, segMarker, false);
+          tokenList = IOBUtils.StringToIOB(line, segMarker, false);
         }
+        
+        if (!inputHasDomainLabels)
+          IOBUtils.labelDomain(tokenList, inputDomain);
+        return tokenList;
       }
     });
   }

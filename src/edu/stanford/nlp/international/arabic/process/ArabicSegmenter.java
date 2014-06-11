@@ -82,7 +82,10 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
       "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory";
 
   // Training and evaluation files have domain labels
-  private static final String optDomains = "withDomains";
+  private static final String optWithDomains = "withDomains";
+  
+  // Training and evaluation text are all in the same domain (default:atb)
+  private static final String optDomain = "domain";
   
   // Ignore rewrites (training only, produces a model that then can be used to do
   // no-rewrite segmentation)
@@ -100,6 +103,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final String tokenizerOptions;
   private final String tedEvalPrefix;
   private final boolean hasDomainLabels;
+  private final String domain;
   private final boolean noRewrites;
 
   /** Make an Arabic Segmenter.
@@ -111,7 +115,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
     tedEvalPrefix = props.getProperty(optTedEval, null);
-    hasDomainLabels = props.containsKey(optDomains);
+    hasDomainLabels = props.containsKey(optWithDomains);
+    domain = props.getProperty(optDomain, "123");
     noRewrites = props.containsKey(optNoRewrites);
     tf = getTokenizerFactory();
 
@@ -136,7 +141,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     props.remove(optSuffix);
     props.remove(optThreads);
     props.remove(optTedEval);
-    props.remove(optDomains);
+    props.remove(optWithDomains);
+    props.remove(optDomain);
     props.remove(optNoRewrites);
     props.remove(optLocalFeaturesOnly);
 
@@ -156,6 +162,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     suffixMarker = other.suffixMarker;
     tedEvalPrefix = other.tedEvalPrefix;
     hasDomainLabels = other.hasDomainLabels;
+    domain = other.domain;
     noRewrites = other.noRewrites;
     flags = other.flags;
 
@@ -242,6 +249,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
       List<CoreLabel> tokens = tf.getTokenizer(new StringReader(line)).tokenize();
       tokenList = IOBUtils.StringToIOB(tokens, null, false);
     }
+    IOBUtils.labelDomain(tokenList, domain);
     tokenList = classifier.classify(tokenList);
     String segmentedString = IOBUtils.IOBToString(tokenList, prefixMarker, suffixMarker);
     return segmentedString;
@@ -277,6 +285,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
                                                                                      hasTags,
                                                                                      hasDomainLabels,
+                                                                                     domain,
                                                                                      noRewrites,
                                                                                      tf);
     ObjectBank<List<CoreLabel>> lines =
@@ -300,6 +309,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
                                                                                      hasTags,
                                                                                      hasDomainLabels,
+                                                                                     domain,
                                                                                      tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.testFile, docReader);
@@ -443,6 +453,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     sb.append("  -featureFactory cls  : Name of feature factory class  (default: ").append(defaultFeatureFactory);
     sb.append(")").append(nl);
     sb.append("  -withDomains         : Train file (if given) and eval file have domain labels.").append(nl);
+    sb.append("  -domain dom          : Assume one domain for all data (default: 123)").append(nl);
     sb.append(nl).append(" Otherwise, all flags correspond to those present in SeqClassifierFlags.java.").append(nl);
     return sb.toString();
   }
@@ -462,6 +473,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     optionArgDefs.put("tedEval", 1);
     optionArgDefs.put("featureFactory", 1);
     optionArgDefs.put("withDomains", 0);
+    optionArgDefs.put("domain", 1);
     return optionArgDefs;
   }
 
