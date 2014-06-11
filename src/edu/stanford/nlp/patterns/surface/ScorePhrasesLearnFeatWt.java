@@ -76,7 +76,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
             constVars.getOtherSemanticClasses(), constVars.ignoreWordswithClassesDuringSelection.get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
             allSelectedPatterns));
       }
-    }else{
+    } else{
       if(computeRawFreq)
         Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
       dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.answerClass.get(label), label,
