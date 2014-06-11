@@ -96,10 +96,6 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
     return reln + "(" + gov + ", " + dep + ")";
   }
 
-  public String toString(String format) {
-    return reln + "(" + gov.toString(format) + ", " + dep.toString(format) + ")";
-  }
-
   public String toString(boolean noIndex) {
     if (!noIndex) return toString();
     String govWord = gov.toString();
