@@ -35,6 +35,7 @@ public class PTBTokenizerTest extends TestCase {
     "Diamond (``Not even the chair'') lives near Udaipur (84km). {1. A potential Palmer trade:}",
     "No. I like No. 24 and no.47.",
     "You can get a B.S. or a B. A. or a Ph.D (sometimes a Ph. D) from Stanford.",
+    "@Harry_Styles didn`t like Mu`ammar al-Qaddafi",
   };
 
   private String[][] ptbGold = {
@@ -63,6 +64,7 @@ public class PTBTokenizerTest extends TestCase {
       "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
     { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
     { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
+    { "@Harry_Styles", "did", "n`t", "like", "Mu`ammar", "al-Qaddafi" },
   };
 
   public void testPTBTokenizerWord() {
