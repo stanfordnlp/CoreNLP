@@ -100,7 +100,7 @@ public class CreatePatterns {
   public boolean useStopWordsBeforeTerm = false;
 
 
-  String channelNameLogger = "createpatterns";
+  //String channelNameLogger = "createpatterns";
 
   ConstantsAndVariables constVars;
 
@@ -512,19 +512,29 @@ public class CreatePatterns {
     if (constVars.numThreads == 1)
       num = keyset.size();
     else
-      num = keyset.size() / (constVars.numThreads - 1);
+      num = keyset.size() / (constVars.numThreads);
     ExecutorService executor = Executors
         .newFixedThreadPool(constVars.numThreads);
-    Redwood.log(Redwood.DBG, channelNameLogger,
-        "keyset size is " + keyset.size());
+    
+    
+    System.out.println("Getting all patterns for label " + label + ". Assigning " + num + " values to each thread");
+    
+    Redwood.log(Redwood.DBG, "Computing all patterns. keyset size is " + keyset.size());
     List<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
-      Redwood.log(Redwood.FORCE, channelNameLogger, "assigning from " + i * num
+      
+      int from = i * num;
+      int to = -1;
+      if(i == constVars.numThreads -1)
+        to = keyset.size();
+      else
+       to =Math.min(keyset.size(), (i + 1) * num);
+      
+      Redwood.log(Redwood.DBG, "assigning from " + i * num
           + " till " + Math.min(keyset.size(), (i + 1) * num));
 
       Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> task = null;
-      List<String> ids = keyset.subList(i * num,
-          Math.min(keyset.size(), (i + 1) * num));
+      List<String> ids = keyset.subList(from ,to);
       task = new CreatePatternsThread(label, sents, ids);
 
       Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> submit = executor
@@ -538,6 +548,8 @@ public class CreatePatterns {
       patternsForEachToken.putAll(future.get());
     }
     executor.shutdown();
+    Redwood.log(Redwood.DBG, "Done computing all patterns");
+    
     return patternsForEachToken;
   }
 
