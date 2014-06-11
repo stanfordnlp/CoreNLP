@@ -332,6 +332,8 @@ public class ScorePhrases {
             patternsLearnedThisIterConsistsOnlyGeneralized.setCount(en.getKey(), en.getValue());
         }
 
+        System.out.println("gen only patterns are " + patternsLearnedThisIterConsistsOnlyGeneralized );
+        
         Map<String, Set<String>> sentidswithfilerest = constVars.invertedIndex.getFileSentIdsFromPats(patternsLearnedThisIterRest.keySet());
         
         if (constVars.batchProcessSents) {
