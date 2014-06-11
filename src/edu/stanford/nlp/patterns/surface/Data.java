@@ -53,7 +53,7 @@ public class Data {
 
   public static double getRatioGoogleNgramFreqWithDataFreq() {
     ratioGoogleNgramFreqWithDataFreq = googleNGram.totalCount() / Data.rawFreq.totalCount();
-    Redwood.log(Redwood.FORCE, "Data", "ratioGoogleNgramFreqWithDataFreq is " + ratioGoogleNgramFreqWithDataFreq);
+    Redwood.log(ConstantsAndVariables.minimaldebug, "Data", "ratioGoogleNgramFreqWithDataFreq is " + ratioGoogleNgramFreqWithDataFreq);
     return ratioGoogleNgramFreqWithDataFreq;
 
   }
@@ -64,17 +64,18 @@ public class Data {
         String[] t = line.split("\t");
         googleNGram.setCount(t[0], Double.valueOf(t[1]));
       }
-      Redwood.log(Redwood.FORCE, "Data", "loading freq from google ngram file " + googleNGramsFile);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "Data", "loading freq from google ngram file " + googleNGramsFile);
     }
   }
 
   public static void loadDomainNGrams() {
+    assert(domainNGramsFile != null);
     if (domainNGramRawFreq == null || domainNGramRawFreq.size() == 0) {
       for (String line : IOUtils.readLines(domainNGramsFile)) {
         String[] t = line.split("\t");
         domainNGramRawFreq.setCount(t[0], Double.valueOf(t[1]));
       }
-      Redwood.log(Redwood.FORCE, "Data", "loading freq from domain ngram file " + domainNGramsFile);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "Data", "loading freq from domain ngram file " + domainNGramsFile);
     }
   }
 }

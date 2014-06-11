@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,11 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.logging.Redwood;
 
+/**
+ * Score phrases by averaging scores of individual features.
+ * @author Sonal Gupta (sonalg@stanford.edu)
+ *
+ */
 public class ScorePhrasesAverageFeatures extends PhraseScorer{
   
   public ScorePhrasesAverageFeatures(ConstantsAndVariables constvar) {
@@ -152,8 +158,6 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
       }
       scores.put(word, scoreslist);
       phraseScoresNormalized.setCounter(word, scoreslist);
-      // double avgScore = score / 4;
-      // scores.setCount(word, avgScore);
     }
     Counter<String> phraseScores = new ClassicCounter<String>();
     for (Entry<String, Counter<ScorePhraseMeasures>> wEn : scores
@@ -162,6 +166,14 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
       phraseScores.setCount(wEn.getKey(), avgScore);
     }
     return phraseScores;
+  }
+
+
+  @Override
+  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
+      String label, Set<String> terms, boolean forLearningPatterns)
+      throws IOException {
+    throw new RuntimeException("not implemented");
   }
 
 
