@@ -45,19 +45,10 @@ class CoordinationPattern extends TregexPattern {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     if (isConj) {
-      if (isNegated()) {
-        sb.append("!(");
-      }
       for (TregexPattern node : children) {
         sb.append(node.toString());
       }
-      if (isNegated()) {
-        sb.append(")");
-      }
     } else {
-      if (isNegated()) {
-        sb.append("!");
-      }
       sb.append('[');
       for (Iterator<TregexPattern> iter = children.iterator(); iter.hasNext();) {
         TregexPattern node = iter.next();

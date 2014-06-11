@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.dvparser;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +45,7 @@ public class AverageDVModels {
   }
 
   public static TwoDimensionalMap<String, String, SimpleMatrix> averageBinaryMatrices(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
-    TwoDimensionalMap<String, String, SimpleMatrix> averages = TwoDimensionalMap.treeMap();
+    TwoDimensionalMap<String, String, SimpleMatrix> averages = new TwoDimensionalMap<String, String, SimpleMatrix>();
     for (Pair<String, String> binary : getBinaryMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
@@ -69,7 +68,7 @@ public class AverageDVModels {
   }
 
   public static Map<String, SimpleMatrix> averageUnaryMatrices(List<Map<String, SimpleMatrix>> maps) {
-    Map<String, SimpleMatrix> averages = Generics.newTreeMap();
+    Map<String, SimpleMatrix> averages = Generics.newHashMap();
     for (String name : getUnaryMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
@@ -107,25 +106,15 @@ public class AverageDVModels {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-input")) {
         for (++argIndex; argIndex < args.length && !args[argIndex].startsWith("-"); ++argIndex) {
-          inputModelFilenames.addAll(Arrays.asList(args[argIndex].split(",")));
+          inputModelFilenames.add(args[argIndex]);
         }
       } else {
         throw new RuntimeException("Unknown argument " + args[argIndex]);
       }
     }
 
-    if (outputModelFilename == null) {
-      System.err.println("Need to specify output model name with -output");
-      System.exit(2);
-    }
-
-    if (inputModelFilenames.size() == 0) {
-      System.err.println("Need to specify input model names with -input");
-      System.exit(2);
-    }
-
-    System.err.println("Averaging " + inputModelFilenames);
-    System.err.println("Outputting result to " + outputModelFilename);
+    System.err.println(outputModelFilename);
+    System.err.println(inputModelFilenames);
 
     LexicalizedParser lexparser = null;
     List<DVModel> models = Generics.newArrayList();
