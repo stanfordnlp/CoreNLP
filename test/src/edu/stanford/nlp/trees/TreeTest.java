@@ -108,6 +108,7 @@ public class TreeTest extends TestCase {
     wrapped.close();
     String answer = writer.toString();
 
+    // TODO: use this when we switch to Java 7 or later
     // String answer = ("( (SBARQ" + System.lineSeparator() +
     //                  "    (WHNP (WP What))" + System.lineSeparator() +
     //                  "    (SQ (VBP are)" + System.lineSeparator() +
