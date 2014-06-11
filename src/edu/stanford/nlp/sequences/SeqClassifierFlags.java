@@ -872,10 +872,12 @@ public class SeqClassifierFlags implements Serializable {
   public String bisequenceTestOutputEn = null;
   public String bisequenceTestOutputCh = null;
   public String bisequenceTestAlignmentFile = null;
+  public String bisequenceAlignmentTestOutput = null;
   public int bisequencePriorType = 1;
   public String bisequenceAlignmentPriorPenaltyCh = null;
   public String bisequenceAlignmentPriorPenaltyEn = null;
   public double alignmentPruneThreshold = 0.0;
+  public double alignmentDecodeThreshold = 0.5;
   public boolean factorInAlignmentProb = false;
   public boolean useChromaticSampling = false;
   public boolean useSequentialScanSampling = false;
@@ -923,6 +925,27 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useNERPriorBIO = false;
   public String entityMatrix = null;
   public int multiThreadClassifier = 0;
+  public boolean useDualDecomp = false;
+  public boolean biAlignmentPriorIsPMI = true;
+  public boolean dampDDStepSizeWithAlignmentProb = false;
+  public boolean dualDecompAlignment = false;
+  public double dualDecompInitialStepSizeAlignment = 0.1;
+  public boolean dualDecompNotBIO = false;
+  public String berkeleyAlignerLoadPath = null;
+  public boolean useBerkeleyAlignerForViterbi = false;
+  public boolean useBerkeleyCompetitivePosterior = false;
+  public boolean useDenero = true;
+  public double alignDDAlpha = 1;
+  public boolean factorInBiEdgePotential = false;
+  public boolean noNeighborConstraints = false;
+  public boolean includeC2EViterbi = true;
+  public boolean initWithPosterior = true;
+  public int nerSkipFirstK = 0;
+  public int nerSlowerTimes = 1;
+  public boolean powerAlignProb = false;
+  public boolean powerAlignProbAsAddition = false;
+  public boolean initWithNERPosterior = false;
+  public boolean applyNERPenalty = true;
   public boolean printFactorTable = false;
   public boolean useAdaGradFOBOS = false;
   public double initRate = 0.1;
@@ -971,6 +994,29 @@ public class SeqClassifierFlags implements Serializable {
   public int startEvaluateIters = 0;
   public int multiThreadPerceptron = 1;
   public boolean lazyUpdate = false;
+  public int featureCountThresh = 0;
+  public transient String serializeWeightsTo = null;
+  public boolean geDebug = false;
+  public boolean doFeatureDiscovery = false;
+  public transient String loadWeightsFrom = null;
+  public transient String loadClassIndexFrom = null;
+  public transient String serializeClassIndexTo = null;
+  public boolean learnCHBasedOnEN = true;
+  public boolean learnENBasedOnCH = false;
+  public String loadWeightsFromEN = null;
+  public String loadWeightsFromCH = null;
+  public String serializeToEN = null;
+  public String serializeToCH = null;
+  public String testFileEN = null;
+  public String testFileCH = null;
+  public String unsupFileEN = null;
+  public String unsupFileCH = null;
+  public String unsupAlignFile = null;
+  public String supFileEN = null;
+  public String supFileCH = null;
+  public transient String serializeFeatureIndexTo = null;
+  public String loadFeatureIndexFromEN = null;
+  public String loadFeatureIndexFromCH = null;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2217,6 +2263,8 @@ public class SeqClassifierFlags implements Serializable {
         bisequenceTestOutputCh = val;
       } else if (key.equalsIgnoreCase("bisequenceTestAlignmentFile")) {
         bisequenceTestAlignmentFile = val;
+      } else if (key.equalsIgnoreCase("bisequenceAlignmentTestOutput")) {
+        bisequenceAlignmentTestOutput = val;
       } else if (key.equalsIgnoreCase("bisequencePriorType")) {
         bisequencePriorType = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("bisequenceAlignmentPriorPenaltyCh")) {
@@ -2225,6 +2273,8 @@ public class SeqClassifierFlags implements Serializable {
         bisequenceAlignmentPriorPenaltyEn = val;
       } else if (key.equalsIgnoreCase("alignmentPruneThreshold")) {
         alignmentPruneThreshold = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("alignmentDecodeThreshold")) {
+        alignmentDecodeThreshold = Double.parseDouble(val);
       } else if (key.equalsIgnoreCase("factorInAlignmentProb")) {
         factorInAlignmentProb = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useChromaticSampling")) {
@@ -2299,6 +2349,48 @@ public class SeqClassifierFlags implements Serializable {
         entityMatrix = val;
       } else if (key.equalsIgnoreCase("multiThreadClassifier")) {
         multiThreadClassifier = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("useDualDecomp")) {
+        useDualDecomp = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("biAlignmentPriorIsPMI")) {
+        biAlignmentPriorIsPMI = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("dampDDStepSizeWithAlignmentProb")) {
+        dampDDStepSizeWithAlignmentProb = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("dualDecompAlignment")) {
+        dualDecompAlignment = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("dualDecompInitialStepSizeAlignment")) {
+        dualDecompInitialStepSizeAlignment = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("dualDecompNotBIO")) {
+        dualDecompNotBIO = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("berkeleyAlignerLoadPath")) {
+        berkeleyAlignerLoadPath = val;
+      } else if (key.equalsIgnoreCase("useBerkeleyAlignerForViterbi")) {
+        useBerkeleyAlignerForViterbi = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useBerkeleyCompetitivePosterior")) {
+        useBerkeleyCompetitivePosterior = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useDenero")) {
+        useDenero = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("alignDDAlpha")) {
+        alignDDAlpha = Double.parseDouble(val);
+      } else if (key.equalsIgnoreCase("factorInBiEdgePotential")) {
+        factorInBiEdgePotential = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("noNeighborConstraints")) {
+        noNeighborConstraints = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("includeC2EViterbi")) {
+        includeC2EViterbi = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("initWithPosterior")) {
+        initWithPosterior = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("nerSlowerTimes")) {
+        nerSlowerTimes = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("nerSkipFirstK")) {
+        nerSkipFirstK = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("powerAlignProb")) {
+        powerAlignProb = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("powerAlignProbAsAddition")) {
+        powerAlignProbAsAddition = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("initWithNERPosterior")) {
+        initWithNERPosterior = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("applyNERPenalty")) {
+        applyNERPenalty = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useGenericFeatures")) {
         useGenericFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("printFactorTable")) {
@@ -2391,6 +2483,53 @@ public class SeqClassifierFlags implements Serializable {
         multiThreadPerceptron = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("lazyUpdate")){
         lazyUpdate = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("featureCountThresh")){
+        featureCountThresh = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("serializeWeightsTo")) {
+        serializeWeightsTo = val;
+      } else if (key.equalsIgnoreCase("geDebug")){
+        geDebug = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("doFeatureDiscovery")){
+        doFeatureDiscovery = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("loadWeightsFrom")) {
+        loadWeightsFrom = val;
+      } else if (key.equalsIgnoreCase("loadClassIndexFrom")) {
+        loadClassIndexFrom = val;
+      } else if (key.equalsIgnoreCase("serializeClassIndexTo")) {
+        serializeClassIndexTo = val;
+      } else if (key.equalsIgnoreCase("learnCHBasedOnEN")){
+        learnCHBasedOnEN = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("learnENBasedOnCH")){
+        learnENBasedOnCH = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("loadWeightsFromEN")){
+        loadWeightsFromEN = val;
+      } else if (key.equalsIgnoreCase("loadWeightsFromCH")){
+        loadWeightsFromCH = val;
+      } else if (key.equalsIgnoreCase("serializeToEN")){
+        serializeToEN = val;
+      } else if (key.equalsIgnoreCase("serializeToCH")){
+        serializeToCH = val;
+      } else if (key.equalsIgnoreCase("testFileEN")){
+        testFileEN = val;
+      } else if (key.equalsIgnoreCase("testFileCH")){
+        testFileCH = val;
+      } else if (key.equalsIgnoreCase("unsupFileEN")){
+        unsupFileEN = val;
+      } else if (key.equalsIgnoreCase("unsupFileCH")){
+        unsupFileCH = val;
+      } else if (key.equalsIgnoreCase("unsupAlignFile")){
+        unsupAlignFile = val;
+      } else if (key.equalsIgnoreCase("supFileEN")){
+        supFileEN = val;
+      } else if (key.equalsIgnoreCase("supFileCH")){
+        supFileCH = val;
+      } else if (key.equalsIgnoreCase("serializeFeatureIndexTo")){
+        serializeFeatureIndexTo = val;
+      } else if (key.equalsIgnoreCase("loadFeatureIndexFromEN")){
+        loadFeatureIndexFromEN = val;
+      } else if (key.equalsIgnoreCase("loadFeatureIndexFromCH")){
+        loadFeatureIndexFromCH = val;
+
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
