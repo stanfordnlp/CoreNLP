@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.*;
 
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
@@ -179,11 +178,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     addStrandedPobj(list);
     if (DEBUG) {
       printListSorted("After adding stranded pobj:", list);
-    }
-
-    SemanticGraph graph;
-    for (int i = 0; i < 1; ++i) {
-      graph = new SemanticGraph(list);
     }
   }
 
