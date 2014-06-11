@@ -28,7 +28,7 @@ public class ShiftReduceOptions extends Options {
   public String recordDebinarized = null;
 
   public enum TrainingMethod {
-    EARLY_TERMINATION, GOLD, ORACLE;
+    EARLY_TERMINATION, GOLD, ORACLE, BEAM;
   };
   public TrainingMethod trainingMethod = TrainingMethod.EARLY_TERMINATION;
 

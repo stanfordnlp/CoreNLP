@@ -464,7 +464,6 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     int numWrong = 0;
 
     Tree tree = binarizedTrees.get(index);
-    State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
 
     // TODO.  This training method seems to be working in that it
     // trains models just like the gold and early termination methods do.
@@ -473,6 +472,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
     // significantly help with that.  Otherwise, not sure how to keep
     // it under control.
     if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.ORACLE) {
+      State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       while (!state.isFinished()) {
         List<String> features = featureFactory.featurize(state);
         ScoredObject<Integer> prediction = findHighestScoringTransition(state, features, true);
@@ -507,7 +507,65 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
         }
         state = predicted.apply(state);
       }
+    } else if (op.trainingMethod == ShiftReduceOptions.TrainingMethod.BEAM) {
+      if (op.beamSize <= 0) {
+        throw new IllegalArgumentException("Illegal beam size " + op.beamSize);
+      }
+      List<Transition> transitions = transitionLists.get(index);
+      PriorityQueue<State> agenda = new PriorityQueue<State>(op.beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      State goldState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
+      agenda.add(goldState);
+      int transitionCount = 0;
+      for (Transition goldTransition : transitions) {
+        PriorityQueue<State> newAgenda = new PriorityQueue<State>(op.beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
+        State highestScoringState = null;
+        State highestCurrentState = null;
+        for (State currentState : agenda) {
+          List<String> features = featureFactory.featurize(currentState);
+          Collection<ScoredObject<Integer>> stateTransitions = findHighestScoringTransitions(currentState, features, true, op.beamSize);
+          for (ScoredObject<Integer> transition : stateTransitions) {
+            State newState = transitionIndex.get(transition.object()).apply(currentState, transition.score());
+            newAgenda.add(newState);
+            if (newAgenda.size() > op.beamSize) {
+              newAgenda.poll();
+            }
+            if (highestScoringState == null || highestScoringState.score() < newState.score()) {
+              highestScoringState = newState;
+              highestCurrentState = currentState;
+            }
+          }
+        }
+
+        List<String> goldFeatures = featureFactory.featurize(goldState);
+        goldState = goldTransition.apply(goldState, 0.0);
+
+        // if highest scoring state used the correct transition, no training
+        // otherwise, down the last transition, up the correct
+        if (!goldState.areTransitionsEqual(highestScoringState)) {
+          ++numWrong;
+          int lastTransition = transitionIndex.indexOf(highestScoringState.transitions.peek());
+          updates.add(new Update(featureFactory.featurize(highestCurrentState), -1, lastTransition, 1.0));
+          updates.add(new Update(goldFeatures, transitionIndex.indexOf(goldTransition), -1, 1.0));
+        } else {
+          ++numCorrect;
+        }
+
+        // If the correct state has fallen off the agenda, break
+        boolean found = false;
+        for (State otherState : newAgenda) {
+          if (otherState.areTransitionsEqual(goldState)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          break;
+        }
+
+        agenda = newAgenda;
+      }
     } else {
+      State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       List<Transition> transitions = transitionLists.get(index);
       for (Transition transition : transitions) {
         int transitionNum = transitionIndex.indexOf(transition);
