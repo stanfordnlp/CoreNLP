@@ -27,7 +27,7 @@ import edu.stanford.nlp.util.*;
  *
  * @author Mihai
  */
-public class CustomAnnotationSerializer implements AnnotationSerializer {
+public class CustomAnnotationSerializer extends AnnotationSerializer {
 
   private final boolean compress;
 
@@ -47,76 +47,6 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     this.haveExplicitAntecedent = haveAnte;
   }
 
-  /** This method does its own buffering of the passed in InputStream. */
-  public Annotation load(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
-    is = new BufferedInputStream(is);
-    if(compress) is = new GZIPInputStream(is);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-    Annotation doc = new Annotation("");
-    String line;
-
-    // read the coref graph (new format)
-    Map<Integer, CorefChain> chains = loadCorefChains(reader);
-    if(chains != null) doc.set(CorefCoreAnnotations.CorefChainAnnotation.class, chains);
-
-    // read the coref graph (old format)
-    line = reader.readLine().trim();
-    if(line.length() > 0){
-      String [] bits = line.split(" ");
-      if(bits.length % 4 != 0){
-        throw new RuntimeIOException("ERROR: Incorrect format for the serialized coref graph: " + line);
-      }
-      List<Pair<IntTuple, IntTuple>> corefGraph = new ArrayList<Pair<IntTuple,IntTuple>>();
-      for(int i = 0; i < bits.length; i += 4){
-        IntTuple src = new IntTuple(2);
-        IntTuple dst = new IntTuple(2);
-        src.set(0, Integer.parseInt(bits[i]));
-        src.set(1, Integer.parseInt(bits[i + 1]));
-        dst.set(0, Integer.parseInt(bits[i + 2]));
-        dst.set(1, Integer.parseInt(bits[i + 3]));
-        corefGraph.add(new Pair<IntTuple, IntTuple>(src, dst));
-      }
-      doc.set(CorefCoreAnnotations.CorefGraphAnnotation.class, corefGraph);
-    }
-
-    // read individual sentences
-    List<CoreMap> sentences = new ArrayList<CoreMap>();
-    while((line = reader.readLine()) != null){
-      CoreMap sentence = new Annotation("");
-
-      // first line is the parse tree. construct it with CoreLabels in Tree nodes
-      Tree tree = new PennTreeReader(new StringReader(line), new LabeledScoredTreeFactory(CoreLabel.factory())).readTree();
-      sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
-
-      // read the dependency graphs
-      IntermediateSemanticGraph intermCollapsedDeps = loadDependencyGraph(reader);
-      IntermediateSemanticGraph intermUncollapsedDeps = loadDependencyGraph(reader);
-      IntermediateSemanticGraph intermCcDeps = loadDependencyGraph(reader);
-
-      // the remaining lines until empty line are tokens
-      List<CoreLabel> tokens = new ArrayList<CoreLabel>();
-      while((line = reader.readLine()) != null){
-        if(line.length() == 0) break;
-        CoreLabel token = loadToken(line, haveExplicitAntecedent);
-        tokens.add(token);
-      }
-      sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
-
-      // convert the intermediate graph to an actual SemanticGraph
-      SemanticGraph collapsedDeps = convertIntermediateGraph(intermCollapsedDeps, tokens);
-      sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, collapsedDeps);
-      SemanticGraph uncollapsedDeps = convertIntermediateGraph(intermUncollapsedDeps, tokens);
-      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
-      SemanticGraph ccDeps = convertIntermediateGraph(intermCcDeps, tokens);
-      sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
-
-      sentences.add(sentence);
-    }
-    doc.set(CoreAnnotations.SentencesAnnotation.class, sentences);
-
-    reader.close();
-    return doc;
-  }
 
   private static final Object LOCK = new Object();
 
@@ -381,29 +311,16 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     return s.replaceAll(SPACE_HOLDER, " ");
   }
   private static Dictionaries.MentionType parseMentionType(String s) {
-    if(s.equals("PRONOMINAL")) return Dictionaries.MentionType.PRONOMINAL;
-    if(s.equals("NOMINAL")) return Dictionaries.MentionType.NOMINAL;
-    if(s.equals("PROPER")) return Dictionaries.MentionType.PROPER;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.MentionType.valueOf(s);
   }
   private static Dictionaries.Number parseNumber(String s) {
-    if(s.equals("SINGULAR")) return Dictionaries.Number.SINGULAR;
-    if(s.equals("PLURAL")) return Dictionaries.Number.PLURAL;
-    if(s.equals("UNKNOWN")) return Dictionaries.Number.UNKNOWN;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.Number.valueOf(s);
   }
   private static Dictionaries.Gender parseGender(String s) {
-    if(s.equals("MALE")) return Dictionaries.Gender.MALE;
-    if(s.equals("FEMALE")) return Dictionaries.Gender.FEMALE;
-    if(s.equals("NEUTRAL")) return Dictionaries.Gender.NEUTRAL;
-    if(s.equals("UNKNOWN")) return Dictionaries.Gender.UNKNOWN;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.Gender.valueOf(s);
   }
   private static Dictionaries.Animacy parseAnimacy(String s) {
-    if(s.equals("ANIMATE")) return Dictionaries.Animacy.ANIMATE;
-    if(s.equals("INANIMATE")) return Dictionaries.Animacy.INANIMATE;
-    if(s.equals("UNKNOWN")) return Dictionaries.Animacy.UNKNOWN;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.Animacy.valueOf(s);
   }
 
   /**
@@ -483,9 +400,11 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     return chains;
   }
 
-  public void save(Annotation corpus, OutputStream os) throws IOException {
-    os = new BufferedOutputStream(os);
-    if(compress) os = new GZIPOutputStream(os);
+  @Override
+  public OutputStream append(Annotation corpus, OutputStream os) throws IOException {
+    if (!(os instanceof GZIPOutputStream)) {
+      if(compress) os = new GZIPOutputStream(os);
+    }
     PrintWriter pw = new PrintWriter(os);
 
     // save the coref graph in the new format
@@ -537,8 +456,77 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       // add an empty line after every sentence
       pw.println();
     }
+    pw.flush();
+    return os;
+  }
 
-    pw.close();
+  @Override
+  public Pair<Annotation, InputStream> read(InputStream is) throws IOException {
+    if(compress && !(is instanceof GZIPInputStream)) is = new GZIPInputStream(is);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    Annotation doc = new Annotation("");
+    String line;
+
+    // read the coref graph (new format)
+    Map<Integer, CorefChain> chains = loadCorefChains(reader);
+    if(chains != null) doc.set(CorefCoreAnnotations.CorefChainAnnotation.class, chains);
+
+    // read the coref graph (old format)
+    line = reader.readLine().trim();
+    if(line.length() > 0){
+      String [] bits = line.split(" ");
+      if(bits.length % 4 != 0){
+        throw new RuntimeIOException("ERROR: Incorrect format for the serialized coref graph: " + line);
+      }
+      List<Pair<IntTuple, IntTuple>> corefGraph = new ArrayList<Pair<IntTuple,IntTuple>>();
+      for(int i = 0; i < bits.length; i += 4){
+        IntTuple src = new IntTuple(2);
+        IntTuple dst = new IntTuple(2);
+        src.set(0, Integer.parseInt(bits[i]));
+        src.set(1, Integer.parseInt(bits[i + 1]));
+        dst.set(0, Integer.parseInt(bits[i + 2]));
+        dst.set(1, Integer.parseInt(bits[i + 3]));
+        corefGraph.add(new Pair<IntTuple, IntTuple>(src, dst));
+      }
+      doc.set(CorefCoreAnnotations.CorefGraphAnnotation.class, corefGraph);
+    }
+
+    // read individual sentences
+    List<CoreMap> sentences = new ArrayList<CoreMap>();
+    while((line = reader.readLine()) != null){
+      CoreMap sentence = new Annotation("");
+
+      // first line is the parse tree. construct it with CoreLabels in Tree nodes
+      Tree tree = new PennTreeReader(new StringReader(line), new LabeledScoredTreeFactory(CoreLabel.factory())).readTree();
+      sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
+
+      // read the dependency graphs
+      IntermediateSemanticGraph intermCollapsedDeps = loadDependencyGraph(reader);
+      IntermediateSemanticGraph intermUncollapsedDeps = loadDependencyGraph(reader);
+      IntermediateSemanticGraph intermCcDeps = loadDependencyGraph(reader);
+
+      // the remaining lines until empty line are tokens
+      List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+      while((line = reader.readLine()) != null){
+        if(line.length() == 0) break;
+        CoreLabel token = loadToken(line, haveExplicitAntecedent);
+        tokens.add(token);
+      }
+      sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+
+      // convert the intermediate graph to an actual SemanticGraph
+      SemanticGraph collapsedDeps = convertIntermediateGraph(intermCollapsedDeps, tokens);
+      sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, collapsedDeps);
+      SemanticGraph uncollapsedDeps = convertIntermediateGraph(intermUncollapsedDeps, tokens);
+      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
+      SemanticGraph ccDeps = convertIntermediateGraph(intermCcDeps, tokens);
+      sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
+
+      sentences.add(sentence);
+    }
+    doc.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+
+    return Pair.makePair(doc, is);
   }
 
   private static final String SPACE_HOLDER = "##";
