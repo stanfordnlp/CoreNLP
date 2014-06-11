@@ -1571,11 +1571,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
       writer.write("<pos>\n");
     }
 
-    String sentenceDelimiter = config.getSentenceDelimiter();
-    if (sentenceDelimiter != null && sentenceDelimiter.equals("newline")) {
-      sentenceDelimiter = "\n";
-    }
-
     while (true) {
       //Now we do everything through the doc preprocessor
       final DocumentPreprocessor docProcessor;
@@ -1583,9 +1578,9 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
       // this happens when we reach end of file
       if (line == null)
         break;
-      docProcessor = new DocumentPreprocessor(new StringReader(line));
+      docProcessor = new DocumentPreprocessor(new BufferedReader(new StringReader(line)));
+
       docProcessor.setTokenizerFactory(tokenizerFactory);
-      docProcessor.setSentenceDelimiter(sentenceDelimiter);
       if (config.keepEmptySentences()) {
         docProcessor.setKeepEmptySentences(true);
       }
