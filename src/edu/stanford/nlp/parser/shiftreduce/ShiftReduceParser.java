@@ -50,6 +50,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
+import edu.stanford.nlp.util.Timing;
 
 public class ShiftReduceParser implements Serializable, ParserGrammar {
   final Index<Transition> transitionIndex;
@@ -468,6 +469,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
       }
 
       for (int iteration = 1; iteration <= parser.op.trainOptions.trainingIterations; ++iteration) {
+        Timing trainingTimer = new Timing();
         int numCorrect = 0;
         int numWrong = 0;
         Collections.shuffle(indices, random);
@@ -495,7 +497,7 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
             state = transition.apply(state);
           }
         }
-        System.err.println("Iteration " + iteration + " complete");
+        trainingTimer.done("Iteration " + iteration);
         System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
 
 
