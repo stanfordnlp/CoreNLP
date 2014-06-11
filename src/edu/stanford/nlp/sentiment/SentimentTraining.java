@@ -84,6 +84,7 @@ public class SentimentTraining {
           // TODO:
           // evaluate the test set on our current model
 
+          // output an intermediate model
           if (modelPath != null) {
             String tempPath = modelPath;
             if (modelPath.endsWith(".ser.gz")) {
@@ -94,8 +95,7 @@ public class SentimentTraining {
             model.saveSerialized(tempPath);
           }
 
-          // output an intermediate model
-          // output a summary of what's happened so far
+          // TODO: output a summary of what's happened so far
 
           ++debugCycle;
           nextDebugCycle = timing.report() + model.op.trainOptions.debugOutputSeconds * 1000;
