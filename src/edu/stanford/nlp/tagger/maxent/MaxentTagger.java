@@ -1595,7 +1595,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
 
         Timing t = new Timing();
         tagAndOutputSentence(sentence, outputLemmas, morpha, outputStyle,
-                             outputVerbosity, numSentences, "\n", writer);
+                             outputVerbosity, numSentences, "", writer);
 
         totalMillis += t.stop();
         writer.newLine();
