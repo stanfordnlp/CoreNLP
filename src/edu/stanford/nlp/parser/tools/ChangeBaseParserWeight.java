@@ -11,6 +11,8 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
  * <code> -output model </code> <br>
  * <code> -baseParserWeight weight </code> <br>
  *
+ * TODO: could be generalized to allow updating of many different options
+ *
  * @author John Bauer
  */
 public class ChangeBaseParserWeight {
