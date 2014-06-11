@@ -539,8 +539,15 @@
   # Compositional date rules
 
   ENV.defaults["priority"] = 0
-  { ( /the/? ($NUM_ORD) ([ { temporal::IS_TIME_UNIT } ]) ) => OrdinalTime($2[0].temporal.value, $1[0].numcompvalue) }
-  { ( /the/? ($NUM_ORD) ([ { temporal::DAYOFWEEK } ]) ) => OrdinalTime($2[0].temporal.value, $1[0].numcompvalue) }
+
+  { ( ($FREQ_MOD|/the/)? ($NUM_ORD) ([ { temporal::IS_TIME_UNIT } | { temporal::DAYOFWEEK } ]) ) =>
+    :case{
+        # Only attach ordinal to time if not prefixed by frequency modifier (e.g. every)
+        ($1 == NIL || $1 =~ ( /the/ ) ) => OrdinalTime($3[0].temporal.value, $2[0].numcompvalue),
+        # Return NIL otherwise - we have other patterns that handle sets (every 3rd months) later
+        :else => NIL
+    }
+  }
 
   { name: "composite-date-expression-1a",
 	priority: 1,

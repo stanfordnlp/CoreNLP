@@ -771,10 +771,10 @@ public class ValueFunctions {
         return false;
       }
       if (clazz != null) {
-        if (in.get(0) == null || !(clazz.isAssignableFrom(in.get(0).get().getClass()))) {
+        if (in.get(0) == null || in.get(0).get() == null || !(clazz.isAssignableFrom(in.get(0).get().getClass()))) {
           return false;
         }
-        if (in.get(1) == null || !(clazz.isAssignableFrom(in.get(1).get().getClass()))) {
+        if (in.get(1) == null || in.get(1).get() == null || !(clazz.isAssignableFrom(in.get(1).get().getClass()))) {
           return false;
         }
       }
