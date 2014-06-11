@@ -30,8 +30,10 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
   ConstantsAndVariables constVars;
   //Set<String> ignoreWords;
   MultiPatternMatcher<CoreMap> multiPatternMatcher;
+  Map<String, List<CoreLabel>> sents = null;
 
-  public ApplyPatternsMulti(List<String> sentids, Map<TokenSequencePattern, SurfacePattern> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatternsMulti(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, SurfacePattern> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+    this.sents = sents;
     this.patterns = patterns;
     multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(patterns.keySet());
     this.sentids = sentids;
@@ -50,7 +52,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> allFreq = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
 
     for (String sentid : sentids) {
-      List<CoreLabel> sent = Data.sents.get(sentid);
+      List<CoreLabel> sent = sents.get(sentid);
       
       Iterable<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.findAllNonOverlappingMatchesPerPattern(sent);
       for (SequenceMatchResult<CoreMap> m: matched) {
