@@ -50,7 +50,6 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
       Triple<Class,String,Boolean> firstTextTrigger = pattern.findNodePattern(textTriggerFilter);
       if (firstTextTrigger != null) {
         if (firstTextTrigger.third) {
-          // Ignore case
           lowercaseStringTriggers.add(firstTextTrigger.first, firstTextTrigger.second.toLowerCase(), pattern);
         } else {
           annotationTriggers.add(firstTextTrigger.first, firstTextTrigger.second, pattern);
