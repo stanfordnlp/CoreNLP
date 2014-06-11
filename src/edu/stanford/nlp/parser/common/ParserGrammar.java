@@ -3,6 +3,11 @@ package edu.stanford.nlp.parser.common;
 import java.util.List;
 
 import edu.stanford.nlp.parser.metrics.Eval;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+// TODO: it would be nice to move these to common, but that would
+// wreck all existing models
+import edu.stanford.nlp.parser.lexparser.Options;
+import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 
 /**
  * An interface for the classes which store the data for a parser.
@@ -19,8 +24,12 @@ public interface ParserGrammar {
 
   /**
    * Returns a list of extra Eval objects to use when scoring the parser.
-   * TODO: perhaps this should go elsewhere, or perhaps we should make
-   * this an "AbstractParser" interface of some kind
    */
   List<Eval> getExtraEvals();
+
+  Options getOp();
+
+  TreebankLangParserParams getTLPParams();
+
+  TreebankLanguagePack treebankLanguagePack();
 }
