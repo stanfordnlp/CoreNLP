@@ -936,8 +936,8 @@ public class EnglishGrammaticalRelations {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
           // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
-          // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.  
-          // Note that the earlier tregexes are usually enough to cover those phrases, such as when 
+          // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.
+          // Note that the earlier tregexes are usually enough to cover those phrases, such as when
           // the QP is by itself in an ADJP or NP, but sometimes it can have other siblings such
           // as in the phrase "$ 100 million or more".  In that case, this next expression is needed.
           "QP < QP=target < /^[$]$/"
@@ -1037,6 +1037,7 @@ public class EnglishGrammaticalRelations {
           // which is the normal case for such a pattern.
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target !<: CD $- /^,$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target < (NP < /^(?:NN|CD)/ $-- /^-LRB-$/ $+ /^-RRB-$/))",
+          // Maybe delete '@' in next pattern, since not clearly appositional when NP-ADV or NP-TMP. But then what is it?
           "@WHNP|NP < (@NP=target !<: CD <, /^-LRB-$/ <` /^-RRB-$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
           // TODO: next pattern with NNP doesn't work because leftmost NNP is deemed head in a
           // structure like (NP (NNP Norway) (, ,) (NNP Verdens_Gang) (, ,))
