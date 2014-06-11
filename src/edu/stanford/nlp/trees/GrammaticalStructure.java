@@ -88,9 +88,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
                               Lock relationsLock, HeadFinder hf, Filter<String> puncFilter) {
     super(t); // makes a Tree with TreeGraphNode nodes
     // add head word and tag to phrase nodes
-    if (hf == null) {
-      throw new AssertionError("Cannot use null HeadFinder");
-    }
     root.percolateHeads(hf);
     if (root.value() == null) {
       root.setValue("ROOT");  // todo: cdm: it doesn't seem like this line should be here
@@ -111,7 +108,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       relationsLock.lock();
     }
     try {
-      analyzeNode(root, root, relations, hf);
+      analyzeNode(root, root, relations);
     }
     finally {
       if (relationsLock != null) {
@@ -242,12 +239,12 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
-  private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations, HeadFinder hf) {
+  private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations) {
     if (t.isPhrasal()) {    // don't do leaves or preterminals!
       TreeGraphNode tHigh = t.highestNodeWithSameHead();
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
-          for (Tree u : egr.getRelatedNodes(t, root, hf)) {
+          for (Tree u : egr.getRelatedNodes(t, root)) {
             //System.out.println("Adding " + egr.getShortName() + " from " + t + " to " + u );
             tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
           }
@@ -255,7 +252,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
       // now recurse into children
       for (TreeGraphNode kid : t.children()) {
-        analyzeNode(kid, root, relations, hf);
+        analyzeNode(kid, root, relations);
       }
     }
   }
