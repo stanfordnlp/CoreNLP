@@ -1,15 +1,18 @@
 package edu.stanford.nlp.sentiment;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.TwoDimensionalSet;
 
 public class SentimentTraining {
 
   public static void executeOneTrainingBatch(SentimentModel model, List<Tree> trainingBatch, double[] sumGradSquare) {
-    SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(trainingBatch, model);
+    SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trainingBatch);
     double[] theta = model.paramsToVector();
 
     // AdaGrad
@@ -22,20 +25,21 @@ public class SentimentTraining {
     System.err.println("batch cost: " + currCost);
     for (int feature = 0; feature<gradf.length;feature++ ) {
       sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
-      theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
+      theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
     } 
 
-    dvModel.vectorToParams(theta);
+    model.vectorToParams(theta);
     
   }
 
   public static void train(SentimentModel model, List<Tree> trainingTrees, List<Tree> devTrees) {
+    final Options op = model.op;
     Timing timing = new Timing();
     // TODO: these training-specific options might be better served in
     // a smaller section of the Options
     // maxTrainTimeSeconds, debugOutputSeconds, iterations, batchSize
-    long maxTrainTimeMillis = model.op.maxTrainTimeSeconds * 1000;
-    long nextDebugCycle = model.op.debugOutputSeconds * 1000;
+    long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
+    long nextDebugCycle = model.op.trainOptions.debugOutputSeconds * 1000;
     int debugCycle = 0;
     double bestAccuracy = 0.0;
 
@@ -43,12 +47,12 @@ public class SentimentTraining {
     double[] sumGradSquare = new double[model.totalParamSize()];
     Arrays.fill(sumGradSquare, 1.0);
     
-    int numBatches = trainingTrees.size() / op.batchSize + 1;
+    int numBatches = trainingTrees.size() / op.trainOptions.batchSize + 1;
     System.err.println("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
-    System.err.println("Times through each training batch: " + op.iterations);
-    for (int iter = 0; iter < op.trainOptions.dvIterations; ++iter) {
-      List<Tree> shuffledSentences = new ArrayList<Tree>(sentences);
-      Collections.shuffle(shuffledSentences, dvModel.rand);
+    System.err.println("Times through each training batch: " + op.trainOptions.iterations);
+    for (int iter = 0; iter < op.trainOptions.iterations; ++iter) {
+      List<Tree> shuffledSentences = Generics.newArrayList(trainingTrees);
+      Collections.shuffle(shuffledSentences, model.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
         System.err.println("======================================");
         System.err.println("Iteration " + iter + " batch " + batch);
@@ -56,9 +60,9 @@ public class SentimentTraining {
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
         // the list
-        int startTree = batch * op.batchSize;
-        int endTree = (batch + 1) * op.batchSize;
-        if (endTree + op.batchSize > shuffledSentences.size()) {
+        int startTree = batch * op.trainOptions.batchSize;
+        int endTree = (batch + 1) * op.trainOptions.batchSize;
+        if (endTree + op.trainOptions.batchSize > shuffledSentences.size()) {
           endTree = shuffledSentences.size();
         }
         
@@ -94,13 +98,26 @@ public class SentimentTraining {
   }
 
   public static boolean runGradientCheck(SentimentModel model, List<Tree> trees) {
-    SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(); // TODO: fill in data from trees
+    SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trees);
     return gcFunc.gradientCheck(1000, 50, model.paramsToVector());    
   }
 
   public static void main(String[] args) {
     // TODO: here we process the arguments
     Options op = new Options();
+
+    boolean runGradientCheck = false;
+    boolean runTraining = false;
+
+    for (int argIndex = 0; argIndex < args.length; ) {
+      if (args[argIndex].equalsIgnoreCase("-train")) {
+        runTraining = true;
+        argIndex++;
+      } else if (args[argIndex].equalsIgnoreCase("-gradientcheck")) {
+        runGradientCheck = true;
+        argIndex++;
+      }
+    }
 
     // TODO
     // read in the trees
