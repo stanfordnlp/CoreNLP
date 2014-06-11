@@ -64,21 +64,6 @@ public class TreeShapedStack<T> {
     return size; 
   }
 
-  @Override
-  public String toString() {
-    return "[" + internalToString() + "]";
-  }
-
-  private String internalToString() {
-    if (size() == 0) {
-      return " ";
-    } else if (size() == 1) {
-      return data.toString();
-    } else {
-      return data.toString() + ", " + previous.internalToString();
-    }
-  }
-
   final T data;
   final int size;
   final TreeShapedStack<T> previous;
