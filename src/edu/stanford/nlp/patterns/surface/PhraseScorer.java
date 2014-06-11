@@ -27,7 +27,7 @@ public abstract class PhraseScorer {
 
   @Option(name = "wordFreqNorm")
   Normalization wordFreqNorm = Normalization.valueOf("LOG");
-
+  
   /**
    * For phrases, some phrases are evaluated as a combination of their
    * individual words. Default is taking minimum of all the words. This flag
@@ -48,12 +48,11 @@ public abstract class PhraseScorer {
 
   Counter<String> learnedScores = new ClassicCounter<String>();
 
-  abstract Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
-      String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
       Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns)
-      throws IOException;
+      throws IOException, ClassNotFoundException;
 
   Counter<String> getLearnedScores() {
     return learnedScores;
@@ -74,7 +73,7 @@ public abstract class PhraseScorer {
       total += weight;
     }
     assert Data.processedDataFreq.containsKey(word) : "How come the processed corpus freq doesnt have "
-        + word;
+        + word + " .Size of processedDataFreq is " + Data.processedDataFreq.size()  + " and size of raw freq is " + Data.rawFreq.size();
     return total / Data.processedDataFreq.getCount(word);
   }
 
@@ -165,8 +164,7 @@ public abstract class PhraseScorer {
       return minScore;
   }
 
-  abstract public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents,
-      String label, Set<String> terms, boolean forLearningPatterns) throws IOException;
+  abstract public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
   
 
 }
