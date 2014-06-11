@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
+import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.List;
@@ -9,23 +10,46 @@ import java.util.List;
 *
 * @author Angel Chang
 */
-public class ApproxMatch<K,V> extends Match<K,V> {
+public class ApproxMatch<K,V> extends MultiMatch<K,V> {
   double cost;
+  Interval<Integer>[] alignments;  // Tracks alignments from original sequence to matched sequence (null indicates not aligned)
 
-  // TODO: These should be moved away...
-  List<List<K>> multimatched;
-  List<V> multivalues;
+  public ApproxMatch() {
+  }
+
+  public ApproxMatch(List<K> matched, V value, int begin, int end, double cost) {
+    this.matched = matched;
+    this.value = value;
+    this.begin = begin;
+    this.end = end;
+    this.cost = cost;
+  }
+
+  public ApproxMatch(List<K> matched, V value, int begin, int end, List<Match<K,V>> multimatches, double cost) {
+    this.matched = matched;
+    this.value = value;
+    this.begin = begin;
+    this.end = end;
+    this.multimatches = multimatches;
+    this.cost = cost;
+  }
+
+  public ApproxMatch(List<K> matched, V value, int begin, int end, List<Match<K,V>> multimatches, double cost, Interval[] alignments) {
+    this.matched = matched;
+    this.value = value;
+    this.begin = begin;
+    this.end = end;
+    this.multimatches = multimatches;
+    this.cost = cost;
+    this.alignments = alignments;
+  }
 
   public double getCost() {
     return cost;
   }
 
-  public List<List<K>> getMultimatched() {
-    return multimatched;
-  }
-
-  public List<V> getMultivalues() {
-    return multivalues;
+  public Interval<Integer>[] getAlignments() {
+    return alignments;
   }
 
   @Override
@@ -37,8 +61,6 @@ public class ApproxMatch<K,V> extends Match<K,V> {
     ApproxMatch that = (ApproxMatch) o;
 
     if (Double.compare(that.cost, cost) != 0) return false;
-    if (multimatched != null ? !multimatched.equals(that.multimatched) : that.multimatched != null) return false;
-    if (multivalues != null ? !multivalues.equals(that.multivalues) : that.multivalues != null) return false;
 
     return true;
   }
@@ -49,23 +71,18 @@ public class ApproxMatch<K,V> extends Match<K,V> {
     long temp;
     temp = Double.doubleToLongBits(cost);
     result = 31 * result + (int) (temp ^ (temp >>> 32));
-    result = 31 * result + (multimatched != null ? multimatched.hashCode() : 0);
-    result = 31 * result + (multivalues != null ? multivalues.hashCode() : 0);
     return result;
   }
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("(");
-    if (multimatched != null && multivalues != null) {
-      sb.append("[" + StringUtils.join(multimatched, "-") + "]");
-      sb.append(" -> ").append(StringUtils.join(multivalues, "-"));
-      sb.append(" at (").append(begin);
-      sb.append(",").append(end).append(")");
-    } else {
-      sb.append(super.toString());
+    sb.append(super.toString());
+    sb.append(",").append(cost);
+    if (alignments != null) {
+      sb.append(", [").append(StringUtils.join(alignments, ", ")).append("]");
     }
-    sb.append(",").append(cost).append(")");
+    sb.append(")");
     return sb.toString();
   }
 }

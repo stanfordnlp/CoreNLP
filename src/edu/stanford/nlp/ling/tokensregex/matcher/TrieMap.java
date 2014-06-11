@@ -43,11 +43,36 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   public TrieMap<K,V> getChildTrie(Iterable<K> key) {
     TrieMap<K, V> curTrie = this;
     // go through each element
-    for(Object element : key){
+    for (K element : key){
       curTrie = (curTrie.children != null)? curTrie.children.get(element):null;
-      if(curTrie == null){
+      if (curTrie == null) {
         return null;
       }
+    }
+    return curTrie;
+  }
+
+  public TrieMap<K,V> putChildTrie(Iterable<K> key, TrieMap<K,V> child) {
+    TrieMap<K,V> parentTrie = null;
+    TrieMap<K, V> curTrie = this;
+    Iterator<K> keyIter = key.iterator();
+    // go through each element
+    while (keyIter.hasNext()) {
+      K element = keyIter.next();
+      boolean isLast = !keyIter.hasNext();
+      if (curTrie.children == null) {
+        curTrie.children = Generics.newConcurrentHashMap();
+      }
+      parentTrie = curTrie;
+      curTrie = curTrie.children.get(element);
+      if (isLast) {
+        parentTrie.children.put(element, child);
+      } else if(curTrie == null){
+        parentTrie.children.put(element, curTrie = new TrieMap<K,V>());
+      }
+    }
+    if (parentTrie == null) {
+      throw new IllegalArgumentException("Cannot put a child trie with no keys");
     }
     return curTrie;
   }
@@ -61,7 +86,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   }
 
 
-  public String toFormattedString(){
+  public String toFormattedString() {
     List<String> strings = new LinkedList<String>();
     updateTrieStrings(strings, "");
     return StringUtils.join(strings, "\n");
@@ -187,8 +212,8 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   @Override
   public void putAll(Map<? extends Iterable<K>, ? extends V> m) {
-    for (Iterable<K> k:m.keySet()) {
-      put(k, m.get(m));
+    for (Iterable<K> k : m.keySet()) {
+      put(k, m.get(k));
     }
   }
 
@@ -254,22 +279,23 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
       }
     }
     if (value != null) {
-      entries.add(new Map.Entry() {
+      entries.add(new Map.Entry<Iterable<K>,V>() {
         @Override
-        public Object getKey() {
+        public Iterable<K> getKey() {
           return prefix;
         }
 
         @Override
-        public Object getValue() {
+        public V getValue() {
           return value;
         }
 
         @Override
-        public Object setValue(Object value) {
+        public V setValue(V value) {
           throw new UnsupportedOperationException();
         }
       });
     }
   }
+
 }

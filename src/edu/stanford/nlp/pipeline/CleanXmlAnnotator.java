@@ -30,13 +30,14 @@ public class CleanXmlAnnotator implements Annotator{
 
   /**
    * This regular expression tells us which tags end a sentence...
-   * for example, &lt;p&gt; would be a great candidate
+   * for example, {@code <p>} would be a great candidate.
    */
   private final Pattern sentenceEndingTagMatcher;
 
   public static final String DEFAULT_SENTENCE_ENDERS = "";
 
   /**
+<<<<<<< HEAD
    * This tells us what tags denote single sentences (tokens inside should not be sentence split on)
    */
   private Pattern singleSentenceTagMatcher = null;
@@ -45,6 +46,9 @@ public class CleanXmlAnnotator implements Annotator{
 
   /**
    * This tells us which XML tags wrap document date
+=======
+   * This tells us which XML tags wrap document date.
+>>>>>>> master
    */
   private final Pattern dateTagMatcher;
 
@@ -232,6 +236,7 @@ public class CleanXmlAnnotator implements Annotator{
     }
   }
 
+  @Override
   public void annotate(Annotation annotation) {
     if (annotation.has(CoreAnnotations.TokensAnnotation.class)) {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
@@ -614,7 +619,7 @@ public class CleanXmlAnnotator implements Annotator{
       currentTagSet = null;
       if (tag.isEndTag) {
         while (true) {
-          if (enclosingTags.size() == 0) {
+          if (enclosingTags.isEmpty()) {
             throw new IllegalArgumentException("Got a close tag " + tag.name +
                                                " which does not match" +
                                                " any open tag");
@@ -694,4 +699,5 @@ public class CleanXmlAnnotator implements Annotator{
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(CLEAN_XML_REQUIREMENT);
   }
+
 }

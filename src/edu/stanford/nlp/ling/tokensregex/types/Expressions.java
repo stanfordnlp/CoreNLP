@@ -20,6 +20,85 @@ import java.util.regex.Pattern;
 
 /**
  * Various implementations of the Expression interface
+ * <p>
+ *   Expressions (used for specifying "action", "result" in TokensRegex extraction rules)
+ *   Expressions are made up of identifiers, literals (numbers, strings "I'm a string", TRUE, FALSE),
+ *     function calls ( FUNC(args) ).
+ * </p>
+ *
+ * After a pattern has been matched, we can access the capture groups using one of the following methods:
+ * <p>
+ * <table>
+ *   <tr><th>Field</th><th>Description</th></tr>
+ *   <tr><th colspan="2">Accessing captured groups as list of tokens</th></tr>
+ *   <tr><td>$n</td><td>Capture group (as list of tokens) corresponding to the variable <code>$n</code>.
+ *     If <code>n</code> is a integer, then the n-th captured group.  Capture group 0 is the entire matched expression.
+ *     Otherwise, if <code>n</code> is a string, then the captured group with name <code>n</code>.</td></tr>
+ *   <tr><td>$n[i]</td><td>The i-th token of the captured group <code>$n</code>.
+ *     Use negative indices to count from the end of the list (e.g. -1 is the last token).</td></tr>
+ *   <tr><td>$n[i].key</td><td>The value of annotation <code>key</code> of the i-th token of the captured group <code>$n</code>.</td></tr>
+ *   <tr><th colspan="2">Accessing captured groups as MatchedGroupInfo</th></tr>
+ *   <tr><td>$$n</td><td>Capture group (as MatchedGroupInfo) corresponding to the variable <code>$n</code>.
+ *     Use to get the associated value of the group and any embedded capture groups.
+ *     If <code>n</code> is a integer, then the n-th captured group.  Capture group 0 is the entire matched expression.
+ *     Otherwise, if <code>n</code> is a string, then the captured group with name <code>n</code>.</td></tr>
+ *   <tr><td>$$n.text</td><td>Text of the capture group <code>n</code>.</td></tr>
+ *   <tr><td>$$n.nodes</td><td>Tokens of the capture group <code>n</code> (this is equivalent to <code>$n</code>).</td></tr>
+ *   <tr><td>$$n.value</td><td>Value associated with capture group <code>n</code>.</td></tr>
+ *   <tr><td>$$n.matchResults</td><td>Additional match results associated with capture group <code>n</code>.
+ *      Use to get embedded capture groups.  For instance, when the TokensRegex <code>/(\d\d)-(\d\d)/</code> is matched
+ *      against the sentence "the score was 10-12", <code>$$0.text</code> will be "10-12" and
+ *      <code>$$0.matchResults[0].word.group(1)</code> will be "10".</td></tr>
+ * </table>
+ * </p>
+ *
+ * <p>
+ *   The following functions are supported:
+ * <table>
+ *   <tr><th>Function</th><th>Description</th></tr>
+ *   <tr><td><code>Annotate(CoreMap, field, value)</td><td>Annotates the CoreMap with specified field=value</td></tr>
+ *   <tr><td><code>Aggregate(function, initialValue,...)</td><td>Aggregates values using function (like fold)</td></tr>
+ *   <tr><td><code>Split(CoreMap, delimRegex, includeMatched)</td><td>Split one CoreMap into smaller coremaps using the specified delimRegex on the text of the CoreMap.
+ *     If includeMatched is true, pieces that matches the delimRegex are included in the final list of CoreMaps</td></tr>
+ *   <tr><th colspan="2">Tagging functions</th></tr>
+ *   <tr><td><code>Tag(CoreMap or List&lt;CoreMap&gt;, tag, value)<br/>VTag(Value,tag,value)</code></td><td>Sets a temporary tag on the CoreMap(s) or Value</td></tr>
+ *   <tr><td><code>GetTag(CoreMap or List&lt;CoreMap&gt;, tag)<br/>GetVTag(Value,tag)</code></td><td>Returns the temporary tag on the CoreMap(s) or Value</td></tr>
+ *   <tr><td><code>RemoveTag(CoreMap or List&lt;CoreMap&gt;, tag)<br/>RemoveVTag(Value,tag)</code></td><td>Removes the temporary tag on the CoreMap(s) or Value</td></tr>
+ *   <tr><th colspan="2">Regex functions</th></tr>
+ *   <tr><td><code>Match(List&lt;CoreMap&gt;, tokensregex)<br/>Match(String,regex)</code></td><td>Returns whether the tokens or text matched</td></tr>
+ *   <tr><td><code>Replace(List&lt;CoreMap&gt;, tokensregex, replacement)<br/>Match(String,regex,replacement)</code></td><td>Replaces the matched tokens or text</td></tr>
+ *   <tr><td><code>CreateRegex(List&lt;String&gt;)</code></td><td>Creates one big string regular expression that matches any of the strings in the list</td></tr>
+ *   <tr><th colspan="2">Accessor functions</th></tr>
+ *   <tr><td><code>Map(list,function)</code></td><td>Returns a new list that is the result of applying the function on every element of the List</td></tr>
+ *   <tr><td><code>Keys(map)</code></td><td>Returns list of keys for the given map</td></tr>
+ *   <tr><td><code>Set(object or map, fieldname, value)<br/>Set(list,index,value)</code></td><td>Set the field to the specified value</td></tr>
+ *   <tr><td><code>Get(object or map, fieldname) or object.fieldname <br/>Get(list,index) or list[index]</code></td><td>Returns the value of the specified field</td></tr>
+ *   <tr><th colspan="2">String functions</th></tr>
+ *   <tr><td><code>Format(format,arg1,arg2,...)</code></td><td>Returns formatted string</td></tr>
+ *   <tr><td><code>Concat(str1,str2,...)</code></td><td>Returns strings concatenated together</td></tr>
+ *   <tr><td><code>Join(glue,str1,str2,...)</code></td><td>Returns strings concatenated together with glue in the middle</td></tr>
+ *   <tr><td><code>Lowercase(str)</code></td><td>Returns the lowercase form of the string</td></tr>
+ *   <tr><td><code>Uppercase(str)</code></td><td>Returns the uppercase form of the string</td></tr>
+ *   <tr><th colspan="2">Numeric functions</th></tr>
+ *   <tr><td><code>Subtract(X,Y)</code></td><td>Returns <code>X-Y</code></td></tr>
+ *   <tr><td><code>Add(X,Y)</code></td><td>Returns <code>X+Y</code></td></tr>
+ *   <tr><td><code>Subtract(X,Y)</code></td><td>Returns <code>X-Y</code></td></tr>
+ *   <tr><td><code>Multiply(X,Y)</code></td><td>Returns <code>X*Y</code></td></tr>
+ *   <tr><td><code>Divide(X,Y)</code></td><td>Returns <code>X/Y</code></td></tr>
+ *   <tr><td><code>Mod(X,Y)</code></td><td>Returns <code>X%Y</code></td></tr>
+ *   <tr><td><code>Negate(X)</code></td><td>Returns <code>-X</code></td></tr>
+ *   <tr><th colspan="2">Boolean functions</th></tr>
+ *   <tr><td><code>And(X,Y)</code></td><td>Returns <code>X&&Y</code></td></tr>
+ *   <tr><td><code>Or(X,Y)</code></td><td>Returns <code>X||Y</code></td></tr>
+ *   <tr><td><code>Not(X)</code></td><td>Returns <code>!X</code></td></tr>
+ *   <tr><td><code>GE(X,Y) or X >= Y</code></td><td>Returns <code>X >= Y</code></td></tr>
+ *   <tr><td><code>GT(X,Y) or X > Y</code></td><td>Returns <code>X > Y</code></td></tr>
+ *   <tr><td><code>LE(X,Y) or X <= Y</code></td><td>Returns <code>X <= Y</code></td></tr>
+ *   <tr><td><code>LT(X,Y) or X < Y</code></td><td>Returns <code>X < Y</code></td></tr>
+ *   <tr><td><code>EQ(X,Y) or X == Y</code></td><td>Returns <code>X == Y</code></td></tr>
+ *   <tr><td><code>NE(X,Y) or X != Y</code></td><td>Returns <code>X != Y</code></td></tr>
+ * </table>
+ * </p>
  *
  * @author Angel Chang
  */

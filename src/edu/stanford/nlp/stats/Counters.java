@@ -784,12 +784,23 @@ public class Counters {
 
   /**
    * Returns the counter with keys modified according to function F. Eager
-   * evaluation.
+   * evaluation. If two keys are same after the transformation, one of the values is randomly chosen (depending on how the keyset is traversed)
    */
   public static <T1, T2> Counter<T2> transform(Counter<T1> c, Function<T1, T2> f) {
     Counter<T2> c2 = new ClassicCounter<T2>();
     for (T1 key : c.keySet()) {
       c2.setCount(f.apply(key), c.getCount(key));
+    }
+    return c2;
+  }
+  
+  /**
+   * Returns the counter with keys modified according to function F. If two keys are same after the transformation, their values get added up.
+   */
+  public static <T1, T2> Counter<T2> transformWithValuesAdd(Counter<T1> c, Function<T1, T2> f) {
+    Counter<T2> c2 = new ClassicCounter<T2>();
+    for (T1 key : c.keySet()) {
+      c2.incrementCount(f.apply(key), c.getCount(key));
     }
     return c2;
   }
@@ -2904,5 +2915,13 @@ public class Counters {
      list.add(new Pair<E, Double>(k, t.getCount(k)));
     }
     return list;
+  }
+  
+  public static<E> Counter<E> getFCounter(Counter<E> precision, Counter<E> recall, double beta){
+    Counter<E> fscores = new ClassicCounter<E>();
+    for(E k: precision.keySet()){
+      fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
+    }
+    return fscores;
   }
 }

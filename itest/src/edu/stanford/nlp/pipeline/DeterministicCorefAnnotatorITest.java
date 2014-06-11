@@ -32,11 +32,7 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
       corefProps.put(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM);
       corefProps.put(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE);
       corefProps.put(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE);
-      corefProps.put(Constants.MALE_PROP, DefaultPaths.DEFAULT_DCOREF_MALE);
       corefProps.put(Constants.NEUTRAL_PROP, DefaultPaths.DEFAULT_DCOREF_NEUTRAL);
-      corefProps.put(Constants.FEMALE_PROP, DefaultPaths.DEFAULT_DCOREF_FEMALE);
-      corefProps.put(Constants.PLURAL_PROP, DefaultPaths.DEFAULT_DCOREF_PLURAL);
-      corefProps.put(Constants.SINGULAR_PROP, DefaultPaths.DEFAULT_DCOREF_SINGULAR);
       pipeline.addAnnotator(new DeterministicCorefAnnotator(corefProps));
     }
   }
