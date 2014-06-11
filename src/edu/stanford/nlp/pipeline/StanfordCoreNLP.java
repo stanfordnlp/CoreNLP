@@ -349,7 +349,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
                   Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
                           "false")));
-          os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" + 
+          os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
                     properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
         return os.toString();
@@ -794,10 +794,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
     // add annotators loaded via reflection from classnames specified
     // in the properties
-    for (Object propertyKey : inputProps.stringPropertyNames()) {
-      if (!(propertyKey instanceof String))
-        continue; // should this be an Exception?
-      String property = (String) propertyKey;
+    for (String property : inputProps.stringPropertyNames()) {
       if (property.startsWith(CUSTOM_ANNOTATOR_PREFIX)) {
         final String customName =
           property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
@@ -860,7 +857,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         return "model=" + inputProps.get("model");
       }
     });
-    
+
     //
     // add more annotators here!
     //
