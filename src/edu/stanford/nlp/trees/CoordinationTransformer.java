@@ -30,9 +30,11 @@ public class CoordinationTransformer implements TreeTransformer {
   private final TreeTransformer qp = new QPTreeTransformer();         //to restructure the QP constituents
   private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns
 
+  private final HeadFinder headFinder;
 
   // default constructor
-  public CoordinationTransformer() {
+  public CoordinationTransformer(HeadFinder hf) {
+    this.headFinder = hf;
   }
 
   /**
@@ -83,7 +85,7 @@ public class CoordinationTransformer implements TreeTransformer {
   // TODO: maybe we want to catch more complicated tree structures
   // with something in between the WH and the actual question.
   private static TregexPattern flattenSQTregex = 
-    TregexPattern.compile("SBARQ <1 (WHNP < WP) <2 (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " + 
+    TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " + 
                           // match against "is running" if the verb is under just a VBG
                           " !< (/^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
                           // match against "is running" if the verb is under a VP - VBG
@@ -91,14 +93,24 @@ public class CoordinationTransformer implements TreeTransformer {
                           // match against "What is on the test?"
                           " !< (PP $- =verb) " + 
                           // match against "is there"
-                          " !<, (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ (NP < (EX < there))))");
+                          " !<, (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ (NP < (EX < there)))))");
 
   private static TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
   
   /**
-   * Removes the SQ structure under a WHNP question, such as "Who am I to judge?"
+   * Removes the SQ structure under a WHNP question, such as "Who am I
+   * to judge?".  We do this so that it is easier to pick out the head
+   * and then easier to connect that head to all of the other words in
+   * the question in this situation.  In the specific case of making
+   * the copula head, we don't do this so that the existing headfinder
+   * code can easily find the "am" or other copula verb.
    */
-  public static Tree SQflatten(Tree t) {
+  public Tree SQflatten(Tree t) {
+    if (headFinder != null && (headFinder instanceof CopulaHeadFinder)) {
+      if (((CopulaHeadFinder) headFinder).makesCopulaHead()) {
+        return t;
+      }
+    }
     if (t == null) {
       return null;
     }
@@ -496,7 +508,7 @@ public class CoordinationTransformer implements TreeTransformer {
 
   public static void main(String[] args) {
 
-    CoordinationTransformer transformer = new CoordinationTransformer();
+    CoordinationTransformer transformer = new CoordinationTransformer(null);
     Treebank tb = new MemoryTreebank();
     Properties props = StringUtils.argsToProperties(args);
     String treeFileName = props.getProperty("treeFile");
