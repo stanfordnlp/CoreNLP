@@ -54,27 +54,13 @@ public final class Characters {
    */
   public static boolean isPunctuation(char c) {
     int cType = Character.getType(c);
-    return cType == Character.START_PUNCTUATION ||
+    return ( 
+        cType == Character.START_PUNCTUATION ||
         cType == Character.END_PUNCTUATION ||
         cType == Character.OTHER_PUNCTUATION ||
         cType == Character.CONNECTOR_PUNCTUATION ||
         cType == Character.DASH_PUNCTUATION ||
         cType == Character.INITIAL_QUOTE_PUNCTUATION ||
-        cType == Character.FINAL_QUOTE_PUNCTUATION;
-  }
-  
-  /**
-   * Returns true if a character is a symbol, and false
-   * otherwise.
-   * 
-   * @param c
-   * @return
-   */
-  public static boolean isSymbol(char c) {
-    int cType = Character.getType(c);
-    return cType == Character.MATH_SYMBOL || 
-        cType == Character.CURRENCY_SYMBOL ||
-        cType == Character.MODIFIER_SYMBOL ||
-        cType == Character.OTHER_SYMBOL;
+        cType == Character.FINAL_QUOTE_PUNCTUATION);
   }
 }
