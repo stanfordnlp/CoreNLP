@@ -97,11 +97,9 @@ public class AnnotatedTextReader {
               c.set(CoreAnnotations.TextAnnotation.class, toksplit);
               c.set(CoreAnnotations.OriginalTextAnnotation.class, tok);
 
-              if (setGoldClass){
-                 
+              if (setGoldClass)
                 c.set(CoreAnnotations.GoldAnswerAnnotation.class, label);
-              }
-              
+
               if (setClassForTheseLabels != null
                   && setClassForTheseLabels.containsKey(label))
                 c.set(setClassForTheseLabels.get(label), label);

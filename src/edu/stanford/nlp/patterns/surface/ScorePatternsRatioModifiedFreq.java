@@ -13,7 +13,6 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.util.Execution;
 
 public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
@@ -82,8 +81,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
           useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.PhEvalInPat)
         || patternScoring.equals(PatternScoring.PhEvalInPatLogP)
-        || patternScoring.equals(PatternScoring.LOGREG)
-        || patternScoring.equals(PatternScoring.LOGREGlogP)) {
+        || patternScoring.equals(PatternScoring.LOGREG)) {
       // deno = negandUnLabeledPatternsandWords4Label;
       denominatorPatWt = this.convert2OneDim(label,
           negandUnLabeledPatternsandWords4Label, constVars.sqrtPatScore, true,
@@ -99,8 +97,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
     currentPatternWeights4Label = Counters.divisionNonNaN(numeratorPatWt,
         denominatorPatWt);
 
-    //Multiplying by logP
-    if (patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREGlogP)) {
+    if (patternScoring.equals(PatternScoring.PhEvalInPatLogP)) {
       Counter<SurfacePattern> logpos_i = new ClassicCounter<SurfacePattern>();
       for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
           .entrySet()) {
@@ -197,15 +194,15 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
                 true, false);
     }
 
-    else if ((patternScoring.equals(PatternScoring.LOGREG) || patternScoring.equals(PatternScoring.LOGREGlogP))
+    else if (patternScoring.equals(PatternScoring.LOGREG)
         && scorePhrasesInPatSelection) {
       Properties props2 = new Properties();
       props2.putAll(props);
       props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.surface.ScorePhrasesLearnFeatWt");
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
-      System.out.println("file is " + props.getProperty("domainNGramsFile"));
-      Execution.fillOptions(Data.class, props2);
-      classifierScores = scoreclassifier.phraseScorer.scorePhrases(Data.sents, label, patternsandWords.secondKeySet(),  true);
+      
+      classifierScores = scoreclassifier.phraseScorer.scorePhrases(Data.sents, label, null,
+          null, null, null, true);
       // scorePhrases(Data.sents, label, true,
       // constVars.perSelectRand, constVars.perSelectNeg, null, null,
       // dictOddsWordWeights);
@@ -289,7 +286,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
             cachedScoresForThisIter.setCount(e.getKey(), score);
           }
-        } else if ((patternScoring.equals(PatternScoring.LOGREG) || patternScoring.equals(PatternScoring.LOGREGlogP))
+        } else if (patternScoring.equals(PatternScoring.LOGREG)
             && scorePhrasesInPatSelection) {
           score = 1 - classifierScores.getCount(e.getKey());
           // score = 1 - scorePhrases.scoreUsingClassifer(classifier,
