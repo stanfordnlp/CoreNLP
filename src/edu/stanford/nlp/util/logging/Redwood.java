@@ -435,7 +435,7 @@ public class Redwood {
       attemptThreadControl( threadId, finish );
     } else {
       //(case: no threading)
-      throw new IllegalStateException("finishThreads() called outside of threaded environment");
+      Redwood.log(Flag.WARN, "finishThreads() called outside of threaded environment");
     }
   }
 
@@ -448,7 +448,7 @@ public class Redwood {
     //(error check)
     isThreaded = false;
     if(currentThread != -1L){
-      throw new IllegalStateException("endThreads() called, but thread " + currentThread + " has not finished (exception in thread?)");
+      Redwood.log(Flag.WARN, "endThreads() called, but thread " + currentThread + " has not finished (exception in thread?)");
     }
     //(end threaded environment)
     assert !control.isHeldByCurrentThread();
@@ -466,7 +466,7 @@ public class Redwood {
           currentThread = thread;
           //(clear buffer)
           while(currentThread >= 0){
-            if(backlog.isEmpty()){ throw new IllegalStateException("Forgot to call finishThread() on thread " + currentThread); }
+            if(backlog.isEmpty()){ Redwood.log(Flag.WARN, "Forgot to call finishThread() on thread " + currentThread); }
             assert !control.isHeldByCurrentThread();
             backlog.poll().run();
           }
@@ -888,7 +888,7 @@ public class Redwood {
       try {
         printWriter = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8")));
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        Redwood.log(Flag.ERROR, e);
       }
     }
 
@@ -1058,7 +1058,6 @@ public class Redwood {
       try {
         exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
       } catch (InterruptedException e) {
-        throw new RuntimeException(e);
       }
     }
     public static void threadAndRun(String title, Iterable<Runnable> runnables){
