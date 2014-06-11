@@ -24,9 +24,4 @@ class CoindexNodes extends TsurgeonPattern {
     return t;
   }
 
-  @Override
-  protected void setRoot(TsurgeonPatternRoot root) {
-    super.setRoot(root);
-    root.setCoindexes();
-  }
 }
