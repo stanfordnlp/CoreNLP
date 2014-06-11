@@ -446,12 +446,13 @@ public class IOUtils {
       }
     }
 
+    if (textFileOrUrl.endsWith(".gz")) {
+      // gunzip it if necessary
+      in = new GZIPInputStream(in, 65536); 
+    }
+
     // buffer this stream
     in = new BufferedInputStream(in);
-
-    // gzip it if necessary
-    if (textFileOrUrl.endsWith(".gz"))
-      in = new GZIPInputStream(in);
 
     return in;
   }
