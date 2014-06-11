@@ -36,7 +36,7 @@ import java.util.*;
  * <td>useQN</td>
  * <td>boolean</td>
  * <td>true</td>
- * <td>Use Quasi-Newton (L-BFGS) optimization to find minimum. NOTE: Need to set this to
+ * <td>Use Quasi-Newton (L-BFGS) to find minimum. NOTE: Need to set this to
  * false if using other minimizers such as SGD.</td>
  * </tr>
  * <tr>
@@ -440,7 +440,8 @@ public class SeqClassifierFlags implements Serializable {
   public transient List<String> gazettes = new ArrayList<String>();
   public transient String selfTrainFile = null;
 
-  public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as well
+  public String inputEncoding = "UTF-8"; // used for CTBSegDocumentReader as
+  // well
 
   public boolean bioSubmitOutput = false;
   public int numRuns = 1;
@@ -450,21 +451,20 @@ public class SeqClassifierFlags implements Serializable {
   public String printGazFeatures = null;
   public int numStartLayers = 1;
   public boolean dump = false;
-
-  // whether to merge B- and I- tags in an input file and to tag with IO tags
-  // (lacking a prefix). E.g., "I-PERS" goes to "PERS"
-  public boolean mergeTags;
-
+  public boolean mergeTags; // whether to merge B- and I- tags
   public boolean splitOnHead;
 
   // threshold
   public int featureCountThreshold = 0;
   public double featureWeightThreshold = 0.0;
 
+  // Inference label dictionary cutoff
+  public int labelDictionaryCutoff = -1;
+  
   // feature factory
   public String featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
   public Object[] featureFactoryArgs = new Object[0];
-
+  
   public String backgroundSymbol = DEFAULT_BACKGROUND_SYMBOL;
   // use
   public boolean useObservedSequencesOnly = false;
@@ -552,9 +552,7 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean booleanFeatures = false;
 
-  // This flag is only used for the sequences Type 2 CRF, not for ie.crf.CRFClassifier
   public boolean iobWrapper = false;
-
   public boolean iobTags = false;
   public boolean useSegmentation = false; /*
                                            * binary segmentation feature for
@@ -687,12 +685,11 @@ public class SeqClassifierFlags implements Serializable {
   public boolean doFE = false;
   public boolean restrictLabels = true;
 
-  // whether to print a line saying each ObjectBank entry (usually a filename)
-  public boolean announceObjectBankEntries = false;
+  public boolean announceObjectBankEntries = false; // whether to print a line
+  // giving each ObjectBank
+  // entry (usually a
+  // filename)
 
-  // This is for use with the OWLQNMinimizer. To use it, set useQN=false, and this to a positive number.
-  // A smaller number means more features are retained. Depending on the problem, a good value might be
-  // between 0.75 (POS tagger) down to 0.01 (Chinese word segmentation)
   public double l1reg = 0.0;
 
   // truecaser flags:
@@ -880,7 +877,6 @@ public class SeqClassifierFlags implements Serializable {
   public String embeddingWords = null;
   public String embeddingVectors = null;
   public boolean transitionEdgeOnly = false;
-  // L1-prior used in OWLQN
   public double priorLambda = 0;
   public boolean addCapitalFeatures = false;
   public int arbitraryInputLayerSize = -1;
@@ -1004,23 +1000,11 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useCRFforUnsup = false;
   public boolean useGEforSup = false;
   public boolean useKnownLCWords = true;
-  // allow for multiple feature factories.
-  public String[] featureFactories = null;
+
+
+  // Thang Sep13: allow for multiple feature factories.  
+  public String[] featureFactories = null; 
   public List<Object[]> featureFactoriesArgs = null;
-  public boolean useNoisyLabel = false;
-  public String errorMatrix = null;
-  public boolean printTrainLabels = false;
-
-  // Inference label dictionary cutoff
-  public int labelDictionaryCutoff = -1;
-
-  public boolean useAdaDelta = false;
-  public boolean useAdaDiff = false;
-  public double adaGradEps = 1e-3;
-  public double adaDeltaRho = 0.95;
-
-  public boolean useRandomSeed = false;
-  public boolean terminateOnAvgImprovement = false;
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1618,6 +1602,8 @@ public class SeqClassifierFlags implements Serializable {
         splitOnHead = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("featureCountThreshold")) {
         featureCountThreshold = Integer.parseInt(val);
+      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
+        labelDictionaryCutoff = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useWord")) {
         useWord = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("memoryThrift")) {
@@ -1633,13 +1619,13 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("backgroundSymbol")) {
         backgroundSymbol = val;
       } else if (key.equalsIgnoreCase("featureFactory")) {
-        // handle multiple feature factories.
+        // Thang Sep13: handle multiple feature factories.
         String[] tokens = val.split("\\s*,\\s*"); // multiple feature factories could be specified and are comma separated.
         int numFactories = tokens.length;
         if (numFactories==1){ // for compatible reason
           featureFactory = getFeatureFactory(val);
         }
-
+        
         featureFactories = new String[numFactories];
         featureFactoriesArgs = new ArrayList<Object[]>(numFactories);
         for (int i = 0; i < numFactories; i++) {
@@ -2504,27 +2490,6 @@ public class SeqClassifierFlags implements Serializable {
         useGEforSup = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useKnownLCWords")){
         useKnownLCWords = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useNoisyLabel")){
-        useNoisyLabel = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("errorMatrix")) {
-        errorMatrix = val;
-      } else if (key.equalsIgnoreCase("printTrainLabels")){
-        printTrainLabels = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("labelDictionaryCutoff")) {
-        labelDictionaryCutoff = Integer.parseInt(val);
-      } else if (key.equalsIgnoreCase("useAdaDelta")){
-        useAdaDelta = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useAdaDiff")){
-        useAdaDiff = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("adaGradEps")){
-        adaGradEps = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("adaDeltaRho")){
-        adaDeltaRho = Double.parseDouble(val);
-      } else if (key.equalsIgnoreCase("useRandomSeed")){
-        useRandomSeed = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("terminateOnAvgImprovement")){
-        terminateOnAvgImprovement = Boolean.parseBoolean(val);
-
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
@@ -2561,7 +2526,7 @@ public class SeqClassifierFlags implements Serializable {
     } else if (val.equalsIgnoreCase("EmbeddingFeatureFactory")) {
       val = "edu.stanford.nlp.ie.EmbeddingFeatureFactory";
     }
-
+    
     return val;
   }
   /**
