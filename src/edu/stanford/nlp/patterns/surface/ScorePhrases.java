@@ -76,8 +76,10 @@ public class ScorePhrases {
     Counter<String> finalwords = new ClassicCounter<String>();
 
     while (termIter.hasNext()) {
-      if (finalwords.size() >= constVars.numWordsToAdd)
+      
+      if (finalwords.size() >= constVars.numWordsToAdd){
         break;
+      }
       String w = termIter.next();
       if (newdt.getCount(w) < thresholdWordExtract) {
         break;
@@ -109,16 +111,16 @@ public class ScorePhrases {
         ignoreWords.add(w);
       }
     }
-    // String nextFive = "";
-    // int n = 0;
-    // while (termIter.hasNext()) {
-    // n++;
-    // if (n > 5)
-    // break;
-    // String w = termIter.next();
-    // nextFive += ";\t" + w + ":" + newdt.getCount(w);
-    // }
-    // Redwood.log(Redwood.FORCE, "Next five phrases were " + nextFive);
+     String nextFive = "";
+     int n = 0;
+     while (termIter.hasNext()) {
+     n++;
+     if (n > 5)
+     break;
+     String w = termIter.next();
+     nextFive += ";\t" + w + ":" + newdt.getCount(w);
+     }
+     Redwood.log(Redwood.DBG, "Next five phrases were " + nextFive);
     return finalwords;
   }
 
@@ -171,7 +173,7 @@ public class ScorePhrases {
       Data.computeRawFreqIfNull(constVars.numWordsCompound);
 
       if (!phraseScorer.wordFreqNorm.equals(Normalization.NONE)) {
-        System.out.println("computing processed freq");
+        Redwood.log(Redwood.DBG, "computing processed freq");
         for (Entry<String, Double> fq : Data.rawFreq.entrySet()) {
           double in = fq.getValue();
           if (phraseScorer.wordFreqNorm.equals(Normalization.SQRT))
@@ -257,11 +259,11 @@ public class ScorePhrases {
       else
         num = keyset.size() / (constVars.numThreads - 1);
       ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-      // Redwood.log(Redwood.FORCE, channelNameLogger, "keyset size is " +
+      // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "keyset size is " +
       // keyset.size());
       List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>>();
       for (int i = 0; i < constVars.numThreads; i++) {
-        // Redwood.log(Redwood.FORCE, channelNameLogger, "assigning from " + i *
+        // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "assigning from " + i *
         // num + " till " + Math.min(keyset.size(), (i + 1) * num));
 
         Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> task = null;
@@ -272,9 +274,7 @@ public class ScorePhrases {
         }
         
         task = new ApplyPatternsMulti(keyset.subList(i * num,
-            Math.min(keyset.size(), (i + 1) * num)), patternsLearnedThisIterConverted,
-            constVars.getCommonEngWords(),
-            alreadyIdentifiedWords, constVars.restrictToMatched, label,
+            Math.min(keyset.size(), (i + 1) * num)), patternsLearnedThisIterConverted, label,
             constVars.removeStopWordsFromSelectedPhrases,
             constVars.removePhrasesWithStopWords, constVars);
 
@@ -293,6 +293,7 @@ public class ScorePhrases {
       }
       executor.shutdown();
     }
+    
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
       for (Pair<String, String> en : wordsandLemmaPatExtracted.firstKeySet()) {
@@ -352,7 +353,7 @@ public class ScorePhrases {
       Counters.addInPlace(scoreForAllWordsThisIteration, phraseScores);
 
       Redwood.log(
-          Redwood.FORCE,
+          ConstantsAndVariables.minimaldebug,
           "## Selected Words: "
               + Counters.toSortedString(finalwords, finalwords.size(),
                   "%1$s:%2$.2f", "\t"));
@@ -368,7 +369,7 @@ public class ScorePhrases {
             }
           }
         }
-        Redwood.log(Redwood.FORCE, "Saving output in " + outputdir);
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Saving output in " + outputdir);
         String filename = outputdir + "/words.json";
 
         // the json object is an array corresponding to each iteration - of list
@@ -407,7 +408,7 @@ public class ScorePhrases {
         }
         obj.add(objThisIter);
 
-        // Redwood.log(Redwood.FORCE, channelNameLogger,
+        // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger,
         // "Writing justification at " + filename);
         IOUtils.writeStringToFile(obj.build().toString(), filename, "utf8");
         writtenInJustification.put(label, true);
@@ -460,7 +461,7 @@ public class ScorePhrases {
       else
         return new ClassicCounter<String>();
 
-      Redwood.log(Redwood.FORCE, "Selected Words: " + bestw);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "Selected Words: " + bestw);
 
       return Counters.asCounter(Arrays.asList(bestw));
     }
@@ -595,7 +596,7 @@ public class ScorePhrases {
   // // BufferedWriter writer = new BufferedWriter(new FileWriter("graph.gdf"));
   // // writeGraph(writer, graph);
   // System.out.println("done writing graph");
-  // Redwood.log(Redwood.FORCE, "calculated look ahead weights for " +
+  // Redwood.log(ConstantsAndVariables.minimaldebug, "calculated look ahead weights for " +
   // weights.size() + " words");
   //
   // return weights;
