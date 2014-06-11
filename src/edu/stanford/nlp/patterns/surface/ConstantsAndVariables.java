@@ -294,7 +294,7 @@ public class ConstantsAndVariables implements Serializable{
   public int minLen4FuzzyForPattern = 6;
 
   /**
-   * Do not learn phrases that match this regex.
+   * Do not learn phrases that match this regex
    */
   @Option(name = "wordIgnoreRegex")
   public String wordIgnoreRegex = "[^a-zA-Z]*";
