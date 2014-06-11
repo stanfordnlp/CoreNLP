@@ -39,7 +39,7 @@ public class RNNTrainOptions implements Serializable {
   public double regClassification = 0.0001;
 
   /** Regularization cost for the word vectors */
-  public double regWordVector = 0.001;
+  public double regWordVector = 0.0001;
 
   /**
    * The value to set the learning rate for each parameter when initializing adagrad.
