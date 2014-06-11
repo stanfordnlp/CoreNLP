@@ -863,27 +863,27 @@ public class ArrayUtils {
   }
 
   /**
-   * If l1 is a part of l2, it finds the starting index of l1 in l2
-   * If l1 is not a sub-array of l2, then it returns -1
-   * note that l2 should have the exact elements and order as in l1
-   * @param l1 array you want to find in l2
-   * @param l2
+   * If tofind is a part of tokens, it finds the starting index of tofind in tokens
+   * If tofind is not a sub-array of tokens, then it returns null
+   * note that tokens sublist should have the exact elements and order as in tofind
+   * @param tofind array you want to find in tokens
+   * @param tokens
    * @return starting index of the sublist
    */
-  public static List<Integer> getSubListIndex(Object[] l1, Object[] l2){
-    if(l1.length > l2.length)
+  public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens){
+    if(tofind.length > tokens.length)
       return null;
     List<Integer> allIndices = new ArrayList<Integer>();
     boolean matched = false;
     int index = -1;
     int lastUnmatchedIndex = 0;
-    for(int i = 0 ; i < l2.length;){
-      for(int j = 0; j < l1.length ;){
-        if(l1[j].equals(l2[i])){
+    for(int i = 0 ; i < tokens.length;){
+      for(int j = 0; j < tofind.length ;){
+        if(tofind[j].equals(tokens[i])){
           index = i;
           i++;
           j++;
-          if(j == l1.length)
+          if(j == tofind.length)
           {
             matched = true;
             break;
@@ -893,18 +893,18 @@ public class ArrayUtils {
           i = lastUnmatchedIndex +1;
           lastUnmatchedIndex = i;
           index = -1;
-          if(lastUnmatchedIndex == l2.length)
+          if(lastUnmatchedIndex == tokens.length)
             break;
         }
-        if(i >= l2.length){
+        if(i >= tokens.length){
           index = -1;
           break;
         }
       }
-      if(i == l2.length || matched){
+      if(i == tokens.length || matched){
         if(index >= 0)
           //index = index - l1.length + 1;
-          allIndices.add(index - l1.length + 1);
+          allIndices.add(index - tofind.length + 1);
         matched = false;
         lastUnmatchedIndex = index;
 
