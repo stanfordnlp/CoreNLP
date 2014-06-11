@@ -9,7 +9,6 @@
     </fileset>
     <pathelement location="${build.path}"/>
     <pathelement location="${project.core}/lib/commons-logging.jar"/>
-    <pathelement location="${project.core}/lib/javax.servlet.jar"/>
   </path>
 
   <target name="jsp" depends="classpath,compile">
