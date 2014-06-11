@@ -18,6 +18,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 public class Dictionaries {
 
@@ -473,10 +474,11 @@ public class Dictionaries {
         props.getProperty(Constants.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
         props.getProperty(Constants.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
         props.getProperty(Constants.SIEVES_PROP, Constants.SIEVEPASSES).contains("CorefDictionaryMatch"),
-        new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
-          DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4},
-        DefaultPaths.DEFAULT_DCOREF_DICT1,
-        DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES);
+        PropertiesUtils.getStringArray(props, Constants.DICT_LIST_PROP,
+                                       new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
+                                                    DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4}),
+        props.getProperty(Constants.DICT_PMI_PROP, DefaultPaths.DEFAULT_DCOREF_DICT1),
+        props.getProperty(Constants.SIGNATURES_PROP, DefaultPaths.DEFAULT_DCOREF_NE_SIGNATURES));
   }
 
   public static String signature(Properties props) {
