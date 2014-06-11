@@ -104,20 +104,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     }
   }
 
-  /*
-  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, int multiThreadGrad) {
-    this(data, labels, window, classIndex, labelIndices, map, "QUADRATIC", backgroundSymbol, multiThreadGrad);
-  }
-
-  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, int multiThreadGrad) {
-    this(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, 1.0, null, multiThreadGrad);
-  }
-
-  CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String backgroundSymbol, double sigma, double[][][][] featureVal, int multiThreadGrad) {
-    this(data, labels, window, classIndex, labelIndices, map, "QUADRATIC", backgroundSymbol, sigma, featureVal, multiThreadGrad);
-  }
-  */
-
   CRFLogConditionalObjectiveFunction(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal, int multiThreadGrad) {
     this(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal, multiThreadGrad, true);
   }
@@ -338,34 +324,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     }
   }
 
-  /*
-  private ThreadsafeProcessor<Pair<Integer, List<Integer>>, Pair<Integer, Double>> gradientThreadProcessor =
-          new ThreadsafeProcessor<Pair<Integer, List<Integer>>, Pair<Integer, Double>>() {
-            @Override
-            public Pair<Integer, Double> process(Pair<Integer, List<Integer>> threadIDAndDocIndices) {
-              int tID = threadIDAndDocIndices.first();
-              if (tID < 0 || tID >= multiThreadGrad) throw new IllegalArgumentException("threadID must be with in range 0 <= tID < multiThreadGrad(="+multiThreadGrad+")");
-              List<Integer> docIDs = threadIDAndDocIndices.second();
-              double[][] partE; // initialized below
-              if (multiThreadGrad == 1) {
-                partE = E;
-              } else {
-                partE = parallelE[tID];
-                clear2D(partE);
-              }
-              double probSum = 0;
-              for (int docIndex: docIDs) {
-                probSum += expectedCountsAndValueForADoc(partE, docIndex);
-              }
-              return new Pair<Integer, Double>(tID, probSum);
-            }
-            @Override
-            public ThreadsafeProcessor<Pair<Integer, List<Integer>>, Pair<Integer, Double>> newInstance() {
-              return this;
-            }
-          };
-  */
-
   public void setWeights(double[][] weights) {
     this.weights = weights;
     cliquePotentialFunc = new LinearCliquePotentialFunction(weights);
@@ -442,7 +400,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     // double[][] E = empty2D();
     clear2D(E);
 
-    prob += regularGradientAndValue();
+    prob = regularGradientAndValue();
 
     if (Double.isNaN(prob)) { // shouldn't be the case
       throw new RuntimeException("Got NaN for prob in CRFLogConditionalObjectiveFunction.calculate()" +
@@ -591,15 +549,6 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     // was: double[][] weights = to2D(x, 1.0); // but 1.0 should be the same as omitting 2nd parameter....
     to2D(x, weights);
     setWeights(weights);
-
-    // if (eHat4Update == null) {
-    //   eHat4Update = empty2D();
-    //   e4Update = new double[eHat4Update.length][];
-    //   for (int i = 0; i < e4Update.length; i++)
-    //     e4Update[i] = new double[eHat4Update[i].length];
-    // } else {
-    //   clearUpdateEs();
-    // }
 
     // iterate over all the documents
     List<Integer> docIDs = new ArrayList<Integer>(batch.length);
