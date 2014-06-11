@@ -197,8 +197,6 @@ public class SemanticGraphFactory {
       deps = depsFiltered;
     }
 
-    Collection<TreeGraphNode> roots = Generics.newHashSet();
-
     // there used to be an if clause that filtered out the case of empty
     // dependencies. However, I could not understand (or replicate) the error
     // it alluded to, and it led to empty dependency graphs for very short fragments,

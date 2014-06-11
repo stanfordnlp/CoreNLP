@@ -101,6 +101,8 @@ public class EnglishGrammaticalRelations {
     "/^(?i:have|had|has|having|'ve|ve|v|'d|d|hvae|hav|as)$/";
   private static final String stopKeepRegex =
     "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
+  private static final String selfRegex =
+    "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
 
   // By setting the HeadFinder to null, we find out right away at
   // runtime if we have incorrectly set the HeadFinder for the
@@ -136,7 +138,11 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "aux", "auxiliary",
         AuxModifierGRAnnotation.class, DEPENDENT, "VP|SQ|SINV|CONJP", tregexCompiler,
         new String[] {
-          "VP < VP < /^(?:TO|MD|VB.*|AUXG?|POS)$/=target",
+          // TODO: want to add "!< passiveAuxWordRegex" to avoid
+          // conflicts with auxpass.  Similarly, want to avoid
+          // conflicts between nsubj and nsubjpass.  One example is
+          // the tree with "charmingly" in the PTB
+          "VP < VP < (/^(?:TO|MD|VB.*|AUXG?|POS)$/=target)",
           "SQ|SINV < (/^(?:VB|MD|AUX)/=target $++ /^(?:VP|ADJP)/)",
           "CONJP < TO=target < VB", // (CONJP not to mention)
           // add handling of tricky VP fronting cases...
@@ -489,10 +495,20 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !< (PP <: IN|TO) $-- (NP !< /^-NONE-$/))",
 
           // matches direct object in relative clauses with relative pronoun "I saw the book that you bought". Seems okay. If this is changed, also change the pattern for "rel"
+          // TODO: this can occasionally produce incorrect dependencies, such as the sentence 
+          // "with the way which his split-fingered fastball is behaving"
+          // eg take a tree where the verb doesn't have an object
           "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN|TO) !< (S < (VP < TO))))",
 
           // matches direct object for long dependencies in relative clause without explicit relative pronouns
-          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target",
+          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " + 
+            // avoid conflicts with rcmod.  TODO: we could look for
+            // empty nodes in this kind of structure and use that to
+            // find dobj, tmod, advmod, etc.  won't help the parser,
+            // of course, but will help when converting a treeback
+            // which contains empties
+            // Example: "with the way his split-fingered fastball is behaving"
+            "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
 
           // If there was an NP between the WHNP and the ADJP, we want
           // that NP to have the nsubj relation, and the WHNP is either
@@ -536,7 +552,9 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "VP < (NP=target !< /\\$/ !<# (/^NN/ < " + timeWordRegex + ") $+ (NP !<# (/^NN/ < " + timeWordRegex + ")))",
           // this next one was meant to fix common mistakes of our parser, but is perhaps too dangerous to keep
-          "VP < (NP=target < (NP !< /\\$/ $++ (NP !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))",
+          // excluding selfRegex leaves out phrases such as "I cooked dinner myself"
+          // excluding DT leaves out phrases such as "My dog ate it all""
+          "VP < (NP=target < (NP !< /\\$/ $++ (NP !<: (PRP < " + selfRegex + ") !<: DT !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))",
         });
   public static class IndirectObjectGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -900,13 +918,10 @@ public class EnglishGrammaticalRelations {
           // useful dependencies rather than introduce some wrong
           // dependencies.
           "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML > @NP|WHNP",
-          "@NP|WHNP|NML $++ (SBAR=target <: (S !<, (VP <, TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
-          // this next pattern is restricted to where and why because
-          // "when" is usually incorrectly parsed: temporal clauses
-          // are put inside the NP; 2nd is for case of relative
-          // clauses with no relativizer (it doesn't distinguish
-          // whether actually gapped).
+          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NML > @NP|WHNP",
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
+          // for case of relative clauses with no relativizer
+          // (it doesn't distinguish whether actually gapped).
           "@NP|WHNP < RRC=target <# NP|WHNP|NML|DT|S",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
         });
@@ -1060,7 +1075,8 @@ public class EnglishGrammaticalRelations {
         NounCompoundModifierGRAnnotation.class, MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML|ADVP|ADJP)(?:-TMP|-ADV)?", tregexCompiler,
         new String[] {
           // added AFX: can't really tell it's natural POS; this seems the best one can do
-          "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW|AFX=target $++ NN|NNS|NNP|NNPS|FW|CD !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ )",
+          // The check for POS is to eliminate conflicts with poss relations
+          "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW|AFX=target $++ NN|NNS|NNP|NNPS|FW|CD=sister !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ !$++ (POS $++ =sister))",
           "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < JJ|JJR|JJS=sister < (NP|NML|NN|NNS|NNP|NNPS|FW=target !<<- POS !<<- (VBZ < /^\'s$/) $+ =sister) <# NN|NNS|NNP|NNPS !<<- POS !<<- (VBZ < /^\'s$/) ",
           "ADJP|ADVP < (FW [ $- FW=target | $- (IN=target < in|In) ] )",  // in vitro, in vivo, etc., in Genia
         });
@@ -1401,7 +1417,7 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "predet", "predeterminer",
         PredeterminerGRAnnotation.class, MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?", tregexCompiler,
         new String[] {
-          "/^(?:(?:WH)?NP(?:-TMP|-ADV)?|NX|NAC|NML)$/ < (PDT|DT=target $+ /^(?:DT|WP\\$|PRP\\$)$/ $++ /^N[NXM]/ !$++ CC)",
+          "/^(?:(?:WH)?NP(?:-TMP|-ADV)?|NX|NAC|NML)$/ < (PDT|DT=target $+ /^(?:DT|WP\\$|PRP\\$)$/ $++ /^(?:NN|NX|NML)/ !$++ CC)",
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PDT|DT=target $+ DT $++ (/^JJ/ !$+ /^NN/)) !$++ CC",
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < PDT=target <- DT"
         });
@@ -1449,8 +1465,9 @@ public class EnglishGrammaticalRelations {
           // todo: possessive pronoun under ADJP needs more work for one case of (ADJP his or her own)
           // basic NP possessive: we want to allow little conjunctions in head noun (NP (NP ... POS) NN CC NN) but not falsely match when there are conjoined NPs.  See tests.
           "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
-          // mediocrely handle a few too flat NPs
-          "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ < (/^NN/=target $+ (POS < /'/ $++ /^NN/))"
+          // handle a few too flat NPs
+          // note that ' matches both ' and 's
+          "/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))"
         });
   public static class PossessionModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
