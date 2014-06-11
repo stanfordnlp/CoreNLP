@@ -149,11 +149,11 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     }
   }
 
-  public List<T> groupNodes() {
+  public List<? extends T> groupNodes() {
     return groupNodes(0);
   }
 
-  public List<T> groupNodes(int group) {
+  public List<? extends T> groupNodes(int group) {
     if (group == GROUP_BEFORE_MATCH || group == GROUP_AFTER_MATCH) {
       // return a new list so the resulting object is serializable
       return new ArrayList<T>(elements.subList(start(group), end(group)));
