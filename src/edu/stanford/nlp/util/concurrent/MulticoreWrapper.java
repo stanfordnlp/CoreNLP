@@ -199,6 +199,19 @@ public class MulticoreWrapper<I,O> {
   }
 
   /**
+   * Blocks until all active processes finish but no threadpool shutdown as in join()
+   */
+  // Thang Mar14
+  public void joinNoShutDown() {
+    // Make blocking calls to the last processes that are running
+    if ( ! threadPool.isShutdown()) {
+      while(idleProcessors.size() != nThreads) {
+        blockingGetResult();
+      }
+    }
+  }
+  
+  /**
    * Indicates whether a not a new result is available.
    *
    * @return true if a new result is available, false otherwise.
