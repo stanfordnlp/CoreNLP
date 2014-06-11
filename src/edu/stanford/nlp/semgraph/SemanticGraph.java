@@ -1743,8 +1743,10 @@ public class SemanticGraph implements Serializable {
           govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
           depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
         }
-        addVertex(govVertex);
-        addVertex(depVertex);
+        // It is unnecessary to call addVertex, since addEdge will
+        // implicitly add vertices if needed
+        //addVertex(govVertex);
+        //addVertex(depVertex);
         addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
       } else { //it's the root and we add it
         IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
