@@ -1062,11 +1062,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             boolean sub = SurfacePattern.subsumes(pat, p);
             boolean sub2 = SurfacePattern.subsumes(pat, p);
             System.out.println("subsume is " + sub + " and subsume2 is " + sub2  + " for comparing " + pat + " and " + p);
-            if (pat.toStringSimple().contains("upon") && p.toStringSimple().contains("upon")) {
+            //if (pat.toStringSimple().contains("upon") && p.toStringSimple().contains("upon")) {
               System.out.println("For " + pat + " and " + p + ": samegenre is " + SurfacePattern.sameGenre(pat, p) + " and subsumes answer is "
-                  + SurfacePattern.subsumes(pat, p) + " and notchoose varaible is " + notchoose + " sub was " + sub + " and sub2 was " + sub2);
+                  + SurfacePattern.subsumes(pat, p) + " sub was " + sub + " and sub2 was " + sub2);
               
-            }
+            //}
             if (sub) {
               Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
                   + " because it is contained in or contains the already chosen pattern " + p);
