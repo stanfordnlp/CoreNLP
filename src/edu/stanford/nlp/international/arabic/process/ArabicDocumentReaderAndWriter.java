@@ -42,8 +42,6 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   private final boolean inputHasTags;
   private final boolean inputHasDomainLabels;
-  private final String inputDomain;
-  private final boolean shouldStripRewrites;
 
   /**
    *
@@ -71,7 +69,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
                                        boolean hasTags,
                                        TokenizerFactory<CoreLabel> tokFactory) {
-    this(hasSegMarkers, hasTags, false, "123", tokFactory);
+    this(hasSegMarkers, hasTags, false, tokFactory);
   }
   
   /**
@@ -85,51 +83,25 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
                                        boolean hasTags,
                                        boolean hasDomainLabels,
-                                       String domain,
                                        TokenizerFactory<CoreLabel> tokFactory) {
-    this(hasSegMarkers, hasTags, hasDomainLabels, domain, false, tokFactory);
-  }
-  
-  /**
-  *
-  * @param hasSegMarkers if true, input has segmentation markers
-  * @param hasTags if true, input has morphological analyses separated by tagDelimiter.
-  * @param hasDomainLabels if true, input has a whitespace-terminated domain at the beginning
-  *     of each line of text
-  * @param stripRewrites if true, erase orthographical rewrites from the gold labels (for
-  *     comparison purposes)
-  * @param tokFactory a TokenizerFactory for the input
-  */
-  public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
-      boolean hasTags,
-      boolean hasDomainLabels,
-      String domain,
-      boolean stripRewrites,
-      TokenizerFactory<CoreLabel> tokFactory) {
     tf = tokFactory;
     inputHasTags = hasTags;
     inputHasDomainLabels = hasDomainLabels;
-    inputDomain = domain;
-    shouldStripRewrites = stripRewrites;
     segMarker = hasSegMarkers ? DEFAULT_SEG_MARKER : null;
     factory = LineIterator.getFactory(new SerializableFunction<String, List<CoreLabel>>() {
       private static final long serialVersionUID = 5243251505653686497L;
       public List<CoreLabel> apply(String in) {
-        List<CoreLabel> tokenList;
-        
         if (inputHasTags) {
-          String lineDomain = "";
+          String domain = "";
           if (inputHasDomainLabels) {
             String[] domainAndData = in.split("\\s+", 2);
             if (domainAndData.length < 2) {
               System.err.println("Missing domain label or text: ");
               System.err.println(in);
             } else {
-              lineDomain = domainAndData[0];
+              domain = domainAndData[0];
               in = domainAndData[1];
             }
-          } else {
-            lineDomain = inputDomain;
           }
           String[] toks = in.split("\\s+");
           List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
@@ -151,22 +123,19 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
             cl.setValue(word);
             cl.setWord(word);
             cl.setTag(wordTagPair[1]);
-            cl.set(CoreAnnotations.DomainAnnotation.class, lineDomain);
+            if (inputHasDomainLabels)
+              cl.set(CoreAnnotations.DomainAnnotation.class, domain);
             input.add(cl);
           }
-          tokenList = IOBUtils.StringToIOB(input, segMarker, true, shouldStripRewrites);
+          return IOBUtils.StringToIOB(input, segMarker, true);
 
         } else if (tf == null) {
-          tokenList = IOBUtils.StringToIOB(in, segMarker);
+          return IOBUtils.StringToIOB(in, segMarker);
 
         } else {
           List<CoreLabel> line = tf.getTokenizer(new StringReader(in)).tokenize();
-          tokenList = IOBUtils.StringToIOB(line, segMarker, false);
+          return IOBUtils.StringToIOB(line, segMarker, false);
         }
-        
-        if (!inputHasDomainLabels)
-          IOBUtils.labelDomain(tokenList, inputDomain);
-        return tokenList;
       }
     });
   }

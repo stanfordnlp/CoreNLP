@@ -15,6 +15,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.PTBEscapingProcessor;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
@@ -42,6 +45,70 @@ public class ReadSentimentDataset {
       return word;
     }
   };
+
+  // A bunch of trees have some funky tokenization which we can
+  // somewhat correct using these tregex / tsurgeon expressions.
+  static final TregexPattern[] tregexPatterns = {
+    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <2 =single <1 (__=useless <<- (__=word !< __)))"),
+    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[aA]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, /^n$/=word))"),
+    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__=A <... { (__ < /^[aA]$/=letter) ; (__=paren < /^-RRB-$/) })"),
+    TregexPattern.compile("__ <1 (__ <<- (/^(?i:provide)$/=provide !<__)) <2 (__ <<, (__=s > __=useless <... { (__ <: -LRB-) ; (__ <1 (__ <: s)) } ))"),
+    TregexPattern.compile("__=single <1 (__ < /^-LRB-$/) <2 (__ <... { (__ < /^[a-zA-Z]$/=letter) ; (__ < /^-RRB-$/) }) > (__ <1 =single <2 (__=useless <<, (__=word !< __)))"),
+    TregexPattern.compile("-LRB-=lrb !, __ : (__=ltop > __ <<, =lrb <<- (-RRB-=rrb > (__ > __=rtop)) !<< (-RRB- !== =rrb))"),
+    // uncensor "fucked"
+    TregexPattern.compile("__=top <1 (__=f1 < f) <2 (__=f2 <... { (__ < /^[*\\\\]+$/) ; (__ < ed) })"),
+    // fix don ' t
+    TregexPattern.compile("__=top <1 (__=f1 <1 (__ < don=do) <2 (__ < /^[\']$/=apos)) <2 (__=wrong < t)"),
+    // parens at the start of a sentence - always appears wrong
+    TregexPattern.compile("-LRB-=lrb !, __ .. (-RRB-=rrb !< __ !.. -RRB-)"),
+    // parens with a single word that we can drop
+    TregexPattern.compile("-LRB-=lrb . and|Haneke|is|Evans|Harmon|Harris|its|it|Aniston|headbanger|Testud|but|frames|yet|Denis|DeNiro|sinks|screenwriter|Cho|meditation|Watts|that|the|this|Madonna|Ahola|Franco|Hopkins|Crudup|writer-director|Diggs|very|Crane|Frei|Reno|Jones|Quills|Bobby|Hill|Kim|subjects|Wang|Jaglom|Vega|Sabara|Sade|Goldbacher|too|being|opening=last : (=last . -RRB-=rrb)"),
+    // parens with two word expressions
+    TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . -RRB-=rrb)) : (=n1 (== Besson|Kissinger|Godard|Seagal|jaglon|It|it|Tsai|Nelson|Rifkan|Shakespeare|Solondz|Madonna|Herzog|Witherspoon|Woo|Eyre|there|Moore|Ricci|Seinfeld . (=n2 == /^\'s$/)) | (== Denis|Skins|Spears|Assayas . (=n2 == /^\'$/)) | (== Je-Gyu . (=n2 == is)) | (== the . (=n2 == leads|film|story|characters)) | (== Monsoon . (=n2 == Wedding)) | (== De . (=n2 == Niro)) | (== Roman . (=n2 == Coppola)) | (== than . (=n2 == Leon)) | (==Colgate . (=n2 == /^U.$/)) | (== teen . (=n2 == comedy)) | (== a . (=n2 == remake)) | (== Powerpuff . (=n2 == Girls)) | (== Woody . (=n2 == Allen)))"),
+    // parens with three word expressions
+    TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . (__=n3 !< __ . -RRB-=rrb))) : (=n1 [ (== the . (=n2 == characters . (=n3 == /^\'$/))) | (== the . (=n2 == movie . (=n3 == /^\'s$/))) | (== of . (=n2 == middle-aged . (=n3 == romance))) | (== Jack . (=n2 == Nicholson . (=n3 == /^\'s$/))) | (== De . (=n2 == Palma . (=n3 == /^\'s$/))) | (== Clara . (=n2 == and . (=n3 == Paul))) | (== Sex . (=n2 == and . (=n3 == Lucía))) ])"),
+    // only one of these, so can be very general
+    TregexPattern.compile("/^401$/ > (__ > __=top)"),
+    TregexPattern.compile("by . (all > (__=all > __=allgp) . (means > (__=means > __=meansgp))) : (=allgp !== =meansgp)"),
+    // 20th century, 21st century
+    TregexPattern.compile("/^(?:20th|21st)$/ . Century=century"),
+
+    // Fix any stranded unitary nodes
+    TregexPattern.compile("__ <: (__=unitary < __)"),
+    // relabel some nodes where punctuation changes the score for no apparent reason
+    // TregexPattern.compile("__=node <2 (__ < /^[!.?,;]$/) !<1 ~node <1 __=child > ~child"),
+    // TODO: relabel words in some less expensive way?
+    TregexPattern.compile("/^[1]$/=label <: /^(?i:protagonist)$/"),
+  };
+
+  static final TsurgeonPattern[] tsurgeonPatterns = {
+    Tsurgeon.parseOperation("[relabel word /^.*$/={word}={letter}/] [prune single] [excise useless useless]"),
+    Tsurgeon.parseOperation("[relabel word /^.*$/={letter}n/] [prune single] [excise useless useless]"),
+    Tsurgeon.parseOperation("[excise single A] [prune paren]"),
+    Tsurgeon.parseOperation("[relabel provide /^.*$/={provide}s/] [prune s] [excise useless useless]"),
+    Tsurgeon.parseOperation("[relabel word /^.*$/={letter}={word}/] [prune single] [excise useless useless]"),
+    Tsurgeon.parseOperation("[prune lrb] [prune rrb] [excise ltop ltop] [excise rtop rtop]"),
+    Tsurgeon.parseOperation("replace top (0 fucked)"),
+    Tsurgeon.parseOperation("[prune wrong] [relabel do do] [relabel apos /^.*$/n={apos}t/] [excise top top]"),
+    // Note: the next couple leave unitary nodes, so we then fix them at the end
+    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
+    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
+    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
+    Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
+    Tsurgeon.parseOperation("replace top (2 (2 401k) (2 statement))"),
+    Tsurgeon.parseOperation("[move means $- all] [excise meansgp meansgp] [createSubtree 2 all means]"),
+    Tsurgeon.parseOperation("relabel century century"),
+    // Fix any stranded unitary nodes
+    Tsurgeon.parseOperation("[excise unitary unitary]"),
+    //Tsurgeon.parseOperation("relabel node /^.*$/={child}/"),
+    Tsurgeon.parseOperation("relabel label /^.*$/2/"),
+  };
+
+  static {
+    if (tregexPatterns.length != tsurgeonPatterns.length) {
+      throw new RuntimeException("Expected the same number of tregex and tsurgeon when initializing");
+    }
+  }
 
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
@@ -117,6 +184,10 @@ public class ReadSentimentDataset {
       leaf.label().setValue(escaper.escapeString(leaf.label().value()));
     }
 
+    for (int i = 0; i < tregexPatterns.length; ++i) {
+      root = Tsurgeon.processPattern(tregexPatterns[i], tsurgeonPatterns[i], root);
+    }
+
     return root;
   }
 
@@ -164,6 +235,9 @@ public class ReadSentimentDataset {
    * <code>-train</code>, <code>-dev</code>, <code>-test</code>
    * Paths for saving the corresponding output files <br>
    * Each of these arguments is required.
+   * <br>
+   * Macro arguments exist in -inputDir and -outputDir, so you can for example run <br>
+   * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir ../data/sentiment/stanfordSentimentTreebank  -outputDir .</code>
    */
   public static void main(String[] args) {
     String dictionaryFilename = null;
@@ -193,6 +267,14 @@ public class ReadSentimentDataset {
       } else if (args[argIndex].equalsIgnoreCase("-split")) {
         splitFilename = args[argIndex + 1];
         argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-inputDir") ||
+                 args[argIndex].equalsIgnoreCase("-inputDirectory")) {
+        dictionaryFilename = args[argIndex + 1] + "/dictionary.txt";
+        sentimentFilename = args[argIndex + 1] + "/sentiment_labels.txt";
+        tokensFilename = args[argIndex + 1] + "/SOStr.txt";
+        parseFilename = args[argIndex + 1] + "/STree.txt";
+        splitFilename = args[argIndex + 1] + "/datasetSplit.txt";
+        argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-train")) {
         trainFilename = args[argIndex + 1];
         argIndex += 2;
@@ -201,6 +283,12 @@ public class ReadSentimentDataset {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-test")) {
         testFilename = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-outputDir") ||
+                 args[argIndex].equalsIgnoreCase("-outputDirectory")) {
+        trainFilename = args[argIndex + 1] + "/train.txt";
+        devFilename = args[argIndex + 1] + "/dev.txt";
+        testFilename = args[argIndex + 1] + "/test.txt";
         argIndex += 2;
       } else {
         System.err.println("Unknown argument " + args[argIndex]);
@@ -219,7 +307,7 @@ public class ReadSentimentDataset {
     // Split and read the phrase ids file.  This file is in the format
     //   w1 w2 w3 ... | id
     Map<List<String>, Integer> phraseIds = Generics.newHashMap();
-    for (String line : IOUtils.readLines(dictionaryFilename)) {
+    for (String line : IOUtils.readLines(dictionaryFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
       String[] sentence = pieces[0].split(" ");
       Integer id = Integer.valueOf(pieces[1]);
@@ -230,7 +318,7 @@ public class ReadSentimentDataset {
     // file is of the format:
     //   phrasenum | score
     Map<Integer, Double> sentimentScores = Generics.newHashMap();
-    for (String line : IOUtils.readLines(sentimentFilename)) {
+    for (String line : IOUtils.readLines(sentimentFilename, "utf-8")) {
       if (line.startsWith("phrase")) {
         continue;
       }
@@ -244,7 +332,7 @@ public class ReadSentimentDataset {
     int index = 0;
     PTBEscapingProcessor escaper = new PTBEscapingProcessor();
     List<Tree> trees = Generics.newArrayList();
-    for (String line : IOUtils.readLines(parseFilename)) {
+    for (String line : IOUtils.readLines(parseFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
       List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() { 
           public Integer apply(String arg) { return Integer.valueOf(arg) - 1; }
@@ -258,7 +346,7 @@ public class ReadSentimentDataset {
     splits.put(1, Generics.<Integer>newArrayList());
     splits.put(2, Generics.<Integer>newArrayList());
     splits.put(3, Generics.<Integer>newArrayList());
-    for (String line : IOUtils.readLines(splitFilename)) {
+    for (String line : IOUtils.readLines(splitFilename, "utf-8")) {
       if (line.startsWith("sentence_index")) {
         continue;
       }
