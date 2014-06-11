@@ -997,7 +997,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             ConstantsAndVariables.class, PatternScoring.class, String.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
-            TwoDimensionalCounter.class);
+            TwoDimensionalCounter.class, String.class);
         
         scorePatterns = ctor.newInstance(new Object[] { constVars,
             constVars.patternScoring, label, patternsandWords4Label,
