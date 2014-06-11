@@ -48,6 +48,17 @@ class DescriptionPattern extends TregexPattern {
 
   private final Function<String, String> basicCatFunction;
 
+  /** Used to detect regex expressions which can be simplified to exact matches */
+  private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/" + "|" + // for example, /^:$/
+                                                                     "/\\^\\[(.)\\]\\$/" + "|" + // for example, /^[$]$/
+                                                                     "/\\^([-a-zA-Z']+)\\$/"); // for example, /^-NONE-$/
+
+  private static final Pattern MULTI_WORD_PATTERN = Pattern.compile("/\\^\\(\\?\\:((?:[-a-zA-Z|]|\\\\\\$)+)\\)\\$\\/");
+
+  /** Used to detect regex expressions which can be simplified to exact matches */
+  private static final Pattern PREFIX_PATTERN = Pattern.compile("/\\^([-a-zA-Z|]+)\\/" + "|" + // for example, /^JJ/
+                                                                "/\\^\\(\\?\\:([-a-zA-Z|]+)\\)\\/");
+
   public DescriptionPattern(Relation rel, boolean negDesc, String desc,
                             String name, boolean useBasicCat,
                             Function<String, String> basicCatFunction,
@@ -59,11 +70,63 @@ class DescriptionPattern extends TregexPattern {
     this.linkedName = linkedName;
     if (desc != null) {
       stringDesc = desc;
+      // TODO: factor out some of these blocks of code
       if (desc.equals("__") || desc.equals("/.*/") || desc.equals("/^.*$/")) {
         descriptionMode = DescriptionMode.ANYTHING;
         descPattern = null;
         exactMatch = null;
         stringFilter = null;
+      } else if (SINGLE_WORD_PATTERN.matcher(desc).matches()) {
+        // Expressions are written like this to put special characters
+        // in the tregex matcher, but a regular expression is less
+        // efficient than a simple string match
+        descriptionMode = DescriptionMode.EXACT;
+        descPattern = null;
+        Matcher matcher = SINGLE_WORD_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        exactMatch = matchedGroup;
+        stringFilter = null;
+        //System.err.println("DescriptionPattern: converting " + desc + " to " + exactMatch);
+      } else if (MULTI_WORD_PATTERN.matcher(desc).matches()) {
+        descriptionMode = DescriptionMode.STRINGS;
+        descPattern = null;
+        exactMatch = null;
+        Matcher matcher = MULTI_WORD_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        matchedGroup = matchedGroup.replaceAll("\\\\", "");
+        // TODO: if this is too long, just use the regular expression
+        stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, matchedGroup.split("[|]")); 
+        //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
+      } else if (PREFIX_PATTERN.matcher(desc).matches()) {
+        descriptionMode = DescriptionMode.STRINGS;
+        descPattern = null;
+        exactMatch = null;
+        Matcher matcher = PREFIX_PATTERN.matcher(desc);
+        matcher.matches();
+        String matchedGroup = null;
+        for (int i = 1; i <= matcher.groupCount(); ++i) {
+          if (matcher.group(i) != null) {
+            matchedGroup = matcher.group(i);
+            break;
+          }
+        }
+        // TODO: if this is too long, just use the regular expression
+        stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.PREFIX, matchedGroup.split("[|]")); 
+        //System.err.println("DescriptionPattern: converting " + desc + " to " + stringFilter);
       } else if (desc.matches("/.*/")) {
         descriptionMode = DescriptionMode.PATTERN;
         descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
@@ -79,7 +142,7 @@ class DescriptionPattern extends TregexPattern {
           descriptionMode = DescriptionMode.STRINGS;
           descPattern = null;
           exactMatch = null;
-          stringFilter = new ArrayStringFilter(words);
+          stringFilter = new ArrayStringFilter(ArrayStringFilter.Mode.EXACT, words);
         } else {
           descriptionMode = DescriptionMode.PATTERN;
           descPattern = Pattern.compile("^(?:" + desc + ")$");
@@ -216,8 +279,9 @@ class DescriptionPattern extends TregexPattern {
     void resetChildIter() {
       decommitVariableGroups();
       removeNamedNodes();
-      treeNodeMatchCandidateIterator =
-        myNode.rel.searchNodeIterator(tree, this);
+      // lazy initialization saves quite a bit of time in use cases
+      // where we call something other than matches()
+      treeNodeMatchCandidateIterator = null;
       finished = false;
       nextTreeNodeMatchCandidate = null;
       if (childMatcher != null) {
@@ -250,6 +314,9 @@ class DescriptionPattern extends TregexPattern {
       finished = true;
       Matcher m = null;
       String value = null;
+      if (treeNodeMatchCandidateIterator == null) {
+        treeNodeMatchCandidateIterator = myNode.rel.searchNodeIterator(tree, this);
+      }
       while (treeNodeMatchCandidateIterator.hasNext()) {
         nextTreeNodeMatchCandidate = treeNodeMatchCandidateIterator.next();
         if (myNode.descriptionMode == null) {
