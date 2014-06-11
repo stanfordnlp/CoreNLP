@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component LANGUAGE_LEVEL="JDK_1_6" jdk="1.6" jdk_type="JavaSDK">
+<component inheritJdk="true">
 	<exclude-output/>
 	<contentEntry url="file://$MODULE_DIR$"/>
 	<lib name="ant-contrib-1.0b3.jar" scope="COMPILE">
@@ -16,6 +16,11 @@
 		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/jasper.jar!/"/>
+	</lib>
+	<lib name="servlet-api.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/servlet-api.jar!/"/>
 	</lib>
 	<lib name="tomcat-juli.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
