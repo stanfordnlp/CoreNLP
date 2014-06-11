@@ -153,6 +153,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
       while ((t = tr.readTree()) != null) {
         tb.add(t);
       }
+      tr.close();
     } catch (IOException e) {
       throw new RuntimeException("File problem: " + e);
     }
@@ -309,6 +310,9 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
         }
         printDependencies(gs, gs.typedDependencies(true), t, conllx, false);
       }
+
+      // TODO: add a non-collapsed which uses the extra dependencies
+      // basic dependencies should be without extras
 
       if (collapsed) {
         if (basic) {
