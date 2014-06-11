@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * Holds environment variables to be used for compiling string into a pattern.
+ * Use {@link EnvLookup} to perform actual lookup (it will provide reasonable defaults)
  *
  * <p>
  * Some of the types of variables to bind are:
@@ -64,15 +65,56 @@ public class Env {
 
   public Class sequenceMatchResultExtractor;
   public Class stringMatchResultExtractor;
+
+  /**
+   * Annotation key to use to getting tokens (default is CoreAnnotations.TokensAnnotation.class)
+   */
   public Class defaultTokensAnnotationKey;
+
+  /**
+   * Annotation key to use to getting text (default is CoreAnnotations.TextAnnotation.class)
+   */
   public Class defaultTextAnnotationKey;
+
+  /**
+   * List of keys indicating the per-token annotations (default is null).
+   * If specified, each token will be annotated with the extracted results from the
+   *   {@link #defaultResultsAnnotationExtractor}.
+   * If null, then individual tokens that are matched are not annotated.
+   */
   public List<Class> defaultTokensResultAnnotationKey;
+
+  /**
+   * List of keys indicating what fields should be annotated for the aggregated coremap.
+   * If specified, the aggregated coremap is annotated with the extracted results from the
+   *   {@link #defaultResultsAnnotationExtractor}.
+   * If null, then the aggregated coremap is not annotated.
+   */
   public List<Class> defaultResultAnnotationKey;
+
+  /**
+   * Annotation key to use during composite phase for storing matched sequences and to match against.
+   */
   public Class defaultNestedResultsAnnotationKey;
+
+  /**
+   * How should the tokens be aggregated when collapsing a sequence of tokens into one CoreMap
+   */
   public Map<Class, CoreMapAttributeAggregator> defaultTokensAggregators;
 
+  /**
+   * How annotations be extracted from the MatchedExpression
+   * If the result type is a List and more than one annotation key is specified,
+   *   then the result is paired with the annotation key
+   *   Example: If annotation key is [ner,normalized] and result is [CITY,San Francisco]
+   *            then the final coremap will have ner=CITY, normalized=San Francisco
+   * Otherwise, the result is treated as one object (all keys will be assigned that value).
+   */
   Function<MatchedExpression,?> defaultResultsAnnotationExtractor;
 
+  /**
+   * Interface for performing custom binding of values to the environment
+   */
   public static interface Binder {
     public void init(String prefix, Properties props);
     public void bind(Env env);
