@@ -49,8 +49,8 @@ public class MachineReadingProperties {
   @Option(name="entityGazetteerPath",gloss="location of entity gazetteer file (if you're using one) -- this is a temporary option")
   static public String entityGazetteerPath;
   
-  @Option(name="entityClassifier",gloss="entity extractor class to use")
-  static public Class<BasicEntityExtractor> entityClassifier = edu.stanford.nlp.ie.machinereading.BasicEntityExtractor.class;
+  @Option(name="entityClassifierClass",gloss="entity extractor class to use")
+  static public Class<BasicEntityExtractor> entityClassifierClass = edu.stanford.nlp.ie.machinereading.BasicEntityExtractor.class;
   
   @Option(name="entityResultsPrinters",gloss="comma-separated list of ResultsPrinter subclasses to use for printing the results of entity extraction")
   static public String entityResultsPrinters = "";
