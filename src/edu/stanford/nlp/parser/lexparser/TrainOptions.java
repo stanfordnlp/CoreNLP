@@ -509,11 +509,8 @@ public class TrainOptions implements Serializable {
     result.append(" transformMatrixType=" + transformMatrixType + "\n");
     result.append(" useContextWords=" + useContextWords + "\n");
     result.append(" trainWordVectors=" + trainWordVectors + "\n");
-<<<<<<< HEAD
     result.append(" stalledIterationLimit=" + stalledIterationLimit + "\n");
-=======
     result.append(" markStrahler=" + markStrahler + "\n");
->>>>>>> d1f86677a79c6bf9085ea46f306521553e080cbc
     return result.toString();
   }
 

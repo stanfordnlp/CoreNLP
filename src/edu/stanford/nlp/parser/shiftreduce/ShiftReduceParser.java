@@ -30,6 +30,7 @@ import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
@@ -235,7 +236,13 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   }
 
   /** TODO: add an eval which measures transition accuracy? */
+  @Override
   public List<Eval> getExtraEvals() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public List<ParserQueryEval> getParserQueryEvals() {
     return Collections.emptyList();
   }
 
