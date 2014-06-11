@@ -159,7 +159,7 @@ class DescriptionPattern extends TregexPattern {
           descPattern = Pattern.compile(desc.substring(1, desc.length() - 1));
           exactMatch = null;
           stringFilter = null;
-          //System.err.println("DescriptionPattern: not converting " + desc);
+          System.err.println("DescriptionPattern: not converting " + desc);
         } else {
           descriptionMode = DescriptionMode.STRINGS;
           descPattern = null;
