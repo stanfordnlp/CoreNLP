@@ -31,7 +31,6 @@ package edu.stanford.nlp.trees.tregex;
 import java.util.*;
 
 import edu.stanford.nlp.trees.HasParent;
-import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 
 /**
@@ -52,18 +51,14 @@ public abstract class TregexMatcher {
   Iterator<Tree> findIterator;
   Tree findCurrent;
 
-  final HeadFinder headFinder;
 
-  TregexMatcher(Tree root, Tree tree, IdentityHashMap<Tree, Tree> nodesToParents, Map<String, Tree> namesToNodes, VariableStrings variableStrings, HeadFinder headFinder) {
+  TregexMatcher(Tree root, Tree tree, IdentityHashMap<Tree, Tree> nodesToParents, Map<String, Tree> namesToNodes, VariableStrings variableStrings) {
     this.root = root;
     this.tree = tree;
     this.nodesToParents = nodesToParents;
     this.namesToNodes = namesToNodes;
     this.variableStrings = variableStrings;
-    this.headFinder = headFinder;
   }
-
-  public HeadFinder getHeadFinder() { return this.headFinder; }
 
   /**
    * Resets the matcher so that its search starts over.
