@@ -3,7 +3,6 @@ package edu.stanford.nlp.sentiment;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -62,7 +61,7 @@ public class ConvertMatlabModel {
     RNNOptions op = new RNNOptions();
     op.lowercaseWordVectors = false;
 
-    wordVectors.put(SentimentModel.UNKNOWN_WORD, SentimentModel.randomWordVector(25, new Random()));
+    // TODO: fill in an unknown word vector
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);
     model.saveSerialized("matlab.ser.gz");
