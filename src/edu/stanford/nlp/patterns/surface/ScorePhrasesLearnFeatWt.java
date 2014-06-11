@@ -24,14 +24,8 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Execution.Option;
-import edu.stanford.nlp.util.logging.Redwood;
 
 
-/**
- * Learn a logistic regression classifier to combine weights to score a phrase
- * @author Sonal Gupta (sonalg@stanford.edu)
- *
- */
 public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
     super(constvar);
@@ -51,10 +45,8 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
       TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns) throws IOException {
     phraseScoresRaw.clear();
     learnedScores.clear();
-    
-    if(Data.domainNGramsFile != null)
-      Data.loadDomainNGrams();
-    
+
+    Data.loadDomainNGrams();
     Data.computeRawFreqIfNull(constVars.numWordsCompound);
     Counter<String> scores = new ClassicCounter<String>();
     RVFDataset<String, ScorePhraseMeasures> dataset = choosedatums(label, forLearningPatterns, sents, constVars.answerClass.get(label), label,
@@ -84,7 +76,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
         Counters.multiplyInPlace(weights, -1);
       }
       List<Pair<String, Double>> wtd = Counters.toDescendingMagnitudeSortedListWithCounts(weights);
-      Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 200)), "\n"));
+      System.out.println("The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 200)), "\n"));
     }
 //    else if (scoreClassifierType.equals(ClassifierType.RF)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.RandomForest", constVars.wekaOptions);
@@ -115,17 +107,6 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     for (Entry<String, ClassicCounter<SurfacePattern>> en : terms.entrySet()) {
       double score = this.scoreUsingClassifer(classifier, en.getKey(), label, forLearningPatterns, en.getValue(), allSelectedPatterns);
       scores.setCount(en.getKey(), score);
-    }
-    return scores;
-  }
-  
-  @Override
-  public Counter<String> scorePhrases(Map<String, List<CoreLabel>> sents, String label, Set<String> terms, boolean forLearningPatterns) throws IOException {
-    Counter<String> scores = new ClassicCounter<String>();
-    edu.stanford.nlp.classify.Classifier classifier = learnClassifier(sents, label, forLearningPatterns, null, null);
-    for (String en : terms) {
-      double score = this.scoreUsingClassifer(classifier, en, label, forLearningPatterns,null, null);
-      scores.setCount(en, score);
     }
     return scores;
   }
