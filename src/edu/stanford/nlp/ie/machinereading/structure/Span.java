@@ -55,9 +55,6 @@ public class Span implements Serializable, Iterable<Integer> {
   }
 
   public static Span fromValues(Object... values) {
-    if (values.length == 1) {
-      return fromValues(values[0], values[0] instanceof Number ? ((Number) values[0]).intValue() + 1 : Integer.parseInt(values[0].toString()) + 1);
-    }
     if (values.length != 2) { throw new IllegalArgumentException("fromValues() must take an array with 2 elements"); }
     int val1;
     if (values[0] instanceof Number) { val1 = ((Number) values[0]).intValue(); }
