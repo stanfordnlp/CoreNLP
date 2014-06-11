@@ -28,6 +28,8 @@ public class POSTaggerAnnotator implements Annotator {
 
   private final int nThreads;
 
+  private final boolean reuseTags;
+
   /** Create a tagger annotator using the default English tagger from the models jar
    *  (and non-verbose initialization).
    */
@@ -62,6 +64,7 @@ public class POSTaggerAnnotator implements Annotator {
     this.pos = model;
     this.maxSentenceLength = maxSentenceLength;
     this.nThreads = numThreads;
+    this.reuseTags = false;
   }
 
   public POSTaggerAnnotator(String annotatorName, Properties props) {
@@ -73,6 +76,7 @@ public class POSTaggerAnnotator implements Annotator {
     this.pos = loadModel(posLoc, verbose);
     this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", Integer.MAX_VALUE);
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
+    this.reuseTags = PropertiesUtils.getBool(props, annotatorName + ".reuseTags", false);
   }
 
   private static MaxentTagger loadModel(String loc, boolean verbose) {
@@ -129,7 +133,7 @@ public class POSTaggerAnnotator implements Annotator {
   private CoreMap doOneSentence(CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tokens.size() <= maxSentenceLength) {
-      List<TaggedWord> tagged = pos.apply(tokens);
+      List<TaggedWord> tagged = pos.tagSentence(tokens, this.reuseTags);
 
       for (int i = 0, sz = tokens.size(); i < sz; i++) {
         tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
