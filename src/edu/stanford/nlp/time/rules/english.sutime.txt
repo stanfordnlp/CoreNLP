@@ -315,19 +315,20 @@
 
   ENV.defaults["ruleType"] = "tokens"
   ENV.defaults["priority"] = 0
-  ENV.defaults["locale"] = "en"
 
   # ISO date/times
   # TODO: Support other timezone formats
-  { ruleType: "time", pattern: /yyyy-?MM-?dd-?'T'HH(:?mm(:?ss([.,]S{1,3})?)?)?(Z|zzz)?/ }
+  { ruleType: "time", pattern: /yyyy-?MM-?dd-?'T'HH(:?mm(:?ss([.,]S{1,3})?)?)?(Z)?/ }
   { ruleType: "time", pattern: /yyyy-MM-dd/ }
-  { ruleType: "time", pattern: /'T'HH(:?mm(:?ss([.,](S{1,3}))?)?)?(Z|zzz)?/ }
+  { ruleType: "time", pattern: /'T'HH(:?mm(:?ss([.,](S{1,3}))?)?)?(Z)?/ }
   # Tokenizer "sometimes adds extra slash
   { ruleType: "time", pattern: /yyyy\\?\/MM\\?\/dd/ }
   { ruleType: "time", pattern: /MM?\\?\/dd?\\?\/(yyyy|yy)/ }
   { ruleType: "time", pattern: /MM?-dd?-(yyyy|yy)/ }
-  { ruleType: "time", pattern: /HH?:mm(:ss)?(Z|zzz)?/ }
+  { ruleType: "time", pattern: /HH?:mm(:ss)?/ }
   { ruleType: "time", pattern: /yyyy-MM/ }
+  # Time zones
+  #  { ruleType: "time", pattern: /ZZZ/ }
 
   # Euro - Ambiguous pattern - interpret as dd.MM.yy(yy)
   { ruleType: "time", pattern: /dd?\.MM?\.(yyyy|yy)/ }
@@ -689,7 +690,7 @@
 
   { name: "composite-time-expression-2",
     pattern: (  (?$minute /a/? /quarter/ | /a/? /half/ | [ $INT & { numcompvalue<=60 } ] /minutes?/? )
-		        (?$rel /past|after|before|to|until/)
+		        (?$rel /past|after|of|before|to|until/)
 				(?: (?$time [ { temporal::IS_TIMEX_TIME } ]) | (?$hour [ $INT & { numcompvalue<=24 } ]))
              ),
 	result: TemporalCompose(
@@ -864,7 +865,6 @@
                 (/would/ | /could/ | /should/ | /will/ | /going/ /to/ | /'/ /ll/ | /'ll/ ) ),
      action: VTag( $0[0].temporal.value, "resolveTo", RESOLVE_TO_FUTURE )
   }
-
  ########################################################################################################################
   # Final filtering rules
 
