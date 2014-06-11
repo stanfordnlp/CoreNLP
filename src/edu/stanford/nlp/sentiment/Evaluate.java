@@ -247,7 +247,7 @@ public class Evaluate {
   }
 
   /**
-   * Expected arguments are <code> model treebank </code> <br>
+   * Expected arguments are <code> -model model -treebank treebank </code> <br>
    *
    * For example <br>
    * <code> 
@@ -257,10 +257,30 @@ public class Evaluate {
    * </code>
    */
   public static void main(String[] args) {
-    String modelPath = args[0];
-    String treePath = args[1];
+    String modelPath = null;
+    String treePath = null;
+    boolean filterUnknown = false;
+
+    for (int argIndex = 0; argIndex < args.length; ) {
+      if (args[argIndex].equalsIgnoreCase("-model")) {
+        modelPath = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-treebank")) {
+        treePath = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {
+        filterUnknown = true;
+        argIndex++;
+      } else {
+        System.err.println("Unknown argument " + args[argIndex]);
+        System.exit(2);
+      }
+    }
 
     List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(treePath);
+    if (filterUnknown) {
+      trees = SentimentUtils.filterUnknownRoots(trees);
+    }
     SentimentModel model = SentimentModel.loadSerialized(modelPath);
 
     Evaluate eval = new Evaluate(model);
