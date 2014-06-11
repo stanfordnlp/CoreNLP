@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.StringLabelFactory;
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.ArrayMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -105,9 +104,7 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td>A &lt;&#35; B <td>B is the immediate head of phrase A
  * <tr><td>A &gt;&#35; B <td>A is the immediate head of phrase B
  * <tr><td>A == B <td>A and B are the same node
- * <tr><td>A &lt;= B <td>A and B are the same node or A is the parent of B
  * <tr><td>A : B<td>[this is a pattern-segmenting operator that places no constraints on the relationship between A and B]
- * <tr><td>A &lt;... { B ; C ; ... }<td>A has exactly B, C, etc as its subtree, with no other children.
  * </table>
  * <p> Label descriptions can be literal strings, which much match labels
  * exactly, or regular expressions in regular expression bars: /regex/.
@@ -398,8 +395,7 @@ public abstract class TregexPattern implements Serializable {
   abstract TregexMatcher matcher(Tree root, Tree tree,
                                  IdentityHashMap<Tree, Tree> nodesToParents,
                                  Map<String, Tree> namesToNodes,
-                                 VariableStrings variableStrings,
-                                 HeadFinder headFinder);
+                                 VariableStrings variableStrings);
 
   /**
    * Get a {@link TregexMatcher} for this pattern on this tree.
@@ -408,22 +404,7 @@ public abstract class TregexPattern implements Serializable {
    * @return a TregexMatcher
    */
   public TregexMatcher matcher(Tree t) {
-    // In the assumption that there will usually be very few names in
-    // the pattern, we use an ArrayMap instead of a hash map
-    // TODO: it would be even more efficient if we set this to be
-    // exactly the right size
-    return matcher(t, t, null, ArrayMap.<String, Tree>newArrayMap(), new VariableStrings(), null);
-  }
-
-  /**
-   * Get a {@link TregexMatcher} for this pattern on this tree.  Any Relations which use heads of trees should use the provided HeadFinder.
-   *
-   * @param t a tree to match on
-   * @param headFinder a HeadFinder to use when matching
-   * @return a TregexMatcher
-   */
-  public TregexMatcher matcher(Tree t, HeadFinder headFinder) {
-    return matcher(t, t, null, ArrayMap.<String, Tree>newArrayMap(), new VariableStrings(), headFinder);
+    return matcher(t, t, null, Generics.<String, Tree>newHashMap(), new VariableStrings());
   }
 
   /**
@@ -467,8 +448,7 @@ public abstract class TregexPattern implements Serializable {
     return patternString;
   }
 
-  /** Only used by the TregexPatternCompiler to set the pattern. Pseudo-final. */
-  void setPatternString(String patternString) {
+  public void setPatternString(String patternString) {
     this.patternString = patternString;
   }
 
