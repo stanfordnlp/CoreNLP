@@ -56,7 +56,7 @@ public class NumberSequenceClassifierITest extends TestCase {
         System.err.println("COMPARING NER " + labels[i] + " with " + tokens.get(i).ner());
         System.err.flush();
         assertTrue(tokens.get(i).ner() != null);
-        assertTrue(p.matcher(tokens.get(i).ner()).matches());
+        assertTrue(tokens.get(i).ner() + " does not match " + p + " for token " + tokens.get(i) + " in sentence " + tokens, p.matcher(tokens.get(i).ner()).matches());
       }
     }
     

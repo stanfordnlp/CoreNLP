@@ -32,16 +32,27 @@ public class JollyDayHolidays implements Env.Binder {
 
   @Override
   public void init(String prefix, Properties props) {
-    String country = props.getProperty(prefix + "country", "sutime");
+    String xmlPath = props.getProperty(prefix + "xml", "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml");
+    String xmlPathType = props.getProperty(prefix + "pathtype", "classpath");
     varPrefix = props.getProperty(prefix + "prefix", varPrefix);
+    System.err.println("Initializing JollyDayHoliday for sutime with " + xmlPathType + ":" + xmlPath);
     Properties managerProps = new Properties();
     managerProps.setProperty("manager.impl", "edu.stanford.nlp.time.JollyDayHolidays$MyXMLManager");
     try {
-      holidayManager = HolidayManager.getInstance(new URL("classpath", null, 0, "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml", new ClasspathURLStreamHandler()), managerProps);
+      URL holidayXmlUrl;
+      if (xmlPathType.equalsIgnoreCase("classpath")) {
+        holidayXmlUrl = new URL("classpath", null, 0, xmlPath, new ClasspathURLStreamHandler());
+      } else if (xmlPathType.equalsIgnoreCase("file")) {
+        holidayXmlUrl = new URL("file:///" + xmlPath);
+      } else if (xmlPathType.equalsIgnoreCase("url")) {
+        holidayXmlUrl = new URL(xmlPath);
+      } else {
+        throw new IllegalArgumentException("Unsupported " + prefix + "pathtype = " + xmlPathType);
+      }
+      holidayManager = HolidayManager.getInstance(holidayXmlUrl, managerProps);
     } catch (java.net.MalformedURLException e) {
       throw new RuntimeException(e);
     }
-    System.err.println("Initializing JollyDayHoliday for " + country);
     if (!(holidayManager instanceof MyXMLManager)) {
       throw new AssertionError("Did not get back JollyDayHolidays$MyXMLManager");
     }
