@@ -118,20 +118,10 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
               List<CoreLabel> lexList = tf.getTokenizer(new StringReader(word)).tokenize();
               if (lexList.size() == 0) {
                 continue;
-              
-              } else if (lexList.size() == 1) {
-                word = lexList.get(0).value();
-              
               } else if (lexList.size() > 1) {
-                String secondWord = lexList.get(1).value();
-                if (secondWord.equals(String.valueOf(segMarker))) {
-                  // Special case for the null marker in the vocalized section
-                  word = lexList.get(0).value() + segMarker;
-                } else {
-                  System.err.printf("%s: Raw token generates multiple segments: %s%n", this.getClass().getName(), word);
-                  word = lexList.get(0).value();
-                }
+                System.err.printf("%s: Raw token generates multiple segments: %s%n", this.getClass().getName(), word);
               }
+              word = lexList.get(0).value();
             }
             cl.setValue(word);
             cl.setWord(word);
@@ -189,6 +179,10 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
     TokenizerFactory<CoreLabel> tokFactory = ArabicTokenizer.atbFactory();
     String atbVocOptions = "removeProMarker,removeMorphMarker";
     tokFactory.setOptions(atbVocOptions);
+    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(true,
+        true,
+        false,
+        tokFactory);
     
     BufferedReader reader = IOUtils.readerFromString(fileName);
     for (String line; (line = reader.readLine()) != null; ) {
@@ -203,20 +197,10 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
           List<CoreLabel> lexList = tokFactory.getTokenizer(new StringReader(word)).tokenize();
           if (lexList.size() == 0) {
             continue;
-          
-          } else if (lexList.size() == 1) {
-            word = lexList.get(0).value();
-          
           } else if (lexList.size() > 1) {
-            String secondWord = lexList.get(1).value();
-            if (secondWord.equals(String.valueOf(DEFAULT_SEG_MARKER))) {
-              // Special case for the null marker in the vocalized section
-              word = lexList.get(0).value() + String.valueOf(DEFAULT_SEG_MARKER);
-            } else {
-              System.err.printf("%s: Raw token generates multiple segments: %s%n", ArabicDocumentReaderAndWriter.class.getName(), word);
-              word = lexList.get(0).value();
-            }
+            System.err.printf("%s: Raw token generates multiple segments: %s%n", ArabicDocumentReaderAndWriter.class.getName(), word);
           }
+          word = lexList.get(0).value();
         }
         if ( ! isStart ) System.out.print(" ");
         System.out.print(word);
@@ -225,10 +209,6 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
       System.out.println();
     }
    
-//    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(true,
-//        true,
-//        false,
-//        tokFactory);
 //    Iterator<List<CoreLabel>> itr = docReader.getIterator(new InputStreamReader(new FileInputStream(new File(fileName))));
 //    while(itr.hasNext()) {
 //      List<CoreLabel> line = itr.next();
