@@ -140,7 +140,7 @@ public class MulticoreWrapper<I,O> {
   /**
    * Block until process specified by processorId returns a result.
    */
-  public void blockingGetResult() {
+  private void blockingGetResult() {
     try {
       // Blocking call
       Future<JobResult<O>> resultFuture;
