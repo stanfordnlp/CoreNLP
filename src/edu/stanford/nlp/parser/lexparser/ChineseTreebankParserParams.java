@@ -907,14 +907,8 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
     } else if (args[i].equalsIgnoreCase("-markModifiedNP")) {
       markModifiedNP = true;
       i += 1;
-    } else if (args[i].equalsIgnoreCase("-nomarkModifiedNP")) {
-      markModifiedNP = false;
-      i += 1;
     } else if (args[i].equalsIgnoreCase("-markNPconj")) {
       markNPconj = true;
-      i += 1;
-    } else if (args[i].equalsIgnoreCase("-nomarkNPconj")) {
-      markNPconj = false;
       i += 1;
     } else if (args[i].equalsIgnoreCase("-chineseSplitPunct")) {
       chineseSplitPunct = true;
