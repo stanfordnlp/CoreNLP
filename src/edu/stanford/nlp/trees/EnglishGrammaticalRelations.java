@@ -741,7 +741,8 @@ public class EnglishGrammaticalRelations {
         XClausalComplementGRAnnotation.class, COMPLEMENT, "VP|ADJP|SINV", tregexCompiler,
         new String[] {
           // basic VP complement xcomp; this used to exclude embedding under a VP headed by be, as some are purpose clauses, but it seems like the vast majority aren't so I've removed that restriction
-          "VP < (S=target !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
+          // one way to detect purpose clauses is to look for an NP before the S, though
+          "VP < (S=target !$-- NP !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
           "ADJP < (S=target <, (VP <, TO))",
           "VP < (S=target !$- (NN < order) < (NP $+ NP|ADJP))",
           // to find "help sustain ...
@@ -1229,6 +1230,8 @@ public class EnglishGrammaticalRelations {
           "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
+          // he asked me to ...
+          "VP < (S=target $-- NP < (VP < TO))",
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
           "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
           "SBARQ < WHNP < (S=target < (VP <1 TO))",
