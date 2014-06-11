@@ -18,6 +18,10 @@ import java.util.Map;
  * @author John Bauer
  */
 public class BinaryTransitionTest extends TestCase {
+  // TODO: add tests for isLegal
+  // test states where BinaryTransition could not apply (eg stack too small)
+  // test compound transitions
+
   public State buildState(int shifts) {
     String[] words = { "This", "is", "a", "short", "test", "." };
     String[] tags = { "DT", "VBZ", "DT", "JJ", "NN", "." };
