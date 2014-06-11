@@ -22,6 +22,8 @@ import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
@@ -31,20 +33,6 @@ import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
 
 public class TrainParser {
-
-  public static void updateWeight(List<ScoredObject<Integer>> weights, int transition, double delta) {
-    for (int i = 0; i < weights.size(); ++i) {
-      ScoredObject<Integer> weight = weights.get(i);
-      if (weight.object() == transition) {
-        weight.setScore(weight.score() + delta);
-        return;
-      } else if (weight.object() > transition) {
-        weights.add(i, new ScoredObject<Integer>(transition, delta));
-        return;
-      }
-    }
-    weights.add(new ScoredObject<Integer>(transition, delta));
-  }
 
   // java -mx5g edu.stanford.nlp.parser.shiftreduce.TrainParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   // java -mx10g edu.stanford.nlp.parser.shiftreduce.TrainParser -trainTreebank ../data/parsetrees/wsj.train.mrg -devTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
@@ -197,8 +185,8 @@ public class TrainParser {
               for (String feature : features) {
                 List<ScoredObject<Integer>> weights = featureWeights.get(feature);
                 // TODO: allow weighted features, weighted training, etc
-                updateWeight(weights, transitionNum, 1.0);
-                updateWeight(weights, predictedNum, -1.0);
+                ShiftReduceParser.updateWeight(weights, transitionNum, 1.0);
+                ShiftReduceParser.updateWeight(weights, predictedNum, -1.0);
               }
             }
             state = transition.apply(state);
@@ -235,10 +223,8 @@ public class TrainParser {
       }
 
       if (bestModels != null) {
-        // TODO: average all the best models
-        while (bestModels.size() > 0) {
-          parser = bestModels.poll().object();
-        }
+        List<ShiftReduceParser> models = CollectionUtils.transformAsList(bestModels, new Function<ScoredObject<ShiftReduceParser>, ShiftReduceParser>() { public ShiftReduceParser apply(ScoredObject<ShiftReduceParser> object) { return object.object(); }});
+        parser = ShiftReduceParser.averageModels(models);
       }
 
       parser.condenseFeatures();
