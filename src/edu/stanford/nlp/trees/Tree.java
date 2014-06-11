@@ -20,14 +20,7 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.Filter;
-import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.MutableInteger;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Scored;
-import edu.stanford.nlp.util.XMLUtils;
+import edu.stanford.nlp.util.*;
 
 /**
  * The abstract class <code>Tree</code> is used to collect all of the
@@ -429,8 +422,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return an IntPair: the SpanAnnotation of this node.
    */
   public IntPair getSpan() {
-    if(label() instanceof CoreLabel && ((CoreLabel) label()).has(CoreAnnotations.SpanAnnotation.class))
-      return ((CoreLabel) label()).get(CoreAnnotations.SpanAnnotation.class);
+    if(label() instanceof CoreMap && ((CoreMap) label()).has(CoreAnnotations.SpanAnnotation.class))
+      return ((CoreMap) label()).get(CoreAnnotations.SpanAnnotation.class);
     return null;
   }
 
@@ -2779,9 +2772,12 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
     }
 
-    CoreLabel afl = (CoreLabel) label();
-    afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
-    afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
+    Label label = label();
+    if (label instanceof CoreMap) {
+    CoreMap afl = (CoreMap) label();
+      afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
+      afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
+    }
     return new Pair<Integer, Integer>(start, end);
   }
 
