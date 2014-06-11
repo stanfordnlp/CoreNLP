@@ -137,21 +137,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   /** Parameter weights of the classifier. */
   double[][] weights;
-  double[][] linearWeights;
-  double[][] inputLayerWeights4Edge;
-  double[][] outputLayerWeights4Edge;
-  double[][] inputLayerWeights;
-  double[][] outputLayerWeights;
 
   /** index the features of CRF */
   Index<String> featureIndex;
   /** caches the featureIndex */
   int[] map;
-  List<Set<Integer>> featureIndicesSetArray;
-  List<List<Integer>> featureIndicesListArray;
   Random random = new Random(2147483647L);
   Index<Integer> nodeFeatureIndicesMap;
   Index<Integer> edgeFeatureIndicesMap;
+
   Map<String, double[]> embeddings; // = null;
 
   /**
@@ -191,10 +185,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     this.pad = crf.pad;
     this.knownLCWords = (crf.knownLCWords != null) ? Generics.<String>newHashSet(crf.knownLCWords) : null;
     this.featureIndex = (crf.featureIndex != null) ? new HashIndex<String>(crf.featureIndex.objectsList()) : null;
-    if (crf.flags.nonLinearCRF) {
-      this.nodeFeatureIndicesMap = (crf.nodeFeatureIndicesMap != null) ? new HashIndex<Integer>(crf.nodeFeatureIndicesMap.objectsList()) : null;
-      this.edgeFeatureIndicesMap = (crf.edgeFeatureIndicesMap != null) ? new HashIndex<Integer>(crf.edgeFeatureIndicesMap.objectsList()) : null;
-    }
     this.classIndex = (crf.classIndex != null) ? new HashIndex<String>(crf.classIndex.objectsList()) : null;
     if (crf.labelIndices != null) {
       this.labelIndices = new ArrayList<Index<CRFLabel>>(crf.labelIndices.size());
@@ -205,16 +195,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       this.labelIndices = null;
     }
     this.cliquePotentialFunction = crf.cliquePotentialFunction;
-    /*
-    int numFeatures = featureIndex != null ? featureIndex.size() : 0;
-    weights = new double[numFeatures][];
-    for (int i = 0; i < numFeatures; i++) {
-      String feature = featureIndex.get(i);
-      int index = crf.featureIndex.indexOf(feature);
-      weights[i] = new double[crf.weights[index].length];
-      System.arraycopy(crf.weights[index], 0, weights[i], 0, weights[i].length);
-    }
-    */
   }
 
   /**
@@ -502,10 +482,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       Collections.reverse(document);
     }
 
-    if (flags.nonLinearCRF) {
-      data = transformDocData(data);
-    }
-
     return new Triple<int[][][], int[], double[][][]>(data, labels, featureVals);
   }
 
@@ -711,16 +687,16 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * This routine builds the <code>labelIndices</code> which give the
+   * This routine builds the {@code labelIndices} which give the
    * empirically legal label sequences (of length (order) at most
-   * <code>windowSize</code>) and the <code>classIndex</code>, which indexes
+   * {@code windowSize}) and the {@code classIndex}, which indexes
    * known answer classes.
    *
    * @param ob The training data: Read from an ObjectBank, each item in it is a
    *          {@code List<CoreLabel>}.
    */
   protected void makeAnswerArraysAndTagIndex(Collection<List<IN>> ob) {
-    boolean useFeatureCountThresh = flags.featureCountThresh > 1 ? true: false;
+    boolean useFeatureCountThresh = flags.featureCountThresh > 1;
 
     Set<String>[] featureIndices = new HashSet[windowSize];
     Map<String, Integer>[] featureCountIndices = null;
@@ -871,8 +847,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       featureIndexToTemplateIndex = new HashMap<Integer, Integer>();
     }
 
-    Matcher m  = null;
-    String groupSuffix = null;
     for (int i = 0; i < windowSize; i++) {
       Index<Integer> featureIndexMap = new HashIndex<Integer>();
 
@@ -884,8 +858,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
         // grouping features by template
         if (flags.groupByFeatureTemplate) {
-          m = suffixPatt.matcher(str);
-          groupSuffix = "NoTemplate";
+          Matcher m = suffixPatt.matcher(str);
+          String groupSuffix = "NoTemplate";
           if (m.matches()) {
             groupSuffix = m.group(1);
           }
@@ -932,8 +906,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   protected static Index<CRFLabel> allLabels(int window, Index<String> classIndex) {
     int[] label = new int[window];
-    // cdm july 2005: below array initialization isn't necessary: JLS (3rd ed.)
-    // 4.12.5
+    // cdm 2005: array initialization isn't necessary: JLS (3rd ed.) 4.12.5
     // Arrays.fill(label, 0);
     int numClasses = classIndex.size();
     Index<CRFLabel> labelIndex = new HashIndex<CRFLabel>();
@@ -992,95 +965,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       windowCliques.removeAll(done);
       done.addAll(windowCliques);
       double[] featureValArr = null;
-      if (flags.useEmbedding && i == 0) {// only activated for node features
-        List<double[]> embeddingList = new ArrayList<double[]>();
-        int concatEmbeddingLen = 0;
-        String currentWord = null;
-        for (int currLoc = loc-2; currLoc <= loc+2; currLoc++) {
-          double[] embedding = null;
-          if (currLoc >=0 && currLoc < info.size()) {
-            currentWord = info.get(loc).get(CoreAnnotations.TextAnnotation.class);
-            String word = currentWord.toLowerCase();
-            word = word.replaceAll("(-)?\\d+(\\.\\d*)?", "0");
-            if (embeddings.containsKey(word))
-              embedding = embeddings.get(word);
-            else
-              embedding = embeddings.get("UNKNOWN");
-          } else {
-            embedding = embeddings.get("PADDING");
-          }
-
-          for (int e = 0; e < embedding.length; e++) {
-            featuresC.add("EMBEDDING-(" + (currLoc-loc) + ")-" + e);
-          }
-
-          if (flags.addCapitalFeatures) {
-            int numOfCapitalFeatures = 4;
-            double[] newEmbedding = new double[embedding.length + numOfCapitalFeatures];
-            int currLen = embedding.length;
-            System.arraycopy(embedding, 0, newEmbedding, 0, currLen);
-            for (int e = 0; e < numOfCapitalFeatures; e++)
-              featuresC.add("CAPITAL-(" + (currLoc-loc) + ")-" + e);
-
-            if (currLoc >=0 && currLoc < info.size()) { // skip PADDING
-              // check if word is all caps
-              if (currentWord.toUpperCase().equals(currentWord))
-                newEmbedding[currLen] = 1;
-              else {
-                currLen += 1;
-                // check if word is all lower
-                if (currentWord.toLowerCase().equals(currentWord))
-                  newEmbedding[currLen] = 1;
-                else {
-                  currLen += 1;
-                  // check first letter cap
-                  if (Character.isUpperCase(currentWord.charAt(0)))
-                    newEmbedding[currLen] = 1;
-                  else {
-                    currLen += 1;
-                    // check if at least one non-initial letter is cap
-                    String remainder = currentWord.substring(1);
-                    if (!remainder.toLowerCase().equals(remainder))
-                      newEmbedding[currLen] = 1;
-                  }
-                }
-              }
-            }
-            embedding = newEmbedding;
-          }
-
-          embeddingList.add(embedding);
-          concatEmbeddingLen += embedding.length;
-        }
-        double[] concatEmbedding = new double[concatEmbeddingLen];
-        int currPos = 0;
-        for (double[] em: embeddingList) {
-          System.arraycopy(em, 0, concatEmbedding, currPos, em.length);
-          currPos += em.length;
-        }
-
-        if (flags.prependEmbedding) {
-          int additionalFeatureCount = 0;
-          for (Clique c : windowCliques) {
-            Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
-            featuresC.addAll(fCol);
-            additionalFeatureCount += fCol.size();
-          }
-          featureValArr = new double[concatEmbedding.length + additionalFeatureCount];
-          System.arraycopy(concatEmbedding, 0, featureValArr, 0, concatEmbedding.length);
-          Arrays.fill(featureValArr, concatEmbedding.length, featureValArr.length, 1.0);
-        } else {
-          featureValArr = concatEmbedding;
-        }
-
-        if (flags.addBiasToEmbedding) {
-          featuresC.add("BIAS-FEATURE");
-          double[] newFeatureValArr = new double[featureValArr.length + 1];
-          System.arraycopy(featureValArr, 0, newFeatureValArr, 0, featureValArr.length);
-          newFeatureValArr[newFeatureValArr.length-1] = 1;
-          featureValArr = newFeatureValArr;
-        }
-
+      if (flags.useEmbedding && i == 0) { // only activated for node features
+        featureValArr = makeDatumUsingEmbedding(info, loc, featureFactory, pInfo, featuresC, windowCliques);
       } else {
         for (Clique c : windowCliques) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c)); //todo useless copy because of typing reasons
@@ -1104,16 +990,106 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return d;
   }
 
+  private double[] makeDatumUsingEmbedding(List<IN> info, int loc, FeatureFactory<IN> featureFactory, PaddedList<IN> pInfo, List<String> featuresC, List<Clique> windowCliques) {
+    double[] featureValArr;
+    List<double[]> embeddingList = new ArrayList<double[]>();
+    int concatEmbeddingLen = 0;
+    String currentWord = null;
+    for (int currLoc = loc-2; currLoc <= loc+2; currLoc++) {
+      double[] embedding = null;
+      if (currLoc >=0 && currLoc < info.size()) {
+        currentWord = info.get(loc).get(CoreAnnotations.TextAnnotation.class);
+        String word = currentWord.toLowerCase();
+        word = word.replaceAll("(-)?\\d+(\\.\\d*)?", "0");
+        if (embeddings.containsKey(word))
+          embedding = embeddings.get(word);
+        else
+          embedding = embeddings.get("UNKNOWN");
+      } else {
+        embedding = embeddings.get("PADDING");
+      }
+
+      for (int e = 0; e < embedding.length; e++) {
+        featuresC.add("EMBEDDING-(" + (currLoc-loc) + ")-" + e);
+      }
+
+      if (flags.addCapitalFeatures) {
+        int numOfCapitalFeatures = 4;
+        double[] newEmbedding = new double[embedding.length + numOfCapitalFeatures];
+        int currLen = embedding.length;
+        System.arraycopy(embedding, 0, newEmbedding, 0, currLen);
+        for (int e = 0; e < numOfCapitalFeatures; e++)
+          featuresC.add("CAPITAL-(" + (currLoc-loc) + ")-" + e);
+
+        if (currLoc >=0 && currLoc < info.size()) { // skip PADDING
+          // check if word is all caps
+          if (currentWord.toUpperCase().equals(currentWord))
+            newEmbedding[currLen] = 1;
+          else {
+            currLen += 1;
+            // check if word is all lower
+            if (currentWord.toLowerCase().equals(currentWord))
+              newEmbedding[currLen] = 1;
+            else {
+              currLen += 1;
+              // check first letter cap
+              if (Character.isUpperCase(currentWord.charAt(0)))
+                newEmbedding[currLen] = 1;
+              else {
+                currLen += 1;
+                // check if at least one non-initial letter is cap
+                String remainder = currentWord.substring(1);
+                if (!remainder.toLowerCase().equals(remainder))
+                  newEmbedding[currLen] = 1;
+              }
+            }
+          }
+        }
+        embedding = newEmbedding;
+      }
+
+      embeddingList.add(embedding);
+      concatEmbeddingLen += embedding.length;
+    }
+    double[] concatEmbedding = new double[concatEmbeddingLen];
+    int currPos = 0;
+    for (double[] em: embeddingList) {
+      System.arraycopy(em, 0, concatEmbedding, currPos, em.length);
+      currPos += em.length;
+    }
+
+    if (flags.prependEmbedding) {
+      int additionalFeatureCount = 0;
+      for (Clique c : windowCliques) {
+        Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
+        featuresC.addAll(fCol);
+        additionalFeatureCount += fCol.size();
+      }
+      featureValArr = new double[concatEmbedding.length + additionalFeatureCount];
+      System.arraycopy(concatEmbedding, 0, featureValArr, 0, concatEmbedding.length);
+      Arrays.fill(featureValArr, concatEmbedding.length, featureValArr.length, 1.0);
+    } else {
+      featureValArr = concatEmbedding;
+    }
+
+    if (flags.addBiasToEmbedding) {
+      featuresC.add("BIAS-FEATURE");
+      double[] newFeatureValArr = new double[featureValArr.length + 1];
+      System.arraycopy(featureValArr, 0, newFeatureValArr, 0, featureValArr.length);
+      newFeatureValArr[newFeatureValArr.length-1] = 1;
+      featureValArr = newFeatureValArr;
+    }
+    return featureValArr;
+  }
+
   public static class TestSequenceModel implements SequenceModel {
 
     private final int window;
     private final int numClasses;
-    // private final FactorTable[] factorTables;
     private final CRFCliqueTree cliqueTree;
     private final int[] tags;
     private final int[] backgroundTag;
 
-    // public Scorer(FactorTable[] factorTables) {
     public TestSequenceModel(CRFCliqueTree cliqueTree) {
       // this.factorTables = factorTables;
       this.cliqueTree = cliqueTree;
@@ -1265,16 +1241,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return new TestSequenceModel(getCliqueTree(documentDataAndLabels));
   }
 
-  private CliquePotentialFunction getCliquePotentialFunction() {
+  protected CliquePotentialFunction getCliquePotentialFunction() {
     if (cliquePotentialFunction == null) {
-      if (flags.nonLinearCRF) {
-        if (flags.secondOrderNonLinear)
-          cliquePotentialFunction = new NonLinearSecondOrderCliquePotentialFunction(inputLayerWeights4Edge, outputLayerWeights4Edge, inputLayerWeights, outputLayerWeights, flags);
-        else
-          cliquePotentialFunction = new NonLinearCliquePotentialFunction(linearWeights, inputLayerWeights, outputLayerWeights, flags);
-      } else {
-        cliquePotentialFunction = new LinearCliquePotentialFunction(weights);
-      }
+      cliquePotentialFunction = new LinearCliquePotentialFunction(weights);
     }
     return cliquePotentialFunction;
   }
@@ -1376,19 +1345,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       priorModel = prior;
       priorListener = prior;
     } else if (flags.useNERPriorBIO) {
-      /*
-      if (tagIndex == null) {
-        tagIndex = new HashIndex<String>();
-        for (String tag: classIndex.objectsList()) {
-          String[] parts = tag.split("-");
-          if (parts.length > 1)
-            tagIndex.add(parts[parts.length-1]);
-        }
-        tagIndex.add(flags.backgroundSymbol);
-      }
-      if (entityMatrices == null)
-        entityMatrices = readEntityMatrices(flags.entityMatrix, tagIndex);
-      */
       EntityCachingAbstractSequencePriorBIO<IN> prior = new EmpiricalNERPriorBIO<IN>(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
       priorModel = prior;
       priorListener = prior;
@@ -1439,8 +1395,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       throw new RuntimeException("No annealing type specified");
     }
 
-    // System.err.println(ArrayMath.toString(sequence));
-
     if (flags.useReverse) {
       Collections.reverse(document);
     }
@@ -1457,174 +1411,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     return document;
-  }
-
-  /**
-   *
-   * @param sentence
-   * @param priorModels
-   *          an array of prior models
-   * @param priorListeners
-   *          an array of prior listeners
-   * @param modelWts
-   *          an array of model weights: IMPORTANT: this includes the weight of
-   *          CRF classifier as well at position 0, and therefore is longer than
-   *          priorListeners/priorModels array by 1.
-   * @return A list of INs with
-   * @throws ClassNotFoundException
-   * @throws SecurityException
-   * @throws NoSuchMethodException
-   * @throws IllegalArgumentException
-   * @throws InstantiationException
-   * @throws IllegalAccessException
-   * @throws InvocationTargetException
-   * TODO(mengqiu) refactor this method to re-use classifyGibbs
-   */
-  public List<IN> classifyGibbsUsingPrior(List<IN> sentence, SequenceModel[] priorModels,
-      SequenceListener[] priorListeners, double[] modelWts) throws ClassNotFoundException, SecurityException,
-      NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException,
-      InvocationTargetException {
-
-    if ((priorModels.length + 1) != modelWts.length)
-      throw new RuntimeException(
-          "modelWts array should be longer than the priorModels array by 1 unit since it also includes the weight of the CRF model at position 0.");
-
-    // System.err.println("Testing using Gibbs sampling.");
-    Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(sentence);
-
-    List<IN> newDocument = sentence; // reversed if necessary
-    if (flags.useReverse) {
-      Collections.reverse(sentence);
-      newDocument = new ArrayList<IN>(sentence);
-      Collections.reverse(sentence);
-    }
-
-    CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
-
-    SequenceModel model = cliqueTree;
-    SequenceListener listener = cliqueTree;
-
-    SequenceModel[] models = new SequenceModel[priorModels.length + 1];
-    models[0] = model;
-    for (int i = 1; i < models.length; i++)
-      models[i] = priorModels[i - 1];
-    model = new FactoredSequenceModel(models, modelWts);
-
-    SequenceListener[] listeners = new SequenceListener[priorListeners.length + 1];
-    listeners[0] = listener;
-    for (int i = 1; i < listeners.length; i++)
-      listeners[i] = priorListeners[i - 1];
-    listener = new FactoredSequenceListener(listeners);
-
-    SequenceGibbsSampler sampler = new SequenceGibbsSampler(0, 0, listener);
-    int[] sequence = new int[cliqueTree.length()];
-
-    if (flags.initViterbi) {
-      TestSequenceModel testSequenceModel = new TestSequenceModel(cliqueTree);
-      ExactBestSequenceFinder tagInference = new ExactBestSequenceFinder();
-      int[] bestSequence = tagInference.bestSequence(testSequenceModel);
-      System.arraycopy(bestSequence, windowSize - 1, sequence, 0, sequence.length);
-    } else {
-      int[] initialSequence = SequenceGibbsSampler.getRandomSequence(model);
-      System.arraycopy(initialSequence, 0, sequence, 0, sequence.length);
-    }
-
-    SequenceGibbsSampler.verbose = 0;
-
-    if (flags.annealingType.equalsIgnoreCase("linear")) {
-      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getLinearSchedule(1.0, flags.numSamples),
-          sequence);
-    } else if (flags.annealingType.equalsIgnoreCase("exp") || flags.annealingType.equalsIgnoreCase("exponential")) {
-      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getExponentialSchedule(1.0, flags.annealingRate,
-          flags.numSamples), sequence);
-    } else {
-      throw new RuntimeException("No annealing type specified");
-    }
-
-    // System.err.println(ArrayMath.toString(sequence));
-
-    if (flags.useReverse) {
-      Collections.reverse(sentence);
-    }
-
-    for (int j = 0, dsize = newDocument.size(); j < dsize; j++) {
-      IN wi = sentence.get(j);
-      if (wi == null) throw new RuntimeException("");
-      if (classIndex == null) throw new RuntimeException("");
-      wi.set(CoreAnnotations.AnswerAnnotation.class, classIndex.get(sequence[j]));
-    }
-
-    if (flags.useReverse) {
-      Collections.reverse(sentence);
-    }
-
-    return sentence;
-  }
-
-
-  //TODO(mengqiu) refactor this method to re-use classifyGibbs
-  public List<IN> classifyGibbsUsingPrior(List<IN> sentence, SequenceModel priorModel, SequenceListener priorListener,
-      double model1Wt, double model2Wt) throws ClassNotFoundException, SecurityException, NoSuchMethodException,
-      IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-    // System.err.println("Testing using Gibbs sampling.");
-    Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(sentence);
-    List<IN> newDocument = sentence; // reversed if necessary
-    if (flags.useReverse) {
-      newDocument = new ArrayList<IN>(sentence);
-      Collections.reverse(newDocument);
-    }
-
-    CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
-
-    SequenceModel model = cliqueTree;
-    SequenceListener listener = cliqueTree;
-
-    model = new FactoredSequenceModel(model, priorModel, model1Wt, model2Wt);
-    listener = new FactoredSequenceListener(listener, priorListener);
-
-    SequenceGibbsSampler sampler = new SequenceGibbsSampler(0, 0, listener);
-    int[] sequence = new int[cliqueTree.length()];
-
-    if (flags.initViterbi) {
-      TestSequenceModel testSequenceModel = new TestSequenceModel(cliqueTree);
-      ExactBestSequenceFinder tagInference = new ExactBestSequenceFinder();
-      int[] bestSequence = tagInference.bestSequence(testSequenceModel);
-      System.arraycopy(bestSequence, windowSize - 1, sequence, 0, sequence.length);
-    } else {
-      int[] initialSequence = SequenceGibbsSampler.getRandomSequence(model);
-      System.arraycopy(initialSequence, 0, sequence, 0, sequence.length);
-    }
-
-    SequenceGibbsSampler.verbose = 0;
-
-    if (flags.annealingType.equalsIgnoreCase("linear")) {
-      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getLinearSchedule(1.0, flags.numSamples),
-          sequence);
-    } else if (flags.annealingType.equalsIgnoreCase("exp") || flags.annealingType.equalsIgnoreCase("exponential")) {
-      sequence = sampler.findBestUsingAnnealing(model, CoolingSchedule.getExponentialSchedule(1.0, flags.annealingRate,
-          flags.numSamples), sequence);
-    } else {
-      throw new RuntimeException("No annealing type specified");
-    }
-
-    // System.err.println(ArrayMath.toString(sequence));
-
-    if (flags.useReverse) {
-      Collections.reverse(sentence);
-    }
-
-    for (int j = 0, dsize = newDocument.size(); j < dsize; j++) {
-      IN wi = sentence.get(j);
-      if (wi == null) throw new RuntimeException("");
-      if (classIndex == null) throw new RuntimeException("");
-      wi.set(CoreAnnotations.AnswerAnnotation.class, classIndex.get(sequence[j]));
-    }
-
-    if (flags.useReverse) {
-      Collections.reverse(sentence);
-    }
-
-    return sentence;
   }
 
   /**
@@ -1830,10 +1616,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   /**
-   * Train a classifier from documents.
-   *
-   * @param docs A Collection (perhaps ObjectBank) of documents
+   * Load auxiliary data to be used in constructing features and labels
+   * Intended to be overriden by subclasses
    */
+  protected Collection<List<IN>> loadAuxiliaryData(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
+    return docs;
+  }
+
+  /** {@inheritDoc} */
   @Override
   public void train(Collection<List<IN>> objectBankWrapper, DocumentReaderAndWriter<IN> readerAndWriter) {
     Timing timer = new Timing();
@@ -1855,27 +1645,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       docs = docsToShuffle.subList(0, cutOff);
     }
 
-    List<List<IN>> unsupDocs = null;
-    if (flags.unsupDropoutFile != null) {
-      System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
-      timer.start();
-      unsupDocs = new ArrayList<List<IN>>();
-      ObjectBank<List<IN>> unsupObjBank = makeObjectBankFromFile(flags.unsupDropoutFile, readerAndWriter);
-      for (List<IN> doc : unsupObjBank) {
-        for (IN tok: doc) {
-          tok.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
-          tok.set(CoreAnnotations.GoldAnswerAnnotation.class, flags.backgroundSymbol);
-        }
-        unsupDocs.add(doc);
-      }
-    }
-
-    List<List<IN>> totalDocs = new ArrayList<List<IN>>();
-    totalDocs.addAll(docs);
-    if (flags.doFeatureDiscovery && unsupDocs != null)
-      totalDocs.addAll(unsupDocs);
+    Collection<List<IN>> totalDocs = loadAuxiliaryData(docs, readerAndWriter);
 
     makeAnswerArraysAndTagIndex(totalDocs);
+
     long elapsedMs = timer.stop();
     System.err.println("Time to convert docs to feature indices: " + Timing.toSecondsString(elapsedMs) + " seconds");
 
@@ -2003,96 +1776,19 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         }
       }
 
-      int[][][][] unsupDropoutData = null;
-      if (flags.unsupDropoutFile != null) {
-        List<Triple<int[][][], int[], double[][][]>> unsupDataAndLabels = documentsToDataAndLabelsList(unsupDocs);
-        unsupDropoutData = new int[unsupDataAndLabels.size()][][][];
-        for (int q=0; q<unsupDropoutData.length; q++)
-          unsupDropoutData[q] = unsupDataAndLabels.get(q).first();
-        elapsedMs = timer.stop();
-        System.err.println("Time to read unsupervised dropout data: " + Timing.toSecondsString(elapsedMs) + " seconds, read " + unsupDropoutData.length + " files");
-      }
-
-      if (flags.nonLinearCRF) {
-        if (flags.secondOrderNonLinear) {
-          CRFNonLinearSecondOrderLogConditionalObjectiveFunction func = new CRFNonLinearSecondOrderLogConditionalObjectiveFunction(data, labels,
-            windowSize, classIndex, labelIndices, map, flags, nodeFeatureIndicesMap.size(), edgeFeatureIndicesMap.size());
-          cliquePotentialFunctionHelper = func;
-
-          double[] allWeights = trainWeightsUsingNonLinearCRF(func, evaluators);
-          Quadruple<double[][], double[][], double[][], double[][]> params = func.separateWeights(allWeights);
-          this.inputLayerWeights4Edge = params.first();
-          this.outputLayerWeights4Edge = params.second();
-          this.inputLayerWeights = params.third();
-          this.outputLayerWeights = params.fourth();
-          System.err.println("Edge Output Layer Weights:");
-          for (int ii = 0; ii < outputLayerWeights4Edge.length; ii++) {
-            System.err.print("[ ");
-            for (int jj = 0; jj < outputLayerWeights4Edge[ii].length; jj++) {
-              System.err.print(outputLayerWeights4Edge[ii][jj] + " ");
-            }
-            System.err.println("]");
-          }
-          System.err.println("Node Output Layer Weights:");
-          for (int ii = 0; ii < outputLayerWeights.length; ii++) {
-            System.err.print("[ ");
-            for (int jj = 0; jj < outputLayerWeights[ii].length; jj++) {
-              System.err.print(outputLayerWeights[ii][jj] + " ");
-            }
-            System.err.println("]");
-          }
-        } else {
-          CRFNonLinearLogConditionalObjectiveFunction func = new CRFNonLinearLogConditionalObjectiveFunction(data, labels,
-            windowSize, classIndex, labelIndices, map, flags, nodeFeatureIndicesMap.size(), edgeFeatureIndicesMap.size(), featureVals);
-          if (flags.useAdaGradFOBOS) {
-            func.gradientsOnly = true;
-          }
-          cliquePotentialFunctionHelper = func;
-
-          double[] allWeights = trainWeightsUsingNonLinearCRF(func, evaluators);
-          Triple<double[][], double[][], double[][]> params = func.separateWeights(allWeights);
-          this.linearWeights = params.first();
-          this.inputLayerWeights = params.second();
-          this.outputLayerWeights = params.third();
-          if (flags.printWeights) {
-            System.err.println("Linear Layer Weights:");
-            for (int ii = 0; ii < linearWeights.length; ii++) {
-              System.err.print("[ ");
-              for (int jj = 0; jj < linearWeights[ii].length; jj++) {
-                System.err.print(linearWeights[ii][jj] + " ");
-              }
-              System.err.println("]");
-            }
-            System.err.println("Input Layer Weights:");
-            for (int ii = 0; ii < inputLayerWeights.length; ii++) {
-              System.err.print("[ ");
-              for (int jj = 0; jj < inputLayerWeights[ii].length; jj++) {
-                System.err.print(inputLayerWeights[ii][jj] + " ");
-              }
-              System.err.println("]");
-            }
-            System.err.println("Output Layer Weights:");
-            for (int ii = 0; ii < outputLayerWeights.length; ii++) {
-              System.err.print("[ ");
-              for (int jj = 0; jj < outputLayerWeights[ii].length; jj++) {
-                System.err.print(outputLayerWeights[ii][jj] + " ");
-              }
-              System.err.println("]");
-            }
-          }
-        }
-      } else {
-        double[] oneDimWeights = null;
-        if (flags.useFloat) {
-          oneDimWeights = trainWeightsUsingFloatCRF(data, labels, i);
-        } else if (flags.numLopExpert > 1) {
-          oneDimWeights = trainWeightsUsingLopCRF(numFeatures, data, labels, evaluators, i);
-        } else {
-          oneDimWeights = trainWeightsUsingDoubleCRF(data, labels, evaluators, i, featureVals, unsupDropoutData);
-        }
+      double[] oneDimWeights = trainWeights(data, labels, evaluators, i, featureVals);
+      if (oneDimWeights != null) {
         this.weights = to2D(oneDimWeights, labelIndices, map);
       }
 
+      // if (flags.useFloat) {
+      //   oneDimWeights = trainWeightsUsingFloatCRF(data, labels, evaluators, i, featureVals);
+      // } else if (flags.numLopExpert > 1) {
+      //   oneDimWeights = trainWeightsUsingLopCRF(data, labels, evaluators, i, featureVals);
+      // } else {
+      //   oneDimWeights = trainWeightsUsingDoubleCRF(data, labels, evaluators, i, featureVals);
+      // }
+      
       // save feature index to disk and read in later
       if (flags.saveFeatureIndexToDisk) {
         try {
@@ -2121,42 +1817,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return newWeights;
   }
 
-  protected double[] trainWeightsUsingFloatCRF(int[][][][] data, int[][] labels, int pruneFeatureItr) {
-    CRFLogConditionalObjectiveFloatFunction func = new CRFLogConditionalObjectiveFloatFunction(data, labels,
-        featureIndex, windowSize, classIndex, labelIndices, map, flags.backgroundSymbol, flags.sigma);
-    cliquePotentialFunctionHelper = func;
-
-    QNMinimizer minimizer;
-    if (flags.interimOutputFreq != 0) {
-      FloatFunction monitor = new ResultStoringFloatMonitor(flags.interimOutputFreq, flags.serializeTo);
-      minimizer = new QNMinimizer(monitor);
-    } else {
-      minimizer = new QNMinimizer();
-    }
-
-    if (pruneFeatureItr == 0) {
-      minimizer.setM(flags.QNsize);
-    } else {
-      minimizer.setM(flags.QNsize2);
-    }
-
-    float[] initialWeights;
-    if (flags.initialWeights == null) {
-      initialWeights = func.initial();
-    } else {
-      try {
-        System.err.println("Reading initial weights from file " + flags.initialWeights);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialWeights))));
-        initialWeights = ConvertByteArray.readFloatArr(dis);
-      } catch (IOException e) {
-        throw new RuntimeException("Could not read from float initial weight file " + flags.initialWeights);
-      }
-    }
-    System.err.println("numWeights: " + initialWeights.length);
-    float[] weights = minimizer.minimize(func, (float) flags.tolerance, initialWeights);
-    return ArrayMath.floatArrayToDoubleArray(weights);
-  }
 
   protected void pruneNodeFeatureIndices(int totalNumOfFeatureSlices, int numOfFeatureSlices) {
     int numOfNodeFeatures = nodeFeatureIndicesMap.size();
@@ -2194,234 +1854,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     featureIndex = newFeatureIndex;
   }
 
-  protected int[][][][] createPartialDataForLOP(int lopIter, int[][][][] data) {
-    int[] oldFeatures = null;
-    int oldFeatureIndex = -1;
-    ArrayList<Integer> newFeatureList = new ArrayList<Integer>(1000);
-    Set<Integer> featureIndicesSet = featureIndicesSetArray.get(lopIter);
-
-    int[][][][] newData = new int[data.length][][][];
-    for (int i = 0; i < data.length; i++) {
-      newData[i] = new int[data[i].length][][];
-      for (int j = 0; j < data[i].length; j++) {
-        newData[i][j] = new int[data[i][j].length][];
-        for (int k = 0; k < data[i][j].length; k++) {
-          oldFeatures = data[i][j][k];
-          newFeatureList.clear();
-          for (int l = 0; l < oldFeatures.length; l++) {
-            oldFeatureIndex = oldFeatures[l];
-            if (featureIndicesSet.contains(oldFeatureIndex)) {
-              newFeatureList.add(oldFeatureIndex);
-            }
-          }
-          newData[i][j][k] = new int[newFeatureList.size()];
-          for (int l = 0; l < newFeatureList.size(); ++l) {
-            newData[i][j][k][l] = newFeatureList.get(l);
-          }
-        }
-      }
-    }
-
-    return newData;
+  protected CRFLogConditionalObjectiveFunction getObjectiveFunction(int[][][][] data, int[][] labels) {
+    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+      labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
+    return func;
   }
 
-  protected void getFeatureBoundaryIndices(int numFeatures, int numLopExpert) {
-    // first find begin/end feature index for each expert
-    int interval = numFeatures / numLopExpert;
-    featureIndicesSetArray = new ArrayList<Set<Integer>>(numLopExpert);
-    featureIndicesListArray =  new ArrayList<List<Integer>>(numLopExpert);
-    for (int i = 0; i < numLopExpert; i++) {
-      featureIndicesSetArray.add(Generics.<Integer>newHashSet(interval));
-      featureIndicesListArray.add(Generics.<Integer>newArrayList(interval));
-    }
-    if (flags.randomLopFeatureSplit) {
-      for (int fIndex = 0; fIndex < numFeatures; fIndex++) {
-        int lopIter = random.nextInt(numLopExpert);
-        featureIndicesSetArray.get(lopIter).add(fIndex);
-        featureIndicesListArray.get(lopIter).add(fIndex);
-      }
-    } else {
-      for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-        int beginIndex = lopIter * interval;
-        int endIndex = (lopIter+1) * interval;
-        if (lopIter == numLopExpert - 1) {
-          endIndex = numFeatures;
-        }
-        for (int fIndex = beginIndex; fIndex < endIndex; fIndex++) {
-          featureIndicesSetArray.get(lopIter).add(fIndex);
-          featureIndicesListArray.get(lopIter).add(fIndex);
-        }
-      }
-    }
-    for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-      Collections.sort(featureIndicesListArray.get(lopIter));
-    }
-  }
+  protected double[] trainWeights(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr, double[][][][] featureVals) {
 
-  protected double[] trainWeightsUsingLopCRF(int numFeatures, int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr) {
-    int numLopExpert = flags.numLopExpert;
-    double[][] lopExpertWeights = new double[numLopExpert][];
-
-    getFeatureBoundaryIndices(numFeatures, numLopExpert);
-
-    if (flags.initialLopWeights != null) {
-      try {
-        System.err.println("Reading initial LOP weights from file " + flags.initialLopWeights + " ...");
-        BufferedReader br = IOUtils.readerFromString(flags.initialLopWeights);
-        List<double[]> listOfWeights = new ArrayList<double[]>(numLopExpert);
-        for (String line; (line = br.readLine()) != null; ) {
-          line = line.trim();
-          String[] parts = line.split("\t");
-          double[] wArr = new double[parts.length];
-          for (int i = 0; i < parts.length; i++) {
-            wArr[i] = Double.parseDouble(parts[i]);
-          }
-          listOfWeights.add(wArr);
-        }
-        assert(listOfWeights.size() == numLopExpert);
-        System.err.println("Done!");
-        for (int i = 0; i < numLopExpert; i++)
-          lopExpertWeights[i] = listOfWeights.get(i);
-        // DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-        //     flags.initialLopWeights))));
-        // initialScales = Convert.readDoubleArr(dis);
-      } catch (IOException e) {
-        throw new RuntimeException("Could not read from double initial LOP weights file " + flags.initialLopWeights);
-      }
-    } else {
-      for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-        int[][][][] partialData = createPartialDataForLOP(lopIter, data);
-        if (flags.randomLopWeights) {
-          lopExpertWeights[lopIter] = initWeightsUsingDoubleCRF(partialData, labels, evaluators, pruneFeatureItr);
-        } else {
-          lopExpertWeights[lopIter] = trainWeightsUsingDoubleCRF(partialData, labels, evaluators, pruneFeatureItr, null, null);
-        }
-      }
-      if (flags.includeFullCRFInLOP) {
-        double[][] newLopExpertWeights = new double[numLopExpert+1][];
-        System.arraycopy(lopExpertWeights, 0, newLopExpertWeights, 0, lopExpertWeights.length);
-        if (flags.randomLopWeights) {
-          newLopExpertWeights[numLopExpert] = initWeightsUsingDoubleCRF(data, labels, evaluators, pruneFeatureItr);
-        } else {
-          newLopExpertWeights[numLopExpert] = trainWeightsUsingDoubleCRF(data, labels, evaluators, pruneFeatureItr, null, null);
-        }
-
-        Set<Integer> newSet = Generics.newHashSet(numFeatures);
-        List<Integer> newList = new ArrayList<Integer>(numFeatures);
-        for (int fIndex = 0; fIndex < numFeatures; fIndex++) {
-          newSet.add(fIndex);
-          newList.add(fIndex);
-        }
-        featureIndicesSetArray.add(newSet);
-        featureIndicesListArray.add(newList);
-
-        numLopExpert += 1;
-        lopExpertWeights = newLopExpertWeights;
-      }
-    }
-
-    // Dumb scales
-    // double[] lopScales = new double[numLopExpert];
-    // Arrays.fill(lopScales, 1.0);
-    CRFLogConditionalObjectiveFunctionForLOP func = new CRFLogConditionalObjectiveFunctionForLOP(data, labels, lopExpertWeights,
-        windowSize, classIndex, labelIndices, map, flags.backgroundSymbol, numLopExpert, featureIndicesSetArray, featureIndicesListArray,
-        flags.backpropLopTraining);
-    cliquePotentialFunctionHelper = func;
-
-    Minimizer minimizer = getMinimizer(0, evaluators);
-
-    double[] initialScales;
-    //TODO(mengqiu) clean this part up when backpropLogTraining == true
-    if (flags.initialLopScales == null) {
-      initialScales = func.initial();
-    } else {
-      try {
-        System.err.println("Reading initial LOP scales from file " + flags.initialLopScales);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialLopScales))));
-        initialScales = ConvertByteArray.readDoubleArr(dis);
-      } catch (IOException e) {
-        throw new RuntimeException("Could not read from double initial LOP scales file " + flags.initialLopScales);
-      }
-    }
-
-    double[] learnedParams = minimizer.minimize(func, flags.tolerance, initialScales);
-    double[] rawScales = func.separateLopScales(learnedParams);
-    double[] lopScales = ArrayMath.softmax(rawScales);
-    System.err.println("After SoftMax Transformation, learned scales are:");
-    for (int lopIter = 0; lopIter < numLopExpert; lopIter++) {
-      System.err.println("lopScales[" + lopIter + "] = " + lopScales[lopIter]);
-    }
-    double[][] learnedLopExpertWeights = lopExpertWeights;
-    if (flags.backpropLopTraining) {
-      learnedLopExpertWeights = func.separateLopExpertWeights(learnedParams);
-    }
-    return CRFLogConditionalObjectiveFunctionForLOP.combineAndScaleLopWeights(numLopExpert, learnedLopExpertWeights, lopScales);
-  }
-
-  protected double[] initWeightsUsingDoubleCRF(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr) {
-    CRFLogConditionalObjectiveFunction func = null;
-    if ("DROPOUT".equalsIgnoreCase(flags.priorType)) {
-      func = new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
-        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
-    } else {
-      func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
-        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
-    }
-    return func.initial();
-  }
-
-  protected double[] trainWeightsUsingNonLinearCRF(AbstractCachingDiffFunction func, Evaluator[] evaluators) {
-    Minimizer minimizer = getMinimizer(0, evaluators);
-
-    double[] initialWeights;
-    if (flags.initialWeights == null) {
-      initialWeights = func.initial();
-    } else {
-      try {
-        System.err.println("Reading initial weights from file " + flags.initialWeights);
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(
-            flags.initialWeights))));
-        initialWeights = ConvertByteArray.readDoubleArr(dis);
-      } catch (IOException e) {
-        throw new RuntimeException("Could not read from double initial weight file " + flags.initialWeights);
-      }
-    }
-    System.err.println("numWeights: " + initialWeights.length);
-
-    if (flags.testObjFunction) {
-      StochasticDiffFunctionTester tester = new StochasticDiffFunctionTester(func);
-      if (tester.testSumOfBatches(initialWeights, 1e-4)) {
-        System.err.println("Testing complete... exiting");
-        System.exit(1);
-      } else {
-        System.err.println("Testing failed....exiting");
-        System.exit(1);
-      }
-
-    }
-    //check gradient
-    if (flags.checkGradient) {
-      if (func.gradientCheck()) {
-        System.err.println("gradient check passed");
-      } else {
-        throw new RuntimeException("gradient check failed");
-      }
-    }
-    return minimizer.minimize(func, flags.tolerance, initialWeights);
-  }
-
-  protected double[] trainWeightsUsingDoubleCRF(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr, double[][][][] featureVals, int[][][][] unsupDropoutData) {
-
-    CRFLogConditionalObjectiveFunction func = null;
-    if ("DROPOUT".equalsIgnoreCase(flags.priorType)) {
-      func = new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
-        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
-    } else {
-      func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
-        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
-    }
-
+    CRFLogConditionalObjectiveFunction func = getObjectiveFunction(data, labels);
     cliquePotentialFunctionHelper = func;
 
     // create feature grouping
@@ -2534,7 +1975,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return minimizer.minimize(func, flags.tolerance, initialWeights);
   }
 
-
   public Minimizer getMinimizer() {
     return getMinimizer(0, null);
   }
@@ -2564,8 +2004,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         ((QNMinimizer) minimizer).useOWLQN(flags.useOWLQN, flags.priorLambda);
       }
     } else if (flags.useInPlaceSGD) {
-      StochasticInPlaceMinimizer<DiffFunction> sgdMinimizer =
-              new StochasticInPlaceMinimizer<DiffFunction>(flags.sigma, flags.SGDPasses, flags.tuneSampleSize, flags.stochasticBatchSize);
+      SGDMinimizer<DiffFunction> sgdMinimizer =
+              new SGDMinimizer<DiffFunction>(flags.sigma, flags.SGDPasses, flags.tuneSampleSize, flags.stochasticBatchSize);
       if (flags.useSGDtoQN) {
         QNMinimizer qnMinimizer;
         int QNmem;
@@ -2599,7 +2039,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       minimizer = new SMDMinimizer(flags.initialGain, flags.stochasticBatchSize, flags.stochasticMethod,
           flags.SGDPasses);
     } else if (flags.useSGD) {
-      minimizer = new SGDMinimizer(flags.initialGain, flags.stochasticBatchSize);
+      minimizer = new InefficientSGDMinimizer(flags.initialGain, flags.stochasticBatchSize);
     } else if (flags.useScaledSGD) {
       minimizer = new ScaledSGDMinimizer(flags.initialGain, flags.stochasticBatchSize, flags.SGDPasses,
           flags.scaledSGDMethod);
@@ -2764,12 +2204,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return result;
   }
 
-  public void loadTextClassifier(String text, Properties props) throws ClassCastException, IOException,
-      ClassNotFoundException, InstantiationException, IllegalAccessException {
-    // System.err.println("DEBUG: in loadTextClassifier");
-    System.err.println("Loading Text Classifier from " + text);
-    BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(text))));
-
+  protected void loadTextClassifier(BufferedReader br) throws Exception {
     String line = br.readLine();
     // first line should be this format:
     // labelIndices.size()=\t%d
@@ -2811,20 +2246,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     }
 
-    /**************************************/
-    System.err.printf("DEBUG: labelIndices.length=\t%d%n", labelIndices.size());
     for (int i = 0; i < labelIndices.size(); i++) {
-      System.err.printf("DEBUG: labelIndices[%d].size()=\t%d%n", i, labelIndices.get(i).size());
       for (int j = 0; j < labelIndices.get(i).size(); j++) {
         int[] label = labelIndices.get(i).get(j).getLabel();
         List<Integer> list = new ArrayList<Integer>();
         for (int l : label) {
           list.add(l);
         }
-        System.err.printf("DEBUG: %d\t%s%n", j, StringUtils.join(list, " "));
       }
     }
-    /**************************************/
 
     line = br.readLine();
     toks = line.split("\\t");
@@ -2845,13 +2275,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       count++;
     }
 
-    /******************************************/
-    System.err.printf("DEBUG: classIndex.size()=\t%d%n", classIndex.size());
-    for (int i = 0; i < classIndex.size(); i++) {
-      System.err.printf("DEBUG: %d\t%s%n", i, classIndex.get(i));
-    }
-    /******************************************/
-
     line = br.readLine();
     toks = line.split("\\t");
     if (!toks[0].equals("featureIndex.size()=")) {
@@ -2871,17 +2294,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       count++;
     }
 
-    /***************************************/
-    System.err.printf("DEBUG: featureIndex.size()=\t%d%n", featureIndex.size());
-    /***************************************/
-
-    /*
-      for(int i = 0; i < featureIndex.size(); i++) {
-        System.err.printf("DEBUG: %d\t%s%n", i, featureIndex.get(i));
-      }
-    */
-    /***************************************/
-
     line = br.readLine();
     if (!line.equals("<flags>")) {
       throw new RuntimeException("format error");
@@ -2900,9 +2312,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     // System.err.println("DEBUG: out from flags");
     flags = new SeqClassifierFlags(p);
-    System.err.println("DEBUG: <flags>");
-    System.err.print(flags.toString());
-    System.err.println("DEBUG: </flags>");
 
     if (flags.useEmbedding) {
       line = br.readLine();
@@ -2921,202 +2330,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         embeddings.put(word, arr);
         count++;
       }
-    }
-
-    if (flags.nonLinearCRF) {
-      line = br.readLine();
-      toks = line.split("\\t");
-      if (!toks[0].equals("nodeFeatureIndicesMap.size()=")) {
-        throw new RuntimeException("format error in nodeFeatureIndicesMap");
-      }
-      int nodeFeatureIndicesMapSize = Integer.parseInt(toks[1]);
-      nodeFeatureIndicesMap = new HashIndex<Integer>();
-      count = 0;
-      while (count < nodeFeatureIndicesMapSize) {
-        line = br.readLine();
-        toks = line.split("\\t");
-        int idx = Integer.parseInt(toks[0]);
-        if (count != idx) {
-          throw new RuntimeException("format error");
-        }
-        nodeFeatureIndicesMap.add(Integer.parseInt(toks[1]));
-        count++;
-      }
-
-      /***************************************/
-      System.err.printf("DEBUG: nodeFeatureIndicesMap.size()=\t%d%n", nodeFeatureIndicesMap.size());
-      /***************************************/
-
-      line = br.readLine();
-      toks = line.split("\\t");
-      if (!toks[0].equals("edgeFeatureIndicesMap.size()=")) {
-        throw new RuntimeException("format error");
-      }
-      int edgeFeatureIndicesMapSize = Integer.parseInt(toks[1]);
-      edgeFeatureIndicesMap = new HashIndex<Integer>();
-      count = 0;
-      while (count < edgeFeatureIndicesMapSize) {
-        line = br.readLine();
-        toks = line.split("\\t");
-        int idx = Integer.parseInt(toks[0]);
-        if (count != idx) {
-          throw new RuntimeException("format error");
-        }
-        edgeFeatureIndicesMap.add(Integer.parseInt(toks[1]));
-        count++;
-      }
-
-      /***************************************/
-      System.err.printf("DEBUG: edgeFeatureIndicesMap.size()=\t%d%n", edgeFeatureIndicesMap.size());
-      /***************************************/
-
-      int  weightsLength = -1;
-      if (flags.secondOrderNonLinear) {
-        line = br.readLine();
-        toks = line.split("\\t");
-        if (!toks[0].equals("inputLayerWeights4Edge.length=")) {
-          throw new RuntimeException("format error");
-        }
-        weightsLength = Integer.parseInt(toks[1]);
-        inputLayerWeights4Edge = new double[weightsLength][];
-        count = 0;
-        while (count < weightsLength) {
-          line = br.readLine();
-
-          toks = line.split("\\t");
-          int weights2Length = Integer.parseInt(toks[0]);
-          inputLayerWeights4Edge[count] = new double[weights2Length];
-          String[] weightsValue = toks[1].split(" ");
-          if (weights2Length != weightsValue.length) {
-            throw new RuntimeException("weights format error");
-          }
-
-          for (int i2 = 0; i2 < weights2Length; i2++) {
-            inputLayerWeights4Edge[count][i2] = Double.parseDouble(weightsValue[i2]);
-          }
-          count++;
-        }
-        /***************************************/
-        System.err.printf("DEBUG: double[%d][] inputLayerWeights4Edge loaded%n", weightsLength);
-        /***************************************/
-
-        line = br.readLine();
-
-        toks = line.split("\\t");
-        if (!toks[0].equals("outputLayerWeights4Edge.length=")) {
-          throw new RuntimeException("format error");
-        }
-        weightsLength = Integer.parseInt(toks[1]);
-        outputLayerWeights4Edge = new double[weightsLength][];
-        count = 0;
-        while (count < weightsLength) {
-          line = br.readLine();
-
-          toks = line.split("\\t");
-          int weights2Length = Integer.parseInt(toks[0]);
-          outputLayerWeights4Edge[count] = new double[weights2Length];
-          String[] weightsValue = toks[1].split(" ");
-          if (weights2Length != weightsValue.length) {
-            throw new RuntimeException("weights format error");
-          }
-
-          for (int i2 = 0; i2 < weights2Length; i2++) {
-            outputLayerWeights4Edge[count][i2] = Double.parseDouble(weightsValue[i2]);
-          }
-          count++;
-        }
-        /***************************************/
-        System.err.printf("DEBUG: double[%d][] outputLayerWeights loaded%n", weightsLength);
-        /***************************************/
-
-      } else {
-        line = br.readLine();
-
-        toks = line.split("\\t");
-        if (!toks[0].equals("linearWeights.length=")) {
-          throw new RuntimeException("format error");
-        }
-        weightsLength = Integer.parseInt(toks[1]);
-        linearWeights = new double[weightsLength][];
-        count = 0;
-        while (count < weightsLength) {
-          line = br.readLine();
-
-          toks = line.split("\\t");
-          int weights2Length = Integer.parseInt(toks[0]);
-          linearWeights[count] = new double[weights2Length];
-          String[] weightsValue = toks[1].split(" ");
-          if (weights2Length != weightsValue.length) {
-            throw new RuntimeException("weights format error");
-          }
-
-          for (int i2 = 0; i2 < weights2Length; i2++) {
-            linearWeights[count][i2] = Double.parseDouble(weightsValue[i2]);
-          }
-          count++;
-        }
-        /***************************************/
-        System.err.printf("DEBUG: double[%d][] linearWeights loaded%n", weightsLength);
-        /***************************************/
-      }
-
-      line = br.readLine();
-
-      toks = line.split("\\t");
-      if (!toks[0].equals("inputLayerWeights.length=")) {
-        throw new RuntimeException("format error");
-      }
-      weightsLength = Integer.parseInt(toks[1]);
-      inputLayerWeights = new double[weightsLength][];
-      count = 0;
-      while (count < weightsLength) {
-        line = br.readLine();
-
-        toks = line.split("\\t");
-        int weights2Length = Integer.parseInt(toks[0]);
-        inputLayerWeights[count] = new double[weights2Length];
-        String[] weightsValue = toks[1].split(" ");
-        if (weights2Length != weightsValue.length) {
-          throw new RuntimeException("weights format error");
-        }
-
-        for (int i2 = 0; i2 < weights2Length; i2++) {
-          inputLayerWeights[count][i2] = Double.parseDouble(weightsValue[i2]);
-        }
-        count++;
-      }
-      /***************************************/
-      System.err.printf("DEBUG: double[%d][] inputLayerWeights loaded%n", weightsLength);
-      /***************************************/
-
-      line = br.readLine();
-
-      toks = line.split("\\t");
-      if (!toks[0].equals("outputLayerWeights.length=")) {
-        throw new RuntimeException("format error");
-      }
-      weightsLength = Integer.parseInt(toks[1]);
-      outputLayerWeights = new double[weightsLength][];
-      count = 0;
-      while (count < weightsLength) {
-        line = br.readLine();
-
-        toks = line.split("\\t");
-        int weights2Length = Integer.parseInt(toks[0]);
-        outputLayerWeights[count] = new double[weights2Length];
-        String[] weightsValue = toks[1].split(" ");
-        if (weights2Length != weightsValue.length) {
-          throw new RuntimeException("weights format error");
-        }
-
-        for (int i2 = 0; i2 < weights2Length; i2++) {
-          outputLayerWeights[count][i2] = Double.parseDouble(weightsValue[i2]);
-        }
-        count++;
-      }
-      /***************************************/
-      System.err.printf("DEBUG: double[%d][] outputLayerWeights loaded%n", weightsLength);
-      /***************************************/
     }
 
     // <featureFactory>
@@ -3176,6 +2389,77 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
+  public void loadTextClassifier(String text, Properties props) throws ClassCastException, IOException,
+      ClassNotFoundException, InstantiationException, IllegalAccessException {
+    // System.err.println("DEBUG: in loadTextClassifier");
+    System.err.println("Loading Text Classifier from " + text);
+    try {
+      BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(text))));
+
+      loadTextClassifier(br);
+
+      br.close();
+    } catch (Exception ex) {
+      System.err.println("Exception in loading text classifier from " + text);
+      ex.printStackTrace();
+    }
+  }
+
+  protected void serializeTextClassifier(PrintWriter pw) throws Exception {
+    pw.printf("labelIndices.length=\t%d%n", labelIndices.size());
+    for (int i = 0; i < labelIndices.size(); i++) {
+      pw.printf("labelIndices[%d].size()=\t%d%n", i, labelIndices.get(i).size());
+      for (int j = 0; j < labelIndices.get(i).size(); j++) {
+        int[] label = labelIndices.get(i).get(j).getLabel();
+        List<Integer> list = new ArrayList<Integer>();
+        for (int l : label) {
+          list.add(l);
+        }
+        pw.printf("%d\t%s%n", j, StringUtils.join(list, " "));
+      }
+    }
+
+    pw.printf("classIndex.size()=\t%d%n", classIndex.size());
+    for (int i = 0; i < classIndex.size(); i++) {
+      pw.printf("%d\t%s%n", i, classIndex.get(i));
+    }
+    // pw.printf("</classIndex>%n");
+
+    pw.printf("featureIndex.size()=\t%d%n", featureIndex.size());
+    for (int i = 0; i < featureIndex.size(); i++) {
+      pw.printf("%d\t%s%n", i, featureIndex.get(i));
+    }
+    // pw.printf("</featureIndex>%n");
+
+    pw.println("<flags>");
+    pw.print(flags.toString());
+    pw.println("</flags>");
+
+    if (flags.useEmbedding) {
+      pw.printf("embeddings.size()=\t%d%n", embeddings.size());
+      for (String word: embeddings.keySet()) {
+        double[] arr = embeddings.get(word);
+        Double[] arrUnboxed = new Double[arr.length];
+        for(int i = 0; i < arr.length; i++)
+          arrUnboxed[i] = arr[i];
+        pw.printf("%s\t%s%n", word, StringUtils.join(arrUnboxed, " "));
+      }
+    }
+
+    pw.printf("<featureFactory> %s </featureFactory>%n", featureFactory.getClass().getName());
+
+    pw.printf("<windowSize> %d </windowSize>%n", windowSize);
+
+    pw.printf("weights.length=\t%d%n", weights.length);
+    for (double[] ws : weights) {
+      ArrayList<Double> list = new ArrayList<Double>();
+      for (double w : ws) {
+        list.add(w);
+      }
+      pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
+    }
+  }
+
   /**
    * Serialize the model to a human readable format. It's not yet complete. It
    * should now work for Chinese segmenter though. TODO: check things in
@@ -3188,116 +2472,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     System.err.print("Serializing Text classifier to " + serializePath + "...");
     try {
       PrintWriter pw = new PrintWriter(new GZIPOutputStream(new FileOutputStream(serializePath)));
-
-      pw.printf("labelIndices.length=\t%d%n", labelIndices.size());
-      for (int i = 0; i < labelIndices.size(); i++) {
-        pw.printf("labelIndices[%d].size()=\t%d%n", i, labelIndices.get(i).size());
-        for (int j = 0; j < labelIndices.get(i).size(); j++) {
-          int[] label = labelIndices.get(i).get(j).getLabel();
-          List<Integer> list = new ArrayList<Integer>();
-          for (int l : label) {
-            list.add(l);
-          }
-          pw.printf("%d\t%s%n", j, StringUtils.join(list, " "));
-        }
-      }
-
-      pw.printf("classIndex.size()=\t%d%n", classIndex.size());
-      for (int i = 0; i < classIndex.size(); i++) {
-        pw.printf("%d\t%s%n", i, classIndex.get(i));
-      }
-      // pw.printf("</classIndex>%n");
-
-      pw.printf("featureIndex.size()=\t%d%n", featureIndex.size());
-      for (int i = 0; i < featureIndex.size(); i++) {
-        pw.printf("%d\t%s%n", i, featureIndex.get(i));
-      }
-      // pw.printf("</featureIndex>%n");
-
-      pw.println("<flags>");
-      pw.print(flags.toString());
-      pw.println("</flags>");
-
-      if (flags.useEmbedding) {
-        pw.printf("embeddings.size()=\t%d%n", embeddings.size());
-        for (String word: embeddings.keySet()) {
-          double[] arr = embeddings.get(word);
-          Double[] arrUnboxed = new Double[arr.length];
-          for(int i = 0; i < arr.length; i++)
-            arrUnboxed[i] = arr[i];
-          pw.printf("%s\t%s%n", word, StringUtils.join(arrUnboxed, " "));
-        }
-      }
-
-      if (flags.nonLinearCRF) {
-        pw.printf("nodeFeatureIndicesMap.size()=\t%d%n", nodeFeatureIndicesMap.size());
-        for (int i = 0; i < nodeFeatureIndicesMap.size(); i++) {
-          pw.printf("%d\t%d%n", i, nodeFeatureIndicesMap.get(i));
-        }
-
-        pw.printf("edgeFeatureIndicesMap.size()=\t%d%n", edgeFeatureIndicesMap.size());
-        for (int i = 0; i < edgeFeatureIndicesMap.size(); i++) {
-          pw.printf("%d\t%d%n", i, edgeFeatureIndicesMap.get(i));
-        }
-
-        if (flags.secondOrderNonLinear) {
-          pw.printf("inputLayerWeights4Edge.length=\t%d%n", inputLayerWeights4Edge.length);
-          for (double[] ws : inputLayerWeights4Edge) {
-            ArrayList<Double> list = new ArrayList<Double>();
-            for (double w : ws) {
-              list.add(w);
-            }
-            pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
-          }
-          pw.printf("outputLayerWeights4Edge.length=\t%d%n", outputLayerWeights4Edge.length);
-          for (double[] ws : outputLayerWeights4Edge) {
-            ArrayList<Double> list = new ArrayList<Double>();
-            for (double w : ws) {
-              list.add(w);
-            }
-            pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
-          }
-        } else {
-          pw.printf("linearWeights.length=\t%d%n", linearWeights.length);
-          for (double[] ws : linearWeights) {
-            ArrayList<Double> list = new ArrayList<Double>();
-            for (double w : ws) {
-              list.add(w);
-            }
-            pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
-          }
-        }
-        pw.printf("inputLayerWeights.length=\t%d%n", inputLayerWeights.length);
-        for (double[] ws : inputLayerWeights) {
-          ArrayList<Double> list = new ArrayList<Double>();
-          for (double w : ws) {
-            list.add(w);
-          }
-          pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
-        }
-        pw.printf("outputLayerWeights.length=\t%d%n", outputLayerWeights.length);
-        for (double[] ws : outputLayerWeights) {
-          ArrayList<Double> list = new ArrayList<Double>();
-          for (double w : ws) {
-            list.add(w);
-          }
-          pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
-        }
-      }
-
-
-      pw.printf("<featureFactory> %s </featureFactory>%n", featureFactory.getClass().getName());
-
-      pw.printf("<windowSize> %d </windowSize>%n", windowSize);
-
-      pw.printf("weights.length=\t%d%n", weights.length);
-      for (double[] ws : weights) {
-        ArrayList<Double> list = new ArrayList<Double>();
-        for (double w : ws) {
-          list.add(w);
-        }
-        pw.printf("%d\t%s%n", ws.length, StringUtils.join(list, " "));
-      }
+      serializeTextClassifier(pw);
 
       pw.close();
       System.err.println("done.");
@@ -3465,18 +2640,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       oos.writeObject(flags);
       if (flags.useEmbedding)
         oos.writeObject(embeddings);
-      if (flags.nonLinearCRF) {
-        oos.writeObject(nodeFeatureIndicesMap);
-        oos.writeObject(edgeFeatureIndicesMap);
-        if (flags.secondOrderNonLinear) {
-          oos.writeObject(inputLayerWeights4Edge);
-          oos.writeObject(outputLayerWeights4Edge);
-        } else {
-          oos.writeObject(linearWeights);
-        }
-        oos.writeObject(inputLayerWeights);
-        oos.writeObject(outputLayerWeights);
-      }
       oos.writeObject(featureFactory);
       oos.writeInt(windowSize);
       oos.writeObject(weights);
@@ -3519,18 +2682,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     flags = (SeqClassifierFlags) ois.readObject();
     if (flags.useEmbedding) {
       embeddings = (Map<String, double[]>) ois.readObject();
-    }
-    if (flags.nonLinearCRF) {
-      nodeFeatureIndicesMap = (Index<Integer>) ois.readObject();
-      edgeFeatureIndicesMap = (Index<Integer>) ois.readObject();
-      if (flags.secondOrderNonLinear) {
-        inputLayerWeights4Edge = (double[][]) ois.readObject();
-        outputLayerWeights4Edge = (double[][]) ois.readObject();
-      } else {
-        linearWeights = (double[][]) ois.readObject();
-      }
-      inputLayerWeights = (double[][]) ois.readObject();
-      outputLayerWeights = (double[][]) ois.readObject();
     }
     featureFactory = (edu.stanford.nlp.sequences.FeatureFactory) ois.readObject();
 
@@ -3743,20 +2894,37 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return crf;
   }
 
+  private static CRFClassifier<CoreLabel> chooseCRFClassifier(SeqClassifierFlags flags) {
+    CRFClassifier<CoreLabel> crf = null;
+    if (flags.useFloat) {
+      crf = new CRFClassifierFloat<CoreLabel>(flags);
+    } else if (flags.nonLinearCRF) {
+      crf = new CRFClassifierNonlinear<CoreLabel>(flags);
+    } else if (flags.numLopExpert > 1) {
+      crf = new CRFClassifierWithLOP<CoreLabel>(flags);
+    } else if (flags.priorType.equals("DROPOUT")) {
+      crf = new CRFClassifierWithDropout<CoreLabel>(flags);
+    } else {
+      crf = new CRFClassifier<CoreLabel>(flags);
+    }
+    return crf;
+  }
+
   /** The main method. See the class documentation. */
   public static void main(String[] args) throws Exception {
     StringUtils.printErrInvocationString("CRFClassifier", args);
 
     Properties props = StringUtils.argsToProperties(args);
-    CRFClassifier<CoreLabel> crf = new CRFClassifier<CoreLabel>(props);
-    String testFile = crf.flags.testFile;
-    String testFiles = crf.flags.testFiles;
-    String textFile = crf.flags.textFile;
-    String textFiles = crf.flags.textFiles;
-    String loadPath = crf.flags.loadClassifier;
-    String loadTextPath = crf.flags.loadTextClassifier;
-    String serializeTo = crf.flags.serializeTo;
-    String serializeToText = crf.flags.serializeToText;
+    SeqClassifierFlags flags = new SeqClassifierFlags(props);
+    CRFClassifier<CoreLabel> crf = chooseCRFClassifier(flags); 
+    String testFile = flags.testFile;
+    String testFiles = flags.testFiles;
+    String textFile = flags.textFile;
+    String textFiles = flags.textFiles;
+    String loadPath = flags.loadClassifier;
+    String loadTextPath = flags.loadTextClassifier;
+    String serializeTo = flags.serializeTo;
+    String serializeToText = flags.serializeToText;
 
     if (crf.flags.useEmbedding && crf.flags.embeddingWords != null && crf.flags.embeddingVectors != null) {
       System.err.println("Reading Embedding Files");
@@ -3803,10 +2971,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     crf.loadTagIndex();
-
-    // System.err.println("Using " + crf.flags.featureFactory);
-    // System.err.println("Using " +
-    // StringUtils.getShortClassName(crf.readerAndWriter));
 
     if (serializeTo != null) {
       crf.serializeClassifier(serializeTo);

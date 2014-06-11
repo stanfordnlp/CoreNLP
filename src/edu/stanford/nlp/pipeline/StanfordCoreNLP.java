@@ -612,9 +612,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           models.addAll(Arrays.asList(modelNames.split(",")));
         }
         if (models.isEmpty()) {
-          // Allow for no real NER model - can just use numeric classifiers or SUTime
-          // Will have to explicitly unset ner.model.3class, ner.model.7class, ner.model.MISCclass
-          // So unlikely that people got here by accident
+          // Allow for no real NER model - can just use numeric classifiers or SUTime.
+          // Have to unset ner.model, so unlikely that people got here by accident.
           System.err.println("WARNING: no NER models specified");
         }
         NERClassifierCombiner nerCombiner;
@@ -1477,7 +1476,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     if(props.containsKey("file")){
       String fileName = props.getProperty("file");
       Collection<File> files = new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true);
-      pipeline.processFiles(fileName, files, numThreads);
+      pipeline.processFiles(null, files, numThreads);
     }
 
     //
