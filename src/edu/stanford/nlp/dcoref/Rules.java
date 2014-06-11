@@ -123,16 +123,19 @@ public class Rules {
       return m1.isRelativePronoun(m2) || m2.isRelativePronoun(m1);
   }
 
-  public static boolean entityIsAcronym(CorefCluster mentionCluster, CorefCluster potentialAntecedent) {
-    for(Mention m : mentionCluster.corefMentions){
-      if(m.isPronominal()) continue;
-      for(Mention ant : potentialAntecedent.corefMentions){
-        if (isAcronym(m.originalSpan, ant.originalSpan)) {
-          return true;
+  public static boolean entityIsAcronym(Document document, CorefCluster mentionCluster, CorefCluster potentialAntecedent) {
+    Pair<Integer, Integer> idPair = Pair.makePair(Math.min(mentionCluster.clusterID, potentialAntecedent.clusterID), Math.max(mentionCluster.clusterID, potentialAntecedent.clusterID));
+    if(!document.acronymCache.containsKey(idPair)) {
+      boolean isAcronym = false;
+      for(Mention m : mentionCluster.corefMentions){
+        if(m.isPronominal()) continue;
+        for(Mention ant : potentialAntecedent.corefMentions){
+          if(isAcronym(m.originalSpan, ant.originalSpan)) isAcronym = true;
         }
       }
+      document.acronymCache.put(idPair, isAcronym);
     }
-    return false;
+    return document.acronymCache.get(idPair);
   }
 
   public static boolean isAcronym(List<CoreLabel> first, List<CoreLabel> second) {
@@ -638,7 +641,8 @@ public class Rules {
         if(ant.person==Person.I || ant.person==Person.WE || ant.person==Person.YOU) return true;
       }
     }
-    if(m.person==Person.YOU && ant.appearEarlierThan(m)) {
+    if(m.person==Person.YOU && m != ant && ant.appearEarlierThan(m)) {
+      assert !m.appearEarlierThan(ant);
       int mUtter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(mUtter - 1)) {
         String previousSpeaker = document.speakers.get(mUtter - 1);
@@ -652,7 +656,8 @@ public class Rules {
       } else {
         return true;
       }
-    } else if (ant.person==Person.YOU && m.appearEarlierThan(ant)) {
+    } else if (ant.person==Person.YOU && m != ant && m.appearEarlierThan(ant)) {
+      assert !(ant.appearEarlierThan(m));
       int aUtter = ant.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
       if (document.speakers.containsKey(aUtter - 1)) {
         String previousSpeaker = document.speakers.get(aUtter - 1);
