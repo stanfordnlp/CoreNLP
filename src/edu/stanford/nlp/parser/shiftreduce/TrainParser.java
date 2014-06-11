@@ -107,104 +107,119 @@ public class TrainParser {
       }
     }
 
-    // TODO: do something with the remaining args, such as set the Options flags...
-    // TODO: allow for different languages; by default this does English
-    // TODO: since Options and buildTrainTransformer are used in so
-    // many different places, it would make sense to factor that out
-    Options op = new Options();
-    CompositeTreeTransformer transformer = LexicalizedParser.buildTrainTransformer(op);
-    BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
-    transformer.addTransformer(basicTransformer);
-    
-    if (trainTreebankPath == null) {
-      throw new IllegalArgumentException("Must specify a treebank to train from with -treebank");
+    if (trainTreebankPath == null && serializedPath == null) {
+      throw new IllegalArgumentException("Must specify a treebank to train from with -trainTreebank");
     }
 
-    System.err.println("Loading training trees from " + trainTreebankPath);
-    Treebank trainTreebank = op.tlpParams.memoryTreebank();;
-    trainTreebank.loadPath(trainTreebankPath, trainTreebankFilter);
-    trainTreebank = trainTreebank.transform(transformer);
-    System.err.println("Read in " + trainTreebank.size() + " trees from " + trainTreebankPath);
+    ShiftReduceParser parser = null;
 
-    HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
-    List<Tree> binarizedTrees = Generics.newArrayList();
-    for (Tree tree : trainTreebank) {
-      Trees.convertToCoreLabels(tree);
-      tree.percolateHeadAnnotations(binaryHeadFinder);
-      binarizedTrees.add(tree);
-    }
+    if (trainTreebankPath != null) {
+      // TODO: do something with the remaining args, such as set the Options flags...
+      // TODO: allow for different languages; by default this does English
+      // TODO: since Options and buildTrainTransformer are used in so
+      // many different places, it would make sense to factor that out
+      Options op = new Options();
+      CompositeTreeTransformer transformer = LexicalizedParser.buildTrainTransformer(op);
+      BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
+      transformer.addTransformer(basicTransformer);
+      
+      System.err.println("Loading training trees from " + trainTreebankPath);
+      Treebank trainTreebank = op.tlpParams.memoryTreebank();;
+      trainTreebank.loadPath(trainTreebankPath, trainTreebankFilter);
+      trainTreebank = trainTreebank.transform(transformer);
+      System.err.println("Read in " + trainTreebank.size() + " trees from " + trainTreebankPath);
 
-    // TODO: allow different feature factories, such as for different languages
-    FeatureFactory featureFactory = new BasicFeatureFactory();
-
-    Index<Transition> transitionIndex = new HashIndex<Transition>();
-    Index<String> featureIndex = new HashIndex<String>();
-    for (Tree tree : binarizedTrees) {
-      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
-      transitionIndex.addAll(transitions);
-
-      State state = initialStateFromGoldTagTree(tree);
-      for (Transition transition : transitions) {
-        Set<String> features = featureFactory.featurize(state);
-        featureIndex.addAll(features);
-        state = transition.apply(state);
+      HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
+      List<Tree> binarizedTrees = Generics.newArrayList();
+      for (Tree tree : trainTreebank) {
+        Trees.convertToCoreLabels(tree);
+        tree.percolateHeadAnnotations(binaryHeadFinder);
+        binarizedTrees.add(tree);
       }
-    }
 
-    System.err.println("Number of unique features: " + featureIndex.size());
-    System.err.println("Number of transitions: " + transitionIndex.size());
-    System.err.println("Feature space will be " + (featureIndex.size() * transitionIndex.size()));
+      // TODO: allow different feature factories, such as for different languages
+      FeatureFactory featureFactory = new BasicFeatureFactory();
 
-    double[][] featureWeights = new double[transitionIndex.size()][featureIndex.size()];
-    for (int i = 0; i < numTrainingIterations; ++i) {
-      int numCorrect = 0;
-      int numWrong = 0;
+      Index<Transition> transitionIndex = new HashIndex<Transition>();
+      Index<String> featureIndex = new HashIndex<String>();
       for (Tree tree : binarizedTrees) {
         List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
+        transitionIndex.addAll(transitions);
+
         State state = initialStateFromGoldTagTree(tree);
         for (Transition transition : transitions) {
-          int transitionNum = transitionIndex.indexOf(transition);
           Set<String> features = featureFactory.featurize(state);
-          int predictedNum = findHighestScoringTransition(featureIndex, transitionIndex, featureWeights, state, features, false);
-          Transition predicted = transitionIndex.get(predictedNum);
-          if (transitionNum == predictedNum) {
-            numCorrect++;
-          } else {
-            numWrong++;
-            for (String feature : features) {
-              int featureNum = featureIndex.indexOf(feature);
-              // TODO: allow weighted features, weighted training, etc
-              featureWeights[predictedNum][featureNum] -= 1.0;
-              featureWeights[transitionNum][featureNum] += 1.0;
-            }
-          }
+          featureIndex.addAll(features);
           state = transition.apply(state);
         }
       }
-      System.err.println("Iteration " + i + " complete");
-      System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
+
+      System.err.println("Number of unique features: " + featureIndex.size());
+      System.err.println("Number of transitions: " + transitionIndex.size());
+      System.err.println("Feature space will be " + (featureIndex.size() * transitionIndex.size()));
+      
+      double[][] featureWeights = new double[transitionIndex.size()][featureIndex.size()];
+      for (int i = 0; i < numTrainingIterations; ++i) {
+        int numCorrect = 0;
+        int numWrong = 0;
+        for (Tree tree : binarizedTrees) {
+          List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
+          State state = initialStateFromGoldTagTree(tree);
+          for (Transition transition : transitions) {
+            int transitionNum = transitionIndex.indexOf(transition);
+            Set<String> features = featureFactory.featurize(state);
+            int predictedNum = findHighestScoringTransition(featureIndex, transitionIndex, featureWeights, state, features, false);
+            Transition predicted = transitionIndex.get(predictedNum);
+            if (transitionNum == predictedNum) {
+              numCorrect++;
+            } else {
+              numWrong++;
+              for (String feature : features) {
+                int featureNum = featureIndex.indexOf(feature);
+                // TODO: allow weighted features, weighted training, etc
+                featureWeights[predictedNum][featureNum] -= 1.0;
+                featureWeights[transitionNum][featureNum] += 1.0;
+              }
+            }
+            state = transition.apply(state);
+          }
+        }
+        System.err.println("Iteration " + i + " complete");
+        System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
+      }
+
+      parser = new ShiftReduceParser(transitionIndex, featureIndex, featureWeights, op, featureFactory);
+
+      if (serializedPath != null) {
+        try {
+          IOUtils.writeObjectToFile(parser, serializedPath);
+        } catch (IOException e) {
+          throw new RuntimeIOException(e);
+        }
+      }
     }
 
-    ShiftReduceParser parser = new ShiftReduceParser(transitionIndex, featureIndex, featureWeights);
-    if (serializedPath != null) {
+    if (serializedPath != null && parser == null) {
       try {
-        IOUtils.writeObjectToFile(parser, serializedPath);
+        parser = IOUtils.readObjectFromFile(serializedPath);
       } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      } catch (ClassNotFoundException e) {
         throw new RuntimeIOException(e);
       }
     }
 
     if (testTreebankPath != null) {
       System.err.println("Loading test trees from " + testTreebankPath);
-      Treebank testTreebank = op.tlpParams.memoryTreebank();
+      Treebank testTreebank = parser.op.tlpParams.memoryTreebank();
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       for (Tree tree : testTreebank) {
         State state = initialStateFromGoldTagTree(tree);
         List<Transition> transitions = Generics.newArrayList();
         while (!state.finished) {
-          Set<String> features = featureFactory.featurize(state);
-          int predictedNum = findHighestScoringTransition(featureIndex, transitionIndex, featureWeights, state, features, true);
-          Transition transition = transitionIndex.get(predictedNum);
+          Set<String> features = parser.featureFactory.featurize(state);
+          int predictedNum = findHighestScoringTransition(parser.featureIndex, parser.transitionIndex, parser.featureWeights, state, features, true);
+          Transition transition = parser.transitionIndex.get(predictedNum);
           state = transition.apply(state);
           transitions.add(transition);
           /*
