@@ -65,8 +65,10 @@ public class ParserAnnotator implements Annotator {
 
   private final boolean saveBinaryTrees;
 
+  public static final String[] DEFAULT_FLAGS = { "-retainTmpSubcategories" };
+
   public ParserAnnotator(boolean verbose, int maxSent) {
-    this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, StringUtils.EMPTY_STRING_ARRAY);
+    this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, DEFAULT_FLAGS);
   }
 
   public ParserAnnotator(String parserLoc,
@@ -107,6 +109,7 @@ public class ParserAnnotator implements Annotator {
     }
     this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 
+    // will use DEFAULT_FLAGS if the flags are not set in the properties
     String[] flags = convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
     this.parser = loadModel(model, VERBOSE, flags);
     this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
@@ -170,7 +173,9 @@ public class ParserAnnotator implements Annotator {
   }
 
   public static String[] convertFlagsToArray(String parserFlags) {
-    if (parserFlags == null || parserFlags.trim().equals("")) {
+    if (parserFlags == null) {
+      return DEFAULT_FLAGS;
+    } else if (parserFlags.trim().equals("")) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
       return parserFlags.trim().split("\\s+");
@@ -188,9 +193,9 @@ public class ParserAnnotator implements Annotator {
       }
       System.err.println();
     }
-    ParserGrammar result = ParserGrammar.loadModel(parserLoc);
-    result.setOptionFlags(result.defaultCoreNLPFlags());
-    result.setOptionFlags(flags);
+    ParserGrammar result = ParserGrammar.loadModel(parserLoc, flags);
+    // lp.setOptionFlags(new String[]{"-outputFormat", "penn,typedDependenciesCollapsed", "-retainTmpSubcategories"});
+    // treePrint = lp.getTreePrint();
 
     return result;
   }
