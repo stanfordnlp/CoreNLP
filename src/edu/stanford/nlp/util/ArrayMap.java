@@ -102,6 +102,14 @@ public final class ArrayMap<K,V> extends AbstractMap<K,V> implements Serializabl
     }
   }
 
+  public static <K, V> ArrayMap<K, V> newArrayMap() {
+    return new ArrayMap<K, V>();
+  }
+
+  public static <K, V> ArrayMap<K, V> newArrayMap(int capacity) {
+    return new ArrayMap<K, V>(capacity);
+  }
+
   @Override
   public Set<Map.Entry<K,V>> entrySet() {
     //throw new java.lang.UnsupportedOperationException();
