@@ -73,7 +73,12 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   String[] trim(String[] p){
     for(int i = 0 ; i < p.length; i++){
-      p[i] = p[i].trim();
+      String trimmed = p[i].trim();
+      if(!trimmed.equals(p[i]))
+      {
+        System.out.println("trimmed is " + trimmed + " and p[i] is " + p[i]);
+      }
+      p[i] = trimmed;
     }
     return p;
   }
@@ -222,7 +227,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)" + Pattern.quote("\\E")+"/\\s*" + Pattern.quote("}")
       + "\\s*" + Pattern.quote("]"));
-  static Pattern p2 = Pattern.compile(Pattern.quote("\\s*[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
+  static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
       + Pattern.quote("]"));
 
   public String[] getSimplerTokens(String[] p) {
@@ -250,7 +255,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
         else if(p[i].startsWith("$STOP"))
           sim[i] = "SW";
         else
-          throw new RuntimeException("Cannot understand " + p[i]);
+          throw new RuntimeException("Cannot understand " + p[i] + "  the thing ends with " + p[i].charAt(p[i].length() -1) + " character");
       } 
     }
     return sim;
