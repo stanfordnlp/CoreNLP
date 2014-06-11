@@ -1,17 +1,15 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.Execution.Option;
 
@@ -69,7 +67,7 @@ public abstract class PhraseScorer {
       if (usePatternWeights) {
         weight = allSelectedPatterns.getCount(en2.getKey());
         if (weight == 0)
-          throw new RuntimeException("How is weight zero for " + en2.getKey());
+          throw new RuntimeException("How is weight zero for " + en2.getKey() + ". Weights are " + Counters.toSortedString(allSelectedPatterns, allSelectedPatterns.size(), "%1$s:%2$f", "\n"));
       }
       total += weight;
     }
@@ -136,7 +134,6 @@ public abstract class PhraseScorer {
       constVars.getWordShapeCache().put(word, wordShape);
     }
     double score = constVars.getWordShapesForLabels().get(label).getCount(wordShape) / (constVars.getWordShapesForLabels().get(label).totalCount() + 1);
-    System.out.println("score for " + word + " is " + score + ". For all labeled words " + constVars.getWordShapesForLabels().get(label));
     return score;
   }
   
