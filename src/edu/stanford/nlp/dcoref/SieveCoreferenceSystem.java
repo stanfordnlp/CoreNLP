@@ -37,7 +37,6 @@ import java.io.ObjectInputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -57,6 +56,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
+import edu.stanford.nlp.dcoref.CorefChain.MentionComparator;
 import edu.stanford.nlp.dcoref.ScorerBCubed.BCubedType;
 import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch;
@@ -76,7 +76,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.NewlineLogFormatter;
-
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Multi-pass Sieve coreference resolution system (see EMNLP 2010 paper).
@@ -343,7 +343,6 @@ public class SieveCoreferenceSystem {
     initializeAndRunCoref(props);
   }
 
-  /** Returns the name of the log file that this method writes. */
   public static String initializeAndRunCoref(Properties props) throws Exception {
     String timeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
 
@@ -399,9 +398,7 @@ public class SieveCoreferenceSystem {
         CorefMentionFinder mentionFinder;
         if (mentionFinderPropFilename != null) {
           Properties mentionFinderProps = new Properties();
-          FileInputStream fis = new FileInputStream(mentionFinderPropFilename);
-          mentionFinderProps.load(fis);
-          fis.close();
+          mentionFinderProps.load(new FileInputStream(mentionFinderPropFilename));
           mentionFinder = (CorefMentionFinder) Class.forName(mentionFinderClass).getConstructor(Properties.class).newInstance(mentionFinderProps);
         } else {
           mentionFinder = (CorefMentionFinder) Class.forName(mentionFinderClass).newInstance();
@@ -557,7 +554,7 @@ public class SieveCoreferenceSystem {
     String scoresFile = props.getProperty(Constants.SCORE_FILE_PROP);
     if (scoresFile != null) {
       PrintWriter pw = IOUtils.getPrintWriter(scoresFile);
-      pw.println((new DecimalFormat("#.##")).format(finalScore));
+      pw.println(finalScore);
       pw.close();
     }
 
@@ -942,7 +939,6 @@ public class SieveCoreferenceSystem {
                 int removeID = c1.clusterID;
                 CorefCluster.mergeClusters(c2, c1);
                 document.mergeIncompatibles(c2, c1);
-                document.mergeAcronymCache(c2, c1);
 //                logger.warning("Removing cluster " + removeID + ", merged with " + c2.getClusterID());
                 corefClusters.remove(removeID);
                 break LOOP;
@@ -1040,17 +1036,19 @@ public class SieveCoreferenceSystem {
     return res;
   }
   public static void runConllEval(String conllMentionEvalScript,
-      String goldFile, String predictFile, String evalFile, String errFile) throws IOException {
+      String goldFile, String predictFile, String evalFile, String errFile) throws IOException
+      {
     ProcessBuilder process = new ProcessBuilder(conllMentionEvalScript, "all", goldFile, predictFile);
     PrintWriter out = new PrintWriter(new FileOutputStream(evalFile));
     PrintWriter err = new PrintWriter(new FileOutputStream(errFile));
     SystemUtils.run(process, out, err);
     out.close();
     err.close();
-  }
+      }
 
   public static String getConllEvalSummary(String conllMentionEvalScript,
-      String goldFile, String predictFile) throws IOException {
+      String goldFile, String predictFile) throws IOException
+      {
     ProcessBuilder process = new ProcessBuilder(conllMentionEvalScript, "all", goldFile, predictFile, "none");
     StringOutputStream errSos = new StringOutputStream();
     StringOutputStream outSos = new StringOutputStream();
@@ -1061,18 +1059,11 @@ public class SieveCoreferenceSystem {
     err.close();
     String summary = outSos.toString();
     String errStr = errSos.toString();
-    if ( ! errStr.isEmpty()) {
+    if (errStr.length() > 0) {
       summary += "\nERROR: " + errStr;
     }
-    Pattern pattern = Pattern.compile("\\d+.\\d\\d\\d+");
-    DecimalFormat df = new DecimalFormat("#.##");
-    Matcher matcher = pattern.matcher(summary);
-    while(matcher.find()) {
-      String number = matcher.group();
-      summary = summary.replaceFirst(number, df.format(Double.parseDouble(number)));
-    }
     return summary;
-  }
+      }
 
   /** Print logs for error analysis */
   public void printTopK(Logger logger, Document document, Semantics semantics) {
@@ -1132,7 +1123,6 @@ public class SieveCoreferenceSystem {
             src.set(1,j);
 
             IntTuple ant = positions.get(antecedent);
-            if(ant==null) continue;
             //correct=(chosen==goldLinks.contains(new Pair<IntTuple, IntTuple>(src,ant)));
             boolean coreferent = golds.containsKey(m.mentionID)
             && golds.containsKey(antecedent.mentionID)
@@ -1464,7 +1454,7 @@ public class SieveCoreferenceSystem {
       F1s[i++] = Double.parseDouble(f1Matcher.group(1));
     }
     double finalScore = (F1s[0]+F1s[1]+F1s[3])/3;
-    logger.info("Final conll score ((muc+bcub+ceafe)/3) = " + (new DecimalFormat("#.##")).format(finalScore));
+    logger.info("Final conll score ((muc+bcub+ceafe)/3) = " + finalScore);
   }
 
   private static double getFinalConllScore(String summary, String metricType, String scoreType) {
@@ -1521,7 +1511,7 @@ public class SieveCoreferenceSystem {
     } else {
         throw new IllegalArgumentException("Invalid sub score type:" + subScoreType);
     }
-    logger.info("Final score (" + scoreDesc + ") " + subScoreType + " = " + (new DecimalFormat("#.##")).format(finalScore));
+    logger.info("Final score (" + scoreDesc + ") " + subScoreType + " = " + finalScore);
     return finalScore;
   }
 
@@ -1684,7 +1674,7 @@ public class SieveCoreferenceSystem {
   public static List<Pair<IntTuple, IntTuple>> getLinks(
       Map<Integer, CorefChain> result) {
     List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple, IntTuple>>();
-    CorefChain.CorefMentionComparator comparator = new CorefChain.CorefMentionComparator();
+    MentionComparator comparator = new MentionComparator();
 
     for(CorefChain c : result.values()) {
       List<CorefMention> s = c.getMentionsInTextualOrder();

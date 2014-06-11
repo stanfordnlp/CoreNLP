@@ -6,19 +6,19 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
-
-import org.ejml.simple.SimpleMatrix;
+import org.ejml.simple.*;
 import org.ejml.data.DenseMatrix64F;
-
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.rnn.RNNUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryGrammar;
 import edu.stanford.nlp.parser.lexparser.BinaryRule;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -31,9 +31,9 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Maps;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;
-
 
 public class DVModel implements Serializable {
   // The following data structures are all transient because the
@@ -44,14 +44,14 @@ public class DVModel implements Serializable {
   // binary nodes and unary nodes.
   // The indices are the children categories.  For binaryTransform, for
   // example, we have a matrix for each type of child that appears.
-  public transient TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform;
-  public transient Map<String, SimpleMatrix> unaryTransform;
+  transient public TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform;
+  transient public Map<String, SimpleMatrix> unaryTransform;
 
   // score matrices for each node type
-  public transient TwoDimensionalMap<String, String, SimpleMatrix> binaryScore;
-  public transient Map<String, SimpleMatrix> unaryScore;
+  transient public TwoDimensionalMap<String, String, SimpleMatrix> binaryScore;
+  transient public Map<String, SimpleMatrix> unaryScore;
 
-  public transient Map<String, SimpleMatrix> wordVectors;
+  transient public Map<String, SimpleMatrix> wordVectors;
 
   // cache these for easy calculation of "theta" parameter size
   int numBinaryMatrices, numUnaryMatrices;
@@ -82,14 +82,12 @@ public class DVModel implements Serializable {
   static final boolean TRAIN_WORD_VECTORS = true;
 
   private static final Function<SimpleMatrix, DenseMatrix64F> convertSimpleMatrix = new Function<SimpleMatrix, DenseMatrix64F>() {
-    @Override
     public DenseMatrix64F apply(SimpleMatrix matrix) {
       return matrix.getMatrix();
     }
   };
 
   private static final Function<DenseMatrix64F, SimpleMatrix> convertDenseMatrix = new Function<DenseMatrix64F, SimpleMatrix>() {
-    @Override
     public SimpleMatrix apply(DenseMatrix64F matrix) {
       return SimpleMatrix.wrap(matrix);
     }
@@ -101,7 +99,7 @@ public class DVModel implements Serializable {
     TwoDimensionalMap<String, String, DenseMatrix64F> binaryT = ErasureUtils.uncheckedCast(in.readObject());
     binaryTransform = TwoDimensionalMap.treeMap();
     binaryTransform.addAll(binaryT, convertDenseMatrix);
-
+    
     Map<String, DenseMatrix64F> unaryT = ErasureUtils.uncheckedCast(in.readObject());
     unaryTransform = Generics.newTreeMap();
     Maps.addAll(unaryTransform, unaryT, convertDenseMatrix);
@@ -118,7 +116,7 @@ public class DVModel implements Serializable {
     wordVectors = Generics.newTreeMap();
     Maps.addAll(wordVectors, wordV, convertDenseMatrix);
 
-    identity = SimpleMatrix.identity(numRows);
+    identity = SimpleMatrix.identity(numRows);    
   }
 
   private void writeObject(ObjectOutputStream out) throws IOException {
@@ -127,7 +125,7 @@ public class DVModel implements Serializable {
     TwoDimensionalMap<String, String, DenseMatrix64F> binaryT = TwoDimensionalMap.treeMap();
     binaryT.addAll(binaryTransform, convertSimpleMatrix);
     out.writeObject(binaryT);
-
+    
     Map<String, DenseMatrix64F> unaryT = Generics.newTreeMap();
     Maps.addAll(unaryT, unaryTransform, convertSimpleMatrix);
     out.writeObject(unaryT);
@@ -135,7 +133,7 @@ public class DVModel implements Serializable {
     TwoDimensionalMap<String, String, DenseMatrix64F> binaryS = TwoDimensionalMap.treeMap();
     binaryS.addAll(binaryScore, convertSimpleMatrix);
     out.writeObject(binaryS);
-
+    
     Map<String, DenseMatrix64F> unaryS = Generics.newTreeMap();
     Maps.addAll(unaryS, unaryScore, convertSimpleMatrix);
     out.writeObject(unaryS);
@@ -153,7 +151,7 @@ public class DVModel implements Serializable {
     this.op = op;
 
     rand = new Random(op.trainOptions.dvSeed);
-
+    
     readWordVectors();
 
     // Binary matrices will be n*2n+1, unary matrices will be n*n+1
@@ -176,17 +174,17 @@ public class DVModel implements Serializable {
     unaryTransformSize = numRows * (numCols + 1);
     binaryScoreSize = numCols;
     unaryScoreSize = numCols;
-
+    
     if (op.trainOptions.useContextWords) {
       binaryTransformSize += numRows * numCols * 2;
       unaryTransformSize += numRows * numCols * 2;
     }
 
     identity = SimpleMatrix.identity(numRows);
-
+    
     for (UnaryRule unaryRule : unaryGrammar) {
       // only make one matrix for each parent state, and only use the
-      // basic category for that
+      // basic category for that      
       String childState = stateIndex.get(unaryRule.child);
       String childBasic = basicCategory(childState);
 
@@ -235,7 +233,7 @@ public class DVModel implements Serializable {
     this.numRows = op.lexOptions.numHid;
     this.numCols = op.lexOptions.numHid;
 
-    this.identity = SimpleMatrix.identity(numRows);
+    this.identity = SimpleMatrix.identity(numRows);    
 
     this.rand = new Random(op.trainOptions.dvSeed);
   }
@@ -295,13 +293,13 @@ public class DVModel implements Serializable {
     if (unaryTransform.get(childBasic) != null) {
       return;
     }
-
+    
     ++numUnaryMatrices;
 
     // scoring matrix
     SimpleMatrix score = SimpleMatrix.random(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
-    unaryScore.put(childBasic, score.scale(op.trainOptions.scalingForInit));
-
+    unaryScore.put(childBasic, score.scale(op.trainOptions.scalingForInit));      
+    
     SimpleMatrix transform;
     if (op.trainOptions.useContextWords) {
       transform = new SimpleMatrix(numRows, numCols * 3 + 1);
@@ -319,13 +317,13 @@ public class DVModel implements Serializable {
     if (binaryTransform.get(leftBasic, rightBasic) != null) {
       return;
     }
-
+      
     ++numBinaryMatrices;
 
     // scoring matrix
     SimpleMatrix score = SimpleMatrix.random(1, numCols, -1.0/Math.sqrt((double)numCols),1.0/Math.sqrt((double)numCols),rand);
-    binaryScore.put(leftBasic, rightBasic, score.scale(op.trainOptions.scalingForInit));
-
+    binaryScore.put(leftBasic, rightBasic, score.scale(op.trainOptions.scalingForInit));      
+    
     SimpleMatrix binary;
     if (op.trainOptions.useContextWords) {
       binary = new SimpleMatrix(numRows, numCols * 4 + 1);
@@ -340,7 +338,7 @@ public class DVModel implements Serializable {
     binary.insertIntoThis(0, numCols, right);
     binaryTransform.put(leftBasic, rightBasic, binary.scale(op.trainOptions.scalingForInit));
   }
-
+  
   public void setRulesForTrainingSet(List<Tree> sentences, Map<Tree, byte[]> compressedTrees) {
     TwoDimensionalSet<String, String> binaryRules = TwoDimensionalSet.treeSet();
     Set<String> unaryRules = new HashSet<String>();
@@ -493,7 +491,7 @@ public class DVModel implements Serializable {
   static final Pattern CHINESE_PERCENT_PATTERN = Pattern.compile("百分之[〇０零一二三四五六七八九０１２３４５６７８９十点]+");
 
   /**
-   * Some word vectors are trained with DG representing number.
+   * Some word vectors are trained with DG representing number.  
    * We mix all of those into the unknown number vectors.
    */
   static final Pattern DG_PATTERN = Pattern.compile(".*DG.*");
@@ -512,21 +510,40 @@ public class DVModel implements Serializable {
     int chineseNumberCount = 0;
     int chinesePercentCount = 0;
 
-    Map<String, SimpleMatrix> rawWordVectors = RNNUtils.readRawWordVectors(op.lexOptions.wordVectorFile, op.lexOptions.numHid);
-
-    for (String word : rawWordVectors.keySet()) {
-      SimpleMatrix vector = rawWordVectors.get(word);
-
+    System.err.println("Reading in the word vector file: " + op.lexOptions.wordVectorFile);
+    int dimOfWords = 0;
+    boolean warned = false;
+    for (String line : IOUtils.readLines(op.lexOptions.wordVectorFile, "utf-8")) {
+      String[]  lineSplit = line.split("\\s+");
+      String word = lineSplit[0];
       if (op.wordFunction != null) {
         word = op.wordFunction.apply(word);
       }
-
+      dimOfWords = lineSplit.length - 1;
       if (op.lexOptions.numHid <= 0) {
-        op.lexOptions.numHid = vector.getNumElements();
+        op.lexOptions.numHid = dimOfWords;
+        System.err.println("Dimensionality of numHid not set.  The length of the word vectors in the given file appears to be " + dimOfWords);
       }
+      // the first entry is the word itself
+      // the other entries will all be entries in the word vector
+      if (dimOfWords > op.lexOptions.numHid) {
+        if (!warned) {
+          warned = true;
+          System.err.println("WARNING: Dimensionality of numHid parameter and word vectors do not match, deleting word vector dimensions to fit!");
+        }
+        dimOfWords = op.lexOptions.numHid;
+      } else if (dimOfWords < op.lexOptions.numHid) {
+        throw new RuntimeException("Word vectors file has dimension too small for requested numHid of " + op.lexOptions.numHid);
+      }
+      double vec[][] = new double[dimOfWords][1];
+      for (int i = 1; i <= dimOfWords; i++) {
+        vec[i-1][0] = Double.parseDouble(lineSplit[i]);
+      }
+      SimpleMatrix vector = new SimpleMatrix(vec);
+      wordVectors.put(word, vector);
 
       // TODO: factor out all of these identical blobs
-      if (op.trainOptions.unknownNumberVector &&
+      if (op.trainOptions.unknownNumberVector && 
           (NUMBER_PATTERN.matcher(word).matches() || DG_PATTERN.matcher(word).matches())) {
         ++numberCount;
         if (unknownNumberVector == null) {
@@ -554,7 +571,7 @@ public class DVModel implements Serializable {
         }
       }
 
-      if (op.trainOptions.unknownChineseNumberVector &&
+      if (op.trainOptions.unknownChineseNumberVector && 
           (CHINESE_NUMBER_PATTERN.matcher(word).matches() || DG_PATTERN.matcher(word).matches())) {
         ++chineseNumberCount;
         if (unknownChineseNumberVector == null) {
@@ -583,7 +600,7 @@ public class DVModel implements Serializable {
     if (unknownWordVector == null) {
       throw new RuntimeException("Unknown word vector not specified in the word vector file");
     }
-
+    
     if (op.trainOptions.unknownNumberVector) {
       if (numberCount > 0) {
         unknownNumberVector = unknownNumberVector.divide(numberCount);
@@ -592,7 +609,7 @@ public class DVModel implements Serializable {
       }
       wordVectors.put(UNKNOWN_NUMBER, unknownNumberVector);
     }
-
+    
     if (op.trainOptions.unknownCapsVector) {
       if (capsCount > 0) {
         unknownCapsVector = unknownCapsVector.divide(capsCount);
@@ -651,49 +668,106 @@ public class DVModel implements Serializable {
     return totalSize;
   }
 
+  
+  public static double[] paramsToVector(double scale, int totalSize, Iterator<SimpleMatrix> ... matrices) {
+    double[] theta = new double[totalSize];
+    int index = 0;
+    for (Iterator<SimpleMatrix> matrixIterator : matrices) {
+      while (matrixIterator.hasNext()) {
+        SimpleMatrix matrix = matrixIterator.next();
+        int numElements = matrix.getNumElements();
+        for (int i = 0; i < numElements; ++i) {
+          theta[index] = matrix.get(i) * scale;
+          ++index;
+        }
+      }
+    }
+    if (index != totalSize) {
+      throw new AssertionError("Did not entirely fill the theta vector: expected " + totalSize + " used " + index);
+    }
+    return theta;
+  }  
+  
+  
+  public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
+    double[] theta = new double[totalSize];
+    int index = 0;
+    for (Iterator<SimpleMatrix> matrixIterator : matrices) {
+      while (matrixIterator.hasNext()) {
+        SimpleMatrix matrix = matrixIterator.next();
+        int numElements = matrix.getNumElements();
+        //System.out.println(Integer.toString(numElements)); // to know what matrices are
+        for (int i = 0; i < numElements; ++i) {
+          theta[index] = matrix.get(i);
+          ++index;
+        }
+      }
+    }
+    if (index != totalSize) {
+      throw new AssertionError("Did not entirely fill the theta vector: expected " + totalSize + " used " + index);
+    }
+    return theta;
+  }
 
   @SuppressWarnings("unchecked")
   public double[] paramsToVector(double scale) {
     int totalSize = totalParamSize();
     if (TRAIN_WORD_VECTORS) {
-      return RNNUtils.paramsToVector(scale, totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator(),
-                                     wordVectors.values().iterator());
+      return paramsToVector(scale, totalSize, 
+                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                            binaryScore.valueIterator(), unaryScore.values().iterator(),
+                            wordVectors.values().iterator());
     } else {
-      return RNNUtils.paramsToVector(scale, totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator());
+      return paramsToVector(scale, totalSize, 
+                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                            binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
-
-
+  
+  
   @SuppressWarnings("unchecked")
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
     if (TRAIN_WORD_VECTORS) {
-      return RNNUtils.paramsToVector(totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator(),
-                                     wordVectors.values().iterator());
+      return paramsToVector(totalSize, 
+                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                            binaryScore.valueIterator(), unaryScore.values().iterator(),
+                            wordVectors.values().iterator());
     } else {
-      return RNNUtils.paramsToVector(totalSize,
-                                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                                     binaryScore.valueIterator(), unaryScore.values().iterator());
+      return paramsToVector(totalSize, 
+                            binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                            binaryScore.valueIterator(), unaryScore.values().iterator());
+    }
+  }
+
+  public static void vectorToParams(double[] theta, Iterator<SimpleMatrix> ... matrices) {
+    int index = 0;
+    for (Iterator<SimpleMatrix> matrixIterator : matrices) {
+      while (matrixIterator.hasNext()) {
+        SimpleMatrix matrix = matrixIterator.next();
+        int numElements = matrix.getNumElements();
+        for (int i = 0; i < numElements; ++i) {
+          matrix.set(i, theta[index]);
+          ++index;
+        }        
+      }
+    }
+    if (index != theta.length) {
+      throw new AssertionError("Did not entirely use the theta vector");
     }
   }
 
   @SuppressWarnings("unchecked")
   public void vectorToParams(double[] theta) {
     if (TRAIN_WORD_VECTORS) {
-      RNNUtils.vectorToParams(theta,
-                              binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                              binaryScore.valueIterator(), unaryScore.values().iterator(),
-                              wordVectors.values().iterator());
+      vectorToParams(theta, 
+                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                     binaryScore.valueIterator(), unaryScore.values().iterator(),
+                     wordVectors.values().iterator());
     } else {
-      RNNUtils.vectorToParams(theta,
-                              binaryTransform.valueIterator(), unaryTransform.values().iterator(),
-                              binaryScore.valueIterator(), unaryScore.values().iterator());
+      vectorToParams(theta, 
+                     binaryTransform.valueIterator(), unaryTransform.values().iterator(),
+                     binaryScore.valueIterator(), unaryScore.values().iterator());
     }
   }
 
@@ -826,7 +900,7 @@ public class DVModel implements Serializable {
     }
   }
 
-
+  
   public int binaryTransformIndex(String leftChild, String rightChild) {
     int pos = 0;
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> binary : binaryTransform) {

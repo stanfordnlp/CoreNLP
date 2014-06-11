@@ -167,7 +167,7 @@ public class TrieMapMatcher<K,V> {
           if (i > 0) {
             K t = (i < target.size())? target.get(i-1):null;
             for (PartialApproxMatch<K,V> pam:prevMatches[0]) {
-              PartialApproxMatch<K,V> npam = pam.withMatch(costFunction, costFunction.cost(t, null, pam.getMatchedLength()), t, null);
+              PartialApproxMatch<K,V> npam = pam.withMatch(costFunction, costFunction.cost(t, null), t, null);
               if (npam.cost <= maxCost) {
                 curMatches[0].add(npam);
               }
@@ -464,7 +464,7 @@ public class TrieMapMatcher<K,V> {
                 res.value,
                 lastMultimatchedOriginalStartIndex, res.end
         ));
-        res.cost += costFunction.multiMatchDeltaCost(newlyMatched, res.value, multimatches, res.multimatches);
+        res.cost += costFunction.multiMatchDeltaCost(newlyMatched, res.value, res.multimatches.size());
         res.lastMultimatchedMatchedStartIndex = res.matched.size();
         res.lastMultimatchedOriginalStartIndex = res.end;
         // Reset current value/key being matched
@@ -590,7 +590,7 @@ public class TrieMapMatcher<K,V> {
                              MatchCostFunction<K,V> costFunction,
                              PartialApproxMatch<K,V> pam, K a, K b,
                              boolean multimatch, boolean complete) {
-    double deltaCost = costFunction.cost(a,b,pam.getMatchedLength());
+    double deltaCost = costFunction.cost(a,b);
     double newCost = pam.cost + deltaCost;
     if (queue.maxCost != Double.MAX_VALUE && newCost > queue.maxCost) return false;
     if (best.size() >= queue.maxSize && newCost > best.topCost()) return false;
@@ -627,17 +627,7 @@ public class TrieMapMatcher<K,V> {
     @Override
     public int compare(PartialApproxMatch o1, PartialApproxMatch o2) {
       if (o1.cost == o2.cost) {
-        if (o1.matched.size() == o2.matched.size()) {
-          int m1 = (o1.multimatches != null)? o1.multimatches.size():0;
-          int m2 = (o2.multimatches != null)? o2.multimatches.size():0;
-          if (m1 == m2) {
-            return 0;
-          } else return (m1 < m2)? -1:1;
-        } else return (o1.matched.size() < o2.matched.size())? -1:1;
-      } else if (Double.isNaN(o1.cost)) {
-        return -1;
-      } else if (Double.isNaN(o2.cost)) {
-        return 1;
+        return 0;
       } else return (o1.cost > o2.cost)? -1:1;
     }
   };

@@ -19,15 +19,7 @@ import edu.stanford.nlp.util.Pair;
 
 public class Dictionaries {
 
-  public enum MentionType {
-    PRONOMINAL(1), NOMINAL(3), PROPER(4), LIST(2);
-    /**
-     * A higher representativeness means that this type of mention is more preferred for choosing
-     * the representative mention. See {@link Mention#moreRepresentativeThan(Mention)}.
-     */
-    public final int representativeness;
-    MentionType(int representativeness) { this.representativeness = representativeness; }
-  }
+  public enum MentionType { PRONOMINAL, NOMINAL, PROPER, LIST }
 
   public enum Gender { MALE, FEMALE, NEUTRAL, UNKNOWN }
 
@@ -257,9 +249,6 @@ public class Dictionaries {
   }
 
   private static void getWordsFromFile(String filename, Set<String> resultSet, boolean lowercase) throws IOException {
-    if(filename==null) {
-      return ;
-    }
     BufferedReader reader = IOUtils.readerFromString(filename);
     while(reader.ready()) {
       if(lowercase) resultSet.add(reader.readLine().toLowerCase());
@@ -316,12 +305,8 @@ public class Dictionaries {
     }
   }
 
-  /** 
-   * load Bergsma and Lin (2006) gender and number list
-   * */
-  private void loadGenderNumber(String file, String neutralWordsFile){
+  private void loadGenderNumber(String file){
     try {
-      getWordsFromFile(neutralWordsFile, neutralWords, false);
       BufferedReader reader = IOUtils.readerFromString(file);
       String line;
       while ((line = reader.readLine())!=null){
@@ -339,6 +324,21 @@ public class Dictionaries {
       reader.close();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
+    }
+  }
+  private void loadExtraGender(String file){
+    BufferedReader reader = null;
+    try {
+      reader = IOUtils.readerFromString(file);
+      while(reader.ready()) {
+        String[] split = reader.readLine().split("\t");
+        if(split[1].equals("MALE")) maleWords.add(split[0]);
+        else if(split[1].equals("FEMALE")) femaleWords.add(split[0]);
+      }
+    } catch (IOException e){
+      throw new RuntimeIOException(e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
@@ -411,15 +411,18 @@ public class Dictionaries {
     this(props.getProperty(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM),
         props.getProperty(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE),
         props.getProperty(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE),
-        props.getProperty(Constants.MALE_PROP),
-        props.getProperty(Constants.NEUTRAL_PROP),
-        props.getProperty(Constants.FEMALE_PROP),
-        props.getProperty(Constants.PLURAL_PROP),
-        props.getProperty(Constants.SINGULAR_PROP),
+        props.getProperty(Constants.MALE_PROP, DefaultPaths.DEFAULT_DCOREF_MALE),
+        props.getProperty(Constants.NEUTRAL_PROP, DefaultPaths.DEFAULT_DCOREF_NEUTRAL),
+        props.getProperty(Constants.FEMALE_PROP, DefaultPaths.DEFAULT_DCOREF_FEMALE),
+        props.getProperty(Constants.PLURAL_PROP, DefaultPaths.DEFAULT_DCOREF_PLURAL),
+        props.getProperty(Constants.SINGULAR_PROP, DefaultPaths.DEFAULT_DCOREF_SINGULAR),
         props.getProperty(Constants.STATES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES),
         props.getProperty(Constants.GENDER_NUMBER_PROP, DefaultPaths.DEFAULT_DCOREF_GENDER_NUMBER),
         props.getProperty(Constants.COUNTRIES_PROP, DefaultPaths.DEFAULT_DCOREF_COUNTRIES),
         props.getProperty(Constants.STATES_PROVINCES_PROP, DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES),
+        props.getProperty(Constants.EXTRA_GENDER_PROP, DefaultPaths.DEFAULT_DCOREF_EXTRA_GENDER),
+        Boolean.parseBoolean(props.getProperty(Constants.BIG_GENDER_NUMBER_PROP, "false")) ||
+        Boolean.parseBoolean(props.getProperty(Constants.REPLICATECONLL_PROP, "false")),
         props.getProperty(Constants.SIEVES_PROP, Constants.SIEVEPASSES).contains("CorefDictionaryMatch"),
         new String[]{DefaultPaths.DEFAULT_DCOREF_DICT1, DefaultPaths.DEFAULT_DCOREF_DICT2,
           DefaultPaths.DEFAULT_DCOREF_DICT3, DefaultPaths.DEFAULT_DCOREF_DICT4},
@@ -438,26 +441,21 @@ public class Dictionaries {
     os.append(Constants.INANIMATE_PROP + ":" +
             props.getProperty(Constants.INANIMATE_PROP,
                     DefaultPaths.DEFAULT_DCOREF_INANIMATE));
-    if(props.containsKey(Constants.MALE_PROP)) {
-      os.append(Constants.MALE_PROP + ":" +
-            props.getProperty(Constants.MALE_PROP));
-    }
-    if(props.containsKey(Constants.NEUTRAL_PROP)) {
-      os.append(Constants.NEUTRAL_PROP + ":" +
-            props.getProperty(Constants.NEUTRAL_PROP));
-    }
-    if(props.containsKey(Constants.FEMALE_PROP)) {
-      os.append(Constants.FEMALE_PROP + ":" +
-            props.getProperty(Constants.FEMALE_PROP));
-    }
-    if(props.containsKey(Constants.PLURAL_PROP)) {
-      os.append(Constants.PLURAL_PROP + ":" +
-            props.getProperty(Constants.PLURAL_PROP));
-    }
-    if(props.containsKey(Constants.SINGULAR_PROP)) {
-      os.append(Constants.SINGULAR_PROP + ":" +
-            props.getProperty(Constants.SINGULAR_PROP));
-    }
+    os.append(Constants.MALE_PROP + ":" +
+            props.getProperty(Constants.MALE_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_MALE));
+    os.append(Constants.NEUTRAL_PROP + ":" +
+            props.getProperty(Constants.NEUTRAL_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_NEUTRAL));
+    os.append(Constants.FEMALE_PROP + ":" +
+            props.getProperty(Constants.FEMALE_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_FEMALE));
+    os.append(Constants.PLURAL_PROP + ":" +
+            props.getProperty(Constants.PLURAL_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_PLURAL));
+    os.append(Constants.SINGULAR_PROP + ":" +
+            props.getProperty(Constants.SINGULAR_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_SINGULAR));
     os.append(Constants.STATES_PROP + ":" +
             props.getProperty(Constants.STATES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_STATES));
@@ -470,6 +468,12 @@ public class Dictionaries {
     os.append(Constants.STATES_PROVINCES_PROP + ":" +
             props.getProperty(Constants.STATES_PROVINCES_PROP,
                     DefaultPaths.DEFAULT_DCOREF_STATES_AND_PROVINCES));
+    os.append(Constants.EXTRA_GENDER_PROP + ":" +
+            props.getProperty(Constants.EXTRA_GENDER_PROP,
+                    DefaultPaths.DEFAULT_DCOREF_EXTRA_GENDER));
+    os.append(Constants.BIG_GENDER_NUMBER_PROP + ":" +
+            props.getProperty(Constants.BIG_GENDER_NUMBER_PROP,
+                    "false"));
     os.append(Constants.REPLICATECONLL_PROP + ":" +
             props.getProperty(Constants.REPLICATECONLL_PROP,
                     "false"));
@@ -489,6 +493,8 @@ public class Dictionaries {
       String genderNumber,
       String countries,
       String states,
+      String extraGender,
+      boolean loadBigGenderNumber,
       boolean loadCorefDict,
       String[] corefDictFiles,
       String corefDictPMIFile,
@@ -496,11 +502,12 @@ public class Dictionaries {
     loadDemonymLists(demonymWords);
     loadStateAbbreviation(statesWords);
     if(Constants.USE_ANIMACY_LIST) loadAnimacyLists(animateWords, inanimateWords);
-    loadGenderLists(maleWords, neutralWords, femaleWords);
-    loadNumberLists(pluralWords, singularWords);
-    loadGenderNumber(genderNumber, neutralWords);
+    if(Constants.USE_GENDER_LIST) loadGenderLists(maleWords, neutralWords, femaleWords);
+    if(Constants.USE_NUMBER_LIST) loadNumberLists(pluralWords, singularWords);
+    if(loadBigGenderNumber) loadGenderNumber(genderNumber);
     loadCountriesLists(countries);
     loadStatesLists(states);
+    loadExtraGender(extraGender);
     setPronouns();
     if(loadCorefDict){
       loadCorefDict(corefDictFiles, corefDict);

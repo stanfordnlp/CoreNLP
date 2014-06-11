@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Reads and stores configuration information for a POS tagger.
@@ -54,9 +52,13 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
   VERBOSE = "false",
   VERBOSE_RESULTS = "true",
   SGML = "false",
+  INIT_FROM_TREES = "false",
   LANG = "",
   TOKENIZER_FACTORY = "",
   XML_INPUT = "",
+  TREE_TRANSFORMER = "",
+  TREE_NORMALIZER = "",
+  TREE_RANGE = "",
   TAG_INSIDE = "",
   APPROXIMATE = "-1.0",
   TOKENIZER_OPTIONS = "",
@@ -135,22 +137,17 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     this();
 
     /* Try and use the default properties from the model */
-    // Properties modelProps = new Properties();
-    // TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
-    if (! props.containsKey("trainFile")) {
-      String name = props.getProperty("model");
-      if (name == null) {
-        name = props.getProperty("dump");
-      }
-      if (name != null) {
-        try {
-          System.err.println("Loading default properties from tagger " + name);
-          DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(name));
-          this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
-          in.close();
-        } catch (Exception e) {
-          throw new RuntimeIOException("No such trained tagger config file found: " + name);
-        }
+    //Properties modelProps = new Properties();
+    TaggerConfig oldConfig = new TaggerConfig(); // loads default values in oldConfig
+    if (!props.containsKey("trainFile")) {
+      try {
+        System.err.println("Loading default properties from tagger " + props.getProperty("model"));
+        DataInputStream in = new DataInputStream(IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(props.getProperty("model")));
+        this.putAll(TaggerConfig.readConfig(in)); // overwrites defaults with any serialized values.
+        in.close();
+      } catch (Exception e) {
+        System.err.println("Error: No such trained tagger config file found.");
+        e.printStackTrace();
       }
     }
 
@@ -184,7 +181,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
       this.setProperty("file", props.getProperty("textFile", "").trim());
     } else if (props.containsKey("dump")) {
       this.setProperty("mode", Mode.DUMP.toString());
-      // this.setProperty("file", props.getProperty("dump").trim());
+      this.setProperty("file", props.getProperty("dump").trim());
       props.setProperty("model", props.getProperty("dump").trim());
     } else {
       this.setProperty("mode", Mode.TAG.toString());
@@ -270,6 +267,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
 
 
   public String getModel() { return getProperty("model"); }
+
+  public String getJarModel() { return getProperty("jarModel"); }
 
   public String getFile() { return getProperty("file"); }
 
@@ -429,7 +428,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     pw.println("                   model = " + getProperty("model"));
     pw.println("                    arch = " + getProperty("arch"));
     pw.println("            wordFunction = " + getProperty("wordFunction"));
-    if (this.getMode() == Mode.TRAIN || this.getMode() == Mode.DUMP) {
+    if (this.getMode() == Mode.TRAIN) {
       pw.println("               trainFile = " + getProperty("file"));
     } else if (this.getMode() == Mode.TAG) {
       pw.println("                textFile = " + getProperty("file"));
@@ -512,8 +511,9 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
    */
   private static void printGenProps(PrintStream out) {
     out.println("## Sample properties file for maxent tagger. This file is used for three main");
-    out.println("## operations: training, testing, and tagging. It may also be used to dump");
-    out.println("## the contents of a model.");
+    out.println("## operations: training, testing, and tagging. It may also be used to convert");
+    out.println("## an old multifile tagger to a single file tagger or to dump the contents of");
+    out.println("## a model.");
     out.println("## To train or test a model, or to tag something, run:");
     out.println("##   java edu.stanford.nlp.tagger.maxent.MaxentTagger -prop <properties file>");
     out.println("## Arguments can be overridden on the commandline, e.g.:");

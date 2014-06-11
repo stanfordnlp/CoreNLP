@@ -47,6 +47,12 @@ public class TextOutputter {
       os.printf("Document: ID=%s (%d sentences, %d tokens)\n", docId, nSentences, nTokens);
     }
 
+    // Display doctitle if available
+    String docTitle =  annotation.get(CoreAnnotations.DocTitleAnnotation.class);
+    if (docTitle != null) {
+      os.printf("Document Title: %s\n", docTitle);
+    }
+
     // Display docdate if available
     String docDate =  annotation.get(CoreAnnotations.DocDateAnnotation.class);
     if (docDate != null) {
@@ -93,8 +99,7 @@ public class TextOutputter {
           // printer.  This might be relevant if using corenlp for a
           // language which doesn't have dependencies, for example.
           if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-            os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
-            os.print("\n");
+            pipeline.getDependencyTreePrinter().printTree(tree, os);
           }
         }
 
