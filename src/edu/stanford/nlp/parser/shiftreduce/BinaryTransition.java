@@ -36,7 +36,16 @@ public class BinaryTransition implements Transition {
     if (state.stack.size() <= 1) {
       return false;
     }
+    // don't allow binarized labels if it makes the state have a stack
+    // of size 1 and a queue of size 0
+    if (state.stack.size() == 2 && isBinarized() && state.endOfQueue()) {
+      return false;
+    }
     return true;
+  }
+
+  public boolean isBinarized() {
+    return (label.charAt(0) == '@');
   }
 
   /**
