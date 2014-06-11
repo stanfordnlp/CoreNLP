@@ -1,10 +1,13 @@
 package edu.stanford.nlp.util;
 
+import edu.stanford.nlp.ling.tokensregex.matcher.Match;
+
 import java.util.*;
 
 /**
- * An interval tree maintains a tree so that all intervals to the left start
- * before current interval and all intervals to the right start after.
+ * Interval tree
+ * Maintain tree so all intervals to the left starts before current interval
+ * and all intervals to the right starts after
  *
  * @author Angel Chang
  */
@@ -13,7 +16,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   private static final double defaultAlpha = 0.65; // How balanced we want this tree (between 0.5 and 1.0)
   private static final boolean debug = false;
 
-  private TreeNode<E,T> root = new TreeNode<E,T>();
+  TreeNode<E,T> root = new TreeNode<E,T>();
 
   // Tree node
   public static class TreeNode<E extends Comparable<E>, T extends HasInterval<E>> {
@@ -794,7 +797,6 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
           List<? extends T> items, Comparator<? super T> compareFunc)
   {
     Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
-      @Override
       public Interval<E> apply(T in) {
         return in.getInterval();
       }
@@ -806,7 +808,6 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
           List<? extends T> items)
   {
     Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
-      @Override
       public Interval<E> apply(T in) {
         return in.getInterval();
       }
@@ -890,7 +891,6 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
       List<? extends T> items, Function<? super T, Double> scoreFunc)
   {
     Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
-      @Override
       public Interval<E> apply(T in) {
         return in.getInterval();
       }
