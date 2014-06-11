@@ -1391,6 +1391,11 @@ public class ArrayMath {
     return sum(a) / a.length;
   }
 
+  // Thang Mar14
+  public static int mean(int[] a) {
+    return sum(a) / a.length;
+  }
+  
   public static double median(double[] a) {
     double[] b = new double[a.length];
     System.arraycopy(a, 0, b, 0, b.length);
