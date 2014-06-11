@@ -77,10 +77,19 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   // Use a custom feature factory
   private static final String optFeatureFactory = "featureFactory";
   private static final String defaultFeatureFactory =
+      "edu.stanford.nlp.international.arabic.process.StartAndEndArabicSegmenterFeatureFactory";
+  private static final String localOnlyFeatureFactory = 
       "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory";
 
   // Training and evaluation files have domain labels
   private static final String optDomains = "withDomains";
+  
+  // Ignore rewrites (training only, produces a model than then can be used to do
+  // no-rewrite segmentation)
+  private static final String optNoRewrites = "noRewrites";
+  
+  // Use the original feature set which doesn't contain start-and-end "wrapper" features
+  private static final String optLocalFeaturesOnly = "localFeaturesOnly";
 
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
@@ -91,6 +100,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final String tokenizerOptions;
   private final String tedEvalPrefix;
   private final boolean hasDomainLabels;
+  private final boolean noRewrites;
 
   /** Make an Arabic Segmenter.
    *
@@ -102,11 +112,23 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     tokenizerOptions = props.getProperty(optTokenizer, null);
     tedEvalPrefix = props.getProperty(optTedEval, null);
     hasDomainLabels = props.containsKey(optDomains);
+    noRewrites = props.containsKey(optNoRewrites);
     tf = getTokenizerFactory();
 
     prefixMarker = props.getProperty(optPrefix, "");
     suffixMarker = props.getProperty(optSuffix, "");
 
+    if (props.containsKey(optLocalFeaturesOnly)) {
+      if (props.containsKey(optFeatureFactory))
+        throw new RuntimeException("Cannot use custom feature factory with localFeaturesOnly flag--" +
+            "have your custom feature factory extend ArabicSegmenterFeatureFactory instead of " +
+            "StartAndEndArabicSegmenterFeatureFactory and remove the localFeaturesOnly flag.");
+      
+      props.put(optFeatureFactory, localOnlyFeatureFactory);
+    }
+    if (!props.containsKey(optFeatureFactory))
+      props.put(optFeatureFactory, defaultFeatureFactory);
+    
     // Remove all command-line properties that are specific to ArabicSegmenter
     props.remove(optTokenizer);
     props.remove(optTokenized);
@@ -115,9 +137,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     props.remove(optThreads);
     props.remove(optTedEval);
     props.remove(optDomains);
-
-    if (!props.containsKey(optFeatureFactory))
-      props.put(optFeatureFactory, defaultFeatureFactory);
+    props.remove(optNoRewrites);
+    props.remove(optLocalFeaturesOnly);
 
     flags = new SeqClassifierFlags(props);
     classifier = new CRFClassifier<CoreLabel>(flags);
@@ -135,6 +156,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     suffixMarker = other.suffixMarker;
     tedEvalPrefix = other.tedEvalPrefix;
     hasDomainLabels = other.hasDomainLabels;
+    noRewrites = other.noRewrites;
     flags = other.flags;
 
     // ArabicTokenizerFactory is *not* threadsafe. Make a new copy.
@@ -255,6 +277,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
                                                                                      hasTags,
                                                                                      hasDomainLabels,
+                                                                                     noRewrites,
                                                                                      tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.trainFile, docReader);

@@ -1,33 +1,6 @@
-// Stanford Dependencies - Code for producing and using Stanford dependencies.
-// Copyright © 2005-2014 The Board of Trustees of
-// The Leland Stanford Junior University. All Rights Reserved.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// For more information, bug reports, fixes, contact:
-//    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
-//    USA
-//    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/stanford-dependencies.shtml
-
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
@@ -35,7 +8,6 @@ import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.util.*;
@@ -80,7 +52,7 @@ import java.util.regex.Pattern;
  * <code>TregexPattern</code>} such that:
  * <ul>
  *   <li>the root of the pattern matches A, and</li>
- *   <li>the pattern includes a node labeled "target", which matches B.</li>
+ *   <li>the pattern includes a special node label, "target", which matches B.</li>
  * </ul>
  * For example, for the grammatical relation <code>PREDICATE</code>
  * which holds between a clause and its primary verb phrase, we might
@@ -120,7 +92,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private static final boolean DEBUG = System.getProperty("GrammaticalRelation", null) != null;
 
   public abstract static class GrammaticalRelationAnnotation implements CoreAnnotation<Set<TreeGraphNode>> {
-    @Override
     @SuppressWarnings({"unchecked", "RedundantCast"})
     public Class<Set<TreeGraphNode>> getType() {  return (Class) Set.class; }
   }
@@ -278,7 +249,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private final String specific; // to hold the specific prep or conjunction associated with the grammatical relation
 
   // TODO document constructor
-  // TODO change to put specificString after longName, and then use String... for targetPatterns
+  // TODO change to put specificString earlier, and then use String... for targetPatterns
   private GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
@@ -352,7 +323,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
                              GrammaticalRelation parent,
                              String sourcePattern,
                              TregexPatternCompiler tregexCompiler,
-                             String... targetPatterns) {
+                             String[] targetPatterns) {
     this(language, shortName, longName, annotation, parent, sourcePattern, tregexCompiler, targetPatterns, null);
   }
 
@@ -533,67 +504,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   public String getSpecific() {
     return specific;
-  }
-
-  /**
-   * When deserializing a GrammaticalRelation, it needs to be matched
-   * up with the existing singleton relation of the same type.
-   *
-   * TODO: there are a bunch of things wrong with this.  For one
-   * thing, it's crazy slow, since it goes through all the existing
-   * relations in an array.  For another, it would be cleaner to have
-   * subclasses for the English and Chinese relations
-   */
-  protected Object readResolve() throws ObjectStreamException {
-    switch (language) {
-    case Any: {
-      if (shortName.equals(GOVERNOR.shortName)) {
-        return GOVERNOR;
-      } else if (shortName.equals(DEPENDENT.shortName)) {
-        return DEPENDENT;
-      } else if (shortName.equals(ROOT.shortName)) {
-        return ROOT;
-      } else if (shortName.equals(KILL.shortName)) {
-        return KILL;
-      } else {
-        throw new RuntimeException("Unknown general relation " + shortName);
-      }
-    }
-    case English: {
-      GrammaticalRelation rel = EnglishGrammaticalRelations.valueOf(toString());
-      if (rel == null) {
-        if (shortName.equals("conj")) {
-          return EnglishGrammaticalRelations.getConj(specific);
-        } else if (shortName.equals("prep")) {
-          return EnglishGrammaticalRelations.getPrep(specific);
-        } else if (shortName.equals("prepc")) {
-          return EnglishGrammaticalRelations.getPrepC(specific);
-        } else {
-          // TODO: we need to figure out what to do with relations
-          // which were serialized and then deprecated.  Perhaps there
-          // is a good way to make them singletons
-          return this;
-          //throw new RuntimeException("Unknown English relation " + this);
-        }
-      } else {
-        return rel;
-      }
-    }
-    case Chinese: {
-      GrammaticalRelation rel = ChineseGrammaticalRelations.valueOf(toString());
-      if (rel == null) {
-        // TODO: we need to figure out what to do with relations
-        // which were serialized and then deprecated.  Perhaps there
-        // is a good way to make them singletons
-        return this;
-        //throw new RuntimeException("Unknown Chinese relation " + this);
-      }
-      return rel;
-    }
-    default: {
-      throw new RuntimeException("Unknown language " + language);
-    }
-    }
   }
 
   /**

@@ -328,9 +328,7 @@ class DescriptionPattern extends TregexPattern {
                               HeadFinder headFinder) {
       super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
       myNode = n;
-      // no need to reset anything - everything starts out as null or false.  
-      // lazy initialization of children to save time.
-      // resetChildIter();
+      resetChildIter();
     }
 
     @Override
@@ -497,7 +495,7 @@ class DescriptionPattern extends TregexPattern {
     }
 
     private void removeNamedNodes() {
-      if ((myNode.descriptionMode != null || myNode.isLink) &&
+      if ((myNode.descPattern != null || myNode.isLink) &&
           myNode.name != null) {
         namesToNodes.remove(myNode.name);
       }
