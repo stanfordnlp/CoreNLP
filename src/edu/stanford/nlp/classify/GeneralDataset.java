@@ -243,9 +243,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    *  @param fold The number of this fold (must be between 0 and (numFolds - 1)
    *  @param numFolds The number of folds to divide the data into (must be greater than or equal to the
    *                  size of the data set)
-   *  @return A Pair of data sets, the first being roughly (numFolds-1)/numFolds of the data items
-   *         (for use as training data_, and the second being 1/numFolds of the data, taken from the
-   *         fold<sup>th</sup> part of the data (for use as devTest data)
+   *  @return A Pair of data sets, the first being the remainder of size this.size() - (end-start)
+   *          and the second usually being of size this.size() / numFolds but with the last fold of size
+   *          this.size() - (this.size() / numFolds * (numFolds - 1)
    */
   public Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> splitOutFold(int fold, int numFolds) {
     if (numFolds < 2 || numFolds > size() || fold < 0 || fold >= numFolds) {

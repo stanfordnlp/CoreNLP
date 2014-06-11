@@ -1,7 +1,5 @@
 package edu.stanford.nlp.sentiment;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Random;
 
@@ -68,6 +66,7 @@ public class RNNOptions implements Serializable {
 
   public RNNTrainOptions trainOptions = new RNNTrainOptions();
 
+  // TODO: most of the existing sentiment models are missing classNames and equivalenceClasses
   public static final String[] DEFAULT_CLASS_NAMES = { "Very negative", "Negative", "Neutral", "Positive", "Very positive" };
   public static final String[] BINARY_DEFAULT_CLASS_NAMES = { "Negative", "Positive" };
   public String[] classNames = DEFAULT_CLASS_NAMES;
@@ -85,17 +84,6 @@ public class RNNOptions implements Serializable {
   public static final String[] DEFAULT_EQUIVALENCE_CLASS_NAMES = { "Negative", "Positive" };
   public String[] equivalenceClassNames = DEFAULT_EQUIVALENCE_CLASS_NAMES;
 
-  public RNNTestOptions testOptions = new RNNTestOptions();
-
-  // TODO: we can remove this if we reserialize all the models
-  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    in.defaultReadObject();
-
-    if (testOptions == null) {
-      testOptions = new RNNTestOptions();
-    }
-  }
-
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
@@ -110,6 +98,7 @@ public class RNNOptions implements Serializable {
     result.append("useTensors=" + useTensors + "\n");
     result.append("simplifiedModel=" + simplifiedModel + "\n");
     result.append("combineClassification=" + combineClassification + "\n");
+    result.append(trainOptions.toString());
     result.append("classNames=" + StringUtils.join(classNames, ",") + "\n");
     result.append("equivalenceClasses=");
     if (equivalenceClasses != null) {
@@ -127,8 +116,6 @@ public class RNNOptions implements Serializable {
       result.append(StringUtils.join(equivalenceClassNames, ","));
     }
     result.append("\n");
-    result.append(trainOptions.toString());
-    result.append(testOptions.toString());
     return result.toString();
   }
 
@@ -215,11 +202,7 @@ public class RNNOptions implements Serializable {
       trainOptions.setOption(args, argIndex); // in case the trainOptions use binaryModel as well
       return argIndex + 1;
     } else {
-      int newIndex = trainOptions.setOption(args, argIndex);
-      if (newIndex == argIndex) {
-        newIndex = testOptions.setOption(args, argIndex);
-      }
-      return newIndex;
+      return trainOptions.setOption(args, argIndex);
     }
   }
 
