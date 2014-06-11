@@ -32,7 +32,7 @@ public class Weight implements Serializable {
       packed = null;
       return;
     }
-    packed = ArrayUtils.copy(packed);
+    packed = ArrayUtils.copy(other.packed);
     condense();
   }
 
