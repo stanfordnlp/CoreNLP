@@ -2,6 +2,11 @@ package edu.stanford.nlp.util;
 
 import junit.framework.TestCase;
 
+/**
+ * Tests that the output of the ConfusionMatrix is in the expected format.
+ *
+ * @author Eric Yeh yeh1@cs.stanford.edu
+ */
 public class ConfusionMatrixTest extends TestCase {
 
   boolean echo;
