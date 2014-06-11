@@ -1387,7 +1387,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         tagIndex.add(flags.backgroundSymbol);
       }
       if (entityMatrices == null)
-        entityMatrices = BisequenceEmpiricalNERPrior.readEntityMatrices(flags.entityMatrix, tagIndex);
+        entityMatrices = readEntityMatrices(flags.entityMatrix, tagIndex);
       */
       EntityCachingAbstractSequencePriorBIO<IN> prior = new EmpiricalNERPriorBIO<IN>(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
       priorModel = prior;
@@ -1835,9 +1835,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @param docs A Collection (perhaps ObjectBank) of documents
    */
   @Override
-  public void train(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
+  public void train(Collection<List<IN>> objectBankWrapper, DocumentReaderAndWriter<IN> readerAndWriter) {
     Timing timer = new Timing();
     timer.start();
+
+    Collection<List<IN>> docs = new ArrayList<List<IN>>();
+    for (List<IN> doc : objectBankWrapper) {
+      docs.add(doc);
+    }
 
     if (flags.numOfSlices > 0) {
       System.err.println("Taking " + flags.numOfSlices + " out of " + flags.totalDataSlice + " slices of data for training");
@@ -1852,7 +1857,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     List<List<IN>> unsupDocs = null;
     if (flags.unsupDropoutFile != null) {
-      
       System.err.println("Reading unsupervised dropout data from file: " + flags.unsupDropoutFile);
       timer.start();
       unsupDocs = new ArrayList<List<IN>>();
@@ -2362,7 +2366,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
     } else {
       func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
-        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null);
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
     }
     return func.initial();
   }
@@ -2415,7 +2419,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, null);
     } else {
       func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
-        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null);
+        labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
     }
 
     cliquePotentialFunctionHelper = func;
@@ -2491,7 +2495,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       func.setFeatureGrouping(fg);
     }
 
-
     Minimizer minimizer = getMinimizer(pruneFeatureItr, evaluators);
 
     double[] initialWeights;
@@ -2532,11 +2535,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
 
-  protected Minimizer getMinimizer() {
+  public Minimizer getMinimizer() {
     return getMinimizer(0, null);
   }
 
-  protected Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
+  public Minimizer getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
     Minimizer<DiffFunction> minimizer = null;
     if (flags.useQN) {
       int QNmem;
@@ -3385,6 +3388,46 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return w;
   }
 
+  public void serializeFeatureIndex(String serializePath) {
+    System.err.print("Serializing FeatureIndex to " + serializePath + "...");
+
+    ObjectOutputStream oos = null;
+    try {
+      oos = IOUtils.writeStreamFromString(serializePath);
+      oos.writeObject(featureIndex);
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  public static Index<String> loadFeatureIndexFromFile(String serializePath) {
+    System.err.print("Reading FeatureIndex from " + serializePath + "...");
+
+    ObjectInputStream ois = null;
+    Index<String> f = null;
+    try {
+      ois = IOUtils.readStreamFromString(serializePath);
+      f = (Index<String>) ois.readObject();
+      System.err.println("done.");
+    } catch (Exception e) {
+      System.err.println("Failed");
+      e.printStackTrace();
+      // don't actually exit in case they're testing too
+      // System.exit(1);
+    } finally {
+      IOUtils.closeIgnoringExceptions(ois);
+    }
+
+    return f;
+  }
+
+
   /**
    * {@inheritDoc}
    */
@@ -3529,8 +3572,62 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         tagIndex.add(flags.backgroundSymbol);
       }
       if (entityMatrices == null)
-        entityMatrices = BisequenceEmpiricalNERPrior.readEntityMatrices(flags.entityMatrix, tagIndex);
+        entityMatrices = readEntityMatrices(flags.entityMatrix, tagIndex);
     }
+  }
+
+  public static Pair<double[][], double[][]> readEntityMatrices(String fileName, Index<String> tagIndex) {
+    int numTags = tagIndex.size();
+    double[][] matrix = new double[numTags-1][numTags-1];
+    for (int i = 0; i < numTags-1; i++)
+      matrix[i] = new double[numTags-1];
+    double[][] subMatrix = new double[numTags-1][numTags-1];
+    for (int i = 0; i < numTags-1; i++)
+      subMatrix[i] = new double[numTags-1];
+
+    try {
+      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileName))));
+      String line = null;
+      int lineCount = 0;
+      while ((line = br.readLine()) != null) {
+        line = line.trim();
+        String[] parts = line.split("\t");
+        for (String part: parts) {
+          String[] subparts = part.split(" ");
+          String[] subsubparts = subparts[0].split(":");
+          double counts = Double.parseDouble(subparts[1]);
+          if (counts == 0.0) // smoothing
+            counts = 1.0;
+          int tagIndex1 = tagIndex.indexOf(subsubparts[0]);
+          int tagIndex2 = tagIndex.indexOf(subsubparts[1]);
+          if (lineCount < numTags-1)
+            matrix[tagIndex1][tagIndex2] = counts;
+          else
+            subMatrix[tagIndex1][tagIndex2] = counts;
+        }
+        lineCount++;
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.exit(-1);
+    }
+    for (int i = 0; i < matrix.length; i++) {
+      double sum = ArrayMath.sum(matrix[i]);
+      for (int j = 0; j < matrix[i].length; j++)
+        matrix[i][j] = Math.log(matrix[i][j] / sum) / 2;
+    }
+    for (int i = 0; i < subMatrix.length; i++) {
+      double sum = ArrayMath.sum(subMatrix[i]);
+      for (int j = 0; j < subMatrix[i].length; j++)
+        subMatrix[i][j] = Math.log(subMatrix[i][j] / sum);
+    }
+
+    System.err.println("Matrix: ");
+    System.err.println(ArrayUtils.toString(matrix));
+    System.err.println("SubMatrix: ");
+    System.err.println(ArrayUtils.toString(subMatrix));
+
+    return new Pair<double[][], double[][]>(matrix, subMatrix);
   }
 
   /**
@@ -3685,7 +3782,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (crf.flags.loadClassIndexFrom != null) {
       crf.classIndex = loadClassIndexFromFile(crf.flags.loadClassIndexFrom);
     }
-      
 
     if (loadPath != null) {
       crf.loadClassifierNoExceptions(loadPath, props);
@@ -3718,6 +3814,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (crf.flags.serializeWeightsTo != null) {
       crf.serializeWeights(crf.flags.serializeWeightsTo);
+    }
+
+    if (crf.flags.serializeFeatureIndexTo != null) {
+      crf.serializeFeatureIndex(crf.flags.serializeFeatureIndexTo);
     }
 
     if (serializeToText != null) {

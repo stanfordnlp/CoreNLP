@@ -435,6 +435,157 @@ public class SemgrexTest extends TestCase {
     runTest("{}=a >> {word:E} : {}=a >> {word:B}", graph, "A");
   }
 
+  public void testEqualsRelation() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemgrexPattern pattern = SemgrexPattern.compile("{} >> ({}=a == {}=b)");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("Bill", matcher.getNode("a").toString());
+    assertEquals("Bill", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("muffins", matcher.getNode("a").toString());
+    assertEquals("muffins", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("muffins", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertFalse(matcher.find());
+
+    // This split pattern should also work
+    pattern = SemgrexPattern.compile("{} >> {}=a >> {}=b : {}=a == {}=b");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("Bill", matcher.getNode("a").toString());
+    assertEquals("Bill", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("muffins", matcher.getNode("a").toString());
+    assertEquals("muffins", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("muffins", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertFalse(matcher.find());
+  }
+
+  /**
+   * In this test, the graph should find matches with pairs of nodes
+   * which are different from each other.  Since "muffins" only has
+   * one dependent, there should not be any matches with "muffins" as
+   * the head, for example.
+   */
+  public void testNotEquals() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+
+    SemgrexPattern pattern = SemgrexPattern.compile("{} >> {}=a >> {}=b : {}=a !== {}=b");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("Bill", matcher.getNode("a").toString());
+    assertEquals("muffins", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("Bill", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("muffins", matcher.getNode("a").toString());
+    assertEquals("Bill", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("muffins", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("Bill", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("muffins", matcher.getNode("b").toString());
+
+    assertFalse(matcher.find());
+
+    // same as the first test, essentially, but with a more compact expression
+    pattern = SemgrexPattern.compile("{} >> {}=a >> ({}=b !== {}=a)");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("Bill", matcher.getNode("a").toString());
+    assertEquals("muffins", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("Bill", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("muffins", matcher.getNode("a").toString());
+    assertEquals("Bill", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("muffins", matcher.getNode("a").toString());
+    assertEquals("blueberry", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("Bill", matcher.getNode("b").toString());
+
+    assertTrue(matcher.find());
+    assertEquals(2, matcher.getNodeNames().size());
+    assertEquals("ate", matcher.getMatch().toString());
+    assertEquals("blueberry", matcher.getNode("a").toString());
+    assertEquals("muffins", matcher.getNode("b").toString());
+
+    assertFalse(matcher.find());
+  }
+
   public void testInitialConditions() {
     SemanticGraph graph = makeComplicatedGraph();
 
