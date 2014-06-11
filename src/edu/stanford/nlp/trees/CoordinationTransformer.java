@@ -83,11 +83,13 @@ public class CoordinationTransformer implements TreeTransformer {
   // TODO: maybe we want to catch more complicated tree structures
   // with something in between the WH and the actual question.
   private static TregexPattern flattenSQTregex = 
-    TregexPattern.compile("SBARQ <1 (WHNP < WP) <2 (SQ=sq < (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + ") " + 
+    TregexPattern.compile("SBARQ <1 (WHNP < WP) <2 (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " + 
                           // match against "is running" if the verb is under just a VBG
                           " !< (/^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
                           // match against "is running" if the verb is under a VP - VBG
                           " !< (/^V/ < /^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
+                          // match against "What is on the test?"
+                          " !< (PP $- =verb) " + 
                           // match against "is there"
                           " !<, (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ (NP < (EX < there))))");
 
