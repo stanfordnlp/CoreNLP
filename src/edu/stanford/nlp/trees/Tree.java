@@ -20,7 +20,14 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Filters;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.MutableInteger;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Scored;
+import edu.stanford.nlp.util.XMLUtils;
 
 /**
  * The abstract class <code>Tree</code> is used to collect all of the
@@ -422,8 +429,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return an IntPair: the SpanAnnotation of this node.
    */
   public IntPair getSpan() {
-    if(label() instanceof CoreMap && ((CoreMap) label()).has(CoreAnnotations.SpanAnnotation.class))
-      return ((CoreMap) label()).get(CoreAnnotations.SpanAnnotation.class);
+    if(label() instanceof CoreLabel && ((CoreLabel) label()).has(CoreAnnotations.SpanAnnotation.class))
+      return ((CoreLabel) label()).get(CoreAnnotations.SpanAnnotation.class);
     return null;
   }
 
@@ -1046,51 +1053,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
       System.err.println("Head preterminal is null: " + this);
       return null;
-    }
-  }
-
-  /**
-   * Finds the head words of each tree and assigns HeadWordAnnotation
-   * to each node pointing to the correct node.  This relies on the
-   * nodes being CoreLabels, so it throws an IllegalArgumentException
-   * if this is ever not true.
-   */
-  public void percolateHeadAnnotations(HeadFinder hf) {
-    if (!(label() instanceof CoreLabel)) {
-      throw new IllegalArgumentException("Expected CoreLabels in the trees");
-    }
-    CoreLabel nodeLabel = (CoreLabel) label();
-
-    if (isLeaf()) {
-      return;
-    }
-
-    if (isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, children()[0]);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, this);
-      return;
-    }
-
-    for (Tree kid : children()) {
-      kid.percolateHeadAnnotations(hf);
-    }
-
-    final Tree head = hf.determineHead(this);
-    if (head == null) {
-      throw new NullPointerException("HeadFinder " + hf + " returned null for " + this);
-    } else if (head.isLeaf()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head.parent(this));
-    } else if (head.isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head.children()[0]);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head);
-    } else {
-      if (!(head.label() instanceof CoreLabel)) {
-        throw new AssertionError("Horrible bug");
-      }
-      CoreLabel headLabel = (CoreLabel) head.label();
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     }
   }
 
@@ -2817,12 +2779,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
     }
 
-    Label label = label();
-    if (label instanceof CoreMap) {
-    CoreMap afl = (CoreMap) label();
-      afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
-      afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
-    }
+    CoreLabel afl = (CoreLabel) label();
+    afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
+    afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
     return new Pair<Integer, Integer>(start, end);
   }
 
