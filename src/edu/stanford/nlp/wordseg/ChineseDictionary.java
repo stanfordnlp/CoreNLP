@@ -110,6 +110,8 @@ public class ChineseDictionary {
 
     for(String dict : dicts) {
       if(dict.endsWith("ser.gz")) {
+        // TODO: the way this is written would not work if we allow
+        // dictionaries to have different settings of MAX_LEXICON_LENGTH
         Set<String>[] dictwords = loadDictionary(dict);
         for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
           words_[i].addAll(dictwords[i]);

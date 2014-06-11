@@ -909,12 +909,9 @@ public class EnglishGrammaticalRelations {
           // dependencies.
           "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML > @NP|WHNP",
           "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
-          // this next pattern is restricted to where and why because
-          // "when" is usually incorrectly parsed: temporal clauses
-          // are put inside the NP; 2nd is for case of relative
-          // clauses with no relativizer (it doesn't distinguish
-          // whether actually gapped).
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
+          // for case of relative clauses with no relativizer
+          // (it doesn't distinguish whether actually gapped).
           "@NP|WHNP < RRC=target <# NP|WHNP|NML|DT|S",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
         });
