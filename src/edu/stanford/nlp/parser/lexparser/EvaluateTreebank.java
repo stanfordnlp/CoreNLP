@@ -717,6 +717,12 @@ public class EvaluateTreebank {
     if(pwFileOut != null) pwFileOut.close();
     if(pwStats != null) pwStats.close();
 
+    if (parserQueryEvals != null) {
+      for (ParserQueryEval parserQueryEval : parserQueryEvals) {
+        parserQueryEval.display(false, pwErr);
+      }
+    }
+
     return f1;
   } // end testOnTreebank()
 
