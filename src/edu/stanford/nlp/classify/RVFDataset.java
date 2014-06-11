@@ -40,8 +40,10 @@ import edu.stanford.nlp.util.HashIndex;
  * @author Anna Rafferty (various refactoring with GeneralDataset/Dataset)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) (Templatization)
  *
- * @param <L> The type of the labels in the Dataset
- * @param <F> The type of the features in the Dataset
+ * @param <L>
+ *          The type of the labels in the Dataset
+ * @param <F>
+ *          The type of the features in the Dataset
  */
 public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Iterable<RVFDatum<L, F>>, Serializable
 
@@ -654,7 +656,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
    * Applies a feature max count threshold to the RVFDataset. All features that
    * occur greater than <i>k</i> times are expunged.
    */
-  @Override
   public void applyFeatureMaxCountThreshold(int k) {
     float[] counts = getFeatureCounts();
     HashIndex<F> newFeatureIndex = new HashIndex<F>();
@@ -788,7 +789,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
    * {@link #printSparseFeatureMatrix(PrintWriter)} to {@link System#out
    * System.out}.
    */
-  @Override
   public void printSparseFeatureMatrix() {
     printSparseFeatureMatrix(new PrintWriter(System.out, true));
   }
@@ -797,7 +797,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
    * Prints a sparse feature matrix representation of the Dataset. Prints the
    * actual {@link Object#toString()} representations of features.
    */
-  @Override
   public void printSparseFeatureMatrix(PrintWriter pw) {
     String sep = "\t";
     for (int i = 0; i < size; i++) {
@@ -923,7 +922,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     return new Iterator<RVFDatum<L, F>>() {
       private int index; // = 0;
 
-      @Override
       public boolean hasNext() {
         return this.index < size;
       }
@@ -937,7 +935,6 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
         return next;
       }
 
-      @Override
       public void remove() {
         throw new UnsupportedOperationException();
       }
@@ -949,7 +946,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
    * need to randomize the values as well.
    */
   @Override
-  public void randomize(long randomSeed) {
+  public void randomize(int randomSeed) {
     Random rand = new Random(randomSeed);
     for (int j = size - 1; j > 0; j--) {
       int randIndex = rand.nextInt(j);
@@ -966,5 +963,4 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
       values[j] = tmpv;
     }
   }
-
 }
