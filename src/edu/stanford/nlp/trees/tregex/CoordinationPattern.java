@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees.tregex;
 
+import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 
 import java.util.Iterator;
@@ -70,8 +71,9 @@ class CoordinationPattern extends TregexPattern {
   public TregexMatcher matcher(Tree root, Tree tree,
                                IdentityHashMap<Tree, Tree> nodesToParents,
                                Map<String, Tree> namesToNodes,
-                               VariableStrings variableStrings) {
-    return new CoordinationMatcher(this, root, tree, nodesToParents, namesToNodes, variableStrings);
+                               VariableStrings variableStrings,
+                               HeadFinder headFinder) {
+    return new CoordinationMatcher(this, root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
   }
 
   private static class CoordinationMatcher extends TregexMatcher {
@@ -85,8 +87,9 @@ class CoordinationPattern extends TregexPattern {
     public CoordinationMatcher(CoordinationPattern n, Tree root, Tree tree,
                                IdentityHashMap<Tree, Tree> nodesToParents,
                                Map<String, Tree> namesToNodes,
-                               VariableStrings variableStrings) {
-      super(root, tree, nodesToParents, namesToNodes, variableStrings);
+                               VariableStrings variableStrings, 
+                               HeadFinder headFinder) {
+      super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
       myNode = n;
       children = new TregexMatcher[myNode.children.size()];
       // lazy initialize the children... don't set children[i] yet
@@ -146,7 +149,7 @@ class CoordinationPattern extends TregexPattern {
 
         while (true) {
           if (children[currChild] == null) {
-            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings);
+            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
             children[currChild].resetChildIter(tree);
           }
           if (myNode.isNegated() != children[currChild].matches()) {
@@ -181,7 +184,7 @@ class CoordinationPattern extends TregexPattern {
         // these are the cases where a single child node can make you match
         for (; currChild < children.length; currChild++) {
           if (children[currChild] == null) {
-            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings);
+            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
             children[currChild].resetChildIter(tree);
           }
           if (myNode.isNegated() != children[currChild].matches()) {
