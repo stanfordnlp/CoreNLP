@@ -37,22 +37,18 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
 
 
 public class DVModel implements Serializable {
-  // The following data structures are all transient because the
-  // SimpleMatrix object is not Serializable.  We read and write them
-  // in specialized readObject and writeObject calls.
-
   // Maps from basic category to the matrix transformation matrices for
   // binary nodes and unary nodes.
   // The indices are the children categories.  For binaryTransform, for
   // example, we have a matrix for each type of child that appears.
-  public transient TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform;
-  public transient Map<String, SimpleMatrix> unaryTransform;
+  public TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform;
+  public Map<String, SimpleMatrix> unaryTransform;
 
   // score matrices for each node type
-  public transient TwoDimensionalMap<String, String, SimpleMatrix> binaryScore;
-  public transient Map<String, SimpleMatrix> unaryScore;
+  public TwoDimensionalMap<String, String, SimpleMatrix> binaryScore;
+  public Map<String, SimpleMatrix> unaryScore;
 
-  public transient Map<String, SimpleMatrix> wordVectors;
+  public Map<String, SimpleMatrix> wordVectors;
 
   // cache these for easy calculation of "theta" parameter size
   int numBinaryMatrices, numUnaryMatrices;
@@ -99,51 +95,7 @@ public class DVModel implements Serializable {
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
 
-    TwoDimensionalMap<String, String, DenseMatrix64F> binaryT = ErasureUtils.uncheckedCast(in.readObject());
-    binaryTransform = TwoDimensionalMap.treeMap();
-    binaryTransform.addAll(binaryT, convertDenseMatrix);
-
-    Map<String, DenseMatrix64F> unaryT = ErasureUtils.uncheckedCast(in.readObject());
-    unaryTransform = Generics.newTreeMap();
-    Maps.addAll(unaryTransform, unaryT, convertDenseMatrix);
-
-    TwoDimensionalMap<String, String, DenseMatrix64F> binaryS = ErasureUtils.uncheckedCast(in.readObject());
-    binaryScore = TwoDimensionalMap.treeMap();
-    binaryScore.addAll(binaryS, convertDenseMatrix);
-
-    Map<String, DenseMatrix64F> unaryS = ErasureUtils.uncheckedCast(in.readObject());
-    unaryScore = Generics.newTreeMap();
-    Maps.addAll(unaryScore, unaryS, convertDenseMatrix);
-
-    Map<String, DenseMatrix64F> wordV = ErasureUtils.uncheckedCast(in.readObject());
-    wordVectors = Generics.newTreeMap();
-    Maps.addAll(wordVectors, wordV, convertDenseMatrix);
-
     identity = SimpleMatrix.identity(numRows);
-  }
-
-  private void writeObject(ObjectOutputStream out) throws IOException {
-    out.defaultWriteObject();
-
-    TwoDimensionalMap<String, String, DenseMatrix64F> binaryT = TwoDimensionalMap.treeMap();
-    binaryT.addAll(binaryTransform, convertSimpleMatrix);
-    out.writeObject(binaryT);
-
-    Map<String, DenseMatrix64F> unaryT = Generics.newTreeMap();
-    Maps.addAll(unaryT, unaryTransform, convertSimpleMatrix);
-    out.writeObject(unaryT);
-
-    TwoDimensionalMap<String, String, DenseMatrix64F> binaryS = TwoDimensionalMap.treeMap();
-    binaryS.addAll(binaryScore, convertSimpleMatrix);
-    out.writeObject(binaryS);
-
-    Map<String, DenseMatrix64F> unaryS = Generics.newTreeMap();
-    Maps.addAll(unaryS, unaryScore, convertSimpleMatrix);
-    out.writeObject(unaryS);
-
-    Map<String, DenseMatrix64F> wordV = Generics.newHashMap();
-    Maps.addAll(wordV, wordVectors, convertSimpleMatrix);
-    out.writeObject(wordV);
   }
 
 
