@@ -410,13 +410,9 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   @Override
   public int compareTo(SurfacePattern o) {
-    int numthis = 0;
-    numthis += this.prevContext != null ? this.prevContext.length : 0;
-    numthis += this.nextContext != null ? this.nextContext.length : 0;
-    int numthat = 0;
-    numthat += o.prevContext != null ? o.prevContext.length : 0;
-    numthat += o.nextContext != null ? o.nextContext.length : 0;
-
+    int numthis = this.getPreviousContextLen() +  this.getNextContextLen();
+    int numthat = o.getPreviousContextLen() +  o.getNextContextLen();
+    
     if (numthis > numthat) {
       return -1;
     } else if (numthis < numthat) {
