@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.StringUtils;
  * Author: Sonal Gupta (sonalg@stanford.edu)
  */
 
-public class SurfacePattern implements Serializable, Comparable {
+public class SurfacePattern implements Serializable, Comparable<SurfacePattern> {
 
   private static final long serialVersionUID = 1L;
 
@@ -242,10 +242,8 @@ public class SurfacePattern implements Serializable, Comparable {
   }
 
   @Override
-  public int compareTo(Object o) {
-    if(o instanceof SurfacePattern)
-      return -1;
-    return this.toString.compareTo(((SurfacePattern)o).toString()); 
+  public int compareTo(SurfacePattern o) {
+    return this.toString.compareTo(o.toString()); 
   }
 
   // public static SurfacePattern parse(String s) {
