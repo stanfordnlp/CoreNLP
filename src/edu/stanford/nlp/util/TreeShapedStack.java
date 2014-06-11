@@ -57,13 +57,6 @@ public class TreeShapedStack<T> {
     return data;
   }
 
-  /**
-   * How many nodes in this branch of the stack
-   */
-  public int size() { 
-    return size; 
-  }
-
   final T data;
   final int size;
   final TreeShapedStack previous;
