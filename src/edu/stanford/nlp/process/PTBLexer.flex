@@ -705,7 +705,14 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
+c[+][+]                     { return getNext(); }
 cannot                  { if (splitAssimilations) {
+                            yypushback(3) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
+'twas                   { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
                             return getNext();
