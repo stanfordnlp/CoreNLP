@@ -82,10 +82,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
   public FeatureFactory<IN> featureFactory;
-  
+
   // Thang Sep13: multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory)
-  public List<FeatureFactory<IN>> featureFactories; 
-  
+  public List<FeatureFactory<IN>> featureFactories;
+
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
   public int windowSize;
@@ -174,7 +174,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         indFeatureFactory.init(flags);
       }
     }
-    
+
     defaultReaderAndWriter = makeReaderAndWriter();
     if (flags.readerAndWriter != null &&
         flags.readerAndWriter.equals(flags.plainTextDocumentReaderAndWriter)) {
@@ -1793,7 +1793,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       return;
     }
     if (cliqueWriter == null) {
-      cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
+      cliqueWriter = IOUtils.getPrintWriterOrDie("features-" + flags.printFeatures + ".txt");
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {
@@ -1829,7 +1829,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   // Separating this method out lets printFeatureLists be inlined, which is good since it is usually a no-op.
   private void printFeatureListsHelper(IN wi, Collection<List<String>> features) {
     if (cliqueWriter == null) {
-      cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
+      cliqueWriter = IOUtils.getPrintWriterOrDie("features-" + flags.printFeatures + ".txt");
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {
