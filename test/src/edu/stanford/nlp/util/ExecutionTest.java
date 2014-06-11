@@ -24,9 +24,17 @@ public class ExecutionTest {
     public int staticOption = -1;
   }
 
+  public static class MixedClass {
+    @Execution.Option(name="option.static")
+    public static int staticOption = -1;
+    @Execution.Option(name="option.nonstatic")
+    public int nonstaticOption = -1;
+  }
+
   @Before
   public void setUp() {
     StaticClass.staticOption = -1;
+    MixedClass.staticOption = -1;
   }
 
   @Test
@@ -61,5 +69,25 @@ public class ExecutionTest {
     props.setProperty("option.nonstatic", "42");
     Execution.fillOptions(x, props);
     assertEquals(42, x.staticOption);
+  }
+
+  @Test
+  public void fillMixedFieldsInstanceGiven() {
+    MixedClass x = new MixedClass();
+    assertEquals(-1, MixedClass.staticOption);
+    assertEquals(-1, x.nonstaticOption);
+    Execution.fillOptions(x, new String[]{ "-option.nonstatic", "42", "-option.static", "43" });
+    assertEquals(43, MixedClass.staticOption);
+    assertEquals(42, x.nonstaticOption);
+  }
+
+  @Test
+  public void fillMixedFieldsNoInstanceGiven() {
+    MixedClass x = new MixedClass();
+    assertEquals(-1, MixedClass.staticOption);
+    assertEquals(-1, x.nonstaticOption);
+    Execution.fillOptions(MixedClass.class, new String[]{ "-option.nonstatic", "42", "-option.static", "43" });
+    assertEquals(43, MixedClass.staticOption);
+    assertEquals(-1, x.nonstaticOption);
   }
 }
