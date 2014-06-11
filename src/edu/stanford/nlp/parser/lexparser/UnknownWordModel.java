@@ -1,17 +1,28 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.io.Serializable;
+import java.util.Collection;
 
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.stats.Counter;
 
 
 public interface UnknownWordModel extends Serializable {
 
+  /** One unknown word model may allow different options to be set; for example,
+   *  several models of unknown words for a given language could be included in one
+   *  class.  The unknown level can be used to set the model one would like.  Effects
+   *  of the level will vary based on the implementing class.  If a given class only
+   *  includes one model, setting the unknown level should have no effect.
+   *
+   *  @param unknownLevel Provides a choice between different unknown word
+   *         processing schemes
+   */
+  void setUnknownLevel(int unknownLevel);
+
+
   /**
    * Get the level of equivalence classing for the model.
-   * One unknown word model may allow different options to be set; for example,
-   * several models of unknown words for a given language could be included in one
-   *  class.  The unknown level can be queried with this method.
    *
    * @return The current level of unknown word equivalence classing
    */
@@ -19,8 +30,8 @@ public interface UnknownWordModel extends Serializable {
 
 
   /**
-   * Returns the lexicon used by this unknown word model. The
-   * lexicon is used to check information about words being seen/unseen.
+   * Returns the lexicon used by this unknown word model;
+   * lexicon is used to check information about words being seen/unseen
    *
    * @return The lexicon used by this unknown word model
    */
@@ -47,7 +58,7 @@ public interface UnknownWordModel extends Serializable {
    */
   float score(IntTaggedWord iTW, int loc, double c_Tseen, double total, double smooth, String word);
 
-
+  
   /** Calculate P(Tag|Signature) with Bayesian smoothing via just P(Tag|Unknown) */
   public double scoreProbTagGivenWordSignature(IntTaggedWord iTW, int loc, double smooth, String word);
 
