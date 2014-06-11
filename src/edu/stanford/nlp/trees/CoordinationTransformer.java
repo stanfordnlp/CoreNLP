@@ -66,54 +66,54 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("Input to CoordinationTransformer: " + t);
     }
-    t = tn.transformTree(t);
+    Tree tx = tn.transformTree(t);
     if (VERBOSE) {
-      System.err.println("After DependencyTreeTransformer:  " + t);
+      System.err.println("After DependencyTreeTransformer:  " + tx);
     }
-    if (t == null) {
-      return t;
+    if (tx == null) {
+      return tx;
     }
-    t = UCPtransform(t);
+    Tree tt = UCPtransform(tx);
     if (VERBOSE) {
-      System.err.println("After UCPTransformer:             " + t);
+      System.err.println("After UCPTransformer:             " + tt);
     }
-    t = CCtransform(t);
+    Tree ttt = CCtransform(tt);
     if (VERBOSE) {
-      System.err.println("After CCTransformer:              " + t);
+      System.err.println("After CCTransformer:              " + ttt);
     }
-    t = qp.transformTree(t);
+    Tree tttt = qp.transformTree(ttt);
     if (VERBOSE) {
-      System.err.println("After QPTreeTransformer:          " + t);
+      System.err.println("After QPTreeTransformer:          " + tttt);
     }
-    t = SQflatten(t);
+    Tree flatSQ = SQflatten(tttt);
     if (VERBOSE) {
-      System.err.println("After SQ flattening:              " + t);
+      System.err.println("After SQ flattening:              " + flatSQ);
     }
-    t = dates.transformTree(t);
+    Tree fixedDates = dates.transformTree(flatSQ);
     if (VERBOSE) {
-      System.err.println("After DateTreeTransformer:        " + t);
+      System.err.println("After DateTreeTransformer:        " + fixedDates);
     }
-    t = removeXOverX(t);
+    Tree removedXX = removeXOverX(fixedDates);
     if (VERBOSE) {
-      System.err.println("After removeXoverX:               " + t);
+      System.err.println("After removeXoverX:               " + removedXX);
     }
-    t = combineConjp(t);
+    Tree conjp = combineConjp(removedXX);
     if (VERBOSE) {
-      System.err.println("After combineConjp:               " + t);
+      System.err.println("After combineConjp:               " + conjp);
     }
-    t = moveRB(t);
+    Tree movedRB = moveRB(conjp);
     if (VERBOSE) {
-      System.err.println("After moveRB:                     " + t);
+      System.err.println("After moveRB:                     " + movedRB);
     }
-    t = changeSbarToPP(t);
+    Tree changedSbar = changeSbarToPP(movedRB);
     if (VERBOSE) {
-      System.err.println("After changeSbarToPP:             " + t);
+      System.err.println("After changeSbarToPP:             " + movedRB);
     }
-    t = rearrangeNowThat(t);
+    Tree nowThat = rearrangeNowThat(changedSbar);
     if (VERBOSE) {
-      System.err.println("After rearrangeNowThat:           " + t);
+      System.err.println("After rearrangeNowThat:           " + nowThat);
     }
-    return t;
+    return nowThat;
   }
 
   private static TregexPattern rearrangeNowThatTregex =
@@ -180,9 +180,8 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern moveRBTregex[] = {
-    TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S|PP|VP|NP)/=dest) "),
-    TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^(,|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
-    TregexPattern.compile("/^FRAG/ < (ADVP|RB=adv $+ VP=dest)"),
+    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^([,]|CC|CONJP)$/ $+ (RB=adv [ < not | < then ] $+ /^(S|PP|VP)/=dest))) "),
+    TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^([,]|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
   };
 
   private static TsurgeonPattern moveRBTsurgeon =
@@ -617,7 +616,7 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t.isPreTerminal()) {
       if (t.value().startsWith("CC")) {
         Tree parent = t.parent(root);
-        if (parent != null && parent.value().startsWith("NP")) {
+        if (parent.value().startsWith("NP")) {
           List<Tree> children = parent.getChildrenAsList();
           //System.out.println(children);
           int ccIndex = children.indexOf(t);

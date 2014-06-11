@@ -24,7 +24,7 @@ class TsurgeonParser {
     System.out.println("Reading from standard input...");
     TsurgeonParser t = new TsurgeonParser(System.in);
     try {
-      TsurgeonPattern n = new TsurgeonPatternRoot(t.Root());
+      TsurgeonPattern n = t.Root();
       System.out.println(n.toString());
       System.out.println("Thank you.");
     } catch (Exception e) {
@@ -48,7 +48,8 @@ SKIP:
 }
 
 TOKEN:
-{ < DELETE: "delete" >
+{
+  < DELETE: "delete" >
 | < PRUNE:  "prune" >
 | < RELABEL: "relabel" >
 | < EXCISE: "excise" >
@@ -68,29 +69,17 @@ TOKEN:
 | < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
 | < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
 | < HASH_INTEGER: "#" (["0"-"9"])+ >
-| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","[","]","(",")",":"] )+ >
+| < TREE_NODE_TERMINAL_LABEL: ( ~[" ","\n","\r","(",")",":"] )+ >
 | < TREE_NODE_NONTERMINAL_LABEL: "(" ( ["-","a"-"z","A"-"Z","_","0"-"9","|","@","=","!","#","$","%","^","&","*","'","`","~",">","<","?",",",".","/","{","}","[","]","+","\\"] )* >
 }
 
-TsurgeonPattern[] Root() :
+TsurgeonPattern Root() :
 {
   TsurgeonPattern result;
-  List<TsurgeonPattern> results = null;
 }
 {
   result = Operation() "\n"
-  { return new TsurgeonPattern[] { result }; } |
-  ( "[" result = Operation() "]"
-    {
-      if (results == null) {
-        results = Generics.newArrayList();
-      }
-      results.add(result);
-    } )+
-  {
-    TsurgeonPattern[] array = new TsurgeonPattern[results.size()];
-    return results.toArray(array);
-  }
+  { return result; }
 }
 
 TsurgeonPattern Operation() :
