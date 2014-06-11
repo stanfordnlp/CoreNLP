@@ -73,6 +73,10 @@ public class TwoDimensionalCollectionValuedMap<K1, K2, V> implements Serializabl
     return map.toString();
   }
   
+  public void putAll(Map<K1, CollectionValuedMap<K2, V>> toAdd){
+    map.putAll(toAdd);
+  }
+  
   /**
    * @return the Collection mapped to by key, never null, but may be empty.
    */
