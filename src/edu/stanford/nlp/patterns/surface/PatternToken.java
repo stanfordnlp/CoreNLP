@@ -6,9 +6,10 @@ import java.util.List;
 
 import edu.stanford.nlp.util.StringUtils;
 
-
 /**
- * Class to represent a target phrase. The class is not completely kosher - toString, hashCode and equals to do not notAllowedClasses, which can be given as input to getTokenStr()
+ * Class to represent a target phrase. The class is not completely kosher -
+ * toString, hashCode and equals to do not notAllowedClasses, which can be given
+ * as input to getTokenStr()
  * 
  * Author: Sonal Gupta (sonalg@stanford.edu)
  */
@@ -22,8 +23,12 @@ public class PatternToken implements Serializable {
   String prevContext = "", nextContext = "";
   boolean useNER = false;
   String nerTag = null;
-  
-  public PatternToken(String tag, boolean useTag, boolean getCompoundPhrases, int numWordsCompound, String nerTag, boolean useNER) {
+  boolean useTargetParserParentRestriction = false;
+  String grandparentParseTag;
+
+  public PatternToken(String tag, boolean useTag, boolean getCompoundPhrases,
+      int numWordsCompound, String nerTag, boolean useNER,
+      boolean useTargetParserParentRestriction, String grandparentParseTag) {
     this.tag = tag;
     this.useTag = useTag;
     this.numWordsCompound = numWordsCompound;
@@ -31,35 +36,39 @@ public class PatternToken implements Serializable {
       numWordsCompound = 1;
     this.nerTag = nerTag;
     this.useNER = useNER;
+    this.useTargetParserParentRestriction = useTargetParserParentRestriction;
+    this.grandparentParseTag = grandparentParseTag;
   }
 
-//  static public PatternToken parse(String str) {
-//    String[] t = str.split("#");
-//    String tag = t[0];
-//    boolean usetag = Boolean.parseBoolean(t[1]);
-//    int num = Integer.parseInt(t[2]);
-//    boolean useNER = false;
-//    String ner = "";
-//    if(t.length > 3){
-//      useNER = true;
-//      ner = t[4];
-//    }
-//    
-//    return new PatternToken(tag, usetag, true, num, ner, useNER);
-//  }
+  // static public PatternToken parse(String str) {
+  // String[] t = str.split("#");
+  // String tag = t[0];
+  // boolean usetag = Boolean.parseBoolean(t[1]);
+  // int num = Integer.parseInt(t[2]);
+  // boolean useNER = false;
+  // String ner = "";
+  // if(t.length > 3){
+  // useNER = true;
+  // ner = t[4];
+  // }
+  //
+  // return new PatternToken(tag, usetag, true, num, ner, useNER);
+  // }
 
   public String toStringToWrite() {
     String s = "X";
-    if(useTag)
-      s+=":"+tag;
-    if(useNER)
-      s+=":"+nerTag;
-//    if(notAllowedClasses !=null && notAllowedClasses.size() > 0){
-//      s+= ":!(";
-//      s+= StringUtils.join(notAllowedClasses,"|")+")"; 
-//    }
-    if(numWordsCompound > 1)
-      s+="{"+numWordsCompound+"}";
+    if (useTag)
+      s += ":" + tag;
+    if (useNER)
+      s += ":" + nerTag;
+    if (useTargetParserParentRestriction)
+      s += ":" + grandparentParseTag;
+    // if(notAllowedClasses !=null && notAllowedClasses.size() > 0){
+    // s+= ":!(";
+    // s+= StringUtils.join(notAllowedClasses,"|")+")";
+    // }
+    if (numWordsCompound > 1)
+      s += "{" + numWordsCompound + "}";
     return s;
   }
 
@@ -73,16 +82,21 @@ public class PatternToken implements Serializable {
     if (useTag) {
       restrictions.add("{tag:/" + tag + ".*/}");
     }
-    
-    if(useNER){
-      restrictions.add("{ner:"+nerTag+"}");
+
+    if (useNER) {
+      restrictions.add("{ner:" + nerTag + "}");
     }
-    
-    if(notAllowedClasses != null && notAllowedClasses.size() > 0){
-      for(String na: notAllowedClasses)
-        restrictions.add("!{"+na+"}");
+
+    if (useTargetParserParentRestriction) {
+      restrictions.add("{grandparentparsetag:" + grandparentParseTag + "}");
     }
-    str += "["+ StringUtils.join(restrictions, " & ") + "]{1," + numWordsCompound + "}";
+
+    if (notAllowedClasses != null && notAllowedClasses.size() > 0) {
+      for (String na : notAllowedClasses)
+        restrictions.add("!{" + na + "}");
+    }
+    str += "[" + StringUtils.join(restrictions, " & ") + "]{1,"
+        + numWordsCompound + "}";
 
     if (!nextContext.isEmpty())
       str += " " + nextContext;

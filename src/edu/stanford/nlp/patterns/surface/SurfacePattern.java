@@ -7,7 +7,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * To present a surface pattern in more detail. The class is not completely kosher. See {@link PatternToken} for more info.
+ * To present a surface pattern in more detail. The class is not completely
+ * kosher. See {@link PatternToken} for more info.
  * 
  * Author: Sonal Gupta (sonalg@stanford.edu)
  */
@@ -24,7 +25,9 @@ public class SurfacePattern implements Serializable {
   protected String[] originalNext;
   protected String originalPrevStr = "";
   protected String originalNextStr = "";
-
+  protected String toString;
+  protected int hashcode;
+  
   public static boolean insertModifierWildcard = false;
 
   public SurfacePattern(String[] prevContext, PatternToken token,
@@ -45,6 +48,9 @@ public class SurfacePattern implements Serializable {
       originalPrevStr = StringUtils.join(originalPrev, " ");
     if (originalNext != null)
       originalNextStr = StringUtils.join(originalNext, " ");
+    
+    toString = toString(null);
+    hashcode = toString.hashCode();
   }
 
   public static String getContextStr(CoreLabel tokenj,
@@ -72,14 +78,15 @@ public class SurfacePattern implements Serializable {
   }
 
   public String toString(List<String> notAllowedClasses) {
-    return (prevContextStr + " " + getToken().getTokenStr(notAllowedClasses) + " " + nextContextStr)
-        .trim();
+    return (prevContextStr + " " + getToken().getTokenStr(notAllowedClasses)
+        + " " + nextContextStr).trim();
   }
 
-  public String toString(String morePreviousPattern, String moreNextPattern, List<String> notAllowedClasses) {
+  public String toString(String morePreviousPattern, String moreNextPattern,
+      List<String> notAllowedClasses) {
     return (prevContextStr + " " + morePreviousPattern + " "
-        + getToken().getTokenStr(notAllowedClasses) + " " + moreNextPattern + " " + nextContextStr)
-        .trim();
+        + getToken().getTokenStr(notAllowedClasses) + " " + moreNextPattern
+        + " " + nextContextStr).trim();
   }
 
   // returns 0 is exactly equal, Integer.MAX_VALUE if the contexts are not same.
@@ -118,12 +125,12 @@ public class SurfacePattern implements Serializable {
 
   @Override
   public int hashCode() {
-    return toString().hashCode();
+    return hashcode;
   }
-  
+
   @Override
-  public String toString(){
-    return toString(null);
+  public String toString() {
+    return toString;
   }
 
   public String toStringToWrite() {
@@ -190,6 +197,48 @@ public class SurfacePattern implements Serializable {
 
   public void setOriginalNext(String[] originalNext) {
     this.originalNext = originalNext;
+  }
+
+  public static boolean notSameGenre(SurfacePattern p1, SurfacePattern p2) {
+    boolean diff = false;
+    if ((p1.getNextContext() != null && p2.getNextContext() == null)
+        || (p2.getNextContext() != null && p1.getNextContext() == null)) {
+      diff = true;
+      return diff;
+    }
+
+    if ((p1.getPrevContext() != null && p2.getPrevContext() == null)
+        || (p2.getPrevContext() != null && p1.getPrevContext() == null)) {
+      diff = true;
+      return diff;
+    }
+    return diff;
+  }
+
+  // true if one pattern subsumes another
+  public static boolean subsumesEitherWay(SurfacePattern p1, SurfacePattern p2) {
+    boolean subsume = false;
+    if (notSameGenre(p1, p2)) {
+      return false;
+    }
+    if (p1.getOriginalNextStr().contains(p2.getOriginalNextStr())
+        && p1.getOriginalPrevStr().contains(p2.getOriginalPrevStr())) {
+      return true;
+    }
+    if (p2.getOriginalNextStr().contains(p1.getOriginalNextStr())
+        && p2.getOriginalPrevStr().contains(p1.getOriginalPrevStr())) {
+      return true;
+    }
+    return subsume;
+  }
+
+  public static boolean sameRestrictions(SurfacePattern p1, SurfacePattern p2) {
+    PatternToken token1 = p1.token;
+    PatternToken token2 = p2.token;
+    if(token1.equals(token2))
+        return true;
+    else
+      return false;
   }
 
   // public static SurfacePattern parse(String s) {
