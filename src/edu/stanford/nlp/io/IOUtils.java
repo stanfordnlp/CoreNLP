@@ -139,7 +139,8 @@ public class IOUtils {
     return os;
   }
 
-  //++ todo [cdm, Aug 2012]: Do we need the below methods? They're kind of weird in unnecessarily bypassing using a Writer.
+  //++ todo [cdm, Aug 2012]: None of the methods below in this block are used. Delete them all?
+  //++ They're also kind of weird in unnecessarily bypassing using a Writer.
 
   /**
    * Writes a string to a file.
@@ -255,10 +256,9 @@ public class IOUtils {
     writeStringToTempFileNoExceptions(contents, path, "UTF-8");
   }
 
-  //-- todo [cdm, Aug 2012]: Do we need the below methods? They're kind of weird in unnecessarily bypassing using a Writer.
+  //-- todo [cdm, Aug 2012]: None of the methods above in the block are used. Delete them all?
 
 
-  // todo [cdm, Sep 2013]: Can we remove this next method and its friends? (Weird in silently gzipping, overlaps other functionality.)
   /**
    * Read an object from a stored file. It is silently ungzipped, regardless of name.
    *
@@ -433,46 +433,6 @@ public class IOUtils {
 
     return in;
   }
-
-  /**
-   * Quietly opens a File. If the file ends with a ".gz" extension,
-   * automatically opens a GZIPInputStream to wrap the constructed
-   * FileInputStream.
-   */
-  public static InputStream inputStreamFromFile(File file) throws RuntimeIOException {
-    try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file));
-      if (file.getName().endsWith(".gz")) {
-        is = new GZIPInputStream(is);
-      }
-      return is;
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
-
-  /**
-   * Open a BufferedReader to a File. If the file's getName() ends in .gz,
-   * it is interpreted as a gzipped file (and uncompressed). The file is then
-   * interpreted as a utf-8 text file.
-   *
-   * @param file What to read from
-   * @return The BufferedReader
-   * @throws RuntimeIOException If there is an I/O problem
-   */
-  public static BufferedReader readerFromFile(File file) {
-    InputStream is = null;
-    try {
-      is = inputStreamFromFile(file);
-      return new BufferedReader(new InputStreamReader(is, "UTF-8"));
-    } catch (IOException ioe) {
-      throw new RuntimeIOException(ioe);
-    } finally {
-      IOUtils.closeIgnoringExceptions(is);
-    }
-  }
-
-
 
   /**
    * Open a BufferedReader on stdin. Use the user's default encoding.
@@ -690,13 +650,12 @@ public class IOUtils {
   }
 
   /**
-   * Given a reader, returns the lines from the reader as an Iterable.
-   *
+   * Given a reader, returns the lines from the reader as a iterable
    * @param r  input reader
    * @param includeEol whether to keep eol-characters in the returned strings
    * @return iterable of lines (as strings)
    */
-  public static Iterable<String> getLineIterable( Reader r, boolean includeEol) {
+  public static final Iterable<String> getLineIterable( Reader r, boolean includeEol) {
     if (includeEol) {
       return new EolPreservingLineReaderIterable(r);
     } else {
@@ -704,7 +663,7 @@ public class IOUtils {
     }
   }
 
-  public static Iterable<String> getLineIterable( Reader r, int bufferSize, boolean includeEol) {
+  public static final Iterable<String> getLineIterable( Reader r, int bufferSize, boolean includeEol) {
     if (includeEol) {
       return new EolPreservingLineReaderIterable(r, bufferSize);
     } else {
@@ -891,6 +850,23 @@ public class IOUtils {
   }
 
   /**
+   * Quietly opens a File. If the file ends with a ".gz" extension,
+   * automatically opens a GZIPInputStream to wrap the constructed
+   * FileInputStream.
+   */
+  public static InputStream openFile(File file) throws RuntimeIOException {
+    try {
+      InputStream is = new BufferedInputStream(new FileInputStream(file));
+      if (file.getName().endsWith(".gz")) {
+        is = new GZIPInputStream(is);
+      }
+      return is;
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
+
+  /**
    * Provides an implementation of closing a file for use in a finally block so
    * you can correctly close a file without even more exception handling stuff.
    * From a suggestion in a talk by Josh Bloch.
@@ -1023,6 +999,10 @@ public class IOUtils {
     return IOUtils.slurpReader(r);
   }
 
+  public static String slurpGBFileNoExceptions(String filename) {
+    return IOUtils.slurpFileNoExceptions(filename, "GB18030");
+  }
+
   /**
    * Returns all the text in the given file with the given encoding.
    */
@@ -1047,6 +1027,10 @@ public class IOUtils {
     }
   }
 
+  public static String slurpGBFile(String filename) throws IOException {
+    return slurpFile(filename, "GB18030");
+  }
+
   /**
    * Returns all the text in the given file
    *
@@ -1061,6 +1045,18 @@ public class IOUtils {
    */
   public static String slurpGBURL(URL u) throws IOException {
     return IOUtils.slurpURL(u, "GB18030");
+  }
+
+  /**
+   * Returns all the text at the given URL.
+   */
+  public static String slurpGBURLNoExceptions(URL u) {
+    try {
+      return slurpGBURL(u);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**
