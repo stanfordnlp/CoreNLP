@@ -38,6 +38,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -97,17 +98,18 @@ public class EvaluateTreebank {
    * We keep it here as a function rather than a MaxentTagger so that
    * we can distribute a version of the parser that doesn't include
    * the entire tagger.
-   * <br>
-   * TODO: pass this in rather than create it here if we wind up using
-   * this in more place.  Right now it's only used in testOnTreebank.
    */
-  protected Function<List<? extends HasWord>, List<TaggedWord>> tagger;
+  protected final Function<List<? extends HasWord>, List<TaggedWord>> tagger;
 
   public EvaluateTreebank(LexicalizedParser parser) {
     this(parser.getOp(), parser.lex, parser);
   }
 
   public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory) {
+    this(op, lex, pqFactory, loadTagger(op));
+  }
+
+  public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory, Function<List<? extends HasWord>,List<TaggedWord>> tagger) {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
@@ -117,18 +119,7 @@ public class EvaluateTreebank {
     // this.lex = lex;
     this.pqFactory = pqFactory;
 
-    if(op.testOptions.preTag) {
-      try {
-        Class[] argsClass = { String.class };
-        Object[] arguments = { op.testOptions.taggerSerializedFile };
-        System.err.printf("Loading tagger from serialized file %s ...\n",op.testOptions.taggerSerializedFile);
-        tagger = (Function<List<? extends HasWord>,List<TaggedWord>>) Class.forName("edu.stanford.nlp.tagger.maxent.MaxentTagger").getConstructor(argsClass).newInstance(arguments);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
+    this.tagger = tagger;
 
     collinizer = op.tlpParams.collinizer();
     boundaryRemover = new BoundaryRemover();
@@ -221,6 +212,14 @@ public class EvaluateTreebank {
       kbestPCFG = Math.max(kbestPCFG, op.testOptions.printPCFGkBest);
     }
 
+  }
+
+  private static Function<List<? extends HasWord>,List<TaggedWord>> loadTagger(Options op) {
+    if (op.testOptions.preTag) {
+      return ReflectionLoading.loadByReflection("edu.stanford.nlp.tagger.maxent.MaxentTagger", op.testOptions.taggerSerializedFile);
+    } else {
+      return null;
+    }
   }
 
   public double getLBScore() {
