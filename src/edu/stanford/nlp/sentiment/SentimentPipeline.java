@@ -17,23 +17,6 @@ import edu.stanford.nlp.util.CoreMap;
  * @author John Bauer
  */
 public class SentimentPipeline {
-  public static String sentimentString(int sentiment) {
-    switch(sentiment) {
-    case 0:
-      return "Very negative";
-    case 1:
-      return "Negative";
-    case 2:
-      return "Neutral";
-    case 3:
-      return "Positive";
-    case 4:
-      return "Very positive";
-    default:
-      return "Unknown sentiment label " + sentiment;
-    }
-  }
-
   public static void main(String[] args) {
     String parserModel = null;
     String sentimentModel = null;
@@ -41,7 +24,13 @@ public class SentimentPipeline {
     String filename = null;
 
     for (int argIndex = 0; argIndex < args.length; ) {
-      if (args[argIndex].equalsIgnoreCase("-file")) {
+      if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
+        sentimentModel = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-parserModel")) {
+        parserModel = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-file")) {
         filename = args[argIndex + 1];
         argIndex += 2;
       } else {
@@ -68,7 +57,7 @@ public class SentimentPipeline {
       Tree tree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
       int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
       System.err.println(sentence);
-      System.err.println("  Predicted sentiment: " + sentimentString(sentiment));
+      System.err.println("  Predicted sentiment: " + SentimentUtils.sentimentString(sentiment));
     }
   }
 }
