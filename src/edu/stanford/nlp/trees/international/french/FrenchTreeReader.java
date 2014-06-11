@@ -36,6 +36,11 @@ import edu.stanford.nlp.util.XMLUtils;
  * XML files are in ISO-8859-1 format, so they must be converted to UTF-8.
  * <p>
  * Handles multiword expressions (MWEs).
+ * <p>
+ * One difference worth documenting between this and the
+ * PennTreeReader is that this does not unescape \* and \/ the way the
+ * PennTreeReader does.  The French Treebank we are using does not
+ * use those escapings.
  *
  * @author Spence Green
  *
