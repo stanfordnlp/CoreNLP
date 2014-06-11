@@ -5,6 +5,12 @@ import junit.framework.TestCase;
 import java.io.IOException;
 import java.io.StringReader;
 
+/**
+ * Very simple test case - checks that reading from a reader produces
+ * the right number of trees with the right text.
+ *
+ * @author John Bauer
+ */
 public class PennTreeReaderTest extends TestCase {
   public void testRead() throws IOException {
     String treeText = "(1 (2 This)) (3 (4 is) (5 a)) (6 (\\* small) (7 \\/test))";
