@@ -80,11 +80,11 @@ lib/tomcat/jasper.jar, el-api.jar, servlet-api.jar, tomcat-juli.jar
 
 ORIGINAL JAR NAME: the same...
 
-VERSION: Tomcat 7.0.12
+VERSION: Tomcat 7.0.42
 
-RELEASE DATE: 2011-04-05 (?)
+RELEASE DATE: 2013-06 (?)
 
-SOURCE AVAILABLE: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
+SOURCE AVAILABLE: no
 
 DESCRIPTION: Various parts of tomcat needed to build .jsp files
 
@@ -93,7 +93,7 @@ URL: http://tomcat.apache.org/download-70.cgi
 USED BY:
 used to build .jsps
 
-LAST UPDATE: 2011-11-21
+LAST UPDATE: 2013-07-09
 
 LAST UPDATE BY: John Bauer
 
@@ -384,18 +384,6 @@ URL: http://code.google.com/p/efficient-java-matrix-library/
 USED BY: Used in deep learning, especially RNN parser
 LAST UPDATE: 2012-07-17
 LAST UPDATE BY: Christopher Manning
------------------------------------------------------------------------
-javacc.jar
-ORIGINAL JAR NAME: javacc.jar
-VERSION: 6.0
-RELEASE DATE: August 2013
-SOURCE AVAILABLE: no
-DESCRIPTION: JavaCC is a parser/scanner generator for java
-             compiles .jj and .jjt files to .java
-URL: https://java.net/projects/javacc
-USED BY: tregex, tsurgeon, semgrex
-LAST UPDATE: 2013-08-28
-LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------
 foo.jar
 

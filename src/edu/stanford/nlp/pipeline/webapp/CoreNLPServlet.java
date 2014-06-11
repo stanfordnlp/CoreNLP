@@ -150,7 +150,7 @@ public class CoreNLPServlet extends HttpServlet {
       String escapedXml = xmlOutput.toString().replaceAll("\\r\\n|\\r|\\n", ""
           ).replace("\"", "\\\"");
       
-      // Inject the XML results into the HTML to be retrieved by the Javascript.
+      // Inject the XML results into the HTML to be retrieved by the Javscript.
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
       out.println("    stanfordXML = \"" + escapedXml + "\";");
