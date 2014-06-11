@@ -178,7 +178,6 @@ public class CharniakScoredParsesReaderWriter {
         int parsesExpected = 0;
         int sentenceId = lastSentenceId;
         ScoredObject<Tree> curParse = null;
-        Double score = null;
         List<ScoredObject<Tree>> curParses = null;
         while ((line = br.readLine()) != null) {
           line = line.trim();
@@ -205,15 +204,14 @@ public class CharniakScoredParsesReaderWriter {
               lastSentenceId = sentenceId;
               curParses = new ArrayList<ScoredObject<Tree>>(parsesExpected);
             } else {
-              if (score == null) {
+              if (curParse == null) {
                 // read score
-                score = Double.parseDouble(line);
+                double score = Double.parseDouble(line);
+                curParses.add(curParse = new ScoredObject<Tree>(null, score));
               } else {
                 // Reading a parse
-                curParse = new ScoredObject<Tree>(Trees.readTree(line), score);
-                curParses.add(curParse);
+                curParse.setObject(Trees.readTree(line));
                 curParse = null;
-                score = null;
                 parsesExpected--;
                 if (parsesExpected == 0) {
                   return curParses;
