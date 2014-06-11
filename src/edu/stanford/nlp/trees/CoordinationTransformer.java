@@ -66,54 +66,54 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("Input to CoordinationTransformer: " + t);
     }
-    Tree tx = tn.transformTree(t);
+    t = tn.transformTree(t);
     if (VERBOSE) {
-      System.err.println("After DependencyTreeTransformer:  " + tx);
+      System.err.println("After DependencyTreeTransformer:  " + t);
     }
-    if (tx == null) {
-      return tx;
+    if (t == null) {
+      return t;
     }
-    Tree tt = UCPtransform(tx);
+    t = UCPtransform(t);
     if (VERBOSE) {
-      System.err.println("After UCPTransformer:             " + tt);
+      System.err.println("After UCPTransformer:             " + t);
     }
-    Tree ttt = CCtransform(tt);
+    t = CCtransform(t);
     if (VERBOSE) {
-      System.err.println("After CCTransformer:              " + ttt);
+      System.err.println("After CCTransformer:              " + t);
     }
-    Tree tttt = qp.transformTree(ttt);
+    t = qp.transformTree(t);
     if (VERBOSE) {
-      System.err.println("After QPTreeTransformer:          " + tttt);
+      System.err.println("After QPTreeTransformer:          " + t);
     }
-    Tree flatSQ = SQflatten(tttt);
+    t = SQflatten(t);
     if (VERBOSE) {
-      System.err.println("After SQ flattening:              " + flatSQ);
+      System.err.println("After SQ flattening:              " + t);
     }
-    Tree fixedDates = dates.transformTree(flatSQ);
+    t = dates.transformTree(t);
     if (VERBOSE) {
-      System.err.println("After DateTreeTransformer:        " + fixedDates);
+      System.err.println("After DateTreeTransformer:        " + t);
     }
-    Tree removedXX = removeXOverX(fixedDates);
+    t = removeXOverX(t);
     if (VERBOSE) {
-      System.err.println("After removeXoverX:               " + removedXX);
+      System.err.println("After removeXoverX:               " + t);
     }
-    Tree conjp = combineConjp(removedXX);
+    t = combineConjp(t);
     if (VERBOSE) {
-      System.err.println("After combineConjp:               " + conjp);
+      System.err.println("After combineConjp:               " + t);
     }
-    Tree movedRB = moveRB(conjp);
+    t = moveRB(t);
     if (VERBOSE) {
-      System.err.println("After moveRB:                     " + movedRB);
+      System.err.println("After moveRB:                     " + t);
     }
-    Tree changedSbar = changeSbarToPP(movedRB);
+    t = changeSbarToPP(t);
     if (VERBOSE) {
-      System.err.println("After changeSbarToPP:             " + movedRB);
+      System.err.println("After changeSbarToPP:             " + t);
     }
-    Tree nowThat = rearrangeNowThat(changedSbar);
+    t = rearrangeNowThat(t);
     if (VERBOSE) {
-      System.err.println("After rearrangeNowThat:           " + nowThat);
+      System.err.println("After rearrangeNowThat:           " + t);
     }
-    return nowThat;
+    return t;
   }
 
   private static TregexPattern rearrangeNowThatTregex =
