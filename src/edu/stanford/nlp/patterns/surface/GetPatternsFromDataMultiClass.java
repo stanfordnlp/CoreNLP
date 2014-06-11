@@ -445,7 +445,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       boolean useTargetNERRestriction, String prefix,
       boolean useTargetParserParentRestriction, String numThreads) {
     Annotation doc = new Annotation(sentsCM);
-    
+
     Properties props = new Properties();
     List<String> anns = new ArrayList<String>();
     anns.add("pos");
@@ -1539,10 +1539,18 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
         }
       }
-      if (!keepRunning && !constVars.tuneThresholdKeepRunning) {
-        Redwood.log(Redwood.FORCE,
-            "No patterns learned for all labels. Ending iterations.");
-        break;
+
+      if (!keepRunning) {
+        if (!constVars.tuneThresholdKeepRunning) {
+          Redwood.log(Redwood.FORCE,
+              "No patterns learned for all labels. Ending iterations.");
+          break;
+        } else {
+          constVars.thresholdSelectPattern = 0.8 * constVars.thresholdSelectPattern;
+          Redwood.log(Redwood.FORCE,
+              "\n\nTuning thresholds to keep running. New Pattern threshold is  "
+                  + constVars.thresholdSelectPattern);
+        }
       }
     }
 
@@ -2179,8 +2187,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           seedWords4Label.add(line);
         }
         seedWords.put(label, seedWords4Label);
-        Redwood.log(Redwood.FORCE, "Number of seed words for label " + label + " is "
-            + seedWords4Label.size());
+        Redwood.log(Redwood.FORCE, "Number of seed words for label " + label
+            + " is " + seedWords4Label.size());
       }
 
       Map<String, Class> answerClasses = new HashMap<String, Class>();
@@ -2254,12 +2262,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             "splitOnPunct", "true"));
         List<File> allFiles = GetPatternsFromDataMultiClass
             .getAllFiles(evalFileWithGoldLabels);
-        int numFile =0;
+        int numFile = 0;
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
           for (File f : allFiles) {
             numFile++;
-            Redwood.log(Redwood.DBG, "Annotating text in " + f  + ". Num file " + numFile);
+            Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file "
+                + numFile);
             List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
                 new BufferedReader(new FileReader(f)), seedWords.keySet(),
                 setClassForTheseLabels, true, splitOnPunct, lowercase,
