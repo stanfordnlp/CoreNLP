@@ -29,9 +29,7 @@
 %Revised for Stanford Parser v.\ 1.6.9 in September 2011
 % Revised for Stanford Parser v.\ 2.0.4 in November 2012
 % Revised for the Stanford Parser v.\ 2.0.5 in March 2013
-% Revised for the Stanford Parser v.\ 3.2 in June 2013
-% Revised for the Stanford Parser v.\ 3.3 in November 2013
-Revised for the Stanford Parser v.\ 3.3 in December 2013
+Revised for the Stanford Parser v.\ 3.2 in June 2013
 }
 
 \begin{document}
@@ -60,7 +58,7 @@ For this sentence, the Stanford Dependencies (SD) representation is:
 \begin{quote}
 nsubj(makes-8, Bell-1) \\
 nsubj(distributes-10, Bell-1) \\
-vmod(Bell-1, based-3) \\
+partmod(Bell-1, based-3) \\
 nn(Angeles-6, Los-5) \\
 prep\_in(based-3, Angeles-6) \\
 root(ROOT-0, makes-8)\\
@@ -143,8 +141,6 @@ An adjectival modifier of an NP is any adjectival phrase that serves to modify t
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
 \> ``Sam eats red meat" \> \> \emph{amod}(meat, red)\\
-\> ``Sam took out  a 3 million dollar loan" \> \> \emph{amod}(loan, dollar)\\
-\> ``Sam took out  a \$ 3 million loan" \> \> \emph{amod}(loan, \$)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{appos}: appositional modifier}\\
@@ -174,6 +170,13 @@ these structures.
    \depedge[edge unit distance=1ex]{4}{6}{appos}
 \end{dependency}
 \end{quote}
+
+\noindent\textbf{\emph{attr}: attributive}\\
+An attributive is a complement of a copular verb such as ``to be", ``to seem", ``to appear". Currently, the converter only recognizes WHNP complements.
+\begin{tabbing}
+\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
+\>  ``What is that?'' \> \>  \emph{attr}(is, What)\\
+\end{tabbing}
 
 \noindent \textbf{\emph{aux}: auxiliary}\\
 An auxiliary of a clause is a non-main verb of the clause, e.g., a
@@ -317,6 +320,15 @@ second part.
 \end{dependency}
 \end{quote}
 
+
+\noindent\textbf{\emph{infmod}: infinitival modifier}\\
+An infinitival modifier of an NP is an infinitive that serves to modify the meaning of the NP.
+\begin{tabbing}
+\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
+\>  ``Points to establish are \ldots" \> \> \emph{infmod}(points, establish)\\
+\> ``I don't have anything to say" \> \> \emph{infmod}(anything, say)\\
+\end{tabbing}
+
 \noindent\textbf{\emph{iobj}: indirect object}\\
 The indirect object of a VP is the noun phrase which is the (dative) object of the verb.
 \begin{tabbing}
@@ -412,22 +424,17 @@ A passive nominal subject is a noun phrase which is the syntactic subject of a p
 \end{tabbing}
 
 \noindent\textbf{\emph{num}: numeric modifier}\\
-A numeric modifier of a noun is any number phrase that serves to
-modify the meaning of the noun with a quantity.
+A numeric modifier of a noun is any number phrase that serves to modify the meaning of the noun.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Sam ate 3 sheep" \> \>  \emph{num}(sheep, 3)\\
-\>  ``Sam spent forty dollars" \> \>  \emph{num}(dollars, 40)\\
-\>  ``Sam spent \$ 40" \> \>  \emph{num}(\$, 40)\\
+\>  ``Sam eats 3 sheep" \> \>  \emph{num}(sheep, 3)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{number}: element of compound number}\\
-An element of compound number is a part of a number phrase or currency
-amount. We regard a number as a specialized kind of multi-word expression.
+An element of compound number is a part of a number phrase or currency amount.
 \begin{tabbing}
 \hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``I have four thousand sheep" \> \> \emph{number}(thousand, four)\\
-\>  ``I lost \$ 3.2 billion" \> \> \emph{number}(billion, 3.2)\\
+\>  ``I lost \$ 3.2 billion" \> \> \emph{number}(\$, billion)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{parataxis}: parataxis}\\
@@ -436,6 +443,14 @@ The parataxis relation (from Greek for ``place side by side'') is a relation bet
 	\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
 \> ``The guy, John said, left early in the morning" \> \> \emph{parataxis}(left, said)\\
 \> ``Let's face it we're annoyed'' \>\> \emph{parataxis}(Let, annoyed)\\
+\end{tabbing}
+
+\noindent\textbf{\emph{partmod}: participial modifier}\\
+A participial modifier of an NP or VP or sentence is a participial verb form that serves to modify the meaning of a noun phrase or sentence.
+\begin{tabbing}
+\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
+\>  ``Truffles picked during the spring are tasty" \> \> \emph{partmod}(truffles, picked)\\
+\>  ``Bill tried to shoot demonstrating his incompetence" \> \> \emph{partmod}(shoot, demonstrating)\\
 \end{tabbing}
 
 \noindent\textbf{\emph{pcomp}: prepositional complement}\\
@@ -557,23 +572,6 @@ A temporal modifier (of a VP, NP, or an ADJP is a bare noun phrase constituent t
 \> ``Last night, I swam in the pool" \> \> \emph{tmod}(swam, night)\\
 \end{tabbing}
 
-\noindent\textbf{\emph{vmod}: reduced non-finite verbal modifier}\\
-A reduced non-finite verbal modifier is a participial or infinitive
-form of a verb heading a phrase (which may have some arguments,
-roughly like a VP). These are used to modify the meaning of an NP or
-another verb. They are not core arguments of a verb 
-or full finite relative clauses.
-\begin{tabbing}
-\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
-\>  ``Points to establish are \ldots" \> \> \emph{vmod}(points, establish)\\
-\> ``I don't have anything to say to you" \> \> \emph{vmod}(anything, say)\\
-\>  ``Truffles picked during the spring are tasty" \> \> \emph{vmod}(truffles, picked)\\
-\>  ``Bill tried to shoot, demonstrating his incompetence" \> \> \emph{vmod}(shoot, demonstrating)\\
-\end{tabbing}
-
-
-
-
 \noindent\textbf{\emph{xcomp}: open clausal complement}\\
 An open clausal complement (\emph{xcomp}) of a VP or an ADJP is a clausal complement without its own subject, whose reference is determined by an external subject.  These complements are always non-finite.  The name \emph{xcomp} is borrowed from Lexical-Functional Grammar.
 \begin{tabbing}
@@ -604,6 +602,7 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
    \> \> \emph{agent} - agent\\
     \> \> \emph{comp} - complement \\
 	  \> \> \> \emph{acomp} - adjectival complement \\
+	  \> \> \> \emph{attr} - attributive \\
 	  \> \> \> \emph{ccomp} - clausal complement with internal subject \\
       \> \> \> \emph{xcomp} -  clausal complement with external subject\\
       \> \> \> \emph{obj} - object \\
@@ -626,10 +625,11 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
     \> \> \emph{det} - determiner \\
     \> \> \emph{predet} - predeterminer\\
     \> \> \emph{preconj} - preconjunct \\
-    \> \> \emph{vmod} - reduced, non-finite verbal modifier \\
+    \> \> \emph{infmod} - infinitival modifier \\
     \> \> \emph{mwe} - multi-word expression modifier \\
     \> \> \> \emph{mark} - marker (word introducing an \emph{advcl} or
     \emph{ccomp} \\
+    \> \> \emph{partmod} - participial modifier \\
     \> \> \emph{advmod} - adverbial modifier \\
     \> \>  \> \emph{neg} - negation modifier \\
     \> \> \emph{rcmod} - relative clause modifier \\
@@ -1096,7 +1096,7 @@ dependencies, but altering their definitions.  This is a separate download.  It 
 \subsubsection*{$\star$ \textbf{Other parsers}}
 
 A number of dependency parsers have now been trained to parse directly
-to the basic Stanford Dependencies, including MaltParser, DeSR, and
+to the basic Stanford Dependencies, including MaltParser and
 MSTParser.  Several of these parsers distribute models trained for
 Stanford Dependencies parsing, including MaltParser and the Easy First
 Parser.  If desired, these parses can then be postprocessed to the collapsed or CCprocessed representation using the \texttt{-conllxFile} option of \texttt{EnglishGrammaticalStructure}, as discussed above.
@@ -1142,13 +1142,9 @@ The Stanford dependency representation has also served as a model for
 developing dependency schemes in other languages. Recently schemes
 based on the Stanford dependency representation have been proposed for
 Finnish \citep{Haverinen2010a,Haverinen2010b}, Thai \citep{Potisuk10},
-Persian \citep{Seraji12}, and French \citep{Maarouf12}. 
-Indeed, there has been increasing interest in defining a
-consistent cross-linguistic set of relations suitable for Stanford
-Dependencies
-\citep{mcdonald-EtAl:2013:Short,tsarfaty:2013:Short}.
-The Stanford Dependencies representation
-was also used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
+Persian \citep{Seraji12}, and French \citep{Maarouf12}. The Stanford
+Dependencies representation
+was used to evaluate dependency parsers in the 2012 shared task on parsing the web \citep{Petrov12}.
 
 \section{Recent changes}
 
@@ -1158,11 +1154,6 @@ versions of the dependencies, or need to update your code.
 \begin{description}
 \item[abbrev] was removed as a relation.  It is now a particular case
   of an \emph{appos}.
-\item[attr] has been removed as a relation. \emph{attr} was a relation intended
-for the complement of a copular verb such as ``to be'', ``to seem'', ``to appear''.
-Mainly, it was used for WHNP complements.  (The relation \emph{attr}
-was meant to stand for ``attributive'' but that was arguably a misuse
-of the word.)
 \item[complm] was removed as a relation. It is now a particular case of
   \emph{mark}. This follows HPSG-like usage, where the complementizer
   is a mark on the clause.
@@ -1171,10 +1162,6 @@ of the word.)
   became more essential as we expanded our consideration of informal
   text types.
 \item[goeswith] was introduced. It is useful on badly edited text.
-\item[infmod] was remode as a relation. It has been generalized as a
-  case of \emph{vmod}.
-\item[partmod] was remode as a relation. It has been generalized as a
-  case of \emph{vmod}.
 \item[purpcl] was removed as a relation. It is now a particular case
   of an \emph{advcl}.
 \item[rel] has been removed as a relation. \emph{rel} was the relation
@@ -1182,9 +1169,6 @@ of the word.)
   \emph{Wh-}phrase. Now, the converter resolves the grammatical
   relation (\emph{nsubj}, \emph{dobj}, or \emph{pobj}) for simple
   cases, and the rest are left unresolved as a \emph{dep} relation.
-\item[vmod] has been introduced as a relation generalizing over
-  non-finite verbal modifiers that are participial in form (formerly
-  \emph{partmod}) or infinitival (formerly \emph{infmod}).
 \end{description}
 
 

@@ -31,89 +31,6 @@ public class TsurgeonTest extends TestCase {
     }
   }
 
-  public void testAdjoin() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@)) foo");
-    TregexPattern tregex = TregexPattern.compile("B=foo");
-    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (FOO (BAR 1 2)))");
-    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
-    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (FOO (BAR (FOO (BAR 1 2)))))");
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR)) foo");
-      throw new RuntimeException("Should have failed for not having a foot");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@) (BAZ@)) foo");
-      throw new RuntimeException("Should have failed for having two feet");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO@ (BAR)) foo");
-      throw new RuntimeException("Non-leaves cannot be foot nodes");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-  }
-
-  public void testCreateSubtrees() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("createSubtree FOO left right");
-
-    TregexPattern tregex = TregexPattern.compile("A < B=left < C=right");
-    // Verify when there are only two nodes
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (FOO (B 1) (C 2)))");
-    // We allow backwards nodes as well
-    runTest(tregex, tsurgeon, "(A (C 1) (B 2))", "(A (FOO (C 1) (B 2)))");
-    // Check nodes in between
-    runTest(tregex, tsurgeon, "(A (B 1) (D 3) (C 2))", "(A (FOO (B 1) (D 3) (C 2)))");
-    // Check nodes outside the span
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2))", "(A (D 3) (FOO (B 1) (C 2)))");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2) (D 3))", "(A (FOO (B 1) (C 2)) (D 3))");
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2) (E 4))", "(A (D 3) (FOO (B 1) (C 2)) (E 4))");
-
-    // Check when the two endpoints are the same
-    tregex = TregexPattern.compile("A < B=left < B=right");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (FOO (B 1)) (C 2))");
-
-    // Check double operation - should make two FOO nodes and then stop
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (FOO (B 1)) (FOO (B 2)))");
-
-    // Check when we only have one argument to createSubtree
-    tsurgeon = Tsurgeon.parseOperation("createSubtree FOO child");
-    tregex = TregexPattern.compile("A < B=child");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (FOO (B 1)) (C 2))");
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (FOO (B 1)) (FOO (B 2)))");
-
-    // Check that incorrectly formatted operations don't successfully parse
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree FOO");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree FOO a b c");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    // Verify that it fails when the parents are different
-    tsurgeon = Tsurgeon.parseOperation("createSubtree FOO left right");
-    tregex = TregexPattern.compile("A << B=left << C=right");
-    try {
-      runTest(tregex, tsurgeon, "(A (B 1) (D (C 2)))", "(A (B 1) (D (C 2)))");
-      throw new AssertionError("Expected a runtime failure");
-    } catch (TsurgeonRuntimeException e) {
-      // yay
-    }
-  }
-
   public void testDelete() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("delete bob");
 
@@ -334,14 +251,6 @@ public class TsurgeonTest extends TestCase {
 
   public void outputResults(TregexPattern tregex, TsurgeonPattern tsurgeon,
                             String input) {
-    System.out.println("Tsurgeon: " + tsurgeon);
-    System.out.println("Tregex: " + tregex);
-    TregexMatcher m = tregex.matcher(treeFromString(input));
-    if (m.find()) {
-      System.err.println(" Matched");
-    } else {
-      System.err.println(" Did not match");
-    }
     Tree result = Tsurgeon.processPattern(tregex, tsurgeon, treeFromString(input));
     System.out.println(result);
   }
