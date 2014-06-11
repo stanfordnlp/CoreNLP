@@ -142,22 +142,16 @@ public abstract class DeterministicCorefSieve  {
         return false;
       }
     }
-    if (flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3 && 
-        mention2.person!=Person.I && mention2.person!=Person.YOU) {
-      return false;
+    if(flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3
+        && mention2.person!=Person.I && mention2.person!=Person.YOU) return false;
+    if(mention2.lowercaseNormalizedSpanString().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) return false;
+    if(mention2.person==Person.YOU && document.docType==DocType.ARTICLE
+        && mention2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0")) return false;
+    if(document.conllDoc != null) {
+      if(ant.generic && ant.person==Person.YOU) return false;
+      if(mention2.generic) return false;
+      if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
     }
-    if (mention2.lowercaseNormalizedSpanString().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) {
-      return false;
-    }
-    if (mention2.person==Person.YOU && document.docType==DocType.ARTICLE &&
-        mention2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0")) {
-      return false;
-    }
-    if (document.conllDoc != null) {
-      if (ant.generic && ant.person==Person.YOU) return false;
-      if (mention2.generic) return false;
-    }
-    if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
 
     if(flags.USE_DISCOURSEMATCH) {
       String mString = mention.lowercaseNormalizedSpanString();
@@ -287,7 +281,7 @@ public abstract class DeterministicCorefSieve  {
       return true;
     }
 
-    if(flags.USE_ACRONYM && Rules.entityIsAcronym(document, mentionCluster, potentialAntecedent)) {
+    if(flags.USE_ACRONYM && Rules.entityIsAcronym(mentionCluster, potentialAntecedent)) {
       SieveCoreferenceSystem.logger.finest("Acronym: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
