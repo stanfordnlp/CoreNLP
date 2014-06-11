@@ -85,7 +85,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable {
+public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable, ParserQueryFactory {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -392,6 +392,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     }
   }
 
+  @Override
   public ParserQuery parserQuery() {
     if (reranker == null) {
       return new LexicalizedParserQuery(this);
