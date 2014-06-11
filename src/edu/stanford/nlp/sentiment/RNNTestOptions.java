@@ -2,6 +2,11 @@ package edu.stanford.nlp.sentiment;
 
 import java.io.Serializable;
 
+/**
+ * Evaluation-only options for the RNN models
+ *
+ * @author John Bauer
+ */
 public class RNNTestOptions implements Serializable {
   public int ngramRecordSize = 0;
 
