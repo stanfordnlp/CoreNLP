@@ -145,6 +145,7 @@ public class PennTreeReader implements TreeReader {
         if (treeNormalizer != null && treeFactory != null) {
           t = treeNormalizer.normalizeWholeTree(t, treeFactory);
         }
+        t.indexLeaves(true);
       }
     }
 
