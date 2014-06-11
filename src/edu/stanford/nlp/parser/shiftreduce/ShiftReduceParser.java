@@ -26,6 +26,7 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -225,8 +226,18 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return copy;
   }
 
+  @Override
   public ParserQuery parserQuery() {
     return new ShiftReduceParserQuery(this);
+  }
+
+  @Override
+  public Tree apply(List<? extends HasWord> sentence) {
+    ShiftReduceParserQuery pq = new ShiftReduceParserQuery(this);
+    if (pq.parse(sentence)) {
+      return pq.getBestParse();
+    }
+    return ParserUtils.xTree(sentence);
   }
 
 
