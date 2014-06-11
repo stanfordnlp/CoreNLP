@@ -37,6 +37,10 @@ public class Match<K,V> implements HasInterval<Integer>
     return matched;
   }
 
+  public int getMatchedLength() {
+    return (matched != null)? matched.size():0;
+  }
+
   public V getValue() {
     return value;
   }
