@@ -428,6 +428,7 @@ public class DVParser {
     System.err.println("  -lpWeight: A weight to give the original LexicalizedParser when testing (0.2 seems to work well)");
     System.err.println("  -unkWord: The vector representing unknown word in the word vectors file");
     System.err.println("  -transformMatrixType: A couple different methods for initializing transform matrices");
+    System.err.println("  -(no)trainWordVectors: whether or not to train the word vectors along with the matrices.  True by default");
   }
 
   /**
@@ -492,7 +493,7 @@ public class DVParser {
           "-unkWord", "*UNK*",
           "-transformMatrixType", "DIAGONAL",
           "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT),
-          "-trainWordVectors", "true",
+          "-trainWordVectors",
         } ));
     argsWithDefaults.addAll(Arrays.asList(args));
     args = argsWithDefaults.toArray(new String[argsWithDefaults.size()]);
