@@ -80,7 +80,8 @@ public class InvertedIndexByTokens {
     Hashtable<String, Set<String>> sentids = new Hashtable<String, Set<String>>();
     for (String w : words) {
       Hashtable<String, Set<String>> st = index.get(w);
-      
+      if(st == null)
+        throw new RuntimeException("How come the index does not have sentences for " + w);
       for (Map.Entry<String, Set<String>> en : st.entrySet()) {
         if (!sentids.containsKey(en.getKey())) {
           sentids.put(en.getKey(), new HashSet<String>());
