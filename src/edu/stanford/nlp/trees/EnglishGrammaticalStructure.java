@@ -142,8 +142,17 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   @Override
   protected void correctDependencies(Collection<TypedDependency> list) {
+    if (DEBUG) {
+      printListSorted("At correctDependencies:", list);
+    }
     correctSubjPassAndPoss(list);
+    if (DEBUG) {
+      printListSorted("After correctSubjPassAndPoss:", list);
+    }
     removeExactDuplicates(list);
+    if (DEBUG) {
+      printListSorted("After removeExactDuplicates:", list);
+    }
   }
 
   private static void printListSorted(String title, Collection<TypedDependency> list) {
