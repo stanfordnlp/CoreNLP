@@ -423,6 +423,11 @@ public class DVParser {
     System.err.println("  -transformMatrixType: A couple different methods for initializing transform matrices");
   }
 
+  /**
+   * An example command line for training a new parser:
+   * <br>
+   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputSeconds 1200 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -dvIterations 40 -dvBatchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
+   */
   public static void main(String[] args) 
     throws IOException, ClassNotFoundException
   {
