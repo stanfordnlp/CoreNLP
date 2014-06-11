@@ -541,8 +541,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
   public void retrain(ObjectBank<List<IN>> doc) {
     if (classifier == null) {
-      System.err.println("Cannot retrain before you train!");
-      System.exit(-1);
+      throw new UnsupportedOperationException("Cannot retrain before you train!");
     }
     Index<String> findex = ((LinearClassifier<String, String>)classifier).featureIndex();
     Index<String> lindex = ((LinearClassifier<String, String>)classifier).labelIndex();
@@ -1036,8 +1035,6 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     } catch (Exception e) {
       System.err.println("Error serializing to " + serializePath);
       e.printStackTrace();
-      // dont actually exit in case they're testing too
-      //System.exit(1);
     }
   }
 
