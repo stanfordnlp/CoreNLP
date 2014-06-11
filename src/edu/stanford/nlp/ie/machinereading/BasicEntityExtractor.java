@@ -266,11 +266,7 @@ public class BasicEntityExtractor implements Extractor {
    * type.
    *
    * @param sentence
-   *          A sentence, ideally annotated with NamedEntityTagAnnotation
-   * @param nerTag
-   *          The name of the NER tag to copy, e.g. "DATE". Use "ALL" for all tags - added by sonalg
-   * @param entityType
-   *          The type of the {@link EntityMention} objects created
+   *          A sentence annotated with NamedEntityTagAnnotation
    */
   public void makeAnnotationFromAllNERTags(CoreMap sentence) {
     List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -447,7 +443,7 @@ public class BasicEntityExtractor implements Extractor {
     }
   }
 
-  static void saveCoNLLFiles(String dir, Annotation dataset, boolean useSubTypes, boolean alreadyBIO) throws IOException {
+  public static void saveCoNLLFiles(String dir, Annotation dataset, boolean useSubTypes, boolean alreadyBIO) throws IOException {
     List<CoreMap> sentences = dataset.get(CoreAnnotations.SentencesAnnotation.class);
 
     String docid = null;
