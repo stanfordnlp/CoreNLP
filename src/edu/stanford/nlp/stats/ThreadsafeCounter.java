@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.util.Factory;
-import edu.stanford.nlp.util.concurrent.AtomicDouble;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -32,7 +31,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
   private static final int DEFAULT_CAPACITY = 100;
   
   private final ConcurrentMap<E,Double> map;
-  private final AtomicDouble totalCount;
+  private double totalCount = 0.0;
   private double defaultReturnValue = 0.0;
   
   public ThreadsafeCounter() {
@@ -41,7 +40,6 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
   
   public ThreadsafeCounter(int initialCapacity) {
     map = new ConcurrentHashMap<E,Double>(initialCapacity);
-    totalCount = new AtomicDouble();
   }
 
   @Override
@@ -79,7 +77,8 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
   @Override
   public void setCount(E key, double value) {
     Double oldV = map.put(key, value);
-    totalCount.addAndGet(value - (oldV == null ? 0.0 : (double) oldV));
+    totalCount -= (oldV == null ? 0.0 : (double) oldV);
+    totalCount += value;
   }
 
   @Override
@@ -90,7 +89,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
       newV = value + (v == null ? 0.0 : (double) v);
       map.put(key, newV);
     }
-    totalCount.addAndGet(value);
+    totalCount += value;
     return newV;
   }
 
@@ -119,7 +118,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
       newV = SloppyMath.logAdd(value, oldV);
       map.put(key, newV);
     }
-    totalCount.addAndGet(newV - oldV);
+    totalCount += newV - oldV;
     return newV;
   }
 
@@ -133,7 +132,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
     Double oldV;
     synchronized(map) {
       oldV = map.remove(key);
-      totalCount.addAndGet( -1.0 * (oldV == null ? 0.0 : (double) oldV));
+      totalCount -= oldV == null ? 0.0 : (double) oldV;
     }
     return oldV == null ? defaultReturnValue : (double) oldV;
   }
@@ -209,7 +208,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
   public void clear() {
     synchronized(map) {
       map.clear();
-      totalCount.set(0);
+      totalCount = 0.0;
     }
   }
 
@@ -220,7 +219,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
 
   @Override
   public double totalCount() {
-    return totalCount.get();
+    return totalCount;
   }
 
   @SuppressWarnings("unchecked")
@@ -236,7 +235,7 @@ public class ThreadsafeCounter<E> implements Serializable, Counter<E>, Iterable<
       // the conjunction and the second.
       synchronized(map) {
         synchronized(other.map) {
-          return totalCount.get() == other.totalCount.get() && map.equals(other.map);
+          return totalCount == other.totalCount && map.equals(other.map);
         }
       }
     }
