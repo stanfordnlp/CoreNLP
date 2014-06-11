@@ -75,7 +75,7 @@ public class BinaryTransition implements Transition {
     newTop.addChild(right);
 
     stack = stack.push(newTop);
-    return new State(stack, state.sentence, state.tokenPosition, state.score, false);    
+    return new State(stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score, false);    
   }
 
   @Override

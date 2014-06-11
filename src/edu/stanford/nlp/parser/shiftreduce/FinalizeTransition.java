@@ -9,7 +9,7 @@ public class FinalizeTransition implements Transition {
   }
 
   public State apply(State state) {
-    return new State(state.stack, state.sentence, state.tokenPosition, state.score, true);    
+    return new State(state.stack, state.transitions.push(this), state.sentence, state.tokenPosition, state.score, true);    
   }
 
   @Override
