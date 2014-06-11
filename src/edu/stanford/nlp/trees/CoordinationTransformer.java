@@ -248,12 +248,16 @@ public class CoordinationTransformer implements TreeTransformer {
   private static final TregexPattern[] matchPatterns = {
     // UCP (JJ ...) -> ADJP
     // UCP (DT JJ ...) -> ADJP
+    // UCP (... (ADJP (JJR older|younger))) -> ADJP
+    // UCP (N ...) -> NP
+    // UCP ADVP -> ADVP
+    // Might want to look for ways to include RB for flatter structures,
+    // but then we have to watch out for (RB not) for example
+    // Note that the order of OR expressions means the older|younger
+    // pattern takes precedence
     TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/=adjp | ( <1 DT <2 /^JJ|ADJP/=adjp ) |" + 
-                          // UCP (N ...) -> NP
-                                      " <, /^N/=np | ( <1 DT <2 /^N/=np ) | " +
-                          // UCP ADVP -> ADVP
-                          // Might want to look for ways to include RB for flatter structures,
-                          // but then we have to watch out for (RB not) for example
+                          " <- (ADJP=adjp < (JJR < /^(?i:younger|older)$/)) |" + 
+                          " <, /^N/=np | ( <1 DT <2 /^N/=np ) | " +
                           " <, /^ADVP/=advp ]"),
   };
 
