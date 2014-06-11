@@ -50,6 +50,8 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   public SurfacePattern(String[] prevContext, PatternToken token, String[] nextContext, Genre genre){
     // String[] originalPrev, String[] originalNext, Genre genre) {
+    prevContext = trim(prevContext);
+    nextContext = trim(nextContext);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
@@ -66,8 +68,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
     // toString = toString(null);
     hashcode = toString().hashCode();
-    prevContext = trim(prevContext);
-    nextContext = trim(nextContext);
+
   }
 
   String[] trim(String[] p){
@@ -221,7 +222,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)" + Pattern.quote("\\E")+"/\\s*" + Pattern.quote("}")
       + "\\s*" + Pattern.quote("]"));
-  static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
+  static Pattern p2 = Pattern.compile(Pattern.quote("\\s*[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
       + Pattern.quote("]"));
 
   public String[] getSimplerTokens(String[] p) {
@@ -230,6 +231,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
     String[] sim = new String[p.length];
     for (int i = 0; i < p.length; i++) {
+      
       assert p[i] != null : "How is the any one " + Arrays.toString(p) + " null!";
       
       if(p1 == null)
