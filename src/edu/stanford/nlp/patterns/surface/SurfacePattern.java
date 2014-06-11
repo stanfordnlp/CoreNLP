@@ -66,14 +66,15 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
     // toString = toString(null);
     hashcode = toString().hashCode();
-    trim(prevContext);
-    trim(nextContext);
+    prevContext = trim(prevContext);
+    nextContext = trim(nextContext);
   }
 
-  void trim(String[] p){
-    for(int i = 0;i < p.length; i++){
+  String[] trim(String[] p){
+    for(int i = 0 ; i < p.length; i++){
       p[i] = p[i].trim();
     }
+    return p;
   }
   
   public static String getContextStr(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {

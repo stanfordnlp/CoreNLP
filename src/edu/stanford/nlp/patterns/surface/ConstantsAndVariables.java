@@ -814,6 +814,9 @@ public class ConstantsAndVariables implements Serializable{
 
   double editDistMax = 100;
 
+  /**
+   * Use this option if you are limited by memory ; ignored if fileFormat is ser. 
+   */
   @Option(name="batchProcessSents")
   public boolean batchProcessSents = false;
 
