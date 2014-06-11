@@ -18,7 +18,7 @@
   $EARLY_LATE_MOD = ( /late|early|mid-?/ | /the/? /beginning|start|dawn|middle|end/ /of/ );
   $APPROX_MOD = ( /about|around|some|exactly|precisely/ );
   $YEAR = ( /[012]\d\d\d/ | /\w+teen|twenty/ [ { numcompvalue<100 } & { numcompvalue>0 } & $INT ] );
-  $POSSIBLE_YEAR = ( $YEAR | $INT /a\.?d\.?|b\.?c\.?/ | $INT1000TO3000 );
+  $POSSIBLE_YEAR = ( $YEAR /a\.?d\.?|b\.?c\.?/? | $INT /a\.?d\.?|b\.?c\.?/ | $INT1000TO3000 );
   $hasTemporal = "{ temporal::EXISTS } & {{ temporal.value != NON_TEMPORAL }}";
 
   # Decades
