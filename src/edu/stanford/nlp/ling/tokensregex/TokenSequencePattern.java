@@ -56,6 +56,7 @@ import java.util.*;
  * <li> All specified token attributes match:
  * <br/> For Strings:
  *     <code> { lemma:/.../; tag:"NNP" } </code> = attributes that need to all match
+ *     If only one attribute, the {} can be dropped.
  * <br/> See {@link edu.stanford.nlp.ling.AnnotationLookup AnnotationLookup} for a list of predefined token attribute names.
  * <br/> Additional attributes can be bound using the environment (see below).
  * <br/> NOTE: <code>/.../</code> used for regular expressions,
@@ -89,6 +90,11 @@ import java.util.*;
  * <p>
  * String pattern match across multiple tokens:
  *   <code>(?m){min,max} /pattern/</code>
+ * </p>
+ *
+ * <p>
+ * Special expressions: indicated by double braces: <code>{{ expr }}</code>
+ *   <br/> See {@link edu.stanford.nlp.ling.tokensregex.types.Expressions} for syntax.
  * </p>
  *
  * <p>

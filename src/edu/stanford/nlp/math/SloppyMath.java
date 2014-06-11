@@ -621,6 +621,32 @@ public final class SloppyMath {
     }
   }
 
+
+  private static float[] acosCache = null;
+  /**
+   * Compute acos very quickly by directly looking up the value.
+   * @param cosValue The cosine of the angle to fine.
+   * @return The angle corresponding to the cosine value.
+   * @throws IllegalArgumentException if cosValue is not between -1 and 1
+   */
+  public static double acos(double cosValue) {
+    if (cosValue < -1.0 || cosValue > 1.0) {
+      throw new IllegalArgumentException("Cosine is not between -1 and 1: " + cosValue);
+    }
+    int numSamples = 10000;
+    if (acosCache == null) {
+      acosCache = new float[numSamples + 1];
+      for (int i = 0; i <= numSamples; ++i) {
+        double x = 2.0 / ((double) numSamples) * ((double) i) - 1.0;
+        acosCache[i] = (float) Math.acos(x);
+      }
+    }
+
+    int i = ((int) (((cosValue + 1.0) / 2.0) * ((double) numSamples)));
+    return acosCache[i];
+  }
+
+
   public static double poisson(int x, double lambda) {
     if (x<0 || lambda<=0.0) throw new RuntimeException("Bad arguments: " + x + " and " + lambda);
     double p = (Math.exp(-lambda) * Math.pow(lambda, x)) / factorial(x);

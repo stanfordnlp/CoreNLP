@@ -118,7 +118,6 @@ import edu.stanford.nlp.process.LexedTokenFactory;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
-        escapeForwardSlashAsterisk = val;
       } else if ("normalizeAmpersandEntity".equals(key)) {
         normalizeAmpersandEntity = val;
       } else if ("normalizeFractions".equals(key)) {
@@ -188,7 +187,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
   private boolean ptb3Dashes;
-  private boolean escapeForwardSlashAsterisk;
+  private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3;
   
   
