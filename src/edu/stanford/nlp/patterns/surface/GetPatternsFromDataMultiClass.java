@@ -2323,7 +2323,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         if (saveSentencesSerDir != null) {
           saveSentencesSerDirFile = new File(saveSentencesSerDir);
           IOUtils.ensureDir(saveSentencesSerDirFile);
-          IOUtils.writeObjectToFile(sents, saveSentencesSerDir + "/sents_0.ser");
+          IOUtils.writeObjectToFile(sents, saveSentencesSerDir + "/sents_all.ser");
         } else {
           String systemdir = System.getProperty("java.io.tmpdir");
           saveSentencesSerDirFile = File.createTempFile("sents", ".tmp", new File(systemdir));
@@ -2359,8 +2359,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           for (File f : allFiles) {
             if (!batchProcessSents)
               sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
-            else
-              Data.sentsFiles.add(f);
+            else{
+              File newf = new File(saveSentencesSerDir + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_"));
+              IOUtils.cp(f, newf);
+              Data.sentsFiles.add(newf);
+            }
           }
         } else {
           throw new RuntimeException(
