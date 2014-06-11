@@ -183,8 +183,16 @@ public class SemanticGraph implements Serializable {
     return graph.edgeIterable();
   }
 
+  public Iterator<SemanticGraphEdge> outgoingEdgeIterator(IndexedWord v) {
+    return graph.outgoingEdgeIterator(v);
+  }
+
   public Iterable<SemanticGraphEdge> outgoingEdgeIterable(IndexedWord v) {
     return graph.outgoingEdgeIterable(v);
+  }
+
+  public Iterator<SemanticGraphEdge> incomingEdgeIterator(IndexedWord v) {
+    return graph.incomingEdgeIterator(v);
   }
 
   public Iterable<SemanticGraphEdge> incomingEdgeIterable(IndexedWord v) {
