@@ -103,6 +103,8 @@ public class EnglishGrammaticalRelations {
     "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
   private static final String selfRegex =
     "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
+  private static final String xcompVerbRegex =
+    "/^(?i:ask|asks|asked|asking|advise|advises|advised|advising|beg|begs|begged|begging|demand|demands|demanded|demanding|desire|desires|desired|desiring|implore|implores|implored|imploring|persuade|persuades|persuaded|persuading|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
 
   // By setting the HeadFinder to null, we find out right away at
   // runtime if we have incorrectly set the HeadFinder for the
@@ -742,7 +744,7 @@ public class EnglishGrammaticalRelations {
         new String[] {
           // basic VP complement xcomp; this used to exclude embedding under a VP headed by be, as some are purpose clauses, but it seems like the vast majority aren't so I've removed that restriction
           // one way to detect purpose clauses is to look for an NP before the S, though
-          "VP < (S=target !$-- NP !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
+          "VP < (S=target [ !$-- NP | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
           "ADJP < (S=target <, (VP <, TO))",
           "VP < (S=target !$- (NN < order) < (NP $+ NP|ADJP))",
           // to find "help sustain ...
@@ -1231,7 +1233,7 @@ public class EnglishGrammaticalRelations {
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
           // they wrote asking the SEC to ...
-          "VP < (S=target $-- NP < (VP < TO))",
+          "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
           "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
           "SBARQ < WHNP < (S=target < (VP <1 TO))",
