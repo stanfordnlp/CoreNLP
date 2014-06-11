@@ -47,24 +47,23 @@ class TsurgeonParser/*@bgen(jjtree)*/implements TsurgeonParserTreeConstants, Tsu
       case ADJOIN_TO_FOOT:
       case COINDEX:{
         result = Operation();
-        jj_consume_token(26);
 jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
 {if ("" != null) return new TsurgeonPattern[] { result };}
         break;
         }
-      case 27:{
+      case OPEN_BRACKET:{
         label_1:
         while (true) {
-          jj_consume_token(27);
+          jj_consume_token(OPEN_BRACKET);
           result = Operation();
-          jj_consume_token(28);
+          jj_consume_token(CLOSE_BRACKET);
 if (results == null) {
         results = Generics.newArrayList();
       }
       results.add(result);
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case 27:{
+          case OPEN_BRACKET:{
             ;
             break;
             }
@@ -379,6 +378,7 @@ if (jjtc000) {
     throw new Error("Missing return statement in function");
   }
 
+// TODO: what does this next comment mean?
 // we'll also put in a way to use a SELECTION with a list of nodes.
   final public TsurgeonPattern NodeSelection() throws ParseException {/*@bgen(jjtree) NodeSelection */
   SimpleNode jjtn000 = new SimpleNode(JJTNODESELECTION);
@@ -581,8 +581,8 @@ jjtree.closeNodeScope(jjtn000, true);
 dtrs.add(0,tree); {if ("" != null) return dtrs;}
         break;
         }
-      case 29:{
-        jj_consume_token(29);
+      case CLOSE_PAREN:{
+        jj_consume_token(CLOSE_PAREN);
 jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
 {if ("" != null) return dtrs;}
@@ -679,6 +679,99 @@ if (jjtc000) {
     finally { jj_save(7, xla); }
   }
 
+  private boolean jj_3_4()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(GENERAL_RELABEL)) return true;
+    return false;
+  }
+
+  private boolean jj_3_3()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(REGEX)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(QUOTEX)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6()
+ {
+    if (jj_scan_token(LOCATION_RELATION)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1()
+ {
+    if (jj_scan_token(RELABEL)) return true;
+    if (jj_3R_4()) return true;
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_5()
+ {
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_15()
+ {
+    if (jj_scan_token(CLOSE_PAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_8()
+ {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_14()
+ {
+    if (jj_3R_9()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_13()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_14()) {
+    jj_scanpos = xsp;
+    if (jj_3R_15()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_4()
+ {
+    if (jj_3R_8()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_12()
+ {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    return false;
+  }
+
+  private boolean jj_3_8()
+ {
+    if (jj_scan_token(INSERT)) return true;
+    if (jj_3R_7()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
   private boolean jj_3R_11()
  {
     if (jj_scan_token(TREE_NODE_TERMINAL_LABEL)) return true;
@@ -730,102 +823,9 @@ if (jjtc000) {
     return false;
   }
 
-  private boolean jj_3_4()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(GENERAL_RELABEL)) return true;
-    return false;
-  }
-
   private boolean jj_3R_7()
  {
     if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3_3()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(REGEX)) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(QUOTEX)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6()
- {
-    if (jj_scan_token(LOCATION_RELATION)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1()
- {
-    if (jj_scan_token(RELABEL)) return true;
-    if (jj_3R_4()) return true;
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_5()
- {
-    if (jj_3R_7()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_15()
- {
-    if (jj_scan_token(29)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_8()
- {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_14()
- {
-    if (jj_3R_9()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_13()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_14()) {
-    jj_scanpos = xsp;
-    if (jj_3R_15()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_4()
- {
-    if (jj_3R_8()) return true;
-    return false;
-  }
-
-  private boolean jj_3_8()
- {
-    if (jj_scan_token(INSERT)) return true;
-    if (jj_3R_7()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_12()
- {
-    if (jj_scan_token(IDENTIFIER)) return true;
     return false;
   }
 
@@ -846,7 +846,7 @@ if (jjtc000) {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x8000000,0x800fff0,0xb0,0x200,0xf800,0x40000,0x3040000,0x3040000,0x23040000,};
+      jj_la1_0 = new int[] {0x20,0x3ffe0,0x2c0,0x800,0x3e000,0x200000,0xc200000,0xc200000,0x1c200000,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[8];
   private boolean jj_rescan = false;
@@ -1036,7 +1036,7 @@ if (jjtc000) {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[30];
+    boolean[] la1tokens = new boolean[29];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1050,7 +1050,7 @@ if (jjtc000) {
         }
       }
     }
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 29; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
