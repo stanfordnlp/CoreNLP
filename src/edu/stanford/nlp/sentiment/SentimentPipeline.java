@@ -41,7 +41,13 @@ public class SentimentPipeline {
     String filename = null;
 
     for (int argIndex = 0; argIndex < args.length; ) {
-      if (args[argIndex].equalsIgnoreCase("-file")) {
+      if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
+        sentimentModel = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-parserModel")) {
+        parserModel = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-file")) {
         filename = args[argIndex + 1];
         argIndex += 2;
       } else {
