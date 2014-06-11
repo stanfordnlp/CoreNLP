@@ -116,6 +116,8 @@ public class Document implements Serializable {
   /** Set of incompatible clusters pairs */
   private Set<Pair<Integer, Integer>> incompatibles;
   private Set<Pair<Integer, Integer>> incompatibleClusters;
+  
+  protected Map<Pair<Integer, Integer>, Boolean> acronymCache;
 
   /** Map of speaker name/id to speaker info */
   transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
@@ -132,6 +134,7 @@ public class Document implements Serializable {
     speakerPairs = Generics.newHashSet();
     incompatibles = Generics.newHashSet();
     incompatibleClusters = Generics.newHashSet();
+    acronymCache = Generics.newHashMap();    
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
@@ -170,7 +173,7 @@ public class Document implements Serializable {
         // Populate speaker info
         SpeakerInfo speakerInfo = speakerInfoMap.get(speaker);
         if (speakerInfo == null) {
-          speakerInfoMap.put(speaker, speakerInfo = new SpeakerInfo(speaker));
+          speakerInfoMap.put(speaker, speakerInfo = new SpeakerInfo(speaker, m));
           // span indicates this is the speaker
           if (Rules.mentionMatchesSpeaker(m, speakerInfo, true)) {
             m.speakerInfo = speakerInfo;
@@ -285,7 +288,27 @@ public class Document implements Serializable {
       incompatibleClusters.add(r.second);
     }
   }
-
+  public void mergeAcronymCache(CorefCluster to, CorefCluster from) {
+    Map<Pair<Integer, Integer>, Boolean> replacements = Generics.newHashMap();
+    for(Pair<Integer, Integer> p : acronymCache.keySet()) {
+      if(acronymCache.get(p)) {
+        Integer other = null;
+        if(p.first==from.clusterID){
+          other = p.second;
+        } else if(p.second==from.clusterID) {
+          other = p.first;
+        }
+        if(other != null && other != to.clusterID) {
+          int cid1 = Math.min(other, to.clusterID);
+          int cid2 = Math.max(other, to.clusterID);
+          replacements.put(Pair.makePair(cid1, cid2), true);
+        }
+      }
+    }
+    for(Pair<Integer, Integer> p : replacements.keySet()) {
+      acronymCache.put(p, replacements.get(p));
+    }
+  }
 
   public boolean isIncompatible(Mention m1, Mention m2) {
     int mid1 = Math.min(m1.mentionID, m2.mentionID);
