@@ -243,7 +243,7 @@ Map<String,Expression> FieldValue(Env env, Map<String,Expression> attributes) : 
 }   {
 	    fieldname = RelaxedString()
 	    (    ":" expr = Expression(env) )
-	    { 
+	    {
 	      if (fieldname != null && expr != null)  {
 	        if (attributes.containsKey(fieldname)) {
                 throw new Error("Field already defined: " + fieldname);
@@ -567,7 +567,7 @@ SequencePattern.PatternExpr SeqRegexRepeatTimes(Env env, SequencePattern.Pattern
        |
        ( "{"  value = <NONNEGINT>  "," v2 = <NONNEGINT> "}" ) { min = Integer.parseInt(value.image); max = Integer.parseInt(v2.image);  }
    )
-   (  "?" {  greedy = false; } )? 
+   (  "?" {  greedy = false; } )?
  )
    {
       return new SequencePattern.RepeatPatternExpr(expr, min, max, greedy);
@@ -599,9 +599,9 @@ SequencePattern.PatternExpr SeqRegexDisjConj(Env env) : {
 	(  ( op = "&"| op = "|" | op = "&&"| op = "||" )
 	   child = SeqRegexBasic(env)
 	  {
-	     if ("&".equals(op.image) | "&&".equals(op.image)) {
+	     if ("&".equals(op.image) || "&&".equals(op.image)) {
 	      conjChildren.add(child);
-	     } else if ("|".equals(op.image) | "||".equals(op.image)) {
+	     } else if ("|".equals(op.image) || "||".equals(op.image)) {
 	       if (conjChildren.size() > 1) {
 	          disjChildren.add(new SequencePattern.AndPatternExpr(conjChildren));
 	       } else {
@@ -674,7 +674,7 @@ SequencePattern.PatternExpr SeqVar(Env env) : {
         expr = env.getSequencePatternExpr(name.image, true);
         if (expr == null) {
             throw new Error("Unknown sequence pattern variable " + name.image);
-        } 
+        }
     }
   )
   { return expr; }
