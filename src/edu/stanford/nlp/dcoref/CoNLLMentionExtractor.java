@@ -39,6 +39,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreeLemmatizer;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -82,10 +83,11 @@ public class CoNLLMentionExtractor extends MentionExtractor {
     singletonPredictor = singletonModel;
   }
 
-  private final boolean includeExtras = false;
-  private final boolean lemmatize = true;
-  private final boolean threadSafe = true;
+  private static final boolean includeExtras = false;
+  private static final boolean LEMMATIZE = true;
+  private static final boolean threadSafe = true;
 
+  private static final TreeLemmatizer treeLemmatizer = new TreeLemmatizer();
 
   public void resetDocs() {
     super.resetDocs();
@@ -110,12 +112,15 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         sentence.remove(TreeCoreAnnotations.TreeAnnotation.class);
       } else {
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+        if (LEMMATIZE) {
+          treeLemmatizer.transformTree(tree);
+        }
         // generate the dependency graph
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.COLLAPSED, includeExtras, lemmatize, threadSafe);
+              SemanticGraphFactory.Mode.COLLAPSED, includeExtras, threadSafe);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.BASIC, includeExtras, lemmatize, threadSafe);
+              SemanticGraphFactory.Mode.BASIC, includeExtras, threadSafe);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
         } catch(Exception e) {

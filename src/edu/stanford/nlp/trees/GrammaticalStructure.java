@@ -61,7 +61,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  */
 public abstract class GrammaticalStructure extends TreeGraph {
 
-  private static final boolean PRINT_DEBUGGING = false;
+  private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
   protected final Set<Dependency<Label, Label, Object>> dependencies;
   protected final List<TypedDependency> typedDependencies;
@@ -101,7 +101,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
     dependencies = root.dependencies(puncDepFilter, null);
     for (Dependency<Label, Label, Object> p : dependencies) {
-      //System.out.println("dep found " + p);
+      //System.err.println("dep found " + p);
       TreeGraphNode gov = (TreeGraphNode) p.governor();
       TreeGraphNode dep = (TreeGraphNode) p.dependent();
       dep.addArc(GrammaticalRelation.getAnnotationClass(GOVERNOR), gov);
@@ -248,7 +248,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
           for (Tree u : egr.getRelatedNodes(t, root, hf)) {
-            //System.out.println("Adding " + egr.getShortName() + " from " + t + " to " + u );
+            //System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh);
             tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
           }
         }
@@ -274,10 +274,10 @@ public abstract class GrammaticalStructure extends TreeGraph {
     for (Dependency<Label, Label, Object> d : dependencies()) {
       TreeGraphNode gov = (TreeGraphNode) d.governor();
       TreeGraphNode dep = (TreeGraphNode) d.dependent();
-        //System.out.println("Gov: " + gov);
-        //System.out.println("Dep: " + dep);
       GrammaticalRelation reln = getGrammaticalRelation(gov, dep);
-        //System.out.println("Reln: " + reln);
+      // System.err.print("Gov: " + gov);
+      // System.err.print("  Dep: " + dep);
+      // System.err.println("  Reln: " + reln);
       basicDep.add(new TypedDependency(reln, gov, dep));
     }
 
@@ -478,18 +478,17 @@ public abstract class GrammaticalStructure extends TreeGraph {
     GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
     TreeGraphNode govH = gov.highestNodeWithSameHead();
     TreeGraphNode depH = dep.highestNodeWithSameHead();
-    /*System.out.println("gov node " + gov);
-    System.out.println("govH " + govH);
-    System.out.println("dep node " + dep);
-    System.out.println("depH " + depH);*/
+    // System.err.println("  gov node " + gov);
+    // System.err.println("  govH " + govH);
+    // System.err.println("  dep node " + dep);
+    // System.err.println("  depH " + depH);
 
     // Set sortedSet = new TreeSet(new NameComparator());
     // sortedSet.addAll(govH.arcLabelsToNode(depH));
     // Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = sortedSet;
     Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = new TreeSet<Class<? extends GrammaticalRelationAnnotation>>(new NameComparator<Class<? extends GrammaticalRelationAnnotation>>());
     arcLabels.addAll(govH.arcLabelsToNode(depH));
-
-    //System.out.println("arcLabels: " + arcLabels);
+    //System.err.println("arcLabels: " + arcLabels);
 
     for (Class<? extends GrammaticalRelationAnnotation> arcLabel : arcLabels) {
       if (arcLabel != null) {
@@ -664,7 +663,9 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // example, the English dependencies, when CC processed, have more
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
+    // TODO: this might not be necessary any more
     if (includeExtras) {
+      getExtras(tdl);
       getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
     }
     collapseDependencies(tdl, false, includeExtras);
@@ -694,7 +695,9 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // example, the English dependencies, when CC processed, have more
     // nsubjs than they originally do.  If we wait until that occurs
     // to add xsubj for xcomp dependencies, we get better coverage.
+    // TODO: this might not be necessary any more
     if (includeExtras) {
+      getExtras(tdl);
       getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
     }
     collapseDependencies(tdl, true, includeExtras);
@@ -904,14 +907,20 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     if (conllx) {
       List<Tree> leaves = tree.getLeaves();
-      List<String> words = new ArrayList<String>(leaves.size());
-      List<String> pos = new ArrayList<String>(leaves.size());
+      String[] words = new String[leaves.size()];
+      String[] pos = new String[leaves.size()];
       String[] relns = new String[leaves.size()];
       int[] govs = new int[leaves.size()];
 
+      int index = 0;
       for (Tree leaf : leaves) {
-        words.add(leaf.value());
-        pos.add(leaf.parent(tree).value()); // use slow, but safe, parent look up
+        index++;
+        if (!indexToPos.containsKey(index)) {
+          continue;
+        }
+        int depPos = indexToPos.get(index) - 1;
+        words[depPos] = leaf.value();
+        pos[depPos] = leaf.parent(tree).value(); // use slow, but safe, parent look up
       }
 
       for (TypedDependency dep : deps) {
@@ -921,7 +930,10 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
 
       for (int i = 0; i < relns.length; i++) {
-        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words.get(i), pos.get(i), pos.get(i), govs[i], (relns[i] != null ? relns[i] : "erased"));
+        if (words[i] == null) {
+          continue;
+        }
+        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], pos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
         bf.append(out);
       }
 

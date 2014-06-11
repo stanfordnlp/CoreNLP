@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.common;
 
 import java.io.FileFilter;
 import java.io.PrintStream;
@@ -7,8 +7,8 @@ import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Utility methods or common blocks of code factored out of
- * LexicalizedParser so they can be reused
+ * Utility methods or common blocks of code for dealing with parser
+ * arguments, such as extracting Treebank information
  */
 public class ArgUtils {
   private ArgUtils() {}
@@ -23,7 +23,7 @@ public class ArgUtils {
   }
 
   public static void printArgs(String[] args, PrintStream ps) {
-    ps.print("LexicalizedParser invoked with arguments:");
+    ps.print("Parser invoked with arguments:");
     for (String arg : args) {
       ps.print(' ' + arg);
     }
