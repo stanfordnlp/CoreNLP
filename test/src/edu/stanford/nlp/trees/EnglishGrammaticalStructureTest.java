@@ -643,6 +643,49 @@ public class EnglishGrammaticalStructureTest extends TestCase {
   }
 
   /**
+   * Test the various verb "to be" cases in statements, questions, and imperatives. Added as part of the SD reform
+   * that abolished attr.
+   */
+  public void testToBeRelations() {
+    // the trees to test
+    String[] testTrees = {
+            "(ROOT (S (NP (NNP Sue)) (VP (VBZ is) (VP (VBG speaking))) (. .)))",
+            "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBZ is)  (VP (VBG speaking))) (. ?)))",
+            "(ROOT (S (VP (VB Be) (VP (VBG caring))) (. !)))",
+    };
+
+    // the expected dependency answers (basic)
+    String[] testAnswers = {
+        // "dobj(missed-6, Which-1)\n" + "nsubj(realized-4, I-2)\n" + "advmod(realized-4, then-3)\n" + "root(ROOT-0, realized-4)\n" + "nsubj(missed-6, I-5)\n" + "ccomp(realized-4, missed-6)\n",
+        "nsubj(speaking-3, Sue-1)\n" +
+                "aux(speaking-3, is-2)\n" +
+                "root(ROOT-0, speaking-3)\n",
+        "nsubj(speaking-3, Who-1)\n" +
+                "aux(speaking-3, is-2)\n" +
+                "root(ROOT-0, speaking-3)\n",
+        "aux(caring-2, Be-1)\n" +
+                "root(ROOT-0, caring-2)\n",
+    };
+
+    assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
+    // TreeReaderFactory trf = new PennTreeReaderFactory();
+    TreeReaderFactory trf = new NPTmpRetainingTreeNormalizer.NPTmpAdvRetainingTreeReaderFactory();
+    for (int i = 0; i < testTrees.length; i++) {
+      String testTree = testTrees[i];
+      String testAnswer = testAnswers[i];
+
+      // specifying our own TreeReaderFactory is vital so that functional
+      // categories - that is -TMP and -ADV in particular - are not stripped off
+      Tree tree = Tree.valueOf(testTree, trf);
+      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+
+      assertEquals("Unexpected basic dependencies for tree " + testTree,
+          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
+    }
+
+  }
+
+  /**
    * Tests that we can extract the basic grammatical relations correctly from
    * some hard-coded trees.
    *
