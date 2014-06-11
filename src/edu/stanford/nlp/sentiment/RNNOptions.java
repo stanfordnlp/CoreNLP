@@ -6,6 +6,9 @@ import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 
 public class RNNOptions implements Serializable {
+  /**
+   * TODO: set this to a random number so we can record it for posterity
+   */
   public int randomSeed;
 
   /**
@@ -29,7 +32,7 @@ public class RNNOptions implements Serializable {
    * in the word vector file.  If a smaller size is specified, vectors
    * will be truncated.
    */
-  public int numHid = 25;
+  public int numHid = 30;
 
   /**
    * Number of classes to build the RNN for
