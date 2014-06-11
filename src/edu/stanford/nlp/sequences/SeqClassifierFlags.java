@@ -461,7 +461,7 @@ public class SeqClassifierFlags implements Serializable {
   // feature factory
   public String featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
   public Object[] featureFactoryArgs = new Object[0];
-  
+
   public String backgroundSymbol = DEFAULT_BACKGROUND_SYMBOL;
   // use
   public boolean useObservedSequencesOnly = false;
@@ -998,10 +998,6 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useGEforSup = false;
   public boolean useKnownLCWords = true;
 
-
-  // Thang Sep13: allow for multiple feature factories.  
-  public String[] featureFactories = null; 
-  public List<Object[]> featureFactoriesArgs = null;
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1614,19 +1610,19 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("backgroundSymbol")) {
         backgroundSymbol = val;
       } else if (key.equalsIgnoreCase("featureFactory")) {
-        // Thang Sep13: handle multiple feature factories.
-        String[] tokens = val.split("\\s*,\\s*"); // multiple feature factories could be specified and are comma separated.
-        int numFactories = tokens.length;
-        if (numFactories==1){ // for compatible reason
-          featureFactory = getFeatureFactory(val);
+        featureFactory = val;
+        if (featureFactory.equalsIgnoreCase("SuperSimpleFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.sequences.SuperSimpleFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("NERFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("GazNERFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.sequences.GazNERFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("IncludeAllFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.sequences.IncludeAllFeatureFactory";
+        } else if (featureFactory.equalsIgnoreCase("PhraseFeatureFactory")) {
+          featureFactory = "edu.stanford.nlp.article.extraction.PhraseFeatureFactory";
         }
-        
-        featureFactories = new String[numFactories];
-        featureFactoriesArgs = new ArrayList<Object[]>(numFactories);
-        for (int i = 0; i < numFactories; i++) {
-          featureFactories[i] = getFeatureFactory(tokens[i]);
-          featureFactoriesArgs.add(new Object[0]);
-        }
+
       } else if (key.equalsIgnoreCase("printXML")) {
         printXML = Boolean.parseBoolean(val); // todo: This appears unused now.
         // Was it replaced by
@@ -2506,24 +2502,6 @@ public class SeqClassifierFlags implements Serializable {
     stringRep = sb.toString();
   } // end setProperties()
 
-  // Thang Sep13: refactor to be used for multiple factories.
-  private String getFeatureFactory(String val){
-    if (val.equalsIgnoreCase("SuperSimpleFeatureFactory")) {
-      val = "edu.stanford.nlp.sequences.SuperSimpleFeatureFactory";
-    } else if (val.equalsIgnoreCase("NERFeatureFactory")) {
-      val = "edu.stanford.nlp.ie.NERFeatureFactory";
-    } else if (val.equalsIgnoreCase("GazNERFeatureFactory")) {
-      val = "edu.stanford.nlp.sequences.GazNERFeatureFactory";
-    } else if (val.equalsIgnoreCase("IncludeAllFeatureFactory")) {
-      val = "edu.stanford.nlp.sequences.IncludeAllFeatureFactory";
-    } else if (val.equalsIgnoreCase("PhraseFeatureFactory")) {
-      val = "edu.stanford.nlp.article.extraction.PhraseFeatureFactory";
-    } else if (val.equalsIgnoreCase("EmbeddingFeatureFactory")) {
-      val = "edu.stanford.nlp.ie.EmbeddingFeatureFactory";
-    }
-    
-    return val;
-  }
   /**
    * Print the properties specified by this object.
    *
