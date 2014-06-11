@@ -583,7 +583,7 @@ THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
-APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
+APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
 HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
@@ -597,12 +597,12 @@ SREDAUX = n{APOSETCETERA}t
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l
 APOWORD2 = y{APOS}
-FULLURL = https?:\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"<>|.!?(){},-]
+FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
-EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}.\u00A0]+)(&gt;|>)?
+EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)*([^ \t\n\f\r\"<>|().\u00A0]+)(&gt;|>)?
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
@@ -693,7 +693,7 @@ TBSPEC2 = {APOS}[0-9][0-9]
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
-ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)
+ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)
 
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
@@ -705,14 +705,7 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
-c[+][+]                     { return getNext(); }
 cannot                  { if (splitAssimilations) {
-                            yypushback(3) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-'twas                   { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
                             return getNext();
@@ -776,7 +769,7 @@ gonna|gotta|lemme|gimme|wanna
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^A-Za-z]      { return handleQuotes(yytext(), false);
                         }
-{SREDAUX}/[^A-Za-z]     { return handleQuotes(yytext(), false);
+{SREDAUX}               { return handleQuotes(yytext(), false);
                         }
 {DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -914,7 +907,7 @@ gonna|gotta|lemme|gimme|wanna
                         } }
 {LESSTHAN}              { return getNext("<", yytext()); }
 {GREATERTHAN}           { return getNext(">", yytext()); }
-{SMILEY}/[^A-Za-z0-9] { String txt = yytext();
+{SMILEY}/[^A-Za-z] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
@@ -1002,9 +995,7 @@ gonna|gotta|lemme|gimme|wanna
 '/[A-Za-z][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
                   return handleQuotes(yytext(), true);
                 }
-/* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
 {REDAUX}        { return handleQuotes(yytext(), false); }
-{SREDAUX}       { return handleQuotes(yytext(), false); }
 {QUOTES}        { return handleQuotes(yytext(), false); }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }
