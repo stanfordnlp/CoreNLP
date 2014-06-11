@@ -11,7 +11,7 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionUtils;
 
 /**
- * Used if patternScoring flag is set to F1. See {@link PatternScoring} enum.
+ * Used if patternScoring flag is set to F1 with the seed pattern. See {@link PatternScoring} enum.
  * 
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
