@@ -83,7 +83,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    */
   public EnglishGrammaticalStructure(Tree t, Filter<String> puncFilter, HeadFinder hf, boolean threadSafe) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super((new CoordinationTransformer(hf)).transformTree(t), EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, hf, puncFilter);
+    super((new CoordinationTransformer()).transformTree(t), EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, hf, puncFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -852,7 +852,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     // dependencies in which the node appears as governor.
     // cdm: could use CollectionValuedMap here!
     Map<TreeGraphNode, SortedSet<TypedDependency>> map = Generics.newHashMap();
-    List<TreeGraphNode> vmod = new ArrayList<TreeGraphNode>();
+    List<TreeGraphNode> partmod = new ArrayList<TreeGraphNode>();
 
     for (TypedDependency typedDep : list) {
       if (!map.containsKey(typedDep.gov())) {
@@ -860,25 +860,11 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
       map.get(typedDep.gov()).add(typedDep);
 
-      if (typedDep.reln() == VERBAL_MODIFIER) {
-        // look for aux deps which indicate this was a to-be verb
-        boolean foundAux = false;
-        for (TypedDependency auxDep : list) {
-          if (auxDep.reln() != AUX_MODIFIER) {
-            continue;
-          }
-          if (auxDep.gov() != typedDep.dep() || !auxDep.dep().value().equalsIgnoreCase("to")) {
-            continue;
-          }
-          foundAux = true;
-          break;
-        }
-        if (!foundAux) {
-          vmod.add(typedDep.dep());
-        }
+      if (typedDep.reln() == PARTICIPIAL_MODIFIER) {
+        partmod.add(typedDep.dep());
       }
     }
-    // System.err.println("here's the vmod list: " + vmod);
+    // System.err.println("here's the partmod list: " + partmod);
 
     // Do preposition conjunction interaction for
     // governor p NP and p NP case ... a lot of special code cdm jan 2006
@@ -1000,7 +986,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // null &&
         // OK, we have a conjunction over parallel PPs: Fred flew to Greece and
         // to Serbia.
-        GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, prepDep.second());
+        GrammaticalRelation reln = determinePrepRelation(map, partmod, td1, td1, prepDep.second());
 
         TypedDependency tdNew = new TypedDependency(reln, td1.gov(), prepDep.first().dep());
         newTypedDeps.add(tdNew);
@@ -1097,7 +1083,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       // conj_and(jumped, jumped)
       // prep_through(jumped, hoop)
 
-      GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, prepDep.second());
+      GrammaticalRelation reln = determinePrepRelation(map, partmod, td1, td1, prepDep.second());
       TypedDependency tdNew = new TypedDependency(reln, td1.gov(), prepDep.first().dep());
       newTypedDeps.add(tdNew);
       if (DEBUG) {
@@ -1135,7 +1121,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // between the copy and the dependent of the prepOtherDep node
         TypedDependency tdNew3;
 
-        GrammaticalRelation reln2 = determinePrepRelation(map, vmod, conjDep, td1, pobj);
+        GrammaticalRelation reln2 = determinePrepRelation(map, partmod, conjDep, td1, pobj);
         tdNew3 = new TypedDependency(reln2, copy, prepOtherDep.dep());
         newTypedDeps.add(tdNew3);
 
@@ -1219,7 +1205,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
                 pobj = false;
               }
 
-              GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, pobj);
+              GrammaticalRelation reln = determinePrepRelation(map, partmod, td1, td1, pobj);
               TypedDependency td3 = new TypedDependency(reln, td1.gov(), td2.dep());
               if (DEBUG) {
                 System.err.println("PP adding: " + td3 + " deleting: " + td1 + ' ' + td2);
@@ -1277,10 +1263,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    *  preposition to do a name for. topPrep may be the same or different.
    *  Among the daughters of its gov is where to look for an auxpass.
    */
-  private static GrammaticalRelation determinePrepRelation(Map<TreeGraphNode, ? extends Set<TypedDependency>> map, List<TreeGraphNode> vmod, TypedDependency pc, TypedDependency topPrep, boolean pobj) {
+  private static GrammaticalRelation determinePrepRelation(Map<TreeGraphNode, ? extends Set<TypedDependency>> map, List<TreeGraphNode> partmod, TypedDependency pc, TypedDependency topPrep, boolean pobj) {
     // handling the case of an "agent":
     // the governor of a "by" preposition must have an "auxpass" dependency
-    // or be the dependent of a "vmod" relation
+    // or be the dependent of a "partmod" relation
     // if it is the case, the "agent" variable becomes true
     boolean agent = false;
     String preposition = pc.dep().value().toLowerCase();
@@ -1294,8 +1280,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           }
         }
       }
-      // look if we have a vmod
-      if (!vmod.isEmpty() && vmod.contains(topPrep.gov())) {
+      // look if we have a partmod
+      if (!partmod.isEmpty() && partmod.contains(topPrep.gov())) {
         agent = true;
       }
     }

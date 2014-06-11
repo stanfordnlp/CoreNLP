@@ -44,6 +44,7 @@ public class SentimentTraining {
   public static void train(SentimentModel model, String modelPath, List<Tree> trainingTrees, List<Tree> devTrees) {
     Timing timing = new Timing();
     long maxTrainTimeMillis = model.op.trainOptions.maxTrainTimeSeconds * 1000;
+    long nextDebugCycle = model.op.trainOptions.debugOutputSeconds * 1000;
     int debugCycle = 0;
     double bestAccuracy = 0.0;
 
@@ -88,7 +89,7 @@ public class SentimentTraining {
           break;
         }
 
-        if (epoch > 0 && epoch % model.op.trainOptions.debugOutputEpochs == 0) {
+        if (nextDebugCycle > 0 && totalElapsed > nextDebugCycle) {
 
           Evaluate eval = new Evaluate(model);
           eval.eval(devTrees);
@@ -108,7 +109,10 @@ public class SentimentTraining {
             model.saveSerialized(tempPath);
           }
 
+          // TODO: output a summary of what's happened so far
+
           ++debugCycle;
+          nextDebugCycle = timing.report() + model.op.trainOptions.debugOutputSeconds * 1000;
         }
       }
       long totalElapsed = timing.report();
