@@ -119,9 +119,6 @@ Please enter your text here (<a href="javascript:sampleSentence()">sample senten
    <%= SUTimeServlet.parseBoolean(request.getParameter("includeRange")) ? 
        "checked" : "" %> /> Include range <br>
 <br>
-<input type="checkbox" name="readRules" onchange="javascript:readRulesChanged()"
-  <%= SUTimeServlet.parseBoolean(request.getParameter("readRules")) ?
-        "checked" : "" %> >Read rules from file</input>
 <div id="rulesDiv" name="rulesDiv" style="display:none;">
   <br> Rules:
   <select name="rules">

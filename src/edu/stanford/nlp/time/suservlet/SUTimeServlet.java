@@ -89,8 +89,7 @@ public class SUTimeServlet extends HttpServlet
             parseBoolean(request.getParameter("includeNested"));
     boolean includeRange =
             parseBoolean(request.getParameter("includeRange"));
-    boolean readRules =
-            parseBoolean(request.getParameter("readRules"));
+    boolean readRules = true;
 
     String heuristicLevel = request.getParameter("relativeHeuristicLevel");
     Options.RelativeHeuristicLevel relativeHeuristicLevel =
