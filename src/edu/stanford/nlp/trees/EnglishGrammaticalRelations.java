@@ -572,7 +572,7 @@ public class EnglishGrammaticalRelations {
           // to deal with preposition stranding in relative clause (works well but doesn't preserve the tree structure!)
           "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
           "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
-          "PP < (CC < less) < NP",
+          //"PP < (CC < less) < NP",
           // to handle "in and out of government"
           "@WHPP|PP < (@WHPP|PP $++ (CC|CONJP $++ (@WHPP|PP $+ (NP=target !$+ __))))",
           // to handle "What weapon is Apollo most proficient with?"

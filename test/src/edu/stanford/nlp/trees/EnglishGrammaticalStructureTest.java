@@ -1,12 +1,39 @@
+// EnglishGrammaticalStructureTest -- unit tests for Stanford dependencies.
+// Copyright (c) 2005, 2011, 2013 The Board of Trustees of
+// The Leland Stanford Junior University. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// For more information, bug reports, fixes, contact:
+//    Christopher Manning
+//    Dept of Computer Science, Gates 1A
+//    Stanford CA 94305-9010
+//    USA
+//    Support/Questions: parser-user@lists.stanford.edu
+//    Licensing: parser-support@lists.stanford.edu
+
 package edu.stanford.nlp.trees;
 
 import junit.framework.TestCase;
 
 
-/** Test cases for English typed dependencies (Stanford Dependencies)
+/** Test cases for English typed dependencies (Stanford dependencies).
  *
- *  @author mcdm
+ *  @author Marie-Catherine de Marneffe (mcdm)
  *  @author Christopher Manning
+ *  @author John Bauer
  */
 public class EnglishGrammaticalStructureTest extends TestCase {
 
@@ -642,7 +669,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       assertEquals("Unexpected basic dependencies for tree " + testTree,
           testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
     }
-
   }
 
   /**
@@ -685,6 +711,13 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ 's) (PP (IN on) (NP (DT the) (NN test)))) (. ?)))",
       "(ROOT (SBARQ (WHADVP (WRB Why)) (SQ (VBZ is) (NP (DT the) (NN dog)) (ADJP (JJ pink))) (. ?)))",
       "(ROOT (S (NP (DT The) (NN dog)) (VP (VBZ is) (ADJP (JJ pink))) (. .)))",
+      "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VP (VBZ causes) (NP (NN pain)))) (. ?)))",
+      // This tree is incorrect, but we added a rule to cover it so
+      // parsers which get this incorrect result (that is, the Charniak/Brown parser) don't get bad
+      // dependencies
+      "(ROOT (SBARQ (WHNP (WDT What) (NN disease)) (SQ (VBZ causes) (NP (NN pain))) (. ?)))",
+      "(ROOT (S (VP (VB Be) (VP (VBG waiting) (PP (IN in) (NP (NN line))) (PP-TMP (IN at) (NP (CD 3) (NN p.m.))))) (. !)))",
+      "(ROOT (S (VP (VB Be) (NP (DT a) (NN man))) (. !)))",
 
       // TODO: add an example for "it is raining" once that is correct... needs expl(raining, It)
       // TODO: add an example for "It is clear that Sue is smart" once that is correct... needs expl(clear, It)
@@ -701,7 +734,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, speaking-3)\n",
         "cop(honest-2, Be-1)\n" +
                 "root(ROOT-0, honest-2)\n",
-        
+
         "dobj(doing-4, What-1)\n" +
                 "aux(doing-4, is-2)\n" +
                 "nsubj(doing-4, he-3)\n" +
@@ -793,13 +826,12 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "det(problem-6, a-5)\n" +
                 "xcomp(becoming-4, problem-6)\n",
 
-
         "dobj(worth-5, What-1)\n" +
                 "cop(worth-5, is-2)\n" +
                 "nn(stock-4, UAL-3)\n" +
-                "nsubj(worth-5, stock-4)\n" + 
+                "nsubj(worth-5, stock-4)\n" +
                 "root(ROOT-0, worth-5)\n",
-        
+
         "root(ROOT-0, Who-1)\n" +
                 "cop(Who-1, am-2)\n" +
                 "nsubj(Who-1, I-3)\n",
@@ -807,7 +839,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "nsubj(told-2, Who-1)\n" +
                 "root(ROOT-0, told-2)\n" +
                 "dobj(told-2, him-3)\n",
-        
+
         "nsubj(lawyer-4, Sue-1)\n" +
                 "cop(lawyer-4, is-2)\n" +
                 "det(lawyer-4, a-3)\n" +
@@ -859,11 +891,33 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(pink-5, dog-4)\n" +
                 "root(ROOT-0, pink-5)\n",
 
-
         "det(dog-2, The-1)\n" +
                 "nsubj(pink-4, dog-2)\n" +
                 "cop(pink-4, is-3)\n" +
                 "root(ROOT-0, pink-4)\n",
+
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
+
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
+
+        "aux(waiting-2, Be-1)\n" +
+                "root(ROOT-0, waiting-2)\n" +
+                "prep(waiting-2, in-3)\n" +
+                "pobj(in-3, line-4)\n" +
+                "prep(waiting-2, at-5)\n" +
+                "num(p.m.-7, 3-6)\n" +
+                "pobj(at-5, p.m.-7)\n",
+
+        "cop(man-3, Be-1)\n" +
+                 "det(man-3, a-2)\n" +
+                 "root(ROOT-0, man-3)\n",
+
 
     };
 
@@ -877,7 +931,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, speaking-3)\n",
         "cop(honest-2, Be-1)\n" +
                 "root(ROOT-0, honest-2)\n",
-        
+
         "dobj(doing-4, What-1)\n" +
                 "aux(doing-4, is-2)\n" +
                 "nsubj(doing-4, he-3)\n" +
@@ -956,7 +1010,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "advmod(loudly-6, so-5)\n" +
                 "advmod(barking-4, loudly-6)\n",
 
-
         "nsubj(barking-3, Who-1)\n" +
                 "aux(barking-3, is-2)\n" +
                 "root(ROOT-0, barking-3)\n" +
@@ -970,13 +1023,12 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "det(problem-6, a-5)\n" +
                 "xcomp(becoming-4, problem-6)\n",
 
-
         "dobj(worth-5, What-1)\n" +
                 "cop(worth-5, is-2)\n" +
                 "nn(stock-4, UAL-3)\n" +
-                "nsubj(worth-5, stock-4)\n" + 
+                "nsubj(worth-5, stock-4)\n" +
                 "root(ROOT-0, worth-5)\n",
-        
+
         "root(ROOT-0, Who-1)\n" +
                 "cop(Who-1, am-2)\n" +
                 "nsubj(Who-1, I-3)\n",
@@ -984,7 +1036,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "nsubj(told-2, Who-1)\n" +
                 "root(ROOT-0, told-2)\n" +
                 "dobj(told-2, him-3)\n",
-        
+
         "nsubj(lawyer-4, Sue-1)\n" +
                 "cop(lawyer-4, is-2)\n" +
                 "det(lawyer-4, a-3)\n" +
@@ -1036,11 +1088,32 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(pink-5, dog-4)\n" +
                 "root(ROOT-0, pink-5)\n",
 
-
         "det(dog-2, The-1)\n" +
                 "nsubj(pink-4, dog-2)\n" +
                 "cop(pink-4, is-3)\n" +
                 "root(ROOT-0, pink-4)\n",
+
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
+
+        "det(disease-2, What-1)\n" +
+                "nsubj(causes-3, disease-2)\n" +
+                "root(ROOT-0, causes-3)\n" +
+                "dobj(causes-3, pain-4)\n",
+
+            "aux(waiting-2, Be-1)\n" +
+                    "root(ROOT-0, waiting-2)\n" +
+                    "prep(waiting-2, in-3)\n" +
+                    "pobj(in-3, line-4)\n" +
+                    "prep(waiting-2, at-5)\n" +
+                    "num(p.m.-7, 3-6)\n" +
+                    "pobj(at-5, p.m.-7)\n",
+
+            "cop(man-3, Be-1)\n" +
+                     "det(man-3, a-2)\n" +
+                     "root(ROOT-0, man-3)\n",
 
     };
 
@@ -1063,7 +1136,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       assertEquals("Unexpected noncollapsed dependencies for tree " + testTree,
           noncollapsedAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(true), tree, false, false));
     }
-
   }
 
   /**
@@ -1071,7 +1143,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
    * some hard-coded trees.
    *
    * Sentence examples from the manual to at least test each relation.
-   *
    */
   public void testBasicRelationsWithCopulaAsHead() {
     // the trees to test
@@ -1163,7 +1234,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       assertEquals("Unexpected basic dependencies for tree "+testTree,
           testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
     }
-
   }
 
    /**
@@ -1220,7 +1290,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       assertEquals("Unexpected basic dependencies for tree "+testTree,
           testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
     }
-
   }
 
 
@@ -1370,7 +1439,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       assertEquals("Unexpected collapsed dependencies for tree "+testTree,
           testAnswer, depString);
     }
-
   }
 
   /**
@@ -1602,13 +1670,11 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       assertEquals("Unexpected CC processed dependencies for tree "+testTree,
           testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(true), tree, false, false));
     }
-
   }
 
 
   /**
    * Tests that the copy nodes are properly handled.
-   *
    */
   public void testCopyNodes() {
     // the trees to test
@@ -1629,7 +1695,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
 
       String testAnswer = testAnswers[i];
 
-      // specifying our own TreeReaderFactory is vital so that functional
+      // Specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
@@ -1637,7 +1703,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
       assertEquals("Unexpected basic dependencies for tree "+testTree,
           testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(true), tree, false, false));
     }
-
   }
 
 }
