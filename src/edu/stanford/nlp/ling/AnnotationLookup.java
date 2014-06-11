@@ -77,8 +77,12 @@ public class AnnotationLookup {
     ABBR_KEY(CoreAnnotations.AbbrAnnotation.class, "abbr"),
     ABSTR_KEY(CoreAnnotations.AbstrAnnotation.class, "abstr"),
     FREQ_KEY(CoreAnnotations.FreqAnnotation.class, "freq"),
-    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web");
-    
+    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web"),
+
+    // Also have "pos" for PartOfTag (POS is also the TAG_KEY - "tag", but "pos" makes more sense)
+    // Still keep "tag" for POS tag so we don't break anything
+    POS_TAG_KEY(CoreAnnotations.PartOfSpeechAnnotation.class, "pos");
+
 
     public final Class coreKey;
     public final String oldKey;
