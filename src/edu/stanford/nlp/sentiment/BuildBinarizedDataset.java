@@ -80,6 +80,29 @@ public class BuildBinarizedDataset {
     return false;
   }
 
+  /**
+   * Turns a text file into trees for use in a RNTN classifier such as
+   * the treebank used in the Sentiment project.
+   * <br>
+   * The expected input file is one sentence per line, with sentences
+   * separated by blank lines.  Lines after the sentence but before
+   * the blank line will be treated as descriptions of labels.  The
+   * labels should start with the label and then contain a list of
+   * tokens the label applies to.  For example:
+   * <br>
+   * <code>
+   * Today is a good day.<br>
+   * 3 good<br>
+   * 3 good day <br>
+   * 3 Today is a good day <br>
+   * 3 Today is a good day. <br>
+   * <br>
+   * (next block starts here) <br>
+   * </code>
+   * By default the englishPCFG parser is used.  This can be changed
+   * with the <code>-parserModel</code> flag.  Specify an input file
+   * with <code>-input</code>.
+   */
   public static void main(String[] args) {
     CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
 
@@ -123,7 +146,7 @@ public class BuildBinarizedDataset {
       document.setSentenceFinalPuncWords(new String[] {"\n"});
       List<HasWord> tokens = document.iterator().next();
 
-      System.err.println(tokens);
+      //System.err.println(tokens);
 
       Map<Pair<Integer, Integer>, String> spanToLabels = Generics.newHashMap();
       for (int i = 1; i < lines.length; ++i) {
@@ -145,7 +168,7 @@ public class BuildBinarizedDataset {
       }
 
       System.err.println(collapsedUnary);
-      System.err.println();
+      //System.err.println();
     }
   }
 }
