@@ -779,11 +779,7 @@ public class ChineseGrammaticalRelations {
                               "NP  $++ (CP=target ) > NP ",
                               "NP  $++ (CP=target <: IP) > NP  ",
                               "NP  $++ (CP=target)",
-                              // don't match this rule for an NP if
-                              // there is another, more specific NP
-                              // which will also match the same
-                              // target.  Otherwise you get cycles
-                              " NP  << ( CP=target $++ NP  ) !<< (NP << =target)"
+                              " NP  << ( CP=target $++ NP  )"
                             });
   public static class RelativeClauseModifierGRAnnotation
     extends GrammaticalRelationAnnotation { }
