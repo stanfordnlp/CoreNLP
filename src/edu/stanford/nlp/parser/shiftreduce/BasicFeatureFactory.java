@@ -94,6 +94,25 @@ public class BasicFeatureFactory implements FeatureFactory {
     features.add(wtFeature + tag + "-" + word);
   }
 
+  public static void addUnaryFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature) {
+    String value = null;
+    switch(feature) {
+    case HEADWORD:
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+      break;
+    case HEADTAG:
+      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+      break;
+    case VALUE:
+      value = (label == null) ? NULL : label.value();
+      break;
+    default:
+      throw new IllegalArgumentException("Unexpected feature type: " + feature);
+    }
+
+    features.add(featureType + value);
+  }
+
   public static void addBinaryFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2) {
     String value1 = null;
     switch(feature1) {
