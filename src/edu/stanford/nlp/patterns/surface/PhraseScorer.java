@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.Data;
+import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
@@ -128,6 +129,17 @@ public abstract class PhraseScorer {
     }
   }
 
+  public double getWordShapeScore(String word, String label){
+    String wordShape = constVars.getWordShapeCache().get(word);
+    if(wordShape == null){
+      wordShape = WordShapeClassifier.wordShape(word, constVars.wordShaper);
+      constVars.getWordShapeCache().put(word, wordShape);
+    }
+    double score = constVars.getWordShapesForLabels().get(label).getCount(wordShape) / (constVars.getWordShapesForLabels().get(label).totalCount() + 1);
+    System.out.println("score for " + word + " is " + score + ". For all labeled words " + constVars.getWordShapesForLabels().get(label));
+    return score;
+  }
+  
   public double getDictOddsScore(String word, String label) {
     double dscore;
     Counter<String> dictOddsWordWeights = constVars.dictOddsWeights.get(label);
