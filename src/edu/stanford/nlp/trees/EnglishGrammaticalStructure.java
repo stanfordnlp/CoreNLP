@@ -128,15 +128,15 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    *         <code>null</code>
    */
   public static TreeGraphNode getSubject(TreeGraphNode t) {
-    TreeGraphNode subj = t.getNodeInRelation(NOMINAL_SUBJECT);
+    TreeGraphNode subj = getNodeInRelation(t, NOMINAL_SUBJECT);
     if (subj != null) {
       return subj;
     }
-    subj = t.getNodeInRelation(CLAUSAL_SUBJECT);
+    subj = getNodeInRelation(t, CLAUSAL_SUBJECT);
     if (subj != null) {
       return subj;
     } else {
-      return t.getNodeInRelation(NOMINAL_PASSIVE_SUBJECT);
+      return getNodeInRelation(t, NOMINAL_PASSIVE_SUBJECT);
     }
   }
 
