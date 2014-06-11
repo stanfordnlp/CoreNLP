@@ -39,7 +39,7 @@ public class SentimentUtils {
    */
   public static List<Tree> readTreesWithGoldLabels(String path) {
     List<Tree> trees = Generics.newArrayList();
-    MemoryTreebank treebank = new MemoryTreebank("utf-8");
+    MemoryTreebank treebank = new MemoryTreebank();
     treebank.loadPath(path, null);
     for (Tree tree : treebank) {
       attachGoldLabels(tree);
