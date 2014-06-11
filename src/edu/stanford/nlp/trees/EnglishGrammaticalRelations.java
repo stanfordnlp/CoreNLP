@@ -496,7 +496,7 @@ public class EnglishGrammaticalRelations {
 
           // matches direct object in relative clauses with relative pronoun "I saw the book that you bought". Seems okay. If this is changed, also change the pattern for "rel"
           // TODO: this can occasionally produce incorrect dependencies, such as the sentence 
-          // "with the way which is split-fingered fastball is behaving"
+          // "with the way which his split-fingered fastball is behaving"
           // eg take a tree where the verb doesn't have an object
           "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN|TO) !< (S < (VP < TO))))",
 
@@ -507,6 +507,7 @@ public class EnglishGrammaticalRelations {
             // find dobj, tmod, advmod, etc.  won't help the parser,
             // of course, but will help when converting a treeback
             // which contains empties
+            // Example: "with the way his split-fingered fastball is behaving"
             "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
 
           // If there was an NP between the WHNP and the ADJP, we want
