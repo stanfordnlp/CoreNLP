@@ -106,14 +106,16 @@ public class BasicFeatureFactory implements FeatureFactory {
     return (CoreLabel) node.label();
   }
 
-  public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String conFeature, String wordFeature, String tagFeature) {
-    String constituent = (label == null) ? NULL : label.value();
-    String tag = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-    String word = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+  public static void addUnaryStackFeatures(Set<String> features, CoreLabel label, String conFeature, String wordTagFeature, String tagFeature, String wordConFeature, String tagConFeature) {
+    String constituent = getFeatureFromCoreLabel(label, FeatureComponent.VALUE);
+    String tag = getFeatureFromCoreLabel(label, FeatureComponent.HEADTAG);
+    String word = getFeatureFromCoreLabel(label, FeatureComponent.HEADWORD);
 
     features.add(conFeature + constituent);
-    features.add(wordFeature + word + "-" + constituent);
-    features.add(tagFeature + tag + "-" + constituent);
+    features.add(wordTagFeature + word + "-" + tag);
+    features.add(tagFeature + tag);
+    features.add(wordConFeature + word + "-" + constituent);
+    features.add(tagConFeature + tag + "-" + constituent);
   }
 
   public static void addUnaryQueueFeatures(Set<String> features, CoreLabel label, String wtFeature) {
@@ -122,11 +124,6 @@ public class BasicFeatureFactory implements FeatureFactory {
 
     // TODO: check to see if this is slow because of the string concat
     features.add(wtFeature + tag + "-" + word);
-  }
-
-  public static void addUnaryFeature(Set<String> features, String featureType, CoreLabel label, FeatureComponent feature) {
-    String value = getFeatureFromCoreLabel(label, feature);
-    features.add(featureType + value);
   }
 
   public static void addBinaryFeature(Set<String> features, String featureType, CoreLabel label1, FeatureComponent feature1, CoreLabel label2, FeatureComponent feature2) {
@@ -248,18 +245,18 @@ public class BasicFeatureFactory implements FeatureFactory {
     CoreLabel qP1Label = getQueueLabel(sentence, tokenPosition, -1); // previous location in queue
     CoreLabel qP2Label = getQueueLabel(sentence, tokenPosition, -2); // two locations prior in queue
 
-    addUnaryStackFeatures(features, s0Label, "S0C-", "S0WC-", "S0TC-");
-    addUnaryStackFeatures(features, s1Label, "S1C-", "S1WC-", "S1TC-");
-    addUnaryStackFeatures(features, s2Label, "S2C-", "S2WC-", "S2TC-");
-    addUnaryStackFeatures(features, s3Label, "S3C-", "S3WC-", "S3TC-");
+    addUnaryStackFeatures(features, s0Label, "S0C-", "S0WT-", "S0T-", "S0WC-", "S0TC-");
+    addUnaryStackFeatures(features, s1Label, "S1C-", "S1WT-", "S1T-", "S1WC-", "S1TC-");
+    addUnaryStackFeatures(features, s2Label, "S2C-", "S2WT-", "S2T-", "S2WC-", "S2TC-");
+    addUnaryStackFeatures(features, s3Label, "S3C-", "S3WT-", "S3T-", "S3WC-", "S3TC-");
 
-    addUnaryStackFeatures(features, s0LLabel, "S0LC-", "S0LWC-", "S0LTC-");
-    addUnaryStackFeatures(features, s0RLabel, "S0RC-", "S0RWC-", "S0RTC-");
-    addUnaryStackFeatures(features, s0ULabel, "S0UC-", "S0UWC-", "S0UTC-");
+    addUnaryStackFeatures(features, s0LLabel, "S0LC-", "S0LWT-", "S0LT-", "S0LWC-", "S0LTC-");
+    addUnaryStackFeatures(features, s0RLabel, "S0RC-", "S0RWT-", "S0RT-", "S0RWC-", "S0RTC-");
+    addUnaryStackFeatures(features, s0ULabel, "S0UC-", "S0UWT-", "S0UT-", "S0UWC-", "S0UTC-");
 
-    addUnaryStackFeatures(features, s1LLabel, "S1LC-", "S1LWC-", "S1LTC-");
-    addUnaryStackFeatures(features, s1RLabel, "S1RC-", "S1RWC-", "S1RTC-");
-    addUnaryStackFeatures(features, s1ULabel, "S1UC-", "S1UWC-", "S1UTC-");
+    addUnaryStackFeatures(features, s1LLabel, "S1LC-", "S1LWT-", "S1LT-", "S1LWC-", "S1LTC-");
+    addUnaryStackFeatures(features, s1RLabel, "S1RC-", "S1RWT-", "S1RT-", "S1RWC-", "S1RTC-");
+    addUnaryStackFeatures(features, s1ULabel, "S1UC-", "S1UWT-", "S1UT-", "S1UWC-", "S1UTC-");
 
     addUnaryQueueFeatures(features, q0Label, "Q0WT-");
     addUnaryQueueFeatures(features, q1Label, "Q1WT-");
