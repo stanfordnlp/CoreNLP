@@ -399,7 +399,9 @@ public class SieveCoreferenceSystem {
         CorefMentionFinder mentionFinder;
         if (mentionFinderPropFilename != null) {
           Properties mentionFinderProps = new Properties();
-          mentionFinderProps.load(new FileInputStream(mentionFinderPropFilename));
+          FileInputStream fis = new FileInputStream(mentionFinderPropFilename);
+          mentionFinderProps.load(fis);
+          fis.close();
           mentionFinder = (CorefMentionFinder) Class.forName(mentionFinderClass).getConstructor(Properties.class).newInstance(mentionFinderProps);
         } else {
           mentionFinder = (CorefMentionFinder) Class.forName(mentionFinderClass).newInstance();

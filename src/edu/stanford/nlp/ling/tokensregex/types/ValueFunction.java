@@ -26,4 +26,10 @@ public interface ValueFunction {
    * @return Value indicating the value of the function
    */
   Value apply(Env env, List<Value> in);
+
+  /**
+   * Returns a string describing what this function does
+   * @return String describing the function
+   */
+  String getDescription();
 }

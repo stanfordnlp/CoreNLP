@@ -115,8 +115,7 @@ public class ExtractionObject implements Serializable {
   public boolean equals(Object other) {
     if(! (other instanceof ExtractionObject)) return false;
     ExtractionObject o = (ExtractionObject) other;
-    if(o.objectId.equals(objectId) && o.sentence == sentence) return true;
-    return false;
+    return o.objectId.equals(objectId) && o.sentence.get(CoreAnnotations.TextAnnotation.class).equals(sentence.get(CoreAnnotations.TextAnnotation.class));
   }
 
   static class CompByExtent implements Comparator<ExtractionObject> {
