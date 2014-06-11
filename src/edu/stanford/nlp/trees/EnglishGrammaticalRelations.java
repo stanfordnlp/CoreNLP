@@ -136,7 +136,11 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "aux", "auxiliary",
         AuxModifierGRAnnotation.class, DEPENDENT, "VP|SQ|SINV|CONJP", tregexCompiler,
         new String[] {
-          "VP < VP < /^(?:TO|MD|VB.*|AUXG?|POS)$/=target",
+          // TODO: want to add "!< passiveAuxWordRegex" to avoid
+          // conflicts with auxpass.  Similarly, want to avoid
+          // conflicts between nsubj and nsubjpass.  One example is
+          // the tree with "charmingly" in the PTB
+          "VP < VP < (/^(?:TO|MD|VB.*|AUXG?|POS)$/=target)",
           "SQ|SINV < (/^(?:VB|MD|AUX)/=target $++ /^(?:VP|ADJP)/)",
           "CONJP < TO=target < VB", // (CONJP not to mention)
           // add handling of tricky VP fronting cases...
@@ -900,7 +904,7 @@ public class EnglishGrammaticalRelations {
           // useful dependencies rather than introduce some wrong
           // dependencies.
           "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML > @NP|WHNP",
-          "@NP|WHNP|NML $++ (SBAR=target <: (S !<, (VP <, TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
+          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
           // this next pattern is restricted to where and why because
           // "when" is usually incorrectly parsed: temporal clauses
           // are put inside the NP; 2nd is for case of relative
@@ -1401,7 +1405,7 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "predet", "predeterminer",
         PredeterminerGRAnnotation.class, MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?", tregexCompiler,
         new String[] {
-          "/^(?:(?:WH)?NP(?:-TMP|-ADV)?|NX|NAC|NML)$/ < (PDT|DT=target $+ /^(?:DT|WP\\$|PRP\\$)$/ $++ /^N[NXM]/ !$++ CC)",
+          "/^(?:(?:WH)?NP(?:-TMP|-ADV)?|NX|NAC|NML)$/ < (PDT|DT=target $+ /^(?:DT|WP\\$|PRP\\$)$/ $++ /^(?:NN|NX|NML)/ !$++ CC)",
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PDT|DT=target $+ DT $++ (/^JJ/ !$+ /^NN/)) !$++ CC",
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < PDT=target <- DT"
         });
