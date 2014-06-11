@@ -342,7 +342,7 @@ public class ExtractorFramesRare {
         String path = Extractor.getParenthesizedArg(arg, 1);
         int lWindow = Extractor.getParenthesizedNum(arg, 2);
         int rWindow = Extractor.getParenthesizedNum(arg, 3);
-        extrs.add(new ExtractorDistsim.ExtractorDistsimConjunction(path, lWindow, rWindow));
+        extrs.add(new ExtractorDistsimConjunction(path, lWindow, rWindow));
       } else if (arg.equalsIgnoreCase("lctagfeatures")) {
         extrs.addAll(Arrays.asList(lcTagFeatures(ttags)));
       }
