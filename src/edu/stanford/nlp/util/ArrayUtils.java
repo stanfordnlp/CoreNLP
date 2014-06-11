@@ -564,6 +564,17 @@ public class ArrayUtils {
     return false;
   }
 
+  // from stackoverflow
+  //  http://stackoverflow.com/questions/80476/how-to-concatenate-two-arrays-in-java
+  /**
+   * Concatenates two arrays and returns the result
+   */
+  public static <T> T[] concatenate(T[] first, T[] second) {
+    T[] result = Arrays.copyOf(first, first.length + second.length);
+    System.arraycopy(second, 0, result, first.length, second.length);
+    return result;
+  }
+
   /** Return a Set containing the same elements as the specified array.
    */
   public static <T> Set<T> asSet(T[] a) {
@@ -863,7 +874,7 @@ public class ArrayUtils {
   }
 
   /**
-   * If tofind is a part of tokens, it finds the starting index of tofind in tokens
+   * If tofind is a part of tokens, it finds the ****starting index***** of tofind in tokens
    * If tofind is not a sub-array of tokens, then it returns null
    * note that tokens sublist should have the exact elements and order as in tofind
    * @param tofind array you want to find in tokens
