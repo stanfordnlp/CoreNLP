@@ -9,6 +9,29 @@ import junit.framework.TestCase;
  */
 public class TreeShapedStackTest extends TestCase {
 
+  public void testEquals() {
+    TreeShapedStack<String> t1 = new TreeShapedStack<String>();
+    t1 = t1.push("foo");
+    t1 = t1.push("bar");
+    t1 = t1.push("bar");
+    t1 = t1.push("diet");
+    t1 = t1.push("coke");
+
+    TreeShapedStack<String> t2 = new TreeShapedStack<String>();
+    t2 = t2.push("foo");
+    t2 = t2.push("bar");
+    t2 = t2.push("bar");
+    t2 = t2.push("diet");
+    t2 = t2.push("coke");
+
+    TreeShapedStack<String> t3 = t2.pop().push("pepsi");
+
+    assertEquals(t1, t2);
+    assertFalse(t1.pop().equals(t2));
+    assertFalse(t2.pop().equals(t1));
+    assertFalse(t2.equals(t3));
+  }
+
   public void testBasicOperations() {
     TreeShapedStack<String> tss = new TreeShapedStack<String>();
     assertEquals(tss.size, 0);
