@@ -138,7 +138,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "nsubj(talked-2, He-1)\n" + "root(ROOT-0, talked-2)\n" + "prep(talked-2, to-3)\n" + "det(president-5, the-4)\n" + "pobj(to-3, president-5)\n" + "mark(secure-9, in-6)\n" + "dep(secure-9, order-7)\n" + "aux(secure-9, to-8)\n" + "advcl(talked-2, secure-9)\n" + "det(account-11, the-10)\n" + "dobj(secure-9, account-11)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "dobj(bought-7, which-5)\n" + "nsubj(bought-7, you-6)\n" + "rcmod(book-4, bought-7)\n",
         "nsubj(eats-2, Sam-1)\n" + "root(ROOT-0, eats-2)\n" + "num(sheep-4, 3-3)\n" + "dobj(eats-2, sheep-4)\n",
-        "nsubj(lost-2, I-1)\n" + "root(ROOT-0, lost-2)\n" + "dobj(lost-2, $-3)\n" + "number(billion-5, 3.2-4)\n" + "num($-3, billion-5)\n",
+        "nsubj(lost-2, I-1)\n" + "root(ROOT-0, lost-2)\n" + "dobj(lost-2, $-3)\n" + "number($-3, 3.2-4)\n" + "number($-3, billion-5)\n",
         "quantmod(200-2, About-1)\n" + "num(people-3, 200-2)\n" + "nsubj(came-4, people-3)\n" + "root(ROOT-0, came-4)\n" + "prep(came-4, to-5)\n" + "det(party-7, the-6)\n" + "pobj(to-5, party-7)\n",
         "nsubj(eats-6, Sam-1)\n" + "poss(brother-4, my-3)\n" + "appos(Sam-1, brother-4)\n" + "root(ROOT-0, eats-6)\n" + "amod(meat-8, red-7)\n" + "dobj(eats-6, meat-8)\n",
         "det(Corporation-4, The-1)\n" + "amod(Corporation-4, Australian-2)\n" + "nn(Corporation-4, Broadcasting-3)\n" + "root(ROOT-0, Corporation-4)\n" + "appos(Corporation-4, ABC-6)\n",
@@ -622,49 +622,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
-    };
-
-    assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
-    // TreeReaderFactory trf = new PennTreeReaderFactory();
-    TreeReaderFactory trf = new NPTmpRetainingTreeNormalizer.NPTmpAdvRetainingTreeReaderFactory();
-    for (int i = 0; i < testTrees.length; i++) {
-      String testTree = testTrees[i];
-      String testAnswer = testAnswers[i];
-
-      // specifying our own TreeReaderFactory is vital so that functional
-      // categories - that is -TMP and -ADV in particular - are not stripped off
-      Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
-
-      assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
-    }
-
-  }
-
-  /**
-   * Test the various verb "to be" cases in statements, questions, and imperatives. Added as part of the SD reform
-   * that abolished attr.
-   */
-  public void testToBeRelations() {
-    // the trees to test
-    String[] testTrees = {
-            "(ROOT (S (NP (NNP Sue)) (VP (VBZ is) (VP (VBG speaking))) (. .)))",
-            "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBZ is)  (VP (VBG speaking))) (. ?)))",
-            "(ROOT (S (VP (VB Be) (VP (VBG caring))) (. !)))",
-    };
-
-    // the expected dependency answers (basic)
-    String[] testAnswers = {
-        // "dobj(missed-6, Which-1)\n" + "nsubj(realized-4, I-2)\n" + "advmod(realized-4, then-3)\n" + "root(ROOT-0, realized-4)\n" + "nsubj(missed-6, I-5)\n" + "ccomp(realized-4, missed-6)\n",
-        "nsubj(speaking-3, Sue-1)\n" +
-                "aux(speaking-3, is-2)\n" +
-                "root(ROOT-0, speaking-3)\n",
-        "nsubj(speaking-3, Who-1)\n" +
-                "aux(speaking-3, is-2)\n" +
-                "root(ROOT-0, speaking-3)\n",
-        "aux(caring-2, Be-1)\n" +
-                "root(ROOT-0, caring-2)\n",
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
