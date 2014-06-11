@@ -90,7 +90,7 @@ public class XMLUtils {
     return (attr != null)? attr.getValue(): null;
   }
 
-  public static void removeChildren(Element e) {
+  public static void removeChildren(Node e) {
     NodeList list = e.getChildNodes();
     for (int i = 0; i < list.getLength(); i++) {
       Node n = list.item(i);
