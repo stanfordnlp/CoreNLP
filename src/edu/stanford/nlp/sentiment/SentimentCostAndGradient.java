@@ -160,16 +160,20 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     String category = tree.label().value();
     category = model.basicCategory(category);
 
-    // TODO: factor this out somewhere?
+    // Build a vector that looks like 0,0,1,0,0 with an indicator for the correct class
     SimpleMatrix goldLabel = new SimpleMatrix(model.numClasses, 1);
-    goldLabel.set(RNNCoreAnnotations.getGoldClass(tree), 1.0);
+    int goldClass = RNNCoreAnnotations.getGoldClass(tree);
+    goldLabel.set(goldClass, 1.0);
+
+    double nodeWeight = model.op.getClassWeight(goldClass);
 
     SimpleMatrix predictions = RNNCoreAnnotations.getPredictions(tree);
 
-    SimpleMatrix deltaClass = predictions.minus(goldLabel);
+    SimpleMatrix deltaClass = predictions.minus(goldLabel).scale(nodeWeight);
     SimpleMatrix localCD = deltaClass.mult(RNNUtils.concatenateWithBias(currentVector).transpose());
 
     double error = -(RNNUtils.elementwiseApplyLog(predictions).elementMult(goldLabel).elementSum());
+    error = error * nodeWeight;
     RNNCoreAnnotations.setPredictionError(tree, error);
 
     if (tree.isPreTerminal()) { // below us is a word vector

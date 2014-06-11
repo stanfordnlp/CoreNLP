@@ -40,6 +40,20 @@ public class RNNOptions implements Serializable {
    */
   public int numClasses = 5;
 
+  private double[] classWeights = null;
+
+  /**
+   * The classWeights can be passed in as a comma separated list of
+   * weights using the -classWeights flag.  If the classWeights are
+   * not specified, the value is assumed to be 1.0.
+   */
+  public double getClassWeight(int i) {
+    if (classWeights == null) {
+      return 1.0;
+    }
+    return classWeights[i];
+  }
+
   public boolean lowercaseWordVectors = true;
 
   public boolean useTensors = true;
@@ -95,6 +109,14 @@ public class RNNOptions implements Serializable {
     } else if (args[argIndex].equalsIgnoreCase("-nouseTensors")) {
       useTensors = false;
       return argIndex + 1;
+    } else if (args[argIndex].equalsIgnoreCase("-classWeights")) {
+      String classWeightString = args[argIndex + 1];
+      String[] pieces = classWeightString.split(",");
+      classWeights = new double[pieces.length];
+      for (int i = 0; i < pieces.length; ++i) {
+        classWeights[i] = Double.valueOf(pieces[i]);
+      }
+      return argIndex + 2;
     } else {
       return trainOptions.setOption(args, argIndex);
     }
