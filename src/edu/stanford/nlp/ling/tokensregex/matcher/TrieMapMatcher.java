@@ -167,7 +167,7 @@ public class TrieMapMatcher<K,V> {
           if (i > 0) {
             K t = (i < target.size())? target.get(i-1):null;
             for (PartialApproxMatch<K,V> pam:prevMatches[0]) {
-              PartialApproxMatch<K,V> npam = pam.withMatch(costFunction, costFunction.cost(t, null), t, null);
+              PartialApproxMatch<K,V> npam = pam.withMatch(costFunction, costFunction.cost(t, null, pam.getMatchedLength()), t, null);
               if (npam.cost <= maxCost) {
                 curMatches[0].add(npam);
               }
@@ -590,7 +590,7 @@ public class TrieMapMatcher<K,V> {
                              MatchCostFunction<K,V> costFunction,
                              PartialApproxMatch<K,V> pam, K a, K b,
                              boolean multimatch, boolean complete) {
-    double deltaCost = costFunction.cost(a,b);
+    double deltaCost = costFunction.cost(a,b,pam.getMatchedLength());
     double newCost = pam.cost + deltaCost;
     if (queue.maxCost != Double.MAX_VALUE && newCost > queue.maxCost) return false;
     if (best.size() >= queue.maxSize && newCost > best.topCost()) return false;
