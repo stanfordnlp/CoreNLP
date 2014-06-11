@@ -22,15 +22,15 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
 
-  private static final String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
+  private static String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
 
-  private static final String[] pennSFPunctTags = {"."};
+  private static String[] pennSFPunctTags = {"."};
 
-  private static final String[] collinsPunctTags = {"''", "``", ".", ":", ","};
+  private static String[] collinsPunctTags = {"''", "``", ".", ":", ","};
 
-  private static final String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
+  private static String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
 
-  private static final String[] pennSFPunctWords = {".", "!", "?"};
+  private static String[] pennSFPunctWords = {".", "!", "?"};
 
 
   /**
@@ -41,12 +41,12 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * printing out lexicalized dependencies.  Note that ] ought to be
    * unnecessary, since it would end the annotation, not start it.
    */
-  private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
+  private static char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
 
   /**
    * This is valid for "BobChrisTreeNormalizer" conventions only.
    */
-  private static final String[] pennStartSymbols = {"ROOT", "TOP"};
+  private static String[] pennStartSymbols = {"ROOT", "TOP"};
 
 
   /**
