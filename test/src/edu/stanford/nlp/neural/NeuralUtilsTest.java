@@ -32,14 +32,4 @@ public class NeuralUtilsTest {
     assertEquals(0.6363636363636364, NeuralUtils.cosine(vector1, vector2), 1e-5);
   }
 
-  public void testIsZero() {
-    double[][] values = new double[][] { { 0.1, 0.2, 0.3, 0.4, 0.5 }, { 0.0, 0.0, 0.0, 0.0, 0.0 }};
-    SimpleMatrix vector1 = new SimpleMatrix(values);
-    assertFalse(NeuralUtils.isZero(vector1));
-
-    values = new double[][] { { 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0 }};
-    vector1 = new SimpleMatrix(values);
-    assertTrue(NeuralUtils.isZero(vector1));
-  }
-
 }
