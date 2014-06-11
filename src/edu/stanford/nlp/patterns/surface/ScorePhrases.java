@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -230,11 +228,14 @@ public class ScorePhrases {
 
     // Now retrieve the result
     for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> future : list) {
-      Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
-          .get();
-
-      wordsandLemmaPatExtracted.addAll(result.first());
-      matchedTokensByPat.addAll(result.second());
+      try{
+        Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
+            .get();
+        wordsandLemmaPatExtracted.addAll(result.first());
+        matchedTokensByPat.addAll(result.second());
+      }catch(Exception e){
+        throw new RuntimeException(e);
+      }
     }
     executor.shutdown();
   }
@@ -247,8 +248,8 @@ public class ScorePhrases {
 
     for(Entry<SurfacePattern, Double> en: patterns.entrySet()){
       SurfacePattern p = en.getKey();
-      String[] n = p.getOriginalNext();
-      String[] pr = p.getOriginalPrev();
+      String[] n = p.getSimplerTokensNext();
+      String[] pr = p.getSimplerTokensPrev();
       boolean rest = false;
       if(n!=null){
         for(String e: n){
@@ -281,19 +282,32 @@ public class ScorePhrases {
       else{
         filesToLoad = new ArrayList<File>();
         for (String fname : sentidswithfilerest.keySet()) {
-          filesToLoad.add(new File(constVars.saveSentencesSerDir+"/"+fname));
+          String filename = "";
+          if(constVars.usingDirForSentsInIndex)
+            filename = constVars.saveSentencesSerDir+"/"+fname;
+          else
+            filename = fname;
+          filesToLoad.add(new File(filename));
         }  
       }
-      
+
       for (File fname : filesToLoad) {
         Redwood.log(Redwood.DBG, "Applying patterns to sents from " + fname);
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(fname);
 
         if(sentidswithfilerest != null && !sentidswithfilerest.isEmpty()){
-          Set<String> sentIDs = sentidswithfilerest.get(fname.getName());
+          
+          String filename = "";
+          if(constVars.usingDirForSentsInIndex)
+            filename = constVars.saveSentencesSerDir+"/"+fname.getName();
+          else
+            filename = fname.getAbsolutePath();
+          
+          Set<String> sentIDs = sentidswithfilerest.get(filename);
           if (sentIDs != null){
             this.runParallelApplyPats(sents, sentIDs, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
-          }
+          } else
+            throw new RuntimeException("How come no sentIds for " + filename  + ". Index keyset is " + constVars.invertedIndex.getKeySet());
         }
         if(patternsLearnedThisIterConsistsOnlyGeneralized.size() > 0){
           this.runParallelApplyPats(sents, sents.keySet(), label, patternsLearnedThisIterConsistsOnlyGeneralized, wordsandLemmaPatExtracted, matchedTokensByPat);
@@ -305,17 +319,21 @@ public class ScorePhrases {
     } else {
       
       if (sentidswithfilerest != null && !sentidswithfilerest.isEmpty()) {
-        Set<String> sentids = sentidswithfilerest.get(CollectionUtils.toList(sentidswithfilerest.keySet()).get(0));
+        String filename = CollectionUtils.toList(sentidswithfilerest.keySet()).get(0);
+        Set<String> sentids = sentidswithfilerest.get(filename);
         if (sentids != null) {
           this.runParallelApplyPats(Data.sents, sentids, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
-        } 
+        } else
+          throw new RuntimeException("How come no sentIds for " + filename  + ". Index keyset is " + constVars.invertedIndex.getKeySet());
       }
       if(patternsLearnedThisIterConsistsOnlyGeneralized.size() > 0){
         this.runParallelApplyPats(Data.sents, Data.sents.keySet(), label, patternsLearnedThisIterConsistsOnlyGeneralized, wordsandLemmaPatExtracted, matchedTokensByPat);
       }
       Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
     }
+    Redwood.log(Redwood.DBG, "# words/lemma and pattern pairs are " + wordsandLemmaPatExtracted.size());
   }
+  
   
   private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
       Counter<SurfacePattern> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted){
@@ -515,11 +533,12 @@ public class ScorePhrases {
         writtenInJustification.put(label, true);
       }
       if (constVars.justify) {
+        Redwood.log(Redwood.DBG, "\nJustification for phrases:\n");
         for (String word : finalwords.keySet()) {
           Redwood.log(
-              Redwood.DBG,
+              Redwood.DBG, "Phrase " + 
               word
-                  + "\t"
+                  + " extracted because of patterns: \t"
                   + Counters.toSortedString(wordsPatExtracted.getCounter(word),
                       wordsPatExtracted.getCounter(word).size(), "%1$s:%2$f",
                       "\n"));
