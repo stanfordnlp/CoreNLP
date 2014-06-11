@@ -1884,7 +1884,8 @@ public class SUTime {
     }
 
     public TimexType getTimexType() {
-      return (hasTime() || tod != null) ? TimexType.TIME : TimexType.DATE;
+      if (tod != null) return TimexType.TIME;
+      return super.getTimexType();
     }
 
     private static final long serialVersionUID = 1;
@@ -2240,6 +2241,7 @@ public class SUTime {
     }
 
     public RelativeTime(Time base) {
+      super(base);
       this.base = base;
     }
 
@@ -2389,6 +2391,16 @@ public class SUTime {
       return new RelativeTime(this, TemporalOp.INTERSECT, t);
     }
 
+    public Time intersect(Time t) {
+      if (base == TIME_REF || base == null) {
+        if (t instanceof PartialTime && tempOp == TemporalOp.OFFSET) {
+          RelativeTime rt = new RelativeTime(this, tempOp, tempArg);
+          rt.base = t;
+          return rt;
+        }
+      }
+      return new RelativeTime(this, TemporalOp.INTERSECT, t);
+    }
     private static final long serialVersionUID = 1;
   }
 
@@ -2458,6 +2470,11 @@ public class SUTime {
       } else {
         return false;
       }
+    }
+
+    public TimexType getTimexType() {
+      if (base == null) return null;
+      return super.getTimexType();
     }
 
     protected boolean appendDateFormats(DateTimeFormatterBuilder builder, int flags) {
@@ -2797,6 +2814,10 @@ public class SUTime {
     }
 
     public static Pair<PartialTime, PartialTime> getCompatible(PartialTime t1, PartialTime t2) {
+      // Incompatible timezones
+      if (t1.dateTimeZone != null && t2.dateTimeZone != null &&
+          !t1.dateTimeZone.equals(t2.dateTimeZone))
+        return null;
       if (t1.isCompatible(t2)) return Pair.makePair(t1,t2);
       if (t1.uncertaintyGranularity != null && t2.uncertaintyGranularity == null) {
         if (t1.uncertaintyGranularity.compareTo(t2.getDuration()) > 0) {
@@ -2882,8 +2903,13 @@ public class SUTime {
     public Time intersect(Time t) {
       if (t == null || t == TIME_UNKNOWN)
         return this;
-      if (base == null)
-        return t;
+      if (base == null) {
+        if (dateTimeZone != null) {
+          return (Time) t.setTimeZone(dateTimeZone);
+        } else {
+          return t;
+        }
+      }
       if (t instanceof CompositePartialTime) {
         return t.intersect(this);
       } else if (t instanceof PartialTime) {
@@ -2892,7 +2918,11 @@ public class SUTime {
           return null;
         }
         Partial p = JodaTimeUtils.combine(compatible.first.base, compatible.second.base);
-        return new PartialTime(p);
+        // Take timezone if there is one
+        DateTimeZone dtz = (dateTimeZone != null)? dateTimeZone: ((PartialTime) t).dateTimeZone;
+        PartialTime res = new PartialTime(p);
+        if (dtz != null) return res.setTimeZone(dtz);
+        else return res;
       } else if (t instanceof GroundedTime) {
         return t.intersect(this);
       } else if (t instanceof RelativeTime) {
