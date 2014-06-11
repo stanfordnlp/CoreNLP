@@ -216,7 +216,7 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
 
   /**
    * Returns a list of Objects representing the match results for the nodes in the group.
-   *                                                                                                                            f
+   *
    * @param  groupVar
    *         The name of the capturing group in this matcher's pattern
    * @return the list of match results associated with the nodes
@@ -227,9 +227,40 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
    */
   public List<Object> groupMatchResults(String groupVar);
 
+  /**
+   * Returns the value (some Object) associated with the entire matched sequence.
+   *
+   * @return value associated with the matched sequence.
+   * @throws  IllegalStateException
+   *          If no match has yet been attempted,
+   *          or if the previous match operation failed
+   */
   public Object groupValue();
+
+  /**
+   * Returns the value (some Object) associated with the captured group.
+   *
+   * @param  group
+   *         The index of a capturing group in this matcher's pattern
+   * @return value associated with the captured group.
+   * @throws  IllegalStateException
+   *          If no match has yet been attempted,
+   *          or if the previous match operation failed
+   */
   public Object groupValue(int group);
+
+  /**
+   * Returns the value (some Object) associated with the captured group.
+   *
+   * @param  var
+   *         The name of the capturing group in this matcher's pattern
+   * @return value associated with the captured group.
+   * @throws  IllegalStateException
+   *          If no match has yet been attempted,
+   *          or if the previous match operation failed
+   */
   public Object groupValue(String var);
+
   public MatchedGroupInfo<T> groupInfo();
   public MatchedGroupInfo<T> groupInfo(int group);
   public MatchedGroupInfo<T> groupInfo(String var);
