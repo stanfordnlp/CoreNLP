@@ -395,7 +395,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     }
   }
 
-  @Override
   public ParserQuery parserQuery() {
     if (reranker == null) {
       return new LexicalizedParserQuery(this);
