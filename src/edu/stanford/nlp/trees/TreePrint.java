@@ -948,8 +948,10 @@ public class TreePrint {
     for (TypedDependency td : dependencies) {
       String reln = td.reln().toString();
       String gov = td.gov().value();
+      String govTag = td.gov().label().tag();
       int govIdx = td.gov().index();
       String dep = td.dep().value();
+      String depTag = td.dep().label().tag();
       int depIdx = td.dep().index();
       boolean extra = td.extra();
       // add an attribute if the node is a copy
@@ -964,14 +966,16 @@ public class TreePrint {
       if (copyDep != null) {
         depCopy = " copy=\"" + copyDep + '\"';
       }
+      String govTagAttribute = (govTag == null) ? "" : " tag=\"" + govTag + "\"";
+      String depTagAttribute = (depTag == null) ? "" : " tag=\"" + depTag + "\"";
       // add an attribute if the typed dependency is an extra relation (do not preserve the tree structure)
       String extraAttr = "";
       if (extra) {
         extraAttr = " extra=\"yes\"";
       }
       buf.append("  <dep type=\"").append(XMLUtils.escapeXML(reln)).append('\"').append(extraAttr).append(">\n");
-      buf.append("    <governor idx=\"").append(govIdx).append('\"').append(govCopy).append('>').append(XMLUtils.escapeXML(gov)).append("</governor>\n");
-      buf.append("    <dependent idx=\"").append(depIdx).append('\"').append(depCopy).append('>').append(XMLUtils.escapeXML(dep)).append("</dependent>\n");
+      buf.append("    <governor idx=\"").append(govIdx).append('\"').append(govCopy).append(govTagAttribute).append('>').append(XMLUtils.escapeXML(gov)).append("</governor>\n");
+      buf.append("    <dependent idx=\"").append(depIdx).append('\"').append(depCopy).append(depTagAttribute).append('>').append(XMLUtils.escapeXML(dep)).append("</dependent>\n");
       buf.append("  </dep>\n");
     }
     buf.append("</dependencies>");

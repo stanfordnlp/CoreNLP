@@ -542,7 +542,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    */
   public static final String TAG_SEPARATOR = "/";
 
-  public static final String DEFAULT_FORMAT = "value-index";
+  public static final String DEFAULT_FORMAT = "value-tag-index";
 
   @Override
   public String toString() {
@@ -589,6 +589,17 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
       buf.append(map2);
     } else if (format.equals("value-index")) {
       buf.append(value());
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      buf.append(toPrimes());
+    } else if (format.equals("value-tag-index")) {
+      buf.append(value());
+      String tag = tag();
+      if (tag != null) {
+        buf.append(TAG_SEPARATOR).append(tag);
+      }
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
         buf.append('-').append((index).intValue());
