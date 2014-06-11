@@ -850,13 +850,7 @@ public class EnglishGrammaticalRelations {
           // second disjunct matches inverted "had he investigated" cases
           // 3rd case is "so that" purpose clauses and one way of parsing "now that"
           // 4th case is another way of parsing "now that"
-          //
-          // the <= relation lets us use the same tregex for either
-          // current node or one of its children matching the rest of
-          // the pattern.  this can be an issue in sentences with sbar
-          // conjunctions.  for example, "Call if you have questions
-          // or if I can be of any help"
-          "VP < (@SBAR=target <= (@SBAR [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ))",
+          "VP < (@SBAR=target [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] )",
           "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV < (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?$).*$/)",
