@@ -861,12 +861,6 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-noUseContextWords")) {
       trainOptions.useContextWords = false;
       i += 1;
-    } else if (args[i].equalsIgnoreCase("-dvCombineCategories")) {
-      dvCombineCategories = true;
-      i += 1;
-    } else if (args[i].equalsIgnoreCase("-nodvCombineCategories")) {
-      dvCombineCategories = false;
-      i += 1;
     }
     return i;
   }
@@ -1141,12 +1135,6 @@ public class Options implements Serializable {
    * parser as well.  This tells us how much weight to give that score.
    */
   public double baseParserWeight = 0.0;
-
-  /**
-   * The DVParser will combine categories such as NP and NNP if this
-   * is set to true
-   */
-  public boolean dvCombineCategories = false;
 
   /**
    * Making the TestOptions transient means it won't even be
