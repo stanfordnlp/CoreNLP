@@ -49,6 +49,9 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Execution.*;
@@ -110,7 +113,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   Counter<String> patternsOtherClass = null;
 
   // String channelNameLogger = "patterns";
-
   /**
    *
    * RlogF is from Riloff 1996, when R's denominator is (pos+neg+unlabeled)
@@ -145,141 +147,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     BPB, WEIGHTEDNORM
   }
 
-  /**
-   * Maximum number of iterations to run
-   */
-  @Option(name = "numIterationsForPatterns")
-  public Integer numIterationsForPatterns = 10;
-
-  /**
-   * Maximum number of patterns learned in each iteration
-   */
-  @Option(name = "numPatterns")
-  public int numPatterns = 10;
-
-  /**
-   * Detailed review of why each pattern and phrase was extracted in the command
-   * line
-   */
-  @Option(name = "justify")
-  public boolean justify = false;
-
-  /**
-   * The output directory where the justifications of learning patterns and
-   * phrases would be saved. These are needed for visualization
-   */
-  @Option(name = "outDir")
-  public String outDir = null;
-
-  /**
-   * Cached file of all patterns for all tokens
-   */
-  @Option(name = "allPatternsFile")
-  public String allPatternsFile = null;
-
-  /**
-   * If all patterns should be computed. Otherwise patterns are read from
-   * allPatternsFile
-   */
-  @Option(name = "computeAllPatterns")
-  public boolean computeAllPatterns = true;
-
-  // @Option(name = "removeRedundantPatterns")
-  // public boolean removeRedundantPatterns = true;
-
-  /**
-   * Pattern Scoring mechanism. See {@link PatternScoring} for options.
-   */
-  @Option(name = "patternScoring")
-  public PatternScoring patternScoring = PatternScoring.PosNegUnlabOdds;
-
-  /**
-   * Threshold for learning a pattern
-   */
-  @Option(name = "thresholdSelectPattern")
-  public double thresholdSelectPattern = 1.0;
-
-  /**
-   * Do not learn patterns that do not extract any unlabeled tokens (kind of
-   * useless)
-   */
-  @Option(name = "discardPatternsWithNoUnlabSupport")
-  public boolean discardPatternsWithNoUnlabSupport = true;
-
-  /**
-   * Currently, does not work correctly. TODO: make this work. Ideally this
-   * would label words only when they occur in the context of any learned
-   * pattern
-   */
-  @Option(name = "restrictToMatched")
-  public boolean restrictToMatched = false;
-
-  /**
-   * Label words that are learned so that in further iterations we have more
-   * information
-   */
-  @Option(name = "usePatternResultAsLabel")
-  public boolean usePatternResultAsLabel = true;
-
-  /**
-   * Debug flag for learning patterns
-   */
-  @Option(name = "learnPatternsDebug")
-  public boolean learnPatternsDebug = false;
-
-  /**
-   * Do not learn patterns in which the neighboring words have the same label.
-   */
-  @Option(name = "ignorePatWithLabeledNeigh")
-  public boolean ignorePatWithLabeledNeigh = false;
-
-  /**
-   * Save this run as ...
-   */
-  @Option(name = "identifier")
-  public String identifier = "getpatterns";
-
-  /**
-   * Use the actual dictionary matching phrase(s) instead of the token word or
-   * lemma in calculating the stats
-   */
-  @Option(name = "useMatchingPhrase")
-  public boolean useMatchingPhrase = false;
-
-  /**
-   * Reduce pattern threshold (=0.8*current_value) to extract as many patterns
-   * as possible (still restricted by <code>numPatterns</code>)
-   */
-  @Option(name = "tuneThresholdKeepRunning")
-  public boolean tuneThresholdKeepRunning = false;
-
-  /**
-   * Maximum number of words to learn
-   */
-  @Option(name = "maxExtractNumWords")
-  public int maxExtractNumWords = Integer.MAX_VALUE;
-
-  /**
-   * Debug log output
-   */
-  @Option(name = "extremedebug")
-  public boolean extremedebug = false;
-
-  /**
-   * use the seed dictionaries and the new words learned for the other labels in
-   * the previous iterations as negative
-   */
-  @Option(name = "useOtherLabelsWordsasNegative")
-  public boolean useOtherLabelsWordsasNegative = true;
-
-  /**
-   * If not null, write the output like
-   * "w1 w2 <label1> w3 <label2>w4</label2> </label1> w5 ... " if w3 w4 have
-   * label1 and w4 has label 2
-   */
-  @Option(name = "markedOutputTextFile")
-  String markedOutputTextFile = null;
-
   Map<String, Boolean> writtenPatInJustification = new HashMap<String, Boolean>();
 
   Map<String, Counter<SurfacePattern>> learnedPatterns = new HashMap<String, Counter<SurfacePattern>>();
@@ -303,8 +170,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       IllegalAccessException, IllegalArgumentException,
       InvocationTargetException, NoSuchMethodException, SecurityException,
       InterruptedException, ExecutionException {
-    this(props, sents, seedSet, labelUsingSeedSets, PatternsAnnotations.PatternLabel1.class,
-        answerLabel);
+    this(props, sents, seedSet, labelUsingSeedSets,
+        PatternsAnnotations.PatternLabel1.class, answerLabel);
   }
 
   @SuppressWarnings("rawtypes")
@@ -325,20 +192,23 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Map<String, Set<String>> seedSets = new HashMap<String, Set<String>>();
     seedSets.put(answerLabel, seedSet);
-    setUpConstructor(sents, seedSets, labelUsingSeedSets, ansCl, generalizeClasses, ignoreClasses);
+    setUpConstructor(sents, seedSets, labelUsingSeedSets, ansCl,
+        generalizeClasses, ignoreClasses);
 
   }
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Set<String> seedSet, boolean labelUsingSeedSets,
-      String answerLabel, Map<String, Class> generalizeClasses,
-      Map<Class, Object> ignoreClasses) throws IOException,
-      InstantiationException, IllegalAccessException, IllegalArgumentException,
-      InvocationTargetException, NoSuchMethodException, SecurityException,
-      InterruptedException, ExecutionException {
-    this(props, sents, seedSet, labelUsingSeedSets, PatternsAnnotations.PatternLabel1.class,
-        answerLabel, generalizeClasses, ignoreClasses);
+      Map<String, List<CoreLabel>> sents, Set<String> seedSet,
+      boolean labelUsingSeedSets, String answerLabel,
+      Map<String, Class> generalizeClasses, Map<Class, Object> ignoreClasses)
+      throws IOException, InstantiationException, IllegalAccessException,
+      IllegalArgumentException, InvocationTargetException,
+      NoSuchMethodException, SecurityException, InterruptedException,
+      ExecutionException {
+    this(props, sents, seedSet, labelUsingSeedSets,
+        PatternsAnnotations.PatternLabel1.class, answerLabel,
+        generalizeClasses, ignoreClasses);
   }
 
   @SuppressWarnings("rawtypes")
@@ -359,16 +229,17 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Map<String, Set<String>> seedSets = new HashMap<String, Set<String>>();
     seedSets.put(answerLabel, seedSet);
-    setUpConstructor(sents, seedSets, labelUsingSeedSets, ansCl, generalizeClasses, iC);
+    setUpConstructor(sents, seedSets, labelUsingSeedSets, ansCl,
+        generalizeClasses, iC);
   }
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets, boolean labelUsingSeedSets)
-      throws IOException, InstantiationException, IllegalAccessException,
-      IllegalArgumentException, InvocationTargetException,
-      NoSuchMethodException, SecurityException, ClassNotFoundException,
-      InterruptedException, ExecutionException {
+      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
+      boolean labelUsingSeedSets) throws IOException, InstantiationException,
+      IllegalAccessException, IllegalArgumentException,
+      InvocationTargetException, NoSuchMethodException, SecurityException,
+      ClassNotFoundException, InterruptedException, ExecutionException {
     this.props = props;
     Map<String, Class<? extends TypesafeMap.Key<String>>> ansCl = new HashMap<String, Class<? extends TypesafeMap.Key<String>>>();
     Map<String, Class> gC = new HashMap<String, Class>();
@@ -387,14 +258,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets, boolean labelUsingSeedSets,
+      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
+      boolean labelUsingSeedSets,
       Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass)
       throws IOException, InstantiationException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException,
       NoSuchMethodException, SecurityException, InterruptedException,
       ExecutionException {
-    this(props, sents, seedSets, labelUsingSeedSets, answerClass, new HashMap<String, Class>(),
-        new HashMap<String, Map<Class, Object>>());
+    this(props, sents, seedSets, labelUsingSeedSets, answerClass,
+        new HashMap<String, Class>(), new HashMap<String, Map<Class, Object>>());
   }
 
   /**
@@ -413,7 +285,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
    */
   @SuppressWarnings("rawtypes")
   public GetPatternsFromDataMultiClass(Properties props,
-      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets, boolean labelUsingSeedSets,
+      Map<String, List<CoreLabel>> sents, Map<String, Set<String>> seedSets,
+      boolean labelUsingSeedSets,
       Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass,
       Map<String, Class> generalizeClasses,
       Map<String, Map<Class, Object>> ignoreClasses) throws IOException,
@@ -426,8 +299,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       for (String label : seedSets.keySet())
         ignoreClasses.put(label, new HashMap<Class, Object>());
     }
-    setUpConstructor(sents, seedSets, labelUsingSeedSets, answerClass, generalizeClasses,
-        ignoreClasses);
+    setUpConstructor(sents, seedSets, labelUsingSeedSets, answerClass,
+        generalizeClasses, ignoreClasses);
   }
 
   @SuppressWarnings("rawtypes")
@@ -440,13 +313,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       InvocationTargetException, NoSuchMethodException, SecurityException,
       InterruptedException, ExecutionException {
 
-    if (!learnPatternsDebug) {
-      Redwood.hideChannelsEverywhere(Redwood.DBG);
-    }
-    if (!extremedebug) {
-      Redwood.hideChannelsEverywhere("extremePatDebug");
-    }
-    Redwood.log(Redwood.DBG, "Running with debug output");
     Data.sents = sents;
     Execution.fillOptions(Data.class, props);
     Execution.fillOptions(constVars, props);
@@ -456,6 +322,17 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     constVars.setLabelDictionary(seedSets);
 
     constVars.setUp(props);
+
+    if (!constVars.learnPatternsDebug) {
+      Redwood.hideChannelsEverywhere(Redwood.DBG);
+    }
+
+    if (!constVars.extremedebug) {
+      Redwood.hideChannelsEverywhere("extremePatDebug");
+    }
+
+    Redwood.log(Redwood.DBG, "Running with debug output");
+    Redwood.log("extremePatDebug", "Running with extreme debug output");
 
     // wordsForOtherClass = new HashMap<String, Set<String>>();
     wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<String, SurfacePattern>>();
@@ -476,9 +353,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         runLabelSeedWords(constVars.answerClass.get(l), l, seedSets.get(l));
       }
 
-    if (constVars.getOtherSemanticClasses() != null)
-      runLabelSeedWords(PatternsAnnotations.OtherSemanticLabel.class,
-          "OTHERSEM", constVars.getOtherSemanticClasses());
+      if (constVars.getOtherSemanticClasses() != null)
+        runLabelSeedWords(PatternsAnnotations.OtherSemanticLabel.class,
+            "OTHERSEM", constVars.getOtherSemanticClasses());
     }
 
     if (constVars.externalFeatureWeightsFile != null) {
@@ -557,13 +434,28 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public static Map<String, List<CoreLabel>> runPOSNEROnTokens(
       List<CoreMap> sentsCM, String posModelPath,
-      boolean useTargetNERRestriction, String prefix) {
+      boolean useTargetNERRestriction, String prefix,
+      boolean useTargetParserParentRestriction, String numThreads) {
     Annotation doc = new Annotation(sentsCM);
+
     Properties props = new Properties();
+    List<String> anns = new ArrayList<String>();
+    anns.add("pos");
+    anns.add("lemma");
+
+    if (useTargetParserParentRestriction) {
+      anns.add("parse");
+
+    }
     if (useTargetNERRestriction) {
-      props.setProperty("annotators", "pos,lemma,ner");
-    } else
-      props.setProperty("annotators", "pos,lemma");
+      anns.add("ner");
+    }
+
+    props.setProperty("annotators", StringUtils.join(anns, ","));
+    props.setProperty("parse.maxlen", "80");
+    // props.setProperty("pos.maxlen", "80");
+    props.setProperty("nthreads", numThreads);
+    props.setProperty("threads", numThreads);
 
     // props.put( "tokenize.options",
     // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
@@ -573,11 +465,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props, false);
 
+    Redwood.log(Redwood.DBG, "Annotating text with NER and POS");
     pipeline.annotate(doc);
+    Redwood.log(Redwood.DBG, "Done annotating text with NER and POS");
+
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
 
     for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
-
+      if (useTargetParserParentRestriction)
+        inferParentParseTag(s.get(TreeAnnotation.class));
       sents.put(prefix + s.get(CoreAnnotations.DocIDAnnotation.class),
           s.get(CoreAnnotations.TokensAnnotation.class));
     }
@@ -589,14 +485,28 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public static Map<String, List<CoreLabel>> tokenize(String text,
       String posModelPath, boolean lowercase, boolean useTargetNERRestriction,
-      String sentIDPrefix) throws InterruptedException, ExecutionException,
+      String sentIDPrefix, boolean useTargetParserParentRestriction,
+      String numThreads) throws InterruptedException, ExecutionException,
       IOException {
     if (pipeline == null) {
       Properties props = new Properties();
+      List<String> anns = new ArrayList<String>();
+      anns.add("tokenize");
+      anns.add("ssplit");
+      anns.add("pos");
+      anns.add("lemma");
+
+      if (useTargetParserParentRestriction) {
+        anns.add("parse");
+      }
       if (useTargetNERRestriction) {
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner");
-      } else
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma");
+        anns.add("ner");
+      }
+
+      props.setProperty("annotators", StringUtils.join(anns, ","));
+      props.setProperty("parse.maxlen", "80");
+      // props.setProperty("pos.maxlen", "100");
+      props.setProperty("threads", numThreads);
 
       props
           .put(
@@ -613,15 +523,34 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Annotation doc = new Annotation(text);
     pipeline.annotate(doc);
+    Redwood.log(Redwood.DBG, "Done annotating text");
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
     int i = -1;
     for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
       i++;
+      if (useTargetParserParentRestriction)
+        inferParentParseTag(s.get(TreeAnnotation.class));
       sents
           .put(sentIDPrefix + i, s.get(CoreAnnotations.TokensAnnotation.class));
+
     }
 
     return sents;
+  }
+
+  static void inferParentParseTag(Tree tree) {
+
+    String grandstr = tree.value();
+    for (Tree child : tree.children()) {
+      for (Tree grand : child.children()) {
+        if (grand.isLeaf()) {
+          ((CoreLabel) grand.label()).set(
+              CoreAnnotations.GrandparentAnnotation.class, grandstr);
+        }
+      }
+      inferParentParseTag(child);
+    }
+
   }
 
   /**
@@ -841,17 +770,20 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       ClassNotFoundException {
 
     if (this.patternsForEachToken == null) {
-      if (computeAllPatterns) {
+      if (constVars.computeAllPatterns) {
         Redwood.log(Redwood.DBG, "Computing all patterns");
         this.patternsForEachToken = createPats
             .getAllPatterns(label, Data.sents);
         // if (removeRedundantPatterns)
         // removeRedundantPatterns(numThreads);
-        if (allPatternsFile != null)
-          IOUtils.writeObjectToFile(this.patternsForEachToken, allPatternsFile);
+        if (constVars.allPatternsFile != null)
+          IOUtils.writeObjectToFile(this.patternsForEachToken,
+              constVars.allPatternsFile);
       } else {
-        this.patternsForEachToken = IOUtils.readObjectFromFile(allPatternsFile);
-        Redwood.log(Redwood.FORCE, "Read all patterns from " + allPatternsFile);
+        this.patternsForEachToken = IOUtils
+            .readObjectFromFile(constVars.allPatternsFile);
+        Redwood.log(Redwood.FORCE, "Read all patterns from "
+            + constVars.allPatternsFile);
       }
     }
 
@@ -892,7 +824,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         String tokenWordOrLemma = token.word();
         String longestMatchingPhrase = null;
 
-        if (useMatchingPhrase) {
+        if (constVars.useMatchingPhrase) {
           if (matchedPhrases != null && !matchedPhrases.isEmpty()) {
             for (String s : matchedPhrases) {
               if (s.equals(tokenWordOrLemma)) {
@@ -928,7 +860,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           boolean nextTokenLabel = i == sent.size() - 1 ? false : sent
               .get(i + 1).get(answerClass4Label)
               .equals(answerLabel4Label.toString());
-          if (!ignorePatWithLabeledNeigh || !prevTokenLabel) {
+          if (!constVars.ignorePatWithLabeledNeigh || !prevTokenLabel) {
             for (SurfacePattern s : prevPat) {
               patternsandWords4Label.getCounter(s).incrementCount(
                   longestMatchingPhrase);
@@ -938,7 +870,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                   longestMatchingPhrase);
             }
           }
-          if (!ignorePatWithLabeledNeigh || !nextTokenLabel) {
+          if (!constVars.ignorePatWithLabeledNeigh || !nextTokenLabel) {
             for (SurfacePattern s : nextPat) {
               patternsandWords4Label.getCounter(s).incrementCount(
                   longestMatchingPhrase);
@@ -948,7 +880,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                   longestMatchingPhrase);
             }
           }
-          if (!ignorePatWithLabeledNeigh
+          if (!constVars.ignorePatWithLabeledNeigh
               || (!prevTokenLabel && !nextTokenLabel)) {
             for (SurfacePattern s : prevnextPat) {
 
@@ -994,14 +926,24 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     }
 
+    Set<SurfacePattern> removePats = enforceMinSupportRequirements(
+        patternsandWords4Label, unLabeledPatternsandWords4Label);
+    Counters.removeKeys(patternsandWords4Label, removePats);
+    Counters.removeKeys(unLabeledPatternsandWords4Label, removePats);
+    Counters.removeKeys(negandUnLabeledPatternsandWords4Label, removePats);
+    Counters.removeKeys(allPatternsandWords4Label, removePats);
+    Counters.removeKeys(posnegPatternsandWords4Label, removePats);
+    Counters.removeKeys(negPatternsandWords4Label, removePats);
+
+    // patternsandWords4Label.g postconstVars.minPosPhraseSupportForPat
     Redwood.log("extremePatDebug",
         "Patterns around positive words in the label " + label + " are "
             + patternsandWords4Label);
     ScorePatterns scorePatterns;
     // One of the baseline measures; ignore if not interested
-    if (patternScoring.equals(PatternScoring.F1)) {
-      scorePatterns = new ScorePatternsF1(constVars, patternScoring, label,
-          patternsandWords4Label, negPatternsandWords4Label,
+    if (constVars.patternScoring.equals(PatternScoring.F1)) {
+      scorePatterns = new ScorePatternsF1(constVars, constVars.patternScoring,
+          label, patternsandWords4Label, negPatternsandWords4Label,
           unLabeledPatternsandWords4Label,
           negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label,
           p0Set, p0);
@@ -1014,32 +956,32 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Redwood.log(Redwood.FORCE, "Selected Pattern: " + finalPat);
       return finalPat;
 
-    } else if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)
-        || patternScoring.equals(PatternScoring.PosNegOdds)
-        || patternScoring.equals(PatternScoring.RatioAll)
-        || patternScoring.equals(PatternScoring.PhEvalInPat)
-        || patternScoring.equals(PatternScoring.PhEvalInPatLogP)
-        || patternScoring.equals(PatternScoring.LOGREG)
-        || patternScoring.equals(PatternScoring.SqrtAllRatio)) {
+    } else if (constVars.patternScoring.equals(PatternScoring.PosNegUnlabOdds)
+        || constVars.patternScoring.equals(PatternScoring.PosNegOdds)
+        || constVars.patternScoring.equals(PatternScoring.RatioAll)
+        || constVars.patternScoring.equals(PatternScoring.PhEvalInPat)
+        || constVars.patternScoring.equals(PatternScoring.PhEvalInPatLogP)
+        || constVars.patternScoring.equals(PatternScoring.LOGREG)
+        || constVars.patternScoring.equals(PatternScoring.SqrtAllRatio)) {
 
       scorePatterns = new ScorePatternsRatioModifiedFreq(constVars,
-          patternScoring, label, patternsandWords4Label,
+          constVars.patternScoring, label, patternsandWords4Label,
           negPatternsandWords4Label, unLabeledPatternsandWords4Label,
           negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label,
           phInPatScores, scorePhrases);
 
-    } else if (patternScoring.equals(PatternScoring.RlogF)
-        || patternScoring.equals(PatternScoring.RlogFPosNeg)
-        || patternScoring.equals(PatternScoring.RlogFUnlabNeg)
-        || patternScoring.equals(PatternScoring.RlogFNeg)
-        || patternScoring.equals(PatternScoring.YanGarber02)
-        || patternScoring.equals(PatternScoring.LinICML03)) {
-      scorePatterns = new ScorePatternsFreqBased(constVars, patternScoring,
-          label, patternsandWords4Label, negPatternsandWords4Label,
-          unLabeledPatternsandWords4Label,
+    } else if (constVars.patternScoring.equals(PatternScoring.RlogF)
+        || constVars.patternScoring.equals(PatternScoring.RlogFPosNeg)
+        || constVars.patternScoring.equals(PatternScoring.RlogFUnlabNeg)
+        || constVars.patternScoring.equals(PatternScoring.RlogFNeg)
+        || constVars.patternScoring.equals(PatternScoring.YanGarber02)
+        || constVars.patternScoring.equals(PatternScoring.LinICML03)) {
+      scorePatterns = new ScorePatternsFreqBased(constVars,
+          constVars.patternScoring, label, patternsandWords4Label,
+          negPatternsandWords4Label, unLabeledPatternsandWords4Label,
           negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
 
-    } else if (patternScoring.equals(PatternScoring.kNN)) {
+    } else if (constVars.patternScoring.equals(PatternScoring.kNN)) {
       try {
         Class<? extends ScorePatterns> clazz = (Class<? extends ScorePatterns>) Class
             .forName("edu.stanford.nlp.patterns.surface.ScorePatternsKNN");
@@ -1049,7 +991,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             TwoDimensionalCounter.class, TwoDimensionalCounter.class,
             TwoDimensionalCounter.class);
         scorePatterns = ctor.newInstance(constVars,
-                patternScoring, label, patternsandWords4Label,
+                constVars.patternScoring, label, patternsandWords4Label,
                 negPatternsandWords4Label, unLabeledPatternsandWords4Label,
                 negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label);
 
@@ -1066,10 +1008,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         throw new RuntimeException("newinstance of kNN not created", e);
       }
     } else {
-      throw new RuntimeException(patternScoring
+      throw new RuntimeException(constVars.patternScoring
           + " is not implemented (check spelling?). ");
     }
-
+    
+    scorePatterns.setUp(props);
     currentPatternWeights4Label = scorePatterns.score();
 
     Redwood.log("extremePatDebug", "patterns counter size is "
@@ -1102,18 +1045,17 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Set<SurfacePattern> removePatterns = new HashSet<SurfacePattern>();
 
-    while (num < numPatterns && !q.isEmpty()) {
+    while (num < constVars.numPatterns && !q.isEmpty()) {
       SurfacePattern pat = q.removeFirst();
-      if (currentPatternWeights4Label.getCount(pat) < thresholdSelectPattern) {
+      if (currentPatternWeights4Label.getCount(pat) < constVars.thresholdSelectPattern) {
         Redwood.log(Redwood.DBG, "The max weight of candidate patterns is "
             + df.format(currentPatternWeights4Label.getCount(pat))
             + " so not adding anymore patterns");
         break;
       }
       boolean notchoose = false;
-      if (discardPatternsWithNoUnlabSupport
-          && (!unLabeledPatternsandWords4Label.containsFirstKey(pat) || unLabeledPatternsandWords4Label
-              .getCounter(pat).isEmpty())) {
+      if (!unLabeledPatternsandWords4Label.containsFirstKey(pat)
+          || unLabeledPatternsandWords4Label.getCounter(pat).isEmpty()) {
         Redwood.log("extremePatDebug", "Removing pattern " + pat
             + " because it has no unlab support; pos words: "
             + patternsandWords4Label.getCounter(pat) + " and all words "
@@ -1214,13 +1156,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Redwood.log(Redwood.FORCE,
           en.first().toStringToWrite() + ":" + df.format(en.second) + "\n");
 
-    if (outDir != null && !outDir.isEmpty()) {
-
+    if (constVars.outDir != null && !constVars.outDir.isEmpty()) {
       CollectionValuedMap<SurfacePattern, String> posWords = new CollectionValuedMap<SurfacePattern, String>();
       for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
           .entrySet()) {
         posWords.addAll(en.getKey(), en.getValue().keySet());
       }
+
       CollectionValuedMap<SurfacePattern, String> negWords = new CollectionValuedMap<SurfacePattern, String>();
       for (Entry<SurfacePattern, ClassicCounter<String>> en : negPatternsandWords4Label
           .entrySet()) {
@@ -1231,10 +1173,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           .entrySet()) {
         unlabWords.addAll(en.getKey(), en.getValue().keySet());
       }
-      IOUtils.ensureDir(new File(outDir + "/" + identifier + "/" + label));
+      String outputdir  = constVars.outDir + "/" + constVars.identifier
+          + "/" + label;
+      Redwood.log(Redwood.FORCE,"Saving output in " + outputdir);
 
-      String filename = this.outDir + "/" + identifier + "/" + label
-          + "/patterns" + ".json";
+      IOUtils.ensureDir(new File(outputdir));
+
+      String filename = outputdir + "/patterns" + ".json";
 
       JsonArrayBuilder obj = Json.createArrayBuilder();
       if (writtenPatInJustification.containsKey(label)
@@ -1276,7 +1221,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       writtenPatInJustification.put(label, true);
     }
 
-    if (justify) {
+    if (constVars.justify) {
       Redwood.log(Redwood.DBG, "Justification for Patterns:");
       for (SurfacePattern key : chosenPat.keySet()) {
         Redwood.log(Redwood.DBG, "Pattern: " + key.toStringToWrite());
@@ -1312,6 +1257,42 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     return chosenPat;
 
+  }
+
+  private Set<SurfacePattern> enforceMinSupportRequirements(
+      TwoDimensionalCounter<SurfacePattern, String> patternsandWords4Label,
+      TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label) {
+    Set<SurfacePattern> remove = new HashSet<SurfacePattern>();
+    for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
+        .entrySet()) {
+      if (en.getValue().size() < constVars.minPosPhraseSupportForPat) {
+        remove.add(en.getKey());
+      }
+
+    }
+    int numRemoved = remove.size();
+    Redwood
+        .log(
+            Redwood.DBG,
+            "Removing "
+                + numRemoved
+                + " patterns that do not meet minPosPhraseSupportForPat requirement of >= "
+                + constVars.minPosPhraseSupportForPat);
+
+    for (Entry<SurfacePattern, ClassicCounter<String>> en : unLabeledPatternsandWords4Label
+        .entrySet()) {
+      if (en.getValue().size() < constVars.minUnlabPhraseSupportForPat) {
+        remove.add(en.getKey());
+      }
+    }
+    Redwood
+        .log(
+            Redwood.DBG,
+            "Removing "
+                + (remove.size() - numRemoved)
+                + " patterns that do not meet minUnlabPhraseSupportForPat requirement of >= "
+                + constVars.minUnlabPhraseSupportForPat);
+    return remove;
   }
 
   void removeLearnedPattern(String label, SurfacePattern p) {
@@ -1386,7 +1367,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       throws IOException {
 
     CollectionValuedMap<String, Integer> tokensMatchedPatterns = null;
-    if (restrictToMatched) {
+    if (constVars.restrictToMatched) {
       tokensMatchedPatterns = new CollectionValuedMap<String, Integer>();
       for (Entry<SurfacePattern, Collection<Triple<String, Integer, Integer>>> en : matchedTokensByPat
           .entrySet()) {
@@ -1421,7 +1402,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         for (Integer idx : ints) {
           boolean donotuse = false;
-          if (restrictToMatched) {
+          if (constVars.restrictToMatched) {
             for (int j = 0; j < ph.length; j++) {
               if (!tokensMatchedPatterns.get(sentEn.getKey()).contains(idx + j)) {
                 Redwood.log("extremePatDebug", "not labeling "
@@ -1435,7 +1416,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             for (int j = 0; j < ph.length; j++) {
               int index = idx + j;
               CoreLabel l = sentEn.getValue().get(index);
-              if (usePatternResultAsLabel) {
+              if (constVars.usePatternResultAsLabel) {
                 l.set(constVars.answerClass.get(label), label);
                 Set<String> matched = new HashSet<String>();
                 matched.add(StringUtils.join(ph, " "));
@@ -1480,7 +1461,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           .put(
               label,
               new CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>());
-      if (this.useOtherLabelsWordsasNegative) {
+      if (constVars.useOtherLabelsWordsasNegative) {
         Set<String> w = new HashSet<String>();
         for (Entry<String, Set<String>> en : constVars.getLabelDictionary()
             .entrySet()) {
@@ -1492,18 +1473,19 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     }
 
-    Redwood.log(Redwood.FORCE, "Iterating " + numIterationsForPatterns
-        + " times.");
+    Redwood.log(Redwood.FORCE, "Iterating "
+        + constVars.numIterationsForPatterns + " times.");
 
     Map<String, BufferedWriter> wordsOutput = new HashMap<String, BufferedWriter>();
     Map<String, BufferedWriter> patternsOutput = new HashMap<String, BufferedWriter>();
 
     for (String label : constVars.getLabelDictionary().keySet()) {
-      IOUtils.ensureDir(new File(outDir + "/" + identifier + "/" + label));
+      IOUtils.ensureDir(new File(constVars.outDir + "/" + constVars.identifier
+          + "/" + label));
       String wordsOutputFileLabel = wordsOutputFile + "_" + label;
       if (wordsOutputFile == null)
-        wordsOutputFileLabel = outDir + "/" + identifier + "/" + label
-            + "/learnedwords.txt";
+        wordsOutputFileLabel = constVars.outDir + "/" + constVars.identifier
+            + "/" + label + "/learnedwords.txt";
       wordsOutput.put(label, new BufferedWriter(new FileWriter(
           wordsOutputFileLabel)));
       System.out.println("Saving the learned words for label " + label + " in "
@@ -1511,15 +1493,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       String patternsOutputFileLabel = patternsOutFile + "_" + label;
       if (patternsOutFile == null)
-        patternsOutputFileLabel = outDir + "/" + identifier + "/" + label
-            + "/learnedpatterns.txt";
+        patternsOutputFileLabel = constVars.outDir + "/" + constVars.identifier
+            + "/" + label + "/learnedpatterns.txt";
       patternsOutput.put(label, new BufferedWriter(new FileWriter(
           patternsOutputFileLabel)));
       System.out.println("Saving the learned patterns for label " + label
           + " in " + patternsOutputFileLabel);
     }
 
-    for (int i = 0; i < numIterationsForPatterns; i++) {
+    for (int i = 0; i < constVars.numIterationsForPatterns; i++) {
       Redwood.log(Redwood.FORCE,
           "\n\n################################ Iteration " + (i + 1)
               + " ##############################");
@@ -1545,7 +1527,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
       }
 
-      if (this.useOtherLabelsWordsasNegative) {
+      if (constVars.useOtherLabelsWordsasNegative) {
         for (String label : constVars.getLabelDictionary().keySet()) {
           for (Entry<String, Counter<String>> en : learnedWordsThisIter
               .entrySet()) {
@@ -1555,24 +1537,34 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
         }
       }
-      if (!keepRunning && !this.tuneThresholdKeepRunning) {
-        Redwood.log(Redwood.FORCE,
-            "No patterns learned for all labels. Ending iterations.");
-        break;
+
+      if (!keepRunning) {
+        if (!constVars.tuneThresholdKeepRunning) {
+          Redwood.log(Redwood.FORCE,
+              "No patterns learned for all labels. Ending iterations.");
+          break;
+        } else {
+          constVars.thresholdSelectPattern = 0.8 * constVars.thresholdSelectPattern;
+          Redwood.log(Redwood.FORCE,
+              "\n\nTuning thresholds to keep running. New Pattern threshold is  "
+                  + constVars.thresholdSelectPattern);
+        }
       }
     }
 
-    if (outDir != null && !outDir.isEmpty()) {
+    if (constVars.outDir != null && !constVars.outDir.isEmpty()) {
       Redwood.log(Redwood.FORCE, "Writing justification files");
       Set<String> allMatchedSents = new HashSet<String>();
 
       for (String label : constVars.getLabelDictionary().keySet()) {
         CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> tokensMatchedPat = matchedTokensByPatAllLabels
             .get(label);
-        IOUtils.ensureDir(new File(outDir + "/" + identifier + "/" + label));
+        IOUtils.ensureDir(new File(constVars.outDir + "/"
+            + constVars.identifier + "/" + label));
 
-        String matchedtokensfilename = this.outDir + "/" + identifier + "/"
-            + label + "/tokensmatchedpatterns" + ".json";
+        String matchedtokensfilename = constVars.outDir + "/"
+            + constVars.identifier + "/" + label + "/tokensmatchedpatterns"
+            + ".json";
         JsonObjectBuilder pats = Json.createObjectBuilder();
         for (Entry<SurfacePattern, Collection<Triple<String, Integer, Integer>>> en : tokensMatchedPat
             .entrySet()) {
@@ -1609,8 +1601,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
           senttokens.add(sentId, sent);
         }
-        String sentfilename = this.outDir + "/" + identifier + "/sentences"
-            + ".json";
+        String sentfilename = constVars.outDir + "/" + constVars.identifier
+            + "/sentences" + ".json";
         IOUtils.writeStringToFile(senttokens.build().toString(), sentfilename,
             "utf8");
       }
@@ -1630,8 +1622,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           + "\n\n");
     }
 
-    if (markedOutputTextFile != null) {
-      this.writeLabeledData(markedOutputTextFile);
+    if (constVars.markedOutputTextFile != null) {
+      this.writeLabeledData(constVars.markedOutputTextFile);
     }
 
     // close all the writers
@@ -1681,9 +1673,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           matchedTokensByPat, scoreForAllWordsThisIteration, terms,
           wordsPatExtracted.get(label), currentPatternWeights.get(label),
           this.patternsandWords.get(label),
-          this.allPatternsandWords.get(label), identifier, ignoreWords));
+          this.allPatternsandWords.get(label), constVars.identifier,
+          ignoreWords));
 
-      if (usePatternResultAsLabel)
+      if (constVars.usePatternResultAsLabel)
         if (constVars.getLabelDictionary().containsKey(label))
           labelWords(label, Data.sents, identifiedWords.keySet(),
               patterns.keySet(), sentsOutFile, matchedTokensByPat);
@@ -1702,17 +1695,17 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
 
       if (patterns.size() == 0 && identifiedWords.size() == 0) {
-        if (learnedWords.get(label).size() >= maxExtractNumWords) {
+        if (learnedWords.get(label).size() >= constVars.maxExtractNumWords) {
           System.out
               .println("Ending because no new words identified and total words learned till now >= max words "
-                  + maxExtractNumWords);
+                  + constVars.maxExtractNumWords);
           break;
         }
-        if (tuneThresholdKeepRunning) {
-          thresholdSelectPattern = 0.8 * thresholdSelectPattern;
+        if (constVars.tuneThresholdKeepRunning) {
+          constVars.thresholdSelectPattern = 0.8 * constVars.thresholdSelectPattern;
           System.out
               .println("\n\nTuning thresholds to keep running. New Pattern threshold is  "
-                  + thresholdSelectPattern);
+                  + constVars.thresholdSelectPattern);
         } else
           break;
       }
@@ -1799,7 +1792,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           wordTP.incrementCount(str);
           entityTP.incrementCount(lastGold, 1.0);
         } else {
-          System.out.println("false negative: " + str);
+          // System.out.println("false negative: " + str);
           wordFN.incrementCount(str);
           entityFN.incrementCount(lastGold, 1.0);
           str = "";
@@ -1815,7 +1808,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           // str = "";
           // only need to tally false positives
         } else {
-          System.out.println("false positive: " + str);
+          // System.out.println("false positive: " + str);
           entityFP.incrementCount(lastGuess, 1.0);
           wordFP.incrementCount(str);
         }
@@ -1905,21 +1898,17 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
         entityTP.incrementCount(gold);
         wordTP.incrementCount(line.word());
-      } else if (!gold.equals(guess) && !gold.equalsIgnoreCase(background)
-          && guess.equalsIgnoreCase(background)) {
+      } else if (!gold.equals(guess) && !gold.equalsIgnoreCase(background) && guess.equalsIgnoreCase(background)) {
         entityFN.incrementCount(gold);
         wordFN.incrementCount(line.word());
 
-      } else if (!gold.equals(guess) && !guess.equalsIgnoreCase(background)
-          && gold.equalsIgnoreCase(background)) {
+      } else if (!gold.equals(guess) && !guess.equalsIgnoreCase(background) && gold.equalsIgnoreCase(background)) {
         wordFP.incrementCount(line.word());
         entityFP.incrementCount(guess);
       } else if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
         wordTN.incrementCount(line.word());
-      } else if (!(gold.equalsIgnoreCase(background) && guess
-          .equalsIgnoreCase(background)))
-        throw new RuntimeException(
-            "don't know reached here. not meant for more than one entity label");
+      } else if (!(gold.equalsIgnoreCase(background) && guess.equalsIgnoreCase(background)))
+        throw new RuntimeException("don't know reached here. not meant for more than one entity label");
 
     }
 
@@ -2098,31 +2087,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     for (Entry<String, List<CoreLabel>> docEn : testSentences.entrySet()) {
       List<CoreLabel> doc = docEn.getValue();
       for (CoreLabel l : doc) {
-        for (Entry<String, Class<? extends Key<String>>> anscl : constVars.answerClass
-            .entrySet()) {
-          l.set(CoreAnnotations.AnswerAnnotation.class,
-              constVars.backgroundSymbol);
+        for (Entry<String, Class<? extends Key<String>>> anscl : constVars.answerClass.entrySet()) {
+          l.set(CoreAnnotations.AnswerAnnotation.class, constVars.backgroundSymbol);
           if (l.get(anscl.getValue()).equals(anscl.getKey())) {
             l.set(CoreAnnotations.AnswerAnnotation.class, anscl.getKey());
           }
         }
       }
       countResults(doc, entityTP, entityFP, entityFN,
-          constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
-          CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
+                   constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
+                   CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
     }
-    System.out.println("False Positives: "
-        + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
-    System.out.println("False Negatives: "
-        + Counters.toSortedString(wordFN, wordFN.size(), "%s:%.2f", ";"));
+    // System.out.println("False Positives: "
+    // + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
+    // System.out.println("False Negatives: "
+    // + Counters.toSortedString(wordFN, wordFN.size(), "%s:%.2f", ";"));
 
     System.out.println("\n\n True Positives: " + entityTP);
     System.out.println("\n\n False Positives: " + entityFP);
     System.out.println("\n\n False Negatives: " + entityFN);
-    Counter<String> precision = Counters.division(entityTP,
-        Counters.add(entityTP, entityFP));
-    Counter<String> recall = Counters.division(entityTP,
-        Counters.add(entityTP, entityFN));
+    Counter<String> precision = Counters.division(entityTP, Counters.add(entityTP, entityFP));
+    Counter<String> recall = Counters.division(entityTP, Counters.add(entityTP, entityFN));
     System.out.println("\n Precision: " + precision);
     System.out.println("\n Recall: " + recall);
     System.out.println("\n F1 score:  " + FScore(precision, recall, 1));
@@ -2130,12 +2115,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   }
 
-  public static <D> Counter<D> FScore(Counter<D> precision, Counter<D> recall,
-      double beta) {
+  public static <D> Counter<D> FScore(Counter<D> precision, Counter<D> recall, double beta) {
     double betasq = beta * beta;
-    return Counters.divisionNonNaN(
-        Counters.scale(Counters.product(precision, recall), (1 + betasq)),
-        (Counters.add(Counters.scale(precision, betasq), recall)));
+    return Counters.divisionNonNaN(Counters.scale(Counters.product(precision, recall), (1 + betasq)),
+                                   (Counters.add(Counters.scale(precision, betasq), recall)));
   }
 
   public static List<File> getAllFiles(String file) {
@@ -2144,9 +2127,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       File filef = new File(tokfile);
       String ext = ".*";
       File dir = null;
-      if (filef.isDirectory())
+      if (filef.isDirectory()) {
         dir = filef;
-      else {
+      } else {
         dir = filef.getParentFile();
         ext = filef.getName();
       }
@@ -2164,22 +2147,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   @SuppressWarnings({ "rawtypes" })
   public static void main(String[] args) {
     try {
-
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
-      // boolean readFromSavedInstance = Boolean.parseBoolean(props
-      // .getProperty("readFromSavedInstance"));
-      // String inputSavedInstanceFile = props
-      // .getProperty("inputSavedInstanceFile");
-      // boolean saveInstance = Boolean.parseBoolean(props
-      // .getProperty("saveInstance"));
-      // String outputSavedInstanceFile = props
-      // .getProperty("outputSavedInstanceFile");
-
-      GetPatternsFromDataMultiClass g = null;
-      // TODO: are we not using this?
-      // Map<String, Set<String>> ignoreWordsList = new HashMap<String,
-      // Set<String>>();
-      // Set<String> ignoreWordsList4Label = new HashSet<String>();
 
       Map<String, Set<SurfacePattern>> ignorePatterns = new HashMap<String, Set<SurfacePattern>>();
       Map<String, SurfacePattern> p0 = new HashMap<String, SurfacePattern>();
@@ -2187,16 +2155,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       String fileFormat = props.getProperty("fileFormat");
 
-      // if (inputSavedInstanceFile == null
-      // || !new File(inputSavedInstanceFile).exists()) {
-      // readFromSavedInstance = false;
-      // }
       Map<String, Set<String>> seedWords = new HashMap<String, Set<String>>();
 
       String seedWordsFiles = props.getProperty("seedWordsFiles");
       if (seedWordsFiles == null) {
-        throw new RuntimeException(
-            "Needs both seedWordsFiles and file parameters to run this class!\nseedWordsFiles has format: label1,filewithlistofwords1;label2,filewithlistofwords2;...");
+        throw new RuntimeException("Needs both seedWordsFiles and file parameters to run this class!\nseedWordsFiles has format: label1,filewithlistofwords1;label2,filewithlistofwords2;...");
       }
       for (String seedFile : seedWordsFiles.split(";")) {
         String[] t = seedFile.split(",");
@@ -2205,13 +2168,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         Set<String> seedWords4Label = new HashSet<String>();
         for (String line : IOUtils.readLines(seedWordsFile)) {
           line = line.trim();
-          if (line.isEmpty() || line.startsWith("#"))
+          if (line.isEmpty() || line.startsWith("#")) {
             continue;
+          }
           seedWords4Label.add(line);
         }
         seedWords.put(label, seedWords4Label);
-        System.out.println("Number of seed words for label " + label + " is "
-            + seedWords4Label.size());
+        Redwood.log(Redwood.FORCE, "Number of seed words for label " + label + " is " + seedWords4Label.size());
       }
 
       Map<String, Class> answerClasses = new HashMap<String, Class>();
@@ -2231,106 +2194,106 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       String file = props.getProperty("file");
 
       String posModelPath = props.getProperty("posModelPath");
-      boolean lowercase = Boolean.parseBoolean(props
-          .getProperty("lowercaseText"));
-      boolean useTargetNERRestriction = Boolean.parseBoolean(props
-          .getProperty("useTargetNERRestriction"));
-      boolean useContextNERRestriction = Boolean.parseBoolean(props
-          .getProperty("useContextNERRestriction"));
+      boolean lowercase = Boolean.parseBoolean(props.getProperty("lowercaseText"));
+      boolean useTargetNERRestriction = Boolean.parseBoolean(props.getProperty("useTargetNERRestriction"));
+      boolean useTargetParserParentRestriction = Boolean.parseBoolean(props.getProperty("useTargetParserParentRestriction"));
+      boolean useContextNERRestriction = Boolean.parseBoolean(props.getProperty("useContextNERRestriction"));
 
       boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
-      boolean addEvalSentsToTrain = Boolean.parseBoolean(props
-          .getProperty("addEvalSentsToTrain"));
-      String evalFileWithGoldLabels = props
-          .getProperty("evalFileWithGoldLabels");
+      boolean addEvalSentsToTrain = Boolean.parseBoolean(props.getProperty("addEvalSentsToTrain"));
+      String evalFileWithGoldLabels = props.getProperty("evalFileWithGoldLabels");
 
-      if (file == null
-          && (evalFileWithGoldLabels == null || addEvalSentsToTrain == false)) {
-        throw new RuntimeException("No training data! file is " + file
-            + " and evalFileWithGoldLabels is " + evalFileWithGoldLabels
-            + " and addEvalSentsToTrain is " + addEvalSentsToTrain);
+      if (file == null && (evalFileWithGoldLabels == null || addEvalSentsToTrain == false)) {
+        throw new RuntimeException("No training data! file is " + file +
+                                   " and evalFileWithGoldLabels is " + evalFileWithGoldLabels +
+                                   " and addEvalSentsToTrain is " + addEvalSentsToTrain);
       }
 
       // Read training file
       if (file != null) {
         List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
-        if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
-            || fileFormat.equalsIgnoreCase("txt")) {
+        if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
           for (File f : allFiles) {
+            Redwood.log(Redwood.DBG, "Annotating text in " + f);
+            
             String text = IOUtils.stringFromFile(f.getAbsolutePath());
             sents.putAll(tokenize(text, posModelPath, lowercase,
-                useTargetNERRestriction || useContextNERRestriction, f.getName()
-                    + "-"));
+                                  useTargetNERRestriction || useContextNERRestriction, 
+                                  f.getName() + "-", useTargetParserParentRestriction,
+                                  props.getProperty("numThreads")));
           }
+
         } else if (fileFormat.equalsIgnoreCase("ser")) {
-          for (File f : allFiles)
-            sents.putAll((Map<String, List<CoreLabel>>) IOUtils
-                .readObjectFromFile(f));
-        } else
-          throw new RuntimeException(
-              "Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
+          for (File f : allFiles) {
+            sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
+          }
+        } else {
+          throw new RuntimeException("Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
+        }
       }
 
       // Read Evaluation File
       Map<String, List<CoreLabel>> evalsents = new HashMap<String, List<CoreLabel>>();
       if (evaluate) {
         Map setClassForTheseLabels = new HashMap<String, Class>();
-        boolean splitOnPunct = Boolean.parseBoolean(props.getProperty(
-            "splitOnPunct", "true"));
-        List<File> allFiles = GetPatternsFromDataMultiClass
-            .getAllFiles(evalFileWithGoldLabels);
-        for (File f : allFiles) {
-          List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
-              new BufferedReader(new FileReader(f)), seedWords.keySet(),
-              setClassForTheseLabels, true, splitOnPunct, lowercase,
-              f.getName());
-          evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
-              useTargetNERRestriction || useContextNERRestriction, ""));
+        boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
+        List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
+        int numFile = 0;
+        if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
+          for (File f : allFiles) {
+            numFile++;
+            Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
+            List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), seedWords.keySet(),
+                                                                   setClassForTheseLabels, true, splitOnPunct, lowercase,
+                                                                   f.getName());
+            evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
+                                               useTargetNERRestriction || useContextNERRestriction, "",
+                                               useTargetParserParentRestriction,
+                                               props.getProperty("numThreads")));
+          }
+
+        } else if (fileFormat.equalsIgnoreCase("ser")) {
+          for (File f : allFiles) {
+            evalsents.putAll((Map<? extends String, ? extends List<CoreLabel>>) IOUtils.readObjectFromFile(f));
+          }
         }
         if (addEvalSentsToTrain) {
-          Redwood.log(Redwood.DBG, "Adding " + evalsents.size()
-              + " eval sents to the training set");
-
+          Redwood.log(Redwood.DBG, "Adding " + evalsents.size() + " eval sents to the training set");
           sents.putAll(evalsents);
-
         }
       }
 
-      System.out.println("Processing # sents " + sents.size()
-          + " from file(s) " + file);
-      boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets","true"));
-      g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
+      boolean learn = Boolean.parseBoolean(props.getProperty("learn", "true"));
 
-      Execution.fillOptions(g, props);
-
-      Redwood.log(Redwood.FORCE, "Total number of training sentences "
-          + Data.sents.size());
-
-      String sentsOutFile = props.getProperty("sentsOutFile");
-
-      String wordsOutputFile = props.getProperty("wordsOutputFile");
-
-      String patternOutFile = props.getProperty("patternOutFile");
-
-      g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile,
-          patternOutFile, ignorePatterns);
-
-      // if (saveInstance) {
-      // System.out.println("Saving the instance to " +
-      // outputSavedInstanceFile);
-      // IOUtils.writeObjectToFile(g, outputSavedInstanceFile);
-      // }
-
-      if (evaluate) {
-        boolean evalPerEntity = Boolean.parseBoolean(props
-            .getProperty("evalPerEntity"));
-        g.evaluate(evalsents, evalPerEntity);
-        // String evalFile = props.getProperty("evalFile");
-        // Map<String, List<CoreLabel>> evalSents =
-        // g.loadJavaNLPAnnotatorLabeledFile(evalFile, props);
-        // g.evaluate("onelabel", evalSents);
+      boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets", "true"));
+      GetPatternsFromDataMultiClass g = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
+      String saveEvalSentencesSerFile = props.getProperty("saveEvalSentencesSerFile");
+      if (saveEvalSentencesSerFile != null) {
+        IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFile);
+      }
+      String saveSentencesSerFile = props.getProperty("saveSentencesSerFile");
+      if (saveSentencesSerFile != null) {
+        IOUtils.writeObjectToFile(sents, saveSentencesSerFile);
       }
 
+      Execution.fillOptions(g, props);
+      if (learn) {
+
+        Redwood.log(Redwood.FORCE, "Total number of training sentences " + Data.sents.size());
+
+        String sentsOutFile = props.getProperty("sentsOutFile");
+
+        String wordsOutputFile = props.getProperty("wordsOutputFile");
+
+        String patternOutFile = props.getProperty("patternOutFile");
+
+        g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile, patternOutFile, ignorePatterns);
+
+        if (evaluate) {
+          boolean evalPerEntity = Boolean.parseBoolean(props.getProperty("evalPerEntity", "true"));
+          g.evaluate(evalsents, evalPerEntity);
+        }
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
