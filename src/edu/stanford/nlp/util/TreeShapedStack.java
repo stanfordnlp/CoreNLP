@@ -57,6 +57,10 @@ public class TreeShapedStack<T> {
     return data;
   }
 
+  public int size() { 
+    return size; 
+  }
+
   final T data;
   final int size;
   final TreeShapedStack previous;
