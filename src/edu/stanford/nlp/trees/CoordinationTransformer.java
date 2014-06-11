@@ -18,10 +18,26 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Coordination transformer transforms a PennTreebank tree containing a coordination in a flat structure
- * in order to get the dependencies right.
+ * Coordination transformer transforms a PennTreebank tree containing
+ * a coordination in a flat structure in order to get the dependencies
+ * right.
+ * <br>
+ * The transformer goes through several steps:
+ * <ul>
+ * <li> Removes empty nodes and simplifies many tags (<code>DependencyTreeTransformer</code>)
+ * <li> Relabels UCP phrases to either ADVP or NP depending on their content
+ * <li> Turn flat CC structures into structures with an intervening node
+ * <li> Add extra structure to QP phrases - combine "well over", unflatted structures with CC (<code>QPTreeTransformer</code>)
+ * <li> Flatten SQ structures to get the verb as the head
+ * <li> Rearrange structures that appear to be dates
+ * <li> Flatten X over only X structures
+ * <li> Turn some fixed conjunction phrases into CONJP, such as "and yet", etc
+ * <li> Attach RB such as "not" to the next phrase to get the RB headed by the phrase it modifies
+ * <li> Turn SBAR to PP if parsed as SBAR in phrases such as "The day after the airline was planning ..."
+ * </ul>
  *
  * @author Marie-Catherine de Marneffe
+ * @author John Bauer
  */
 public class CoordinationTransformer implements TreeTransformer {
 
@@ -88,7 +104,32 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After moveRB:                     " + movedRB);
     }
-    return movedRB;
+    Tree changedSbar = changeSbarToPP(movedRB);
+    if (VERBOSE) {
+      System.err.println("After changeSbarToPP:             " + movedRB);
+    }
+    return changedSbar;
+  }
+
+  private static TregexPattern changeSbarToPPTregex =
+    TregexPattern.compile("NP < (NP $++ (SBAR=sbar < (IN < /^(?i:after|before|until|since|during)$/ $++ S)))");
+
+  private static TsurgeonPattern changeSbarToPPTsurgeon =
+    Tsurgeon.parseOperation("relabel sbar PP");
+
+  /**
+   * For certain phrases, we change the SBAR to a PP to get prep/pcomp
+   * dependencies.  For example, in "The day after the airline was
+   * planning...", we want prep(day, after) and pcomp(after,
+   * planning).  If "after the airline was planning" was parsed as an
+   * SBAR, either by the parser or in the treebank, we fix that here.
+   */
+
+  public Tree changeSbarToPP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(changeSbarToPPTregex, changeSbarToPPTsurgeon, t);
   }
 
   private static TregexPattern findFlatConjpTregex =
