@@ -19,7 +19,7 @@ public class ConfusionMatrixTest extends TestCase {
     this.echo = echo;
   }
 
-  public void test1() {
+  public void testBasic() {
     String expected = "      Guess/Gold      C1      C2      C3    Marg. (Guess)\n" +
                       "              C1       2       0       0       2\n" +
                       "              C2       1       0       0       1\n" +
@@ -42,7 +42,7 @@ public class ConfusionMatrixTest extends TestCase {
     }
   }
 
-  public void test3() {
+  public void testRealLabels() {
     String expected = "      Guess/Gold       a       b       c    Marg. (Guess)\n" +
                       "               a       2       0       0       2\n" +
                       "               b       1       0       0       1\n" +
@@ -66,7 +66,7 @@ public class ConfusionMatrixTest extends TestCase {
     }
   }
 	
-  public void test2() {
+  public void testBulkAdd() {
     String expected = "      Guess/Gold      C1      C2    Marg. (Guess)\n" +
                       "              C1      10       5      15\n" +
                       "              C2       2       3       5\n" +
@@ -90,11 +90,11 @@ public class ConfusionMatrixTest extends TestCase {
   public static void main(String[] args) {
     ConfusionMatrixTest tester = new ConfusionMatrixTest(true);
     System.out.println("Test 1");
-    tester.test1();
+    tester.testBasic();
     System.out.println("\nTest 2");
-    tester.test2();
+    tester.testRealLabels();
     System.out.println("\nTest 3");
-    tester.test3();
+    tester.testBulkAdd();
   }
 
 }
