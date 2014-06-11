@@ -17,11 +17,6 @@ public class SpeakerInfo {
   private String speakerName;
   private String[] speakerNameStrings; // tokenized speaker name
   private String speakerDesc;
-  // TODO: it is possible for this set to have Mentions with different
-  // corefClusterIds.  In that case, the results are actually not
-  // deterministic, since the cluster id of the speaker will depend on
-  // the order in which mentions are iterated over.  This will change
-  // from execution to execution in a HashSet.
   private Set<Mention> mentions = Generics.newHashSet();  // Mentions that corresponds to the speaker...
   private boolean speakerIdIsNumber;          // speaker id is a number (probably mention id)
   private boolean speakerIdIsAutoDetermined;  // speaker id was auto determined by system
@@ -98,10 +93,6 @@ public class SpeakerInfo {
       }
     }
     return corefClusterId;
-  }
-
-  public String toString() {
-    return speakerId;
   }
 
 }
