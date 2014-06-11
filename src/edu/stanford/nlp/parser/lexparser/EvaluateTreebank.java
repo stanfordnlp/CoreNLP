@@ -29,6 +29,7 @@ import edu.stanford.nlp.parser.metrics.Evalb;
 import edu.stanford.nlp.parser.metrics.EvalbByCat;
 import edu.stanford.nlp.parser.metrics.FilteredEval;
 import edu.stanford.nlp.parser.metrics.LeafAncestorEval;
+import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.TaggingEval;
 import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
 import edu.stanford.nlp.trees.LeftHeadFinder;
@@ -56,6 +57,7 @@ public class EvaluateTreebank {
   // private final Lexicon lex;
 
   List<Eval> extraEvals = null;
+  List<ParserQueryEval> parserQueryEvals = null;
 
   private final boolean runningAverages, summary, tsv;
 
@@ -115,6 +117,7 @@ public class EvaluateTreebank {
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
 
     this.extraEvals = pqFactory.getExtraEvals();
+    this.parserQueryEvals = pqFactory.getParserQueryEvals();
 
     // this.lex = lex;
     this.pqFactory = pqFactory;
@@ -546,6 +549,11 @@ public class EvaluateTreebank {
         if (extraEvals != null) {
           for (Eval eval : extraEvals) {
             eval.evaluate(treeFact, transGoldTree, pwErr);
+          }
+        }
+        if (parserQueryEvals != null) {
+          for (ParserQueryEval eval : parserQueryEvals) {
+            eval.evaluate(pq, transGoldTree, pwErr);
           }
         }
         if (op.testOptions.evalb) {
