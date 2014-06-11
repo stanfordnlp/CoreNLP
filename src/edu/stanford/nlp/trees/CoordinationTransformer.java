@@ -77,14 +77,14 @@ public class CoordinationTransformer implements TreeTransformer {
   private static final TregexPattern[][] matchPatterns = {
     {
       // UCP (JJ ...) -> ADJP
-      TregexPattern.compile("/^UCP/=ucp <, /^JJ|ADJP/"),
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^JJ|ADJP/", true),
       // UCP (DT JJ ...) -> ADJP
-      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)")
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^JJ|ADJP/)", true)
     },
     {
       // UCP (N ...) -> NP
-      TregexPattern.compile("/^UCP/=ucp <, /^N/"),
-      TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^N/)")
+      TregexPattern.safeCompile("/^UCP/=ucp <, /^N/", true),
+      TregexPattern.safeCompile("/^UCP/=ucp <, (DT $+ /^N/)", true)
     }
   };
 
