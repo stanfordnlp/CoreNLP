@@ -395,7 +395,8 @@ public abstract class TregexPattern implements Serializable {
   abstract TregexMatcher matcher(Tree root, Tree tree,
                                  IdentityHashMap<Tree, Tree> nodesToParents,
                                  Map<String, Tree> namesToNodes,
-                                 VariableStrings variableStrings);
+                                 VariableStrings variableStrings,
+                                 HeadFinder headFinder);
 
   /**
    * Get a {@link TregexMatcher} for this pattern on this tree.
@@ -404,7 +405,18 @@ public abstract class TregexPattern implements Serializable {
    * @return a TregexMatcher
    */
   public TregexMatcher matcher(Tree t) {
-    return matcher(t, t, null, Generics.<String, Tree>newHashMap(), new VariableStrings());
+    return matcher(t, t, null, Generics.<String, Tree>newHashMap(), new VariableStrings(), null);
+  }
+
+  /**
+   * Get a {@link TregexMatcher} for this pattern on this tree.  Any Relations which use heads of trees should use the provided HeadFinder.
+   *
+   * @param t a tree to match on
+   * @param headFinder a HeadFinder to use when matching
+   * @return a TregexMatcher
+   */
+  public TregexMatcher matcher(Tree t, HeadFinder headFinder) {
+    return matcher(t, t, null, Generics.<String, Tree>newHashMap(), new VariableStrings(), headFinder);
   }
 
   /**
