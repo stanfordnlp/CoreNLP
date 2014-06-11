@@ -332,9 +332,10 @@ public class TrainOptions implements Serializable {
   public double qnTolerance = 15;
 
   /**
-   * If larger than 0, the parser may choose to output debug information every X seconds
+   * If larger than 0, the parser may choose to output debug information
+   * every X seconds, X iterations, or some other similar metric
    */
-  public int debugOutputSeconds = 0;
+  public int debugOutputFrequency = 0;
 
   public long dvSeed = 0;
 
@@ -416,7 +417,7 @@ public class TrainOptions implements Serializable {
   public TransformMatrixType transformMatrixType = TransformMatrixType.DIAGONAL;
 
   public boolean useContextWords = false;
-
+  
   public void display() {
     System.err.println(toString());
   }
@@ -463,7 +464,7 @@ public class TrainOptions implements Serializable {
             " qnIterationsPerBatch=" + qnIterationsPerBatch + 
             " qnEstimates=" + qnEstimates + 
             " qnTolerance=" + qnTolerance + 
-            " debugOutputSeconds=" + debugOutputSeconds + 
+            " debugOutputFrequency=" + debugOutputFrequency + 
             " dvSeed=" + dvSeed + 
             " learningRate=" + learningRate +
             " deltaMargin=" + deltaMargin + 

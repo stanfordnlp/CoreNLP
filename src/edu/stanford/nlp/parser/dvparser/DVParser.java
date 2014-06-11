@@ -115,7 +115,7 @@ public class DVParser {
 
     Timing timing = new Timing();
     long maxTrainTimeMillis = op.trainOptions.maxTrainTimeSeconds * 1000;
-    long nextDebugCycle = op.trainOptions.debugOutputSeconds * 1000;
+    int batchCount = 0;
     int debugCycle = 0;
     double bestLabelF1 = 0.0;
 
@@ -138,6 +138,7 @@ public class DVParser {
       List<Tree> shuffledSentences = new ArrayList<Tree>(sentences);
       Collections.shuffle(shuffledSentences, dvModel.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
+        ++batchCount;
         // This did not help performance
         //System.err.println("Setting AdaGrad's sum of squares to 1...");
         //Arrays.fill(sumGradSquare, 1.0);
@@ -164,7 +165,8 @@ public class DVParser {
           break;
         }
 
-        if (nextDebugCycle > 0 && totalElapsed > nextDebugCycle) {
+        if (op.trainOptions.debugOutputFrequency > 0 && batchCount % op.trainOptions.debugOutputFrequency == 0) {
+          System.err.println("Finished " + batchCount + " total batches, running evaluation cycle");
           // Time for debugging output!
           double tagF1 = 0.0;
           double labelF1 = 0.0;
@@ -207,7 +209,6 @@ public class DVParser {
           }
 
           ++debugCycle;
-          nextDebugCycle = timing.report() + op.trainOptions.debugOutputSeconds * 1000;
         }
       }
       long totalElapsed = timing.report();
@@ -406,7 +407,7 @@ public class DVParser {
     System.err.println("  -qnIterationsPerBatch <int>: How many steps to take per batch.");
     System.err.println("  -qnEstimates <int>: Parameter for qn optimization.");
     System.err.println("  -qnTolerance <double>: Tolerance for early exit when optimizing a batch.");
-    System.err.println("  -debugOutputSeconds <int>: How frequently to score a model when training and write out intermediate models.");
+    System.err.println("  -debugOutputFrequency <int>: How frequently to score a model when training and write out intermediate models.");
     System.err.println("  -maxTrainTimeSeconds <int>: How long to train before terminating.");
     System.err.println("  -dvSeed <long>: A starting point for the random number generator.  Setting this should lead to repeatable results, even taking into account randomness.  Otherwise, a new random seed will be picked.");
     System.err.println("  -wordVectorFile <name>: A filename to load word vectors from.");
@@ -426,7 +427,7 @@ public class DVParser {
   /**
    * An example command line for training a new parser:
    * <br>
-   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputSeconds 1200 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -dvIterations 40 -dvBatchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
+   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputFrequency 400 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -dvIterations 40 -dvBatchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
    */
   public static void main(String[] args) 
     throws IOException, ClassNotFoundException
