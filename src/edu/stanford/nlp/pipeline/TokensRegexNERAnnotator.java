@@ -28,8 +28,7 @@ import java.util.regex.Pattern;
  * </pre>
  * where each argument is tab-separated, and the last two arguments are optional. Several regexes can be
  * associated with a single type. In the case where multiple regexes match a phrase, the priority ranking
- * is used to choose between the possible types. When the priority is the same, then longer matches are favored.
- * This classifier is designed to be used as part of a full
+ * is used to choose between the possible types. This classifier is designed to be used as part of a full
  * NER system to label entities that don't fall into the usual NER categories. It only records the label
  * if the token has not already been NER-annotated, or it has been annotated but the NER-type has been
  * designated overwritable (the third argument).
@@ -38,15 +37,11 @@ import java.util.regex.Pattern;
  * <p>
  * The first column regex may follow one of two formats:
  * <ol>
- * <li> A TokensRegex expression (marked by starting with "( " and ending with " )".
- *      See {@link TokenSequencePattern} for TokensRegex syntax.
- *    <br/><em>Example</em>: <code>( /University/ /of/ [ {ner:LOCATION} ] )    SCHOOL</code>
- * </li>
- * <li> a sequence of regex, each separated by whitespace (matching "\s+").
- *    <br/><em>Example</em>: <code>Stanford    SCHOOL</code>
+ * <li> A TokensRegex expression (marked by starting with "( " and ending with " )" </li>
+ * <li> a sequence of regex, each separated by whitespace (matching "\\s+").
  *    <br/>
  *    The regex will match if the successive regex match a sequence of tokens in the input.
- *    Spaces can only be used to separate regular expression tokens; within tokens \s or similar non-space
+ *    Spaces can only be used to separate regular expression tokens; within tokens \\s or similar non-space
  *    representations need to be used instead.
  *    <br/>
  *    Notes: Following Java regex conventions, some characters in the file need to be escaped. Only a single
@@ -57,7 +52,7 @@ import java.util.regex.Pattern;
  * </p>
  *
  * <p>
- * This annotator is similar to {@link RegexNERAnnotator} but uses TokensRegex as the underlying library for matching
+ * This annotator is similar to {link @RegexNERAnnotator} but uses TokensRegex as the underlying library for matching
  * regular expressions.  This allows for more flexibility in the types of expressions matched as well as utilizing
  * any optimization that is included in the TokensRegex library.
  * </p>
@@ -68,10 +63,9 @@ import java.util.regex.Pattern;
  *   <li>When NER annotation can be overwritten based on the original NER labels.  The rules for when the new NER labels are used
  *       are given below:
  *       <br/>If the found expression overlaps with a previous NER phrase, then the NER labels are not replaced.
- *       <br/>  <em>Example</em>: Old NER phrase: <code>The ABC Company</code>, Found Phrase: <code>ABC => </code> Old NER labels are not replaced.
- *       <br/>If the found expression has inconsistent NER tags among the tokens, then the NER labels are replaced.
- *       <br/>  <em>Example</em>: Old NER phrase: <code>The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG</code>
- *   </li>
+ *       <br/>  Example: Old NER phrase: The ABC Company, Found Phrase: ABC => Old NER labels are not replaced.
+ *       <br/>If the found expression has inconsistent NER tags among the tokens, then the NER labels are replaced. </li>
+ *       <br/>  Example: Old NER phrase: The/O ABC/MISC Company/ORG => The/ORG ABC/ORG Company/ORG
  *   <li>How <code>validpospattern</code> is handled for POS tags is specified by <code>PosMatchType</code></li>
  *   <li>By default, there is no <code>validPosPattern</code></li>
  *   <li>By default, both O and MISC is always replaced</li>
