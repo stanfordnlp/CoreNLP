@@ -8,6 +8,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.process.DocumentPreprocessor;
@@ -31,6 +32,18 @@ public class BuildBinarizedDataset {
 
     tree.label().setValue(defaultLabel.toString());
   }  
+
+  public static void setPredictedLabels(Tree tree) {
+    if (tree.isLeaf()) {
+      return;
+    }
+
+    for (Tree child : tree.children()) {
+      setPredictedLabels(child);
+    }
+
+    tree.label().setValue(Integer.toString(RNNCoreAnnotations.getPredictedClass(tree)));
+  }
   
   public static void extractLabels(Map<Pair<Integer, Integer>, String> spanToLabels, List<HasWord> tokens, String line) {
     String[] pieces = line.trim().split("\\s+");
@@ -96,13 +109,17 @@ public class BuildBinarizedDataset {
    * 1 Today is not a good day.<br>
    * 3 good<br>
    * 3 good day <br>
-   * 3 a good day. <br>
+   * 3 a good day <br>
    * <br>
    * (next block starts here) <br>
    * </code>
    * By default the englishPCFG parser is used.  This can be changed
    * with the <code>-parserModel</code> flag.  Specify an input file
    * with <code>-input</code>.
+   * <br>
+   * If a sentiment model is provided with -sentimentModel, that model
+   * will be used to prelabel the sentences.  Any spans with given
+   * labels will then be used to adjust those labels.
    */
   public static void main(String[] args) {
     CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
@@ -111,12 +128,18 @@ public class BuildBinarizedDataset {
 
     String inputPath = null;
 
-    for (int argIndex = 0; argIndex < args.length; ++argIndex) {
+    String sentimentModelPath = null;
+    SentimentModel sentimentModel = null;
+
+    for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-input")) {
         inputPath = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-parserModel")) {
         parserModel = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
+        sentimentModelPath = args[argIndex + 1];
         argIndex += 2;
       } else {
         System.err.println("Unknown argument " + args[argIndex]);
@@ -124,9 +147,17 @@ public class BuildBinarizedDataset {
       }
     }
 
+    if (inputPath == null) {
+      throw new IllegalArgumentException("Must specify input file with -input");
+    }
+
     LexicalizedParser parser = LexicalizedParser.loadModel(parserModel);
     TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(), 
                                                 false, false, 0, false, false, 0.0, false, true, true);
+
+    if (sentimentModelPath != null) {
+      sentimentModel = SentimentModel.loadSerialized(sentimentModelPath);
+    }
 
     String text = IOUtils.slurpFileNoExceptions(inputPath);
     String[] chunks = text.split("\\n\\s*\\n+"); // need blank line to make a new chunk
@@ -160,8 +191,18 @@ public class BuildBinarizedDataset {
 
       Tree tree = parser.apply(tokens);
       Tree binarized = binarizer.transformTree(tree);
-      setUnknownLabels(binarized, mainLabel);
       Tree collapsedUnary = transformer.transformTree(binarized);
+
+      // if there is a sentiment model for use in prelabeling, we
+      // label here and then use the user given labels to adjust
+      if (sentimentModel != null) {
+        Trees.convertToCoreLabels(collapsedUnary);
+        SentimentCostAndGradient scorer = new SentimentCostAndGradient(sentimentModel, null);
+        scorer.forwardPropagateTree(collapsedUnary);
+        setPredictedLabels(collapsedUnary);
+      } else {
+        setUnknownLabels(binarized, mainLabel);
+      }
 
       Trees.convertToCoreLabels(collapsedUnary);
       collapsedUnary.indexSpans();

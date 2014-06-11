@@ -50,10 +50,8 @@ public class TokensRegexDemo {
     }
 
     pipeline.annotate(annotation);
-//    pipeline.prettyPrint(annotation, out);
 
     // An Annotation is a Map and you can get and use the various analyses individually.
-    // For instance, this gets the parse tree of the first sentence in the text.
     out.println();
     // The toString() method on an Annotation just prints the text of the Annotation
     // But you can see what is in it with other methods like toShorterString()
