@@ -8,7 +8,7 @@ import java.util.Random;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.neural.SimpleTensor;
+import edu.stanford.nlp.rnn.SimpleTensor;
 import edu.stanford.nlp.util.Generics;
 
 /**
