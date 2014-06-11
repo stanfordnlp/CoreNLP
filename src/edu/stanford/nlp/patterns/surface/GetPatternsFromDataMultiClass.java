@@ -461,6 +461,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     props.setProperty("annotators", StringUtils.join(anns, ","));
     props.setProperty("parser.maxlen", "120");
     props.setProperty("nthreads", numThreads);
+    props.setProperty("threads", numThreads);
+    
     // props.put( "tokenize.options",
     // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
