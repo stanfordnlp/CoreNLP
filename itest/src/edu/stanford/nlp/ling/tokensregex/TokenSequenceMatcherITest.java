@@ -1089,6 +1089,21 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
+  public void testTokenSequenceMatcherNested() throws IOException {
+    CoreMap doc = createDocument("A A A B B B B B B C C");
+
+    // Test sequence with groups
+    TokenSequencePattern p = TokenSequencePattern.compile( "( /B/+ )+");
+    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
+    boolean match = m.find();
+    assertTrue(match);
+    assertEquals(1, m.groupCount());
+    assertEquals("B B B B B B", m.group());
+    assertEquals("B B B B B B", m.group(1));
+    match = m.find();
+    assertFalse(match);
+  }
+
   public void testTokenSequenceMatcherABs() throws IOException {
     CoreMap doc = createDocument("A A A A A A A B A A B A C A E A A A A A A A A A A A B A A A");
 
@@ -1298,7 +1313,7 @@ public class TokenSequenceMatcherITest extends TestCase {
   public void testCompile() {
     String s = "(?$se \"matching\" \"this\"|\"don't\")";
     CoreMap doc = createDocument("does this do matching this");
-    TokenSequencePattern p =TokenSequencePattern.compile(s);
+    TokenSequencePattern p = TokenSequencePattern.compile(s);
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     boolean match = m.find();
     assertTrue(match);
