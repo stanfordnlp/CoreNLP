@@ -2,7 +2,9 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -86,6 +88,11 @@ public class TrainParser {
       }
       op.setOptions(newArgs);
 
+      if (op.trainOptions.randomSeed == 0) {
+        op.trainOptions.randomSeed = (new Random()).nextLong();
+        System.err.println("Random seed not set by options, using " + op.trainOptions.randomSeed);
+      }
+
       TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
       BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
       CompositeTreeTransformer transformer = new CompositeTreeTransformer();
@@ -131,9 +138,12 @@ public class TrainParser {
 
       parser = new ShiftReduceParser(transitionIndex, featureIndex, featureWeights, op, featureFactory);
 
+      Random random = new Random(parser.op.trainOptions.randomSeed);
+
       for (int i = 0; i < numTrainingIterations; ++i) {
         int numCorrect = 0;
         int numWrong = 0;
+        Collections.shuffle(binarizedTrees, random);
         for (Tree tree : binarizedTrees) {
           List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree);
           State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
