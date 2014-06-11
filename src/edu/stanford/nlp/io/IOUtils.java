@@ -1678,21 +1678,6 @@ public class IOUtils {
     }
   }
 
-  /**
-   * Given a filepath, delete all files in the directory recursively
-   * @param dir
-   * @return
-   */
-  public static boolean deleteDirRecursively(File dir) {
-    if (dir.isDirectory()) {
-      for (File f : dir.listFiles()) {
-        boolean success = deleteDirRecursively(f);
-        if (!success)
-          return false;
-      }
-    }
-    return dir.delete();
-  }
 
   public static String getExtension(String fileName) {
     if(!fileName.contains("."))
