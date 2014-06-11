@@ -30,7 +30,8 @@
 % Revised for Stanford Parser v.\ 2.0.4 in November 2012
 % Revised for the Stanford Parser v.\ 2.0.5 in March 2013
 % Revised for the Stanford Parser v.\ 3.2 in June 2013
-Revised for the Stanford Parser v.\ 3.3 in November 2013
+% Revised for the Stanford Parser v.\ 3.3 in November 2013
+Revised for the Stanford Parser v.\ 3.3 in December 2013
 }
 
 \begin{document}
@@ -59,7 +60,7 @@ For this sentence, the Stanford Dependencies (SD) representation is:
 \begin{quote}
 nsubj(makes-8, Bell-1) \\
 nsubj(distributes-10, Bell-1) \\
-partmod(Bell-1, based-3) \\
+vmod(Bell-1, based-3) \\
 nn(Angeles-6, Los-5) \\
 prep\_in(based-3, Angeles-6) \\
 root(ROOT-0, makes-8)\\
@@ -316,15 +317,6 @@ second part.
 \end{dependency}
 \end{quote}
 
-
-\noindent\textbf{\emph{infmod}: infinitival modifier}\\
-An infinitival modifier of an NP is an infinitive that serves to modify the meaning of the NP.
-\begin{tabbing}
-\hspace{1cm} \= xxxxxxxxxxxxxxxxxxxxxxxxxx\= \hspace{.5cm}\=  \kill
-\>  ``Points to establish are \ldots" \> \> \emph{infmod}(points, establish)\\
-\> ``I don't have anything to say" \> \> \emph{infmod}(anything, say)\\
-\end{tabbing}
-
 \noindent\textbf{\emph{iobj}: indirect object}\\
 The indirect object of a VP is the noun phrase which is the (dative) object of the verb.
 \begin{tabbing}
@@ -446,14 +438,6 @@ The parataxis relation (from Greek for ``place side by side'') is a relation bet
 \> ``Let's face it we're annoyed'' \>\> \emph{parataxis}(Let, annoyed)\\
 \end{tabbing}
 
-\noindent\textbf{\emph{partmod}: participial modifier}\\
-A participial modifier of an NP or VP or sentence is a participial verb form that serves to modify the meaning of a noun phrase or sentence.
-\begin{tabbing}
-\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
-\>  ``Truffles picked during the spring are tasty" \> \> \emph{partmod}(truffles, picked)\\
-\>  ``Bill tried to shoot demonstrating his incompetence" \> \> \emph{partmod}(shoot, demonstrating)\\
-\end{tabbing}
-
 \noindent\textbf{\emph{pcomp}: prepositional complement}\\
 This is used when the complement of a preposition is a clause or
 prepositional phrase (or occasionally, an adverbial phrase).
@@ -573,6 +557,23 @@ A temporal modifier (of a VP, NP, or an ADJP is a bare noun phrase constituent t
 \> ``Last night, I swam in the pool" \> \> \emph{tmod}(swam, night)\\
 \end{tabbing}
 
+\noindent\textbf{\emph{vmod}: reduced non-finite verbal modifier}\\
+A reduced non-finite verbal modifier is a participial or infinitive
+form of a verb heading a phrase (which may have some arguments,
+roughly like a VP). These are used to modify the meaning of an NP or
+another verb. They are not core arguments of a verb 
+or full finite relative clauses.
+\begin{tabbing}
+\hspace{1cm} \=XXXXXXXXXXXXXXXXXXXXXXXXXXXX\= \hspace{2cm}\=  \kill
+\>  ``Points to establish are \ldots" \> \> \emph{vmod}(points, establish)\\
+\> ``I don't have anything to say to you" \> \> \emph{vmod}(anything, say)\\
+\>  ``Truffles picked during the spring are tasty" \> \> \emph{vmod}(truffles, picked)\\
+\>  ``Bill tried to shoot, demonstrating his incompetence" \> \> \emph{vmod}(shoot, demonstrating)\\
+\end{tabbing}
+
+
+
+
 \noindent\textbf{\emph{xcomp}: open clausal complement}\\
 An open clausal complement (\emph{xcomp}) of a VP or an ADJP is a clausal complement without its own subject, whose reference is determined by an external subject.  These complements are always non-finite.  The name \emph{xcomp} is borrowed from Lexical-Functional Grammar.
 \begin{tabbing}
@@ -625,11 +626,10 @@ xxxxx\= xxxxx\= xxxxx\= xxxxx\= xxxxx \kill
     \> \> \emph{det} - determiner \\
     \> \> \emph{predet} - predeterminer\\
     \> \> \emph{preconj} - preconjunct \\
-    \> \> \emph{infmod} - infinitival modifier \\
+    \> \> \emph{vmod} - reduced, non-finite verbal modifier \\
     \> \> \emph{mwe} - multi-word expression modifier \\
     \> \> \> \emph{mark} - marker (word introducing an \emph{advcl} or
     \emph{ccomp} \\
-    \> \> \emph{partmod} - participial modifier \\
     \> \> \emph{advmod} - adverbial modifier \\
     \> \>  \> \emph{neg} - negation modifier \\
     \> \> \emph{rcmod} - relative clause modifier \\
