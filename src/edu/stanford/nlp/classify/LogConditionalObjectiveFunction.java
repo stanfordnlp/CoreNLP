@@ -68,15 +68,16 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
     return data.length;
   }
 
-  int classOf(int index) {
+  private int classOf(int index) {
     return index % numClasses;
   }
 
-  int featureOf(int index) {
+  private int featureOf(int index) {
     return index / numClasses;
   }
 
   /** Converts a Phi feature number and class index into an f(x,y) feature index. */
+  // [cdm2014: Tried inline this; no big gains.]
   protected int indexOf(int f, int c) {
     return f * numClasses + c;
   }
