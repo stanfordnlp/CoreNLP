@@ -240,8 +240,8 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                     "neg(only-4, not-3)\n" +
                     "preconj(cats-5, only-4)\n" +
                     "dobj(like-2, cats-5)\n" +
-                    "cc(also-7, but-6)\n" +
-                    "cc(cats-5, also-7)\n" +
+                    "cc(cats-5, but-6)\n" +
+                    "advmod(but-6, also-7)\n" +
                     "conj(cats-5, dogs-8)\n",
         "nsubj(knows-2, He-1)\n" + "root(ROOT-0, knows-2)\n" +
                 "det(industry-6, the-3)\n" +
@@ -1524,6 +1524,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
          "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
          "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NN brandy)) (CONJP (RB not) (TO to) (VB mention)) (NP (NN cognac)))) (. .)))",
          "( (S (NP (PRP I)) (VP (VBP like) (NP (CONJP (RB not) (RB only)) (NP (NNS cats)) (CONJP (CC but) (RB also)) (NP (NN dogs)))) (. .)))",
+         "((S (NP (NNP Fred)) (VP (VBD flew) (PP (CONJP (RB not) (JJ only)) (PP (TO to) (NP (NNP Greece))) (CONJP (CC but) (RB also)) (PP (TO to) (NP (NNP Serbia))))) (. .)))",
          "( (SINV (ADVP-TMP (RB Only) (RB recently)) (SINV (VBZ has) (NP (PRP it)) (VP (VBN been) (VP (ADVP-MNR (RB attractively)) (VBN redesigned)))) (CC and) (SINV (NP (PRP$ its) (JJ editorial) (NN product)) (VP (VBN improved))) (. .)))",
          "( (S (NP-SBJ (JJP (JJ Political) (CC and) (NN currency)) (NNS gyrations)) (VP (MD can) (VP (VB whipsaw) (NP (DT the) (NNS funds)))) (. .)))",
          "(NP-SBJ (NNS Managers) (CC and) (NNS presenters))",
@@ -1668,6 +1669,14 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "dobj(like-2, cats-5)\n" +
                 "dobj(like-2, dogs-8)\n" +
                 "conj_and(cats-5, dogs-8)\n",
+        "nsubj(flew-2, Fred-1)\n" +
+                "root(ROOT-0, flew-2)\n" +
+                "neg(only-4, not-3)\n" +
+                "preconj(flew-2, only-4)\n" +
+                "prep_to(flew-2, Greece-6)\n" +
+                "prep_to(flew-2, Serbia-10)\n" +
+                "conj_and(Greece-6, Serbia-10)\n",
+
         "advmod(recently-2, Only-1)\n" +
                 "advmod(redesigned-7, recently-2)\n" +
                 "aux(redesigned-7, has-3)\n" +

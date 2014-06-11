@@ -53,7 +53,7 @@ import java.util.Set;
  */
 public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
   /* A few times the apostrophe is missing on "'s", so we have "s" */
   /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc.  "of" as non-standard for "have" */
@@ -80,8 +80,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     this(new PennTreebankLanguagePack(), true);
   }
 
-  public SemanticHeadFinder(boolean cop) {
-    this(new PennTreebankLanguagePack(), cop);
+  public SemanticHeadFinder(boolean noCopulaHead) {
+    this(new PennTreebankLanguagePack(), noCopulaHead);
   }
 
 
@@ -127,6 +127,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
     nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
+    nonTerminalInfo.put("NX", nonTerminalInfo.get("NP"));
+    nonTerminalInfo.put("NML", nonTerminalInfo.get("NP"));
     // WHNP clauses should have the same sort of head as an NP
     // but it a WHNP has a NP and a WHNP under it, the WHNP should be the head.  E.g.,  (WHNP (WHNP (WP$ whose) (JJ chief) (JJ executive) (NN officer))(, ,) (NP (NNP James) (NNP Gatward))(, ,))
     nonTerminalInfo.put("WHNP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP"}, {"left", "WHNP", "NP"}, {"rightdis", "$", "ADJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}, {"left", "WHPP", "WHADJP", "WP$", "WDT"}});
@@ -151,7 +153,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});
 
     // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
-    nonTerminalInfo.put("CONJP", new String[][]{{"right", "VB", "JJ", "RB", "IN", "CC"}});
+    nonTerminalInfo.put("CONJP", new String[][]{{"right", "CC", "VB", "JJ", "RB", "IN" }});
 
     // FRAG: crap rule needs to be change if you want to parse glosses; but it is correct to have ADJP and ADVP before S because of weird parses of reduced sentences.
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
