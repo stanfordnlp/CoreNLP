@@ -13,6 +13,11 @@ import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.ReflectionLoading;
 
+/** Parses and specifies all the details for how to read some POS tagging data.
+ *  The options for this class are documented in MaxentTagger.
+ *
+ *  @author John Bauer
+ */
 public class TaggedFileRecord {
 
   public enum Format {
