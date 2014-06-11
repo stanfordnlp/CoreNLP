@@ -222,6 +222,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     String[] sim = new String[p.length];
     for (int i = 0; i < p.length; i++) {
       p[i] = p[i].trim();
+      assert p[i] != null : "How is the any one " + Arrays.toString(p) + " null!";
       Matcher m = p1.matcher(p[i]);
       if (m.matches()) {
         sim[i] = m.group(2);
