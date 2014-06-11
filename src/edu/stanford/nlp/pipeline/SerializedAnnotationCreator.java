@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.IOException;
@@ -27,9 +26,7 @@ public class SerializedAnnotationCreator extends AbstractInputStreamAnnotationCr
   @Override
   public Annotation create(InputStream stream, String encoding) throws IOException {
     try {
-      Pair<Annotation, InputStream> pair = serializer.read(stream);
-      pair.second.close();
-      Annotation annotation = pair.first;
+      Annotation annotation = serializer.load(stream);
       return annotation;
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
