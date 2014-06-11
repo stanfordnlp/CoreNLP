@@ -9,7 +9,6 @@ import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 
 /**
@@ -23,13 +22,6 @@ public class RegexNERAnnotator implements Annotator {
 
   private final RegexNERSequenceClassifier classifier;
   private final boolean verbose;
-
-  public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
-          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Mapping file to use."),
-          new PropertiesUtils.Property("ignorecase", "false", "Whether to ignore case or not when matching patterns."),
-          new PropertiesUtils.Property("validpospattern", "", "Regular expression pattern for matching POS tags."),
-          new PropertiesUtils.Property("verbose", "false", ""),
-  };
 
   public RegexNERAnnotator(String name, Properties properties) {
     String mapping = properties.getProperty(name + ".mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
