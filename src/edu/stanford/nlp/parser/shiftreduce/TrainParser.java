@@ -11,6 +11,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.lexparser.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryHeadFinder;
+import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
@@ -210,6 +211,8 @@ public class TrainParser {
     }
 
     if (testTreebankPath != null) {
+      Debinarizer debinarizer = new Debinarizer(false);
+
       System.err.println("Loading test trees from " + testTreebankPath);
       Treebank testTreebank = parser.op.tlpParams.memoryTreebank();
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
@@ -222,16 +225,11 @@ public class TrainParser {
           Transition transition = parser.transitionIndex.get(predictedNum);
           state = transition.apply(state);
           transitions.add(transition);
-          /*
-          System.err.println("Predicted transition " + transition);
-          System.err.println(state);
-          if (transitions.size() > 200) {
-            System.exit(1);
-          }
-          */
         }
+        Tree debinarized = debinarizer.transformTree(state.stack.peek());
         System.err.println("Input tree: " + tree);
-        System.err.println("Parsed tree: " + state.stack.peek());
+        System.err.println("Debinarized tree: " + debinarized);
+        System.err.println("Parsed binarized tree: " + state.stack.peek());
         System.err.println("Predicted transition sequence: " + transitions);
       }
     }
