@@ -356,36 +356,10 @@ public class CountersTest extends TestCase {
     c1 = Counters.transformWithValuesAdd(c1, new Function<String, String>() {
       @Override
       public String apply(String in) {
-        return in.toLowerCase();
+        return ((String) in).toLowerCase();
       }
     });
     System.out.println(c1);
-
-  }
-
-  public void testEquals(){
-    setUp();
-    c1.clear();
-    c2.clear();
-    c1.setCount("p", 1.0);
-    c1.setCount("q", 2.0);
-    c1.setCount("r", 3.0);
-    c1.setCount("s", 4.0);
-    c2.setCount("p", 1.0);
-    c2.setCount("q", 2.0);
-    c2.setCount("r", 3.0);
-    c2.setCount("s", 4.0);
-    assertTrue(Counters.equals(c1, c2));
-    c2.setCount("s", 4.1);
-    assertFalse(Counters.equals(c1, c2));
-    c2.remove("s");
-    assertFalse(Counters.equals(c1, c2));
-    c2.setCount("s", 4.0 + 1e-10);
-    assertFalse(Counters.equals(c1, c2));
-    assertTrue(Counters.equals(c1, c2, 1e-5));
-    c2.setCount("2", 3.0 + 8e-5);
-    c2.setCount("s", 4.0 + 8e-5);
-    assertFalse(Counters.equals(c1, c2, 1e-5));  // fails totalCount() equality check
 
   }
 }
