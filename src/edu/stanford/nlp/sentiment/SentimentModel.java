@@ -1,11 +1,14 @@
 package edu.stanford.nlp.sentiment;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
 import org.ejml.simple.SimpleMatrix;
 
+import edu.stanford.nlp.rnn.RNNUtils;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalMap;
@@ -73,11 +76,17 @@ public class SentimentModel implements Serializable {
     binaryTransform = TwoDimensionalMap.treeMap();
     binaryClassification = TwoDimensionalMap.treeMap();
     
-    // TODO: when we make a flat model (no syntactic untying) we only
-    // make one transform matrix for the entire model
+    // When making a flat model (no symantic untying) the
+    // basicCategory function will return the same basic category for
+    // all labels, so all entries will map to the same matrix
     for (Pair<String, String> binary : binaryProductions) {
-      binaryTransform.put(binary.first, binary.second, randomTransformMatrix());
-      binaryClassification.put(binary.first, binary.second, randomClassificationMatrix());
+      String left = basicCategory(binary.first);
+      String right = basicCategory(binary.second);
+      if (binaryTransform.get(left, right) == null) {
+        continue;
+      }
+      binaryTransform.put(left, right, randomTransformMatrix());
+      binaryClassification.put(left, right, randomClassificationMatrix());
     }
     numBinaryMatrices = binaryTransform.size();
     binaryTransformSize = numHid * (2 * numHid + 1);
@@ -116,19 +125,11 @@ public class SentimentModel implements Serializable {
   
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
-    return paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), wordVectors.values().iterator());
+    return RNNUtils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), wordVectors.values().iterator());
   }
 
-  public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
-    // TODO: factor this out from DVModel
-  }
-
-  public vectorToParams(double[] theta) {
-    vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), wordVectors.values().iterator());
-  }
-
-  public static void vectorToParams(double[] theta, Iterator<SimpleMatrix> ... matrices) {
-    // TODO: factor this out from DVModel
+  public void vectorToParams(double[] theta) {
+    RNNUtils.vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), wordVectors.values().iterator());
   }
 
   // TODO: combine this and getClassWForNode?
@@ -173,6 +174,17 @@ public class SentimentModel implements Serializable {
     }
     // TODO: go through unknown words here
     return null;
+  }
+
+  public String basicCategory(String category) {
+    if (op.simplifiedModel) {
+      return "";
+    }
+    String basic = op.langpack.basicCategory(category);
+    if (basic.length() > 0 && basic.charAt(0) == '@') {
+      basic = basic.substring(1);
+    }
+    return basic;
   }
 
   private static final long serialVersionUID = 1;
