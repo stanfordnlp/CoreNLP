@@ -51,7 +51,7 @@ class DescriptionPattern extends TregexPattern {
   /** Used to detect regex expressions which can be simplified to exact matches */
   private static final Pattern SINGLE_WORD_PATTERN = Pattern.compile("/\\^(.)\\$/" + "|" + // for example, /^:$/
                                                                      "/\\^\\[(.)\\]\\$/" + "|" + // for example, /^[$]$/
-                                                                     "/\\^([-a-zA-Z]+)\\$/"); // for example, /^-NONE-$/
+                                                                     "/\\^([-a-zA-Z']+)\\$/"); // for example, /^-NONE-$/
 
   private static final Pattern MULTI_WORD_PATTERN = Pattern.compile("/\\^\\(\\?\\:((?:[-a-zA-Z|]|\\\\\\$)+)\\)\\$\\/");
 
