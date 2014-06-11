@@ -45,7 +45,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   }
 
   @Override
-  Counter<SurfacePattern> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+  Counter<SurfacePattern> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
     // TODO: changed
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
@@ -116,12 +116,11 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       TwoDimensionalCounter<SurfacePattern, String> patternsandWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
       Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat)
-      throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+      throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 
     if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
       Data.loadGoogleNGrams();
     }
-    Data.computeRawFreqIfNull(constVars.numWordsCompound);
 
     Counter<SurfacePattern> patterns = new ClassicCounter<SurfacePattern>();
 
@@ -205,7 +204,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
       Execution.fillOptions(Data.class, props2);
-      classifierScores = scoreclassifier.phraseScorer.scorePhrases(Data.sents, label, patternsandWords.secondKeySet(),  true);
+      classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, patternsandWords.secondKeySet(),  true);
       // scorePhrases(Data.sents, label, true,
       // constVars.perSelectRand, constVars.perSelectNeg, null, null,
       // dictOddsWordWeights);

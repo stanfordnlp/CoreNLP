@@ -4,77 +4,115 @@ import java.io.Serializable;
 
 import edu.stanford.nlp.util.ArrayUtils;
 
+/**
+ * Stores one row of the sparse matrix which makes up the multiclass perceptron.
+ * <br>
+ * Uses a lot of bit fiddling to get the desired results.  What we
+ * want is a row of scores representing transitions where each score
+ * is the score for that transition (for the feature using this Weight
+ * object).  Since the average model seems to have about 3 non-zero
+ * scores per feature, we condense that by keeping pairs of index and
+ * score.  However, we can then further condense that by bit packing
+ * the index and score into one long.  This cuts down on object
+ * creation and makes it faster to read/write the models.
+ * <br>
+ * Thankfully, all of the unpleasant bit fiddling can be hidden away
+ * in this one class.
+ *
+ * @author John Bauer
+ */
+
 public class Weight implements Serializable {
   public Weight() {
-    indices = null;
-    values = null;
+    packed = null;
   }
 
   public Weight(Weight other) {
     if (other.size() == 0) {
-      indices = null;
-      values = null;
+      packed = null;
       return;
     }
-    indices = ArrayUtils.copy(other.indices);
-    values = ArrayUtils.copy(other.values);
+    packed = ArrayUtils.copy(other.packed);
     condense();
   }
 
   public int size() {
-    if (indices == null) {
+    if (packed == null) {
       return 0;
     }
-    return indices.length;
+    return packed.length;
+  }
+
+  private int unpackIndex(int i) {
+    long pack = packed[i];
+    return (int) (pack >>> 32);
+  }
+
+  private float unpackScore(int i) {
+    long pack = packed[i];
+    return Float.intBitsToFloat((int) (pack & 0xFFFFFFFF));
+  }
+
+  private long pack(int index, float score) {
+    long pack = ((long) (Float.floatToIntBits(score))) & 0x00000000FFFFFFFFL;
+    pack = pack | (((long) index) << 32);
+    return pack;
   }
 
   public void score(float[] scores) {
     for (int i = 0; i < size(); ++i) {
-      scores[indices[i]] += values[i];
+      // Since this is the critical method, we optimize it even further.
+      // We could do this:
+      // int index = unpackIndex; float score = unpackScore;
+      // That results in an extra array lookup
+      final long pack = packed[i];
+      final int index = (int) (pack >>> 32);
+      final float score = Float.intBitsToFloat((int) (pack & 0xFFFFFFFF));
+      scores[index] += score;
     }
   }
 
   public void addScaled(Weight other, float scale) {
     for (int i = 0; i < other.size(); ++i) {
-      updateWeight(other.indices[i], other.values[i] * scale);
+      int index = other.unpackIndex(i);
+      float score = other.unpackScore(i);
+      updateWeight(index, score * scale);
     }
   }
 
   public void condense() {
-    if (values == null) {
+    if (packed == null) {
       return;
     }
 
     int nonzero = 0;
-    for (int i = 0; i < values.length; ++i) {
-      if (values[i] != 0.0f) {
+    for (int i = 0; i < packed.length; ++i) {
+      if (unpackScore(i) != 0.0f) {
         ++nonzero;
       }
     }
 
     if (nonzero == 0) {
-      indices = null;
-      values = null;
+      packed = null;
       return;
     }
 
-    if (nonzero == indices.length) {
+    if (nonzero == packed.length) {
       return;
     }
 
-    int[] newIndices = new int[nonzero];
-    float[] newValues = new float[nonzero];
+    long[] newPacked = new long[nonzero];
     int j = 0;
-    for (int i = 0; i < values.length; ++i) {
-      if (values[i] == 0.0f) {
+    for (int i = 0; i < packed.length; ++i) {
+      if (unpackScore(i) == 0.0f) {
         continue;
       }
-      newIndices[j] = indices[i];
-      newValues[j] = values[i];
+      int index = unpackIndex(i);
+      float score = unpackScore(i);
+      newPacked[j] = pack(index, score);
       ++j;
     }
-    indices = newIndices;
-    values = newValues;
+    packed = newPacked;
   }
 
   public void updateWeight(int index, float increment) {
@@ -82,35 +120,29 @@ public class Weight implements Serializable {
       return;
     }
 
-    if (indices == null) {
-      indices = new int[1];
-      indices[0] = index;
-      values = new float[1];
-      values[0] = increment;
+    if (packed == null) {
+      packed = new long[1];
+      packed[0] = pack(index, increment);
       return;
     }
 
-    for (int i = 0; i < indices.length; ++i) {
-      if (indices[i] == index) {
-        values[i] += increment;
+    for (int i = 0; i < packed.length; ++i) {
+      if (unpackIndex(i) == index) {
+        float score = unpackScore(i);
+        packed[i] = pack(index, score + increment);
         return;
       }
     }
 
-    int[] newIndices = new int[indices.length + 1];
-    float[] newValues = new float[values.length + 1];
-    for (int i = 0; i < indices.length; ++i) {
-      newIndices[i] = indices[i];
-      newValues[i] = values[i];
+    long[] newPacked = new long[packed.length + 1];
+    for (int i = 0; i < packed.length; ++i) {
+      newPacked[i] = packed[i];
     }
-    newIndices[indices.length] = index;
-    newValues[values.length] = increment;
-    indices = newIndices;
-    values = newValues;
+    newPacked[packed.length] = pack(index, increment);
+    packed = newPacked;
   }
 
-  int[] indices;
-  float[] values;
+  long[] packed;
 
   private static final long serialVersionUID = 1;
 }
