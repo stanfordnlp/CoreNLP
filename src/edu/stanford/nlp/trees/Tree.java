@@ -2313,8 +2313,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * t.dominates(t) returns false.
    */
   public boolean dominates(Tree t) {
-    List<Tree> dominationPath = dominationPath(t);
-    return dominationPath != null && dominationPath.size() > 1;
+    return !(dominationPath(t) == null);
   }
 
   /**
