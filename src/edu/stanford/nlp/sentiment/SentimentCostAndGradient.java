@@ -66,6 +66,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
 
     // We use TreeMap for each of these so that they stay in a
     // canonical sorted order
+    // TODO: factor out the initialization routines
     // binaryTD stands for Transform Derivatives (see the SentimentModel)
     TwoDimensionalMap<String, String, SimpleMatrix> binaryTD = TwoDimensionalMap.treeMap();
     // the derivatives of the tensors for the binary nodes
@@ -131,8 +132,60 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
       error += sumError(tree);
     }
 
-    value = error;
+    // scale the error by the number of sentences so that the
+    // regularization isn't drowned out for large training batchs
+    double scale = (1.0 / trainingBatch.size());
+    value = error * scale;
+
+    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransform);
+    value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification);
+    value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransform);
+    value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification);
+    value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector);
+
     derivative = RNNUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
+  }
+
+  double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
+                            TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
+                            double scale,
+                            double regCost) {
+    double cost = 0.0; // the regularization cost
+    for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : currentMatrices) {
+      SimpleMatrix D = derivatives.get(entry.getFirstKey(), entry.getSecondKey());
+      D = D.scale(scale).plus(entry.getValue().scale(regCost));
+      derivatives.put(entry.getFirstKey(), entry.getSecondKey(), D);
+      cost += entry.getValue().elementMult(entry.getValue()).elementSum() * regCost / 2.0;
+    }
+    return cost;
+  }
+
+  double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
+                            Map<String, SimpleMatrix> currentMatrices,
+                            double scale,
+                            double regCost) {
+    double cost = 0.0; // the regularization cost
+    for (Map.Entry<String, SimpleMatrix> entry : currentMatrices.entrySet()) {
+      SimpleMatrix D = derivatives.get(entry.getKey());
+      D = D.scale(scale).plus(entry.getValue().scale(regCost));
+      derivatives.put(entry.getKey(), D);
+      cost += entry.getValue().elementMult(entry.getValue()).elementSum() * regCost / 2.0;
+    }
+    return cost;
+  }
+
+  double scaleAndRegularizeTensor(TwoDimensionalMap<String, String, SimpleTensor> derivatives,
+                                  TwoDimensionalMap<String, String, SimpleTensor> currentMatrices,
+                                  double scale,
+                                  double regCost) {
+    double cost = 0.0; // the regularization cost
+    for (TwoDimensionalMap.Entry<String, String, SimpleTensor> entry : currentMatrices) {
+      SimpleTensor D = derivatives.get(entry.getFirstKey(), entry.getSecondKey());
+      D = D.scale(scale).plus(entry.getValue().scale(regCost));
+      derivatives.put(entry.getFirstKey(), entry.getSecondKey(), D);
+      cost += entry.getValue().elementMult(entry.getValue()).elementSum() * regCost / 2.0;
+    }
+    return cost;
   }
 
   private void backpropDerivativesAndError(Tree tree, 
