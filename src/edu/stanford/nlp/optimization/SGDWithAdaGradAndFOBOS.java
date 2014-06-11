@@ -28,7 +28,6 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
                             // some samples may get accounted for twice in one pass
   private static final int DEFAULT_TUNING_SAMPLES = Integer.MAX_VALUE;
   private static final int DEFAULT_BATCH_SIZE = 1000;
-  protected final int tuningSamples;
   private final double eps = 1e-3;
 
   protected Random gen = new Random(1);
@@ -96,16 +95,12 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
     this(initRate, lambda, numPasses, -1);
   }
 
-  public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses, int tuningSamples) {
-    this(initRate, lambda, numPasses, tuningSamples, DEFAULT_BATCH_SIZE);
-  }
-
-  public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses, int tuningSamples, int batchSize) {
-    this(initRate, lambda, numPasses, tuningSamples, batchSize, "lasso", 1.0);
+  public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses, int batchSize) {
+    this(initRate, lambda, numPasses, batchSize, "lasso", 1.0);
   }
 
 
-  public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses, int tuningSamples, int batchSize, String priorType, double alpha)
+  public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses, int batchSize, String priorType, double alpha)
   {
     this.initRate = initRate;
     this.prior = getPrior(priorType);
@@ -117,12 +112,6 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
     } else {
       this.numPasses = DEFAULT_NUM_PASSES;
       sayln("  SGDWithAdaGradAndFOBOS: numPasses=" + numPasses + ", defaulting to " + this.numPasses);
-    }
-    if (tuningSamples > 0) {
-      this.tuningSamples = tuningSamples;
-    } else {
-      this.tuningSamples = DEFAULT_TUNING_SAMPLES;
-      sayln("  SGDWithAdaGradAndFOBOS: tuneSampleSize=" + tuningSamples + ", defaulting to " + this.tuningSamples);
     }
   }
 
@@ -179,18 +168,11 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
   @Override
   public double[] minimize(Function f, double functionTolerance, double[] initial, int maxIterations) {
     int totalSamples = 0;
-    int tuneSampleSize = 0;
     sayln("Using lambda=" + lambda);
     if (f instanceof AbstractStochasticCachingDiffUpdateFunction) {
       AbstractStochasticCachingDiffUpdateFunction func  = (AbstractStochasticCachingDiffUpdateFunction) f;
       func.sampleMethod = AbstractStochasticCachingDiffFunction.SamplingMethod.Shuffled;
       totalSamples = func.dataDimension();
-      tuneSampleSize = Math.min(totalSamples, tuningSamples);
-      if (tuneSampleSize < tuningSamples) {
-        System.err.println("WARNING: Total number of samples=" + totalSamples +
-                " is smaller than requested tuning sample size=" + tuningSamples + "!!!");
-      }
-      sayln("Using sample size=" + tuneSampleSize);
       if (bSize > totalSamples) {
         System.err.println("WARNING: Total number of samples=" + totalSamples +
                 " is smaller than requested batch size=" + bSize + "!!!");
@@ -268,6 +250,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
         if (useEvalImprovement && !toContinue(x, evalScore))
           break;
       }
+      double objVal = 0;
 
       say("Iter: " + iters + " pass " + pass + " batch 1 ... ");
       int numOfNonZero = 0, numOfNonZeroGroup = 0;
@@ -283,6 +266,9 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
           AbstractStochasticCachingDiffUpdateFunction func = (AbstractStochasticCachingDiffUpdateFunction) f;
           func.calculateStochasticGradient(x, bSize);
           gradients = func.getDerivative();
+          if (bSize == totalSamples)
+            objVal = func.valueAt(x, 1.0, bSize);
+            
         } else if (f instanceof AbstractCachingDiffFunction) {
           AbstractCachingDiffFunction func = (AbstractCachingDiffFunction) f;
           gradients = func.derivativeAt(x);
@@ -420,7 +406,7 @@ public class SGDWithAdaGradAndFOBOS<T extends Function> implements Minimizer<T>,
         for(int i=0;i<x.length;i++){ x[i]=Double.NaN; }
         break;
       }
-      sayln(String.valueOf(numBatches)+", n0-fCount:" + numOfNonZero + ((prior != Prior.LASSO && prior != Prior.RIDGE)? ", n0-gCount:"+numOfNonZeroGroup : "")  + ((evalScore != Double.NEGATIVE_INFINITY) ? ", evalScore:"+evalScore : ""));
+      sayln(String.valueOf(numBatches)+", n0-fCount:" + numOfNonZero + ((prior != Prior.LASSO && prior != Prior.RIDGE)? ", n0-gCount:"+numOfNonZeroGroup : "") + ((evalScore != Double.NEGATIVE_INFINITY) ? ", evalScore:"+evalScore : "") + ", obj_val:" + nf.format(objVal));
          // + ((prior == Prior.aeLASSO || prior == Prior.sgLASSO)? ", gSize: "+ gSizeStr : "") );
 
       if (iters >= maxIterations) {
