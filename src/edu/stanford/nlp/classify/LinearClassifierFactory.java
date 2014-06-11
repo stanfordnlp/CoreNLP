@@ -856,8 +856,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     System.err.println(String.format("Training linear classifier with %d features and %d labels", featureIndex.size(), labelIndex.size()));
 
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataIterable, logPrior, featureIndex, labelIndex);
-    // [cdm 2014] Commented out next line. Why not use the logPrior set up previously and used at creation???
-    // objective.setPrior(new LogPrior(LogPrior.LogPriorType.QUADRATIC));
+    objective.setPrior(new LogPrior(LogPrior.LogPriorType.QUADRATIC));
 
     double[] initial = objective.initial();
     double[] weights = minimizer.minimize(objective, TOL, initial);
@@ -868,10 +867,9 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public Classifier<L, F> trainClassifier(GeneralDataset<L, F> dataset, float[] dataWeights, LogPrior prior) {
     Minimizer<DiffFunction> minimizer = getMinimizer();
-    if (dataset instanceof RVFDataset) {
+    if(dataset instanceof RVFDataset)
       ((RVFDataset<L,F>)dataset).ensureRealValues();
-    }
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, dataWeights, prior);
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, dataWeights, logPrior);
 
     double[] initial = objective.initial();
     double[] weights = minimizer.minimize(objective, TOL, initial);
