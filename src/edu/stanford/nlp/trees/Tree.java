@@ -841,8 +841,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return (value() == null) ? "" : value();
   }
 
-  public static boolean DISPLAY_SCORES = true;
-
   /**
    * Display a node, implementing Penn Treebank style layout
    */
@@ -868,7 +866,13 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       return;
     }
     pw.print("(");
-    String nodeString = onlyLabelValue ? nodeString() : nodeString();
+    String nodeString;
+    if (onlyLabelValue) {
+      String value = value();
+      nodeString = (value == null) ? "" : value;
+    } else {
+      nodeString = nodeString();
+    }
     pw.print(nodeString);
     // pw.flush();
     boolean parentIsNull = label() == null || label().value() == null;
@@ -1046,6 +1050,51 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       }
       System.err.println("Head preterminal is null: " + this);
       return null;
+    }
+  }
+
+  /**
+   * Finds the head words of each tree and assigns HeadWordAnnotation
+   * to each node pointing to the correct node.  This relies on the
+   * nodes being CoreLabels, so it throws an IllegalArgumentException
+   * if this is ever not true.
+   */
+  public void percolateHeadAnnotations(HeadFinder hf) {
+    if (!(label() instanceof CoreLabel)) {
+      throw new IllegalArgumentException("Expected CoreLabels in the trees");
+    }
+    CoreLabel nodeLabel = (CoreLabel) label();
+
+    if (isLeaf()) {
+      return;
+    }
+
+    if (isPreTerminal()) {
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, children()[0]);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, this);
+      return;
+    }
+
+    for (Tree kid : children()) {
+      kid.percolateHeadAnnotations(hf);
+    }
+
+    final Tree head = hf.determineHead(this);
+    if (head == null) {
+      throw new NullPointerException("HeadFinder " + hf + " returned null for " + this);
+    } else if (head.isLeaf()) {
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head.parent(this));
+    } else if (head.isPreTerminal()) {
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head.children()[0]);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head);
+    } else {
+      if (!(head.label() instanceof CoreLabel)) {
+        throw new AssertionError("Horrible bug");
+      }
+      CoreLabel headLabel = (CoreLabel) head.label();
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     }
   }
 
