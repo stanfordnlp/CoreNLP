@@ -43,9 +43,9 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   public TrieMap<K,V> getChildTrie(Iterable<K> key) {
     TrieMap<K, V> curTrie = this;
     // go through each element
-    for (K element : key){
+    for(Object element : key){
       curTrie = (curTrie.children != null)? curTrie.children.get(element):null;
-      if (curTrie == null) {
+      if(curTrie == null){
         return null;
       }
     }
@@ -86,7 +86,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   }
 
 
-  public String toFormattedString() {
+  public String toFormattedString(){
     List<String> strings = new LinkedList<String>();
     updateTrieStrings(strings, "");
     return StringUtils.join(strings, "\n");
@@ -212,7 +212,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   @Override
   public void putAll(Map<? extends Iterable<K>, ? extends V> m) {
-    for (Iterable<K> k : m.keySet()) {
+    for (Iterable<K> k:m.keySet()) {
       put(k, m.get(m));
     }
   }
@@ -279,23 +279,22 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
       }
     }
     if (value != null) {
-      entries.add(new Map.Entry<Iterable<K>,V>() {
+      entries.add(new Map.Entry() {
         @Override
-        public Iterable<K> getKey() {
+        public Object getKey() {
           return prefix;
         }
 
         @Override
-        public V getValue() {
+        public Object getValue() {
           return value;
         }
 
         @Override
-        public V setValue(V value) {
+        public Object setValue(Object value) {
           throw new UnsupportedOperationException();
         }
       });
     }
   }
-
 }
