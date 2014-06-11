@@ -19,10 +19,10 @@ public class WordToSentenceProcessorTest extends TestCase {
   private static final Annotator ptbNL = new PTBTokenizerAnnotator(false, "invertible,ptb3Escaping=true,tokenizeNLs=true");
   private static final WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<CoreLabel>();
   private static final WordToSentenceProcessor<CoreLabel> wtsNull =
-          new WordToSentenceProcessor<CoreLabel>(true);
+          new WordToSentenceProcessor<CoreLabel>(true); // treat input as one sentence
 
 
-  public static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
+  private static void checkResult(WordToSentenceProcessor<CoreLabel> wts,
                                  String testSentence, String ... gold) {
     Annotation annotation = new Annotation(testSentence);
     ptbNL.annotate(annotation);
