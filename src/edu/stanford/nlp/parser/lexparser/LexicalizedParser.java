@@ -641,6 +641,7 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
 
   public static TreeAnnotatorAndBinarizer buildTrainBinarizer(Options op) {
     TreebankLangParserParams tlpParams = op.tlpParams;
+    TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
     if (!op.trainOptions.leftToRight) {
       return new TreeAnnotatorAndBinarizer(tlpParams, op.forceCNF, !op.trainOptions.outsideFactor(), !op.trainOptions.predictSplits, op);
     } else {
@@ -1355,9 +1356,6 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
           }
         } else {
           // have options but no tokenizer factory; default to PTB
-          // todo [cdm 2013]: Really this is broken: if we're parsing non-English, we should be
-          // able to get the TokenizerFactory from the model and then just add options to it.
-          // todo [cdm 2013]: Also, we should change the static factory method so it isn't tied to returning Word tokens.
           tokenizerFactory = PTBTokenizer.PTBTokenizerFactory.newWordTokenizerFactory(tokenizerOptions);
         }
       } catch (IllegalAccessException e) {
