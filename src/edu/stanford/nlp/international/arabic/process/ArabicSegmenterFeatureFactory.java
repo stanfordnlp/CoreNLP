@@ -24,6 +24,8 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   
   private static final long serialVersionUID = -4560226365250020067L;
   
+  private static final String DOMAIN_MARKER = "@";
+  
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
   }
@@ -47,6 +49,15 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
       addAllInterningAndSuffixing(features, featuresCp3C(cInfo, loc), "Cp3C");
     }
 
+    String domain = cInfo.get(loc).get(CoreAnnotations.DomainAnnotation.class);
+    if (domain != null) {
+      Collection<String> domainFeatures = Generics.newHashSet();
+      for (String feature : features) {
+        domainFeatures.add(feature + DOMAIN_MARKER + domain);
+      }
+      features.addAll(domainFeatures);
+    }
+    
     return features;
   }
 
@@ -98,7 +109,7 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
 
     // Indicator transition feature
     features.add("cliqueC");
-
+    
     return features;
   }
 
