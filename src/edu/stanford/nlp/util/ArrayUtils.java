@@ -564,17 +564,6 @@ public class ArrayUtils {
     return false;
   }
 
-  // from stackoverflow
-  //  http://stackoverflow.com/questions/80476/how-to-concatenate-two-arrays-in-java
-  /**
-   * Concatenates two arrays and returns the result
-   */
-  public static <T> T[] concatenate(T[] first, T[] second) {
-    T[] result = Arrays.copyOf(first, first.length + second.length);
-    System.arraycopy(second, 0, result, first.length, second.length);
-    return result;
-  }
-
   /** Return a Set containing the same elements as the specified array.
    */
   public static <T> Set<T> asSet(T[] a) {

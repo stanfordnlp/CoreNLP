@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.dvparser;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -106,15 +107,25 @@ public class AverageDVModels {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-input")) {
         for (++argIndex; argIndex < args.length && !args[argIndex].startsWith("-"); ++argIndex) {
-          inputModelFilenames.add(args[argIndex]);
+          inputModelFilenames.addAll(Arrays.asList(args[argIndex].split(",")));
         }
       } else {
         throw new RuntimeException("Unknown argument " + args[argIndex]);
       }
     }
 
-    System.err.println(outputModelFilename);
-    System.err.println(inputModelFilenames);
+    if (outputModelFilename == null) {
+      System.err.println("Need to specify output model name with -output");
+      System.exit(2);
+    }
+
+    if (inputModelFilenames.size() == 0) {
+      System.err.println("Need to specify input model names with -input");
+      System.exit(2);
+    }
+
+    System.err.println("Averaging " + inputModelFilenames);
+    System.err.println("Outputting result to " + outputModelFilename);
 
     LexicalizedParser lexparser = null;
     List<DVModel> models = Generics.newArrayList();
