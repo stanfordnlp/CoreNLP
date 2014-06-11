@@ -116,7 +116,7 @@ public class TokensRegexNERAnnotator implements Annotator {
 
   private final boolean ignoreCase;
   private final List<Entry> entries;
-  private final Map<TokenSequencePattern,Entry> patternToEntry = new IdentityHashMap<TokenSequencePattern,Entry>();
+  private final Map<SequencePattern<CoreMap>,Entry> patternToEntry;
   private final MultiPatternMatcher<CoreMap>  multiPatternMatcher;
 
   private final Set<String> myLabels;  // set of labels to always overwrite
@@ -181,11 +181,11 @@ public class TokensRegexNERAnnotator implements Annotator {
     String validPosRegex = properties.getProperty(prefix + "validpospattern");
     this.posMatchType = PosMatchType.valueOf(properties.getProperty(prefix + "posmatchtype",
             DEFAULT_POS_MATCH_TYPE.name()));
-    boolean overwriteMyLabels = true;
 
     String noDefaultOverwriteLabelsProp = properties.getProperty(prefix + "noDefaultOverwriteLabels");
-    this.noDefaultOverwriteLabels = (noDefaultOverwriteLabelsProp != null)?
-            CollectionUtils.asSet(noDefaultOverwriteLabelsProp.split("\\s*,\\s*")):new HashSet<String>();
+    this.noDefaultOverwriteLabels = (noDefaultOverwriteLabelsProp != null)
+            ? Collections.unmodifiableSet(CollectionUtils.asSet(noDefaultOverwriteLabelsProp.split("\\s*,\\s*")))
+            : Collections.unmodifiableSet(new HashSet<String>());
     this.ignoreCase = PropertiesUtils.getBool(properties, prefix + "ignorecase", false);
     this.verbose = PropertiesUtils.getBool(properties, prefix + "verbose", false);
 
@@ -194,16 +194,17 @@ public class TokensRegexNERAnnotator implements Annotator {
     } else {
       validPosPattern = null;
     }
-    entries = readEntries(name, noDefaultOverwriteLabels, ignoreCase, verbose, mappings);
-    multiPatternMatcher = createPatternMatcher();
-    myLabels = Generics.newHashSet();
+    entries = Collections.unmodifiableList(readEntries(name, noDefaultOverwriteLabels, ignoreCase, verbose, mappings));
+    IdentityHashMap<SequencePattern<CoreMap>, Entry> patternToEntry = new IdentityHashMap<SequencePattern<CoreMap>, Entry>();
+    multiPatternMatcher = createPatternMatcher(patternToEntry);
+    this.patternToEntry = Collections.unmodifiableMap(patternToEntry);
+    Set<String> myLabels = Generics.newHashSet();
     // Can always override background or none.
-    for (String s:backgroundSymbols)
-      myLabels.add(s);
+    Collections.addAll(myLabels, backgroundSymbols);
     myLabels.add(null);
-    if (overwriteMyLabels) {
-      for (Entry entry: entries) myLabels.add(entry.type);
-    }
+    // Always overwrite labels
+    for (Entry entry: entries) myLabels.add(entry.type);
+    this.myLabels = Collections.unmodifiableSet(myLabels);
   }
 
   @Override
@@ -231,7 +232,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       System.err.println("done.");
   }
 
-  private MultiPatternMatcher<CoreMap> createPatternMatcher() {
+  private MultiPatternMatcher<CoreMap> createPatternMatcher(Map<SequencePattern<CoreMap>, Entry> patternToEntry) {
     // Convert to tokensregex pattern
     int patternFlags = ignoreCase? Pattern.CASE_INSENSITIVE:0;
     int stringMatchFlags = ignoreCase? NodePattern.CASE_INSENSITIVE:0;
@@ -278,7 +279,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       int start = m.start(g);
       int end = m.end(g);
 
-      boolean overwriteOriginalNer = checkPosTags(entry, tokens, start, end);
+      boolean overwriteOriginalNer = checkPosTags(tokens, start, end);
       if (overwriteOriginalNer) {
         overwriteOriginalNer = checkOrigNerTags(entry, tokens, start, end);
       }
@@ -298,7 +299,7 @@ public class TokensRegexNERAnnotator implements Annotator {
 
   // TODO: roll check into tokens regex pattern?
   // That allows for better matching because unmatched sequences will be eliminated at match time
-  private boolean checkPosTags(Entry entry, List<CoreLabel> tokens, int start, int end) {
+  private boolean checkPosTags(List<CoreLabel> tokens, int start, int end) {
     if (validPosPattern != null) {
       // Need to check POS tag too...
       switch (posMatchType) {
@@ -356,6 +357,7 @@ public class TokensRegexNERAnnotator implements Annotator {
       }
     }
     boolean overwriteOriginalNer = false;
+    //noinspection StatementWithEmptyBody
     if (prevNerEndIndex != (start-1) || nextNerStartIndex != end) {
       // Cutting across already recognized NEs don't disturb
     } else if (startNer == null) {
@@ -426,6 +428,7 @@ public class TokensRegexNERAnnotator implements Annotator {
     //       we don't know how many tokens are matched until after the matching is done)
     List<Entry> entries = new ArrayList<Entry>();
     TrieMap<String,Entry> seenRegexes = new TrieMap<String,Entry>();
+    Arrays.sort(mappings);
     for (String mapping:mappings) {
       BufferedReader rd = null;
       try {
