@@ -639,6 +639,34 @@ public class Counters {
     }
     return removed;
   }
+  
+  /**
+   * Removes all entries with counts below the given threshold, returning the
+   * set of removed entries.
+   * 
+   * @param counter
+   *          The counter.
+   * @param countThreshold
+   *          The minimum count for an entry to be kept. Entries (strictly) less
+   *          than this threshold are discarded.
+   * @return The set of discarded entries.
+   */
+  public static <E1, E2> Set<Pair<E1, E2>> retainAbove(
+      TwoDimensionalCounter<E1, E2> counter, double countThreshold) {
+
+    Set<Pair<E1, E2>> removed = new HashSet<Pair<E1, E2>>();
+    for (Entry<E1, ClassicCounter<E2>> en : counter.entrySet()) {
+      for (Entry<E2, Double> en2 : en.getValue().entrySet()) {
+        if (counter.getCount(en.getKey(), en2.getKey()) < countThreshold) {
+          removed.add(new Pair<E1, E2>(en.getKey(), en2.getKey()));
+        }
+      }
+    }
+    for (Pair<E1, E2> key : removed) {
+      counter.remove(key.first(), key.second());
+    }
+    return removed;
+  }
 
   /**
    * Removes all entries with counts above the given threshold, returning the
@@ -1034,8 +1062,15 @@ public class Counters {
     }
     // descending order
     Collections.sort(l, new Comparator<Pair<E, Double>>() {
+      @SuppressWarnings("unchecked")
       public int compare(Pair<E, Double> a, Pair<E, Double> b) {
-        return Double.compare(b.second, a.second);
+        int candidate = Double.compare(a.second, b.second);
+        if (candidate == 0.0 && a.first instanceof  Comparable && b.first instanceof Comparable) {
+          // Try to create a stable ordering, breaking ties with the key's natural order
+          return ((Comparable) a.first).compareTo(b.first);
+        } else {
+          return candidate;
+        }
       }
     });
     return l;
@@ -1192,6 +1227,9 @@ public class Counters {
     return result;
   }
 
+  /**
+   * increments every key in the counter by value
+   */
   public static <E> Counter<E> add(Counter<E> c1, double value) {
     Counter<E> result = c1.getFactory().create();
     for (E key : c1.keySet()) {
@@ -2772,6 +2810,25 @@ public class Counters {
   }
 
   /**
+   * Check if this counter is a uniform distribution.
+   * That is, it should sum to 1.0, and every value should be equal to every other value.
+   * @param distribution The distribution to check.
+   * @param tolerance The tolerance for floating point error, in both the equality and total count checks.
+   * @param <E> The type of the counter.
+   * @return True if this counter is the uniform distribution over its domain.
+   */
+  public static <E> boolean isUniformDistribution(Counter<E> distribution, double tolerance) {
+    double value = Double.NaN;
+    double totalCount = 0.0;
+    for (double val : distribution.values()) {
+      if (Double.isNaN(value)) { value = val; }
+      if (Math.abs(val - value) > tolerance) { return false; }
+      totalCount += val;
+    }
+    return Math.abs(totalCount - 1.0) < tolerance;
+  }
+
+  /**
    * Default comparator for breaking ties in argmin and argmax.
    * //TODO: What type should this be?
    * // Unused, so who cares?
@@ -2923,5 +2980,11 @@ public class Counters {
       fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
     }
     return fscores;
+  }
+  
+  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
+    for(E key: counter.keySet()){
+      counter.setCount(key, func.apply(counter.getCount(key)));
+    }
   }
 }
