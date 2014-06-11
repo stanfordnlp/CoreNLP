@@ -16,6 +16,22 @@ public class RNNTrainOptions implements Serializable {
 
   public double scalingForInit = 1.0;
 
+  private double[] classWeights = null;
+
+  /**
+   * The classWeights can be passed in as a comma separated list of
+   * weights using the -classWeights flag.  If the classWeights are
+   * not specified, the value is assumed to be 1.0.  classWeights only
+   * apply at train time; we do not weight the classes at all during
+   * test time.
+   */
+  public double getClassWeight(int i) {
+    if (classWeights == null) {
+      return 1.0;
+    }
+    return classWeights[i];
+  }
+
   public int setOption(String[] args, int argIndex) {
     if (args[argIndex].equalsIgnoreCase("-batchSize")) {
       batchSize = Integer.valueOf(args[argIndex + 1]);
@@ -34,6 +50,14 @@ public class RNNTrainOptions implements Serializable {
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-scalingForInit")) {
       scalingForInit = Double.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-classWeights")) {
+      String classWeightString = args[argIndex + 1];
+      String[] pieces = classWeightString.split(",");
+      classWeights = new double[pieces.length];
+      for (int i = 0; i < pieces.length; ++i) {
+        classWeights[i] = Double.valueOf(pieces[i]);
+      }
       return argIndex + 2;
     } else {
       return argIndex;
