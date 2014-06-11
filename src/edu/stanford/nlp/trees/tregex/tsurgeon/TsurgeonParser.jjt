@@ -63,7 +63,6 @@ TOKEN:
 | < SELECTION: "#rightmost" | "#leftmost" >
 | < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|~["\n","\r"])* "/") )+ >
 | < IDENTIFIER: ["-","*","a"-"z","A"-"Z"] ( ["-","*","a"-"z","A"-"Z","_","0"-"9","|","@","="] )* >
-| < LABEL: ["A"-"Z"] (["A"-"Z","0"-"9","-","_"])* >
 | < LOCATION_RELATION: "$-" | "$+" | ">" ("-")? (["0"-"9"])+ >
 | < REGEX: "/" ("\\/"|~["\n","\r"])* "/" >
 | < QUOTEX: "|" ("\\|"|~["\n","\r","|"])* "|" >
@@ -179,6 +178,7 @@ List<TsurgeonPattern> NodeSelectionList(List<TsurgeonPattern> l) :
    { return l; }
 }
 
+// TODO: what does this next comment mean?
 // we'll also put in a way to use a SELECTION with a list of nodes.
 TsurgeonPattern NodeSelection() :
 {
