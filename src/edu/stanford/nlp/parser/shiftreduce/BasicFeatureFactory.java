@@ -45,18 +45,6 @@ public class BasicFeatureFactory implements FeatureFactory {
     return value;
   }
 
-  public static State.HeadPosition getSeparator(TreeShapedStack<State.HeadPosition> separators, int nodeNum) {
-    if (separators.size() <= nodeNum) {
-      return null;
-    }
-
-    for (int i = 0; i < nodeNum; ++i) {
-      separators = separators.pop();
-    }
-
-    return separators.peek();
-  }
-
   public static CoreLabel getRecentDependent(TreeShapedStack<Tree> stack, Transition transition, int nodeNum) {
     if (stack.size() <= nodeNum) {
       return null;
@@ -419,8 +407,8 @@ public class BasicFeatureFactory implements FeatureFactory {
 
     addPositionFeatures(features, state);
 
-    State.HeadPosition s0Separator = getSeparator(state.separators, 0);
-    State.HeadPosition s1Separator = getSeparator(state.separators, 1);
+    State.HeadPosition s0Separator = state.getSeparator(0);
+    State.HeadPosition s1Separator = state.getSeparator(1);
     addSeparatorFeatures(features, s0Label, s1Label, s0Separator, s1Separator);
 
     return features;
