@@ -335,6 +335,8 @@ public final class SloppyMath {
    * the exponent is treated as 0, and 1 is returned.  0^0 also
    * returns 1.
    * Biased to do quickly small exponents, like the CRF needs.
+   * Todo: Claim is that it will be faster if use if, not switch, and also do 3 (and even 4, 5) via cases:
+   * http://jafama.svn.sourceforge.net/viewvc/jafama/src/odk/lang/FastMath.java?view=markup
    *
    * @param b base
    * @param e exponent
