@@ -14,6 +14,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
 
 public class SentimentTraining {
 
+  private static final NumberFormat NF = new DecimalFormat("0.00");
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
   public static void executeOneTrainingBatch(SentimentModel model, List<Tree> trainingBatch, double[] sumGradSquare) {
@@ -79,16 +80,20 @@ public class SentimentTraining {
 
         if (nextDebugCycle > 0 && totalElapsed > nextDebugCycle) {
 
-          // TODO:
-          // evaluate the test set on our current model
+          Evaluate eval = new Evaluate(model);
+          eval.eval(devTrees);
+          eval.printSummary();
+          double score = eval.exactNodeAccuracy();
 
           // output an intermediate model
           if (modelPath != null) {
             String tempPath = modelPath;
             if (modelPath.endsWith(".ser.gz")) {
-              tempPath = modelPath.substring(0, modelPath.length() - 7) + "-" + FILENAME.format(debugCycle) + ".ser.gz";
+              tempPath = modelPath.substring(0, modelPath.length() - 7) + "-" + FILENAME.format(debugCycle) + "-" + NF.format(score) + ".ser.gz";
             } else if (modelPath.endsWith(".gz")) {
-              tempPath = modelPath.substring(0, modelPath.length() - 3) + "-" + FILENAME.format(debugCycle) + ".ser.gz";
+              tempPath = modelPath.substring(0, modelPath.length() - 3) + "-" + FILENAME.format(debugCycle) + "-" + NF.format(score) + ".gz";
+            } else {
+              tempPath = modelPath.substring(0, modelPath.length() - 3) + "-" + FILENAME.format(debugCycle) + "-" + NF.format(score);
             }
             model.saveSerialized(tempPath);
           }
