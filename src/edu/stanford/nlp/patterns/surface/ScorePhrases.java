@@ -76,8 +76,10 @@ public class ScorePhrases {
     Counter<String> finalwords = new ClassicCounter<String>();
 
     while (termIter.hasNext()) {
-      if (finalwords.size() >= constVars.numWordsToAdd)
+      
+      if (finalwords.size() >= constVars.numWordsToAdd){
         break;
+      }
       String w = termIter.next();
       if (newdt.getCount(w) < thresholdWordExtract) {
         break;
@@ -109,16 +111,16 @@ public class ScorePhrases {
         ignoreWords.add(w);
       }
     }
-    // String nextFive = "";
-    // int n = 0;
-    // while (termIter.hasNext()) {
-    // n++;
-    // if (n > 5)
-    // break;
-    // String w = termIter.next();
-    // nextFive += ";\t" + w + ":" + newdt.getCount(w);
-    // }
-    // Redwood.log(Redwood.FORCE, "Next five phrases were " + nextFive);
+     String nextFive = "";
+     int n = 0;
+     while (termIter.hasNext()) {
+     n++;
+     if (n > 5)
+     break;
+     String w = termIter.next();
+     nextFive += ";\t" + w + ":" + newdt.getCount(w);
+     }
+     Redwood.log(Redwood.DBG, "Next five phrases were " + nextFive);
     return finalwords;
   }
 
@@ -152,7 +154,6 @@ public class ScorePhrases {
 
   public Counter<String> learnNewPhrases(
       String label,
-      Map<String, List<CoreLabel>> sents,
       Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
       Counter<SurfacePattern> patternsLearnedThisIter,
       Counter<SurfacePattern> allSelectedPatterns,
@@ -164,14 +165,150 @@ public class ScorePhrases {
       TwoDimensionalCounter<SurfacePattern, String> patternsAndWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> allPatternsAndWords4Label,
       String identifier, Set<String> ignoreWords) throws InterruptedException, ExecutionException,
-      IOException {
+      IOException, ClassNotFoundException {
 
-    if (Data.processedDataFreq == null) {
+    boolean computeDataFreq = false;
+    if (Data.processedDataFreq == null || Data.rawFreq == null) {
+      Data.rawFreq = new ClassicCounter<String>();
+      computeDataFreq = true;
       Data.processedDataFreq = new ClassicCounter<String>();
-      Data.computeRawFreqIfNull(constVars.numWordsCompound);
+    }
+    
+    Counter<String> words = learnNewPhrasesPrivate(label,
+        patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns,
+        constVars.getLabelDictionary().get(label),
+        tokensMatchedPatterns, scoreForAllWordsThisIteration, terms,
+        wordsPatExtracted, currentAllPatternWeights, patternsAndWords4Label,
+        allPatternsAndWords4Label, identifier, ignoreWords, computeDataFreq);
+    constVars.getLabelDictionary().get(label).addAll(words.keySet());
+    
 
+    return words;
+  }
+
+  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, Counter<SurfacePattern> patternsLearnedThisIter,   TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
+    List<String> keyset = new ArrayList<String>(sents.keySet());
+    List<String> notAllowedClasses = new ArrayList<String>();
+    if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
+      for(String l: constVars.answerClass.keySet()){
+        if(!l.equals(label)){
+          notAllowedClasses.add(l+":"+l);
+        }
+      }
+      notAllowedClasses.add("OTHERSEM:OTHERSEM");
+    }
+    int num = 0;
+    if (constVars.numThreads == 1)
+      num = keyset.size();
+    else
+      num = keyset.size() / (constVars.numThreads - 1);
+    ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
+    // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "keyset size is " +
+    // keyset.size());
+    List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>>();
+    for (int i = 0; i < constVars.numThreads; i++) {
+      // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "assigning from " + i *
+      // num + " till " + Math.min(keyset.size(), (i + 1) * num));
+
+      Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> task = null;
+      Map<TokenSequencePattern, SurfacePattern> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , SurfacePattern>();
+      for(SurfacePattern p : patternsLearnedThisIter.keySet()){
+        TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString(notAllowedClasses));
+        patternsLearnedThisIterConverted.put(pat, p);
+      }
+      
+      task = new ApplyPatternsMulti(sents, keyset.subList(i * num,
+          Math.min(keyset.size(), (i + 1) * num)), patternsLearnedThisIterConverted, label,
+          constVars.removeStopWordsFromSelectedPhrases,
+          constVars.removePhrasesWithStopWords, constVars);
+
+      Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> submit = executor
+          .submit(task);
+      list.add(submit);
+    }
+
+    // // Now retrieve the result
+    for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> future : list) {
+      Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
+          .get();
+
+      wordsandLemmaPatExtracted.addAll(result.first());
+      matchedTokensByPat.addAll(result.second());
+    }
+    executor.shutdown();
+  }
+  
+  private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
+      Counter<SurfacePattern> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted){
+    for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
+      Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> pat4Sent = patternsForEachToken
+          .get(sentEn.getKey());
+      if (pat4Sent == null) {
+        throw new RuntimeException("How come there are no patterns for "
+            + sentEn.getKey() + ". The total patternsForEachToken size is "
+            + patternsForEachToken.size() + " and keys "
+            + patternsForEachToken.keySet());
+      }
+      for (Entry<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> en : pat4Sent
+          .entrySet()) {
+        CoreLabel token = null;
+        Set<SurfacePattern> p1 = en.getValue().first();
+        Set<SurfacePattern> p2 = en.getValue().second();
+        Set<SurfacePattern> p3 = en.getValue().third();
+        for (SurfacePattern p : patternsLearnedThisIter.keySet()) {
+          if (p1.contains(p) || p2.contains(p) || p3.contains(p)) {
+            if (token == null)
+              token = sentEn.getValue().get(en.getKey());
+            wordsandLemmaPatExtracted.incrementCount(
+                new Pair<String, String>(token.word(), token.lemma()), p);
+          }
+        }
+      }
+    }
+  }
+  private Counter<String> learnNewPhrasesPrivate(
+      String label,
+      Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
+      Counter<SurfacePattern> patternsLearnedThisIter,
+      Counter<SurfacePattern> allSelectedPatterns,
+      Set<String> alreadyIdentifiedWords, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat,
+      Counter<String> scoreForAllWordsThisIteration,
+      TwoDimensionalCounter<String, SurfacePattern> terms,
+      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
+      Counter<SurfacePattern> currentAllPatternWeights,
+      TwoDimensionalCounter<SurfacePattern, String> patternsAndWords4Label,
+      TwoDimensionalCounter<SurfacePattern, String> allPatternsAndWords4Label,
+      String identifier, Set<String> ignoreWords, boolean computeDataFreq) throws InterruptedException, ExecutionException,
+      IOException, ClassNotFoundException {
+
+    TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
+    if (constVars.doNotApplyPatterns) {
+      if(constVars.batchProcessSents){
+        for(File f: Data.sentsFiles){
+          Redwood.log(Redwood.DBG, "Calculating stats from sents file " + f);
+          Map<String, List<CoreLabel>> sents  = IOUtils.readObjectFromFile(f);
+          this.statsWithoutApplyingPatterns(sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
+        }
+      }else
+        this.statsWithoutApplyingPatterns(Data.sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
+    } else {
+      if(constVars.batchProcessSents){
+        for(File f: Data.sentsFiles){
+          Redwood.log(Redwood.DBG, "Applying patterns to sents from " + f);
+          Map<String, List<CoreLabel>> sents  = IOUtils.readObjectFromFile(f);
+          this.runParallelApplyPats(sents, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
+          if(computeDataFreq)
+            Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
+        }
+      } else{
+        this.runParallelApplyPats(Data.sents, label, patternsLearnedThisIter, wordsandLemmaPatExtracted, matchedTokensByPat);
+        Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
+      }
+     
+    }
+    if(computeDataFreq){
       if (!phraseScorer.wordFreqNorm.equals(Normalization.NONE)) {
-        System.out.println("computing processed freq");
+        Redwood.log(Redwood.DBG, "computing processed freq");
         for (Entry<String, Double> fq : Data.rawFreq.entrySet()) {
           double in = fq.getValue();
           if (phraseScorer.wordFreqNorm.equals(Normalization.SQRT))
@@ -186,113 +323,7 @@ public class ScorePhrases {
       } else
         Data.processedDataFreq = Data.rawFreq;
     }
-    Counter<String> words = learnNewPhrasesPrivate(label, sents,
-        patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns,
-        constVars.getLabelDictionary().get(label),
-        tokensMatchedPatterns, scoreForAllWordsThisIteration, terms,
-        wordsPatExtracted, currentAllPatternWeights, patternsAndWords4Label,
-        allPatternsAndWords4Label, identifier, ignoreWords);
-    constVars.getLabelDictionary().get(label).addAll(words.keySet());
-
-    return words;
-  }
-
-  private Counter<String> learnNewPhrasesPrivate(
-      String label,
-      Map<String, List<CoreLabel>> sents,
-      Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
-      Counter<SurfacePattern> patternsLearnedThisIter,
-      Counter<SurfacePattern> allSelectedPatterns,
-      Set<String> alreadyIdentifiedWords, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat,
-      Counter<String> scoreForAllWordsThisIteration,
-      TwoDimensionalCounter<String, SurfacePattern> terms,
-      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
-      Counter<SurfacePattern> currentAllPatternWeights,
-      TwoDimensionalCounter<SurfacePattern, String> patternsAndWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsAndWords4Label,
-      String identifier, Set<String> ignoreWords) throws InterruptedException, ExecutionException,
-      IOException {
-
-    TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
-    if (constVars.doNotApplyPatterns) {
-      for (Entry<String, List<CoreLabel>> sentEn : Data.sents.entrySet()) {
-        Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> pat4Sent = patternsForEachToken
-            .get(sentEn.getKey());
-        if (pat4Sent == null) {
-          throw new RuntimeException("How come there are no patterns for "
-              + sentEn.getKey() + ". The total patternsForEachToken size is "
-              + patternsForEachToken.size() + " and keys "
-              + patternsForEachToken.keySet());
-        }
-        for (Entry<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> en : pat4Sent
-            .entrySet()) {
-          CoreLabel token = null;
-          Set<SurfacePattern> p1 = en.getValue().first();
-          Set<SurfacePattern> p2 = en.getValue().second();
-          Set<SurfacePattern> p3 = en.getValue().third();
-          for (SurfacePattern p : patternsLearnedThisIter.keySet()) {
-            if (p1.contains(p) || p2.contains(p) || p3.contains(p)) {
-              if (token == null)
-                token = sentEn.getValue().get(en.getKey());
-              wordsandLemmaPatExtracted.incrementCount(
-                  new Pair<String, String>(token.word(), token.lemma()), p);
-            }
-          }
-        }
-      }
-    } else {
-      List<String> keyset = new ArrayList<String>(sents.keySet());
-      List<String> notAllowedClasses = new ArrayList<String>();
-      if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
-        for(String l: constVars.answerClass.keySet()){
-          if(!l.equals(label)){
-            notAllowedClasses.add(l+":"+l);
-          }
-        }
-        notAllowedClasses.add("OTHERSEM:OTHERSEM");
-      }
-      int num = 0;
-      if (constVars.numThreads == 1)
-        num = keyset.size();
-      else
-        num = keyset.size() / (constVars.numThreads - 1);
-      ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-      // Redwood.log(Redwood.FORCE, channelNameLogger, "keyset size is " +
-      // keyset.size());
-      List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>>>();
-      for (int i = 0; i < constVars.numThreads; i++) {
-        // Redwood.log(Redwood.FORCE, channelNameLogger, "assigning from " + i *
-        // num + " till " + Math.min(keyset.size(), (i + 1) * num));
-
-        Callable<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> task = null;
-        Map<TokenSequencePattern, SurfacePattern> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , SurfacePattern>();
-        for(SurfacePattern p : patternsLearnedThisIter.keySet()){
-          TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString(notAllowedClasses));
-          patternsLearnedThisIterConverted.put(pat, p);
-        }
-        
-        task = new ApplyPatternsMulti(keyset.subList(i * num,
-            Math.min(keyset.size(), (i + 1) * num)), patternsLearnedThisIterConverted,
-            constVars.getCommonEngWords(),
-            alreadyIdentifiedWords, constVars.restrictToMatched, label,
-            constVars.removeStopWordsFromSelectedPhrases,
-            constVars.removePhrasesWithStopWords, constVars);
-
-        Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> submit = executor
-            .submit(task);
-        list.add(submit);
-      }
-
-      // // Now retrieve the result
-      for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>> future : list) {
-        Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>> result = future
-            .get();
-
-        wordsandLemmaPatExtracted.addAll(result.first());
-        matchedTokensByPat.addAll(result.second());
-      }
-      executor.shutdown();
-    }
+    
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
       for (Pair<String, String> en : wordsandLemmaPatExtracted.firstKeySet()) {
@@ -332,7 +363,7 @@ public class ScorePhrases {
       // //TODO
       // }
 
-      Counter<String> phraseScores = phraseScorer.scorePhrases(sents, label,
+      Counter<String> phraseScores = phraseScorer.scorePhrases(label,
           terms, wordsPatExtracted, allSelectedPatterns,
           alreadyIdentifiedWords, false);
 
@@ -352,7 +383,7 @@ public class ScorePhrases {
       Counters.addInPlace(scoreForAllWordsThisIteration, phraseScores);
 
       Redwood.log(
-          Redwood.FORCE,
+          ConstantsAndVariables.minimaldebug,
           "## Selected Words: "
               + Counters.toSortedString(finalwords, finalwords.size(),
                   "%1$s:%2$.2f", "\t"));
@@ -368,7 +399,7 @@ public class ScorePhrases {
             }
           }
         }
-        Redwood.log(Redwood.FORCE, "Saving output in " + outputdir);
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Saving output in " + outputdir);
         String filename = outputdir + "/words.json";
 
         // the json object is an array corresponding to each iteration - of list
@@ -407,7 +438,7 @@ public class ScorePhrases {
         }
         obj.add(objThisIter);
 
-        // Redwood.log(Redwood.FORCE, channelNameLogger,
+        // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger,
         // "Writing justification at " + filename);
         IOUtils.writeStringToFile(obj.build().toString(), filename, "utf8");
         writtenInJustification.put(label, true);
@@ -460,7 +491,7 @@ public class ScorePhrases {
       else
         return new ClassicCounter<String>();
 
-      Redwood.log(Redwood.FORCE, "Selected Words: " + bestw);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "Selected Words: " + bestw);
 
       return Counters.asCounter(Arrays.asList(bestw));
     }
@@ -595,7 +626,7 @@ public class ScorePhrases {
   // // BufferedWriter writer = new BufferedWriter(new FileWriter("graph.gdf"));
   // // writeGraph(writer, graph);
   // System.out.println("done writing graph");
-  // Redwood.log(Redwood.FORCE, "calculated look ahead weights for " +
+  // Redwood.log(ConstantsAndVariables.minimaldebug, "calculated look ahead weights for " +
   // weights.size() + " words");
   //
   // return weights;
