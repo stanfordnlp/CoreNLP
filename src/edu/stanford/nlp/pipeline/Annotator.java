@@ -101,6 +101,7 @@ public interface Annotator {
   public static final String STANFORD_PARSE = "parse";
   public static final String STANFORD_DETERMINISTIC_COREF = "dcoref";
   public static final String STANFORD_RELATION = "relation";
+  public static final String STANFORD_SENTIMENT = "sentiment";
 
 
   public static final Requirement TOKENIZE_REQUIREMENT = new Requirement(STANFORD_TOKENIZE);
@@ -131,6 +132,11 @@ public interface Annotator {
   public static final Requirement QUANTIFIABLE_ENTITY_NORMALIZATION_REQUIREMENT = new Requirement("quantifiable_entity_normalization");
 
   /**
+   * The Stanford Parser can produce this if it is specifically requested
+   */
+  public static final Requirement BINARIZED_TREES_REQUIREMENT = new Requirement("binarized_trees");
+
+  /**
    * These are typical combinations of annotators which may be used as
    * requirements by other annotators.
    */
@@ -141,4 +147,5 @@ public interface Annotator {
   public static final Set<Requirement> TOKENIZE_SSPLIT_PARSE_NER = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, PARSE_REQUIREMENT, NER_REQUIREMENT));
   public static final Set<Requirement> TOKENIZE_SSPLIT_POS_LEMMA = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, LEMMA_REQUIREMENT));
   public static final Set<Requirement> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<Requirement>(POS_REQUIREMENT, PARSE_REQUIREMENT));
+  public static final Set<Requirement> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<Requirement>(POS_REQUIREMENT, PARSE_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
 }
