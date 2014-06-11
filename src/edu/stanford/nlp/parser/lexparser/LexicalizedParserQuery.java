@@ -39,9 +39,6 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.KBestViterbiParser;
-import edu.stanford.nlp.parser.common.NoSuchParseException;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
@@ -164,7 +161,6 @@ public class LexicalizedParserQuery implements ParserQuery {
     subcategoryStripper = op.tlpParams.subcategoryStripper();
   }
 
-  @Override
   public void setConstraints(List<ParserConstraint> constraints) {
     if (pparser != null) {
       pparser.setConstraints(constraints);
