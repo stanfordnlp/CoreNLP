@@ -223,7 +223,7 @@
   { (/hours?|hrs?/) => HOUR }
   { (/minutes?|mins?/) => MINUTE }
   { (/seconds?|secs?/) => SECOND }
-  { (/milliseconds?|millisecs?/) => MILLISECOND }
+  { (/milliseconds?|millisecs?/) => MILLIS }
   { (/weeks?|wks?/) => WEEK }
   { (/fortnights?/) => FORTNIGHT }
   { (/quarters?/) => QUARTER }
@@ -861,5 +861,6 @@
   {  pattern: ( /(quarter|sun)s?/ ) }
   {  pattern: ( [ { word:/(fall|spring|second|march|may|sat|sun|min)s?/ } & !{ tag:/NN.*/ } ] )  }
   {  pattern: ( /the/ [ { word:/second/ } & !{ tag:/NN.*/ } ] )  }
+  {  pattern: ( [ { word:/((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)-)?second/ } ] )  }
   {  pattern: ( [ {{ temporal.value == NON_TEMPORAL }} ] ), over: NIL }
 

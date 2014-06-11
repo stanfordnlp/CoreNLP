@@ -22,25 +22,18 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
 
   private static final int MAX_UNKNOWN = 10;
 
-  protected boolean smartMutation = false;
+  protected final boolean smartMutation;
+  protected final int unknownSuffixSize;
+  protected final int unknownPrefixSize;
 
-
-  protected int unknownSuffixSize = 0;
-  protected int unknownPrefixSize = 0;
 
   public ArabicUnknownWordModel(Options op, Lexicon lex,
                                 Index<String> wordIndex,
                                 Index<String> tagIndex,
                                 ClassicCounter<IntTaggedWord> unSeenCounter) {
     super(op, lex, wordIndex, tagIndex, unSeenCounter, null, null, null);
-    unknownLevel = op.lexOptions.useUnknownWordSignatures;
     if (unknownLevel < MIN_UNKNOWN || unknownLevel > MAX_UNKNOWN) {
-      if (unknownLevel < MIN_UNKNOWN) {
-        unknownLevel = MIN_UNKNOWN;
-      } else if (unknownLevel > MAX_UNKNOWN) {
-        unknownLevel = MAX_UNKNOWN;
-      }
-      System.err.println("Invalid value for useUnknownWordSignatures");
+      throw new IllegalArgumentException("Invalid value for useUnknownWordSignatures: " + unknownLevel);
     }
     this.smartMutation = op.lexOptions.smartMutation;
     this.unknownSuffixSize = op.lexOptions.unknownSuffixSize;
@@ -246,12 +239,6 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
     // System.err.println("Summarized " + word + " to " + sb.toString());
     return sb.toString();
   } // end getSignature()
-
-
-  @Override
-  public void setUnknownLevel(int unknownLevel) {
-    this.unknownLevel = unknownLevel;
-  }
 
   @Override
   public int getUnknownLevel() {
