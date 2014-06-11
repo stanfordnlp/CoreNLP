@@ -24,9 +24,8 @@ import edu.stanford.nlp.util.Generics;
  */
 public class Embedding {  
   private Map<String, SimpleMatrix> wordVectors;
-
   private int embeddingSize;
-  
+
   static final String START_WORD = "*START*";
   static final String END_WORD = "*END*";
   
@@ -85,17 +84,31 @@ public class Embedding {
    * truncated and a warning is printed.
    */
   private void loadWordVectors(String wordVectorFile) {
-    System.err.println("Reading in the word vector file: " + wordVectorFile);
+    System.err.println("# Loading embedding ...\n  word vector file = " + wordVectorFile);
     int dimOfWords = 0;
     boolean warned = false;
     
     for (String line : IOUtils.readLines(wordVectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
       String word = lineSplit[0];
+
+      // check for unknown token
+      if(word.equals("UNKNOWN") || word.equals("UUUNKKK") || word.equals("UNK") || word.equals("*UNKNOWN*")){
+        word = UNKNOWN_WORD;
+      }
+      // check for start token
+      if(word.equals("<s>")){
+        word = START_WORD;
+      }
+      // check for end token
+      if(word.equals("</s>")){
+        word = START_WORD;
+      }
+      
       dimOfWords = lineSplit.length - 1;
       if (embeddingSize <= 0) {
         embeddingSize = dimOfWords;
-        System.err.println("Dimensionality of numHid not set.  The length of the word vectors in the given file appears to be " + dimOfWords);
+        System.err.println("  detected embedding size = " + dimOfWords);
       }
       // the first entry is the word itself
       // the other entries will all be entries in the word vector
@@ -128,7 +141,7 @@ public class Embedding {
    * truncated and a warning is printed.
    */
   private void loadWordVectors(String wordFile, String vectorFile) {
-    System.err.println("Reading in the word file " + wordFile + " and vector file " + vectorFile);
+    System.err.println("# Loading embedding ...\n  word file = " + wordFile + "\n  vector file = " + vectorFile);
     int dimOfWords = 0;
     boolean warned = false;
     
@@ -136,11 +149,25 @@ public class Embedding {
     for (String line : IOUtils.readLines(vectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
       String word = wordIterator.next();
+      
+      // check for unknown token
+      if(word.equals("UNKNOWN") || word.equals("UUUNKKK") || word.equals("UNK") || word.equals("*UNKNOWN*")){
+        word = UNKNOWN_WORD;
+      }
+      // check for start token
+      if(word.equals("<s>")){
+        word = START_WORD;
+      }
+      // check for end token
+      if(word.equals("</s>")){
+        word = START_WORD;
+      }
+      
       dimOfWords = lineSplit.length;
       
       if (embeddingSize <= 0) {
         embeddingSize = dimOfWords;
-        System.err.println("Dimensionality of numHid not set.  The length of the word vectors in the given file appears to be " + dimOfWords);
+        System.err.println("  detected embedding size = " + dimOfWords);
       }
       // the first entry is the word itself
       // the other entries will all be entries in the word vector
@@ -364,8 +391,13 @@ public class Embedding {
   public Set<Entry<String, SimpleMatrix>> entrySet(){
     return wordVectors.entrySet();
   }
+  
   public SimpleMatrix get(String word) {
-    return wordVectors.get(word);
+    if(wordVectors.containsKey(word)){
+      return wordVectors.get(word);
+    } else {
+      return wordVectors.get(UNKNOWN_WORD);
+    }
   }
   
   public SimpleMatrix getStartWordVector() {
@@ -383,6 +415,11 @@ public class Embedding {
   public Map<String, SimpleMatrix> getWordVectors() {
     return wordVectors;
   }
+    
+  public int getEmbeddingSize() {
+    return embeddingSize;
+  }
+
  
   public void setWordVectors(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
