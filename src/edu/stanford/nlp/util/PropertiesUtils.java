@@ -249,4 +249,29 @@ public class PropertiesUtils {
     }
     return results;
   }
+
+  public static class Property {
+    public String name;
+    public String defaultValue;
+    public String description;
+
+    public Property(String name, String defaultValue, String description) {
+      this.name = name;
+      this.defaultValue = defaultValue;
+      this.description = description;
+    }
+  }
+
+  public static String getSignature(String name, Properties properties, Property[] supportedProperties) {
+    String prefix = (name != null && !name.isEmpty())? name + ".":"";
+    // keep track of all relevant properties for this annotator here!
+    StringBuilder sb = new StringBuilder();
+    for (Property p:supportedProperties) {
+      String pname = prefix + p.name;
+      String pvalue = properties.getProperty(pname, p.defaultValue);
+      sb.append(pname).append(":").append(pvalue);
+    }
+    return sb.toString();
+  }
+
 }
