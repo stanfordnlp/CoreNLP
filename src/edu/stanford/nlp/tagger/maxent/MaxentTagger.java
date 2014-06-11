@@ -238,35 +238,31 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
   public MaxentTagger() {
   }
 
-  public MaxentTagger(TaggerConfig config) {
-    // maybe this shouldn't do this but replace the zero arg constructor.
-    // i.e., call init() not readModelAndInit()
-    this(config.getModel(), config);
-  }
-
   /**
-   * Constructor for a tagger, loading a model stored in a particular file,
-   * classpath resource, or URL.
-   * The tagger data is loaded when the constructor is called (this can be
-   * slow). This constructor first constructs a TaggerConfig object, which
-   * loads the tagger options from the modelFile.
+   * Constructor for a tagger using a model stored in a particular file.
+   * The <code>modelFile</code> is a filename for the model data.
+   * The tagger data is loaded when the
+   * constructor is called (this can be slow).
+   * This constructor first constructs a TaggerConfig object, which loads
+   * the tagger options from the modelFile.
    *
-   * @param modelFile Filename, classpath resource, or URL for the trained model
+   * @param modelFile filename of the trained model
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
   public MaxentTagger(String modelFile) {
-    this(modelFile, StringUtils.argsToProperties("-model", modelFile), true);
+    this(modelFile, StringUtils.argsToProperties(new String[] {"-model", modelFile}), true);
   }
 
   /**
    * Constructor for a tagger using a model stored in a particular file,
    * with options taken from the supplied TaggerConfig.
+   * The <code>modelFile</code> is a filename for the model data.
    * The tagger data is loaded when the
    * constructor is called (this can be slow).
    * This version assumes that the tagger options in the modelFile have
    * already been loaded into the TaggerConfig (if that is desired).
    *
-   * @param modelFile Filename, classpath resource, or URL for the trained model
+   * @param modelFile filename of the trained model
    * @param config The configuration for the tagger
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
@@ -294,7 +290,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
   }
 
 
-  final Dictionary dict = new Dictionary();
+  Dictionary dict = new Dictionary();
   TTags tags;
 
   /**
@@ -329,14 +325,14 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
   final boolean alltags = false;
   final Map<String, Set<String>> tagTokens = Generics.newHashMap();
 
-  static final int RARE_WORD_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_THRESH);
-  static final int MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.MIN_FEATURE_THRESH);
-  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
-  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
-  static final int VERY_COMMON_WORD_THRESH = Integer.parseInt(TaggerConfig.VERY_COMMON_WORD_THRESH);
+  static final int RARE_WORD_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_THRESH);
+  static final int MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.MIN_FEATURE_THRESH);
+  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
+  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
+  static final int VERY_COMMON_WORD_THRESH = Integer.valueOf(TaggerConfig.VERY_COMMON_WORD_THRESH);
 
-  static final boolean OCCURRING_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.OCCURRING_TAGS_ONLY);
-  static final boolean POSSIBLE_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.POSSIBLE_TAGS_ONLY);
+  static final boolean OCCURRING_TAGS_ONLY = Boolean.valueOf(TaggerConfig.OCCURRING_TAGS_ONLY);
+  static final boolean POSSIBLE_TAGS_ONLY = Boolean.valueOf(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
   private double defaultScore;
   private double[] defaultScores = null;
@@ -802,7 +798,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
 
       xSize = rf.readInt();
       ySize = rf.readInt();
-      // dict = new Dictionary();  // this method is called in constructor, and it's initialized as empty already
+      dict = new Dictionary();
       dict.read(rf);
 
       if (VERBOSE) {
