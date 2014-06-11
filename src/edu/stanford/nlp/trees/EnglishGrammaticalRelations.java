@@ -190,6 +190,8 @@ public class EnglishGrammaticalRelations {
           "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
           // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
           "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
+          // "Such a great idea this was"
+          "SINV < (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
         });
 
   public static class CopulaGRAnnotation extends GrammaticalRelationAnnotation {
@@ -358,6 +360,8 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (SQ=target < (/^(?:VB|AUX)/ < " + copularWordRegex + ") !< VP)",
           // matches subj in SINV
           "SINV < (NP|WHNP=target [ $- VP|VBZ|VBD|VBP|VB|MD|AUX | $- (@RB|ADVP $- VP|VBZ|VBD|VBP|VB|MD|AUX) | !$- __ !$ @NP] )",
+          // Another SINV subj, such as "Such a great idea this was"
+          "SINV < (NP $++ (NP=target $++ (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
           //matches subj in xcomp like "He considered him a friend"
           "S < (NP=target $+ NP|ADJP) > VP",
           // matches subj in relative clauses
@@ -743,6 +747,7 @@ public class EnglishGrammaticalRelations {
           "VP < (/^(?:VB|AUX)/ $+ (VP=target < VB < NP))",
           "VP < (SBAR=target < (S !$- (NN < order) < (VP < TO))) !> (VP < (VB|AUX < be)) ",
           "VP < (S=target !$- (NN < order) <: NP) > VP",
+          "VP < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) $-- (/^VB/ < " + copularWordRegex + " )",
           // stop eating
           // note that we eliminate parentheticals and clauses that could match a vmod
           // the clause !$-- VBG eliminates matches such as "What are you wearing dancing tonight"
@@ -826,7 +831,10 @@ public class EnglishGrammaticalRelations {
           // ADJP=target used to be limited by !$-- NP, but that
           // stopped the converter from finding the right dependency
           // in cases such as "driving prices lower"
-          "VP [ < ADJP=target |  < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) ]",
+          // The second half of the expression leaves out relations
+          // which should be xcomp because they are actually
+          // passivized verbs
+          "VP [ < ADJP=target | ( < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) !$-- (/^VB/ < " + copularWordRegex + " )) ]",          
         });
   public static class AdjectivalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -885,7 +893,9 @@ public class EnglishGrammaticalRelations {
           // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
           // note that we allow adverb phrases to come before the WHADVP, which allows for phrases such as "even when"
           // ":" indicates something that should be a parataxis
-          "S|SQ|VP < (SBAR|SBAR-TMP=target < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
+          // in cases where there are two SBARs conjoined, we're happy
+          // to use the head SBAR as a candidate for this relation
+          "S|SQ|VP < (@SBAR=target [ == @SBAR=sbar | <# @SBAR=sbar ] ): (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
           // "S|SQ < (PP=target <, RB < @S)", // caught as prep and pcomp.
           "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
@@ -1331,6 +1341,10 @@ public class EnglishGrammaticalRelations {
           // one word nouns like "cost efficient", "ice-free"
           "@ADJP < (NN=target $++ /^JJ/) !< CC|CONJP",
           "@NP|WHNP < /^NP-ADV/=target",
+          // Mr. Bush himself ..., in a couple different parse
+          // patterns.  Looking for CC|CONJP leaves out phrases such
+          // as "he and myself"
+          "@NP|WHNP [ < (NP=target <: (PRP < " + selfRegex + ")) | < (PRP=target < " + selfRegex + ") ] : (=target $-- NP|NN|NNS|NNP|NNPS|PRP=noun !$-- (/^,|CC|CONJP$/ $-- =noun))",
           // this next one is for weird financial listings: 4.7% three months
           "@NP <1 (@NP <<# /^%$/) <2 (@NP=target <<# days|month|months) !<3 __",
           "@VP < /^NP-ADV/=target",
