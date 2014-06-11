@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.FileBackedCache;
 
 /**
@@ -64,6 +65,7 @@ public class InvertedIndexByTokens {
         index.put(w, t);
       }
     }
+    System.out.println("size of inv index is " + index.size() + " and some elements are " + CollectionUtils.toList(index.keySet()).subList(0, 10));
       }
 
   public Map<String, Set<String>> getFileSentIds(String word) {
@@ -121,8 +123,8 @@ public class InvertedIndexByTokens {
         relevantWords.addAll(relwordsThisPat);
             
     }
-    System.out.println("searching for " + relevantWords);
     relevantWords.removeAll(specialWords);
+    System.out.println("searching for " + relevantWords);
     return getFileSentIds(relevantWords);
   }
 }
