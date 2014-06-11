@@ -219,7 +219,7 @@ public class ReadSentimentDataset {
     // Split and read the phrase ids file.  This file is in the format
     //   w1 w2 w3 ... | id
     Map<List<String>, Integer> phraseIds = Generics.newHashMap();
-    for (String line : IOUtils.readLines(dictionaryFilename)) {
+    for (String line : IOUtils.readLines(dictionaryFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
       String[] sentence = pieces[0].split(" ");
       Integer id = Integer.valueOf(pieces[1]);
@@ -230,7 +230,7 @@ public class ReadSentimentDataset {
     // file is of the format:
     //   phrasenum | score
     Map<Integer, Double> sentimentScores = Generics.newHashMap();
-    for (String line : IOUtils.readLines(sentimentFilename)) {
+    for (String line : IOUtils.readLines(sentimentFilename, "utf-8")) {
       if (line.startsWith("phrase")) {
         continue;
       }
@@ -244,7 +244,7 @@ public class ReadSentimentDataset {
     int index = 0;
     PTBEscapingProcessor escaper = new PTBEscapingProcessor();
     List<Tree> trees = Generics.newArrayList();
-    for (String line : IOUtils.readLines(parseFilename)) {
+    for (String line : IOUtils.readLines(parseFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
       List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() { 
           public Integer apply(String arg) { return Integer.valueOf(arg) - 1; }
@@ -258,7 +258,7 @@ public class ReadSentimentDataset {
     splits.put(1, Generics.<Integer>newArrayList());
     splits.put(2, Generics.<Integer>newArrayList());
     splits.put(3, Generics.<Integer>newArrayList());
-    for (String line : IOUtils.readLines(splitFilename)) {
+    for (String line : IOUtils.readLines(splitFilename, "utf-8")) {
       if (line.startsWith("sentence_index")) {
         continue;
       }

@@ -87,6 +87,8 @@ interface TsurgeonParserConstants {
     "<TREE_NODE_TERMINAL_LABEL>",
     "<TREE_NODE_NONTERMINAL_LABEL>",
     "\"\\n\"",
+    "\"[\"",
+    "\"]\"",
     "\")\"",
   };
 
