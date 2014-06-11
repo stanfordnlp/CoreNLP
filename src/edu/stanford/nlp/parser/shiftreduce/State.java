@@ -77,5 +77,15 @@ public class State {
    * idle transitions are allowed.
    */ 
   final boolean finished;
+
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder();
+    result.append("State summary\n");
+    result.append("  Tokens: " + sentence + "\n");
+    result.append("  Token position: " + tokenPosition + "\n");
+    result.append("  Current stack contents: " + stack + "\n");
+    return result.toString();
+  }
 }
 
