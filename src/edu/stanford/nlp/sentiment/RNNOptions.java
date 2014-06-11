@@ -1,15 +1,16 @@
 package edu.stanford.nlp.sentiment;
 
 import java.io.Serializable;
+import java.util.Random;
 
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 
 public class RNNOptions implements Serializable {
   /**
-   * TODO: set this to a random number so we can record it for posterity
+   * The random seed the random number generator is initialized with.  
    */
-  public int randomSeed;
+  public int randomSeed = (new Random()).nextInt();
 
   /**
    * Filename for the word vectors
