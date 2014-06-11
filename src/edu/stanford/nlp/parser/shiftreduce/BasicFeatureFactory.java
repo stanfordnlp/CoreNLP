@@ -180,27 +180,11 @@ public class BasicFeatureFactory implements FeatureFactory {
   }
 
   public static void addUnaryQueueFeatures(List<String> features, CoreLabel label, String wtFeature) {
-    if (label == null) {
-      features.add(wtFeature + NULL);
-      return;
-    }
-    String tag = label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-    String word = label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+    String tag = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
+    String word = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
 
     // TODO: check to see if this is slow because of the string concat
     features.add(wtFeature + tag + "-" + word);
-  }
-
-  public static void addBinaryFeatures(List<String> features, String WN, String CN, String WW, String WC, String CW, String CC, CoreLabel label1, CoreLabel label2) {
-    if (label2 == null) {
-      addUnaryFeature(features, WN, label1, FeatureComponent.HEADWORD);
-      addUnaryFeature(features, CN, label1, FeatureComponent.VALUE);
-    } else {
-      addBinaryFeature(features, WW, label1, FeatureComponent.HEADWORD, label2, FeatureComponent.HEADWORD);
-      addBinaryFeature(features, WC, label1, FeatureComponent.HEADWORD, label2, FeatureComponent.VALUE);
-      addBinaryFeature(features, CW, label1, FeatureComponent.VALUE, label2, FeatureComponent.HEADWORD);
-      addBinaryFeature(features, CC, label1, FeatureComponent.VALUE, label2, FeatureComponent.VALUE);
-    }
   }
 
   public static void addUnaryFeature(List<String> features, String featureType, CoreLabel label, FeatureComponent feature) {
@@ -385,7 +369,10 @@ public class BasicFeatureFactory implements FeatureFactory {
     addUnaryFeature(features, "recL1-", recentL1Label, FeatureComponent.HEADWORD);
     addUnaryFeature(features, "recR1-", recentR1Label, FeatureComponent.HEADWORD);
 
-    addBinaryFeatures(features, "S0WS1n-", "S0CS1n-", "S0WS1W-", "S0WS1C-", "S0CS1W-", "S0CS1C-", s0Label, s1Label);
+    addBinaryFeature(features, "S0WS1W-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD);
+    addBinaryFeature(features, "S0WS1C-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE);
+    addBinaryFeature(features, "S0CS1W-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD);
+    addBinaryFeature(features, "S0CS1C-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE);
 
     addBinaryFeature(features, "S0WQ0W-", s0Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADWORD);
     addBinaryFeature(features, "S0WQ0T-", s0Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
