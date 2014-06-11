@@ -160,6 +160,18 @@ public final class SloppyMath {
     return (a <= b) ? a : b;
   }
 
+  /** Returns a mod where the sign of the answer is the same as the sign of the second
+   *  argument.  This is how languages like Python do it. Helpful for array accesses.
+   *
+   *  @param num The number
+   * @param modulus The modulus
+   * @return num mod modulus, where the sign of the answer is the same as the sign of modulus
+   */
+  public static int pythonMod(int num, int modulus) {
+    // This is: num < 0 ? num % modulus + modulus: num % modulus, but avoids a test-and-branch
+    return (num % modulus + modulus) % modulus;
+  }
+
   /**
    * @return an approximation of the log of the Gamma function of x.  Laczos Approximation
    * Reference: Numerical Recipes in C
@@ -323,6 +335,8 @@ public final class SloppyMath {
    * the exponent is treated as 0, and 1 is returned.  0^0 also
    * returns 1.
    * Biased to do quickly small exponents, like the CRF needs.
+   * Todo: Claim is that it will be faster if use if, not switch, and also do 3 (and even 4, 5) via cases:
+   * http://jafama.svn.sourceforge.net/viewvc/jafama/src/odk/lang/FastMath.java?view=markup
    *
    * @param b base
    * @param e exponent

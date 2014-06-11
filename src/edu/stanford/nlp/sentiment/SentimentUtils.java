@@ -2,7 +2,7 @@ package edu.stanford.nlp.sentiment;
 
 import java.util.List;
 
-import edu.stanford.nlp.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
