@@ -1,11 +1,13 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
+import java.util.List;
+
 /**
 * Exact match cost function
 *
 * @author Angel Chang
 */
-public final class ExactMatchCost<K,V> extends MatchCostFunction.AbstractMatchCostFunction<K,V> {
+public final class ExactMatchCost<K,V> implements MatchCostFunction<K,V> {
   final double mismatchCost;
   final double insCost;
   final double delCost;
@@ -34,4 +36,8 @@ public final class ExactMatchCost<K,V> extends MatchCostFunction.AbstractMatchCo
     }
   }
 
+  @Override
+  public double multiMatchDeltaCost(List<K> ks, V v, List<Match<K,V>> prevMatched, List<Match<K,V>> curMatched) {
+    return 0;
+  }
 }
