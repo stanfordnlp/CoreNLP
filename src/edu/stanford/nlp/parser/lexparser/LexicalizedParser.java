@@ -1245,18 +1245,12 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
         treebankPath = treebankDescription.first();
         trainFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-train2")) {
-        // TODO: we could use the fully expressive -train options if
-        // we add some mechanism for returning leftover options from
-        // ArgUtils.getTreebankDescription
         // train = true;     // cdm july 2005: should require -train for this
-        int numSubArgs = ArgUtils.numSubArgs(args, argIndex);
-        argIndex++;
-        if (numSubArgs < 2) {
-          throw new RuntimeException("Error: -train2 <treebankPath> [<ranges>] <weight>.");
-        }
-        secondaryTreebankPath = args[argIndex++];
-        secondaryTrainFilter = (numSubArgs == 3) ? new NumberRangesFileFilter(args[argIndex++], true) : null;
-        secondaryTreebankWeight = Double.parseDouble(args[argIndex++]);
+        Triple<String, FileFilter, Double> treebankDescription = ArgUtils.getWeightedTreebankDescription(args, argIndex, "-train2");
+        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
+        secondaryTreebankPath = treebankDescription.first();
+        secondaryTrainFilter = treebankDescription.second();
+        secondaryTreebankWeight = treebankDescription.third();
       } else if (args[argIndex].equalsIgnoreCase("-tLPP") && (argIndex + 1 < args.length)) {
         try {
           op.tlpParams = (TreebankLangParserParams) Class.forName(args[argIndex + 1]).newInstance();
