@@ -243,9 +243,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    *  @param fold The number of this fold (must be between 0 and (numFolds - 1)
    *  @param numFolds The number of folds to divide the data into (must be greater than or equal to the
    *                  size of the data set)
-   *  @return A Pair of data sets, the first being roughly (numFolds-1)/numFolds of the data items
-   *         (for use as training data_, and the second being 1/numFolds of the data, taken from the
-   *         fold<sup>th</sup> part of the data (for use as devTest data)
+   *  @return A Pair of data sets, the first being the remainder of size this.size() - (end-start)
+   *          and the second usually being of size this.size() / numFolds but with the last fold of size
+   *          this.size() - (this.size() / numFolds * (numFolds - 1)
    */
   public Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> splitOutFold(int fold, int numFolds) {
     if (numFolds < 2 || numFolds > size() || fold < 0 || fold >= numFolds) {
@@ -296,20 +296,14 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    * Randomizes the data array in place.
    * Note: this cannot change the values array or the datum weights,
    * so redefine this for RVFDataset and WeightedDataset!
-   * This uses the Fisher-Yates (or Durstenfeld-Knuth) shuffle, which is unbiased.
-   * The same algorithm is used by shuffle() in j.u.Collections, and so you should get compatible
-   * results if using it on a Collection with the same seed (as of JDK1.7, at least).
-   *
-   * @param randomSeed A seed for the Random object (allows you to reproduce the same ordering)
+   * @param randomSeed
    */
-  // todo: Probably should be renamed 'shuffle' to be consistent with Java Collections API
-  public void randomize(long randomSeed) {
+  public void randomize(int randomSeed) {
     Random rand = new Random(randomSeed);
-    for (int j = size - 1; j > 0; j--) {
-      // swap each item with some lower numbered item
+    for(int j = size - 1; j > 0; j --){
       int randIndex = rand.nextInt(j);
 
-      int[] tmp = data[randIndex];
+      int [] tmp = data[randIndex];
       data[randIndex] = data[j];
       data[j] = tmp;
 
@@ -323,9 +317,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     int sampleSize = (int)(this.size()*sampleFrac);
     Random rand = new Random(randomSeed);
     GeneralDataset<L,F> subset;
-    if (this instanceof RVFDataset) {
+    if(this instanceof RVFDataset)
       subset = new RVFDataset<L,F>();
-    } else if (this instanceof Dataset) {
+    else if (this instanceof Dataset) {
       subset = new Dataset<L,F>();
     }
     else {
