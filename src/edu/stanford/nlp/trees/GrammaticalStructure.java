@@ -61,7 +61,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  */
 public abstract class GrammaticalStructure extends TreeGraph {
 
-  private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
+  private static final boolean PRINT_DEBUGGING = false;
 
   protected final Set<Dependency<Label, Label, Object>> dependencies;
   protected final List<TypedDependency> typedDependencies;
@@ -101,7 +101,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
     dependencies = root.dependencies(puncDepFilter, null);
     for (Dependency<Label, Label, Object> p : dependencies) {
-      //System.err.println("dep found " + p);
+      //System.out.println("dep found " + p);
       TreeGraphNode gov = (TreeGraphNode) p.governor();
       TreeGraphNode dep = (TreeGraphNode) p.dependent();
       dep.addArc(GrammaticalRelation.getAnnotationClass(GOVERNOR), gov);
@@ -248,7 +248,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
           for (Tree u : egr.getRelatedNodes(t, root, hf)) {
-            //System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh);
+            //System.out.println("Adding " + egr.getShortName() + " from " + t + " to " + u );
             tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
           }
         }
@@ -274,10 +274,10 @@ public abstract class GrammaticalStructure extends TreeGraph {
     for (Dependency<Label, Label, Object> d : dependencies()) {
       TreeGraphNode gov = (TreeGraphNode) d.governor();
       TreeGraphNode dep = (TreeGraphNode) d.dependent();
+        //System.out.println("Gov: " + gov);
+        //System.out.println("Dep: " + dep);
       GrammaticalRelation reln = getGrammaticalRelation(gov, dep);
-      // System.err.print("Gov: " + gov);
-      // System.err.print("  Dep: " + dep);
-      // System.err.println("  Reln: " + reln);
+        //System.out.println("Reln: " + reln);
       basicDep.add(new TypedDependency(reln, gov, dep));
     }
 
@@ -478,17 +478,18 @@ public abstract class GrammaticalStructure extends TreeGraph {
     GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
     TreeGraphNode govH = gov.highestNodeWithSameHead();
     TreeGraphNode depH = dep.highestNodeWithSameHead();
-    // System.err.println("  gov node " + gov);
-    // System.err.println("  govH " + govH);
-    // System.err.println("  dep node " + dep);
-    // System.err.println("  depH " + depH);
+    /*System.out.println("gov node " + gov);
+    System.out.println("govH " + govH);
+    System.out.println("dep node " + dep);
+    System.out.println("depH " + depH);*/
 
     // Set sortedSet = new TreeSet(new NameComparator());
     // sortedSet.addAll(govH.arcLabelsToNode(depH));
     // Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = sortedSet;
     Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = new TreeSet<Class<? extends GrammaticalRelationAnnotation>>(new NameComparator<Class<? extends GrammaticalRelationAnnotation>>());
     arcLabels.addAll(govH.arcLabelsToNode(depH));
-    //System.err.println("arcLabels: " + arcLabels);
+
+    //System.out.println("arcLabels: " + arcLabels);
 
     for (Class<? extends GrammaticalRelationAnnotation> arcLabel : arcLabels) {
       if (arcLabel != null) {
