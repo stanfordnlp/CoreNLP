@@ -156,7 +156,6 @@ import edu.stanford.nlp.util.StringUtils;
       } else if ("tokenizeNLs".equals(key)) {
         tokenizeNLs = val;
       } else if ("ptb3Escaping".equals(key)) {
-        americanize = val;
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
         normalizeCurrency = val;
@@ -169,7 +168,6 @@ import edu.stanford.nlp.util.StringUtils;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
-        escapeForwardSlashAsterisk = val;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
@@ -257,7 +255,7 @@ import edu.stanford.nlp.util.StringUtils;
   /* Flags begin with historical ptb3Escaping behavior */
   private boolean invertible;
   private boolean tokenizeNLs;
-  private boolean americanize = true;
+  private boolean americanize = false;
   private boolean normalizeSpace = true;
   private boolean normalizeAmpersandEntity = true;
   private boolean normalizeCurrency = true;
@@ -270,7 +268,7 @@ import edu.stanford.nlp.util.StringUtils;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
   private boolean ptb3Dashes = true;
-  private boolean escapeForwardSlashAsterisk = true;
+  private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
 
@@ -707,7 +705,14 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
+c[+][+]                     { return getNext(); }
 cannot                  { if (splitAssimilations) {
+                            yypushback(3) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
+'twas                   { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
                             return getNext();
