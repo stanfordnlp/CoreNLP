@@ -20,10 +20,10 @@ for SPLIT in dev train test
 do
 
 # Get absolute paths of integrated files
-  cat ${SPLITS}/${SPLIT} | xargs -n 1 find ${ATB_BASE}/*/data/integrated -name | \
+  cat ${SPLITS}/${SPLIT} | xargs -r -n 1 find ${ATB_BASE}/*/data/integrated -name | \
 
 # Run them through the parse_integrated script to output training data 
-  xargs cat | "`dirname $0`/parse_integrated" > ${OUTPUT}-${SPLIT}.utf8.txt
+  xargs -r cat | "`dirname $0`/parse_integrated" > ${OUTPUT}-${SPLIT}.utf8.txt
 
   if [ "$DOMAIN" != "" ]; then
     sed "s/^/$DOMAIN /" ${OUTPUT}-${SPLIT}.utf8.txt > ${OUTPUT}-withDomains-${SPLIT}.utf8.txt ;
