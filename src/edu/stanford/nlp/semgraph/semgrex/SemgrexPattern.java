@@ -26,12 +26,12 @@ import edu.stanford.nlp.util.Generics;
  *
  * For example, <code>{lemma:slice;tag:/VB.* /}</code> represents any verb nodes
  * with "slice" as their lemma. <p/>
- * 
+ *
  * The root of the graph can be marked by the $ sign, that is <code>{$}</code>
  * represents the root node. <p/>
- *  
+ *
  * Relations are defined by a symbol representing the type of relationship and a
- * string, or regular expression representing the value of the relationship. A
+ * string or regular expression representing the value of the relationship. A
  * relationship string of <code>%</code> means any relationship.  It is
  * also OK simply to omit the relationship symbol altogether.
  * <p/>
@@ -46,18 +46,19 @@ import edu.stanford.nlp.util.Generics;
  * <tr><td>A &gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths
  * <tr><td>A x,y&lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following dep-&gt;gov paths between distances of x and y
  * <tr><td>A x,y&gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths between distances of x and y
+ * <tr><td>A == B <td>A and B are the same nodes in the same graph
  * <tr><td>A @ B <td>A is aligned to B
  * </table>
  * <p/>
  *
  * In a chain of relations, all relations are relative to the first
  * node in the chain. For example, "<code>{} &gt;nsubj {} &gt;dobj
- * {}</code>" means "any node that is the governer of both a nsubj and
+ * {}</code>" means "any node that is the governor of both a nsubj and
  * a dobj relation".  If instead what you want is a node that is the
  * governer of a nsubj relation with a node that is itself the
  * governer of dobj relation, you should write: "<code>{} &gt;nsubj
  * ({} &gt;dobj {})</code>". <p/>
- * 
+ *
  * If a relation type is specified for the &lt;&lt; relation, the
  * relation type is only used for the first relation in the sequence.
  * Therefore, if B depends on A with the relation type foo, the
@@ -115,7 +116,7 @@ import edu.stanford.nlp.util.Generics;
  * be stored in a map that maps names to nodes so that if a match is found, the
  * node corresponding to the named node can be extracted from the map.  For
  * example <code> ({tag:NN}=noun) </code> will match a singular noun node and
- * after a match is found, the map can be queried with the name to retreived the
+ * after a match is found, the map can be queried with the name to retrieved the
  * matched node using {@link SemgrexMatcher#getNode(String o)} with (String)
  * argument "noun" (<it>not</it> "=noun").  Note that you are not allowed to
  * name a node that is under the scope of a negation operator (the semantics
@@ -123,10 +124,10 @@ import edu.stanford.nlp.util.Generics;
  * Trying to do so will cause a {@link ParseException} to be thrown. Named nodes
  * <it>can be put within the scope of an optionality operator</it>. <p/>
  *
- * Named nodes that refer back to previous named nodes need not have a node
+ * Named nodes that refer back to previously named nodes need not have a node
  * description -- this is known as "backreferencing".  In this case, the
  * expression will match only when all instances of the same name get matched to
- * the same node.  For example: the pattern 
+ * the same node.  For example: the pattern
  * <code>{} &gt;dobj ({} &gt; {}=foo) &gt;mod ({} &gt; {}=foo) </code>
  * will match a graph in which there are two nodes, <code>X</code> and
  * <code>Y</code>, for which <code>X</code> is the grandparent of
@@ -137,10 +138,11 @@ import edu.stanford.nlp.util.Generics;
  * @author Chloe Kiddon
  */
 public abstract class SemgrexPattern implements Serializable {
+
   private static final long serialVersionUID = 1722052832350596732L;
   private boolean neg = false;
   private boolean opt = false;
-  private String patternString;
+  private String patternString; // conceptually final, but can't do because of parsing
 
   // package private constructor
   SemgrexPattern() {
@@ -155,17 +157,17 @@ public abstract class SemgrexPattern implements Serializable {
   abstract void setChild(SemgrexPattern child);
 
   void negate() {
-    neg = true;
-    if (neg && opt) {
+    if (opt) {
       throw new RuntimeException("Node cannot be both negated and optional.");
     }
+    neg = true;
   }
 
   void makeOptional() {
-    opt = true;
-    if (neg && opt) {
+    if (neg) {
       throw new RuntimeException("Node cannot be both negated and optional.");
     }
+    opt = true;
   }
 
   boolean isNegated() {
@@ -189,7 +191,7 @@ public abstract class SemgrexPattern implements Serializable {
 
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
-   * 
+   *
    * @param sg
    *          the SemanticGraph to match on
    * @return a SemgrexMatcher
@@ -209,7 +211,7 @@ public abstract class SemgrexPattern implements Serializable {
 
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
-   * 
+   *
    * @param sg
    *          the SemanticGraph to match on
    * @param ignoreCase
@@ -237,7 +239,7 @@ public abstract class SemgrexPattern implements Serializable {
 
   /**
    * Creates a pattern from the given string.
-   * 
+   *
    * @param semgrex
    *          the pattern string
    * @return a SemgrexPattern for the string.
@@ -248,7 +250,7 @@ public abstract class SemgrexPattern implements Serializable {
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
-      newPattern.setPatternString(semgrex);
+      newPattern.patternString = semgrex;
       return newPattern;
     } catch (ParseException ex) {
       throw new SemgrexParseException("Error parsing semgrex pattern " + semgrex, ex);
@@ -261,10 +263,6 @@ public abstract class SemgrexPattern implements Serializable {
     return patternString;
   }
 
-  public void setPatternString(String patternString) {
-    this.patternString = patternString;
-  }
-
   // printing methods
   // -----------------------------------------------------------
 
@@ -272,43 +270,42 @@ public abstract class SemgrexPattern implements Serializable {
    * @return A single-line string representation of the pattern
    */
   @Override
-  abstract public String toString();
+  public abstract String toString();
 
   /**
-   * hasPrecedence indicates that this pattern has precedence in terms
+   * @param hasPrecedence indicates that this pattern has precedence in terms
    * of "order of operations", so there is no need to parenthesize the
    * expression
    */
-  abstract public String toString(boolean hasPrecedence);
+  public abstract String toString(boolean hasPrecedence);
 
   private void prettyPrint(PrintWriter pw, int indent) {
     for (int i = 0; i < indent; i++) {
       pw.print("   ");
     }
     pw.println(localString());
-    for (Iterator<SemgrexPattern> iter = getChildren().iterator(); iter.hasNext();) {
-      SemgrexPattern child = iter.next();
+    for (SemgrexPattern child : getChildren()) {
       child.prettyPrint(pw, indent + 1);
     }
   }
 
   /**
-   * Print a multi-line respresentation of the pattern illustrating its syntax.
+   * Print a multi-line representation of the pattern illustrating its syntax.
    */
   public void prettyPrint(PrintWriter pw) {
     prettyPrint(pw, 0);
   }
 
   /**
-   * Print a multi-line respresentation of the pattern illustrating its syntax.
+   * Print a multi-line representation of the pattern illustrating its syntax.
    */
   public void prettyPrint(PrintStream ps) {
     prettyPrint(new PrintWriter(new OutputStreamWriter(ps), true));
   }
 
   /**
-   * Print a multi-line respresentation of the pattern illustrating its syntax
-   * to <code>System.out</code>.
+   * Print a multi-line representation of the pattern illustrating its syntax
+   * to {@code System.out}.
    */
   public void prettyPrint() {
     prettyPrint(System.out);
@@ -317,16 +314,13 @@ public abstract class SemgrexPattern implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof SemgrexPattern)) return false;
-    if (((SemgrexPattern) o).toString().equals(this.toString()))
-      return true;
-    else
-      return false;
+    return o.toString().equals(this.toString());
   }
 
   @Override
   public int hashCode() {
-    if (this == null) return 0;
+    // if (this == null) return 0;
     return this.toString().hashCode();
-
   }
+
 }

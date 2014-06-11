@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -384,7 +385,16 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
 
     // Decode either an evaluation file or raw text
     try {
-      PrintWriter pwOut = new PrintWriter(System.out, true);
+      PrintWriter pwOut;
+      if (segmenter.flags.outputEncoding != null) {
+        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.outputEncoding);
+        pwOut = new PrintWriter(out, true);
+      } else if (segmenter.flags.inputEncoding != null) {
+        OutputStreamWriter out = new OutputStreamWriter(System.out, segmenter.flags.inputEncoding);
+        pwOut = new PrintWriter(out, true);
+      } else {
+        pwOut = new PrintWriter(System.out, true);
+      }
       if (segmenter.flags.testFile != null) {
         if (segmenter.flags.answerFile == null) {
           segmenter.evaluate(pwOut);
