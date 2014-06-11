@@ -754,19 +754,19 @@ public class ChineseGrammaticalRelations {
 
   /**
    * The "relative clause modifier" grammatical relation.
-   * (CP (IP (VP (NP (NT 以前))
+   *(CP (IP (VP (NP (NT 以前))
    *             (ADVP (AD 不))
    *             (ADVP (AD 曾))
    *             (VP (VV 遇到) (AS 过))))
    *         (DEC 的))
-   * (NP
-   *   (NP
-   *     (ADJP (JJ 新))
-   *     (NP (NN 情况)))
-   *   (PU 、)
-   *   (NP
-   *     (ADJP (JJ 新))
-   *     (NP (NN 问题)))))))
+   *       (NP
+   *         (NP
+   *           (ADJP (JJ 新))
+   *           (NP (NN 情况)))
+   *         (PU 、)
+   *         (NP
+   *           (ADJP (JJ 新))
+   *           (NP (NN 问题)))))))
    * (PU 。)))
    * the new problem that has not been encountered.
    * <code> rcmod </code> (问题, 遇到)
@@ -777,11 +777,9 @@ public class ChineseGrammaticalRelations {
                             MODIFIER, "NP", tregexCompiler,
                             new String[]{
                               "NP  $++ (CP=target ) > NP ",
-                              // don't match this rule for an NP if
-                              // there is another, more specific NP
-                              // which will also match the same rule
-                              // TODO: can we just get rid of the <<
-                              " NP  << ( CP=target $++ NP  ) !<< (NP << =target)"
+                              "NP  $++ (CP=target <: IP) > NP  ",
+                              "NP  $++ (CP=target)",
+                              " NP  << ( CP=target $++ NP  )"
                             });
   public static class RelativeClauseModifierGRAnnotation
     extends GrammaticalRelationAnnotation { }
