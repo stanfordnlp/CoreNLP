@@ -2,8 +2,8 @@ package edu.stanford.nlp.dcoref;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.NumberMatchingRegex;
+import edu.stanford.nlp.util.Generics;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -17,8 +17,7 @@ public class SpeakerInfo {
   private String speakerName;
   private String[] speakerNameStrings; // tokenized speaker name
   private String speakerDesc;
-  private Set<Mention> mentions = new LinkedHashSet<Mention>();  // Mentions that corresponds to the speaker...
-  private Mention originalMention;            // the mention used when creating this SpeakerInfo
+  private Set<Mention> mentions = Generics.newHashSet();  // Mentions that corresponds to the speaker...
   private boolean speakerIdIsNumber;          // speaker id is a number (probably mention id)
   private boolean speakerIdIsAutoDetermined;  // speaker id was auto determined by system
   private Mention mainMention;
@@ -94,10 +93,6 @@ public class SpeakerInfo {
       }
     }
     return corefClusterId;
-  }
-
-  public String toString() {
-    return speakerId;
   }
 
 }

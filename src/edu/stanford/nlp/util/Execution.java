@@ -16,6 +16,10 @@ import java.util.jar.JarFile;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
+/*
+ *  TODO(gabor) options for non-static files
+*/
+
 /**
  * A class to set command line options. To use, create a static class into which you'd like
  * to put your properties. Then, for each field, set the annotation:
@@ -58,7 +62,6 @@ public class Execution {
     String alt() default "";
   }
 
-  @SuppressWarnings("MismatchedReadAndWriteOfArray")
   private static final String[] IGNORED_JARS = {
   };
   private static final Class[] BOOTSTRAP_CLASSES = {
@@ -90,6 +93,28 @@ public class Execution {
     private Stack<Integer> indices = new Stack<Integer>();
 
     private int toReturn = -1;
+
+
+    public LazyFileIterator(String path) {
+      this(new File(path));
+    }
+
+    public LazyFileIterator(File path) {
+      this(path, new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+          return true;
+        }
+      });
+    }
+
+    public LazyFileIterator(String path, FilenameFilter filter) {
+      this(new File(path), filter);
+    }
+
+    public LazyFileIterator(String path, final String filter) {
+      this(new File(path), filter);
+    }
 
     public LazyFileIterator(File path, final String filter) {
       this(path, new FilenameFilter() {
@@ -165,7 +190,7 @@ public class Execution {
 	 * ----------
 	 */
 
-  private static void fillField(Object instance, Field f, String value) {
+  private static void fillField(Field f, String value) {
     try {
       //--Permissions
       boolean accessState = true;
@@ -192,10 +217,10 @@ public class Execution {
             Array.set(toSet, i, array[i]);
           }
           // set value
-          f.set(instance, toSet);
+          f.set(null, toSet);
         } else {
           //case: not array
-          f.set(instance, objVal);
+          f.set(null, objVal);
         }
       } else {
         fatal("Cannot assign option field: " + f + " value: " + value + "; invalid type");
@@ -217,7 +242,7 @@ public class Execution {
   }
 
   @SuppressWarnings("rawtypes")
-  private static Class filePathToClass(String cpEntry, String path) {
+  private static final Class filePathToClass(String cpEntry, String path) {
     if (path.length() <= cpEntry.length()) {
       throw new IllegalArgumentException("Illegal path: cp=" + cpEntry
           + " path=" + path);
@@ -240,7 +265,7 @@ public class Execution {
     }
   }
 
-  private static boolean isIgnored(String path) {
+  private static final boolean isIgnored(String path) {
     for (String ignore : IGNORED_JARS) {
       if (path.endsWith(ignore)) {
         return true;
@@ -249,7 +274,7 @@ public class Execution {
     return false;
   }
 
-  public static Class<?>[] getVisibleClasses() {
+  public static final Class<?>[] getVisibleClasses() {
     //--Variables
     List<Class<?>> classes = new ArrayList<Class<?>>();
     // (get classpath)
@@ -277,8 +302,7 @@ public class Execution {
             classes.add(clazz);
           }
         }
-      } else //noinspection StatementWithEmptyBody
-        if (!isIgnored(entry)) {
+      } else if (!isIgnored(entry)) {
         // --Case: Jar
         try {
           JarFile jar = new JarFile(f);
@@ -317,26 +341,16 @@ public class Execution {
 
   @SuppressWarnings("rawtypes")
   protected static Map<String, Field> fillOptionsImpl(
-      Object[] instances,
       Class<?>[] classes,
       Properties options,
       boolean ensureAllOptions) {
-
-    //--Create Class->Object Mapping
-    Map<Class, Object> class2object = new HashMap<Class, Object>();
-    if (instances != null) {
-      for (int i = 0; i < classes.length; ++i) {
-        assert instances[i].getClass() == classes[i];
-        class2object.put(classes[i], instances[i]);
-      }
-    }
 
     //--Get Fillable Options
     Map<String, Field> canFill = new HashMap<String, Field>();
     Map<String, Pair<Boolean, Boolean>> required = new HashMap<String, Pair<Boolean, Boolean>>(); /* <exists, is_set> */
     Map<String, String> interner = new HashMap<String, String>();
     for (Class c : classes) {
-      Field[] fields;
+      Field[] fields = null;
       try {
         fields = c.getDeclaredFields();
       } catch (Throwable e) {
@@ -348,8 +362,8 @@ public class Execution {
         Option o = f.getAnnotation(Option.class);
         if (o != null) {
           //(check if field is static)
-          if ((f.getModifiers() & Modifier.STATIC) == 0 && instances == null) {
-            fatal("An instance object must be provided if an option is applied to a non-static field: " + c + "." + f);
+          if ((f.getModifiers() & Modifier.STATIC) == 0) {
+            fatal("Option can only be applied to static field: " + c + "." + f);
           }
           //(required marker)
           Pair<Boolean, Boolean> mark = Pair.makePair(false, false);
@@ -399,12 +413,12 @@ public class Execution {
       // (mark required option as fulfilled)
       Pair<Boolean, Boolean> mark = required.get(key);
       if (mark != null && mark.first) {
-        required.put(key, Pair.makePair(true, true));
+        required.put(key.toString(), Pair.makePair(true, true));
       }
       // (fill the field)
       if (target != null) {
         // (case: declared option)
-        fillField(class2object.get(target.getDeclaringClass()), target, value);
+        fillField(target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
         // split the key
@@ -428,7 +442,7 @@ public class Execution {
           } catch (Exception e) {
             debug("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
           }
-          fillField(class2object.get(target.getDeclaringClass()), target, value);
+          fillField(target, value);
         }
       }
     }
@@ -451,10 +465,9 @@ public class Execution {
   }
 
   protected static Map<String, Field> fillOptionsImpl(
-      Object[] instances,
       Class<?>[] classes,
       Properties options) {
-    return fillOptionsImpl(instances, classes, options, false);
+    return fillOptionsImpl(classes, options, false);
   }
 
 
@@ -465,11 +478,7 @@ public class Execution {
 	 */
 
   public static void fillOptions(Class<?>[] classes, Properties options) {
-    fillOptionsImpl(null, classes, options);
-  }
-
-  public static void fillOptions(Class<?> clazz, Properties options) {
-    fillOptionsImpl(null, new Class[]{ clazz }, options);
+    fillOptionsImpl(classes, options);
   }
 
   public static void fillOptions(Properties props, String[] args) {
@@ -479,14 +488,13 @@ public class Execution {
       options.put(key, props.getProperty(key));
     }
     //(bootstrap)
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(BOOTSTRAP_CLASSES, options, false); //bootstrap
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
     if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
-    fillOptionsImpl(null, visibleClasses, options);//fill
+    Map<String, Field> optionFields = fillOptionsImpl(visibleClasses, options);//fill
   }
 
-  @SuppressWarnings("UnusedDeclaration")
   public static void fillOptions(Class<?>[] optionClasses, Properties props, String[] args) {
     Execution.optionClasses = optionClasses;
     fillOptions(props, args);
@@ -500,8 +508,8 @@ public class Execution {
   public static void fillOptions(Class<?>[] classes,
                                   String[] args) {
     Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    fillOptionsImpl(null, classes, options);
+    fillOptionsImpl(BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(classes, options);
   }
 
   public static void fillOptions(Class<?> clazz,
@@ -509,30 +517,6 @@ public class Execution {
     Class<?>[] classes = new Class<?>[1];
     classes[0] = clazz;
     fillOptions(classes, args);
-  }
-
-  public static void fillOptions(Object[] instances, Properties options) {
-    Class[] classes = new Class[instances.length];
-    for (int i = 0; i < classes.length; ++i) { classes[i] = instances[i].getClass(); }
-    fillOptionsImpl(instances, classes, options);
-  }
-
-  public static void fillOptions(Object instance, Properties options) {
-    fillOptions(new Object[]{ instance }, options);
-  }
-
-  public static void fillOptions(Object[] instances,
-                                 String[] args) {
-    Properties options = StringUtils.argsToProperties(args); //get options
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    Class[] classes = new Class[instances.length];
-    for (int i = 0; i < classes.length; ++i) { classes[i] = instances[i].getClass(); }
-    fillOptionsImpl(instances, classes, options);
-  }
-
-  public static void fillOptions(Object instance,
-                                 String[] args) {
-    fillOptions(new Object[]{ instance }, args);
   }
 
   public static void exec(Runnable toRun) {
@@ -568,12 +552,12 @@ public class Execution {
   public static void exec(Runnable toRun, Properties options, boolean exit) {
     //--Init
     //(bootstrap)
-    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
+    fillOptionsImpl(BOOTSTRAP_CLASSES, options, false); //bootstrap
     startTrack("init");
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
     if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
-    fillOptionsImpl(null, visibleClasses, options);//fill
+    Map<String, Field> optionFields = fillOptionsImpl(visibleClasses, options);//fill
     endTrack("init");
     // -- Setup Logging
     StanfordRedwoodConfiguration.apply(options);
@@ -592,14 +576,14 @@ public class Execution {
     }
   }
 
-  private static String threadRootClass() {
+  private static final String threadRootClass() {
     StackTraceElement[] trace = Thread.currentThread().getStackTrace();
     StackTraceElement elem = trace[trace.length - 1];
-    return elem.getClassName();
+    String clazz = elem.getClassName();
+    return clazz;
   }
 
-  @SuppressWarnings("UnusedDeclaration")
-  public static void usageAndExit(String[] expectedArgs) {
+  public static final void usageAndExit(String[] expectedArgs) {
     String clazz = threadRootClass();
     StringBuilder b = new StringBuilder();
     b.append("USAGE: ").append(clazz).append(" ");
@@ -610,8 +594,7 @@ public class Execution {
     System.exit(0);
   }
 
-  @SuppressWarnings("UnusedDeclaration")
-  public static void usageAndExit(Map<String, String[]> argToFlagsMap) {
+  public static final void usageAndExit(Map<String, String[]> argToFlagsMap) {
     String clazz = threadRootClass();
     StringBuilder b = new StringBuilder();
     b.append("USAGE: ").append(clazz).append("\n\t");
