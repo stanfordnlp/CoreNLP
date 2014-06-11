@@ -180,6 +180,7 @@ public class Execution {
         f.setAccessible(true);
       }
       //--Set Value
+      System.out.println(value + " and " + f.getGenericType());
       Object objVal = MetaClass.cast(value, f.getGenericType());
       if (objVal != null) {
         if (objVal.getClass().isArray()) {
