@@ -40,11 +40,6 @@ public abstract class AbstractStochasticCachingDiffUpdateFunction
    */
   public abstract double valueAt(double[] x, double xScale, int[] batch);
 
-  public double valueAt(double[] x, double xScale, int batchSize) {
-    getBatch(batchSize);
-    return valueAt(x, xScale, thisBatch);
-  }
-
   /**
    * Performs stochastic update of weights x (scaled by xScale) based
    * on samples indexed by batch.
@@ -73,13 +68,11 @@ public abstract class AbstractStochasticCachingDiffUpdateFunction
   }
 
   /**
-   * Performs stochastic gradient calculation based
+   * Performs stochastic gradient updates based
    * on samples indexed by batch and do not apply regularization.
-   * does not update the parameter values
    *
    * @param x unscaled weights
    * @param batch indices of which samples to compute function over
-   * @return value of function at specified x (not scaled) for samples
    */
   public abstract void calculateStochasticGradient(double[] x, int[] batch);
 
