@@ -1986,10 +1986,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         countResults(doceval, entityTP, entityFP, entityFN, constVars.backgroundSymbol, wordTP, wordTN, wordFP, wordFN,
             CoreAnnotations.AnswerAnnotation.class, evalPerEntity); //
       }
-       System.out.println("False Positives: "
-       + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
-       System.out.println("False Negatives: "
-       + Counters.toSortedString(wordFN, wordFN.size(), "%s:%.2f", ";"));
+      // System.out.println("False Positives: "
+      // + Counters.toSortedString(wordFP, wordFP.size(), "%s:%.2f", ";"));
+      // System.out.println("False Negatives: "
+      // + Counters.toSortedString(wordFN, wordFN.size(), "%s:%.2f", ";"));
 
       Redwood.log(Redwood.DBG, "\nFor label " + label + " True Positives: " + entityTP + "\tFalse Positives: " + entityFP + "\tFalse Negatives: "
           + entityFN);
@@ -2013,19 +2013,18 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     List<File> allFiles = new ArrayList<File>();
     for (String tokfile : file.split("[,;]")) {
       File filef = new File(tokfile);
-      String path = ".*";
+      String ext = ".*";
       File dir = null;
       if (filef.isDirectory()) {
         dir = filef;
       } else {
         dir = filef.getParentFile();
-        path = "^"+filef.getAbsolutePath()+"$";
+        ext = filef.getName();
       }
 
       //RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
       //File[] files = dir.listFiles(fileFilter);
-      for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
-        System.out.println("Reading file " + f);
+      for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(ext))) {
         allFiles.add(f);
       }
     }
