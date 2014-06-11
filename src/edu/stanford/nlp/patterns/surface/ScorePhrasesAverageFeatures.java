@@ -2,10 +2,12 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.stats.ClassicCounter;
