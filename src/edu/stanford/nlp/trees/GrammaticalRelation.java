@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
@@ -542,11 +542,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         } else if (shortName.equals("prepc")) {
           return EnglishGrammaticalRelations.getPrepC(specific);
         } else {
-          // TODO: we need to figure out what to do with relations
-          // which were serialized and then deprecated.  Perhaps there
-          // is a good way to make them singletons
-          return this;
-          //throw new RuntimeException("Unknown English relation " + this);
+          throw new RuntimeException("Unknown English relation " + this);
         }
       } else {
         return rel;
@@ -555,11 +551,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     case Chinese: {
       GrammaticalRelation rel = ChineseGrammaticalRelations.valueOf(toString());      
       if (rel == null) {
-        // TODO: we need to figure out what to do with relations
-        // which were serialized and then deprecated.  Perhaps there
-        // is a good way to make them singletons
-        return this;
-        //throw new RuntimeException("Unknown Chinese relation " + this);
+        throw new RuntimeException("Unknown Chinese relation " + this);
       }
     }
     default: {
