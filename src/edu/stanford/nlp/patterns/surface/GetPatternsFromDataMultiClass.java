@@ -953,7 +953,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     } else if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsRatioModifiedFreq.class)) {
       scorePatterns = new ScorePatternsRatioModifiedFreq(constVars, constVars.patternScoring, label, patternsandWords4Label,
           negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label,
-          phInPatScores, scorePhrases, props);
+          phInPatScoresCache, scorePhrases, props);
 
     } else if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsFreqBased.class)) {
       scorePatterns = new ScorePatternsFreqBased(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
@@ -964,9 +964,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         Class<? extends ScorePatterns> clazz = (Class<? extends ScorePatterns>) Class.forName("edu.stanford.nlp.patterns.surface.ScorePatternsKNN");
         Constructor<? extends ScorePatterns> ctor = clazz.getConstructor(ConstantsAndVariables.class, PatternScoring.class, String.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class, TwoDimensionalCounter.class, TwoDimensionalCounter.class,
-            TwoDimensionalCounter.class, Properties.class);
+            TwoDimensionalCounter.class, ScorePhrases.class, Properties.class);
         scorePatterns = ctor.newInstance(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
-            unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
+            unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, scorePhrases, props);
 
       } catch (ClassNotFoundException e) {
         throw new RuntimeException("kNN pattern scoring is not released yet. Stay tuned.");
@@ -1443,7 +1443,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return newscores;
   }
 
-  public TwoDimensionalCounter<String, ScorePhraseMeasures> phInPatScores = new TwoDimensionalCounter<String, ScorePhraseMeasures>();
+  public TwoDimensionalCounter<String, ScorePhraseMeasures> phInPatScoresCache = new TwoDimensionalCounter<String, ScorePhraseMeasures>();
 
   // TODO: this right now doesn't work for matchPatterns because of
   // DictAnnotationDTorSC. we are not setting DT, SC thing in the test sentences
