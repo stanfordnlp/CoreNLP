@@ -1,18 +1,13 @@
 package edu.stanford.nlp.util;
 
-import org.junit.After;
-import org.junit.Before;
+import junit.framework.TestCase;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  *
@@ -20,8 +15,7 @@ import static org.junit.Assert.*;
  *
  * @author Gabor Angeli
  */
-@SuppressWarnings("ResultOfMethodCallIgnored")
-public class FileBackedCacheTest {
+public class FileBackedCacheTest extends TestCase {
 
   private static class CustomHash implements Serializable {
     private int unique;
@@ -38,39 +32,26 @@ public class FileBackedCacheTest {
   }
 
   private FileBackedCache<String, String> cache;
-  private FileBackedCache<Integer, Map<String, ArrayList<String>>> mapCache;
 
-  @Before
-  public void setUp() {
+  @Override
+  protected void setUp() {
     try {
-      // (regular cache)
       File cacheDir = File.createTempFile("cache", ".dir");
       cacheDir.delete();
       cache = new FileBackedCache<String, String>(cacheDir);
       assertEquals(0, cacheDir.listFiles().length);
-      // (map cache)
-      File mapCacheDir = File.createTempFile("cache", ".dir");
-      mapCacheDir.delete();
-      mapCache = new FileBackedCache<Integer, Map<String, ArrayList<String>>>(mapCacheDir);
-      assertEquals(0, mapCacheDir.listFiles().length);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  @After
-  public  void tearDown() {
+  @Override
+  protected  void tearDown() {
     if (cache.cacheDir.listFiles() != null) {
       for (File c : cache.cacheDir.listFiles()) {
         assertTrue(c.delete());
       }
       assertTrue(cache.cacheDir.delete());
-    }
-    if (mapCache.cacheDir.listFiles() != null) {
-      for (File c : mapCache.cacheDir.listFiles()) {
-        assertTrue(c.delete());
-      }
-      assertTrue(mapCache.cacheDir.delete());
     }
   }
 
@@ -287,15 +268,5 @@ public class FileBackedCacheTest {
       assertTrue(constituent2File.delete());
     }
     assertTrue(FileBackedCache.locksHeld().isEmpty());
-  }
-
-  @Test
-  public void testMapValueGoodPattern() throws IOException {
-    HashMap<String, ArrayList<String>> map = new HashMap<String, ArrayList<String>>();
-    map.put("foo", new ArrayList<String>());
-    mapCache.put(42, map);
-    assertEquals(1, mapCache.get(42).size());
-    mapCache.clear();
-    assertEquals(1, mapCache.get(42).size());
   }
 }

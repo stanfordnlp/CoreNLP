@@ -533,11 +533,29 @@ public class ConstantsAndVariables {
   @Option(name="tempFileFolder")
   public String tempFileFolder = null;
   
+  // /**
+  // * Use FileBackedCache for the inverted index -- use if memory is limited
+  // */
+  // @Option(name="diskBackedInvertedIndex")
+  // public boolean diskBackedInvertedIndex = false;
+  
   /**
-   * Use FileBackedCache for the inverted index -- use if memory is limited
+   * You can save the inverted index to this file
    */
-  @Option(name="diskBackedInvertedIndex")
-  public boolean diskBackedInvertedIndex = false;
+  @Option(name="saveInvertedIndexDir")
+  public String saveInvertedIndexDir  = null;
+  
+  /**
+   * You can load the inv index using this file
+   */
+  @Option(name="loadInvertedIndexDir")
+  public String loadInvertedIndexDir  = null;
+
+  /**
+   * Directory where to save the sentences ser files. 
+   */
+  @Option(name="saveSentencesSerDir")
+  public String saveSentencesSerDir = null;
   
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
