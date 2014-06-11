@@ -65,26 +65,6 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return true;
   }
 
-  private Map<V, List<E>> getOutgoingEdgesMap(V v) {
-    Map<V, List<E>> map = outgoingEdges.get(v);
-    if (map == null) {
-      map = Generics.<V, List<E>>newHashMap();
-      outgoingEdges.put(v, map);
-      incomingEdges.put(v, Generics.<V, List<E>>newHashMap());
-    }
-    return map;
-  }
-
-  private Map<V, List<E>> getIncomingEdgesMap(V v) {
-    Map<V, List<E>> map = incomingEdges.get(v);
-    if (map == null) {
-      outgoingEdges.put(v, Generics.<V, List<E>>newHashMap());
-      map = Generics.<V, List<E>>newHashMap();
-      incomingEdges.put(v, map);
-    }
-    return map;
-  }
-
   /**
    * adds vertices (if not already in the graph) and the edge between them
    *
@@ -94,15 +74,17 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    */
   @Override
   public void add(V source, V dest, E data) {
-    Map<V, List<E>> outgoingMap = getOutgoingEdgesMap(source);
-    Map<V, List<E>> incomingMap = getIncomingEdgesMap(dest);
+    addVertex(source);
+    addVertex(dest);
 
+    Map<V, List<E>> outgoingMap = outgoingEdges.get(source);
     List<E> outgoingList = outgoingMap.get(dest);
     if (outgoingList == null) {
       outgoingList = new ArrayList<E>();
       outgoingMap.put(dest, outgoingList);
     }
 
+    Map<V, List<E>> incomingMap = incomingEdges.get(dest);
     List<E> incomingList = incomingMap.get(source);
     if (incomingList == null) {
       incomingList = new ArrayList<E>();
