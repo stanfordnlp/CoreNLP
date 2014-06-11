@@ -1,13 +1,16 @@
-package edu.stanford.nlp.rnn;
+package edu.stanford.nlp.neural;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import java.util.Random;
 
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Includes a bunch of utility methods usable by projects which use
@@ -17,10 +20,81 @@ import edu.stanford.nlp.util.Generics;
  *
  * @author John Bauer
  * @author Richard Socher
+ * @author Thang Luong
  */
-public class RNNUtils {
-  private RNNUtils() {} // static methods only
+public class NeuralUtils {
+  private NeuralUtils() {} // static methods only
 
+  /**
+   * Convert a file into a text matrix.  The expected format one row
+   * per line, one entry per column.  Not too efficient for large
+   * matrices, but you shouldn't store large matrices in text files
+   * anyway.  This specific format is not supported by ejml, which
+   * expects the number of rows and columns in its text matrices.
+   */
+  public static SimpleMatrix loadTextMatrix(String path) {
+    return convertTextMatrix(IOUtils.slurpFileNoExceptions(path));
+  }
+
+  /**
+   * Convert a file into a text matrix.  The expected format one row
+   * per line, one entry per column.  Not too efficient for large
+   * matrices, but you shouldn't store large matrices in text files
+   * anyway.  This specific format is not supported by ejml, which
+   * expects the number of rows and columns in its text matrices.
+   */
+  public static SimpleMatrix loadTextMatrix(File file) {
+    return convertTextMatrix(IOUtils.slurpFileNoExceptions(file));
+  }
+
+  public static SimpleMatrix convertTextMatrix(String text) {
+    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Filter<String>() { 
+        public boolean accept(String s) {
+          return s.trim().length() > 0;
+        }
+        private static final long serialVersionUID = 1;
+      });
+    int numRows = lines.size();
+    int numCols = lines.get(0).trim().split("\\s+").length;
+    double[][] data = new double[numRows][numCols];
+    for (int row = 0; row < numRows; ++row) {
+      String line = lines.get(row);
+      String[] pieces = line.trim().split("\\s+");
+      if (pieces.length != numCols) {
+        throw new RuntimeException("Unexpected row length in line " + row);
+      }
+      for (int col = 0; col < numCols; ++col) {
+        data[row][col] = Double.valueOf(pieces[col]);
+      }
+    }
+    return new SimpleMatrix(data);
+  }
+
+
+  /**
+   * Compute cosine distance between two column vectors.
+   */
+  public static double cosine(SimpleMatrix vector1, SimpleMatrix vector2){
+    return dot(vector1, vector2)/(vector1.normF()*vector2.normF());
+  }
+  
+  /**
+   * Compute dot product between two vectors.
+   */
+  public static double dot(SimpleMatrix vector1, SimpleMatrix vector2){
+    double score = Double.NaN;
+    if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too 
+      score = vector1.mult(vector2.transpose()).get(0); 
+    } else if (vector1.numCols()==1){ // vector1: col vector, assume that vector2 is also a column vector.
+      score = vector1.transpose().mult(vector2).get(0);
+    } else {
+      System.err.println("! Error in neural.Utils.dot: vector1 is a matrix " + vector1.numRows() + " x " + vector1.numCols());
+      System.exit(1);
+    }
+
+    return score;
+  }
+  
   /**
    * Given a sequence of Iterators over SimpleMatrix, fill in all of
    * the matrices with the entries in the theta vector.  Errors are
@@ -94,53 +168,6 @@ public class RNNUtils {
     }
     return theta;
   }
-
-  /**
-   * This method reads a file of raw word vectors, with a given expected size, and returns a map of word to vector.
-   * <br>
-   * The file should be in the format <br>
-   * <code>WORD X1 X2 X3 ...</code> <br>
-   * If vectors in the file are smaller than expectedSize, an
-   * exception is thrown.  If vectors are larger, the vectors are
-   * trunccated and a warning is printed.
-   */
-  public static Map<String, SimpleMatrix> readRawWordVectors(String filename, int expectedSize) {
-    Map<String, SimpleMatrix> wordVectors = Generics.newHashMap();
-
-    System.err.println("Reading in the word vector file: " + filename);
-    int dimOfWords = 0;
-    boolean warned = false;
-    for (String line : IOUtils.readLines(filename, "utf-8")) {
-      String[] lineSplit = line.split("\\s+");
-      String word = lineSplit[0];
-      dimOfWords = lineSplit.length - 1;
-      if (expectedSize <= 0) {
-        expectedSize = dimOfWords;
-        System.err.println("Dimensionality of numHid not set.  The length of the word vectors in the given file appears to be " + dimOfWords);
-      }
-      // the first entry is the word itself
-      // the other entries will all be entries in the word vector
-      if (dimOfWords > expectedSize) {
-        if (!warned) {
-          warned = true;
-          System.err.println("WARNING: Dimensionality of numHid parameter and word vectors do not match, deleting word vector dimensions to fit!");
-        }
-        dimOfWords = expectedSize;
-      } else if (dimOfWords < expectedSize) {
-        throw new RuntimeException("Word vectors file has dimension too small for requested numHid of " + expectedSize);
-      }
-      double vec[][] = new double[dimOfWords][1];
-      for (int i = 1; i <= dimOfWords; i++) {
-        vec[i-1][0] = Double.parseDouble(lineSplit[i]);
-      }
-      SimpleMatrix vector = new SimpleMatrix(vec);
-      wordVectors.put(word, vector);
-    }
- 
-    return wordVectors;
-  }
-
-
 
   /**
    * Returns a sigmoid applied to the input <code>x</code>.
@@ -254,5 +281,5 @@ public class RNNUtils {
     }
     return result;
   }
-
 }
+

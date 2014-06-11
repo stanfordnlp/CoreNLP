@@ -3,6 +3,7 @@ package edu.stanford.nlp.trees.international.pennchinese;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
+import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +35,10 @@ public class ChineseGrammaticalRelations {
   private ChineseGrammaticalRelations() {
   }
 
-  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler(new ChineseSemanticHeadFinder());
+  // By setting the HeadFinder to null, we find out right away at
+  // runtime if we have incorrectly set the HeadFinder for the
+  // dependency tregexes
+  private static final TregexPatternCompiler tregexCompiler = new TregexPatternCompiler((HeadFinder) null);
 
   public static List<GrammaticalRelation> values() {
     return Collections.unmodifiableList(Arrays.asList(values));
@@ -96,7 +100,7 @@ public class ChineseGrammaticalRelations {
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.Chinese,
       "conj", "conjunct",
-      PreconjunctGRAnnotation.class, DEPENDENT, "VP|NP|ADJP|PP|ADVP|UCP", tregexCompiler,
+      PreconjunctGRAnnotation.class, DEPENDENT, "FRAG|INC|IP|VP|NP|ADJP|PP|ADVP|UCP", tregexCompiler,
       new String[]{
         "NP|ADJP|PP|ADVP|UCP < (!PU=target $+ CC)",
         // Split the first rule to the second rule to avoid the duplication:
@@ -132,7 +136,10 @@ public class ChineseGrammaticalRelations {
         "NP <( NP=target $+ ((PU < 、) $+ NP) )",
         "NP <( NN|NR|NT|PN=target $+ ((PU < ，|、) $+ NN|NR|NT|PN) )",
         "VP < (CC $+ VV=target)",
-        "  VP  < VV|VC|VRD|VCD|VE|VA < NP|QP|LCP  $ IP|VP|VRD|VCD|VE|VC|VA=target  ",
+        // Original version of this did not have the outer layer of
+        // the FRAG|INC|IP|VP.  This caused a bug where the basic
+        // dependencies could have cycles.
+        "FRAG|INC|IP|VP < (VP  < VV|VC|VRD|VCD|VE|VA < NP|QP|LCP  $ IP|VP|VRD|VCD|VE|VC|VA=target)  ",
          "IP|VP < ( IP|VP < NP|QP|LCP $ IP|VP=target )",
       });
   public static class PreconjunctGRAnnotation
@@ -772,7 +779,11 @@ public class ChineseGrammaticalRelations {
                               "NP  $++ (CP=target ) > NP ",
                               "NP  $++ (CP=target <: IP) > NP  ",
                               "NP  $++ (CP=target)",
-                              " NP  << ( CP=target $++ NP  )"
+                              // don't match this rule for an NP if
+                              // there is another, more specific NP
+                              // which will also match the same
+                              // target.  Otherwise you get cycles
+                              " NP  << ( CP=target $++ NP  ) !<< (NP << =target)"
                             });
   public static class RelativeClauseModifierGRAnnotation
     extends GrammaticalRelationAnnotation { }
