@@ -2651,15 +2651,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
   }
 
-   static double[][] parseMatrix(String[] lines, Index<String> tagIndex, int matrixSize, boolean smooth) {
-      return parseMatrix(lines, tagIndex, matrixSize, smooth, true);
-   }
-
   /**
    * @return a matrix where each entry m[i][j] is logP(j|i)
    * in other words, each row vector is normalized log conditional likelihood
    */
-   static double[][] parseMatrix(String[] lines, Index<String> tagIndex, int matrixSize, boolean smooth, boolean useLogProb) {
+   static double[][] parseMatrix(String[] lines, Index<String> tagIndex, int matrixSize, boolean smooth) {
     double[][] matrix = new double[matrixSize][matrixSize];
     for (int i = 0; i < matrix.length; i++)
       matrix[i] = new double[matrixSize];
@@ -2680,10 +2676,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       double sum = ArrayMath.sum(matrix[i]);
       for (int j = 0; j < matrix[i].length; j++) {
         // log conditional probability
-        if (useLogProb)
-          matrix[i][j] = Math.log(matrix[i][j] / sum);
-        else
-          matrix[i][j] = matrix[i][j] / sum;
+        matrix[i][j] = Math.log(matrix[i][j] / sum);
       }
     }
     return matrix;
@@ -2945,6 +2938,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         crf.printFirstOrderProbs(testFile, readerAndWriter);
       } else if (crf.flags.printFactorTable) {
         crf.printFactorTable(testFile, readerAndWriter);
+      } else if (crf.flags.printProbs) {
+        crf.printProbs(testFile, readerAndWriter);
       } else if (crf.flags.printProbs) {
         crf.printProbs(testFile, readerAndWriter);
       } else if (crf.flags.useKBest) {
