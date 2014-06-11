@@ -452,12 +452,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     if (useTargetParserParentRestriction) {
       anns.add("parse");
+
     }
     if (useTargetNERRestriction) {
       anns.add("ner");
     }
 
     props.setProperty("annotators", StringUtils.join(anns, ","));
+    props.setProperty("parser.maxlen", "120");
     // props.put( "tokenize.options",
     // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
@@ -504,7 +506,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
 
       props.setProperty("annotators", StringUtils.join(anns, ","));
-
+      props.setProperty("parser.maxlen", "120");
       props
           .put(
               "tokenize.options",
@@ -519,7 +521,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       text = text.toLowerCase();
 
     Annotation doc = new Annotation(text);
-    Redwood.log(Redwood.DBG, "Annotating text");
     pipeline.annotate(doc);
     Redwood.log(Redwood.DBG, "Done annotating text");
     Map<String, List<CoreLabel>> sents = new HashMap<String, List<CoreLabel>>();
@@ -2143,20 +2144,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     try {
 
       Properties props = StringUtils.argsToPropertiesWithResolve(args);
-      // boolean readFromSavedInstance = Boolean.parseBoolean(props
-      // .getProperty("readFromSavedInstance"));
-      // String inputSavedInstanceFile = props
-      // .getProperty("inputSavedInstanceFile");
-      // boolean saveInstance = Boolean.parseBoolean(props
-      // .getProperty("saveInstance"));
-      // String outputSavedInstanceFile = props
-      // .getProperty("outputSavedInstanceFile");
 
       GetPatternsFromDataMultiClass g = null;
-      // TODO: are we not using this?
-      // Map<String, Set<String>> ignoreWordsList = new HashMap<String,
-      // Set<String>>();
-      // Set<String> ignoreWordsList4Label = new HashSet<String>();
 
       Map<String, Set<SurfacePattern>> ignorePatterns = new HashMap<String, Set<SurfacePattern>>();
       Map<String, SurfacePattern> p0 = new HashMap<String, SurfacePattern>();
@@ -2164,10 +2153,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       String fileFormat = props.getProperty("fileFormat");
 
-      // if (inputSavedInstanceFile == null
-      // || !new File(inputSavedInstanceFile).exists()) {
-      // readFromSavedInstance = false;
-      // }
       Map<String, Set<String>> seedWords = new HashMap<String, Set<String>>();
 
       String seedWordsFiles = props.getProperty("seedWordsFiles");
@@ -2236,6 +2221,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
             || fileFormat.equalsIgnoreCase("txt")) {
           for (File f : allFiles) {
+            Redwood.log(Redwood.DBG, "Annotating text in " + f);
+
             String text = IOUtils.stringFromFile(f.getAbsolutePath());
             sents.putAll(tokenize(text, posModelPath, lowercase,
                 useTargetNERRestriction | useContextNERRestriction, f.getName()
@@ -2263,24 +2250,36 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             "splitOnPunct", "true"));
         List<File> allFiles = GetPatternsFromDataMultiClass
             .getAllFiles(evalFileWithGoldLabels);
-        for (File f : allFiles) {
-          List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
-              new BufferedReader(new FileReader(f)), seedWords.keySet(),
-              setClassForTheseLabels, true, splitOnPunct, lowercase,
-              f.getName());
-          evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
-              useTargetNERRestriction | useContextNERRestriction, "",
-              useTargetParserParentRestriction));
+        if (fileFormat == null || fileFormat.equalsIgnoreCase("text")
+            || fileFormat.equalsIgnoreCase("txt")) {
+          for (File f : allFiles) {
+            Redwood.log(Redwood.DBG, "Annotating text in " + f);
+            List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(
+                new BufferedReader(new FileReader(f)), seedWords.keySet(),
+                setClassForTheseLabels, true, splitOnPunct, lowercase,
+                f.getName());
+            evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath,
+                useTargetNERRestriction | useContextNERRestriction, "",
+                useTargetParserParentRestriction));
+          }
+          String saveEvalSentencesSerFile = props
+              .getProperty("saveEvalSentencesSerFile");
+          if (saveEvalSentencesSerFile != null) {
+            IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFile);
+          }
+        } else if (fileFormat.equalsIgnoreCase("ser")) {
+          for (File f : allFiles) {
+            evalsents
+                .putAll((Map<? extends String, ? extends List<CoreLabel>>) IOUtils
+                    .readObjectFromFile(f));
+          }
         }
         if (addEvalSentsToTrain) {
           Redwood.log(Redwood.DBG, "Adding " + evalsents.size()
               + " eval sents to the training set");
-
           sents.putAll(evalsents);
-
         }
       }
-
       System.out.println("Processing # sents " + sents.size()
           + " from file(s) " + file);
       boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty(
@@ -2302,20 +2301,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       g.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile,
           patternOutFile, ignorePatterns);
 
-      // if (saveInstance) {
-      // System.out.println("Saving the instance to " +
-      // outputSavedInstanceFile);
-      // IOUtils.writeObjectToFile(g, outputSavedInstanceFile);
-      // }
-
       if (evaluate) {
         boolean evalPerEntity = Boolean.parseBoolean(props.getProperty(
             "evalPerEntity", "true"));
         g.evaluate(evalsents, evalPerEntity);
-        // String evalFile = props.getProperty("evalFile");
-        // Map<String, List<CoreLabel>> evalSents =
-        // g.loadJavaNLPAnnotatorLabeledFile(evalFile, props);
-        // g.evaluate("onelabel", evalSents);
       }
 
     } catch (Exception e) {
