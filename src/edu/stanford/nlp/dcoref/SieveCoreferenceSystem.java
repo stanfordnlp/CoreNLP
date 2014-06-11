@@ -56,6 +56,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
+import edu.stanford.nlp.dcoref.CorefChain.MentionComparator;
 import edu.stanford.nlp.dcoref.ScorerBCubed.BCubedType;
 import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch;
@@ -1673,7 +1674,7 @@ public class SieveCoreferenceSystem {
   public static List<Pair<IntTuple, IntTuple>> getLinks(
       Map<Integer, CorefChain> result) {
     List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple, IntTuple>>();
-    CorefChain.CorefMentionComparator comparator = new CorefChain.CorefMentionComparator();
+    MentionComparator comparator = new MentionComparator();
 
     for(CorefChain c : result.values()) {
       List<CorefMention> s = c.getMentionsInTextualOrder();
