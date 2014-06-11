@@ -17,10 +17,6 @@ class TsurgeonPatternRoot extends TsurgeonPattern {
   CoindexationGenerator coindexer;
   Map<String, Tree> newNodeNames;
 
-  public TsurgeonPatternRoot(TsurgeonPattern child) {
-    this(new TsurgeonPattern[] { child });
-  }
-
   public TsurgeonPatternRoot(TsurgeonPattern[] children) {
     super("operations: ", children);
     setRoot(this);
