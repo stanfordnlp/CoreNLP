@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  * SVM Struct for multiclass SVMs, on the command line, reads in the produced
  * model file and creates a Linear Classifier.  A Platt model is also trained
  * (unless otherwise specified) on top of the SVM so that probabilities can
- * be produced.
+ * be produced. For multiclass classifier, you have to set C using setC otherwise the code will not run (by sonalg).
  *
  * @author Jenny Finkel
  * @author Aria Haghighi
