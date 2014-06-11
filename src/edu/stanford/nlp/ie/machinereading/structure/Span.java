@@ -172,6 +172,19 @@ public class Span implements Serializable, Iterable<Integer> {
             spanA.equals(spanB);
   }
 
+  public static int overlap(Span spanA, Span spanB) {
+    if (spanA.contains(spanB)) {
+      return Math.min(spanA.end - spanA.start, spanB.end - spanB.start);
+    } else if (spanA.equals(spanB)) {
+      return spanA.end - spanA.start;
+    } else if ( (spanA.end > spanB.end && spanA.start < spanB.end) ||
+                (spanB.end > spanA.end && spanB.start < spanA.end) ) {
+      return Math.min(spanA.end, spanB.end) - Math.max(spanA.start, spanB.start) ;
+    } else {
+      return 0;
+    }
+  }
+
   public static boolean overlaps(Span spanA, Collection<Span> spanB) {
     for (Span candidate : spanB) {
       if (overlaps(spanA, candidate)) { return true; }
