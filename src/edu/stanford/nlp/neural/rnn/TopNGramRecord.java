@@ -1,11 +1,12 @@
 package edu.stanford.nlp.neural.rnn;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
@@ -51,9 +52,28 @@ public class TopNGramRecord {
    * PriorityQueues for each predicted class.
    */
   public void countTree(Tree tree) {
+    Tree simplified = simplifyTree(tree);
     for (int i = 0; i < numClasses; ++i) {
-      countTreeHelper(tree, i, classToNGrams.get(i));
+      countTreeHelper(simplified, i, classToNGrams.get(i));
     }
+  }
+
+  /**
+   * Remove everything but the skeleton, the predictions, and the labels
+   */
+  private Tree simplifyTree(Tree tree) {
+    CoreLabel newLabel = new CoreLabel();
+    newLabel.set(RNNCoreAnnotations.Predictions.class, RNNCoreAnnotations.getPredictions(tree));
+    newLabel.setValue(tree.label().value());
+    if (tree.isLeaf()) {
+      return tree.treeFactory().newLeaf(newLabel);
+    }
+
+    List<Tree> children = Generics.newArrayList(tree.children().length);
+    for (int i = 0; i < tree.children().length; ++i) {
+      children.add(simplifyTree(tree.children()[i]));
+    }
+    return tree.treeFactory().newTreeNode(newLabel, children);
   }
 
   private int countTreeHelper(Tree tree, int prediction, Map<Integer, PriorityQueue<Tree>> ngrams) {
@@ -111,7 +131,7 @@ public class TopNGramRecord {
       result.append("Best scores for class " + prediction + "\n");
       Map<Integer, PriorityQueue<Tree>> ngrams = classToNGrams.get(prediction);
       for (Map.Entry<Integer, PriorityQueue<Tree>> entry : ngrams.entrySet()) {
-        ArrayList<Tree> trees = new ArrayList<Tree>(entry.getValue());
+        List<Tree> trees = Generics.newArrayList(entry.getValue());
         Collections.sort(trees, scoreComparator(prediction));
         result.append("  Len " + entry.getKey() + "\n");
         for (int i = trees.size() - 1; i >= 0; i--) {
