@@ -77,6 +77,7 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.SystemUtils;
 import edu.stanford.nlp.util.logging.NewlineLogFormatter;
 
+
 /**
  * Multi-pass Sieve coreference resolution system (see EMNLP 2010 paper).
  * <p>
@@ -141,8 +142,9 @@ public class SieveCoreferenceSystem {
    * Array of sieve passes to be used in the system
    * Ordered from highest precision to lowest!
    */
+  /** Not final because may change when running optimize sieve ordering but otherwise should stay fixed */
   private /*final */DeterministicCorefSieve [] sieves;
-  public /*final*/ String [] sieveClassNames;
+  private /*final*/ String [] sieveClassNames;
 
   /**
    * Dictionaries of all the useful goodies (gender, animacy, number etc. lists)
@@ -152,27 +154,28 @@ public class SieveCoreferenceSystem {
   /**
    * Semantic knowledge: WordNet
    */
-  public final Semantics semantics;
+  private final Semantics semantics;
 
-  public LogisticClassifier<String, String> singletonPredictor;
+  private LogisticClassifier<String, String> singletonPredictor;
+
+  // Below are member variables used for scoring (not thread safe)
 
   /** Current sieve index */
-  public int currentSieve;
+  private int currentSieve;
 
   /** counter for links in passes (Pair<correct links, total links>)  */
-  public List<Pair<Integer, Integer>> linksCountInPass;
-
+  private List<Pair<Integer, Integer>> linksCountInPass;
 
   /** Scores for each pass */
-  public List<CorefScorer> scorePairwise;
-  public List<CorefScorer> scoreBcubed;
-  public List<CorefScorer> scoreMUC;
+  private List<CorefScorer> scorePairwise;
+  private List<CorefScorer> scoreBcubed;
+  private List<CorefScorer> scoreMUC;
 
   private List<CorefScorer> scoreSingleDoc;
 
   /** Additional scoring stats */
-  int additionalCorrectLinksCount;
-  int additionalLinksCount;
+  private int additionalCorrectLinksCount;
+  private int additionalLinksCount;
 
   public SieveCoreferenceSystem(Properties props) throws Exception {
     // initialize required fields
@@ -327,6 +330,8 @@ public class SieveCoreferenceSystem {
   public boolean doScore() { return doScore; }
   public Dictionaries dictionaries() { return dictionaries; }
   public Semantics semantics() { return semantics; }
+  public String sieveClassName(int sieveIndex)  {
+    return (sieveIndex >= 0 && sieveIndex < sieveClassNames.length)? sieveClassNames[sieveIndex]:null; }
 
   /**
    * Needs the following properties:
@@ -338,6 +343,7 @@ public class SieveCoreferenceSystem {
     initializeAndRunCoref(props);
   }
 
+  /** Returns the name of the log file that this method writes. */
   public static String initializeAndRunCoref(Properties props) throws Exception {
     String timeStamp = Calendar.getInstance().getTime().toString().replaceAll("\\s", "-").replaceAll(":", "-");
 
@@ -854,6 +860,8 @@ public class SieveCoreferenceSystem {
       Document document,
       DeterministicCorefSieve sieve) throws Exception {
 
+    //Redwood.forceTrack("Coreference: sieve " + sieve.getClass().getSimpleName());
+    logger.finer("Coreference: sieve " + sieve.getClass().getSimpleName());
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     Map<Integer, CorefCluster> corefClusters = document.corefClusters;
     Set<Mention> roleSet = document.roleSet;
@@ -931,6 +939,7 @@ public class SieveCoreferenceSystem {
 
                 int removeID = c1.clusterID;
                 CorefCluster.mergeClusters(c2, c1);
+                document.mergeIncompatibles(c2, c1);
 //                logger.warning("Removing cluster " + removeID + ", merged with " + c2.getClusterID());
                 corefClusters.remove(removeID);
                 break LOOP;
@@ -962,6 +971,7 @@ public class SieveCoreferenceSystem {
 
       printSieveScore(document, sieve);
     }
+    //Redwood.endTrack("Coreference: sieve " + sieve.getClass().getSimpleName());
   }
 
   /** Remove singletons, appositive, predicate nominatives, relative pronouns */
@@ -1027,19 +1037,17 @@ public class SieveCoreferenceSystem {
     return res;
   }
   public static void runConllEval(String conllMentionEvalScript,
-      String goldFile, String predictFile, String evalFile, String errFile) throws IOException
-      {
+      String goldFile, String predictFile, String evalFile, String errFile) throws IOException {
     ProcessBuilder process = new ProcessBuilder(conllMentionEvalScript, "all", goldFile, predictFile);
     PrintWriter out = new PrintWriter(new FileOutputStream(evalFile));
     PrintWriter err = new PrintWriter(new FileOutputStream(errFile));
     SystemUtils.run(process, out, err);
     out.close();
     err.close();
-      }
+  }
 
   public static String getConllEvalSummary(String conllMentionEvalScript,
-      String goldFile, String predictFile) throws IOException
-      {
+      String goldFile, String predictFile) throws IOException {
     ProcessBuilder process = new ProcessBuilder(conllMentionEvalScript, "all", goldFile, predictFile, "none");
     StringOutputStream errSos = new StringOutputStream();
     StringOutputStream outSos = new StringOutputStream();
@@ -1050,22 +1058,24 @@ public class SieveCoreferenceSystem {
     err.close();
     String summary = outSos.toString();
     String errStr = errSos.toString();
-    if (errStr.length() > 0) {
+    if ( ! errStr.isEmpty()) {
       summary += "\nERROR: " + errStr;
     }
     return summary;
-      }
+  }
 
   /** Print logs for error analysis */
   public void printTopK(Logger logger, Document document, Semantics semantics) {
 
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     Map<Integer, CorefCluster> corefClusters = document.corefClusters;
-    Map<Mention, IntTuple> positions = document.positions;
+    Map<Mention, IntTuple> positions = document.allPositions;
     Map<Integer, Mention> golds = document.allGoldMentions;
 
     logger.fine("=======ERROR ANALYSIS=========================================================");
 
+    // Temporary sieve for getting ordered antecedents
+    DeterministicCorefSieve tmpSieve = new ExactStringMatch();
     for (int i = 0 ; i < orderedMentionsBySentence.size(); i++) {
       List<Mention> orderedMentions = orderedMentionsBySentence.get(i);
       for (int j = 0 ; j < orderedMentions.size(); j++) {
@@ -1085,7 +1095,7 @@ public class SieveCoreferenceSystem {
         boolean alreadyChoose = false;
 
         for (int sentJ = i; sentJ >= 0; sentJ--) {
-          List<Mention> l = (new ExactStringMatch()).getOrderedAntecedents(sentJ, i, orderedMentions, orderedMentionsBySentence, m, j, corefClusters, dictionaries);
+          List<Mention> l = tmpSieve.getOrderedAntecedents(sentJ, i, orderedMentions, orderedMentionsBySentence, m, j, corefClusters, dictionaries);
 
           // Sort mentions by length whenever we have two mentions beginning at the same position and having the same head
           for(int ii = 0; ii < l.size(); ii++) {
@@ -1206,7 +1216,8 @@ public class SieveCoreferenceSystem {
       String header,
       IntTuple src,
       IntTuple dst,
-      Document document, Semantics semantics
+      Document document,
+      Semantics semantics
   ) {
     List<List<Mention>> orderedMentionsBySentence = document.getOrderedMentions();
     List<List<Mention>> goldOrderedMentionsBySentence = document.goldOrderedMentionsBySentence;

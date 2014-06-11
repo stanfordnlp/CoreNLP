@@ -92,7 +92,7 @@ public class DcorefExactOutputITest extends TestCase {
     return results;
   }
 
-  public void saveResults(String filename, Map<Integer, CorefChain> chains) throws IOException {
+  public static void saveResults(String filename, Map<Integer, CorefChain> chains) throws IOException {
     FileWriter fout = new FileWriter(filename);
     BufferedWriter bout = new BufferedWriter(fout);
     
@@ -108,7 +108,7 @@ public class DcorefExactOutputITest extends TestCase {
     fout.close();
   }
 
-  public void saveKey(BufferedWriter bout, Integer key, CorefChain chain) throws IOException {
+  public static void saveKey(BufferedWriter bout, Integer key, CorefChain chain) throws IOException {
     bout.write(key.toString());
     bout.newLine();
     for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
@@ -167,5 +167,29 @@ public class DcorefExactOutputITest extends TestCase {
     Map<Integer, CorefChain> chains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     Map<Integer, List<ExpectedMention>> expected = loadExpectedResults("edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.expectedcoref");
     compareResults(expected, chains);
+  }
+
+  /**
+   * If run as a program, writes the expected output of args[0] to args[1]
+   */
+  public static void main(String[] args) throws Exception {
+    if (args.length != 2) {
+      System.err.println("Expected args <input> <output>");
+      throw new IllegalArgumentException();
+    }
+
+    String input = args[0];
+    String output = args[1];
+
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+    // for example
+    // "edu/stanford/nlp/dcoref/STILLALONEWOLF_20050102.1100.eng.LDC2005E83.sgm"
+    String doc = IOUtils.slurpFile(input);
+    Annotation annotation = pipeline.process(doc);
+    Map<Integer, CorefChain> chains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+    saveResults(output, chains);
   }
 }

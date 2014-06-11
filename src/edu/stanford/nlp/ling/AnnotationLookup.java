@@ -59,7 +59,26 @@ public class AnnotationLookup {
     MORPHO_GEN_KEY(CoreAnnotations.MorphoGenAnnotation.class,"gen"),
     MORPHO_CASE_KEY(CoreAnnotations.MorphoCaseAnnotation.class,"case"),
     WORDNET_SYN_KEY(CoreAnnotations.WordnetSynAnnotation.class,"wordnetsyn"),
-    PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto");
+    PROTO_SYN_KEY(CoreAnnotations.ProtoAnnotation.class,"proto"),
+    DOCTYPE_KEY(CoreAnnotations.DocTypeAnnotation.class,"doctype"),
+    DOCDATE_KEY(CoreAnnotations.DocDateAnnotation.class,"docdate"),
+    DOCSOURCETYPE_KEY(CoreAnnotations.DocSourceTypeAnnotation.class,"docsourcetype"),
+    LINK_KEY(CoreAnnotations.LinkAnnotation.class,"link"),
+    SPEAKER_KEY(CoreAnnotations.SpeakerAnnotation.class,"speaker"),
+    AUTHOR_KEY(CoreAnnotations.AuthorAnnotation.class,"author"),
+    SECTION_KEY(CoreAnnotations.SectionAnnotation.class,"section"),
+    SECTIONID_KEY(CoreAnnotations.SectionIDAnnotation.class,"sectionID"),
+    SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate"),
+
+    // Thang Sep13: for Genia NER
+    HEAD_KEY(CoreAnnotations.HeadWordStringAnnotation.class, "head"),
+    GOVERNOR_KEY(CoreAnnotations.GovernorAnnotation.class, "governor"),
+    GAZ_KEY(CoreAnnotations.GazAnnotation.class, "gaz"),
+    ABBR_KEY(CoreAnnotations.AbbrAnnotation.class, "abbr"),
+    ABSTR_KEY(CoreAnnotations.AbstrAnnotation.class, "abstr"),
+    FREQ_KEY(CoreAnnotations.FreqAnnotation.class, "freq"),
+    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web");
+    
 
     public final Class coreKey;
     public final String oldKey;

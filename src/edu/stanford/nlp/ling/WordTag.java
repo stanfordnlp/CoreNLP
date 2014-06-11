@@ -13,6 +13,7 @@ import java.io.DataOutputStream;
  * word and tag.  Note that this is different from
  * <code>TaggedWord</code>, for which equality derives from
  * <code>ValueLabel</code> and requires only identity of value.
+ *
  * @author Roger Levy
  */
 
@@ -33,7 +34,7 @@ public class WordTag implements Label, HasWord, HasTag, Comparable<WordTag> {
     setWord(word);
     setTag(tag);
   }
-  
+
   public WordTag(String word) {
     this(word, null);
   }
@@ -42,7 +43,7 @@ public class WordTag implements Label, HasWord, HasTag, Comparable<WordTag> {
     this(word.value(), word.tag());
   }
 
-  public WordTag() { }
+  private WordTag() { }  // only used internally for doing setFromString()
 
   /**
    * Create a new <code>WordTag</code> from a Label.  The value of
@@ -57,7 +58,7 @@ public class WordTag implements Label, HasWord, HasTag, Comparable<WordTag> {
     this(word.value(), tag.value());
   }
 
-  
+
   public static WordTag valueOf(String s) {
     WordTag result = new WordTag();
     result.setFromString(s);
@@ -118,7 +119,7 @@ public class WordTag implements Label, HasWord, HasTag, Comparable<WordTag> {
     return toString(DIVIDER);
   }
 
-  public String toString(String divider) {  
+  public String toString(String divider) {
     String tag = tag();
     if (tag == null) {
       return word();
@@ -140,6 +141,7 @@ public class WordTag implements Label, HasWord, HasTag, Comparable<WordTag> {
    *
    * @param wordTagString The word that will go into the <code>Word</code>
    */
+  @Override
   public void setFromString(String wordTagString) {
     setFromString(wordTagString, DIVIDER);
   }
@@ -182,7 +184,7 @@ public class WordTag implements Label, HasWord, HasTag, Comparable<WordTag> {
    * @return result (positive if <code>this</code> is greater than
    *         <code>obj</code>, 0 if equal, negative otherwise)
    */
-  public int compareTo(WordTag wordTag) {    
+  public int compareTo(WordTag wordTag) {
     int first = (word != null ? word().compareTo(wordTag.word()) : 0);
     if(first != 0)
       return first;
