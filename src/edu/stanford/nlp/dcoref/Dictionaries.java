@@ -379,8 +379,8 @@ public class Dictionaries {
       BufferedReader reader = IOUtils.readerFromString(file);
       for (String line; (line = reader.readLine()) != null; ) {
         String[] split = line.split("\t");
-        String[] pieces = split[0].split(" ");
-        List<String> tokens = Arrays.asList(pieces);
+        String[] words = split[0].split(" ");
+        List<String> tokens = Arrays.asList(words);
         String[] countStr = split[1].split(" ");
         
         int male = Integer.parseInt(countStr[0]);
