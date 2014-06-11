@@ -1,0 +1,43 @@
+orig = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$OriginalTextAnnotation" }
+numtokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumerizedTokensAnnotation" }
+numcomptype = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumericCompositeTypeAnnotation" }
+numcompvalue = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumericCompositeValueAnnotation" }
+
+mytokens = { type: "CLASS", value: "edu.stanford.nlp.ling.tokensregex.demo.MyAnnotations$MyTokensAnnotation" }
+type = { type: "CLASS", value: "edu.stanford.nlp.ling.tokensregex.demo.MyAnnotations$MyTypeAnnotation" }
+value = { type: "CLASS", value: "edu.stanford.nlp.ling.tokensregex.demo.MyAnnotations$MyValueAnnotation" }
+
+ENV.defaultResultAnnotationKey = ( type, value ) 
+ENV.defaultNestedResultsAnnotationKey = mytokens 
+ENV.defaults["stage.limitIters"] = 0
+
+// Numbers
+{ ruleType: "tokens",
+  pattern: ( [ numcomptype:"NUMBER" ] ),
+  result: ( "EXPR", $0[0].numcompvalue )
+}
+
+// Operators
+{ pattern: ( "+" ),            result: ( "OP", "Add" ),      priority: 1}
+{ pattern: ( /plus/ ),         result: ( "OP", "Add" ),      priority: 1}
+{ pattern: ( "-" ),            result: ( "OP", "Subtract" ), priority: 1}
+{ pattern: ( /minus/ ),        result: ( "OP", "Subtract" ), priority: 1}
+{ pattern: ( "*" ),            result: ( "OP", "Multiply" ), priority: 2}
+{ pattern: ( /times/ ),        result: ( "OP", "Multiply" ), priority: 2}
+{ pattern: ( "/" ),            result: ( "OP", "Divide" ),   priority: 2}
+{ pattern: ( /divided/ /by/ ), result: ( "OP", "Divide" ),   priority: 2}
+{ pattern: ( "^" ),            result: ( "OP", "Pow" ),      priority: 3}
+
+$OP = ( [ type:"OP" ] )
+$EXPR = ( [ type:"EXPR" ] )
+
+{ ruleType: "composite",
+  pattern: ( ($EXPR) ($OP) ($EXPR) ),  
+  result: ("EXPR", Call($2[0].value, $1[0].value, $3[0].value))
+}
+  
+{ ruleType: "composite",
+  pattern: ( [orig:"("] ($EXPR) [orig:")"] ),  
+  result: ("EXPR", $1[0].value)
+}
+  
