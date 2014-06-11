@@ -71,9 +71,6 @@ public class Execution {
   public static int threads = Runtime.getRuntime().availableProcessors();
   @Option(name = "host", gloss = "Name of computer we are running on")
   public static String host = "(unknown)";
-  @SuppressWarnings("FieldCanBeLocal")
-  @Option(name = "strict", gloss = "If true, make sure that all options passed in are used somewhere")
-  private static boolean strict = false;
 
   static {
     try {
@@ -415,25 +412,23 @@ public class Execution {
         if (lastDotIndex < 0) {
           fatal("Unrecognized option: " + key);
         }
-        if (!rawKeyStr.startsWith("log.")) {  // ignore Redwood options
-          String className = rawKeyStr.substring(0, lastDotIndex);
-          String fieldName = rawKeyStr.substring(lastDotIndex + 1);
-          // get the class
-          Class clazz = null;
+        String className = rawKeyStr.substring(0, lastDotIndex);
+        String fieldName = rawKeyStr.substring(lastDotIndex + 1);
+        // get the class
+        Class clazz = null;
+        try {
+          clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+        } catch (Exception e) {
+          debug("Could not set option: " + rawKey + "; no such class: " + className);
+        }
+        // get the field
+        if (clazz != null) {
           try {
-            clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+            target = clazz.getField(fieldName);
           } catch (Exception e) {
-            err("Could not set option: " + rawKey + "; no such class: " + className);
+            debug("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
           }
-          // get the field
-          if (clazz != null) {
-            try {
-              target = clazz.getField(fieldName);
-            } catch (Exception e) {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
-            }
-            fillField(class2object.get(target.getDeclaringClass()), target, value);
-          }
+          fillField(class2object.get(target.getDeclaringClass()), target, value);
         }
       }
     }
@@ -459,7 +454,7 @@ public class Execution {
       Object[] instances,
       Class<?>[] classes,
       Properties options) {
-    return fillOptionsImpl(instances, classes, options, strict);
+    return fillOptionsImpl(instances, classes, options, false);
   }
 
 
@@ -484,10 +479,7 @@ public class Execution {
       options.put(key, props.getProperty(key));
     }
     //(bootstrap)
-    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    for (String key : bootstrapMap.keySet()) {
-      options.remove(key);
-    }
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
     if (visibleClasses == null) visibleClasses = getVisibleClasses(); //get classes
@@ -576,10 +568,7 @@ public class Execution {
   public static void exec(Runnable toRun, Properties options, boolean exit) {
     //--Init
     //(bootstrap)
-    Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
-    for (String key : bootstrapMap.keySet()) {
-      options.remove(key);
-    }
+    fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
     startTrack("init");
     //(fill options)
     Class<?>[] visibleClasses = optionClasses;
