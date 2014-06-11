@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sentiment;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Random;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.neural.SimpleTensor;
 import edu.stanford.nlp.util.Generics;
 
@@ -16,6 +18,9 @@ import edu.stanford.nlp.util.Generics;
  * the Matlab version of the code to the Java version of the code.  It
  * is useful to save this tool in case the format of the Java model
  * changes, in which case this will let us easily recreate it.
+ * <br>
+ * Another set of matrices is in <br>
+ * /u/nlp/data/sentiment/binary/model_binary_best_asTextFiles/
  *
  * @author John Bauer
  */
@@ -25,6 +30,20 @@ public class ConvertMatlabModel {
       return;
     }
     wordVectors.put(target, new SimpleMatrix(wordVectors.get(source)));
+  }
+
+  public static SimpleMatrix loadMatrix(String binaryName, String textName) throws IOException {
+    File matrixFile = new File(binaryName);
+    if (matrixFile.exists()) {
+      return SimpleMatrix.loadBinary(matrixFile.getPath());
+    }
+
+    matrixFile = new File(textName);
+    if (matrixFile.exists()) {
+      return NeuralUtils.loadTextMatrix(matrixFile);
+    }
+    
+    throw new RuntimeException("Could not find either " + binaryName + " or " + textName);
   }
 
   public static void main(String[] args) throws IOException {
@@ -46,24 +65,25 @@ public class ConvertMatlabModel {
 
     SimpleMatrix[] slices = new SimpleMatrix[numSlices];
     for (int i = 0; i < numSlices; ++i) {
-      String filename = basePath + "bin/Wt_" + (i + 1) + ".bin";
-      SimpleMatrix slice = SimpleMatrix.loadBinary(filename);
-      slices[i] = slice;
+      slices[i] = loadMatrix(basePath + "bin/Wt_" + (i + 1) + ".bin", basePath + "Wt_" + (i + 1) + ".txt");
     }
     SimpleTensor tensor = new SimpleTensor(slices);
+    System.err.println("W tensor size: " + tensor.numRows() + "x" + tensor.numCols() + "x" + tensor.numSlices());
 
-    String Wfilename = basePath + "bin/W.bin";
-    SimpleMatrix W = SimpleMatrix.loadBinary(Wfilename);
+    SimpleMatrix W = loadMatrix(basePath + "bin/W.bin", basePath + "W.txt");
+    System.err.println("W matrix size: " + W.numRows() + "x" + W.numCols());
     
-    String WcatFilename = basePath + "bin/Wcat.bin";
-    SimpleMatrix Wcat = SimpleMatrix.loadBinary(WcatFilename);
+    SimpleMatrix Wcat = loadMatrix(basePath + "bin/Wcat.bin", basePath + "Wcat.txt");
+    System.err.println("W cat size: " + Wcat.numRows() + "x" + Wcat.numCols());
 
-    String WvFilename = basePath + "bin/Wv.bin";
-    SimpleMatrix combinedWV = SimpleMatrix.loadBinary(WvFilename);
+    SimpleMatrix combinedWV = loadMatrix(basePath + "bin/Wv.bin", basePath + "Wv.txt");
 
-    String vocabFilename = basePath + "vocab_1.txt";
+    File vocabFile = new File(basePath + "vocab_1.txt");
+    if (!vocabFile.exists()) {
+      vocabFile = new File(basePath + "words.txt");
+    }
     List<String> lines = Generics.newArrayList();
-    for (String line : IOUtils.readLines(vocabFilename)) {
+    for (String line : IOUtils.readLines(vocabFile)) {
       lines.add(line.trim());
     }
 
@@ -82,6 +102,7 @@ public class ConvertMatlabModel {
     copyWordVector(wordVectors, "''", "``");
 
     RNNOptions op = new RNNOptions();
+    op.numHid = numSlices;
     op.lowercaseWordVectors = false;
 
     wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
