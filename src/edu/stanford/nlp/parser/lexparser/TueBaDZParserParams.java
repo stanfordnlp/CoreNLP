@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.ling.CategoryWordTag;
+import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.tuebadz.TueBaDZHeadFinder;
@@ -43,6 +45,7 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
   }
 
   /** Returns the first sentence of TueBaDZ. */
+  @Override
   public List<? extends HasWord> defaultTestSentence() {
     return Sentence.toWordList("Veruntreute", "die", "AWO", "Spendengeld", "?");
   }
@@ -67,10 +70,12 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
     return new MemoryTreebank(treeReaderFactory());
   }
 
+  @Override
   public DiskTreebank diskTreebank() {
     return new DiskTreebank(treeReaderFactory());
   }
 
+  @Override
   public TreeReaderFactory treeReaderFactory() {
     return new TueBaDZTreeReaderFactory(treebankLanguagePack(), nodeCleanup);
   }
@@ -134,8 +139,9 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
       i+=2;
     } else if (args[i].equalsIgnoreCase("-gfCharacter")) {
       String gfChar = args[i + 1];
-      if(gfChar.length() > 1)
+      if (gfChar.length() > 1) {
         System.out.println("Warning! gfCharacter argument ignored; must specify a character, not a String");
+      }
       treebankLanguagePack().setGfCharacter(gfChar.charAt(0));
       i+=2;
     }
@@ -170,11 +176,17 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
     }
 
     List<String> annotations = new ArrayList<String>();
-    CategoryWordTag lab = (CategoryWordTag) t.label();
-    String word = lab.word();
-    String tag = lab.tag();
+    Label lab = t.label();
+    String word = null;
+    if (lab instanceof HasWord) {
+      word = ((HasWord) lab).word();
+    }
+    String tag = null;
+    if (lab instanceof HasTag) {
+      tag = ((HasTag) lab).tag();
+    }
     String cat = lab.value();
-    Tree parent = t.parent(root);
+    // Tree parent = t.parent(root);
 
     if (t.isPhrasal()) {
 
@@ -226,13 +238,13 @@ public class TueBaDZParserParams extends AbstractTreebankParserParams {
 //        parentVal = parentVal.substring(0, curMin);
 //        annotations.add("^" + parentVal);
 //      }
-      if (markColons && cat.equals("$.") && (word.equals(":") || word.equals(";"))) {
+      if (markColons && cat.equals("$.") && word != null && (word.equals(":") || word.equals(";"))) {
         annotations.add("-%colon");
       }
 
       if(leftPhrasal && leftPhrasal(t)) {
         annotations.add("%LP");
-      };
+      }
 
 
     }
