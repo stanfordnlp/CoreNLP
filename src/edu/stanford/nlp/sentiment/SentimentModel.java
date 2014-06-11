@@ -12,9 +12,8 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.neural.Embedding;
-import edu.stanford.nlp.neural.Utils;
-import edu.stanford.nlp.neural.SimpleTensor;
+import edu.stanford.nlp.rnn.RNNUtils;
+import edu.stanford.nlp.rnn.SimpleTensor;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -290,7 +289,7 @@ public class SentimentModel implements Serializable {
   }
 
   static SimpleMatrix randomWordVector(int size, Random rand) {
-    return Utils.randomGaussian(size, 1, rand);
+    return RNNUtils.randomGaussian(size, 1, rand);
   }
 
   void initRandomWordVectors(List<Tree> trainingTrees) {
@@ -317,13 +316,11 @@ public class SentimentModel implements Serializable {
   }
 
   void readWordVectors() {
-    Embedding embedding = new Embedding(op.wordVectors, op.numHid);
     this.wordVectors = Generics.newTreeMap();
-//    Map<String, SimpleMatrix> rawWordVectors = RNNUtils.readRawWordVectors(op.wordVectors, op.numHid);
-//    for (String word : rawWordVectors.keySet()) {
-    for (String word : embedding.keySet()) {
+    Map<String, SimpleMatrix> rawWordVectors = RNNUtils.readRawWordVectors(op.wordVectors, op.numHid);
+    for (String word : rawWordVectors.keySet()) {
       // TODO: factor out unknown word vector code from DVParser
-      wordVectors.put(word, embedding.get(word));
+      wordVectors.put(word, rawWordVectors.get(word));
     }
 
     String unkWord = op.unkWord;
@@ -346,11 +343,11 @@ public class SentimentModel implements Serializable {
   
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
-    return Utils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
+    return RNNUtils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
   }
 
   public void vectorToParams(double[] theta) {
-    Utils.vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
+    RNNUtils.vectorToParams(theta, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
   }
 
   // TODO: combine this and getClassWForNode?
