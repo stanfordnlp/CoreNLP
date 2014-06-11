@@ -2243,7 +2243,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       if (evaluate) {
         boolean evalPerEntity = Boolean.parseBoolean(props
-            .getProperty("evalPerEntity"));
+            .getProperty("evalPerEntity","true"));
         g.evaluate(evalsents, evalPerEntity);
         // String evalFile = props.getProperty("evalFile");
         // Map<String, List<CoreLabel>> evalSents =
