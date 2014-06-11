@@ -73,7 +73,8 @@ For more information, see:
 
 [Training data]
 (Chinese Penn Treebank)
-"data/ctb.gz" is trained with the training data in the LDC Chinese Treebank 7 
+"data/ctb.gz" is trained with all data in the LDC Chinese Treebank 6 
+(prerelease).
 
 (Beijing University)
 "data/pku.gz" is trained with the data provided by Peking University 
