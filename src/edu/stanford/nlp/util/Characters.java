@@ -63,15 +63,4 @@ public final class Characters {
         cType == Character.INITIAL_QUOTE_PUNCTUATION ||
         cType == Character.FINAL_QUOTE_PUNCTUATION);
   }
-
-  /**
-   * Returns true if a character is a control character, and
-   * false otherwise.
-   * 
-   * @param c
-   * @return
-   */
-  public static boolean isControl(char c) {
-    return Character.getType(c) == Character.CONTROL;
-  }
 }
