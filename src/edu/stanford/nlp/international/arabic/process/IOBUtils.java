@@ -118,7 +118,6 @@ public class IOBUtils {
                                 int charIndex,
                                 boolean applyRewriteRules) {
 
-    if (token.isEmpty()) return;
     String lastLabel = ContinuationSymbol;
     String firstLabel = BeginSymbol;
     if (applyRewriteRules) {
@@ -128,7 +127,6 @@ public class IOBUtils {
       MorphoFeatureSpecification featureSpec = new ArabicMorphoFeatureSpecification();
       featureSpec.activate(MorphoFeatureType.NGEN);
       featureSpec.activate(MorphoFeatureType.NNUM);
-      featureSpec.activate(MorphoFeatureType.DEF);
       MorphoFeatures features = featureSpec.strToFeatures(tag);
 
       // Rule #1 : ت --> ة
@@ -139,10 +137,7 @@ public class IOBUtils {
       }
 
       // Rule #2 : لل --> ل ال
-      if (lastToken.equals("ل") &&
-          features.getValue(MorphoFeatureType.DEF).equals("D")) {
-        assert rawToken.startsWith("-ال") && token.startsWith("ا");
-        token = token.substring(1);
+      if (lastToken.equals("ل") && rawToken.startsWith("-ل")) {
         firstLabel = RewriteTareefSymbol;
       }
     }
@@ -248,39 +243,12 @@ public class IOBUtils {
 
   /**
    * Convert a list of labeled characters to a String. Include segmentation markers
-   * for prefixes and suffixes in the string, and add a space at segmentations.
+   * in the string.
    *
    * @param labeledSequence
    * @param prefixMarker
-   * @param suffixMarker
    */
   public static String IOBToString(List<CoreLabel> labeledSequence, String prefixMarker, String suffixMarker) {
-    return IOBToString(labeledSequence, prefixMarker, suffixMarker, true, true);
-  }
-
-  /**
-   * Convert a list of labeled characters to a String. Include segmentation markers
-   * (but no spaces) at segmentation boundaries.
-   *
-   * @param labeledSequence
-   * @param segmentationMarker
-   */
-  public static String IOBToString(List<CoreLabel> labeledSequence, String segmentationMarker) {
-    return IOBToString(labeledSequence, segmentationMarker, null, false, true);
-  }
-
-  /**
-   * Convert a list of labeled characters to a String. Preserve the original (unsegmented) text.
-   *
-   * @param labeledSequence
-   * @param segmentationMarker
-   */
-  public static String IOBToString(List<CoreLabel> labeledSequence) {
-    return IOBToString(labeledSequence, null, null, false, false);
-  }
-
-  private static String IOBToString(List<CoreLabel> labeledSequence,
-      String prefixMarker, String suffixMarker, boolean addSpace, boolean applyRewrites) {
     StringBuilder sb = new StringBuilder();
     String lastLabel = "";
     final boolean addPrefixMarker = prefixMarker != null && prefixMarker.length() > 0;
@@ -289,20 +257,14 @@ public class IOBUtils {
     for (int i = 0; i < sequenceLength; ++i) {
       CoreLabel labeledChar = labeledSequence.get(i);
       String token = labeledChar.get(CoreAnnotations.CharAnnotation.class);
-      if (addPrefixMarker && token.equals(prefixMarker))
-        token = "#pm#";
-      if (addSuffixMarker && token.equals(suffixMarker))
-        token = "#sm#";
       String label = labeledChar.get(CoreAnnotations.AnswerAnnotation.class);
       if (label.equals(BeginSymbol)) {
         if (lastLabel.equals(ContinuationSymbol) || lastLabel.equals(BeginSymbol)) {
-          if (addPrefixMarker && (!addSpace || addPrefixMarker(i, labeledSequence))) {
+          if (addPrefixMarker && addPrefixMarker(i, labeledSequence)) {
             sb.append(prefixMarker);
           }
-          if (addSpace) {
-            sb.append(" ");
-          }
-          if (addSuffixMarker && (!addSpace || addSuffixMarker(i, labeledSequence))) {
+          sb.append(" ");
+          if (addSuffixMarker && addSuffixMarker(i, labeledSequence)) {
             sb.append(suffixMarker);
           }
         }
@@ -321,23 +283,12 @@ public class IOBUtils {
         sb.append(" ");
 
       } else if (label.equals(RewriteTahSymbol)) {
-        if (applyRewrites) {
-          sb.append("ة");
-        } else {
-          sb.append("ت");
-        }
-        if (addSpace) sb.append(" ");
+        sb.append("ة ");
         if (addSuffixMarker) sb.append(suffixMarker);
-        else if (addPrefixMarker && !addSpace) sb.append(prefixMarker);
 
       } else if (label.equals(RewriteTareefSymbol)) {
         if (addPrefixMarker) sb.append(prefixMarker);
-        if (addSpace) sb.append(" ");
-        if (applyRewrites) {
-          sb.append("ال");
-        } else {
-          sb.append("ل");
-        }
+        sb.append(" ال");
 
       } else {
         throw new RuntimeException("Unknown label: " + label);

@@ -1,20 +1,20 @@
-5       Iris-setosa     Iris-setosa     0.9919247137755053
-4.6     Iris-setosa     Iris-setosa     0.9988153870786971
-5.1     Iris-setosa     Iris-setosa     0.9893228231715544
-4.9     Iris-setosa     Iris-setosa     0.9835318845429561
-5.4     Iris-setosa     Iris-setosa     0.9960427411240634
-4.4     Iris-setosa     Iris-setosa     0.9910859075339642
-5.3     Iris-setosa     Iris-setosa     0.9965862883009643
-6.1     Iris-versicolor Iris-versicolor 0.8468902641192759
-6       Iris-versicolor Iris-versicolor 0.9307517829994151
-5.5     Iris-versicolor Iris-versicolor 0.7982164305911292
-6.5     Iris-versicolor Iris-versicolor 0.873020490772672
-6.8     Iris-versicolor Iris-versicolor 0.9142958840729118
-6.2     Iris-versicolor Iris-versicolor 0.9691329948474605
-6.7     Iris-virginica  Iris-virginica  0.9514065325627161
-6.4     Iris-virginica  Iris-virginica  0.8326970803989662
-5.7     Iris-virginica  Iris-virginica  0.9861478471561218
-6.7     Iris-virginica  Iris-virginica  0.9281387678310443
-6.8     Iris-virginica  Iris-virginica  0.9869791941203433
-7.7     Iris-virginica  Iris-virginica  0.980694494307154
-7.3     Iris-virginica  Iris-virginica  0.9555631398239129
+5       Iris-setosa     Iris-setosa     0.992	0.992
+4.6     Iris-setosa     Iris-setosa     0.999	0.999
+5.1     Iris-setosa     Iris-setosa     0.989	0.989
+4.9     Iris-setosa     Iris-setosa     0.984	0.984
+5.4     Iris-setosa     Iris-setosa     0.996	0.996
+4.4     Iris-setosa     Iris-setosa     0.991	0.991
+5.3     Iris-setosa     Iris-setosa     0.997	0.997
+6.1     Iris-versicolor Iris-versicolor 0.847	0.847
+6       Iris-versicolor Iris-versicolor 0.931	0.931
+5.5     Iris-versicolor Iris-versicolor 0.798	0.798
+6.5     Iris-versicolor Iris-versicolor 0.873	0.873
+6.8     Iris-versicolor Iris-versicolor 0.914	0.914
+6.2     Iris-versicolor Iris-versicolor 0.969	0.969
+6.7     Iris-virginica  Iris-virginica  0.951	0.951
+6.4     Iris-virginica  Iris-virginica  0.833	0.833
+5.7     Iris-virginica  Iris-virginica  0.986	0.986
+6.7     Iris-virginica  Iris-virginica  0.928	0.928
+6.8     Iris-virginica  Iris-virginica  0.987	0.987
+7.7     Iris-virginica  Iris-virginica  0.981	0.981
+7.3     Iris-virginica  Iris-virginica  0.956	0.956
