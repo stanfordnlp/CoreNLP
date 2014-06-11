@@ -30,8 +30,8 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     String expectedResults = IOUtils.slurpFile("edu/stanford/nlp/dcoref/expected.txt");
 
     String[] corefArgs = { "-props", "edu/stanford/nlp/dcoref/coref.properties",
-                           "-" + Constants.LOG_PROP, baseLogFile,
-                           "-" + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
+                      "-" + Constants.LOG_PROP, baseLogFile,
+                      "-" + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
 
     Properties props = StringUtils.argsToProperties(corefArgs);
     System.err.println("Running dcoref with properties:");
@@ -56,7 +56,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     for (int i = 0; i < expectedLines.length; ++i) {
       String expectedLine = expectedLines[expectedLines.length - 1 - i].trim().replaceAll("\\s+", " ");
       String actualLine = actualLines[line - i].trim().replaceAll("\\s+", " ");
-      assertEquals(expectedLine, actualLine.substring(0, expectedLine.length()));
+      assertEquals(expectedLine, actualLine);
     }
     System.err.println(line);
   }
