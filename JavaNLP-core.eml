@@ -60,7 +60,4 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-lang3-3.1-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-lang3-3.1.jar!/"/>
 	</lib>
-	<lib name="servlet-api.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/servlet-api.jar!/"/>
-	</lib>
 </component>
