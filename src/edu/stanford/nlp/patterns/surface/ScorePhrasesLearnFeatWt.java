@@ -16,7 +16,6 @@ import edu.stanford.nlp.classify.LogisticClassifierFactory;
 import edu.stanford.nlp.classify.RVFDataset;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
-import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -43,7 +42,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
 
   public enum ClassifierType {
     DT, LR, RF
-  };
+  }
 
   public TwoDimensionalCounter<String, ScorePhraseMeasures> phraseScoresRaw = new TwoDimensionalCounter<String, ScorePhraseMeasures>();
 
@@ -69,7 +68,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
 //      System.out.println(j48decisiontree.toSummaryString());
 //      System.out.println(j48decisiontree.toString());
 //
-//    } else 
+//    } else
     if (scoreClassifierType.equals(ClassifierType.LR)) {
       LogisticClassifierFactory<String, ScorePhraseMeasures> logfactory = new LogisticClassifierFactory<String, ScorePhraseMeasures>();
       LogPrior lprior = new LogPrior();
@@ -84,7 +83,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
       }
       List<Pair<String, Double>> wtd = Counters.toDescendingMagnitudeSortedListWithCounts(weights);
       System.out.println("The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 200)), "\n"));
-    } 
+    }
 //    else if (scoreClassifierType.equals(ClassifierType.RF)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.RandomForest", constVars.wekaOptions);
 //      classifier = wekaFactory.trainClassifier(dataset);
@@ -118,18 +117,18 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     return scores;
   }
 
-  public boolean getRandomBoolean(Random random, double p) {
+  public static boolean getRandomBoolean(Random random, double p) {
     return random.nextFloat() < p;
   }
 
-  double logistic(double d) {
+  static double logistic(double d) {
     return 1 / (1 + Math.exp(-1 * d));
   }
 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, List<CoreLabel>> sents, Class answerClass, String answerLabel,
       Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
       Counter<SurfacePattern> allSelectedPatterns) {
-    // TODO: check whats happening with candiate terms for this iteration. do
+    // TODO: check whats happening with candidate terms for this iteration. do
     // not count them as negative!!!
     Random r = new Random(10);
     Random rneg = new Random(10);
@@ -137,7 +136,8 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     int numpos = 0, numneg = 0;
     List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
     for (Entry<String, List<CoreLabel>> en : sents.entrySet()) {
-      CoreLabel[] sent = en.getValue().toArray(new CoreLabel[0]);
+      List<CoreLabel> value = en.getValue();
+      CoreLabel[] sent = value.toArray(new CoreLabel[value.size()]);
 
       for (int i = 0; i < sent.length; i++) {
         CoreLabel l = sent[i];
@@ -146,8 +146,9 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
         boolean ignoreclass = false;
         Boolean datumlabel = false;
         for (Class cl : otherIgnoreClasses.keySet()) {
-          if ((boolean) l.get(cl))
+          if ((Boolean) l.get(cl)) {    // cast is needed for jdk 1.6
             ignoreclass = true;
+          }
         }
         if (l.get(answerClass).equals(answerLabel)) {
           datumlabel = true;
@@ -358,4 +359,5 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
+
 }

@@ -44,8 +44,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
       externalWordWeightsNormalized = GetPatternsFromDataMultiClass
-          .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
-              true, true, false);
+          .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label), true,
+              true, false);
 
     Counter<SurfacePattern> currentPatternWeights4Label = new ClassicCounter<SurfacePattern>();
 
@@ -55,37 +55,46 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     Counter<SurfacePattern> numeratorPatWt = this.convert2OneDim(label,
         patternsandWords4Label, constVars.sqrtPatScore, false, null,
-        useFreqPhraseExtractedByPat);
+        constVars.minPosPhraseSupportForPat, useFreqPhraseExtractedByPat);
     Counter<SurfacePattern> denominatorPatWt = null;
 
     if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
       // deno = negandUnLabeledPatternsandWords4Label;
-      denominatorPatWt = this.convert2OneDim(label,
-          negandUnLabeledPatternsandWords4Label, constVars.sqrtPatScore, false,
-          externalWordWeightsNormalized, useFreqPhraseExtractedByPat);
+      denominatorPatWt = this
+          .convert2OneDim(label, negandUnLabeledPatternsandWords4Label,
+              constVars.sqrtPatScore, false, externalWordWeightsNormalized,
+              constVars.minUnlabNegPhraseSupportForPat,
+              useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.RatioAll)) {
       // deno = allPatternsandWords4Label;
-      denominatorPatWt = this.convert2OneDim(label, allPatternsandWords4Label,
-          constVars.sqrtPatScore, false, externalWordWeightsNormalized,
-          useFreqPhraseExtractedByPat);
+      denominatorPatWt = this
+          .convert2OneDim(label, allPatternsandWords4Label,
+              constVars.sqrtPatScore, false, externalWordWeightsNormalized,
+              constVars.minUnlabNegPhraseSupportForPat,
+              useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.PosNegOdds)) {
       // deno = negPatternsandWords4Label;
-      denominatorPatWt = this.convert2OneDim(label, negPatternsandWords4Label,
-          constVars.sqrtPatScore, false, externalWordWeightsNormalized,
-
-          useFreqPhraseExtractedByPat);
+      denominatorPatWt = this
+          .convert2OneDim(label, negPatternsandWords4Label,
+              constVars.sqrtPatScore, false, externalWordWeightsNormalized,
+              constVars.minUnlabNegPhraseSupportForPat,
+              useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.PhEvalInPat)
         || patternScoring.equals(PatternScoring.PhEvalInPatLogP)
         || patternScoring.equals(PatternScoring.LOGREG)) {
       // deno = negandUnLabeledPatternsandWords4Label;
-      denominatorPatWt = this.convert2OneDim(label,
-          negandUnLabeledPatternsandWords4Label, constVars.sqrtPatScore, true,
-          externalWordWeightsNormalized, useFreqPhraseExtractedByPat);
+      denominatorPatWt = this
+          .convert2OneDim(label, negandUnLabeledPatternsandWords4Label,
+              constVars.sqrtPatScore, true, externalWordWeightsNormalized,
+              constVars.minUnlabNegPhraseSupportForPat,
+              useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.SqrtAllRatio)) {
       // deno = negandUnLabeledPatternsandWords4Label;
-      denominatorPatWt = this.convert2OneDim(label,
-          negandUnLabeledPatternsandWords4Label, true, false,
-          externalWordWeightsNormalized, useFreqPhraseExtractedByPat);
+      denominatorPatWt = this
+          .convert2OneDim(label, negandUnLabeledPatternsandWords4Label, true,
+              false, externalWordWeightsNormalized,
+              constVars.minUnlabNegPhraseSupportForPat,
+              useFreqPhraseExtractedByPat);
     } else
       throw new RuntimeException("Cannot understand patterns scoring");
 
@@ -107,8 +116,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   Counter<SurfacePattern> convert2OneDim(String label,
       TwoDimensionalCounter<SurfacePattern, String> patternsandWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
-      Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat)
-      throws IOException {
+      Counter<String> dictOddsWordWeights, Integer minPhraseSupport,
+      boolean useFreqPhraseExtractedByPat) throws IOException {
 
     if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
       Data.loadGoogleNGrams();
@@ -200,6 +209,11 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     for (Entry<SurfacePattern, ClassicCounter<String>> d : patternsandWords
         .entrySet()) {
+
+      if (minPhraseSupport != null && minPhraseSupport > 1) {
+        if (d.getValue().size() < minPhraseSupport)
+          continue;
+      }
 
       for (Entry<String, Double> e : d.getValue().entrySet()) {
         String word = e.getKey();
