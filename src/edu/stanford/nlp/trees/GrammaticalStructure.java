@@ -1564,7 +1564,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     boolean test = props.getProperty("test") != null;
     boolean keepPunct = props.getProperty("keepPunct") != null;
     boolean conllx = props.getProperty("conllx") != null;
-    // todo: Support checkConnected on more options (including basic)
     boolean checkConnected = props.getProperty("checkConnected") != null;
     boolean portray = props.getProperty("portray") != null;
 
@@ -1741,7 +1740,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     } // end for
   } // end main
 
-  // todo [cdm 2013]: Take this out and make it a trees class: TreeIterableByParsing
+
   static class LazyLoadTreesByParsing implements Iterable<Tree> {
     final Reader reader;
     final String filename;
