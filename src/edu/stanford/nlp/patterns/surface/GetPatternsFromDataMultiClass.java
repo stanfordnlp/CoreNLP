@@ -1065,13 +1065,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
                   + " because it is contained in or contains the already chosen pattern " + p);
               notchoose = true;
-              
-              if (pat.toStringSimple().contains("upon") && p.toStringSimple().contains("upon")) {
-                System.out.println("For " + pat + " and " + p + ": samegenre is " + SurfacePattern.sameGenre(pat, p) + " and subsumes answer is "
-                    + SurfacePattern.subsumes(pat, p) + " and notchoose varaible is " + notchoose);
-                
-              }
-              
               break;
             } 
             else if (SurfacePattern.subsumes(p, pat)) {
