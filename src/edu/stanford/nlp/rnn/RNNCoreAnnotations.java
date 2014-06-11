@@ -71,6 +71,14 @@ public class RNNCoreAnnotations {
     return ((CoreLabel) label).get(GoldClass.class);
   }
 
+  public static void setGoldClass(Tree tree, int goldClass) {
+    Label label = tree.label();
+    if (!(label instanceof CoreLabel)) {
+      throw new IllegalArgumentException("CoreLabels required to get the attached gold class");
+    }
+    ((CoreLabel) label).set(GoldClass.class, goldClass);
+  }
+
   public static class PredictionError implements CoreAnnotation<Double> {
     public Class<Double> getType() {
       return Double.class;
@@ -85,11 +93,11 @@ public class RNNCoreAnnotations {
     return ((CoreLabel) label).get(PredictionError.class);
   }
 
-  public static double setPredictionError(Tree tree, double error) {
+  public static void setPredictionError(Tree tree, double error) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
       throw new IllegalArgumentException("CoreLabels required to set the attached prediction error");
     }
-    return ((CoreLabel) label).set(PredictionError.class, error);
+    ((CoreLabel) label).set(PredictionError.class, error);
   }
 }
