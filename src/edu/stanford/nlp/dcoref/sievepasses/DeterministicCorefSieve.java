@@ -142,22 +142,16 @@ public abstract class DeterministicCorefSieve  {
         return false;
       }
     }
-    if (flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3 && 
-        mention2.person!=Person.I && mention2.person!=Person.YOU) {
-      return false;
+    if(flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3
+        && mention2.person!=Person.I && mention2.person!=Person.YOU) return false;
+    if(mention2.lowercaseNormalizedSpanString().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) return false;
+    if(mention2.person==Person.YOU && document.docType==DocType.ARTICLE
+        && mention2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0")) return false;
+    if(document.conllDoc != null) {
+      if(ant.generic && ant.person==Person.YOU) return false;
+      if(mention2.generic) return false;
     }
-    if (mention2.lowercaseNormalizedSpanString().equals("this") && Math.abs(mention2.sentNum-ant.sentNum) > 3) {
-      return false;
-    }
-    if (mention2.person==Person.YOU && document.docType==DocType.ARTICLE &&
-        mention2.headWord.get(CoreAnnotations.SpeakerAnnotation.class).equals("PER0")) {
-      return false;
-    }
-    if (document.conllDoc != null) {
-      if (ant.generic && ant.person==Person.YOU) return false;
-      if (mention2.generic) return false;
-      if (mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
-    }
+    if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
 
     if(flags.USE_DISCOURSEMATCH) {
       String mString = mention.lowercaseNormalizedSpanString();
@@ -287,7 +281,7 @@ public abstract class DeterministicCorefSieve  {
       return true;
     }
 
-    if(flags.USE_ACRONYM && Rules.entityIsAcronym(mentionCluster, potentialAntecedent)) {
+    if(flags.USE_ACRONYM && Rules.entityIsAcronym(document, mentionCluster, potentialAntecedent)) {
       SieveCoreferenceSystem.logger.finest("Acronym: " + mention.spanToString() + "\tvs\t" + ant.spanToString());
       return true;
     }
@@ -419,9 +413,18 @@ public abstract class DeterministicCorefSieve  {
           document.addIncompatible(m, ant);
           return false;
         }
+        
+        if(mention2.spanToString().toLowerCase().equals("you") && ant.spanToString().toLowerCase().equals("bill")) {
+          System.err.println(ant.speakerInfo.getSpeakerName());
+          System.err.println();
+        }
         if(Constants.USE_DISCOURSE_CONSTRAINTS && Rules.entityPersonDisagree(document, mentionCluster, potentialAntecedent, dict)){
           SieveCoreferenceSystem.logger.finest("Incompatibles: Person Disagree: "+ant.spanToString()+"("+ant.mentionID+") :: "+mention.spanToString()+"("+mention.mentionID+") -> "+(mention.goldCorefClusterID!=ant.goldCorefClusterID));
           document.addIncompatible(m, ant);
+          if(mention2.spanToString().toLowerCase().equals("you") && ant.spanToString().toLowerCase().equals("bill")) {
+            System.err.println("persondisagree!!!!!!!!!!!");
+            System.err.println();
+          }
           return false;
         }
         return true;
