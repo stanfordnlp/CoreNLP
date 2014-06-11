@@ -433,13 +433,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     public boolean accept(TypedDependency d) {
       if (d == null) return false;
 
-      if (d.reln() == GrammaticalRelation.ROOT) {
-        // Even if it's a punct, we should keep ROOT dependencies.
-        // Note that a root-punct dependency could indicate a bug
-        // except in cases where the sentence is only one word long
-        return true;
-      }
-
       TreeGraphNode s = d.dep();
       if (s == null) return false;
 
