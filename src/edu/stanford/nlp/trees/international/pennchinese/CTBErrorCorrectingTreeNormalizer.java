@@ -7,6 +7,9 @@ import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.io.EncodingPrintWriter;
@@ -123,6 +126,18 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
 
   private Filter<Tree> chineseEmptyFilter = new ChineseEmptyFilter();
 
+  private static final TregexPattern[] splitPuncTregex = { 
+    TregexPattern.compile("PU=punc < 她｛") 
+  };
+  private static final TsurgeonPattern[] splitPuncTsurgeon = {
+    Tsurgeon.parseOperation("replace punc (PN 她) (PU ｛)")
+  };
+
+  static {
+    if (splitPuncTregex.length != splitPuncTsurgeon.length) {
+      throw new AssertionError("splitPuncTregex and splitPuncTsurgeon have different lengths in CTBErrorCorrectingTreeNormalizer.java");
+    }
+  }
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
@@ -236,6 +251,19 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       }
     }
 
+    for (int i = 0; i < splitPuncTregex.length; ++i) {
+      if (DEBUG) {
+        Tree preProcessed = newTree.deepCopy();
+        newTree = Tsurgeon.processPattern(splitPuncTregex[i], splitPuncTsurgeon[i], newTree);
+        if (!preProcessed.equals(newTree)) {
+          EncodingPrintWriter.err.println("Correcting error: Updated tree using tregex " + splitPuncTregex[i] + " and tsurgeon " + splitPuncTsurgeon[i], ChineseTreebankLanguagePack.ENCODING);
+        }
+      } else {
+        newTree = Tsurgeon.processPattern(splitPuncTregex[i], splitPuncTsurgeon[i], newTree);
+      }
+    }
+
+    
     if (tagExtender != null) {
       newTree = tagExtender.transformTree(newTree);
     }
