@@ -22,10 +22,12 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.ReflectionLoading;
 
 public class TrainParser {
 
   // java -mx15g edu.stanford.nlp.parser.shiftreduce.TrainParser -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
+  // java -mx15g edu.stanford.nlp.parser.shiftreduce.TrainParser -trainTreebank ../data/parsetrees/wsj.train.mrg -testTreebank ../data/parsetrees/wsj.dev.mrg -serializedPath foo.ser.gz
   public static void main(String[] args) {
     List<String> remainingArgs = Generics.newArrayList();
 
@@ -36,6 +38,8 @@ public class TrainParser {
     int numTrainingIterations = 10;
 
     String serializedPath = null;
+
+    String tlppClass = null;
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-trainTreebank")) {
@@ -54,6 +58,9 @@ public class TrainParser {
       } else if (args[argIndex].equalsIgnoreCase("-serializedPath")) {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
+      } else if (args[argIndex].equalsIgnoreCase("-tlpp")) {
+        tlppClass = args[argIndex] + 1;
+        argIndex += 2;
       } else {
         remainingArgs.add(args[argIndex]);
         ++argIndex;
@@ -67,11 +74,16 @@ public class TrainParser {
     ShiftReduceParser parser = null;
 
     if (trainTreebankPath != null) {
-      // TODO: do something with the remaining args, such as set the Options flags...
-      // TODO: allow for different languages; by default this does English
       // TODO: since Options and buildTrainTransformer are used in so
       // many different places, it would make sense to factor that out
-      Options op = new Options();
+      String[] newArgs = new String[remainingArgs.size()];
+      newArgs = remainingArgs.toArray(newArgs);
+      ShiftReduceOptions op = new ShiftReduceOptions();
+      if (tlppClass != null) {
+        op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
+      }
+      op.setOptions(newArgs);
+
       TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
       BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
       CompositeTreeTransformer transformer = new CompositeTreeTransformer();

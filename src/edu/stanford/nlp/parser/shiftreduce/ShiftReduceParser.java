@@ -29,14 +29,13 @@ public class ShiftReduceParser implements Serializable, ParserGrammar {
   Index<String> featureIndex;
   double[][] featureWeights;
 
-  // TODO: replace this with our own options object?
-  final Options op;
+  final ShiftReduceOptions op;
 
-  // TODO: then we could fold the featureFactory into our options
+  // TODO: fold the featureFactory into our options
   final FeatureFactory featureFactory;
 
   public ShiftReduceParser(Index<Transition> transitionIndex, Index<String> featureIndex,
-                           double[][] featureWeights, Options op, FeatureFactory featureFactory) {
+                           double[][] featureWeights, ShiftReduceOptions op, FeatureFactory featureFactory) {
     this.transitionIndex = transitionIndex;
     this.featureIndex = featureIndex;
     this.featureWeights = featureWeights;

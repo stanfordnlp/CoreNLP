@@ -52,13 +52,12 @@ public class ShiftReduceParserQuery implements ParserQuery {
     return parseInternal();
   }
 
-  // TODO: make this a parameter
-  static final int BEAM_SIZE = 1;
-
   private boolean parseInternal() {
+    final int maxBeamSize = parser.op.beamSize;
+
     success = true;
     unparsable = false;
-    PriorityQueue<State> beam = new PriorityQueue<State>(BEAM_SIZE + 1, ScoredComparator.ASCENDING_COMPARATOR);
+    PriorityQueue<State> beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
     beam.add(initialState);
     // TODO: don't construct as many PriorityQueues
     while (beam.size() > 0) {
@@ -66,11 +65,11 @@ public class ShiftReduceParserQuery implements ParserQuery {
       // System.err.println("Current beam:");
       // System.err.println(beam);
       PriorityQueue<State> oldBeam = beam;
-      beam = new PriorityQueue<State>(BEAM_SIZE + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
         Set<String> features = parser.featureFactory.featurize(state);
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, BEAM_SIZE);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
           Transition transition = parser.transitionIndex.get(predictedTransition.object());
@@ -80,7 +79,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
             bestState = newState;
           }
           beam.add(newState);
-          if (beam.size() > BEAM_SIZE) {
+          if (beam.size() > maxBeamSize) {
             beam.poll();
           }
         }
