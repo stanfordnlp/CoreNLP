@@ -1037,7 +1037,7 @@ public class Redwood {
      */
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
       // (short circuit if single thread)
-      if (numThreads == 1) {
+      if (numThreads == 1 || isThreaded) {
         startTrack( "Threads (" + title + ")" );
         for (Runnable toRun : runnables) { toRun.run(); }
         endTrack( "Threads (" + title + ")" );
