@@ -136,7 +136,6 @@ public abstract class PhraseScorer {
       constVars.getWordShapeCache().put(word, wordShape);
     }
     double score = constVars.getWordShapesForLabels().get(label).getCount(wordShape) / (constVars.getWordShapesForLabels().get(label).totalCount() + 1);
-    System.out.println("score for " + word + " is " + score + ". For all labeled words " + constVars.getWordShapesForLabels().get(label));
     return score;
   }
   
