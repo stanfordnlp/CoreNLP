@@ -2,6 +2,7 @@ package edu.stanford.nlp.time;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.*;
+import edu.stanford.nlp.ling.tokensregex.types.Expression;
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchRules;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
@@ -72,6 +73,26 @@ public class TimeFormatter {
     }
   }
 
+  static class ApplyActionWrapper<I,O> implements Function<I,O> {
+    Env env;
+    Function<I,O> base;
+    Expression action;
+
+    ApplyActionWrapper(Env env, Function<I,O> base, Expression action) {
+      this.env = env;
+      this.base = base;
+      this.action = action;
+    }
+
+    public O apply(I in) {
+      O v = base.apply(in);
+      if (action != null) {
+        action.evaluate(env, v);
+      }
+      return v;
+    }
+  }
+
   static class TimePatternExtractRuleCreator extends SequenceMatchRules.AnnotationExtractRuleCreator {
     protected void updateExtractRule(SequenceMatchRules.AnnotationExtractRule r,
                                      Env env,
@@ -107,27 +128,28 @@ public class TimeFormatter {
       if (r.ruleType == null) { r.ruleType = "time"; }
       String expr = (String) Expressions.asObject(env, attributes.get("pattern"));
       String formatter = (String) Expressions.asObject(env, attributes.get("formatter"));
+      Expression action = Expressions.asExpression(env, attributes.get("action"));
       if (formatter == null) {
         if (r.annotationField == null) { r.annotationField = EnvLookup.getDefaultTextAnnotationKey(env);  }
         /* Parse pattern and figure out what the result should be.... */
         CustomDateFormatExtractor formatExtractor = new CustomDateFormatExtractor(expr);        
         //SequenceMatchRules.Expression result = (SequenceMatchRules.Expression) attributes.get("result");
-        updateExtractRule(r, env, formatExtractor.getTextPattern(), formatExtractor);
+        updateExtractRule(r, env, formatExtractor.getTextPattern(), new ApplyActionWrapper(env, formatExtractor, action));
       } else if ("org.joda.time.format.DateTimeFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        updateExtractRule(r, env, new JodaDateTimeFormatExtractor(expr));
+        updateExtractRule(r, env, new ApplyActionWrapper(env, new JodaDateTimeFormatExtractor(expr), action));
       } else if ("org.joda.time.format.ISODateTimeFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
         try {
           Method m = ISODateTimeFormat.class.getMethod(expr);
           DateTimeFormatter dtf = (DateTimeFormatter) m.invoke(null);
-          updateExtractRule(r, env, new JodaDateTimeFormatExtractor(expr));
+          updateExtractRule(r, env, new ApplyActionWrapper(env, new JodaDateTimeFormatExtractor(expr), action));
         } catch (Exception ex) {
           throw new RuntimeException("Error creating DateTimeFormatter", ex);
         }
       } else if ("java.text.SimpleDateFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        updateExtractRule(r, env, new JavaDateFormatExtractor(expr));
+        updateExtractRule(r, env, new ApplyActionWrapper(env, new JavaDateFormatExtractor(expr), action));
       } else {
         throw new IllegalArgumentException("Unsupported formatter: " + formatter);
       }
@@ -147,6 +169,7 @@ public class TimeFormatter {
    # m       minute of hour               number        30                           m
    # s       second of minute             number        55                           s
    # S       fraction of second           number        978                          S (Millisecond)
+   # a       half day of day marker       am/pm
    */
   /**
    * 1. Convert time string pattern to text pattern
