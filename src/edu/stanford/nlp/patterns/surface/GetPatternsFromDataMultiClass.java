@@ -1081,7 +1081,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               if (rest == Integer.MAX_VALUE)
               {
                 Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + p
-                    + " because it is contained in or contains the another chosen pattern in this iteration " + pat);  
+                    + " because it is contained in or contains another chosen pattern in this iteration " + pat);  
                 removeChosenPatFlag = true;
               }
               // if pat is less restrictive, remove p from chosen patterns and

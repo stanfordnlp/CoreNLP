@@ -552,9 +552,6 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
   
-  @Option(name="tempFileFolder")
-  public String tempFileFolder = null;
-  
   // /**
   // * Use FileBackedCache for the inverted index -- use if memory is limited
   // */
