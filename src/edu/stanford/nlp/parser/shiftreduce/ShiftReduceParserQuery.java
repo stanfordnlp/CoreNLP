@@ -22,7 +22,6 @@ public class ShiftReduceParserQuery implements ParserQuery {
   Debinarizer debinarizer = new Debinarizer(false);
 
   List<? extends HasWord> originalSentence;
-  List<Transition> transitions;
   State initialState, finalState;
   Tree debinarized;
 
@@ -52,13 +51,11 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   private boolean parseInternal() {
     State state = initialState;
-    transitions = Generics.newArrayList();
     while (!state.finished) {
       Set<String> features = parser.featureFactory.featurize(state);
       int predictedNum = parser.findHighestScoringTransition(state, features, true);
       Transition transition = parser.transitionIndex.get(predictedNum);
       state = transition.apply(state);
-      transitions.add(transition);
     }
     finalState = state;
     debinarized = debinarizer.transformTree(state.stack.peek());
@@ -78,13 +75,8 @@ public class ShiftReduceParserQuery implements ParserQuery {
     return finalState.stack.peek();
   }
 
-  /**
-   * TODO: should the State keep track of its transition sequence,
-   * allowing us to return transition sequences for any parse we
-   * produce, not just the best?
-   */
   public List<Transition> getBestTransitionSequence() {
-    return transitions;
+    return finalState.transitions.asList();
   }
 
   @Override
