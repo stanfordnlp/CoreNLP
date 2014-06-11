@@ -43,7 +43,7 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2014-01-02    3.3.1     Bugfix release 
+2014-01-04    3.3.1     Bugfix release 
 
 2013-11-12    3.3.0     Add sentiment model, minor sutime improvements 
 
