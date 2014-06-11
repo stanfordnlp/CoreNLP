@@ -169,7 +169,6 @@ import edu.stanford.nlp.util.StringUtils;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
-        escapeForwardSlashAsterisk = val;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
