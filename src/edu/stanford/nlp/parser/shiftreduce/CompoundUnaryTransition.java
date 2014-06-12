@@ -17,13 +17,18 @@ import edu.stanford.nlp.util.TreeShapedStack;
  * @author John Bauer
  */
 public class CompoundUnaryTransition implements Transition {
+  /** labels[0] is the top of the unary chain */
   public final String[] labels;
+
+  /** root transitions are illegal in the middle of the tree, naturally */
+  public final boolean isRoot;
   
-  public CompoundUnaryTransition(List<String> labels) {
+  public CompoundUnaryTransition(List<String> labels, boolean isRoot) {
     this.labels = new String[labels.size()];
     for (int i = 0; i < labels.size(); ++i) {
       this.labels[i] = labels.get(i);
     }
+    this.isRoot = isRoot;
   }
 
   /**
@@ -51,6 +56,9 @@ public class CompoundUnaryTransition implements Transition {
     if (top.label().value().startsWith("@") && !labels[labels.length - 1].equals(top.label().value().substring(1))) {
       // Disallow a transition if the top is a binarized node and the
       // bottom of the unary transition chain isn't the same type
+      return false;
+    }
+    if (isRoot && (state.stack.size() > 1 || !state.endOfQueue())) {
       return false;
     }
     return true;
@@ -96,7 +104,7 @@ public class CompoundUnaryTransition implements Transition {
 
   @Override
   public String toString() {
-    return "CompoundUnary(" + Arrays.asList(labels).toString() + ")";
+    return "CompoundUnary" + (isRoot ? "*" : "") + "(" + Arrays.asList(labels).toString() + ")";
   }
 
   private static final long serialVersionUID = 1;  

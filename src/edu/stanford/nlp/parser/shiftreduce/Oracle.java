@@ -255,9 +255,9 @@ class Oracle {
         parent = parents.get(parent);
       }
       Collections.reverse(labels);
-      return new OracleTransition(new CompoundUnaryTransition(labels), false, false, false);
+      return new OracleTransition(new CompoundUnaryTransition(labels, false), false, false, false);
     } else {
-      return new OracleTransition(new UnaryTransition(parent.value()), false, false, false);
+      return new OracleTransition(new UnaryTransition(parent.value(), false), false, false, false);
     }
   }
 }
