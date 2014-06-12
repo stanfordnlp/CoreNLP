@@ -98,6 +98,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     return defaultReaderAndWriter;
   }
 
+  private final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
+
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
     return plainTextReaderAndWriter;
@@ -1067,8 +1069,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     boolean resultsCounted = true;
     int numWords = 0;
     int numDocs = 0;
-
-    final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
     ThreadsafeProcessor<List<IN>, List<IN>> threadProcessor =
         new ThreadsafeProcessor<List<IN>, List<IN>>() {
