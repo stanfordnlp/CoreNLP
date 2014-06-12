@@ -81,7 +81,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
-  public FeatureFactory<IN> featureFactory;
 
   // Thang Sep13: multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory)
   public List<FeatureFactory<IN>> featureFactories;
@@ -126,9 +125,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     // try {
     // Thang Sep13: allow for multiple feature factories.
-    this.featureFactory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
+    this.featureFactories = Generics.newArrayList();
+    if (flags.featureFactory != null) {
+      FeatureFactory factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
+      featureFactories.add(factory);
+    }
     if(flags.featureFactories!=null){
-      this.featureFactories = new ArrayList<FeatureFactory<IN>>();
       for (int i = 0; i < flags.featureFactories.length; i++) {
         FeatureFactory<IN> indFeatureFactory = new MetaClass(flags.featureFactories[i]).
             createInstance(flags.featureFactoriesArgs.get(i));
@@ -165,12 +167,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
     pad.set(CoreAnnotations.GoldAnswerAnnotation.class, flags.backgroundSymbol);
 
-    // Thang Sep13: allow for multiple feature factories.
-    featureFactory.init(flags); // for compatible use
-    if(flags.featureFactories!=null){
-      for (FeatureFactory<IN> indFeatureFactory : featureFactories) {
-        indFeatureFactory.init(flags);
-      }
+    for (FeatureFactory featureFactory : featureFactories) {
+      featureFactory.init(flags);
     }
 
     defaultReaderAndWriter = makeReaderAndWriter();
