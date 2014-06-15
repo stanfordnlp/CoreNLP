@@ -15,7 +15,7 @@ ALIFS = u'اأإٱآ'
 HAAS = u'هح'
 
 
-def get_edits(line, options):
+def get_edits(line, options, special_noseg=True):
     if '\t' not in line:
         if options.verbose:
             uprint("ignoring line that doesn't have two parts:")
@@ -25,7 +25,7 @@ def get_edits(line, options):
 
     # Special cases:
     # - an odd edit with no segmentations [e.g. ع -> على]
-    if raw != seg and SEG_MARKER not in seg:
+    if special_noseg and raw != seg and SEG_MARKER not in seg:
         return [u'<other>'] * len(raw)
     # - token deleted
     if seg == '':
@@ -214,6 +214,7 @@ COMMON_REWRITES = [
     u'دذضظ',     # normalized letters pronounced /d/
     u'سص',       # normalized letters pronounced /s/
     u'زذظ',      # normalized letters pronounced /z/
+    u'?–,،؟',    # normalized punctuation
 ]
 
 def is_common_rewrite(seg, raw):

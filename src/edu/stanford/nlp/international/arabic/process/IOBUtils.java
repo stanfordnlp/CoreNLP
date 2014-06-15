@@ -181,6 +181,15 @@ public class IOBUtils {
     if (token.isEmpty()) return;
     String lastLabel = ContinuationSymbol;
     String firstLabel = BeginSymbol;
+    String rewritten = cl.get(ArabicDocumentReaderAndWriter.RewrittenArabicAnnotation.class);
+    boolean crossRefRewrites = true;
+    if (rewritten == null) {
+      rewritten = token;
+      crossRefRewrites = false;
+    } else {
+      rewritten = stripSegmentationMarkers(rewritten, tokType);
+    }
+
     if (applyRewriteRules) {
       // Apply Arabic-specific re-write rules
       String rawToken = tokenLabel.word();
@@ -211,6 +220,7 @@ public class IOBUtils {
           if (!token.startsWith("ا"))
             System.err.println("Bad REWAL: " + rawToken + " / " + token);
           token = token.substring(1);
+          rewritten = rewritten.substring(1);
           if (!stripRewrites)
             firstLabel = RewriteSymbol;
         } else if (rawToken.startsWith("-ل")) {
@@ -247,9 +257,16 @@ public class IOBUtils {
     String firstChar = String.valueOf(token.charAt(0));
     iobList.add(createDatum(cl, firstChar, firstLabel));
     final int numChars = token.length();
+    if (crossRefRewrites && rewritten.length() != numChars) {
+      System.err.printf("Rewritten annotation doesn't have correct length: %s>>>%s%n", token, rewritten);
+      crossRefRewrites = false;
+    }
+
     for (int j = 1; j < numChars; ++j) {
-      String thisChar = String.valueOf(token.charAt(j));
       String charLabel = (j == numChars-1) ? lastLabel : ContinuationSymbol;
+      String thisChar = String.valueOf(token.charAt(j));
+      if (crossRefRewrites && !String.valueOf(rewritten.charAt(j)).equals(thisChar))
+        charLabel = RewriteSymbol;
       if (charLabel == ContinuationSymbol && thisChar.equals("ى") && j != numChars - 1)
         charLabel = RewriteSymbol; // Assume all mid-word alef maqsura are supposed to be yah
       iobList.add(createDatum(cl, thisChar, charLabel));
@@ -426,14 +443,16 @@ public class IOBUtils {
         sb.append(token);
 
       } else if (label.equals(RewriteSymbol) || label.equals("REWAL") || label.equals("REWTA")) {
-        if (token.equals("ت")) {
-          sb.append(applyRewrites ? "ة" : "ت");
+        if (token.equals("ت") || token.equals("ه")) {
+          sb.append(applyRewrites ? "ة" : token);
         } else if (token.equals("ل")) {
           sb.append((addPrefixMarker ? prefixMarker : "") +
                     (addSpace ? " " : "") + 
                     (applyRewrites ? "ال" : "ل"));
         } else if (token.equals("ي") || token.equals("ا")) {
           sb.append(applyRewrites ? "ى" : token);
+        } else if (token.equals("ى")) {
+          sb.append(applyRewrites ? "ي" : token);
         } else {
           // Nonsense rewrite predicted by the classifier--just assume CONT
           sb.append(token);

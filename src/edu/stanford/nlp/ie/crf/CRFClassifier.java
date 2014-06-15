@@ -184,7 +184,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   public CRFClassifier(CRFClassifier<IN> crf) {
     super(crf.flags);
     this.windowSize = crf.windowSize;
-    this.featureFactories = crf.featureFactories;
+    this.featureFactory = crf.featureFactory;
     this.pad = crf.pad;
     this.knownLCWords = (crf.knownLCWords != null) ? Generics.<String>newHashSet(crf.knownLCWords) : null;
     this.featureIndex = (crf.featureIndex != null) ? new HashIndex<String>(crf.featureIndex.objectsList()) : null;
@@ -444,7 +444,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     // System.err.println("docSize:"+docSize);
     for (int j = 0; j < docSize; j++) {
-      CRFDatum<List<String>, CRFLabel> d = makeDatum(document, j, featureFactories);
+      CRFDatum<List<String>, CRFLabel> d = makeDatum(document, j, featureFactory);
 
       List<List<String>> features = d.asFeatures();
       List<double[]> featureValList = d.asFeatureVals();
@@ -547,7 +547,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         if (j + p >= document.size()) {
           continue;
         }
-        CRFDatum<List<String>, CRFLabel> d = makeDatum(document, j + p, featureFactories);
+        CRFDatum<List<String>, CRFLabel> d = makeDatum(document, j + p, featureFactory);
 
         List<List<String>> features = d.asFeatures();
         for (int k = p, fSize = features.size(); k < fSize; k++) {
@@ -756,7 +756,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
 
       for (int j = 0, docSize = doc.size(); j < docSize; j++) {
-        CRFDatum<List<String>, CRFLabel> d = makeDatum(doc, j, featureFactories);
+        CRFDatum<List<String>, CRFLabel> d = makeDatum(doc, j, featureFactory);
         labelIndex.add(d.label());
 
         List<List<String>> features = d.asFeatures();
@@ -956,7 +956,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @return The constructed CRFDatum
    */
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc,
-                                                    List<FeatureFactory<IN>> featureFactories) {
+      edu.stanford.nlp.sequences.FeatureFactory<IN> featureFactory) {
     // pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol); // cdm: isn't this unnecessary, as this is how it's initialized in AbstractSequenceClassifier.reinit?
     PaddedList<IN> pInfo = new PaddedList<IN>(info, pad);
 
@@ -981,12 +981,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       done.addAll(windowCliques);
       double[] featureValArr = null;
       if (flags.useEmbedding && i == 0) { // only activated for node features
-        featureValArr = makeDatumUsingEmbedding(info, loc, featureFactories, pInfo, featuresC, windowCliques);
+        featureValArr = makeDatumUsingEmbedding(info, loc, featureFactory, pInfo, featuresC, windowCliques);
       } else {
         for (Clique c : windowCliques) {
-          for (FeatureFactory featureFactory : featureFactories) {
-            featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c)); //todo useless copy because of typing reasons
-          }
+          featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c)); //todo useless copy because of typing reasons
         }
       }
       features.add(featuresC);
@@ -1007,7 +1005,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return d;
   }
 
-  private double[] makeDatumUsingEmbedding(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories, PaddedList<IN> pInfo, List<String> featuresC, List<Clique> windowCliques) {
+  private double[] makeDatumUsingEmbedding(List<IN> info, int loc, FeatureFactory<IN> featureFactory, PaddedList<IN> pInfo, List<String> featuresC, List<Clique> windowCliques) {
     double[] featureValArr;
     List<double[]> embeddingList = new ArrayList<double[]>();
     int concatEmbeddingLen = 0;
@@ -1078,11 +1076,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (flags.prependEmbedding) {
       int additionalFeatureCount = 0;
       for (Clique c : windowCliques) {
-        for (FeatureFactory featureFactory : featureFactories) {
-          Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
-          featuresC.addAll(fCol);
-          additionalFeatureCount += fCol.size();
-        }
+        Collection<String> fCol = featureFactory.getCliqueFeatures(pInfo, loc, c); //todo useless copy because of typing reasons
+        featuresC.addAll(fCol);
+        additionalFeatureCount += fCol.size();
       }
       featureValArr = new double[concatEmbedding.length + additionalFeatureCount];
       System.arraycopy(concatEmbedding, 0, featureValArr, 0, concatEmbedding.length);
@@ -2276,15 +2272,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     line = br.readLine();
 
     String[] featureFactoryName = line.split(" ");
-    if (featureFactoryName.length < 2 || !featureFactoryName[0].equals("<featureFactory>") || !featureFactoryName[featureFactoryName.length - 1].equals("</featureFactory>")) {
-      throw new RuntimeException("format error unexpected featureFactory line: " + line);
+    if (!featureFactoryName[0].equals("<featureFactory>") || !featureFactoryName[2].equals("</featureFactory>")) {
+      throw new RuntimeException("format error");
     }
-    featureFactories = Generics.newArrayList();
-    for (int ff = 1; ff < featureFactoryName.length - 1; ++ff) {
-      FeatureFactory featureFactory = (edu.stanford.nlp.sequences.FeatureFactory<IN>) Class.forName(featureFactoryName[1]).newInstance();
-      featureFactory.init(flags);
-      featureFactories.add(featureFactory);
-    }
+    featureFactory = (edu.stanford.nlp.sequences.FeatureFactory<IN>) Class.forName(featureFactoryName[1]).newInstance();
+    featureFactory.init(flags);
 
     reinit();
 
@@ -2388,11 +2380,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       }
     }
 
-    pw.printf("<featureFactory>");
-    for (FeatureFactory featureFactory : featureFactories) {
-      pw.printf(" %s ", featureFactory.getClass().getName());
-    }
-    pw.printf("</featureFactory>%n");
+    pw.printf("<featureFactory> %s </featureFactory>%n", featureFactory.getClass().getName());
 
     pw.printf("<windowSize> %d </windowSize>%n", windowSize);
 
@@ -2570,7 +2558,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       oos.writeObject(flags);
       if (flags.useEmbedding)
         oos.writeObject(embeddings);
-      oos.writeObject(featureFactories);
+      oos.writeObject(featureFactory);
       oos.writeInt(windowSize);
       oos.writeObject(weights);
       // oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
@@ -2616,13 +2604,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (flags.useEmbedding) {
       embeddings = (Map<String, double[]>) ois.readObject();
     }
-    Object featureFactory = ois.readObject();
-    if (featureFactory instanceof List) {
-      featureFactories = ErasureUtils.uncheckedCast(featureFactories);
-    } else if (featureFactory instanceof FeatureFactory) {
-      featureFactories = Generics.newArrayList();
-      featureFactories.add((FeatureFactory) featureFactory);
-    }
+    featureFactory = (edu.stanford.nlp.sequences.FeatureFactory) ois.readObject();
 
     if (props != null) {
       flags.setProperties(props, false);

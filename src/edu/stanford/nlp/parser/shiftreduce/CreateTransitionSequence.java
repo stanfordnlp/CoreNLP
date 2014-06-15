@@ -15,14 +15,14 @@ public class CreateTransitionSequence {
   public static List<Transition> createTransitionSequence(Tree tree, boolean compoundUnary) {
     List<Transition> transitions = Generics.newArrayList();
 
-    createTransitionSequenceHelper(transitions, tree, compoundUnary, true);
+    createTransitionSequenceHelper(transitions, tree, compoundUnary);
     transitions.add(new FinalizeTransition());
     transitions.add(new IdleTransition());
 
     return transitions;
   }
 
-  private static void createTransitionSequenceHelper(List<Transition> transitions, Tree tree, boolean compoundUnary, boolean isRoot) {
+  private static void createTransitionSequenceHelper(List<Transition> transitions, Tree tree, boolean compoundUnary) {
     if (tree.isLeaf()) {
       // do nothing
     } else if (tree.isPreTerminal()) {
@@ -34,15 +34,15 @@ public class CreateTransitionSequence {
           labels.add(tree.label().value());
           tree = tree.children()[0];
         }
-        createTransitionSequenceHelper(transitions, tree, compoundUnary, false);
-        transitions.add(new CompoundUnaryTransition(labels, isRoot));
+        createTransitionSequenceHelper(transitions, tree, compoundUnary);
+        transitions.add(new CompoundUnaryTransition(labels));
       } else {
-        createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, false);
-        transitions.add(new UnaryTransition(tree.label().value(), isRoot));
+        createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary);
+        transitions.add(new UnaryTransition(tree.label().value()));
       }
     } else if (tree.children().length == 2) {
-      createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, false);
-      createTransitionSequenceHelper(transitions, tree.children()[1], compoundUnary, false);
+      createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary);
+      createTransitionSequenceHelper(transitions, tree.children()[1], compoundUnary);
 
       // This is the tricky part... need to decide if the binary
       // transition is a left or right transition.  This is done by

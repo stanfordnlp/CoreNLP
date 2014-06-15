@@ -82,20 +82,16 @@ public class TreeShapedStack<T> {
 
   @Override
   public String toString() {
-    return "[" + internalToString(" ") + "]";
+    return "[" + internalToString() + "]";
   }
 
-  public String toString(String delimiter) {
-    return "[" + internalToString(delimiter) + "]";
-  }
-
-  private String internalToString(String delimiter) {
+  private String internalToString() {
     if (size() == 0) {
       return " ";
     } else if (size() == 1) {
       return data.toString();
     } else {
-      return previous.internalToString(delimiter) + "," + delimiter + data.toString();
+      return previous.internalToString() + ", " + data.toString();
     }
   }
 

@@ -730,18 +730,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     Timing transitionTimer = new Timing();
     List<List<Transition>> transitionLists = createTransitionSequences(binarizedTrees);
     for (List<Transition> transitions : transitionLists) {
-      // TODO: there is a potential bug here.  So far, the assumption
-      // is that all unary transitions which occur at the root only
-      // ever occur at the root.  If that assumption doesn't hold for
-      // some treebank, it may occur that a root transition occurs in
-      // the middle of the tree but is marked "isRoot", meaning it can
-      // never actually be used in the middle of the tree.
-      //
-      // A solution to this would be to keep a separate index of all
-      // the transitions which have only ever been seen in the context
-      // of the root.  Eg, nothing comes after those transitions
-      // except Finalize or Idle.  (That also picks up the unlikely
-      // case of a binary transition being a root transition.)
       transitionIndex.addAll(transitions);
     }
     transitionTimer.done("Converting trees into transition lists");

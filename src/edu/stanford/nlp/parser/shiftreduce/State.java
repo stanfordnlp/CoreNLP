@@ -237,8 +237,7 @@ public class State implements Scored {
     result.append("State summary\n");
     result.append("  Tokens: " + sentence + "\n");
     result.append("  Token position: " + tokenPosition + "\n");
-    result.append("  Current stack contents: " + stack.toString("\n") + "\n");
-    result.append("  Component transitions: " + transitions + "\n");
+    result.append("  Current stack contents: " + stack + "\n");
     result.append("  Score: " + score + "\n");
     result.append("  " + ((finished) ? "" : "not ") + "finished\n");
     return result.toString();

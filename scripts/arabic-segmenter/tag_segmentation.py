@@ -11,6 +11,8 @@ from edits import get_edits, SEG_MARKER
 from output_to_tedeval import is_deleted
 
 
+REWRITE_MARKER = "REW"
+
 class FalseOptions(object):
   def __getattr__(self, name): return False
 
@@ -83,27 +85,30 @@ def convert(infile, tagsfile):
   tagger = Tagger(tagsfile)
   accum = Accumulator(tagger)
   for line in infile:
-    segs = convert_line(line)
-    for seg in segs:
-      accum.add(seg)
-    if len(segs) == 0:
+    segs_norew, segs_rew = convert_line(line)
+    assert len(segs_norew) == len(segs_rew)
+    for norew, rew in zip(segs_norew, segs_rew):
+      accum.add('%s>>>%s' % (norew, rew))
+    if len(segs_norew) == 0:
       accum.flush()
   print >> sys.stderr, ('%d sentences ignored.' % tagger.ignored)
 
 
 def convert_line(line):
   if '\t' not in line:
-    return ''
+    return '', ''
 
   line = line[:-1]
-  edits = get_edits(line, FALSE_OPTIONS)
+  edits = get_edits(line, FALSE_OPTIONS, special_noseg=False)
   raw, segmented = line.split('\t')
   if edits is None:
-    reconstructed = segmented
+    norew = rew = segmented
   else:
-    reconstructed = apply_edits(edits, raw)
-  segs = reconstructed.split(SEG_MARKER)
-  return unescape('- -'.join(segs)).split()
+    norew, rew = apply_edits(edits, raw)
+  segs_norew = norew.split(SEG_MARKER)
+  segs_rew = rew.split(SEG_MARKER)
+  return (unescape('- -'.join(segs_norew)).split(),
+          unescape('- -'.join(segs_rew)).split())
 
 
 def unescape(s):
@@ -120,23 +125,36 @@ def apply_edits(edits, raw):
     raise AssertionError
 
   labels = [crf_label(raw[i], edits[i]) for i in range(len(raw))]
-  return ''.join(rewrite_with_label(raw[i], labels[i])
-                 for i in range(len(raw)))
+  norew = ''.join(rewrite_with_label(raw[i], labels[i], False)
+                  for i in range(len(raw)))
+  rew = ''.join(rewrite_with_label(raw[i], labels[i], True)
+                for i in range(len(raw)))
+  return norew, rew
 
 
 def crf_label(char, edit):
   if (edit == u'   :+ا ' and char == u'ل'): return 'REW'
   elif SEG_MARKER in edit: return 'BEGIN'
-  elif u'ي>ى' in edit or u'ت>ة' in edit: return 'REW'
+  elif edit.strip() in (u'ي>ى', u'ت>ة', u'ى>ي', u'ه>ة', u'ة>ه'):
+    return 'REW'
   else: return 'CONT'
 
 
-def rewrite_with_label(char, label):
+def rewrite_with_label(char, label, apply_rewrites):
   if label == 'BEGIN': return SEG_MARKER + char
   elif label == 'CONT': return char
   elif label == 'REW':
     if char == u'ل':
       return u':ال'
+    elif apply_rewrites:
+      if char in u'ته':
+        return u'ة'
+      elif char == u'ة':
+        return u'ه'
+      elif char == u'ي':
+        return u'ى'
+      elif char == u'ى':
+        return u'ي'
     else:
       return char
   else:

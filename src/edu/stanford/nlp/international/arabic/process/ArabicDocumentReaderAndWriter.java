@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 import edu.stanford.nlp.objectbank.LineIterator;
@@ -42,11 +43,18 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
 
   // TODO(spenceg): Make this configurable.
   private static final String tagDelimiter = "|||";
+  private static final String rewriteDelimiter = ">>>";
 
   private final boolean inputHasTags;
   private final boolean inputHasDomainLabels;
   private final String inputDomain;
   private final boolean shouldStripRewrites;
+
+  public static class RewrittenArabicAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
 
   /**
    *
@@ -137,35 +145,52 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
         if (inputHasTags) {
           String[] toks = in.split("\\s+");
           List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
-          final String delim = Pattern.quote(tagDelimiter);
+          final String tagDelim = Pattern.quote(tagDelimiter);
+          final String rewDelim = Pattern.quote(rewriteDelimiter);
           for (String wordTag : toks) {
-            String[] wordTagPair = wordTag.split(delim);
+            String[] wordTagPair = wordTag.split(tagDelim);
             assert wordTagPair.length == 2;
+            String[] rewritePair = wordTagPair[0].split(rewDelim);
+            assert rewritePair.length == 1 || rewritePair.length == 2;
+            String raw = rewritePair[0];
+            String rewritten = raw;
+            if (rewritePair.length == 2)
+              rewritten = rewritePair[1];
+
             CoreLabel cl = new CoreLabel();
-            String word = wordTagPair[0];
             if (tf != null) {
-              List<CoreLabel> lexList = tf.getTokenizer(new StringReader(word)).tokenize();
-              if (lexList.size() == 0) {
+              List<CoreLabel> lexListRaw = tf.getTokenizer(new StringReader(raw)).tokenize();
+              List<CoreLabel> lexListRewritten = tf.getTokenizer(new StringReader(rewritten)).tokenize();
+              if (lexListRewritten.size() != lexListRaw.size()) {
+                System.err.printf("%s: Different number of tokens in raw and rewritten: %s>>>%s%n", this.getClass().getName(), raw, rewritten);
+                lexListRewritten = lexListRaw;
+
+              }
+              if (lexListRaw.size() == 0) {
                 continue;
               
-              } else if (lexList.size() == 1) {
-                word = lexList.get(0).value();
+              } else if (lexListRaw.size() == 1) {
+                raw = lexListRaw.get(0).value();
+                rewritten = lexListRewritten.get(0).value();
               
-              } else if (lexList.size() > 1) {
-                String secondWord = lexList.get(1).value();
+              } else if (lexListRaw.size() > 1) {
+                String secondWord = lexListRaw.get(1).value();
                 if (secondWord.equals(String.valueOf(segMarker))) {
                   // Special case for the null marker in the vocalized section
-                  word = lexList.get(0).value() + segMarker;
+                  raw = lexListRaw.get(0).value() + segMarker;
+                  rewritten = lexListRewritten.get(0).value() + segMarker;
                 } else {
-                  System.err.printf("%s: Raw token generates multiple segments: %s%n", this.getClass().getName(), word);
-                  word = lexList.get(0).value();
+                  System.err.printf("%s: Raw token generates multiple segments: %s%n", this.getClass().getName(), raw);
+                  raw = lexListRaw.get(0).value();
+                  rewritten = lexListRewritten.get(0).value();
                 }
               }
             }
-            cl.setValue(word);
-            cl.setWord(word);
+            cl.setValue(raw);
+            cl.setWord(raw);
             cl.setTag(wordTagPair[1]);
             cl.set(CoreAnnotations.DomainAnnotation.class, lineDomain);
+            cl.set(RewrittenArabicAnnotation.class, rewritten);
             input.add(cl);
           }
           tokenList = IOBUtils.StringToIOB(input, segMarker, true, shouldStripRewrites);

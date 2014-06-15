@@ -91,11 +91,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
     if (beam.size() == 0) {
       success = false;
       unparsable = true;
-      debinarized = null;
-      finalState = null;
-      bestParses = Collections.emptyList();
     } else {
-      // TODO: filter out beam elements that aren't finished
       bestParses = Generics.newArrayList(beam);
       Collections.sort(bestParses, beam.comparator());
       Collections.reverse(bestParses);
