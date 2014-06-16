@@ -342,6 +342,40 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return evals;
   }
 
+  /**
+   * Returns a transition which might not even be part of the model,
+   * but will hopefully allow progress in an otherwise stuck parse
+   *
+   * TODO: perhaps we want to create an EmergencyTransition class
+   * which indicates that something has gone wrong
+   */
+  public Transition findEmergencyTransition(State state) {
+    if (state.stack.size() == 0) {
+      return null;
+    }
+
+    if (ShiftReduceUtils.isTemporary(state.stack.peek()) && 
+        (state.stack.size() == 1 || ShiftReduceUtils.isTemporary(state.stack.pop().peek()))) {
+      return ((op.compoundUnaries) ? 
+              new CompoundUnaryTransition(Collections.singletonList(state.stack.peek().value().substring(1)), false) : 
+              new UnaryTransition(state.stack.peek().value().substring(1), false));
+    }
+
+    if (state.stack.size() == 1) {
+      return null;
+    }
+
+    if (ShiftReduceUtils.isTemporary(state.stack.peek())) {
+      return new BinaryTransition(state.stack.peek().value().substring(1), BinaryTransition.Side.RIGHT);
+    }
+
+    if (ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
+      return new BinaryTransition(state.stack.pop().peek().value().substring(1), BinaryTransition.Side.LEFT);
+    }
+    
+    return null;
+  }
+
   public ScoredObject<Integer> findHighestScoringTransition(State state, List<String> features, boolean requireLegal) {
     Collection<ScoredObject<Integer>> transitions = findHighestScoringTransitions(state, features, requireLegal, 1);
     if (transitions.size() == 0) {

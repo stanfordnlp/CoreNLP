@@ -84,6 +84,28 @@ public class ShiftReduceParserQuery implements ParserQuery {
           }
         }
       }
+      if (beam.size() == 0) {
+        // Oops, time for some fallback plan
+        // This can happen with the set of constraints given by the original paper
+        // For example, one particular French model had a situation where it would reach
+        //   @Ssub @Ssub .
+        // without a left(Ssub) transition, so finishing the parse was impossible.
+        // This will probably result in a bad parse, but at least it
+        // will result in some sort of parse.
+        for (State state : oldBeam) {
+          Transition transition = parser.findEmergencyTransition(state);
+          if (transition != null) {
+            State newState = transition.apply(state);
+            if (bestState == null || bestState.score() < newState.score()) {
+              bestState = newState;
+            }
+            beam.add(newState);
+          }
+        }
+      }
+
+      // bestState == null only happens when we have failed to make progress, so quit
+      // If the bestState is finished, we are done
       if (bestState == null || bestState.isFinished()) {
         break;
       }
