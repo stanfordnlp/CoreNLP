@@ -1967,20 +1967,30 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       for (CoreLabel s : sent.getValue()) {
         String str = "";
+        //write them in reverse order
+        List<String> listEndedLabels = new ArrayList<String>();
+        //to first finish labels before starting
+        List<String> startingLabels = new ArrayList<String>();
+        
         for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : constVars.answerClass.entrySet()) {
           String label = as.getKey();
           boolean lastwordlabeled = lastWordLabeled.get(label);
           if (s.get(as.getValue()).equals(label)) {
             if (!lastwordlabeled) {
-              str += " <" + label + "> ";
+              startingLabels.add(label);
             }
             lastWordLabeled.put(label, true);
           } else {
             if (lastwordlabeled) {
-              str += " </" + label + ">";
+              listEndedLabels.add(label);
             }
             lastWordLabeled.put(label, false);
           }
+        }
+        for(int i = listEndedLabels.size() -1 ; i >=0; i--)
+          str += " </" + listEndedLabels.get(i) + ">";
+        for(String label : startingLabels){
+          str += " <" + label + "> ";
         }
         str += " " + s.word();
         writer.write(str.trim() + " ");
