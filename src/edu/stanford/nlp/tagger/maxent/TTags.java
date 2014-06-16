@@ -2,7 +2,7 @@ package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.tagger.common.TaggerConstants;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
@@ -91,7 +91,7 @@ public class TTags {
       closed.add("PRP$");
       closed.add("RP");
       closed.add("TO");
-      closed.add(TaggerConstants.EOS_TAG);
+      closed.add(Tagger.EOS_TAG);
       closed.add("UH");
       closed.add("WDT");
       closed.add("WP");
@@ -112,7 +112,7 @@ public class TTags {
       closed.add(")");
       closed.add("#");
       closed.add("POS");
-      closed.add(TaggerConstants.EOS_TAG);
+      closed.add(Tagger.EOS_TAG);
       closed.add("ppron12");
       closed.add("ppron3");
       closed.add("siebie");
@@ -149,7 +149,7 @@ public class TTags {
       closed.add("PUNC");
       closed.add("CC");
       closed.add("CPRP$");
-      closed.add(TaggerConstants.EOS_TAG);
+      closed.add(Tagger.EOS_TAG);
       // maybe more should still be added ... cdm jun 2006
       isEnglish = false;
     } else if(language.equalsIgnoreCase("german")) {
@@ -180,7 +180,7 @@ public class TTags {
       closed.add("$.");
       closed.add("$(");
       closed.add("--");
-      closed.add(TaggerConstants.EOS_TAG);
+      closed.add(Tagger.EOS_TAG);
       closed.add("KOKOM");
       closed.add("PPOSS");
       closed.add("PTKA");
@@ -231,13 +231,13 @@ public class TTags {
       closed.add("PND");
       closed.add("PNG");
       closed.add("TO");
-      closed.add(TaggerConstants.EOS_TAG);
+      closed.add(Tagger.EOS_TAG);
       closed.add("-LRB-");
       closed.add("-RRB-");
       isEnglish = false;
     } else if (language.equalsIgnoreCase("testing")) {
       closed.add(".");
-      closed.add(TaggerConstants.EOS_TAG);
+      closed.add(Tagger.EOS_TAG);
       isEnglish = false;
     } else if (language.equalsIgnoreCase("")) {
       isEnglish = false;

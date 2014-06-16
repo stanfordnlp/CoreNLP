@@ -19,7 +19,7 @@ import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.sequences.BestSequenceFinder;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
-import edu.stanford.nlp.tagger.common.TaggerConstants;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -114,7 +114,7 @@ public class TestSentence implements SequenceModel {
         sent.add(s.get(j).word());
       }
     }
-    sent.add(TaggerConstants.EOS_WORD);
+    sent.add(Tagger.EOS_WORD);
     if (reuseTags) {
       this.originalTags = new ArrayList<String>(sz + 1);
       for (int j = 0; j < sz; ++j) {
@@ -124,7 +124,7 @@ public class TestSentence implements SequenceModel {
           originalTags.add(null);
         }
       }
-      originalTags.add(TaggerConstants.EOS_TAG);
+      originalTags.add(Tagger.EOS_TAG);
     }
     size = sz + 1;
     if (VERBOSE) {
