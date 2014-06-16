@@ -1,4 +1,4 @@
-Stanford NER - v3.3.1 - 2014-01-04
+Stanford NER - v3.4 - 2014-06-16
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -164,6 +164,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2014-06-16      3.4     Fix serialization bug 
 
 2014-01-04    3.3.1     Bugfix release 
 
