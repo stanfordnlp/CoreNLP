@@ -117,7 +117,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     tokenizerOptions = props.getProperty(optTokenizer, null);
     tedEvalPrefix = props.getProperty(optTedEval, null);
     hasDomainLabels = props.containsKey(optWithDomains);
-    domain = props.getProperty(optDomain, "123");
+    domain = props.getProperty(optDomain, "atb");
     noRewrites = props.containsKey(optNoRewrites);
     tf = getTokenizerFactory();
 

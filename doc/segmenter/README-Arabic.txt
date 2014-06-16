@@ -38,7 +38,7 @@ automatically change file encodings.
 Suppose that your raw Arabic file is called "my_arabic_file.txt". You can
 segment the tokens in this file with the following command:
 
-  java -mx1g edu.stanford.nlp.international.arabic.process.ArabicSegmenter -loadClassifier data/arabic-segmenter-atbtrain.ser.gz -textFile my_arabic_file.txt > my_arabic_file.txt.segmented
+  java -mx1g edu.stanford.nlp.international.arabic.process.ArabicSegmenter -loadClassifier data/arabic-segmenter-atb+bn+arztrain.ser.gz -textFile my_arabic_file.txt > my_arabic_file.txt.segmented
 
 Additional command line options are available to mark proclitics and enclitics
 that were split by the segmenter. Suppose that the raw token "AABBBCC" was split
