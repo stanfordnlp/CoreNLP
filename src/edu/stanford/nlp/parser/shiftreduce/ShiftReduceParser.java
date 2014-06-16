@@ -61,7 +61,7 @@ import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -504,7 +504,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   // TODO: factor out the retagging?
-  public static void redoTags(Tree tree, MaxentTagger tagger) {
+  public static void redoTags(Tree tree, Tagger tagger) {
     List<Word> words = tree.yieldWords();
     List<TaggedWord> tagged = tagger.apply(words);
     List<Label> tags = tree.preTerminalYield();
@@ -517,9 +517,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   private static class RetagProcessor implements ThreadsafeProcessor<Tree, Tree> {
-    MaxentTagger tagger;
+    Tagger tagger;
 
-    public RetagProcessor(MaxentTagger tagger) {
+    public RetagProcessor(Tagger tagger) {
       this.tagger = tagger;
     }
 
@@ -534,7 +534,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-  public static void redoTags(List<Tree> trees, MaxentTagger tagger, int nThreads) {
+  public static void redoTags(List<Tree> trees, Tagger tagger, int nThreads) {
     if (nThreads == 1) {
       for (Tree tree : trees) {
         redoTags(tree, tagger);
@@ -753,10 +753,10 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     int nThreads = op.trainOptions.trainingThreads;
     nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;      
 
-    MaxentTagger tagger = null;
+    Tagger tagger = null;
     if (op.testOptions.preTag) {
       Timing retagTimer = new Timing();
-      tagger = new MaxentTagger(op.testOptions.taggerSerializedFile);
+      tagger = Tagger.loadModel(op.testOptions.taggerSerializedFile);
       redoTags(binarizedTrees, tagger, nThreads);
       retagTimer.done("Retagging");
     }

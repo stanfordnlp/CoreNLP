@@ -43,6 +43,7 @@ import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter.OutputStyle;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.DataFilePaths;
 import edu.stanford.nlp.util.Function;
@@ -214,7 +215,7 @@ import java.text.DecimalFormat;
  * @author Christopher Manning
  * @author John Bauer
  */
-public class MaxentTagger implements Function<List<? extends HasWord>,List<TaggedWord>>, ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
+public class MaxentTagger extends Tagger implements ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
 
   /**
    * The directory from which to get taggers when using
