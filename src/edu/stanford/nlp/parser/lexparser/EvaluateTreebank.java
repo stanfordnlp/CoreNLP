@@ -31,6 +31,7 @@ import edu.stanford.nlp.parser.metrics.FilteredEval;
 import edu.stanford.nlp.parser.metrics.LeafAncestorEval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.TaggingEval;
+import edu.stanford.nlp.parser.metrics.TopMatchEval;
 import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
 import edu.stanford.nlp.trees.LeftHeadFinder;
 import edu.stanford.nlp.trees.Tree;
@@ -203,6 +204,9 @@ public class EvaluateTreebank {
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factLL"))) {
       factLL = new AbstractEval.ScoreEval("factLL", runningAverages);
+    }
+    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("topMatch"))) {
+      evals.add(new TopMatchEval("topMatch", runningAverages));
     }
     // this one is for the various k Good/Best options.  Just for individual results
     kGoodLB = new Evalb("kGood LP/LR", false);
