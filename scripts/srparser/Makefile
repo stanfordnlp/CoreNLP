@@ -35,11 +35,18 @@ GERMAN_TAGGER = /u/nlp/data/pos-tagger/distrib/german-fast.tagger
 GERMAN_TLPP   = edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams
 
 
+ARABIC_TRAIN  = /u/nlp/data/lexparser/trees/Arabic/2-Unvoc-Train.utf8.txt
+ARABIC_DEV    = /u/nlp/data/lexparser/trees/Arabic/2-Unvoc-Dev.utf8.txt
+ARABIC_TEST   = /u/nlp/data/lexparser/trees/Arabic/2-Unvoc-Test.utf8.txt
+ARABIC_TAGGER = /u/nlp/data/pos-tagger/distrib/arabic-train.tagger
+ARABIC_TLPP   = edu.stanford.nlp.parser.lexparser.ArabicTreebankParserParams
+
+
 TRAIN_BEAM = -trainingMethod BEAM -trainBeamSize 4
 TEST_BEAM  = -beamSize 4
 CUTOFF     = -featureFrequencyCutoff 5
 
-all: wsjSR.ser.gz wsjSR.beam.ser.gz englishSR.ser.gz englishSR.beam.ser.gz frenchSR.ser.gz frenchSR.beam.ser.gz chineseSR.ser.gz germanSR.ser.gz
+all: wsjSR.ser.gz wsjSR.beam.ser.gz englishSR.ser.gz englishSR.beam.ser.gz frenchSR.ser.gz frenchSR.beam.ser.gz chineseSR.ser.gz germanSR.ser.gz arabicSR.ser.gz
 .PHONY: all
 
 wsjSR.ser.gz:
@@ -89,4 +96,10 @@ germanSR.ser.gz:
 	@echo Will test on $(GERMAN_TEST)
 	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(GERMAN_TRAIN) -devTreebank $(GERMAN_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 12 -preTag -taggerSerializedFile $(GERMAN_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(GERMAN_TLPP) > $@.out 2>&1
 	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(GERMAN_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(GERMAN_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 >> $@.out 2>&1
+
+arabicSR.ser.gz:
+	@echo Training $@
+	@echo Will test on $(ARABIC_TEST)
+	java -mx10g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -trainTreebank $(ARABIC_TRAIN) -devTreebank $(ARABIC_DEV) -serializedPath $@ -trainingThreads 4 -batchSize 12 -preTag -taggerSerializedFile $(ARABIC_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 -tlpp $(ARABIC_TLPP) > $@.out 2>&1
+	java -mx5g edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser -testTreebank $(ARABIC_TEST) -serializedPath $@ -preTag -taggerSerializedFile $(ARABIC_TAGGER) -trainingIterations 100 -stalledIterationLimit 25 >> $@.out 2>&1
 
