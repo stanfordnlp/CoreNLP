@@ -6,7 +6,6 @@ import de.jollyday.config.Holidays;
 // import de.jollyday.configuration.ConfigurationProvider;
 import de.jollyday.impl.XMLManager;
 import edu.stanford.nlp.ling.tokensregex.Env;
-import edu.stanford.nlp.net.ClasspathURLStreamHandler;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
@@ -41,7 +40,7 @@ public class JollyDayHolidays implements Env.Binder {
     try {
       URL holidayXmlUrl;
       if (xmlPathType.equalsIgnoreCase("classpath")) {
-        holidayXmlUrl = new URL("classpath", null, 0, xmlPath, new ClasspathURLStreamHandler());
+        holidayXmlUrl = getClass().getClassLoader().getResource(xmlPath);
       } else if (xmlPathType.equalsIgnoreCase("file")) {
         holidayXmlUrl = new URL("file:///" + xmlPath);
       } else if (xmlPathType.equalsIgnoreCase("url")) {
