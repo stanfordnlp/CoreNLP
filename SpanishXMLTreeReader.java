@@ -221,40 +221,30 @@ public class SpanishXMLTreeReader implements TreeReader {
     if (isWordNode(eRoot)) {
       return buildWordNode(eRoot);
     } else if (isEllipticNode(eRoot)) {
-      String constituentStr = eRoot.getNodeName();
-
+      return buildEllipticNode(eRoot);
+    } else {
       List<Tree> kids = new ArrayList<Tree>();
-      Tree leafNode = treeFactory.newLeaf(EMPTY_LEAF);
-      if (leafNode.label() instanceof HasWord)
-        ((HasWord) leafNode.label()).setWord(EMPTY_LEAF);
+      for(Node childNode = eRoot.getFirstChild(); childNode != null;
+          childNode = childNode.getNextSibling()) {
+        if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
+        Tree t = getTreeFromXML(childNode);
+        if(t == null) {
+          System.err.printf("%s: Discarding empty tree (root: %s)%n", this.getClass().getName(),childNode.getNodeName());
+        } else {
+          kids.add(t);
+        }
+      }
 
-      kids.add(leafNode);
-      Tree t = treeFactory.newTreeNode(constituentStr, kids);
+      String rootLabel = eRoot.getNodeName().trim();
+
+      Tree t = (kids.size() == 0) ? null : treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(rootLabel), kids);
+
+      // TODO bring upwards -- MWE case doesn't reach here
+      // if(t != null && isMWE)
+      //   t = postProcessMWE(t);
 
       return t;
     }
-
-    List<Tree> kids = new ArrayList<Tree>();
-    for(Node childNode = eRoot.getFirstChild(); childNode != null;
-        childNode = childNode.getNextSibling()) {
-      if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
-      Tree t = getTreeFromXML(childNode);
-      if(t == null) {
-        System.err.printf("%s: Discarding empty tree (root: %s)%n", this.getClass().getName(),childNode.getNodeName());
-      } else {
-        kids.add(t);
-      }
-    }
-
-    String rootLabel = eRoot.getNodeName().trim();
-
-    Tree t = (kids.size() == 0) ? null : treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(rootLabel), kids);
-
-    // TODO bring upwards -- MWE case doesn't reach here
-    // if(t != null && isMWE)
-    //   t = postProcessMWE(t);
-
-    return t;
   }
 
   /**
@@ -359,6 +349,24 @@ public class SpanishXMLTreeReader implements TreeReader {
     }
 
     return treeFactory.newTreeNode(MISSING_PHRASAL, kids);
+  }
+
+  /**
+   * Build a parse tree node corresponding to an elliptic node in the parse XML.
+   */
+  private Tree buildEllipticNode(Node root) {
+    Element eRoot = (Element) root;
+    String constituentStr = eRoot.getNodeName();
+
+    List<Tree> kids = new ArrayList<Tree>();
+    Tree leafNode = treeFactory.newLeaf(EMPTY_LEAF);
+    if (leafNode.label() instanceof HasWord)
+      ((HasWord) leafNode.label()).setWord(EMPTY_LEAF);
+
+    kids.add(leafNode);
+    Tree t = treeFactory.newTreeNode(constituentStr, kids);
+
+    return t;
   }
 
   private Tree postProcessMWE(Tree t) {
