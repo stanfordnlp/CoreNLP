@@ -218,86 +218,8 @@ public class SpanishXMLTreeReader implements TreeReader {
   private Tree getTreeFromXML(Node root) {
     final Element eRoot = (Element) root;
 
-    boolean isMWE = false;
     if (isWordNode(eRoot)) {
-      // TODO make sure there are no children as well?
-
-      String posStr = getPOS(eRoot);
-      posStr = treeNormalizer.normalizeNonterminal(posStr);
-
-      List<String> lemmas = getLemma(eRoot);
-      // TODO
-      // String morph = getMorph(eRoot);
-      List<String> leafToks = getWordString(eRoot.getAttribute(ATTR_WORD).trim());
-      // TODO
-      // String subcat = getSubcat(eRoot);
-
-      // TODO multiword tokens
-
-      if (lemmas != null && lemmas.size() != leafToks.size()) {
-        // If this happens (and it does for a few poorly editted trees)
-        // we assume something has gone wrong and ignore the lemmas.
-        System.err.println("Lemmas don't match tokens, ignoring lemmas: " +
-                           "lemmas " + lemmas + ", tokens " + leafToks);
-        lemmas = null;
-      }
-
-      // //Terminals can have multiple tokens (MWEs). Make these into a
-      // //flat structure for now.
-      Tree t = null;
-      List<Tree> kids = new ArrayList<Tree>();
-      if(leafToks.size() > 1) {
-        isMWE = true;
-
-        for (int i = 0; i < leafToks.size(); ++i) {
-          String tok = leafToks.get(i);
-          String s = treeNormalizer.normalizeTerminal(tok);
-          List<Tree> leafList = new ArrayList<Tree>();
-          Tree leafNode = treeFactory.newLeaf(s);
-          if(leafNode.label() instanceof HasWord)
-            ((HasWord) leafNode.label()).setWord(s);
-          if (leafNode.label() instanceof CoreLabel && lemmas != null) {
-            ((CoreLabel) leafNode.label()).setLemma(lemmas.get(i));
-          }
-          // TODO
-          // if(leafNode.label() instanceof HasContext) {
-          //   ((HasContext) leafNode.label()).setOriginalText(morph);
-          // }
-          // if (leafNode.label() instanceof HasCategory) {
-          //   ((HasCategory) leafNode.label()).setCategory(subcat);
-          // }
-          leafList.add(leafNode);
-
-          Tree posNode = treeFactory.newTreeNode(MISSING_POS, leafList);
-          if(posNode.label() instanceof HasTag)
-            ((HasTag) posNode.label()).setTag(MISSING_POS);
-
-          kids.add(posNode);
-        }
-        t = treeFactory.newTreeNode(MISSING_PHRASAL, kids);
-
-      } else {
-        String leafStr = treeNormalizer.normalizeTerminal(leafToks.get(0));
-        Tree leafNode = treeFactory.newLeaf(leafStr);
-        if (leafNode.label() instanceof HasWord)
-          ((HasWord) leafNode.label()).setWord(leafStr);
-        if (leafNode.label() instanceof CoreLabel && lemmas != null) {
-          ((CoreLabel) leafNode.label()).setLemma(lemmas.get(0));
-        }
-        // TODO
-        // if (leafNode.label() instanceof HasContext) {
-        //   ((HasContext) leafNode.label()).setOriginalText(morph);
-        // }
-        // if (leafNode.label() instanceof HasCategory) {
-        //   ((HasCategory) leafNode.label()).setCategory(subcat);
-        // }
-        kids.add(leafNode);
-
-        t = treeFactory.newTreeNode(posStr, kids);
-        if (t.label() instanceof HasTag) ((HasTag) t.label()).setTag(posStr);
-      }
-
-      return t;
+      return buildWordNode(eRoot);
     } else if (isEllipticNode(eRoot)) {
       String constituentStr = eRoot.getNodeName();
 
@@ -324,20 +246,120 @@ public class SpanishXMLTreeReader implements TreeReader {
       }
     }
 
-    // MWEs have a label with a
     String rootLabel = eRoot.getNodeName().trim();
-    // boolean isMWE = rootLabel.equals("w") && eRoot.hasAttribute(ATTR_POS);
-    if(isMWE)
-      rootLabel = eRoot.getAttribute(ATTR_POS).trim();
 
     Tree t = (kids.size() == 0) ? null : treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(rootLabel), kids);
 
-    if(t != null && isMWE)
-      t = postProcessMWE(t);
+    // TODO bring upwards -- MWE case doesn't reach here
+    // if(t != null && isMWE)
+    //   t = postProcessMWE(t);
 
     return t;
   }
 
+  /**
+   * Build a parse tree node corresponding to the word in the given XML node.
+   */
+  private Tree buildWordNode(Node root) {
+    Element eRoot = (Element) root;
+
+    // TODO make sure there are no children as well?
+
+    String posStr = getPOS(eRoot);
+    posStr = treeNormalizer.normalizeNonterminal(posStr);
+
+    List<String> lemmas = getLemma(eRoot);
+    // TODO
+    // String morph = getMorph(eRoot);
+    List<String> leafToks = getWordString(eRoot.getAttribute(ATTR_WORD).trim());
+    // TODO
+    // String subcat = getSubcat(eRoot);
+
+    if (lemmas != null && lemmas.size() != leafToks.size()) {
+      // If this happens (and it does for a few poorly editted trees)
+      // we assume something has gone wrong and ignore the lemmas.
+      System.err.println("Lemmas don't match tokens, ignoring lemmas: " +
+                         "lemmas " + lemmas + ", tokens " + leafToks);
+      lemmas = null;
+    }
+
+    // Convert multi-word tokens into a flat structure, governed by a node
+    // with the label `MISSING_PHRASAL`.
+    boolean isMWE = leafToks.size() > 1;
+
+    Tree t = isMWE
+      ? buildMWENode(leafToks, lemmas)
+      : buildLeafWordNode(leafToks.get(0), posStr,
+                          lemmas == null ? null : lemmas.get(0));
+
+    return t;
+  }
+
+  /**
+   * Build the tree node corresponding to the leaf of a phrase structure tree.
+   */
+  private Tree buildLeafWordNode(String token, String posStr, String lemma) {
+    String leafStr = treeNormalizer.normalizeTerminal(token);
+    Tree leafNode = treeFactory.newLeaf(leafStr);
+    if (leafNode.label() instanceof HasWord)
+      ((HasWord) leafNode.label()).setWord(leafStr);
+    if (leafNode.label() instanceof CoreLabel && lemma != null) {
+      ((CoreLabel) leafNode.label()).setLemma(lemma);
+    }
+    // TODO
+    // if (leafNode.label() instanceof HasContext) {
+    //   ((HasContext) leafNode.label()).setOriginalText(morph);
+    // }
+    // if (leafNode.label() instanceof HasCategory) {
+    //   ((HasCategory) leafNode.label()).setCategory(subcat);
+    // }
+    List<Tree> kids = new ArrayList<Tree>();
+    kids.add(leafNode);
+
+    Tree t = treeFactory.newTreeNode(posStr, kids);
+    if (t.label() instanceof HasTag) ((HasTag) t.label()).setTag(posStr);
+
+    return t;
+  }
+
+  /**
+   * Build the tree structure for a multi-word expression.
+   *
+   * Converts multi-word tokens into a flat structure, governed by a node with
+   * the label `MISSING_PHRASAL`.
+   */
+  private Tree buildMWENode(List<String> tokens, List<String> lemmas) {
+    List<Tree> kids = new ArrayList<Tree>();
+
+    for (int i = 0; i < tokens.size(); ++i) {
+      String tok = tokens.get(i);
+      String s = treeNormalizer.normalizeTerminal(tok);
+
+      List<Tree> leafList = new ArrayList<Tree>();
+      Tree leafNode = treeFactory.newLeaf(s);
+      if(leafNode.label() instanceof HasWord)
+        ((HasWord) leafNode.label()).setWord(s);
+      if (leafNode.label() instanceof CoreLabel && lemmas != null) {
+        ((CoreLabel) leafNode.label()).setLemma(lemmas.get(i));
+      }
+      // TODO
+      // if(leafNode.label() instanceof HasContext) {
+      //   ((HasContext) leafNode.label()).setOriginalText(morph);
+      // }
+      // if (leafNode.label() instanceof HasCategory) {
+      //   ((HasCategory) leafNode.label()).setCategory(subcat);
+      // }
+      leafList.add(leafNode);
+
+      Tree posNode = treeFactory.newTreeNode(MISSING_POS, leafList);
+      if(posNode.label() instanceof HasTag)
+        ((HasTag) posNode.label()).setTag(MISSING_POS);
+
+      kids.add(posNode);
+    }
+
+    return treeFactory.newTreeNode(MISSING_PHRASAL, kids);
+  }
 
   private Tree postProcessMWE(Tree t) {
     String tYield = Sentence.listToString(t.yield()).replaceAll("\\s+", "");
