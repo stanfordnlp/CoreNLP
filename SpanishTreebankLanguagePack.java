@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees.international.spanish;
 
 import edu.stanford.nlp.international.spanish.SpanishMorphoFeatureSpecification;
-import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -37,11 +36,6 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~'};
 
   private static final String[] frenchStartSymbols = {"ROOT"};
-
-  @Override
-  public TokenizerFactory<? extends HasWord> getTokenizerFactory() {
-    return FrenchTokenizer.ftbFactory();
-  }
 
   @Override
   public String getEncoding() {
