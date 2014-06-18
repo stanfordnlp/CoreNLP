@@ -21,6 +21,7 @@ import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.util.ArrayUtils;
+import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -287,6 +288,17 @@ public class TestSentence implements SequenceModel {
       }
       pw.println(sw);
     }
+  }
+
+  /**
+   * Update a confusion matrix with the errors from this sentence.
+   *
+   * @param finalTags Chosen tags for sentence
+   * @param confusionMatrix Confusion matrix to write to
+   */
+  protected void updateConfusionMatrix(String[] finalTags, ConfusionMatrix confusionMatrix) {
+    for (int i = 0; i < correctTags.length; i++)
+      confusionMatrix.add(finalTags[i], correctTags[i]);
   }
 
 
