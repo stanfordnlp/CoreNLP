@@ -213,6 +213,38 @@ public class TTags {
       closed.add("[");
       closed.add("]");
       isEnglish = false;
+    } else if (language.equalsIgnoreCase("spanish")) {
+      closed.add(Tagger.EOS_TAG);
+
+      // conjunctions
+      closed.add("CC");
+      closed.add("CS");
+
+      // punctuation
+      closed.add("Faa");
+      closed.add("Fat");
+      closed.add("Fc");
+      closed.add("Fca");
+      closed.add("Fct");
+      closed.add("Fd");
+      closed.add("Fe");
+      closed.add("Fg");
+      closed.add("Fh");
+      closed.add("Fia");
+      closed.add("Fit");
+      closed.add("Fla");
+      closed.add("Flt");
+      closed.add("Fp");
+      closed.add("Fpa");
+      closed.add("Fpt");
+      closed.add("Fra");
+      closed.add("Frc");
+      closed.add("Fs");
+      closed.add("Ft");
+      closed.add("Fx");
+      closed.add("Fz");
+
+      isEnglish = false;
     } else if (language.equalsIgnoreCase("medpost")) {
       closed.add(".");
       closed.add(",");
