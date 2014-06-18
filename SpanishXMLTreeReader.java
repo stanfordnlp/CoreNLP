@@ -51,6 +51,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_FUNC = "func";
   private static final String ATTR_NAMED_ENTITY = "ne";
   private static final String ATTR_POS = "pos";
+  private static final String ATTR_ELLIPTIC = "elliptic";
 
   // public static final String EMPTY_LEAF = "-NONE-";
   // public static final String MISSING_PHRASAL = "DUMMYP";
@@ -135,7 +136,10 @@ public class SpanishXMLTreeReader implements TreeReader {
   }
 
   private boolean isWordNode(Element node) {
-    return node.hasAttribute(ATTR_WORD);
+    return (node.hasAttribute(ATTR_WORD)
+
+            // Also accept elliptic nodes (e.g., dropped pronouns)
+            || node.hasAttribute(ATTR_ELLIPTIC));
   }
 
   //wsg2010: Sometimes the cat attribute is not present, in which case the POS
