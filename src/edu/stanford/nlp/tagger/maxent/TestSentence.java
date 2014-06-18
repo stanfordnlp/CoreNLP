@@ -571,7 +571,8 @@ public class TestSentence implements SequenceModel {
     int numTags = maxentTagger.numTags();
     double[][][] probabilities = new double[size][kBestSize][numTags];
     calculateProbs(probabilities);
-    for (int current = 0; current < size; current++) {
+
+    for (int current = 0; current < correctTags.length; current++) {
       pfu.print(sent.get(current));
       double[] probs = new double[3];
       String[] tag3 = new String[3];
