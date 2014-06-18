@@ -17,7 +17,7 @@ import edu.stanford.nlp.trees.HeadFinder;
  */
 public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
-  private static final long serialVersionUID = -7338244949063822519L;
+  private static final long serialVersionUID = -7059939700276532428L;
 
   //wsg2011: The distributed treebank is encoding in ISO8859_1, but
   //the current FrenchTreebankParserParams is currently configured to
