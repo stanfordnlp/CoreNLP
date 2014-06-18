@@ -54,8 +54,6 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_ELLIPTIC = "elliptic";
 
   private static final String EMPTY_LEAF = "-NONE-";
-  private static final String MISSING_PHRASAL = "DUMMYP";
-  private static final String MISSING_POS = "DUMMY";
 
   private NodeList sentences;
   private int sentIdx;
