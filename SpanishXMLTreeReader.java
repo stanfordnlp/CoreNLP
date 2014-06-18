@@ -53,9 +53,6 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_POS = "pos";
   private static final String ATTR_ELLIPTIC = "elliptic";
 
-  // Prefix for MWE nodes
-  private static final String MWE_PHRASAL = "MW";
-
   private static final String EMPTY_LEAF = "-NONE-";
   private static final String MISSING_PHRASAL = "DUMMYP";
   private static final String MISSING_POS = "DUMMY";
@@ -124,8 +121,8 @@ public class SpanishXMLTreeReader implements TreeReader {
 
         // TODO calculate sentence IDs -- why can't we just use sentIdx?
         if(t.label() instanceof CoreLabel) {
-        //   String ftbId = ((Element) sentRoot).getAttribute(ATTR_NUMBER);
-        //   ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class, ftbId);
+          //   String ftbId = ((Element) sentRoot).getAttribute(ATTR_NUMBER);
+          //   ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class, ftbId);
           ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class,
                                       Integer.toString(thisSentenceId));
         }
@@ -140,26 +137,6 @@ public class SpanishXMLTreeReader implements TreeReader {
 
   private boolean isEllipticNode(Element node) {
     return node.hasAttribute(ATTR_ELLIPTIC);
-  }
-
-  //wsg2010: Sometimes the cat attribute is not present, in which case the POS
-  //is in the attribute catint, which indicates a part of a compound / MWE
-  private String getPOS(Element node) {
-    return node.getAttribute(ATTR_POS).trim();
-  }
-
-  /**
-   * Extract the lemma attribute.
-   *
-   * @param node
-   */
-  private List<String> getLemma(Element node) {
-    // String lemma = node.getAttribute(ATTR_LEMMA);
-    // if (lemma == null || lemma.equals(""))
-    //   return null;
-    // return getWordString(lemma);
-
-    return getWordString(node.getAttribute(ATTR_LEMMA));
   }
 
   /**
@@ -184,35 +161,12 @@ public class SpanishXMLTreeReader implements TreeReader {
   //   return subcat == null ? "" : subcat;
   // }
 
-  /**
-   * Terminals may consist of one or more underscore-delimited tokens.
-   * <p>
-   * wsg2010: Marie recommends replacing empty terminals with -NONE- instead of using the lemma
-   * (these are usually the determiner)
-   *
-   * @param text
-   */
-  private List<String> getWordString(String text) {
-    List<String> toks = new ArrayList<String>();
-    if(text == null || text.equals("")) {
-      toks.add(EMPTY_LEAF);
-    } else {
-      //Strip spurious parens
-      if(text.length() > 1)
-        text = text.replaceAll("[\\(\\)]", "");
+  private String getWord(Element node) {
+    String word = node.getAttribute(ATTR_WORD);
+    if (word.equals(""))
+      return EMPTY_LEAF;
 
-      //Check for numbers and punctuation
-      String noWhitespaceStr = text.replaceAll("\\s+", "");
-      if(noWhitespaceStr.matches("\\d+") || noWhitespaceStr.matches("\\p{Punct}+"))
-        toks.add(noWhitespaceStr);
-      else
-        toks = Arrays.asList(text.split("_+"));
-    }
-
-    if(toks.size() == 0)
-      throw new RuntimeException(this.getClass().getName() + ": Zero length token list for: " + text);
-
-    return toks;
+    return word.trim();
   }
 
   private Tree getTreeFromXML(Node root) {
@@ -239,10 +193,6 @@ public class SpanishXMLTreeReader implements TreeReader {
 
       Tree t = (kids.size() == 0) ? null : treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(rootLabel), kids);
 
-      // TODO bring upwards -- MWE case doesn't reach here
-      // if(t != null && isMWE)
-      //   t = postProcessMWE(t);
-
       return t;
     }
   }
@@ -255,41 +205,17 @@ public class SpanishXMLTreeReader implements TreeReader {
 
     // TODO make sure there are no children as well?
 
-    String posStr = getPOS(eRoot);
+    String posStr = eRoot.getAttribute(ATTR_POS);
     posStr = treeNormalizer.normalizeNonterminal(posStr);
 
-    List<String> lemmas = getLemma(eRoot);
+    String lemma = eRoot.getAttribute(ATTR_LEMMA);
+    String word = getWord(eRoot);
+
     // TODO
     // String morph = getMorph(eRoot);
-    List<String> leafToks = getWordString(eRoot.getAttribute(ATTR_WORD).trim());
-    // TODO
     // String subcat = getSubcat(eRoot);
 
-    if (lemmas != null && lemmas.size() != leafToks.size()) {
-      // If this happens (and it does for a few poorly editted trees)
-      // we assume something has gone wrong and ignore the lemmas.
-      System.err.println("Lemmas don't match tokens, ignoring lemmas: " +
-                         "lemmas " + lemmas + ", tokens " + leafToks);
-      lemmas = null;
-    }
-
-    // Convert multi-word tokens into a flat structure, governed by a node
-    // with the label `MISSING_PHRASAL`.
-    boolean isMWE = leafToks.size() > 1;
-
-    Tree t = isMWE
-      ? buildMWENode(leafToks, lemmas)
-      : buildLeafWordNode(leafToks.get(0), posStr,
-                          lemmas == null ? null : lemmas.get(0));
-
-    return t;
-  }
-
-  /**
-   * Build the tree node corresponding to the leaf of a phrase structure tree.
-   */
-  private Tree buildLeafWordNode(String token, String posStr, String lemma) {
-    String leafStr = treeNormalizer.normalizeTerminal(token);
+    String leafStr = treeNormalizer.normalizeTerminal(word);
     Tree leafNode = treeFactory.newLeaf(leafStr);
     if (leafNode.label() instanceof HasWord)
       ((HasWord) leafNode.label()).setWord(leafStr);
@@ -313,45 +239,6 @@ public class SpanishXMLTreeReader implements TreeReader {
   }
 
   /**
-   * Build the tree structure for a multi-word expression.
-   *
-   * Converts multi-word tokens into a flat structure, governed by a node with
-   * the label `MISSING_PHRASAL`.
-   */
-  private Tree buildMWENode(List<String> tokens, List<String> lemmas) {
-    List<Tree> kids = new ArrayList<Tree>();
-
-    for (int i = 0; i < tokens.size(); ++i) {
-      String tok = tokens.get(i);
-      String s = treeNormalizer.normalizeTerminal(tok);
-
-      List<Tree> leafList = new ArrayList<Tree>();
-      Tree leafNode = treeFactory.newLeaf(s);
-      if(leafNode.label() instanceof HasWord)
-        ((HasWord) leafNode.label()).setWord(s);
-      if (leafNode.label() instanceof CoreLabel && lemmas != null) {
-        ((CoreLabel) leafNode.label()).setLemma(lemmas.get(i));
-      }
-      // TODO
-      // if(leafNode.label() instanceof HasContext) {
-      //   ((HasContext) leafNode.label()).setOriginalText(morph);
-      // }
-      // if (leafNode.label() instanceof HasCategory) {
-      //   ((HasCategory) leafNode.label()).setCategory(subcat);
-      // }
-      leafList.add(leafNode);
-
-      Tree posNode = treeFactory.newTreeNode(MISSING_POS, leafList);
-      if(posNode.label() instanceof HasTag)
-        ((HasTag) posNode.label()).setTag(MISSING_POS);
-
-      kids.add(posNode);
-    }
-
-    return treeFactory.newTreeNode(MISSING_PHRASAL, kids);
-  }
-
-  /**
    * Build a parse tree node corresponding to an elliptic node in the parse XML.
    */
   private Tree buildEllipticNode(Node root) {
@@ -368,19 +255,6 @@ public class SpanishXMLTreeReader implements TreeReader {
 
     return t;
   }
-
-  private Tree postProcessMWE(Tree t) {
-    String tYield = Sentence.listToString(t.yield()).replaceAll("\\s+", "");
-    if(tYield.matches("[\\d\\p{Punct}]*")) {
-      List<Tree> kids = new ArrayList<Tree>();
-      kids.add(treeFactory.newLeaf(tYield));
-      t = treeFactory.newTreeNode(t.value(), kids);
-    } else {
-      t.setValue(MWE_PHRASAL + t.value());
-    }
-    return t;
-  }
-
 
   /**
    * For debugging.
