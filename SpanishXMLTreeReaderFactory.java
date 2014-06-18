@@ -13,7 +13,7 @@ import edu.stanford.nlp.trees.*;
  */
 public class SpanishXMLTreeReaderFactory implements TreeReaderFactory, Serializable {
 
-  private static final long serialVersionUID = 2019486878175311263L;
+  private static final long serialVersionUID = 578942679136874L;
 
   private final boolean ccTagset;
 

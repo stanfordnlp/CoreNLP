@@ -51,9 +51,14 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_FUNC = "func";
   private static final String ATTR_NAMED_ENTITY = "ne";
   private static final String ATTR_POS = "pos";
-  private static final String ATTR_ELLIPTIC = "elliptic";
+
+  // public static final String EMPTY_LEAF = "-NONE-";
+  // public static final String MISSING_PHRASAL = "DUMMYP";
+  // public static final String MISSING_POS = "DUMMY";
 
   private static final String EMPTY_LEAF = "-NONE-";
+  private static final String MISSING_PHRASAL = "DUMMYP";
+  private static final String MISSING_POS = "DUMMY";
 
   private NodeList sentences;
   private int sentIdx;
@@ -119,8 +124,8 @@ public class SpanishXMLTreeReader implements TreeReader {
 
         // TODO calculate sentence IDs -- why can't we just use sentIdx?
         if(t.label() instanceof CoreLabel) {
-          //   String ftbId = ((Element) sentRoot).getAttribute(ATTR_NUMBER);
-          //   ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class, ftbId);
+        //   String ftbId = ((Element) sentRoot).getAttribute(ATTR_NUMBER);
+        //   ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class, ftbId);
           ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class,
                                       Integer.toString(thisSentenceId));
         }
@@ -133,8 +138,25 @@ public class SpanishXMLTreeReader implements TreeReader {
     return node.hasAttribute(ATTR_WORD);
   }
 
-  private boolean isEllipticNode(Element node) {
-    return node.hasAttribute(ATTR_ELLIPTIC);
+  //wsg2010: Sometimes the cat attribute is not present, in which case the POS
+  //is in the attribute catint, which indicates a part of a compound / MWE
+  private String getPOS(Element node) {
+    return node.getAttribute(ATTR_POS).trim();
+  }
+
+  /**
+   * Extract the lemma attribute.
+   *
+   * @param node
+   */
+  private List<String> getLemma(Element node) {
+    // String lemma = node.getAttribute(ATTR_LEMMA);
+    // if (lemma == null || lemma.equals(""))
+    //   return null;
+    // return getWordString(lemma);
+
+    // TODO getWordString necessary?
+    return getWordString(node.getAttribute(ATTR_LEMMA));
   }
 
   /**
@@ -159,100 +181,157 @@ public class SpanishXMLTreeReader implements TreeReader {
   //   return subcat == null ? "" : subcat;
   // }
 
-  private String getWord(Element node) {
-    String word = node.getAttribute(ATTR_WORD);
-    if (word.equals(""))
-      return EMPTY_LEAF;
+  /**
+   * Terminals may consist of one or more underscore-delimited tokens.
+   * <p>
+   * wsg2010: Marie recommends replacing empty terminals with -NONE- instead of using the lemma
+   * (these are usually the determiner)
+   *
+   * @param text
+   */
+  private List<String> getWordString(String text) {
+    List<String> toks = new ArrayList<String>();
+    if(text == null || text.equals("")) {
+      toks.add(EMPTY_LEAF);
+    } else {
+      //Strip spurious parens
+      if(text.length() > 1)
+        text = text.replaceAll("[\\(\\)]", "");
 
-    return word.trim();
+      //Check for numbers and punctuation
+      String noWhitespaceStr = text.replaceAll("\\s+", "");
+      if(noWhitespaceStr.matches("\\d+") || noWhitespaceStr.matches("\\p{Punct}+"))
+        toks.add(noWhitespaceStr);
+      else
+        toks = Arrays.asList(text.split("_+"));
+    }
+
+    if(toks.size() == 0)
+      throw new RuntimeException(this.getClass().getName() + ": Zero length token list for: " + text);
+
+    return toks;
   }
 
   private Tree getTreeFromXML(Node root) {
     final Element eRoot = (Element) root;
 
     if (isWordNode(eRoot)) {
-      return buildWordNode(eRoot);
-    } else if (isEllipticNode(eRoot)) {
-      return buildEllipticNode(eRoot);
-    } else {
+      // TODO make sure there are no children as well?
+
+      String posStr = getPOS(eRoot);
+      posStr = treeNormalizer.normalizeNonterminal(posStr);
+
+      List<String> lemmas = getLemma(eRoot);
+      // TODO
+      // String morph = getMorph(eRoot);
+      List<String> leafToks = getWordString(eRoot.getAttribute(ATTR_WORD).trim());
+      // TODO
+      // String subcat = getSubcat(eRoot);
+
+      // TODO multiword tokens
+
+      // if (lemmas != null && lemmas.size() != leafToks.size()) {
+      //   // If this happens (and it does for a few poorly editted trees)
+      //   // we assume something has gone wrong and ignore the lemmas.
+      //   System.err.println("Lemmas don't match tokens, ignoring lemmas: " +
+      //                      "lemmas " + lemmas + ", tokens " + leafToks);
+      //   lemmas = null;
+      // }
+
+      // //Terminals can have multiple tokens (MWEs). Make these into a
+      // //flat structure for now.
+      Tree t = null;
       List<Tree> kids = new ArrayList<Tree>();
-      for(Node childNode = eRoot.getFirstChild(); childNode != null;
-          childNode = childNode.getNextSibling()) {
-        if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
-        Tree t = getTreeFromXML(childNode);
-        if(t == null) {
-          System.err.printf("%s: Discarding empty tree (root: %s)%n", this.getClass().getName(),childNode.getNodeName());
-        } else {
-          kids.add(t);
+      // if(leafToks.size() > 1) {
+      //   for (int i = 0; i < leafToks.size(); ++i) {
+      //     String tok = leafToks.get(i);
+      //     String s = treeNormalizer.normalizeTerminal(tok);
+      //     List<Tree> leafList = new ArrayList<Tree>();
+      //     Tree leafNode = treeFactory.newLeaf(s);
+      //     if(leafNode.label() instanceof HasWord)
+      //       ((HasWord) leafNode.label()).setWord(s);
+      //     if (leafNode.label() instanceof CoreLabel && lemmas != null) {
+      //       ((CoreLabel) leafNode.label()).setLemma(lemmas.get(i));
+      //     }
+      //     if(leafNode.label() instanceof HasContext) {
+      //       ((HasContext) leafNode.label()).setOriginalText(morph);
+      //     }
+      //     if (leafNode.label() instanceof HasCategory) {
+      //       ((HasCategory) leafNode.label()).setCategory(subcat);
+      //     }
+      //     leafList.add(leafNode);
+
+      //     Tree posNode = treeFactory.newTreeNode(MISSING_POS, leafList);
+      //     if(posNode.label() instanceof HasTag)
+      //       ((HasTag) posNode.label()).setTag(MISSING_POS);
+
+      //     kids.add(posNode);
+      //   }
+      //   t = treeFactory.newTreeNode(MISSING_PHRASAL, kids);
+
+      // } else {
+        String leafStr = treeNormalizer.normalizeTerminal(leafToks.get(0));
+        Tree leafNode = treeFactory.newLeaf(leafStr);
+        if (leafNode.label() instanceof HasWord)
+          ((HasWord) leafNode.label()).setWord(leafStr);
+        if (leafNode.label() instanceof CoreLabel && lemmas != null) {
+          ((CoreLabel) leafNode.label()).setLemma(lemmas.get(0));
         }
-      }
+        // TODO
+        // if (leafNode.label() instanceof HasContext) {
+        //   ((HasContext) leafNode.label()).setOriginalText(morph);
+        // }
+        // if (leafNode.label() instanceof HasCategory) {
+        //   ((HasCategory) leafNode.label()).setCategory(subcat);
+        // }
+        kids.add(leafNode);
 
-      String rootLabel = eRoot.getNodeName().trim();
-
-      Tree t = (kids.size() == 0) ? null : treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(rootLabel), kids);
+        t = treeFactory.newTreeNode(posStr, kids);
+        if (t.label() instanceof HasTag) ((HasTag) t.label()).setTag(posStr);
+      // }
 
       return t;
     }
-  }
 
-  /**
-   * Build a parse tree node corresponding to the word in the given XML node.
-   */
-  private Tree buildWordNode(Node root) {
-    Element eRoot = (Element) root;
-
-    // TODO make sure there are no children as well?
-
-    String posStr = eRoot.getAttribute(ATTR_POS);
-    posStr = treeNormalizer.normalizeNonterminal(posStr);
-
-    String lemma = eRoot.getAttribute(ATTR_LEMMA);
-    String word = getWord(eRoot);
-
-    // TODO
-    // String morph = getMorph(eRoot);
-    // String subcat = getSubcat(eRoot);
-
-    String leafStr = treeNormalizer.normalizeTerminal(word);
-    Tree leafNode = treeFactory.newLeaf(leafStr);
-    if (leafNode.label() instanceof HasWord)
-      ((HasWord) leafNode.label()).setWord(leafStr);
-    if (leafNode.label() instanceof CoreLabel && lemma != null) {
-      ((CoreLabel) leafNode.label()).setLemma(lemma);
+    List<Tree> kids = new ArrayList<Tree>();
+    for(Node childNode = eRoot.getFirstChild(); childNode != null;
+        childNode = childNode.getNextSibling()) {
+      if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
+      Tree t = getTreeFromXML(childNode);
+      if(t == null) {
+        System.err.printf("%s: Discarding empty tree (root: %s)%n", this.getClass().getName(),childNode.getNodeName());
+      } else {
+        kids.add(t);
+      }
     }
-    // TODO
-    // if (leafNode.label() instanceof HasContext) {
-    //   ((HasContext) leafNode.label()).setOriginalText(morph);
-    // }
-    // if (leafNode.label() instanceof HasCategory) {
-    //   ((HasCategory) leafNode.label()).setCategory(subcat);
-    // }
-    List<Tree> kids = new ArrayList<Tree>();
-    kids.add(leafNode);
 
-    Tree t = treeFactory.newTreeNode(posStr, kids);
-    if (t.label() instanceof HasTag) ((HasTag) t.label()).setTag(posStr);
+    // MWEs have a label with a
+    String rootLabel = eRoot.getNodeName().trim();
+    // boolean isMWE = rootLabel.equals("w") && eRoot.hasAttribute(ATTR_POS);
+    // if(isMWE)
+    //   rootLabel = eRoot.getAttribute(ATTR_POS).trim();
 
-    return t;
-  }
+    Tree t = (kids.size() == 0) ? null : treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(rootLabel), kids);
 
-  /**
-   * Build a parse tree node corresponding to an elliptic node in the parse XML.
-   */
-  private Tree buildEllipticNode(Node root) {
-    Element eRoot = (Element) root;
-    String constituentStr = eRoot.getNodeName();
-
-    List<Tree> kids = new ArrayList<Tree>();
-    Tree leafNode = treeFactory.newLeaf(EMPTY_LEAF);
-    if (leafNode.label() instanceof HasWord)
-      ((HasWord) leafNode.label()).setWord(EMPTY_LEAF);
-
-    kids.add(leafNode);
-    Tree t = treeFactory.newTreeNode(constituentStr, kids);
+    // if(t != null && isMWE)
+    //   t = postProcessMWE(t);
 
     return t;
   }
+
+
+  // private Tree postProcessMWE(Tree t) {
+  //   String tYield = Sentence.listToString(t.yield()).replaceAll("\\s+", "");
+  //   if(tYield.matches("[\\d\\p{Punct}]*")) {
+  //     List<Tree> kids = new ArrayList<Tree>();
+  //     kids.add(treeFactory.newLeaf(tYield));
+  //     t = treeFactory.newTreeNode(t.value(), kids);
+  //   } else {
+  //     t.setValue(MWE_PHRASAL + t.value());
+  //   }
+  //   return t;
+  // }
+
 
   /**
    * For debugging.

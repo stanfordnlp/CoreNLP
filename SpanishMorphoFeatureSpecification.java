@@ -22,7 +22,7 @@ import edu.stanford.nlp.international.morph.MorphoFeatures;
  */
 public class SpanishMorphoFeatureSpecification extends MorphoFeatureSpecification {
 
-  private static final long serialVersionUID = -8560629684352048892L;
+  private static final long serialVersionUID = -58379347760106784L;
 
   public static final String[] genVals = {"M","F"};
   public static final String[] numVals = {"SG","PL"};
