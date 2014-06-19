@@ -28,6 +28,9 @@ public class PatternToken implements Serializable {
   public PatternToken(String tag, boolean useTag, boolean getCompoundPhrases,
       int numWordsCompound, String nerTag, boolean useNER,
       boolean useTargetParserParentRestriction, String grandparentParseTag) {
+    if(useNER && nerTag == null){
+      throw new RuntimeException("NER tag is null and using NER restriction is true. Check your data.");
+    }
     this.tag = tag;
     this.useTag = useTag;
     this.numWordsCompound = numWordsCompound;
