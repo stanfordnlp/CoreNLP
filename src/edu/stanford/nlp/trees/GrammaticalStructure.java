@@ -63,7 +63,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
-  private final Set<Dependency<Label, Label, Object>> dependencies;
   protected final List<TypedDependency> typedDependencies;
   protected final List<TypedDependency> allTypedDependencies;
 
@@ -99,7 +98,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     this.puncFilter = puncFilter;
     NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
-    dependencies = root.dependencies(puncDepFilter, null);
+    Set<Dependency<Label, Label, Object>> dependencies = root.dependencies(puncDepFilter, null);
     for (Dependency<Label, Label, Object> p : dependencies) {
       //System.err.println("dep found " + p);
       TreeGraphNode gov = (TreeGraphNode) p.governor();
@@ -119,8 +118,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
     }
     // add typed dependencies
-    typedDependencies = getDeps(false, puncTypedDepFilter);
-    allTypedDependencies = getDeps(true, puncTypedDepFilter);
+    typedDependencies = getDeps(false, puncTypedDepFilter, dependencies);
+    allTypedDependencies = getDeps(true, puncTypedDepFilter, dependencies);
   }
 
 
@@ -217,10 +216,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     super(root);
     this.puncFilter = Filters.acceptFilter();
     allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
-    dependencies = Generics.newHashSet();
-    for (TypedDependency tdep : projectiveDependencies) {
-      dependencies.add(new NamedDependency(tdep.gov().toString(), tdep.dep().toString(), tdep.reln()));
-    }
   }
 
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
@@ -268,7 +263,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param getExtra If true, the list of typed dependencies will contain extra ones.
    *              If false, the list of typed dependencies will respect the tree structure.
    */
-  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter) {
+  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter, Set<Dependency<Label, Label, Object>> dependencies) {
     List<TypedDependency> basicDep = Generics.newArrayList();
 
     for (Dependency<Label, Label, Object> d : dependencies) {
