@@ -63,7 +63,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
-  protected final Set<Dependency<Label, Label, Object>> dependencies;
+  private final Set<Dependency<Label, Label, Object>> dependencies;
   protected final List<TypedDependency> typedDependencies;
   protected final List<TypedDependency> allTypedDependencies;
 
@@ -275,9 +275,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       TreeGraphNode gov = (TreeGraphNode) d.governor();
       TreeGraphNode dep = (TreeGraphNode) d.dependent();
       GrammaticalRelation reln = getGrammaticalRelation(gov, dep);
-      // System.err.print("Gov: " + gov);
-      // System.err.print("  Dep: " + dep);
-      // System.err.println("  Reln: " + reln);
+      // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
       basicDep.add(new TypedDependency(reln, gov, dep));
     }
 
@@ -456,7 +454,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return The set of (governor, dependent) dependencies in this
    * <code>GrammaticalStructure</code>.
    */
-  public Set<Dependency<Label, Label, Object>> dependencies() {
+  private Set<Dependency<Label, Label, Object>> dependencies() {
     return dependencies;
   }
 
