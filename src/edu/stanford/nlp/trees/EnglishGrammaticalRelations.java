@@ -1443,7 +1443,8 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "PP|XS < (IN|TO < as|of|at|to|in) < (JJ|IN|JJR|JJS|NN=target < such|because|Because|least|instead|due|Due|addition|to)",
           "ADVP < (RB|IN < well) < (IN|RB|JJS=target < as)",
-          "ADVP < (DT < all) < (CC < but)",
+          // TODO: perhaps the phrase "all but" is more like "all" and should have that as the head
+          "ADVP < (DT=target < all) < (CC < but)",
           "CONJP < (RB < rather|well|instead) < (RB|IN=target < as|than|of)",
           "CONJP < (IN < in) < (NN|TO=target < addition|to)",
           // todo: note inconsistent head finding for "rather than"!

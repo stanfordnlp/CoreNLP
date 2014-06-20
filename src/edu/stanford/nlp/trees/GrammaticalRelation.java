@@ -393,7 +393,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       // building the dependencies
       TregexMatcher m = p.matcher(root, headFinder);
       while (m.findAt(t)) {
-        nodeList.add((TreeGraphNode) (m.getNode("target")));
+        TreeGraphNode target = (TreeGraphNode) m.getNode("target");
+        if (target == null) {
+          throw new AssertionError("Expression has no target: " + p);
+        }
+        nodeList.add(target);
         if (DEBUG) {
           System.err.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
           for (String nodeName : m.getNodeNames()) {
