@@ -1323,7 +1323,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
             // System.err.println(t);
             return;
           } catch (NullPointerException npe) {
-            System.err.println("Bung (empty?) tree caused below dump. Continuing....");
+            System.err.println("Bung tree caused below dump. Continuing....");
+            System.err.println(t);
             npe.printStackTrace();
           }
         }
