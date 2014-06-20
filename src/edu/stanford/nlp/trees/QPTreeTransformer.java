@@ -3,6 +3,9 @@ package edu.stanford.nlp.trees;
 
 
 import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.ArrayList;
@@ -30,9 +33,16 @@ import java.io.IOException;
  */
 public class QPTreeTransformer implements TreeTransformer {
 
+  private static TregexPattern flattenNPoverQPTregex =
+    TregexPattern.compile("NP < (QP=left $+ (QP=right < CC))");
+
+  private static TsurgeonPattern flattenNPoverQPTsurgeon =
+    Tsurgeon.parseOperation("[createSubtree QP left right] [excise left left] [excise right right]");
+
   /**
    * Right now (Jan 2013) we only deal with the following QP structures:
    * <ul>
+   * <li> NP (QP ...) (QP (CC and/or) ...)
    * <li> QP (RB IN CD|DT ...)   well over, more than
    * <li> QP (JJR IN CD|DT ...)  fewer than
    * <li> QP (IN JJS CD|DT ...)  at least
@@ -50,15 +60,20 @@ public class QPTreeTransformer implements TreeTransformer {
 
   /**
    * Transforms t if it contains one of the following QP structure:
-   * QP (RB IN CD|DT ...)   well over, more than
-   * QP (JJR IN CD|DT ...)  fewer than
-   * QP (IN JJS CD|DT ...)  at least
-   * QP (... CC ...)        between 5 and 10
+   * <ul>
+   * <li> NP (QP ...) (QP (CC and/or) ...)
+   * <li> QP (RB IN CD|DT ...)   well over, more than
+   * <li> QP (JJR IN CD|DT ...)  fewer than
+   * <li> QP (IN JJS CD|DT ...)  at least
+   * <li> QP (... CC ...)        between 5 and 10
+   * </ul>
    *
    * @param t a tree to be transformed
    * @return t transformed
    */
   public static Tree QPtransform(Tree t) {
+    t = Tsurgeon.processPattern(flattenNPoverQPTregex, flattenNPoverQPTsurgeon, t);
+
     doTransform(t);
     return t;
   }
