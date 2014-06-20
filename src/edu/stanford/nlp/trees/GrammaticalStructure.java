@@ -304,8 +304,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
       rootDep = iterator.next().gov();
     }
     if (rootDep != null) {
-      TypedDependency rootTypedDep =
-        new TypedDependency(ROOT, dependencyRoot, rootDep);
+      TypedDependency rootTypedDep = new TypedDependency(ROOT, dependencyRoot, rootDep);
       if (puncTypedDepFilter.accept(rootTypedDep)) {
         basicDep.add(rootTypedDep);
       }
