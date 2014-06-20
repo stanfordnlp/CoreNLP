@@ -399,7 +399,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         }
         nodeList.add(target);
         if (DEBUG) {
-          System.err.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
+          System.err.println("found " + this + "(" + t + "-" + t.headWordNode() + ", " + m.getNode("target") + "-" + ((TreeGraphNode) m.getNode("target")).headWordNode() + ") using pattern " + p);
           for (String nodeName : m.getNodeNames()) {
             if (nodeName.equals("target"))
               continue;
