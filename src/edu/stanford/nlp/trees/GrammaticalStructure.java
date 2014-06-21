@@ -297,7 +297,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     for (TreeGraphNode gov : basicGraph.getAllVertices()) {
       for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
-        GrammaticalRelation reln = getGrammaticalRelation(gov, dep);
+        GrammaticalRelation reln = getGrammaticalRelation(gov, dep, basicGraph.getEdges(gov, dep));
         // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
         basicDep.add(new TypedDependency(reln, gov.headWordNode(), dep.headWordNode()));
       }
@@ -486,7 +486,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * governor of dep
    */
   public static GrammaticalRelation getGrammaticalRelation(TreeGraphNode gov, TreeGraphNode dep) {
-    GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
     TreeGraphNode govH = gov.highestNodeWithSameHead();
     TreeGraphNode depH = dep.highestNodeWithSameHead();
     // System.err.println("  gov node " + gov);
@@ -494,28 +493,35 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // System.err.println("  dep node " + dep);
     // System.err.println("  depH " + depH);
 
-    // Set sortedSet = new TreeSet(new NameComparator());
-    // sortedSet.addAll(govH.arcLabelsToNode(depH));
-    // Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = sortedSet;
-    Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = new TreeSet<Class<? extends GrammaticalRelationAnnotation>>(new NameComparator<Class<? extends GrammaticalRelationAnnotation>>());
-    arcLabels.addAll(govH.arcLabelsToNode(depH));
-    //System.err.println("arcLabels: " + arcLabels);
+    List<GrammaticalRelation> labels = Generics.newArrayList();
+    for (Class<? extends GrammaticalRelationAnnotation> arcLabel : govH.arcLabelsToNode(depH)) {
+      if (arcLabel == null) {
+        continue;
+      }
+      try {
+        GrammaticalRelation reln = GrammaticalRelation.getRelation(arcLabel);
+        labels.add(reln);
+      } catch (Exception e) {
+        continue;
+      }
+    }
 
-    for (Class<? extends GrammaticalRelationAnnotation> arcLabel : arcLabels) {
-      if (arcLabel != null) {
-        GrammaticalRelation reln2;
-        try {
-          reln2 = GrammaticalRelation.getRelation(arcLabel);
-        } catch (Exception e) {
-          continue;
-        }
-        //GrammaticalRelation reln2 = r;
-        if (reln.isAncestor(reln2)) {
-          reln = reln2;
-        } else if (PRINT_DEBUGGING && ! reln2.isAncestor(reln)) {
-          System.err.println("@@@\t" + reln + "\t" + reln2 + "\t" +
-                             govH.label().get(CoreAnnotations.ValueAnnotation.class) + "\t" + depH.label().get(CoreAnnotations.ValueAnnotation.class));
-        }
+    return getGrammaticalRelation(govH, depH, labels);
+  }
+
+  public static GrammaticalRelation getGrammaticalRelation(TreeGraphNode govH, TreeGraphNode depH, List<GrammaticalRelation> labels) {
+    GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
+
+    Set<GrammaticalRelation> sortedLabels = new TreeSet<GrammaticalRelation>(new NameComparator<GrammaticalRelation>());
+    sortedLabels.addAll(labels);
+    // System.err.println(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
+
+    for (GrammaticalRelation reln2 : sortedLabels) {
+      if (reln.isAncestor(reln2)) {
+        reln = reln2;
+      } else if (PRINT_DEBUGGING && ! reln2.isAncestor(reln)) {
+        System.err.println("@@@\t" + reln + "\t" + reln2 + "\t" +
+                           govH.label().get(CoreAnnotations.ValueAnnotation.class) + "\t" + depH.label().get(CoreAnnotations.ValueAnnotation.class));
       }
     }
     if (PRINT_DEBUGGING && reln.equals(GrammaticalRelation.DEPENDENT)) {
