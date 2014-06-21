@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 
+import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
@@ -98,28 +99,27 @@ public abstract class GrammaticalStructure extends TreeGraph {
     this.puncFilter = puncFilter;
     NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
-    Set<Dependency<Label, Label, Object>> dependencies = root.dependencies(puncDepFilter, null);
-    for (Dependency<Label, Label, Object> p : dependencies) {
-      //System.err.println("dep found " + p);
-      TreeGraphNode gov = (TreeGraphNode) p.governor();
-      TreeGraphNode dep = (TreeGraphNode) p.dependent();
-      dep.addArc(GrammaticalRelation.getAnnotationClass(GOVERNOR), gov);
-    }
+
+    DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
+
     // analyze the root (and its descendants, recursively)
     if (relationsLock != null) {
       relationsLock.lock();
     }
     try {
-      analyzeNode(root, root, relations, hf);
+      analyzeNode(root, root, relations, hf, puncFilter, basicGraph);
     }
     finally {
       if (relationsLock != null) {
         relationsLock.unlock();
       }
     }
+
+    attachStrandedNodes(root, root, false, puncFilter, basicGraph);
+    
     // add typed dependencies
-    typedDependencies = getDeps(false, puncTypedDepFilter, dependencies);
-    allTypedDependencies = getDeps(true, puncTypedDepFilter, dependencies);
+    typedDependencies = getDeps(false, puncTypedDepFilter, basicGraph);
+    allTypedDependencies = getDeps(true, puncTypedDepFilter, basicGraph);
   }
 
 
@@ -235,22 +235,51 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // return sb.toString();
   // }
 
+  private static void attachStrandedNodes(TreeGraphNode t, TreeGraphNode root, boolean attach, Filter<String> puncFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
+    if (t.isLeaf()) {
+      return;
+    }
+    if (attach && puncFilter.accept(t.headWordNode().label().value())) {
+      // make faster by first looking for links from parent
+      TreeGraphNode parent = t.parent().highestNodeWithSameHead();
+      if (!basicGraph.isEdge(parent, t) && basicGraph.getShortestPath(root, t, true) == null) {
+        basicGraph.add(parent, t, GrammaticalRelation.DEPENDENT);
+      }
+    }
+    for (TreeGraphNode kid : t.children()) {
+      attachStrandedNodes(kid, root, (kid.headWordNode() != t.headWordNode()), puncFilter, basicGraph);
+    }    
+  }
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
-  private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations, HeadFinder hf) {
+  private static void analyzeNode(TreeGraphNode t, TreeGraphNode root, Collection<GrammaticalRelation> relations, HeadFinder hf, Filter<String> puncFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     if (t.isPhrasal()) {    // don't do leaves or preterminals!
       TreeGraphNode tHigh = t.highestNodeWithSameHead();
       for (GrammaticalRelation egr : relations) {
         if (egr.isApplicable(t)) {
-          for (Tree u : egr.getRelatedNodes(t, root, hf)) {
-            //System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh);
-            tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), (TreeGraphNode) u);
+          for (TreeGraphNode u : egr.getRelatedNodes(t, root, hf)) {
+            TreeGraphNode uHigh = u.highestNodeWithSameHead();
+            if (uHigh == tHigh) {
+              continue;
+            }
+            if (!puncFilter.accept(uHigh.headWordNode().label().value())) {
+              continue;
+            }
+            tHigh.addArc(GrammaticalRelation.getAnnotationClass(egr), uHigh);
+            // If there are two patterns that add dependencies, X --> Z and Y --> Z, and X dominates Y, then the dependency Y --> Z is not added to the basic graph to prevent unwanted duplication.
+            // Similarly, if there is already a path from X --> Y, and an expression would trigger Y --> X somehow, we ignore that
+            Set<TreeGraphNode> parents = basicGraph.getParents(uHigh);
+            if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) && 
+                basicGraph.getShortestPath(uHigh, tHigh, true) == null) {
+              // System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh + "(" + tHigh.headWordNode() + ") uHigh=" + uHigh + "(" + uHigh.headWordNode() + ")");
+              basicGraph.add(tHigh, uHigh, egr);
+            }
           }
         }
       }
       // now recurse into children
       for (TreeGraphNode kid : t.children()) {
-        analyzeNode(kid, root, relations, hf);
+        analyzeNode(kid, root, relations, hf, puncFilter, basicGraph);
       }
     }
   }
@@ -263,15 +292,15 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param getExtra If true, the list of typed dependencies will contain extra ones.
    *              If false, the list of typed dependencies will respect the tree structure.
    */
-  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter, Set<Dependency<Label, Label, Object>> dependencies) {
+  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     List<TypedDependency> basicDep = Generics.newArrayList();
 
-    for (Dependency<Label, Label, Object> d : dependencies) {
-      TreeGraphNode gov = (TreeGraphNode) d.governor();
-      TreeGraphNode dep = (TreeGraphNode) d.dependent();
-      GrammaticalRelation reln = getGrammaticalRelation(gov, dep);
-      // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
-      basicDep.add(new TypedDependency(reln, gov, dep));
+    for (TreeGraphNode gov : basicGraph.getAllVertices()) {
+      for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
+        GrammaticalRelation reln = getGrammaticalRelation(gov, dep);
+        // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
+        basicDep.add(new TypedDependency(reln, gov.headWordNode(), dep.headWordNode()));
+      }
     }
 
     // add the root
