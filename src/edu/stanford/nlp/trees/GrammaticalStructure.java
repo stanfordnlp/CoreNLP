@@ -116,6 +116,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
     }
 
     attachStrandedNodes(root, root, false, puncFilter, basicGraph);
+
+    addGovernorArcLabels(basicGraph);
     
     // add typed dependencies
     typedDependencies = getDeps(false, puncTypedDepFilter, basicGraph);
@@ -125,6 +127,14 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   private static void throwDepFormatException(String dep) {
      throw new RuntimeException(String.format("Dependencies should be for the format 'type(arg-idx, arg-idx)'. Could not parse '%s'", dep));
+  }
+
+  private static void addGovernorArcLabels(DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
+    for (TreeGraphNode gov : basicGraph.getAllVertices()) {
+      for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
+        dep.headWordNode().addArc(GrammaticalRelation.getAnnotationClass(GOVERNOR), gov.headWordNode());
+      }
+    }
   }
 
   /**
