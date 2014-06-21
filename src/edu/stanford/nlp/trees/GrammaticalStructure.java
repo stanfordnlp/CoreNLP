@@ -512,8 +512,13 @@ public abstract class GrammaticalStructure extends TreeGraph {
   public static GrammaticalRelation getGrammaticalRelation(TreeGraphNode govH, TreeGraphNode depH, List<GrammaticalRelation> labels) {
     GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
 
-    Set<GrammaticalRelation> sortedLabels = new TreeSet<GrammaticalRelation>(new NameComparator<GrammaticalRelation>());
-    sortedLabels.addAll(labels);
+    List<GrammaticalRelation> sortedLabels;
+    if (labels.size() <= 1) {
+      sortedLabels = labels;
+    } else {
+      sortedLabels = new ArrayList(labels);
+      Collections.sort(sortedLabels, new NameComparator<GrammaticalRelation>());
+    }
     // System.err.println(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
 
     for (GrammaticalRelation reln2 : sortedLabels) {
