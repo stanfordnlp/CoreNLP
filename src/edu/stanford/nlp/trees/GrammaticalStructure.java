@@ -306,31 +306,19 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // add the root
     TreeGraphNode dependencyRoot = new TreeGraphNode(new Word("ROOT"));
     dependencyRoot.setIndex(0);
-    TreeGraphNode rootDep = null;
-    Collection<TypedDependency> roots = getRoots(basicDep);
-    if (roots.size() == 0) {
-      // This can happen if the sentence has only one non-punctuation
-      // word.  In that case, we still want to add the root->word
-      // dependency, but we won't find any roots using the getRoots()
-      // method.  Instead we use the HeadFinder and the tree.
-      rootDep = root().headWordNode();
-      if (rootDep == null) {
-        List<Tree> leaves = Trees.leaves(root());
-        if (leaves.size() > 0) {
-          Tree leaf = leaves.get(0);
-          if (!(leaf instanceof TreeGraphNode)) {
-            throw new AssertionError("Leaves should be TreeGraphNodes");
-          }
-          rootDep = (TreeGraphNode) leaf;
-          if (rootDep.headWordNode() != null) {
-            rootDep = rootDep.headWordNode();
-          }
+    TreeGraphNode rootDep = root().headWordNode();
+    if (rootDep == null) {
+      List<Tree> leaves = Trees.leaves(root());
+      if (leaves.size() > 0) {
+        Tree leaf = leaves.get(0);
+        if (!(leaf instanceof TreeGraphNode)) {
+          throw new AssertionError("Leaves should be TreeGraphNodes");
+        }
+        rootDep = (TreeGraphNode) leaf;
+        if (rootDep.headWordNode() != null) {
+          rootDep = rootDep.headWordNode();
         }
       }
-    } else {
-      // since roots.size() > 0, there must be at least one element
-      Iterator<TypedDependency> iterator = roots.iterator();
-      rootDep = iterator.next().gov();
     }
     if (rootDep != null) {
       TypedDependency rootTypedDep = new TypedDependency(ROOT, dependencyRoot, rootDep);
