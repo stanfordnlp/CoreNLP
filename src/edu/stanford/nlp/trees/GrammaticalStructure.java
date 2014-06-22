@@ -101,7 +101,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
 
     DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
-    //DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> ncGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
 
     // analyze the root (and its descendants, recursively)
     if (relationsLock != null) {
@@ -121,9 +120,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
     addGovernorArcLabels(basicGraph);
     
     // add typed dependencies
-    typedDependencies = getDeps(puncTypedDepFilter, basicGraph);
-    allTypedDependencies = Generics.newArrayList(typedDependencies);
-    getExtraDeps(allTypedDependencies, puncTypedDepFilter);
+    typedDependencies = getDeps(false, puncTypedDepFilter, basicGraph);
+    allTypedDependencies = getDeps(true, puncTypedDepFilter, basicGraph);
   }
 
 
@@ -296,12 +294,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     }
   }
 
-  private void getExtraDeps(List<TypedDependency> deps, Filter<TypedDependency> puncTypedDepFilter) {
-    getExtras(deps);
-    // adds stuff to basicDep based on the tregex patterns over the tree
-    getTreeDeps(root(), deps, puncTypedDepFilter, extraTreeDepFilter());
-    Collections.sort(deps);
-  }
 
   /**
    * The constructor builds a list of typed dependencies using
@@ -310,7 +302,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param getExtra If true, the list of typed dependencies will contain extra ones.
    *              If false, the list of typed dependencies will respect the tree structure.
    */
-  private List<TypedDependency> getDeps(Filter<TypedDependency> puncTypedDepFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
+  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     List<TypedDependency> basicDep = Generics.newArrayList();
 
     for (TreeGraphNode gov : basicGraph.getAllVertices()) {
@@ -347,6 +339,11 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     postProcessDependencies(basicDep);
 
+    if (getExtra) {
+      getExtras(basicDep);
+      // adds stuff to basicDep based on the tregex patterns over the tree
+      getTreeDeps(root(), basicDep, puncTypedDepFilter, extraTreeDepFilter());
+    }
     Collections.sort(basicDep);
 
     return basicDep;
