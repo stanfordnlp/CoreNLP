@@ -678,19 +678,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return collapsed dependencies
    */
   public List<TypedDependency> typedDependenciesCollapsed(boolean includeExtras) {
-    List<TypedDependency> tdl = typedDependencies(false);
-    // Adds stuff to the basic dependencies.
-    // We don't want to simply call typedDependencies with
-    // "includeExtras" because the collapseDependencies method may add
-    // the extras in a way that makes more logical sense.  For
-    // example, the English dependencies, when CC processed, have more
-    // nsubjs than they originally do.  If we wait until that occurs
-    // to add xsubj for xcomp dependencies, we get better coverage.
-    // TODO: this might not be necessary any more
-    if (includeExtras) {
-      getExtras(tdl);
-      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
-    }
+    List<TypedDependency> tdl = typedDependencies(includeExtras);
     collapseDependencies(tdl, false, includeExtras);
     return tdl;
   }
@@ -710,19 +698,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @return collapsed dependencies with CC processed
    */
   public List<TypedDependency> typedDependenciesCCprocessed(boolean includeExtras) {
-    List<TypedDependency> tdl = typedDependencies(false);
-    // Adds stuff to the basic dependencies.
-    // We don't want to simply call typedDependencies with
-    // "includeExtras" because the collapseDependencies method may add
-    // the extras in a way that makes more logical sense.  For
-    // example, the English dependencies, when CC processed, have more
-    // nsubjs than they originally do.  If we wait until that occurs
-    // to add xsubj for xcomp dependencies, we get better coverage.
-    // TODO: this might not be necessary any more
-    if (includeExtras) {
-      getExtras(tdl);
-      getTreeDeps(root(), tdl, new NoPunctTypedDependencyFilter(puncFilter), extraTreeDepFilter());
-    }
+    List<TypedDependency> tdl = typedDependencies(includeExtras);
     collapseDependencies(tdl, true, includeExtras);
     return tdl;
   }
