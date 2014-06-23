@@ -1472,25 +1472,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(m.find());
   }
 
-  public void testMatchPrevToken() throws IOException {
-    CoreMap doc = createDocument("A A B B B");
-
-    // Test simple sequence
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-    TokenSequencePattern p = TokenSequencePattern.compile(env, "([] [ {{ ner==-1.ner}} ] )");
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    assertTrue(m.find());
-    assertEquals("Archbishop of Canterbury", m.group());
-    assertFalse(m.find());
-
-    p = TokenSequencePattern.compile(env, "ARCHBISHOP OF CANTERBURY");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    assertTrue(m.find());
-    assertEquals("Archbishop of Canterbury", m.group());
-    assertFalse(m.find());
-  }
-
   //just to test if a pattern is compiling or not
   public void testCompile() {
     String s = "(?$se \"matching\" \"this\"|\"don't\")";
