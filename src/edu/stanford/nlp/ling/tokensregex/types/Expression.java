@@ -28,7 +28,7 @@ public interface Expression {
 
   /**
    * Simplifies the expression using the specified environment
-   * @param env Environment to simplify with respect to
+   * @param env Environment to simply with respect to
    * @return Simplified expressions
    */
   public Expression simplify(Env env);

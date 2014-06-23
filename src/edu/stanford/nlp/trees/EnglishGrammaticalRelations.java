@@ -1086,6 +1086,7 @@ public class EnglishGrammaticalRelations {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
           // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
           // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
           // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.
           // Note that the earlier tregexes are usually enough to cover those phrases, such as when
@@ -1442,8 +1443,7 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "PP|XS < (IN|TO < as|of|at|to|in) < (JJ|IN|JJR|JJS|NN=target < such|because|Because|least|instead|due|Due|addition|to)",
           "ADVP < (RB|IN < well) < (IN|RB|JJS=target < as)",
-          // TODO: perhaps the phrase "all but" is more like "all" and should have that as the head
-          "ADVP < (DT=target < all) < (CC < but)",
+          "ADVP < (DT < all) < (CC < but)",
           "CONJP < (RB < rather|well|instead) < (RB|IN=target < as|than|of)",
           "CONJP < (IN < in) < (NN|TO=target < addition|to)",
           // todo: note inconsistent head finding for "rather than"!

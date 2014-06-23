@@ -296,8 +296,7 @@ public class TestSentence implements SequenceModel {
    * @param finalTags Chosen tags for sentence
    * @param confusionMatrix Confusion matrix to write to
    */
-  protected void updateConfusionMatrix(String[] finalTags,
-                                       ConfusionMatrix<String> confusionMatrix) {
+  protected void updateConfusionMatrix(String[] finalTags, ConfusionMatrix confusionMatrix) {
     for (int i = 0; i < correctTags.length; i++)
       confusionMatrix.add(finalTags[i], correctTags[i]);
   }
