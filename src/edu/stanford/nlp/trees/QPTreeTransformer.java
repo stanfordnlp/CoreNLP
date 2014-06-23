@@ -59,7 +59,11 @@ public class QPTreeTransformer implements TreeTransformer {
     Tsurgeon.parseOperation("[createSubtree QP left right] [excise left left] [excise right right]");
 
   private static TregexPattern twoChildrenXSTregex =
-    TregexPattern.compile("QP <1 /^RB|JJ|IN/=left <2 /^JJ|IN/=right <3 /^CD|DT/"); /// TODO: should add NN and $
+    // TODO: should add NN and $ to the numeric expressions captured
+    //   NN is for words such as "half" which are probably misparsed
+    // TODO: <3 (IN < as|than) is to avoid one weird case in PTB, 
+    // "more than about".  Perhaps there is some way to generalize this
+    TregexPattern.compile("QP <1 /^RB|JJ|IN/=left [ ( <2 /^JJ|IN/=right <3 /^CD|DT/ ) | ( <2 /^JJ|IN/ <3 ( IN=right < /^(?i:as|than)$/ ) <4 /^CD|DT/ ) ] ");
 
   private static TsurgeonPattern twoChildrenXSTsurgeon =
     Tsurgeon.parseOperation("createSubtree XS left right");
