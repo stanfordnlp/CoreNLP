@@ -265,7 +265,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * Get the parent for the current node.
    */
   @Override
-  public Tree parent() {
+  public TreeGraphNode parent() {
     return parent;
   }
 
@@ -445,7 +445,10 @@ public class TreeGraphNode extends Tree implements HasParent {
     if (arcLabels == null) {
       return null;
     }
-    return (new ArrayList<Class<? extends GrammaticalRelationAnnotation>>(arcLabels)).get(0);
+    if (arcLabels.size() == 0) {
+      return null;
+    }
+    return arcLabels.iterator().next();
   }
 
   /**
@@ -537,62 +540,6 @@ public class TreeGraphNode extends Tree implements HasParent {
         System.err.println("Head is null: " + this);
       }
     }
-  }
-
-  /**
-   * Return a set of node-node dependencies, represented as Dependency
-   * objects, for the Tree.
-   *
-   * @param hf The HeadFinder to use to identify the head of constituents.
-   *           If this is <code>null</code>, then nodes are assumed to already
-   *           be marked with their heads.
-   * @return Set of dependencies (each a <code>Dependency</code>)
-   */
-  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> filter, HeadFinder hf) {
-    Set<Dependency<Label, Label, Object>> deps = Generics.newHashSet();
-    for (Tree t : this) {
-
-      TreeGraphNode node = safeCast(t);
-      if (node == null || node.isLeaf() || node.children().length < 2) {
-        continue;
-      }
-
-      TreeGraphNode headWordNode;
-      if (hf != null) {
-        headWordNode = safeCast(node.headTerminal(hf));
-      } else {
-        headWordNode = node.headWordNode();
-      }
-
-      for (Tree k : node.children()) {
-        TreeGraphNode kid = safeCast(k);
-        if (kid == null) {
-          continue;
-        }
-        TreeGraphNode kidHeadWordNode;
-        if (hf != null) {
-          kidHeadWordNode = safeCast(kid.headTerminal(hf));
-        } else {
-          kidHeadWordNode = kid.headWordNode();
-        }
-
-        if (headWordNode != null && headWordNode != kidHeadWordNode && kidHeadWordNode != null) {
-          int headWordNodeIndex = headWordNode.index();
-          int kidHeadWordNodeIndex = kidHeadWordNode.index();
-
-          // If the two indices are equal, then the leaves haven't been indexed. Just return an ordinary
-          // UnnamedDependency. This mirrors the implementation of super.dependencies().
-          Dependency<Label, Label, Object> d = (headWordNodeIndex == kidHeadWordNodeIndex) ?
-              new UnnamedDependency(headWordNode, kidHeadWordNode) :
-              new UnnamedConcreteDependency(headWordNode, headWordNodeIndex, kidHeadWordNode, kidHeadWordNodeIndex);
-
-          if (filter.accept(d)) {
-            deps.add(d);
-          }
-        }
-      }
-    }
-    return deps;
   }
 
   /**
