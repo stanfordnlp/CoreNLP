@@ -1086,6 +1086,7 @@ public class EnglishGrammaticalRelations {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
           // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
+          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
           // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
           // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.
           // Note that the earlier tregexes are usually enough to cover those phrases, such as when
