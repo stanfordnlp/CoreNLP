@@ -78,6 +78,14 @@ public class QPTreeTransformer implements TreeTransformer {
   private static TsurgeonPattern splitCCTsurgeon =
     Tsurgeon.parseOperation("[createSubtree NP l1 r1] [createSubtree NP l2 r2]");
 
+  // TODO: get rid of <3 __
+  // only there to reproduce old results
+  private static TregexPattern splitMoneyTregex =
+    TregexPattern.compile("QP <1 /^[$]$/ !< /^(?!([$]|CD)).*$/ !< (__ < (__ < __)) <2 __=left <3 __ <- __=right");
+
+  private static TsurgeonPattern splitMoneyTsurgeon =
+    Tsurgeon.parseOperation("createSubtree QP left right");
+
   /**
    * Transforms t if it contains one of the following QP structure:
    * <ul>
@@ -95,74 +103,8 @@ public class QPTreeTransformer implements TreeTransformer {
     t = Tsurgeon.processPattern(flattenNPoverQPTregex, flattenNPoverQPTsurgeon, t);
     t = Tsurgeon.processPattern(multiwordXSTregex, multiwordXSTsurgeon, t);
     t = Tsurgeon.processPattern(splitCCTregex, splitCCTsurgeon, t);
-
-    doTransform(t);
+    t = Tsurgeon.processPattern(splitMoneyTregex, splitMoneyTsurgeon, t);
     return t;
-  }
-
-  /**
-   * Given a tree t, if this tree contains a QP of the form
-   * QP (... CC ...)        between 5 and 10
-   * it will transform it
-   *
-   */
-  private static void doTransform(Tree t) {
-
-    if (t.value().startsWith("QP")) {
-      //look at the children
-      List<Tree> children = t.getChildrenAsList();
-      // If the children include a CC, we split that into left and
-      // right subtrees with the CC in the middle so the headfinders
-      // have an easier time interpreting the tree later on
-      if (children.size() >= 3) {
-        boolean isFlat = isFlat(children);
-        if (isFlat) {
-          boolean isMoney = children.get(0).value().startsWith("$");
-          if (isMoney) {
-            for (int i = 1; i < children.size(); ++i) {
-              if (!children.get(i).value().startsWith("CD")) {
-                isMoney = false;
-                break;
-              }
-            }
-          }
-          if (isMoney) {
-            transformMoney(t, children);
-          }
-        }
-      }
-    /* --- to be written or deleted
-    } else if (t.value().startsWith("NP")) {
-      //look at the children
-      List<Tree> children = t.getChildrenAsList();
-      if (children.size() >= 3) {
-
-      }
-    ---- */
-    } else if (t.isPhrasal()) {
-      for (Tree child : t.children()) {
-        doTransform(child);
-      }
-    }
-  }
-
-  private static boolean isFlat(List<Tree> children) {
-    for (int i = 0; i < children.size(); ++i) {
-      if (!children.get(i).isPreTerminal()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private static void transformMoney(Tree t, List<Tree> children) {
-    TreeFactory tf = t.treeFactory();
-    LabelFactory lf = t.label().labelFactory();
-    Tree rightQP = tf.newTreeNode(lf.newLabel("QP"), children.subList(1, children.size()));
-    List<Tree> newChildren = new ArrayList<Tree>();
-    newChildren.add(children.get(0));
-    newChildren.add(rightQP);
-    t.setChildren(newChildren);
   }
 
 
