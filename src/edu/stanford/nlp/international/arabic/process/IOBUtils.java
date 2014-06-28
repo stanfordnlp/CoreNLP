@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.Pair;
 
 /**
  * A class for converting strings to input suitable for processing by
- * and IOB sequence model.
+ * an IOB sequence model.
  *
  * @author Spence Green
  * @author Will Monroe
@@ -275,9 +275,6 @@ public class IOBUtils {
 
   /**
    * Identify tokens that should not be segmented.
-   *
-   * @param token
-   * @return
    */
   private static boolean shouldNotSegment(String token) {
     return (isDigit.matcher(token).find() ||
@@ -287,10 +284,6 @@ public class IOBUtils {
 
   /**
    * Strip segmentation markers.
-   *
-   * @param tok
-   * @param tokType
-   * @return
    */
   private static String stripSegmentationMarkers(String tok, TokenType tokType) {
     int beginOffset = (tokType == TokenType.BeginMarker || tokType == TokenType.BothMarker) ? 1 : 0;
@@ -303,11 +296,6 @@ public class IOBUtils {
    * SequenceClassifier. The following annotations are copied from the provided
    * CoreLabel cl, if present:
    *    DomainAnnotation
-   *
-   * @param cl
-   * @param token
-   * @param label
-   * @return
    */
   private static CoreLabel createDatum(CoreLabel cl, String token, String label) {
     CoreLabel newTok = new CoreLabel();
@@ -323,10 +311,6 @@ public class IOBUtils {
 
   /**
    * Deterministically classify a token.
-   *
-   * @param token
-   * @param segMarker
-   * @return
    */
   private static TokenType getTokenType(String token, String segMarker) {
     if (segMarker == null || token.equals(segMarker)) {
@@ -352,8 +336,6 @@ public class IOBUtils {
   /**
    * This version is for turning an unsegmented string to an IOB input, i.e.,
    * for processing raw text.
-   *
-   * @param string
    */
   public static List<CoreLabel> StringToIOB(String string) {
     return StringToIOB(string, null);
@@ -368,10 +350,6 @@ public class IOBUtils {
   /**
    * Convert a list of labeled characters to a String. Include segmentation markers
    * for prefixes and suffixes in the string, and add a space at segmentations.
-   *
-   * @param labeledSequence
-   * @param prefixMarker
-   * @param suffixMarker
    */
   public static String IOBToString(List<CoreLabel> labeledSequence, String prefixMarker, String suffixMarker) {
     return IOBToString(labeledSequence, prefixMarker, suffixMarker, true, true);
@@ -380,9 +358,6 @@ public class IOBUtils {
   /**
    * Convert a list of labeled characters to a String. Include segmentation markers
    * (but no spaces) at segmentation boundaries.
-   *
-   * @param labeledSequence
-   * @param segmentationMarker
    */
   public static String IOBToString(List<CoreLabel> labeledSequence, String segmentationMarker) {
     return IOBToString(labeledSequence, segmentationMarker, null, false, true);
@@ -390,9 +365,6 @@ public class IOBUtils {
 
   /**
    * Convert a list of labeled characters to a String. Preserve the original (unsegmented) text.
-   *
-   * @param labeledSequence
-   * @param segmentationMarker
    */
   public static String IOBToString(List<CoreLabel> labeledSequence) {
     return IOBToString(labeledSequence, null, null, false, false);

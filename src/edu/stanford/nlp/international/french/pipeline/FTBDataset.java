@@ -57,9 +57,6 @@ public class FTBDataset extends AbstractDataset {
 
   /**
    * Return the ID of this tree according to the Candito split files.
-   *
-   * @param t
-   * @return
    */
   private String getCanditoTreeID(Tree t) {
     String canditoName = null;
