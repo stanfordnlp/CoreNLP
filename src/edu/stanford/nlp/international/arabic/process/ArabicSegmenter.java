@@ -107,10 +107,10 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final String domain;
   private final boolean noRewrites;
 
-  /** Make an Arabic Segmenter.
+  /** 
+   * Make an Arabic Segmenter.
    *
-   *  @param props Options for how to tokenize. See the main method of
-   *               {@see ArabicTokenizer} for details.
+   *  @param props Options for how to tokenize. See the main method of {@see ArabicTokenizer} for details
    */
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
