@@ -78,10 +78,8 @@ public class QPTreeTransformer implements TreeTransformer {
   private static TsurgeonPattern splitCCTsurgeon =
     Tsurgeon.parseOperation("[createSubtree NP l1 r1] [createSubtree NP l2 r2]");
 
-  // TODO: get rid of <3 __
-  // only there to reproduce old results
   private static TregexPattern splitMoneyTregex =
-    TregexPattern.compile("QP <1 /^[$]$/ !< /^(?!([$]|CD)).*$/ !< (__ < (__ < __)) <2 __=left <3 __ <- __=right");
+    TregexPattern.compile("QP <1 /^[$]$/ !< /^(?!([$]|CD)).*$/ !< (__ < (__ < __)) <2 __=left <- __=right");
 
   private static TsurgeonPattern splitMoneyTsurgeon =
     Tsurgeon.parseOperation("createSubtree QP left right");
