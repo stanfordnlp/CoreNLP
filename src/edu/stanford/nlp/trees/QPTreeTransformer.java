@@ -73,13 +73,14 @@ public class QPTreeTransformer implements TreeTransformer {
   // the old style split any flat QP with a CC in the middle
   // TOD: there should be some allowances for phrases such as "or more", "or so", etc
   private static TregexPattern splitCCTregex =
-    TregexPattern.compile("QP < (CC $- __=r1 $+ __=l2) <1 __=l1 <- __=r2 !< (__ < (__ < __))");
+    TregexPattern.compile("QP < (CC $- __=r1 $+ __=l2 ?$-- /^[$]|CC$/=lnum ?$++ /^[$]|CC$/=rnum) <1 __=l1 <- __=r2 !< (__ < (__ < __))");
 
   private static TsurgeonPattern splitCCTsurgeon =
-    Tsurgeon.parseOperation("[createSubtree NP l1 r1] [createSubtree NP l2 r2]");
+    Tsurgeon.parseOperation("[if exists lnum createSubtree QP l1 r1] [if not exists lnum createSubtree NP l1 r1] " +
+                            "[if exists rnum createSubtree QP l2 r2] [if not exists rnum createSubtree NP l2 r2]");
 
   private static TregexPattern splitMoneyTregex =
-    TregexPattern.compile("QP <1 /^[$]$/ !< /^(?!([$]|CD)).*$/ !< (__ < (__ < __)) <2 __=left <- __=right");
+    TregexPattern.compile("QP < (/^[$]$/ !$++ /^(?!([$]|CD)).*$/ !$++ (__ < (__ < __)) $+ __=left) <- __=right");
 
   private static TsurgeonPattern splitMoneyTsurgeon =
     Tsurgeon.parseOperation("createSubtree QP left right");
