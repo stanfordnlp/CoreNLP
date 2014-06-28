@@ -70,6 +70,14 @@ public class QPTreeTransformer implements TreeTransformer {
   private static TsurgeonPattern multiwordXSTsurgeon =
     Tsurgeon.parseOperation("createSubtree XS left right");
 
+  // the old style split any flat QP with a CC in the middle
+  // TOD: there should be some allowances for phrases such as "or more", "or so", etc
+  private static TregexPattern splitCCTregex =
+    TregexPattern.compile("QP < (CC $- __=r1 $+ __=l2) <1 __=l1 <- __=r2 !< (__ < (__ < __))");
+
+  private static TsurgeonPattern splitCCTsurgeon =
+    Tsurgeon.parseOperation("[createSubtree NP l1 r1] [createSubtree NP l2 r2]");
+
   /**
    * Transforms t if it contains one of the following QP structure:
    * <ul>
@@ -86,6 +94,7 @@ public class QPTreeTransformer implements TreeTransformer {
   public static Tree QPtransform(Tree t) {
     t = Tsurgeon.processPattern(flattenNPoverQPTregex, flattenNPoverQPTsurgeon, t);
     t = Tsurgeon.processPattern(multiwordXSTregex, multiwordXSTsurgeon, t);
+    t = Tsurgeon.processPattern(splitCCTregex, splitCCTsurgeon, t);
 
     doTransform(t);
     return t;
@@ -107,17 +116,6 @@ public class QPTreeTransformer implements TreeTransformer {
       // have an easier time interpreting the tree later on
       if (children.size() >= 3) {
         boolean isFlat = isFlat(children);
-        if (isFlat) {
-          for (int i = 1; i < children.size() - 1; ++i) {
-            if (children.get(i).value().startsWith("CC")) {
-              transformCC(t, children.subList(0, i), children.get(i), children.subList(i + 1, children.size()));
-              children = t.getChildrenAsList();
-              isFlat = false;
-              break;
-            }
-          }
-        }
-
         if (isFlat) {
           boolean isMoney = children.get(0).value().startsWith("$");
           if (isMoney) {
@@ -155,18 +153,6 @@ public class QPTreeTransformer implements TreeTransformer {
       }
     }
     return true;
-  }
-
-  private static void transformCC(Tree t, List<Tree> left, Tree conj, List<Tree> right) {
-    TreeFactory tf = t.treeFactory();
-    LabelFactory lf = t.label().labelFactory();
-    Tree leftQP = tf.newTreeNode(lf.newLabel("NP"), left);
-    Tree rightQP = tf.newTreeNode(lf.newLabel("NP"), right);
-    List<Tree> newChildren = new ArrayList<Tree>();
-    newChildren.add(leftQP);
-    newChildren.add(conj);
-    newChildren.add(rightQP);
-    t.setChildren(newChildren);
   }
 
   private static void transformMoney(Tree t, List<Tree> children) {
