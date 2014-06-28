@@ -605,13 +605,13 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nn(pilots-6, Eastern-4)\n" +
                 "nn(pilots-6, Airlines-5)\n" +
                 "iobj(awarded-3, pilots-6)\n" +
-                "amod($-8, between-7)\n" +
+                "quantmod($-8, between-7)\n" +
                 "dobj(awarded-3, $-8)\n" +
-                "num($-8, 60-9)\n" +
+                "number(million-10, 60-9)\n" +
                 "num($-8, million-10)\n" +
                 "cc($-8, and-11)\n" +
                 "conj($-8, $-12)\n" +
-                "num($-12, 100-13)\n" +
+                "number(million-14, 100-13)\n" +
                 "num($-12, million-14)\n" +
                 "prep($-8, in-15)\n" +
                 "amod(pay-17, back-16)\n" +
