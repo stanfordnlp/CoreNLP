@@ -1174,7 +1174,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *  loc.
    *  @param info A List of IN objects
    *  @param loc  The position in the info list to focus feature creation on
-   *  @param featureFactory The factory that constructs features out of the item
+   *  @param featureFactories The factory that constructs features out of the item
    *  @return A Datum (BasicDatum) representing this data instance
    */
   public Datum<String, String> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
