@@ -1436,6 +1436,17 @@ public class TregexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  public void testOptional() {
+    Tree tree = treeFromString("(A (B (C 1)) (B 2))");
+    TregexPattern pattern = TregexPattern.compile("B ? < C=c");
+    TregexMatcher matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(C 1)", matcher.getNode("c").toString());
+    assertTrue(matcher.find());
+    assertEquals(null, matcher.getNode("c"));
+    assertFalse(matcher.find());
+  }
+
   /**
    * Stores an input and the expected output.  Obviously this is only
    * expected to work with a given pattern, but this is a bit more
