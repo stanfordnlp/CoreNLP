@@ -1428,8 +1428,12 @@ public class TregexTest extends TestCase {
   }
 
   public void testDisjunctionVariableAssignments() {
-    outputResults("UCP [ <- (ADJP=adjp < JJR) | <, NNP=np ]", "(NP (UCP (NNP U.S.) (CC and) (ADJP (JJ northern) (JJ European))) (NNS diplomats))");
-
+    Tree tree = treeFromString("(NP (UCP (NNP U.S.) (CC and) (ADJP (JJ northern) (JJ European))) (NNS diplomats))");
+    TregexPattern pattern = TregexPattern.compile("UCP [ <- (ADJP=adjp < JJR) | <, NNP=np ]");
+    TregexMatcher matcher = pattern.matcher(tree);
+    assertTrue(matcher.find());
+    assertEquals("(NNP U.S.)", matcher.getNode("np").toString());
+    assertFalse(matcher.find());
   }
 
   /**
