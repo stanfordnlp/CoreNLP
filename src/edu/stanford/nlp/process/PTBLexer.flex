@@ -625,8 +625,8 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|[D]el|Fla|Ga|[I]ll|Ind|Kans?|Ky|[L]a|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|[P]a|Penn|Tenn|[T]ex|Va|Vt|[W]ash|Wisc?|Wyo
 /* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
-ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
-/* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
+ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Bhd|Assn|Univ|Intl|Sys
+/* Don't include fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
 ABNUM = tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
@@ -637,7 +637,7 @@ ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Esq
  *  If they're followed by an uppercase one, we assume there is also a
  *  sentence boundary.
  */
-ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq)\.
+ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq|Bldg)\.
 
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
@@ -646,7 +646,7 @@ ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K
 ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
 ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
-ABCOMP2 = Invt|Elec|Natl|M[ft]g
+ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally. Ph is in there for Ph. D
@@ -706,6 +706,7 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 %%
 
 c[+][+]                     { return getNext(); }
+(c|f)#			    { return getNext(); }
 cannot                  { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
@@ -714,6 +715,12 @@ cannot                  { if (splitAssimilations) {
                         }
 'twas                   { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
+'tis                   { if (splitAssimilations) {
+                            yypushback(2) ; return getNext();
                           } else {
                             return getNext();
                           }
