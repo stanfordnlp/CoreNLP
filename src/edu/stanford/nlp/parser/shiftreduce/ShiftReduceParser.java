@@ -104,10 +104,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
   FeatureFactory featureFactory;
 
+  Set<String> knownStates;
+
   public ShiftReduceParser(ShiftReduceOptions op) {
     this.transitionIndex = new HashIndex<Transition>();
     this.featureWeights = Generics.newHashMap();
     this.op = op;
+    this.knownStates = Generics.newHashSet();
 
     String[] classes = op.featureFactoryClass.split(";");
     if (classes.length == 1) {
@@ -127,11 +130,12 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-  public ShiftReduceParser(ShiftReduceOptions op, FeatureFactory factory) {
+  private ShiftReduceParser(ShiftReduceOptions op, FeatureFactory factory) {
     this.transitionIndex = new HashIndex<Transition>();
     this.featureWeights = Generics.newHashMap();
     this.op = op;
     this.featureFactory = factory;
+    this.knownStates = Generics.newHashSet();
   }
 
   /*
@@ -198,6 +202,10 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     for (Transition transition : other.transitionIndex) {
       transitionIndex.add(transition);
     }
+
+    knownStates.clear();
+    knownStates.addAll(other.knownStates);
+
     featureWeights.clear();
     for (String feature : other.featureWeights.keySet()) {
       featureWeights.put(feature, new Weight(other.featureWeights.get(feature)));
@@ -503,6 +511,25 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return transitionLists;
   }
 
+  public static void findKnownStates(List<Tree> binarizedTrees, Set<String> knownStates) {
+    for (Tree tree : binarizedTrees) {
+      findKnownStates(tree, knownStates);
+    }
+  }
+
+  public static void findKnownStates(Tree tree, Set<String> knownStates) {
+    if (tree.isLeaf() || tree.isPreTerminal()) {
+      return;
+    }
+    if (!ShiftReduceUtils.isTemporary(tree)) {
+      knownStates.add(tree.value());
+    }
+    for (Tree child : tree.children()) {
+      findKnownStates(child, knownStates);
+    }
+  }
+
+  
   // TODO: factor out the retagging?
   public static void redoTags(Tree tree, Tagger tagger) {
     List<Word> words = tree.yieldWords();
@@ -781,6 +808,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     transitionTimer.done("Converting trees into transition lists");
     System.err.println("Number of transitions: " + transitionIndex.size());
     
+    findKnownStates(binarizedTrees, knownStates);
+    System.err.println("Known states: " + knownStates);
+
     Random random = new Random(op.trainOptions.randomSeed);
 
     Treebank devTreebank = null;
