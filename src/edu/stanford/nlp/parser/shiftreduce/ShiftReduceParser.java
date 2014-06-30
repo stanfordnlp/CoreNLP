@@ -187,6 +187,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
+  @Override
+  public boolean requiresTags() {
+    return true;
+  }
+
   public ShiftReduceParser deepCopy() {
     // TODO: should we deep copy the options / factory?  seems wasteful
     ShiftReduceParser copy = new ShiftReduceParser(op, featureFactory);

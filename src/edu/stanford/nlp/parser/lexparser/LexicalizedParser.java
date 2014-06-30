@@ -115,6 +115,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return getTLPParams().defaultCoreNLPFlags();
   }
 
+  @Override
+  public boolean requiresTags() {
+    return false;
+  }
+
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
   public static final String DEFAULT_PARSER_LOC = ((System.getenv("NLP_PARSER") != null) ?
                                                    System.getenv("NLP_PARSER") :
