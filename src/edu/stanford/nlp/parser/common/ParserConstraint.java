@@ -46,4 +46,9 @@ public class ParserConstraint implements Serializable {
     this.end = end;
     this.state = state;
   }
+
+  @Override
+  public String toString() {
+    return "ParserConstraint(" + start + "," + end + ":" + state + ")";
+  }
 }
