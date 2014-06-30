@@ -214,8 +214,10 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   @Override
   public void setConstraints(List<ParserConstraint> constraints) {
-    // TODO
-    throw new UnsupportedOperationException("Unable to set constraints on the shift reduce parser (yet)");
+    if (constraints != null && constraints.size() > 0) {
+      // TODO
+      throw new UnsupportedOperationException("Unable to set constraints on the shift reduce parser (yet)");      
+    }
   }
 
   @Override
