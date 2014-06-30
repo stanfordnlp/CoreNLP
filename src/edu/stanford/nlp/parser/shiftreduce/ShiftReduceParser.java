@@ -426,7 +426,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       HasWord hw = words.get(index);
 
       CoreLabel wordLabel = new CoreLabel();
-      wordLabel.setIndex(index);
+      // Index from 1.  Tools downstream from the parser expect that
+      wordLabel.setIndex(index + 1);
       wordLabel.setValue(hw.word());
       if (!(hw instanceof HasTag)) {
         throw new RuntimeException("Expected tagged words");
@@ -496,7 +497,10 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     for (Tree tree : treebank) {
       Trees.convertToCoreLabels(tree);
       tree.percolateHeadAnnotations(binaryHeadFinder);
-      tree.indexLeaves(0, true);
+      // Index from 1.  Tools downstream expect index from 1, so for
+      // uses internal to the srparser we have to renormalize the
+      // indices, with the result that here we have to index from 1
+      tree.indexLeaves(1, true);
       binarizedTrees.add(tree);
     }
     return binarizedTrees;
