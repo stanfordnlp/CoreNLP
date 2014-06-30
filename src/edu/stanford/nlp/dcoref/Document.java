@@ -51,6 +51,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;
 
 public class Document implements Serializable {
@@ -118,7 +119,7 @@ public class Document implements Serializable {
   private TwoDimensionalSet<Integer, Integer> incompatibles;
   private TwoDimensionalSet<Integer, Integer> incompatibleClusters;
   
-  protected Map<Pair<Integer, Integer>, Boolean> acronymCache;
+  protected TwoDimensionalMap<Integer, Integer, Boolean> acronymCache;
 
   /** Map of speaker name/id to speaker info */
   transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
@@ -135,7 +136,7 @@ public class Document implements Serializable {
     speakerPairs = Generics.newHashSet();
     incompatibles = TwoDimensionalSet.hashSet();
     incompatibleClusters = TwoDimensionalSet.hashSet();
-    acronymCache = Generics.newHashMap();    
+    acronymCache = TwoDimensionalMap.hashMap();    
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
@@ -270,7 +271,7 @@ public class Document implements Serializable {
   // Update incompatibles for two clusters that are about to be merged
   public void mergeIncompatibles(CorefCluster to, CorefCluster from) {
     List<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>> replacements =
-      new ArrayList<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>>();
+            new ArrayList<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>>();
     for (Pair<Integer, Integer> p : incompatibleClusters) {
       Integer other = null;
       if (p.first == from.clusterID) {
@@ -291,24 +292,28 @@ public class Document implements Serializable {
   }
 
   public void mergeAcronymCache(CorefCluster to, CorefCluster from) {
-    Map<Pair<Integer, Integer>, Boolean> replacements = Generics.newHashMap();
-    for(Pair<Integer, Integer> p : acronymCache.keySet()) {
-      if(acronymCache.get(p)) {
-        Integer other = null;
-        if(p.first==from.clusterID){
-          other = p.second;
-        } else if(p.second==from.clusterID) {
-          other = p.first;
-        }
-        if(other != null && other != to.clusterID) {
-          int cid1 = Math.min(other, to.clusterID);
-          int cid2 = Math.max(other, to.clusterID);
-          replacements.put(Pair.makePair(cid1, cid2), true);
+    TwoDimensionalSet<Integer, Integer> replacements = TwoDimensionalSet.hashSet();
+    for (Integer first : acronymCache.firstKeySet()) {
+      for (Integer second : acronymCache.get(first).keySet()) {
+        if (acronymCache.get(first, second)) {
+          Integer other = null;
+          if (first == from.clusterID) {
+            other = second;
+          } else if (second == from.clusterID) {
+            other = first;
+          }
+          if (other != null && other != to.clusterID) {
+            int cid1 = Math.min(other, to.clusterID);
+            int cid2 = Math.max(other, to.clusterID);
+            replacements.add(cid1, cid2);
+          }
         }
       }
     }
-    for(Pair<Integer, Integer> p : replacements.keySet()) {
-      acronymCache.put(p, replacements.get(p));
+    for (Integer first : replacements.firstKeySet()) {
+      for (Integer second : replacements.secondKeySet(first)) {
+        acronymCache.put(first, second, true);
+      }
     }
   }
 
