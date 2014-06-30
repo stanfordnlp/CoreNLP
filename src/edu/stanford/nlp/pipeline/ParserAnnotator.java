@@ -300,7 +300,7 @@ public class ParserAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return TOKENIZE_AND_SSPLIT;
+    return parser.requiresTags() ? TOKENIZE_SSPLIT_POS : TOKENIZE_AND_SSPLIT;
   }
 
   @Override
