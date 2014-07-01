@@ -50,6 +50,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.common.ArgUtils;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
@@ -362,9 +363,34 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
    * TODO: perhaps we want to create an EmergencyTransition class
    * which indicates that something has gone wrong
    */
-  public Transition findEmergencyTransition(State state) {
+  public Transition findEmergencyTransition(State state, List<ParserConstraint> constraints) {
     if (state.stack.size() == 0) {
       return null;
+    }
+
+    // See if there is a constraint whose boundaries match the end
+    // points of the top node on the stack.  If so, we can apply a
+    // UnaryTransition / CompoundUnaryTransition if that would solve
+    // the constraint
+    if (constraints != null) {
+      final Tree top = state.stack.peek();
+      for (ParserConstraint constraint : constraints) {
+        if (ShiftReduceUtils.leftIndex(top) != constraint.start || ShiftReduceUtils.rightIndex(top) != constraint.end - 1) {
+          continue;
+        }
+        if (ShiftReduceUtils.constraintMatchesTreeTop(top, constraint)) { 
+          continue;
+        }
+        // found an unmatched constraint that can be fixed with a unary transition
+        // now we need to find a matching state for the transition
+        for (String label : knownStates) {
+          if (constraint.state.matcher(label).matches()) {
+            return ((op.compoundUnaries) ? 
+                    new CompoundUnaryTransition(Collections.singletonList(label), false) : 
+                    new UnaryTransition(label, false));
+          }
+        }
+      }
     }
 
     if (ShiftReduceUtils.isTemporary(state.stack.peek()) && 
@@ -389,15 +415,16 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return null;
   }
 
+  /** Convenience method: returns one highest scoring transition, without any ParserConstraints */
   public ScoredObject<Integer> findHighestScoringTransition(State state, List<String> features, boolean requireLegal) {
-    Collection<ScoredObject<Integer>> transitions = findHighestScoringTransitions(state, features, requireLegal, 1);
+    Collection<ScoredObject<Integer>> transitions = findHighestScoringTransitions(state, features, requireLegal, 1, null);
     if (transitions.size() == 0) {
       return null;
     }
     return transitions.iterator().next();
   }
 
-  public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, List<String> features, boolean requireLegal, int numTransitions) {
+  public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, List<String> features, boolean requireLegal, int numTransitions, List<ParserConstraint> constraints) {
     float[] scores = new float[transitionIndex.size()];
     for (String feature : features) {
       Weight weight = featureWeights.get(feature);
@@ -410,7 +437,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
     PriorityQueue<ScoredObject<Integer>> queue = new PriorityQueue<ScoredObject<Integer>>(numTransitions + 1, ScoredComparator.ASCENDING_COMPARATOR);
     for (int i = 0; i < scores.length; ++i) {
-      if (!requireLegal || transitionIndex.get(i).isLegal(state)) {
+      if (!requireLegal || transitionIndex.get(i).isLegal(state, constraints)) {
         queue.add(new ScoredObject<Integer>(i, scores[i]));
         if (queue.size() > numTransitions) {
           queue.poll();
@@ -665,7 +692,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         State highestCurrentState = null;
         for (State currentState : agenda) {
           List<String> features = featureFactory.featurize(currentState);
-          Collection<ScoredObject<Integer>> stateTransitions = findHighestScoringTransitions(currentState, features, true, op.trainOptions().beamSize);
+          Collection<ScoredObject<Integer>> stateTransitions = findHighestScoringTransitions(currentState, features, true, op.trainOptions().beamSize, null);
           for (ScoredObject<Integer> transition : stateTransitions) {
             State newState = transitionIndex.get(transition.object()).apply(currentState, transition.score());
             newAgenda.add(newState);

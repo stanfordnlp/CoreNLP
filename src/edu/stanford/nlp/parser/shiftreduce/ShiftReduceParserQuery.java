@@ -35,6 +35,8 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   final ShiftReduceParser parser;
 
+  List<ParserConstraint> constraints = null;
+
   public ShiftReduceParserQuery(ShiftReduceParser parser) {
     this.parser = parser;
   }
@@ -69,7 +71,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       State bestState = null;
       for (State state : oldBeam) {
         List<String> features = parser.featureFactory.featurize(state);
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
           Transition transition = parser.transitionIndex.get(predictedTransition.object());
@@ -93,7 +95,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
         // This will probably result in a bad parse, but at least it
         // will result in some sort of parse.
         for (State state : oldBeam) {
-          Transition transition = parser.findEmergencyTransition(state);
+          Transition transition = parser.findEmergencyTransition(state, constraints);
           if (transition != null) {
             State newState = transition.apply(state);
             if (bestState == null || bestState.score() < newState.score()) {
@@ -214,10 +216,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   @Override
   public void setConstraints(List<ParserConstraint> constraints) {
-    if (constraints != null && constraints.size() > 0) {
-      // TODO
-      throw new UnsupportedOperationException("Unable to set constraints on the shift reduce parser (yet)");      
-    }
+    this.constraints = constraints;
   }
 
   @Override

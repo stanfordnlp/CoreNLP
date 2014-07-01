@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -56,5 +57,17 @@ class ShiftReduceUtils {
     }
 
     return rightIndex(tree.children()[tree.children().length - 1]);
+  }
+
+  static boolean constraintMatchesTreeTop(Tree top, ParserConstraint constraint) {
+    while (true) {
+      if (constraint.state.matcher(top.value()).matches()) {
+        return true;
+      } else if (top.children().length == 1) {
+        top = top.children()[0];
+      } else {
+        return false;
+      } 
+    }
   }
 }
