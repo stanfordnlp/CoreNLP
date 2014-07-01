@@ -983,7 +983,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     try {
       Timing timing = new Timing();
       System.err.print("Loading parser from serialized file " + path + " ...");
-      parser = IOUtils.readObjectFromFile(path);
+      parser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
       timing.done();
     } catch (IOException e) {
       throw new RuntimeIOException(e);
@@ -1032,7 +1032,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       } else if (args[argIndex].equalsIgnoreCase("-devTreebank")) {
         devTreebankPath = ArgUtils.getTreebankDescription(args, argIndex, "-devTreebank");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
-      } else if (args[argIndex].equalsIgnoreCase("-serializedPath")) {
+      } else if (args[argIndex].equalsIgnoreCase("-serializedPath") || args[argIndex].equalsIgnoreCase("-model")) {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-tlpp")) {
