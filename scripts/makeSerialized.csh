@@ -145,7 +145,7 @@ java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA
 # This now works
 ( echo "Running xinhuaFactored from serialized (check without specifying -tLPP) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -maxLength 40 -loadFromSerializedFile xinhuaFactored.ser.gz -test $ctb 001-025 ) >>& ./serializedParsers.log
 
-( echo "Running chinesePCFG (simplified for use in the RNN parser) on $host -server" ; time java -server -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -PCFG -compactGrammar 0 -saveToSerializedFile chinesePCFG-simple.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
+( echo "Running chinesePCFG (simplified for use in the RNN parser) on $host -server" ; time java -server -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -PCFG -hMarkov 1 -nomarkNPconj -compactGrammar 0 -saveToSerializedFile chinesePCFG.simple.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
 
 # German Factored binary from Negra (version 2)
 # $negra 3 is the dev set 
