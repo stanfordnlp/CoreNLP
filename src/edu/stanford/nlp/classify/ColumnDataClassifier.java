@@ -140,6 +140,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as test data</td></tr>
  * <tr><td> encoding</td><td>String</td><td><i>platform default</i></td><td>Character encoding of training and test file, e.g. utf-8 or iso-8859-1</td></tr>
  * <tr><td> displayedColumn</td><td>int</td><td>1</td><td>Column number that will be printed out to stdout in the output next to the gold class and the chosen class.  This is just an aide memoire.  If the value is negative, nothing is printed. </td></tr>
+ * <tr><td> displayAllAnswers</td><td>boolean</td><td>false</td><td>If true, print all classes and their probability, sorted by probability, rather than just the highest scoring and correct classes. </td></tr>
  * <tr><td> goldAnswerColumn</td><td>int</td><td>0</td><td>Column number that contains the correct class for each data item (again, columns are numbered from 0 up).</td></tr>
  * <tr><td> groupingColumn</td><td>int</td><td>-1</td><td>Column for grouping multiple data items for the purpose of computing ranking accuracy.  This is appropriate when only one datum in a group can be correct, and the intention is to choose the highest probability one, rather than accepting all above a threshold.  Multiple items in the same group must be contiguous in the test file (otherwise it would be necessary to cache probabilities and groups for the entire test file to check matches).  If it is negative, no grouping column is used, and no ranking accuracy is reported.</td></tr>
  * <tr><td> rankingScoreColumn</td><td>int</td><td>-1</td><td>If this parameter is non-negative and a groupingColumn is defined, then an average ranking score will be calculated by scoring the chosen candidate from a group according to its value in this column (for instance, the values of this column can be set to a mean reciprocal rank of 1.0 for the best answer, 0.5 for the second best and so on, or the value of this column can be a similarity score reflecting the similarity of the answer to the true answer.</td></tr>
@@ -215,6 +216,9 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight web page</a> for more information)</td></tr>
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
  * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization)</td></tr>
+ * <tr><td>crossValidationFolds</td><td>int</td><td>-1</td><td>If positive, the training data is divided in to this many folds and cross-validation is done on the training data (prior to testing on test data, if it is also specified)</td></tr>
+ * <tr><td>shuffleTrainingData</td><td>boolean</td><td>false</td><td>If true, the training data is shuffled prior to training and cross-validation. This is vital in cross-validation if the training data is otherwise sorted by class.</td></tr>
+ * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
  * </table>
  *
  * @author Christopher Manning
@@ -227,7 +231,7 @@ public class ColumnDataClassifier {
 
   private final Flags[] flags;
   private final Flags globalFlags; // simply points to flags[0]
-  private Classifier<String,String> classifier = null; // really only assigned once too, but it's too hard for the compiler
+  private Classifier<String,String> classifier; // really only assigned once too (either in train or load in setProperties)
 
 
   /**
@@ -278,7 +282,6 @@ public class ColumnDataClassifier {
           }
         }
       }
-
       return new RVFDatum<String,String>(theFeatures, fields[globalFlags.goldAnswerColumn]);
     } else {
       String[] wi = makeSimpleLineInfo(line, lineNo);
@@ -307,30 +310,40 @@ public class ColumnDataClassifier {
    *  featurized form. If feature selection is asked for, the returned
    *  featurized form is after feature selection has been applied.
    *
-   * @param fileName File with supervised training examples.
-   * @return A GeneralDataset, where the labels and features are Strings.
+   *  @param fileName File with supervised training examples.
+   *  @return A GeneralDataset, where the labels and features are Strings.
    */
   public GeneralDataset<String,String> readTrainingExamples(String fileName) {
+    return readAndReturnTrainingExamples(fileName).first();
+  }
+
+
+  /** Read a set of training examples from a file, and return the data in a
+   *  featurized form and in String form. If feature selection is asked for, the returned
+   *  featurized form is after feature selection has been applied.
+   *
+   *  @param fileName File with supervised training examples.
+   *  @return A Pair of a GeneralDataset, where the labels and features are Strings and a List of the input examples
+   */
+  public Pair<GeneralDataset<String,String>, List<String[]>> readAndReturnTrainingExamples(String fileName) {
     if (globalFlags.printFeatures != null) {
       newFeaturePrinter(globalFlags.printFeatures, "train");
     }
-    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, false);
+    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, true);
     GeneralDataset<String,String> train = dataInfo.first();
     if (globalFlags.featureMinimumSupport > 1) {
-
       System.err.println("Removing Features with counts < " + globalFlags.featureMinimumSupport);
       train.applyFeatureCountThreshold(globalFlags.featureMinimumSupport);
     }
     train.summaryStatistics();
-    return train;
-
+    return dataInfo;
   }
 
 
   /** Read a data set from a file at test time, and return it.
    *
-   * @param filename The file to read the examples from.
-   * @return A Pair. The first item of the pair is the featurized data set,
+   *  @param filename The file to read the examples from.
+   *  @return A Pair. The first item of the pair is the featurized data set,
    *     ready for passing to the classifier.  The second item of the pair
    *     is simply each line of the file split into tab-separated columns.
    *     This is at present necessary for the built-in evaluation, which uses
@@ -399,7 +412,7 @@ public class ColumnDataClassifier {
           }
         }
       } catch (Exception e) {
-        throw new RuntimeException("Training dataset could not be processed", e);
+        throw new RuntimeException("Dataset could not be processed", e);
       }
     }
 
@@ -410,7 +423,7 @@ public class ColumnDataClassifier {
   /**
    * Write summary statistics about a group of answers.
    */
-  private void writeResultsSummary(int num, Counter<String> contingency, Collection<String> labels) {
+  private Pair<Double, Double> writeResultsSummary(int num, Counter<String> contingency, Collection<String> labels) {
     System.err.println();
     System.err.print(num + " examples");
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null) {
@@ -426,8 +439,8 @@ public class ColumnDataClassifier {
       int fn = (int) contingency.getCount(key + "|FN");
       int fp = (int) contingency.getCount(key + "|FP");
       int tn = (int) contingency.getCount(key + "|TN");
-      double p = (tp == 0) ? 0.0 : ((double) tp) / (tp + fp);
-      double r = (tp == 0) ? 0.0 : ((double) tp) / (tp + fn);
+      double p = (tp + fp == 0) ? 1.0 : ((double) tp) / (tp + fp); // If nothing selected, then vacuous 1.0
+      double r = (tp + fn == 0) ? 1.0 : ((double) tp) / (tp + fn); // If nothing to find, then vacuous 1.0
       double f = (p == 0.0 && r == 0.0) ? 0.0 : 2 * p * r / (p + r);
       double acc = ((double) tp + tn)/num;
       macroF1 += f;
@@ -459,10 +472,10 @@ public class ColumnDataClassifier {
     }
     microAccuracy = microAccuracy / num;
     macroF1 = macroF1 / numClasses;
-    nf.setMinimumFractionDigits(5);
-    nf.setMaximumFractionDigits(5);
-    System.err.println("Micro-averaged accuracy/F1: " + nf.format(microAccuracy));
-    System.err.println("Macro-averaged F1: " + nf.format(macroF1));
+    NumberFormat nf2 = new DecimalFormat("0.00000");
+    System.err.println("Accuracy/micro-averaged F1: " + nf2.format(microAccuracy));
+    System.err.println("Macro-averaged F1: " + nf2.format(macroF1));
+    return new Pair<Double, Double>(microAccuracy, macroF1);
   }
 
   // These variables are only used by the private methods used by main() for displaying
@@ -503,7 +516,7 @@ public class ColumnDataClassifier {
       }
       results = builder.toString();
     } else {
-      results = clAnswer + '\t' + cntr.probabilityOf(clAnswer);
+      results = clAnswer + '\t' + nf.format(cntr.probabilityOf(clAnswer)) + '\t' + nf.format(cntr.probabilityOf(goldAnswer));
     }
 
     String line;
@@ -585,15 +598,26 @@ public class ColumnDataClassifier {
   }
 
 
-  private void readAndTestExamples(Classifier<String,String> cl, String filename) {
-    if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "test");
+  /** Test and evaluate classifier on examples with their String representation and gold classification available.
+   *
+   * @param cl The classifier to test
+   * @param test The dataset to test on
+   * @param lineInfos Duplicate List of the items to be classified, each an array of Strings (like a line of a TSV file)
+   * @return A Pair consisting of the accuracy (micro-averaged F1) and macro-averaged F1 for the dataset
+   */
+  private Pair<Double, Double> testExamples(Classifier<String, String> cl, GeneralDataset<String, String> test, List<String[]> lineInfos) {
+    System.err.print("Output format: ");
+    if (globalFlags.displayedColumn >= 0) {
+      System.err.printf("dataColumn%d\t", globalFlags.displayedColumn);
+    }
+    System.err.print("goldAnswer\t");
+    if (globalFlags.displayAllAnswers) {
+      System.err.println("[P(class) class]+ {sorted by probability}");
+    } else {
+      System.err.println("classifierAnswer\tP(clAnswer)\tP(goldAnswer)");
     }
 
     Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
-    Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(filename);
-    GeneralDataset<String,String> test = testInfo.first();
-    List<String[]> lineInfos = testInfo.second();
     for (int i = 0; i < test.size; i++) {
       String[] simpleLineInfo = lineInfos.get(i);
       Datum<String,String> d;
@@ -662,9 +686,8 @@ public class ColumnDataClassifier {
     if (globalFlags.printFeatures != null) {
       closeFeaturePrinter();
     }
-    writeResultsSummary(test.size, contingency, cl.labels());
+    return writeResultsSummary(test.size, contingency, cl.labels());
   }
-
 
 
   /**
@@ -1603,6 +1626,12 @@ public class ColumnDataClassifier {
           }
         }
         // System.err.println("Biased Hyperplane is " + biasedHyperplane);
+      } else if (key.equals("crossValidationFolds")) {
+        myFlags[col].crossValidationFolds = Integer.parseInt(val);
+      } else if (key.equals("shuffleTrainingData")) {
+        myFlags[col].shuffleTrainingData = Boolean.parseBoolean(val);
+      } else if (key.equals("shuffleSeed")) {
+        myFlags[col].shuffleSeed = Long.parseLong(val);
       } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
@@ -1648,13 +1677,23 @@ public class ColumnDataClassifier {
     System.err.println(StringUtils.toInvocationString("ColumnDataClassifier", args));
     // the constructor will load a classifier if one is specified with loadClassifier
     ColumnDataClassifier cdc = new ColumnDataClassifier(StringUtils.argsToProperties(args));
+    String testFile = cdc.globalFlags.testFile;
+
+    // check that we have roughly sensible options or else warn and exit
+    if ((testFile == null && Flags.serializeTo == null && cdc.globalFlags.crossValidationFolds < 2) ||
+            (Flags.trainFile == null && cdc.globalFlags.loadClassifier == null)) {
+      System.err.println("usage: java edu.stanford.nlp.classify.ColumnDataClassifier -prop propFile");
+      System.err.println("  and/or: -trainFile trainFile -testFile testFile|-serializeTo modelFile [-useNGrams|-sigma sigma|...]");
+      return; // ENDS PROCESSING
+    }
+
     if (cdc.globalFlags.loadClassifier == null) {
       // Otherwise we attempt to train one and exit if we don't succeed
       if ( ! cdc.trainClassifier()) {
         return;
       }
     }
-    String testFile = cdc.globalFlags.testFile;
+
     if (testFile != null) {
       cdc.testClassifier(testFile);
     }
@@ -1662,19 +1701,22 @@ public class ColumnDataClassifier {
 
 
   private boolean trainClassifier() throws IOException {
-    String trainFile = Flags.trainFile;
-    String testFile = globalFlags.testFile;
-    String serializeTo = Flags.serializeTo;
+    // build dataset of training data featurized
+    Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readAndReturnTrainingExamples(Flags.trainFile);
+    GeneralDataset<String,String> train = dataInfo.first();
+    List<String[]> lineInfos = dataInfo.second();
 
-    // if we are training the classifier now
-    if ((testFile == null && serializeTo == null) || trainFile == null) {
-      System.err.println("usage: java edu.stanford.nlp.classify.ColumnDataClassifier -prop propFile");
-      System.err.println("  and/or: -trainFile trainFile -testFile testFile|-serializeTo modelFile [-useNGrams|-sigma sigma|...]");
-      return false; // ENDS PROCESSING
+    // For things like cross validation, we may well need to sort data!  Data sets are often ordered by class.
+    if (globalFlags.shuffleTrainingData) {
+      long seed;
+      if (globalFlags.shuffleSeed != 0) {
+        seed = globalFlags.shuffleSeed;
+      } else {
+        seed = System.nanoTime();
+      }
+      train.shuffleWithSideInformation(seed, lineInfos);
     }
 
-    // build dataset of training data featurized
-    GeneralDataset<String,String> train = readTrainingExamples(trainFile);
     // print any binned value histograms
     for (int i = 0; i < flags.length; i++) {
       if (flags[i] != null && flags[i].binnedValuesCounter != null) {
@@ -1691,22 +1733,48 @@ public class ColumnDataClassifier {
     }
     // print the training data in SVMlight format if desired
     if (Flags.printSVMLightFormatTo != null) {
-      PrintWriter pw = new PrintWriter(IOUtils.getPrintWriter(Flags.printSVMLightFormatTo, Flags.encoding));
+      PrintWriter pw = IOUtils.getPrintWriter(Flags.printSVMLightFormatTo, Flags.encoding);
       train.printSVMLightFormat(pw);
       IOUtils.closeIgnoringExceptions(pw);
       train.featureIndex().saveToFilename(Flags.printSVMLightFormatTo + ".featureIndex");
       train.labelIndex().saveToFilename(Flags.printSVMLightFormatTo + ".labelIndex");
     }
 
+    if (globalFlags.crossValidationFolds > 1) {
+      crossValidate(train, lineInfos);
+    }
+
     if (globalFlags.exitAfterTrainingFeaturization) {
       return false; // ENDS PROCESSING
     }
+
     // build the classifier
     classifier = makeClassifier(train);
-    String classString = null;
+    printClassifier(classifier);
+
+    // serialize the classifier
+    String serializeTo = Flags.serializeTo;
+    if (serializeTo != null) {
+      System.err.println("Serializing classifier to " + serializeTo + "...");
+      //ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serializeTo)));
+      ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(IOUtils.getFileOutputStream(serializeTo)));
+      oos.writeObject(classifier);
+      // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
+      String testFile = globalFlags.testFile;
+      globalFlags.testFile = null;
+      oos.writeObject(flags);
+      globalFlags.testFile = testFile;
+      oos.close();
+      System.err.println("Done.");
+    }
+    return true;
+  }
+
+  private void printClassifier(Classifier classifier) {
+    String classString;
     if (classifier instanceof LinearClassifier<?,?>) {
       classString = ((LinearClassifier<?,?>)classifier).toString(globalFlags.printClassifier, globalFlags.printClassifierParam);
-    } else if (classifier instanceof LogisticClassifier<?,?>) {
+    } else {
       classString = classifier.toString();
     }
     if (Flags.printTo != null) {
@@ -1725,34 +1793,63 @@ public class ColumnDataClassifier {
       System.err.print("Built this classifier: ");
       System.err.println(classString);
     }
-
-    // serialize the classifier
-    if (serializeTo != null) {
-      System.err.println("Serializing classifier to " + serializeTo + "...");
-      //ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serializeTo)));
-      ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(IOUtils.getFileOutputStream(serializeTo)));
-      oos.writeObject(classifier);
-      // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
-      globalFlags.testFile = null;
-      oos.writeObject(flags);
-      globalFlags.testFile = testFile;
-      oos.close();
-      System.err.println("Done.");
-    }
-    return true;
   }
 
   private void testClassifier(String testFile) {
-    System.err.print("Output format: ");
-    if (globalFlags.displayedColumn >= 0) {
-      System.err.printf("dataColumn%d ", globalFlags.displayedColumn);
+    if (globalFlags.printFeatures != null) {
+      newFeaturePrinter(globalFlags.printFeatures, "test");
     }
-    System.err.println("goldAnswer classifierAnswer P(clAnswer) P(goldAnswer)");
 
-    readAndTestExamples(classifier, testFile);
+    Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(testFile);
+    GeneralDataset<String,String> test = testInfo.first();
+    List<String[]> lineInfos = testInfo.second();
+
+    testExamples(classifier, test, lineInfos);
     // ((LinearClassifier) classifier).dumpSorted();
   }
 
+  /** Run cross-validation on a dataset, and return accuracy and macro-F1 scores.
+   *  The number of folds is given by the crossValidationFolds property.
+   *
+   *  @param dataset The dataset of examples to cross-validate on.
+   *  @param lineInfos The String form of the items in the dataset. (Must be present.)
+   *  @return Accuracy and macro F1
+   */
+  public Pair<Double,Double> crossValidate(GeneralDataset<String,String> dataset, List<String[]> lineInfos) {
+    final int numFolds = globalFlags.crossValidationFolds;
+    double accuracySum = 0.0;
+    double macroF1Sum = 0.0;
+    for (int fold = 0; fold < numFolds; fold++) {
+      System.err.println();
+      System.err.println("### Fold " + fold);
+      Pair<GeneralDataset<String,String>,GeneralDataset<String,String>> split =
+              dataset.splitOutFold(fold, numFolds);
+      GeneralDataset<String,String> devTrain = split.first();
+      GeneralDataset<String,String> devTest = split.second();
+
+      Classifier<String,String> cl = makeClassifier(devTrain);
+      printClassifier(cl);
+
+      int normalFoldSize = lineInfos.size()/numFolds;
+      int start = normalFoldSize * fold;
+      int end = start + normalFoldSize;
+      if (fold == (numFolds - 1)) {
+        end = lineInfos.size();
+      }
+
+      List<String[]> devTestLineInfos = lineInfos.subList(start, end);
+      Pair<Double,Double> accuracies = testExamples(cl, devTest, devTestLineInfos);
+      accuracySum += accuracies.first();
+      macroF1Sum += accuracies.second();
+    }
+    double averageAccuracy = accuracySum / numFolds;
+    double averageMacroF1 = macroF1Sum / numFolds;
+    NumberFormat nf2 = new DecimalFormat("0.00000");
+    System.err.println("Average accuracy/micro-averaged F1: " + nf2.format(averageAccuracy));
+    System.err.println("Average macro-averaged F1: " + nf2.format(averageMacroF1));
+    System.err.println();
+    return new Pair<Double,Double>(averageAccuracy, averageMacroF1);
+  }
 
   static class Flags implements Serializable {
 
@@ -1858,8 +1955,8 @@ public class ColumnDataClassifier {
     double l1regmax = 500.0;
     double featureWeightThreshold = 0;
 
-    String testFile = null;
-    String loadClassifier = null;
+    String testFile = null;  // this one would be better off static (we avoid serializing it)
+    String loadClassifier = null;   // this one could also be static
 
     // these are static because we don't want them serialized
     static String trainFile = null;
@@ -1881,6 +1978,10 @@ public class ColumnDataClassifier {
     boolean useAllSplitWordTriples;
 
     boolean showTokenization = false;
+
+    int crossValidationFolds = -1;
+    boolean shuffleTrainingData = false;
+    long shuffleSeed = 0;
 
     @Override
     public String toString() {
