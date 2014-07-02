@@ -994,11 +994,16 @@ public class Redwood {
       return new IterableIterator<>(new Iterator<Runnable>() {
         @Override
         public boolean hasNext() {
-          return iter.hasNext();
+          synchronized (iter) {
+            return iter.hasNext();
+          }
         }
         @Override
         public synchronized Runnable next() {
-          final Runnable runnable = iter.next();
+          final Runnable runnable;
+          synchronized (iter) {
+            runnable = iter.next();
+          }
           // (don't flood the queu)
           while (numPending.get() > 100) {
             try { Thread.sleep(100); }
@@ -1031,8 +1036,10 @@ public class Redwood {
                 threadFinished = true;
                 //(signal end of threads)
                 int numStillPending = numPending.decrementAndGet();
-                if(numStillPending <= 0 && !iter.hasNext()){
-                  endThreads(title);
+                synchronized (iter) {
+                  if (numStillPending <= 0 && !iter.hasNext()) {
+                    endThreads(title);
+                  }
                 }
               } catch(Throwable t){
                 t.printStackTrace();
@@ -1045,7 +1052,9 @@ public class Redwood {
 
         @Override
         public void remove() {
-          iter.remove();
+          synchronized (iter) {
+            iter.remove();
+          }
         }
       });
     }
