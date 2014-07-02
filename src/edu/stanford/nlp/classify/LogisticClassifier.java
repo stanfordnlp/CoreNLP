@@ -265,9 +265,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, Serializable,
   }
 
   public double probabilityOf(Datum<L, F> example) {
-    if (example instanceof RVFDatum<?,?>) {
-      return probabilityOfRVFDatum((RVFDatum<L,F>)example);
-    }
+    if(example instanceof RVFDatum<?,?>)return probabilityOfRVFDatum((RVFDatum<L,F>)example);
     return probabilityOf(example.asFeatures(), example.label());
   }
 
@@ -276,8 +274,9 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, Serializable,
     return 1.0 / (1.0 + Math.exp(sign * scoreOf(features)));
   }
 
+  @Deprecated //use probabilityOf(Datum) instead.
   public double probabilityOf(RVFDatum<L, F> example) {
-    return probabilityOfRVFDatum(example);
+    return probabilityOf(example.asFeaturesCounter(), example.label());
   }
 
   private double probabilityOfRVFDatum(RVFDatum<L, F> example) {
@@ -380,6 +379,7 @@ public class LogisticClassifier<L, F> implements Classifier<L, F>, Serializable,
       String g = lc.classOf(f);
       System.out.println(g + '\t' + line);
     }
+
   }
 
 

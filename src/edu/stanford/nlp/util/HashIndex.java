@@ -276,7 +276,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
 
   public HashIndex(Index<? extends E> index) {
     this();
-    // TODO: this assumes that no index supports deletion
     addAll(index.objectsList());
   }
 
@@ -498,7 +497,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    // TODO: why not allow equality to non-HashIndex indices?
     if (!(o instanceof HashIndex)) return false;
     HashIndex hashIndex = (HashIndex) o;
     return indexes.equals(hashIndex.indexes) && objects.equals(hashIndex.objects);

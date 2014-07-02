@@ -573,7 +573,7 @@ DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\u
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
 LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
-FILENAME_EXT = bat|bmp|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip
+FILENAME_EXT = bat|bmp|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|xml|zip
 FILENAME = ({LETTER}|{DIGIT})+([.]({LETTER}|{DIGIT})+)*([.]{FILENAME_EXT})
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
@@ -622,11 +622,11 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 /* Ma. or Me. isn't included as too many errors, and most sources use Mass. etc. */
 /* Fed. is tricky.  Usually sentence end, but not before "Governor" or "Natl. Mtg. Assn." */
 /* Make some states case sensitive, since they're also reasonably common words */
-ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|[D]el|Fla|Ga|[I]ll|Ind|Kans?|Ky|[L]a|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|[P]a|Penn|Tenn|[T]ex|Va|Vt|[W]ash|Wisc?|Wyo
+ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
 /* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
-ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Bhd|Assn|Univ|Intl|Sys
-/* Don't include fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
+ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
+/* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
 ABNUM = tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
@@ -637,7 +637,7 @@ ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Esq
  *  If they're followed by an uppercase one, we assume there is also a
  *  sentence boundary.
  */
-ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq|Bldg)\.
+ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq)\.
 
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
@@ -646,7 +646,7 @@ ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K
 ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
 ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
-ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept
+ABCOMP2 = Invt|Elec|Natl|M[ft]g
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally. Ph is in there for Ph. D
@@ -706,7 +706,6 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 %%
 
 c[+][+]                     { return getNext(); }
-(c|f)#			    { return getNext(); }
 cannot                  { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
@@ -715,12 +714,6 @@ cannot                  { if (splitAssimilations) {
                         }
 'twas                   { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
-                          } else {
-                            return getNext();
-                          }
-                        }
-'tis                   { if (splitAssimilations) {
-                            yypushback(2) ; return getNext();
                           } else {
                             return getNext();
                           }

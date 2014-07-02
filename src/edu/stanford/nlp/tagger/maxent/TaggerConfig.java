@@ -285,10 +285,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     return getOutputOptionsContains("lemmatize");
   }
 
-  public boolean keepEmptySentences() {
-    return getOutputOptionsContains("keepEmptySentences");    
-  }
-
   public boolean getOutputOptionsContains(String sought) {
     String[] options = getOutputOptions();
     for (String option : options) {
@@ -548,8 +544,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     out.println("# outputFormat = " + OUTPUT_FORMAT);
     out.println();
 
-    out.println("# Output format options. Comma separated list.");
-    out.println("# currently \"lemmatize\" and \"keepEmptySentences\" are supported.");
+    out.println("# Output format options. Comma separated list, but");
+    out.println("# currently \"lemmatize\" is the only supported option.");
     out.println("# outputFormatOptions = " + OUTPUT_FORMAT_OPTIONS);
     out.println();
 

@@ -4,6 +4,7 @@ import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.*;
@@ -58,7 +59,7 @@ public class SemanticGraph implements Serializable {
    */
   private Collection<IndexedWord> roots;
 
-  private final DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
+  private DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
 
   public int edgeCount() {
     return graph.getNumEdges();
@@ -183,16 +184,8 @@ public class SemanticGraph implements Serializable {
     return graph.edgeIterable();
   }
 
-  public Iterator<SemanticGraphEdge> outgoingEdgeIterator(IndexedWord v) {
-    return graph.outgoingEdgeIterator(v);
-  }
-
   public Iterable<SemanticGraphEdge> outgoingEdgeIterable(IndexedWord v) {
     return graph.outgoingEdgeIterable(v);
-  }
-
-  public Iterator<SemanticGraphEdge> incomingEdgeIterator(IndexedWord v) {
-    return graph.incomingEdgeIterator(v);
   }
 
   public Iterable<SemanticGraphEdge> incomingEdgeIterable(IndexedWord v) {
@@ -907,35 +900,40 @@ public class SemanticGraph implements Serializable {
    * @return A sorted list of the vertices
    * @throws IllegalStateException if this graph is not a DAG
    */
-  public List<IndexedWord> topologicalSort() {
-    List<IndexedWord> result = Generics.newArrayList();
-    Set<IndexedWord> temporary = Generics.newHashSet();
-    Set<IndexedWord> permanent = Generics.newHashSet();
-    for (IndexedWord vertex : vertexSet()) {
-      if (!temporary.contains(vertex)) {
-        topologicalSortHelper(vertex, temporary, permanent, result);
+  public List<IndexedWord> topologicalSort() throws IllegalStateException {
+    LinkedList<IndexedWord> q =
+      new LinkedList<IndexedWord>(getVerticesWithoutParents());
+    Set<SemanticGraphEdge> remainingEdges = getEdgeSet();
+    List<IndexedWord> result = new ArrayList<IndexedWord>();
+    while (!q.isEmpty()) {
+      IndexedWord node = q.removeLast();
+      // System.err.println("Outputting node: " + node);
+      result.add(node);
+      for (SemanticGraphEdge e : outgoingEdgeIterable(node)) {
+        IndexedWord target = e.getTarget();
+        // System.err.println("Considering node: " + target);
+        remainingEdges.remove(e);
+        boolean hasInbound = false;
+        for (SemanticGraphEdge other : incomingEdgeIterable(target)) {
+          if (remainingEdges.contains(other)) {
+            hasInbound = true;
+            // System.err.println("Other inbound edge found: " + other);
+            break;
+          }
+        }
+        if (!hasInbound) {
+          q.addLast(target); // this guy can be put on the queue, because he has
+                             // no more outstanding parents!
+          // System.err.println("Adding to queue: " + target);
+        } else {
+          // System.err.println("Can't add to queue: " + target);
+        }
       }
     }
-    Collections.reverse(result);
+    if (result.size() != vertexSet().size())
+      throw new IllegalStateException("This graph has cycles. Topological sort not possible: " + result);
     return result;
   }
-
-  private void topologicalSortHelper(IndexedWord vertex, Set<IndexedWord> temporary, Set<IndexedWord> permanent, List<IndexedWord> result) {
-    temporary.add(vertex);
-    for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
-      IndexedWord target = edge.getTarget();
-      if (permanent.contains(target)) {
-        continue;
-      }
-      if (temporary.contains(target)) {
-        throw new IllegalStateException("This graph has cycles. Topological sort not possible: " + this.toString());
-      }
-      topologicalSortHelper(target, temporary, permanent, result);
-    }
-    result.add(vertex);
-    permanent.add(vertex);
-  }
-
 
   public boolean hasChild(IndexedWord vertex, GrammaticalRelation reln, String childLemma) {
     if (!vertexSet().contains(vertex)) {
@@ -1715,11 +1713,18 @@ public class SemanticGraph implements Serializable {
     this(dependencies, "", 0);
   }
 
+  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
+      int sentIndex) {
+    this(dependencies, docID, sentIndex, false);
+  }
+
   /**
    *
    *
    */
-  public SemanticGraph(Collection<TypedDependency> dependencies, String docID, int sentIndex) {
+  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
+      int sentIndex, boolean lemmatize) {
+    Morphology morphology = (lemmatize) ? new Morphology() : null;
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
     roots = Generics.newHashSet();
@@ -1729,16 +1734,30 @@ public class SemanticGraph implements Serializable {
       TreeGraphNode dep = d.dep();
       GrammaticalRelation reln = d.reln();
 
+      // attention: the Labels [gov|dep].label() contain the words and their
+      // indices!
+      // but the CoreLabels govLabel/depLabel throw away the index information
+      CoreLabel govLabel = new CoreLabel(gov.label());
+      CoreLabel depLabel = new CoreLabel(dep.label());
+
       if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
-        IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), gov.label());
-        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
-        // It is unnecessary to call addVertex, since addEdge will
-        // implicitly add vertices if needed
-        //addVertex(govVertex);
-        //addVertex(depVertex);
+        IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), govLabel);
+        govVertex.setTag(gov.highestNodeWithSameHead().headTagNode().value());
+        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
+        depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
+        if (lemmatize) {
+          govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
+          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
+        }
+        addVertex(govVertex);
+        addVertex(depVertex);
         addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
       } else { //it's the root and we add it
-        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
+        depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
+        if (lemmatize) {
+          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
+        }
 
         addVertex(depVertex);
         roots.add(depVertex);
@@ -1975,19 +1994,6 @@ public class SemanticGraph implements Serializable {
    */
   public Collection<TypedDependency> typedDependencies() {
     Collection<TypedDependency> dependencies = new ArrayList<TypedDependency>();
-    // FIXME: parts of the code (such as the dependencies) expect the
-    // TreeGraphNodes to be == equal, but that doesn't apply the way
-    // this method is written
-    TreeGraphNode root = null;
-    for (IndexedWord node : roots) {
-      if (root == null) {
-        IndexedWord rootLabel = new IndexedWord(node.docID(), node.sentIndex(), 0);
-        rootLabel.setValue("ROOT");
-        root = new TreeGraphNode(rootLabel);
-      }
-      TypedDependency dependency = new TypedDependency(ROOT, root, new TreeGraphNode(node));
-      dependencies.add(dependency);
-    }
     for (SemanticGraphEdge e : this.edgeIterable()){
       TreeGraphNode gov = new TreeGraphNode(e.getGovernor());
       TreeGraphNode dep = new TreeGraphNode(e.getDependent());

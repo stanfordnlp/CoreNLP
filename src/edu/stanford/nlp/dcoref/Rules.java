@@ -127,9 +127,8 @@ public class Rules {
   }
 
   public static boolean entityIsAcronym(Document document, CorefCluster mentionCluster, CorefCluster potentialAntecedent) {
-    int minId = Math.min(mentionCluster.clusterID, potentialAntecedent.clusterID);
-    int maxId = Math.max(mentionCluster.clusterID, potentialAntecedent.clusterID);
-    if(!document.acronymCache.contains(minId, maxId)) {
+    Pair<Integer, Integer> idPair = Pair.makePair(Math.min(mentionCluster.clusterID, potentialAntecedent.clusterID), Math.max(mentionCluster.clusterID, potentialAntecedent.clusterID));
+    if(!document.acronymCache.containsKey(idPair)) {
       boolean isAcronym = false;
       for(Mention m : mentionCluster.corefMentions){
         if(m.isPronominal()) continue;
@@ -137,9 +136,9 @@ public class Rules {
           if(isAcronym(m.originalSpan, ant.originalSpan)) isAcronym = true;
         }
       }
-      document.acronymCache.put(minId, maxId, isAcronym);
+      document.acronymCache.put(idPair, isAcronym);
     }
-    return document.acronymCache.get(minId, maxId);
+    return document.acronymCache.get(idPair);
   }
 
   public static boolean isAcronym(List<CoreLabel> first, List<CoreLabel> second) {

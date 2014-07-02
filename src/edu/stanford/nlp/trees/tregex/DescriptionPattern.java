@@ -39,6 +39,11 @@ class DescriptionPattern extends TregexPattern {
   // to make it so.
   private TregexPattern child;
   // also conceptually final, but it depends on the child
+  /**
+   * whether or not this node can change variables.  helps determine
+   * which nodes to change when backtracking
+   */
+  private boolean changesVariables;
   private final List<Pair<Integer,String>> variableGroups; // specifies the groups in a regex that are captured as matcher-global string variables
 
   private final Function<String, String> basicCatFunction;
@@ -267,6 +272,9 @@ class DescriptionPattern extends TregexPattern {
 
   public void setChild(TregexPattern n) {
     child = n;
+    changesVariables = ((descriptionMode != null || isLink) && name != null);
+    changesVariables = (changesVariables ||
+                        (child != null && child.getChangesVariables()));
   }
 
   @Override
@@ -276,6 +284,11 @@ class DescriptionPattern extends TregexPattern {
     } else {
       return Collections.singletonList(child);
     }
+  }
+
+  @Override
+  boolean getChangesVariables() {
+    return changesVariables;
   }
 
   @Override
@@ -315,9 +328,7 @@ class DescriptionPattern extends TregexPattern {
                               HeadFinder headFinder) {
       super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
       myNode = n;
-      // no need to reset anything - everything starts out as null or false.  
-      // lazy initialization of children to save time.
-      // resetChildIter();
+      resetChildIter();
     }
 
     @Override
@@ -343,6 +354,11 @@ class DescriptionPattern extends TregexPattern {
       } else {
         childMatcher.resetChildIter(nextTreeNodeMatchCandidate);
       }
+    }
+
+    @Override
+    boolean getChangesVariables() {
+      return myNode.getChangesVariables();
     }
 
     /* goes to the next node in the tree that is a successful match to my description pattern.
@@ -479,7 +495,7 @@ class DescriptionPattern extends TregexPattern {
     }
 
     private void removeNamedNodes() {
-      if ((myNode.descriptionMode != null || myNode.isLink) &&
+      if ((myNode.descPattern != null || myNode.isLink) &&
           myNode.name != null) {
         namesToNodes.remove(myNode.name);
       }

@@ -29,7 +29,6 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   public static int GROUP_AFTER_MATCH = Integer.MIN_VALUE+1;   // Special match groups (after match)
 
   public double score();
-  public double priority();
 
   /**
    * Returns the original sequence the match was performed on.
@@ -275,26 +274,12 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
     }
   }
 
-  public final static Comparator<MatchResult> PRIORITY_COMPARATOR = new Comparator<MatchResult>() {
-    public int compare(MatchResult e1, MatchResult e2) {
-      double s1 = 0;
-      if (e1 instanceof SequenceMatchResult) { s1 =  ((SequenceMatchResult) e1).priority(); }
-      double s2 = 0;
-      if (e2 instanceof SequenceMatchResult) { s2 =  ((SequenceMatchResult) e2).priority(); }
-      if (s1 == s2) {
-        return 0;
-      } else {
-        return (s1 > s2)? -1:1;
-      }
-    }
-  };
-
   public final static Comparator<MatchResult> SCORE_COMPARATOR = new Comparator<MatchResult>() {
     public int compare(MatchResult e1, MatchResult e2) {
       double s1 = 0;
-      if (e1 instanceof SequenceMatchResult) { s1 =  ((SequenceMatchResult) e1).score(); }
+      if (e1 instanceof SequenceMatchResult) { s1 =  ((SequenceMatchResult) e1).score(); };
       double s2 = 0;
-      if (e2 instanceof SequenceMatchResult) { s2 =  ((SequenceMatchResult) e2).score(); }
+      if (e2 instanceof SequenceMatchResult) { s2 =  ((SequenceMatchResult) e2).score(); };
       if (s1 == s2) {
         return 0;
       } else {
@@ -307,9 +292,9 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
     new Comparator<MatchResult>() {
     public int compare(MatchResult e1, MatchResult e2) {
       int o1 = 0;
-      if (e1 instanceof SequenceMatchResult) {o1 =  ((SequenceMatchResult) e1).getOrder(); }
+      if (e1 instanceof SequenceMatchResult) {o1 =  ((SequenceMatchResult) e1).getOrder(); };
       int o2 = 0;
-      if (e2 instanceof SequenceMatchResult) {o2 =  ((SequenceMatchResult) e2).getOrder(); }
+      if (e2 instanceof SequenceMatchResult) {o2 =  ((SequenceMatchResult) e2).getOrder(); };
       if (o1 == o2) {
         return 0;
       } else {
@@ -351,21 +336,13 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
 
   // Compares two match results.
   // Use to order match results by:
-  //   priority (highest first),
-  //    score (highest first),
+   //   score (highest first)
   //    length (longest first),
   //       and then beginning token offset (smaller offset first)
   //    original order (smaller first)
-  public final static Comparator<MatchResult> PRIORITY_SCORE_LENGTH_ORDER_OFFSET_COMPARATOR =
-          Comparators.chain(PRIORITY_COMPARATOR, SCORE_COMPARATOR, LENGTH_COMPARATOR, ORDER_COMPARATOR, OFFSET_COMPARATOR);
-  public final static Comparator<? super MatchResult> DEFAULT_COMPARATOR = PRIORITY_SCORE_LENGTH_ORDER_OFFSET_COMPARATOR;
-  public final static Function<MatchResult, Double> SCORER = new Function<MatchResult, Double>() {
-    @Override
-    public Double apply(MatchResult in) {
-      if (in instanceof SequenceMatchResult) { return  ((SequenceMatchResult) in).score(); }
-      else return 0.0;
-    }
-  };
+  public final static Comparator<MatchResult> SCORE_LENGTH_ORDER_OFFSET_COMPARATOR =
+          Comparators.chain(SCORE_COMPARATOR, LENGTH_COMPARATOR, ORDER_COMPARATOR, OFFSET_COMPARATOR);
+  public final static Comparator<? super MatchResult> DEFAULT_COMPARATOR = SCORE_LENGTH_ORDER_OFFSET_COMPARATOR;
 
   /**
    * Information about a matched group

@@ -15,9 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.IterableIterator;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -78,7 +76,7 @@ public class Redwood {
    * The stack of track titles, for consistency checking
    * the endTrack() call
    */
-  private static final Stack<String> titleStack = new Stack<String>();
+  private static Stack<String> titleStack = new Stack<String>();
   /**
    * Signals that no more log messages should be accepted by Redwood
    */
@@ -97,7 +95,7 @@ public class Redwood {
    * Threads which have something they wish to log, but do not yet
    * have control of Redwood
    */
-  private static final Queue<Long> threadsWaiting = new LinkedList<Long>();
+  private static Queue<Long> threadsWaiting = new LinkedList<Long>();
   /**
    * Indicator that messages are coming from multiple threads
    */
@@ -106,9 +104,7 @@ public class Redwood {
   /**
    * Synchronization
    */
-  private static final ReentrantLock control = new ReentrantLock();
-
-  private Redwood() {} // static class
+  private static ReentrantLock control = new ReentrantLock();
 
   /*
       ---------------------------------------------------------
@@ -149,9 +145,9 @@ public class Redwood {
     }
     //(perform action)
     attemptThreadControlThreadsafe(threadId);
-    if(threadId == currentThread){
-      r.run();
-    } else {
+    if(threadId == currentThread){ 
+      r.run(); 
+    } else { 
       queueTask(threadId, r);
     }
     //(release lock)
@@ -292,7 +288,6 @@ public class Redwood {
     if(isThreaded){
       //(case: multithreaded)
       final Runnable log = new Runnable(){
-        @Override
         public void run(){
           assert !isThreaded || control.isHeldByCurrentThread();
           Record toPass = new Record(content,tags,depth,timestamp);
@@ -331,7 +326,6 @@ public class Redwood {
     System.arraycopy(args,0,tags,0,len);
     //--Create Task
     final Runnable startTrack = new Runnable(){
-      @Override
       public void run(){
         assert !isThreaded || control.isHeldByCurrentThread();
         Record toPass = new Record(content,tags,depth,timestamp);
@@ -351,7 +345,7 @@ public class Redwood {
       startTrack.run();
     }
   }
-
+  
   /**
    * Helper method to start a track on the FORCE channel.
    * @param name The track name to print
@@ -359,7 +353,7 @@ public class Redwood {
   public static void forceTrack(Object name) {
     startTrack(FORCE, name);
   }
-
+  
   /**
    * Helper method to start an anonymous track on the FORCE channel.
    */
@@ -376,7 +370,6 @@ public class Redwood {
     //--Make Task
     final long timestamp = System.currentTimeMillis();
     Runnable endTrack = new Runnable(){
-      @Override
       public void run(){
         assert !isThreaded || control.isHeldByCurrentThread();
         String expected = titleStack.pop();
@@ -432,7 +425,6 @@ public class Redwood {
     //--Create Task
     final long threadId = Thread.currentThread().getId();
     Runnable finish = new Runnable(){
-      @Override
       public void run(){
         releaseThreadControl(threadId);
       }
@@ -492,8 +484,8 @@ public class Redwood {
       control.unlock();
     }
     //(clean up)
-    for(Map.Entry<Long, Queue<Runnable>> longQueueEntry : threadedLogQueue.entrySet()){
-      assert longQueueEntry.getValue().isEmpty();
+    for(long threadId : threadedLogQueue.keySet()){
+      assert threadedLogQueue.get(threadId).isEmpty();
     }
     assert threadsWaiting.isEmpty();
     assert currentThread == -1L;
@@ -503,7 +495,7 @@ public class Redwood {
   /**
    * Create an object representing a group of channels.
    * {@link RedwoodChannels} contains a more complete description.
-   *
+   * 
    * @see RedwoodChannels
    */
   public static RedwoodChannels channels(Object... channelNames) {
@@ -609,17 +601,12 @@ public class Redwood {
    */
   protected static class RecordHandlerTree implements Iterable<LogRecordHandler>{
     // -- Overhead --
-    private final boolean isRoot;
-    private final LogRecordHandler head;
-    private final List<RecordHandlerTree> children = new ArrayList<RecordHandlerTree>();
+    private boolean isRoot = false;
+    private LogRecordHandler head;
+    private ArrayList<RecordHandlerTree> children = new ArrayList<RecordHandlerTree>();
 
-    public RecordHandlerTree() {
-      isRoot = true;
-      head = null;
-    }
-
-    public RecordHandlerTree(LogRecordHandler head) {
-      this.isRoot = false;
+    public RecordHandlerTree(){ isRoot = true; }
+    public RecordHandlerTree(LogRecordHandler head){
       this.head = head;
     }
 
@@ -669,17 +656,15 @@ public class Redwood {
       }
       return null;
     }
-    @Override
     public Iterator<LogRecordHandler> iterator() {
       return new Iterator<LogRecordHandler>(){
         // -- Variables
         private boolean seenHead = isRoot;
-        private final Iterator<RecordHandlerTree> childrenIter = children();
-        private final RecordHandlerTree childOnPrix = childrenIter.hasNext() ? childrenIter.next() : null;
+        private Iterator<RecordHandlerTree> childrenIter = children();
+        private RecordHandlerTree childOnPrix = childrenIter.hasNext() ? childrenIter.next() : null;
         private Iterator<LogRecordHandler> childIter = childOnPrix == null ? null : childOnPrix.iterator();
         private LogRecordHandler lastReturned = null;
         // -- HasNext
-        @Override
         public boolean hasNext() {
           while(childIter != null && !childIter.hasNext()){
             if(!childrenIter.hasNext()) {
@@ -691,14 +676,12 @@ public class Redwood {
           return !seenHead || (childIter != null && childIter.hasNext());
         }
         // -- Next
-        @Override
         public LogRecordHandler next() {
           if(!seenHead){ seenHead = true; return head(); }
           lastReturned = childIter.next();
           return lastReturned;
         }
         // -- Remove
-        @Override
         public void remove() {
           if(!seenHead){ throw new IllegalStateException("INTERNAL: this shouldn't happen..."); }
           if(lastReturned == null){ throw new IllegalStateException("Called remove() before any elements returned"); }
@@ -713,7 +696,7 @@ public class Redwood {
       };
     }
 
-    private static List<Record> append(List<Record> lst, Record toAppend){
+    private List<Record> append(List<Record> lst, Record toAppend){
       if(lst == LogRecordHandler.EMPTY){
         lst = new ArrayList<Record>();
       }
@@ -802,7 +785,7 @@ public class Redwood {
    * to eventually display the enclosed message.
    */
   public static class Record {
-
+ 
     //(filled in at construction)
     public final Object content;
     private final Object[] channels;
@@ -835,7 +818,6 @@ public class Redwood {
       //(sort flags)
       if(!channelsSorted && channels.length > 1){
         Arrays.sort(channels, new Comparator<Object>() {
-          @Override
           public int compare(Object a, Object b) {
             if (a == FORCE) {
               return -1;
@@ -864,7 +846,7 @@ public class Redwood {
      * @return A sorted list of channels
      */
     public Object[] channels(){ sort(); return this.channels; }
-
+    
     @Override
     public String toString() {
       return "Record [content=" + content + ", depth=" + depth
@@ -913,7 +895,7 @@ public class Redwood {
     /** {@inheritDoc} */
     @Override
     public void print(Object[] channels, String line) {
-      printWriter.write(line == null ? "null" : line);
+      printWriter.write(line);
       printWriter.flush();
     }
   }
@@ -925,9 +907,6 @@ public class Redwood {
    */
   @SuppressWarnings("UnusedDeclaration")
   public static class Util {
-
-    private Util() {} // static methods
-
     private static Object[] revConcat(Object[] B, Object... A) {
       Object[] C = new Object[A.length+B.length];
       System.arraycopy(A, 0, C, 0, A.length);
@@ -988,7 +967,7 @@ public class Redwood {
     public static void endThreads(String check){ Redwood.endThreads(check); }
 
     public static RedwoodChannels channels(Object... channels) { return new RedwoodChannels(channels); }
-
+    
     /**
      * Wrap a collection of threads (Runnables) to be logged by Redwood.
      * Each thread will be logged as a continuous chunk; concurrent threads will be queued
@@ -1003,83 +982,53 @@ public class Redwood {
      * @param runnables The Runnables representing the tasks being run, without the Redwood overhead
      * @return A new collection of Runnables with the Redwood overhead taken care of
      */
-    public static Iterable<Runnable> thread(final String title, Iterable<Runnable> runnables){
+    public static ArrayList<Runnable> thread(final String title, Iterable<Runnable> runnables){
       //--Preparation
       //(variables)
       final AtomicBoolean haveStarted = new AtomicBoolean(false);
       final ReentrantLock metaInfoLock = new ReentrantLock();
       final AtomicInteger numPending = new AtomicInteger(0);
-      final Iterator<Runnable> iter = runnables.iterator();
       //--Create Runnables
-      return new IterableIterator<Runnable>(new Iterator<Runnable>() {
-        @Override
-        public boolean hasNext() {
-          synchronized (iter) {
-            return iter.hasNext();
-          }
-        }
-        @Override
-        public synchronized Runnable next() {
-          final Runnable runnable;
-          synchronized (iter) {
-            runnable = iter.next();
-          }
-          // (don't flood the queu)
-          while (numPending.get() > 100) {
-            try { Thread.sleep(100); }
-            catch (InterruptedException e) { }
-          }
-          numPending.incrementAndGet();
-          // (add the job)
-          Runnable toReturn = new Runnable(){
-            public void run(){
-              boolean threadFinished = false;
-              try{
-                //(signal start of threads)
-                metaInfoLock.lock();
-                if(!haveStarted.getAndSet(true)){
-                  startThreads(title); //<--this must be a blocking operation
-                }
-                metaInfoLock.unlock();
-                //(run runnable)
-                try{
-                  runnable.run();
-                } catch (Exception e){
-                  e.printStackTrace();
-                  System.exit(1);
-                } catch (AssertionError e) {
-                  e.printStackTrace();
-                  System.exit(1);
-                }
-                //(signal end of thread)
-                finishThread();
-                threadFinished = true;
-                //(signal end of threads)
-                int numStillPending = numPending.decrementAndGet();
-                synchronized (iter) {
-                  if (numStillPending <= 0 && !iter.hasNext()) {
-                    endThreads(title);
-                  }
-                }
-              } catch(Throwable t){
-                t.printStackTrace();
-                if (!threadFinished) { finishThread(); }
+      ArrayList<Runnable> rtn = new ArrayList<Runnable>();
+      for(final Runnable runnable : runnables){
+        rtn.add(new Runnable(){
+          public void run(){
+            try{
+              //(signal start of threads)
+              metaInfoLock.lock();
+              if(!haveStarted.getAndSet(true)){
+                startThreads(title); //<--this must be a blocking operation
               }
+              metaInfoLock.unlock();
+              //(run runnable)
+              try{
+                runnable.run();
+              } catch (Exception e){
+                e.printStackTrace();
+                System.exit(1);
+              } catch (AssertionError e) {
+                e.printStackTrace();
+                System.exit(1);
+              }
+              //(signal end of thread)
+              finishThread();
+              //(signal end of threads)
+              int numStillPending = numPending.decrementAndGet();
+              if(numStillPending <= 0){
+                endThreads(title);
+              }
+            } catch(Throwable t){
+              t.printStackTrace();
+              System.exit(1);
             }
-          };
-          return toReturn;
-        }
-
-        @Override
-        public void remove() {
-          synchronized (iter) {
-            iter.remove();
           }
-        }
-      });
+        });
+        numPending.incrementAndGet();
+      }
+      //--Return
+      return rtn;
     }
-
-    public static Iterable<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
+    public static ArrayList<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
 
     /**
      * Thread a collection of runnables, and run them via a java Executor.
@@ -1092,7 +1041,7 @@ public class Redwood {
      */
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
       // (short circuit if single thread)
-      if (numThreads <= 1 || isThreaded || (runnables instanceof Collection && ((Collection<Runnable>) runnables).size() <= 1)) {
+      if (numThreads <= 1 || isThreaded) {
         startTrack( "Threads (" + title + ")" );
         for (Runnable toRun : runnables) { toRun.run(); }
         endTrack( "Threads (" + title + ")" );
@@ -1118,7 +1067,7 @@ public class Redwood {
       threadAndRun(""+numThreads, runnables, numThreads);
     }
     public static void threadAndRun(Iterable<Runnable> runnables){
-      threadAndRun(runnables, Execution.threads);
+      threadAndRun(runnables,Runtime.getRuntime().availableProcessors());
     }
 
     /**
@@ -1134,21 +1083,21 @@ public class Redwood {
       }
     }
 
-    public static final Style BOLD      = Style.BOLD;
-    public static final Style DIM       = Style.DIM;
-    public static final Style ITALIC    = Style.ITALIC;
-    public static final Style UNDERLINE = Style.UNDERLINE;
-    public static final Style BLINK     = Style.BLINK;
-    public static final Style CROSS_OUT = Style.CROSS_OUT;
+    public static Style BOLD      = Style.BOLD;
+    public static Style DIM       = Style.DIM;
+    public static Style ITALIC    = Style.ITALIC;
+    public static Style UNDERLINE = Style.UNDERLINE;
+    public static Style BLINK     = Style.BLINK;
+    public static Style CROSS_OUT = Style.CROSS_OUT;
 
-    public static final Color BLACK   = Color.BLACK;
-    public static final Color RED     = Color.RED;
-    public static final Color GREEN   = Color.GREEN;
-    public static final Color YELLOW  = Color.YELLOW;
-    public static final Color BLUE    = Color.BLUE;
-    public static final Color MAGENTA = Color.MAGENTA;
-    public static final Color CYAN    = Color.CYAN;
-    public static final Color WHITE   = Color.WHITE;
+    public static Color BLACK   = Color.BLACK;
+    public static Color RED     = Color.RED;
+    public static Color GREEN   = Color.GREEN;
+    public static Color YELLOW  = Color.YELLOW;
+    public static Color BLUE    = Color.BLUE;
+    public static Color MAGENTA = Color.MAGENTA;
+    public static Color CYAN    = Color.CYAN;
+    public static Color WHITE   = Color.WHITE;
   }
 
   /**
@@ -1157,13 +1106,13 @@ public class Redwood {
    * {@link RedwoodChannels} have log and logf methods. Unlike Redwood.log and
    * Redwood.logf, these do not take channel names since those are specified
    * inside {@link RedwoodChannels}.
-   *
+   * 
    * Required if you want to use logf with a channel. This follows the
    * Builder Pattern so Redwood.channels("chanA", "chanB").log("message") is equivalent to
    * Redwood.channels("chanA").channels("chanB").log("message")
    */
   public static class RedwoodChannels {
-    private final Object[] channelNames;
+    private Object[] channelNames;
 
     public RedwoodChannels(Object... channelNames) {
       this.channelNames = channelNames;
@@ -1183,7 +1132,7 @@ public class Redwood {
       //(create channels)
       return new RedwoodChannels(result);
     }
-
+    
     /**
      * Log a message to the channels specified in this RedwoodChannels object.
      * @param obj The object to log
@@ -1203,7 +1152,7 @@ public class Redwood {
     public void logf(String format, Object... args) {
       log(new Formatter().format(format, args));
     }
-
+    
     /**
      * PrettyLog an object using these channels.  A default description will be created
      * based on the type of obj.
@@ -1224,7 +1173,7 @@ public class Redwood {
     public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
     public void fatal(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
   }
-
+  
    /**
    * Standard channels; enum for the sake of efficiency
    */
@@ -1261,7 +1210,6 @@ public class Redwood {
     for(int i=0; i<1000; i++){
       final int fI = i;
       tasks.add(new Runnable(){
-        @Override
         public void run(){
           startTrack("Runnable " + fI);
           log(Thread.currentThread().getId());
@@ -1289,7 +1237,7 @@ public class Redwood {
     }
     endTrack("Wrapper");
     System.exit(1);
-
+    
     forceTrack("Track 1");
     log("tag", ERR, "hello world");
     startTrack("Hidden");
@@ -1395,7 +1343,6 @@ public class Redwood {
     for(int i=0; i<50; i++){
       final int theI = i;
       exec.execute(new Runnable(){
-        @Override
         public void run() {
           startTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
           for(int time=0; time<5; time++){
