@@ -128,7 +128,7 @@ public class EntityMention extends ExtractionObject {
     // have the same head span, the same type/subtype, and the same text.
     // We need this for scoring NER, and in various places in KBP
     //
-    if((sentence == otherEnt.sentence || sentence.equals(otherEnt.sentence)) && textEquals(otherEnt) && labelEquals(otherEnt, useSubType)){
+    if(sentence.get(CoreAnnotations.TextAnnotation.class).equals(otherEnt.sentence.get(CoreAnnotations.TextAnnotation.class)) && textEquals(otherEnt) && labelEquals(otherEnt, useSubType)){
       return true;
     }
     /*

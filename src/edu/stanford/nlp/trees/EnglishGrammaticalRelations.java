@@ -495,10 +495,20 @@ public class EnglishGrammaticalRelations {
           "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !< (PP <: IN|TO) $-- (NP !< /^-NONE-$/))",
 
           // matches direct object in relative clauses with relative pronoun "I saw the book that you bought". Seems okay. If this is changed, also change the pattern for "rel"
+          // TODO: this can occasionally produce incorrect dependencies, such as the sentence 
+          // "with the way which his split-fingered fastball is behaving"
+          // eg take a tree where the verb doesn't have an object
           "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN|TO) !< (S < (VP < TO))))",
 
-          // matches direct object for long dependencies in relative clause without explicit relative pronouns
-          "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target",
+          // // matches direct object for long dependencies in relative clause without explicit relative pronouns
+          // "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " + 
+          //   // avoid conflicts with rcmod.  TODO: we could look for
+          //   // empty nodes in this kind of structure and use that to
+          //   // find dobj, tmod, advmod, etc.  won't help the parser,
+          //   // of course, but will help when converting a treebank
+          //   // which contains empties
+          //   // Example: "with the way his split-fingered fastball is behaving"
+          //   "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
 
           // If there was an NP between the WHNP and the ADJP, we want
           // that NP to have the nsubj relation, and the WHNP is either
@@ -582,8 +592,6 @@ public class EnglishGrammaticalRelations {
           "(PP <: IN|TO) >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
           "(PP <: IN|TO) $- (NP $-- (VBZ|VBD) !$++ VP) >+(SQ) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/)",
 
-          // to deal with preposition stranding in relative clause (works well but doesn't preserve the tree structure!)
-          "(PP <- IN|TO) >+(@VP|S|SINV|SBAR) (SBAR !< (WHPP|WHNP) < (S < (NP $+ (VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) !<+(VP) NP !< SBAR ))) $-- NP > NP=target)",
           "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
           //"PP < (CC < less) < NP",
           "@PP < CC  < @NP=target !< @IN|TO|VBG|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
@@ -679,7 +687,7 @@ public class EnglishGrammaticalRelations {
           "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
           // to find "...", he said or "...?" he asked.
           // We eliminate conflicts with conj by looking for CC
-          "S|SINV < (S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN))",
+          "@S|SINV < (@S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN)) !< (@S !== =target $++ =target !$++ @CC|CONJP)",
           "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
           "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
           // That ... he know
@@ -836,13 +844,19 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "advcl", "adverbial clause modifier",
-        AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ", tregexCompiler,
+        AdvClauseModifierGRAnnotation.class, MODIFIER, "VP|S|SQ|SINV|SBARQ|NP", tregexCompiler,
         new String[] {
           // first case includes regular in order to purpose clauses
           // second disjunct matches inverted "had he investigated" cases
           // 3rd case is "so that" purpose clauses and one way of parsing "now that"
           // 4th case is another way of parsing "now that"
-          "VP < (@SBAR=target [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] )",
+          //
+          // the <= relation lets us use the same tregex for either
+          // current node or one of its children matching the rest of
+          // the pattern.  this can be an issue in sentences with sbar
+          // conjunctions.  for example, "Call if you have questions
+          // or if I can be of any help"
+          "VP < (@SBAR=target <= (@SBAR [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ))",
           "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
           // to get "rather than"
           "S|SQ|SINV < (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?$).*$/)",
@@ -858,6 +872,18 @@ public class EnglishGrammaticalRelations {
           "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
           // "VP > (VP < (VB|AUX < be)) < (S=target !$- /^,$/ < (VP < TO|VBG) !$-- NP)", // part of former purpcl [cdm 2010: this pattern was added by me in 2006, but it is just bad!]
+
+          // // matches direct object for long dependencies in relative clause without explicit relative pronouns
+          // "SBAR !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !$-- CC $-- NP > NP=target " + 
+          //   // avoid conflicts with rcmod.  TODO: we could look for
+          //   // empty nodes in this kind of structure and use that to
+          //   // find dobj, tmod, advmod, etc.  won't help the parser,
+          //   // of course, but will help when converting a treebank
+          //   // which contains empties
+          //   // Example: "with the way his split-fingered fastball is behaving"
+          //   "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))", 
+          "NP < (NP $++ (SBAR=target < (IN < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))"
+
 
         });
   public static class AdvClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
@@ -908,15 +934,13 @@ public class EnglishGrammaticalRelations {
           // useful dependencies rather than introduce some wrong
           // dependencies.
           "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML > @NP|WHNP",
-          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NLP > @NP|WHNP",
-          // this next pattern is restricted to where and why because
-          // "when" is usually incorrectly parsed: temporal clauses
-          // are put inside the NP; 2nd is for case of relative
-          // clauses with no relativizer (it doesn't distinguish
-          // whether actually gapped).
+          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NML > @NP|WHNP",
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML > @NP",
+          // for case of relative clauses with no relativizer
+          // (it doesn't distinguish whether actually gapped).
           "@NP|WHNP < RRC=target <# NP|WHNP|NML|DT|S",
           "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
+          "NP < (NP $++ (SBAR=target !< (IN < /^(?i:than|that|whether)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))"
         });
   public static class RelativeClauseModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1559,7 +1583,7 @@ public class EnglishGrammaticalRelations {
           // "But even if he agrees -- which he won't -- etc etc"
           "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
           // two juxtaposed sentences; common in web materials (but this also matches quite a few wsj things)
-          "@S < (@S $.. @S=target) !< @CC|CONJP",
+          "@S < (@S|SBARQ $++ @S|SBARQ=target !$++ @CC|CONJP)",
           "@S|VP < (/^:$/ $-- /^V/ $+ @NP=target) !< @CONJP|CC", // sometimes CC cases are right node raising, etc.
         });
   public static class ParataxisGRAnnotation extends GrammaticalRelationAnnotation { }
