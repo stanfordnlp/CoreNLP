@@ -103,7 +103,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private int numWords;
 
   /** Maintains the shared pool of annotators */
-  protected static AnnotatorPool pool = null;
+  private static AnnotatorPool pool = null;
 
   private Properties properties;
 
@@ -126,7 +126,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   public StanfordCoreNLP(Properties props, boolean enforceRequirements)  {
-    construct(props, enforceRequirements, getAnnotatorImplementations());
+    construct(props, enforceRequirements);
   }
 
   /**
@@ -142,32 +142,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     if (props == null) {
       throw new RuntimeIOException("ERROR: cannot find properties file \"" + propsFileNamePrefix + "\" in the classpath!");
     }
-    construct(props, enforceRequirements, getAnnotatorImplementations());
-  }
-
-  //
-  // @Override-able methods to change pipeline behavior
-  //
-
-  /**
-   * <p>
-   *   Get the implementation of each relevant annotator in the pipeline.
-   *   The primary use of this method is to be overwritten by subclasses of StanfordCoreNLP
-   *   to call different annotators that obey the exact same contract as the default
-   *   annotator.
-   * </p>
-   *
-   * <p>
-   *   The canonical use case for this is as an implementation of the Curator server,
-   *   where the annotators make server calls rather than calling each annotator locally.
-   * </p>
-   *
-   * @return A class which specifies the actual implementation of each of the annotators called
-   *         when creating the annotator pool. The cannonical annotators are defaulted to in
-   *         {@link edu.stanford.nlp.pipeline.AnnotatorImplementations}.
-   */
-  protected AnnotatorImplementations getAnnotatorImplementations() {
-    return new AnnotatorImplementations();
+    construct(props, enforceRequirements);
   }
 
   //
@@ -242,11 +217,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return properties.getProperty("encoding", "UTF-8");
   }
 
-  public boolean getPrintSingletons() {
-    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false); 
-  }
-   
-
   public static boolean isXMLOutputPresent() {
     try {
       Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
@@ -262,7 +232,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   // AnnotatorPool construction support
   //
 
-  private void construct(Properties props, boolean enforceRequirements, AnnotatorImplementations annotatorImplementations) {
+  private void construct(Properties props, boolean enforceRequirements) {
     this.numWords = 0;
     this.constituentTreePrinter = new TreePrint("penn");
     this.dependencyTreePrinter = new TreePrint("typedDependenciesCollapsed");
@@ -278,7 +248,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       props = fromClassPath;
     }
     this.properties = props;
-    AnnotatorPool pool = getDefaultAnnotatorPool(props, annotatorImplementations);
+    AnnotatorPool pool = getDefaultAnnotatorPool(props);
 
     // now construct the annotators from the given properties in the given order
     List<String> annoNames = Arrays.asList(getRequiredProperty(props, "annotators").split("[, \t]+"));
@@ -321,14 +291,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool = null;
   }
 
-  /**
-   * Construct the default annotator pool from the passed properties, and overwriting annotations which have changed
-   * since the last
-   * @param inputProps
-   * @param annotatorImplementation
-   * @return
-   */
-  protected synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps, final AnnotatorImplementations annotatorImplementation) {
+  private static synchronized AnnotatorPool getDefaultAnnotatorPool(final Properties inputProps) {
     // if the pool already exists reuse!
     if(pool == null) {
       // first time we get here
@@ -339,13 +302,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     // tokenizer: breaks text into a sequence of tokens
     // this is required for all following annotators!
     //
-    pool.register(STANFORD_TOKENIZE, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_TOKENIZE, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
                           "false"))) {
-          return annotatorImplementation.whitespaceTokenizer(properties);
+          return new WhitespaceTokenizerAnnotator(properties);
         } else {
           String options = properties.getProperty("tokenize.options", PTBTokenizerAnnotator.DEFAULT_OPTIONS);
           boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
@@ -358,12 +321,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           if (keepNewline) {
             options = "tokenizeNLs," + options;
           }
-          return annotatorImplementation.ptbTokenizer(properties, false, options);
+          return new PTBTokenizerAnnotator(false, options);
         }
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         StringBuilder os = new StringBuilder();
         os.append("tokenize.whitespace:" +
@@ -381,14 +344,14 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
                   Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
                           "false")));
-          os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
+          os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" + 
                     properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
         return os.toString();
       }
     });
 
-    pool.register(STANFORD_CLEAN_XML, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_CLEAN_XML, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -434,7 +397,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                         CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
         String ssplitDiscardTokens =
                 properties.getProperty("clean.ssplitDiscardTokens");
-        CleanXmlAnnotator annotator = annotatorImplementation.cleanXML(properties, xmlTags,
+        CleanXmlAnnotator annotator = new CleanXmlAnnotator(xmlTags,
             sentenceEndingTags,
             dateTags,
             allowFlawed);
@@ -451,7 +414,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return "clean.xmltags:" +
                 properties.getProperty("clean.xmltags",
@@ -499,7 +462,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     // sentences.  This is required when processing entire documents or
     // text consisting of multiple sentences.
     //
-    pool.register(STANFORD_SSPLIT, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_SSPLIT, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
@@ -554,14 +517,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           }
           String nlsb = properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
 
-          return annotatorImplementation.wordToSentences(properties,
-              false, boundaryTokenRegex, boundariesToDiscard, htmlElementsToDiscard,
-              nlsb, boundaryMultiTokenRegex, tokenRegexesToDiscard);
+          return new WordsToSentencesAnnotator(false, boundaryTokenRegex, boundariesToDiscard, htmlElementsToDiscard,
+                  nlsb, boundaryMultiTokenRegex, tokenRegexesToDiscard);
         }
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         StringBuilder os = new StringBuilder();
         os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
@@ -591,19 +553,19 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // POS tagger
     //
-    pool.register(STANFORD_POS, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_POS, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
         try {
-          return annotatorImplementation.posTagger(properties);
+          return new POSTaggerAnnotator("pos", properties);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return ("pos.maxlen:" + properties.getProperty("pos.maxlen", "") +
                 "pos.model:" + properties.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL) +
@@ -614,15 +576,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Lemmatizer
     //
-    pool.register(STANFORD_LEMMA, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_LEMMA, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.morpha(properties, false);
+        return new MorphaAnnotator(false);
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         // nothing for this one
         return "";
@@ -632,19 +594,44 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // NER
     //
-    pool.register(STANFORD_NER, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_NER, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
+        List<String> models = new ArrayList<String>();
+        String modelNames = properties.getProperty("ner.model");
+        if (modelNames == null) {
+          modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+        }
+        if (modelNames.length() > 0) {
+          models.addAll(Arrays.asList(modelNames.split(",")));
+        }
+        if (models.isEmpty()) {
+          // Allow for no real NER model - can just use numeric classifiers or SUTime.
+          // Have to unset ner.model, so unlikely that people got here by accident.
+          System.err.println("WARNING: no NER models specified");
+        }
+        NERClassifierCombiner nerCombiner;
         try {
-          return annotatorImplementation.ner(properties);
+          boolean applyNumericClassifiers =
+            PropertiesUtils.getBool(properties,
+                NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
+                NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
+          boolean useSUTime =
+            PropertiesUtils.getBool(properties,
+                NumberSequenceClassifier.USE_SUTIME_PROPERTY,
+                NumberSequenceClassifier.USE_SUTIME_DEFAULT);
+          nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
+                useSUTime, properties,
+                models.toArray(new String[models.size()]));
         } catch (FileNotFoundException e) {
           throw new RuntimeIOException(e);
         }
+        return new NERCombinerAnnotator(nerCombiner, false);
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return "ner.model:" +
                 properties.getProperty("ner.model", "") +
@@ -669,15 +656,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Regex NER
     //
-    pool.register(STANFORD_REGEXNER, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_REGEXNER, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.tokensRegexNER(properties, "regexner");
+        return new TokensRegexNERAnnotator("regexner", properties);
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return PropertiesUtils.getSignature("regexner", properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
       }
@@ -686,15 +673,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Gender Annotator
     //
-    pool.register(STANFORD_GENDER, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_GENDER, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.gender(properties, false);
+        return new GenderAnnotator(false, properties.getProperty("gender.firstnames", DefaultPaths.DEFAULT_GENDER_FIRST_NAMES));
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return "gender.firstnames:" +
                 properties.getProperty("gender.firstnames",
@@ -706,18 +693,18 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // True caser
     //
-    pool.register(STANFORD_TRUECASE, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_TRUECASE, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
         String model = properties.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL);
         String bias = properties.getProperty("truecase.bias", TrueCaseAnnotator.DEFAULT_MODEL_BIAS);
         String mixed = properties.getProperty("truecase.mixedcasefile", DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
-        return annotatorImplementation.trueCase(properties, model, bias, mixed, false);
+        return new TrueCaseAnnotator(model, bias, mixed, false);
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return "truecase.model:" +
                 properties.getProperty("truecase.model",
@@ -734,15 +721,37 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Parser
     //
-    pool.register(STANFORD_PARSE, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_PARSE, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.parse(properties);
+        String parserType = properties.getProperty("parse.type", "stanford");
+        String maxLenStr = properties.getProperty("parse.maxlen");
+
+        if (parserType.equalsIgnoreCase("stanford")) {
+          ParserAnnotator anno = new ParserAnnotator("parse", properties);
+          return anno;
+        } else if (parserType.equalsIgnoreCase("charniak")) {
+          String model = properties.getProperty("parse.model");
+          String parserExecutable = properties.getProperty("parse.executable");
+          if (model == null || parserExecutable == null) {
+            throw new RuntimeException("Both parse.model and parse.executable properties must be specified if parse.type=charniak");
+          }
+          int maxLen = 399;
+          if (maxLenStr != null) {
+            maxLen = Integer.parseInt(maxLenStr);
+          }
+
+          CharniakParserAnnotator anno = new CharniakParserAnnotator(model, parserExecutable, false, maxLen);
+
+          return anno;
+        } else {
+          throw new RuntimeException("Unknown parser type: " + parserType + " (currently supported: stanford and charniak)");
+        }
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         String type = properties.getProperty("parse.type", "stanford");
         if(type.equalsIgnoreCase("stanford")){
@@ -764,15 +773,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     //
     // Coreference resolution
     //
-    pool.register(STANFORD_DETERMINISTIC_COREF, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_DETERMINISTIC_COREF, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.coref(properties);
+        return new DeterministicCorefAnnotator(properties);
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return DeterministicCorefAnnotator.signature(properties);
       }
@@ -783,21 +792,24 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     for (Object propertyKey : inputProps.stringPropertyNames()) {
       if (!(propertyKey instanceof String))
         continue; // should this be an Exception?
-      final String property = (String) propertyKey;
+      String property = (String) propertyKey;
       if (property.startsWith(CUSTOM_ANNOTATOR_PREFIX)) {
         final String customName =
           property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         System.err.println("Registering annotator " + customName +
             " with class " + customClassName);
-        pool.register(customName, new AnnotatorFactory(inputProps, annotatorImplementation) {
+        pool.register(customName, new AnnotatorFactory(inputProps) {
           private static final long serialVersionUID = 1L;
+          private final String name = customName;
+          private final String className = customClassName;
           @Override
           public Annotator create() {
-            return annotatorImplementation.custom(properties, property);
+            return ReflectionLoading.loadByReflection(className, name,
+                                                      properties);
           }
           @Override
-          public String additionalSignature() {
+          public String signature() {
             // keep track of all relevant properties for this annotator here!
             // since we don't know what props they need, let's copy all
             // TODO: can we do better here? maybe signature() should be a method in the Annotator?
@@ -813,15 +825,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
 
 
-    pool.register(STANFORD_RELATION, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_RELATION, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.relations(properties);
+        return new RelationExtractorAnnotator(properties);
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         // keep track of all relevant properties for this annotator here!
         return "sup.relation.verbose:" +
         properties.getProperty("sup.relation.verbose",
@@ -831,19 +843,19 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       }
     });
 
-    pool.register(STANFORD_SENTIMENT, new AnnotatorFactory(inputProps, annotatorImplementation) {
+    pool.register(STANFORD_SENTIMENT, new AnnotatorFactory(inputProps) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.sentiment(properties, STANFORD_SENTIMENT);
+        return new SentimentAnnotator(STANFORD_SENTIMENT, properties);
       }
 
       @Override
-      public String additionalSignature() {
+      public String signature() {
         return "model=" + inputProps.get("model");
       }
     });
-
+    
     //
     // add more annotators here!
     //
@@ -966,7 +978,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @param os PrintStream to print usage to
    * @param helpTopic a topic to print help about (or null for general options)
    */
-  protected static void printHelp(PrintStream os, String helpTopic) {
+  private static void printHelp(PrintStream os, String helpTopic) {
     if (helpTopic.toLowerCase().startsWith("pars")) {
       os.println("StanfordCoreNLP currently supports the following parsers:");
       os.println("\tstanford - Stanford lexicalized parser (default)");
@@ -1372,70 +1384,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     processFiles(files, 1);
   }
 
-  public void run() throws IOException {
-    Timing tim = new Timing();
-    StanfordRedwoodConfiguration.minimalSetup();
-
-    // multithreading thread count
-    String numThreadsString = (this.properties == null) ? null : this.properties.getProperty("threads");
-    int numThreads = 1;
-    try{
-      if (numThreadsString != null) {
-        numThreads = Integer.parseInt(numThreadsString);
-      }
-    } catch(NumberFormatException e) {
-      err("-threads [number]: was not given a valid number: " + numThreadsString);
-    }
-
-    long setupTime = tim.report();
-
-    // blank line after all the loading statements to make output more readable
-    log("");
-
-    //
-    // Process one file or a directory of files
-    //
-    if(properties.containsKey("file")){
-      String fileName = properties.getProperty("file");
-      Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
-      this.processFiles(null, files, numThreads);
-    }
-
-    //
-    // Process a list of files
-    //
-    else if (properties.containsKey("filelist")){
-      String fileName = properties.getProperty("filelist");
-      Collection<File> inputfiles = readFileList(fileName);
-      Collection<File> files = new ArrayList<File>(inputfiles.size());
-      for (File file:inputfiles) {
-        if (file.isDirectory()) {
-          files.addAll(new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true));
-        } else {
-          files.add(file);
-        }
-      }
-      this.processFiles(null, files, numThreads);
-    }
-
-    //
-    // Run the interactive shell
-    //
-    else {
-      shell(this);
-    }
-
-    if (TIME) {
-      log();
-      log(this.timingInformation());
-      log("Pipeline setup: " +
-          Timing.toSecondsString(setupTime) + " sec.");
-      log("Total time for StanfordCoreNLP pipeline: " +
-          tim.toSecondsString() + " sec.");
-    }
-
-  }
-
   /**
    * This can be used just for testing or for command-line text processing.
    * This runs the pipeline you specify on the
@@ -1451,12 +1399,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @throws ClassNotFoundException If class loading problem
    */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
+    Timing tim = new Timing();
+    StanfordRedwoodConfiguration.minimalSetup();
+
     //
     // process the arguments
     //
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
-    Properties props = new Properties();
+    Properties props = null;
     if (args.length > 0) {
       props = StringUtils.argsToProperties(args);
       boolean hasH = props.containsKey("h");
@@ -1467,8 +1418,68 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         return;
       }
     }
-    // Run the pipeline
-    new StanfordCoreNLP(props).run();
+    // multithreading thread count
+    String numThreadsString = (props == null) ? null : props.getProperty("threads");
+    int numThreads = 1;
+    try{
+      if (numThreadsString != null) {
+        numThreads = Integer.parseInt(numThreadsString);
+      }
+    } catch(NumberFormatException e) {
+      err("-threads [number]: was not given a valid number: " + numThreadsString);
+    }
+
+    //
+    // construct the pipeline
+    //
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    props = pipeline.getProperties();
+    long setupTime = tim.report();
+
+    // blank line after all the loading statements to make output more readable
+    log("");
+
+    //
+    // Process one file or a directory of files
+    //
+    if(props.containsKey("file")){
+      String fileName = props.getProperty("file");
+      Collection<File> files = new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true);
+      pipeline.processFiles(null, files, numThreads);
+    }
+
+    //
+    // Process a list of files
+    //
+    else if (props.containsKey("filelist")){
+      String fileName = props.getProperty("filelist");
+      Collection<File> inputfiles = readFileList(fileName);
+      Collection<File> files = new ArrayList<File>(inputfiles.size());
+      for (File file:inputfiles) {
+        if (file.isDirectory()) {
+          files.addAll(new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true));
+        } else {
+          files.add(file);
+        }
+      }
+      pipeline.processFiles(null, files, numThreads);
+    }
+
+    //
+    // Run the interactive shell
+    //
+    else {
+      shell(pipeline);
+    }
+
+    if (TIME) {
+      log();
+      log(pipeline.timingInformation());
+      log("Pipeline setup: " +
+          Timing.toSecondsString(setupTime) + " sec.");
+      log("Total time for StanfordCoreNLP pipeline: " +
+          tim.toSecondsString() + " sec.");
+    }
   }
 
 }
