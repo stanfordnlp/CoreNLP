@@ -18,6 +18,10 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.parser.common.NoSuchParseException;
+import edu.stanford.nlp.parser.common.ParserGrammar;
+import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.parser.metrics.BestOfTopKEval;
 import edu.stanford.nlp.parser.metrics.Eval;
@@ -34,6 +38,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -43,10 +48,10 @@ public class EvaluateTreebank {
   private final Options op;
   private final TreeTransformer debinarizer;
   private final TreeTransformer subcategoryStripper;
-  private final TreeTransformer tc;
-  private final TreeTransformer br;
+  private final TreeTransformer collinizer;
+  private final TreeTransformer boundaryRemover;
 
-  private final LexicalizedParser pqFactory;
+  private final ParserGrammar pqFactory;
 
   // private final Lexicon lex;
 
@@ -93,17 +98,18 @@ public class EvaluateTreebank {
    * We keep it here as a function rather than a MaxentTagger so that
    * we can distribute a version of the parser that doesn't include
    * the entire tagger.
-   * <br>
-   * TODO: pass this in rather than create it here if we wind up using
-   * this in more place.  Right now it's only used in testOnTreebank.
    */
-  protected Function<List<? extends HasWord>, ArrayList<TaggedWord>> tagger;
+  protected final Function<List<? extends HasWord>, List<TaggedWord>> tagger;
 
   public EvaluateTreebank(LexicalizedParser parser) {
     this(parser.getOp(), parser.lex, parser);
   }
 
-  public EvaluateTreebank(Options op, Lexicon lex, LexicalizedParser pqFactory) {
+  public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory) {
+    this(op, lex, pqFactory, loadTagger(op));
+  }
+
+  public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory, Function<List<? extends HasWord>,List<TaggedWord>> tagger) {
     this.op = op;
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
@@ -113,21 +119,10 @@ public class EvaluateTreebank {
     // this.lex = lex;
     this.pqFactory = pqFactory;
 
-    if(op.testOptions.preTag) {
-      try {
-        Class[] argsClass = { String.class };
-        Object[] arguments = { op.testOptions.taggerSerializedFile };
-        System.err.printf("Loading tagger from serialized file %s ...\n",op.testOptions.taggerSerializedFile);
-        tagger = (Function<List<? extends HasWord>,ArrayList<TaggedWord>>) Class.forName("edu.stanford.nlp.tagger.maxent.MaxentTagger").getConstructor(argsClass).newInstance(arguments);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
+    this.tagger = tagger;
 
-    tc = op.tlpParams.collinizer();
-    br = new BoundaryRemover();
+    collinizer = op.tlpParams.collinizer();
+    boundaryRemover = new BoundaryRemover();
 
     runningAverages = Boolean.parseBoolean(op.testOptions.evals.getProperty("runningAverages"));
     summary = Boolean.parseBoolean(op.testOptions.evals.getProperty("summary"));
@@ -217,6 +212,14 @@ public class EvaluateTreebank {
       kbestPCFG = Math.max(kbestPCFG, op.testOptions.printPCFGkBest);
     }
 
+  }
+
+  private static Function<List<? extends HasWord>,List<TaggedWord>> loadTagger(Options op) {
+    if (op.testOptions.preTag) {
+      return ReflectionLoading.loadByReflection("edu.stanford.nlp.tagger.maxent.MaxentTagger", op.testOptions.taggerSerializedFile);
+    } else {
+      return null;
+    }
   }
 
   public double getLBScore() {
@@ -321,7 +324,7 @@ public class EvaluateTreebank {
           int sz = parses.size();
           if (sz > 1) {
             pwOut.println("There were " + sz + " best PCFG parses with score " + parses.get(0).score() + '.');
-            Tree transGoldTree = tc.transformTree(goldTree);
+            Tree transGoldTree = collinizer.transformTree(goldTree);
             int iii = 0;
             for (ScoredObject<Tree> sot : parses) {
               iii++;
@@ -331,7 +334,7 @@ public class EvaluateTreebank {
               pq.restoreOriginalWords(tbd);
               pwOut.println("PCFG Parse #" + iii + " with score " + tbd.score());
               tbd.pennPrint(pwOut);
-              Tree tbtr = tc.transformTree(tbd);
+              Tree tbtr = collinizer.transformTree(tbd);
               // pwOut.println("Tree size = " + tbtr.size() + "; depth = " + tbtr.depth());
               kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
             }
@@ -340,14 +343,14 @@ public class EvaluateTreebank {
         // Huang and Chiang (2006) Algorithm 3 output from the PCFG parser
         else if (op.testOptions.printPCFGkBest > 0 && op.testOptions.outputkBestEquivocation == null) {
           List<ScoredObject<Tree>> trees = kbestPCFGTrees.subList(0, op.testOptions.printPCFGkBest);
-          Tree transGoldTree = tc.transformTree(goldTree);
+          Tree transGoldTree = collinizer.transformTree(goldTree);
           int i = 0;
           for (ScoredObject<Tree> tp : trees) {
             i++;
             pwOut.println("PCFG Parse #" + i + " with score " + tp.score());
             Tree tbd = tp.object();
             tbd.pennPrint(pwOut);
-            Tree tbtr = tc.transformTree(tbd);
+            Tree tbtr = collinizer.transformTree(tbd);
             kGoodLB.evaluate(tbtr, transGoldTree, pwErr);
           }
         }
@@ -355,14 +358,14 @@ public class EvaluateTreebank {
         else if (op.testOptions.printFactoredKGood > 0 && pq.hasFactoredParse()) {
           // DZ: debug n best trees
           List<ScoredObject<Tree>> trees = pq.getKGoodFactoredParses(op.testOptions.printFactoredKGood);
-          Tree transGoldTree = tc.transformTree(goldTree);
+          Tree transGoldTree = collinizer.transformTree(goldTree);
           int ii = 0;
           for (ScoredObject<Tree> tp : trees) {
             ii++;
             pwOut.println("Factored Parse #" + ii + " with score " + tp.score());
             Tree tbd = tp.object();
             tbd.pennPrint(pwOut);
-            Tree tbtr = tc.transformTree(tbd);
+            Tree tbtr = collinizer.transformTree(tbd);
             kGoodLB.evaluate(tbtr, transGoldTree, pwOut);
           }
         }
@@ -398,14 +401,14 @@ public class EvaluateTreebank {
       if (tree != null) {
         //Strip subcategories and remove punctuation for evaluation
         tree = subcategoryStripper.transformTree(tree);
-        Tree treeFact = tc.transformTree(tree);
+        Tree treeFact = collinizer.transformTree(tree);
 
         //Setup the gold tree
         if (op.testOptions.verbose) {
           pwOut.println("Correct parse");
           treePrint.printTree(goldTree, pwOut);
         }
-        Tree transGoldTree = tc.transformTree(goldTree);
+        Tree transGoldTree = collinizer.transformTree(goldTree);
         if(transGoldTree != null)
           transGoldTree = subcategoryStripper.transformTree(transGoldTree);
 
@@ -438,7 +441,7 @@ public class EvaluateTreebank {
           List<Tree> transGuesses = new ArrayList<Tree>();
           int kbest = Math.min(op.testOptions.evalPCFGkBest, kbestPCFGTrees.size());
           for (ScoredObject<Tree> guess : kbestPCFGTrees.subList(0, kbest)) {
-            transGuesses.add(tc.transformTree(guess.object()));
+            transGuesses.add(collinizer.transformTree(guess.object()));
           }
           for (BestOfTopKEval eval : topKEvals) {
             eval.evaluate(transGuesses, transGoldTree, pwErr);
@@ -448,7 +451,7 @@ public class EvaluateTreebank {
         //PCFG eval
         Tree treePCFG = pq.getBestPCFGParse();
         if (treePCFG != null) {
-          Tree treePCFGeval = tc.transformTree(treePCFG);
+          Tree treePCFGeval = collinizer.transformTree(treePCFG);
           if (pcfgLB != null) {
             pcfgLB.evaluate(treePCFGeval, transGoldTree, pwErr);
           }
@@ -532,7 +535,7 @@ public class EvaluateTreebank {
           factLA.evaluate(treeFact, transGoldTree, pwErr);
         }
         if (factTA != null) {
-          factTA.evaluate(tree, br.transformTree(goldTree), pwErr);
+          factTA.evaluate(tree, boundaryRemover.transformTree(goldTree), pwErr);
         }
         if (factLL != null && pq.getFactoredParser() != null) {
           factLL.recordScore(pq.getFactoredParser(), pwErr);
