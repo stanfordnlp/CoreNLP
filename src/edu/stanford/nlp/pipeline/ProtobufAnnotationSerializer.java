@@ -691,7 +691,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       // Populate the tokens from the sentence
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
         // It's conceivable that the sentences are not contiguous -- pad this with nulls
-        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetBegin()) {
+        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetEnd()) {
           tokens.add(null);
         }
         // Read the sentence
@@ -699,7 +699,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           CoreLabel coreLabel = fromProto(token);
           // Set docid
           if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
-          tokens.add(coreLabel);
+          for (int i = token.getTokenBeginIndex(); i < token.getTokenEndIndex(); ++i) {
+            tokens.set(token.getTokenBeginIndex(), coreLabel);
+          }
         }
       }
     } else if (proto.getSentencelessTokenCount() > 0) {
@@ -730,6 +732,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         map.set(TokensAnnotation.class, tokens.subList(tokenBegin, tokenEnd));
         // Set sentence index + token index + paragraph index
         for (int i = tokenBegin; i < tokenEnd; ++i) {
+          if (tokens.get(i) == null) {
+            System.err.println("HERE");
+          }
           tokens.get(i).setSentIndex(sentIndex);
           tokens.get(i).setIndex(i - sentence.getTokenOffsetBegin() + 1);
           if (sentence.hasParagraph()) { tokens.get(i).set(ParagraphAnnotation.class, sentence.getParagraph()); }
@@ -1037,6 +1042,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
       last = token;
+      System.err.println(tokens.get(0).beginPosition() + "\t" + token.beginPosition() + "\t" + token.endPosition());
+      if (!token.originalText().equals(text.substring(token.beginPosition() - tokens.get(0).beginPosition(), token.endPosition() - tokens.get(0).beginPosition()))) {
+        System.err.println(text.toString());
+        System.err.println();
+      }
     }
     return text.toString();
   }
