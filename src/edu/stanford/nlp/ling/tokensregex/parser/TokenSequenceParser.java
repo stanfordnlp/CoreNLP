@@ -24,6 +24,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
     public void updateExpressionExtractor(CoreMapExpressionExtractor extractor, Reader r) throws ParseException {
         TokenSequenceParser p = new TokenSequenceParser(r);
         List<SequenceMatchRules.Rule> rules = p.RuleList(extractor.getEnv());
+        System.err.println("Read " + rules.size() + " rules.");
         extractor.appendRules(rules);
     }
 
