@@ -76,8 +76,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     super(props);
     this.useSUTime = useSUTime;
     if(this.useSUTime) {
-      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor();
-      this.timexExtractor.init("sutime", sutimeProps);
+      this.timexExtractor = TimeExpressionExtractorFactory.createExtractor("sutime", sutimeProps);
     } else {
       this.timexExtractor = null;
     }

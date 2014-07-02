@@ -103,6 +103,19 @@ public class EnglishGrammaticalRelations {
     "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
   private static final String selfRegex =
     "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
+  private static final String xcompVerbRegex =
+    "/^(?i:advise|advises|advised|advising|ask|asks|asked|asking|beg|begs|begged|begging|demand|demands|demanded|demanding|desire|desires|desired|desiring|force|forces|forced|forcing|implore|implores|implored|imploring|order|orders|ordered|ordering|persuade|persuades|persuaded|persuading|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
+  // A list of verbs where the answer to a question involving that
+  // verb would be a ccomp.  For example, "I know when the train is
+  // arriving."  What does the person know?
+  private static final String ccompVerbRegex =
+    "/^(?i:know|knows|knew|knowing|specify|specifies|specified|specifying|tell|tells|told|telling|understand|understands|understood|understanding|wonder|wonders|wondered|wondering)$/";
+  // A subset of ccompVerbRegex where you could expect an object and
+  // still have a ccomp.  For example, "They told me when ..." can
+  // still have a ccomp.  "They know my order when ..." would not
+  // expect a ccomp between "know" and the head of "when ..."
+  private static final String ccompObjVerbRegex =
+    "/^(?i:tell|tells|told|telling)$/";
 
   // By setting the HeadFinder to null, we find out right away at
   // runtime if we have incorrectly set the HeadFinder for the
@@ -191,7 +204,7 @@ public class EnglishGrammaticalRelations {
           // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
           "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
           // "Such a great idea this was"
-          "SINV < (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
+          "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
         });
 
   public static class CopulaGRAnnotation extends GrammaticalRelationAnnotation {
@@ -432,7 +445,7 @@ public class EnglishGrammaticalRelations {
    * "That she lied was suspected by everyone" &rarr; <code>csubjpass</code>(suspected, lied)
    */
   public static final GrammaticalRelation CLAUSAL_PASSIVE_SUBJECT =
-    new GrammaticalRelation(Language.English, "csubjpass", "clausal subject",
+    new GrammaticalRelation(Language.English, "csubjpass", "clausal passive subject",
         ClausalPassiveSubjectGRAnnotation.class, CLAUSAL_SUBJECT, "S", tregexCompiler,
         new String[] {
           "S < (SBAR|S=target !$+ /^,$/ $++ (VP < (VP < VBN|VBD) < (/^(?:VB|AUXG?)/ < " + passiveAuxWordRegex + ") !$-- NP))",
@@ -603,9 +616,9 @@ public class EnglishGrammaticalRelations {
         PrepositionalObjectGRAnnotation.class, OBJECT, "SBARQ|PP(?:-TMP)?|WHPP|PRT|ADVP|WHADVP|XS", tregexCompiler,
         new String[] {
           // "not" should not be the cause of a pobj
-          "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
+          "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|VBN|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
           // We allow ADVP with NP objects for cases like (ADVP earlier this year)
-          "/^PP(?:-TMP)?$/ < (/^(?:IN|VBG|TO)$/ $+ (ADVP=target [ < (RB < /^(?i:here|there)$/) | < (ADVP < /^NP(?:-TMP)?$/) ] ))",
+          "/^PP(?:-TMP)?$/ < (/^(?:IN|VBG|VBN|TO)$/ $+ (ADVP=target [ < (RB < /^(?i:here|there)$/) | < (ADVP < /^NP(?:-TMP)?$/) ] ))",
           // second disjunct is weird ADVP, only matches 1 tree in 2-21
           // to deal with preposition stranding in questions (e.g., "Which city do you live in?") -- the preposition is sometimes treated as a particle by the parser (works well but doesn't preserve the tree structure!)
           "PRT >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
@@ -614,7 +627,7 @@ public class EnglishGrammaticalRelations {
 
           "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
           //"PP < (CC < less) < NP",
-          "@PP < CC  < @NP=target !< @IN|TO|VBG|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
+          "@PP < CC  < @NP=target !< @IN|TO|VBG|VBN|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
           // to handle "in and out of government"
           "@WHPP|PP < (@WHPP|PP $++ (CC|CONJP $++ (@WHPP|PP $+ (NP=target !$+ __))))",
           // to handle "What weapon is Apollo most proficient with?"
@@ -705,12 +718,20 @@ public class EnglishGrammaticalRelations {
           "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)))",
           "VP < @SBARQ=target",  // Direct question: She asked "Who is in trouble"
           "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
+          // !$-- @SBAR|S handles cases where the answer to the question
+          //   "What do they ccompVerb?" 
+          //   is already answered by a different node
+          // the ccompObjVerbRegex/NP test distinguishes "He told me why ..." 
+          //   vs "They know my order when ..."
+          "VP < (@SBAR=target !$-- @SBAR|S !$-- /^:$/ [ == @SBAR=sbar | <# @SBAR=sbar ] ) < (/^V/ < " + ccompVerbRegex + ") [ < (/^V/ < " + ccompObjVerbRegex + ") | < (=target !$-- NP) ] : (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)))",
           // to find "...", he said or "...?" he asked.
           // We eliminate conflicts with conj by looking for CC
           // Matching against "!< (VP < TO|VBG|VBN)" matches against vmod
           // "!< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])))" also matches against vmod
           "@S|SINV < (@S|SBARQ=target $+ /^(,|\\.|'')$/ !$- /^(?:CC|CONJP|:)$/ !$- (/^(?:,)$/ $- CC|CONJP) !< (VP < TO|VBG|VBN) !< (VP <1 (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))) !< (@S !== =target $++ =target !$++ @CC|CONJP)",
-          "ADVP < (SBAR=target < (IN < /^(?i:as|that)/) < (S < (VP !< TO)))", // ADVP is things like "As long as they spend ..."
+          // ADVP is things like "As long as they spend ..."
+          // < WHNP captures phrases such as "no matter what", "no matter how", etc
+          "ADVP < (SBAR=target [ < WHNP | ( < (IN < /^(?i:as|that)/) < (S < (VP !< TO))) ])",
           "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
           // That ... he know
           "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
@@ -737,10 +758,11 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation XCLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "xcomp", "xclausal complement",
-        XClausalComplementGRAnnotation.class, COMPLEMENT, "VP|ADJP", tregexCompiler,
+        XClausalComplementGRAnnotation.class, COMPLEMENT, "VP|ADJP|SINV", tregexCompiler,
         new String[] {
           // basic VP complement xcomp; this used to exclude embedding under a VP headed by be, as some are purpose clauses, but it seems like the vast majority aren't so I've removed that restriction
-          "VP < (S=target !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
+          // one way to detect purpose clauses is to look for an NP before the S, though
+          "VP < (S=target [ !$-- NP | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
           "ADJP < (S=target <, (VP <, TO))",
           "VP < (S=target !$- (NN < order) < (NP $+ NP|ADJP))",
           // to find "help sustain ...
@@ -758,7 +780,8 @@ public class EnglishGrammaticalRelations {
 
           // The old attr relation, used here to recover xcomp relations instead.
           "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
-
+          // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
+          "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
         });
   public static class XClausalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -895,7 +918,8 @@ public class EnglishGrammaticalRelations {
           // ":" indicates something that should be a parataxis
           // in cases where there are two SBARs conjoined, we're happy
           // to use the head SBAR as a candidate for this relation
-          "S|SQ|VP < (@SBAR=target [ == @SBAR=sbar | <# @SBAR=sbar ] ): (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
+          "S|SQ < (@SBAR=target [ == @SBAR=sbar | <# @SBAR=sbar ] ): (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
+          "VP < (@SBAR=target !$-- /^:$/ [ == @SBAR=sbar | <# @SBAR=sbar ] ) [ !< (/^V/ < " + ccompVerbRegex + ") | < (=target $-- @SBAR|S) | ( !< (/^V/ < " + ccompObjVerbRegex + ") < (=target $-- NP)) ] : (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)))",
           // "S|SQ < (PP=target <, RB < @S)", // caught as prep and pcomp.
           "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
           "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
@@ -961,8 +985,10 @@ public class EnglishGrammaticalRelations {
           // Stanford..."  However, it seems better to eliminate some
           // useful dependencies rather than introduce some wrong
           // dependencies.
-          "@NP|WHNP|NML $++ (SBAR=target <+(SBAR) WHPP|WHNP) !$-- @NP|WHNP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP|WHNP",
-          "@NP|WHNP|NML $++ (SBAR=target <: (S !< (VP < TO))) !$-- @NP|WHNP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP|WHNP",
+          // Note that we want to eliminate situations where we
+          // conflict with conj by looking for CC|CONJP to the right
+          // of the noun
+          "@NP|WHNP|NML=np $++ (SBAR=target [ <+(SBAR) WHPP|WHNP | <: (S !< (VP < TO)) ]) !$-- @NP|WHNP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP|WHNP : (=np !$++ (CC|CONJP $++ =target))",
           "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP",
           // for case of relative clauses with no relativizer
           // (it doesn't distinguish whether actually gapped).
@@ -1227,6 +1253,8 @@ public class EnglishGrammaticalRelations {
           "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
           // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
           // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
+          // they wrote asking the SEC to ...
+          "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
           "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
           "SBARQ < WHNP < (S=target < (VP <1 TO))",
@@ -1253,7 +1281,10 @@ public class EnglishGrammaticalRelations {
           "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
           // avoids adverb conjunctions matching as advmod; added JJ to catch How long
           // "!< no" so we can get neg instead for "no foo" when no is tagged as RB
-          "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target !< " + NOT_PAT + " !< /^(?i:no)$/ !< " + ETC_PAT + ") !< CC|CONJP",
+          // we allow CC|CONJP as long as it is not between the target and the head
+          // TODO: perhaps remove that last clause if we transform 
+          // more and more, less and less, etc.
+          "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target !< " + NOT_PAT + " !< /^(?i:no)$/ !< " + ETC_PAT + ") [ !< /^CC|CONJP$/ | ( <#__=head !< (/^CC|CONJP$/ [ ($++ =head $-- =target) | ($-- =head $++ =target) ])) ]",
           //this one gets "at least" advmod(at, least) or "fewer than" advmod(than, fewer)
           "SBAR < (WHNP=target < WRB)", "SBARQ <, WHADVP=target", "XS < JJ=target",
           // for PP, only ones before head, or after NP, since others afterwards are pcomp
@@ -1284,7 +1315,7 @@ public class EnglishGrammaticalRelations {
           "VP > SQ $-- (RB=target < " + NOT_PAT + ")",
           // the commented out parts were relevant for the "det", 
           // but don't seem to matter for the "neg" relation
-          "/^(?:NP(?:-TMP|-ADV)?|NAC|NML|NX)$/ < (DT=target < /^(?i:no)$/ " + /* !$++ CC */ " $++ /^(?:N[MNXP]|CD|JJ|FW|ADJP|QP|RB|PRP(?![$])|PRN)/ " + /* =det !$++ (/^PRP[$]|POS/ $++ =det !$++ (/''/ $++ =det)) */ ")",
+          "/^(?:NP(?:-TMP|-ADV)?|NAC|NML|NX|ADJP|ADVP)$/ < (DT|RB=target < /^(?i:no)$/ " + /* !$++ CC */ " $++ /^(?:N[MNXP]|CD|JJ|JJR|FW|ADJP|QP|RB|RBR|PRP(?![$])|PRN)/ " + /* =det !$++ (/^PRP[$]|POS/ $++ =det !$++ (/''/ $++ =det)) */ ")",
           // catches "no more", possibly others as well
           // !< CC|CONJP catches phrases such as "no more or less", which maybe should be preconj
           "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target < /^(?i:no)$/) !< CC|CONJP",
@@ -1460,7 +1491,7 @@ public class EnglishGrammaticalRelations {
           // testing against CC|CONJP avoids conflicts with preconj in
           // phrases such as "both foo and bar"
           // however, we allow WDT|WP to account for "what foo or bar" and "whatever foo or bar"
-          "@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target [ ==WDT|WP | !$++ CC|CONJP ]))",
+          "@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target !< /^(?i:no)$/ [ ==WDT|WP | !$++ CC|CONJP ]))",
           "@NP < (/^(?:NP|NN|CD|RBS)/ $-- WDT|WP=target)"
         });
   public static class DeterminerGRAnnotation extends GrammaticalRelationAnnotation { }
