@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -41,7 +40,7 @@ public interface Annotator {
   /**
    * Given an Annotation, perform a task on this Annotation.
    */
-  public void annotate(Annotation annotation) throws SQLException;
+  public void annotate(Annotation annotation) ;
 
   /**
    * The Requirement is a general way of describing the pre and post
