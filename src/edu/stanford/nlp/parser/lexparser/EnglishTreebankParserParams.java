@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 import java.io.IOException;
@@ -2275,6 +2276,42 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   public boolean supportsBasicDependencies() {
     return true;
   }
+
+  private static final Map<String, String> DEFAULT_CATEGORY_MAPPING = Generics.newHashMap();
+  static {
+    DEFAULT_CATEGORY_MAPPING.put("NN", "NN");
+    DEFAULT_CATEGORY_MAPPING.put("NNS", "NN");
+    DEFAULT_CATEGORY_MAPPING.put("NNP", "NN");
+    DEFAULT_CATEGORY_MAPPING.put("NNPS", "NN");
+
+    DEFAULT_CATEGORY_MAPPING.put("RB", "RB");
+    DEFAULT_CATEGORY_MAPPING.put("RBR", "RB");
+    DEFAULT_CATEGORY_MAPPING.put("RBS", "RB");
+
+    DEFAULT_CATEGORY_MAPPING.put("VB", "VB");
+    DEFAULT_CATEGORY_MAPPING.put("VBD", "VB");
+    DEFAULT_CATEGORY_MAPPING.put("VBG", "VB");
+    DEFAULT_CATEGORY_MAPPING.put("VBN", "VB");
+    DEFAULT_CATEGORY_MAPPING.put("VBP", "VB");
+    DEFAULT_CATEGORY_MAPPING.put("VBZ", "VB");
+
+    DEFAULT_CATEGORY_MAPPING.put("`", "\"");
+    DEFAULT_CATEGORY_MAPPING.put("``", "\"");
+    DEFAULT_CATEGORY_MAPPING.put("'", "\"");
+    DEFAULT_CATEGORY_MAPPING.put("''", "\"");
+    DEFAULT_CATEGORY_MAPPING.put("\"", "\"");
+
+    DEFAULT_CATEGORY_MAPPING.put("NX", "NP");
+    DEFAULT_CATEGORY_MAPPING.put("NML", "NP");
+  }
+  private Map<String, String> dvCategoryMapping = DEFAULT_CATEGORY_MAPPING;
+
+  @Override
+  public String combineCategory(String basic) {
+    String combined = dvCategoryMapping.get(basic);
+    return (combined == null) ? basic : combined;
+  }
+
 
   public static void main(String[] args) {
     TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
