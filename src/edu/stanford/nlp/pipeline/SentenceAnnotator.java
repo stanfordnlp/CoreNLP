@@ -38,7 +38,6 @@ public abstract class SentenceAnnotator implements Annotator {
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       if (nThreads() != 1 || maxTime() > 0) {
-        System.err.println(getClass() + " with time limit " + maxTime());
         MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads(), new AnnotatorProcessor(annotation));
         if (maxTime() > 0) {
           wrapper.setMaxBlockTime(maxTime());
@@ -54,7 +53,6 @@ public abstract class SentenceAnnotator implements Annotator {
           wrapper.poll();
         }
       } else {
-        System.err.println(getClass() + " with no time limit");
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
           doOneSentence(annotation, sentence);
         }
