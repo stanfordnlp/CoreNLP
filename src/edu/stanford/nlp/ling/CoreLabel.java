@@ -323,10 +323,12 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    */
   @Override
   public void setWord(String word) {
+    String originalWord = get(CoreAnnotations.TextAnnotation.class);
     set(CoreAnnotations.TextAnnotation.class, word);
     // pado feb 09: if you change the word, delete the lemma.
-    if (containsKey(CoreAnnotations.LemmaAnnotation.class)) {
-      set(CoreAnnotations.LemmaAnnotation.class, null);  // note[gabor]: set to null rather than removing for efficiency
+    // gabor dec 2012: check if there was a real change -- this remove is actually rather expensive if it gets called a lot
+    if (word != null && !word.equals(originalWord) && containsKey(CoreAnnotations.LemmaAnnotation.class)) {
+      remove(CoreAnnotations.LemmaAnnotation.class);
     }
   }
 
