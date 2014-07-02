@@ -134,6 +134,10 @@ public class CoordinationTransformer implements TreeTransformer {
 
   private static TregexPattern findFlatConjpTregex =
     // TODO: add more patterns, perhaps ignore case
+    // for example, what should we do with "and not"?  Is it right to
+    // generally add the "not" to the following tree with moveRB, or
+    // should we make "and not" a CONJP?
+    // also, perhaps look at ADVP
     TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " + 
                           "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
                           "  (< and $+ (RB=end < so)) | " + 
@@ -149,8 +153,10 @@ public class CoordinationTransformer implements TreeTransformer {
     return Tsurgeon.processPattern(findFlatConjpTregex, addConjpTsurgeon, t);
   }
 
-  private static TregexPattern moveRBTregex = 
-    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^([,]|CC|CONJP)$/ $+ (RB=adv $+ /^(S|PP|VP)/=dest [ < not | < then ] ))) ");
+  private static TregexPattern moveRBTregex[] = {
+    TregexPattern.compile("/^S|PP|VP/ < (/^(S|PP|VP)/ $++ (/^([,]|CC|CONJP)$/ $+ (RB=adv [ < not | < then ] $+ /^(S|PP|VP)/=dest))) "),
+    TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^([,]|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
+  };
 
   private static TsurgeonPattern moveRBTsurgeon =
     Tsurgeon.parseOperation("move adv >0 dest");
@@ -159,7 +165,10 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t == null) {
       return null;
     }
-    return Tsurgeon.processPattern(moveRBTregex, moveRBTsurgeon, t);
+    for (TregexPattern pattern : moveRBTregex) {
+      t = Tsurgeon.processPattern(pattern, moveRBTsurgeon, t);
+    }
+    return t;
   }
 
   // Matches to be questions if the question starts with WHNP, such as
@@ -220,12 +229,20 @@ public class CoordinationTransformer implements TreeTransformer {
       // UCP (N ...) -> NP
       TregexPattern.compile("/^UCP/=ucp <, /^N/"),
       TregexPattern.compile("/^UCP/=ucp <, (DT $+ /^N/)")
-    }
+    },
+    {
+      // UCP ADVP -> ADVP
+      // Might want to look for ways to include RB for flatter structures,
+      // but then we have to watch out for (RB not) for example
+      TregexPattern.compile("/^UCP/=ucp <, /^ADVP/")
+    },
   };
 
   private static final TsurgeonPattern[] operations = {
     Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADJP$1/"),
     Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/NP$1/"),
+    // TODO: this turns UCP-TMP into ADVP instead of ADVP-TMP.  What do we actually want?
+    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADVP/"), 
   };
 
   /**
