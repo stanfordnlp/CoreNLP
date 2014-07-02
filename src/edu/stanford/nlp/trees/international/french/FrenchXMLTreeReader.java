@@ -45,7 +45,7 @@ import edu.stanford.nlp.util.XMLUtils;
  * @author Spence Green
  *
  */
-public class FrenchTreeReader implements TreeReader {
+public class FrenchXMLTreeReader implements TreeReader {
 
   private InputStream stream;
   private final TreeNormalizer treeNormalizer;
@@ -77,8 +77,8 @@ public class FrenchTreeReader implements TreeReader {
    *
    * @param in The <code>Reader</code>
    */
-  public FrenchTreeReader(Reader in) {
-    this(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer());
+  public FrenchXMLTreeReader(Reader in, boolean ccTagset) {
+    this(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer(ccTagset));
   }
 
   /**
@@ -88,7 +88,7 @@ public class FrenchTreeReader implements TreeReader {
    * @param tf TreeFactory -- factory to create some kind of Tree
    * @param tn the method of normalizing trees
    */
-  public FrenchTreeReader(Reader in, TreeFactory tf, TreeNormalizer tn) {
+  public FrenchXMLTreeReader(Reader in, TreeFactory tf, TreeNormalizer tn) {
     TreebankLanguagePack tlp = new FrenchTreebankLanguagePack();
     stream = new ReaderInputStream(in,tlp.getEncoding());
     treeFactory = tf;
@@ -336,7 +336,7 @@ public class FrenchTreeReader implements TreeReader {
    */
   public static void main(String[] args) {
     if(args.length < 1) {
-      System.err.printf("Usage: java %s tree_file(s)%n%n",FrenchTreeReader.class.getName());
+      System.err.printf("Usage: java %s tree_file(s)%n%n",FrenchXMLTreeReader.class.getName());
       System.exit(-1);
     }
 
@@ -344,7 +344,7 @@ public class FrenchTreeReader implements TreeReader {
     for(int i = 0; i < args.length; i++)
       fileList.add(new File(args[i]));
 
-    TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+    TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false);
     int totalTrees = 0;
     Set<String> morphAnalyses = Generics.newHashSet();
     try {

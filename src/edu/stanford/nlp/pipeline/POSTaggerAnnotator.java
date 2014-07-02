@@ -80,6 +80,14 @@ public class POSTaggerAnnotator implements Annotator {
     this.reuseTags = PropertiesUtils.getBool(props, annotatorName + ".reuseTags", false);
   }
 
+  public static String signature(Properties props) {
+    return ("pos.maxlen:" + props.getProperty("pos.maxlen", "") +
+            "pos.verbose:" + PropertiesUtils.getBool(props, "pos.verbose") + 
+            "pos.reuseTags:" + PropertiesUtils.getBool(props, "pos.reuseTags") + 
+            "pos.model:" + props.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL) +
+            "pos.nthreads:" + props.getProperty("pos.nthreads", props.getProperty("nthreads", "")));
+  }
+
   private static MaxentTagger loadModel(String loc, boolean verbose) {
     Timing timer = null;
     if (verbose) {
@@ -133,8 +141,8 @@ public class POSTaggerAnnotator implements Annotator {
 
   private CoreMap doOneSentence(CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<TaggedWord> tagged = null;
     if (tokens.size() <= maxSentenceLength) {
-      List<TaggedWord> tagged = null;
       try {
         tagged = pos.tagSentence(tokens, this.reuseTags);
       } catch (OutOfMemoryError e) {
@@ -142,15 +150,15 @@ public class POSTaggerAnnotator implements Annotator {
                            "Will ignore and continue: " +
                            Sentence.listToString(tokens));
       }
+    }
 
-      if (tagged != null) {
-        for (int i = 0, sz = tokens.size(); i < sz; i++) {
-          tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
-        }
-      } else {
-        for (int i = 0, sz = tokens.size(); i < sz; i++) {
-          tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
-        }
+    if (tagged != null) {
+      for (int i = 0, sz = tokens.size(); i < sz; i++) {
+        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, tagged.get(i).tag());
+      }
+    } else {
+      for (int i = 0, sz = tokens.size(); i < sz; i++) {
+        tokens.get(i).set(CoreAnnotations.PartOfSpeechAnnotation.class, "X");
       }
     }
     return sentence;

@@ -86,6 +86,46 @@ public class MultiPatternMatcher<T> {
   }
 
   /**
+   * Given a sequence, applies our patterns over the sequence and returns
+   *   all non overlapping matches.  When multiple patterns overlaps,
+   *   matched patterns are selected to give the overall maximum score
+   * @param elements input sequence to match against
+   * @return list of match results that are non-overlapping
+   */
+  public List<SequenceMatchResult<T>> findNonOverlappingMaxScore(List<? extends T> elements)
+  {
+    return findNonOverlappingMaxScore(elements, SequenceMatchResult.SCORER);
+  }
+
+  /**
+   * Given a sequence, applies our patterns over the sequence and returns
+   *   all non overlapping matches.  When multiple patterns overlaps,
+   *   matched patterns are selected to give the overall maximum score
+   * @param elements input sequence to match against
+   * @param scorer scorer for scoring each match
+   * @return list of match results that are non-overlapping
+   */
+  public List<SequenceMatchResult<T>> findNonOverlappingMaxScore(List<? extends T> elements,
+                                                                 Function<? super SequenceMatchResult, Double> scorer)
+  {
+    Collection<SequencePattern<T>> triggered = getTriggeredPatterns(elements);
+    List<SequenceMatchResult<T>> all = new ArrayList<SequenceMatchResult<T>>();
+    int i = 0;
+    for (SequencePattern<T> p:triggered) {
+      SequenceMatcher<T> m = p.getMatcher(elements);
+      m.setOrder(i);
+      while (m.find()) {
+        all.add(m.toBasicSequenceMatchResult());
+      }
+      i++;
+    }
+    List<SequenceMatchResult<T>> res = IntervalTree.getNonOverlappingMaxScore( all, SequenceMatchResult.TO_INTERVAL, scorer);
+    Collections.sort(res, SequenceMatchResult.OFFSET_COMPARATOR);
+
+    return res;
+  }
+
+  /**
    * Given a sequence, applies each of our patterns over the sequence and returns
    *   all non overlapping matches for each of the patterns.
    * Unlike #findAllNonOverlapping, overlapping matches from different patterns are kept
@@ -149,7 +189,7 @@ public class MultiPatternMatcher<T> {
 
     @Override
     public Collection<SequencePattern<T>> apply(List<? extends T> elements) {
-      // Use LinkedHashSet to preserve orginal ordering of patterns.
+      // Use LinkedHashSet to preserve original ordering of patterns.
       Set<SequencePattern<T>> triggeredPatterns = new LinkedHashSet<SequencePattern<T>>();
       for (T node:elements) {
         Collection<SequencePattern<T>> triggered = trigger.apply(node);

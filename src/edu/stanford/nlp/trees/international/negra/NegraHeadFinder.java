@@ -172,6 +172,9 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
   protected Tree determineNonTrivialHead(Tree t, Tree parent) {
     Tree theHead = null;
     String motherCat = basicCategory(t.label().value());
+    if (motherCat.startsWith("@")) {
+      motherCat = motherCat.substring(1);
+    }
     if (DEBUG) {
       System.err.println("Looking for head of " + t.label() +
                          "; value is |" + t.label().value() + "|, " +
