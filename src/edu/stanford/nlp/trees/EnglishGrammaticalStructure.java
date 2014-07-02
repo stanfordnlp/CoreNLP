@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.*;
 
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
@@ -172,6 +173,64 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     addXSubj(list);
     if (DEBUG) {
       printListSorted("After adding xsubj:", list);
+    }
+
+    addStrandedPobj(list);
+    if (DEBUG) {
+      printListSorted("After adding stranded pobj:", list);
+    }    
+  }
+
+  // Deal with preposition stranding in relative clauses.
+  // For example, "the only thing I'm rooting for"
+  // This method will add pobj(for, thing) by connecting using the rcmod and prep
+  private static void addStrandedPobj(List<TypedDependency> list) {
+    List<TreeGraphNode> depNodes = null;
+    List<TypedDependency> newDeps = null;
+    for (TypedDependency rcmod : list) {
+      if (rcmod.reln() != RELATIVE_CLAUSE_MODIFIER) {
+        continue;
+      }
+
+      TreeGraphNode head = rcmod.gov();
+      if (depNodes == null) {
+        depNodes = Generics.newArrayList();
+      } else {
+        depNodes.clear();
+      }
+      depNodes.add(rcmod.dep());
+      for (TypedDependency connected : list) {
+        if (connected.gov() == rcmod.dep() && (connected.reln() == XCLAUSAL_COMPLEMENT || connected.reln() == CONJUNCT)) {
+          depNodes.add(connected.dep());
+        }
+      }
+
+      for (TreeGraphNode dep : depNodes) {
+        for (TypedDependency prep : list) {
+          if (prep.gov() != dep || prep.reln() != PREPOSITIONAL_MODIFIER) {
+            continue;
+          }
+
+          boolean found = false;
+          for (TypedDependency other : list) {
+            if (other.gov() == prep.dep() && (other.reln() == PREPOSITIONAL_COMPLEMENT || other.reln() == PREPOSITIONAL_OBJECT)) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            if (newDeps == null) {
+              newDeps = Generics.newArrayList();
+            }
+            TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, prep.dep(), head);
+            newDeps.add(newDep);
+          }
+        }
+      }
+
+    }
+    if (newDeps != null) {
+      list.addAll(newDeps);
     }
   }
 

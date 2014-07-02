@@ -144,6 +144,13 @@ public class LexicalizedParser implements Function<List<? extends HasWord>, Tree
     return loadModel(parserFileOrUrl, new Options(), extraFlags);
   }
 
+  public static LexicalizedParser loadModel(String parserFileOrUrl,
+                                            List<String> extraFlags) {
+    String[] flags = new String[extraFlags.size()];
+    extraFlags.toArray(flags);
+    return loadModel(parserFileOrUrl, flags);
+  }
+
   /**
    * Construct a new LexicalizedParser.  This loads a grammar
    * that was previously assembled and stored as a serialized file.

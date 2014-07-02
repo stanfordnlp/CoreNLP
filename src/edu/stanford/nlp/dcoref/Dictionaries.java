@@ -202,7 +202,7 @@ public class Dictionaries {
   public final Set<String> inanimateWords = Generics.newHashSet();
   public final Set<String> animateWords = Generics.newHashSet();
 
-  public final Map<List<String>, int[]> genderNumber = Generics.newHashMap();
+  public final Map<List<String>, Gender> genderNumber = Generics.newHashMap();
 
   public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<Counter<Pair<String, String>>>(4);
   public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<Pair<String, String>>();
@@ -379,15 +379,29 @@ public class Dictionaries {
       BufferedReader reader = IOUtils.readerFromString(file);
       for (String line; (line = reader.readLine()) != null; ) {
         String[] split = line.split("\t");
-        List<String> tokens = new ArrayList<String>(Arrays.asList(split[0].split(" ")));
         String[] countStr = split[1].split(" ");
-        int[] counts = new int[4];
-        counts[0] = Integer.parseInt(countStr[0]);
-        counts[1] = Integer.parseInt(countStr[1]);
-        counts[2] = Integer.parseInt(countStr[2]);
-        counts[3] = Integer.parseInt(countStr[3]);
+        
+        int male = Integer.parseInt(countStr[0]);
+        int female = Integer.parseInt(countStr[1]);
+        int neutral = Integer.parseInt(countStr[2]);
 
-        genderNumber.put(tokens, counts);
+        Gender gender = Gender.UNKNOWN;
+        if (male * 0.5 > female + neutral && male > 2) {
+          gender = Gender.MALE;
+        } else if (female * 0.5 > male + neutral && female > 2) {
+          gender = Gender.FEMALE;
+        } else if (neutral * 0.5 > male + female && neutral > 2) {
+          gender = Gender.NEUTRAL;
+        }
+
+        if (gender == Gender.UNKNOWN) {
+          continue;
+        }
+
+        String[] words = split[0].split(" ");
+        List<String> tokens = Arrays.asList(words);
+
+        genderNumber.put(tokens, gender);
       }
       reader.close();
     } catch (IOException e) {
