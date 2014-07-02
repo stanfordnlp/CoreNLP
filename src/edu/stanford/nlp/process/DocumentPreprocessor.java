@@ -65,6 +65,8 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
   //From PTB conventions
   private final String[] sentenceFinalFollowers = {")", "]", "\"", "\'", "''", "-RRB-", "-RSB-", "-RCB-"};
+  
+  private boolean keepEmptySentences = false;
 
 
   /**
@@ -112,6 +114,15 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
       System.err.printf("%s: Could not open path %s\n", this.getClass().getName(), docPath);
       throw new RuntimeIOException(ioe);
     }
+  }
+
+  /**
+   * Set whether or not the tokenizer keeps empty sentences in
+   * whitespace mode.  Useful for programs that want to echo blank
+   * lines.  Not relevant for the non-whitespace model.
+   */
+  public void setKeepEmptySentences(boolean keepEmptySentences) {
+    this.keepEmptySentences = keepEmptySentences;
   }
 
   /**
@@ -256,8 +267,14 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
       nextSentCarryover.clear();
       boolean seenBoundary = false;
 
-      while (tokenizer.hasNext()) {
+      if (!tokenizer.hasNext()) {
+        IOUtils.closeIgnoringExceptions(inputReader);
+        inputReader = null;
+        nextSent = null;
+        return;
+      }
 
+      do {
         HasWord token = tokenizer.next();
         if (splitTag != null) {
           String[] toks = splitTag.apply(token.word());
@@ -295,15 +312,15 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
         // was a whitespace token such as \n.  We might as well keep
         // going as if we had never seen anything.
         if (seenBoundary && delimFollowers.size() == 0) {
-          if (nextSent.size() > 0) {
+          if (nextSent.size() > 0 || keepEmptySentences) {
             break;
           } else {
             seenBoundary = false;
           }
         }
-      }
+      } while (tokenizer.hasNext());
 
-      if (nextSent.size() == 0 && nextSentCarryover.size() == 0) {
+      if (nextSent.size() == 0 && nextSentCarryover.size() == 0 && !keepEmptySentences) {
         IOUtils.closeIgnoringExceptions(inputReader);
         inputReader = null;
         nextSent = null;
