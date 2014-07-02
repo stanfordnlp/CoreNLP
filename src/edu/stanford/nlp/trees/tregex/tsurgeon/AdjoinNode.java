@@ -12,7 +12,11 @@ class AdjoinNode extends TsurgeonPattern {
   private final AuxiliaryTree adjunctionTree;
 
   public AdjoinNode(AuxiliaryTree t, TsurgeonPattern p) {
-    super("adjoin", new TsurgeonPattern[] {p});
+    this("adjoin", t, p);
+  }
+
+  public AdjoinNode(String name, AuxiliaryTree t, TsurgeonPattern p) {
+    super(name, new TsurgeonPattern[] {p});
     if (t == null || p == null) {
       throw new NullPointerException("AdjoinNode: illegal null argument, t=" + t + ", p=" + p);
     }
