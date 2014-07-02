@@ -464,6 +464,7 @@ public class GenericDataSetReader {
   private static CoreLabel initCoreLabel(String token) {
     CoreLabel label = new CoreLabel();
     label.setWord(token);
+    label.setValue(token);
     label.set(CoreAnnotations.TextAnnotation.class, token);
     return label;
   }
