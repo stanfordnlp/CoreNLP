@@ -256,7 +256,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       unaryScoreDerivativesG.put(entry.getKey(), new SimpleMatrix(1, numRows));
       unaryScoreDerivativesB.put(entry.getKey(), new SimpleMatrix(1, numRows));
     }
-    if (DVModel.TRAIN_WORD_VECTORS) {
+    if (op.trainOptions.trainWordVectors) {
       for (Map.Entry<String, SimpleMatrix> entry : dvModel.wordVectors.entrySet()) {
         int numRows = entry.getValue().numRows();
         int numCols = entry.getValue().numCols();
@@ -319,7 +319,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
 
     double[] localDerivativeGood;
     double[] localDerivativeB;
-    if (DVModel.TRAIN_WORD_VECTORS) {
+    if (op.trainOptions.trainWordVectors) {
       localDerivativeGood = NeuralUtils.paramsToVector(theta.length,
                                                        binaryW_dfsG.valueIterator(), unaryW_dfsG.values().iterator(),
                                                        binaryScoreDerivativesG.valueIterator(),
@@ -401,7 +401,7 @@ public class DVParserCostAndGradient extends AbstractCachingDiffFunction {
       return;
     }
     if (tree.isPreTerminal()) {
-      if (DVModel.TRAIN_WORD_VECTORS) {
+      if (op.trainOptions.trainWordVectors) {
         String word = tree.children()[0].label().value();
         word = dvModel.getVocabWord(word);
 //        SimpleMatrix currentVector = nodeVectors.get(tree);
