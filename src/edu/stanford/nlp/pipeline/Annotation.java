@@ -76,6 +76,13 @@ public class Annotation extends ArrayCoreMap {
     this.set(CoreAnnotations.TextAnnotation.class, text);
   }
 
+  /** The basic toString() method of an Annotation simply
+   *  prints out the text over which any annotations have
+   *  been made (TextAnnotation). To print all the
+   *  Annotation keys, use {@code toShorterString();}.
+   *
+   *  @return The text underlying this Annotation
+   */
   @Override
   public String toString() {
     return this.get(CoreAnnotations.TextAnnotation.class);
@@ -94,7 +101,7 @@ public class Annotation extends ArrayCoreMap {
       } else {
         // If there is no text in the sentence, fake it as best as we can
         if (text.length() > 0) {
-          text.append("\n");
+          text.append('\n');
         }
         text.append(Sentence.listToString(sentenceTokens));
       }
