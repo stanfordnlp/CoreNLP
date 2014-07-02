@@ -790,13 +790,8 @@
   # General compositional rules
   ENV.defaults["stage"] = 3
 
-  { name: "temporal-composite-timezone1",
+  { name: "temporal-composite-timezone",
     pattern: ( (?$time [ { temporal::IS_TIMEX_TIME } ]) (?$timezone [ {{ tags["TIMEZONE"] }} ])  ),
-    result: TemporalCompose(INTERSECT, $time[0].temporal, $timezone[0].temporal)
-  }
-
-  { name: "temporal-composite-timezone2",
-    pattern: ( (?$time [ { temporal::IS_TIMEX_TIME } ]) "-LRB-" (?$timezone [ {{ tags["TIMEZONE"] }} ]) "-RRB-" ),
     result: TemporalCompose(INTERSECT, $time[0].temporal, $timezone[0].temporal)
   }
 

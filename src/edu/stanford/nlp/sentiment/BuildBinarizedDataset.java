@@ -18,20 +18,21 @@ import edu.stanford.nlp.util.Pair;
 
 public class BuildBinarizedDataset {
   /**
-   * Sets all of the labels on a tree to the given default value.
+   * Sets all of the labels on a tree to -1, representing that they
+   * are the unknown class.
    */
-  public static void setUnknownLabels(Tree tree, Integer defaultLabel) {
+  public static void setUnknownLabels(Tree tree) {
     if (tree.isLeaf()) {
       return;
     }
 
     for (Tree child : tree.children()) {
-      setUnknownLabels(child, defaultLabel);
+      setUnknownLabels(child);
     }
 
-    tree.label().setValue(defaultLabel.toString());
-  }  
-  
+    tree.label().setValue("-1");
+  }
+
   public static void extractLabels(Map<Pair<Integer, Integer>, String> spanToLabels, List<HasWord> tokens, String line) {
     String[] pieces = line.trim().split("\\s+");
     if (pieces.length == 0) {
@@ -43,7 +44,6 @@ public class BuildBinarizedDataset {
       throw new RuntimeException(error);
     }
 
-    //TODO: BUG: The pieces are tokenized differently than the splitting, e.g. on possessive markers as in "actors' expenses" 
     for (int i = 0; i < tokens.size() - pieces.length + 2; ++i) {
       boolean found = true;
       for (int j = 1; j < pieces.length; ++j) {
@@ -85,18 +85,17 @@ public class BuildBinarizedDataset {
    * the treebank used in the Sentiment project.
    * <br>
    * The expected input file is one sentence per line, with sentences
-   * separated by blank lines. The first line has the main label of the sentence together with the full sentence. 
-   * Lines after the first sentence line but before
-   * the blank line will be treated as labeled subphrases.  The
+   * separated by blank lines.  Lines after the sentence but before
+   * the blank line will be treated as descriptions of labels.  The
    * labels should start with the label and then contain a list of
-   * tokens the label applies to. All phrases that do not have their own label will take on the main sentence label!
-   *  For example:
+   * tokens the label applies to.  For example:
    * <br>
    * <code>
-   * 1 Today is not a good day.<br>
+   * Today is a good day.<br>
    * 3 good<br>
    * 3 good day <br>
-   * 3 a good day. <br>
+   * 3 Today is a good day <br>
+   * 3 Today is a good day. <br>
    * <br>
    * (next block starts here) <br>
    * </code>
@@ -135,7 +134,7 @@ public class BuildBinarizedDataset {
       if (chunk.trim() == "") {
         continue;
       }
-      // The expected format is that line 0 will be the text of the
+      // The exected format is that line 0 will be the text of the
       // sentence, and each subsequence line, if any, will be a value
       // followed by the sequence of tokens that get that value.
 
@@ -146,9 +145,7 @@ public class BuildBinarizedDataset {
       DocumentPreprocessor document = new DocumentPreprocessor(sin);
       document.setSentenceFinalPuncWords(new String[] {"\n"});
       List<HasWord> tokens = document.iterator().next();
-      Integer mainLabel = new Integer(tokens.get(0).word());
-      //System.out.print("Main Sentence Label: " + mainLabel.toString() + "; ");
-      tokens = tokens.subList(1, tokens.size());
+
       //System.err.println(tokens);
 
       Map<Pair<Integer, Integer>, String> spanToLabels = Generics.newHashMap();
@@ -160,7 +157,7 @@ public class BuildBinarizedDataset {
 
       Tree tree = parser.apply(tokens);
       Tree binarized = binarizer.transformTree(tree);
-      setUnknownLabels(binarized, mainLabel);
+      setUnknownLabels(binarized);
       Tree collapsedUnary = transformer.transformTree(binarized);
 
       Trees.convertToCoreLabels(collapsedUnary);
@@ -170,8 +167,8 @@ public class BuildBinarizedDataset {
         setSpanLabel(collapsedUnary, span, spanToLabels.get(span));
       }
 
-      System.out.println(collapsedUnary);
-      //System.out.println();
+      System.err.println(collapsedUnary);
+      //System.err.println();
     }
   }
 }
