@@ -146,6 +146,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
     if (o instanceof CoreMap) {
       Boolean forcedEndValue =
               ((CoreMap)o).get(CoreAnnotations.ForcedSentenceEndAnnotation.class);
+      ((CoreMap) o).remove(CoreAnnotations.ForcedSentenceEndAnnotation.class);  // clean up
       return forcedEndValue != null && forcedEndValue;
     } else {
       return false;
@@ -240,6 +241,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         // Hacky stuff to ensure sentence breaks does not happen in certain cases
         CoreMap cm = (CoreMap) o;
         Boolean forcedUntilEndValue = cm.get(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);
+        cm.remove(CoreAnnotations.ForcedSentenceUntilEndAnnotation.class);  // clean up after ourselves
         if (!forcedEnd) {
           if (forcedUntilEndValue != null && forcedUntilEndValue)
             inWaitForForcedEnd = true;
