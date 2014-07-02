@@ -115,7 +115,7 @@ public class DVParser {
 
     Timing timing = new Timing();
     long maxTrainTimeMillis = op.trainOptions.maxTrainTimeSeconds * 1000;
-    long nextDebugCycle = op.trainOptions.debugOutputSeconds * 1000;
+    int batchCount = 0;
     int debugCycle = 0;
     double bestLabelF1 = 0.0;
 
@@ -138,6 +138,7 @@ public class DVParser {
       List<Tree> shuffledSentences = new ArrayList<Tree>(sentences);
       Collections.shuffle(shuffledSentences, dvModel.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
+        ++batchCount;
         // This did not help performance
         //System.err.println("Setting AdaGrad's sum of squares to 1...");
         //Arrays.fill(sumGradSquare, 1.0);
@@ -164,7 +165,8 @@ public class DVParser {
           break;
         }
 
-        if (nextDebugCycle > 0 && totalElapsed > nextDebugCycle) {
+        if (op.trainOptions.debugOutputFrequency > 0 && batchCount % op.trainOptions.debugOutputFrequency == 0) {
+          System.err.println("Finished " + batchCount + " total batches, running evaluation cycle");
           // Time for debugging output!
           double tagF1 = 0.0;
           double labelF1 = 0.0;
@@ -207,7 +209,6 @@ public class DVParser {
           }
 
           ++debugCycle;
-          nextDebugCycle = timing.report() + op.trainOptions.debugOutputSeconds * 1000;
         }
       }
       long totalElapsed = timing.report();
@@ -235,51 +236,57 @@ public class DVParser {
     // 1: QNMinimizer, 2: SGD
     switch (MINIMIZER) {
     case (1): {
-    	QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);    
-    	qn.useMinPackSearch();
-    	qn.useDiagonalScaling();
-    	qn.terminateOnAverageImprovement(true);
-    	qn.terminateOnNumericalZero(true);
-    	qn.terminateOnRelativeNorm(true);
-
-    	theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);   	
+      QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);    
+      qn.useMinPackSearch();
+      qn.useDiagonalScaling();
+      qn.terminateOnAverageImprovement(true);
+      qn.terminateOnNumericalZero(true);
+      qn.terminateOnRelativeNorm(true);
+      
+      theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);   	
+      break;
     }
     case 2:{
-    	//Minimizer smd = new SGDMinimizer();    	double tol = 1e-4;    	theta = smd.minimize(gcFunc,tol,theta,op.trainOptions.qnIterationsPerBatch);
-    	double lastCost = 0, currCost = 0;
-    	boolean firstTime = true;
-    	for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
-    		//gcFunc.calculate(theta);
-    		double[] grad = gcFunc.derivativeAt(theta);
-    		currCost = gcFunc.valueAt(theta);
-    		System.err.println("batch cost: " + currCost);
-//    		if(!firstTime){
-//    			if(currCost > lastCost){
-//    				System.out.println("HOW IS FUNCTION VALUE INCREASING????!!! ... still updating theta");
-//    			}
-//    			if(Math.abs(currCost - lastCost) < 0.0001){
-//    				System.out.println("function value is not decreasing. stop");
-//    			}
-//    		}else{
-//    			firstTime = false;
-//    		}
-		lastCost = currCost;
-		ArrayMath.addMultInPlace(theta, grad, -1*op.trainOptions.learningRate);
-    	}
+      //Minimizer smd = new SGDMinimizer();    	double tol = 1e-4;    	theta = smd.minimize(gcFunc,tol,theta,op.trainOptions.qnIterationsPerBatch);
+      double lastCost = 0, currCost = 0;
+      boolean firstTime = true;
+      for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
+        //gcFunc.calculate(theta);
+        double[] grad = gcFunc.derivativeAt(theta);
+        currCost = gcFunc.valueAt(theta);
+        System.err.println("batch cost: " + currCost);
+        //    		if(!firstTime){
+        //    			if(currCost > lastCost){
+        //    				System.out.println("HOW IS FUNCTION VALUE INCREASING????!!! ... still updating theta");
+        //    			}
+        //    			if(Math.abs(currCost - lastCost) < 0.0001){
+        //    				System.out.println("function value is not decreasing. stop");
+        //    			}
+        //    		}else{
+        //    			firstTime = false;
+        //    		}
+        lastCost = currCost;
+        ArrayMath.addMultInPlace(theta, grad, -1*op.trainOptions.learningRate);
+      }
+      break;
     }
     case 3:{
-    	// AdaGrad
-    	double eps = 1e-3;
-    	double currCost = 0;
-    	for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
-    		double[] gradf = gcFunc.derivativeAt(theta);
-    		currCost = gcFunc.valueAt(theta);
-    		System.err.println("batch cost: " + currCost);
-    	    for (int feature =0; feature<gradf.length;feature++ ) {
-    	    	sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
-    	        theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
-    	      }    		
-    	} 
+      // AdaGrad
+      double eps = 1e-3;
+      double currCost = 0;
+      for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
+        double[] gradf = gcFunc.derivativeAt(theta);
+        currCost = gcFunc.valueAt(theta);
+        System.err.println("batch cost: " + currCost);
+        for (int feature =0; feature<gradf.length;feature++ ) {
+          sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
+          theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
+        }    		
+      } 
+      break;
+    }
+    default: {
+      throw new IllegalArgumentException("Unsupported minimizer " + MINIMIZER);
     }
     }
 
@@ -406,7 +413,7 @@ public class DVParser {
     System.err.println("  -qnIterationsPerBatch <int>: How many steps to take per batch.");
     System.err.println("  -qnEstimates <int>: Parameter for qn optimization.");
     System.err.println("  -qnTolerance <double>: Tolerance for early exit when optimizing a batch.");
-    System.err.println("  -debugOutputSeconds <int>: How frequently to score a model when training and write out intermediate models.");
+    System.err.println("  -debugOutputFrequency <int>: How frequently to score a model when training and write out intermediate models.");
     System.err.println("  -maxTrainTimeSeconds <int>: How long to train before terminating.");
     System.err.println("  -dvSeed <long>: A starting point for the random number generator.  Setting this should lead to repeatable results, even taking into account randomness.  Otherwise, a new random seed will be picked.");
     System.err.println("  -wordVectorFile <name>: A filename to load word vectors from.");
@@ -418,15 +425,16 @@ public class DVParser {
     System.err.println("  -(no)unknownCapsVector: Whether or not to use a word vector for unknown words with capitals");
     System.err.println("  -dvSimplifiedModel: Use a greatly dumbed down DVModel");
     System.err.println("  -scalingForInit: How much to scale matrices when creating a new DVModel");
-    System.err.println("  -lpWeight: A weight to give the original LexicalizedParser when testing (0.2 seems to work well)");
+    System.err.println("  -baseParserWeight: A weight to give the original LexicalizedParser when testing (0.2 seems to work well for English)");
     System.err.println("  -unkWord: The vector representing unknown word in the word vectors file");
     System.err.println("  -transformMatrixType: A couple different methods for initializing transform matrices");
+    System.err.println("  -(no)trainWordVectors: whether or not to train the word vectors along with the matrices.  True by default");
   }
 
   /**
    * An example command line for training a new parser:
    * <br>
-   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputSeconds 1200 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -dvIterations 40 -dvBatchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
+   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputFrequency 400 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -dvIterations 40 -dvBatchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
    */
   public static void main(String[] args) 
     throws IOException, ClassNotFoundException
@@ -482,9 +490,10 @@ public class DVParser {
           "-unknownchinesepercentvector",
           "-unknownchinesenumbervector",
           "-unknownchineseyearvector",
-          "-unkWord", "UNK",
+          "-unkWord", "*UNK*",
           "-transformMatrixType", "DIAGONAL",
-          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT)
+          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT),
+          "-trainWordVectors",
         } ));
     argsWithDefaults.addAll(Arrays.asList(args));
     args = argsWithDefaults.toArray(new String[argsWithDefaults.size()]);
@@ -618,6 +627,7 @@ public class DVParser {
 
     if (runTraining) {
       System.err.println("Training the RNN parser");
+      System.err.println("Current train options: " + dvparser.getOp().trainOptions);
       dvparser.train(trainSentences, trainCompressedParses, testTreebank, modelPath, resultsRecordPath);
       if (modelPath != null) {
         dvparser.saveModel(modelPath);
