@@ -9,7 +9,7 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 class AdjoinToFootNode extends AdjoinNode {
 
   public AdjoinToFootNode(AuxiliaryTree t, TsurgeonPattern p) {
-    super("adjoinF", t, p);
+    super(t, p);
   }
 
   @Override

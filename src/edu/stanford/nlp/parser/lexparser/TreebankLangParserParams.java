@@ -238,4 +238,12 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
                                                HeadFinder hf);
 
   boolean supportsBasicDependencies();
+
+  /**
+   * For the DVParser in particular, we want to combine some
+   * categories to simplify the number of matrices and therefore the
+   * number of parameters.  For example, we will treat NN, NNP, etc
+   * the same for English.
+   */
+  String combineCategory(String basic);
 }
