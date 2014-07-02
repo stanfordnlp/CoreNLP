@@ -94,13 +94,7 @@ import java.io.*;
  * <code>collectOperations</code> to collect all the surgery patterns
  * into one TsurgeonPattern, and then to call processPatternOnTrees.
  * Either of these latter methods is much faster.
- * </p><p>
- * The parser also has the ability to collect multiple
- * TsurgeonPatterns into one pattern by itself by enclosing each
- * pattern in <code>[ ... ]</code>.  For example, 
- * <br>
- * <code>Tsurgeon.parseOperation("[relabel foo BAR] [prune bar]")</code>
- * </p><p>
+ * <p>
  * For more information on using Tsurgeon from the command line,
  * see the {@link #main} method and the package Javadoc.
  *
@@ -274,15 +268,7 @@ public class Tsurgeon {
    * </blockquote>
    *
    * </p>
-   * <p>
-
-   * Tsurgeon has (very) limited support for conditional statements.
-   * If a pattern is prefaced with 
-   * <code>if exists &lt;name&gt;</code>, 
-   * the rest of the pattern will only execute if
-   * the named node was found in the corresponding TregexMatcher.
    *
-   * </p>
    *
    * @param args a list of names of files each of which contains a single tregex matching pattern plus a list, one per line,
    *        of transformation operations to apply to the matched pattern.
@@ -586,7 +572,7 @@ public class Tsurgeon {
     try {
       TsurgeonParser parser =
         new TsurgeonParser(new StringReader(operationString + "\n"));
-      return parser.Root();
+      return new TsurgeonPatternRoot(new TsurgeonPattern[] {parser.Root()} );
     } catch(ParseException e) {
       throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
                                        operationString, e);
