@@ -1339,8 +1339,76 @@ public class TregexTest extends TestCase {
     
     matcher = pattern.matcher(trees[2]);
     assertFalse(matcher.find());
- }
+  }
 
+  /** 
+   * The PARENT_EQUALS relation allows for a simplification of what
+   * would have been a pair of rules in the dependencies.
+   */
+  public void testParentEquals() {
+    runTest("A <= B", "(A (B 1))", "(A (B 1))");
+    // Note that if the child node is the same as the parent node, a
+    // double match is expected if there is nothing to eliminate it in
+    // the expression
+    runTest("A <= A", "(A (A 1) (B 2))", "(A (A 1) (B 2))", "(A (A 1) (B 2))", "(A 1)");
+    // This is the kind of expression where this relation can be useful
+    runTest("A <= (A < B)", "(A (A (B 1)))", "(A (A (B 1)))", "(A (B 1))");
+    runTest("A <= (A < B)", "(A (A (B 1)) (A (C 2)))", "(A (A (B 1)) (A (C 2)))", "(A (B 1))");
+    runTest("A <= (A < B)", "(A (A (C 2)))");
+  }
+
+  /** 
+   * Test a few possible ways to make disjunctions at the root level.
+   * Note that disjunctions at lower levels can always be created by
+   * repeating the relation, but that is not true at the root, since
+   * the root "relation" is implicit.
+   */
+  public void testRootDisjunction() {
+    runTest("A | B", "(A (B 1))", "(A (B 1))", "(B 1)");
+
+    runTest("(A) | (B)", "(A (B 1))", "(A (B 1))", "(B 1)");
+
+    runTest("A < B | A < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+
+    runTest("A < B | B < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+    runTest("A < B | B < C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))");
+
+    runTest("A | B | C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))", "(C 1)", "(C 2)");
+
+    // The binding of the | should look like this:
+    // A ( (< B) | (< C) )
+    runTest("A < B | < C", "(A (B 1))", "(A (B 1))");
+    runTest("A < B | < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+    runTest("A < B | < C", "(B (C 1))");
+  }
+
+
+  /**
+   * Tests the subtree pattern, <code>&lt;...</code>, which checks for
+   * an exact subtree under our current tree
+   */
+  public void testSubtreePattern() {
+    // test the obvious expected matches and several expected match failures
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3))", "(A (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))", "(A (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))");
+    runTest("A <... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))");
+    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2))");
+
+    // every test above should return the opposite when negated
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))", "(A (B 1) (C 2) (D 3) (E 4))");
+    runTest("A !<... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))", "(A (E 4) (B 1) (C 2) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))", "(A (B 1) (C 2) (E 4) (D 3))");
+    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
+
+    // test a couple various forms of nesting
+    runTest("A <... { (B < C) ; D }", "(A (B (C 2)) (D 3))", "(A (B (C 2)) (D 3))");
+    runTest("A <... { (B <... { C ; D }) ; E }", "(A (B (C 2) (D 3)) (E 4))", "(A (B (C 2) (D 3)) (E 4))");
+    runTest("A <... { (B !< C) ; D }", "(A (B (C 2)) (D 3))");
+  }
 
   /**
    * Stores an input and the expected output.  Obviously this is only
