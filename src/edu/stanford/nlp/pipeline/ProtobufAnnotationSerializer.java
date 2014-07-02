@@ -181,6 +181,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A parsed Annotation.
    * @throws IOException In case the stream cannot be read from.
    */
+  @SuppressWarnings("UnusedDeclaration")
   public Annotation readUndelimited(File in) throws IOException {
     FileInputStream delimited = new FileInputStream(in);
     FileInputStream undelimited = new FileInputStream(in);
@@ -634,15 +635,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     lossySentence.set(TokensAnnotation.class, tokens);
     // Add text -- missing by default as it's populated from the Document
-    StringBuilder text = new StringBuilder();
-    if (tokens.size() > 0) {
-      if (tokens.get(0).before() != null) { text.append(tokens.get(0).before()); }
-    }
-    for (CoreLabel token : tokens) {
-      if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
-      if (token.after() != null) { text.append(token.after()); }
-    }
-    lossySentence.set(TextAnnotation.class, text.toString());
+    lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens));
     // Return
     return lossySentence;
   }
@@ -697,6 +690,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getSentenceCount() > 0) {
       // Populate the tokens from the sentence
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
+        // It's conceivable that the sentences are not contiguous -- pad this with nulls
+        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetBegin()) {
+          tokens.add(null);
+        }
+        // Read the sentence
         for (CoreNLPProtos.Token token : sentence.getTokenList()) {
           CoreLabel coreLabel = fromProto(token);
           // Set docid
@@ -722,10 +720,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     for (int sentIndex = 0; sentIndex < proto.getSentenceCount(); ++sentIndex) {
       CoreNLPProtos.Sentence sentence = proto.getSentence(sentIndex);
       CoreMap map = fromProtoNoTokens(sentence);
-      if (!tokens.isEmpty() && sentence.hasTokenOffsetBegin() && sentence.hasTokenOffsetEnd()) {
+      if (!tokens.isEmpty() && sentence.hasTokenOffsetBegin() && sentence.hasTokenOffsetEnd() &&
+          map.get(TokensAnnotation.class) == null) {
         // Set tokens for sentence
-        int tokenBegin = Math.min(sentence.getTokenOffsetBegin(), tokens.size());
-        int tokenEnd = Math.min(sentence.getTokenOffsetEnd(), tokens.size());
+        int tokenBegin = sentence.getTokenOffsetBegin();
+        int tokenEnd = sentence.getTokenOffsetEnd();
+        assert tokenBegin <= tokens.size() && tokenBegin <= tokenEnd;
+        assert tokenEnd <= tokens.size();
         map.set(TokensAnnotation.class, tokens.subList(tokenBegin, tokenEnd));
         // Set sentence index + token index + paragraph index
         for (int i = tokenBegin; i < tokenEnd; ++i) {
@@ -734,9 +735,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           if (sentence.hasParagraph()) { tokens.get(i).set(ParagraphAnnotation.class, sentence.getParagraph()); }
         }
         // Set text
-        int characterBegin = Math.min(sentence.getCharacterOffsetBegin(), proto.getText().length());
-        int characterEnd = Math.min(sentence.getCharacterOffsetEnd(), proto.getText().length());
-        map.set(TextAnnotation.class, proto.getText().substring(characterBegin, characterEnd));
+        int characterBegin = sentence.getCharacterOffsetBegin();
+        int characterEnd = sentence.getCharacterOffsetEnd();
+        if (characterEnd <= proto.getText().length()) {
+          // The usual case -- get the text from the document text
+          map.set(TextAnnotation.class, proto.getText().substring(characterBegin, characterEnd));
+        } else {
+          // The document text is wrong -- guess the text from the tokens
+          map.set(TextAnnotation.class, recoverOriginalText(tokens.subList(tokenBegin, tokenEnd)));
+        }
       }
       // End iteration
       sentences.add(map);
@@ -1001,4 +1008,26 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return rtn;
   }
 
+  /**
+   * Recover the {@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation} field of a sentence
+   * from the tokens. This is useful if the text was not set in the protocol buffer, and therefore
+   * needs to be reconstructed from tokens.
+   *
+   * @param tokens The list of tokens representing this sentence.
+   * @return The original text of the sentence.
+   */
+  public static String recoverOriginalText(List<CoreLabel> tokens) {
+    StringBuilder text = new StringBuilder();
+    if (tokens.size() > 0) {
+      CoreLabel token = tokens.get(0);
+      if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
+    }
+    for (int i = 1; i < tokens.size() - 1; ++i) {
+      CoreLabel token = tokens.get(i);
+      if (token.before() != null) { text.append(token.before()); }
+      if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
+    }
+    System.err.println(text.toString());
+    return text.toString();
+  }
 }
