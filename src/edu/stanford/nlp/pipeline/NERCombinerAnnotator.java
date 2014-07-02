@@ -107,11 +107,11 @@ public class NERCombinerAnnotator implements Annotator {
               models.toArray(new String[models.size()]));
     } catch (FileNotFoundException e) {
       throw new RuntimeIOException(e);
-   }
-   return nerCombiner;
- }
-
-public void annotate(Annotation annotation) {
+    }
+    return nerCombiner;
+  }
+  
+  public void annotate(Annotation annotation) {
     timerStart("Adding NER Combiner annotation...");
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       // classify tokens for each sentence
