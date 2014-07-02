@@ -1,10 +1,10 @@
-xom-1.2.6.jar
+xom-1.2.10.jar
 
-Url: http://www.xom.nu/
+Url: http://www.xom.nu/  OR  http://www.cafeconleche.org/XOM/
 
 License: http://www.xom.nu/license.xhtml
 
-LGPL
+LGPL v2.1
 Gnu lesser general public license
 
 -----------------------------------------
@@ -24,4 +24,12 @@ ejml.jar
 URL: http://code.google.com/p/efficient-java-matrix-library/
 
 Gnu lesser general public license
+-----------------------------------------------------------------
+
+
+javax.json.jar
+
+URL: https://json-processing-spec.java.net/
+
+GNU GPLv2 with Classpath Exception
 -----------------------------------------------------------------

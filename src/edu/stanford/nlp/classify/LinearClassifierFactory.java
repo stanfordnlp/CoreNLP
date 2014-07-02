@@ -856,7 +856,8 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     System.err.println(String.format("Training linear classifier with %d features and %d labels", featureIndex.size(), labelIndex.size()));
 
     LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataIterable, logPrior, featureIndex, labelIndex);
-    objective.setPrior(new LogPrior(LogPrior.LogPriorType.QUADRATIC));
+    // [cdm 2014] Commented out next line. Why not use the logPrior set up previously and used at creation???
+    // objective.setPrior(new LogPrior(LogPrior.LogPriorType.QUADRATIC));
 
     double[] initial = objective.initial();
     double[] weights = minimizer.minimize(objective, TOL, initial);
@@ -867,9 +868,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public Classifier<L, F> trainClassifier(GeneralDataset<L, F> dataset, float[] dataWeights, LogPrior prior) {
     Minimizer<DiffFunction> minimizer = getMinimizer();
-    if(dataset instanceof RVFDataset)
+    if (dataset instanceof RVFDataset) {
       ((RVFDataset<L,F>)dataset).ensureRealValues();
-    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, dataWeights, logPrior);
+    }
+    LogConditionalObjectiveFunction<L, F> objective = new LogConditionalObjectiveFunction<L, F>(dataset, dataWeights, prior);
 
     double[] initial = objective.initial();
     double[] weights = minimizer.minimize(objective, TOL, initial);
@@ -932,19 +934,19 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
                 + currLine + " in file " + file);
         }
         currLine++;
-        int feature = Integer.valueOf(tuples[0]);
-        int label = Integer.valueOf(tuples[1]);
-        double value = Double.valueOf(tuples[2]);
+        int feature = Integer.parseInt(tuples[0]);
+        int label = Integer.parseInt(tuples[1]);
+        double value = Double.parseDouble(tuples[2]);
         weights[feature][label] = value;
         line = in.readLine();
       }
 
       // First line in thresholds is the number of thresholds
-      int numThresholds = Integer.valueOf(in.readLine());
+      int numThresholds = Integer.parseInt(in.readLine());
       double[] thresholds = new double[numThresholds];
       int curr = 0;
       while ((line = in.readLine()) != null) {
-        double tval = Double.valueOf(line.trim());
+        double tval = Double.parseDouble(line.trim());
         thresholds[curr++] = tval;
       }
       in.close();

@@ -14,7 +14,7 @@ public abstract class NodePattern<T> {
 
   // Flags for string annotations
   public static final int CASE_INSENSITIVE = 0x02;
-  public static final int NORMALiZE = 0x04;
+  public static final int NORMALIZE = 0x04;
 
   /**
    * Returns true if the input node matches this pattern

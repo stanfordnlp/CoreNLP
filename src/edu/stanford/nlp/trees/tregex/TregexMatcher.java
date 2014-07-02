@@ -183,9 +183,6 @@ public abstract class TregexMatcher {
     return false;
   }
 
-  // todo [cdm 2013]: This just seems unused. What's it meant to do? Eliminable???
-  abstract boolean getChangesVariables();
-
   /**
    * Returns the node labeled with <code>name</code> in the pattern.
    *

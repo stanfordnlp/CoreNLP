@@ -103,9 +103,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   /**
    * Splits a compound marked by the lexer.
-   *
-   * @param cl
-   * @return
    */
   private CoreLabel processCompound(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
@@ -216,8 +213,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Returns a factory for FrenchTokenizer.
    * THIS IS NEEDED FOR CREATION BY REFLECTION.
-   *
-   * @return
    */
   public static TokenizerFactory<CoreLabel> factory() {
     return FrenchTokenizerFactory.newTokenizerFactory();
@@ -227,8 +222,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Returns a factory for FrenchTokenizer that replicates the tokenization of
    * Green, de Marneffe, and Manning (2011).
-   *
-   * @return
    */
   public static TokenizerFactory<CoreLabel> ftbFactory() {
     TokenizerFactory<CoreLabel> tf = FrenchTokenizerFactory.newTokenizerFactory();

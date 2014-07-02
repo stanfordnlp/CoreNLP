@@ -31,7 +31,7 @@ public class IOUtils {
   private IOUtils() { }
 
   /**
-   * Write object to a file with the specified name.
+   * Write object to a file with the specified name.  The file is silently gzipped if the filename ends with .gz.
    *
    * @param o Object to be written to file
    * @param filename Name of the temp file
@@ -44,7 +44,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File.
+   * Write an object to a specified File.  The file is silently gzipped if the filename ends with .gz.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -56,7 +56,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File. The file is silently gzipped regardless of name.
+   * Write an object to a specified File. The file is silently gzipped if the filename ends with .gz.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -66,8 +66,12 @@ public class IOUtils {
    */
   public static File writeObjectToFile(Object o, File file, boolean append) throws IOException {
     // file.createNewFile(); // cdm may 2005: does nothing needed
-    ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(
-            new GZIPOutputStream(new FileOutputStream(file, append))));
+    OutputStream os = new FileOutputStream(file, append);
+    if (file.getName().endsWith(".gz")) {
+      os = new GZIPOutputStream(os);
+    }
+    os = new BufferedOutputStream(os);
+    ObjectOutputStream oos = new ObjectOutputStream(os);
     oos.writeObject(o);
     oos.close();
     return file;
@@ -446,12 +450,13 @@ public class IOUtils {
       }
     }
 
+    if (textFileOrUrl.endsWith(".gz")) {
+      // gunzip it if necessary
+      in = new GZIPInputStream(in, 65536);
+    }
+
     // buffer this stream
     in = new BufferedInputStream(in);
-
-    // gzip it if necessary
-    if (textFileOrUrl.endsWith(".gz"))
-      in = new GZIPInputStream(in);
 
     return in;
   }
@@ -498,10 +503,29 @@ public class IOUtils {
 
   /**
    * Open a BufferedReader on stdin. Use the user's default encoding.
+   *
+   * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
    */
   public static BufferedReader readerFromStdin() throws IOException {
     return new BufferedReader(new InputStreamReader(System.in));
   }
+
+  /**
+   * Open a BufferedReader on stdin. Use the specified character encoding.
+   *
+   * @param encoding CharSet encoding. Maybe be null, in which case the
+   *         platform default encoding is used
+   * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
+   */
+  public static BufferedReader readerFromStdin(String encoding) throws IOException {
+    if (encoding == null) {
+      return new BufferedReader(new InputStreamReader(System.in));
+    }
+    return new BufferedReader(new InputStreamReader(System.in, encoding));
+  }
+
 
   /**
    * Open a BufferedReader to a file or URL specified by a String name. If the
@@ -1600,7 +1624,7 @@ public class IOUtils {
       List<String> lines = new ArrayList<String>();
       BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
-      int i = 0; 
+      int i = 0;
       while ((line = in.readLine()) != null) {
         i++;
         if(ignoreHeader && i == 1)
@@ -1615,7 +1639,7 @@ public class IOUtils {
       return null;
     }
   }
-  
+
   public static String backupName(String filename) {
     return backupFile(new File(filename)).toString();
   }
@@ -1673,6 +1697,21 @@ public class IOUtils {
     }
   }
 
+  /**
+   * Given a filepath, delete all files in the directory recursively
+   * @param dir
+   * @return
+   */
+  public static boolean deleteDirRecursively(File dir) {
+    if (dir.isDirectory()) {
+      for (File f : dir.listFiles()) {
+        boolean success = deleteDirRecursively(f);
+        if (!success)
+          return false;
+      }
+    }
+    return dir.delete();
+  }
 
   public static String getExtension(String fileName) {
     if(!fileName.contains("."))

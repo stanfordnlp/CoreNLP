@@ -684,13 +684,11 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     return false;
   }
 
+  private static final String[] EMPTY_ARGS = new String[0];
 
-  /**
-   * In general, we don't actually do any category combining for
-   * DVModels.  Only English for now
-   */
   @Override
-  public String combineCategory(String basic) {
-    return basic;
+  public String[] defaultCoreNLPFlags() {
+    return EMPTY_ARGS;
   }
+
 }
