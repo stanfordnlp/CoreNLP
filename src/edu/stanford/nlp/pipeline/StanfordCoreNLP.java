@@ -1009,7 +1009,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @param os PrintStream to print usage to
    * @param helpTopic a topic to print help about (or null for general options)
    */
-  private static void printHelp(PrintStream os, String helpTopic) {
+  protected static void printHelp(PrintStream os, String helpTopic) {
     if (helpTopic.toLowerCase().startsWith("pars")) {
       os.println("StanfordCoreNLP currently supports the following parsers:");
       os.println("\tstanford - Stanford lexicalized parser (default)");
@@ -1415,6 +1415,70 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     processFiles(files, 1);
   }
 
+  public void run() throws IOException {
+    Timing tim = new Timing();
+    StanfordRedwoodConfiguration.minimalSetup();
+
+    // multithreading thread count
+    String numThreadsString = (this.properties == null) ? null : this.properties.getProperty("threads");
+    int numThreads = 1;
+    try{
+      if (numThreadsString != null) {
+        numThreads = Integer.parseInt(numThreadsString);
+      }
+    } catch(NumberFormatException e) {
+      err("-threads [number]: was not given a valid number: " + numThreadsString);
+    }
+
+    long setupTime = tim.report();
+
+    // blank line after all the loading statements to make output more readable
+    log("");
+
+    //
+    // Process one file or a directory of files
+    //
+    if(properties.containsKey("file")){
+      String fileName = properties.getProperty("file");
+      Collection<File> files = new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true);
+      this.processFiles(null, files, numThreads);
+    }
+
+    //
+    // Process a list of files
+    //
+    else if (properties.containsKey("filelist")){
+      String fileName = properties.getProperty("filelist");
+      Collection<File> inputfiles = readFileList(fileName);
+      Collection<File> files = new ArrayList<File>(inputfiles.size());
+      for (File file:inputfiles) {
+        if (file.isDirectory()) {
+          files.addAll(new FileSequentialCollection(new File(fileName), properties.getProperty("extension"), true));
+        } else {
+          files.add(file);
+        }
+      }
+      this.processFiles(null, files, numThreads);
+    }
+
+    //
+    // Run the interactive shell
+    //
+    else {
+      shell(this);
+    }
+
+    if (TIME) {
+      log();
+      log(this.timingInformation());
+      log("Pipeline setup: " +
+          Timing.toSecondsString(setupTime) + " sec.");
+      log("Total time for StanfordCoreNLP pipeline: " +
+          tim.toSecondsString() + " sec.");
+    }
+
+  }
+
   /**
    * This can be used just for testing or for command-line text processing.
    * This runs the pipeline you specify on the
@@ -1430,15 +1494,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * @throws ClassNotFoundException If class loading problem
    */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    Timing tim = new Timing();
-    StanfordRedwoodConfiguration.minimalSetup();
-
     //
     // process the arguments
     //
     // extract all the properties from the command line
     // if cmd line is empty, set the properties to null. The processor will search for the properties file in the classpath
-    Properties props = null;
+    Properties props = new Properties();
     if (args.length > 0) {
       props = StringUtils.argsToProperties(args);
       boolean hasH = props.containsKey("h");
@@ -1449,68 +1510,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         return;
       }
     }
-    // multithreading thread count
-    String numThreadsString = (props == null) ? null : props.getProperty("threads");
-    int numThreads = 1;
-    try{
-      if (numThreadsString != null) {
-        numThreads = Integer.parseInt(numThreadsString);
-      }
-    } catch(NumberFormatException e) {
-      err("-threads [number]: was not given a valid number: " + numThreadsString);
-    }
-
-    //
-    // construct the pipeline
-    //
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    props = pipeline.getProperties();
-    long setupTime = tim.report();
-
-    // blank line after all the loading statements to make output more readable
-    log("");
-
-    //
-    // Process one file or a directory of files
-    //
-    if(props.containsKey("file")){
-      String fileName = props.getProperty("file");
-      Collection<File> files = new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true);
-      pipeline.processFiles(null, files, numThreads);
-    }
-
-    //
-    // Process a list of files
-    //
-    else if (props.containsKey("filelist")){
-      String fileName = props.getProperty("filelist");
-      Collection<File> inputfiles = readFileList(fileName);
-      Collection<File> files = new ArrayList<File>(inputfiles.size());
-      for (File file:inputfiles) {
-        if (file.isDirectory()) {
-          files.addAll(new FileSequentialCollection(new File(fileName), props.getProperty("extension"), true));
-        } else {
-          files.add(file);
-        }
-      }
-      pipeline.processFiles(null, files, numThreads);
-    }
-
-    //
-    // Run the interactive shell
-    //
-    else {
-      shell(pipeline);
-    }
-
-    if (TIME) {
-      log();
-      log(pipeline.timingInformation());
-      log("Pipeline setup: " +
-          Timing.toSecondsString(setupTime) + " sec.");
-      log("Total time for StanfordCoreNLP pipeline: " +
-          tim.toSecondsString() + " sec.");
-    }
+    // Run the pipeline
+    new StanfordCoreNLP(props).run();
   }
 
 }

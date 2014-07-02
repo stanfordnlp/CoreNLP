@@ -34,7 +34,7 @@ public class AnnotatorImplementations {
   /**
    * Clean XML input
    */
-  protected Annotator cleanXML(Properties properties,
+  protected CleanXmlAnnotator cleanXML(Properties properties,
                                String xmlTagsToRemove,
                                String sentenceEndingTags,
                                String dateTags,
