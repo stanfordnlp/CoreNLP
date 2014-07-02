@@ -120,6 +120,7 @@ import java.util.*;
  */
 public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
+  /** A global lock; necessary since dependency tree creation is not threadsafe */
   private static final Object globalLock = "I'm a lock :)";
 
   /**
@@ -157,6 +158,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   public ProtobufAnnotationSerializer(boolean enforceLosslessSerialization) { this.enforceLosslessSerialization = enforceLosslessSerialization; }
 
+  /** {@inheritDoc} */
   @Override
   public OutputStream write(Annotation corpus, OutputStream os) throws IOException {
     CoreNLPProtos.Document serialized = toProto(corpus);
@@ -165,6 +167,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return os;
   }
 
+  /** {@inheritDoc} */
   @Override
   public Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
     CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseFrom(is);
