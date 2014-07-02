@@ -74,9 +74,6 @@ public class Execution {
   @SuppressWarnings("FieldCanBeLocal")
   @Option(name = "strict", gloss = "If true, make sure that all options passed in are used somewhere")
   private static boolean strict = false;
-  @SuppressWarnings("FieldCanBeLocal")
-  @Option(name = "exec.verbose", gloss = "If true, print options as they are set.")
-  private static boolean verbose = false;
 
   static {
     try {
@@ -172,17 +169,6 @@ public class Execution {
 	 */
 
   private static void fillField(Object instance, Field f, String value) {
-    //--Verbose
-    if (verbose) {
-      Option opt = f.getAnnotation(Option.class);
-      StringBuilder b = new StringBuilder("setting ").append(f.getDeclaringClass().getName()).append("#").append(f.getName()).append(" ");
-      if (opt != null) {
-        b.append("[").append(opt.name()).append("] ");
-      }
-      b.append("to: ").append(value);
-      log(b.toString());
-    }
-
     try {
       //--Permissions
       boolean accessState = true;
@@ -409,7 +395,7 @@ public class Execution {
       }
       //(check to ensure that something got filled, if any @Option annotation was found)
       if (someOptionFound && !someOptionFilled) {
-        warn("found @Option annotations in class " + c + ", but didn't set any of them (all options were instance variables and no instance given?)");
+        warn("found @Option annotations in class, but didn't set any of them (all options were instance variables and no instance given?)");
       }
     }
 
@@ -428,7 +414,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)z
+        // (case: declared option)
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -445,7 +431,7 @@ public class Execution {
           try {
             clazz = ClassLoader.getSystemClassLoader().loadClass(className);
           } catch (Exception e) {
-            err("Could not set option: " + rawKey + "; either the option is mistyped, not defined, or the class " + className + " does not exist.");
+            err("Could not set option: " + rawKey + "; no such class: " + className);
           }
           // get the field
           if (clazz != null) {
@@ -454,12 +440,7 @@ public class Execution {
             } catch (Exception e) {
               err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
             }
-            if (target != null) {
-              log("option overrides " + target + " to '" + value + "'");
-              fillField(class2object.get(target.getDeclaringClass()), target, value);
-            } else {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
-            }
+            fillField(class2object.get(target.getDeclaringClass()), target, value);
           }
         }
       }

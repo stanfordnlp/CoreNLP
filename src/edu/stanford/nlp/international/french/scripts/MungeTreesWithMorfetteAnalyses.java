@@ -18,7 +18,6 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
-import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 
 /**
  * Places predicted morphological analyses in the leaves of gold FTB parse trees.
@@ -117,7 +116,8 @@ public final class MungeTreesWithMorfetteAnalyses {
 
     String treeFile = args[0];
     String morfetteFile = args[1];
-    TreeReaderFactory trf = new FrenchTreeReaderFactory();
+    boolean pennFormat = true;
+    TreeReaderFactory trf = new FrenchTreeReaderFactory(pennFormat);
     try {
       TreeReader tr = trf.newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8")));
       Iterator<List<CoreLabel>> morfetteItr = new MorfetteFileIterator(morfetteFile);

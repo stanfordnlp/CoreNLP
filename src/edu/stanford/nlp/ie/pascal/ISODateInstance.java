@@ -554,9 +554,9 @@ public class ISODateInstance {
     String yearOther = date2.substring(0, 4);
     if (year.contains("*") || yearOther.contains("*")) {
       after = after && checkWildcardCompatibility(year, yearOther);
-    } else if (Integer.parseInt(year) > Integer.parseInt(yearOther)) {
+    } else if (Integer.valueOf(year) > Integer.valueOf(yearOther)) {
       return true;
-    } else if (Integer.parseInt(year) < Integer.parseInt(yearOther)) {
+    } else if (Integer.valueOf(year) < Integer.valueOf(yearOther)) {
       return false;
     }
 
@@ -564,7 +564,7 @@ public class ISODateInstance {
       if (year.contains("*") || yearOther.contains("*")) {
         return after;
       } else {
-        return after && (Integer.parseInt(year) != Integer.parseInt(yearOther));
+        return after && (!Integer.valueOf(year).equals(Integer.valueOf(yearOther)));
       }
     }
     //then check months
@@ -572,9 +572,9 @@ public class ISODateInstance {
     String monthOther = date2.substring(4, 6);
     if (month.contains("*") || monthOther.contains("*")) {
       after = after && checkWildcardCompatibility(month, monthOther);
-    } else if (Integer.parseInt(month) > Integer.parseInt(monthOther)) {
+    } else if (Integer.valueOf(month) > Integer.valueOf(monthOther)) {
       return true;
-    } else if (Integer.parseInt(month) < Integer.parseInt(monthOther)) {
+    } else if (Integer.valueOf(month) < Integer.valueOf(monthOther)) {
       return false;
     }
 
@@ -582,7 +582,7 @@ public class ISODateInstance {
       if (month.contains("*") || monthOther.contains("*")) {
         return after;
       } else {
-        return after && (Integer.parseInt(month) != Integer.parseInt(monthOther));
+        return after && (!Integer.valueOf(month).equals(Integer.valueOf(monthOther)));
       }
     }
 
@@ -591,9 +591,9 @@ public class ISODateInstance {
     String dayOther = date2.substring(6, 8);
     if (day.contains("*") || dayOther.contains("*")) {
       after = after && checkWildcardCompatibility(day, dayOther);
-    } else if (Integer.parseInt(day) > Integer.parseInt(dayOther)) {
+    } else if (Integer.valueOf(day) > Integer.valueOf(dayOther)) {
       return true;
-    } else if (Integer.parseInt(day) <= Integer.parseInt(dayOther)) {
+    } else if (Integer.valueOf(day) <= Integer.valueOf(dayOther)) {
       return false;
     }
 
@@ -921,7 +921,7 @@ public class ISODateInstance {
   }
 
   /**
-   * Note: This method copied from {@code DateInstance}; not sure how we tell that it
+   * This method copied from {@link DateInstance}; not sure how we tell that it
    * is MMDD versus DDMM (sometimes it will be ambiguous).
    *
    */
@@ -997,10 +997,10 @@ public class ISODateInstance {
       }
       if (inputDate.charAt(inputDate.length() - 1) == 's') {//decade or century marker
         if (extract.charAt(2) == '0') {//e.g., 1900s -> 1900/1999
-          String endDate = Integer.toString((Integer.parseInt(extract) + 99));
+          String endDate = Integer.toString((Integer.valueOf(extract) + 99));
           extract = extract + '/' + endDate;
         } else {//e.g., 1920s -> 1920/1929
-          String endDate = Integer.toString((Integer.parseInt(extract) + 9));
+          String endDate = Integer.toString((Integer.valueOf(extract) + 9));
           extract = extract + '/' + endDate;
         }
       }

@@ -10,7 +10,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -95,7 +94,9 @@ public class LatticeXMLReader implements Iterable<Lattice> {
             assert nodeName % NODE_OFFSET == 0;
             lastBoundaryNode = realNodeIdx;
           } else if(nodeName % NODE_OFFSET == 0) {
-            ParserConstraint c = new ParserConstraint(lastBoundaryNode, realNodeIdx, ".*");
+            ParserConstraint c = new ParserConstraint();
+            c.start = lastBoundaryNode;
+            c.end = realNodeIdx;
             lattice.addConstraint(c);
           }
 

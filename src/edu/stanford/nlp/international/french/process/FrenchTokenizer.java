@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
@@ -56,7 +55,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   private List<CoreLabel> compoundBuffer;
 
   // Produces the tokenization for parsing used by Green, de Marneffe, and Manning (2011)
-  public static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
+  private static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
 
   /**
    * Constructor.
@@ -103,6 +102,9 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   /**
    * Splits a compound marked by the lexer.
+   *
+   * @param cl
+   * @return
    */
   private CoreLabel processCompound(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
@@ -111,7 +113,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
       newLabel.setValue(part);
-      newLabel.set(OriginalTextAnnotation.class, part);
       compoundBuffer.add(newLabel);
     }
     return compoundBuffer.remove(0);
@@ -213,6 +214,8 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Returns a factory for FrenchTokenizer.
    * THIS IS NEEDED FOR CREATION BY REFLECTION.
+   *
+   * @return
    */
   public static TokenizerFactory<CoreLabel> factory() {
     return FrenchTokenizerFactory.newTokenizerFactory();
@@ -222,6 +225,8 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Returns a factory for FrenchTokenizer that replicates the tokenization of
    * Green, de Marneffe, and Manning (2011).
+   *
+   * @return
    */
   public static TokenizerFactory<CoreLabel> ftbFactory() {
     TokenizerFactory<CoreLabel> tf = FrenchTokenizerFactory.newTokenizerFactory();
