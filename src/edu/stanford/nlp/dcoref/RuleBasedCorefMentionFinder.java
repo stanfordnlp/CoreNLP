@@ -47,7 +47,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing) {
     SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
-    this.headFinder = new SemanticHeadFinder();
+    headFinder = new SemanticHeadFinder();
     this.allowReparsing = allowReparsing;
   }
 
@@ -467,9 +467,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private Tree safeHead(Tree top, int endIndex) {
-    // The trees passed in do not have the CoordinationTransformer
-    // applied, but that just means the SemanticHeadFinder results are
-    // slightly worse.
     Tree head = top.headTerminal(headFinder);
     // One obscure failure case is that the added period becomes the head. Disallow this.
     if (head != null) {
