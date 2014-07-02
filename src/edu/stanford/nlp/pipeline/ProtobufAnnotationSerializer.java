@@ -635,7 +635,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     lossySentence.set(TokensAnnotation.class, tokens);
     // Add text -- missing by default as it's populated from the Document
-    lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens));
+    lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
     // Return
     return lossySentence;
   }
@@ -732,9 +732,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         map.set(TokensAnnotation.class, tokens.subList(tokenBegin, tokenEnd));
         // Set sentence index + token index + paragraph index
         for (int i = tokenBegin; i < tokenEnd; ++i) {
-          if (tokens.get(i) == null) {
-            System.err.println("HERE");
-          }
           tokens.get(i).setSentIndex(sentIndex);
           tokens.get(i).setIndex(i - sentence.getTokenOffsetBegin() + 1);
           if (sentence.hasParagraph()) { tokens.get(i).set(ParagraphAnnotation.class, sentence.getParagraph()); }
@@ -747,7 +744,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           map.set(TextAnnotation.class, proto.getText().substring(characterBegin, characterEnd));
         } else {
           // The document text is wrong -- guess the text from the tokens
-          map.set(TextAnnotation.class, recoverOriginalText(tokens.subList(tokenBegin, tokenEnd)));
+          map.set(TextAnnotation.class, recoverOriginalText(tokens.subList(tokenBegin, tokenEnd), sentence));
         }
       }
       // End iteration
@@ -1021,7 +1018,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param tokens The list of tokens representing this sentence.
    * @return The original text of the sentence.
    */
-  private static String recoverOriginalText(List<CoreLabel> tokens) {
+  protected String recoverOriginalText(List<CoreLabel> tokens, CoreNLPProtos.Sentence sentence) {
     StringBuilder text = new StringBuilder();
     CoreLabel last = null;
     if (tokens.size() > 0) {
@@ -1042,11 +1039,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
       last = token;
-      System.err.println(tokens.get(0).beginPosition() + "\t" + token.beginPosition() + "\t" + token.endPosition());
-      if (!token.originalText().equals(text.substring(token.beginPosition() - tokens.get(0).beginPosition(), token.endPosition() - tokens.get(0).beginPosition()))) {
-        System.err.println(text.toString());
-        System.err.println();
-      }
     }
     return text.toString();
   }
