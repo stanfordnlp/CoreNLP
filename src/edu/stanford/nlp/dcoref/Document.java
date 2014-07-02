@@ -51,6 +51,8 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.TwoDimensionalMap;
+import edu.stanford.nlp.util.TwoDimensionalSet;
 
 public class Document implements Serializable {
 
@@ -114,10 +116,10 @@ public class Document implements Serializable {
   public int numSentences;
 
   /** Set of incompatible clusters pairs */
-  private Set<Pair<Integer, Integer>> incompatibles;
-  private Set<Pair<Integer, Integer>> incompatibleClusters;
+  private TwoDimensionalSet<Integer, Integer> incompatibles;
+  private TwoDimensionalSet<Integer, Integer> incompatibleClusters;
   
-  protected Map<Pair<Integer, Integer>, Boolean> acronymCache;
+  protected TwoDimensionalMap<Integer, Integer, Boolean> acronymCache;
 
   /** Map of speaker name/id to speaker info */
   transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
@@ -132,9 +134,9 @@ public class Document implements Serializable {
     allGoldMentions = Generics.newHashMap();
     speakers = Generics.newHashMap();
     speakerPairs = Generics.newHashSet();
-    incompatibles = Generics.newHashSet();
-    incompatibleClusters = Generics.newHashSet();
-    acronymCache = Generics.newHashMap();    
+    incompatibles = TwoDimensionalSet.hashSet();
+    incompatibleClusters = TwoDimensionalSet.hashSet();
+    acronymCache = TwoDimensionalMap.hashMap();    
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
@@ -263,14 +265,14 @@ public class Document implements Serializable {
     // Was any of the pairs of mentions marked as incompatible
     int cid1 = Math.min(c1.clusterID, c2.clusterID);
     int cid2 = Math.max(c1.clusterID, c2.clusterID);
-    return incompatibleClusters.contains(Pair.makePair(cid1,cid2));
+    return incompatibleClusters.contains(cid1,cid2);
   }
 
   // Update incompatibles for two clusters that are about to be merged
   public void mergeIncompatibles(CorefCluster to, CorefCluster from) {
     List<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>> replacements =
             new ArrayList<Pair<Pair<Integer,Integer>, Pair<Integer,Integer>>>();
-    for (Pair<Integer, Integer> p:incompatibleClusters) {
+    for (Pair<Integer, Integer> p : incompatibleClusters) {
       Integer other = null;
       if (p.first == from.clusterID) {
         other = p.second;
@@ -284,45 +286,50 @@ public class Document implements Serializable {
       }
     }
     for (Pair<Pair<Integer,Integer>, Pair<Integer,Integer>> r:replacements)  {
-      incompatibleClusters.remove(r.first);
-      incompatibleClusters.add(r.second);
+      incompatibleClusters.remove(r.first.first(), r.first.second());
+      incompatibleClusters.add(r.second.first(), r.second.second());
     }
   }
+
   public void mergeAcronymCache(CorefCluster to, CorefCluster from) {
-    Map<Pair<Integer, Integer>, Boolean> replacements = Generics.newHashMap();
-    for(Pair<Integer, Integer> p : acronymCache.keySet()) {
-      if(acronymCache.get(p)) {
-        Integer other = null;
-        if(p.first==from.clusterID){
-          other = p.second;
-        } else if(p.second==from.clusterID) {
-          other = p.first;
-        }
-        if(other != null && other != to.clusterID) {
-          int cid1 = Math.min(other, to.clusterID);
-          int cid2 = Math.max(other, to.clusterID);
-          replacements.put(Pair.makePair(cid1, cid2), true);
+    TwoDimensionalSet<Integer, Integer> replacements = TwoDimensionalSet.hashSet();
+    for (Integer first : acronymCache.firstKeySet()) {
+      for (Integer second : acronymCache.get(first).keySet()) {
+        if (acronymCache.get(first, second)) {
+          Integer other = null;
+          if (first == from.clusterID) {
+            other = second;
+          } else if (second == from.clusterID) {
+            other = first;
+          }
+          if (other != null && other != to.clusterID) {
+            int cid1 = Math.min(other, to.clusterID);
+            int cid2 = Math.max(other, to.clusterID);
+            replacements.add(cid1, cid2);
+          }
         }
       }
     }
-    for(Pair<Integer, Integer> p : replacements.keySet()) {
-      acronymCache.put(p, replacements.get(p));
+    for (Integer first : replacements.firstKeySet()) {
+      for (Integer second : replacements.secondKeySet(first)) {
+        acronymCache.put(first, second, true);
+      }
     }
   }
 
   public boolean isIncompatible(Mention m1, Mention m2) {
     int mid1 = Math.min(m1.mentionID, m2.mentionID);
     int mid2 = Math.max(m1.mentionID, m2.mentionID);
-    return incompatibles.contains(Pair.makePair(mid1,mid2));
+    return incompatibles.contains(mid1,mid2);
   }
 
   public void addIncompatible(Mention m1, Mention m2) {
     int mid1 = Math.min(m1.mentionID, m2.mentionID);
     int mid2 = Math.max(m1.mentionID, m2.mentionID);
-    incompatibles.add(Pair.makePair(mid1,mid2));
+    incompatibles.add(mid1,mid2);
     int cid1 = Math.min(m1.corefClusterID, m2.corefClusterID);
     int cid2 = Math.max(m1.corefClusterID, m2.corefClusterID);
-    incompatibleClusters.add(Pair.makePair(cid1,cid2));
+    incompatibleClusters.add(cid1,cid2);
   }
 
   /** Mark twin mentions in gold and predicted mentions */

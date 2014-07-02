@@ -358,10 +358,7 @@ public class GenericDataSetReader {
     // -1 to exclude the period.
     // We now let it be any kind of nominal constituent, since there
     // are VP and S ones
-    ParserConstraint constraint = new ParserConstraint();
-    constraint.start = ADDED_WORDS;
-    constraint.end = extentTokens.size() - 1;
-    constraint.state = Pattern.compile(".*");
+    ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, ".*");
     List<ParserConstraint> constraints = Collections.singletonList(constraint);
     Tree tree = parse(extentTokens, constraints);
     logger.fine("No exact match found. Local parse:\n" + tree.pennString());
@@ -467,6 +464,7 @@ public class GenericDataSetReader {
   private static CoreLabel initCoreLabel(String token) {
     CoreLabel label = new CoreLabel();
     label.setWord(token);
+    label.setValue(token);
     label.set(CoreAnnotations.TextAnnotation.class, token);
     return label;
   }

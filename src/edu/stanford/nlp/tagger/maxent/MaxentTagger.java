@@ -43,6 +43,7 @@ import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter.OutputStyle;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.DataFilePaths;
 import edu.stanford.nlp.util.Function;
@@ -200,7 +201,7 @@ import java.text.DecimalFormat;
  * <tr><td>curWordMinFeatureThreshold</td><td>int</td><td>2</td><td>Train</td><td>Words that occur more than this number of times will generate features with all of the tags they've been seen with.</td></tr>
  * <tr><td>rareWordMinFeatureThresh</td><td>int</td><td>10</td><td>Train</td><td>Features of rare words whose histories occur fewer than this number of times are discarded.</td></tr>
  * <tr><td>veryCommonWordThresh</td><td>int</td><td>250</td><td>Train</td><td>Words that occur more than this number of times form an equivalence class by themselves.  Ignored unless you are using ambiguity classes.</td></tr>
- * <tr><td>debug</td><td>boolean</td><td>boolean</td><td>All</td><td>Whether to write debugging information (words, top words, unknown words).  Useful for error analysis.</td></tr>
+ * <tr><td>debug</td><td>boolean</td><td>boolean</td><td>All</td><td>Whether to write debugging information (words, top words, unknown words, confusion matrix).  Useful for error analysis.</td></tr>
  * <tr><td>debugPrefix</td><td>String</td><td>N/A</td><td>All</td><td>File (path) prefix for where to write out the debugging information (relevant only if debug=true).</td></tr>
  * <tr><td>nthreads</td><td>int</td><td>1</td><td>Test,Text</td><td>Number of threads to use when processing text.</td></tr>
  * </table>
@@ -214,7 +215,7 @@ import java.text.DecimalFormat;
  * @author Christopher Manning
  * @author John Bauer
  */
-public class MaxentTagger implements Function<List<? extends HasWord>,List<TaggedWord>>, ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
+public class MaxentTagger extends Tagger implements ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
 
   /**
    * The directory from which to get taggers when using
@@ -238,31 +239,35 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
   public MaxentTagger() {
   }
 
+  public MaxentTagger(TaggerConfig config) {
+    // maybe this shouldn't do this but replace the zero arg constructor.
+    // i.e., call init() not readModelAndInit()
+    this(config.getModel(), config);
+  }
+
   /**
-   * Constructor for a tagger using a model stored in a particular file.
-   * The <code>modelFile</code> is a filename for the model data.
-   * The tagger data is loaded when the
-   * constructor is called (this can be slow).
-   * This constructor first constructs a TaggerConfig object, which loads
-   * the tagger options from the modelFile.
+   * Constructor for a tagger, loading a model stored in a particular file,
+   * classpath resource, or URL.
+   * The tagger data is loaded when the constructor is called (this can be
+   * slow). This constructor first constructs a TaggerConfig object, which
+   * loads the tagger options from the modelFile.
    *
-   * @param modelFile filename of the trained model
+   * @param modelFile Filename, classpath resource, or URL for the trained model
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
   public MaxentTagger(String modelFile) {
-    this(modelFile, StringUtils.argsToProperties(new String[] {"-model", modelFile}), true);
+    this(modelFile, StringUtils.argsToProperties("-model", modelFile), true);
   }
 
   /**
    * Constructor for a tagger using a model stored in a particular file,
    * with options taken from the supplied TaggerConfig.
-   * The <code>modelFile</code> is a filename for the model data.
    * The tagger data is loaded when the
    * constructor is called (this can be slow).
    * This version assumes that the tagger options in the modelFile have
    * already been loaded into the TaggerConfig (if that is desired).
    *
-   * @param modelFile filename of the trained model
+   * @param modelFile Filename, classpath resource, or URL for the trained model
    * @param config The configuration for the tagger
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
@@ -290,7 +295,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
   }
 
 
-  Dictionary dict = new Dictionary();
+  final Dictionary dict = new Dictionary();
   TTags tags;
 
   /**
@@ -325,14 +330,14 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
   final boolean alltags = false;
   final Map<String, Set<String>> tagTokens = Generics.newHashMap();
 
-  static final int RARE_WORD_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_THRESH);
-  static final int MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.MIN_FEATURE_THRESH);
-  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
-  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
-  static final int VERY_COMMON_WORD_THRESH = Integer.valueOf(TaggerConfig.VERY_COMMON_WORD_THRESH);
+  static final int RARE_WORD_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_THRESH);
+  static final int MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.MIN_FEATURE_THRESH);
+  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
+  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
+  static final int VERY_COMMON_WORD_THRESH = Integer.parseInt(TaggerConfig.VERY_COMMON_WORD_THRESH);
 
-  static final boolean OCCURRING_TAGS_ONLY = Boolean.valueOf(TaggerConfig.OCCURRING_TAGS_ONLY);
-  static final boolean POSSIBLE_TAGS_ONLY = Boolean.valueOf(TaggerConfig.POSSIBLE_TAGS_ONLY);
+  static final boolean OCCURRING_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.OCCURRING_TAGS_ONLY);
+  static final boolean POSSIBLE_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
   private double defaultScore;
   private double[] defaultScores = null;
@@ -798,7 +803,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
 
       xSize = rf.readInt();
       ySize = rf.readInt();
-      dict = new Dictionary();
+      // dict = new Dictionary();  // this method is called in constructor, and it's initialized as empty already
       dict.read(rf);
 
       if (VERBOSE) {
@@ -1567,6 +1572,11 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
       writer.write("<pos>\n");
     }
 
+    String sentenceDelimiter = config.getSentenceDelimiter();
+    if (sentenceDelimiter != null && sentenceDelimiter.equals("newline")) {
+      sentenceDelimiter = "\n";
+    }
+
     while (true) {
       //Now we do everything through the doc preprocessor
       final DocumentPreprocessor docProcessor;
@@ -1574,9 +1584,9 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
       // this happens when we reach end of file
       if (line == null)
         break;
-      docProcessor = new DocumentPreprocessor(new BufferedReader(new StringReader(line)));
-
+      docProcessor = new DocumentPreprocessor(new StringReader(line));
       docProcessor.setTokenizerFactory(tokenizerFactory);
+      docProcessor.setSentenceDelimiter(sentenceDelimiter);
       if (config.keepEmptySentences()) {
         docProcessor.setKeepEmptySentences(true);
       }
@@ -1586,7 +1596,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
 
         Timing t = new Timing();
         tagAndOutputSentence(sentence, outputLemmas, morpha, outputStyle,
-                             outputVerbosity, numSentences, "\n", writer);
+                             outputVerbosity, numSentences, "", writer);
 
         totalMillis += t.stop();
         writer.newLine();

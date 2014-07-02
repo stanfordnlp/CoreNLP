@@ -42,6 +42,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2014-06-16      3.4     Add shift reduce parser 
+
 2014-01-04    3.3.1     Bugfix release
 
 2013-11-12    3.3.0     Add sentiment model, minor sutime improvements

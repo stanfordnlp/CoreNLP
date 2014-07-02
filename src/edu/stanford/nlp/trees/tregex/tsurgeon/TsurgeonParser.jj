@@ -58,6 +58,7 @@ PARSER_END(TsurgeonParser)
 
 TOKEN:
 { < IF: "if" >
+| < NOT: "not" >
 | < EXISTS: "exists" > : CONDITIONAL
 | < DELETE: "delete" > : OPERATION
 | < PRUNE:  "prune" > : OPERATION
@@ -113,14 +114,22 @@ TsurgeonPatternRoot Root() :
   }
 /*@egen*/
   { return new TsurgeonPatternRoot(result); } 
- | 
+ | LOOKAHEAD(2)
   ( <IF> <EXISTS> name = <NAME> result = Root() )/*@bgen(jjtree)*/
   {
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
   }
 /*@egen*/
-  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, result.children)); }
+  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, false, result.children)); }
+ | LOOKAHEAD(2)
+  ( <IF> <NOT> <EXISTS> name = <NAME> result = Root() )/*@bgen(jjtree)*/
+  {
+    jjtree.closeNodeScope(jjtn000, true);
+    jjtc000 = false;
+  }
+/*@egen*/
+  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, true, result.children)); }
  |
   ( <OPEN_BRACKET> result = Root() <CLOSE_BRACKET>
     {
