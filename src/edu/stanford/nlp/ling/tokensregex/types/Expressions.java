@@ -546,6 +546,9 @@ public class Expressions {
           }
         }
       }
+      if (VAR_SELF.equals(varName))  {
+        return createValue(varName, env.peek(varName));
+      }
       Object obj = env.get(varName);
       if (obj != null) {
         exp = asExpression(env, obj);
