@@ -170,7 +170,8 @@ public class TreePrint {
       stemmer = null;
     }
     if (formats.containsKey("typedDependenciesCollapsed") ||
-        formats.containsKey("typedDependencies")) {
+        formats.containsKey("typedDependencies") ||
+        (formats.containsKey("conll2007") && tlp.supportsGrammaticalStructures())) {
       gsf = tlp.grammaticalStructureFactory(puncWordFilter, typedDependencyHF);
     } else {
       gsf = null;
@@ -534,9 +535,7 @@ public class TreePrint {
       if (formats.containsKey("dependencies")) {
         Tree indexedTree = outputTree.deepCopy(outputTree.treeFactory());
         indexedTree.indexLeaves();
-        Set<Dependency<Label, Label, Object>> depsSet = indexedTree.mapDependencies(dependencyWordFilter, hf);
-        List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>(depsSet);
-        Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
+        List<Dependency<Label, Label, Object>> sortedDeps = getSortedDeps(indexedTree, dependencyWordFilter);
         for (Dependency<Label, Label, Object> d : sortedDeps) {
           pw.println(d.toString("predicate"));
         }
@@ -548,14 +547,12 @@ public class TreePrint {
         //      that dependencies for other languages can be printed.
         // wsg2011: This code currently ignores the dependency label since the present implementation
         //          of mapDependencies() returns UnnamedDependency objects.
-
+        // TODO: if there is a GrammaticalStructureFactory available, use that instead of mapDependencies
         Tree it = outputTree.deepCopy(outputTree.treeFactory(), CoreLabel.factory());
         it.indexLeaves();
 
         List<CoreLabel> tagged = it.taggedLabeledYield();
-        Set<Dependency<Label, Label, Object>> depsSet = it.mapDependencies(dependencyFilter, hf, "root");
-        List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>(depsSet);
-        Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
+        List<Dependency<Label, Label, Object>> sortedDeps = getSortedDeps(it, dependencyFilter);
 
         for (int i = 0; i < tagged.size(); i++) {
           CoreLabel w = tagged.get(i);
@@ -574,7 +571,12 @@ public class TreePrint {
           String feats = "_";
           String pHead = "_";
           String pDepRel = "_";
-          String depRel = (govi == 0) ? "ROOT" : "NULL";
+          String depRel;
+          if (d.name() != null) {
+            depRel = d.name().toString();
+          } else {
+            depRel = (govi == 0) ? "ROOT" : "NULL";
+          }
 
           // The 2007 format has 10 fields
           pw.printf("%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%s\t%s%n", depi,word,lemma,tag,tag,feats,govi,depRel,pHead,pDepRel);
@@ -670,6 +672,24 @@ public class TreePrint {
 
     // flush to make sure we see all output
     pw.flush();
+  }
+
+  private List<Dependency<Label, Label, Object>> getSortedDeps(Tree tree, Filter<Dependency<Label, Label, Object>> filter) {
+    if (gsf != null) {
+      GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
+      Collection<TypedDependency> deps = gs.typedDependencies(false);
+      List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>();
+      for (TypedDependency dep : deps) {
+        sortedDeps.add(new NamedDependency(dep.gov().label(), dep.dep().label(), dep.reln().toString()));
+      }
+      Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
+      return sortedDeps;
+    } else {
+      Set<Dependency<Label, Label, Object>> depsSet = tree.mapDependencies(filter, hf, "root");
+      List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>(depsSet);
+      Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
+      return sortedDeps;
+    }
   }
 
 
