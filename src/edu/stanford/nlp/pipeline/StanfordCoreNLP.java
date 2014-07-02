@@ -756,29 +756,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        String parserType = properties.getProperty("parse.type", "stanford");
-        String maxLenStr = properties.getProperty("parse.maxlen");
-
-        if (parserType.equalsIgnoreCase("stanford")) {
-          ParserAnnotator anno = new ParserAnnotator("parse", properties);
-          return anno;
-        } else if (parserType.equalsIgnoreCase("charniak")) {
-          String model = properties.getProperty("parse.model");
-          String parserExecutable = properties.getProperty("parse.executable");
-          if (model == null || parserExecutable == null) {
-            throw new RuntimeException("Both parse.model and parse.executable properties must be specified if parse.type=charniak");
-          }
-          int maxLen = 399;
-          if (maxLenStr != null) {
-            maxLen = Integer.parseInt(maxLenStr);
-          }
-
-          CharniakParserAnnotator anno = new CharniakParserAnnotator(model, parserExecutable, false, maxLen);
-
-          return anno;
-        } else {
-          throw new RuntimeException("Unknown parser type: " + parserType + " (currently supported: stanford and charniak)");
-        }
+        return annotatorImplementation.parse(properties);
       }
 
       @Override
@@ -823,7 +801,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     for (Object propertyKey : inputProps.stringPropertyNames()) {
       if (!(propertyKey instanceof String))
         continue; // should this be an Exception?
-      String property = (String) propertyKey;
+      final String property = (String) propertyKey;
       if (property.startsWith(CUSTOM_ANNOTATOR_PREFIX)) {
         final String customName =
           property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
@@ -832,12 +810,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             " with class " + customClassName);
         pool.register(customName, new AnnotatorFactory(inputProps, annotatorImplementation) {
           private static final long serialVersionUID = 1L;
-          private final String name = customName;
-          private final String className = customClassName;
           @Override
           public Annotator create() {
-            return ReflectionLoading.loadByReflection(className, name,
-                                                      properties);
+            return annotatorImplementation.custom(properties, property);
           }
           @Override
           public String additionalSignature() {

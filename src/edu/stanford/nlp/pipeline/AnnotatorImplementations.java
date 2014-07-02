@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
+import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.FileNotFoundException;
 import java.util.Properties;
@@ -94,6 +95,44 @@ public class AnnotatorImplementations {
    */
   public Annotator gender(Properties properties, boolean verbose) {
     return new GenderAnnotator(false, properties.getProperty("gender.firstnames", DefaultPaths.DEFAULT_GENDER_FIRST_NAMES));
+  }
+
+  /**
+   * Annotate parse trees
+   *
+   * @param properties
+   * @return
+   */
+  public Annotator parse(Properties properties) {
+    String parserType = properties.getProperty("parse.type", "stanford");
+    String maxLenStr = properties.getProperty("parse.maxlen");
+
+    if (parserType.equalsIgnoreCase("stanford")) {
+      return new ParserAnnotator("parse", properties);
+    } else if (parserType.equalsIgnoreCase("charniak")) {
+      String model = properties.getProperty("parse.model");
+      String parserExecutable = properties.getProperty("parse.executable");
+      if (model == null || parserExecutable == null) {
+        throw new RuntimeException("Both parse.model and parse.executable properties must be specified if parse.type=charniak");
+      }
+      int maxLen = 399;
+      if (maxLenStr != null) {
+        maxLen = Integer.parseInt(maxLenStr);
+      }
+
+      return new CharniakParserAnnotator(model, parserExecutable, false, maxLen);
+    } else {
+      throw new RuntimeException("Unknown parser type: " + parserType + " (currently supported: stanford and charniak)");
+    }
+  }
+
+  public Annotator custom(Properties properties, String property) {
+    String customName = property.substring(StanfordCoreNLP
+            .CUSTOM_ANNOTATOR_PREFIX.length());
+    String customClassName = properties.getProperty(property);
+
+    return ReflectionLoading.loadByReflection(customClassName, customName,
+            properties);
   }
 
   /**
