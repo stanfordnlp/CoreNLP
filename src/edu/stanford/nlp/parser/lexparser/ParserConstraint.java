@@ -46,4 +46,19 @@ public class ParserConstraint implements Serializable {
     this.end = end;
     this.state = state;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ParserConstraint)) return false;
+    ParserConstraint that = (ParserConstraint) o;
+    return end == that.end && start == that.start && !(state != null ? !state.toString().equals(that.state.toString()) : that.state != null);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = start;
+    result = 31 * result + end;
+    return result;
+  }
 }
