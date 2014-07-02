@@ -85,7 +85,7 @@ public class IOUtilsTest extends TestCase {
     Assert.assertEquals("!zipped!text", StringUtils.join(iterable, "!"));
   }
 
-  private static void checkLineIterable(boolean includeEol) throws IOException {
+  private void checkLineIterable(boolean includeEol) throws IOException {
     String[] expected = {
             "abcdefhij\r\n",
             "klnm\r\n",
@@ -123,15 +123,15 @@ public class IOUtilsTest extends TestCase {
     File b = new File(dir, "x/y/b.txt");
     File c = new File(dir, "c.txt");
     File d = new File(dir, "dtxt");
-
+    
     write("A", a);
     write("B", b);
     write("C", c);
     write("D", d);
-
+    
     Set<File> actual = toSet(IOUtils.iterFilesRecursive(dir));
     Assert.assertEquals(toSet(Arrays.asList(a, b, c, d)), actual);
-
+    
     actual = toSet(IOUtils.iterFilesRecursive(dir, ".txt"));
     Assert.assertEquals(toSet(Arrays.asList(b, c)), actual);
 
@@ -141,11 +141,8 @@ public class IOUtilsTest extends TestCase {
 
   protected void delete(File file) {
     if (file.isDirectory()) {
-      File[] children = file.listFiles();
-      if (children != null) {
-        for (File child : children) {
-          this.delete(child);
-        }
+      for (File child: file.listFiles()) {
+        this.delete(child);
       }
     }
     // Use an Assert here to make sure that all files were closed properly
@@ -154,7 +151,6 @@ public class IOUtilsTest extends TestCase {
 
   protected static void write(String text, File file) throws IOException {
     if (!file.getParentFile().exists()) {
-      //noinspection ResultOfMethodCallIgnored
       file.getParentFile().mkdirs();
     }
     FileWriter writer = new FileWriter(file);
@@ -169,6 +165,47 @@ public class IOUtilsTest extends TestCase {
     }
     return set;
   }
+
+  /**
+   * Tests that slurpFile can get files from within the classpath
+   */
+  public void testSlurpFile() {
+    String contents;
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txt", "utf-8");
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+
+    assertEquals("This is a test sentence.", contents.trim());
+
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txt");
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+
+    assertEquals("This is a test sentence.", contents.trim());
+
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txtzzz");
+      throw new AssertionError("Should not have found unknown file");
+    } catch (IOException e) {
+      // yay
+    }
+
+    contents = IOUtils.slurpFileNoExceptions("edu/stanford/nlp/io/test.txt");
+    assertEquals("This is a test sentence.", contents.trim());
+
+
+    try {
+      contents = IOUtils.slurpFileNoExceptions("edu/stanford/nlp/io/test.txtzzz");
+      throw new AssertionError("Should not have found unknown file");
+    } catch (RuntimeIOException e) {
+      // yay
+    }
+  }
+
   public void testCpSourceFileTargetNotExists() throws IOException {
     File source = File.createTempFile("foo", ".file");
     IOUtils.writeStringToFile("foo", source.getPath(), "utf-8");
@@ -285,33 +322,6 @@ public class IOUtilsTest extends TestCase {
     assertTrue( new File(dst + File.separator + "d2").delete() );
     assertTrue( new File(dst + File.separator + "bar").delete() );
     assertTrue( dst.delete() );
-  }
-
-  public void testTail() throws IOException {
-    File f = File.createTempFile("totail", ".file");
-    // Easy case
-    IOUtils.writeStringToFile("line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7", f.getPath(), "utf-8");
-    assertEquals("line 7", IOUtils.tail(f, 1)[0]);
-    assertEquals("line 6", IOUtils.tail(f, 2)[0]);
-    assertEquals("line 7", IOUtils.tail(f, 2)[1]);
-    // Hard case
-    IOUtils.writeStringToFile("line 1\nline 2\n\nline 3\n", f.getPath(), "utf-8");
-    assertEquals("", IOUtils.tail(f, 1)[0]);
-    assertEquals("", IOUtils.tail(f, 3)[0]);
-    assertEquals("line 3", IOUtils.tail(f, 3)[1]);
-    assertEquals("", IOUtils.tail(f, 3)[2]);
-    // Too few lines
-    IOUtils.writeStringToFile("line 1\nline 2", f.getPath(), "utf-8");
-    assertEquals(0, IOUtils.tail(f, 0).length);
-    assertEquals(1, IOUtils.tail(f, 1).length);
-    assertEquals(2, IOUtils.tail(f, 3).length);
-    assertEquals(2, IOUtils.tail(f, 2).length);
-    // UTF-reading
-    IOUtils.writeStringToFile("↹↝\n۝æ", f.getPath(), "utf-8");
-    assertEquals("↹↝", IOUtils.tail(f, 2)[0]);
-    assertEquals("۝æ", IOUtils.tail(f, 2)[1]);
-    // Clean up
-    assertTrue(f.delete());
   }
 
 }
