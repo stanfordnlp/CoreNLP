@@ -5,6 +5,15 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
+/**
+ * A parent class for annotators which might want to analyze one
+ * sentence at a time, possibly in a multithreaded manner.
+ *
+ * TODO: fix the timeout
+ * TODO: also factor out the POS
+ *
+ * @author John Bauer
+ */
 public abstract class SentenceAnnotator implements Annotator {
   protected class AnnotatorProcessor implements ThreadsafeProcessor<CoreMap, CoreMap> {
     Annotation annotation;
