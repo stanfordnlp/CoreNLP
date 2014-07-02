@@ -328,7 +328,9 @@ class DescriptionPattern extends TregexPattern {
                               HeadFinder headFinder) {
       super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
       myNode = n;
-      resetChildIter();
+      // no need to reset anything - everything starts out as null or false.  
+      // lazy initialization of children to save time.
+      // resetChildIter();
     }
 
     @Override
