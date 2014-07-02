@@ -375,7 +375,6 @@ public class Dictionaries {
    * map, which saves quite a bit of time loading.  
    * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
    */
-  // todo: This is a complete memory hog. It takes at least 600MB and probably does pretty little. Either store more efficiently or just eliminate?
   private void loadGenderNumber(String file, String neutralWordsFile) {
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);

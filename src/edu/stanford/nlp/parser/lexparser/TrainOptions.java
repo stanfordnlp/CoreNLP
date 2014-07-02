@@ -418,6 +418,11 @@ public class TrainOptions implements Serializable {
 
   public TransformMatrixType transformMatrixType = TransformMatrixType.DIAGONAL;
 
+  /**
+   * Specifically for the DVModel, uses words on either side of a
+   * context when combining constituents.  Gives perhaps a microscopic
+   * improvement in performance but causes a large slowdown.
+   */
   public boolean useContextWords = false;
 
   /**

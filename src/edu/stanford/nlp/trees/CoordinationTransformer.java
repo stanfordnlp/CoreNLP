@@ -160,6 +160,10 @@ public class CoordinationTransformer implements TreeTransformer {
 
   private static TregexPattern findFlatConjpTregex =
     // TODO: add more patterns, perhaps ignore case
+    // for example, what should we do with "and not"?  Is it right to
+    // generally add the "not" to the following tree with moveRB, or
+    // should we make "and not" a CONJP?
+    // also, perhaps look at ADVP
     TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " + 
                           "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
                           "  (< and $+ (RB=end < so)) | " + 
