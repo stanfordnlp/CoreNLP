@@ -97,10 +97,8 @@ public class SequencePattern<T> {
   // binding of group number to variable name
   VarGroupBindings varGroupBindings;
 
-  // Priority associated with the pattern (higher priority patterns should take precedence over lower priority ones)
+  // Priority associated with pattern
   double priority = 0.0;
-  // Weight associated with the pattern
-  double weight = 0.0;
 
   protected SequencePattern(SequencePattern.PatternExpr nodeSequencePattern) {
     this(null, nodeSequencePattern);
@@ -145,14 +143,6 @@ public class SequencePattern<T> {
 
   public void setPriority(double priority) {
     this.priority = priority;
-  }
-
-  public double getWeight() {
-    return weight;
-  }
-
-  public void setWeight(double weight) {
-    this.weight = weight;
   }
 
   public SequenceMatchAction<T> getAction() {
@@ -838,12 +828,6 @@ public class SequencePattern<T> {
     }
 
     private PatternExpr optimizeOr() {
-      PatternExpr optimizedStringSeqs = optimizeOrStringSeqs();
-      // Go through patterns and get candidate sequences with the same start...
-      return optimizedStringSeqs;
-    }
-
-    private PatternExpr optimizeOrStringSeqs() {
       // Try to collapse OR of NodePattern with just strings into a StringInSetAnnotationPattern
       List<PatternExpr> opts = new ArrayList<PatternExpr>(patterns.size());
       // Map from annotation key (Class), ignoreCase (Boolean) to set of patterns/strings

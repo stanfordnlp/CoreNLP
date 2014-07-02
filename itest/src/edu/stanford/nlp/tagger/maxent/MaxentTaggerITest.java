@@ -127,6 +127,10 @@ public class MaxentTaggerITest extends TestCase {
     try {
       for (String outputLine; (outputLine = reader.readLine()) != null; ) {
         outputStrings.add(outputLine);
+        // When the tagger is in stdin mode, it prints out extra blank
+        // lines to make the output more readable for the user
+        if (emulateStdin)
+          reader.readLine();
       }
     } catch(IOException e) {
       throw new RuntimeException(e);

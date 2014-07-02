@@ -9,17 +9,14 @@ import java.util.*;
  * Map that takes a iterable as key, and maps it to an value.
  *
  * This implementation is not particularly memory efficient, but will have relatively
- * fast lookup times for sequences where there are many possible keys (e.g. sequences over Strings).
- * Can be used for fairly efficient look up of sequence by prefix.
+ *   fast lookup times for sequences where there are many possible keys (e.g. sequences over Strings)
+ * Can be used for fairly efficient look up of sequence by prefix
  *
  * @author Angel Chang
  *
- * @param <K> Key of the elements of the trie
- * @param <V> The value
- *
+ * @param <K, V>
  */
 public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
-
   /**
    * Child tries
    */
@@ -80,10 +77,6 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     return curTrie;
   }
 
-  public Map<K, TrieMap<K, V>> getChildren() {
-    return children;
-  }
-
   public V getValue() {
     return value;
   }
@@ -101,8 +94,8 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   protected void updateTrieStrings(List<String> strings, String prefix) {
     if (children != null) {
-      for (Entry<K, TrieMap<K, V>> kTrieMapEntry : children.entrySet()) {
-        kTrieMapEntry.getValue().updateTrieStrings(strings, prefix + " - " + kTrieMapEntry.getKey());
+      for (K key:children.keySet()) {
+        children.get(key).updateTrieStrings(strings, prefix + " - " + key);
       }
     }
     if (isLeaf()) {
@@ -116,8 +109,8 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   public int size() {
     int s = 0;
     if (children != null) {
-      for (Entry<K, TrieMap<K, V>> kTrieMapEntry : children.entrySet()) {
-        s += kTrieMapEntry.getValue().size();
+      for (K key:children.keySet()) {
+        s += children.get(key).size();
       }
     }
     if (isLeaf()) s++;
@@ -142,16 +135,16 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
   @Override
   public V get(Object key) {
     if (key instanceof Iterable) {
-      return get( (Iterable<K>) key);
+      return get( (Iterable) key);
     } else if (key instanceof Object[]) {
       return get( Arrays.asList( (Object[]) key) );
     }
     return null;
   }
 
-  public V get(Iterable<K> key) {
+  public V get(Iterable key) {
     TrieMap<K, V> curTrie = getChildTrie(key);
-    return (curTrie != null) ? curTrie.value: null;
+    return (curTrie != null)? curTrie.value:null;
   }
 
   public V get(K[] key) {
@@ -219,8 +212,8 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   @Override
   public void putAll(Map<? extends Iterable<K>, ? extends V> m) {
-    for (Entry<? extends Iterable<K>, ? extends V> entry : m.entrySet()) {
-      put(entry.getKey(), entry.getValue());
+    for (Iterable<K> k : m.keySet()) {
+      put(k, m.get(k));
     }
   }
 
@@ -239,11 +232,11 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   protected void updateKeys(Set<Iterable<K>> keys, List<K> prefix) {
     if (children != null) {
-      for (Entry<K, TrieMap<K, V>> kTrieMapEntry : children.entrySet()) {
+      for (K key:children.keySet()) {
         List<K> p = new ArrayList<K>(prefix.size() + 1);
         p.addAll(prefix);
-        p.add(kTrieMapEntry.getKey());
-        kTrieMapEntry.getValue().updateKeys(keys, p);
+        p.add(key);
+        children.get(key).updateKeys(keys, p);
       }
     }
     if (value != null) {
@@ -260,8 +253,8 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   protected void updateValues(List<V> values) {
     if (children != null) {
-      for (Entry<K, TrieMap<K, V>> kTrieMapEntry : children.entrySet()) {
-        kTrieMapEntry.getValue().updateValues(values);
+      for (K key:children.keySet()) {
+        children.get(key).updateValues(values);
       }
     }
     if (value != null) {
@@ -278,11 +271,11 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
 
   protected void updateEntries(Set<Entry<Iterable<K>,V>> entries, final List<K> prefix) {
     if (children != null) {
-      for (Entry<K, TrieMap<K, V>> kTrieMapEntry : children.entrySet()) {
+      for (K key:children.keySet()) {
         List<K> p = new ArrayList<K>(prefix.size() + 1);
         p.addAll(prefix);
-        p.add(kTrieMapEntry.getKey());
-        kTrieMapEntry.getValue().updateEntries(entries, p);
+        p.add(key);
+        children.get(key).updateEntries(entries, p);
       }
     }
     if (value != null) {

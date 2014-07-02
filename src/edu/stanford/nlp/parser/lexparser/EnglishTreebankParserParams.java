@@ -1,35 +1,10 @@
-// Stanford Parser -- a probabilistic lexicalized NL CFG parser
-// Copyright (c) 2002 - 2014 The Board of Trustees of
-// The Leland Stanford Junior University. All Rights Reserved.
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// For more information, bug reports, fixes, contact:
-//    Christopher Manning
-//    Dept of Computer Science, Gates 1A
-//    Stanford CA 94305-9010
-//    USA
-//    parser-support@lists.stanford.edu
-//    http://nlp.stanford.edu/software/lex-parser.shtml
-
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 import java.io.IOException;
@@ -300,7 +275,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
   public static class EnglishTest implements Serializable {
     /* THESE OPTIONS ARE ENGLISH-SPECIFIC AND AFFECT ONLY TEST TIME */
-    EnglishTest() {}
+    EnglishTest() {}  // not instantiable
     boolean retainNPTMPSubcategories = false;
     boolean retainTMPSubcategories = false;
     boolean retainADVSubcategories = false;
@@ -1338,20 +1313,18 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
         }
       }
       if (englishTrain.splitJJCOMP && cat.startsWith("JJ") && (parentStr.startsWith("PP") || parentStr.startsWith("ADJP")) && headFinder().determineHead(parent) == t) {
+        // look for _anything_ right sister of JJ -- if so has comp (I guess)
         Tree[] kids = parent.children();
+        boolean foundJJ = false;
         int i = 0;
-        for (boolean foundJJ = false; i < kids.length && !foundJJ; i++) {
+        for (; i < kids.length && !foundJJ; i++) {
           if (kids[i].label().value().startsWith("JJ")) {
-            foundJJ = true;
-          }
-        }
-        for (int j = i; j < kids.length; j++) {
-          String kid = tlp.basicCategory(kids[j].label().value());
-          if ("S".equals(kid) || "SBAR".equals(kid) || "PP".equals(kid) || "NP".equals(kid)) {
-            // there's a complement.
-            cat = cat + "^CMPL";
             break;
           }
+        }
+        if (foundJJ && i < kids.length - 1) {
+          // there's still a complement to go.
+          cat = cat + "^CMPL";
         }
       }
       if (englishTrain.splitMoreLess) {
@@ -1901,13 +1874,13 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     }
     n = false;
     if (n) {
-      sb.append('N');
+      sb.append("N");
     }
     if (p) {
-      sb.append('P');
+      sb.append("P");
     }
     if (s) {
-      sb.append('S');
+      sb.append("S");
     }
     return sb.toString();
   }
@@ -1933,13 +1906,13 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
   private String changeBaseCat(String cat, String newBaseCat) {
     int i = 1;  // not 0 in case tag is annotation introducing char
-    int length = cat.length();
-    for (; (i < length); i++) {
+    int leng = cat.length();
+    for (; (i < leng); i++) {
       if (tlp.isLabelAnnotationIntroducingCharacter(cat.charAt(i))) {
         break;
       }
     }
-    if (i < length) {
+    if (i < leng) {
       return newBaseCat + cat.substring(i);
     } else {
       return newBaseCat;
@@ -1973,7 +1946,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     }
   }
 
-  private static boolean hasV(List<? extends Label> tags) {
+  private static boolean hasV(List<Label> tags) {
     for (Label tag : tags) {
       String str = tag.toString();
       if (str.startsWith("V") || str.startsWith("MD")) {
@@ -1983,7 +1956,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     return false;
   }
 
-  private static boolean hasI(List<? extends Label> tags) {
+  private static boolean hasI(List<Label> tags) {
     for (Label tag : tags) {
       if (tag.toString().startsWith("I")) {
         return true;
@@ -1992,7 +1965,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     return false;
   }
 
-  private static boolean hasC(List<? extends Label> tags) {
+  private static boolean hasC(List<Label> tags) {
     for (Label tag : tags) {
       if (tag.toString().startsWith("CC")) {
         return true;
@@ -2302,13 +2275,6 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   @Override
   public boolean supportsBasicDependencies() {
     return true;
-  }
-
-  private static final String[] RETAIN_TMP_ARGS = { "-retainTmpSubcategories" };
-
-  @Override
-  public String[] defaultCoreNLPFlags() {
-    return RETAIN_TMP_ARGS;
   }
 
   public static void main(String[] args) {
