@@ -20,21 +20,21 @@ public class AnnotatorImplementations {
   /**
    * Tokenize, according to whitespace only
    */
-  protected Annotator whitespaceTokenizer(Properties properties) {
+  public Annotator whitespaceTokenizer(Properties properties) {
     return new WhitespaceTokenizerAnnotator(properties);
   }
 
   /**
    * Tokenize, emulating the Penn Treebank
    */
-  protected Annotator ptbTokenizer(Properties properties, boolean verbose, String options) {
+  public Annotator ptbTokenizer(Properties properties, boolean verbose, String options) {
     return new PTBTokenizerAnnotator(verbose, options);
   }
 
   /**
    * Clean XML input
    */
-  protected CleanXmlAnnotator cleanXML(Properties properties,
+  public CleanXmlAnnotator cleanXML(Properties properties,
                                String xmlTagsToRemove,
                                String sentenceEndingTags,
                                String dateTags,
@@ -45,7 +45,7 @@ public class AnnotatorImplementations {
   /**
    * Sentence split, in addition to a bunch of other things in this annotator (be careful to check the implementation!)
    */
-  protected Annotator wordToSentences(Properties properties,
+  public Annotator wordToSentences(Properties properties,
                                       boolean verbose, String boundaryTokenRegex,
                                       Set<String> boundaryToDiscard, Set<String> htmlElementsToDiscard,
                                       String newlineIsSentenceBreak, String boundaryMultiTokenRegex,
@@ -57,21 +57,21 @@ public class AnnotatorImplementations {
   /**
    * Part of speech tag
    */
-  protected Annotator posTagger(Properties properties, String annotatorName) {
+  public Annotator posTagger(Properties properties, String annotatorName) {
     return new POSTaggerAnnotator(annotatorName, properties);
   }
 
   /**
    * Annotate lemmas
    */
-  protected Annotator morpha(Properties properties, boolean verbose) {
+  public Annotator morpha(Properties properties, boolean verbose) {
     return new MorphaAnnotator(verbose);
   }
 
   /**
    * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxilliary things (like temporal tagging)
    */
-  protected Annotator ner(Properties properties,
+  public Annotator ner(Properties properties,
                           boolean applyNumericClassifiers,
                           boolean useSUTime,
                           boolean verbose,
@@ -85,21 +85,21 @@ public class AnnotatorImplementations {
   /**
    * Run RegexNER -- rule-based NER based on a deterministic mapping file
    */
-  protected Annotator tokensRegexNER(Properties properties, String name) {
+  public Annotator tokensRegexNER(Properties properties, String name) {
     return new TokensRegexNERAnnotator("regexner", properties);
   }
 
   /**
    * Annotate for gender of tokens
    */
-  protected Annotator gender(Properties properties, boolean verbose) {
+  public Annotator gender(Properties properties, boolean verbose) {
     return new GenderAnnotator(false, properties.getProperty("gender.firstnames", DefaultPaths.DEFAULT_GENDER_FIRST_NAMES));
   }
 
   /**
    * Infer the original casing of tokens
    */
-  protected Annotator trueCase(Properties properties, String modelLoc,
+  public Annotator trueCase(Properties properties, String modelLoc,
                                String classBias,
                                String mixedCaseFileName,
                                boolean verbose) {
@@ -109,14 +109,14 @@ public class AnnotatorImplementations {
   /**
    * Annotate for coreference
    */
-  protected Annotator coref(Properties properties) {
+  public Annotator coref(Properties properties) {
     return new DeterministicCorefAnnotator(properties);
   }
 
   /**
    * Annotate for relations expressed in sentences
    */
-  protected Annotator relations(Properties properties) {
+  public Annotator relations(Properties properties) {
     return new RelationExtractorAnnotator(properties);
   }
 
