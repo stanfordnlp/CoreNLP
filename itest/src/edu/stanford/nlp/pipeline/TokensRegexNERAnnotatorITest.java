@@ -128,24 +128,6 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
               "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
   }
 
-  // Tests for TokensRegex syntax with match group
-  public void testTokensRegexMatchGroup() throws Exception {
-    String[][] regexes =
-      new String[][]{
-        new String[]{"( /the/? /movie/ (/[A-Z].*/+) )", "MOVIE", "", "0", "1"}
-      };
-    Annotator annotatorCased = getTokensRegexNerAnnotator(regexes, false);
-
-    String str = "the movie Mud was very muddy";
-    Annotation document = createDocument(str);
-    annotatorCased.annotate(document);
-    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
-
-    checkTags(tokens,
-      "O", "O", "MOVIE", "O", "O", "O");
-
-  }
-
   // Basic tests from RegexNERAnnotatorITest
   public void testBasicMatching() throws Exception {
     String str = "President Barack Obama lives in Chicago , Illinois , " +
