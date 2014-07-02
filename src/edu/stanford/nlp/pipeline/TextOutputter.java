@@ -21,13 +21,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
-/**
- * @author John Bauer
- */
 public class TextOutputter {
-
-  private TextOutputter() {} // currently static. todo: fix this, make implement an interface
-
   public static void prettyPrint(Annotation annotation, OutputStream stream, StanfordCoreNLP pipeline) {
     try {
       PrintWriter os = new PrintWriter(IOUtils.encodedOutputStreamWriter(stream, pipeline.getEncoding()));
@@ -50,31 +44,31 @@ public class TextOutputter {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
       int nSentences = (sentences != null)? sentences.size():0;
       int nTokens = (tokens != null)? tokens.size():0;
-      os.printf("Document: ID=%s (%d sentences, %d tokens)%n", docId, nSentences, nTokens);
+      os.printf("Document: ID=%s (%d sentences, %d tokens)\n", docId, nSentences, nTokens);
     }
 
     // Display doctitle if available
     String docTitle =  annotation.get(CoreAnnotations.DocTitleAnnotation.class);
     if (docTitle != null) {
-      os.printf("Document Title: %s%n", docTitle);
+      os.printf("Document Title: %s\n", docTitle);
     }
 
     // Display docdate if available
     String docDate =  annotation.get(CoreAnnotations.DocDateAnnotation.class);
     if (docDate != null) {
-      os.printf("Document Date: %s%n", docDate);
+      os.printf("Document Date: %s\n", docDate);
     }
 
     // Display doctype if available
     String docType =  annotation.get(CoreAnnotations.DocTypeAnnotation.class);
     if (docType != null) {
-      os.printf("Document Type: %s%n", docType);
+      os.printf("Document Type: %s\n", docType);
     }
 
     // Display docsourcetype if available
     String docSourceType =  annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
     if (docSourceType != null) {
-      os.printf("Document Source Type: %s%n", docSourceType);
+      os.printf("Document Source Type: %s\n", docSourceType);
     }
 
     // display each sentence in this annotation
@@ -82,7 +76,7 @@ public class TextOutputter {
       for(int i = 0, sz = sentences.size(); i < sz; i ++) {
         CoreMap sentence = sentences.get(i);
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-        os.printf("Sentence #%d (%d tokens):%n", (i + 1), tokens.size());
+        os.printf("Sentence #%d (%d tokens):\n", (i + 1), tokens.size());
 
         String text = sentence.get(CoreAnnotations.TextAnnotation.class);
         os.println(text);
@@ -106,7 +100,7 @@ public class TextOutputter {
           // language which doesn't have dependencies, for example.
           if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
             os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
-            os.printf("%n");
+            os.print("\n");
           }
         }
 
@@ -174,5 +168,4 @@ public class TextOutputter {
 
     os.flush();
   }
-
 }

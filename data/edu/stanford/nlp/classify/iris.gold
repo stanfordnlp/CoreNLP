@@ -1,20 +1,20 @@
-5	Iris-setosa	Iris-setosa	0.996	0.996
-4.6	Iris-setosa	Iris-setosa	0.999	0.999
-5.1	Iris-setosa	Iris-setosa	0.994	0.994
-4.9	Iris-setosa	Iris-setosa	0.991	0.991
-5.4	Iris-setosa	Iris-setosa	0.998	0.998
-4.4	Iris-setosa	Iris-setosa	0.994	0.994
-5.3	Iris-setosa	Iris-setosa	0.998	0.998
-6.1	Iris-versicolor	Iris-versicolor	0.887	0.887
-6	Iris-versicolor	Iris-versicolor	0.942	0.942
-5.5	Iris-versicolor	Iris-versicolor	0.903	0.903
-6.5	Iris-versicolor	Iris-versicolor	0.929	0.929
-6.8	Iris-versicolor	Iris-versicolor	0.957	0.957
-6.2	Iris-versicolor	Iris-versicolor	0.986	0.986
-6.7	Iris-virginica	Iris-virginica	0.970	0.970
-6.4	Iris-virginica	Iris-virginica	0.898	0.898
-5.7	Iris-virginica	Iris-virginica	0.992	0.992
-6.7	Iris-virginica	Iris-virginica	0.969	0.969
-6.8	Iris-virginica	Iris-virginica	0.996	0.996
-7.7	Iris-virginica	Iris-virginica	0.990	0.990
-7.3	Iris-virginica	Iris-virginica	0.977	0.977
+5	Iris-setosa	Iris-setosa	0.995615365125735
+4.6	Iris-setosa	Iris-setosa	0.9994804135630505
+5.1	Iris-setosa	Iris-setosa	0.9937095680980086
+4.9	Iris-setosa	Iris-setosa	0.9905109629700247
+5.4	Iris-setosa	Iris-setosa	0.9982151488134486
+4.4	Iris-setosa	Iris-setosa	0.9944214428148407
+5.3	Iris-setosa	Iris-setosa	0.9984497925740373
+6.1	Iris-versicolor	Iris-versicolor	0.8873152482428373
+6	Iris-versicolor	Iris-versicolor	0.9424246013278404
+5.5	Iris-versicolor	Iris-versicolor	0.9030026595536319
+6.5	Iris-versicolor	Iris-versicolor	0.928816167001929
+6.8	Iris-versicolor	Iris-versicolor	0.9569376555329442
+6.2	Iris-versicolor	Iris-versicolor	0.9857141927233324
+6.7	Iris-virginica	Iris-virginica	0.9698639532763317
+6.4	Iris-virginica	Iris-virginica	0.8982390073296296
+5.7	Iris-virginica	Iris-virginica	0.9920401400173403
+6.7	Iris-virginica	Iris-virginica	0.968576539063806
+6.8	Iris-virginica	Iris-virginica	0.9957320369272686
+7.7	Iris-virginica	Iris-virginica	0.9900526044768513
+7.3	Iris-virginica	Iris-virginica	0.9766204287594443
