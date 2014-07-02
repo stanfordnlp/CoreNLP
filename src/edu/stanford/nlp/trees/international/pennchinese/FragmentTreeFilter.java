@@ -32,13 +32,7 @@ public class FragmentTreeFilter implements Filter<Tree> {
   static final TregexPattern metaPattern =
     TregexPattern.compile("META !> __ <: NN");
 
-  // The ctb tree reader uses CHTBTokenizer, which filters out SGML
-  // and accidentally catches five trees in ctb7.  
-  // TODO: One alternative would be to get rid of the specialized tokenizer
-  static final TregexPattern bracketPattern =
-    TregexPattern.compile("/[<>]/");
-
-  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern, metaPattern, bracketPattern };
+  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern, metaPattern };
 
   public boolean accept(Tree tree) {
     for (TregexPattern pattern : patterns) {
