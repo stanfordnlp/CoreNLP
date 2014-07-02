@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IterableIterator;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -967,7 +968,7 @@ public class Redwood {
     public static void endThreads(String check){ Redwood.endThreads(check); }
 
     public static RedwoodChannels channels(Object... channels) { return new RedwoodChannels(channels); }
-    
+
     /**
      * Wrap a collection of threads (Runnables) to be logged by Redwood.
      * Each thread will be logged as a continuous chunk; concurrent threads will be queued
@@ -982,53 +983,74 @@ public class Redwood {
      * @param runnables The Runnables representing the tasks being run, without the Redwood overhead
      * @return A new collection of Runnables with the Redwood overhead taken care of
      */
-    public static ArrayList<Runnable> thread(final String title, Iterable<Runnable> runnables){
+    public static Iterable<Runnable> thread(final String title, Iterable<Runnable> runnables){
       //--Preparation
       //(variables)
       final AtomicBoolean haveStarted = new AtomicBoolean(false);
       final ReentrantLock metaInfoLock = new ReentrantLock();
       final AtomicInteger numPending = new AtomicInteger(0);
+      final Iterator<Runnable> iter = runnables.iterator();
       //--Create Runnables
-      ArrayList<Runnable> rtn = new ArrayList<Runnable>();
-      for(final Runnable runnable : runnables){
-        rtn.add(new Runnable(){
-          public void run(){
-            try{
-              //(signal start of threads)
-              metaInfoLock.lock();
-              if(!haveStarted.getAndSet(true)){
-                startThreads(title); //<--this must be a blocking operation
-              }
-              metaInfoLock.unlock();
-              //(run runnable)
-              try{
-                runnable.run();
-              } catch (Exception e){
-                e.printStackTrace();
-                System.exit(1);
-              } catch (AssertionError e) {
-                e.printStackTrace();
-                System.exit(1);
-              }
-              //(signal end of thread)
-              finishThread();
-              //(signal end of threads)
-              int numStillPending = numPending.decrementAndGet();
-              if(numStillPending <= 0){
-                endThreads(title);
-              }
-            } catch(Throwable t){
-              t.printStackTrace();
-              System.exit(1);
-            }
+      return new IterableIterator<>(new Iterator<Runnable>() {
+        @Override
+        public boolean hasNext() {
+          return iter.hasNext();
+        }
+        @Override
+        public synchronized Runnable next() {
+          final Runnable runnable = iter.next();
+          // (don't flood the queu)
+          while (numPending.get() > 100) {
+            try { Thread.sleep(100); }
+            catch (InterruptedException e) { }
           }
-        });
-        numPending.incrementAndGet();
-      }
-      //--Return
-      return rtn;
+          numPending.incrementAndGet();
+          // (add the job)
+          Runnable toReturn = new Runnable(){
+            public void run(){
+              boolean threadFinished = false;
+              try{
+                //(signal start of threads)
+                metaInfoLock.lock();
+                if(!haveStarted.getAndSet(true)){
+                  startThreads(title); //<--this must be a blocking operation
+                }
+                metaInfoLock.unlock();
+                //(run runnable)
+                try{
+                  runnable.run();
+                } catch (Exception e){
+                  e.printStackTrace();
+                  System.exit(1);
+                } catch (AssertionError e) {
+                  e.printStackTrace();
+                  System.exit(1);
+                }
+                //(signal end of thread)
+                finishThread();
+                threadFinished = true;
+                //(signal end of threads)
+                int numStillPending = numPending.decrementAndGet();
+                if(numStillPending <= 0 && !iter.hasNext()){
+                  endThreads(title);
+                }
+              } catch(Throwable t){
+                t.printStackTrace();
+                if (!threadFinished) { finishThread(); }
+              }
+            }
+          };
+          return toReturn;
+        }
+
+        @Override
+        public void remove() {
+          iter.remove();
+        }
+      });
     }
-    public static ArrayList<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
+
+    public static Iterable<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
 
     /**
      * Thread a collection of runnables, and run them via a java Executor.
