@@ -147,9 +147,9 @@ public class Redwood {
     }
     //(perform action)
     attemptThreadControlThreadsafe(threadId);
-    if(threadId == currentThread){ 
-      r.run(); 
-    } else { 
+    if(threadId == currentThread){
+      r.run();
+    } else {
       queueTask(threadId, r);
     }
     //(release lock)
@@ -347,7 +347,7 @@ public class Redwood {
       startTrack.run();
     }
   }
-  
+
   /**
    * Helper method to start a track on the FORCE channel.
    * @param name The track name to print
@@ -355,7 +355,7 @@ public class Redwood {
   public static void forceTrack(Object name) {
     startTrack(FORCE, name);
   }
-  
+
   /**
    * Helper method to start an anonymous track on the FORCE channel.
    */
@@ -497,7 +497,7 @@ public class Redwood {
   /**
    * Create an object representing a group of channels.
    * {@link RedwoodChannels} contains a more complete description.
-   * 
+   *
    * @see RedwoodChannels
    */
   public static RedwoodChannels channels(Object... channelNames) {
@@ -787,7 +787,7 @@ public class Redwood {
    * to eventually display the enclosed message.
    */
   public static class Record {
- 
+
     //(filled in at construction)
     public final Object content;
     private final Object[] channels;
@@ -848,7 +848,7 @@ public class Redwood {
      * @return A sorted list of channels
      */
     public Object[] channels(){ sort(); return this.channels; }
-    
+
     @Override
     public String toString() {
       return "Record [content=" + content + ", depth=" + depth
@@ -992,7 +992,7 @@ public class Redwood {
       final AtomicInteger numPending = new AtomicInteger(0);
       final Iterator<Runnable> iter = runnables.iterator();
       //--Create Runnables
-      return new IterableIterator<>(new Iterator<Runnable>() {
+      return new IterableIterator<Runnable>(new Iterator<Runnable>() {
         @Override
         public boolean hasNext() {
           synchronized (iter) {
@@ -1138,7 +1138,7 @@ public class Redwood {
    * {@link RedwoodChannels} have log and logf methods. Unlike Redwood.log and
    * Redwood.logf, these do not take channel names since those are specified
    * inside {@link RedwoodChannels}.
-   * 
+   *
    * Required if you want to use logf with a channel. This follows the
    * Builder Pattern so Redwood.channels("chanA", "chanB").log("message") is equivalent to
    * Redwood.channels("chanA").channels("chanB").log("message")
@@ -1164,7 +1164,7 @@ public class Redwood {
       //(create channels)
       return new RedwoodChannels(result);
     }
-    
+
     /**
      * Log a message to the channels specified in this RedwoodChannels object.
      * @param obj The object to log
@@ -1184,7 +1184,7 @@ public class Redwood {
     public void logf(String format, Object... args) {
       log(new Formatter().format(format, args));
     }
-    
+
     /**
      * PrettyLog an object using these channels.  A default description will be created
      * based on the type of obj.
@@ -1205,7 +1205,7 @@ public class Redwood {
     public void err(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); }
     public void fatal(Object...objs){ log(Util.revConcat(objs, ERR, FORCE)); System.exit(1); }
   }
-  
+
    /**
    * Standard channels; enum for the sake of efficiency
    */
@@ -1269,7 +1269,7 @@ public class Redwood {
     }
     endTrack("Wrapper");
     System.exit(1);
-    
+
     forceTrack("Track 1");
     log("tag", ERR, "hello world");
     startTrack("Hidden");
