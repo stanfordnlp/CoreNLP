@@ -368,6 +368,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         StringBuilder os = new StringBuilder();
         os.append("tokenize.whitespace:" +
                 properties.getProperty("tokenize.whitespace", "false"));
+        if (properties.getProperty("tokenize.options") != null) {
+          os.append(":tokenize.options:" + properties.getProperty("tokenize.options"));
+        }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
                 "false"))) {
           os.append(WhitespaceTokenizerAnnotator.EOL_PROPERTY + ":" +
@@ -503,6 +506,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
+        System.err.println(signature());
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
@@ -564,25 +568,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
         StringBuilder os = new StringBuilder();
-        os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
-                properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-        if (Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
-                "false"))) {
-          os.append("tokenize.whitespace:" +
-                  properties.getProperty("tokenize.whitespace", "false"));
+        if (Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"))) {
+          os.append(NEWLINE_SPLITTER_PROPERTY + "=").append(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false")).append("\n");
+          os.append("tokenize.whitespace=").append(properties.getProperty("tokenize.whitespace", "false")).append("\n");
         } else {
-          os.append("ssplit.isOneSentence:" +
-                  properties.getProperty("ssplit.isOneSentence", "false"));
-          if ( ! Boolean.valueOf(properties.getProperty("ssplit.isOneSentence", "false"))) {
-            os.append("ssplit.boundaryTokenRegex:" +
-                    properties.getProperty("ssplit.boundaryTokenRegex", ""));
-            os.append("ssplit.boundariesToDiscard:" +
-                    properties.getProperty("ssplit.boundariesToDiscard", ""));
-            os.append("ssplit.htmlBoundariesToDiscard:" +
-                    properties.getProperty("ssplit.htmlBoundariesToDiscard", ""));
-            os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
-                    properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
-          }
+          os.append(baseSignature(properties, STANFORD_SSPLIT));
         }
         return os.toString();
       }
@@ -605,9 +595,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
-        return ("pos.maxlen:" + properties.getProperty("pos.maxlen", "") +
-                "pos.model:" + properties.getProperty("pos.model", DefaultPaths.DEFAULT_POS_MODEL) +
-                "pos.nthreads:" + properties.getProperty("pos.nthreads", properties.getProperty("nthreads", "")));
+        return POSTaggerAnnotator.signature(properties);
       }
     });
 
@@ -746,7 +734,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         // keep track of all relevant properties for this annotator here!
         String type = properties.getProperty("parse.type", "stanford");
         if(type.equalsIgnoreCase("stanford")){
-          return ParserAnnotator.signature("parser", properties);
+          return ParserAnnotator.signature("parse", properties);
         } else if(type.equalsIgnoreCase("charniak")) {
           return "parse.model:" +
                   properties.getProperty("parse.model", "") +
@@ -840,7 +828,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
       @Override
       public String additionalSignature() {
-        return "model=" + inputProps.get("model");
+        return "sentiment.model=" + inputProps.get("sentiment.model");
       }
     });
 
@@ -1104,6 +1092,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     String encoding = pipeline.getEncoding();
     BufferedReader r = new BufferedReader(IOUtils.encodedInputStreamReader(System.in, encoding));
     System.err.println("Entering interactive shell. Type q RETURN or EOF to quit.");
+    final OutputFormat outputFormat = OutputFormat.valueOf(pipeline.properties.getProperty("outputFormat", "text").toUpperCase());
     while (true) {
       System.err.print("NLP> ");
       String line = r.readLine();
@@ -1112,7 +1101,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       }
       if (line.length() > 0) {
         Annotation anno = pipeline.process(line);
-        pipeline.prettyPrint(anno, System.out);
+        switch (outputFormat) {
+        case XML:
+          pipeline.xmlPrint(anno, System.out);
+          break;
+        case TEXT:
+          pipeline.prettyPrint(anno, System.out);
+          break;
+        default:
+          throw new IllegalArgumentException("Cannot output in format " + outputFormat + " from the interactive shell");
+        }
       }
     }
   }

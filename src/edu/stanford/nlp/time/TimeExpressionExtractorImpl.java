@@ -26,9 +26,6 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
   CoreMapExpressionExtractor expressionExtractor;
 
-  // Index of temporal object to ids
-  //SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
-
   // Options
   Options options;
 
@@ -183,8 +180,10 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
 
   public List<TimeExpression> extractTimeExpressions(CoreMap annotation, SUTime.Time refDate, SUTime.TimeIndex timeIndex)
   {
-    List<CoreMap> mergedNumbers = NumberNormalizer.findAndMergeNumbers(annotation);
-    annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbers);
+    if (!annotation.containsKey(CoreAnnotations.NumerizedTokensAnnotation.class)) {
+      List<CoreMap> mergedNumbers = NumberNormalizer.findAndMergeNumbers(annotation);
+      annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbers);
+    }
 
     List<? extends MatchedExpression> matchedExpressions = expressionExtractor.extractExpressions(annotation);
     List<TimeExpression> timeExpressions = new ArrayList<TimeExpression>(matchedExpressions.size());

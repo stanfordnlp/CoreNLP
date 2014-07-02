@@ -113,6 +113,14 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
     return backingMap.size();
   }
 
+  public Set<K1> firstKeySet() {
+    return backingMap.firstKeySet();
+  }
+
+  public Set<K2> secondKeySet(K1 k1) {
+    return backingMap.getMap(k1).keySet();
+  }
+
   /**
    * Iterate over the map using the iterator and entry inner classes.
    */

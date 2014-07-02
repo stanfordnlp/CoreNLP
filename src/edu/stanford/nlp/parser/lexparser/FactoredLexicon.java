@@ -168,12 +168,6 @@ public class FactoredLexicon extends BaseLexicon {
   
   /**
    * This method should never return 0!!
-   * 
-   * @param word
-   * @param loc
-   * @param tagId
-   * @param lemmaId
-   * @return
    */
   private double probLemmaTag(String word, int loc, int tagId, int lemmaId) {
     double cL = lemmaTag.totalCount(lemmaId);
@@ -216,10 +210,6 @@ public class FactoredLexicon extends BaseLexicon {
 
   /**
    * This method should never return 0!
-   * 
-   * @param tagId
-   * @param morphId
-   * @return
    */
   private double probMorphTag(int tagId, int morphId) {
     double cM = morphTag.totalCount(morphId);
@@ -377,11 +367,6 @@ public class FactoredLexicon extends BaseLexicon {
   /**
    * Convert a treebank to factored lexicon events for fast iteration in the
    * optimizer.
-   * @param treebank
-   * @param tlpp 
-   * @param counts
-   * @param morphoSpec
-   * @return
    */
   private static List<FactoredLexiconEvent> treebankToLexiconEvents(List<Tree> treebank, 
       FactoredLexicon lexicon) {

@@ -58,7 +58,7 @@ public class Distsim implements Serializable {
     }
   }
 
-  static Distsim initLexicon(String path) {
+  static public Distsim initLexicon(String path) {
     synchronized (lexiconMap) {
       Distsim lex = lexiconMap.get(path);
       if (lex == null) {

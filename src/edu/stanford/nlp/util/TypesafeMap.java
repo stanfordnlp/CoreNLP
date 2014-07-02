@@ -20,6 +20,7 @@ public interface TypesafeMap {
 
   /**
    * Returns true if the map contains the given key.
+   * todo [cdm 2014]: This is synonymous with containsKey(), but used less, so we should just eliminate it.
    */
   public <VALUE> boolean has(Class<? extends Key<VALUE>> key);
 

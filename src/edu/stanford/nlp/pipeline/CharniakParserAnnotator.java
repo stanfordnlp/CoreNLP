@@ -5,6 +5,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.charniak.CharniakParser;
 import edu.stanford.nlp.trees.EnglishGrammaticalStructureFactory;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
@@ -60,7 +61,7 @@ public class CharniakParserAnnotator implements Annotator {
           tree = parser.getBestParse(words);
         }
         else {
-          tree = ParserAnnotatorUtils.xTree(words);
+          tree = ParserUtils.xTree(words);
         }
 
         ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);

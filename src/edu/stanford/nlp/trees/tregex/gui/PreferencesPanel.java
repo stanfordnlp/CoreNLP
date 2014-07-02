@@ -290,7 +290,7 @@ public class PreferencesPanel extends JDialog {
     } else if(trfName.equalsIgnoreCase("Basic categories only (LabeledScoredTreeReaderFactory)")) {
       return new LabeledScoredTreeReaderFactory();
     } else if(trfName.equalsIgnoreCase("FrenchTreeReaderFactory")) {
-      return new FrenchTreeReaderFactory(true);//PTB format
+      return new FrenchTreeReaderFactory();//PTB format
     } else if(trfName.equalsIgnoreCase("PennTreeReaderFactory")) {
       return new PennTreeReaderFactory();
     } else if(trfName.equalsIgnoreCase("StringLabeledScoredTreeReaderFactory")) {
