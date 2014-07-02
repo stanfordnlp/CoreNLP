@@ -13,7 +13,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
-import edu.stanford.nlp.parser.lexparser.NoSuchParseException;
+import edu.stanford.nlp.parser.common.NoSuchParseException;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.metrics.TreeSpanScoring;
 import edu.stanford.nlp.trees.DeepTree;
