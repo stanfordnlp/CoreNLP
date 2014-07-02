@@ -608,11 +608,19 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     // document tokens
     List<CoreLabel> tokens = new ArrayList<CoreLabel>();
     for (CoreNLPProtos.Token token : proto.getTokenList()) {
-      CoreLabel coreLabel = fromProto(token);
-      // Set docid
-      tokens.add(coreLabel);
+      tokens.add(fromProto(token));
     }
     lossySentence.set(TokensAnnotation.class, tokens);
+    // Add text -- missing by default as it's populated from the Document
+    StringBuilder text = new StringBuilder();
+    if (tokens.size() > 0) {
+      if (tokens.get(0).before() != null) { text.append(tokens.get(0).before()); }
+    }
+    for (CoreLabel token : tokens) {
+      if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
+      if (token.after() != null) { text.append(token.after()); }
+    }
+    lossySentence.set(TextAnnotation.class, text.toString());
     // Return
     return lossySentence;
   }
