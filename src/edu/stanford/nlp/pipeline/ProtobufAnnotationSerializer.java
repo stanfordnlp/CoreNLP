@@ -349,6 +349,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).containsKey(ParagraphAnnotation.class)) {
       builder.setParagraph(getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).get(ParagraphAnnotation.class));
     }
+    if (sentence.containsKey(NumerizedTokensAnnotation.class)) { builder.setHasNumerizedTokensAnnotation(true); } else { builder.setHasNumerizedTokensAnnotation(false); }
     // Non-default annotators
     if (sentence.containsKey(EntityMentionsAnnotation.class)) {
       builder.setHasRelationAnnotations(true);
@@ -782,12 +783,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (sentence.hasCollapsedCCProcessedDependencies()) {
         map.set(CollapsedCCProcessedDependenciesAnnotation.class, fromProto(sentence.getCollapsedCCProcessedDependencies(), sentenceTokens, docid));
       }
-    }
-
-    // Redo some light annotation
-    for (CoreMap sentence : sentences) {
-      if (sentence.containsKey(TokensAnnotation.class)) {
-        sentence.set(NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
+      // Redo some light annotation
+      if ( map.containsKey(TokensAnnotation.class) &&
+          (!sentence.hasHasNumerizedTokensAnnotation() || sentence.getHasNumerizedTokensAnnotation())) {
+        map.set(NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(map));
       }
     }
 
