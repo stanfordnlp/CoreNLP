@@ -895,7 +895,7 @@ public class Redwood {
     /** {@inheritDoc} */
     @Override
     public void print(Object[] channels, String line) {
-      printWriter.write(line);
+      printWriter.write(line == null ? "null" : line);
       printWriter.flush();
     }
   }
