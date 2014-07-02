@@ -1,11 +1,12 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
+import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.FileNotFoundException;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A class abstracting the implementation of various annotators.
@@ -58,7 +59,8 @@ public class AnnotatorImplementations {
   /**
    * Part of speech tag
    */
-  public Annotator posTagger(Properties properties, String annotatorName) {
+  public Annotator posTagger(Properties properties) {
+    String annotatorName = "pos";
     return new POSTaggerAnnotator(annotatorName, properties);
   }
 
@@ -72,11 +74,35 @@ public class AnnotatorImplementations {
   /**
    * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxilliary things (like temporal tagging)
    */
-  public Annotator ner(Properties properties,
-                          boolean applyNumericClassifiers,
-                          boolean useSUTime,
-                          boolean verbose,
-                          String... loadPaths) throws FileNotFoundException {
+  public Annotator ner(Properties properties) throws FileNotFoundException {
+
+    List<String> models = new ArrayList<String>();
+    String modelNames = properties.getProperty("ner.model");
+    if (modelNames == null) {
+      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+    }
+    if (modelNames.length() > 0) {
+      models.addAll(Arrays.asList(modelNames.split(",")));
+    }
+    if (models.isEmpty()) {
+      // Allow for no real NER model - can just use numeric classifiers or SUTime.
+      // Have to unset ner.model, so unlikely that people got here by accident.
+      System.err.println("WARNING: no NER models specified");
+    }
+
+    boolean applyNumericClassifiers =
+            PropertiesUtils.getBool(properties,
+                    NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
+                    NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
+    boolean useSUTime =
+            PropertiesUtils.getBool(properties,
+                    NumberSequenceClassifier.USE_SUTIME_PROPERTY,
+                    NumberSequenceClassifier.USE_SUTIME_DEFAULT);
+
+    boolean verbose = false;
+
+    String[] loadPaths = models.toArray(new String[models.size()]);
+
     NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
         useSUTime, properties,
         loadPaths);

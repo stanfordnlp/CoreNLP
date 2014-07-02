@@ -591,7 +591,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       @Override
       public Annotator create() {
         try {
-          return annotatorImplementation.posTagger(properties, "pos");
+          return annotatorImplementation.posTagger(properties);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
@@ -631,31 +631,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        List<String> models = new ArrayList<String>();
-        String modelNames = properties.getProperty("ner.model");
-        if (modelNames == null) {
-          modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
-        }
-        if (modelNames.length() > 0) {
-          models.addAll(Arrays.asList(modelNames.split(",")));
-        }
-        if (models.isEmpty()) {
-          // Allow for no real NER model - can just use numeric classifiers or SUTime.
-          // Have to unset ner.model, so unlikely that people got here by accident.
-          System.err.println("WARNING: no NER models specified");
-        }
-        NERClassifierCombiner nerCombiner;
         try {
-          boolean applyNumericClassifiers =
-            PropertiesUtils.getBool(properties,
-                NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
-                NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-          boolean useSUTime =
-            PropertiesUtils.getBool(properties,
-                NumberSequenceClassifier.USE_SUTIME_PROPERTY,
-                NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-          return annotatorImplementation.ner(properties, applyNumericClassifiers,
-                useSUTime, false, models.toArray(new String[models.size()]));
+          return annotatorImplementation.ner(properties);
         } catch (FileNotFoundException e) {
           throw new RuntimeIOException(e);
         }
