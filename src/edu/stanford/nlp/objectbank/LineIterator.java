@@ -16,8 +16,8 @@ import edu.stanford.nlp.util.AbstractIterator;
  */
 public class LineIterator<X> extends AbstractIterator<X> {
 
-  private Function<String,X> op;
-  private BufferedReader in;
+  private final Function<String,X> op;
+  private final BufferedReader in;
   private X nextToken; // = null;
 
   @SuppressWarnings({"unchecked"})
@@ -92,7 +92,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-    private Function<String,X> oper;
+    private final Function<String,X> oper;
 
     @SuppressWarnings({"unchecked"})
     public LineIteratorFactory() {
