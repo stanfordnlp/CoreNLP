@@ -36,11 +36,14 @@ import java.util.*;
  *   that can be attached to a sentence. Nonetheless, it is guaranteed to be
  *   lossless with the default set of named annotators you can create from a
  *   {@link StanfordCoreNLP} pipeline, with default properties defined for each annotator.
+ *   Note that the serializer does not gzip automatically -- this must be done by passing in a GZipOutputStream
+ *   and calling a GZipInputStream manually. For most Annotations, gzipping provides a notable decrease in size (~2.5x)
+ *   due to most of the data being raw Strings.
  * </p>
  *
  * <p>
- *   To enforce lossless serialization, use {@link ProtobufAnnotationSerializer#ProtobufAnnotationSerializer(boolean)};
- *   this will throw an exception if an unknown key appears in the annotation which would not be saved to the
+ *   To allow lossy serialization, use {@link ProtobufAnnotationSerializer#ProtobufAnnotationSerializer(boolean)}.
+ *   Otherwise, an exception is thrown if an unknown key appears in the annotation which would not be saved to th
  *   protocol buffer.
  *   If such keys exist, and are a part of the standard CoreNLP pipeline, please let us know!
  *   If you would like to serialize keys in addition to those serialized by default (e.g., you are attaching
