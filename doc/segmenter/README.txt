@@ -32,10 +32,6 @@ LICENSE
 CHANGES
 ------------------------------------
 
-2014-06-16      3.4     Update Arabic segmenter 
-
-2014-01-04    3.3.1     Bugfix release 
-
 2013-11-12    3.3.0     Update for compatibility 
 
 2013-06-19    3.2.0     Improve handling of line-by-line input 

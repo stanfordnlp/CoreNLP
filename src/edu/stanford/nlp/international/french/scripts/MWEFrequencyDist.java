@@ -44,7 +44,7 @@ public final class MWEFrequencyDist {
     
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory();
+      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
       TreeReader tr = trf.newTreeReader(br);
 
       final TregexPattern pMWE = TregexPattern.compile("/^MW/");

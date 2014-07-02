@@ -84,7 +84,9 @@ public class DependencyTreeTransformer implements TreeTransformer {
     Tsurgeon.parseOperation("prune none");
 
   protected static Tree stripEmptyNode(Tree t) {
-    return Tsurgeon.processPattern(matchPattern, operation, t);
+    List<Pair<TregexPattern, TsurgeonPattern>> ops = Generics.newArrayList();
+    ops.add(Generics.newPair(matchPattern, operation));
+    return Tsurgeon.processPatternsOnTree(ops, t);
   }
 
 }

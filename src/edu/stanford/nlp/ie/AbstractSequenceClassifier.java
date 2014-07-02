@@ -81,10 +81,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public SeqClassifierFlags flags;
   public Index<String> classIndex; // = null;
-
+  public FeatureFactory<IN> featureFactory;
+  
   // Thang Sep13: multiple feature factories (NERFeatureFactory, EmbeddingFeatureFactory)
-  public List<FeatureFactory<IN>> featureFactories;
-
+  public List<FeatureFactory<IN>> featureFactories; 
+  
   protected IN pad;
   private CoreTokenFactory<IN> tokenFactory;
   public int windowSize;
@@ -96,6 +97,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public DocumentReaderAndWriter<IN> defaultReaderAndWriter() {
     return defaultReaderAndWriter;
   }
+
+  private final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
   private DocumentReaderAndWriter<IN> plainTextReaderAndWriter;
   public DocumentReaderAndWriter<IN> plainTextReaderAndWriter() {
@@ -125,12 +128,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     // try {
     // Thang Sep13: allow for multiple feature factories.
-    this.featureFactories = Generics.newArrayList();
-    if (flags.featureFactory != null) {
-      FeatureFactory factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
-      featureFactories.add(factory);
-    }
+    this.featureFactory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
     if(flags.featureFactories!=null){
+      this.featureFactories = new ArrayList<FeatureFactory<IN>>();
       for (int i = 0; i < flags.featureFactories.length; i++) {
         FeatureFactory<IN> indFeatureFactory = new MetaClass(flags.featureFactories[i]).
             createInstance(flags.featureFactoriesArgs.get(i));
@@ -167,10 +167,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     pad.set(CoreAnnotations.AnswerAnnotation.class, flags.backgroundSymbol);
     pad.set(CoreAnnotations.GoldAnswerAnnotation.class, flags.backgroundSymbol);
 
-    for (FeatureFactory featureFactory : featureFactories) {
-      featureFactory.init(flags);
+    // Thang Sep13: allow for multiple feature factories.
+    featureFactory.init(flags); // for compatible use
+    if(flags.featureFactories!=null){
+      for (FeatureFactory<IN> indFeatureFactory : featureFactories) {
+        indFeatureFactory.init(flags);
+      }
     }
-
+    
     defaultReaderAndWriter = makeReaderAndWriter();
     if (flags.readerAndWriter != null &&
         flags.readerAndWriter.equals(flags.plainTextDocumentReaderAndWriter)) {
@@ -964,7 +968,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyStdin(DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
-    BufferedReader is = IOUtils.readerFromStdin(flags.inputEncoding);
+    BufferedReader is = new BufferedReader(new InputStreamReader(System.in, flags.inputEncoding));
     for (String line; (line = is.readLine()) != null; ) {
       Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
       if (flags.keepEmptySentences && documents.size() == 0) {
@@ -1065,8 +1069,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     boolean resultsCounted = true;
     int numWords = 0;
     int numDocs = 0;
-
-    final AtomicInteger threadCompletionCounter = new AtomicInteger(0);
 
     ThreadsafeProcessor<List<IN>, List<IN>> threadProcessor =
         new ThreadsafeProcessor<List<IN>, List<IN>>() {
@@ -1791,7 +1793,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       return;
     }
     if (cliqueWriter == null) {
-      cliqueWriter = IOUtils.getPrintWriterOrDie("features-" + flags.printFeatures + ".txt");
+      cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {
@@ -1827,7 +1829,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   // Separating this method out lets printFeatureLists be inlined, which is good since it is usually a no-op.
   private void printFeatureListsHelper(IN wi, Collection<List<String>> features) {
     if (cliqueWriter == null) {
-      cliqueWriter = IOUtils.getPrintWriterOrDie("features-" + flags.printFeatures + ".txt");
+      cliqueWriter = IOUtils.getPrintWriterOrDie("feats-" + flags.printFeatures + ".txt");
       writtenNum = 0;
     }
     if (wi instanceof CoreLabel) {

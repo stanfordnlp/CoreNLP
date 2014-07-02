@@ -34,8 +34,6 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.parser.KBestViterbiParser;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.Tree;
@@ -1071,9 +1069,7 @@ oScore[split][end][br.rightChild] = totR;
             }
 
             float lS = iScore_start[split][leftChild];
-            // cdm [2012]: Test whether removing these 2 tests might speed things up because less branching?
-            // jab [2014]: oddly enough, removing these tests helps the chinese parser but not the english parser.
-            if (lS == Float.NEGATIVE_INFINITY) {
+            if (lS == Float.NEGATIVE_INFINITY) {        // cdm [2012]: Test whether removing these 2 tests might speed things up because less branching?
               continue;
             }
             float rS = iScore[split][end][rightState];
@@ -1848,7 +1844,7 @@ oScore[split][end][br.rightChild] = totR;
 
     List<Derivation> dHatV = dHat.get(v);
 
-    if (isTag[v.goal] && v.start + 1 == v.end) {
+    if (isTag[v.goal]) {
       IntTaggedWord tagging = new IntTaggedWord(words[start], tagIndex.indexOf(goalStr));
       String contextStr = getCoreLabel(start).originalText();
       float tagScore = lex.score(tagging, start, wordIndex.get(words[start]), contextStr);
@@ -1983,7 +1979,7 @@ oScore[split][end][br.rightChild] = totR;
     List<Arc> bs = new ArrayList<Arc>();
 
     // pre-terminal??
-    if (isTag[v.goal] && v.start + 1 == v.end) {
+    if (isTag[v.goal]) {
       List<Vertex> tails = new ArrayList<Vertex>();
       double score = iScore[v.start][v.end][v.goal];
       Arc arc = new Arc(tails, v, score);

@@ -202,7 +202,7 @@ public class Dictionaries {
   public final Set<String> inanimateWords = Generics.newHashSet();
   public final Set<String> animateWords = Generics.newHashSet();
 
-  public final Map<List<String>, Gender> genderNumber = Generics.newHashMap();
+  public final Map<List<String>, int[]> genderNumber = Generics.newHashMap();
 
   public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<Counter<Pair<String, String>>>(4);
   public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<Pair<String, String>>();
@@ -248,7 +248,7 @@ public class Dictionaries {
    *  Otherwise, null is returned.
    *
    *  @param name Is treated as a cased string. ME != me
-   */
+   */ 
   public String lookupCanonicalAmericanStateName(String name) {
     return statesAbbreviation.get(name);
   }
@@ -288,7 +288,7 @@ public class Dictionaries {
 
   /** Returns a set of demonyms for a country (or city or region).
    *  @param name Some string perhaps a country name like "Australia"
-   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }.
+   *  @return A Set of demonym Strings, perhaps { "Australian", "Aussie", "Aussies" }. 
    *     If none are known (including if the argument isn't a country/region name,
    *     then the empty set will be returned.
    */
@@ -300,9 +300,9 @@ public class Dictionaries {
     return result;
   }
 
-  /** Returns whether this mention (possibly multi-word) is the
+  /** Returns whether this mention (possibly multi-word) is the 
    *  adjectival form of a demonym, like "African" or "Iraqi".
-   *  True if it is an adjectival form, even if also a name for a
+   *  True if it is an adjectival form, even if also a name for a 
    *  person of that country (such as "Iraqi").
    */
   public boolean isAdjectivalDemonym(String token) {
@@ -359,7 +359,8 @@ public class Dictionaries {
   private void loadCountriesLists(String file) {
     try{
       BufferedReader reader = IOUtils.readerFromString(file);
-      for (String line; (line = reader.readLine()) != null; ) {
+      while(reader.ready()) {
+        String line = reader.readLine();
         countries.add(line.split("\t")[1].toLowerCase());
       }
       reader.close();
@@ -368,21 +369,28 @@ public class Dictionaries {
     }
   }
 
-  /**
-   * Load Bergsma and Lin (2006) gender and number list.
-   * <br>
-   * The list is converted from raw text and numbers to a serialized
-   * map, which saves quite a bit of time loading.  
-   * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
-   */
-  private void loadGenderNumber(String file, String neutralWordsFile) {
+  /** 
+   * load Bergsma and Lin (2006) gender and number list
+   * */
+  private void loadGenderNumber(String file, String neutralWordsFile){
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
-      Map<List<String>, Gender> temp = IOUtils.readObjectFromURLOrClasspathOrFileSystem(file);
-      genderNumber.putAll(temp);
+      BufferedReader reader = IOUtils.readerFromString(file);
+      String line;
+      while ((line = reader.readLine())!=null){
+        String[] split = line.split("\t");
+        List<String> tokens = new ArrayList<String>(Arrays.asList(split[0].split(" ")));
+        String[] countStr = split[1].split(" ");
+        int[] counts = new int[4];
+        counts[0] = Integer.parseInt(countStr[0]);
+        counts[1] = Integer.parseInt(countStr[1]);
+        counts[2] = Integer.parseInt(countStr[2]);
+        counts[3] = Integer.parseInt(countStr[3]);
+
+        genderNumber.put(tokens, counts);
+      }
+      reader.close();
     } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    } catch (ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
   }

@@ -18,6 +18,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
+import edu.stanford.nlp.sentiment.SentimentUtils;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
@@ -51,8 +52,6 @@ public class XMLOutputter {
     public String encoding = "UTF-8";
     /** How to print a constituent tree */
     public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
-    /** If false, will print only non-singleton entities*/
-    public boolean printSingletons = false;
   }
 
   /**
@@ -63,7 +62,6 @@ public class XMLOutputter {
     options.relationsBeam = pipeline.getBeamPrintingOption();
     options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
     options.encoding = pipeline.getEncoding();
-    options.printSingletons = pipeline.getPrintSingletons();
     return options;
   }
 
@@ -194,11 +192,10 @@ public class XMLOutputter {
          * Adds sentiment as an attribute of this sentence.
          */
         Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
-        if (sentimentTree != null) {
+        if (sentimentTree != null){
           int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
           sentElem.addAttribute(new Attribute("sentimentValue", Integer.toString(sentiment)));
-          String sentimentClass = sentence.get(SentimentCoreAnnotations.ClassName.class);
-          sentElem.addAttribute(new Attribute("sentiment", sentimentClass.replaceAll(" ", "")));
+          sentElem.addAttribute(new Attribute("sentiment", SentimentUtils.sentimentString(sentiment).replaceAll(" ", "")));
         }
 
 
@@ -328,7 +325,7 @@ public class XMLOutputter {
   {
     boolean foundCoref = false;
     for (CorefChain chain : corefChains.values()) {
-      if (!options.printSingletons && chain.getMentionsInTextualOrder().size() <= 1)
+      if (chain.getMentionsInTextualOrder().size() <= 1)
         continue;
       foundCoref = true;
       Element chainElem = new Element("coreference", curNS);

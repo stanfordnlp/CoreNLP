@@ -16,8 +16,6 @@ import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
-import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
-import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 
 /**
  * A "TreeGraph" is a tree with additional directed, labeled arcs
@@ -265,7 +263,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * Get the parent for the current node.
    */
   @Override
-  public TreeGraphNode parent() {
+  public Tree parent() {
     return parent;
   }
 
@@ -357,12 +355,10 @@ public class TreeGraphNode extends Tree implements HasParent {
     if (!treeGraph().equals(node.treeGraph())) {
       System.err.println("Warning: you are trying to add an arc from node " + this + " to node " + node + ", but they do not belong to the same TreeGraph!");
     }
-    Set<TreeGraphNode> collection = label.get(arcLabel);
-    if (collection == null) {
-      collection = Generics.<TreeGraphNode>newHashSet();
-      label.set(arcLabel, collection);
+    if (!label.containsKey(arcLabel)) {
+      label.set(arcLabel, Generics.<TreeGraphNode>newHashSet());
     }
-    return collection.add(node);
+    return ((Collection) label.get(arcLabel)).add(node);
   }
 
   /**
@@ -445,49 +441,7 @@ public class TreeGraphNode extends Tree implements HasParent {
     if (arcLabels == null) {
       return null;
     }
-    if (arcLabels.size() == 0) {
-      return null;
-    }
-    return arcLabels.iterator().next();
-  }
-
-  /**
-   * Tries to return a leaf (terminal) node which is the {@link
-   * GrammaticalRelation#GOVERNOR
-   * <code>GOVERNOR</code>} of the given node <code>t</code>.
-   * Probably, <code>t</code> should be a leaf node as well.
-   *
-   * @param t a leaf node in this <code>GrammaticalStructure</code>
-   * @return a node which is the governor for node
-   *         <code>t</code>, or else <code>null</code>
-   */
-  public TreeGraphNode getGovernor() {
-    return getNodeInRelation(GOVERNOR);
-  }
-
-  public TreeGraphNode getNodeInRelation(GrammaticalRelation r) {
-    return followArcToNode(GrammaticalRelation.getAnnotationClass(r));
-  }
-
-  /**
-   * Tries to return a <code>Set</code> of leaf (terminal) nodes
-   * which are the {@link GrammaticalRelation#DEPENDENT
-   * <code>DEPENDENT</code>}s of the given node <code>t</code>.
-   * Probably, <code>this</code> should be a leaf node as well.
-   *
-   * @return a <code>Set</code> of nodes which are dependents of
-   *         node <code>this</code>, possibly an empty set
-   */
-  public Set<TreeGraphNode> getDependents() {
-    Set<TreeGraphNode> deps = Generics.newHashSet();
-    for (Tree subtree : treeGraph().root()) {
-      TreeGraphNode node = (TreeGraphNode) subtree;
-      TreeGraphNode gov = node.getGovernor();
-      if (gov != null && gov == this) {
-        deps.add(node);
-      }
-    }
-    return deps;
+    return (new ArrayList<Class<? extends GrammaticalRelationAnnotation>>(arcLabels)).get(0);
   }
 
   /**
@@ -540,6 +494,62 @@ public class TreeGraphNode extends Tree implements HasParent {
         System.err.println("Head is null: " + this);
       }
     }
+  }
+
+  /**
+   * Return a set of node-node dependencies, represented as Dependency
+   * objects, for the Tree.
+   *
+   * @param hf The HeadFinder to use to identify the head of constituents.
+   *           If this is <code>null</code>, then nodes are assumed to already
+   *           be marked with their heads.
+   * @return Set of dependencies (each a <code>Dependency</code>)
+   */
+  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf) {
+    Set<Dependency<Label, Label, Object>> deps = Generics.newHashSet();
+    for (Tree t : this) {
+
+      TreeGraphNode node = safeCast(t);
+      if (node == null || node.isLeaf() || node.children().length < 2) {
+        continue;
+      }
+
+      TreeGraphNode headWordNode;
+      if (hf != null) {
+        headWordNode = safeCast(node.headTerminal(hf));
+      } else {
+        headWordNode = node.headWordNode();
+      }
+
+      for (Tree k : node.children()) {
+        TreeGraphNode kid = safeCast(k);
+        if (kid == null) {
+          continue;
+        }
+        TreeGraphNode kidHeadWordNode;
+        if (hf != null) {
+          kidHeadWordNode = safeCast(kid.headTerminal(hf));
+        } else {
+          kidHeadWordNode = kid.headWordNode();
+        }
+
+        if (headWordNode != null && headWordNode != kidHeadWordNode && kidHeadWordNode != null) {
+          int headWordNodeIndex = headWordNode.index();
+          int kidHeadWordNodeIndex = kidHeadWordNode.index();
+
+          // If the two indices are equal, then the leaves haven't been indexed. Just return an ordinary
+          // UnnamedDependency. This mirrors the implementation of super.dependencies().
+          Dependency<Label, Label, Object> d = (headWordNodeIndex == kidHeadWordNodeIndex) ?
+              new UnnamedDependency(headWordNode, kidHeadWordNode) :
+              new UnnamedConcreteDependency(headWordNode, headWordNodeIndex, kidHeadWordNode, kidHeadWordNodeIndex);
+
+          if (f.accept(d)) {
+            deps.add(d);
+          }
+        }
+      }
+    }
+    return deps;
   }
 
   /**

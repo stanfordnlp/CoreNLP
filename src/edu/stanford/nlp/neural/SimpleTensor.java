@@ -97,12 +97,6 @@ public class SimpleTensor implements Serializable {
     return numRows * numCols * numSlices;
   }
 
-  public void set(double value) {
-    for (int slice = 0; slice < numSlices; ++slice) {
-      slices[slice].set(value);
-    }
-  }
-
   /**
    * Returns a new tensor which has the values of the original tensor
    * scaled by <code>scaling</code>.  The original object is
@@ -206,18 +200,6 @@ public class SimpleTensor implements Serializable {
       out.set(slice, result);
     }
     return out;
-  }
-
-  /**
-   * Returns true iff every element of the tensor is 0
-   */
-  public boolean isZero() {
-    for (int i = 0; i < numSlices; ++i) {
-      if (!NeuralUtils.isZero(slices[i])) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**

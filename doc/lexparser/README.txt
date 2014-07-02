@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.4 - 2014-06-16
+Stanford Lexicalized Parser v3.3.0 - 2013-11-12
 -----------------------------------------------
 
 Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
@@ -205,10 +205,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2014-06-16      3.4     Shift-reduce parser 
-
-2014-01-04    3.3.1     Bugfix release, dependency improvements 
 
 2013-11-12    3.3.0     Remove the attr dependency, add imperatives to 
                         English training data 

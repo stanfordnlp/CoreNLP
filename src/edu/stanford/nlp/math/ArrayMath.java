@@ -280,7 +280,7 @@ public class ArrayMath {
 
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
-      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
+      throw new RuntimeException();
     }
     for (int i = 0; i < to.length; i++) {
       to[i] = to[i] + from[i];
@@ -379,22 +379,6 @@ public class ArrayMath {
     }
     return c;
   }
-
-  /**
-   * Assumes that both arrays have same length.
-   */
-  public static double dotProduct(double[] a, double[] b) {
-    if (a.length != b.length) {
-      throw new RuntimeException("Can't calculate dot product of multiple different lengths: a.length=" + a.length + " b.length=" + b.length);
-    }
-    double result = 0;
-    for (int i = 0; i < a.length; i++) {
-      result += a[i] * b[i];
-    }
-    return result;
-  }
-
-
 
   /**
    * Assumes that both arrays have same length.
@@ -1391,11 +1375,6 @@ public class ArrayMath {
     return sum(a) / a.length;
   }
 
-  // Thang Mar14
-  public static int mean(int[] a) {
-    return sum(a) / a.length;
-  }
-  
   public static double median(double[] a) {
     double[] b = new double[a.length];
     System.arraycopy(a, 0, b, 0, b.length);

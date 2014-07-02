@@ -1054,7 +1054,7 @@ public class SUTimeMain {
     String date = props.getProperty("date");
     String dct = props.getProperty("tempeval2.dct");
     String out = props.getProperty("o");
-    String inputTypeStr = props.getProperty("in.type", InputType.TEXT.name());
+    String inputTypeStr = props.getProperty("in.type", TIMEBANK_CSV.name());
     String eval = props.getProperty("eval");
     PYTHON = props.getProperty("python", PYTHON);
     InputType inputType = InputType.valueOf(inputTypeStr);

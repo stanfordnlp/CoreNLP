@@ -18,10 +18,10 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.QNMinimizer;
-import edu.stanford.nlp.parser.common.ArgUtils;
-import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.lexparser.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.TrainOptions;
 import edu.stanford.nlp.trees.CompositeTreeTransformer;
@@ -115,7 +115,7 @@ public class DVParser {
 
     Timing timing = new Timing();
     long maxTrainTimeMillis = op.trainOptions.maxTrainTimeSeconds * 1000;
-    int batchCount = 0;
+    long nextDebugCycle = op.trainOptions.debugOutputSeconds * 1000;
     int debugCycle = 0;
     double bestLabelF1 = 0.0;
 
@@ -130,15 +130,14 @@ public class DVParser {
     double[] sumGradSquare = new double[dvModel.totalParamSize()];
     Arrays.fill(sumGradSquare, 1.0);
     
-    int numBatches = sentences.size() / op.trainOptions.batchSize + 1;
+    int numBatches = sentences.size() / op.trainOptions.dvBatchSize + 1;
     System.err.println("Training on " + sentences.size() + " trees in " + numBatches + " batches");
-    System.err.println("Times through each training batch: " + op.trainOptions.trainingIterations);
+    System.err.println("Times through each training batch: " + op.trainOptions.dvIterations);
     System.err.println("QN iterations per batch: " + op.trainOptions.qnIterationsPerBatch);
-    for (int iter = 0; iter < op.trainOptions.trainingIterations; ++iter) {
+    for (int iter = 0; iter < op.trainOptions.dvIterations; ++iter) {
       List<Tree> shuffledSentences = new ArrayList<Tree>(sentences);
       Collections.shuffle(shuffledSentences, dvModel.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
-        ++batchCount;
         // This did not help performance
         //System.err.println("Setting AdaGrad's sum of squares to 1...");
         //Arrays.fill(sumGradSquare, 1.0);
@@ -149,9 +148,9 @@ public class DVParser {
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
         // the list
-        int startTree = batch * op.trainOptions.batchSize;
-        int endTree = (batch + 1) * op.trainOptions.batchSize;
-        if (endTree + op.trainOptions.batchSize > shuffledSentences.size()) {
+        int startTree = batch * op.trainOptions.dvBatchSize;
+        int endTree = (batch + 1) * op.trainOptions.dvBatchSize;
+        if (endTree + op.trainOptions.dvBatchSize > shuffledSentences.size()) {
           endTree = shuffledSentences.size();
         }
         
@@ -165,8 +164,7 @@ public class DVParser {
           break;
         }
 
-        if (op.trainOptions.debugOutputFrequency > 0 && batchCount % op.trainOptions.debugOutputFrequency == 0) {
-          System.err.println("Finished " + batchCount + " total batches, running evaluation cycle");
+        if (nextDebugCycle > 0 && totalElapsed > nextDebugCycle) {
           // Time for debugging output!
           double tagF1 = 0.0;
           double labelF1 = 0.0;
@@ -209,6 +207,7 @@ public class DVParser {
           }
 
           ++debugCycle;
+          nextDebugCycle = timing.report() + op.trainOptions.debugOutputSeconds * 1000;
         }
       }
       long totalElapsed = timing.report();
@@ -236,57 +235,51 @@ public class DVParser {
     // 1: QNMinimizer, 2: SGD
     switch (MINIMIZER) {
     case (1): {
-      QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);    
-      qn.useMinPackSearch();
-      qn.useDiagonalScaling();
-      qn.terminateOnAverageImprovement(true);
-      qn.terminateOnNumericalZero(true);
-      qn.terminateOnRelativeNorm(true);
-      
-      theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);   	
-      break;
+    	QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);    
+    	qn.useMinPackSearch();
+    	qn.useDiagonalScaling();
+    	qn.terminateOnAverageImprovement(true);
+    	qn.terminateOnNumericalZero(true);
+    	qn.terminateOnRelativeNorm(true);
+
+    	theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);   	
     }
     case 2:{
-      //Minimizer smd = new SGDMinimizer();    	double tol = 1e-4;    	theta = smd.minimize(gcFunc,tol,theta,op.trainOptions.qnIterationsPerBatch);
-      double lastCost = 0, currCost = 0;
-      boolean firstTime = true;
-      for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
-        //gcFunc.calculate(theta);
-        double[] grad = gcFunc.derivativeAt(theta);
-        currCost = gcFunc.valueAt(theta);
-        System.err.println("batch cost: " + currCost);
-        //    		if(!firstTime){
-        //    			if(currCost > lastCost){
-        //    				System.out.println("HOW IS FUNCTION VALUE INCREASING????!!! ... still updating theta");
-        //    			}
-        //    			if(Math.abs(currCost - lastCost) < 0.0001){
-        //    				System.out.println("function value is not decreasing. stop");
-        //    			}
-        //    		}else{
-        //    			firstTime = false;
-        //    		}
-        lastCost = currCost;
-        ArrayMath.addMultInPlace(theta, grad, -1*op.trainOptions.learningRate);
-      }
-      break;
+    	//Minimizer smd = new SGDMinimizer();    	double tol = 1e-4;    	theta = smd.minimize(gcFunc,tol,theta,op.trainOptions.qnIterationsPerBatch);
+    	double lastCost = 0, currCost = 0;
+    	boolean firstTime = true;
+    	for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
+    		//gcFunc.calculate(theta);
+    		double[] grad = gcFunc.derivativeAt(theta);
+    		currCost = gcFunc.valueAt(theta);
+    		System.err.println("batch cost: " + currCost);
+//    		if(!firstTime){
+//    			if(currCost > lastCost){
+//    				System.out.println("HOW IS FUNCTION VALUE INCREASING????!!! ... still updating theta");
+//    			}
+//    			if(Math.abs(currCost - lastCost) < 0.0001){
+//    				System.out.println("function value is not decreasing. stop");
+//    			}
+//    		}else{
+//    			firstTime = false;
+//    		}
+		lastCost = currCost;
+		ArrayMath.addMultInPlace(theta, grad, -1*op.trainOptions.learningRate);
+    	}
     }
     case 3:{
-      // AdaGrad
-      double eps = 1e-3;
-      double currCost = 0;
-      for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
-        double[] gradf = gcFunc.derivativeAt(theta);
-        currCost = gcFunc.valueAt(theta);
-        System.err.println("batch cost: " + currCost);
-        for (int feature =0; feature<gradf.length;feature++ ) {
-          sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
-          theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
-        }    		
-      } 
-      break;
-    }
-    default: {
-      throw new IllegalArgumentException("Unsupported minimizer " + MINIMIZER);
+    	// AdaGrad
+    	double eps = 1e-3;
+    	double currCost = 0;
+    	for(int i = 0; i < op.trainOptions.qnIterationsPerBatch; i++){
+    		double[] gradf = gcFunc.derivativeAt(theta);
+    		currCost = gcFunc.valueAt(theta);
+    		System.err.println("batch cost: " + currCost);
+    	    for (int feature =0; feature<gradf.length;feature++ ) {
+    	    	sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
+    	        theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
+    	      }    		
+    	} 
     }
     }
 
@@ -304,18 +297,18 @@ public class DVParser {
     this.parser = parser;
     this.op = parser.getOp();
 
-    if (op.trainOptions.randomSeed == 0) {
-      op.trainOptions.randomSeed = (new Random()).nextLong();
-      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.randomSeed);
+    if (op.trainOptions.dvSeed == 0) {
+      op.trainOptions.dvSeed = (new Random()).nextLong();
+      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.dvSeed);
     } else {
-      System.err.println("Random seed set to " + op.trainOptions.randomSeed);
+      System.err.println("Random seed set to " + op.trainOptions.dvSeed);
     }
 
     System.err.println("Word vector file: " + op.lexOptions.wordVectorFile);
     System.err.println("Size of word vectors: " + op.lexOptions.numHid);
     System.err.println("Number of hypothesis trees to train against: " + op.trainOptions.dvKBest);
-    System.err.println("Number of trees in one batch: " + op.trainOptions.batchSize);
-    System.err.println("Number of iterations of trees: " + op.trainOptions.trainingIterations);
+    System.err.println("Number of trees in one batch: " + op.trainOptions.dvBatchSize);
+    System.err.println("Number of iterations of trees: " + op.trainOptions.dvIterations);
     System.err.println("Number of qn iterations per batch: " + op.trainOptions.qnIterationsPerBatch);
     System.err.println("Learning rate: " + op.trainOptions.learningRate);
     System.err.println("Delta margin: " + op.trainOptions.deltaMargin);
@@ -407,15 +400,15 @@ public class DVParser {
     System.err.println("Options overlapping the parser:");
     System.err.println("  -trainingThreads <int>: How many threads to use when training.");
     System.err.println("  -dvKBest <int>: How many hypotheses to use from the underlying parser.");
-    System.err.println("  -trainingIterations <int>: When training, how many times to go through the train set.");
+    System.err.println("  -dvIterations <int>: When training, how many times to go through the train set.");
     System.err.println("  -regCost <double>: How large of a cost to put on regularization.");
-    System.err.println("  -batchSize <int>: How many trees to use in each batch of the training.");
+    System.err.println("  -dvBatchSize <int>: How many trees to use in each batch of the training.");
     System.err.println("  -qnIterationsPerBatch <int>: How many steps to take per batch.");
     System.err.println("  -qnEstimates <int>: Parameter for qn optimization.");
     System.err.println("  -qnTolerance <double>: Tolerance for early exit when optimizing a batch.");
-    System.err.println("  -debugOutputFrequency <int>: How frequently to score a model when training and write out intermediate models.");
+    System.err.println("  -debugOutputSeconds <int>: How frequently to score a model when training and write out intermediate models.");
     System.err.println("  -maxTrainTimeSeconds <int>: How long to train before terminating.");
-    System.err.println("  -randomSeed <long>: A starting point for the random number generator.  Setting this should lead to repeatable results, even taking into account randomness.  Otherwise, a new random seed will be picked.");
+    System.err.println("  -dvSeed <long>: A starting point for the random number generator.  Setting this should lead to repeatable results, even taking into account randomness.  Otherwise, a new random seed will be picked.");
     System.err.println("  -wordVectorFile <name>: A filename to load word vectors from.");
     System.err.println("  -numHid: The size of the matrices.  In most circumstances, should be set to the size of the word vectors.");
     System.err.println("  -learningRate: The rate of optimization when training");
@@ -425,17 +418,11 @@ public class DVParser {
     System.err.println("  -(no)unknownCapsVector: Whether or not to use a word vector for unknown words with capitals");
     System.err.println("  -dvSimplifiedModel: Use a greatly dumbed down DVModel");
     System.err.println("  -scalingForInit: How much to scale matrices when creating a new DVModel");
-    System.err.println("  -baseParserWeight: A weight to give the original LexicalizedParser when testing (0.2 seems to work well for English)");
+    System.err.println("  -lpWeight: A weight to give the original LexicalizedParser when testing (0.2 seems to work well)");
     System.err.println("  -unkWord: The vector representing unknown word in the word vectors file");
     System.err.println("  -transformMatrixType: A couple different methods for initializing transform matrices");
-    System.err.println("  -(no)trainWordVectors: whether or not to train the word vectors along with the matrices.  True by default");
   }
 
-  /**
-   * An example command line for training a new parser:
-   * <br>
-   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputFrequency 400 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -trainingIterations 40 -batchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
-   */
   public static void main(String[] args) 
     throws IOException, ClassNotFoundException
   {
@@ -478,8 +465,8 @@ public class DVParser {
     List<String> argsWithDefaults = new ArrayList<String>(Arrays.asList(new String[] { 
           "-wordVectorFile", Options.LexOptions.DEFAULT_WORD_VECTOR_FILE,
           "-dvKBest", Integer.toString(TrainOptions.DEFAULT_K_BEST),
-          "-batchSize", Integer.toString(TrainOptions.DEFAULT_BATCH_SIZE),
-          "-trainingIterations", Integer.toString(TrainOptions.DEFAULT_TRAINING_ITERATIONS),
+          "-dvBatchSize", Integer.toString(TrainOptions.DEFAULT_BATCH_SIZE),
+          "-dvIterations", Integer.toString(TrainOptions.DEFAULT_DV_ITERATIONS),
           "-qnIterationsPerBatch", Integer.toString(TrainOptions.DEFAULT_QN_ITERATIONS_PER_BATCH),
           "-regCost", Double.toString(TrainOptions.DEFAULT_REGCOST),
           "-learningRate", Double.toString(TrainOptions.DEFAULT_LEARNING_RATE),
@@ -490,10 +477,9 @@ public class DVParser {
           "-unknownchinesepercentvector",
           "-unknownchinesenumbervector",
           "-unknownchineseyearvector",
-          "-unkWord", "*UNK*",
+          "-unkWord", "UNK",
           "-transformMatrixType", "DIAGONAL",
-          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT),
-          "-trainWordVectors",
+          "-scalingForInit", Double.toString(TrainOptions.DEFAULT_SCALING_FOR_INIT)
         } ));
     argsWithDefaults.addAll(Arrays.asList(args));
     args = argsWithDefaults.toArray(new String[argsWithDefaults.size()]);
@@ -627,7 +613,6 @@ public class DVParser {
 
     if (runTraining) {
       System.err.println("Training the RNN parser");
-      System.err.println("Current train options: " + dvparser.getOp().trainOptions);
       dvparser.train(trainSentences, trainCompressedParses, testTreebank, modelPath, resultsRecordPath);
       if (modelPath != null) {
         dvparser.saveModel(modelPath);

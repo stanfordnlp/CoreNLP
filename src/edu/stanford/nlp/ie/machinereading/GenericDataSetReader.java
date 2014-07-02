@@ -16,8 +16,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
+import edu.stanford.nlp.parser.lexparser.ParserConstraint;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -358,7 +358,10 @@ public class GenericDataSetReader {
     // -1 to exclude the period.
     // We now let it be any kind of nominal constituent, since there
     // are VP and S ones
-    ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, ".*");
+    ParserConstraint constraint = new ParserConstraint();
+    constraint.start = ADDED_WORDS;
+    constraint.end = extentTokens.size() - 1;
+    constraint.state = Pattern.compile(".*");
     List<ParserConstraint> constraints = Collections.singletonList(constraint);
     Tree tree = parse(extentTokens, constraints);
     logger.fine("No exact match found. Local parse:\n" + tree.pennString());

@@ -29,7 +29,6 @@ import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.international.french.DybroFrenchHeadFinder;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
-import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -41,7 +40,7 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * TreebankLangParserParams for the French Treebank corpus. This package assumes that the FTB
+ * TreebankLangParserParams for the Frenck Treebank corpus. This package assumes that the FTB
  * has been transformed into PTB-format trees encoded in UTF-8. The "-xmlFormat" option can
  * be used to read the raw FTB trees.
  *
@@ -69,10 +68,10 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
   private TwoDimensionalCounter<String, String> mwCounter;
 
   private MorphoFeatureSpecification morphoSpec;
-
+  
   // For adding the CC tagset as annotations.
   private MorphoFeatureSpecification tagSpec;
-
+  
   public FrenchTreebankParserParams() {
     super(new FrenchTreebankLanguagePack());
 
@@ -90,7 +89,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
   private final List<String> baselineFeatures = new ArrayList<String>();
   {
     baselineFeatures.add("-tagPAFr");
-
+    
     baselineFeatures.add("-markInf");
     baselineFeatures.add("-markPart");
     baselineFeatures.add("-markVN");
@@ -104,7 +103,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
     baselineFeatures.add("-MWADVSel2");
     baselineFeatures.add("-MWNSel1");
     baselineFeatures.add("-MWNSel2");
-
+    
     // New features for CL submission
     baselineFeatures.add("-splitPUNC");
   }
@@ -129,7 +128,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
 
       // +1.45 F1  (Helps MWEs significantly)
       annotationPatterns.put("-tagPAFr", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("!@PUNC < (__ !< __) > __=parent"),new AddRelativeNodeFunction("-","parent", true)));
-
+      
       // +.14 F1
       annotationPatterns.put("-coord1",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@COORD <2 __=word"), new AddRelativeNodeFunction("-","word", true)));
 
@@ -152,15 +151,15 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
       annotationPatterns.put("-MWNSel3", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@MWN <1 @N <2 @- <3 @N !<4 __"),new SimpleStringFunction("-mwn3")));
 
       annotationPatterns.put("-splitPUNC",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@PUNC < __=" + AnnotatePunctuationFunction.key),new AnnotatePunctuationFunction()));
-
+      
       /***************************************************************************
        *                          TEST FEATURES
        ***************************************************************************/
 
       // Mark MWE tags only
       annotationPatterns.put("-mweTag", new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("!@PUNC < (__ !< __) > /MW/=parent"),new AddRelativeNodeFunction("-","parent", true)));
-
-
+      
+      
       annotationPatterns.put("-sq",new Pair<TregexPattern,Function<TregexMatcher,String>>(tregexPatternCompiler.compile("@SENT << /\\?/"),new SimpleStringFunction("-Q")));
 
       //New phrasal splits
@@ -365,7 +364,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
 
     private static final long serialVersionUID = 1L;
   }
-
+  
   /**
    * Annotates all nodes that match the tregex query with annotationMark.
    *
@@ -563,14 +562,14 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
   }
 
   public TreeReaderFactory treeReaderFactory() {
-    return (readPennFormat) ? new FrenchTreeReaderFactory() : new FrenchXMLTreeReaderFactory(false);
+    return new FrenchTreeReaderFactory(readPennFormat);
   }
 
   public List<HasWord> defaultTestSentence() {
     String[] sent = {"Ceci", "est", "seulement", "un", "test", "."};
     return Sentence.toWordList(sent);
   }
-
+  
   @Override
   public Tree transformTree(Tree t, Tree root) {
 
@@ -724,7 +723,7 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
       // WSGDEBUG Maybe add -mweTag in place of -tagPAFr?
       removeBaselineFeature("-tagPAFr");
       optionsString.append(" (removed -tagPAFr)\n");
-
+      
       // Add -mweTag
       String[] option = {"-mweTag"};
       setOptionFlag(option, 0);
@@ -740,8 +739,8 @@ public class FrenchTreebankParserParams extends AbstractTreebankParserParams {
       tagSpec.activate(MorphoFeatureType.OTHER);
       optionsString.append("Adding CC tagset as POS state splits.\n");
       ++i;
-    }
-
+    } 
+    
     return i;
   }
 }
