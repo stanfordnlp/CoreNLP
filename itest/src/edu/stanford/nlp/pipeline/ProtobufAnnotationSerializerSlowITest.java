@@ -59,7 +59,7 @@ public class ProtobufAnnotationSerializerSlowITest {
   }
 
   @SuppressWarnings("unchecked")
-  private void sameAsRead(Annotation doc, Annotation readDoc) {
+  public static void sameAsRead(Annotation doc, Annotation readDoc) {
     // Run the original document through the number normalizer
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
