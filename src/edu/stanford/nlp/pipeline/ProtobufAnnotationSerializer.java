@@ -162,7 +162,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   @Override
   public OutputStream write(Annotation corpus, OutputStream os) throws IOException {
     CoreNLPProtos.Document serialized = toProto(corpus);
-    serialized.writeTo(os);
+    serialized.writeDelimitedTo(os);
     os.flush();
     return os;
   }
@@ -170,7 +170,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /** {@inheritDoc} */
   @Override
   public Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
-    CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseFrom(is);
+    CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseDelimitedFrom(is);
     return Pair.makePair( fromProto(doc), is );
   }
 
@@ -702,15 +702,19 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       CoreMap map = fromProtoNoTokens(sentence);
       if (!tokens.isEmpty() && sentence.hasTokenOffsetBegin() && sentence.hasTokenOffsetEnd()) {
         // Set tokens for sentence
-        map.set(TokensAnnotation.class, tokens.subList(sentence.getTokenOffsetBegin(), sentence.getTokenOffsetEnd()));
+        int tokenBegin = Math.min(sentence.getTokenOffsetBegin(), tokens.size());
+        int tokenEnd = Math.min(sentence.getTokenOffsetEnd(), tokens.size());
+        map.set(TokensAnnotation.class, tokens.subList(tokenBegin, tokenEnd));
         // Set sentence index + token index + paragraph index
-        for (int i = sentence.getTokenOffsetBegin(); i < sentence.getTokenOffsetEnd(); ++i) {
+        for (int i = tokenBegin; i < tokenEnd; ++i) {
           tokens.get(i).setSentIndex(sentIndex);
           tokens.get(i).setIndex(i - sentence.getTokenOffsetBegin() + 1);
           if (sentence.hasParagraph()) { tokens.get(i).set(ParagraphAnnotation.class, sentence.getParagraph()); }
         }
         // Set text
-        map.set(TextAnnotation.class, proto.getText().substring(sentence.getCharacterOffsetBegin(), sentence.getCharacterOffsetEnd()));
+        int characterBegin = Math.min(sentence.getCharacterOffsetBegin(), proto.getText().length());
+        int characterEnd = Math.min(sentence.getCharacterOffsetEnd(), proto.getText().length());
+        map.set(TextAnnotation.class, proto.getText().substring(characterBegin, characterEnd));
       }
       // End iteration
       sentences.add(map);
