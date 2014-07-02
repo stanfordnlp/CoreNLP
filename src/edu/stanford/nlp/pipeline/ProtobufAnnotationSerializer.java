@@ -1016,16 +1016,27 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param tokens The list of tokens representing this sentence.
    * @return The original text of the sentence.
    */
-  public static String recoverOriginalText(List<CoreLabel> tokens) {
+  private static String recoverOriginalText(List<CoreLabel> tokens) {
     StringBuilder text = new StringBuilder();
+    CoreLabel last = null;
     if (tokens.size() > 0) {
       CoreLabel token = tokens.get(0);
       if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
+      last = tokens.get(0);
     }
     for (int i = 1; i < tokens.size() - 1; ++i) {
       CoreLabel token = tokens.get(i);
-      if (token.before() != null) { text.append(token.before()); }
+      if (token.before() != null) {
+        text.append(token.before());
+        assert last != null;
+        int missingWhitespace = (token.beginPosition() - last.endPosition()) - token.before().length();
+        while (missingWhitespace > 0) {
+          text.append(' ');
+          missingWhitespace -= 1;
+        }
+      }
       if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
+      last = token;
     }
     System.err.println(text.toString());
     return text.toString();
