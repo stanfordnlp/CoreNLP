@@ -254,7 +254,8 @@ public class Extractor implements Serializable {
 
   /** This is used for argument parsing in arch variable.
    *  It can extract a comma separated argument.
-   *  Assumes the input format is "name(arg,arg,arg)".
+   *  Assumes the input format is "name(arg,arg,arg)", with possible
+   *  spaces around the parentheses and comma(s).
    *
    *  @param str arch variable component input
    *  @param num Number of argument

@@ -41,9 +41,11 @@ import java.util.*;
  * <table>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>
  * <tr><td>wordshapes</td><td>left, right</td>
- *     <td>Word shape features, eg transform Foo5 into Xxx#
+ *     <td>Word shape features, e.g., transform Foo5 into Xxx#
  *         (not exactly like that, but that general idea).
  *         Creates individual features for each word left ... right.
+ *         If just one argument wordshapes(-2) is given, then end is taken as 0.
+  *        If left is not less than or equal to right, no features are made.
  *         Fairly English-specific.</td></tr>
  * <tr><td>unicodeshapes</td><td>left, right</td>
  *     <td>Same thing, but works for unicode characters generally.</td></tr>
