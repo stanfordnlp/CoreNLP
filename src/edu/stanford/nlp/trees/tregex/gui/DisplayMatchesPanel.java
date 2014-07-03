@@ -32,28 +32,18 @@ package edu.stanford.nlp.trees.tregex.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Pair;
@@ -78,9 +68,6 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   private static DisplayMatchesPanel instance = null;
   private ScrollableTreeJPanel tjp;
 
-  private List<Point2D.Double> matchedPartCoordinates;
-  private int matchedPartCoordinateIdx = -1;
-
   public static synchronized DisplayMatchesPanel getInstance() {
     if (instance == null) {
       instance = new DisplayMatchesPanel();
@@ -97,13 +84,6 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     spaceholder.add(message);
 
     scroller = new JScrollPane(spaceholder);
-
-    // Fix slow scrolling on OS X
-    if (TregexGUI.isMacOSX()) {
-      scroller.getVerticalScrollBar().setUnitIncrement(3);
-      scroller.getHorizontalScrollBar().setUnitIncrement(3);
-    }
-
     this.setFocusable(true);
     this.setTransferHandler(new DisplayTransferHandler());
     MatchesPanel.getInstance().addListener(this);
@@ -159,13 +139,9 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   public void clearMatches() {
     JPanel spaceholder = new JPanel();
     spaceholder.setBackground(Color.white);
-
     scroller.setViewportView(spaceholder);
     scroller.validate();
     scroller.repaint();
-
-    matchedPartCoordinates = null;
-    matchedPartCoordinateIdx = -1;
   }
 
   public class FilenameMouseInputAdapter extends MouseInputAdapter {
@@ -241,10 +217,8 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     } else {
       tjp = getTreeJPanel(match.getTree(), matchedParts);
     }
-
-    matchedPartCoordinates = tjp.getMatchedPartCoordinates();
-    matchedPartCoordinateIdx = -1;
-
+    
+    
     treeDisplay.add(tjp, BorderLayout.CENTER);
 
     filename.setOpaque(true);
@@ -252,76 +226,8 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     filename.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
     scroller.setViewportView(treeDisplay);
-
     this.revalidate();
     this.repaint();
-  }
-
-  void showPrevMatchedPart() {
-    if (matchedPartCoordinates.size() == 0)
-      return;
-    else if (matchedPartCoordinateIdx <= 0)
-      matchedPartCoordinateIdx = matchedPartCoordinates.size();
-
-    matchedPartCoordinateIdx--;
-    showMatchedPart(matchedPartCoordinateIdx);
-  }
-
-  void showNextMatchedPart() {
-    if (matchedPartCoordinates.size() == 0)
-      return;
-
-    matchedPartCoordinateIdx =
-      ++matchedPartCoordinateIdx % matchedPartCoordinates.size();
-    showMatchedPart(matchedPartCoordinateIdx);
-  }
-
-  private void showMatchedPart(int idx) {
-    Point2D.Double coord = matchedPartCoordinates.get(idx);
-    Dimension treeSize = tjp.getPreferredSize();
-
-    JScrollBar horizontal = scroller.getHorizontalScrollBar();
-    JScrollBar vertical = scroller.getVerticalScrollBar();
-
-    int horizontalLength = horizontal.getMaximum() - horizontal.getMinimum();
-    double x = Math.max(0,
-                        (coord.getX() / treeSize.getWidth() * horizontalLength
-                         - (scroller.getWidth() / 2.0)));
-
-    int verticalLength = vertical.getMaximum() - vertical.getMinimum();
-    double y = Math.max(0,
-                        (coord.getY() / treeSize.getHeight() * verticalLength
-                         - (scroller.getHeight() / 2.0)));
-
-    horizontal.setValue((int) x);
-    vertical.setValue((int) y);
-  }
-
-  private void doExportTree() {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setSelectedFile(new File("./tree.png"));
-    FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG images", "png");
-    chooser.setFileFilter(filter);
-
-    int status = chooser.showSaveDialog(this);
-
-    if (status != JFileChooser.APPROVE_OPTION)
-      return;
-
-    Dimension size = tjp.getPreferredSize();
-    BufferedImage im = new BufferedImage((int) size.getWidth(),
-                                         (int) size.getHeight(),
-                                         BufferedImage.TYPE_INT_ARGB);
-    Graphics2D g = im.createGraphics();
-    tjp.paint(g);
-
-    try {
-      ImageIO.write(im, "png", chooser.getSelectedFile());
-    } catch (IOException e) {
-      JOptionPane.showMessageDialog(this, "Failed to save the tree image file.\n"
-                                    + e.getLocalizedMessage(), "Export Error",
-                                    JOptionPane.ERROR_MESSAGE);
-    }
   }
 
 
@@ -335,47 +241,12 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     treeJP.setMatchedParts(matchedParts);
     treeJP.setBackground(Color.WHITE);
     treeJP.setFocusable(true);
-
-    final JPopupMenu treePopup = new JPopupMenu();
-
-    JMenuItem copy = new JMenuItem("Copy");
-    copy.setActionCommand((String) TransferHandler.getCopyAction()
-                          .getValue(Action.NAME));
-    copy.addActionListener(new TregexGUI.TransferActionListener());
-    int mask = TregexGUI.isMacOSX() ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
-    copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
-    treePopup.add(copy);
-
-    JMenuItem exportTree = new JMenuItem("Export tree as image");
-    exportTree.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          doExportTree();
-        }
-      });
-    treePopup.add(exportTree);
-
     treeJP.addMouseListener(new MouseAdapter() {
-        @Override
-        public void mouseClicked(MouseEvent e) {
-          treeJP.requestFocusInWindow();
-        }
-
-        private void maybeShowPopup(MouseEvent e) {
-          if (e.isPopupTrigger())
-            treePopup.show(e.getComponent(), e.getX(), e.getY());
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-          maybeShowPopup(e);
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-          maybeShowPopup(e);
-        }
-      });
-
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        treeJP.requestFocusInWindow();
+      }
+    });
     DisplayMouseMotionAdapter d = new DisplayMouseMotionAdapter();
     treeJP.addMouseMotionListener(d);
     treeJP.addMouseListener(d);
@@ -433,8 +304,16 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   } // end class DisplayMouseMotionAdapter
 
 
+  public String getFontName() {
+    return fontName;
+  }
+
   public void setFontName(String fontName) {
     this.fontName = fontName;
+  }
+
+  public int getFontSize() {
+    return fontSize;
   }
 
   public void setFontSize(int fontSize) {
@@ -451,8 +330,16 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     }
   }
 
+  public Color getDefaultColor() {
+    return defaultColor;
+  }
+
   public void setDefaultColor(Color defaultColor) {
     this.defaultColor = defaultColor;
+  }
+
+  public Color getMatchedColor() {
+    return matchedColor;
   }
 
   public void setMatchedColor(Color matchedColor) {
