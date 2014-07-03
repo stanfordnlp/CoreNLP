@@ -138,8 +138,10 @@ public class GenericDataSetReader {
 
     if (preProcessSentences) {
       preProcessSentences(retVal);
-      if(MachineReadingProperties.trainUsePipelineNER)
+      if(MachineReadingProperties.trainUsePipelineNER){
+        logger.severe("Changing NER tags using the CoreNLP pipeline.");
         modifyUsingCoreNLPNER(retVal);
+        }
     }
     return retVal;
   }
