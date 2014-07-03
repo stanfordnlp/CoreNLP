@@ -588,7 +588,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     int keysCode = 0;
     int valuesCode = 0;
     for (int i = 0; i < size; i++) {
-      keysCode += (i < keys.length ? keys[i].hashCode() : 0);
+      keysCode += (i < keys.length && values[i] != null ? keys[i].hashCode() : 0);
       valuesCode += (i < values.length && values[i] != null ? values[i].hashCode() : 0);
     }
 
