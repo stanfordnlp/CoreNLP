@@ -1230,8 +1230,8 @@ class ExtractorWordPref extends RareExtractor {
 
 class ExtractorsConjunction extends RareExtractor {
 
-  private Extractor extractor1;
-  private Extractor extractor2;
+  private final Extractor extractor1;
+  private final Extractor extractor2;
 
   volatile boolean isLocal, isDynamic;
 
@@ -1265,6 +1265,13 @@ class ExtractorsConjunction extends RareExtractor {
 
   @Override public boolean isLocal() { return isLocal; }
   @Override public boolean isDynamic() { return isDynamic; }
+
+  @Override
+  public String toString() {
+    return StringUtils.getShortClassName(this) + '(' + extractor1 + ',' + extractor2 + ')';
+  }
+
+
 }
 
 
