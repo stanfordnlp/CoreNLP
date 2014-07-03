@@ -32,19 +32,28 @@ package edu.stanford.nlp.trees.tregex.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Pair;
@@ -231,6 +240,33 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     this.repaint();
   }
 
+  private void doExportTree() {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setSelectedFile(new File("./tree.png"));
+    FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG images", "png");
+    chooser.setFileFilter(filter);
+
+    int status = chooser.showSaveDialog(this);
+
+    if (status != JFileChooser.APPROVE_OPTION)
+      return;
+
+    Dimension size = tjp.getPreferredSize();
+    BufferedImage im = new BufferedImage((int) size.getWidth(),
+                                         (int) size.getHeight(),
+                                         BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = im.createGraphics();
+    tjp.paint(g);
+
+    try {
+      ImageIO.write(im, "png", chooser.getSelectedFile());
+    } catch (IOException e) {
+      JOptionPane.showMessageDialog(this, "Failed to save the tree image file.\n"
+                                    + e.getLocalizedMessage(), "Export Error",
+                                    JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
 
   private ScrollableTreeJPanel getTreeJPanel(Tree t, List<Tree> matchedParts) {
     final ScrollableTreeJPanel treeJP = new ScrollableTreeJPanel(SwingConstants.CENTER,SwingConstants.TOP);
@@ -244,6 +280,7 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     treeJP.setFocusable(true);
 
     final JPopupMenu treePopup = new JPopupMenu();
+
     JMenuItem copy = new JMenuItem("Copy");
     copy.setActionCommand((String) TransferHandler.getCopyAction()
                           .getValue(Action.NAME));
@@ -251,6 +288,14 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     int mask = TregexGUI.isMacOSX() ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
     copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
     treePopup.add(copy);
+
+    JMenuItem exportTree = new JMenuItem("Export tree as image");
+    exportTree.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          doExportTree();
+        }
+      });
+    treePopup.add(exportTree);
 
     treeJP.addMouseListener(new MouseAdapter() {
         @Override
