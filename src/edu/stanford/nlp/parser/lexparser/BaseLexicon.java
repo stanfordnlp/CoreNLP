@@ -108,8 +108,8 @@ public class BaseLexicon implements Lexicon {
   protected boolean useSignatureForKnownSmoothing;
 
   /**
-   * Only used when training, specifically when training on sentenes
-   * that weren't part of annotated (eg markovized, etc) data
+   * Only used when training, specifically when training on sentences
+   * that weren't part of annotated (e.g., markovized, etc.) data.
    */
   private Map<String, Counter<String>> baseTagCounts = Generics.newHashMap();
 
@@ -172,6 +172,13 @@ public class BaseLexicon implements Lexicon {
     IntTaggedWord iW = new IntTaggedWord(wordIndex.indexOf(word), nullTag);
     return seenCounter.getCount(iW) > 0.0;
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public Set<String> tagSet() {
+    return new HashSet<String>(tagIndex.objectsList());
+  }
+
 
   /**
    * Returns the possible POS taggings for a word.
