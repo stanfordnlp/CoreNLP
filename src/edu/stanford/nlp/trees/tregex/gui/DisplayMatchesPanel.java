@@ -94,6 +94,13 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     spaceholder.add(message);
 
     scroller = new JScrollPane(spaceholder);
+
+    // Fix slow scrolling on OS X
+    if (TregexGUI.isMacOSX()) {
+      scroller.getVerticalScrollBar().setUnitIncrement(3);
+      scroller.getHorizontalScrollBar().setUnitIncrement(3);
+    }
+
     this.setFocusable(true);
     this.setTransferHandler(new DisplayTransferHandler());
     MatchesPanel.getInstance().addListener(this);
