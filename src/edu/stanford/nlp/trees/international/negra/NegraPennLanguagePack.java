@@ -127,7 +127,7 @@ public class NegraPennLanguagePack extends AbstractTreebankLanguagePack {
     } else {
       basicCat = super.basicCategory(category);
     }
-    System.err.println("NPLP stripping " + category + " with leaveGF = " + leaveGF + " gives " + basicCat);
+    // System.err.println("NPLP stripping " + category + " with leaveGF = " + leaveGF + " gives " + basicCat);
     return basicCat;
   }
 
