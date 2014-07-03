@@ -35,6 +35,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -79,6 +80,9 @@ import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
+import edu.stanford.nlp.swing.FontDetector;
+import edu.stanford.nlp.trees.HeadFinder;
+import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.tregex.gui.MatchesPanel.MatchesPanelListener;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
@@ -118,7 +122,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   final TreeTransformer transformer;
 
   //preferences, about panel so that we don't have to remake each time
-  private JDialog preferenceDialog; // = null;
+  private PreferencesPanel preferenceDialog; // = null;
   private JDialog aboutBox; // = null;
 
   private static final String TRANSFORMER = "transformer";
@@ -197,6 +201,9 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     mbar.add(tools);
 
     setShortcutKeys(); //sets for appropriate operating system
+
+    loadPreferences();
+
     return mbar;
   }
 
@@ -425,6 +432,89 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     return chooser;
   }
 
+
+  /**
+   * Load and apply application preferences.
+   */
+  void loadPreferences() {
+    //general parameters
+    InputPanel.getInstance().enableTsurgeon(Preferences.getEnableTsurgeon());
+    MatchesPanel.getInstance().setShowOnlyMatchedPortion(Preferences.getMatchPortionOnly());
+    //display stuff
+    MatchesPanel.getInstance().setHighlightColor(Preferences.getHighlightColor());
+    InputPanel.getInstance().setNumRecentPatterns(Preferences.getHistorySize());
+    MatchesPanel.getInstance().setMaxMatches(Preferences.getMaxMatches());
+
+    //tree display stuff
+    DisplayMatchesPanel.getInstance().setMatchedColor(Preferences.getMatchedColor());
+    DisplayMatchesPanel.getInstance().setDefaultColor(Preferences.getTreeColor());
+    DisplayMatchesPanel.getInstance().setFontName(Preferences.getFont());
+    MatchesPanel.getInstance().setFontName(Preferences.getFont());
+
+    int fontSize = Preferences.getFontSize();
+    if(fontSize != 0)
+      DisplayMatchesPanel.getInstance().setFontSize(Preferences.getFontSize());
+
+    //advanced stuff
+    HeadFinder hf = Preferences.getHeadFinder();
+    InputPanel.getInstance().setHeadFinder(hf);
+
+    TreeReaderFactory trf = Preferences.getTreeReaderFactory();
+    FilePanel.getInstance().setTreeReaderFactory(trf);
+
+    String hfName = hf.getClass().getSimpleName();
+    String trfName = trf.getClass().getSimpleName();
+    String encoding = Preferences.getEncoding();
+    if(encoding != null && !encoding.equals(""))
+      FileTreeModel.setCurEncoding(encoding);
+    if (PreferencesPanel.isChinese(hfName, trfName))
+      setChineseFont();
+    else if (PreferencesPanel.isArabic(hfName, trfName))
+      setArabicFont();
+
+    if (preferenceDialog == null)
+      preferenceDialog = new PreferencesPanel(this);
+    preferenceDialog.checkEncodingAndDisplay(hfName, trfName);
+  }
+
+  private static void setChineseFont() {
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        List<Font> fonts = FontDetector.supportedFonts(FontDetector.CHINESE);
+        String fontName = "";
+        if ( ! fonts.isEmpty()) {
+          fontName = fonts.get(0).getName();
+        } else if (FontDetector.hasFont("Watanabe Mincho")) {
+          fontName = "Watanabe Mincho";
+        }
+
+        if(!fontName.equals("")) {
+          DisplayMatchesPanel.getInstance().setFontName(fontName);
+          MatchesPanel.getInstance().setFontName(fontName);
+        }
+      }
+    };
+    t.start();
+  }
+
+  private static void setArabicFont() {
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        List<Font> fonts = FontDetector.supportedFonts(FontDetector.ARABIC);
+        String fontName = "";
+        if (fonts.size() > 0) {
+          fontName = fonts.get(0).getName();
+        }
+        if(!fontName.equals("")) {
+          DisplayMatchesPanel.getInstance().setFontName(fontName);
+          MatchesPanel.getInstance().setFontName(fontName);
+        }
+      }
+    };
+    t.start();
+  }
 
   /*
    * Method for bringing up the load file dialog box and conveying

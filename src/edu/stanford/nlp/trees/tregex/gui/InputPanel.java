@@ -352,15 +352,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
 
-  public boolean getTsurgeonEnabled() {
-    return tsurgeonEnabled;
-  }
-
   public void enableTsurgeon(boolean enable) {
     if(tsurgeonEnabled == enable)
       return;//nothing changes
     enableTsurgeonHelper(enable);
-
   }
 
   //Doesn't check if tsurgeon is already in this enable state - used by enableTsurgeon and for

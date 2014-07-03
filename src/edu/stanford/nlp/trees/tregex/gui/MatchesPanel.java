@@ -441,10 +441,6 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
       this.matchedParts = matchedParts;
   }
 
-  public Color getHighlightColor() {
-    return highlightColor;
-  }
-
   public void setHighlightColor(Color highlightColor) {
     this.highlightColor = highlightColor;
   }
@@ -480,10 +476,6 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
     } else
       lastSelected = curSelected;
-  }
-
-  public int getMaxMatches() {
-    return maxMatches;
   }
 
   public void setMaxMatches(int maxMatches) {

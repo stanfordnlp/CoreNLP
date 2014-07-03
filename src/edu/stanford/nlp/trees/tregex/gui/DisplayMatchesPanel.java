@@ -376,16 +376,8 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   } // end class DisplayMouseMotionAdapter
 
 
-  public String getFontName() {
-    return fontName;
-  }
-
   public void setFontName(String fontName) {
     this.fontName = fontName;
-  }
-
-  public int getFontSize() {
-    return fontSize;
   }
 
   public void setFontSize(int fontSize) {
@@ -402,16 +394,8 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     }
   }
 
-  public Color getDefaultColor() {
-    return defaultColor;
-  }
-
   public void setDefaultColor(Color defaultColor) {
     this.defaultColor = defaultColor;
-  }
-
-  public Color getMatchedColor() {
-    return matchedColor;
   }
 
   public void setMatchedColor(Color matchedColor) {
