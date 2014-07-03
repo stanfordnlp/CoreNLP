@@ -36,7 +36,7 @@ public class NegraPennLanguagePackTest extends TestCase {
     assertEquals("T22", ans22, t22.toString());
 
     String ans = lp1.basicCategory("---CJ");
-    assertEquals("BC1", "--", ans);
+    assertEquals("BC1", "-", ans);
   }
 
 }
