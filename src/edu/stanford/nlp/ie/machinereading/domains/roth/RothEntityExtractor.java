@@ -16,9 +16,12 @@ public class RothEntityExtractor extends BasicEntityExtractor {
   public RothEntityExtractor() {
     super(null, USE_SUB_TYPES, null, true, new EntityMentionFactory(), true);
     entityTagForNer = new HashMap<String, String>();
-    entityTagForNer.put("person", "Peop");
-    entityTagForNer.put("organization", "Org");
-    entityTagForNer.put("location", "Loc");
+//    entityTagForNer.put("person", "Peop");
+//    entityTagForNer.put("organization", "Org");
+//    entityTagForNer.put("location", "Loc");
+    entityTagForNer.put("person", "PEOPLE");
+    entityTagForNer.put("organization", "ORGANIZATION");
+    entityTagForNer.put("location", "LOCATION");
     
   }
   

@@ -135,9 +135,9 @@ public class RothResultsByRelation extends ResultsPrinter {
   		String type1 = rel.getArg(0).getType();
   		String type2 = rel.getArg(1).getType();
   		String path = featureFactory.getFeature(rel, "dependency_path_lowlevel");
-  		if (!((type1.equals("Peop") && type2.equals("Peop")) || (type1.equals("Peop") && type2.equals("Loc"))
-  				|| (type1.equals("Loc") && type2.equals("Loc")) || (type1.equals("Org") && type2.equals("Loc")) || (type1
-  				.equals("Peop") && type2.equals("Org")))) {
+  		if (!((type1.equals("PEOPLE") && type2.equals("PEOPLE")) || (type1.equals("PEOPLE") && type2.equals("LOCATION"))
+  				|| (type1.equals("LOCATION") && type2.equals("LOCATION")) || (type1.equals("ORGANIZATION") && type2.equals("LOCATION")) || (type1
+  				.equals("PEOPLE") && type2.equals("ORGANIZATION")))) {
   			continue;
   		}
   		if (path == "") {
