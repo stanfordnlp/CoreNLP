@@ -82,8 +82,12 @@ public class ChineseMaxentLexicon implements Lexicon {
 
   /** {@inheritDoc} */
   @Override
-  public Set<String> tagSet() {
-    return new HashSet<String>(tagIndex.objectsList());
+  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
+    Set<String> tagSet = new HashSet<String>();
+    for (String tag : tagIndex.objectsList()) {
+      tagSet.add(basicCategoryFunction.apply(tag));
+    }
+    return tagSet;
   }
 
 

@@ -10,6 +10,7 @@ import edu.stanford.nlp.stats.Distribution;
 import edu.stanford.nlp.stats.GeneralizedCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Timing;
@@ -414,8 +415,12 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
 
   /** {@inheritDoc} */
   @Override
-  public Set<String> tagSet() {
-    return new HashSet<String>(tagIndex.objectsList());
+  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
+    Set<String> tagSet = new HashSet<String>();
+    for (String tag : tagIndex.objectsList()) {
+      tagSet.add(basicCategoryFunction.apply(tag));
+    }
+    return tagSet;
   }
 
 

@@ -56,8 +56,8 @@ public class ChineseLexiconAndWordSegmenter implements Lexicon, WordSegmenter {
 
   /** {@inheritDoc} */
   @Override
-  public Set<String> tagSet() {
-    return chineseLexicon.tagSet();
+  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
+    return chineseLexicon.tagSet(basicCategoryFunction);
   }
 
 

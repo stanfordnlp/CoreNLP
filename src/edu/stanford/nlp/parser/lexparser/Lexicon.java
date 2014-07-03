@@ -11,6 +11,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Function;
 
 
 /**
@@ -60,7 +61,7 @@ public interface Lexicon extends Serializable {
    *
    * @return The Set of tags used by this tagger
    */
-  Set<String> tagSet();
+  Set<String> tagSet(Function<String,String> basicCategoryFunction);
 
   /**
    * Get an iterator over all rules (pairs of (word, POS)) for this word.
