@@ -36,8 +36,7 @@ public class RelationExtractorAnnotator implements Annotator {
     try {
       Extractor entityExtractor = new RothEntityExtractor();
       BasicRelationExtractor relationExtractor = BasicRelationExtractor.load(relationModel);
-      
-      System.err.println("Loading relation model from " + relationModel);
+      System.out.println("Loading relation model " + relationModel + " and the features are " + relationExtractor.featureFactory);
       mr = MachineReading.makeMachineReadingForAnnotation(new RothCONLL04Reader(), entityExtractor, relationExtractor, null, null,
           null, true, verbose);
     } catch(Exception e){

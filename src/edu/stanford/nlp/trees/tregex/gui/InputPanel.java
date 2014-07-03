@@ -637,10 +637,14 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   private void runScript() {
     setTsurgeonState(true);
     final String script = tsurgeonScript.getText();
+
     searchThread = new Thread() {
       @Override
       public void run() {
         try {
+          BufferedReader reader = new BufferedReader(new StringReader(script));
+          TsurgeonPattern operation = Tsurgeon.getTsurgeonOperationsFromReader(reader);
+
           final String text = tregexPattern.getText().intern();
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -655,8 +659,6 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
             return;
           }
           //System.err.println("Running Script with matches: " + visitor.getMatches());
-          BufferedReader reader = new BufferedReader(new StringReader(script));
-          TsurgeonPattern operation = Tsurgeon.getTsurgeonOperationsFromReader(reader);
           List<TreeFromFile> trees = visitor.getMatches();
           final List<TreeFromFile> modifiedTrees = new ArrayList<TreeFromFile>();
           for (TreeFromFile tff : trees) {

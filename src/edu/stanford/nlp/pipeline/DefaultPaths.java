@@ -40,7 +40,7 @@ public class DefaultPaths {
   public static final String DEFAULT_NFL_RELATION_MODEL = "edu/stanford/nlp/models/machinereading/nfl/nfl_relation_model.ser";
   public static final String DEFAULT_NFL_GAZETTEER = "edu/stanford/nlp/models/machinereading/nfl/NFLgazetteer.txt";
   
-  public static final String DEFAULT_SUP_RELATION_EX_RELATION_MODEL = "edu/stanford/nlp/models/supervised_relation_extractor/roth_relation_model_pipelineNER.ser";
+  public static final String DEFAULT_SUP_RELATION_EX_RELATION_MODEL = "edu/stanford/nlp/models/supervised_relation_extractor/roth_relation_model.ser";
 
 
   private DefaultPaths() {
