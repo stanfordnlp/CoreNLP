@@ -559,7 +559,7 @@ public class DVParser {
       lexparser = LexicalizedParser.loadModel(parserPath, newArgs);
       dvparser = new DVParser(lexparser);
     } else if (modelPath != null) {
-      lexparser = LexicalizedParser.loadModel(modelPath, newArgs);
+      lexparser = LexicalizedParser.loadModel(initialModelPath, newArgs);
       DVModel model = getModelFromLexicalizedParser(lexparser);
       dvparser = new DVParser(model, lexparser);
     }
