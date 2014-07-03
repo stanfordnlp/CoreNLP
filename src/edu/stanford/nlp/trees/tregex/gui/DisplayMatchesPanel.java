@@ -35,6 +35,7 @@ import java.awt.Color;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -241,12 +242,38 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     treeJP.setMatchedParts(matchedParts);
     treeJP.setBackground(Color.WHITE);
     treeJP.setFocusable(true);
+
+    final JPopupMenu treePopup = new JPopupMenu();
+    JMenuItem copy = new JMenuItem("Copy");
+    copy.setActionCommand((String) TransferHandler.getCopyAction()
+                          .getValue(Action.NAME));
+    copy.addActionListener(new TregexGUI.TransferActionListener());
+    int mask = TregexGUI.isMacOSX() ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
+    copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
+    treePopup.add(copy);
+
     treeJP.addMouseListener(new MouseAdapter() {
-      @Override
-      public void mouseClicked(MouseEvent e) {
-        treeJP.requestFocusInWindow();
-      }
-    });
+        @Override
+        public void mouseClicked(MouseEvent e) {
+          treeJP.requestFocusInWindow();
+        }
+
+        private void maybeShowPopup(MouseEvent e) {
+          if (e.isPopupTrigger())
+            treePopup.show(e.getComponent(), e.getX(), e.getY());
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+          maybeShowPopup(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+          maybeShowPopup(e);
+        }
+      });
+
     DisplayMouseMotionAdapter d = new DisplayMouseMotionAdapter();
     treeJP.addMouseMotionListener(d);
     treeJP.addMouseListener(d);
