@@ -388,5 +388,19 @@
     </war>
   </target>
 
-</project>
+  <taskdef name="bundleapp"
+           classname="com.oracle.appbundler.AppBundlerTask"
+           classpath="lib/appbundler-1.0.jar" />
 
+  <target name="tregex-osx" depends="jar"
+          description="Build an OS X app for TregexGUI">
+    <bundleapp outputdirectory="."
+               name="Tregex GUI"
+               displayname="Tregex GUI"
+               identifier="edu.stanford.nlp.trees.tregex.gui.TregexGUI"
+               mainclassname="edu.stanford.nlp.trees.tregex.gui.TregexGUI">
+      <classpath file="javanlp-core.jar" />
+    </bundleapp>
+  </target>
+
+</project>
