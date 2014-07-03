@@ -437,7 +437,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * Returns short name (abbreviation) for this
    * <code>GrammaticalRelation</code>.  toString() for collapsed
    * relations will include the word that was collapsed.
-   * <br/>
+   * <br>
    * <i>Implementation note:</i> Note that this method must be synced with
    * the equals() and valueOf(String) methods
    */
