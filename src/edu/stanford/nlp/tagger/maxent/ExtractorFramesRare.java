@@ -62,8 +62,8 @@ import java.util.*;
  *     <td>Features for concatenated prefix and suffix.  One feature for
  *         each of length 1 ... length.</td></tr>
  * <tr><td>capitalizationsuffix</td><td>length</td>
- *     <td>Current word only.  Combines the suffix with a binary value
- *         for whether the word contains any capital letters.</td></tr>
+ *     <td>Current word only.  Combines character suffixes up to size length with a
+ *         binary value for whether the word contains any capital letters.</td></tr>
  * <tr><td>distsim</td><td>filename, left, right</td>
  *     <td>Individual features for each position left ... right.
  *         Compares that word with the dictionary in filename.</td></tr>
