@@ -113,6 +113,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   private JMenuItem searchMenuItem;
   private JMenuItem prevMatch;
   private JMenuItem nextMatch;
+  private JMenuItem prevTreeMatch;
+  private JMenuItem nextTreeMatch;
   private JMenuItem clearFileList;
 
   //file choosing components for loading trees
@@ -183,6 +185,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     nextMatch = new JMenuItem("Display next match");
     nextMatch.addActionListener(this);
     search.add(nextMatch);
+    search.addSeparator();
+    prevTreeMatch = new JMenuItem("Show previous match within tree");
+    prevTreeMatch.addActionListener(this);
+    search.add(prevTreeMatch);
+    nextTreeMatch = new JMenuItem("Show next match within tree");
+    nextTreeMatch.addActionListener(this);
+    search.add(nextTreeMatch);
 
     preferences = new JMenuItem("Options...");
     preferences.addActionListener(this);
@@ -226,6 +235,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.META_MASK));
     prevMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.META_MASK));
     nextMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.META_MASK));
+    prevTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.SHIFT_MASK | InputEvent.META_DOWN_MASK));
+    nextTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.SHIFT_MASK | InputEvent.META_MASK));
 
   }
 
@@ -240,6 +251,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
     prevMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_MASK));
     nextMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_MASK));
+    prevTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK));
+    nextTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK));
 
   }
 
@@ -325,7 +338,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     } else {
       transformer = ReflectionLoading.loadByReflection(transformerClass);
     }
-    
+
     initAboutBox();
     Container content = getContentPane();
     content.setBackground(Color.lightGray);
@@ -881,6 +894,10 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       MatchesPanel.getInstance().selectPreviousMatch();
     } else if (source == nextMatch) {
       MatchesPanel.getInstance().selectNextMatch();
+    } else if (source == prevTreeMatch) {
+      DisplayMatchesPanel.getInstance().showPrevMatchedPart();
+    } else if (source == nextTreeMatch) {
+      DisplayMatchesPanel.getInstance().showNextMatchedPart();
     }
   }
 

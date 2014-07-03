@@ -78,6 +78,9 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   private static DisplayMatchesPanel instance = null;
   private ScrollableTreeJPanel tjp;
 
+  private List<Point2D.Double> matchedPartCoordinates;
+  private int matchedPartCoordinateIdx = -1;
+
   public static synchronized DisplayMatchesPanel getInstance() {
     if (instance == null) {
       instance = new DisplayMatchesPanel();
@@ -156,9 +159,13 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
   public void clearMatches() {
     JPanel spaceholder = new JPanel();
     spaceholder.setBackground(Color.white);
+
     scroller.setViewportView(spaceholder);
     scroller.validate();
     scroller.repaint();
+
+    matchedPartCoordinates = null;
+    matchedPartCoordinateIdx = -1;
   }
 
   public class FilenameMouseInputAdapter extends MouseInputAdapter {
@@ -234,8 +241,10 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     } else {
       tjp = getTreeJPanel(match.getTree(), matchedParts);
     }
-    
-    
+
+    matchedPartCoordinates = tjp.getMatchedPartCoordinates();
+    matchedPartCoordinateIdx = -1;
+
     treeDisplay.add(tjp, BorderLayout.CENTER);
 
     filename.setOpaque(true);
@@ -243,8 +252,49 @@ public class DisplayMatchesPanel extends JPanel implements ListSelectionListener
     filename.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
     scroller.setViewportView(treeDisplay);
+
     this.revalidate();
     this.repaint();
+  }
+
+  void showPrevMatchedPart() {
+    if (matchedPartCoordinates.size() == 0)
+      return;
+    else if (matchedPartCoordinateIdx <= 0)
+      matchedPartCoordinateIdx = matchedPartCoordinates.size();
+
+    matchedPartCoordinateIdx--;
+    showMatchedPart(matchedPartCoordinateIdx);
+  }
+
+  void showNextMatchedPart() {
+    if (matchedPartCoordinates.size() == 0)
+      return;
+
+    matchedPartCoordinateIdx =
+      ++matchedPartCoordinateIdx % matchedPartCoordinates.size();
+    showMatchedPart(matchedPartCoordinateIdx);
+  }
+
+  private void showMatchedPart(int idx) {
+    Point2D.Double coord = matchedPartCoordinates.get(idx);
+    Dimension treeSize = tjp.getPreferredSize();
+
+    JScrollBar horizontal = scroller.getHorizontalScrollBar();
+    JScrollBar vertical = scroller.getVerticalScrollBar();
+
+    int horizontalLength = horizontal.getMaximum() - horizontal.getMinimum();
+    double x = Math.max(0,
+                        (coord.getX() / treeSize.getWidth() * horizontalLength
+                         - (scroller.getWidth() / 2.0)));
+
+    int verticalLength = vertical.getMaximum() - vertical.getMinimum();
+    double y = Math.max(0,
+                        (coord.getY() / treeSize.getHeight() * verticalLength
+                         - (scroller.getHeight() / 2.0)));
+
+    horizontal.setValue((int) x);
+    vertical.setValue((int) y);
   }
 
   private void doExportTree() {
