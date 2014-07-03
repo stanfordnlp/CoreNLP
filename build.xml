@@ -390,14 +390,18 @@
 
   <property environment="env" />
 
-  <taskdef name="bundleapp"
-           classname="com.oracle.appbundler.AppBundlerTask"
-           classpath="lib/appbundler-1.0.jar" />
+  <condition property="version1.7">
+    <equals arg1="${ant.java.version}" arg2="1.7" />
+  </condition>
 
-  <target name="tregex-osx" depends="jar"
+  <target name="tregex-osx" if="version1.7" depends="jar"
           description="Build an OS X app for TregexGUI">
     <fail unless="env.JAVA_HOME"
           message="Environment variable JAVA_HOME not set." />
+
+    <taskdef name="bundleapp"
+             classname="com.oracle.appbundler.AppBundlerTask"
+             classpath="lib/appbundler-1.0.jar" />
 
     <bundleapp outputdirectory="."
                name="Tregex GUI"
