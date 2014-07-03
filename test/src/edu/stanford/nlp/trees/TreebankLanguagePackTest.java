@@ -15,4 +15,5 @@ public class TreebankLanguagePackTest extends TestCase {
     assertEquals("-LRB-", tlp.basicCategory("-LRB--PU"));
     assertEquals("-LRB-", tlp.basicCategory("-LRB--PU-U"));
   }
+
 }

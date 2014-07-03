@@ -80,6 +80,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   private JButton help;
   private JTextArea tregexPattern;
   private JComboBox recentTregexPatterns;
+  private DefaultComboBoxModel recentTregexPatternsModel;
   private int numRecentPatterns = 5;// we save the last n patterns in our combo box, where n = numRecentPatterns
   private JTextArea tsurgeonScript;
   private TregexPatternCompiler compiler;//this should change only when someone changes the headfinder/basic category finder
@@ -248,9 +249,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   //separated out to make constructor more readable
   private JPanel makeTregexPatternArea() {
     //combo box with recent searches
-    recentTregexPatterns = new JComboBox();
+    recentTregexPatternsModel = new DefaultComboBoxModel();
+    recentTregexPatterns = new JComboBox(recentTregexPatternsModel);
     recentTregexPatterns.setMinimumSize(new Dimension(120, 24));
     recentTregexPatterns.addActionListener(this);
+
     JLabel recentLabel = new JLabel("Recent: ");
     //interactive tregex pattern
     JLabel patternLabel = new JLabel("Pattern: ");
@@ -349,15 +352,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
 
-  public boolean getTsurgeonEnabled() {
-    return tsurgeonEnabled;
-  }
-
   public void enableTsurgeon(boolean enable) {
     if(tsurgeonEnabled == enable)
       return;//nothing changes
     enableTsurgeonHelper(enable);
-
   }
 
   //Doesn't check if tsurgeon is already in this enable state - used by enableTsurgeon and for
@@ -529,7 +527,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
 
   private void doRecent() {
     //this is called only when a user does something
-    Object recent = recentTregexPatterns.getSelectedItem();
+    Object recent = recentTregexPatternsModel.getSelectedItem();
     if (recent != null) {
       String selected = recent.toString();
       if (selected.length() != 0) {
@@ -580,7 +578,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
 
-  private void runSearch() {
+  void runSearch() {
     setTregexState(true);
     MatchesPanel.getInstance().removeAllMatches();
     this.setPreferredSize(this.getSize());
@@ -637,10 +635,14 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   private void runScript() {
     setTsurgeonState(true);
     final String script = tsurgeonScript.getText();
+
     searchThread = new Thread() {
       @Override
       public void run() {
         try {
+          BufferedReader reader = new BufferedReader(new StringReader(script));
+          TsurgeonPattern operation = Tsurgeon.getTsurgeonOperationsFromReader(reader);
+
           final String text = tregexPattern.getText().intern();
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -655,8 +657,6 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
             return;
           }
           //System.err.println("Running Script with matches: " + visitor.getMatches());
-          BufferedReader reader = new BufferedReader(new StringReader(script));
-          TsurgeonPattern operation = Tsurgeon.getTsurgeonOperationsFromReader(reader);
           List<TreeFromFile> trees = visitor.getMatches();
           final List<TreeFromFile> modifiedTrees = new ArrayList<TreeFromFile>();
           for (TreeFromFile tff : trees) {
@@ -704,10 +704,20 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
   private void addRecentTregexPattern(String pattern) {
-    if(recentTregexPatterns.getItemCount() >= numRecentPatterns) {
-      recentTregexPatterns.removeItemAt(numRecentPatterns - 1);
+    // If pattern already exists, just move it to the top of the list
+    int existingIndex = recentTregexPatternsModel.getIndexOf(pattern);
+    if (existingIndex != -1) {
+      recentTregexPatternsModel.removeElementAt(existingIndex);
+      recentTregexPatternsModel.insertElementAt(pattern, 0);
+      recentTregexPatterns.setSelectedIndex(0);
+
+      return;
     }
-    recentTregexPatterns.insertItemAt(pattern,0);
+
+    if(recentTregexPatternsModel.getSize() >= numRecentPatterns) {
+      recentTregexPatternsModel.removeElementAt(numRecentPatterns - 1);
+    }
+    recentTregexPatternsModel.insertElementAt(pattern,0);
     recentTregexPatterns.setSelectedIndex(0);
     recentTregexPatterns.revalidate();
   }
@@ -715,9 +725,9 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   public void setNumRecentPatterns(int n) {
     numRecentPatterns = n;
     //shrink down the number of recent patterns if necessary
-    ComboBoxModel model = recentTregexPatterns.getModel();
-    while(model.getSize() > n) {
-      recentTregexPatterns.removeItemAt(model.getSize()-1);
+    while(recentTregexPatternsModel.getSize() > n) {
+      int lastIndex = recentTregexPatternsModel.getSize() - 1;
+      recentTregexPatternsModel.removeElementAt(lastIndex);
     }
   }
 
