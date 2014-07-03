@@ -1,8 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
+import junit.framework.TestCase;
+
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import junit.framework.TestCase;
 
 /**
  * @author Christopher Manning
