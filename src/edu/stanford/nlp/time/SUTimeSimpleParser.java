@@ -55,7 +55,7 @@ public class SUTimeSimpleParser {
     pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(new POSTaggerAnnotator(false));
-    pipeline.addAnnotator(new TimeAnnotator());
+    pipeline.addAnnotator(new TimeAnnotator(true));
 
     return pipeline;
   }

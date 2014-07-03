@@ -7,9 +7,11 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Function;
 
 
 /**
@@ -54,6 +56,12 @@ public interface Lexicon extends Serializable {
    * @return Whether the word is in the lexicon
    */
   boolean isKnown(String word);
+
+  /** Return the Set of tags used by this tagger (available after training the tagger).
+   *
+   * @return The Set of tags used by this tagger
+   */
+  Set<String> tagSet(Function<String,String> basicCategoryFunction);
 
   /**
    * Get an iterator over all rules (pairs of (word, POS)) for this word.
