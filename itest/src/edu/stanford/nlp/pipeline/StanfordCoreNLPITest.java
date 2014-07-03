@@ -182,7 +182,6 @@ public class StanfordCoreNLPITest extends TestCase {
     StringWriter stringWriter = new StringWriter();
     pipeline.prettyPrint(document, new PrintWriter(stringWriter));
     String result = stringWriter.getBuffer().toString();
-    System.out.println(result);
   }
   
   
