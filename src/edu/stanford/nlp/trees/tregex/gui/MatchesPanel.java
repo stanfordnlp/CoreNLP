@@ -320,6 +320,17 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     return sb;
   }
 
+  public void selectPreviousMatch() {
+    int idx = Math.max(0, list.getSelectedIndex() - 1);
+    list.setSelectedIndex(idx);
+  }
+
+  public void selectNextMatch() {
+    int idx = Math.min(list.getModel().getSize() - 1,
+                       list.getSelectedIndex() + 1);
+    list.setSelectedIndex(idx);
+  }
+
   /**
    * Determine whether any trees are in the matches panel at this time
    * @return true if trees are present

@@ -96,6 +96,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
 public class TregexGUI extends JFrame implements ActionListener, MatchesPanelListener {
 
   private static TregexGUI instance; // = null;
+
   private JMenuItem preferences;
   private JMenuItem loadFiles;
   private JMenuItem saveMatches;
@@ -105,7 +106,11 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   private JMenuItem tDiff;
   private JMenuItem quit;//for when we're not running on a mac
   private JMenuItem copy;
+  private JMenuItem searchMenuItem;
+  private JMenuItem prevMatch;
+  private JMenuItem nextMatch;
   private JMenuItem clearFileList;
+
   //file choosing components for loading trees
   private JFileChooser chooser; // = null;
   private static File chooserFile;
@@ -164,6 +169,17 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     copy.addActionListener(new TransferActionListener());
     edit.add(copy);
 
+    JMenu search = new JMenu("Search");
+    searchMenuItem = new JMenuItem("Search");
+    searchMenuItem.addActionListener(this);
+    search.add(searchMenuItem);
+    prevMatch = new JMenuItem("Display previous match");
+    prevMatch.addActionListener(this);
+    search.add(prevMatch);
+    nextMatch = new JMenuItem("Display next match");
+    nextMatch.addActionListener(this);
+    search.add(nextMatch);
+
     preferences = new JMenuItem("Options...");
     preferences.addActionListener(this);
     tDiff = new JCheckBoxMenuItem("Tdiff");
@@ -177,6 +193,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
     mbar.add(file);
     mbar.add(edit);
+    mbar.add(search);
     mbar.add(tools);
 
     setShortcutKeys(); //sets for appropriate operating system
@@ -199,6 +216,10 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.META_MASK));
     copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.META_MASK));
 
+    searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.META_MASK));
+    prevMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.META_MASK));
+    nextMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.META_MASK));
+
   }
 
   private void setWindowsShortcutKeys() {
@@ -208,6 +229,10 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     saveHistory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.SHIFT_MASK+InputEvent.CTRL_MASK));
     quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK)); // cdm: maybe should be Control or Alt F4
     copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+
+    searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
+    prevMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_MASK));
+    nextMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_MASK));
 
   }
 
@@ -760,6 +785,12 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       doSaveHistory();
     } else if (source == clearFileList) {
       doClearFileList();
+    } else if (source == searchMenuItem) {
+      InputPanel.getInstance().runSearch();
+    } else if (source == prevMatch) {
+      MatchesPanel.getInstance().selectPreviousMatch();
+    } else if (source == nextMatch) {
+      MatchesPanel.getInstance().selectNextMatch();
     }
   }
 

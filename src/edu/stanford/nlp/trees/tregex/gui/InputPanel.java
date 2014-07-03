@@ -583,7 +583,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
 
-  private void runSearch() {
+  void runSearch() {
     setTregexState(true);
     MatchesPanel.getInstance().removeAllMatches();
     this.setPreferredSize(this.getSize());
