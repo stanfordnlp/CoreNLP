@@ -8,6 +8,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.Timing;
 
 import java.io.FileNotFoundException;
@@ -143,7 +144,19 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   @Override
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+    List<CoreLabel> output = null;
+    try {
+      output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
+    } catch (RuntimeInterruptedException e) {
+      // If we get interrupted, set the NER labels to the background
+      // symbol if they are not already set, then exit.
+      for (int i = 0; i < tokens.size(); ++i) {
+        if (tokens.get(i).ner() == null) {
+          tokens.get(i).setNER(this.ner.backgroundSymbol());
+        }
+      }
+      return;
+    }
     if (VERBOSE) {
       boolean first = true;
       System.err.print("NERCombinerAnnotator direct output: [");
