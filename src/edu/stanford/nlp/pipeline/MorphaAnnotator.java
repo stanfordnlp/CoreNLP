@@ -44,8 +44,10 @@ public class MorphaAnnotator implements Annotator{
     }
     Morphology morphology = new Morphology();
     if (annotation.has(CoreAnnotations.SentencesAnnotation.class)) {
-      for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      for (CoreMap sentence :
+           annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        List<CoreLabel> tokens =
+          sentence.get(CoreAnnotations.TokensAnnotation.class);
         //System.err.println("Lemmatizing sentence: " + tokens);
         for (CoreLabel token : tokens) {
           String text = token.get(CoreAnnotations.TextAnnotation.class);
