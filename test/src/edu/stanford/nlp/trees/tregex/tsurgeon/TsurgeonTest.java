@@ -93,6 +93,27 @@ public class TsurgeonTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  public void testAdjoinWithNamedNode() {
+    TsurgeonPattern tsurgeon =
+      Tsurgeon.parseOperation("[adjoinF (D (E=target foot@)) bar] " +
+                              "[insert (G 1) $+ target]");
+    TregexPattern tregex = TregexPattern.compile("B=bar !>> D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (G 1) (E (B C))))");
+
+    tsurgeon =
+      Tsurgeon.parseOperation("[adjoinF (D (E=target foot@)) bar] " +
+                              "[insert (G 1) >0 target]");
+    tregex = TregexPattern.compile("B=bar !>> D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (E (G 1) (B C))))");
+
+    // Named leaf
+    tsurgeon =
+      Tsurgeon.parseOperation("[adjoinF (D (E foot@) F=target) bar] " +
+                              "[insert (G 1) >0 target]");
+    tregex = TregexPattern.compile("B=bar !>> D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (E (B C)) (F (G 1))))");
+  }
+
   public void testAuxiliaryTreeErrors() {
     TsurgeonPattern tsurgeon;
     try {
