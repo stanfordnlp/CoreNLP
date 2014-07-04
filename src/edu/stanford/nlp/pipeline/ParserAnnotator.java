@@ -26,6 +26,8 @@ import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 /**
  * This class will add parse information to an Annotation.
@@ -40,7 +42,7 @@ import edu.stanford.nlp.util.StringUtils;
  *
  * @author Jenny Finkel
  */
-public class ParserAnnotator extends SentenceAnnotator {
+public class ParserAnnotator implements Annotator {
 
   private final boolean VERBOSE;
   private final boolean BUILD_GRAPHS;
@@ -193,18 +195,49 @@ public class ParserAnnotator extends SentenceAnnotator {
     return result;
   }
 
-  @Override
-  protected int nThreads() {
-    return nThreads;
+  private class ParserAnnotatorProcessor implements ThreadsafeProcessor<CoreMap, CoreMap> {
+    @Override
+    public CoreMap process(CoreMap sentence) {
+      doOneSentence(sentence);
+      return sentence;
+    }
+
+    @Override
+    public ThreadsafeProcessor<CoreMap, CoreMap> newInstance() {
+      return this;
+    }
   }
 
   @Override
-  protected long maxTime() {
-    return maxParseTime;
-  };  
+  public void annotate(Annotation annotation) {
+    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+      if (nThreads != 1 || maxParseTime > 0) {
+        MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads, new ParserAnnotatorProcessor());
+        if (maxParseTime > 0) {
+          wrapper.setMaxBlockTime(maxParseTime);
+        }
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          wrapper.put(sentence);
+          while (wrapper.peek()) {
+            wrapper.poll();
+          }
+        }
+        wrapper.join();
+        while (wrapper.peek()) {
+          wrapper.poll();
+        }
+      } else {
+        // parse a tree for each sentence
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          doOneSentence(sentence);
+        }
+      }
+    } else {
+      throw new RuntimeException("unable to find sentences in: " + annotation);
+    }
+  }
 
-  @Override
-  protected void doOneSentence(Annotation annotation, CoreMap sentence) {
+  private void doOneSentence(CoreMap sentence) {
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (VERBOSE) {
       System.err.println("Parsing: " + words);
@@ -226,11 +259,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     // the sentence is longer than the max length
     if (tree == null) {
       tree = ParserUtils.xTree(words);
-      for (CoreLabel word : words) {
-        if (word.tag() == null) {
-          word.setTag("X");
-        }
-      }
     }
 
     if (treeMap != null) {

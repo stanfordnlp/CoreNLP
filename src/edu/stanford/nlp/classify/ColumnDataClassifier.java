@@ -236,7 +236,7 @@ public class ColumnDataClassifier {
    * @return A Datum (may be an RVFDatum; never null)
    */
   public Datum<String,String> makeDatumFromLine(String line) {
-    return makeDatumFromStrings(tab.split(line));
+    return makeDatumFromStrings(splitLineToFields(line));
   }
 
 
@@ -245,7 +245,7 @@ public class ColumnDataClassifier {
    * If real-valued features are used, this method accesses makeRVFDatumFromLine
    * and returns an RVFDatum; otherwise, categorical features are used.
    *
-   * @param strings The elements that features a made from (the tab-split columns of a TSV file)
+   * @param strings The elements that features are made from (the columns of a TSV/CSV file)
    * @return A Datum (may be an RVFDatum; never null)
    */
   public Datum<String,String> makeDatumFromStrings(String[] strings) {
@@ -846,7 +846,7 @@ public class ColumnDataClassifier {
      * @param cWord The String to extract data from
      */
     private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
-       //System.err.println("Making features for " + cWord + " flags " + flags);
+      //System.err.println("Making features for " + cWord + " flags " + flags);
       if (flags == null) {
         // no features for this column
         return;
