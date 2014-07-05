@@ -300,10 +300,10 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
     if (annotation != null) {
       if (GrammaticalRelation.annotationsToRelations.put(annotation, this) != null) {
-        throw new IllegalArgumentException("Adding '" + shortName + "' failed: Annotation cannot be associated with more than one relation!");
+        throw new IllegalArgumentException("Annotation cannot be associated with more than one relation!");
       }
       if (GrammaticalRelation.relationsToAnnotations.put(this, annotation) != null) {
-        throw new IllegalArgumentException("Adding '" + shortName + "' failed: There should only ever be one instance of each relation!");
+        throw new IllegalArgumentException("There should only ever be one instance of each relation!");
       }
     }
 
@@ -477,7 +477,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     for (int i = 0; i < indentLevel; i++) {
       buf.append("  ");
     }
-    buf.append(shortName + " (" + longName + ")").append(": ").append(targetPatterns);
+    buf.append(shortName).append(": ").append(targetPatterns);
     for (GrammaticalRelation child : children) {
       buf.append('\n');
       child.toPrettyString(indentLevel + 1, buf);
