@@ -4,8 +4,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 
 /**
  * A class for measuring how long things take.  For backward
@@ -32,7 +30,7 @@ public class Timing {
   private static long startTime = System.nanoTime();
 
   /** Stores a suitable formatter for printing seconds nicely. */
-  private static final NumberFormat nf = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
+  private static final NumberFormat nf = new DecimalFormat("0.0");
 
 
   /**

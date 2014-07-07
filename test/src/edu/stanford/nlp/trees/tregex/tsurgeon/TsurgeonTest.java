@@ -259,24 +259,6 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (B (D (E\\ 6)) 0) (C 1))");
   }
 
-  public void testInsertWithNamedNode() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[insert (D=target E) $+ bar] " +
-                                                       "[insert (F 1) >0 target]");
-    TregexPattern tregex = TregexPattern.compile("B=bar !$- D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (F 1) E) (B C))");
-
-    tsurgeon = Tsurgeon.parseOperation("[insert (D=target E) $+ bar] " +
-                                       "[insert (F 1) $+ target]");
-    tregex = TregexPattern.compile("B=bar !$- D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (F 1) (D E) (B C))");
-
-    // Named leaf
-    tsurgeon = Tsurgeon.parseOperation("[insert (D E=target) $+ bar] " +
-                                       "[insert (F 1) $+ target]");
-    tregex = TregexPattern.compile("B=bar !$- D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (F 1) E) (B C))");
-  }
-
   public void testRelabel() {
     TsurgeonPattern tsurgeon;
     TregexPattern tregex;

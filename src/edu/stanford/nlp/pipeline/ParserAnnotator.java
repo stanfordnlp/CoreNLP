@@ -209,7 +209,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
     Tree tree = null;
     // generate the constituent tree
-    if (maxSentenceLength <= 0 || words.size() < maxSentenceLength) {
+    if (maxSentenceLength <= 0 || words.size() <= maxSentenceLength) {
       try {
         final List<ParserConstraint> constraints = sentence.get(ParserAnnotations.ConstraintAnnotation.class);
         tree = doOneSentence(constraints, words);
