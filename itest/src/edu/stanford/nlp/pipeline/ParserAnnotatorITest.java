@@ -76,13 +76,13 @@ public class ParserAnnotatorITest extends TestCase {
   }
 
   public void testParserAnnotator() throws Exception {    
-    Annotation document = new Annotation(text);    
+    Annotation document = new Annotation(TEXT);    
     pipeline.annotate(document);
     
     int i = 0;
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      assertEquals(parse.toString(), answer[i++]);
+      assertEquals(parse.toString(), ANSWER[i++]);
     }
   }
 
@@ -149,9 +149,9 @@ public class ParserAnnotatorITest extends TestCase {
 
   }
 
-  static final String text = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
+  static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
 
-  static final String[] answer = {
+  static final String[] ANSWER = {
       // TODO: this is actually the wrong parse!
       "(ROOT (S (NP (PRP I)) (VP (VBD saw) (S (NP (PRP him)) (VP (VBG ordering) (NP (PRP them)) (PP (TO to) (NP (NN saw)))))) (. .)))",
 
