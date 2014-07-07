@@ -141,9 +141,7 @@ public class ParserAnnotatorITest extends TestCase {
    */
   public void testAnnotatorConstructors() {
     assertParseOK(new ParserAnnotator(false, -1));
-    assertParseOK(new ParserAnnotator(true, -1));
     assertParseOK(new ParserAnnotator(false, 100));
-    assertParseOK(new ParserAnnotator(true, 100));
 
     Properties props = new Properties();
     props.setProperty("annotators", "parse");
