@@ -32,7 +32,7 @@ public class Timing {
   private static long startTime = System.nanoTime();
 
   /** Stores a suitable formatter for printing seconds nicely. */
-  private static final NumberFormat nf = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.ENGLISH));
+  private static final NumberFormat nf = new DecimalFormat("0.0");
 
 
   /**
