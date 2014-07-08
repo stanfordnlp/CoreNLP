@@ -1,18 +1,11 @@
 package edu.stanford.nlp.util;
 
-import java.util.Locale;
-
 import junit.framework.TestCase;
 
 /**
  * @author Christopher Manning
  */
 public class TimingTest extends TestCase {
-
-  @Override
-  protected void setUp() {
-    Locale.setDefault(Locale.US);
-  }
 
   /** There's a lot of time slop in these tests so they don't fire by mistake.
    *  You definitely get them more than 10% off sometimes. :(
