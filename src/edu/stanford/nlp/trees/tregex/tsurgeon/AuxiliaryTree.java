@@ -15,7 +15,7 @@ class AuxiliaryTree {
 
   private final String originalTreeString;
   final Tree tree;
-  final Tree foot;
+  Tree foot;
   private final IdentityHashMap<Tree,String> nodesToNames; // no one else should be able to get this one.
   private final Map<String,Tree> namesToNodes; // this one has a getter.
 
@@ -115,10 +115,14 @@ class AuxiliaryTree {
     Tree footNode = findFootNodeHelper(t);
     Tree result = footNode;
     if (footNode != null) {
-      Tree parent = footNode.parent(t);
-      int i = parent.objectIndexOf(footNode);
       Tree newFootNode = footNode.treeFactory().newTreeNode(footNode.label(), new ArrayList<Tree>());
-      parent.setChild(i, newFootNode);
+
+      Tree parent = footNode.parent(t);
+      if (parent != null) {
+        int i = parent.objectIndexOf(footNode);
+        parent.setChild(i, newFootNode);
+      }
+
       result = newFootNode;
     }
     return result;
