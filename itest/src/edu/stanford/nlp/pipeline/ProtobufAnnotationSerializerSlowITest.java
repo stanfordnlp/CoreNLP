@@ -435,7 +435,11 @@ public class ProtobufAnnotationSerializerSlowITest {
         kis.close();
 
         sameAsRead(doc, readDoc);
-      } catch (Exception e) { throw new RuntimeException(e); }
+      } catch (RuntimeException e) { 
+        throw e;
+      } catch (Exception e) { 
+        throw new RuntimeException(e); 
+      }
     }
   }
 }
