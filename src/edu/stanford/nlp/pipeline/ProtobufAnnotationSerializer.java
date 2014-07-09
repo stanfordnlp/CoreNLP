@@ -692,7 +692,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       // Populate the tokens from the sentence
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
         // It's conceivable that the sentences are not contiguous -- pad this with nulls
-        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetEnd()) {
+        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetBegin()) {
           tokens.add(null);
         }
         // Read the sentence
