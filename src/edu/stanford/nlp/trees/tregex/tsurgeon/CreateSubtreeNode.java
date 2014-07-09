@@ -20,14 +20,12 @@ public class CreateSubtreeNode extends TsurgeonPattern {
   private AuxiliaryTree auxTree;
 
   public CreateSubtreeNode(TsurgeonPattern start, AuxiliaryTree tree) {
-    super("combineSubtrees", new TsurgeonPattern[] { start });
-
-    this.auxTree = tree;
-    findFoot();
+    this(start, null, tree);
   }
 
   public CreateSubtreeNode(TsurgeonPattern start, TsurgeonPattern end, AuxiliaryTree tree) {
-    super("combineSubtrees", new TsurgeonPattern[] { start, end });
+    super("combineSubtrees",
+      (end == null) ? new TsurgeonPattern[] { start } : new TsurgeonPattern[] { start, end });
 
     this.auxTree = tree;
     findFoot();
