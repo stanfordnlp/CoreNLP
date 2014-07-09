@@ -702,6 +702,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
           if (token.hasTokenBeginIndex() && token.hasTokenEndIndex()) {
             // This is usually true, if enough annotators are defined
+            while (tokens.size() < sentence.getTokenOffsetEnd()) {
+              tokens.add(null);
+            }
             for (int i = token.getTokenBeginIndex(); i < token.getTokenEndIndex(); ++i) {
               tokens.set(token.getTokenBeginIndex(), coreLabel);
             }
