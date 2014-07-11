@@ -787,7 +787,7 @@ private int jjMoveNfa_0(int startState, int curPos)
                   if (jjCanMove_0(hiByte, i1, i2, l1, l2))
                      { jjAddStates(30, 32); }
                   break;
-               default : if (i1 == 0 || l1 == 0 || i2 == 0 ||  l2 == 0) break; else break;
+               default : if (i1 == 0 || l1 == 0 || i2 == 0 || l2 == 0) break; else break;
             }
          } while(i != startsAt);
       }
@@ -896,7 +896,7 @@ private int jjMoveNfa_1(int startState, int curPos)
                      kind = 21;
                   jjstateSet[jjnewStateCnt++] = 0;
                   break;
-               default : if (i1 == 0 || l1 == 0 || i2 == 0 ||  l2 == 0) break; else break;
+               default : if (i1 == 0 || l1 == 0 || i2 == 0 || l2 == 0) break; else break;
             }
          } while(i != startsAt);
       }

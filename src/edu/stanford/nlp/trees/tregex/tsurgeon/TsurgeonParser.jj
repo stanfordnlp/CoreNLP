@@ -283,16 +283,16 @@ TsurgeonPattern Operation() :
     }
 /*@egen*/
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> tree = TreeRoot(false) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())/*@bgen(jjtree)*/
+| operator = <CREATE_SUBTREE> (( newLabel = <IDENTIFIER> ) | ( newLabel = <TREE_NODE_TERMINAL_LABEL> )) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
     }
 /*@egen*/
     { if (nodeSelections.size() == 1) {
-        return new CreateSubtreeNode(nodeSelections.get(0), tree);
+        return new CreateSubtreeNode(nodeSelections.get(0), newLabel.image);
       } else if (nodeSelections.size() == 2) {
-        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), tree);
+        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), newLabel.image);
       } else {
         throw new ParseException("Illegal number of nodes given to createSubtree (" + nodeSelections.size() + ")");
       }
