@@ -17,16 +17,34 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class CreateSubtreeNode extends TsurgeonPattern {
-  private final String newLabel;
+  private AuxiliaryTree auxTree;
 
-  public CreateSubtreeNode(TsurgeonPattern start, String newLabel) {
-    super("combineSubtrees", new TsurgeonPattern[] { start });
-    this.newLabel = newLabel;
+  public CreateSubtreeNode(TsurgeonPattern start, AuxiliaryTree tree) {
+    this(start, null, tree);
   }
 
-  public CreateSubtreeNode(TsurgeonPattern start, TsurgeonPattern end, String newLabel) {
-    super("combineSubtrees", new TsurgeonPattern[] { start, end });
-    this.newLabel = newLabel;
+  public CreateSubtreeNode(TsurgeonPattern start, TsurgeonPattern end, AuxiliaryTree tree) {
+    super("combineSubtrees",
+      (end == null) ? new TsurgeonPattern[] { start } : new TsurgeonPattern[] { start, end });
+
+    this.auxTree = tree;
+    findFoot();
+  }
+
+  /**
+   * We want to support a command syntax where a simple node label can
+   * be given (i.e., without using a tree literal).
+   *
+   * Check if this syntax is being used, and simulate a foot if so.
+   */
+  private void findFoot() {
+    if (auxTree.foot == null) {
+      if (!auxTree.tree.isLeaf())
+        throw new TsurgeonParseException("No foot node found for " + auxTree);
+
+      // Pretend this leaf is a foot node
+      auxTree.foot = auxTree.tree;
+    }
   }
 
   /**
@@ -46,18 +64,7 @@ public class CreateSubtreeNode extends TsurgeonPattern {
       throw new TsurgeonRuntimeException("Parents did not match for trees when applied to " + this);
     }
 
-    // prepare a new label
-    Label label;
-    LabelFactory lf = parent.labelFactory();
-    if (lf == null) {
-      lf = t.labelFactory();
-    }
-    if (lf == null) {
-      label = new CoreLabel();
-      label.setValue(newLabel);
-    } else {
-      label = lf.newLabel(newLabel);
-    }
+    AuxiliaryTree treeCopy = auxTree.copy(this);
 
     // Collect all the children of the parent of the node we care
     // about.  If the child is one of the nodes we care about, or
@@ -77,8 +84,10 @@ public class CreateSubtreeNode extends TsurgeonPattern {
         } else {
           insideSpan = false;
           innerChildren.add(child);
-          Tree newNode = t.treeFactory().newTreeNode(label, innerChildren);
-          children.add(newNode);
+
+          // All children have been collected; place these beneath the foot of the auxiliary tree
+          treeCopy.foot.setChildren(innerChildren);
+          children.add(treeCopy.tree);
         }
       } else if (insideSpan) {
         innerChildren.add(child);

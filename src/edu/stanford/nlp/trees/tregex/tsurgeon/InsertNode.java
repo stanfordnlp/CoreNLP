@@ -11,6 +11,12 @@ class InsertNode extends TsurgeonPattern {
 
   TreeLocation l;
 
+  /**
+   * Does the item being inserted need to be deep-copied before
+   * insertion?
+   */
+  boolean needsCopy = true;
+
   public InsertNode(TsurgeonPattern child, TreeLocation l) {
     super("insert", new TsurgeonPattern[] { child });
     this.l = l;
@@ -23,14 +29,18 @@ class InsertNode extends TsurgeonPattern {
   }
 
   public InsertNode(AuxiliaryTree t, TreeLocation l) {
-    this(new HoldTreeNode(t),l);
+    this(new HoldTreeNode(t), l);
+
+    // Copy occurs in HoldTreeNode's `evaluate` method
+    needsCopy = false;
   }
 
   @Override
   public Tree evaluate(Tree t, TregexMatcher m) {
     Tree nodeToInsert = children[0].evaluate(t,m);
     Pair<Tree,Integer> position = l.evaluate(t,m);
-    position.first().insertDtr(nodeToInsert.deepCopy(),position.second());
+    position.first().insertDtr(needsCopy ? nodeToInsert.deepCopy() : nodeToInsert,
+                               position.second());
     return t;
   }
 
