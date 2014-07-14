@@ -604,6 +604,18 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  /**
+   * Test that a particular AnnotationLookup is honored
+   */
+  public void testIndex() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    runTest("{idx:0}", graph, "ate");
+    runTest("{idx:1}", graph, "Bill");
+    runTest("{idx:2}", graph, "muffins");
+    runTest("{idx:3}", graph, "blueberry");
+    runTest("{idx:4}", graph);
+  }
+
   static public void outputResults(String pattern, String graph, 
                                    String ... ignored) {
     outputResults(SemgrexPattern.compile(pattern), 
