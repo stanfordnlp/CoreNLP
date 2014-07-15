@@ -373,6 +373,17 @@ public class SemgrexTest extends TestCase {
             "E", "H", "I");
   }
 
+  /**
+   * Tests that if there are different paths from A to I, those paths show up for exactly the right depths
+   */
+  public void testMultipleDepths() {
+    SemanticGraph graph = makeComplicatedGraph();
+    runTest("{} 3,3<< {word:A}", graph, "F", "G", "I");
+    runTest("{} 4,4<< {word:A}", graph, "H", "J");
+    runTest("{} 5,5<< {word:A}", graph, "I");
+    runTest("{} 6,6<< {word:A}", graph, "J");
+  }
+
   public void testNamedNode() {
     SemanticGraph graph = makeComplicatedGraph();
     
