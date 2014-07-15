@@ -650,7 +650,6 @@ abstract class GraphRelation implements Serializable {
                 if (type.accept(edge.getRelation().toString()) && !matchedNodes.contains(source)) {
                   matchedNodes.add(source);
                   next = source;
-                  relation = edge.getRelation().toString();
                   return;
                 }
               }

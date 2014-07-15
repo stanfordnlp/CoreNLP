@@ -150,11 +150,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
     } catch (RuntimeInterruptedException e) {
       // If we get interrupted, set the NER labels to the background
       // symbol if they are not already set, then exit.
-      for (int i = 0; i < tokens.size(); ++i) {
-        if (tokens.get(i).ner() == null) {
-          tokens.get(i).setNER(this.ner.backgroundSymbol());
-        }
-      }
+      doOneFailedSentence(annotation, sentence);
       return;
     }
     if (VERBOSE) {
@@ -184,6 +180,16 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
         System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
       }
       System.err.println(']');
+    }
+  }
+
+  @Override
+  public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    for (int i = 0; i < tokens.size(); ++i) {
+      if (tokens.get(i).ner() == null) {
+        tokens.get(i).setNER(this.ner.backgroundSymbol());
+      }
     }
   }
 

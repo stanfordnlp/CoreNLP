@@ -223,14 +223,25 @@ public class ParserAnnotator extends SentenceAnnotator {
     // tree == null may happen if the parser takes too long or if
     // the sentence is longer than the max length
     if (tree == null) {
-      tree = ParserUtils.xTree(words);
-      for (CoreLabel word : words) {
-        if (word.tag() == null) {
-          word.setTag("X");
-        }
+      doOneFailedSentence(annotation, sentence);
+    } else {
+      finishSentence(sentence, tree);
+    }
+  }
+
+  @Override
+  public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
+    final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    Tree tree = ParserUtils.xTree(words);
+    for (CoreLabel word : words) {
+      if (word.tag() == null) {
+        word.setTag("X");
       }
     }
+    finishSentence(sentence, tree);
+  }
 
+  private void finishSentence(CoreMap sentence, Tree tree) {
     if (treeMap != null) {
       tree = treeMap.apply(tree);
     }

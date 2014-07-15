@@ -30,6 +30,9 @@ public class ParserAnnotatorITest extends TestCase {
 
   private static ParserAnnotator parser = null;
 
+  private static AnnotationPipeline timeoutPipeline = null;
+  private static AnnotationPipeline threadedTimeoutPipeline = null;
+
   public void setUp() throws Exception {
     synchronized(ParserAnnotatorITest.class) {
       if (pipeline != null)
@@ -53,6 +56,17 @@ public class ParserAnnotatorITest extends TestCase {
 
       parserOnlyPipeline = new AnnotationPipeline();
       parserOnlyPipeline.addAnnotator(parser);
+
+      Properties props = new Properties();
+      props.setProperty("parse.maxtime", "1");
+      props.setProperty("annotators", "tokenize, ssplit, parse");
+      timeoutPipeline = new StanfordCoreNLP(props);
+
+      props = new Properties();
+      props.setProperty("parse.maxtime", "1");
+      props.setProperty("parse.nthreads", "3");
+      props.setProperty("annotators", "tokenize, ssplit, parse");
+      threadedTimeoutPipeline = new StanfordCoreNLP(props);
     }
   }
 
@@ -135,6 +149,39 @@ public class ParserAnnotatorITest extends TestCase {
                result.indexOf("SBAR") >= 0);
   }
 
+  /**
+   * Tests that if you run a parser annotator with an absurdly low
+   * timeout, all sentences are successfully labeled with X trees, as
+   * opposed to null trees or not timing out
+   */
+  public void testTimeout() {
+    Annotation document = new Annotation(TEXT);    
+    timeoutPipeline.annotate(document);
+    
+    int i = 0;
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      assertEquals(parse.toString(), XPARSES[i++]);      
+    }
+  }
+
+  /**
+   * Tests that if you run a threaded parser annotator on input text,
+   * all sentences get successfully converted into X trees after they
+   * time out.  Incidentally, this sort of tests that the threaded
+   * parser annotator adds output in the right order.
+   */
+  public void testThreadedTimeout() {
+    Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT);
+    threadedTimeoutPipeline.annotate(document);
+    
+    int i = 0;
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      assertEquals(parse.toString(), XPARSES[i++ % XPARSES.length]);
+    }
+  }
+
 
   private void assertParseOK(ParserAnnotator parser) {
     AnnotationPipeline pipeline = new AnnotationPipeline();
@@ -173,7 +220,7 @@ public class ParserAnnotatorITest extends TestCase {
 
   }
 
-  static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
+  static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .  ";
 
   static final String[] ANSWER = {
       // TODO: this is actually the wrong parse!
