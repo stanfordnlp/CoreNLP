@@ -616,6 +616,17 @@ public class SemgrexTest extends TestCase {
     runTest("{idx:4}", graph);
   }
 
+  public void testNamedRelation() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>=foo {idx:3}=dep");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("ate", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("nn", matcher.getRelnString("foo").toString());
+    assertFalse(matcher.find());
+  }
+
   static public void outputResults(String pattern, String graph, 
                                    String ... ignored) {
     outputResults(SemgrexPattern.compile(pattern), 
@@ -642,6 +653,13 @@ public class SemgrexTest extends TestCase {
       if (nodeNames != null && nodeNames.size() > 0) {
         for (String name : nodeNames) {
           System.out.println("    " + name + ": " + matcher.getNode(name));
+        }
+      }
+
+      Set<String> relNames = matcher.getRelationNames();
+      if (relNames != null) {
+        for (String name : relNames) {
+          System.out.println("    " + name + ": " + matcher.getRelnString(name));
         }
       }
     }
