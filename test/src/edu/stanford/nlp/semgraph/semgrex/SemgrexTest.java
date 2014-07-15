@@ -625,6 +625,14 @@ public class SemgrexTest extends TestCase {
     assertEquals("blueberry", matcher.getNode("dep").toString());
     assertEquals("nn", matcher.getRelnString("foo").toString());
     assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{idx:3}=dep <<=foo {idx:0}=gov");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("ate", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("dobj", matcher.getRelnString("foo").toString());
+    assertFalse(matcher.find());
   }
 
   static public void outputResults(String pattern, String graph, 
