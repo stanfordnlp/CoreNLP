@@ -9,11 +9,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * Provides convenient multicore processing for threadsafe objects. Objects that can
@@ -22,8 +20,7 @@ import java.util.concurrent.TimeUnit;
  * See edu.stanford.nlp.util.concurrent.MulticoreWrapperTest and
  * edu.stanford.nlp.tagger.maxent.documentation.MulticoreWrapperDemo for examples of use.
  *
- * TODO(spenceg): Handle exceptions gracefully in the queue.
- * TODO(spenceg): This code does not support multiple consumers, i.e., multi-threaded calls
+ * TODO(spenceg): This code does **not** support multiple consumers, i.e., multi-threaded calls
  * to peek() and poll().
  *
  * @author Spence Green
@@ -98,7 +95,7 @@ public class MulticoreWrapper<I,O> {
     processorList = Collections.unmodifiableList(procList);
   }
 
-  ThreadPoolExecutor buildThreadPool(int nThreads) {
+  protected ThreadPoolExecutor buildThreadPool(int nThreads) {
     return (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
   }
 

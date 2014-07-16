@@ -19,7 +19,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
   }
 
   @Override
-  ThreadPoolExecutor buildThreadPool(int nThreads) {
+  protected ThreadPoolExecutor buildThreadPool(int nThreads) {
     return new FixedNamedThreadPoolExecutor(nThreads);
   }
 
