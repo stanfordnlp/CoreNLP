@@ -72,6 +72,7 @@ public abstract class TregexMatcher {
     findIterator = null;
     findCurrent = null;
     namesToNodes.clear();
+    variableStrings.reset();
   }
 
   /**

@@ -21,6 +21,11 @@ class VariableStrings {
     numVarsSet = new IntCounter<String>(MapFactory.<String, MutableInteger>arrayMapFactory());
   }
 
+  public void reset() {
+    numVarsSet.clear();
+    varsToStrings.clear();
+  }
+
   public boolean isSet(String o) {
     return numVarsSet.getCount(o) >= 1;
   }
