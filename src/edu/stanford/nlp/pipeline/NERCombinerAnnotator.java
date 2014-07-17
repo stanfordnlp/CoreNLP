@@ -81,7 +81,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   public NERCombinerAnnotator(String name, Properties properties) {
     this(createNERClassifierCombiner(name, properties), false, 
          PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
-         PropertiesUtils.getLong(properties, name + ".maxtime", 0));
+         PropertiesUtils.getLong(properties, name + ".maxtime", -1));
   }
 
   private final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {

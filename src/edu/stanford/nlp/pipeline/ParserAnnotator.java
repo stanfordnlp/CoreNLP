@@ -114,7 +114,7 @@ public class ParserAnnotator extends SentenceAnnotator {
       this.treeMap = ReflectionLoading.loadByReflection(treeMapClass, props);
     }
 
-    this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", 0);
+    this.maxParseTime = PropertiesUtils.getLong(props, annotatorName + ".maxtime", -1);
 
     String buildGraphsProperty = annotatorName + ".buildgraphs";
     if (!this.parser.getTLPParams().supportsBasicDependencies()) {
@@ -153,7 +153,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     os.append(annotatorName + ".treemap:" +
             props.getProperty(annotatorName + ".treemap", ""));
     os.append(annotatorName + ".maxtime:" +
-            props.getProperty(annotatorName + ".maxtime", "0"));
+            props.getProperty(annotatorName + ".maxtime", "-1"));
     os.append(annotatorName + ".buildgraphs:" +
             props.getProperty(annotatorName + ".buildgraphs", "true"));
     os.append(annotatorName + ".nthreads:" +
