@@ -66,7 +66,7 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
         // if the poll hit a timeout, retake the remaining processors
         // so join() can guarantee the threads are finished
         if (i > 0) {
-          for ( ; i > 0; --i) {
+          for ( ; i > leftover.size(); --i) {
             idleProcessors.take();
           }
           return leftover;
