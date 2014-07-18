@@ -84,7 +84,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
          PropertiesUtils.getLong(properties, name + ".maxtime", -1));
   }
 
-  private final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
+  final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
     // TODO: Move function into NERClassifierCombiner?
     List<String> models = new ArrayList<String>();
     String prefix = (name != null)? name + ".": "ner.";
