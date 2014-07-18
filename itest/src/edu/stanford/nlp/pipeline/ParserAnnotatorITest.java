@@ -30,8 +30,13 @@ public class ParserAnnotatorITest extends TestCase {
 
   private static ParserAnnotator parser = null;
 
+  // TODO: kind of silly to make so many copies of the ParserAnnotator
   private static AnnotationPipeline timeoutPipeline = null;
-  private static AnnotationPipeline threadedTimeoutPipeline = null;
+  private static AnnotationPipeline threaded3TimeoutPipeline = null;
+  private static AnnotationPipeline threaded4TimeoutPipeline = null;
+
+  private static AnnotationPipeline threaded3Pipeline = null;
+  private static AnnotationPipeline threaded4Pipeline = null;
 
   public void setUp() throws Exception {
     synchronized(ParserAnnotatorITest.class) {
@@ -66,7 +71,16 @@ public class ParserAnnotatorITest extends TestCase {
       props.setProperty("parse.maxtime", "1");
       props.setProperty("parse.nthreads", "3");
       props.setProperty("annotators", "tokenize, ssplit, parse");
-      threadedTimeoutPipeline = new StanfordCoreNLP(props);
+      threaded3TimeoutPipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.nthreads", "4");
+      threaded4TimeoutPipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.maxtime", "-1");
+      threaded4Pipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.nthreads", "3");
+      threaded3Pipeline = new StanfordCoreNLP(props);
     }
   }
 
@@ -89,7 +103,7 @@ public class ParserAnnotatorITest extends TestCase {
     }
   }
 
-  public void testParserAnnotator() throws Exception {    
+  public void testParserAnnotator() {
     Annotation document = new Annotation(TEXT);    
     pipeline.annotate(document);
     
@@ -100,6 +114,16 @@ public class ParserAnnotatorITest extends TestCase {
     }
   }
 
+  public void testThreadedAnnotator() {
+    Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
+    
+    document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded3Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
+  }
+
   public void testMaxLen() {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, ssplit, parse");
@@ -107,12 +131,8 @@ public class ParserAnnotatorITest extends TestCase {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     Annotation document = new Annotation(TEXT);
     pipeline.annotate(document);
-    
-    int i = 0;
-    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
-      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      assertEquals(XPARSES[i++], parse.toString());
-    } 
+
+    verifyAnswers(document, XPARSES);
 
     props.setProperty("parse.maxlen", "8");
     pipeline = new StanfordCoreNLP(props);
@@ -157,12 +177,7 @@ public class ParserAnnotatorITest extends TestCase {
   public void testTimeout() {
     Annotation document = new Annotation(TEXT);    
     timeoutPipeline.annotate(document);
-    
-    int i = 0;
-    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
-      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      assertEquals(parse.toString(), XPARSES[i++]);      
-    }
+    verifyAnswers(document, XPARSES);
   }
 
   /**
@@ -172,14 +187,13 @@ public class ParserAnnotatorITest extends TestCase {
    * parser annotator adds output in the right order.
    */
   public void testThreadedTimeout() {
-    Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT);
-    threadedTimeoutPipeline.annotate(document);
-    
-    int i = 0;
-    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
-      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      assertEquals(parse.toString(), XPARSES[i++ % XPARSES.length]);
-    }
+    Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded3TimeoutPipeline.annotate(document);
+    verifyAnswers(document, XPARSES);
+
+    document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded4TimeoutPipeline.annotate(document);
+    verifyAnswers(document, XPARSES);
   }
 
 
@@ -219,6 +233,16 @@ public class ParserAnnotatorITest extends TestCase {
     assertParseOK(new ParserAnnotator("parse", props));
 
   }
+
+
+  public void verifyAnswers(Annotation document, String[] expected) {
+    int i = 0;
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      assertEquals(expected[i++ % expected.length], parse.toString());
+    } 
+  }
+
 
   static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .  ";
 
