@@ -122,6 +122,10 @@ public class ParserAnnotatorITest extends TestCase {
     document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
     threaded3Pipeline.annotate(document);
     verifyAnswers(document, ANSWER);
+
+    document = new Annotation(TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
   }
 
   public void testMaxLen() {
