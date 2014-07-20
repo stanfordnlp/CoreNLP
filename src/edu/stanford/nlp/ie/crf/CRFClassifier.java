@@ -674,7 +674,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     try {
       String enc = flags.inputEncoding;
       if (flags.inputEncoding == null) {
-        System.err.println("flags.inputEncoding doesn't exist, Use UTF-8 as default");
+        System.err.println("flags.inputEncoding doesn't exist, using UTF-8 as default");
         enc = "UTF-8";
       }
 
