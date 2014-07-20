@@ -2336,10 +2336,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // System.err.println("DEBUG: in loadTextClassifier");
     System.err.println("Loading Text Classifier from " + text);
     try {
-      BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(text))));
-
+      BufferedReader br = IOUtils.readerFromString(text);
       loadTextClassifier(br);
-
       br.close();
     } catch (Exception ex) {
       System.err.println("Exception in loading text classifier from " + text);
