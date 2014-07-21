@@ -674,7 +674,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     try {
       String enc = flags.inputEncoding;
       if (flags.inputEncoding == null) {
-        System.err.println("flags.inputEncoding doesn't exist, using UTF-8 as default");
+        System.err.println("flags.inputEncoding doesn't exist, Use UTF-8 as default");
         enc = "UTF-8";
       }
 
@@ -2336,8 +2336,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // System.err.println("DEBUG: in loadTextClassifier");
     System.err.println("Loading Text Classifier from " + text);
     try {
-      BufferedReader br = IOUtils.readerFromString(text);
+      BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(text))));
+
       loadTextClassifier(br);
+
       br.close();
     } catch (Exception ex) {
       System.err.println("Exception in loading text classifier from " + text);
