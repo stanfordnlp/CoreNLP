@@ -23,6 +23,7 @@ import java.util.zip.GZIPOutputStream;
 public class IOUtils {
 
   private static final int SLURPBUFFSIZE = 16000;
+  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
 
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
@@ -383,6 +384,7 @@ public class IOUtils {
 
   /**
    * Locates this file either in the CLASSPATH or in the file system. The CLASSPATH takes priority.
+   *
    * @param name The file or resource name
    * @throws FileNotFoundException If the file does not exist
    * @return The InputStream of name, or null if not found
@@ -451,15 +453,16 @@ public class IOUtils {
     }
 
     if (textFileOrUrl.endsWith(".gz")) {
-      // gunzip it if necessary
-      in = new GZIPInputStream(in, 65536);
+      // gunzip it if necessary. Since a GZIPInputStream has a buffer in it, don't need a second level of buffering
+      in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
+    } else {
+      // buffer this stream
+      in = new BufferedInputStream(in);
     }
-
-    // buffer this stream
-    in = new BufferedInputStream(in);
 
     return in;
   }
+
 
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
@@ -478,6 +481,7 @@ public class IOUtils {
     }
   }
 
+
   /**
    * Open a BufferedReader to a File. If the file's getName() ends in .gz,
    * it is interpreted as a gzipped file (and uncompressed). The file is then
@@ -493,12 +497,31 @@ public class IOUtils {
       is = inputStreamFromFile(file);
       return new BufferedReader(new InputStreamReader(is, "UTF-8"));
     } catch (IOException ioe) {
-      throw new RuntimeIOException(ioe);
-    } finally {
       IOUtils.closeIgnoringExceptions(is);
+      throw new RuntimeIOException(ioe);
     }
   }
 
+
+  /**
+   * Open a BufferedReader to a File. If the file's getName() ends in .gz,
+   * it is interpreted as a gzipped file (and uncompressed). The file is then
+   * interpreted as a utf-8 text file.
+   *
+   * @param file What to read from
+   * @return The BufferedReader
+   * @throws RuntimeIOException If there is an I/O problem
+   */
+  public static BufferedReader readerFromFile(File file, String encoding) {
+    InputStream is = null;
+    try {
+      is = inputStreamFromFile(file);
+      return new BufferedReader(new InputStreamReader(is, encoding));
+    } catch (IOException ioe) {
+      IOUtils.closeIgnoringExceptions(is);
+      throw new RuntimeIOException(ioe);
+    }
+  }
 
 
   /**
@@ -528,10 +551,11 @@ public class IOUtils {
 
 
   /**
-   * Open a BufferedReader to a file or URL specified by a String name. If the
-   * String starts with https?://, then it is first tried as a URL, otherwise it
-   * is next tried as a resource on the CLASSPATH, and then finally it is tried
-   * as a local file or other network-available file. If the String ends in .gz, it
+   * Open a BufferedReader to a file, class path entry or URL specified by a String name.
+   * If the String starts with https?://, then it is first tried as a URL. It
+   * is next tried as a resource on the CLASSPATH, and then it is tried
+   * as a local file. Finally, it is then tried again in case it is some network-available
+   * file accessible by URL. If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
    *
@@ -1290,7 +1314,8 @@ public class IOUtils {
   }
 
   /**
-   * Read in a CSV formatted file with a header row
+   * Read in a CSV formatted file with a header row.
+   *
    * @param path - path to CSV file
    * @param quoteChar - character for enclosing strings, defaults to "
    * @param escapeChar - character for escaping quotes appearing in quoted strings; defaults to " (i.e. "" is used for " inside quotes, consistent with Excel)
@@ -1779,6 +1804,7 @@ public class IOUtils {
     }
   }
 
+
   /**
    * A raw file copy function -- this is not public since no error checks are made as to the
    * consistency of the filed being copied. Use instead:
@@ -1790,10 +1816,20 @@ public class IOUtils {
   private static void copyFile(File source, File target) throws IOException {
     FileChannel sourceChannel = new FileInputStream( source ).getChannel();
     FileChannel targetChannel = new FileOutputStream( target ).getChannel();
-    sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
+
+    // allow for the case that it doesn't all transfer in one go (though it probably does for a file cp)
+    long pos = 0;
+    long toCopy = sourceChannel.size();
+    while (toCopy > 0) {
+      long bytes = sourceChannel.transferTo(pos, toCopy, targetChannel);
+      pos += bytes;
+      toCopy -= bytes;
+    }
+
     sourceChannel.close();
     targetChannel.close();
   }
+
 
   /**
    * <p>An implementation of cp, as close to the Unix command as possible.
