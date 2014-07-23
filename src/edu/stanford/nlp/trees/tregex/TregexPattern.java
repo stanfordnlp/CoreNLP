@@ -393,6 +393,8 @@ public abstract class TregexPattern implements Serializable {
     return opt;
   }
 
+  abstract boolean getChangesVariables();
+
   abstract TregexMatcher matcher(Tree root, Tree tree,
                                  IdentityHashMap<Tree, Tree> nodesToParents,
                                  Map<String, Tree> namesToNodes,

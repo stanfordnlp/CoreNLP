@@ -27,9 +27,6 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   /** How many times a feature must be seen when training.  Less than this and it is filtered. */
   public int featureFrequencyCutoff = 0;
 
-  /** Saves intermediate models, but that takes up a lot of space */
-  public boolean saveIntermediateModels = false;
-
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;
 }

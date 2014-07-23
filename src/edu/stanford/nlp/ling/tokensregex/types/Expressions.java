@@ -193,10 +193,6 @@ public class Expressions {
     if (value instanceof Value) {
       return (Value) value;
     } else {
-      if (typename == null && value != null) {
-        // TODO: Check for simpler typename provided by value
-        typename = value.getClass().getName();
-      }
       return new PrimitiveValue<T>(typename, value, tags);
     }
   }
@@ -1200,25 +1196,6 @@ public class Expressions {
       evaluated = null;
     }
 
-    private static Object toCompatibleObject(Field f, Object value) {
-      if (value == null) return value;
-      if (!f.getDeclaringClass().isAssignableFrom(value.getClass())) {
-        if (Number.class.isAssignableFrom(value.getClass())) {
-          Number number = (Number) value;
-          if (f.getType().isAssignableFrom(Double.class)) {
-            return number.doubleValue();
-          } else if (f.getType().isAssignableFrom(Float.class)) {
-              return number.floatValue();
-          } else if (f.getType().isAssignableFrom(Long.class)) {
-            return number.longValue();
-          } else if (f.getType().isAssignableFrom(Integer.class)) {
-            return number.intValue();
-          }
-        }
-      }
-      return value;
-    }
-
     private static Value attemptTypeConversion(CompositeValue cv, Env env, Object... args) {
       Expression typeFieldExpr = cv.value.get("type");
       if (typeFieldExpr != null) {
@@ -1243,12 +1220,9 @@ public class Expressions {
                     Value v = cv.value.get(s).evaluate(env, args);
                     try {
                       Field f = c.getField(s);
-                      Object objVal =  toCompatibleObject(f, v.get());
-                      f.set(obj, objVal);
+                      f.set(obj, v.get());
                     } catch (NoSuchFieldException ex){
-                      throw new RuntimeException("Unknown field " + s + " for type " + typeName + ", trying to set to " + v, ex);
-                    } catch (IllegalArgumentException ex){
-                      throw new RuntimeException("Incompatible type " + s + " for type " + typeName + ", trying to set to " + v, ex);
+                      throw new RuntimeException("Unknown field " + s + " for type " + typeName, ex);
                     }
                   }
                 }

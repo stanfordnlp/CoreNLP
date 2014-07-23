@@ -3,6 +3,7 @@ package edu.stanford.nlp.classify;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -698,7 +698,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     RVFDataset<String, String> dataset;
     try {
       dataset = new RVFDataset<String, String>(10, featureIndex, labelIndex);
-      in = IOUtils.readerFromString(filename);
+      in = new BufferedReader(new FileReader(filename));
 
       while (in.ready()) {
         String line = in.readLine();
@@ -777,7 +777,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
       Counter<F> features = datum.asFeaturesCounter();
       for (F feature : features.keySet()) {
         double count = features.getCount(feature);
-        writer.format(Locale.ENGLISH, " %s:%f", this.featureIndex.indexOf(feature), count);
+        writer.format(" %s:%f", this.featureIndex.indexOf(feature), count);
       }
       writer.println();
     }

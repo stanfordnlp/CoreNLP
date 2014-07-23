@@ -1,8 +1,5 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
-import java.util.List;
-
-import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
 
 /**
@@ -16,7 +13,7 @@ public class ShiftTransition implements Transition {
    * TODO: go through the papers and make sure they don't mention any
    * other conditions where one shouldn't shift
    */
-  public boolean isLegal(State state, List<ParserConstraint> constraints) {
+  public boolean isLegal(State state) {
     if (state.finished) {
       return false;
     }
@@ -35,31 +32,6 @@ public class ShiftTransition implements Transition {
         return false;
       }
     }
-
-    if (constraints == null || state.stack.size() == 0) {
-      return true;
-    }
-    final Tree top = state.stack.peek();
-    // If there are ParserConstraints, you can only shift if shifting
-    // will not make a constraint unsolvable.  This happens if we
-    // shift beyond the right end of a constraint which is not solved.
-    for (ParserConstraint constraint : constraints) {
-      // either went past or haven't gotten to this constraint yet
-      if (ShiftReduceUtils.rightIndex(top) != constraint.end - 1) {
-        continue;
-      }
-      int left = ShiftReduceUtils.leftIndex(top);
-      if (left < constraint.start) {
-        continue;
-      }
-      if (left > constraint.start) {
-        return false;
-      }
-      if (!ShiftReduceUtils.constraintMatchesTreeTop(top, constraint)) {
-        return false;
-      }
-    }
-    
     return true;
   }
 

@@ -177,19 +177,11 @@ public class State implements Scored {
 
   static final Pattern separatorRegex = Pattern.compile("^[,;:-]+$");
 
-  static final char[][] equivalentSeparators = { { '，', ',' },
-                                                 { '；', ';' },
-                                                 { '：', ':' } };
-
   static TreeMap<Integer, String> findSeparators(List<Tree> sentence) {
     TreeMap<Integer, String> separators = Generics.newTreeMap();
     for (int index = 0; index < sentence.size(); ++index) {
       Tree leaf = sentence.get(index).children()[0];
-      String value = leaf.value();
-      for (int i = 0; i < equivalentSeparators.length; ++i) {
-        value = value.replace(equivalentSeparators[i][0], equivalentSeparators[i][1]);
-      }
-      if (separatorRegex.matcher(value).matches()) {
+      if (separatorRegex.matcher(leaf.value()).matches()) {
         separators.put(index, leaf.value());
       }
     }
@@ -237,8 +229,7 @@ public class State implements Scored {
     result.append("State summary\n");
     result.append("  Tokens: " + sentence + "\n");
     result.append("  Token position: " + tokenPosition + "\n");
-    result.append("  Current stack contents: " + stack.toString("\n") + "\n");
-    result.append("  Component transitions: " + transitions + "\n");
+    result.append("  Current stack contents: " + stack + "\n");
     result.append("  Score: " + score + "\n");
     result.append("  " + ((finished) ? "" : "not ") + "finished\n");
     return result.toString();

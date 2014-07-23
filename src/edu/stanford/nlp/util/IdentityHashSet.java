@@ -23,8 +23,6 @@ import java.util.*;
  */
 public class IdentityHashSet<E> extends AbstractSet<E> implements Cloneable, Serializable {
 
-  // todo: The Java bug database notes that "From 1.6, an identity hash set can be created by Collections.newSetFromMap(new IdentityHashMap())."
-
   // INSTANCE VARIABLES -------------------------------------------------
 
   // the IdentityHashMap which backs this set

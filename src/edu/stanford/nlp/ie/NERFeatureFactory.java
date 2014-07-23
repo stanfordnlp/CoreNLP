@@ -1038,36 +1038,36 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         featuresC.add(pWord + '-' + nWord + "-SWORDS");
       }
 
-      String pGazAnnotation = (flags.useGazFeatures || flags.useMoreGazFeatures) ? p.get(CoreAnnotations.GazAnnotation.class) : null;
-      String nGazAnnotation = (flags.useGazFeatures || flags.useMoreGazFeatures) ? n.get(CoreAnnotations.GazAnnotation.class) : null;
-      String cGazAnnotation = (flags.useGazFeatures || flags.useMoreGazFeatures) ? c.get(CoreAnnotations.GazAnnotation.class) : null;
+      // Thang Sep13: handle cases when get(CoreAnnotations.GazAnnotation.class) is null
+      String pGazAnnotationClass = (flags.useGazFeatures || flags.useMoreGazFeatures) ? p.get(CoreAnnotations.GazAnnotation.class) : null;
+      String nGazAnnotationClass = (flags.useGazFeatures || flags.useMoreGazFeatures) ? n.get(CoreAnnotations.GazAnnotation.class) : null;
       if (flags.useGazFeatures) {
 
-        if (cGazAnnotation != null && !cGazAnnotation.equals(flags.dropGaz)) {
-          featuresC.add(cGazAnnotation + "-GAZ");
+        if (!c.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
+          featuresC.add(c.get(CoreAnnotations.GazAnnotation.class) + "-GAZ");
         }
         // n
-        if (nGazAnnotation != null && !nGazAnnotation.equals(flags.dropGaz)) {
-          featuresC.add(nGazAnnotation + "-NGAZ");
+        if (nGazAnnotationClass!=null && !nGazAnnotationClass.equals(flags.dropGaz)) {
+          featuresC.add(nGazAnnotationClass + "-NGAZ");
         }
         // p
-        if (pGazAnnotation != null && !pGazAnnotation.equals(flags.dropGaz)) {
-          featuresC.add(pGazAnnotation + "-PGAZ");
+        if (pGazAnnotationClass!=null && !pGazAnnotationClass.equals(flags.dropGaz)) {
+          featuresC.add(pGazAnnotationClass + "-PGAZ");
         }
       }
 
       if (flags.useMoreGazFeatures) {
-        if (cGazAnnotation != null && !cGazAnnotation.equals(flags.dropGaz)) {
-          featuresC.add(cGazAnnotation + '-' + cWord + "-CG-CW-GAZ");
+        if (!c.get(CoreAnnotations.GazAnnotation.class).equals(flags.dropGaz)) {
+          featuresC.add(c.get(CoreAnnotations.GazAnnotation.class) + '-' + cWord + "-CG-CW-GAZ");
 
           // c-n
-          if (nGazAnnotation != null && !nGazAnnotation.equals(flags.dropGaz)) {
-            featuresC.add(cGazAnnotation + '-' + nGazAnnotation + "-CNGAZ");
+          if (nGazAnnotationClass!=null && !nGazAnnotationClass.equals(flags.dropGaz)) {
+            featuresC.add(c.get(CoreAnnotations.GazAnnotation.class) + '-' + nGazAnnotationClass + "-CNGAZ");
           }
 
           // p-c
-          if (pGazAnnotation != null && !pGazAnnotation.equals(flags.dropGaz)) {
-            featuresC.add(pGazAnnotation + '-' + cGazAnnotation + "-PCGAZ");
+          if (pGazAnnotationClass!=null && !pGazAnnotationClass.equals(flags.dropGaz)) {
+            featuresC.add(pGazAnnotationClass + '-' + c.get(CoreAnnotations.GazAnnotation.class) + "-PCGAZ");
           }
         }
       }

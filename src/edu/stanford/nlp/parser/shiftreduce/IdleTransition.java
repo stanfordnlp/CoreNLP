@@ -1,8 +1,5 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
-import java.util.List;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-
 /**
  * Transition that literally does nothing
  */
@@ -10,7 +7,7 @@ public class IdleTransition implements Transition {
   /**
    * Legal only if the state is already finished
    */
-  public boolean isLegal(State state, List<ParserConstraint> constraints) {
+  public boolean isLegal(State state) {
     return state.finished;
   }
 

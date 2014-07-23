@@ -12,17 +12,15 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
  */
 class IfExistsNode extends TsurgeonPattern {
   final String name;
-  final boolean invert;
 
-  public IfExistsNode(String name, boolean invert, TsurgeonPattern ... children) {
-    super("if " + (invert ? "not " : "") + "exists " + name, children);
+  public IfExistsNode(String name, TsurgeonPattern ... children) {
+    super("if exists " + name, children);
     this.name = name;
-    this.invert = invert;
   }
 
   @Override
   public Tree evaluate(Tree t, TregexMatcher m) {
-    if (invert ^ (m.getNode(name) != null)) {
+    if (m.getNode(name) != null) {
       for (TsurgeonPattern child : children) {
         child.evaluate(t, m);
       }

@@ -54,7 +54,6 @@ PARSER_END(TsurgeonParser)
 
 TOKEN:
 { < IF: "if" >
-| < NOT: "not" >
 | < EXISTS: "exists" > : CONDITIONAL
 | < DELETE: "delete" > : OPERATION
 | < PRUNE:  "prune" > : OPERATION
@@ -99,12 +98,9 @@ TsurgeonPatternRoot Root() :
 {
   result = Operation()
   { return new TsurgeonPatternRoot(result); } 
- | LOOKAHEAD(2)
+ | 
   ( <IF> <EXISTS> name = <NAME> result = Root() )
-  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, false, result.children)); }
- | LOOKAHEAD(2)
-  ( <IF> <NOT> <EXISTS> name = <NAME> result = Root() )
-  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, true, result.children)); }
+  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, result.children)); }
  |
   ( <OPEN_BRACKET> result = Root() <CLOSE_BRACKET>
     {
@@ -167,11 +163,11 @@ TsurgeonPattern Operation() :
 | LOOKAHEAD(3)
   operator = <INSERT> tree = TreeRoot(false) loc = Location()
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> tree = TreeRoot(false) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
+| operator = <CREATE_SUBTREE> (( newLabel = <IDENTIFIER> ) | ( newLabel = <TREE_NODE_TERMINAL_LABEL> )) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
     { if (nodeSelections.size() == 1) {
-        return new CreateSubtreeNode(nodeSelections.get(0), tree);
+        return new CreateSubtreeNode(nodeSelections.get(0), newLabel.image);
       } else if (nodeSelections.size() == 2) {
-        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), tree);
+        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), newLabel.image);
       } else {
         throw new ParseException("Illegal number of nodes given to createSubtree (" + nodeSelections.size() + ")");
       }

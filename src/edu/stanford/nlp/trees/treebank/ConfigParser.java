@@ -48,7 +48,6 @@ public class ConfigParser implements Iterable<Properties> {
   public static final String paramMaxLen = "MAXLEN";        //Max yield of the trees in the data set
   public static final String paramMorph = "MORPH";          //Add the pre-terminal morphological analysis to the leaf (using the delimiter)
   public static final String paramTransform = "TVISITOR";   //Apply a custom TreeVisitor to each tree in the dataset
-  public static final String paramCCTagset = "CC_TAGSET"; // specific to French.  TODO: move it to the French dataset
 
   //Absolute parameters
   private static final Pattern matchName = Pattern.compile(paramName + DELIM);
@@ -72,8 +71,6 @@ public class ConfigParser implements Iterable<Properties> {
 
   private static final Pattern matchEncode = Pattern.compile(paramEncode + DELIM);
   private static final Pattern matchEncodeArgs = Pattern.compile("Buckwalter|UTF8");
-
-  private static final Pattern matchCCTagset = Pattern.compile(paramCCTagset + DELIM);
 
   private static final Pattern booleanArgs = Pattern.compile("true|false");
 
@@ -120,7 +117,6 @@ public class ConfigParser implements Iterable<Properties> {
     patternsMap.put(paramMaxLen, new Pair<Pattern,Pattern>(matchMaxLen,null));
     patternsMap.put(paramMorph, new Pair<Pattern,Pattern>(matchMorph,null));
     patternsMap.put(paramTransform, new Pair<Pattern,Pattern>(matchTransform,null));
-    patternsMap.put(paramCCTagset, new Pair<Pattern,Pattern>(matchCCTagset,null));
   }
 
   public Iterator<Properties> iterator() {
@@ -160,7 +156,7 @@ public class ConfigParser implements Iterable<Properties> {
             String[] tokens = line.split(DELIM);
 
             if(tokens.length != 2) {
-              System.err.printf("%s: Skipping malformed parameter in %s (line %d)%n", this.getClass().getName(), configFile,reader.getLineNumber());
+              System.err.printf("%s: Skipping malformed parameter in %s (line %d)\n", this.getClass().getName(), configFile,reader.getLineNumber());
               break;
             }
 
@@ -171,7 +167,7 @@ public class ConfigParser implements Iterable<Properties> {
               if(paramToken.matches()) {
                 paramsForDataset.setProperty(actualParam, paramValue);
               } else {
-                System.err.printf("%s: Skipping illegal parameter value in %s (line %d)%n", this.getClass().getName(), configFile,reader.getLineNumber());
+                System.err.printf("%s: Skipping illegal parameter value in %s (line %d)\n", this.getClass().getName(), configFile,reader.getLineNumber());
                 break;
               }
             } else {
@@ -179,10 +175,9 @@ public class ConfigParser implements Iterable<Properties> {
             }
           }
         }
-        if (!matched) {
-          String error = this.getClass().getName() + ": Unknown token in " + configFile + " (line " + reader.getLineNumber() + ")%n";
-          System.err.printf(error);
-          throw new IllegalArgumentException(error);
+        if(!matched) {
+          System.err.printf("%s: Unknown token in %s (line %d)\n", this.getClass().getName(), configFile, reader.getLineNumber());
+          System.exit(-1);
         }
       }
 
@@ -191,23 +186,23 @@ public class ConfigParser implements Iterable<Properties> {
       reader.close();
 
     } catch (FileNotFoundException e) {
-      System.err.printf("%s: Cannot open file %s%n", this.getClass().getName(), configFile);
+      System.err.printf("%s: Cannot open file %s\n", this.getClass().getName(), configFile);
     } catch (IOException e) {
-      System.err.printf("%s: Error reading %s (line %d)%n", this.getClass().getName(), configFile, lineNum);
+      System.err.printf("%s: Error reading %s (line %d)\n", this.getClass().getName(), configFile, lineNum);
     }
   }
 
   @Override
   public String toString() {
     final int numDatasets = datasetList.size();
-    StringBuilder sb = new StringBuilder(String.format("Loaded %d datasets: %n",numDatasets));
+    StringBuilder sb = new StringBuilder(String.format("Loaded %d datasets: \n",numDatasets));
 
     int dataSetNum = 1;
     for(Properties sm : datasetList) {
       if(sm.containsKey(paramName))
-        sb.append(String.format(" %d: %s%n",dataSetNum++, sm.getProperty(paramName)));
+        sb.append(String.format(" %d: %s\n",dataSetNum++, sm.getProperty(paramName)));
       else
-        sb.append(String.format(" %d: %s%n",dataSetNum++,"UNKNOWN NAME"));
+        sb.append(String.format(" %d: %s\n",dataSetNum++,"UNKNOWN NAME"));
     }
 
     return sb.toString();
@@ -222,7 +217,7 @@ public class ConfigParser implements Iterable<Properties> {
     for(Properties sm : cp) {
       System.out.println("--------------------");
       for(String key : sm.stringPropertyNames())
-        System.out.printf(" %s: %s%n",key,sm.get(key));
+        System.out.printf(" %s: %s\n",key,sm.get(key));
     }
   }
 
