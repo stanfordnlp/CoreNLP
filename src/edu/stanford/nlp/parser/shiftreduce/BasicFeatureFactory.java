@@ -9,155 +9,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.TreeShapedStack;
 
-public class BasicFeatureFactory implements FeatureFactory {
-  enum Transition {
-    LEFT, RIGHT, UNARY
-  };
-
-  enum FeatureComponent {
-    HEADWORD ("W"), HEADTAG ("T"), VALUE ("C");
-
-    private final String shortName;
-    FeatureComponent(String shortName) {
-      this.shortName = shortName;
-    }
-
-    public String shortName() { return shortName; }
-  };
-
-  static final String NULL = "*NULL*";
-
-  public static String getFeatureFromCoreLabel(CoreLabel label, FeatureComponent feature) {
-    String value = null;
-    switch(feature) {
-    case HEADWORD:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
-      break;
-    case HEADTAG:
-      value = (label == null) ? NULL : label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-      break;
-    case VALUE:
-      value = (label == null) ? NULL : label.value();
-      break;
-    default:
-      throw new IllegalArgumentException("Unexpected feature type: " + feature);
-    }
-    return value;
-  }
-
-  public static CoreLabel getRecentDependent(TreeShapedStack<Tree> stack, Transition transition, int nodeNum) {
-    if (stack.size() <= nodeNum) {
-      return null;
-    }
-
-    for (int i = 0; i < nodeNum; ++i) {
-      stack = stack.pop();
-    }
-
-    Tree node = stack.peek();
-    if (node == null) {
-      return null;
-    }
-    if (!(node.label() instanceof CoreLabel)) {
-      throw new IllegalArgumentException("Can only featurize CoreLabel trees");
-    }
-    Tree head = ((CoreLabel) node.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class);
-
-    switch (transition) {
-    case LEFT: {
-      while (true) {
-        if (node.children().length == 0) {
-          return null;
-        }
-        Tree child = node.children()[0];
-        if (!(child.label() instanceof CoreLabel)) {
-          throw new IllegalArgumentException("Can only featurize CoreLabel trees");
-        }
-        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class) != head) {
-          return (CoreLabel) child.label();
-        }
-        node = child;
-      }
-    }
-    case RIGHT: {
-      while (true) {
-        if (node.children().length == 0) {
-          return null;
-        }
-        if (node.children().length == 1) {
-          node = node.children()[0];
-          continue;
-        }
-        Tree child = node.children()[1];
-        if (!(child.label() instanceof CoreLabel)) {
-          throw new IllegalArgumentException("Can only featurize CoreLabel trees");
-        }
-        if (((CoreLabel) child.label()).get(TreeCoreAnnotations.HeadWordAnnotation.class) != head) {
-          return (CoreLabel) child.label();
-        }
-        node = child;
-      }
-    }
-    default:
-      throw new IllegalArgumentException("Can only get left or right heads");
-    }
-  }
-
-  public static CoreLabel getStackLabel(TreeShapedStack<Tree> stack, int nodeNum, Transition ... transitions) {
-    if (stack.size() <= nodeNum) {
-      return null;
-    }
-
-    for (int i = 0; i < nodeNum; ++i) {
-      stack = stack.pop();
-    }
-
-    Tree node = stack.peek();
-
-    // TODO: this is nice for code readability, but might be expensive
-    for (Transition t : transitions) {
-      switch (t) {
-      case LEFT:
-        if (node.children().length != 2) {
-          return null;
-        }
-        node = node.children()[0];
-        break;
-      case RIGHT:
-        if (node.children().length != 2) {
-          return null;
-        }
-        node = node.children()[1];
-        break;
-      case UNARY:
-        if (node.children().length != 1) {
-          return null;
-        }
-        node = node.children()[0];
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown transition type " + t);
-      }
-    }
-
-    if (!(node.label() instanceof CoreLabel)) {
-      throw new IllegalArgumentException("Can only featurize CoreLabel trees");
-    }
-    return (CoreLabel) node.label();
-  }
-
-  public static CoreLabel getQueueLabel(List<Tree> sentence, int tokenPosition, int nodeNum) {
-    if (tokenPosition + nodeNum < 0 || tokenPosition + nodeNum >= sentence.size()) { 
-      return null;
-    }
-
-    Tree node = sentence.get(tokenPosition + nodeNum);
-    if (!(node.label() instanceof CoreLabel)) {
-      throw new IllegalArgumentException("Can only featurize CoreLabel trees");
-    }
-    return (CoreLabel) node.label();
-  }
-
+public class BasicFeatureFactory extends FeatureFactory {
   public static void addUnaryStackFeatures(List<String> features, CoreLabel label, String conFeature, String wordTagFeature, String tagFeature, String wordConFeature, String tagConFeature) {
     if (label == null) {
       features.add(conFeature + NULL);
@@ -327,6 +179,49 @@ public class BasicFeatureFactory implements FeatureFactory {
     }
   }
 
+  /**
+   * Could potentially add the tags and words for the left and right
+   * ends of the tree.  Also adds notes about the sizes of the given
+   * tree.  However, it seems somewhat slow and doesn't help accuracy.
+   */
+  public void addEdgeFeatures(List<String> features, State state, String nodeName, String neighborName, Tree node, Tree neighbor) {
+    if (node == null) {
+      return;
+    }
+
+    int left = ShiftReduceUtils.leftIndex(node);
+    int right = ShiftReduceUtils.rightIndex(node);
+
+    // Trees of size one are already featurized
+    if (right == left) {
+      features.add(nodeName + "SZ1");
+      return;
+    }
+
+    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(left)), nodeName + "EL-");
+    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(right)), nodeName + "ER-");
+
+    if (neighbor != null) {
+      addBinaryFeatures(features, nodeName, getCoreLabel(state.sentence.get(right)), FeatureComponent.HEADWORD, FeatureComponent.HEADTAG, neighborName, getCoreLabel(neighbor), FeatureComponent.HEADWORD, FeatureComponent.HEADTAG);
+    }
+
+    if (right - left == 1) {
+      features.add(nodeName + "SZ2");
+      return;
+    }
+
+    if (right - left == 2) {
+      features.add(nodeName + "SZ3");
+      addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(left + 1)), nodeName + "EM-");
+      return;
+    }
+
+    features.add(nodeName + "SZB");
+    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(left + 1)), nodeName + "El-");
+    addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(right - 1)), nodeName + "Er-");
+  }
+
+  @Override
   public List<String> featurize(State state) {
     List<String> features = Generics.newArrayList();
 

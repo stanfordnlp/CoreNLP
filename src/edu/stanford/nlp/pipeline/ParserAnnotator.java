@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -32,7 +31,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 /**
  * This class will add parse information to an Annotation.
  * It assumes that the Annotation already contains the tokenized words
- * as a List&lt;CoreLabel&gt; in the TokensAnnotation under each
+ * as a {@code List<CoreLabel>} in the TokensAnnotation under each
  * particular CoreMap in the SentencesAnnotation.
  * If the words have POS tags, they will be used.
  * <br>
@@ -53,8 +52,8 @@ public class ParserAnnotator implements Annotator {
   /** Do not parse sentences larger than this sentence length */
   private final int maxSentenceLength;
 
-  /** 
-   * Stop parsing if we exceed this time limit, in milliseconds. 
+  /**
+   * Stop parsing if we exceed this time limit, in milliseconds.
    * Use 0 for no limit.
    */
   private final long maxParseTime;
@@ -65,10 +64,8 @@ public class ParserAnnotator implements Annotator {
 
   private final boolean saveBinaryTrees;
 
-  public static final String[] DEFAULT_FLAGS = { "-retainTmpSubcategories" };
-
   public ParserAnnotator(boolean verbose, int maxSent) {
-    this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, DEFAULT_FLAGS);
+    this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, StringUtils.EMPTY_STRING_ARRAY);
   }
 
   public ParserAnnotator(String parserLoc,
@@ -109,7 +106,6 @@ public class ParserAnnotator implements Annotator {
     }
     this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 
-    // will use DEFAULT_FLAGS if the flags are not set in the properties
     String[] flags = convertFlagsToArray(props.getProperty(annotatorName + ".flags"));
     this.parser = loadModel(model, VERBOSE, flags);
     this.maxSentenceLength = PropertiesUtils.getInt(props, annotatorName + ".maxlen", -1);
@@ -163,7 +159,7 @@ public class ParserAnnotator implements Annotator {
             props.getProperty(annotatorName + ".maxtime", "0"));
     os.append(annotatorName + ".buildgraphs:" +
             props.getProperty(annotatorName + ".buildgraphs", "true"));
-    os.append(annotatorName + ".nthreads:" + 
+    os.append(annotatorName + ".nthreads:" +
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
     boolean saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
@@ -173,9 +169,7 @@ public class ParserAnnotator implements Annotator {
   }
 
   public static String[] convertFlagsToArray(String parserFlags) {
-    if (parserFlags == null) {
-      return DEFAULT_FLAGS;
-    } else if (parserFlags.trim().equals("")) {
+    if (parserFlags == null || parserFlags.trim().equals("")) {
       return StringUtils.EMPTY_STRING_ARRAY;
     } else {
       return parserFlags.trim().split("\\s+");
@@ -193,9 +187,9 @@ public class ParserAnnotator implements Annotator {
       }
       System.err.println();
     }
-    ParserGrammar result = ParserGrammar.loadModel(parserLoc, flags);
-    // lp.setOptionFlags(new String[]{"-outputFormat", "penn,typedDependenciesCollapsed", "-retainTmpSubcategories"});
-    // treePrint = lp.getTreePrint();
+    ParserGrammar result = ParserGrammar.loadModel(parserLoc);
+    result.setOptionFlags(result.defaultCoreNLPFlags());
+    result.setOptionFlags(flags);
 
     return result;
   }
@@ -265,15 +259,15 @@ public class ParserAnnotator implements Annotator {
     if (tree == null) {
       tree = ParserAnnotatorUtils.xTree(words);
     }
-    
+
     if (treeMap != null) {
       tree = treeMap.apply(tree);
     }
-    
+
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
 
     if (saveBinaryTrees) {
-      TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(), 
+      TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(),
                                                   false, false, 0, false, false, 0.0, false, true, true);
       Tree binarized = binarizer.transformTree(tree);
       Trees.convertToCoreLabels(binarized);
@@ -281,7 +275,7 @@ public class ParserAnnotator implements Annotator {
     }
   }
 
-  private Tree doOneSentence(List<ParserConstraint> constraints, 
+  private Tree doOneSentence(List<ParserConstraint> constraints,
                              List<CoreLabel> words) {
     ParserQuery pq = parser.parserQuery();
     pq.setConstraints(constraints);

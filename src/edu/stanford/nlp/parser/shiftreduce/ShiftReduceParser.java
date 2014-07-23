@@ -75,7 +75,30 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     this.transitionIndex = new HashIndex<Transition>();
     this.featureWeights = Generics.newHashMap();
     this.op = op;
-    this.featureFactory = ReflectionLoading.loadByReflection(op.featureFactoryClass);
+
+    String[] classes = op.featureFactoryClass.split(";");
+    if (classes.length == 1) {
+      this.featureFactory = ReflectionLoading.loadByReflection(classes[0]);
+    } else {
+      FeatureFactory[] factories = new FeatureFactory[classes.length];
+      for (int i = 0; i < classes.length; ++i) {
+        int paren = classes[i].indexOf("(");
+        if (paren >= 0) {
+          String arg = classes[i].substring(paren + 1, classes[i].length() - 1);
+          factories[i] = ReflectionLoading.loadByReflection(classes[i].substring(0, paren), arg);
+        } else {
+          factories[i] = ReflectionLoading.loadByReflection(classes[i]);
+        }
+      }
+      this.featureFactory = new CombinationFeatureFactory(factories);
+    }
+  }
+
+  public ShiftReduceParser(ShiftReduceOptions op, FeatureFactory factory) {
+    this.transitionIndex = new HashIndex<Transition>();
+    this.featureWeights = Generics.newHashMap();
+    this.op = op;
+    this.featureFactory = factory;
   }
 
   /*
@@ -114,9 +137,22 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return getTLPParams().treebankLanguagePack();
   }
 
+  private final static String[] BEAM_FLAGS = { "-beamSize", "4" };
+
+  @Override
+  public String[] defaultCoreNLPFlags() {
+    if (op.trainOptions().beamSize > 1) {
+      return ArrayUtils.concatenate(getTLPParams().defaultCoreNLPFlags(), BEAM_FLAGS);
+    } else {
+      // TODO: this may result in some options which are useless for
+      // this model, such as -retainTmpSubcategories
+      return getTLPParams().defaultCoreNLPFlags();
+    }
+  }
+
   public ShiftReduceParser deepCopy() {
-    // TODO: should we deep copy the options?
-    ShiftReduceParser copy = new ShiftReduceParser(op);
+    // TODO: should we deep copy the options / factory?  seems wasteful
+    ShiftReduceParser copy = new ShiftReduceParser(op, featureFactory);
     copy.copyWeights(this);
     return copy;
   }
@@ -153,9 +189,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
   public static ShiftReduceParser averageModels(Collection<ShiftReduceParser> models) {
     ShiftReduceParser firstModel = models.iterator().next();
-    ShiftReduceOptions op = firstModel.op;
-    // TODO: should we deep copy the options?
-    ShiftReduceParser copy = new ShiftReduceParser(op);
+    ShiftReduceParser copy = new ShiftReduceParser(firstModel.op, firstModel.featureFactory);
 
     for (Transition transition : firstModel.transitionIndex) {
       copy.transitionIndex.add(transition);
@@ -751,7 +785,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
           }
         }
       }
-      if (serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
+      if (op.trainOptions().saveIntermediateModels && serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
         String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
         saveModel(tempName);
         // TODO: we could save a cutoff version of the model,
@@ -890,7 +924,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         serializedPath = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-tlpp")) {
-        tlppClass = args[argIndex] + 1;
+        tlppClass = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-continueTraining")) {
         continueTraining = args[argIndex + 1];
