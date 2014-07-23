@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="kbe_to_html.xsl"?>
+<root xmlns="http://bogusnamespace.com/inference_pilot_evaluation/annotation">
+  <inference id="RTE2_10" task="QA" length="">
+    <passage>In Nigeria, by far the most populous country in sub-Saharan Africa, over 2.7 million people are infected with HIV.</passage>
+    <question/>
+    <hypothesis>2.7 percent of the people infected with HIV live in Africa.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="RTE1_1637" task="IE" length="">
+    <passage>Twenty years ago, on June 6, 1968, Sen. Robert F. Kennedy died at Good Samaritan Hospital in Los Angeles, 25 -LCB- hours after he was shot at the Ambassador Hotel by Sirhan Bishara Sirhan.</passage>
+    <question/>
+    <hypothesis>Sirhan Bishara Sirhan killed Sen. Robert F. Kennedy</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="RTE2_271" task="IR" length="">
+    <passage>The May 3 ferry sinking in the Meghna River that claimed the lives of at least 370 people is a reminder of the dangers inherent in this sort of travel. </passage>
+    <question/>
+    <hypothesis>100 or more people lost their lives in a ferry sinking.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="RTE2_293" task="IR" length="">
+    <passage>The Townsend Thoresen cross-Channel ferry Herald of Free Enterprise capsized outside the Belgian port of Zeebrugge on the 6th of March with the loss of 135 lives. </passage>
+    <question/>
+    <hypothesis>100 or more people lost their lives in a ferry sinking.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="danr_001" task="" length="">
+    <passage>I ate cheese and bread.</passage>
+    <question/>
+    <hypothesis>I ate bread.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="danr_002" task="" length="">
+    <passage>I ate cheese and carp.</passage>
+    <question/>
+    <hypothesis>I ate carp.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="danr_003" task="" length="">
+    <passage>I ate cheese and hummus.</passage>
+    <question/>
+    <hypothesis>I ate hummus.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="hypernymy1" task="" length="">
+    <passage>The cat napped.</passage>
+    <question/>
+    <hypothesis>The cat slept.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="hypernymy2" task="" length="">
+    <passage>I like Java.</passage>
+    <question/>
+    <hypothesis>I like a programming language.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="hypernymy3" task="" length="">
+    <passage>Some elephants like mice.</passage>
+    <question/>
+    <hypothesis>Some animals like mice.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="hypernymy4" task="" length="">
+    <passage>Snakes don't like people.</passage>
+    <question/>
+    <hypothesis>Some reptiles don't like people.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>yes</response>
+    </answer>
+  </inference>
+  <inference id="chris_001" task="" length="">
+    <passage>A major US intelligence review has projected that Iran is about a decade
+away from manufacturing the key ingredient for a nuclear weapon.</passage>
+    <question/>
+    <hypothesis>In January 2000, the Central Intelligence Agency concluded that Iran
+might now be able to make a nuclear weapon.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_002" task="" length="">
+    <passage>A major US intelligence review has projected that Iran is about a decade
+away from manufacturing the key ingredient for a nuclear weapon.</passage>
+    <question/>
+    <hypothesis>On 10 November 2004 the Wall Street Journal reported that European
+officials believed Iran was five or six years away from possessing
+nuclear weapon.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_003" task="" length="">
+    <passage>On 10 November 2004 the Wall Street Journal reported that European
+officials believed Iran was five or six years away from possessing
+nuclear weapon.</passage>
+    <question/>
+    <hypothesis>Iran does not currently have nuclear weapons, and would appear to be
+about two years away from acquiring nuclear weapons.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_004" task="" length="">
+    <passage>Iran does not currently have nuclear weapons, and would appear to be
+about two years away from acquiring nuclear weapons.</passage>
+    <question/>
+    <hypothesis>On 10 November 2004 the Wall Street Journal reported that European
+officials believed Iran was five or six years away from possessing
+nuclear weapon.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_005" task="" length="">
+    <passage>Iranian Foreign Minister Kamal Kharazi, denied his country has "any
+program to produce weapons of mass destruction."</passage>
+    <question/>
+    <hypothesis>"According to experts, the document is unequivocal proof that Iran's
+nuclear project is involved in weapons production".</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_006" task="" length="">
+    <passage>Iranian Foreign Minister Kamal Kharazi, denied his country has "any
+program to produce weapons of mass destruction."</passage>
+    <question/>
+    <hypothesis>A major US intelligence review has projected that Iran is about a decade
+away from manufacturing the key ingredient for a nuclear weapon.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_007" task="" length="">
+    <passage>"According to experts, the document is unequivocal proof that Iran's
+nuclear project is involved in weapons production."</passage>
+    <question/>
+    <hypothesis>Iran does not currently have nuclear weapons, and would appear to be
+about two years away from acquiring nuclear weapons.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_008" task="" length="">
+    <passage>Iranian Foreign Minister Kamal Kharazi, denied his country has "any
+program to produce weapons of mass destruction."</passage>
+    <question/>
+    <hypothesis>In January 2000, the Central Intelligence Agency concluded that Iran
+might now be able to make a nuclear weapon.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_009" task="" length="">
+    <passage>In January 2000, the Central Intelligence Agency concluded that Iran
+might now be able to make a nuclear weapon.</passage>
+    <question/>
+    <hypothesis>A major US intelligence review has projected that Iran is about a decade
+away from manufacturing the key ingredient for a nuclear weapon.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_010" task="" length="">
+    <passage>Iran does not currently have nuclear weapons, and would appear to be
+about two years away from acquiring nuclear weapons.</passage>
+    <question/>
+    <hypothesis>The Jerusalem post reported the Israeli government estimated that Iran
+would be able to build an atomic bomb as soon as the year 2008.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_011" task="" length="">
+    <passage>In January 2000, the Central Intelligence Agency concluded that Iran
+might now be able to make a nuclear weapon.</passage>
+    <question/>
+    <hypothesis>A major US intelligence review has projected that Iran is about a decade
+away from manufacturing the key ingredient for a nuclear weapon.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+  <inference id="chris_012" task="" length="">
+    <passage>In January 2000, the Central Intelligence Agency concluded that Iran
+might now be able to make a nuclear weapon.</passage>
+    <question/>
+    <hypothesis>The Jerusalem post reported the Israeli government estimated that Iran
+would be able to build an atomic bomb as soon as the year 2008.</hypothesis>
+    <answer id="1" polarity="true" force="plausible" source="world">
+      <response>don't know</response>
+    </answer>
+  </inference>
+</root>
