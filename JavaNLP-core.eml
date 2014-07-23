@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component LANGUAGE_LEVEL="JDK_1_6" jdk="1.6" jdk_type="JavaSDK">
+<component LANGUAGE_LEVEL="JDK_1_6" inheritJdk="true">
 	<exclude-output/>
-	<contentEntry url="file://$MODULE_DIR$"/>
+	<contentEntry url="file://$MODULE_DIR$">
+		<testFolder url="file://$MODULE_DIR$/test/src"/>
+	</contentEntry>
 	<lib name="ant-contrib-1.0b3.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/ant-contrib-1.0b3-src.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ant-contrib-1.0b3-src.zip!/"/>
@@ -48,10 +50,8 @@
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/junit.jar!/"/>
 	</lib>
 	<lib name="javax.servlet.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/java"/>
-		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/test"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/java"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/test"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.servlet.jar!/"/>
 	</lib>
 	<lib name="AppleJavaExtensions.jar" scope="COMPILE">

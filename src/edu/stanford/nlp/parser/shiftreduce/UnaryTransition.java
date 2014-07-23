@@ -1,6 +1,9 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.util.List;
+
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
@@ -12,14 +15,18 @@ import edu.stanford.nlp.util.TreeShapedStack;
 public class UnaryTransition implements Transition {
   public final String label;
 
-  public UnaryTransition(String label) {
+  /** root transitions are illegal in the middle of the tree, naturally */
+  public final boolean isRoot;
+
+  public UnaryTransition(String label, boolean isRoot) {
     this.label = label;
+    this.isRoot = isRoot;
   }
 
   /**
    * Legal as long as there is at least one item on the state's stack.
    */
-  public boolean isLegal(State state) {
+  public boolean isLegal(State state, List<ParserConstraint> constraints) {
     if (state.finished) {
       return false;
     }
@@ -45,6 +52,12 @@ public class UnaryTransition implements Transition {
         }
       }
     }
+    if (isRoot && (state.stack.size() > 1 || !state.endOfQueue())) {
+      return false;
+    }
+    // UnaryTransition actually doesn't care about the constraints.
+    // If the constraint winds up unsatisfied, we'll get stuck and
+    // have to do an "emergency transition" to fix the situation.
     return true;
   }
 
@@ -107,7 +120,7 @@ public class UnaryTransition implements Transition {
 
   @Override
   public String toString() {
-    return "Unary(" + label + ")";
+    return "Unary" + (isRoot ? "*" : "") + "(" + label + ")";
   }
 
   private static final long serialVersionUID = 1;  

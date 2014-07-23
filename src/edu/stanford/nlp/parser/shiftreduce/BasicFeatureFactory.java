@@ -221,10 +221,32 @@ public class BasicFeatureFactory extends FeatureFactory {
     addUnaryQueueFeatures(features, getCoreLabel(state.sentence.get(right - 1)), nodeName + "Er-");
   }
 
-  @Override
-  public List<String> featurize(State state) {
-    List<String> features = Generics.newArrayList();
+  /** This option also does not seem to help */
+  public void addEdgeFeatures2(List<String> features, State state, String nodeName, Tree node) {
+    if (node == null) {
+      return;
+    }
 
+    int left = ShiftReduceUtils.leftIndex(node);
+    int right = ShiftReduceUtils.rightIndex(node);
+
+    CoreLabel nodeLabel = getCoreLabel(node);
+    String nodeValue = getFeatureFromCoreLabel(nodeLabel, FeatureComponent.VALUE) + "-";
+    CoreLabel leftLabel = getQueueLabel(state, left);
+    CoreLabel rightLabel = getQueueLabel(state, right);
+
+    addUnaryQueueFeatures(features, leftLabel, nodeName + "EL-" + nodeValue);
+    addUnaryQueueFeatures(features, rightLabel, nodeName + "ER-" + nodeValue);
+
+    CoreLabel previousLabel = getQueueLabel(state, left - 1);
+    addUnaryQueueFeatures(features, previousLabel, nodeName + "EP-" + nodeValue);
+
+    CoreLabel nextLabel = getQueueLabel(state, right + 1);
+    addUnaryQueueFeatures(features, nextLabel, nodeName + "EN-" + nodeValue);
+  }
+
+  @Override
+  public List<String> featurize(State state, List<String> features) {
     final TreeShapedStack<Tree> stack = state.stack;
     final List<Tree> sentence = state.sentence;
     final int tokenPosition = state.tokenPosition;

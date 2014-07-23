@@ -6,10 +6,15 @@ import java.util.List;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.TreeShapedStack;
 
 public abstract class FeatureFactory implements Serializable {
-  abstract public List<String> featurize(State state);
+  public List<String> featurize(State state) {
+    return featurize(state, Generics.<String>newArrayList(200));
+  }
+
+  abstract public List<String> featurize(State state, List<String> features);
 
   enum Transition {
     LEFT, RIGHT, UNARY
@@ -147,12 +152,16 @@ public abstract class FeatureFactory implements Serializable {
     return (CoreLabel) node.label();
   }
 
-  public static CoreLabel getQueueLabel(List<Tree> sentence, int tokenPosition, int nodeNum) {
-    if (tokenPosition + nodeNum < 0 || tokenPosition + nodeNum >= sentence.size()) { 
+  public static CoreLabel getQueueLabel(State state, int offset) {
+    return getQueueLabel(state.sentence, state.tokenPosition, offset);
+  }
+
+  public static CoreLabel getQueueLabel(List<Tree> sentence, int tokenPosition, int offset) {
+    if (tokenPosition + offset < 0 || tokenPosition + offset >= sentence.size()) { 
       return null;
     }
 
-    Tree node = sentence.get(tokenPosition + nodeNum);
+    Tree node = sentence.get(tokenPosition + offset);
     if (!(node.label() instanceof CoreLabel)) {
       throw new IllegalArgumentException("Can only featurize CoreLabel trees");
     }
@@ -165,4 +174,6 @@ public abstract class FeatureFactory implements Serializable {
     }
     return (CoreLabel) node.label();
   }  
+
+  private static final long serialVersionUID = -9086427962537286031L;
 }

@@ -97,6 +97,9 @@ public class LexicalizedParserQuery implements ParserQuery {
   @Override
   public List<? extends HasWord> originalSentence() { return originalSentence; }
 
+  /** Keeps track of whether the sentence had punctuation added, which affects the expected length of the sentence */
+  private boolean addedPunct = false;
+
   private boolean saidMemMessage = false;
 
   public boolean saidMemMessage() {
@@ -199,6 +202,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     parseSkipped = false;
     parseFallback = false;
     whatFailed = null;
+    addedPunct = false;
     originalSentence = sentence;
     int length = sentence.size();
     if (length == 0) {
@@ -233,7 +237,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
 
     if (op.testOptions.addMissingFinalPunctuation) {
-      addSentenceFinalPunctIfNeeded(sentenceB, length);
+      addedPunct = addSentenceFinalPunctIfNeeded(sentenceB, length);
     }
     if (length > op.testOptions.maxLength) {
       parseSkipped = true;
@@ -302,14 +306,19 @@ public class LexicalizedParserQuery implements ParserQuery {
       return;
     }
     List<Tree> leaves = tree.getLeaves();
-    if (leaves.size() != originalSentence.size()) {
-      throw new IllegalStateException("originalWords and sentence of different sizes: " + originalSentence.size() + " vs. " + leaves.size() +
+    int expectedSize = addedPunct ? originalSentence.size() + 1 : originalSentence.size();
+    if (leaves.size() != expectedSize) {
+      throw new IllegalStateException("originalWords and sentence of different sizes: " + expectedSize + " vs. " + leaves.size() +
                                       "\n Orig: " + Sentence.listToString(originalSentence) +
                                       "\n Pars: " + Sentence.listToString(leaves));
     }
-    Iterator<? extends Label> wordsIterator = (Iterator<? extends Label>) originalSentence.iterator();
-    for (Tree leaf : leaves) {
-      leaf.setLabel(wordsIterator.next());
+    Iterator<Tree> leafIterator = leaves.iterator();
+    for (HasWord word : originalSentence) {
+      Tree leaf = leafIterator.next();
+      if (!(word instanceof Label)) {
+        continue;
+      }
+      leaf.setLabel((Label) word);
     }
   }
 
@@ -652,7 +661,7 @@ public class LexicalizedParserQuery implements ParserQuery {
    *  @param sentence The sentence to check
    *  @param length The length of the sentence (just to avoid recomputation)
    */
-  void addSentenceFinalPunctIfNeeded(List<HasWord> sentence, int length) {
+  private boolean addSentenceFinalPunctIfNeeded(List<HasWord> sentence, int length) {
     int start = length - 3;
     if (start < 0) start = 0;
     TreebankLanguagePack tlp = op.tlpParams.treebankLanguagePack();
@@ -667,12 +676,12 @@ public class LexicalizedParserQuery implements ParserQuery {
       }
       if (tag != null && ! tag.isEmpty()) {
         if (tlp.isSentenceFinalPunctuationTag(tag)) {
-          return;
+          return false;
         }
       } else {
         String str = item.word();
         if (tlp.isPunctuationWord(str)) {
-          return;
+          return false;
         }
       }
     }
@@ -684,6 +693,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     if (sfpWords.length > 0) {
       sentence.add(new Word(sfpWords[0]));
     }
+    return true;
   }
 
 }

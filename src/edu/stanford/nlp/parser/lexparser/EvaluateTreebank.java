@@ -31,6 +31,7 @@ import edu.stanford.nlp.parser.metrics.FilteredEval;
 import edu.stanford.nlp.parser.metrics.LeafAncestorEval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.parser.metrics.TaggingEval;
+import edu.stanford.nlp.parser.metrics.TopMatchEval;
 import edu.stanford.nlp.parser.metrics.UnlabeledAttachmentEval;
 import edu.stanford.nlp.trees.LeftHeadFinder;
 import edu.stanford.nlp.trees.Tree;
@@ -39,6 +40,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
@@ -56,7 +58,7 @@ public class EvaluateTreebank {
 
   // private final Lexicon lex;
 
-  List<Eval> extraEvals = null;
+  List<Eval> evals = null;
   List<ParserQueryEval> parserQueryEvals = null;
 
   private final boolean summary;
@@ -117,7 +119,8 @@ public class EvaluateTreebank {
     this.debinarizer = new Debinarizer(op.forceCNF);
     this.subcategoryStripper = op.tlpParams.subcategoryStripper();
 
-    this.extraEvals = pqFactory.getExtraEvals();
+    this.evals = Generics.newArrayList();
+    evals.addAll(pqFactory.getExtraEvals());
     this.parserQueryEvals = pqFactory.getParserQueryEvals();
 
     // this.lex = lex;
@@ -201,6 +204,9 @@ public class EvaluateTreebank {
     }
     if (Boolean.parseBoolean(op.testOptions.evals.getProperty("factLL"))) {
       factLL = new AbstractEval.ScoreEval("factLL", runningAverages);
+    }
+    if (Boolean.parseBoolean(op.testOptions.evals.getProperty("topMatch"))) {
+      evals.add(new TopMatchEval("topMatch", runningAverages));
     }
     // this one is for the various k Good/Best options.  Just for individual results
     kGoodLB = new Evalb("kGood LP/LR", false);
@@ -547,10 +553,8 @@ public class EvaluateTreebank {
         if (factCB != null) {
           factCB.evaluate(treeFact, transGoldTree, pwErr);
         }
-        if (extraEvals != null) {
-          for (Eval eval : extraEvals) {
-            eval.evaluate(treeFact, transGoldTree, pwErr);
-          }
+        for (Eval eval : evals) {
+          eval.evaluate(treeFact, transGoldTree, pwErr);
         }
         if (parserQueryEvals != null) {
           for (ParserQueryEval eval : parserQueryEvals) {
@@ -677,10 +681,8 @@ public class EvaluateTreebank {
       if (factTA != null) factTA.display(false, pwErr);
       if (factLL != null && pq.getFactoredParser() != null) factLL.display(false, pwErr);
       if (pcfgCatE != null) pcfgCatE.display(false, pwErr);
-      if (extraEvals != null) {
-        for (Eval eval : extraEvals) {
-          eval.display(false, pwErr);
-        }
+      for (Eval eval : evals) {
+        eval.display(false, pwErr);
       }
       for (BestOfTopKEval eval : topKEvals) {
         eval.display(false, pwErr);

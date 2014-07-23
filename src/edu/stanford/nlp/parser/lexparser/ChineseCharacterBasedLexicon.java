@@ -10,6 +10,7 @@ import edu.stanford.nlp.stats.Distribution;
 import edu.stanford.nlp.stats.GeneralizedCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Timing;
@@ -51,7 +52,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
   // We need to make two passes over the data, whereas the calling
   // routines only pass in the sentences or trees once, so we keep all
   // the sentences and then process them at the end
-  transient private List<List<TaggedWord>> trainingSentences;
+  private transient List<List<TaggedWord>> trainingSentences;
 
   @Override
   public void initializeTraining(double numTrees) {
@@ -207,10 +208,9 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     charDistributions.put(Collections.EMPTY_LIST, prior);
 
     for (int i = 0; i <= CONTEXT_LENGTH; i++) {
-      Set counterEntries = POSspecificCharNGrams[i].lowestLevelCounterEntrySet();
+      Set<Map.Entry<List<Serializable>, ClassicCounter<Symbol>>> counterEntries = POSspecificCharNGrams[i].lowestLevelCounterEntrySet();
       Timing.tick("Creating " + counterEntries.size() + " character " + (i + 1) + "-gram distributions...");
-      for (Iterator it = counterEntries.iterator(); it.hasNext();) {
-        Map.Entry<List,ClassicCounter> entry = (Map.Entry<List,ClassicCounter>) it.next();
+      for (Map.Entry<List<Serializable>, ClassicCounter<Symbol>> entry : counterEntries) {
         context = entry.getKey();
         ClassicCounter<Symbol> c = entry.getValue();
         Distribution<Symbol> thisPrior = charDistributions.get(context.subList(0, context.size() - 1));
@@ -412,6 +412,17 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
   public boolean isKnown(String word) {
     throw new UnsupportedOperationException();
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
+    Set<String> tagSet = new HashSet<String>();
+    for (String tag : tagIndex.objectsList()) {
+      tagSet.add(basicCategoryFunction.apply(tag));
+    }
+    return tagSet;
+  }
+
 
   static class Symbol implements Serializable {
     private static final int UNKNOWN_TYPE = 0;

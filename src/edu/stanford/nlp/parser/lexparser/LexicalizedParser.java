@@ -27,7 +27,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
@@ -35,6 +34,7 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
@@ -88,7 +88,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser extends ParserGrammar implements Function<List<? extends HasWord>, Tree>, Serializable {
+public class LexicalizedParser extends ParserGrammar implements Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -112,6 +112,11 @@ public class LexicalizedParser extends ParserGrammar implements Function<List<? 
   @Override
   public String[] defaultCoreNLPFlags() {
     return getTLPParams().defaultCoreNLPFlags();
+  }
+
+  @Override
+  public boolean requiresTags() {
+    return false;
   }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
@@ -329,16 +334,7 @@ public class LexicalizedParser extends ParserGrammar implements Function<List<? 
       System.err.println("Recovering using fall through strategy: will construct an (X ...) tree.");
     }
     // if can't parse or exception, fall through
-    // TODO: merge with ParserAnnotatorUtils
-    TreeFactory lstf = new LabeledScoredTreeFactory();
-    List<Tree> lst2 = new ArrayList<Tree>();
-    for (HasWord obj : lst) {
-      String s = obj.word();
-      Tree t = lstf.newLeaf(s);
-      Tree t2 = lstf.newTreeNode("X", Collections.singletonList(t));
-      lst2.add(t2);
-    }
-    return lstf.newTreeNode("X", lst2);
+    return ParserUtils.xTree(lst);
   }
 
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {
@@ -1253,18 +1249,12 @@ public class LexicalizedParser extends ParserGrammar implements Function<List<? 
         treebankPath = treebankDescription.first();
         trainFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-train2")) {
-        // TODO: we could use the fully expressive -train options if
-        // we add some mechanism for returning leftover options from
-        // ArgUtils.getTreebankDescription
         // train = true;     // cdm july 2005: should require -train for this
-        int numSubArgs = ArgUtils.numSubArgs(args, argIndex);
-        argIndex++;
-        if (numSubArgs < 2) {
-          throw new RuntimeException("Error: -train2 <treebankPath> [<ranges>] <weight>.");
-        }
-        secondaryTreebankPath = args[argIndex++];
-        secondaryTrainFilter = (numSubArgs == 3) ? new NumberRangesFileFilter(args[argIndex++], true) : null;
-        secondaryTreebankWeight = Double.parseDouble(args[argIndex++]);
+        Triple<String, FileFilter, Double> treebankDescription = ArgUtils.getWeightedTreebankDescription(args, argIndex, "-train2");
+        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
+        secondaryTreebankPath = treebankDescription.first();
+        secondaryTrainFilter = treebankDescription.second();
+        secondaryTreebankWeight = treebankDescription.third();
       } else if (args[argIndex].equalsIgnoreCase("-tLPP") && (argIndex + 1 < args.length)) {
         try {
           op.tlpParams = (TreebankLangParserParams) Class.forName(args[argIndex + 1]).newInstance();

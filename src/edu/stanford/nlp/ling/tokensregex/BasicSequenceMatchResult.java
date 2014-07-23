@@ -22,6 +22,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
   Function<List<? extends T>, String> nodesToStringConverter;
   SequencePattern.VarGroupBindings varGroupBindings;
   double score = 0.0;
+  double priority = 0.0;
   int order;
 
   public List<? extends T> elements() { return elements; }
@@ -45,6 +46,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
     res.matchedGroups = new MatchedGroup[matchedGroups.length];
     res.nodesToStringConverter = nodesToStringConverter;
     res.score = score;
+    res.priority = priority;
     res.order = order;
     res.varGroupBindings = varGroupBindings;
     for (int i = 0; i < matchedGroups.length; i++ ) {
@@ -69,6 +71,10 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
 
   public void setOrder(int order) {
     this.order = order;
+  }
+
+  public double priority() {
+    return priority;
   }
 
   public double score() {

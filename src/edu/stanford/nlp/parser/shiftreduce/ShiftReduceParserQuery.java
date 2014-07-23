@@ -35,6 +35,8 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   final ShiftReduceParser parser;
 
+  List<ParserConstraint> constraints = null;
+
   public ShiftReduceParserQuery(ShiftReduceParser parser) {
     this.parser = parser;
   }
@@ -69,7 +71,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       State bestState = null;
       for (State state : oldBeam) {
         List<String> features = parser.featureFactory.featurize(state);
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
           Transition transition = parser.transitionIndex.get(predictedTransition.object());
@@ -84,6 +86,28 @@ public class ShiftReduceParserQuery implements ParserQuery {
           }
         }
       }
+      if (beam.size() == 0) {
+        // Oops, time for some fallback plan
+        // This can happen with the set of constraints given by the original paper
+        // For example, one particular French model had a situation where it would reach
+        //   @Ssub @Ssub .
+        // without a left(Ssub) transition, so finishing the parse was impossible.
+        // This will probably result in a bad parse, but at least it
+        // will result in some sort of parse.
+        for (State state : oldBeam) {
+          Transition transition = parser.findEmergencyTransition(state, constraints);
+          if (transition != null) {
+            State newState = transition.apply(state);
+            if (bestState == null || bestState.score() < newState.score()) {
+              bestState = newState;
+            }
+            beam.add(newState);
+          }
+        }
+      }
+
+      // bestState == null only happens when we have failed to make progress, so quit
+      // If the bestState is finished, we are done
       if (bestState == null || bestState.isFinished()) {
         break;
       }
@@ -91,7 +115,11 @@ public class ShiftReduceParserQuery implements ParserQuery {
     if (beam.size() == 0) {
       success = false;
       unparsable = true;
+      debinarized = null;
+      finalState = null;
+      bestParses = Collections.emptyList();
     } else {
+      // TODO: filter out beam elements that aren't finished
       bestParses = Generics.newArrayList(beam);
       Collections.sort(bestParses, beam.comparator());
       Collections.reverse(bestParses);
@@ -188,8 +216,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   @Override
   public void setConstraints(List<ParserConstraint> constraints) {
-    // TODO
-    throw new UnsupportedOperationException("Unable to set constraints on the shift reduce parser (yet)");
+    this.constraints = constraints;
   }
 
   @Override
