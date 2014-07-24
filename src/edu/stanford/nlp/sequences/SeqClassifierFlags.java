@@ -1021,10 +1021,16 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean useRandomSeed = false;
   public boolean terminateOnAvgImprovement = false;
+
+  public boolean strictGoodCoNLL = false;
+  public boolean removeStrictGoodCoNLLDuplicates = false;
+
   // "ADD VARIABLES ABOVE HERE"
+
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
+
 
   public SeqClassifierFlags() {
   }
@@ -1149,6 +1155,7 @@ public class SeqClassifierFlags implements Serializable {
           useBoundarySequences = true;
           useLemmas = true; // no-op except for German
           usePrevNextLemmas = true; // no-op except for German
+          strictGoodCoNLL = true; // don't add some CpC features added later
           inputEncoding = "iso-8859-1"; // needed for CoNLL German and Spanish files
           // optimization
           useQN = true;
@@ -2525,6 +2532,10 @@ public class SeqClassifierFlags implements Serializable {
         useRandomSeed = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("terminateOnAvgImprovement")){
         terminateOnAvgImprovement = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("strictGoodCoNLL")) {
+        strictGoodCoNLL = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("removeStrictGoodCoNLLDuplicates")) {
+        removeStrictGoodCoNLLDuplicates = Boolean.parseBoolean(val);
 
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {
