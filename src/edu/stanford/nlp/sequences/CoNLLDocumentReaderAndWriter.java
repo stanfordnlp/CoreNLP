@@ -351,11 +351,12 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
       if (word == BOUNDARY) { // Using == is okay, because it is set to constant
         out.println();
       } else {
-        String gold = fl.getString(CoreAnnotations.OriginalAnswerAnnotation.class);
+        String gold = fl.get(CoreAnnotations.OriginalAnswerAnnotation.class);
+        if(gold == null) gold = "";
         String guess = fl.get(CoreAnnotations.AnswerAnnotation.class);
-        // System.err.println(word + "\t" + gold + "\t" + guess));
-        String pos = fl.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
-        String chunk = fl.getString(CoreAnnotations.ChunkAnnotation.class);
+        // System.err.println(fl.word() + "\t" + fl.get(CoreAnnotations.AnswerAnnotation.class) + "\t" + fl.get(CoreAnnotations.AnswerAnnotation.class));
+        String pos = fl.tag();
+        String chunk = (fl.get(CoreAnnotations.ChunkAnnotation.class) == null ? "" : fl.get(CoreAnnotations.ChunkAnnotation.class));
         out.println(fl.word() + '\t' + pos + '\t' + chunk + '\t' +
                     gold + '\t' + guess);
       }
@@ -391,14 +392,14 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
           ansPrefix = bits[0];
         }
         numTokens++;
-        if ( ! ansBase.equals("O")) {
-          if (ansBase.equals(lastAnsBase)) {
-            if (ansPrefix.equals("B")) {
-              numEntities++;
-            }
-          } else {
+        if (ansBase.equals("O")) {
+           // don't need to do anything
+        } else if (ansBase.equals(lastAnsBase)) {
+          if (ansPrefix.equals("B")) {
             numEntities++;
           }
+        } else {
+          numEntities++;
         }
       }
     }

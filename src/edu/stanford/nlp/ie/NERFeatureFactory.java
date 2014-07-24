@@ -1703,26 +1703,18 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (flags.useSequences && flags.usePrevSequences) {
           featuresCpC.add("PSEQ");
           featuresCpC.add(cWord + "-PSEQW");
+          featuresCpC.add(pWord+ '-' +cWord + "-PSEQW2");
 
-          if ( ! flags.strictGoodCoNLL) {
-            featuresCpC.add(pWord+ '-' +cWord + "-PSEQW2");  // added later after goodCoNLL
-            featuresCpC.add(pWord + "-PSEQpW"); // added later after goodCoNLL
-          }
+          featuresCpC.add(pWord + "-PSEQpW");
 
-          if (true) { // TODO [cdm Jul 2014]: should really be if (flags.useDistSim) but fixing current itest....
-            featuresCpC.add(pDS + "-PSEQpDS");
-            featuresCpC.add(cDS + "-PSEQcDS");
-            featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");
-          }
+          featuresCpC.add(pDS + "-PSEQpDS");
+          featuresCpC.add(cDS + "-PSEQcDS");
+          featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");
 
           if (((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings)) {
-            if ( ! flags.strictGoodCoNLL) {     // These ones were added later after goodCoNLL
-              featuresCpC.add(pShape + "-PSEQpS");
-              featuresCpC.add(cShape + "-PSEQcS");
-            }
-            if (flags.strictGoodCoNLL && ! flags.removeStrictGoodCoNLLDuplicates) {
-              featuresCpC.add(pShape + '-' + cShape + "-PSEQpcS"); // Duplicate (in goodCoNLL orig, see -TYPES below)
-            }
+            featuresCpC.add(pShape + "-PSEQpS");
+            featuresCpC.add(cShape + "-PSEQcS");
+            featuresCpC.add(pShape+ '-' +cShape + "-PSEQpcS");
           }
         }
       }
@@ -1734,7 +1726,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
           featuresCpC.add(pShape + '-' + cShape + '-' + n.get(CoreAnnotations.ShapeAnnotation.class) + "-PCNSHAPES");
         }
         if (flags.useTypeSeqs2) {
-          featuresCpC.add(pShape + '-' + cShape + "-TYPES");  // this duplicates PSEQpcS above
+          featuresCpC.add(pShape + '-' + cShape + "-TYPES");
         }
 
         if (flags.useYetMoreCpCShapes) {
@@ -1968,8 +1960,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
     if (flags.useInternal && flags.useExternal) {
 
-      if (flags.strictGoodCoNLL && ! flags.removeStrictGoodCoNLLDuplicates && flags.useTypeySequences && flags.maxLeft >= 2) {
-        // this feature duplicates -TYPETYPES below, so probably don't include it, but it was in original tests of CMM goodCoNLL
+      if (false && flags.useTypeySequences && flags.maxLeft >= 2) {  // this feature duplicates -TYPETYPES one below, so don't include it (hurts to duplicate)!!!
         featuresCpCp2C.add(p2.get(CoreAnnotations.ShapeAnnotation.class) + '-' + p.get(CoreAnnotations.ShapeAnnotation.class) + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-TTPS");
       }
 
