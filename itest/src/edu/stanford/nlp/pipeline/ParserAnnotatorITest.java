@@ -191,13 +191,15 @@ public class ParserAnnotatorITest extends TestCase {
    * parser annotator adds output in the right order.
    */
   public void testThreadedTimeout() {
-    Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
-    threaded3TimeoutPipeline.annotate(document);
-    verifyAnswers(document, XPARSES);
+    for (int i = 0; i < 20; ++i) {
+      Annotation document = new Annotation(TEXT + TEXT);
+      threaded3TimeoutPipeline.annotate(document);
+      verifyAnswers(document, XPARSES);
 
-    document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
-    threaded4TimeoutPipeline.annotate(document);
-    verifyAnswers(document, XPARSES);
+      document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+      threaded4TimeoutPipeline.annotate(document);
+      verifyAnswers(document, XPARSES);
+    }
   }
 
 
@@ -243,6 +245,7 @@ public class ParserAnnotatorITest extends TestCase {
     int i = 0;
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      assertFalse("Sentence " + i + " was null", parse == null);
       assertEquals(expected[i++ % expected.length], parse.toString());
     } 
   }
