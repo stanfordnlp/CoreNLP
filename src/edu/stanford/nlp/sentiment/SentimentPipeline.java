@@ -38,8 +38,11 @@ import edu.stanford.nlp.util.Generics;
  * <code>-parserModel</code> Which parser model to use, defaults to englishPCFG.ser.gz <br>
  * <code>-sentimentModel</code> Which sentiment model to use, defaults to sentiment.ser.gz <br>
  * <code>-file</code> Which file to process. <br>
+ * <code>-fileList</code> A comma separated list of files to process. <br>
  * <code>-stdin</code> Read one line at a time from stdin. <br>
- * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  Defaults to printing just the root. <br>
+ * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
+ * <code>-filterUnknown</code> remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
+ * <code>-help</code> Print out help <br>
  *
  * @author John Bauer
  */
