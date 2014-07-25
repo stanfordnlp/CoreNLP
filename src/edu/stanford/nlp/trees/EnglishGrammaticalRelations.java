@@ -30,6 +30,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,7 +117,7 @@ public class EnglishGrammaticalRelations {
   // TODO: remove everything but "to be".  Must do this carefully to
   // make sure we like all the dependency changes that happen
   static final String copularWordRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|stay|stays|stayed|remain|remains|remained|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
+    "/^(?i:" + StringUtils.join(SemanticHeadFinder.copulaVerbs, "|") + ")$/";
   static final String clausalComplementRegex =
     "/^(?i:seem|seems|seemed|seeming|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
   private static final String passiveAuxWordRegex =
