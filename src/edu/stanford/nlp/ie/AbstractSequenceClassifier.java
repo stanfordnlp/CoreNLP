@@ -1052,18 +1052,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
             IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), readerWriter);
   }
 
-  /** Does nothing by default.  Children classes can override if necessary */
-  public void dumpFeatures(Collection<List<IN>> documents) {}
-
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
                                       DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
-    if (flags.exportFeatures != null) {
-      dumpFeatures(documents);
-    }
-
     Timing timer = new Timing();
 
     Counter<String> entityTP = new ClassicCounter<String>();
