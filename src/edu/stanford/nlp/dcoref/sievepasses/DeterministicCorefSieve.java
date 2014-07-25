@@ -477,8 +477,8 @@ public abstract class DeterministicCorefSieve  {
     if (sameSentence) {
       Tree tree = m1.contextParseTree;
       Tree current = m1.mentionSubTree;
-      while (true) {
-        current = current.ancestor(1, tree);
+      current = current.parent(tree);
+      while (current != null) {
         if (current.label().value().startsWith("S")) {
           for (Mention m : l) {
             if (!sorted.contains(m) && current.dominates(m.mentionSubTree)) {
@@ -486,7 +486,7 @@ public abstract class DeterministicCorefSieve  {
             }
           }
         }
-        if (current.label().value().equals("ROOT") || current.ancestor(1, tree)==null) break;
+        current = current.parent(tree);
       }
       if (SieveCoreferenceSystem.logger.isLoggable(Level.FINEST)) {
         if (l.size()!=sorted.size()) {
