@@ -1747,7 +1747,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.useTypeySequences) {
         featuresCpC.add(cShape + "-TPS2");
         featuresCpC.add(n.get(CoreAnnotations.ShapeAnnotation.class) + "-TNS1");
-        // featuresCpC.add(pShape) + "-" + cShape) + "-TPS"); // duplicates -TYPES, so now omitted; you may need to slightly increase sigma to duplicate previous results, however.
+        // featuresCpC.add(pShape) + "-" + cShape) + "-TPS"); // duplicates -TYPES, so now omitted; you may need to slighly increase sigma to duplicate previous results, however.
       }
 
       if (flags.useTaggySequences) {
