@@ -776,7 +776,7 @@ public class EnglishGrammaticalRelations {
           "ADJP < (S=target <, (VP <, TO))",
           "VP < (S=target !$- (NN < order) < (NP $+ NP|ADJP))",
           // to find "help sustain ...
-          "VP <# (/^(?:VB|AUX)/ $+ (VP=target < VB|VBG))",
+          "VP < (/^(?:VB|AUX)/ $+ (VP=target < VB < NP))",
           "VP < (SBAR=target < (S !$- (NN < order) < (VP < TO))) !> (VP < (VB|AUX < be)) ",
           "VP < (S=target !$- (NN < order) <: NP) > VP",
           "VP < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) $-- (/^VB/ < " + copularWordRegex + " )",

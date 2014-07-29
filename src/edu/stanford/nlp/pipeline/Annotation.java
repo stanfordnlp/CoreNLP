@@ -96,8 +96,8 @@ public class Annotation extends ArrayCoreMap {
     for (CoreMap sentence : sentences) {
       List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       tokens.addAll(sentenceTokens);
-      if (sentence.containsKey(CoreAnnotations.TextAnnotation.class)) {
-        text.append(sentence.get(CoreAnnotations.TextAnnotation.class));
+      if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
+        text.append(sentence.get(CoreAnnotations.TokensAnnotation.class));
       } else {
         // If there is no text in the sentence, fake it as best as we can
         if (text.length() > 0) {

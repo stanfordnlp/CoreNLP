@@ -286,5 +286,15 @@ public class SimpleTensor implements Serializable {
     }
   }
 
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder();
+    for (int slice = 0; slice < numSlices; ++slice) {
+      result.append("Slice " + slice + "\n");
+      result.append(slices[slice]);
+    }
+    return result.toString();
+  }
+
   private static final long serialVersionUID = 1;
 }
