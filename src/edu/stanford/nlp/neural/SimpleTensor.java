@@ -18,7 +18,7 @@ import org.ejml.simple.SimpleMatrix;
  * @author Richard Socher
  */
 public class SimpleTensor implements Serializable {
-  private SimpleMatrix[] slices;
+  private final SimpleMatrix[] slices;
 
   final int numRows;
   final int numCols;
