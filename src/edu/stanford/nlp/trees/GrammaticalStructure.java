@@ -551,7 +551,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * Get a list of GrammaticalRelation between gov and dep. Useful for getting extra dependencies, in which
    * two nodes can be linked by multiple arcs.
    */
-  public static List<GrammaticalRelation> getListGrammaticalRelation(TreeGraphNode gov, TreeGraphNode dep) {
+  private static List<GrammaticalRelation> getListGrammaticalRelation(TreeGraphNode gov, TreeGraphNode dep) {
     List<GrammaticalRelation> list = new ArrayList<GrammaticalRelation>();
     TreeGraphNode govH = gov.highestNodeWithSameHead();
     TreeGraphNode depH = dep.highestNodeWithSameHead();
@@ -761,44 +761,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     // do nothing as default operation
   }
 
-
-  /**
-   * Returns the dependency path as a list of String, from node to root, it is assumed that
-   * that root is an ancestor of node
-   *
-   * @return A list of dependency labels
-   */
-  public List<String> getDependencyPath(int nodeIndex, int rootIndex) {
-    TreeGraphNode node = getNodeByIndex(nodeIndex);
-    TreeGraphNode rootTree = getNodeByIndex(rootIndex);
-    return getDependencyPath(node, rootTree);
-  }
-
-  /**
-   * Returns the dependency path as a list of String, from node to root, it is assumed that
-   * that root is an ancestor of node
-   *
-   * @param node Note to return path from
-   * @param root The root of the tree, an ancestor of node
-   * @return A list of dependency labels
-   */
-  // used only by unused method above.
-  private static List<String> getDependencyPath(TreeGraphNode node, TreeGraphNode root) {
-    List<String> path = new ArrayList<String>();
-    while (!node.equals(root)) {
-      TreeGraphNode gov = node.getGovernor();
-      // System.out.println("Governor for \"" + node.value() + "\": \"" + gov.value() + "\"");
-      List<GrammaticalRelation> relations = getListGrammaticalRelation(gov, node);
-      StringBuilder sb = new StringBuilder();
-      for (GrammaticalRelation relation : relations) {
-        //if (!arcLabel.equals(GOVERNOR))
-        sb.append((sb.length() == 0 ? "" : "+")).append(relation.toString());
-      }
-      path.add(sb.toString());
-      node = gov;
-    }
-    return path;
-  }
 
   /**
    * Returns all the dependencies of a certain node.
