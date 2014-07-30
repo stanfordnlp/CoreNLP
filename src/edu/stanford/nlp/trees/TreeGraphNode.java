@@ -429,29 +429,6 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   /**
-   * Returns the label of a single arc between this node and <code>destNode</code>,
-   * or <code>null</code> if no such arc exists.  If more than one
-   * such arc exists, this method will return an arbitrary arc label
-   * from among them; if this is a possibility, you might want to
-   * use {@link TreeGraphNode#arcLabelsToNode
-   * <code>arcLabelsToNode</code>} instead.
-   *
-   * @param destNode the destination node
-   * @return the <code>Object</code> which
-   *         labels one arc between this node and <code>destNode</code>
-   */
-  public Class<? extends GrammaticalRelationAnnotation> arcLabelToNode(TreeGraphNode destNode) {
-    Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = arcLabelsToNode(destNode);
-    if (arcLabels == null) {
-      return null;
-    }
-    if (arcLabels.size() == 0) {
-      return null;
-    }
-    return arcLabels.iterator().next();
-  }
-
-  /**
    * Tries to return a leaf (terminal) node which is the {@link
    * GrammaticalRelation#GOVERNOR
    * <code>GOVERNOR</code>} of the given node <code>t</code>.
