@@ -318,7 +318,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
     for (TreeGraphNode gov : basicGraph.getAllVertices()) {
       for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
-        GrammaticalRelation reln = getGrammaticalRelation(gov, dep, basicGraph.getEdges(gov, dep));
+        GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov, dep, basicGraph.getEdges(gov, dep));
         // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
         basicDep.add(new TypedDependency(reln, gov.headWordNode(), dep.headWordNode()));
       }
@@ -489,31 +489,23 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * Get GrammaticalRelation between gov and dep, and null if gov is not the
    * governor of dep
    */
-  public static GrammaticalRelation getGrammaticalRelation(TreeGraphNode gov, TreeGraphNode dep) {
-    TreeGraphNode govH = gov.highestNodeWithSameHead();
-    TreeGraphNode depH = dep.highestNodeWithSameHead();
-    // System.err.println("  gov node " + gov);
-    // System.err.println("  govH " + govH);
-    // System.err.println("  dep node " + dep);
-    // System.err.println("  depH " + depH);
-
+  public GrammaticalRelation getGrammaticalRelation(TreeGraphNode gov, TreeGraphNode dep) {
     List<GrammaticalRelation> labels = Generics.newArrayList();
-    for (Class<? extends GrammaticalRelationAnnotation> arcLabel : govH.arcLabelsToNode(depH)) {
-      if (arcLabel == null) {
-        continue;
-      }
-      try {
-        GrammaticalRelation reln = GrammaticalRelation.getRelation(arcLabel);
-        labels.add(reln);
-      } catch (Exception e) {
-        continue;
+    for (TypedDependency dependency : typedDependencies(true)) {
+      if (dependency.gov() == gov && dependency.dep() == dep) {
+        labels.add(dependency.reln());
       }
     }
 
-    return getGrammaticalRelation(govH, depH, labels);
+    return getGrammaticalRelationCommonAncestor(gov, dep, labels);
   }
 
-  public static GrammaticalRelation getGrammaticalRelation(TreeGraphNode govH, TreeGraphNode depH, List<GrammaticalRelation> labels) {
+  /**
+   * Returns the GrammaticalRelation which is the highest common
+   * ancestor of the list of relations passed in.  The TreeGraphNodes
+   * are passed in only for debugging reasons.
+   */
+  private static GrammaticalRelation getGrammaticalRelationCommonAncestor(TreeGraphNode govH, TreeGraphNode depH, List<GrammaticalRelation> labels) {
     GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
 
     List<GrammaticalRelation> sortedLabels;
