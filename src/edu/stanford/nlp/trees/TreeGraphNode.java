@@ -366,43 +366,6 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   /**
-   * Returns the <code>Set</code> of <code>TreeGraphNode</code>s to
-   * which there exist arcs bearing the specified label from this
-   * node, or <code>null</code> if no such nodes exist.
-   *
-   * @param arcLabel the <code>Object</code> which labels the
-   *                 arc(s) to be followed.
-   * @return a <code>Set</code> containing only and all the
-   *         <code>TreeGraphNode</code>s to which there exist arcs bearing
-   *         the specified label from this node.
-   */
-  public Set<TreeGraphNode> followArcToSet(Class<? extends GrammaticalRelationAnnotation> arcLabel) {
-    return label().get(arcLabel);
-  }
-
-  /**
-   * Returns a single <code>TreeGraphNode</code> to which there
-   * exists an arc bearing the specified label from this node, or
-   * <code>null</code> if no such node exists.  If more than one
-   * such node exists, this method will return an arbitrary node
-   * from among them; if this is a possibility, you might want to
-   * use {@link TreeGraphNode#followArcToSet
-   * <code>followArcToSet</code>} instead.
-   *
-   * @param arcLabel a <code>Object</code> containing the label of
-   *                 the arc(s) to be followed
-   * @return a <code>TreeGraphNode</code> to which there exists an
-   *         arc bearing the specified label from this node
-   */
-  private TreeGraphNode followArcToNode(Class<? extends GrammaticalRelationAnnotation> arcLabel) {
-    Set<TreeGraphNode> valueSet = followArcToSet(arcLabel);
-    if (valueSet == null) {
-      return null;
-    }
-    return valueSet.iterator().next();
-  }
-
-  /**
    * Finds all arcs between this node and <code>destNode</code>,
    * and returns the <code>Set</code> of <code>Object</code>s which
    * label those arcs.  If no such arcs exist, returns an empty
@@ -426,10 +389,6 @@ public class TreeGraphNode extends Tree implements HasParent {
       }
     }
     return arcLabels;
-  }
-
-  public TreeGraphNode getNodeInRelation(GrammaticalRelation r) {
-    return followArcToNode(GrammaticalRelation.getAnnotationClass(r));
   }
 
   /**
