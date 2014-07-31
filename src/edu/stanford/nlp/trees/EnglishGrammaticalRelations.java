@@ -1645,19 +1645,6 @@ public class EnglishGrammaticalRelations {
 
 
   /**
-   * The "controlling subject" grammatical relation.<p>
-   * A controlling subject is the relation between the head of an xcomp and the external subject
-   * of that clause.
-   * <p/>
-   * Example: <br/>
-   * "Tom likes to eat fish" &rarr;
-   * <code>xsubj</code>(eat, Tom)
-   */
-  public static final GrammaticalRelation CONTROLLING_SUBJECT =
-    new GrammaticalRelation(Language.English, "xsubj", "controlling subject", SEMANTIC_DEPENDENT);
-
-
-  /**
    * The "agent" grammatical relation. The agent of a passive VP
    * is the complement introduced by "by" and doing the action.<p>
    * <p/>
@@ -1732,7 +1719,6 @@ public class EnglishGrammaticalRelations {
       PREPOSITIONAL_MODIFIER,
       PHRASAL_VERB_PARTICLE,
       SEMANTIC_DEPENDENT,
-      CONTROLLING_SUBJECT,
       AGENT,
       NUMBER_MODIFIER,
       QUANTIFIER_MODIFIER,
