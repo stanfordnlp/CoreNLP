@@ -117,28 +117,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   private static final Filter<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
 
 
-  /**
-   * Tries to return a node representing the <code>SUBJECT</code> (whether
-   * nominal or clausal) of the given node <code>t</code>. Probably, node
-   * <code>t</code> should represent a clause or verb phrase.
-   *
-   * @param t A node in this <code>GrammaticalStructure</code>
-   * @return A node which is the subject of node <code>t</code>, or else
-   *         <code>null</code>
-   */
-  public static TreeGraphNode getSubject(TreeGraphNode t) {
-    TreeGraphNode subj = t.getNodeInRelation(NOMINAL_SUBJECT);
-    if (subj != null) {
-      return subj;
-    }
-    subj = t.getNodeInRelation(CLAUSAL_SUBJECT);
-    if (subj != null) {
-      return subj;
-    } else {
-      return t.getNodeInRelation(NOMINAL_PASSIVE_SUBJECT);
-    }
-  }
-
   @Override
   protected void correctDependencies(Collection<TypedDependency> list) {
     if (DEBUG) {
