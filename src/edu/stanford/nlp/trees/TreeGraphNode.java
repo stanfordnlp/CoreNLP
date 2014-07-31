@@ -394,7 +394,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return a <code>TreeGraphNode</code> to which there exists an
    *         arc bearing the specified label from this node
    */
-  public TreeGraphNode followArcToNode(Class<? extends GrammaticalRelationAnnotation> arcLabel) {
+  private TreeGraphNode followArcToNode(Class<? extends GrammaticalRelationAnnotation> arcLabel) {
     Set<TreeGraphNode> valueSet = followArcToSet(arcLabel);
     if (valueSet == null) {
       return null;
@@ -438,7 +438,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return a node which is the governor for node
    *         <code>t</code>, or else <code>null</code>
    */
-  public TreeGraphNode getGovernor() {
+  private TreeGraphNode getGovernor() {
     return getNodeInRelation(GOVERNOR);
   }
 
