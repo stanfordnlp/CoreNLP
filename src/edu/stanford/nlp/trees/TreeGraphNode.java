@@ -10,7 +10,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
-import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
@@ -338,57 +337,6 @@ public class TreeGraphNode extends Tree implements HasParent {
     for (TreeGraphNode child : children) {
       child.setTreeGraph(tg);
     }
-  }
-
-  /**
-   * Add a labeled arc from this node to the argument node.
-   *
-   * @param arcLabel the <code>Class&lt;? extends GrammaticalRelationAnnotation&gt;</code> with which the new arc
-   *                 is to be labeled.
-   * @param node     the <code>TreeGraphNode</code> to which the new
-   *                 arc should point.
-   * @return <code>true</code> iff the arc did not already exist.
-   */
-  @SuppressWarnings("unchecked")
-  <GR extends GrammaticalRelationAnnotation> boolean addArc(Class<GR> arcLabel, TreeGraphNode node) {
-    if (node == null) {
-      return false;
-    }
-    if (!treeGraph().equals(node.treeGraph())) {
-      System.err.println("Warning: you are trying to add an arc from node " + this + " to node " + node + ", but they do not belong to the same TreeGraph!");
-    }
-    Set<TreeGraphNode> collection = label.get(arcLabel);
-    if (collection == null) {
-      collection = Generics.<TreeGraphNode>newHashSet();
-      label.set(arcLabel, collection);
-    }
-    return collection.add(node);
-  }
-
-  /**
-   * Finds all arcs between this node and <code>destNode</code>,
-   * and returns the <code>Set</code> of <code>Object</code>s which
-   * label those arcs.  If no such arcs exist, returns an empty
-   * <code>Set</code>.
-   *
-   * @param destNode the destination node
-   * @return the <code>Set</code> of <code>Object</code>s which
-   *         label arcs between this node and <code>destNode</code>
-   */
-  Set<Class<? extends GrammaticalRelationAnnotation>> arcLabelsToNode(TreeGraphNode destNode) {
-    Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = Generics.newHashSet();
-    CoreLabel cl = label();
-    for (Class key : cl.keySet()) {
-      if (key == null || !GrammaticalRelationAnnotation.class.isAssignableFrom(key)) {
-        continue;
-      }
-      Class<? extends GrammaticalRelationAnnotation> typedKey = ErasureUtils.uncheckedCast(key);
-      Set<TreeGraphNode> val = cl.get(typedKey);
-      if (val != null && val.contains(destNode)) {
-        arcLabels.add(typedKey);
-      }
-    }
-    return arcLabels;
   }
 
   /**
