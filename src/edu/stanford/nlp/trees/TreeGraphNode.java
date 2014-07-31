@@ -350,7 +350,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return <code>true</code> iff the arc did not already exist.
    */
   @SuppressWarnings("unchecked")
-  public <GR extends GrammaticalRelationAnnotation> boolean addArc(Class<GR> arcLabel, TreeGraphNode node) {
+  <GR extends GrammaticalRelationAnnotation> boolean addArc(Class<GR> arcLabel, TreeGraphNode node) {
     if (node == null) {
       return false;
     }
@@ -375,7 +375,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return the <code>Set</code> of <code>Object</code>s which
    *         label arcs between this node and <code>destNode</code>
    */
-  public Set<Class<? extends GrammaticalRelationAnnotation>> arcLabelsToNode(TreeGraphNode destNode) {
+  Set<Class<? extends GrammaticalRelationAnnotation>> arcLabelsToNode(TreeGraphNode destNode) {
     Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = Generics.newHashSet();
     CoreLabel cl = label();
     for (Class key : cl.keySet()) {
