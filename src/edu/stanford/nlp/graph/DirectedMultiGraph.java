@@ -249,7 +249,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   public Set<V> getParents(V vertex) {
     Map<V, List<E>> parentMap = incomingEdges.get(vertex);
     if (parentMap == null)
-      return Collections.emptySet();
+      return null;
     return Collections.unmodifiableSet(parentMap.keySet());
   }
 
@@ -257,7 +257,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   public Set<V> getChildren(V vertex) {
     Map<V, List<E>> childMap = outgoingEdges.get(vertex);
     if (childMap == null)
-      return Collections.emptySet();
+      return null;
     return Collections.unmodifiableSet(childMap.keySet());
   }
 
