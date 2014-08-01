@@ -139,6 +139,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     this.featureFactory = factory;
   }
 
+  /*
   private void readObject(ObjectInputStream in)
     throws IOException, ClassNotFoundException 
   {
@@ -159,6 +160,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       System.err.println("Adding rootOnlyStates: " + rootOnlyStates);
     }    
   }
+  */
 
   @Override
   public Options getOp() {
