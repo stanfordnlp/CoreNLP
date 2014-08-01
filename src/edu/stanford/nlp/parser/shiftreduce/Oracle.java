@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
@@ -35,7 +36,9 @@ class Oracle {
 
   boolean compoundUnaries;
 
-  Oracle(List<Tree> binarizedTrees, boolean compoundUnaries) {
+  Set<String> rootStates;
+
+  Oracle(List<Tree> binarizedTrees, boolean compoundUnaries, Set<String> rootStates) {
     this.binarizedTrees = binarizedTrees;
 
     parentMaps = Generics.newArrayList(binarizedTrees.size());
@@ -136,7 +139,7 @@ class Oracle {
 
     // TODO: we could interject that all trees must end with ROOT, for example
     if (state.tokenPosition >= state.sentence.size() && state.stack.size() == 1) {
-      return new OracleTransition(new FinalizeTransition(), false, false, false);
+      return new OracleTransition(new FinalizeTransition(rootStates), false, false, false);
     }
 
     if (state.stack.size() == 1) {

@@ -1,15 +1,38 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
+import java.util.Set;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
+
+// only needed for readObject
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.Collections;
+import edu.stanford.nlp.util.ErasureUtils;
 
 /**
  * Transition that finishes the processing of a state
  */
 public class FinalizeTransition implements Transition {
+  private Set<String> rootStates;
+
+  private void readObject(ObjectInputStream in)
+    throws IOException, ClassNotFoundException 
+  {
+    ObjectInputStream.GetField fields = in.readFields();
+    rootStates = ErasureUtils.uncheckedCast(fields.get("rootStates", null));
+    if (rootStates == null) {
+      rootStates = Collections.singleton("ROOT");
+    }
+  }
+
+  public FinalizeTransition(Set<String> rootStates) {
+    this.rootStates = rootStates;
+  }
+
   public boolean isLegal(State state, List<ParserConstraint> constraints) {
-    boolean legal = !state.finished && state.tokenPosition >= state.sentence.size() && state.stack.size() == 1;
+    boolean legal = !state.finished && state.tokenPosition >= state.sentence.size() && state.stack.size() == 1 && rootStates.contains(state.stack.peek().value());
     if (!legal || constraints == null) {
       return legal;
     }
@@ -22,6 +45,7 @@ public class FinalizeTransition implements Transition {
         return false;
       }
     }
+
     return true;
   }
 
