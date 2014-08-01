@@ -782,6 +782,17 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
+  /**
+   * Trains a batch of trees and returns the following: a list of
+   * Update objects, the number of transitions correct, and the number
+   * of transitions wrong.
+   * <br>
+   * If the model is trained with multiple threads, it is expected
+   * that a valid MulticoreWrapper is passed in which does the
+   * processing.  In that case, the processing is done on all of the
+   * trees without updating any weights, which allows the results for
+   * multithreaded training to be reproduced.
+   */
   private Triple<List<Update>, Integer, Integer> trainBatch(List<Integer> indices, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle, MulticoreWrapper<Integer, Pair<Integer, Integer>> wrapper) {
     int numCorrect = 0;
     int numWrong = 0;

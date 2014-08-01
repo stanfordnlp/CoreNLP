@@ -40,7 +40,7 @@ set ctb=/afs/ir/data/linguistic-data/Chinese-Treebank/6/data/utf8/bracketed
 # [(1, 40), (901, 931), (1018, 1018), (1020, 1020), (1036, 1036), (1044, 1044), (1060, 1061), (1072, 1072), (1118, 1119), (1132, 1132), (1141, 1142), (1148, 1148), (2165, 2180), (2295, 2310), (2570, 2602), (2800, 2819)]
 set ctb7train=/u/nlp/data/chinese/ctb7/train.mrg
 set ctb7test=/u/nlp/data/chinese/ctb7/test.mrg
-set negra=/afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test
+set negra=/u/nlp/data/GermanACL08/negra/penn-format-train-dev-test
 
 set host=`hostname | cut -d. -f1`
 
