@@ -562,6 +562,10 @@ public class TsurgeonTest extends TestCase {
     // Test that if a deleted root is excised down to a level that has
     // just one child, that one child gets returned as the new tree
     runTest(tregex, tsurgeon, "(B (B foo))", "(B foo)");
+
+    tregex = TregexPattern.compile("A=root");
+    tsurgeon = Tsurgeon.parseOperation("excise root root");
+    runTest(tregex, tsurgeon, "(A (B bar) (C foo))", null);
   }
 
   public static void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
