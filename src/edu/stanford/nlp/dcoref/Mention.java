@@ -1367,7 +1367,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(relation.toString().startsWith("prep") || relation == EnglishGrammaticalRelations.PREPOSITIONAL_OBJECT || relation == EnglishGrammaticalRelations.TEMPORAL_MODIFIER || relation == EnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER || relation == EnglishGrammaticalRelations.ADVERBIAL_MODIFIER || relation == EnglishGrammaticalRelations.PREPOSITIONAL_COMPLEMENT) return "adjunct";
 
     // subject relations
-    if(relation == EnglishGrammaticalRelations.NOMINAL_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_SUBJECT) return "subject";
+    if(relation == EnglishGrammaticalRelations.NOMINAL_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_SUBJECT || relation == EnglishGrammaticalRelations.CONTROLLING_SUBJECT) return "subject";
     if(relation == EnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_PASSIVE_SUBJECT) return "subject";
 
     // verbal argument relations

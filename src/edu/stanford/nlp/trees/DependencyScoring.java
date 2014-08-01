@@ -493,7 +493,7 @@ class fakeShortNameToGRel implements Map<String, GrammaticalRelation>{
 	    throw new UnsupportedOperationException();
 	  }
 	  String strkey = (String)key;
-	  return new GrammaticalRelation(Language.Any, strkey, null, DEPENDENT) {
+	  return new GrammaticalRelation(Language.Any, strkey, null, null, DEPENDENT) {
       private static final long serialVersionUID = 1L;
 
       @Override
