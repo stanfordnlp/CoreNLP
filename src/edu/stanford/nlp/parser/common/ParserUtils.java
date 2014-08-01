@@ -25,7 +25,9 @@ public class ParserUtils {
       Tree t = lstf.newLeaf(s);
       String tag = "X";
       if (obj instanceof HasTag) {
-        tag = ((HasTag) obj).tag();
+        if (((HasTag) obj).tag() != null) {
+          tag = ((HasTag) obj).tag();
+        }
       }
       Tree t2 = lstf.newTreeNode(tag, Collections.singletonList(t));
       lst2.add(t2);
