@@ -245,6 +245,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       copy.transitionIndex.add(transition);
     }
     
+    // TODO: would make more sense to put this in the constructor
+    copy.knownStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.knownStates));
+    copy.rootStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.rootStates));
+    copy.rootOnlyStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.rootOnlyStates));
+
     for (ShiftReduceParser model : models) {
       if (!model.transitionIndex.equals(copy.transitionIndex)) {
         throw new IllegalArgumentException("Can only average models with the same transition index");
