@@ -23,7 +23,7 @@ public class ParserUtils {
     for (HasWord obj : words) {
       String s = obj.word();
       Tree t = lstf.newLeaf(s);
-      String tag = "X";
+      String tag = "XX";
       if (obj instanceof HasTag) {
         if (((HasTag) obj).tag() != null) {
           tag = ((HasTag) obj).tag();
