@@ -1150,6 +1150,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
         String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
         parser.train(trainTreebankPath, devTreebankPath, tempName, null);
+        parser.saveModel(tempName);
         Set<String> features = parser.featureWeights.keySet();
         parser = new ShiftReduceParser(op);
         parser.train(trainTreebankPath, devTreebankPath, serializedPath, features);
