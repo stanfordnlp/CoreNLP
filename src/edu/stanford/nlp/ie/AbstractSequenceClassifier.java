@@ -970,7 +970,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       if (flags.keepEmptySentences && documents.size() == 0) {
         documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
       }
-      classifyAndWriteAnswers(documents, readerWriter);
+      classifyAndWriteAnswers(documents, readerWriter, false);
     }
   }
 
@@ -986,7 +986,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyAndWriteAnswers(String testFile)
     throws IOException
   {
-    classifyAndWriteAnswers(testFile, plainTextReaderAndWriter);
+    classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, false);
   }
 
   /**
@@ -998,12 +998,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param readerWriter A reader and writer to use for the output
    */
   public void classifyAndWriteAnswers(String testFile,
-                                      DocumentReaderAndWriter<IN> readerWriter)
+                                      DocumentReaderAndWriter<IN> readerWriter,
+                                      boolean outputScores)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFile(testFile, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter);
+    classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   /** If the flag
@@ -1011,45 +1012,48 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * character encoding, otherwise in the system default character encoding.
    */
   public void classifyAndWriteAnswers(String testFile, OutputStream outStream,
-                                      DocumentReaderAndWriter<IN> readerWriter)
+                                      DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFile(testFile, readerWriter);
     PrintWriter pw = IOUtils.encodedOutputStreamPrintWriter(outStream, flags.outputEncoding, true);
-    classifyAndWriteAnswers(documents, pw, readerWriter);
+    classifyAndWriteAnswers(documents, pw, readerWriter, outputScores);
   }
 
   public void classifyAndWriteAnswers(String baseDir, String filePattern,
-                                      DocumentReaderAndWriter<IN> readerWriter)
+                                      DocumentReaderAndWriter<IN> readerWriter,
+                                      boolean outputScores)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFiles(baseDir, filePattern, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter);
+    classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
     throws IOException
   {
-    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter);
+    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter, false);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
-                                           DocumentReaderAndWriter<IN> readerWriter)
+                                           DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFiles(testFiles, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter);
+    classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   private void classifyAndWriteAnswers(Collection<List<IN>> documents,
-                                       DocumentReaderAndWriter<IN> readerWriter)
+                                       DocumentReaderAndWriter<IN> readerWriter, 
+                                       boolean outputScores)
     throws IOException
   {
     classifyAndWriteAnswers(documents,
-            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), readerWriter);
+                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), 
+                            readerWriter, outputScores);
   }
 
   /** Does nothing by default.  Children classes can override if necessary */
@@ -1057,7 +1061,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
-                                      DocumentReaderAndWriter<IN> readerWriter)
+                                      DocumentReaderAndWriter<IN> readerWriter, 
+                                      boolean outputScores)
     throws IOException
   {
     if (flags.exportFeatures != null) {
@@ -1069,7 +1074,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     Counter<String> entityTP = new ClassicCounter<String>();
     Counter<String> entityFP = new ClassicCounter<String>();
     Counter<String> entityFN = new ClassicCounter<String>();
-    boolean resultsCounted = true;
+    boolean resultsCounted = outputScores;
     int numWords = 0;
     int numDocs = 0;
 
