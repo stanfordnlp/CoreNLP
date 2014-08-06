@@ -59,7 +59,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * @see GrammaticalRelation
  * @see EnglishGrammaticalStructure
  */
-public abstract class GrammaticalStructure {
+public abstract class GrammaticalStructure implements Serializable {
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
