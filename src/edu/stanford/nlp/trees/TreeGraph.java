@@ -68,7 +68,7 @@ public class TreeGraph implements Serializable {
    * @param index the arbitrary integer index
    * @param node  the <code>TreeGraphNode</code> to be indexed
    */
-  public void addNodeToIndexMap(int index, TreeGraphNode node) {
+  void addNodeToIndexMap(int index, TreeGraphNode node) {
     indexMap.put(Integer.valueOf(index), node);
   }
 
@@ -80,11 +80,11 @@ public class TreeGraph implements Serializable {
    * @return the <code>TreeGraphNode</code> having the specified
    *         index (or <code>null</code> if such does not exist)
    */
-  public TreeGraphNode getNodeByIndex(int index) {
+  TreeGraphNode getNodeByIndex(int index) {
     return indexMap.get(Integer.valueOf(index));
   }
 
-  public Collection<TreeGraphNode> getNodes() {
+  Collection<TreeGraphNode> getNodes() {
     return indexMap.values();
   }
 
