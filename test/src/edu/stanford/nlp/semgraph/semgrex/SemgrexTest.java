@@ -627,6 +627,14 @@ public class SemgrexTest extends TestCase {
     runTest("{idx:4}", graph);
   }
 
+  public void testLemma() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    for (IndexedWord word : graph.vertexSet()) {
+      word.setLemma(word.word());
+    }
+    runTest("{lemma:ate}", graph, "ate");
+  }
+
   public void testNamedRelation() {
     SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
     SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>=foo {idx:3}=dep");
