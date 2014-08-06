@@ -1228,6 +1228,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // we add a "copy" entry in the CoreLabel
         // existence of copy key is checked at printing (toString method of
         // TypedDependency)
+        // FIXME: this is copying the entire branch of the tree via
+        // the TreeGraphNode constructor.  Is that really appropriate?
         TreeGraphNode copy = new TreeGraphNode(td1.gov());
         CoreLabel label = new CoreLabel(td1.gov().label());
         label.set(CoreAnnotations.CopyAnnotation.class, copyNumber);
