@@ -53,7 +53,7 @@ public class TreeGraphNode extends Tree implements HasParent {
   protected TreeGraphNode[] children = ZERO_TGN_CHILDREN;
 
   /**
-   * The {@link TreeGraph <code>TreeGraph</code>} of which this
+   * The {@link GrammaticalStructure <code>GrammaticalStructure</code>} of which this
    * node is part.
    */
   protected GrammaticalStructure tg;
