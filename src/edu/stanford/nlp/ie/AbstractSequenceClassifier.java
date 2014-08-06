@@ -1259,10 +1259,42 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     } else if (flags.iobTags) {
       bg = flags.backgroundSymbol;
       return countResultsIOB(doc, entityTP, entityFP, entityFN, bg);
+    } else if (flags.sighanPostProcessing) {
+      // TODO: this is extremely indicative of being a Chinese Segmenter, 
+      // but it would still be better to have something more concrete
+      return countResultsSegmenter(doc, entityTP, entityFP, entityFN);
     } else {
       return countResults(doc, entityTP, entityFP, entityFN, bg);
     }
   }
+
+  // TODO: could make this a parameter for the model
+  public static final String CUT_LABEL = "Cut";
+
+  public static boolean countResultsSegmenter(List<? extends CoreMap> doc,
+                                              Counter<String> entityTP,
+                                              Counter<String> entityFP,
+                                              Counter<String> entityFN) {
+    // count from 1 because each label represents cutting or 
+    // not cutting at a word, so we don't count the first word
+    for (int i = 1; i < doc.size(); ++i) {
+      CoreMap word = doc.get(i);
+      String gold = word.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String guess = word.get(CoreAnnotations.AnswerAnnotation.class);
+      if (gold == null || guess == null) {
+        return false;
+      }
+      if (gold.equals("1") && guess.equals("1")) {
+        entityTP.incrementCount(CUT_LABEL, 1.0);
+      } else if (gold.equals("0") && guess.equals("1")) {
+        entityFP.incrementCount(CUT_LABEL, 1.0);
+      } else if (gold.equals("1") && guess.equals("0")) {
+        entityFN.incrementCount(CUT_LABEL, 1.0);
+      }
+    }
+    return true;
+  }
+                                              
 
   public static boolean countResultsIOB2(List<? extends CoreMap> doc,
                                          Counter<String> entityTP,
