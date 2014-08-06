@@ -1659,25 +1659,7 @@ public class SemanticGraph implements Serializable {
    * are copied.
    */
   public SemanticGraph(SemanticGraph g) {
-    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
-    Collection<IndexedWord> oldRoots =
-      new ArrayList<IndexedWord>(g.getRoots());
-    Set<IndexedWord> vertexes = g.vertexSet();
-    Map<IndexedWord, IndexedWord> prevToNewMap = Generics.newHashMap();
-    for (IndexedWord vertex : vertexes) {
-      IndexedWord newVertex = new IndexedWord(vertex);
-      addVertex(newVertex);
-      prevToNewMap.put(vertex, newVertex);
-    }
-    roots = Generics.newHashSet();
-    for (IndexedWord oldRoot : oldRoots) {
-      roots.add(prevToNewMap.get(oldRoot));
-    }
-    for (SemanticGraphEdge edge : g.edgeIterable()) {
-      IndexedWord newGov = prevToNewMap.get(edge.getGovernor());
-      IndexedWord newDep = prevToNewMap.get(edge.getDependent());
-      addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
-    }
+    this(g, null);
   }
 
   /**
@@ -1723,6 +1705,8 @@ public class SemanticGraph implements Serializable {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
     roots = Generics.newHashSet();
+    
+    Map<Integer, IndexedWord> vertices = Generics.newHashMap();
 
     for (TypedDependency d : dependencies) {
       TreeGraphNode gov = d.gov();
@@ -1730,17 +1714,29 @@ public class SemanticGraph implements Serializable {
       GrammaticalRelation reln = d.reln();
 
       if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
-        IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), gov.label());
-        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+        IndexedWord govVertex = vertices.get(gov.index());
+        if (govVertex == null) {
+          govVertex = new IndexedWord(docID, sentIndex, gov.index(), gov.label());
+          vertices.put(gov.index(), govVertex);
+        }
+        IndexedWord depVertex = vertices.get(dep.index());
+        if (depVertex == null) {
+          depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+          vertices.put(dep.index(), depVertex);
+        }
         // It is unnecessary to call addVertex, since addEdge will
         // implicitly add vertices if needed
         //addVertex(govVertex);
         //addVertex(depVertex);
         addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
       } else { //it's the root and we add it
-        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+        IndexedWord depVertex = vertices.get(dep.index());
+        if (depVertex == null) {
+          depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+          vertices.put(dep.index(), depVertex);
+          addVertex(depVertex);
+        }
 
-        addVertex(depVertex);
         roots.add(depVertex);
       }
     }
