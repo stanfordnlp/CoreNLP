@@ -754,6 +754,30 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
         agenda = newAgenda;
       }
+    } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE) {
+      State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
+      List<Transition> transitions = transitionLists.get(index);
+      transitions = Generics.newLinkedList(transitions);
+      while (transitions.size() > 0) {
+        Transition transition = transitions.get(0);
+        int transitionNum = transitionIndex.indexOf(transition);
+        List<String> features = featureFactory.featurize(state);
+        int predictedNum = findHighestScoringTransition(state, features, false).object();
+        Transition predicted = transitionIndex.get(predictedNum);
+        if (transitionNum == predictedNum) {
+          numCorrect++;
+          transitions.remove(0);
+        } else {
+          numWrong++;
+          // TODO: allow weighted features, weighted training, etc
+          updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
+          boolean canContinue = ReorderingOracle.reorder(state, predicted, transitions);
+          if (!canContinue) {
+            break;
+          }
+        }
+        state = predicted.apply(state);
+      }
     } else {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       List<Transition> transitions = transitionLists.get(index);
