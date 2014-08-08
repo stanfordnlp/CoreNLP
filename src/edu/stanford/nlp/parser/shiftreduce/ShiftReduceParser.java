@@ -556,15 +556,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return binarizedTrees;
   }
 
-  public List<List<Transition>> createTransitionSequences(List<Tree> binarizedTrees) {
-    List<List<Transition>> transitionLists = Generics.newArrayList();
-    for (Tree tree : binarizedTrees) {
-      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, op.compoundUnaries, rootStates, rootOnlyStates);
-      transitionLists.add(transitions);
-    }
-    return transitionLists;
-  }
-
   public static Set<String> findKnownStates(List<Tree> binarizedTrees) {
     Set<String> knownStates = Generics.newHashSet();
     for (Tree tree : binarizedTrees) {
@@ -922,7 +913,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     System.err.println("States which only occur at the root: " + rootStates);
 
     Timing transitionTimer = new Timing();
-    List<List<Transition>> transitionLists = createTransitionSequences(binarizedTrees);
+    List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
     for (List<Transition> transitions : transitionLists) {
       transitionIndex.addAll(transitions);
     }

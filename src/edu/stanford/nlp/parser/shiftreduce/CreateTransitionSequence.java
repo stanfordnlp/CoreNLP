@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +13,19 @@ public class CreateTransitionSequence {
   // static methods only.  
   // we could change this if we wanted to include options.
   private CreateTransitionSequence() {}
+
+  public static List<List<Transition>> createTransitionSequences(List<Tree> binarizedTrees, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
+    List<List<Transition>> transitionLists = Generics.newArrayList();
+    for (Tree tree : binarizedTrees) {
+      List<Transition> transitions = createTransitionSequence(tree, compoundUnary, rootStates, rootOnlyStates);
+      transitionLists.add(transitions);
+    }
+    return transitionLists;
+  }
+
+  public static List<Transition> createTransitionSequence(Tree tree) {
+    return createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
+  }
 
   public static List<Transition> createTransitionSequence(Tree tree, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
     List<Transition> transitions = Generics.newArrayList();
