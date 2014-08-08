@@ -2035,6 +2035,24 @@ public class StringUtils {
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
   }
 
+  /**
+   * Build a list of character-based ngrams from the given string.
+   */
+  public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
+    Collection<String> ngrams = new ArrayList<String>();
+    int len = s.length();
+
+    for (int i = 0; i < len; i++) {
+      for (int ngramSize = minSize;
+           ngramSize > 0 && ngramSize <= maxSize && i + ngramSize <= len;
+           ngramSize++) {
+        ngrams.add(s.substring(i, i + ngramSize));
+      }
+    }
+
+    return ngrams;
+  }
+
   private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
   public static String normalize(String s) {
     // Normalizes string and strips diacritics (map to ascii) by
