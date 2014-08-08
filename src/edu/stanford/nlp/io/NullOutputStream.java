@@ -4,6 +4,8 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 /**
+ * An OutputStream which throws away all output instead of outputting anything
+ *<br>
  * Taken from http://stackoverflow.com/questions/2127979
  *
  * @author John Bauer
