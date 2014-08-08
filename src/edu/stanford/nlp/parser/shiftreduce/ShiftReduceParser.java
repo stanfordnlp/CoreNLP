@@ -226,7 +226,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       throw new IllegalArgumentException("Cannot average empty models");
     }
 
-    System.err.print("Averaging models with scores");
+    System.err.print("Averaging " + scoredModels.size() + " models with scores");
     for (ScoredObject<ShiftReduceParser> model : scoredModels) {
       System.err.print(" " + NF.format(model.score()));
     }
@@ -505,7 +505,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
   public static ShiftReduceOptions buildTrainingOptions(String tlppClass, String[] args) {
     ShiftReduceOptions op = new ShiftReduceOptions();
-    op.setOptions("-forceTags", "-debugOutputFrequency", "1");
+    op.setOptions("-forceTags", "-debugOutputFrequency", "1", "-quietEvaluation");
     if (tlppClass != null) {
       op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
     }
@@ -1020,6 +1020,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
             break;
           }
         }
+        System.err.println();
         
         if (bestModels != null) {
           bestModels.add(new ScoredObject<ShiftReduceParser>(this.deepCopy(), labelF1));
