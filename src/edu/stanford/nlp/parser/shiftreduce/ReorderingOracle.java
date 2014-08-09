@@ -1,6 +1,9 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
+import java.util.ListIterator;
+
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A second attempt at making an oracle.  Instead of always trying to
@@ -58,8 +61,6 @@ public class ReorderingOracle {
 
     if (chosenTransition instanceof BinaryTransition) {
       if (!(goldTransition instanceof BinaryTransition)) {
-        // TODO: perhaps there are ways to make it work for some
-        // examples which should have been ShiftTransition
         return false;
       }
 
@@ -83,6 +84,98 @@ public class ReorderingOracle {
       return true;
     }
 
+    if ((chosenTransition instanceof ShiftTransition) && (goldTransition instanceof BinaryTransition)) {
+      // can't shift at the end of the queue
+      if (state.endOfQueue()) {
+        return false;
+      }
+
+      // doesn't help, sadly
+      // BinaryTransition goldBinary = (BinaryTransition) goldTransition;
+      // if (!goldBinary.isBinarized()) {
+      //   return reorderIncorrectShiftTransition(transitions);
+      // }
+
+    }
+
     return false;
+  }
+
+  /**
+   * In this case, we are starting to build a new subtree when instead
+   * we should have been combining existing trees.  What we can do is
+   * find the transitions that build up the next subtree in the gold
+   * transition list, figure out how it gets applied to a
+   * BinaryTransition, and make that the next BinaryTransition we
+   * perform after finishing the subtree.  If there are multiple
+   * BinaryTransitions in a row, we ignore any associated
+   * UnaryTransitions (unfixable) and try to transition to the final
+   * state.  The assumption is that we can't do anything about the
+   * incorrect subtrees any more, so we skip them all.
+   *<br>
+   * Sadly, this does not seem to help - the parser gets worse when it
+   * learns these states
+   */
+  static boolean reorderIncorrectShiftTransition(List<Transition> transitions) {
+    List<BinaryTransition> leftoverBinary = Generics.newArrayList();
+    while (transitions.size() > 0) {
+      Transition head = transitions.remove(0);
+      if (head instanceof ShiftTransition) {
+        break;
+      }
+
+      if (head instanceof BinaryTransition) {
+        leftoverBinary.add((BinaryTransition) head);
+      } 
+    }
+    if (transitions.size() == 0 || leftoverBinary.size() == 0) {
+      // honestly this is an error we should probably just throw
+      return false;
+    }
+
+    int shiftCount = 0;
+    ListIterator<Transition> cursor = transitions.listIterator();
+    BinaryTransition lastBinary = null;
+    while (cursor.hasNext() && shiftCount >= 0) {
+      Transition next = cursor.next();
+      if (next instanceof ShiftTransition) {
+        ++shiftCount;
+      } else if (next instanceof BinaryTransition) {
+        --shiftCount;
+        if (shiftCount < 0) {
+          lastBinary = (BinaryTransition) next;
+          cursor.remove();
+        }
+      }
+    }
+    if (!cursor.hasNext() || lastBinary == null) {
+      // once again, an error.  even if the sequence of tree altering
+      // gold transitions ends with a BinaryTransition, there should
+      // be a FinalizeTransition after that
+      return false;
+    }
+
+    String label = lastBinary.label;
+    if (lastBinary.isBinarized()) {
+      label = label.substring(1);
+    }
+    if (lastBinary.side == BinaryTransition.Side.RIGHT) {
+      // When we finally transition all the binary transitions, we
+      // will want to have the new node be the right head.  Therefore,
+      // we add a bunch of temporary binary transitions with a right
+      // head, ending up with a binary transition with a right head
+      for (int i = 0; i < leftoverBinary.size(); ++i) {
+        cursor.add(new BinaryTransition("@" + label, BinaryTransition.Side.RIGHT));
+      }
+      // use lastBinary.label in case the last transition is temporary
+      cursor.add(new BinaryTransition(lastBinary.label, BinaryTransition.Side.RIGHT));
+    } else {
+      cursor.add(new BinaryTransition("@" + label, BinaryTransition.Side.LEFT));
+      for (int i = 0; i < leftoverBinary.size() - 1; ++i) {
+        cursor.add(new BinaryTransition("@" + label, leftoverBinary.get(i).side));
+      }
+      cursor.add(new BinaryTransition(lastBinary.label, leftoverBinary.get(leftoverBinary.size() - 1).side));
+    }
+    return true;
   }
 }
