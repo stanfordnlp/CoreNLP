@@ -60,6 +60,16 @@ public class ReorderingOracle {
     }
 
     if (chosenTransition instanceof BinaryTransition) {
+      if (state.stack.size() < 2) {
+        return false;
+      }
+
+      if (goldTransition instanceof ShiftTransition) {
+        // Helps, but adds quite a bit of size to the model and only helps a tiny bit
+        //return reorderIncorrectBinaryTransition(transitions);
+        return false;
+      }
+
       if (!(goldTransition instanceof BinaryTransition)) {
         return false;
       }
@@ -99,6 +109,40 @@ public class ReorderingOracle {
     }
 
     return false;
+  }
+
+  static boolean reorderIncorrectBinaryTransition(List<Transition> transitions) {
+    int shiftCount = 0;
+    ListIterator<Transition> cursor = transitions.listIterator();
+    do {
+      if (!cursor.hasNext()) {
+        return false;
+      }
+      Transition next = cursor.next();
+      if (next instanceof ShiftTransition) {
+        ++shiftCount;
+      } else if (next instanceof BinaryTransition) {
+        --shiftCount;
+        if (shiftCount <= 0) {
+          cursor.remove();
+        }
+      }
+    } while (shiftCount > 0);
+
+    if (!cursor.hasNext()) {
+      return false;
+    }
+    Transition next = cursor.next();
+    while ((next instanceof UnaryTransition) || (next instanceof CompoundUnaryTransition)) {
+      cursor.remove();
+      if (!cursor.hasNext()) {
+        return false;
+      }
+      next = cursor.next();
+    }
+
+    // At this point, the rest of the transition sequence should suffice
+    return true;
   }
 
   /**

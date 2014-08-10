@@ -51,7 +51,12 @@ public class ReorderingOracleTest extends TestCase {
     Tree.valueOf("(ROOT (S (NP (PRP$ My) (JJ small) (NN dog)) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))"),
   };
   List<Tree> binarizedTrees; // initialized in setUp
-  int[] initialTransitionsBeforeShift = { 2, 2, 3 };
+
+  Tree[] incorrectShiftTrees = { 
+    Tree.valueOf("(ROOT (S (PRP$ My) (NN dog) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))"),
+    Tree.valueOf("(NP (NN A) (NN B) (NN C))") , // doesn't have to make sense
+    Tree.valueOf("(ROOT (S (PRP$ My) (JJ small) (NN dog) (ADVP (RB also)) (VP (VBZ likes) (S (VP (VBG eating) (NP (NN sausage))))) (. .)))"),
+  };
 
   Debinarizer debinarizer = new Debinarizer(false);
 
@@ -67,27 +72,44 @@ public class ReorderingOracleTest extends TestCase {
     return Generics.newLinkedList(Arrays.asList(transitions));
   }
 
-  // Mostly just checks that it isn't failing horribly.  Not sure what
-  // the correct results should be
-  public void testReorderIncorrectShiftResultingState() {
-    for (int testcase = 0; testcase < 3; ++testcase) {
+  public void testReorderIncorrectBinaryTransition() {
+    List<Transition> transitions = buildTransitionList(shift, rightNP, rightVP, finalize);
+    assertTrue(ReorderingOracle.reorderIncorrectBinaryTransition(transitions));
+    assertEquals(buildTransitionList(shift, rightVP, finalize), transitions);
+
+    transitions = buildTransitionList(shift, unaryADVP, rightNP, rightVP, finalize);
+    assertTrue(ReorderingOracle.reorderIncorrectBinaryTransition(transitions));
+    assertEquals(buildTransitionList(shift, unaryADVP, rightVP, finalize), transitions);    
+
+    transitions = buildTransitionList(shift, rightNP, unaryADVP, rightVP, finalize);
+    assertTrue(ReorderingOracle.reorderIncorrectBinaryTransition(transitions));
+    assertEquals(buildTransitionList(shift, rightVP, finalize), transitions);    
+  }
+
+  public void testReorderIncorrectShiftResultingTree() {
+    for (int testcase = 0; testcase < correctTrees.length; ++testcase) {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(correctTrees[testcase]);
       List<Transition> gold = CreateTransitionSequence.createTransitionSequence(binarizedTrees.get(testcase));
-      System.err.println(correctTrees[testcase]);
-      System.err.println(gold);
+      // System.err.println(correctTrees[testcase]);
+      // System.err.println(gold);
 
-      for (int i = 0; i < initialTransitionsBeforeShift[testcase]; ++i) {
-        state = gold.get(i).apply(state);
+      int tnum = 0;
+      for (; tnum < gold.size(); ++tnum) {
+        if (gold.get(tnum) instanceof BinaryTransition) {
+          break;
+        }
+        state = gold.get(tnum).apply(state);
       }
       state = shift.apply(state);
-      List<Transition> reordered = Generics.newLinkedList(gold.subList(initialTransitionsBeforeShift[testcase], gold.size()));
+      List<Transition> reordered = Generics.newLinkedList(gold.subList(tnum, gold.size()));
       assertTrue(ReorderingOracle.reorderIncorrectShiftTransition(reordered));
-      System.err.println(reordered);
+      // System.err.println(reordered);
       for (Transition transition : reordered) {
         state = transition.apply(state);
       }
       Tree debinarized = debinarizer.transformTree(state.stack.peek());
-      System.err.println(debinarized);
+      // System.err.println(debinarized);
+      assertEquals(incorrectShiftTrees[testcase].toString(), debinarized.toString());
     }
   }
 
