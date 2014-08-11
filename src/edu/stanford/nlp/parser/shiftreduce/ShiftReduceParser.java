@@ -745,36 +745,18 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
         agenda = newAgenda;
       }
-    } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE) {
-      ReorderingOracle reorderer = new ReorderingOracle(op);
-      State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
-      List<Transition> transitions = transitionLists.get(index);
-      transitions = Generics.newLinkedList(transitions);
-      while (transitions.size() > 0) {
-        Transition transition = transitions.get(0);
-        int transitionNum = transitionIndex.indexOf(transition);
-        List<String> features = featureFactory.featurize(state);
-        int predictedNum = findHighestScoringTransition(state, features, false).object();
-        Transition predicted = transitionIndex.get(predictedNum);
-        if (transitionNum == predictedNum) {
-          numCorrect++;
-          transitions.remove(0);
-        } else {
-          numWrong++;
-          // TODO: allow weighted features, weighted training, etc
-          updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
-          boolean canContinue = reorderer.reorder(state, predicted, transitions);
-          if (!canContinue) {
-            break;
-          }
-        }
-        state = predicted.apply(state);
+    } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
+               op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION || 
+               op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.GOLD) {
+      ReorderingOracle reorderer = null;
+      if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE) {
+        reorderer = new ReorderingOracle(op);
       }
-    } else {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       List<Transition> transitions = transitionLists.get(index);
       transitions = Generics.newLinkedList(transitions);
-      while (transitions.size() > 0) {
+      boolean keepGoing = true;
+      while (transitions.size() > 0 && keepGoing) {
         Transition transition = transitions.get(0);        
         int transitionNum = transitionIndex.indexOf(transition);
         List<String> features = featureFactory.featurize(state);
@@ -786,12 +768,22 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
           numWrong++;
           // TODO: allow weighted features, weighted training, etc
           updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
+          switch (op.trainOptions().trainingMethod) {
+          case EARLY_TERMINATION:
+            keepGoing = false;
+            break;
+          case GOLD:
+            break;
+          case REORDER_ORACLE:
+            keepGoing = reorderer.reorder(state, predicted, transitions);
+          default:
+            throw new IllegalArgumentException("Unexpected method " + op.trainOptions().trainingMethod);
+          }
         }
-        if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION && transitionNum != predictedNum) {
-          break;
+        if (keepGoing) {
+          transitions.remove(0);
+          state = transition.apply(state);
         }
-        transitions.remove(0);
-        state = transition.apply(state);
       }
     }
 
