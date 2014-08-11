@@ -14,12 +14,18 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ReorderingOracle {
+  ShiftReduceOptions op;
+
+  public ReorderingOracle(ShiftReduceOptions op) {
+    this.op = op;
+  }
+
   /**
    * Given a predicted transition and a state, this method rearranges
    * the list of transitions and returns whether or not training can
    * continue.
    */
-  static boolean reorder(State state, Transition chosenTransition, List<Transition> transitions) {
+  boolean reorder(State state, Transition chosenTransition, List<Transition> transitions) {
     if (transitions.size() == 0) {
       throw new AssertionError();
     }
@@ -66,8 +72,7 @@ public class ReorderingOracle {
 
       if (goldTransition instanceof ShiftTransition) {
         // Helps, but adds quite a bit of size to the model and only helps a tiny bit
-        //return reorderIncorrectBinaryTransition(transitions);
-        return false;
+        return op.trainOptions().oracleBinaryToShift && reorderIncorrectBinaryTransition(transitions);
       }
 
       if (!(goldTransition instanceof BinaryTransition)) {
@@ -101,11 +106,10 @@ public class ReorderingOracle {
       }
 
       // doesn't help, sadly
-      // BinaryTransition goldBinary = (BinaryTransition) goldTransition;
-      // if (!goldBinary.isBinarized()) {
-      //   return reorderIncorrectShiftTransition(transitions);
-      // }
-
+      BinaryTransition goldBinary = (BinaryTransition) goldTransition;
+      if (!goldBinary.isBinarized()) {
+        return op.trainOptions().oracleShiftToBinary && reorderIncorrectShiftTransition(transitions);
+      }
     }
 
     return false;

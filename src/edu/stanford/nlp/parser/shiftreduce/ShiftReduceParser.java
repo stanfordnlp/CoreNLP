@@ -746,6 +746,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         agenda = newAgenda;
       }
     } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE) {
+      ReorderingOracle reorderer = new ReorderingOracle(op);
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       List<Transition> transitions = transitionLists.get(index);
       transitions = Generics.newLinkedList(transitions);
@@ -762,7 +763,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
           numWrong++;
           // TODO: allow weighted features, weighted training, etc
           updates.add(new Update(features, transitionNum, predictedNum, 1.0f));
-          boolean canContinue = ReorderingOracle.reorder(state, predicted, transitions);
+          boolean canContinue = reorderer.reorder(state, predicted, transitions);
           if (!canContinue) {
             break;
           }
