@@ -51,7 +51,7 @@ import edu.stanford.nlp.util.Pair;
 @SuppressWarnings("serial")
 public class MatchesPanel extends JPanel implements ListSelectionListener {
   private static MatchesPanel instance = null;
-  private JList list;
+  private JList<TreeFromFile> list;
   // todo: Change the below to just be a List<List<Tree>> paralleling list above
   private Map<TreeFromFile,List<Tree>> matchedParts;
   private List<MatchesPanelListener> listeners;
@@ -204,7 +204,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     // I changed that, but that wasn't really the problem, it was that the if part didn't honor
     // maxMatches!
     removeAllMatches();
-    final DefaultListModel newModel = new DefaultListModel();
+    final DefaultListModel<TreeFromFile> newModel = new DefaultListModel<TreeFromFile>();
     newModel.ensureCapacity(matches.size());
 
     //Two cases:
@@ -294,16 +294,17 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   /**
    * Returns all currently displayed matches in string buffer, penn treebank form
    * (suitable for writing out, for instance)
-   * @return StringBuffer filled with the penn treebank forms of all trees in the matches panel
+   *
+   * @return String filled with the Penn treebank forms of all trees in the matches panel
    */
-  public StringBuffer getMatches() {
-    StringBuffer sb = new StringBuffer();
-    for(int i = 0; i < list.getModel().getSize(); i++) {
+  public String getMatches() {
+    StringBuilder sb = new StringBuilder();
+    for(int i = 0, sz = list.getModel().getSize(); i < sz; i++) {
       Tree t = ((TreeFromFile) list.getModel().getElementAt(i)).getTree();
       sb.append(t.pennString());
       sb.append("\n\n");
     }
-    return sb;
+    return sb.toString();
   }
 
   /**
@@ -459,15 +460,16 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     list.setFont(newFont);
   }
 
+  @Override
   public void valueChanged(ListSelectionEvent arg0) {
-    TreeFromFile t = (TreeFromFile) list.getSelectedValue();
+    TreeFromFile t = list.getSelectedValue();
     if(t == null) {
       lastSelected = null;
       return;
     }
     JTextField curSelected = t.getLabel();
     if(lastSelected != null) {
-      if(lastSelected != curSelected) {//get rid of old highlights
+      if(lastSelected != curSelected) { //get rid of old highlights
         lastSelected.getHighlighter().removeAllHighlights();
         lastSelected = curSelected;
         firstMouseEvent = null;
