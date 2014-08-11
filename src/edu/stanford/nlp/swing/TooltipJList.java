@@ -8,28 +8,29 @@ import javax.swing.ListModel;
 /**
  * Simple list class that extends JList and adds tool tip functionality to the list.  Tool tips are automatically
  * wrapped to a specific length (default 80 chars) while preserving word boundaries.
+ *
  * @author Anna Rafferty
  *
  */
 @SuppressWarnings("serial")
-public class TooltipJList extends JList{
+public class TooltipJList<E> extends JList<E> {
+
   private static int PROBLEM_LINE_LENGTH = 80;
-  
+
   public TooltipJList() {
     super();
   }
-  
-  public TooltipJList(ListModel model) {
+
+  public TooltipJList(ListModel<E> model) {
     this(model, PROBLEM_LINE_LENGTH);
   }
-  
-  public TooltipJList(ListModel model, int lineWrapLength) {
+
+  public TooltipJList(ListModel<E> model, int lineWrapLength) {
     super(model);
     PROBLEM_LINE_LENGTH = lineWrapLength;
-    
   }
-  
-  
+
+
   @Override
   public String getToolTipText(MouseEvent evt) {
     int index = locationToIndex(evt.getPoint());
@@ -68,4 +69,5 @@ public class TooltipJList extends JList{
       return null;
     }
   }
+
 }

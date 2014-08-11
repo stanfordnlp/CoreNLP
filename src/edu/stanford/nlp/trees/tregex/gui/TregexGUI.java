@@ -752,8 +752,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
         public void run() {
           try {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(chooser.getSelectedFile()), FileTreeModel.getCurEncoding()));
-            StringBuffer sb = MatchesPanel.getInstance().getMatchedSentences();
-            out.write(sb.toString());
+            String str = MatchesPanel.getInstance().getMatchedSentences();
+            out.write(str);
             out.flush();
             out.close();
           } catch(Exception e) {
@@ -793,7 +793,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       t.start();
     }
   }
-
 
 
   private void loadTsurgeonScript() {

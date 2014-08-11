@@ -76,7 +76,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   private MatchesPanel() {
     //data
     DefaultListModel model = new DefaultListModel();
-    list = new TooltipJList(model);
+    list = new TooltipJList<TreeFromFile>(model);
     list.setCellRenderer(new MatchCellRenderer());
     list.setTransferHandler(new TreeTransferHandler());
     matchedParts = Generics.newHashMap();
@@ -90,7 +90,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
           firstMouseEvent = e;
         }
         e.consume();
-        TreeFromFile selectedValue = (TreeFromFile) list.getSelectedValue();
+        TreeFromFile selectedValue = list.getSelectedValue();
         if(selectedValue == null) return;
         JTextField label = selectedValue.getLabel();
         if(((e.getModifiersEx()) & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK) {
@@ -140,7 +140,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
         if (firstMouseEvent != null) {
           e.consume();
-          JTextField label = ((TreeFromFile) list.getSelectedValue()).getLabel();
+          JTextField label = list.getSelectedValue().getLabel();
           if(dragNDrop) {
             if(label == null)
               return;
@@ -265,6 +265,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
 
     if (! newModel.isEmpty())
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           list.setModel(newModel);
           list.setSelectedIndex(0);
@@ -284,7 +285,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
    */
   public Pair<TreeFromFile, List<Tree>> getSelectedMatch() {
     if(!isEmpty()) {
-      TreeFromFile selectedTree = (TreeFromFile) list.getSelectedValue();
+      TreeFromFile selectedTree = list.getSelectedValue();
       return new Pair<TreeFromFile,List<Tree>>(selectedTree, matchedParts.get(selectedTree));
     }
     else
@@ -300,7 +301,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   public String getMatches() {
     StringBuilder sb = new StringBuilder();
     for(int i = 0, sz = list.getModel().getSize(); i < sz; i++) {
-      Tree t = ((TreeFromFile) list.getModel().getElementAt(i)).getTree();
+      Tree t = list.getModel().getElementAt(i).getTree();
       sb.append(t.pennString());
       sb.append("\n\n");
     }
@@ -308,17 +309,18 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   }
 
   /**
-   * Returns all currently displayed sentences in string buffer, plain text form
-   * @return StringBuffer filled with the plain text form of all sentences in the matches panel
+   * Returns all currently displayed sentences in plain text form.
+   *
+   * @return String filled with the plain text form of all sentences in the matches panel
    */
-  public StringBuffer getMatchedSentences() {
-    StringBuffer sb = new StringBuffer();
-    for(int i = 0; i < list.getModel().getSize(); i++) {
-      String t = ((TreeFromFile) list.getModel().getElementAt(i)).getLabel().getText();
+  public String getMatchedSentences() {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0, sz = list.getModel().getSize(); i < sz; i++) {
+      String t = list.getModel().getElementAt(i).getLabel().getText();
       sb.append(t);
       sb.append("\n");
     }
-    return sb;
+    return sb.toString();
   }
 
   public void selectPreviousMatch() {
@@ -377,6 +379,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
       setOpaque(true);
     }
 
+    @Override
     public Component getListCellRendererComponent(JList list, Object value,
         int index, boolean isSelected, boolean cellHasFocus) {
       JTextField l = ((TreeFromFile) value).getLabel();
