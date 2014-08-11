@@ -13,7 +13,9 @@ import javax.swing.ListModel;
  *
  */
 @SuppressWarnings("serial")
-public class TooltipJList<E> extends JList<E> {
+public class TooltipJList extends JList {
+
+  // todo: generify once we move to Java 8, but JList wasn't generic in Java 6 so can't do now.
 
   private static int PROBLEM_LINE_LENGTH = 80;
 
@@ -21,11 +23,11 @@ public class TooltipJList<E> extends JList<E> {
     super();
   }
 
-  public TooltipJList(ListModel<E> model) {
+  public TooltipJList(ListModel model) {
     this(model, PROBLEM_LINE_LENGTH);
   }
 
-  public TooltipJList(ListModel<E> model, int lineWrapLength) {
+  public TooltipJList(ListModel model, int lineWrapLength) {
     super(model);
     PROBLEM_LINE_LENGTH = lineWrapLength;
   }
