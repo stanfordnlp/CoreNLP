@@ -1235,7 +1235,7 @@ public class SemanticGraph implements Serializable {
     Collection<IndexedWord> rootNodes = getRoots();
     if (rootNodes.isEmpty()) {
       // Shouldn't happen, but return something!
-      return toString("readable");
+      return toString(OutputFormat.READABLE);
     }
 
     StringBuilder sb = new StringBuilder();
@@ -1354,12 +1354,16 @@ public class SemanticGraph implements Serializable {
     return StringUtils.join(uncompressedList, " ");
   }
 
+  public enum OutputFormat {
+    LIST, XML, READABLE, RECURSIVE
+  };
+
   /**
    * Returns a String representation of the result of this set of typed
-   * dependencies in a user-specified format. Currently, three formats are
-   * supported:
+   * dependencies in a user-specified format. Currently, four formats are
+   * supported ({@link OutputFormat}):
    * <dl>
-   * <dt>"plain"</dt>
+   * <dt>list</dt>
    * <dd>(Default.) Formats the dependencies as logical relations, as
    * exemplified by the following:
    *
@@ -1369,7 +1373,7 @@ public class SemanticGraph implements Serializable {
    * </pre>
    *
    * </dd>
-   * <dt>"readable"</dt>
+   * <dt>readable</dt>
    * <dd>Formats the dependencies as a table with columns <code>dependent</code>, <code>relation</code>, and <code>governor</code>, as exemplified by the
    * following:
    *
@@ -1379,7 +1383,7 @@ public class SemanticGraph implements Serializable {
    * </pre>
    *
    * </dd>
-   * <dt>"xml"</dt>
+   * <dt>xml</dt>
    * <dd>Formats the dependencies as XML, as exemplified by the following:
    *
    * <pre>
@@ -1394,8 +1398,13 @@ public class SemanticGraph implements Serializable {
    *    &lt;/dep&gt;
    *  &lt;/dependencies&gt;
    * </pre>
-   *
    * </dd>
+   *
+   * <dt>recursive</dt>
+   * <dd>
+   * The default output for {@link toString()}
+   * </dd>
+   *
    * </dl>
    *
    * @param format
@@ -1403,13 +1412,18 @@ public class SemanticGraph implements Serializable {
    * @return a <code>String</code> representation of the typed dependencies in
    *         this <code>GrammaticalStructure</code>
    */
-  public String toString(String format) {
-    if (format != null && format.equals("xml")) {
+  public String toString(OutputFormat format) {
+    switch(format) {
+    case XML:
       return toXMLString();
-    } else if (format != null && format.equals("readable")) {
+    case READABLE:
       return toReadableString();
-    } else {
+    case LIST:
       return toList();
+    case RECURSIVE:
+      return toString();
+    default:
+      throw new IllegalArgumentException("Unsupported format " + format);
     }
   }
 
