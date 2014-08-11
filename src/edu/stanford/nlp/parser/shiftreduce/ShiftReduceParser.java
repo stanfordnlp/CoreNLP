@@ -889,6 +889,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   private void train(List<Pair<String, FileFilter>> trainTreebankPath, 
                      Pair<String, FileFilter> devTreebankPath,
                      String serializedPath, Set<String> allowedFeatures) {
+    System.err.println("Training method: " + op.trainOptions().trainingMethod);
+
     List<Tree> binarizedTrees = Generics.newArrayList();
     for (Pair<String, FileFilter> treebank : trainTreebankPath) {
       binarizedTrees.addAll(readBinarizedTreebank(treebank.first(), treebank.second()));
@@ -1165,6 +1167,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       }
       ShiftReduceOptions op = parser.op;
       if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
+        // TODO: factor out some of the treebank loading
         String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
         parser.train(trainTreebankPath, devTreebankPath, tempName, null);
         parser.saveModel(tempName);
