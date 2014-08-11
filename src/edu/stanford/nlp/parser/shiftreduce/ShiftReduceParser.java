@@ -773,7 +773,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     } else {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       List<Transition> transitions = transitionLists.get(index);
-      for (Transition transition : transitions) {
+      transitions = Generics.newLinkedList(transitions);
+      while (transitions.size() > 0) {
+        Transition transition = transitions.get(0);        
         int transitionNum = transitionIndex.indexOf(transition);
         List<String> features = featureFactory.featurize(state);
         int predictedNum = findHighestScoringTransition(state, features, false).object();
@@ -788,6 +790,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION && transitionNum != predictedNum) {
           break;
         }
+        transitions.remove(0);
         state = transition.apply(state);
       }
     }
