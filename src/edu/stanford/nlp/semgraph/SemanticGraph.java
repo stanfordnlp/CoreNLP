@@ -1232,6 +1232,10 @@ public class SemanticGraph implements Serializable {
    */
   @Override
   public String toString() {
+    return toString(IndexedWord.WORD_TAG_FORMAT);
+  }
+
+  public String toString(String wordFormat) {
     Collection<IndexedWord> rootNodes = getRoots();
     if (rootNodes.isEmpty()) {
       // Shouldn't happen, but return something!
@@ -1241,30 +1245,30 @@ public class SemanticGraph implements Serializable {
     StringBuilder sb = new StringBuilder();
     Set<IndexedWord> used = Generics.newHashSet();
     for (IndexedWord root : rootNodes) {
-      sb.append("-> ").append(root).append(" (root)\n");
-      recToString(root, sb, 1, used);
+      sb.append("-> ").append(root.toString(wordFormat)).append(" (root)\n");
+      recToString(root, wordFormat, sb, 1, used);
     }
     Set<IndexedWord> nodes = Generics.newHashSet(vertexSet());
     nodes.removeAll(used);
     while (!nodes.isEmpty()) {
       IndexedWord node = nodes.iterator().next();
-      sb.append(node).append("\n");
-      recToString(node, sb, 1, used);
+      sb.append(node.toString(wordFormat)).append("\n");
+      recToString(node, wordFormat, sb, 1, used);
       nodes.removeAll(used);
     }
     return sb.toString();
   }
 
   // helper for toString()
-  private void recToString(IndexedWord curr, StringBuilder sb, int offset, Set<IndexedWord> used) {
+  private void recToString(IndexedWord curr, String wordFormat, StringBuilder sb, int offset, Set<IndexedWord> used) {
     used.add(curr);
     List<SemanticGraphEdge> edges = outgoingEdgeList(curr);
     Collections.sort(edges);
     for (SemanticGraphEdge edge : edges) {
       IndexedWord target = edge.getTarget();
-      sb.append(space(2 * offset)).append("-> ").append(target).append(" (").append(edge.getRelation()).append(")\n");
+      sb.append(space(2 * offset)).append("-> ").append(target.toString(wordFormat)).append(" (").append(edge.getRelation()).append(")\n");
       if (!used.contains(target)) { // recurse
-        recToString(target, sb, offset + 1, used);
+        recToString(target, wordFormat, sb, offset + 1, used);
       }
     }
   }
