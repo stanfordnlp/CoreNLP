@@ -181,8 +181,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   //   SemgrexMatcher matcher = strandedPobjSemgrex.matcher(graph);
   //   TreeGraphNode[] nodeToWords = null;
   //   while (matcher.find()) {
-  //     IndexedWord gov = matcher.getNode("prepdep");
-  //     IndexedWord dep = matcher.getNode("head");
+  //     CoreLabel gov = matcher.getNode("prepdep");
+  //     CoreLabel dep = matcher.getNode("head");
   //
   //     if (nodeToWords == null) {
   //       nodeToWords = getNodesToWords(list);
