@@ -640,6 +640,15 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
+  private static boolean findStateOnAgenda(Collection<State> agenda, State state) {
+    for (State other : agenda) {
+      if (other.areTransitionsEqual(state)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private Pair<Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
@@ -717,32 +726,26 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
           }
         }
 
-        List<String> goldFeatures = featureFactory.featurize(goldState);
-        goldState = goldTransition.apply(goldState, 0.0);
+        State newGoldState = goldTransition.apply(goldState, 0.0);
 
         // if highest scoring state used the correct transition, no training
         // otherwise, down the last transition, up the correct
-        if (!goldState.areTransitionsEqual(highestScoringState)) {
+        if (!newGoldState.areTransitionsEqual(highestScoringState)) {
           ++numWrong;
+          List<String> goldFeatures = featureFactory.featurize(goldState);
           int lastTransition = transitionIndex.indexOf(highestScoringState.transitions.peek());
           updates.add(new Update(featureFactory.featurize(highestCurrentState), -1, lastTransition, 1.0f));
           updates.add(new Update(goldFeatures, transitionIndex.indexOf(goldTransition), -1, 1.0f));
+
+          // If the correct state has fallen off the agenda, break
+          if (!findStateOnAgenda(newAgenda, newGoldState)) {
+            break;
+          }
         } else {
           ++numCorrect;
         }
 
-        // If the correct state has fallen off the agenda, break
-        boolean found = false;
-        for (State otherState : newAgenda) {
-          if (otherState.areTransitionsEqual(goldState)) {
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          break;
-        }
-
+        goldState = newGoldState;
         agenda = newAgenda;
       }
     } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
