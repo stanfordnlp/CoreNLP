@@ -763,6 +763,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         int predictedNum = findHighestScoringTransition(state, features, false).object();
         Transition predicted = transitionIndex.get(predictedNum);
         if (transitionNum == predictedNum) {
+          transitions.remove(0);
+          state = transition.apply(state);
           numCorrect++;
         } else {
           numWrong++;
@@ -773,16 +775,18 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
             keepGoing = false;
             break;
           case GOLD:
+            transitions.remove(0);
+            state = transition.apply(state);
             break;
           case REORDER_ORACLE:
             keepGoing = reorderer.reorder(state, predicted, transitions);
+            if (keepGoing) {
+              state = predicted.apply(state);
+            }
+            break;
           default:
             throw new IllegalArgumentException("Unexpected method " + op.trainOptions().trainingMethod);
           }
-        }
-        if (keepGoing) {
-          transitions.remove(0);
-          state = transition.apply(state);
         }
       }
     }
