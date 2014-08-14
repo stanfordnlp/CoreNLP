@@ -72,22 +72,6 @@ public class SemanticGraph implements Serializable {
     return graph.getInDegree(vertex);
   }
 
-  // public int outDegreeOf(IndexedWord vertex) {
-  //   return graph.outDegreeOf(vertex);
-  // }
-
-  // public int inDegreeOf(IndexedWord vertex) {
-  //   return graph.inDegreeOf(vertex);
-  // }
-
-  // public List<SemanticGraphEdge> outgoingEdgesOf(IndexedWord vertex) {
-  //   return graph.outgoingEdgesOf(vertex);
-  // }
-
-  // public List<SemanticGraphEdge> incomingEdgesOf(IndexedWord vertex) {
-  //   return graph.incomingEdgesOf(vertex);
-  // }
-
   public List<SemanticGraphEdge> getAllEdges(IndexedWord gov,
                                              IndexedWord dep) {
     return graph.getEdges(gov, dep);
@@ -873,34 +857,6 @@ public class SemanticGraph implements Serializable {
     roots.clear();
     roots.addAll(words);
   }
-
-  /*
-   * This method is invalidated by updated JGraph
-   * Call this after performing a sequence of edits on vertices in the graph.
-   * Because JGrapht maintains a set of indices based upon the vertices
-   * themselves, any modifications to them will result in those indices being
-   * invalidated, resulting in errors. SemanticGraphEdges maintain references to
-   * the actual vertices themselves, and this uses those to recreate the indices
-   * by pulling the edges and vertices out, and putting them back in (similar to
-   * pulling electronic components out of the board and placing them back in, or
-   * reseating them, to ensure the connections are proper).
-   *
-   * public synchronized void reseat() { List<IndexedFeatureLabel> vertices =
-   * new ArrayList<IndexedFeatureLabel>(vertexSet()); List<SemanticGraphEdge>
-   * edges = new ArrayList<SemanticGraphEdge>(edgeSet());
-   *
-   * for (IndexedFeatureLabel vertex1 : vertices) { for (IndexedFeatureLabel
-   * vertex2 : vertices) { if (vertex1 != vertex2) removeEdge(vertex1, vertex2);
-   * } }
-   *
-   * for (IndexedFeatureLabel vertex : vertices) { removeVertex(vertex); }
-   *
-   * // for (SemanticGraphEdge edge : edges) { // removeEdge(edge); // } for
-   * (IndexedFeatureLabel vertex : vertices) { addVertex(vertex); } for
-   * (SemanticGraphEdge edge : edges) { addEdge(edge.getCachedSourceRef(),
-   * edge.getCachedTargetRef(), edge.getRelation(), edge.getWeight()); }
-   * edgeList(true); vertexList(true); }
-   */
 
   /**
    *
