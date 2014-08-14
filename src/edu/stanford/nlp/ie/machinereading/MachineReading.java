@@ -401,12 +401,10 @@ public class MachineReading {
         relationExtractor = ExtractorMerger.buildRelationExtractorMerger(modelNames);
       } else if (!this.forceRetraining&& new File(modelName).exists()) {
         MachineReadingProperties.logger.info("Loading relation extraction model from " + modelName + " ...");
-        //TODO change this to load any type of BasicRelationExtractor
         relationExtractor = BasicRelationExtractor.load(modelName);
       } else {
         RelationFeatureFactory rff = makeRelationFeatureFactory(MachineReadingProperties.relationFeatureFactoryClass, MachineReadingProperties.relationFeatures, MachineReadingProperties.doNotLexicalizeFirstArg);
-        Execution.fillOptions(rff, args);
-
+        
         if (MachineReadingProperties.trainRelationsUsingPredictedEntities) {
       		// generate predicted entities
       		assert(entityExtractor != null);
@@ -445,9 +443,7 @@ public class MachineReading {
       	  removeSkippableRelations(dataset, relationsToSkip);
       	}
       	
-      	//relationExtractor = new BasicRelationExtractor(rff, MachineReadingProperties.createUnrelatedRelations, makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
-        relationExtractor = makeRelationExtractor(MachineReadingProperties.relationClassifier, rff, MachineReadingProperties.createUnrelatedRelations,
-          makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
+      	relationExtractor = new BasicRelationExtractor(rff, MachineReadingProperties.createUnrelatedRelations, makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
         Execution.fillOptions(relationExtractor, args);
       	//Arguments.parse(args,relationExtractor);
         MachineReadingProperties.logger.info("Training relation extraction model...");
@@ -830,20 +826,8 @@ public class MachineReading {
     return ex;
   }
 
-  public static Extractor makeRelationExtractor(
-    Class<? extends BasicRelationExtractor> relationExtractorClass,RelationFeatureFactory featureFac, boolean createUnrelatedRelations, RelationMentionFactory factory) {
-    if (relationExtractorClass == null) return null;
-    BasicRelationExtractor ex;
-    try {
-      ex = relationExtractorClass.getConstructor(RelationFeatureFactory.class, Boolean.class, RelationMentionFactory.class).newInstance(featureFac, createUnrelatedRelations, factory);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    return ex;
-  }
-
   public static RelationFeatureFactory makeRelationFeatureFactory(
-      Class<? extends RelationFeatureFactory> relationFeatureFactoryClass,
+      Class<RelationFeatureFactory> relationFeatureFactoryClass,
       String relationFeatureList,
       boolean doNotLexicalizeFirstArg) {
     if (relationFeatureList == null || relationFeatureFactoryClass == null)

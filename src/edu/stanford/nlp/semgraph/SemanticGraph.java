@@ -1232,7 +1232,7 @@ public class SemanticGraph implements Serializable {
    */
   @Override
   public String toString() {
-    return toString(IndexedWord.WORD_TAG_FORMAT);
+    return toString(CoreLabel.VALUE_TAG_FORMAT);
   }
 
   public String toString(String wordFormat) {
@@ -1624,7 +1624,7 @@ public class SemanticGraph implements Serializable {
    * with the dependency.
    */
   public String toDotFormat(String graphname) {
-    return toDotFormat(graphname, IndexedWord.WORD_TAG_INDEX_FORMAT);
+    return toDotFormat(graphname, CoreLabel.VALUE_TAG_INDEX_FORMAT);
   }
 
   public String toDotFormat(String graphname, String indexedWordFormat) {
