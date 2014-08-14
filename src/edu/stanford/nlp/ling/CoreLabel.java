@@ -556,6 +556,8 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
 
   public static final String MAP_FORMAT = "{map}";
 
+  public static final String WORD_FORMAT = "word";
+
   @Override
   public String toString() {
     return toString(DEFAULT_FORMAT);
@@ -646,7 +648,8 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
       if (!map2.isEmpty()) {
         buf.append(map2);
       }
-    } else if (format.equals("word")) {
+    } else if (format.equals(WORD_FORMAT)) {
+      // TODO: we should unify word() and value()
       buf.append(word());
     } else if (format.equals("text-index")) {
       buf.append(this.get(CoreAnnotations.TextAnnotation.class));
