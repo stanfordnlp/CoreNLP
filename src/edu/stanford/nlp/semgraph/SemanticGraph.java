@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.Pair;
@@ -175,19 +176,11 @@ public class SemanticGraph implements Serializable {
   }
 
   public List<SemanticGraphEdge> outgoingEdgeList(IndexedWord v) {
-    List<SemanticGraphEdge> edges = new ArrayList<SemanticGraphEdge>();
-    for (SemanticGraphEdge edge : outgoingEdgeIterable(v)) {
-      edges.add(edge);
-    }
-    return edges;
+    return CollectionUtils.toList(outgoingEdgeIterable(v));
   }
 
-  public List<SemanticGraphEdge> incomingEdgeList(IndexedWord v) {
-    List<SemanticGraphEdge> edges = new ArrayList<SemanticGraphEdge>();
-    for (SemanticGraphEdge edge : incomingEdgeIterable(v)) {
-      edges.add(edge);
-    }
-    return edges;
+  private List<SemanticGraphEdge> incomingEdgeList(IndexedWord v) {
+    return CollectionUtils.toList(incomingEdgeIterable(v));
   }
 
   public boolean isEmpty() {

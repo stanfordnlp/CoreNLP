@@ -464,17 +464,19 @@ public class SemanticGraphUtils {
    * Replaces a node in the given SemanticGraph with the new node,
    * replacing its position in the node edges.
    */
-  public static void replaceNode(IndexedWord newNode, IndexedWord oldNode,
-      SemanticGraph sg) {
+  public static void replaceNode(IndexedWord newNode, IndexedWord oldNode, SemanticGraph sg) {
     // Obtain the edges where the old node was the governor and the dependent.
     // Remove the old node, insert the new, and re-insert the edges.
+    // Save the edges in a list so that remove operations don't affect
+    // the iterator or our ability to find the edges in the first place
     List<SemanticGraphEdge> govEdges = sg.outgoingEdgeList(oldNode);
     List<SemanticGraphEdge> depEdges = sg.incomingEdgeList(oldNode);
     boolean oldNodeRemoved = sg.removeVertex(oldNode);
     if (oldNodeRemoved) {
       // If the new node is not present, be sure to add it in.
-      if (!sg.containsVertex(newNode))
+      if (!sg.containsVertex(newNode)) {
         sg.addVertex(newNode);
+      }
       for (SemanticGraphEdge govEdge : govEdges) {
         sg.removeEdge(govEdge);
         sg.addEdge(newNode, govEdge.getDependent(), govEdge.getRelation(), govEdge.getWeight(), govEdge.isExtra());
@@ -806,7 +808,7 @@ public class SemanticGraphUtils {
     if(!orderedNodes){
      edgeIter = sg.outgoingEdgeIterable(vertice); 
     } else{
-      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), new Comparator<SemanticGraphEdge>(){
+      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeIterable(vertice), new Comparator<SemanticGraphEdge>(){
         @Override
         public int compare(SemanticGraphEdge arg0, SemanticGraphEdge arg1) {
           return (arg0.getRelation().toString().compareTo(arg1.getRelation().toString()));      
