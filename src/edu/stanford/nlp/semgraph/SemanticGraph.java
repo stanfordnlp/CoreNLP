@@ -1878,6 +1878,7 @@ public class SemanticGraph implements Serializable {
       // indexesUsed);
       String[] wordAndTag = word.split("/");
       ifl.set(CoreAnnotations.TextAnnotation.class, wordAndTag[0]);
+      ifl.set(CoreAnnotations.ValueAnnotation.class, wordAndTag[0]);
       if (wordAndTag.length > 1)
         ifl.set(CoreAnnotations.PartOfSpeechAnnotation.class, wordAndTag[1]);
       return ifl;
