@@ -187,4 +187,12 @@ public class MachineReadingProperties {
   @Option(name="percentageOfTrain",gloss="Pct of train partition to use for training (e.g. for RELMS experiment)")
   static public double percentageOfTrain = 1.0;
 
+  /**
+   * Additional features, may not necessarily be used in the public release
+   */
+  @Option(name="featureSimilarityThreshold")
+  static public double featureSimilarityThreshold = 0.2;
+
+  @Option(name="computeFeatSimilarity")
+  static public boolean computeFeatSimilarity = true;
 }

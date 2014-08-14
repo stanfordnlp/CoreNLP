@@ -405,7 +405,8 @@ public class MachineReading {
         relationExtractor = BasicRelationExtractor.load(modelName);
       } else {
         RelationFeatureFactory rff = makeRelationFeatureFactory(MachineReadingProperties.relationFeatureFactoryClass, MachineReadingProperties.relationFeatures, MachineReadingProperties.doNotLexicalizeFirstArg);
-        
+        Execution.fillOptions(rff, args);
+
         if (MachineReadingProperties.trainRelationsUsingPredictedEntities) {
       		// generate predicted entities
       		assert(entityExtractor != null);
