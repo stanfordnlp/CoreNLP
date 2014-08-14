@@ -61,7 +61,7 @@ public class BasicRelationExtractor implements Extractor {
   public void setFeatureCountThreshold(int i) {featureCountThreshold = i; }
   public void setSigma(double d) { sigma = d; }
 
-  public BasicRelationExtractor(RelationFeatureFactory featureFac, boolean createUnrelatedRelations, RelationMentionFactory factory) {
+  public BasicRelationExtractor(RelationFeatureFactory featureFac, Boolean createUnrelatedRelations, RelationMentionFactory factory) {
     featureFactory = featureFac;
     this.createUnrelatedRelations = createUnrelatedRelations;
     this.relationMentionFactory = factory;
