@@ -62,13 +62,12 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return outgoingEdges.hashCode();
   }
 
-  @SuppressWarnings("unchecked")
   public boolean equals(Object that) {
     if (that == this)
       return true;
     if (!(that instanceof DirectedMultiGraph))
       return false;
-    return outgoingEdges.equals(((DirectedMultiGraph) that).outgoingEdges);
+    return outgoingEdges.equals(((DirectedMultiGraph<?, ?>) that).outgoingEdges);
   }
 
   /**
@@ -221,7 +220,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   @Override
   public List<E> getOutgoingEdges(V v) {
     if (!outgoingEdges.containsKey(v)) { //noinspection unchecked
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
     return CollectionUtils.flatten(outgoingEdges.get(v).values());
   }
@@ -229,7 +228,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   @Override
   public List<E> getIncomingEdges(V v) {
     if (!incomingEdges.containsKey(v)) { //noinspection unchecked
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
     return CollectionUtils.flatten(incomingEdges.get(v).values());
   }
