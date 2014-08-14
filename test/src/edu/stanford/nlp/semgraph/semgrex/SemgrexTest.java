@@ -627,7 +627,6 @@ public class SemgrexTest extends TestCase {
     runTest("{idx:2}", graph, "muffins");
     runTest("{idx:3}", graph, "blueberry");
     runTest("{idx:4}", graph);
-    System.err.println(graph);
   }
 
   public void testLemma() {
@@ -645,9 +644,9 @@ public class SemgrexTest extends TestCase {
     // This set of three tests also provides some coverage for a
     // bizarre error a user found where multiple copies of the same
     // IndexedWord were created
-    runTest("{}=Obj <dobj {lemma:love}=Pred", graph, "display-NN");
-    runTest("{}=Obj <dobj {}=Pred", graph, "display-NN");
-    runTest("{lemma:love}=Pred >dobj {}=Obj ", graph, "love-VBP");
+    runTest("{}=Obj <dobj {lemma:love}=Pred", graph, "display/NN");
+    runTest("{}=Obj <dobj {}=Pred", graph, "display/NN");
+    runTest("{lemma:love}=Pred >dobj {}=Obj ", graph, "love/VBP");
   }
 
   public void testNamedRelation() {
