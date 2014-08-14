@@ -48,6 +48,7 @@ public class EditDistanceDamerauLevenshteinLike {
     }
   };
 
+  //return -1 if the edit distance is more than the threshold
   public static int editDistance(CharSequence s, CharSequence t, int threshold) {
     assert(s!=null);
     assert(t!=null);

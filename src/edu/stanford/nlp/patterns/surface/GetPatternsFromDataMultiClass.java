@@ -96,9 +96,9 @@ import edu.stanford.nlp.util.logging.Redwood;
  * 
  * <p>
  * To use a properties file, see
- * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties
+ * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties or patterns/example.properties (depends on which codebase you are using)
  * as an example for the flags and their brief descriptions. Run the code as:
- * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props projects/core/data/edu/stanford/nlp/patterns/surface/example.properties</code>
+ * <code>java -mx1000m -cp classpath edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props dir-as-above/example.properties</code>
  * 
  * <p>
  * IMPORTANT: Many flags are described in the classes
@@ -117,7 +117,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken = null;
 
   public Map<String, Set<String>> wordsForOtherClass = null;
-  Counter<String> patternsOtherClass = null;
 
   // String channelNameLogger = "patterns";
   /**
@@ -402,7 +401,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             Set<String> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<String>() : (seedSets.containsKey(l) ? seedSets.get(l)
                 : new HashSet<String>());
 
-            runLabelSeedWords(sentsf, constVars.answerClass.get(l), l, seed);
+            runLabelSeedWords(sentsf, constVars.answerClass.get(l), l, seed, constVars);
 
             Set<String> otherseed = constVars.getOtherSemanticClasses() == null || !labelUsingSeedSets ? new HashSet<String>() : constVars
                 .getOtherSemanticClasses();
@@ -417,7 +416,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               }
             }
             if (constVars.getOtherSemanticClasses() != null)
-              runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed);
+              runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars);
 
           }
           Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + f);
@@ -438,12 +437,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         Set<String> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<String>() : (seedSets.containsKey(l) ? seedSets.get(l)
             : new HashSet<String>());
 
-        runLabelSeedWords(Data.sents, constVars.answerClass.get(l), l, seed);
+        runLabelSeedWords(Data.sents, constVars.answerClass.get(l), l, seed, constVars);
 
         Set<String> otherseed = constVars.getOtherSemanticClasses() == null || !labelUsingSeedSets ? new HashSet<String>() : constVars
             .getOtherSemanticClasses();
         if (constVars.getOtherSemanticClasses() != null)
-          runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed);
+          runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars);
       }
 
     }
@@ -748,7 +747,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return allIndices;
   }
 
-  public void runLabelSeedWords(Map<String, List<CoreLabel>> sents, Class answerclass, String label, Set<String> seedWords)
+  public static void runLabelSeedWords(Map<String, List<CoreLabel>> sents, Class answerclass, String label, Set<String> seedWords, ConstantsAndVariables constVars)
       throws InterruptedException, ExecutionException, IOException {
 
     List<String> keyset = new ArrayList<String>(sents.keySet());
@@ -765,7 +764,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       List<String> keys = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
       Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
 
-      Callable<Map<String, List<CoreLabel>>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label);
+      Callable<Map<String, List<CoreLabel>>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords());
       Future<Map<String, List<CoreLabel>>> submit = executor.submit(task);
       list.add(submit);
     }
@@ -784,21 +783,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   @SuppressWarnings("rawtypes")
-  public class LabelWithSeedWords implements Callable<Map<String, List<CoreLabel>>> {
+  public static class LabelWithSeedWords implements Callable<Map<String, List<CoreLabel>>> {
     Set<String[]> seedwordsTokens = new HashSet<String[]>();
     Map<String, List<CoreLabel>> sents;
     List<String> keyset;
     Class labelClass;
     HashSet<String> seenFuzzyMatches = new HashSet<String>();
     String label;
+    int minLen4FuzzyForPattern;
+    String backgroundSymbol = "O";
+    Set<String> dictWords = null;
 
-    public LabelWithSeedWords(Set<String> seedwords, Map<String, List<CoreLabel>> sents, List<String> keyset, Class labelclass, String label) {
+    public LabelWithSeedWords(Set<String> seedwords, Map<String, List<CoreLabel>> sents, List<String> keyset, Class labelclass, String label, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> dictWords) {
       for (String s : seedwords)
         this.seedwordsTokens.add(s.split("\\s+"));
       this.sents = sents;
       this.keyset = keyset;
       this.labelClass = labelclass;
       this.label = label;
+      this.minLen4FuzzyForPattern= minLen4FuzzyForPattern;
+      this.backgroundSymbol = backgroundSymbol;
+      this.dictWords = dictWords;
     }
 
     @SuppressWarnings("unchecked")
@@ -820,8 +825,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         boolean[] labels = new boolean[tokens.length];
         CollectionValuedMap<Integer, String> matchedPhrases = new CollectionValuedMap<Integer, String>();
         for (String[] s : seedwordsTokens) {
-          List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, constVars.getEnglishWords(), seenFuzzyMatches,
-              constVars.minLen4FuzzyForPattern);
+          List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, dictWords, seenFuzzyMatches,
+              minLen4FuzzyForPattern);
           if (indices != null && !indices.isEmpty())
             for (int index : indices)
               for (int i = 0; i < s.length; i++) {
@@ -837,7 +842,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             Redwood.log(ConstantsAndVariables.extremedebug, "labeling " + l.word() + " or its lemma " + l.lemma() + " as " + label
                 + " because of the dict phrases " + (Set<String>) matchedPhrases.get(i));
           } else
-            l.set(labelClass, constVars.backgroundSymbol);
+            l.set(labelClass, backgroundSymbol);
           if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
             l.set(PatternsAnnotations.MatchedPhrases.class, new HashSet<String>());
           l.get(PatternsAnnotations.MatchedPhrases.class).addAll(matchedPhrases.get(i));
