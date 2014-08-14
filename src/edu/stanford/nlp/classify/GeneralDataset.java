@@ -151,8 +151,8 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   /**
-   * Applies a feature count threshold to the Dataset.  All features that
-   * occur fewer than <i>k</i> times are expunged.
+   * Retains the given features in the Dataset.  All features that
+   * do not occur in features are expunged.
    */
   public void retainFeatures(Set<F> features) {
     //float[] counts = getFeatureCounts();
