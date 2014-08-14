@@ -195,4 +195,7 @@ public class MachineReadingProperties {
 
   @Option(name="computeFeatSimilarity")
   static public boolean computeFeatSimilarity = true;
+
+  @Option(name="featureSelectionNumFeaturesRatio")
+  static public double featureSelectionNumFeaturesRatio = 0.7;
 }
