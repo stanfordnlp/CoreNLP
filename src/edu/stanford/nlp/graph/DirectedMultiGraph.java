@@ -108,8 +108,8 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     Map<V, List<E>> map = incomingEdges.get(v);
     if (map == null) {
       outgoingEdges.put(v, innerMapFactory.newMap());
-      map = Generics.<V, List<E>>newHashMap();
-      incomingEdges.put(v, innerMapFactory.newMap());
+      map = innerMapFactory.newMap();
+      incomingEdges.put(v, map);
     }
     return map;
   }
