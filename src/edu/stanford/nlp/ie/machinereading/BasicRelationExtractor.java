@@ -311,4 +311,5 @@ public class BasicRelationExtractor implements Extractor {
     logger.setLevel(level);
   }
 
+
 }

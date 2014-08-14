@@ -843,7 +843,7 @@ public class MachineReading {
   }
 
   public static RelationFeatureFactory makeRelationFeatureFactory(
-      Class<RelationFeatureFactory> relationFeatureFactoryClass,
+      Class<? extends RelationFeatureFactory> relationFeatureFactoryClass,
       String relationFeatureList,
       boolean doNotLexicalizeFirstArg) {
     if (relationFeatureList == null || relationFeatureFactoryClass == null)

@@ -66,7 +66,7 @@ public class MachineReadingProperties {
   protected static String serializedRelationExtractionResults = null;
   
   @Option(name="relationFeatureFactoryClass",gloss="FeatureFactory class to use for generating features from relations for relation extraction")
-  static public Class<RelationFeatureFactory> relationFeatureFactoryClass = edu.stanford.nlp.ie.machinereading.RelationFeatureFactory.class;
+  static public Class<? extends RelationFeatureFactory> relationFeatureFactoryClass = edu.stanford.nlp.ie.machinereading.BasicRelationFeatureFactory.class;
 
   @Option(name="relationMentionFactoryClass",gloss="relation mention factory class to use.")
   static public Class<RelationMentionFactory> relationMentionFactoryClass =  edu.stanford.nlp.ie.machinereading.structure.RelationMentionFactory.class;
