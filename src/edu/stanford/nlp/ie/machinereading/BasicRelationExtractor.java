@@ -126,7 +126,7 @@ public class BasicRelationExtractor implements Extractor {
     }
   }
 
-  private static void reportWeights(LinearClassifier<String, String> classifier, String classLabel) {
+  protected static void reportWeights(LinearClassifier<String, String> classifier, String classLabel) {
     if (classLabel != null) logger.fine("CLASSIFIER WEIGHTS FOR LABEL " + classLabel);
     Map<String, Counter<String>> labelsToFeatureWeights = classifier.weightsAsMapOfCounters();
     List<String> labels = new ArrayList<String>(labelsToFeatureWeights.keySet());

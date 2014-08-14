@@ -198,4 +198,10 @@ public class MachineReadingProperties {
 
   @Option(name="featureSelectionNumFeaturesRatio")
   static public double featureSelectionNumFeaturesRatio = 0.7;
+
+  @Option(name="L1Reg")
+  static public boolean L1Reg = false;
+
+  @Option(name="L1RegLambda")
+  static public double L1RegLambda = 1.0;
 }
