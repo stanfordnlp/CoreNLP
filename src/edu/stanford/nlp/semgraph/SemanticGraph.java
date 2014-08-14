@@ -49,7 +49,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  */
 public class SemanticGraph implements Serializable {
 
-  public static boolean addSRLArcs = false;
+  public static final boolean addSRLArcs = false;
 
   private static final SemanticGraphFormatter formatter = new SemanticGraphFormatter();
 
