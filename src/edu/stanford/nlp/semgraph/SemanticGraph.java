@@ -179,7 +179,7 @@ public class SemanticGraph implements Serializable {
     return CollectionUtils.toList(outgoingEdgeIterable(v));
   }
 
-  private List<SemanticGraphEdge> incomingEdgeList(IndexedWord v) {
+  public List<SemanticGraphEdge> incomingEdgeList(IndexedWord v) {
     return CollectionUtils.toList(incomingEdgeIterable(v));
   }
 
