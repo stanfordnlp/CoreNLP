@@ -184,9 +184,9 @@ public class WordsToSentencesAnnotator implements Annotator {
       int index = 1;
       for (CoreLabel token : sentenceTokens) {
         token.setIndex(index++);
-        token.set(CoreAnnotations.SentenceIndexAnnotation.class, sentences.size());
+        token.setSentIndex(sentences.size());
         if (docID != null) {
-          sentence.set(CoreAnnotations.DocIDAnnotation.class, docID);
+          token.setDocID(docID);
         }
       }
 
