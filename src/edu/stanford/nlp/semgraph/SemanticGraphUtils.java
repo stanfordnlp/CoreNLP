@@ -313,7 +313,7 @@ public class SemanticGraphUtils {
     }
 
     descendantSet.add(curr);
-    for (IndexedWord child : sg.getChildList(curr)) {
+    for (IndexedWord child : sg.getChildren(curr)) {
       for (SemanticGraphEdge edge : sg.getAllEdges(curr, child)) {
         if (relnsToAvoid != null && relnsToAvoid.contains(edge.getRelation()))
           continue;

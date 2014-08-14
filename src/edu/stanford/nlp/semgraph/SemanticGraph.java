@@ -327,9 +327,8 @@ public class SemanticGraph implements Serializable {
       char dir = s.charAt(0);
       if (dir == '<') {
         // look for a matching parent
-        List<IndexedWord> parents = getParentList(vertex);
         boolean match = false;
-        for (IndexedWord parent : parents) {
+        for (IndexedWord parent : getParents(vertex)) {
           String lemma = parent.get(CoreAnnotations.LemmaAnnotation.class);
           if (lemma.equals(word)) {
             match = true;
@@ -401,9 +400,8 @@ public class SemanticGraph implements Serializable {
       char dir = s.charAt(0);
       if (dir == '<') {
         // look for a matching parent
-        List<IndexedWord> parents = getParentList(vertex);
         boolean match = false;
-        for (IndexedWord parent : parents) {
+        for (IndexedWord parent : getParents(vertex)) {
           String lemma = parent.get(CoreAnnotations.LemmaAnnotation.class);
           if (lemma.equals(word)) {
             match = true;
@@ -415,9 +413,8 @@ public class SemanticGraph implements Serializable {
         }
       } else if (dir == '>') {
         // look for a matching child
-        List<IndexedWord> children = getChildList(vertex);
         boolean match = false;
-        for (IndexedWord child : children) {
+        for (IndexedWord child : getChildren(vertex)) {
           String lemma = child.get(CoreAnnotations.LemmaAnnotation.class);
           if (lemma == null || lemma.equals("")) {
             lemma = child.word().toLowerCase();
@@ -439,8 +436,6 @@ public class SemanticGraph implements Serializable {
 
   public List<IndexedWord> getChildList(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
-      System.err.println("Weird vertex: Index " + vertex.index() + ", word " + vertex.word());
-      System.err.println("Vertices I know: " + vertexSet());
       throw new IllegalArgumentException();
     }
     List<IndexedWord> result = new ArrayList<IndexedWord>(getChildren(vertex));
@@ -449,12 +444,10 @@ public class SemanticGraph implements Serializable {
   }
 
   public Collection<IndexedWord> getChildren(IndexedWord vertex) {
-    List<IndexedWord> result = new ArrayList<IndexedWord>();
-    for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
-      IndexedWord child = edge.getTarget();
-      result.add(child);
+    if (!containsVertex(vertex)) {
+      throw new IllegalArgumentException();
     }
-    return result;
+    return graph.getChildren(vertex);
   }
 
   public boolean hasChildren(IndexedWord vertex) {
@@ -486,12 +479,10 @@ public class SemanticGraph implements Serializable {
   }
 
   public Collection<IndexedWord> getParents(IndexedWord vertex) {
-    List<IndexedWord> result = new ArrayList<IndexedWord>();
-    for (SemanticGraphEdge edge : incomingEdgeIterable(vertex)) {
-      IndexedWord parent = edge.getSource();
-      result.add(parent);
+    if (!containsVertex(vertex)) {
+      throw new IllegalArgumentException();
     }
-    return result;
+    return graph.getParents(vertex);
   }
 
   /**
@@ -504,12 +495,14 @@ public class SemanticGraph implements Serializable {
    */
   public Collection<IndexedWord> getSiblings(IndexedWord vertex) {
     IndexedWord parent = this.getParent(vertex);
-    if(parent != null) {
-      List<IndexedWord> result = this.getChildList(parent);
+    if (parent != null) {
+      Set<IndexedWord> result = wordMapFactory.newSet();
+      result.addAll(this.getChildren(parent));
       result.remove(vertex);//remove this vertex - you're not your own sibling
       return result;
+    } else {
+      return Collections.emptySet();
     }
-    else return new ArrayList<IndexedWord>();
   }
 
   /*
@@ -644,7 +637,7 @@ public class SemanticGraph implements Serializable {
       return;
     }
     descendantSet.add(curr);
-    for (IndexedWord child : getChildList(curr)) {
+    for (IndexedWord child : getChildren(curr)) {
       descendantsHelper(child, descendantSet);
     }
   }
@@ -1115,7 +1108,7 @@ public class SemanticGraph implements Serializable {
     }
     unused.remove(current);
     trail.add(current);
-    for (IndexedWord child : getChildList(current)) {
+    for (IndexedWord child : getChildren(current)) {
       boolean result = isDagHelper(child, unused, trail);
       if (result) {
         return true;
