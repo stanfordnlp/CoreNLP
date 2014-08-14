@@ -505,21 +505,22 @@ public class SemanticGraph implements Serializable {
     }
   }
 
-  /*
-   * Helper function for the public function with the same name.
+  /**
+   * Helper function for the public function with the same name.  
+   * <br>
+   * Builds up the list backwards.
    */
-
   private List<IndexedWord> getPathToRoot(IndexedWord vertex, List<IndexedWord> used) {
     used.add(vertex);
 
-    List<IndexedWord> parents = getParentList(vertex);
-
+    Set<IndexedWord> parents = wordMapFactory.newSet();
+    parents.addAll(getParents(vertex));
     parents.removeAll(used);
 
     if (roots.contains(vertex) || (parents.size() == 0)) {
       used.remove(used.size() - 1);
       if (roots.contains(vertex))
-        return new Vector<IndexedWord>();
+        return Generics.newArrayList();
       else
         return null; // no path found
     }
@@ -527,7 +528,7 @@ public class SemanticGraph implements Serializable {
     for (IndexedWord parent : parents) {
       List<IndexedWord> path = getPathToRoot(parent, used);
       if (path != null) {
-        path.add(0, parent);
+        path.add(parent);
         used.remove(used.size() - 1);
         return path;
       }
@@ -544,7 +545,9 @@ public class SemanticGraph implements Serializable {
    * root is inaccessible (should never happen).
    */
   public List<IndexedWord> getPathToRoot(IndexedWord vertex) {
-    return getPathToRoot(vertex, new Vector<IndexedWord>());
+    List<IndexedWord> path = getPathToRoot(vertex, Generics.<IndexedWord>newArrayList());
+    if (path != null) Collections.reverse(path);
+    return path;
   }
 
   /**
@@ -1047,7 +1050,7 @@ public class SemanticGraph implements Serializable {
   // Obsolete; use functions in rte.feat.NegPolarityFeaturizers instead
 
   public boolean attachedNegatedVerb(IndexedWord vertex) {
-    for (IndexedWord parent : getParentList(vertex)) {
+    for (IndexedWord parent : getParents(vertex)) {
       if (isNegatedVerb(parent)) {
         return true;
       }

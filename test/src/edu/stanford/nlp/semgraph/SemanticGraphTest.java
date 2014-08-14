@@ -2,10 +2,13 @@ package edu.stanford.nlp.semgraph;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
@@ -145,5 +148,37 @@ public class SemanticGraphTest extends TestCase {
         assertTrue(parentIndex < childIndex);
       }
     }
+  }
+
+  public void testGetPathToRoot() {
+    verifyPath(graph.getPathToRoot(graph.getNodeByIndex(1)), 4, 10);
+    verifyPath(graph.getPathToRoot(graph.getNodeByIndex(10))); // empty path
+    verifyPath(graph.getPathToRoot(graph.getNodeByIndex(34)), 35, 28, 10);
+  }
+
+  public void verifyPath(List<IndexedWord> path, int ... expected) {
+    assertEquals(expected.length, path.size());
+    for (int i = 0; i < expected.length; ++i) {
+      assertEquals(expected[i], path.get(i).index());
+    }
+  }
+
+  public void testGetSiblings() {
+    //System.err.println(graph.toString(CoreLabel.VALUE_TAG_INDEX_FORMAT));
+    verifySet(graph.getSiblings(graph.getNodeByIndex(43)), 42, 44, 48);
+    verifySet(graph.getSiblings(graph.getNodeByIndex(10))); // empty set
+    verifySet(graph.getSiblings(graph.getNodeByIndex(42)), 43, 44, 48);
+  }
+
+  public void verifySet(Collection<IndexedWord> nodes, int ... expected) {
+    Set<Integer> results = Generics.newTreeSet();
+    for (IndexedWord node : nodes) {
+      results.add(node.index());
+    }
+    Set<Integer> expectedIndices = Generics.newTreeSet();
+    for (Integer index : expected) {
+      expectedIndices.add(index);
+    }
+    assertEquals(expectedIndices, results);
   }
 }
