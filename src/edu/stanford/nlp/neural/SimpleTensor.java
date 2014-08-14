@@ -18,7 +18,7 @@ import org.ejml.simple.SimpleMatrix;
  * @author Richard Socher
  */
 public class SimpleTensor implements Serializable {
-  private SimpleMatrix[] slices;
+  private final SimpleMatrix[] slices;
 
   final int numRows;
   final int numCols;
@@ -284,6 +284,16 @@ public class SimpleTensor implements Serializable {
     public void remove() {
       throw new UnsupportedOperationException();
     }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder result = new StringBuilder();
+    for (int slice = 0; slice < numSlices; ++slice) {
+      result.append("Slice " + slice + "\n");
+      result.append(slices[slice]);
+    }
+    return result.toString();
   }
 
   private static final long serialVersionUID = 1;

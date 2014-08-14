@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
+import java.util.Set;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
 
@@ -8,8 +9,14 @@ import edu.stanford.nlp.trees.Tree;
  * Transition that finishes the processing of a state
  */
 public class FinalizeTransition implements Transition {
+  private final Set<String> rootStates;
+
+  public FinalizeTransition(Set<String> rootStates) {
+    this.rootStates = rootStates;
+  }
+
   public boolean isLegal(State state, List<ParserConstraint> constraints) {
-    boolean legal = !state.finished && state.tokenPosition >= state.sentence.size() && state.stack.size() == 1;
+    boolean legal = !state.finished && state.tokenPosition >= state.sentence.size() && state.stack.size() == 1 && rootStates.contains(state.stack.peek().value());
     if (!legal || constraints == null) {
       return legal;
     }
@@ -22,6 +29,7 @@ public class FinalizeTransition implements Transition {
         return false;
       }
     }
+
     return true;
   }
 

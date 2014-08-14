@@ -161,12 +161,12 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   /**
-   * The LOCATION on Ontario Place should not be overwritten since Ontario (STATE_OR_PROVINCE)
-   * does not span Ontario Place.  Native American Church will overwrite ORGANIZATION with
+   * The LOCATION on Ontario Lake should not be overwritten since Ontario (STATE_OR_PROVINCE)
+   * does not span Ontario Lake.  Native American Church will overwrite ORGANIZATION with
    * RELIGION.
    */
   public void testOverwrite() throws Exception {
-    String str = "I like Ontario Place , and I like the Native American Church , too .";
+    String str = "I like Ontario Lake , and I like the Native American Church , too .";
     Annotation document = createDocument(str);
     annotator.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
