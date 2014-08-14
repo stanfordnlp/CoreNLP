@@ -202,6 +202,9 @@ public class MachineReadingProperties {
   @Option(name="L1Reg")
   static public boolean L1Reg = false;
 
+  @Option(name="L2Reg")
+  static public boolean L2Reg = true;
+
   @Option(name="L1RegLambda")
   static public double L1RegLambda = 1.0;
 }
