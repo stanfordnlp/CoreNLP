@@ -98,7 +98,10 @@ public class MachineReadingProperties {
   
   @Option(name="relationExtractionPostProcessorClass",gloss="additional (probably domain-dependent) annotator to postprocess relations")
   static public Class<Extractor> relationExtractionPostProcessorClass;
-  
+
+  @Option(name="relationClassifier",gloss="relation extractor class to use")
+  static public Class<? extends BasicRelationExtractor> relationClassifier = edu.stanford.nlp.ie.machinereading.BasicRelationExtractor.class;
+
   /*
    * event extraction options
    */
