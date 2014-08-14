@@ -131,6 +131,11 @@ public abstract class MapFactory<K,V> implements Serializable {
     }
 
     @Override
+    public Set<K> newSet() {
+      return Generics.newHashSet();
+    }
+
+    @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
       map = Generics.newHashMap();
       return map;
@@ -160,6 +165,11 @@ public abstract class MapFactory<K,V> implements Serializable {
     }
 
     @Override
+    public Set<K> newSet() {
+      return Collections.newSetFromMap(new IdentityHashMap<K, Boolean>());
+    }
+
+    @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
       map = new IdentityHashMap<K1,V1>();
       return map;
@@ -186,6 +196,11 @@ public abstract class MapFactory<K,V> implements Serializable {
     @Override
     public Map<K,V> newMap(int initCapacity) {
       return new WeakHashMap<K,V>(initCapacity);
+    }
+
+    @Override
+    public Set<K> newSet() {
+      return Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
     }
 
 
@@ -218,6 +233,11 @@ public abstract class MapFactory<K,V> implements Serializable {
       return newMap();
     }
 
+    @Override
+    public Set<K> newSet() {
+      return new TreeSet<K>();
+    }
+
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
@@ -246,6 +266,11 @@ public abstract class MapFactory<K,V> implements Serializable {
     @Override
     public Map<K,V> newMap(int initCapacity) {
       return newMap();
+    }
+
+    @Override
+    public Set<K> newSet() {
+      return new LinkedHashSet<K>();
     }
 
 
@@ -279,6 +304,11 @@ public abstract class MapFactory<K,V> implements Serializable {
     }
 
     @Override
+    public Set<K> newSet() {
+      return new ArraySet<K>();
+    }
+
+    @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1, V1> map) {
       return new ArrayMap<K1,V1>();
     }
@@ -306,6 +336,11 @@ public abstract class MapFactory<K,V> implements Serializable {
    * @return A new non-parameterized map of a particular sort with an initial capacity
    */
   public abstract Map<K,V> newMap(int initCapacity);
+
+  /**
+   * A set with the same <code>K</code> parameterization of the Maps.
+   */
+  public abstract Set<K> newSet();
 
   /**
    * A method to get a parameterized (genericized) map out.
