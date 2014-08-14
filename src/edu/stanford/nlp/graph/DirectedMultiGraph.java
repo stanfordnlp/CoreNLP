@@ -3,7 +3,9 @@ package edu.stanford.nlp.graph;
 import java.util.*;
 
 import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.MapFactory;
 
 /**
  * Simple graph library; this is directed for now. This class focuses on time
@@ -24,9 +26,18 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
   final Map<V, Map<V, List<E>>> incomingEdges;
 
+  final MapFactory<V, Map<V, List<E>>> outerMapFactory;
+  final MapFactory<V, List<E>> innerMapFactory;
+
   public DirectedMultiGraph() {
-    outgoingEdges = Generics.newHashMap();
-    incomingEdges = Generics.newHashMap();
+    this(MapFactory.<V, Map<V, List<E>>>hashMapFactory(), MapFactory.<V, List<E>>hashMapFactory());
+  }
+
+  public DirectedMultiGraph(MapFactory<V, Map<V, List<E>>> outerMapFactory, MapFactory<V, List<E>> innerMapFactory) {
+    this.outerMapFactory = outerMapFactory;
+    this.innerMapFactory = innerMapFactory;
+    this.outgoingEdges = outerMapFactory.newMap();
+    this.incomingEdges = outerMapFactory.newMap();
   }
 
   /**
@@ -36,17 +47,16 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    * @param graph The graph to copy into this object.
    */
   public DirectedMultiGraph(DirectedMultiGraph<V,E> graph) {
-    outgoingEdges = Generics.newHashMap();
-    incomingEdges = Generics.newHashMap();
+    this(graph.outerMapFactory, graph.innerMapFactory);
     for (Map.Entry<V, Map<V, List<E>>> map : graph.outgoingEdges.entrySet()) {
-      Map<V, List<E>> edgesCopy = Generics.newHashMap();
+      Map<V, List<E>> edgesCopy = innerMapFactory.newMap();
       for (Map.Entry<V, List<E>> entry : map.getValue().entrySet()) {
         edgesCopy.put(entry.getKey(), Generics.newArrayList(entry.getValue()));
       }
       this.outgoingEdges.put(map.getKey(), edgesCopy);
     }
     for (Map.Entry<V, Map<V, List<E>>> map : graph.incomingEdges.entrySet()) {
-      Map<V, List<E>> edgesCopy = Generics.newHashMap();
+      Map<V, List<E>> edgesCopy = innerMapFactory.newMap();
       for (Map.Entry<V, List<E>> entry : map.getValue().entrySet()) {
         edgesCopy.put(entry.getKey(), Generics.newArrayList(entry.getValue()));
       }
@@ -79,17 +89,17 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   public boolean addVertex(V v) {
     if (outgoingEdges.containsKey(v))
       return false;
-    outgoingEdges.put(v, Generics.<V, List<E>>newHashMap());
-    incomingEdges.put(v, Generics.<V, List<E>>newHashMap());
+    outgoingEdges.put(v, innerMapFactory.newMap());
+    incomingEdges.put(v, innerMapFactory.newMap());
     return true;
   }
 
   private Map<V, List<E>> getOutgoingEdgesMap(V v) {
     Map<V, List<E>> map = outgoingEdges.get(v);
     if (map == null) {
-      map = Generics.<V, List<E>>newHashMap();
+      map = innerMapFactory.newMap();
       outgoingEdges.put(v, map);
-      incomingEdges.put(v, Generics.<V, List<E>>newHashMap());
+      incomingEdges.put(v, innerMapFactory.newMap());
     }
     return map;
   }
@@ -97,9 +107,9 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   private Map<V, List<E>> getIncomingEdgesMap(V v) {
     Map<V, List<E>> map = incomingEdges.get(v);
     if (map == null) {
-      outgoingEdges.put(v, Generics.<V, List<E>>newHashMap());
+      outgoingEdges.put(v, innerMapFactory.newMap());
       map = Generics.<V, List<E>>newHashMap();
-      incomingEdges.put(v, map);
+      incomingEdges.put(v, innerMapFactory.newMap());
     }
     return map;
   }
@@ -273,7 +283,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     if (children == null && parents == null)
       return null;
-    Set<V> neighbors = Generics.newHashSet();
+    Set<V> neighbors = innerMapFactory.newSet();
     neighbors.addAll(children);
     neighbors.addAll(parents);
     return neighbors;
