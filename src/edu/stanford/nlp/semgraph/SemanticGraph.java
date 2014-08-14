@@ -29,19 +29,22 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * objects for nodes.
  * <p>
  * Notes:
- * <br/>
+ * <br>
  * The root is not at present represented as a vertex in the graph.
  * At present you need to get a root/roots
  * from the separate roots variable and to know about it.
  * This should maybe be changed, because otherwise, doing things like
  * simply getting the set of nodes or edges from the graph doesn't give
  * you root nodes or edges.
- * <br/>
+ * <br>
  * Given the kinds of representations that we normally use with
  * typedDependenciesCollapsed, there can be (small) cycles in a
  * SemanticGraph, and these cycles may involve the node that is conceptually the
  * root of the graph, so there may be no node without a parent node. You can
  * better get at the root(s) via the variable and methods provided.
+ * <br>
+ * There is no mechanism for returning all edges at once (eg <code>edgeSet()</code>).  
+ * This is intentional.  Use <code>edgeIterable()</code> to iterate over the edges if necessary.
  *
  * @author Christopher Cox
  * @author Teg Grenager
@@ -112,23 +115,6 @@ public class SemanticGraph implements Serializable {
   public Set<IndexedWord> vertexSet() {
     return graph.getAllVertices();
   }
-
-  /**
-   * Return a set of all the edges in the graph.  The set does not
-   * already exist in the graph data structure, so this method builds
-   * it.  Therefore, it is expensive; call edgeIterable() if possible.
-   */
-  public Set<SemanticGraphEdge> getEdgeSet() {
-    Set<SemanticGraphEdge> edges = Generics.newHashSet();
-    for (SemanticGraphEdge edge : edgeIterable()) {
-      edges.add(edge);
-    }
-    return edges;
-  }
-
-  // public Set<SemanticGraphEdge> edgeSet() {
-  //   return graph.edgeSet();
-  // }
 
   public boolean removeEdge(SemanticGraphEdge e) {
     return graph.removeEdge(e.getSource(), e.getTarget(), e);
