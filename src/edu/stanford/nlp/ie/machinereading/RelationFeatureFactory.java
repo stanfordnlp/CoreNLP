@@ -57,7 +57,7 @@ public class RelationFeatureFactory implements Serializable {
     BASIC, COLLAPSED, COLLAPSED_CCPROCESSED
   }
 
-  private static final List<String> dependencyFeatures = Collections.unmodifiableList(Arrays.asList(
+  protected static final List<String> dependencyFeatures = Collections.unmodifiableList(Arrays.asList(
           "dependency_path_lowlevel","dependency_path_length","dependency_path_length_binary",
           "verb_in_dependency_path","dependency_path","dependency_path_words","dependency_paths_to_verb",
           "dependency_path_stubs_to_verb",
@@ -214,7 +214,7 @@ public class RelationFeatureFactory implements Serializable {
         }
         String pathString = pathStringBuilder.toString();
         if(logger != null && ! rel.getType().equals(RelationMention.UNRELATED)) logger.info("full_tree_path: " + pathString);
-        features.setCount(pathString, 1.0);
+        features.setCount("treepath:"+pathString, 1.0);
       } else {
         System.err.println("WARNING: found weird argument offsets. Most likely because arguments appear in different sentences than the relation:");
         System.err.println("ARG0: " + arg0);
@@ -915,12 +915,12 @@ public class RelationFeatureFactory implements Serializable {
    * @param type
    * @return true if types contains type
    */
-  private static boolean usingFeature(final List<String> types, List<String> checklist, String type) {
+  protected static boolean usingFeature(final List<String> types, List<String> checklist, String type) {
     checklist.remove(type);
     return types.contains(type) || types.contains("all");
   }
 
-  private static GrammaticalRelation generalizeRelation(GrammaticalRelation gr) {
+  protected static GrammaticalRelation generalizeRelation(GrammaticalRelation gr) {
     final GrammaticalRelation[] GENERAL_RELATIONS = { EnglishGrammaticalRelations.SUBJECT,
             EnglishGrammaticalRelations.COMPLEMENT, EnglishGrammaticalRelations.CONJUNCT,
             EnglishGrammaticalRelations.MODIFIER, };
