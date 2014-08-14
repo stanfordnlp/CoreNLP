@@ -8,6 +8,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringParsingTask;
 import edu.stanford.nlp.util.StringUtils;
@@ -56,9 +57,13 @@ public class SemanticGraph implements Serializable {
   /**
    * The distinguished root vertices, if known.
    */
-  private Collection<IndexedWord> roots;
+  private final Collection<IndexedWord> roots;
 
   private final DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
+
+  private static final MapFactory<IndexedWord, Map<IndexedWord, List<SemanticGraphEdge>>> outerMapFactory = MapFactory.hashMapFactory();
+  private static final MapFactory<IndexedWord, List<SemanticGraphEdge>> innerMapFactory = MapFactory.hashMapFactory();
+  private static final MapFactory<IndexedWord, IndexedWord> wordMapFactory = MapFactory.hashMapFactory();
 
   public int edgeCount() {
     return graph.getNumEdges();
@@ -650,7 +655,7 @@ public class SemanticGraph implements Serializable {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = Generics.newHashSet();
+    Set<IndexedWord> descendantSet = wordMapFactory.newSet();
     descendantsHelper(vertex, descendantSet);
     return descendantSet;
   }
@@ -865,8 +870,8 @@ public class SemanticGraph implements Serializable {
    */
   public List<IndexedWord> topologicalSort() {
     List<IndexedWord> result = Generics.newArrayList();
-    Set<IndexedWord> temporary = Generics.newHashSet();
-    Set<IndexedWord> permanent = Generics.newHashSet();
+    Set<IndexedWord> temporary = wordMapFactory.newSet();
+    Set<IndexedWord> permanent = wordMapFactory.newSet();
     for (IndexedWord vertex : vertexSet()) {
       if (!temporary.contains(vertex)) {
         topologicalSortHelper(vertex, temporary, permanent, result);
@@ -1094,9 +1099,8 @@ public class SemanticGraph implements Serializable {
   }
 
   public Set<IndexedWord> getLeafVertices() {
-    Set<IndexedWord> result = Generics.newHashSet();
-    Set<IndexedWord> vertices = vertexSet();
-    for (IndexedWord v : vertices) {
+    Set<IndexedWord> result = wordMapFactory.newSet();
+    for (IndexedWord v : vertexSet()) {
       if (outDegree(v) == 0) {
         result.add(v);
       }
@@ -1112,10 +1116,11 @@ public class SemanticGraph implements Serializable {
    * @return true if the graph contains no cycles.
    */
   public boolean isDag() {
-    Set<IndexedWord> unused = Generics.newHashSet(vertexSet());
+    Set<IndexedWord> unused = wordMapFactory.newSet();
+    unused.addAll(vertexSet());
     while (!unused.isEmpty()) {
       IndexedWord arbitrary = unused.iterator().next();
-      boolean result = isDagHelper(arbitrary, unused, Generics.<IndexedWord>newHashSet());
+      boolean result = isDagHelper(arbitrary, unused, wordMapFactory.newSet());
       if (result) {
         return false;
       }
@@ -1199,12 +1204,13 @@ public class SemanticGraph implements Serializable {
     }
 
     StringBuilder sb = new StringBuilder();
-    Set<IndexedWord> used = Generics.newHashSet();
+    Set<IndexedWord> used = wordMapFactory.newSet();
     for (IndexedWord root : rootNodes) {
       sb.append("-> ").append(root.toString(wordFormat)).append(" (root)\n");
       recToString(root, wordFormat, sb, 1, used);
     }
-    Set<IndexedWord> nodes = Generics.newHashSet(vertexSet());
+    Set<IndexedWord> nodes = wordMapFactory.newSet();
+    nodes.addAll(vertexSet());
     nodes.removeAll(used);
     while (!nodes.isEmpty()) {
       IndexedWord node = nodes.iterator().next();
@@ -1483,7 +1489,7 @@ public class SemanticGraph implements Serializable {
 
   public String toCompactString(boolean showTags) {
     StringBuilder sb = new StringBuilder();
-    Set<IndexedWord> used = Generics.newHashSet();
+    Set<IndexedWord> used = wordMapFactory.newSet();
     Collection<IndexedWord> roots = getRoots();
     if (roots.isEmpty()) {
       if (size() == 0) {
@@ -1623,8 +1629,8 @@ public class SemanticGraph implements Serializable {
   }
 
   public SemanticGraph() {
-    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
-    roots = Generics.newHashSet();
+    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
+    roots = wordMapFactory.newSet();
   }
 
   /**
@@ -1642,19 +1648,19 @@ public class SemanticGraph implements Serializable {
    */
   public SemanticGraph(SemanticGraph g,
                        Map<IndexedWord, IndexedWord> prevToNewMap) {
-    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
-    Collection<IndexedWord> oldRoots =
-      new ArrayList<IndexedWord>(g.getRoots());
-    if (prevToNewMap == null)
-      prevToNewMap = Generics.newHashMap();
+    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
+    if (prevToNewMap == null) {
+      prevToNewMap = wordMapFactory.newMap();
+    }
     Set<IndexedWord> vertexes = g.vertexSet();
     for (IndexedWord vertex : vertexes) {
       IndexedWord newVertex = new IndexedWord(vertex);
       addVertex(newVertex);
       prevToNewMap.put(vertex, newVertex);
     }
-    roots = Generics.newHashSet();
-    for (IndexedWord oldRoot : oldRoots) {
+
+    roots = wordMapFactory.newSet();
+    for (IndexedWord oldRoot : g.getRoots()) {
       roots.add(prevToNewMap.get(oldRoot));
     }
     for (SemanticGraphEdge edge : g.edgeIterable()) {
@@ -1668,9 +1674,8 @@ public class SemanticGraph implements Serializable {
    * This is the constructor used by the parser.
    */
   public SemanticGraph(Collection<TypedDependency> dependencies) {
-    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
-
-    roots = Generics.newHashSet();
+    graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
+    roots = wordMapFactory.newSet();
     
     Map<Integer, IndexedWord> vertices = Generics.newHashMap();
 
