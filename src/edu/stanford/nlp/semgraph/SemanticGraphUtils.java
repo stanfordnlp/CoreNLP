@@ -132,7 +132,7 @@ public class SemanticGraphUtils {
   public static List<IndexedWord> getChildrenWithRelnPrefix(SemanticGraph graph, IndexedWord vertex, String relnPrefix) {
     if (vertex.equals(IndexedWord.NO_WORD))
       return new ArrayList<IndexedWord>();
-    if (!graph.vertexSet().contains(vertex)) {
+    if (!graph.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     List<IndexedWord> childList = new ArrayList<IndexedWord>();
@@ -150,7 +150,7 @@ public class SemanticGraphUtils {
   public static List<IndexedWord> getChildrenWithRelnPrefix(SemanticGraph graph, IndexedWord vertex, Collection<String> relnPrefixes) {
     if (vertex.equals(IndexedWord.NO_WORD))
       return new ArrayList<IndexedWord>();
-    if (!graph.vertexSet().contains(vertex)) {
+    if (!graph.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     List<IndexedWord> childList = new ArrayList<IndexedWord>();
@@ -238,7 +238,7 @@ public class SemanticGraphUtils {
    * Finds the descendents of the given node in graph, avoiding the given set of nodes
    */
   public static Set<IndexedWord> tabuDescendants(SemanticGraph sg, IndexedWord vertex, Collection<IndexedWord> tabu) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -254,7 +254,7 @@ public class SemanticGraphUtils {
    */
   public static Set<IndexedWord> tabuDescendants(SemanticGraph sg, IndexedWord vertex, Collection<IndexedWord> tabu,
                                                  Collection<GrammaticalRelation> tabuRelns) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -265,7 +265,7 @@ public class SemanticGraphUtils {
 
   public static Set<IndexedWord> descendantsTabuRelns(SemanticGraph sg, IndexedWord vertex,
                                                       Collection<GrammaticalRelation> tabuRelns) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -276,7 +276,7 @@ public class SemanticGraphUtils {
 
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
       Collection<GrammaticalRelation> tabuRelns, IndexedWordUnaryPred tabuTest) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -287,7 +287,7 @@ public class SemanticGraphUtils {
 
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
       Collection<IndexedWord> tabuNodes, Collection<GrammaticalRelation> tabuRelns, IndexedWordUnaryPred tabuTest) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search

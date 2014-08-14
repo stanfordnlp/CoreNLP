@@ -1360,7 +1360,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(dependency.getRoots().isEmpty()) return null;
     // root relation
     if(dependency.getFirstRoot().equals(headIndexedWord)) return "root";
-    if(!dependency.vertexSet().contains(dependency.getParent(headIndexedWord))) return null;
+    if(!dependency.containsVertex(dependency.getParent(headIndexedWord))) return null;
     GrammaticalRelation relation = dependency.reln(dependency.getParent(headIndexedWord), headIndexedWord);
 
     // adjunct relations
