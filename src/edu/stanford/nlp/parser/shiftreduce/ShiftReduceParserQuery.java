@@ -55,7 +55,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   }
 
   private boolean parseInternal() {
-    final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
+    final int maxBeamSize = parser.op.testOptions().beamSize;
 
     success = true;
     unparsable = false;

@@ -61,7 +61,7 @@ public class ParserAnnotatorUtils {
       SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), docID, index);
       if (verbose) {
         System.err.println("SDs:");
-        System.err.println(deps.toString(SemanticGraph.OutputFormat.LIST));
+        System.err.println(deps.toString("plain"));
       }
       sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
       sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);

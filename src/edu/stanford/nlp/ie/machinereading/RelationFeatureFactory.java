@@ -929,6 +929,9 @@ public class RelationFeatureFactory implements Serializable {
         return generalGR;
       }
     }
+    if (gr.equals(EnglishGrammaticalRelations.CONTROLLING_SUBJECT)) {
+      return EnglishGrammaticalRelations.SUBJECT;
+    }
     return gr;
   }
 

@@ -1102,18 +1102,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   @Override
-  public void dumpFeatures(Collection<List<IN>> docs) {
-    if (flags.exportFeatures != null) {
-      Timing timer = new Timing();
-      timer.start();
-      CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
-      featureExporter.printFeatures(flags.exportFeatures, docs);
-      long elapsedMs = timer.stop();
-      System.err.println("Time to export features: " + Timing.toSecondsString(elapsedMs) + " seconds");
-    }
-  }
-
-  @Override
   public List<IN> classify(List<IN> document) {
     if (flags.doGibbs) {
       try {
@@ -1611,7 +1599,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     if (flags.exportFeatures != null) {
-      dumpFeatures(docs);
+      timer.start();
+      CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
+      featureExporter.printFeatures(flags.exportFeatures, docs);
+      elapsedMs = timer.stop();
+      System.err.println("Time to export features: " + Timing.toSecondsString(elapsedMs) + " seconds");
     }
 
     for (int i = 0; i <= flags.numTimesPruneFeatures; i++) {
@@ -2980,7 +2972,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       } else if (crf.flags.printLabelValue) {
         crf.printLabelInformation(testFile, readerAndWriter);
       } else {
-        crf.classifyAndWriteAnswers(testFile, readerAndWriter, true);
+        crf.classifyAndWriteAnswers(testFile, readerAndWriter);
       }
     }
 
@@ -2989,7 +2981,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (String filename : testFiles.split(",")) {
         files.add(new File(filename));
       }
-      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
+      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter());
     }
 
     if (textFile != null) {

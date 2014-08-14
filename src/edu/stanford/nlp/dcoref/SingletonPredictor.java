@@ -17,6 +17,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
@@ -80,7 +81,7 @@ public class SingletonPredictor {
           // Ignore verbal mentions
           if(mention.headWord.tag().startsWith("V")) continue;
 
-          CoreLabel head = mention.dependency.
+          IndexedWord head = mention.dependency.
               getNodeByIndexSafe(mention.headWord.index());
           if(head == null) continue;          
           ArrayList<String> feats = mention.getSingletonFeatures(dict);
@@ -96,8 +97,8 @@ public class SingletonPredictor {
       }      
       for(Mention predicted_men : document.allPredictedMentions.values()){
         SemanticGraph dep = predicted_men.dependency;
-        CoreLabel head = dep.getNodeByIndexSafe(predicted_men.headWord.index());
-        if(head == null) continue;
+        IndexedWord head = dep.getNodeByIndexSafe(predicted_men.headWord.index());
+        if(head == null || !dep.vertexSet().contains(head)) continue;
 
         // Ignore verbal mentions
         if(predicted_men.headWord.tag().startsWith("V")) continue;

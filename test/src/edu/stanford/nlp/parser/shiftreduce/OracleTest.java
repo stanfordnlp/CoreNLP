@@ -7,7 +7,6 @@ import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -52,13 +51,13 @@ public class OracleTest extends TestCase {
    */
   public void testEndToEndCompoundUnaries() {
     List<Tree> binarizedTrees = buildTestTreebank();
-    Oracle oracle = new Oracle(binarizedTrees, true, Collections.singleton("ROOT"));
+    Oracle oracle = new Oracle(binarizedTrees, true);
     runEndToEndTest(binarizedTrees, oracle);
   }
 
   public void testEndToEndSingleUnaries() {
     List<Tree> binarizedTrees = buildTestTreebank();
-    Oracle oracle = new Oracle(binarizedTrees, false, Collections.singleton("ROOT"));
+    Oracle oracle = new Oracle(binarizedTrees, false);
     runEndToEndTest(binarizedTrees, oracle);
   }
 

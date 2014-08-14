@@ -31,7 +31,7 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
   public static final String VALUE_FORMAT = "VALUE_FORMAT";
   public static final String COMPLETE_FORMAT = "COMPLETE_FORMAT";
 
-  private static final String printFormat = WORD_TAG_FORMAT;
+  private static String printFormat = WORD_TAG_FORMAT;
 
   /**
    * Default constructor; uses {@link CoreLabel} default constructor
@@ -222,6 +222,10 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
   @Override
   public String toString() {
     return toString(printFormat);
+  }
+
+  public static void setPrintFormat(String printFormat) {
+    IndexedWord.printFormat = printFormat;
   }
 
   /**

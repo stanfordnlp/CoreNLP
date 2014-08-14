@@ -85,11 +85,11 @@ public class SemanticGraphPrinter {
         System.out.println("TEST SEMANTIC GRAPH - graph ----------------------------");
         System.out.println(g1.toString());
         System.out.println("readable ----------------------------");
-        System.out.println(g1.toString(SemanticGraph.OutputFormat.READABLE));
+        System.out.println(g1.toString("readable"));
         System.out.println("List of dependencies ----------------------------");
         System.out.println(g1.toList());
         System.out.println("xml ----------------------------");
-        System.out.println(g1.toString(SemanticGraph.OutputFormat.XML));
+        System.out.println(g1.toString("xml"));
         System.out.println("dot ----------------------------");
         System.out.println(g1.toDotFormat());
         System.out.println("dot (simple) ----------------------------");

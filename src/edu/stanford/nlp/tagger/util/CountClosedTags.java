@@ -1,15 +1,19 @@
 package edu.stanford.nlp.tagger.util;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.StringTokenizer;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.tagger.io.TaggedFileReader;
@@ -74,9 +78,9 @@ public class CountClosedTags {
   final boolean printWords;
 
   /**
-   * Tag separator...
+   * Tag separator... TODO, make this a constant
    */
-  private static final String tagSeparator = "_";
+  static final String tagSeparator = "_";
 
   // intended to be a standalone program, not a class
   private CountClosedTags(Properties props) {
@@ -84,26 +88,28 @@ public class CountClosedTags {
     if (tagList != null) {
       closedTags = new TreeSet<String>();
       String[] pieces = tagList.split("\\s+");
-      Collections.addAll(closedTags, pieces);
+      for (String tag : pieces) {
+        closedTags.add(tag);
+      }
     } else {
       closedTags = null;
     }
 
     if (props.containsKey(TRAINING_RATIO_PROPERTY)) {
-      trainingRatio =
+      trainingRatio = 
         Double.valueOf(props.getProperty(TRAINING_RATIO_PROPERTY));
     } else {
       trainingRatio = DEFAULT_TRAINING_RATIO;
     }
 
-    printWords = Boolean.valueOf(props.getProperty(PRINT_WORDS_PROPERTY,
+    printWords = Boolean.valueOf(props.getProperty(PRINT_WORDS_PROPERTY, 
                                                    "false"));
-  }
+  } 
 
   /**
    * Count how many sentences there are in filename
    */
-  private static int countSentences(TaggedFileRecord file)
+  int countSentences(TaggedFileRecord file) 
     throws IOException
   {
     int count = 0;
@@ -116,7 +122,7 @@ public class CountClosedTags {
    * Given a line, split it into tagged words and add each word to
    * the given tagWordMap
    */
-  void addTaggedWords(List<TaggedWord> line,
+  void addTaggedWords(List<TaggedWord> line, 
                       Map<String, Set<String>> tagWordMap) {
     for (TaggedWord taggedWord : line) {
       String word = taggedWord.word();
@@ -127,7 +133,7 @@ public class CountClosedTags {
         }
         tagWordMap.get(tag).add(word);
       }
-    }
+    }    
   }
 
   /**
@@ -144,7 +150,7 @@ public class CountClosedTags {
     for (int i = 0; i < trainSentences && reader.hasNext(); ++i) {
       line = reader.next();
       addTaggedWords(line, trainingWords);
-      addTaggedWords(line, allWords);
+      addTaggedWords(line, allWords);   
     }
     while (reader.hasNext()) {
       line = reader.next();
@@ -155,7 +161,7 @@ public class CountClosedTags {
   /**
    * Count all the words in the given file for just allWords
    */
-  void countTestTags(TaggedFileRecord file)
+  void countTestTags(TaggedFileRecord file) 
     throws IOException
   {
     for (List<TaggedWord> line : file.reader()) {
@@ -176,7 +182,7 @@ public class CountClosedTags {
     for (String tag : tags) {
       int numTraining = (trainingWords.containsKey(tag) ?
                          trainingWords.get(tag).size() : 0);
-      int numTotal = (allWords.containsKey(tag) ?
+      int numTotal = (allWords.containsKey(tag) ? 
                       allWords.get(tag).size() : 0);
       if (numTraining == numTotal && numTraining > 0)
         successfulTags.add(tag);
@@ -204,13 +210,13 @@ public class CountClosedTags {
     System.out.println(successfulTags);
   }
 
-  public static final String TEST_FILE_PROPERTY = "testFile";
-  public static final String TRAIN_FILE_PROPERTY = "trainFile";
-  public static final String CLOSED_TAGS_PROPERTY = "closedTags";
-  public static final String TRAINING_RATIO_PROPERTY = "trainingRatio";
-  public static final String PRINT_WORDS_PROPERTY = "printWords";
+  static final public String TEST_FILE_PROPERTY = "testFile";
+  static final public String TRAIN_FILE_PROPERTY = "trainFile";
+  static final public String CLOSED_TAGS_PROPERTY = "closedTags";
+  static final public String TRAINING_RATIO_PROPERTY = "trainingRatio";
+  static final public String PRINT_WORDS_PROPERTY = "printWords";
 
-  private static final Set<String> knownArgs =
+  static final Set<String> knownArgs = 
     Generics.newHashSet(Arrays.asList(TEST_FILE_PROPERTY,
                                       TRAIN_FILE_PROPERTY,
                                       CLOSED_TAGS_PROPERTY,
@@ -219,24 +225,26 @@ public class CountClosedTags {
                                       TaggerConfig.ENCODING_PROPERTY,
                                       TaggerConfig.TAG_SEPARATOR_PROPERTY));
 
-  private static void help(String error) {
+  static void help(String error) {
     if (error != null && !error.equals("")) {
       System.err.println(error);
     }
     System.exit(2);
   }
 
-  private static void checkArgs(Properties props) {
+  static void checkArgs(Properties props) {
     if (!props.containsKey(TRAIN_FILE_PROPERTY)) {
       help("No " + TRAIN_FILE_PROPERTY + " specified");
     }
-    for (String arg : props.stringPropertyNames()) {
+    for (Object arg : props.keySet()) {
       if (!knownArgs.contains(arg))
         help("Unknown arg " + arg);
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  static public void main(String[] args) 
+    throws Exception
+  {
     System.setOut(new PrintStream(System.out, true, "UTF-8"));
     System.setErr(new PrintStream(System.err, true, "UTF-8"));
 
@@ -246,7 +254,7 @@ public class CountClosedTags {
     CountClosedTags cct = new CountClosedTags(config);
     String trainFiles = config.getProperty(TRAIN_FILE_PROPERTY);
     String testFiles = config.getProperty(TEST_FILE_PROPERTY);
-    List<TaggedFileRecord> files =
+    List<TaggedFileRecord> files = 
       TaggedFileRecord.createRecords(config, trainFiles);
     for (TaggedFileRecord file : files) {
       cct.countTrainingTags(file);

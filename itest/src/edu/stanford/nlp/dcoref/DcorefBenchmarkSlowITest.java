@@ -128,7 +128,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
 
     lowResults.setCount(BLANC_F1, 75.35);
     expectedResults.setCount(BLANC_F1, 75.39);
-    highResults.setCount(BLANC_F1, 75.42);
+    highResults.setCount(BLANC_F1, 75.4);
 
     lowResults.setCount(CONLL_SCORE, 59.6);
     expectedResults.setCount(CONLL_SCORE, 59.65);

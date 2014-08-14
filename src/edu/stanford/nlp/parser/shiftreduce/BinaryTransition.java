@@ -203,7 +203,6 @@ public class BinaryTransition implements Transition {
 
   @Override
   public int hashCode() {
-    // TODO: fix the hashcode for the side?  would require rebuilding all models
     switch(side) {
     case LEFT:
       return 97197711 ^ label.hashCode();
