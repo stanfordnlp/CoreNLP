@@ -26,7 +26,7 @@ public class BasicRelationExtractor implements Extractor {
 
   private static final Logger logger = Logger.getLogger(BasicRelationExtractor.class.getName());
 
-  private LinearClassifier<String, String> classifier;
+  protected LinearClassifier<String, String> classifier;
 
   @Option(name="featureCountThreshold", gloss="feature count threshold to apply to dataset")
   public int featureCountThreshold = 2;
@@ -49,12 +49,12 @@ public class BasicRelationExtractor implements Extractor {
    * If true, it creates automatically negative examples by generating all combinations between EntityMentions in a sentence
    * This is the common behavior, but for some domain (i.e., KBP) it must disabled. In these domains, the negative relation examples are created in the reader
    */
-  private boolean createUnrelatedRelations;
+  protected boolean createUnrelatedRelations;
 
   /** Verifies that predicted labels are compatible with the relation arguments */
   private LabelValidator validator;
 
-  private RelationMentionFactory relationMentionFactory;
+  protected RelationMentionFactory relationMentionFactory;
 
   public void setValidator(LabelValidator lv) { validator = lv; }
   public void setRelationExtractorClassifierType(String s) { relationExtractorClassifierType = s; }
@@ -143,7 +143,7 @@ public class BasicRelationExtractor implements Extractor {
     }
   }
 
-  private String classOf(Datum<String, String> datum, ExtractionObject rel) {
+  protected String classOf(Datum<String, String> datum, ExtractionObject rel) {
     Counter<String> probs = classifier.probabilityOf(datum);
     List<Pair<String, Double>> sortedProbs = Counters.toDescendingMagnitudeSortedListWithCounts(probs);
     double nrProb = probs.getCount(RelationMention.UNRELATED);
@@ -161,11 +161,11 @@ public class BasicRelationExtractor implements Extractor {
     return true;
   }
 
-  private Counter<String> probabilityOf(Datum<String, String> testDatum) {
+  protected Counter<String> probabilityOf(Datum<String, String> testDatum) {
     return classifier.probabilityOf(testDatum);
   }
 
-  private void justificationOf(Datum<String, String> testDatum, PrintWriter pw, String label) {
+  protected void justificationOf(Datum<String, String> testDatum, PrintWriter pw, String label) {
     classifier.justificationOf(testDatum, pw);
   }
 
@@ -173,7 +173,7 @@ public class BasicRelationExtractor implements Extractor {
    * Predict a relation for each pair of entities in the sentence; including relations of type unrelated.
    * This creates new RelationMention objects!
    */
-  private List<RelationMention> extractAllRelations(CoreMap sentence) {
+  protected List<RelationMention> extractAllRelations(CoreMap sentence) {
     List<RelationMention> extractions = new ArrayList<RelationMention>();
 
     List<RelationMention> cands = null;
@@ -282,7 +282,7 @@ public class BasicRelationExtractor implements Extractor {
     }
   }
 
-  private GeneralDataset<String, String> createDataset(Annotation corpus) {
+  protected GeneralDataset<String, String> createDataset(Annotation corpus) {
     GeneralDataset<String, String> dataset = new RVFDataset<String, String>();
 
     for (CoreMap sentence : corpus.get(CoreAnnotations.SentencesAnnotation.class)) {
