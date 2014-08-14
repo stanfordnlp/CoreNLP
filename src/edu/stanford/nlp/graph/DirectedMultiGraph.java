@@ -573,7 +573,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
    * @return A map representation of the graph.
    */
   public Map<V, List<E>> toMap() {
-    Map<V, List<E>> map = new HashMap<V, List<E>>();
+    Map<V, List<E>> map = innerMapFactory.newMap();
     for (V vertex : getAllVertices()) {
       map.put(vertex, getOutgoingEdges(vertex));
     }
