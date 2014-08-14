@@ -25,22 +25,22 @@ public class SentimentModel implements Serializable {
   /**
    * Nx2N+1, where N is the size of the word vectors
    */
-  public TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform;
+  public final TwoDimensionalMap<String, String, SimpleMatrix> binaryTransform;
 
   /**
    * 2Nx2NxN, where N is the size of the word vectors
    */
-  public TwoDimensionalMap<String, String, SimpleTensor> binaryTensors;
+  public final TwoDimensionalMap<String, String, SimpleTensor> binaryTensors;
 
   /**
    * CxN+1, where N = size of word vectors, C is the number of classes
    */
-  public TwoDimensionalMap<String, String, SimpleMatrix> binaryClassification;
+  public final TwoDimensionalMap<String, String, SimpleMatrix> binaryClassification;
 
   /**
    * CxN+1, where N = size of word vectors, C is the number of classes
    */
-  public Map<String, SimpleMatrix> unaryClassification;
+  public final Map<String, SimpleMatrix> unaryClassification;
 
   public Map<String, SimpleMatrix> wordVectors;
 
@@ -92,6 +92,76 @@ public class SentimentModel implements Serializable {
    * Will store various options specific to this model
    */
   final RNNOptions op;
+
+  /*
+  // An example of how you could read in old models with readObject to fix the serialization
+  // You would first read in the old model, then reserialize it
+  private void readObject(ObjectInputStream in)
+    throws IOException, ClassNotFoundException 
+  {
+    ObjectInputStream.GetField fields = in.readFields();
+    binaryTransform = ErasureUtils.uncheckedCast(fields.get("binaryTransform", null));
+
+    // transform binaryTensors
+    binaryTensors = TwoDimensionalMap.treeMap();
+    TwoDimensionalMap<String, String, edu.stanford.nlp.rnn.SimpleTensor> oldTensors = ErasureUtils.uncheckedCast(fields.get("binaryTensors", null));
+    for (String first : oldTensors.firstKeySet()) {
+      for (String second : oldTensors.get(first).keySet()) {
+        binaryTensors.put(first, second, new SimpleTensor(oldTensors.get(first, second).slices));
+      }
+    }
+
+    binaryClassification = ErasureUtils.uncheckedCast(fields.get("binaryClassification", null));
+    unaryClassification = ErasureUtils.uncheckedCast(fields.get("unaryClassification", null));
+    wordVectors = ErasureUtils.uncheckedCast(fields.get("wordVectors", null));
+
+    if (fields.defaulted("numClasses")) {
+      throw new RuntimeException();
+    }
+    numClasses = fields.get("numClasses", 0);
+
+    if (fields.defaulted("numHid")) {
+      throw new RuntimeException();
+    }
+    numHid = fields.get("numHid", 0);
+
+    if (fields.defaulted("numBinaryMatrices")) {
+      throw new RuntimeException();
+    }
+    numBinaryMatrices = fields.get("numBinaryMatrices", 0);
+
+    if (fields.defaulted("binaryTransformSize")) {
+      throw new RuntimeException();
+    }
+    binaryTransformSize = fields.get("binaryTransformSize", 0);
+
+    if (fields.defaulted("binaryTensorSize")) {
+      throw new RuntimeException();
+    }
+    binaryTensorSize = fields.get("binaryTensorSize", 0);
+
+    if (fields.defaulted("binaryClassificationSize")) {
+      throw new RuntimeException();
+    }
+    binaryClassificationSize = fields.get("binaryClassificationSize", 0);
+
+    if (fields.defaulted("numUnaryMatrices")) {
+      throw new RuntimeException();
+    }
+    numUnaryMatrices = fields.get("numUnaryMatrices", 0);
+
+    if (fields.defaulted("unaryClassificationSize")) {
+      throw new RuntimeException();
+    }
+    unaryClassificationSize = fields.get("unaryClassificationSize", 0);
+
+    rand = ErasureUtils.uncheckedCast(fields.get("rand", null));
+    op = ErasureUtils.uncheckedCast(fields.get("op", null));
+    op.classNames = op.DEFAULT_CLASS_NAMES;
+    op.equivalenceClasses = op.APPROXIMATE_EQUIVALENCE_CLASSES;
+    op.equivalenceClassNames = op.DEFAULT_EQUIVALENCE_CLASS_NAMES;
+  }
+  */
 
   /**
    * Given single matrices and sets of options, create the
