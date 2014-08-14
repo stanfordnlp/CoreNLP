@@ -335,10 +335,13 @@ FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a-zA-Z]{2,4}
 
+PAREN = -LRB-|-RRB-
+
 %%
 
 {ELLIPSIS}  { return getEllipsis(); }
 
+{PAREN}     |
 {FULLURL}   |
 {LIKELYURL} |
 {EMAIL}     |
