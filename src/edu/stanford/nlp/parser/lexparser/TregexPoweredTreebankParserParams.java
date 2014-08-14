@@ -9,11 +9,13 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -88,12 +90,12 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
    * Extra features which have been requested. Use
    * {@link #addFeature(String)} to add features.
    */
-  private final List<String> features;
+  private final Collection<String> features;
 
   public TregexPoweredTreebankParserParams(TreebankLanguagePack tlp) {
     super(tlp);
 
-    features = Arrays.asList(baselineAnnotationFeatures());
+    features = CollectionUtils.asSet(baselineAnnotationFeatures());
   }
 
   /**
@@ -124,7 +126,8 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
   }
 
   /**
-   * Enable an annotation feature.
+   * Enable an annotation feature. If the provided feature has already
+   * been enabled, this method does nothing.
    *
    * @param featureName
    * @throws java.lang.IllegalArgumentException If the provided feature
@@ -139,6 +142,16 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
         "did you call compileAnnotations?");
 
     features.add(featureName);
+  }
+
+  /**
+   * Disable a feature. If the feature was never enabled, this method
+   * returns without error.
+   *
+   * @param featureName
+   */
+  protected void removeFeature(String featureName) {
+    features.remove(featureName);
   }
 
   /**
