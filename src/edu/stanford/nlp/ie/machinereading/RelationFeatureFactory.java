@@ -643,12 +643,12 @@ public class RelationFeatureFactory implements Serializable {
     // dependency_path_lowlevel: Same but with finer-grained syntactic relations
     // e.g. "nsubj->  <-prep_in  <-nn"
     if (usingFeature(types, checklist, "dependency_path")) {
-      features.setCount(generalizedDependencyPath(edgePath, node0), 1.0);
+      features.setCount("dependency_path:"+generalizedDependencyPath(edgePath, node0), 1.0);
     }
     if (usingFeature(types, checklist, "dependency_path_lowlevel")) {
       String depLowLevel = dependencyPath(edgePath, node0);
       if(logger != null && ! rel.getType().equals(RelationMention.UNRELATED)) logger.info("dependency_path_lowlevel: " + depLowLevel);
-      features.setCount(depLowLevel, 1.0);
+      features.setCount("dependency_path_lowlevel:" + depLowLevel, 1.0);
     }
 
     List<String> pathLemmas = new ArrayList<String>();
@@ -684,9 +684,9 @@ public class RelationFeatureFactory implements Serializable {
           String lemma = Morphology.lemmaStatic(node.value(), node.tag(), true);
           String node1Path = generalizedDependencyPath(graph.getShortestUndirectedPathEdges(node, node1), node);
           String node0Path = generalizedDependencyPath(graph.getShortestUndirectedPathEdges(node0, node), node0);
-          features.setCount(node0Path + " " + lemma, 1.0);
-          features.setCount(lemma + " " + node1Path, 1.0);
-          features.setCount(node0Path + " " + lemma + " " + node1Path, 1.0);
+          features.setCount("dependency_paths_to_verb:" + node0Path + " " + lemma, 1.0);
+          features.setCount("dependency_paths_to_verb:" + lemma + " " + node1Path, 1.0);
+          features.setCount("dependency_paths_to_verb:" + node0Path + " " + lemma + " " + node1Path, 1.0);
         }
       }
     }
