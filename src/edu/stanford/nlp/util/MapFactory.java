@@ -75,7 +75,7 @@ public abstract class MapFactory<K,V> implements Serializable {
     return WEAK_HASH_MAP_FACTORY;
   }
 
-  /** Return a MapFactory that returns an TreeMap.
+  /** Return a MapFactory that returns a TreeMap.
    *  <i>Implementation note: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
@@ -86,6 +86,13 @@ public abstract class MapFactory<K,V> implements Serializable {
   @SuppressWarnings("unchecked")
   public static <K,V> MapFactory<K,V> treeMapFactory() {
     return TREE_MAP_FACTORY;
+  }
+
+  /** 
+   * Return a MapFactory that returns a TreeMap with the given Comparator.
+   */
+  public static <K,V> MapFactory<K,V> treeMapFactory(Comparator<? super K> comparator) {
+    return new TreeMapFactory<K,V>(comparator);
   }
 
   /** Return a MapFactory that returns an LinkedHashMap.
@@ -223,9 +230,19 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     private static final long serialVersionUID = -9138736068025818670L;
 
+    private final Comparator<? super K> comparator;
+
+    public TreeMapFactory() {
+      this.comparator = null;
+    }
+
+    public TreeMapFactory(Comparator<? super K> comparator) {
+      this.comparator = comparator;
+    }
+
     @Override
     public Map<K,V> newMap() {
-      return new TreeMap<K,V>();
+      return comparator == null ? new TreeMap<K,V>() : new TreeMap<K,V>(comparator);
     }
 
     @Override
@@ -235,24 +252,29 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     @Override
     public Set<K> newSet() {
-      return new TreeSet<K>();
+      return comparator == null ? new TreeSet<K>() : new TreeSet<K>(comparator);
     }
 
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
+      if (comparator == null) {
+        throw new UnsupportedOperationException();
+      }
       map = new TreeMap<K1,V1>();
       return map;
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
+      if (comparator == null) {
+        throw new UnsupportedOperationException();
+      }
       map = new TreeMap<K1,V1>();
       return map;
     }
 
   } // end class TreeMapFactory
-
 
   private static class LinkedHashMapFactory<K,V> extends MapFactory<K,V> {
 
