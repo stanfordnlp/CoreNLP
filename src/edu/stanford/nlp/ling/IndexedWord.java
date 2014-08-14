@@ -82,24 +82,6 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
 
 
   /**
-   * Copies the given label and then sets the docID, sentenceIndex,
-   * and Index; if these differ from those in label, the parameters
-   * will be used (not the label values).
-   *
-   * @param docID The document ID (arbitrary string)
-   * @param sentenceIndex The sentence number in the document (normally 0-based)
-   * @param index The index of the word in the sentence (normally 0-based)
-   * @param label The CoreLabel to initialize all other fields from.
-   */
-  public IndexedWord(String docID, int sentenceIndex, int index, CoreLabel label) {
-    this(label);
-    this.set(CoreAnnotations.DocIDAnnotation.class, docID);
-    this.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
-    this.set(CoreAnnotations.IndexAnnotation.class, index);
-  }
-
-
-  /**
    * This .equals is dependent only on docID, sentenceIndex, and index.
    * It doesn't consider the actual word value, but assumes that it is
    * validly represented by token position.

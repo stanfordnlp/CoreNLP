@@ -57,7 +57,20 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     Map<Integer, IndexedWord> nodes = Generics.newHashMap();
     for(IntermediateNode in: ig.nodes){
       CoreLabel token = sentence.get(in.index - 1); // index starts at 1!
-      IndexedWord word = new IndexedWord(in.docId, in.sentIndex, in.index, token);
+      IndexedWord word = new IndexedWord(token);
+
+      // for backwards compatibility - new annotations should have
+      // these fields set, but annotations older than August 2014 might not
+      if (word.docID() == null) {
+        word.setDocID(in.docId);
+      }
+      if (word.sentIndex() < 0) {
+        word.setSentIndex(in.sentIndex);
+      }
+      if (word.index() < 0) {
+        word.setIndex(in.index);
+      }
+
       word.set(CoreAnnotations.ValueAnnotation.class, word.get(CoreAnnotations.TextAnnotation.class));
       if(in.copyAnnotation >= 0){
         word.set(CoreAnnotations.CopyAnnotation.class, in.copyAnnotation);

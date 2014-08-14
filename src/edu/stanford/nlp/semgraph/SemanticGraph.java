@@ -1712,14 +1712,6 @@ public class SemanticGraph implements Serializable {
    * This is the constructor used by the parser.
    */
   public SemanticGraph(Collection<TypedDependency> dependencies) {
-    this(dependencies, "", 0);
-  }
-
-  /**
-   *
-   *
-   */
-  public SemanticGraph(Collection<TypedDependency> dependencies, String docID, int sentIndex) {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
     roots = Generics.newHashSet();
@@ -1734,12 +1726,12 @@ public class SemanticGraph implements Serializable {
       if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
         IndexedWord govVertex = vertices.get(gov.index());
         if (govVertex == null) {
-          govVertex = new IndexedWord(docID, sentIndex, gov.index(), gov.label());
+          govVertex = new IndexedWord(gov.label());
           vertices.put(gov.index(), govVertex);
         }
         IndexedWord depVertex = vertices.get(dep.index());
         if (depVertex == null) {
-          depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+          depVertex = new IndexedWord(dep.label());
           vertices.put(dep.index(), depVertex);
         }
         // It is unnecessary to call addVertex, since addEdge will
@@ -1750,7 +1742,7 @@ public class SemanticGraph implements Serializable {
       } else { //it's the root and we add it
         IndexedWord depVertex = vertices.get(dep.index());
         if (depVertex == null) {
-          depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+          depVertex = new IndexedWord(dep.label());
           vertices.put(dep.index(), depVertex);
           addVertex(depVertex);
         }
