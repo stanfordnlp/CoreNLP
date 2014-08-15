@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
@@ -813,29 +814,24 @@ public class SemanticGraph implements Serializable {
     // edges (rcmod), find the node that dominates the most nodes, and let
     // that be the new root. Note this implementation epitomizes K.I.S.S., and
     // is brain dead and non-optimal, and will require further work.
-    ClassicCounter<Pair<IndexedWord, IndexedWord>> nodeDists = new ClassicCounter<Pair<IndexedWord, IndexedWord>>();
-    TreeSet<IndexedWord> nodes = new TreeSet<IndexedWord>(vertexSet());
-
-    for (IndexedWord node1 : nodes) {
-      for (IndexedWord node2 : nodes) {
+    TwoDimensionalCounter<IndexedWord, IndexedWord> nodeDists = TwoDimensionalCounter.identityHashMapCounter();
+    for (IndexedWord node1 : vertexSet()) {
+      for (IndexedWord node2 : vertexSet()) {
         // want directed paths only
-        Pair<IndexedWord, IndexedWord> key = new Pair<IndexedWord, IndexedWord>(node1, node2);
         List<SemanticGraphEdge> path = getShortestDirectedPathEdges(node1, node2);
         if (path != null) {
           int dist = path.size();
-          nodeDists.setCount(key, dist);
+          nodeDists.setCount(node1, node2, dist);
         }
       }
     }
 
     // K.I.S.S. alg: just sum up and see who's on top, values don't have much
     // meaning outside of determining dominance.
-    ClassicCounter<IndexedWord> dominatedEdgeCount = new ClassicCounter<IndexedWord>();
-    TreeSet<IndexedWord> nodesList = new TreeSet<IndexedWord>(vertexSet());
-    for (IndexedWord outer : nodesList) {
-      for (IndexedWord inner : nodesList) {
-        Pair<IndexedWord, IndexedWord> key = new Pair<IndexedWord, IndexedWord>(outer, inner);
-        dominatedEdgeCount.incrementCount(outer, nodeDists.getCount(key));
+    ClassicCounter<IndexedWord> dominatedEdgeCount = ClassicCounter.identityHashMapCounter();
+    for (IndexedWord outer : vertexSet()) {
+      for (IndexedWord inner : vertexSet()) {
+        dominatedEdgeCount.incrementCount(outer, nodeDists.getCount(outer, inner));
       }
     }
 
@@ -890,19 +886,26 @@ public class SemanticGraph implements Serializable {
   }
 
 
+  /**
+   * Does the given <code>vertex</code> have at least one child with the given <code>reln<code> and the lemma <code>childLemma</code>?
+   */
   public boolean hasChild(IndexedWord vertex, GrammaticalRelation reln, String childLemma) {
     if (!containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
       if (edge.getRelation().equals(reln)) {
-        if (edge.getTarget().get(CoreAnnotations.LemmaAnnotation.class).equals(childLemma))
+        if (edge.getTarget().get(CoreAnnotations.LemmaAnnotation.class).equals(childLemma)) {
           return true;
+        }
       }
     }
     return false;
   }
 
+  /**
+   * Does the given <code>vertex</code> have at least one child with the given <code>reln<code>?
+   */
   public boolean hasChildWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (!containsVertex(vertex)) {
       throw new IllegalArgumentException();
