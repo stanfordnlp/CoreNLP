@@ -528,8 +528,11 @@ public class SemanticGraph implements Serializable {
   private List<IndexedWord> getPathToRoot(IndexedWord vertex, List<IndexedWord> used) {
     used.add(vertex);
 
-    Set<IndexedWord> parents = wordMapFactory.newSet();
-    parents.addAll(getParents(vertex));
+    // TODO: Apparently the order of the nodes in the path to the root
+    // makes a different for the RTE system.  Look into this some more
+    List<IndexedWord> parents = getParentList(vertex);
+    // Set<IndexedWord> parents = wordMapFactory.newSet();
+    // parents.addAll(getParents(vertex));
     parents.removeAll(used);
 
     if (roots.contains(vertex) || (parents.size() == 0)) {
