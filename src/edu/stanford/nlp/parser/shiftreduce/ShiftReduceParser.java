@@ -655,6 +655,12 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
     Tree tree = binarizedTrees.get(index);
 
+    ReorderingOracle reorderer = null;
+    if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
+        op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
+      reorderer = new ReorderingOracle(op);
+    }
+
     // TODO.  This training method seems to be working in that it
     // trains models just like the gold and early termination methods do.
     // However, it causes the feature space to go crazy.  Presumably
@@ -697,20 +703,27 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         }
         state = predicted.apply(state);
       }
-    } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM) {
+    } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
+               op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
       if (op.trainOptions().beamSize <= 0) {
         throw new IllegalArgumentException("Illegal beam size " + op.trainOptions().beamSize);
       }
-      List<Transition> transitions = transitionLists.get(index);
+      List<Transition> transitions = Generics.newLinkedList(transitionLists.get(index));
       PriorityQueue<State> agenda = new PriorityQueue<State>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State goldState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       agenda.add(goldState);
       int transitionCount = 0;
-      for (Transition goldTransition : transitions) {
+      while (transitions.size() > 0) {
+        Transition goldTransition = transitions.get(0);
+        Transition highestScoringTransitionFromGoldState = null;
+        double highestScoreFromGoldState = 0.0;
         PriorityQueue<State> newAgenda = new PriorityQueue<State>(op.trainOptions().beamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
         State highestScoringState = null;
         State highestCurrentState = null;
         for (State currentState : agenda) {
+          boolean isGoldState = (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM &&
+                                 goldState.areTransitionsEqual(currentState));
+
           List<String> features = featureFactory.featurize(currentState);
           Collection<ScoredObject<Integer>> stateTransitions = findHighestScoringTransitions(currentState, features, true, op.trainOptions().beamSize, null);
           for (ScoredObject<Integer> transition : stateTransitions) {
@@ -723,7 +736,21 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
               highestScoringState = newState;
               highestCurrentState = currentState;
             }
+            if (isGoldState && 
+                (highestScoringTransitionFromGoldState == null || transition.score() > highestScoreFromGoldState)) {
+              highestScoringTransitionFromGoldState = transitionIndex.get(transition.object());
+              highestScoreFromGoldState = transition.score();
+            }
           }
+        }
+
+        // This can happen if the REORDER_BEAM method backs itself
+        // into a corner, such as transitioning to something that
+        // can't have a FinalizeTransition applied.  This doesn't
+        // happen for the BEAM method because in that case the correct
+        // state (eg one with ROOT) isn't on the agenda so it stops.
+        if (highestScoringTransitionFromGoldState == null) {
+          break;
         }
 
         State newGoldState = goldTransition.apply(goldState, 0.0);
@@ -737,12 +764,29 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
           updates.add(new Update(featureFactory.featurize(highestCurrentState), -1, lastTransition, 1.0f));
           updates.add(new Update(goldFeatures, transitionIndex.indexOf(goldTransition), -1, 1.0f));
 
-          // If the correct state has fallen off the agenda, break
-          if (!findStateOnAgenda(newAgenda, newGoldState)) {
-            break;
+          if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM) {
+            // If the correct state has fallen off the agenda, break
+            if (!findStateOnAgenda(newAgenda, newGoldState)) {
+              break;
+            } else {
+              transitions.remove(0);
+            }
+          } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
+            if (!findStateOnAgenda(newAgenda, newGoldState)) {
+              if (!reorderer.reorder(goldState, highestScoringTransitionFromGoldState, transitions)) {
+                break;
+              }
+              newGoldState = highestScoringTransitionFromGoldState.apply(goldState);
+              if (!findStateOnAgenda(newAgenda, newGoldState)) {
+                break;
+              }
+            } else {
+              transitions.remove(0);
+            }
           }
         } else {
           ++numCorrect;
+          transitions.remove(0);
         }
 
         goldState = newGoldState;
@@ -751,10 +795,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION || 
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.GOLD) {
-      ReorderingOracle reorderer = null;
-      if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE) {
-        reorderer = new ReorderingOracle(op);
-      }
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       List<Transition> transitions = transitionLists.get(index);
       transitions = Generics.newLinkedList(transitions);
