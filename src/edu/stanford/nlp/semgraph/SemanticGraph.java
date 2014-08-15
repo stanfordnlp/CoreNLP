@@ -960,8 +960,8 @@ public class SemanticGraph implements Serializable {
   }
 
   /**
-   * Returns a set of all parents bearing a certain grammatical relation, or an
-   * empty set if none.
+   * Returns a list of all parents bearing a certain grammatical relation, or an
+   * empty list if none.
    */
   public Set<IndexedWord> getParentsWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (vertex.equals(IndexedWord.NO_WORD))
@@ -979,8 +979,8 @@ public class SemanticGraph implements Serializable {
   }
 
   /**
-   * Returns a set of all children bearing a certain grammatical relation, or
-   * an empty set if none.
+   * Returns a list of all children bearing a certain grammatical relation, or
+   * an empty list if none.
    */
   public Set<IndexedWord> getChildrenWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (vertex.equals(IndexedWord.NO_WORD))
@@ -998,8 +998,8 @@ public class SemanticGraph implements Serializable {
   }
 
   /**
-   * Returns a set of all children bearing one of a set of grammatical
-   * relations, or an empty set if none.
+   * Returns a list of all children bearing one of a set of grammatical
+   * relations, or an empty list if none.
    *
    * NOTE: this will only work for relation types that are classes. Those that
    * are collapsed are currently not handled correctly since they are identified
@@ -1144,6 +1144,30 @@ public class SemanticGraph implements Serializable {
 
     trail.remove(current);
     return false;
+  }
+
+  /**
+   * Inserts the given specific portion of an uncollapsed relation back into the
+   * targetList
+   *
+   * @param specific
+   *          Specific relation to put in.
+   * @param relnTgtNode
+   *          Node governed by the uncollapsed relation
+   * @param tgtList
+   *          Target List of words
+   */
+  private void insertSpecificIntoList(String specific, IndexedWord relnTgtNode, List<IndexedWord> tgtList) {
+    int currIndex = tgtList.indexOf(relnTgtNode);
+    Set<IndexedWord> descendents = descendants(relnTgtNode);
+    IndexedWord specificNode = new IndexedWord();
+    specificNode.set(CoreAnnotations.LemmaAnnotation.class, specific);
+    specificNode.set(CoreAnnotations.TextAnnotation.class, specific);
+    specificNode.set(CoreAnnotations.OriginalTextAnnotation.class, specific);
+    while ((currIndex >= 1) && descendents.contains(tgtList.get(currIndex - 1))) {
+      currIndex--;
+    }
+    tgtList.add(currIndex, specificNode);
   }
 
   // ============================================================================
@@ -1294,32 +1318,6 @@ public class SemanticGraph implements Serializable {
 
     return StringUtils.join(uncompressedList, " ");
   }
-
-  /**
-   * Inserts the given specific portion of an uncollapsed relation back into the
-   * targetList
-   *
-   * @param specific
-   *          Specific relation to put in.
-   * @param relnTgtNode
-   *          Node governed by the uncollapsed relation
-   * @param tgtList
-   *          Target List of words
-   */
-  private void insertSpecificIntoList(String specific, IndexedWord relnTgtNode, List<IndexedWord> tgtList) {
-    int currIndex = tgtList.indexOf(relnTgtNode);
-    Set<IndexedWord> descendents = descendants(relnTgtNode);
-    IndexedWord specificNode = new IndexedWord();
-    specificNode.set(CoreAnnotations.LemmaAnnotation.class, specific);
-    specificNode.set(CoreAnnotations.TextAnnotation.class, specific);
-    specificNode.set(CoreAnnotations.OriginalTextAnnotation.class, specific);
-    while ((currIndex >= 1) && descendents.contains(tgtList.get(currIndex - 1))) {
-      currIndex--;
-    }
-    tgtList.add(currIndex, specificNode);
-  }
-
-
 
   public enum OutputFormat {
     LIST, XML, READABLE, RECURSIVE
@@ -1909,12 +1907,8 @@ public class SemanticGraph implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (o == this) {
-      return true;
-    }
-    if (!(o instanceof SemanticGraph)) {
+    if (!(o instanceof SemanticGraph))
       return false;
-    }
     SemanticGraph g = (SemanticGraph) o;
     return graph.equals(g.graph) && roots.equals(g.roots);
   }
