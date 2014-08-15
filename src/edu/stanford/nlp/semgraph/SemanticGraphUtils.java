@@ -370,14 +370,14 @@ public class SemanticGraphUtils {
    * ordering returned by vertexList (presumably in order).  This is to ensure
    * accesses to the InfoFile word table do not fall off after a SemanticGraph has
    * been edited.
-   *
-   * NOTE: the vertices will be replaced, as JGraphT does not permit in-place
-   * modification of the nodes.
+   * <br>
+   * NOTE: the vertices will be replaced, as JGraphT does not permit
+   * in-place modification of the nodes.  (TODO: we no longer use
+   * JGraphT, so this should be fixed)
    */
   public static SemanticGraph resetVerticeOrdering(SemanticGraph sg) {
     SemanticGraph nsg = new SemanticGraph();
     List<IndexedWord> vertices = sg.vertexListSorted();
-    List<SemanticGraphEdge> edges = sg.edgeListSorted();
     int index = 1;
     Map<IndexedWord, IndexedWord> oldToNewVertices = Generics.newHashMap();
     List<IndexedWord> newVertices = new ArrayList<IndexedWord>();
@@ -399,7 +399,7 @@ public class SemanticGraphUtils {
     }
     nsg.setRoots(newRoots);
 
-    for (SemanticGraphEdge edge : edges) {
+    for (SemanticGraphEdge edge : sg.edgeIterable()) {
       IndexedWord newGov = oldToNewVertices.get(edge.getGovernor());
       IndexedWord newDep = oldToNewVertices.get(edge.getDependent());
       nsg.addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
