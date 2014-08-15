@@ -709,6 +709,9 @@ public class SemanticGraph implements Serializable {
 
   /**
    * Returns the relation that node a has with node b.
+   * <br>
+   * Note: there may be multiple arcs between <code>a</code> and
+   * <code>b</code>, and this method only returns one relation.
    */
   public GrammaticalRelation reln(IndexedWord a, IndexedWord b) {
     if (!containsVertex(a)) {
