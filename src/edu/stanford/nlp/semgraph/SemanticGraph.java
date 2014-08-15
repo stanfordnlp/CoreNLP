@@ -200,15 +200,12 @@ public class SemanticGraph implements Serializable {
    */
   public int isAncestor(IndexedWord child, IndexedWord ancestor) {
 
-    List<IndexedWord> parents = this.getParentList(child);
-    if (parents == null) {
-      return -1;
-    }
+    Set<IndexedWord> parents = this.getParents(child);
     if (parents.contains(ancestor)) {
       return 1;
     }
     for (IndexedWord parent : parents) {
-      List<IndexedWord> grandparents = this.getParentList(parent);
+      Set<IndexedWord> grandparents = this.getParents(parent);
       if (grandparents.contains(ancestor)) {
         return 2;
       }
@@ -224,6 +221,10 @@ public class SemanticGraph implements Serializable {
    * @return The maximum distance to a least common ancestor.
    */
   public int commonAncestor(IndexedWord v1, IndexedWord v2) {
+    if (v1.equals(v2)) {
+      return 0;
+    }
+
     List<IndexedWord> v1Parents = this.getParentList(v1);
     List<IndexedWord> v2Parents = this.getParentList(v2);
     List<IndexedWord> v1GrandParents = new ArrayList<IndexedWord>();
@@ -262,11 +263,15 @@ public class SemanticGraph implements Serializable {
    * Returns the least common ancestor. We only search as high as grandparents.
    * We return null if no common parent or grandparent is found. Any of the
    * input words can also be the answer if one is the parent or grandparent of
-   * other
+   * other, or if the input words are the same.
    *
    * @return The least common ancestor.
    */
   public IndexedWord getCommonAncestor(IndexedWord v1, IndexedWord v2) {
+    if (v1.equals(v2)) {
+      return v1;
+    }
+
     if (this.isAncestor(v1, v2) >= 1) {
       return v2;
     }
@@ -275,17 +280,17 @@ public class SemanticGraph implements Serializable {
       return v1;
     }
 
-    List<IndexedWord> v1Parents = this.getParentList(v1);
-    List<IndexedWord> v2Parents = this.getParentList(v2);
-    List<IndexedWord> v1GrandParents = new ArrayList<IndexedWord>();
-    List<IndexedWord> v2GrandParents = new ArrayList<IndexedWord>();
+    Set<IndexedWord> v1Parents = this.getParents(v1);
+    Set<IndexedWord> v2Parents = this.getParents(v2);
+    Set<IndexedWord> v1GrandParents = wordMapFactory.newSet();
+    Set<IndexedWord> v2GrandParents = wordMapFactory.newSet();
     // does v1 have any parents that are v2's parents?
 
     for (IndexedWord v1Parent : v1Parents) {
       if (v2Parents.contains(v1Parent)) {
         return v1Parent;
       }
-      v1GrandParents.addAll(this.getParentList(v1Parent));
+      v1GrandParents.addAll(this.getParents(v1Parent));
     }
     // does v1 have any grandparents that are v2's parents?
     for (IndexedWord v1GrandParent : v1GrandParents) {
@@ -295,7 +300,7 @@ public class SemanticGraph implements Serializable {
     }
     // build v2 grandparents
     for (IndexedWord v2Parent : v2Parents) {
-      v2GrandParents.addAll(this.getParentList(v2Parent));
+      v2GrandParents.addAll(this.getParents(v2Parent));
     }
     // does v1 have any parents or grandparents that are v2's grandparents?
     for (IndexedWord v2GrandParent : v2GrandParents) {
@@ -443,7 +448,7 @@ public class SemanticGraph implements Serializable {
     return result;
   }
 
-  public Collection<IndexedWord> getChildren(IndexedWord vertex) {
+  public Set<IndexedWord> getChildren(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
@@ -478,7 +483,7 @@ public class SemanticGraph implements Serializable {
     return result;
   }
 
-  public Collection<IndexedWord> getParents(IndexedWord vertex) {
+  public Set<IndexedWord> getParents(IndexedWord vertex) {
     if (!containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
