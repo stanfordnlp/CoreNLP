@@ -356,7 +356,8 @@ public class SemanticGraph implements Serializable {
       } else if (dir == '>') {
         if (det) {
           // look for a matching child with "det" relation
-          List<IndexedWord> children = getChildrenWithReln(vertex, EnglishGrammaticalRelations.DETERMINER);
+          Set<IndexedWord> children = wordMapFactory.newSet();
+          children.addAll(getChildrenWithReln(vertex, EnglishGrammaticalRelations.DETERMINER));
           children.addAll(getChildrenWithReln(vertex, EnglishGrammaticalRelations.PREDETERMINER));
           boolean match = false;
           for (IndexedWord child : children) {
@@ -962,13 +963,13 @@ public class SemanticGraph implements Serializable {
    * Returns a list of all parents bearing a certain grammatical relation, or an
    * empty list if none.
    */
-  public List<IndexedWord> getParentsWithReln(IndexedWord vertex, GrammaticalRelation reln) {
+  public Set<IndexedWord> getParentsWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (vertex.equals(IndexedWord.NO_WORD))
-      return new ArrayList<IndexedWord>();
+      return Collections.emptySet();
     if (!containsVertex(vertex))
       throw new IllegalArgumentException();
 
-    List<IndexedWord> parentList = Generics.newArrayList();
+    Set<IndexedWord> parentList = wordMapFactory.newSet();
     for (SemanticGraphEdge edge : incomingEdgeIterable(vertex)) {
       if (edge.getRelation().equals(reln)) {
         parentList.add(edge.getSource());
@@ -981,13 +982,13 @@ public class SemanticGraph implements Serializable {
    * Returns a list of all children bearing a certain grammatical relation, or
    * an empty list if none.
    */
-  public List<IndexedWord> getChildrenWithReln(IndexedWord vertex, GrammaticalRelation reln) {
+  public Set<IndexedWord> getChildrenWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (vertex.equals(IndexedWord.NO_WORD))
-      return new ArrayList<IndexedWord>();
+      return Collections.emptySet();
     if (!containsVertex(vertex))
       throw new IllegalArgumentException();
 
-    List<IndexedWord> childList = Generics.newArrayList();
+    Set<IndexedWord> childList = wordMapFactory.newSet();
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
       if (edge.getRelation().equals(reln)) {
         childList.add(edge.getTarget());
@@ -1004,13 +1005,13 @@ public class SemanticGraph implements Serializable {
    * are collapsed are currently not handled correctly since they are identified
    * by strings.
    */
-  public List<IndexedWord> getChildrenWithRelns(IndexedWord vertex, Collection<GrammaticalRelation> relns) {
+  public Set<IndexedWord> getChildrenWithRelns(IndexedWord vertex, Collection<GrammaticalRelation> relns) {
     if (vertex.equals(IndexedWord.NO_WORD))
-      return new ArrayList<IndexedWord>();
+      return Collections.emptySet();
     if (!containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
-    List<IndexedWord> childList = new ArrayList<IndexedWord>();
+    Set<IndexedWord> childList = wordMapFactory.newSet();
     for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
       if (relns.contains(edge.getRelation())) {
         childList.add(edge.getTarget());
@@ -1045,8 +1046,8 @@ public class SemanticGraph implements Serializable {
       throw new IllegalArgumentException("Vertex " + vertex + " not in graph " + this);
     }
 
-    return hasChildWithReln(vertex, EnglishGrammaticalRelations.NEGATION_MODIFIER)
-        || hasChild(vertex, GrammaticalRelation.DEPENDENT, "nor");
+    return (hasChildWithReln(vertex, EnglishGrammaticalRelations.NEGATION_MODIFIER) ||
+            hasChild(vertex, GrammaticalRelation.DEPENDENT, "nor"));
   }
 
   private boolean isNegatedVerb(IndexedWord vertex) {
@@ -1062,10 +1063,10 @@ public class SemanticGraph implements Serializable {
    * is in a clause headed by "if".
    */
   public boolean isInConditionalContext(IndexedWord vertex) {
-    List<IndexedWord> children = this.getChildrenWithReln(vertex, EnglishGrammaticalRelations.MARKER);
-    for (IndexedWord child : children) {
-      if (child.word().equalsIgnoreCase("if"))
+    for (IndexedWord child : getChildrenWithReln(vertex, EnglishGrammaticalRelations.MARKER)) {
+      if (child.word().equalsIgnoreCase("if")) {
         return true;
+      }
     }
     return false;
   }
