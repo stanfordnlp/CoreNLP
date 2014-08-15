@@ -84,7 +84,7 @@ public class SemanticGraphTest extends TestCase {
     assertEquals(word1, nodes.get(0));
   }
   
-  public void testCommonAncestor(){
+  public void testGetCommonAncestor(){
     IndexedWord common = graph.getCommonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44));
     assertEquals(45, common.index());
 
@@ -113,6 +113,32 @@ public class SemanticGraphTest extends TestCase {
 
     common = graph.getCommonAncestor(graph.getNodeByIndex(1), graph.getNodeByIndex(10));
     assertEquals(10, common.index());
+  }
+
+  public void testCommonAncestor(){
+    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44)));
+
+    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(41), graph.getNodeByIndex(39)));
+
+    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(39), graph.getNodeByIndex(41)));
+
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(42)));
+
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(40)));
+
+    // too far for this method
+    assertEquals(-1, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(42)));
+    // assertEquals(null, common);
+
+    assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(10)));
+
+    assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(40)));
+    // assertEquals(40, common.index());
+
+    // a couple tests at the top of the graph
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(1)));
+
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(1), graph.getNodeByIndex(10)));
   }
 
   public void testTopologicalSort() {

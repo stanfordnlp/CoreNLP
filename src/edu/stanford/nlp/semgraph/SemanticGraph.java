@@ -225,33 +225,42 @@ public class SemanticGraph implements Serializable {
       return 0;
     }
 
-    List<IndexedWord> v1Parents = this.getParentList(v1);
-    List<IndexedWord> v2Parents = this.getParentList(v2);
-    List<IndexedWord> v1GrandParents = new ArrayList<IndexedWord>();
-    List<IndexedWord> v2GrandParents = new ArrayList<IndexedWord>();
-    // does v1 have any parents that are v2's parents?
+    Set<IndexedWord> v1Parents = this.getParents(v1);
+    Set<IndexedWord> v2Parents = this.getParents(v2);
+    Set<IndexedWord> v1GrandParents = wordMapFactory.newSet();
+    Set<IndexedWord> v2GrandParents = wordMapFactory.newSet();
 
+    if (v1Parents.contains(v2) || v2Parents.contains(v1)) {
+      return 1;
+    }
+
+    // does v1 have any parents that are v2's parents?
     for (IndexedWord v1Parent : v1Parents) {
       if (v2Parents.contains(v1Parent)) {
         return 1;
       }
-      v1GrandParents.addAll(this.getParentList(v1Parent));
-    }
-    // does v1 have any grandparents that are v2's parents?
-    for (IndexedWord v1GrandParent : v1GrandParents) {
-      if (v2Parents.contains(v1GrandParent)) {
-        return 2;
-      }
+      v1GrandParents.addAll(this.getParents(v1Parent));
     }
     // build v2 grandparents
     for (IndexedWord v2Parent : v2Parents) {
       v2GrandParents.addAll(this.getParentList(v2Parent));
     }
-    // does v1 have any parents or grandparents that are v2's grandparents?
+    if (v1GrandParents.contains(v2) || v2GrandParents.contains(v1)) {
+      return 2;
+    }
+    // Are any of v1's parents a grandparent of v2?
     for (IndexedWord v2GrandParent : v2GrandParents) {
       if (v1Parents.contains(v2GrandParent)) {
-        return 1;
+        return 2;
       }
+    }
+    // Are any of v2's parents a grandparent of v1?
+    for (IndexedWord v1GrandParent : v1GrandParents) {
+      if (v2Parents.contains(v1GrandParent)) {
+        return 2;
+      }
+    }
+    for (IndexedWord v2GrandParent : v2GrandParents) {
       if (v1GrandParents.contains(v2GrandParent)) {
         return 2;
       }
