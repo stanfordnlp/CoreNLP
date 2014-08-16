@@ -32,10 +32,8 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
 /**
- * A {@code GrammaticalStructure} is a {@link TreeGraph
- * <code>TreeGraph</code>} (that is, a tree with additional labeled
- * arcs between nodes) for representing the grammatical relations in a
- * parse tree.  A new <code>GrammaticalStructure</code> is constructed
+ * A {@code GrammaticalStructure} stores dependency relations between
+ * nodes in a tree.  A new <code>GrammaticalStructure</code> is constructed
  * from an existing parse tree with the help of {@link
  * GrammaticalRelation <code>GrammaticalRelation</code>}, which
  * defines a hierarchy of grammatical relations, along with
@@ -45,7 +43,10 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * labeled grammatical relations as it can.  Once constructed, the new
  * <code>GrammaticalStructure</code> can be printed in various
  * formats, or interrogated using the interface methods in this
- * class.
+ * class. Internally, this uses a representation via a {@code TreeGraphNode},
+ * that is, a tree with additional labeled
+ * arcs between nodes, for representing the grammatical relations in a
+ * parse tree.
  * <p/>
  * <b>Caveat emptor!</b> This is a work in progress.
  * Nothing in here should be relied upon to function perfectly.
@@ -358,7 +359,7 @@ public abstract class GrammaticalStructure implements Serializable {
     }
     for (TreeGraphNode kid : t.children()) {
       attachStrandedNodes(kid, root, (kid.headWordNode() != t.headWordNode()), puncFilter, basicGraph);
-    }    
+    }
   }
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
@@ -379,7 +380,7 @@ public abstract class GrammaticalStructure implements Serializable {
             // If there are two patterns that add dependencies, X --> Z and Y --> Z, and X dominates Y, then the dependency Y --> Z is not added to the basic graph to prevent unwanted duplication.
             // Similarly, if there is already a path from X --> Y, and an expression would trigger Y --> X somehow, we ignore that
             Set<TreeGraphNode> parents = basicGraph.getParents(uHigh);
-            if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) && 
+            if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) &&
                 basicGraph.getShortestPath(uHigh, tHigh, true) == null) {
               // System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh + "(" + tHigh.headWordNode() + ") uHigh=" + uHigh + "(" + uHigh.headWordNode() + ")");
               basicGraph.add(tHigh, uHigh, egr);
@@ -402,11 +403,8 @@ public abstract class GrammaticalStructure implements Serializable {
   }
 
   /**
-   * The constructor builds a list of typed dependencies using
-   * information from a <code>GrammaticalStructure</code>.
-   *
-   * @param getExtra If true, the list of typed dependencies will contain extra ones.
-   *              If false, the list of typed dependencies will respect the tree structure.
+   * Helps the constructor build a list of typed dependencies using
+   * information from a {@code GrammaticalStructure}.
    */
   private List<TypedDependency> getDeps(Filter<TypedDependency> puncTypedDepFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     List<TypedDependency> basicDep = Generics.newArrayList();
