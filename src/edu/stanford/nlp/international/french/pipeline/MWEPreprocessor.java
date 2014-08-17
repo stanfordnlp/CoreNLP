@@ -13,54 +13,53 @@ import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReader;
-import edu.stanford.nlp.trees.tregex.ParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
 
 /**
  * Various modifications to the MWEs in the treebank.
- * 
+ *
  * @author Spence Green
  *
  */
 public final class MWEPreprocessor {
 
   private static final boolean RESOLVE_DUMMY_TAGS = true;
-  
+
   private static int nMissingPOS = 0;
   private static int nMissingPhrasal = 0;
 
   private MWEPreprocessor() {}
-  
+
   //UW words extracted from June2010 revision of FTB
   private static class ManualUWModel {
-    
+
     private static final Set<String> nouns = Generics.newHashSet();
-    private static final String nStr = 
+    private static final String nStr =
       "A. Alezais alfa Annick Appliances Ardenne Artois baptiste Bargue Bellanger Bregenz clefs Coeurs ...conomie consumer " +
       "contrôleur Coopérative Coppée cuisson dédoublement demandeuse défraie Domestic dépistage Elektra Elettrodomestici " +
       "Essonnes Fair Finparcom Gelisim gorge Happy Indesit Italia jockey Lawrence leone Levi machinisme Mc.Donnel MD Merloni " +
       "Meydan ménagers Muenchener Parcel Prost R. sam Sara Siège silos SPA Stateman Valley Vanity VF Vidal Vives Yorker Young Zemment";
     //TODO wsg2011: défraie is a verb
-    
+
     private static final Set<String> adjectives = Generics.newHashSet();
     private static final String aStr = "astral bis bovin gracieux intégrante italiano sanguin sèche";
-    
+
     private static final Set<String> preps = Generics.newHashSet();
     private static final String pStr = "c o t";
-    
+
     private static int nUnknownWordTypes;
-    
+
     static {
       nouns.addAll(Arrays.asList(nStr.split("\\s+")));
       adjectives.addAll(Arrays.asList(aStr.split("\\s+")));
       preps.addAll(Arrays.asList(pStr.split("\\s+")));
       nUnknownWordTypes = nouns.size() + adjectives.size() + preps.size();
     }
-    
+
     private static final Pattern digit = Pattern.compile("\\d+");
-    
+
     public static String getTag(String word) {
       if(digit.matcher(word).find())
         return "N"; //This isn't right, but its close enough....
@@ -70,13 +69,13 @@ public final class MWEPreprocessor {
         return "A";
       else if(preps.contains(word))
         return "P";
-      
+
       System.err.println("No POS tag for " + word);
       return "N";
     }
   }
-    
-  public static void printCounter(TwoDimensionalCounter<String,String> cnt, 
+
+  public static void printCounter(TwoDimensionalCounter<String,String> cnt,
                                   String fname) {
     try {
       PrintWriter pw = new PrintWriter(new PrintStream(new FileOutputStream(new File(fname)),false,"UTF-8"));
@@ -86,7 +85,7 @@ public final class MWEPreprocessor {
         }
       }
       pw.close();
-      
+
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
 
@@ -94,44 +93,44 @@ public final class MWEPreprocessor {
       e.printStackTrace();
     }
   }
-  
-  public static void updateTagger(TwoDimensionalCounter<String,String> tagger, 
+
+  public static void updateTagger(TwoDimensionalCounter<String,String> tagger,
                                   Tree t) {
     List<CoreLabel> yield = t.taggedLabeledYield();
     for(CoreLabel cl : yield) {
-      if(RESOLVE_DUMMY_TAGS && cl.tag().equals(FrenchXMLTreeReader.MISSING_POS)) 
+      if(RESOLVE_DUMMY_TAGS && cl.tag().equals(FrenchXMLTreeReader.MISSING_POS))
         continue;
       else
         tagger.incrementCount(cl.word(), cl.tag());
     }
   }
-  
-  
-  public static void traverseAndFix(Tree t, 
+
+
+  public static void traverseAndFix(Tree t,
       TwoDimensionalCounter<String, String> pretermLabel,
       TwoDimensionalCounter<String, String> unigramTagger) {
     if(t.isPreTerminal()) {
       if(t.value().equals(FrenchXMLTreeReader.MISSING_POS)) {
         nMissingPOS++;
         String word = t.firstChild().value();
-        String tag = (unigramTagger.firstKeySet().contains(word)) ? 
+        String tag = (unigramTagger.firstKeySet().contains(word)) ?
           Counters.argmax(unigramTagger.getCounter(word)) : ManualUWModel.getTag(word);
         t.setValue(tag);
       }
-      
+
       return;
     }
 
     for(Tree kid : t.children())
       traverseAndFix(kid,pretermLabel,unigramTagger);
-    
+
     //Post-order visit
     if(t.value().equals(FrenchXMLTreeReader.MISSING_PHRASAL)) {
       nMissingPhrasal++;
       StringBuilder sb = new StringBuilder();
       for(Tree kid : t.children())
         sb.append(kid.value()).append(" ");
-      
+
       String posSequence = sb.toString().trim();
       if(pretermLabel.firstKeySet().contains(posSequence)) {
         String phrasalCat = Counters.argmax(pretermLabel.getCounter(posSequence));
@@ -141,19 +140,19 @@ public final class MWEPreprocessor {
       }
     }
   }
-  
-  
+
+
   private static void resolveDummyTags(File treeFile,
       TwoDimensionalCounter<String, String> pretermLabel,
       TwoDimensionalCounter<String, String> unigramTagger) {
-    
+
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
       TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
-      
+
       PrintWriter pw = new PrintWriter(new PrintStream(new FileOutputStream(new File(treeFile + ".fixed")),false,"UTF-8"));
-   
+
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
         traverseAndFix(t, pretermLabel, unigramTagger);
@@ -172,7 +171,7 @@ public final class MWEPreprocessor {
       e.printStackTrace();
     }
   }
-  
+
   static final TregexPattern pMWE = TregexPattern.compile("/^MW/");
 
   static public void countMWEStatistics(Tree t,
@@ -180,7 +179,7 @@ public final class MWEPreprocessor {
       TwoDimensionalCounter<String, String> labelPreterm,
       TwoDimensionalCounter<String, String> pretermLabel,
       TwoDimensionalCounter<String, String> labelTerm,
-      TwoDimensionalCounter<String, String> termLabel) 
+      TwoDimensionalCounter<String, String> termLabel)
   {
     updateTagger(unigramTagger,t);
 
@@ -191,20 +190,20 @@ public final class MWEPreprocessor {
       String label = match.value();
       if(RESOLVE_DUMMY_TAGS && label.equals(FrenchXMLTreeReader.MISSING_PHRASAL))
         continue;
-      
+
       String preterm = Sentence.listToString(match.preTerminalYield());
       String term = Sentence.listToString(match.yield());
-      
+
       labelPreterm.incrementCount(label,preterm);
       pretermLabel.incrementCount(preterm,label);
       labelTerm.incrementCount(label,term);
       termLabel.incrementCount(term, label);
     }
   }
-                                
+
 
   /**
-   * 
+   *
    * @param args
    */
   public static void main(String[] args) {
@@ -212,54 +211,54 @@ public final class MWEPreprocessor {
       System.err.printf("Usage: java %s file%n", MWEPreprocessor.class.getName());
       System.exit(-1);
     }
-    
+
     final File treeFile = new File(args[0]);
-    TwoDimensionalCounter<String,String> labelTerm = 
+    TwoDimensionalCounter<String,String> labelTerm =
       new TwoDimensionalCounter<String,String>();
-    TwoDimensionalCounter<String,String> termLabel = 
+    TwoDimensionalCounter<String,String> termLabel =
       new TwoDimensionalCounter<String,String>();
-    TwoDimensionalCounter<String,String> labelPreterm = 
+    TwoDimensionalCounter<String,String> labelPreterm =
       new TwoDimensionalCounter<String,String>();
-    TwoDimensionalCounter<String,String> pretermLabel = 
+    TwoDimensionalCounter<String,String> pretermLabel =
       new TwoDimensionalCounter<String,String>();
-    
-    TwoDimensionalCounter<String,String> unigramTagger = 
+
+    TwoDimensionalCounter<String,String> unigramTagger =
       new TwoDimensionalCounter<String,String>();
-    
+
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
       TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
-      
+
       for(Tree t; (t = tr.readTree()) != null;) {
         countMWEStatistics(t, unigramTagger,
                            labelPreterm, pretermLabel, labelTerm, termLabel);
       }
       tr.close(); //Closes the underlying reader
-      
+
       System.out.println("Generating {MWE Type -> Terminal}");
       printCounter(labelTerm, "label_term.csv");
-      
+
       System.out.println("Generating {Terminal -> MWE Type}");
       printCounter(termLabel, "term_label.csv");
-      
+
       System.out.println("Generating {MWE Type -> POS sequence}");
       printCounter(labelPreterm, "label_pos.csv");
-      
+
       System.out.println("Generating {POS sequence -> MWE Type}");
       printCounter(pretermLabel, "pos_label.csv");
-      
+
       if(RESOLVE_DUMMY_TAGS) {
         System.out.println("Resolving DUMMY tags");
         resolveDummyTags(treeFile, pretermLabel, unigramTagger);
       }
-      
+
       System.out.println("#Unknown Word Types: " + ManualUWModel.nUnknownWordTypes);
       System.out.println("#Missing POS: " + nMissingPOS);
       System.out.println("#Missing Phrasal: " + nMissingPhrasal);
-      
+
       System.out.println("Done!");
-      
+
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
 

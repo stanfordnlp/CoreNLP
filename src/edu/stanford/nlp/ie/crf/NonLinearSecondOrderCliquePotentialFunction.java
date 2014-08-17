@@ -2,7 +2,6 @@ package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.Index;
 
 /**
  * @author Mengqiu Wang
@@ -53,7 +52,7 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
     }
     if (!aFlag.useHiddenLayer)
       return layerCache;
-      
+
     // transform layer one through hidden
     if (cliqueSize > 1) {
       if (hiddenLayerCache4Edge == null || layerOneSize != hiddenLayerCache4Edge.length)
@@ -116,7 +115,7 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
     } else {
       output = hiddenLayer[labelIndex];
     }
-    
+
     return output;
   }
 }

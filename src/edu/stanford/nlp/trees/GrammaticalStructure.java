@@ -16,7 +16,6 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Function;
@@ -25,7 +24,6 @@ import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
-import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
@@ -338,8 +336,8 @@ public abstract class GrammaticalStructure implements Serializable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(root.toPrettyString(0).substring(1));
-    sb.append("Typed Dependencies:");
-    sb.append("\n" + typedDependencies);
+    sb.append("Typed Dependencies:\n");
+    sb.append(typedDependencies);
     return sb.toString();
   }
 

@@ -43,7 +43,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -187,10 +186,10 @@ public class LexicalizedParserITest extends TestCase {
     sentences.add(Sentence.toCoreLabelList("Hopefully", "they", "can", "turn", "it", "around", "."));
     sentences.add(Sentence.toCoreLabelList("Winning", "on", "Wednesday", "would", "be", "a", "good", "first", "step", "."));
     sentences.add(Sentence.toCoreLabelList("Their", "next", "opponent", "is", "quite", "bad", "."));
-    
+
     List<Tree> results1 = englishParser.parseMultiple(sentences);
     List<Tree> results2 = englishParser.parseMultiple(sentences, 3);
-    
+
     assertEquals(results1, results2);
   }
 
