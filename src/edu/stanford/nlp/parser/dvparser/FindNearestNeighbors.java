@@ -1,11 +1,8 @@
 package edu.stanford.nlp.parser.dvparser;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileFilter;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -15,7 +12,6 @@ import java.util.PriorityQueue;
 
 import org.ejml.simple.SimpleMatrix;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.common.ParserQuery;
@@ -108,7 +104,7 @@ public class FindNearestNeighbors {
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       System.err.println("Read in " + testTreebank.size() + " trees for testing");
     }
-     
+
     FileWriter out = new FileWriter(outputPath);
     BufferedWriter bout = new BufferedWriter(out);
 
@@ -126,7 +122,7 @@ public class FindNearestNeighbors {
       }
       RerankingParserQuery rpq = (RerankingParserQuery) parserQuery;
       if (!(rpq.rerankerQuery() instanceof DVModelReranker.Query)) {
-        throw new IllegalArgumentException("Expected a LexicalizedParser with a DVModel attached");        
+        throw new IllegalArgumentException("Expected a LexicalizedParser with a DVModel attached");
       }
       DeepTree tree = ((DVModelReranker.Query) rpq.rerankerQuery()).getDeepTrees().get(0);
 
@@ -172,7 +168,7 @@ public class FindNearestNeighbors {
     for (int i = 0; i < subtrees.size(); ++i) {
       System.err.println(subtrees.get(i).first().yieldWords());
       System.err.println(subtrees.get(i).first());
-      
+
       for (int j = 0; j < subtrees.size(); ++j) {
         if (i == j) {
           continue;
@@ -180,7 +176,7 @@ public class FindNearestNeighbors {
 
         // TODO: look at basic category?
         double normF = subtrees.get(i).second().minus(subtrees.get(j).second()).normF();
-        
+
         bestmatches.add(new ScoredObject<Pair<Tree, Tree>>(Pair.makePair(subtrees.get(i).first(), subtrees.get(j).first()), normF));
         if (bestmatches.size() > 100) {
           bestmatches.poll();

@@ -3,7 +3,6 @@ package edu.stanford.nlp.ie;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 
 import java.util.List;
@@ -47,8 +46,8 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
 
           EntityBIO otherEntity = null;
           for (int k = other[j]; k < other[j]+length && k < entities.length; k++) {
-            otherEntity = entities[k]; 
-            if (otherEntity != null) { 
+            otherEntity = entities[k];
+            if (otherEntity != null) {
               break;
             }
           }
@@ -97,7 +96,7 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
             if (flags.matchNERIncentive) {
               factor = p2;
               // factor *= -1;
-            } else 
+            } else
               factor = 0;
           }
           if (DEBUG)

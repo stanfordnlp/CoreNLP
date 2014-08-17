@@ -2,8 +2,6 @@ package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.math.ArrayMath;
 
-import java.util.Arrays;
-
 
 /**
  * @author grenager

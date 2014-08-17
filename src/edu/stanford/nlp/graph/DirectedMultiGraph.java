@@ -3,7 +3,6 @@ package edu.stanford.nlp.graph;
 import java.util.*;
 
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapFactory;
 

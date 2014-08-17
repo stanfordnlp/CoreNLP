@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.stanford.nlp.neural;
 
@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -21,13 +20,13 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  * @author Richard Socher
  */
-public class Embedding {  
+public class Embedding {
   private Map<String, SimpleMatrix> wordVectors;
   private int embeddingSize;
 
   static final String START_WORD = "*START*";
   static final String END_WORD = "*END*";
-  
+
   static final String UNKNOWN_WORD = "*UNK*";
   static final String UNKNOWN_NUMBER = "*NUM*";
   static final String UNKNOWN_CAPS = "*CAPS*";
@@ -47,12 +46,12 @@ public class Embedding {
    */
   static final Pattern DG_PATTERN = Pattern.compile(".*DG.*");
 
-  
+
   public Embedding(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
     this.embeddingSize = getEmbeddingSize(wordVectors);
   }
-  
+
   public Embedding(String wordVectorFile) {
     this(wordVectorFile, 0);
   }
@@ -66,7 +65,7 @@ public class Embedding {
   public Embedding(String wordFile, String vectorFile) {
     this(wordFile, vectorFile, 0);
   }
-  
+
   public Embedding(String wordFile, String vectorFile, int embeddingSize) {
     this.wordVectors = Generics.newHashMap();
     this.embeddingSize = embeddingSize;
@@ -84,9 +83,8 @@ public class Embedding {
    */
   private void loadWordVectors(String wordVectorFile) {
     System.err.println("# Loading embedding ...\n  word vector file = " + wordVectorFile);
-    int dimOfWords = 0;
     boolean warned = false;
-    
+
     int numWords = 0;
     for (String line : IOUtils.readLines(wordVectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
@@ -104,8 +102,8 @@ public class Embedding {
       if(word.equals("</s>")){
         word = START_WORD;
       }
-      
-      dimOfWords = lineSplit.length - 1;
+
+      int dimOfWords = lineSplit.length - 1;
       if (embeddingSize <= 0) {
         embeddingSize = dimOfWords;
         System.err.println("  detected embedding size = " + dimOfWords);
@@ -121,7 +119,7 @@ public class Embedding {
       } else if (dimOfWords < embeddingSize) {
         throw new RuntimeException("Word vectors file has dimension too small for requested numHid of " + embeddingSize);
       }
-      double vec[][] = new double[dimOfWords][1];
+      double[][] vec = new double[dimOfWords][1];
       for (int i = 1; i <= dimOfWords; i++) {
         vec[i-1][0] = Double.parseDouble(lineSplit[i]);
       }
@@ -145,15 +143,14 @@ public class Embedding {
    */
   private void loadWordVectors(String wordFile, String vectorFile) {
     System.err.println("# Loading embedding ...\n  word file = " + wordFile + "\n  vector file = " + vectorFile);
-    int dimOfWords = 0;
     boolean warned = false;
-   
+
     int numWords = 0;
     Iterator<String> wordIterator = IOUtils.readLines(wordFile, "utf-8").iterator();
     for (String line : IOUtils.readLines(vectorFile, "utf-8")) {
       String[] lineSplit = line.split("\\s+");
       String word = wordIterator.next();
-      
+
       // check for unknown token
     if(word.equals("UNKNOWN") || word.equals("UUUNKKK") || word.equals("UNK") || word.equals("*UNKNOWN*") || word.equals("<unk>")){
         word = UNKNOWN_WORD;
@@ -166,9 +163,9 @@ public class Embedding {
       if(word.equals("</s>")){
         word = START_WORD;
       }
-      
-      dimOfWords = lineSplit.length;
-      
+
+      int dimOfWords = lineSplit.length;
+
       if (embeddingSize <= 0) {
         embeddingSize = dimOfWords;
         System.err.println("  detected embedding size = " + dimOfWords);
@@ -184,8 +181,8 @@ public class Embedding {
       } else if (dimOfWords < embeddingSize) {
         throw new RuntimeException("Word vectors file has dimension too small for requested numHid of " + embeddingSize);
       }
-      
-      double vec[][] = new double[dimOfWords][1];
+
+      double[][] vec = new double[dimOfWords][1];
       for (int i = 0; i < dimOfWords; i++) {
         vec[i][0] = Double.parseDouble(lineSplit[i]);
       }
@@ -193,28 +190,28 @@ public class Embedding {
       wordVectors.put(word, vector);
       numWords++;
     }
-    
+
     System.err.println("  num words = " + numWords);
   }
-  
-  
+
+
   /*** Getters & Setters ***/
   public int size(){
     return wordVectors.size();
   }
-  
+
   public Collection<SimpleMatrix> values(){
     return wordVectors.values();
   }
-  
+
   public Set<String> keySet(){
     return wordVectors.keySet();
   }
-  
+
   public Set<Entry<String, SimpleMatrix>> entrySet(){
     return wordVectors.entrySet();
   }
-  
+
   public SimpleMatrix get(String word) {
     if(wordVectors.containsKey(word)){
       return wordVectors.get(word);
@@ -222,7 +219,7 @@ public class Embedding {
       return wordVectors.get(UNKNOWN_WORD);
     }
   }
-  
+
   public SimpleMatrix getStartWordVector() {
     return wordVectors.get(START_WORD);
   }
@@ -230,26 +227,26 @@ public class Embedding {
   public SimpleMatrix getEndWordVector() {
     return wordVectors.get(END_WORD);
   }
-  
+
   public SimpleMatrix getUnknownWordVector() {
     return wordVectors.get(UNKNOWN_WORD);
   }
-  
+
   public Map<String, SimpleMatrix> getWordVectors() {
     return wordVectors;
   }
-    
+
   public int getEmbeddingSize() {
     return embeddingSize;
   }
 
- 
+
   public void setWordVectors(Map<String, SimpleMatrix> wordVectors) {
     this.wordVectors = wordVectors;
     this.embeddingSize = getEmbeddingSize(wordVectors);
   }
-  
-  private int getEmbeddingSize(Map<String, SimpleMatrix> wordVectors){
+
+  private static int getEmbeddingSize(Map<String, SimpleMatrix> wordVectors){
     if (!wordVectors.containsKey(UNKNOWN_WORD)){
       // find if there's any other unk string
       String unkStr = "";
@@ -258,15 +255,16 @@ public class Embedding {
       if (wordVectors.containsKey("UNKNOWN")) { unkStr = "UNKNOWN"; }
       if (wordVectors.containsKey("*UNKNOWN*")) { unkStr = "*UNKNOWN*"; }
       if (wordVectors.containsKey("<unk>")) { unkStr = "<unk>"; }
-      
+
       // set UNKNOWN_WORD
       if (!unkStr.equals("")){
         wordVectors.put(UNKNOWN_WORD, wordVectors.get(unkStr));
       } else {
         throw new RuntimeException("! wordVectors used to initialize Embedding doesn't contain any recognized form of " + UNKNOWN_WORD);
       }
-    }  
-    
+    }
+
     return wordVectors.get(UNKNOWN_WORD).getNumElements();
   }
+
 }
