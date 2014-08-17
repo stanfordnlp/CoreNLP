@@ -2,9 +2,6 @@ package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.Generics;
@@ -56,7 +53,7 @@ public class CreateSubtreeNode extends TsurgeonPattern {
   public Tree evaluate(Tree t, TregexMatcher tm) {
     Tree startChild = children[0].evaluate(t, tm);
     Tree endChild = (children.length == 2) ? children[1].evaluate(t, tm) : startChild;
-    
+
     Tree parent = startChild.parent(t);
 
     // sanity check

@@ -3,7 +3,6 @@ package edu.stanford.nlp.sentiment;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.neural.rnn.TopNGramRecord;
@@ -22,7 +21,7 @@ public class Evaluate {
 
   final int[][] equivalenceClasses;
   final String[] equivalenceClassNames;
-  
+
   int labelsCorrect;
   int labelsIncorrect;
 
@@ -243,7 +242,7 @@ public class Evaluate {
         System.err.println("Approximate " + equivalenceClassNames[i] + " label accuracy: " + NF.format(approxLabelAccuracy[i]));
       }
       System.err.println("Combined approximate label accuracy: " + NF.format(approxCombinedAccuracy(labelConfusion, equivalenceClasses)));
-      
+
       double[] approxRootLabelAccuracy = approxAccuracy(rootLabelConfusion, equivalenceClasses);
       for (int i = 0; i < equivalenceClassNames.length; ++i) {
         System.err.println("Approximate " + equivalenceClassNames[i] + " root label accuracy: " + NF.format(approxRootLabelAccuracy[i]));
@@ -265,9 +264,9 @@ public class Evaluate {
    * Expected arguments are <code> -model model -treebank treebank </code> <br>
    *
    * For example <br>
-   * <code> 
-   *  java edu.stanford.nlp.sentiment.Evaluate 
-   *   edu/stanford/nlp/models/sentiment/sentiment.ser.gz 
+   * <code>
+   *  java edu.stanford.nlp.sentiment.Evaluate
+   *   edu/stanford/nlp/models/sentiment/sentiment.ser.gz
    *   /u/nlp/data/sentiment/trees/dev.txt
    * </code>
    */

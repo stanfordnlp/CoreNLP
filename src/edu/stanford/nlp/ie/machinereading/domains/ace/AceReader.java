@@ -16,7 +16,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.ie.machinereading.GenericDataSetReader;
-import edu.stanford.nlp.ie.machinereading.BasicEntityExtractor;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceCharSeq;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceDocument;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceEntity;

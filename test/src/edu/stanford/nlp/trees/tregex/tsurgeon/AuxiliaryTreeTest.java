@@ -2,7 +2,6 @@ package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import junit.framework.TestCase;
 
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
@@ -20,12 +19,12 @@ public class AuxiliaryTreeTest extends TestCase {
     runNamePatternTrue("abcd\\\\\\\\=efgh", "abcd\\\\\\\\", "efgh");
   }
 
-  public void runNamePatternFalse(String input) {
+  public static void runNamePatternFalse(String input) {
     Matcher m = AuxiliaryTree.namePattern.matcher(input);
     assertFalse(m.find());
   }
 
-  public void runNamePatternTrue(String input, String leftover, String name) {
+  public static void runNamePatternTrue(String input, String leftover, String name) {
     Matcher m = AuxiliaryTree.namePattern.matcher(input);
     assertTrue(m.find());
     assertEquals(leftover, m.group(1));

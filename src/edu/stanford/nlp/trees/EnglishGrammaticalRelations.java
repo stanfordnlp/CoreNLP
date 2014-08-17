@@ -26,7 +26,6 @@
 
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
