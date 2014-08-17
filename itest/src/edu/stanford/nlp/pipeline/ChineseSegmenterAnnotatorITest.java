@@ -2,17 +2,21 @@ package edu.stanford.nlp.pipeline;
 
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.ArrayCoreMap;
+import edu.stanford.nlp.util.CoreMap;
 
 public class ChineseSegmenterAnnotatorITest extends TestCase {
   StanfordCoreNLP pipeline = null;
 
   @Override
-  public void setUp()
+  public void setUp() 
     throws Exception
   {
     if (pipeline != null) {
@@ -42,5 +46,5 @@ public class ChineseSegmenterAnnotatorITest extends TestCase {
       assertEquals(expectedPositions[i], tokens.get(i).beginPosition());
       assertEquals(expectedPositions[i+1], tokens.get(i).endPosition());
     }
-  }
+  } 
 }

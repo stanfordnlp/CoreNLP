@@ -2,6 +2,8 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
 
+import edu.stanford.nlp.util.Generics;
+
 /**
  * Combines multiple feature factories into one feature factory
  *
@@ -13,7 +15,7 @@ public class CombinationFeatureFactory extends FeatureFactory {
   public CombinationFeatureFactory(FeatureFactory[] factories) {
     this.factories = factories;
   }
-
+  
   @Override
   public List<String> featurize(State state, List<String> features) {
     for (FeatureFactory factory : factories) {
@@ -22,5 +24,5 @@ public class CombinationFeatureFactory extends FeatureFactory {
     return features;
   }
 
-  private static final long serialVersionUID = 1;
+  private static final long serialVersionUID = 1;  
 }

@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.tagger.io.TaggedFileReader;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 
 /**
@@ -43,7 +44,7 @@ import edu.stanford.nlp.tagger.io.TaggedFileRecord;
  * </tr>
  * <tr>
  * <td> -treeFilter &lt;classname&gt; </td>
- * <td> A Filter&lt;Tree&gt; to load by reflection which eliminates
+ * <td> A Filter&lt;Tree&gt; to load by reflection which eliminates 
  *      trees from the data read </td>
  * </tr>
  * <tr>
@@ -74,7 +75,7 @@ public class ConvertTreesToTags {
     boolean noSpaces = false;
     List<String> inputFilenames = new ArrayList<String>();
     for (int i = 0; i < args.length; ++i) {
-      if ((args[i].equalsIgnoreCase("-output") ||
+      if ((args[i].equalsIgnoreCase("-output") || 
            args[i].equalsIgnoreCase("--output")) &&
           (i + 1 < args.length)) {
         outputFilename = args[i + 1];
@@ -128,10 +129,10 @@ public class ConvertTreesToTags {
     BufferedWriter bout = new BufferedWriter(osw);
     Properties props = new Properties();
     for (String filename : inputFilenames) {
-      String description = (TaggedFileRecord.FORMAT + "=" +
+      String description = (TaggedFileRecord.FORMAT + "=" + 
                             TaggedFileRecord.Format.TREES + "," + filename);
       if (!treeRange.equals("")) {
-        description = (TaggedFileRecord.TREE_RANGE + "=" + treeRange +
+        description = (TaggedFileRecord.TREE_RANGE + "=" + treeRange + 
                        "," + description);
       }
       if (!treeFilter.equals("")) {
@@ -140,7 +141,7 @@ public class ConvertTreesToTags {
       }
       description = (TaggedFileRecord.ENCODING + "=" + inputEncoding +
                      "," + description);
-      TaggedFileRecord record =
+      TaggedFileRecord record = 
         TaggedFileRecord.createRecord(props, description);
       for (List<TaggedWord> sentence : record.reader()) {
         String output = Sentence.listToString(sentence, noTags, tagSeparator);
