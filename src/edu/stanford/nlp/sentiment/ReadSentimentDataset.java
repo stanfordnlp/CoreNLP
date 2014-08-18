@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +28,8 @@ import edu.stanford.nlp.util.Generics;
  */
 public class ReadSentimentDataset {
   static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = new Function<Tree, String>() {
-    public String apply(Tree tree) { 
-      return tree.label().value(); 
+    public String apply(Tree tree) {
+      return tree.label().value();
     }
   };
 
@@ -155,7 +154,7 @@ public class ReadSentimentDataset {
       List<String> words = CollectionUtils.transformAsList(leaves, TRANSFORM_TREE_TO_WORD);
       // First we look for a copy of the phrase with -LRB- -RRB-
       // instead of ().  The sentiment trees sometimes have both, and
-      // the escaped versions seem to have more reasonable scores.  
+      // the escaped versions seem to have more reasonable scores.
       // If a particular phrase doesn't have -LRB- -RRB- we fall back
       // to the unescaped versions.
       Integer phraseId = phraseIds.get(CollectionUtils.transformAsList(words, TRANSFORM_PARENS));
@@ -207,7 +206,7 @@ public class ReadSentimentDataset {
     try {
       FileOutputStream fos = new FileOutputStream(filename);
       BufferedWriter bout = new BufferedWriter(new OutputStreamWriter(fos));
-      
+
       for (Integer id : treeIds) {
         bout.write(trees.get(id).toString());
         bout.write("\n");
@@ -334,7 +333,7 @@ public class ReadSentimentDataset {
     List<Tree> trees = Generics.newArrayList();
     for (String line : IOUtils.readLines(parseFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
-      List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() { 
+      List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() {
           public Integer apply(String arg) { return Integer.valueOf(arg) - 1; }
         });
       Tree tree = convertTree(parentPointers, sentences.get(index), phraseIds, sentimentScores, escaper);
