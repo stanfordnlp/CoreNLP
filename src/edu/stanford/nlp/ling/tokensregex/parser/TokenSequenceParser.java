@@ -43,7 +43,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
         return new SequencePattern.NodePatternExpr(n);
         }
 
-    private Integer parseInteger(String str) {
+    private static Integer parseInteger(String str) {
       if (str.startsWith("+")) {
         return Integer.valueOf(str.substring(1));
       } else {
@@ -51,7 +51,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap>, Tok
       }
     }
 
-    private Long parseLongInteger(String str) {
+    private static Long parseLongInteger(String str) {
       if (str.endsWith("L")) {
         str = str.substring(0, str.length()-1);
       }
