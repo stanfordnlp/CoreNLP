@@ -51,7 +51,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         return new SequencePattern.NodePatternExpr(n);
   	}
 
-    private Integer parseInteger(String str) {
+    private static Integer parseInteger(String str) {
       if (str.startsWith("+")) {
         return Integer.valueOf(str.substring(1));
       } else {
@@ -59,7 +59,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
       }
     }
 
-    private Long parseLongInteger(String str) {
+    private static Long parseLongInteger(String str) {
       if (str.endsWith("L")) {
         str = str.substring(0, str.length()-1);
       }
@@ -71,6 +71,7 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
     }
 
     private String parseQuotedString(String str) {
+      // todo [cdm 2014]: I suspect this doesn't work because of how JavaCC escapes \
       // Trim start/end quote and unescape \"
       return str.substring(1,str.length()-1).replaceAll("\\\\\"", "\"");
     }
