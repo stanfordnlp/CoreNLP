@@ -689,7 +689,7 @@ public abstract class GrammaticalStructure implements Serializable {
         deps.add(new TypedDependency(dep));
       }
     } else {
-      deps = new ArrayList<TypedDependency>(typedDependencies);
+      deps = new ArrayList<TypedDependency>(typedDependencies.size());
       for (TypedDependency dep : typedDependencies) {
         deps.add(new TypedDependency(dep));
       }
