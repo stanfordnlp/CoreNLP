@@ -1,6 +1,7 @@
 package edu.stanford.nlp.process;
 
 import java.io.Reader;
+import edu.stanford.nlp.ling.Word;
 
 /** Provides a Unicode-aware plain whitespace tokenizer.  This tokenizer separates words
  *  based on whitespace, including Unicode spaces such as the CJK ideographic space as well
@@ -21,7 +22,7 @@ import java.io.Reader;
 %char
 
 %{
-/**
+/** 
  * See: http://www.w3.org/TR/newline on Web newline chars: NEL, LS, PS.
    See: http://unicode.org/reports/tr13/tr13-9.html and
    http://www.unicode.org/unicode/reports/tr18/#Line_Boundaries
@@ -29,9 +30,9 @@ import java.io.Reader;
    including other separators (vertical tab and form feed).
    <br>
    We do not interpret the zero width joiner/non-joiner (U+200C,
-   U+200D) as white spaces.
+   U+200D) as white spaces. 
    <br>
-   No longer %standalone.  See WhitespaceTokenizer for a main method.
+   No longer %standalone.  See WhitespaceTokenizer for a main method. 
  */
 
   public WhitespaceLexer(Reader r, LexedTokenFactory<?> tf) {

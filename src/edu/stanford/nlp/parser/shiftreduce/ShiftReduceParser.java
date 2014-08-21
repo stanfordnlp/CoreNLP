@@ -28,6 +28,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -73,6 +74,7 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
@@ -89,7 +91,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 
 /**
- * Overview and description available at
+ * Overview and description available at 
  * http://nlp.stanford.edu/software/srparser.shtml
  *
  * @author John Bauer
@@ -139,7 +141,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
   /*
   private void readObject(ObjectInputStream in)
-    throws IOException, ClassNotFoundException
+    throws IOException, ClassNotFoundException 
   {
     ObjectInputStream.GetField fields = in.readFields();
     transitionIndex = ErasureUtils.uncheckedCast(fields.get("transitionIndex", null));
@@ -156,7 +158,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     if (rootOnlyStates == null) {
       rootOnlyStates = Collections.singleton("ROOT");
       System.err.println("Adding rootOnlyStates: " + rootOnlyStates);
-    }
+    }    
   }
   */
 
@@ -166,8 +168,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   @Override
-  public TreebankLangParserParams getTLPParams() {
-    return op.tlpParams;
+  public TreebankLangParserParams getTLPParams() { 
+    return op.tlpParams; 
   }
 
   @Override
@@ -242,7 +244,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     for (Transition transition : firstModel.transitionIndex) {
       copy.transitionIndex.add(transition);
     }
-
+    
     // TODO: would make more sense to put this in the constructor
     copy.knownStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.knownStates));
     copy.rootStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.rootStates));
@@ -264,7 +266,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     for (String feature : features) {
       copy.featureWeights.put(feature, new Weight());
     }
-
+    
     int numModels = models.size();
     for (String feature : features) {
       for (ShiftReduceParser model : models) {
@@ -384,25 +386,25 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         if (ShiftReduceUtils.leftIndex(top) != constraint.start || ShiftReduceUtils.rightIndex(top) != constraint.end - 1) {
           continue;
         }
-        if (ShiftReduceUtils.constraintMatchesTreeTop(top, constraint)) {
+        if (ShiftReduceUtils.constraintMatchesTreeTop(top, constraint)) { 
           continue;
         }
         // found an unmatched constraint that can be fixed with a unary transition
         // now we need to find a matching state for the transition
         for (String label : knownStates) {
           if (constraint.state.matcher(label).matches()) {
-            return ((op.compoundUnaries) ?
-                    new CompoundUnaryTransition(Collections.singletonList(label), false) :
+            return ((op.compoundUnaries) ? 
+                    new CompoundUnaryTransition(Collections.singletonList(label), false) : 
                     new UnaryTransition(label, false));
           }
         }
       }
     }
 
-    if (ShiftReduceUtils.isTemporary(state.stack.peek()) &&
+    if (ShiftReduceUtils.isTemporary(state.stack.peek()) && 
         (state.stack.size() == 1 || ShiftReduceUtils.isTemporary(state.stack.pop().peek()))) {
-      return ((op.compoundUnaries) ?
-              new CompoundUnaryTransition(Collections.singletonList(state.stack.peek().value().substring(1)), false) :
+      return ((op.compoundUnaries) ? 
+              new CompoundUnaryTransition(Collections.singletonList(state.stack.peek().value().substring(1)), false) : 
               new UnaryTransition(state.stack.peek().value().substring(1), false));
     }
 
@@ -410,8 +412,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       // either need to finalize or transition to a root state
       if (!rootStates.contains(state.stack.peek().value())) {
         String root = rootStates.iterator().next();
-        return ((op.compoundUnaries) ?
-                new CompoundUnaryTransition(Collections.singletonList(root), false) :
+        return ((op.compoundUnaries) ? 
+                new CompoundUnaryTransition(Collections.singletonList(root), false) : 
                 new UnaryTransition(root, false));
       }
     }
@@ -427,7 +429,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     if (ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
       return new BinaryTransition(state.stack.pop().peek().value().substring(1), BinaryTransition.Side.LEFT);
     }
-
+    
     return null;
   }
 
@@ -486,7 +488,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       }
       CoreLabel tagLabel = new CoreLabel();
       tagLabel.setValue(((HasTag) hw).tag());
-
+      
       LabeledScoredTreeNode wordNode = new LabeledScoredTreeNode(wordLabel);
       LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tagLabel);
       tagNode.addChild(wordNode);
@@ -508,7 +510,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       op.tlpParams = ReflectionLoading.loadByReflection(tlppClass);
     }
     op.setOptions(args);
-
+    
     if (op.trainOptions.randomSeed == 0) {
       op.trainOptions.randomSeed = (new Random()).nextLong();
       System.err.println("Random seed not set by options, using " + op.trainOptions.randomSeed);
@@ -537,7 +539,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
     transformer.addTransformer(binarizer);
     transformer.addTransformer(basicTransformer);
-
+      
     treebank = treebank.transform(transformer);
 
     HeadFinder binaryHeadFinder = new BinaryHeadFinder(op.tlpParams.headFinder());
@@ -574,7 +576,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-
+  
   // TODO: factor out the retagging?
   public static void redoTags(Tree tree, Tagger tagger) {
     List<Word> words = tree.yieldWords();
@@ -734,7 +736,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
               highestScoringState = newState;
               highestCurrentState = currentState;
             }
-            if (isGoldState &&
+            if (isGoldState && 
                 (highestScoringTransitionFromGoldState == null || transition.score() > highestScoreFromGoldState)) {
               highestScoringTransitionFromGoldState = transitionIndex.get(transition.object());
               highestScoreFromGoldState = transition.score();
@@ -791,14 +793,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         agenda = newAgenda;
       }
     } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_ORACLE ||
-               op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION ||
+               op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.EARLY_TERMINATION || 
                op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.GOLD) {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       List<Transition> transitions = transitionLists.get(index);
       transitions = Generics.newLinkedList(transitions);
       boolean keepGoing = true;
       while (transitions.size() > 0 && keepGoing) {
-        Transition transition = transitions.get(0);
+        Transition transition = transitions.get(0);        
         int transitionNum = transitionIndex.indexOf(transition);
         List<String> features = featureFactory.featurize(state);
         int predictedNum = findHighestScoringTransition(state, features, false).object();
@@ -840,7 +842,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     List<List<Transition>> transitionLists;
     List<Update> updates; // this needs to be a synchronized list
     Oracle oracle;
-
+    
     public TrainTreeProcessor(List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
       this.binarizedTrees = binarizedTrees;
       this.transitionLists = transitionLists;
@@ -926,7 +928,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-  private void train(List<Pair<String, FileFilter>> trainTreebankPath,
+  private void train(List<Pair<String, FileFilter>> trainTreebankPath, 
                      Pair<String, FileFilter> devTreebankPath,
                      String serializedPath, Set<String> allowedFeatures) {
     System.err.println("Training method: " + op.trainOptions().trainingMethod);
@@ -937,7 +939,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
 
     int nThreads = op.trainOptions.trainingThreads;
-    nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;
+    nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;      
 
     Tagger tagger = null;
     if (op.testOptions.preTag) {
@@ -962,7 +964,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
     transitionTimer.done("Converting trees into transition lists");
     System.err.println("Number of transitions: " + transitionIndex.size());
-
+    
     Random random = new Random(op.trainOptions.randomSeed);
 
     Treebank devTreebank = null;
@@ -1042,7 +1044,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         evaluator.testOnTreebank(devTreebank);
         labelF1 = evaluator.getLBScore();
         System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
-
+        
         if (labelF1 > bestScore) {
           System.err.println("New best dev score (previous best " + bestScore + ")");
           bestScore = labelF1;
@@ -1055,7 +1057,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
           }
         }
         System.err.println();
-
+        
         if (bestModels != null) {
           bestModels.add(new ScoredObject<ShiftReduceParser>(this.deepCopy(), labelF1));
           if (bestModels.size() > op.trainOptions().averagedModels) {
