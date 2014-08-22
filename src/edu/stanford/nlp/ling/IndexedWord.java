@@ -227,6 +227,9 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     label.setEndPosition(endPos);
   }
 
+  public int copyCount() {
+    return label.copyCount();
+  }
 
   /**
    * This .equals is dependent only on docID, sentenceIndex, and index.
@@ -263,6 +266,9 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
       if (otherInd != null)
       return false;
     } else if ( ! myInd.equals(otherInd)) {
+      return false;
+    }
+    if (copyCount() != otherWord.copyCount()) {
       return false;
     }
     return true;
@@ -330,7 +336,10 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     int sentComp = sentIndex() - w.sentIndex();
     if (sentComp != 0) return sentComp;
 
-    return index() - w.index();
+    int indexComp = index() - w.index();
+    if (indexComp != 0) return indexComp;
+
+    return copyCount() - w.copyCount();
   }
 
   /**
