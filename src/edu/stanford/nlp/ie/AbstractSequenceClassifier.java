@@ -127,7 +127,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // Thang Sep13: allow for multiple feature factories.
     this.featureFactories = Generics.newArrayList();
     if (flags.featureFactory != null) {
-      FeatureFactory factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
+      FeatureFactory<IN> factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
       featureFactories.add(factory);
     }
     if(flags.featureFactories!=null){
@@ -1047,12 +1047,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   private void classifyAndWriteAnswers(Collection<List<IN>> documents,
-                                       DocumentReaderAndWriter<IN> readerWriter, 
+                                       DocumentReaderAndWriter<IN> readerWriter,
                                        boolean outputScores)
     throws IOException
   {
     classifyAndWriteAnswers(documents,
-                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), 
+                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true),
                             readerWriter, outputScores);
   }
 
@@ -1061,7 +1061,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
-                                      DocumentReaderAndWriter<IN> readerWriter, 
+                                      DocumentReaderAndWriter<IN> readerWriter,
                                       boolean outputScores)
     throws IOException
   {
@@ -1260,7 +1260,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       bg = flags.backgroundSymbol;
       return countResultsIOB(doc, entityTP, entityFP, entityFN, bg);
     } else if (flags.sighanPostProcessing) {
-      // TODO: this is extremely indicative of being a Chinese Segmenter, 
+      // TODO: this is extremely indicative of being a Chinese Segmenter,
       // but it would still be better to have something more concrete
       return countResultsSegmenter(doc, entityTP, entityFP, entityFN);
     } else {
@@ -1275,7 +1275,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                                               Counter<String> entityTP,
                                               Counter<String> entityFP,
                                               Counter<String> entityFN) {
-    // count from 1 because each label represents cutting or 
+    // count from 1 because each label represents cutting or
     // not cutting at a word, so we don't count the first word
     for (int i = 1; i < doc.size(); ++i) {
       CoreMap word = doc.get(i);
@@ -1294,7 +1294,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     return true;
   }
-                                              
+
 
   public static boolean countResultsIOB2(List<? extends CoreMap> doc,
                                          Counter<String> entityTP,

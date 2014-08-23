@@ -6,16 +6,18 @@ import edu.stanford.nlp.util.Index;
 import java.util.List;
 
 
-/**
- * @author Jenny Finkel
+/** This was the empirical NER prior used for long distance consistency
+ *  in the Finkel et al. ACL 2005 paper.
+ *
+ *  @author Jenny Finkel
  */
 
 public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstractSequencePrior<IN> {
 
-  protected String ORG = "ORGANIZATION";
-  protected String PER = "PERSON";
-  protected String LOC = "LOCATION";
-  protected String MISC = "MISC";
+  protected static final String ORG = "ORGANIZATION";
+  protected static final String PER = "PERSON";
+  protected static final String LOC = "LOCATION";
+  protected static final String MISC = "MISC";
 
   public EmpiricalNERPrior(String backgroundSymbol, Index<String> classIndex, List<IN> doc) {
     super(backgroundSymbol, classIndex, doc);
@@ -71,6 +73,8 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
   protected double p32 = -Math.log(3.0 / dem8);
   protected double p33 = -Math.log(365.0 / dem8);
 
+  @SuppressWarnings("StringEquality")
+  @Override
   public double scoreOf(int[] sequence) {
     double p = 0.0;
     for (int i = 0; i < entities.length; i++) {
@@ -81,16 +85,17 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
         int length = entity.words.size();
         String tag1 = classIndex.get(entity.type);
 
+        // Use canonical String values, so we can henceforth just use ==
         if (tag1.equals(LOC)) { tag1 = LOC; }
         else if (tag1.equals(ORG)) { tag1 = ORG; }
         else if (tag1.equals(PER)) { tag1 = PER; }
         else if (tag1.equals(MISC)) { tag1 = MISC; }
 
         int[] other = entities[i].otherOccurrences;
-        for (int j = 0; j < other.length; j++) {
+        for (int otherOccurrence : other) {
 
           Entity otherEntity = null;
-          for (int k = other[j]; k < other[j]+length && k < entities.length; k++) {
+          for (int k = otherOccurrence; k < otherOccurrence + length && k < entities.length; k++) {
             otherEntity = entities[k];
             if (otherEntity != null) {
 //               if (k > other[j]) {
@@ -103,7 +108,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
           if (otherEntity == null) {
             //p -= length * Math.log(0.1);
             //if (entity.words.size() == 1) {
-              //p -= length * p1;
+            //p -= length * p1;
             //}
             continue;
           }
@@ -111,16 +116,22 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
           int oLength = otherEntity.words.size();
           String tag2 = classIndex.get(otherEntity.type);
 
-          if (tag2.equals(LOC)) { tag2 = LOC; }
-          else if (tag2.equals(ORG)) { tag2 = ORG; }
-          else if (tag2.equals(PER)) { tag2 = PER; }
-          else if (tag2.equals(MISC)) { tag2 = MISC; }
+          // Use canonical String values, so we can henceforth just use ==
+          if (tag2.equals(LOC)) {
+            tag2 = LOC;
+          } else if (tag2.equals(ORG)) {
+            tag2 = ORG;
+          } else if (tag2.equals(PER)) {
+            tag2 = PER;
+          } else if (tag2.equals(MISC)) {
+            tag2 = MISC;
+          }
 
           // exact match??
           boolean exact = false;
           int[] oOther = otherEntity.otherOccurrences;
-          for (int k = 0; k < oOther.length; k++) {
-            if (oOther[k] >= i && oOther[k] <= i+length-1) {
+          for (int index : oOther) {
+            if (index >= i && index <= i + length - 1) {
               exact = true;
               break;
             }
@@ -133,7 +144,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
                 //p -= Math.abs(oLength - length) * Math.log(0.1);
                 p -= Math.abs(oLength - length) * p1;
               } else if (!(tag1.equals(ORG) && tag2.equals(LOC)) &&
-                         !(tag2.equals(LOC) && tag1.equals(ORG))) {
+                      !(tag2.equals(LOC) && tag1.equals(ORG))) {
                 // shorter
                 p -= (oLength + length) * p1;
               }

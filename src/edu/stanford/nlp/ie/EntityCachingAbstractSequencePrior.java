@@ -1,11 +1,10 @@
 package edu.stanford.nlp.ie;
 
+import edu.stanford.nlp.sequences.ListeningSequenceModel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.sequences.SequenceModel;
-import edu.stanford.nlp.sequences.SequenceListener;
 import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.List;
@@ -13,21 +12,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * This class keeps track of all labeled entities and updates the
+ * This class keeps track of all labeled entities and updates
  * its list whenever the label at a point gets changed.  This allows
- * you to not have to regereate the list everytime, which can be quite
+ * you to not have to regenerate the list every time, which can be quite
  * inefficient.
  *
  * @author Jenny Finkel
  **/
-public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> implements SequenceModel, SequenceListener {
+public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> implements ListeningSequenceModel {
 
   protected int[] sequence;
-  protected int backgroundSymbol;
-  protected int numClasses;
-  protected int[] possibleValues;
-  protected Index<String> classIndex;
-  protected List<IN> doc;
+  protected final int backgroundSymbol;
+  protected final int numClasses;
+  protected final int[] possibleValues;
+  protected final Index<String> classIndex;
+  protected final List<IN> doc;
 
   public EntityCachingAbstractSequencePrior(String backgroundSymbol, Index<String> classIndex, List<IN> doc) {
     this.classIndex = classIndex;
@@ -117,7 +116,7 @@ public abstract class EntityCachingAbstractSequencePrior<IN extends CoreMap> imp
   /**
    * extracts the entity starting at the given position
    * and adds it to the entity list.  returns the index
-   * of the last element in the entity (<B>not</b> index+1)
+   * of the last element in the entity (<b>not</b> index+1)
    **/
   public Entity extractEntity(int[] sequence, int position) {
     Entity entity = new Entity();

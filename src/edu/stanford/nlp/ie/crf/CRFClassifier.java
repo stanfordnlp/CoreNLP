@@ -1118,9 +1118,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       try {
         return classifyGibbs(document);
       } catch (Exception e) {
-        System.err.println("Error running testGibbs inference!");
-        e.printStackTrace();
-        return null;
+        throw new RuntimeException("Error running testGibbs inference!", e);
       }
     } else if (flags.crfType.equalsIgnoreCase("maxent")) {
       return classifyMaxEnt(document);
@@ -1134,9 +1132,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       try {
         return classifyGibbs(document, documentDataAndLabels);
       } catch (Exception e) {
-        System.err.println("Error running testGibbs inference!");
-        e.printStackTrace();
-        return null;
+        throw new RuntimeException("Error running testGibbs inference!", e);
       }
     } else if (flags.crfType.equalsIgnoreCase("maxent")) {
       return classifyMaxEnt(document, documentDataAndLabels);
@@ -1281,44 +1277,16 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     CRFCliqueTree<? extends CharSequence> cliqueTree = getCliqueTree(documentDataAndLabels);
 
-    SequenceModel model = cliqueTree;
-    SequenceListener listener = cliqueTree;
+    PriorModelFactory<IN> pmf = (PriorModelFactory<IN>) Class.forName(flags.priorModelFactory).newInstance();
+    ListeningSequenceModel prior = pmf.getInstance(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
 
-    SequenceModel priorModel = null;
-    SequenceListener priorListener = null;
-
-    if (flags.useNERPrior) {
-      EntityCachingAbstractSequencePrior<IN> prior = new EmpiricalNERPrior<IN>(flags.backgroundSymbol, classIndex,
-          newDocument);
-      // SamplingNERPrior prior = new SamplingNERPrior(flags.backgroundSymbol,
-      // classIndex, newDocument);
-      priorModel = prior;
-      priorListener = prior;
-    } else if (flags.useNERPriorBIO) {
-      EntityCachingAbstractSequencePriorBIO<IN> prior = new EmpiricalNERPriorBIO<IN>(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
-      priorModel = prior;
-      priorListener = prior;
-    } else if (flags.useAcqPrior) {
-      EntityCachingAbstractSequencePrior<IN> prior = new AcquisitionsPrior<IN>(flags.backgroundSymbol, classIndex,
-          newDocument);
-      priorModel = prior;
-      priorListener = prior;
-    } else if (flags.useSemPrior) {
-      EntityCachingAbstractSequencePrior<IN> prior = new SeminarsPrior<IN>(flags.backgroundSymbol, classIndex,
-          newDocument);
-      priorModel = prior;
-      priorListener = prior;
-    } else if (flags.useUniformPrior) {
-      // System.err.println("Using uniform prior!");
-      UniformPrior<IN> uniPrior = new UniformPrior<IN>(flags.backgroundSymbol, classIndex, newDocument);
-      priorModel = uniPrior;
-      priorListener = uniPrior;
+    if (flags.useUniformPrior) {
     } else {
       throw new RuntimeException("no prior specified");
     }
 
-    model = new FactoredSequenceModel(model, priorModel);
-    listener = new FactoredSequenceListener(listener, priorListener);
+    SequenceModel model = new FactoredSequenceModel(cliqueTree, prior);
+    SequenceListener listener = new FactoredSequenceListener(cliqueTree, prior);
 
     SequenceGibbsSampler sampler = new SequenceGibbsSampler(0, 0, listener);
     int[] sequence = new int[cliqueTree.length()];
