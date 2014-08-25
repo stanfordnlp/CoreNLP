@@ -59,7 +59,7 @@ import java.util.*;
  * <td>boolean</td>
  * <td>false</td>
  * <td>Use SGD (tweaking weights in place) to find minimum (more efficient than
- * the old SGD, faster to converge than Quasi-Newton if there are very large of
+ * the old SGD, faster to converge than Quasi-Newtown if there are very large of
  * samples). Implemented for CRFClassifier. NOTE: Remember to set useQN to false
  * </td>
  * </tr>

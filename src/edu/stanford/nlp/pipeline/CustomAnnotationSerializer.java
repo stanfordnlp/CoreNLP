@@ -53,8 +53,10 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
   static SemanticGraph convertIntermediateGraph(IntermediateSemanticGraph ig, List<CoreLabel> sentence) {
     SemanticGraph graph = new SemanticGraph();
 
-    // first construct the actual nodes; keep them indexed by their index
-    Map<Integer, IndexedWord> nodes = Generics.newHashMap();
+    // first construct the actual nodes; keep them indexed by their index and copy count
+    // sentences such as "I went over the river and through the woods" have
+    // copys for "went" in the collapsed dependencies
+    TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
     for(IntermediateNode in: ig.nodes){
       CoreLabel token = sentence.get(in.index - 1); // index starts at 1!
       IndexedWord word;
@@ -78,17 +80,23 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
         word.setIndex(in.index);
       }      
 
-      nodes.put(word.index(), word);
-    }
-    for(IndexedWord node: nodes.values()){
-      graph.addVertex(node);
+      nodes.put(word.index(), word.copyCount(), word);
+      graph.addVertex(word);
+      if (in.isRoot) {
+        graph.addRoot(word);
+      }
     }
 
     // add all edges to the actual graph
     for(IntermediateEdge ie: ig.edges){
-      IndexedWord source = nodes.get(ie.source);
-      assert(source != null);
-      IndexedWord target = nodes.get(ie.target);
+      IndexedWord source = nodes.get(ie.source, ie.sourceCopy);
+      if (source == null) {
+        throw new RuntimeIOException("Failed to find node " + ie.source + "-" + ie.sourceCopy);
+      }
+      IndexedWord target = nodes.get(ie.target, ie.targetCopy);
+      if (target == null) {
+        throw new RuntimeIOException("Failed to find node " + ie.target + "-" + ie.targetCopy);
+      }
       assert(target != null);
       synchronized (LOCK) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
@@ -97,8 +105,8 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       }
     }
 
-    // compute root nodes if non-empty
-    if( ! graph.isEmpty()){
+    // compute root nodes if they weren't stored in the graph
+    if (!graph.isEmpty() && graph.getRoots().size() == 0){
       graph.resetRoots();
     }
 
@@ -123,23 +131,29 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     int sentIndex;
     int index;
     int copyAnnotation;
-    IntermediateNode(String docId, int sentIndex, int index, int copy) {
+    boolean isRoot;
+    IntermediateNode(String docId, int sentIndex, int index, int copy, boolean isRoot) {
       this.docId = docId;
       this.sentIndex = sentIndex;
       this.index = index;
       this.copyAnnotation = copy;
+      this.isRoot = isRoot;
     }
   }
 
   private static class IntermediateEdge {
     int source;
+    int sourceCopy;
     int target;
+    int targetCopy;
     String dep;
     boolean isExtra;
-    IntermediateEdge(String dep, int source, int target, boolean isExtra) {
+    IntermediateEdge(String dep, int source, int sourceCopy, int target, int targetCopy, boolean isExtra) {
       this.dep = dep;
       this.source = source;
+      this.sourceCopy = sourceCopy;
       this.target = target;
+      this.targetCopy = targetCopy;
       this.isExtra = isExtra;
     }
   }
@@ -158,15 +172,19 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       int sentIndex = Integer.valueOf(bits[1]);
       for(int i = 2; i < bits.length; i ++){
         String bit = bits[i];
-        String [] bbits = bit.split("-");
+        String[] bbits = bit.split("-");
         int copyAnnotation = -1;
-        if(bbits.length > 2){
+        boolean isRoot = false;
+        if(bbits.length > 3){
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         } else if(bbits.length == 2){
           copyAnnotation = Integer.valueOf(bbits[1]);
+        } else if (bbits.length == 3) {
+          copyAnnotation = Integer.valueOf(bbits[1]);
+          isRoot = bbits[2].equals("R");
         }
         int index = Integer.valueOf(bbits[0]);
-        graph.nodes.add(new IntermediateNode(docId, sentIndex, index, copyAnnotation));
+        graph.nodes.add(new IntermediateNode(docId, sentIndex, index, copyAnnotation, isRoot));
       }
     }
 
@@ -176,14 +194,16 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       String [] bits = line.split("\t");
       for(String bit: bits){
         String [] bbits = bit.split(" ");
-        if(bbits.length < 3 || bbits.length > 4){
+        if(bbits.length < 3 || bbits.length > 6){
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         }
         String dep = bbits[0];
         int source = Integer.valueOf(bbits[1]);
         int target = Integer.valueOf(bbits[2]);
         boolean isExtra = (bbits.length == 4) ? Boolean.valueOf(bbits[3]) : false;
-        graph.edges.add(new IntermediateEdge(dep, source, target, isExtra));
+        int sourceCopy = (bbits.length > 4) ? Integer.valueOf(bbits[4]) : 0;
+        int targetCopy = (bbits.length > 5) ? Integer.valueOf(bbits[5]) : 0;
+        graph.edges.add(new IntermediateEdge(dep, source, sourceCopy, target, targetCopy, isExtra));
       }
     }
 
@@ -224,6 +244,13 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
         pw.print(node.get(CoreAnnotations.CopyAnnotation.class));
         // System.out.println("FOUND COPY ANNOTATION: " + node.get(CoreAnnotations.CopyAnnotation.class));
       }
+      if (graph.getRoots().contains(node)) {
+        if (node.containsKey(CoreAnnotations.CopyAnnotation.class)) {
+          pw.print("-R");
+        } else {
+          pw.print("-0-R");
+        }
+      }
     }
     pw.println();
 
@@ -240,9 +267,13 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       pw.print(edge.getSource().index());
       pw.print(" ");
       pw.print(edge.getTarget().index());
-      if (edge.isExtra()) {
+      if (edge.isExtra() || edge.getSource().copyCount() > 0 || edge.getTarget().copyCount() > 0) {
         pw.print(" ");
         pw.print(edge.isExtra());
+        pw.print(" ");
+        pw.print(edge.getSource().copyCount());
+        pw.print(" ");
+        pw.print(edge.getTarget().copyCount());
       }
       first = false;
     }
@@ -555,6 +586,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     // word
     String word = bits[0].replaceAll(SPACE_HOLDER, " ");
     token.set(CoreAnnotations.TextAnnotation.class, word);
+    token.set(CoreAnnotations.ValueAnnotation.class, word);
     // if(word.length() == 0) System.err.println("FOUND 0-LENGTH TOKEN!");
 
     // lemma
@@ -591,6 +623,9 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
    */
   private static void saveToken(CoreLabel token, boolean haveExplicitAntecedent, PrintWriter pw) {
     String word = token.get(CoreAnnotations.TextAnnotation.class);
+    if (word == null) {
+      word = token.get(CoreAnnotations.ValueAnnotation.class);
+    }
     if(word != null){
       word = word.replaceAll("\\s+", SPACE_HOLDER); // spaces are used for formatting
       pw.print(word);
