@@ -14,6 +14,7 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
   protected float value = 0.0f;
 
 
+  @Override
   abstract public int domainDimension();
 
   /**
@@ -22,13 +23,14 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
    */
   abstract protected void calculate(float[] x);
 
+  @Override
   public float[] initial() {
     float[] initial = new float[domainDimension()];
     Arrays.fill(initial, 0.0f);
     return initial;
   }
 
-  protected void copy(float[] y, float[] x) {
+  protected static void copy(float[] y, float[] x) {
     System.arraycopy(x, 0, y, 0, x.length);
   }
 
@@ -46,19 +48,21 @@ public abstract class AbstractCachingDiffFloatFunction implements DiffFloatFunct
     calculate(x);
   }
 
+  @Override
   public float valueAt(float[] x) {
     ensure(x);
     return value;
   }
 
-  float norm2(float[] x) {
+  static float norm2(float[] x) {
     float sum = 0.0f;
-    for (int i = 0; i < x.length; i++) {
-      sum += x[i] * x[i];
+    for (float aX : x) {
+      sum += aX * aX;
     }
     return (float) Math.sqrt(sum);
   }
 
+  @Override
   public float[] derivativeAt(float[] x) {
     ensure(x);
     return derivative;
