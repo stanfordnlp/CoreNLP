@@ -549,6 +549,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     return copy;
   }
 
+  public void setCopyCount(int count) {
+    set(CoreAnnotations.CopyAnnotation.class, count);
+  }
+
   /**
    * Tag separator to use by default
    */
