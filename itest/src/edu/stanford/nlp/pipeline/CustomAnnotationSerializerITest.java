@@ -38,6 +38,12 @@ public class CustomAnnotationSerializerITest extends TestCase {
     runTest(annotation);
   }
 
+  public void testTwoSentences() throws IOException {
+    Annotation annotation = new Annotation("I bought a bone for my dog.  He chews it every day.");
+    fullPipeline.annotate(annotation);
+    runTest(annotation);
+  }
+
   public void testCopyWordGraphs() throws IOException {
     Annotation annotation = new Annotation("I went over the river and through the woods");
     fullPipeline.annotate(annotation);
