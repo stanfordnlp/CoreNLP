@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import java.util.List;
+import java.util.Map;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -19,14 +20,25 @@ class PruneNode extends TsurgeonPattern {
   }
 
   @Override
-  public Tree evaluate(Tree t, TregexMatcher m) {
-    boolean prunedWholeTree = false;
-    for(TsurgeonPattern child : children) {
-      final Tree nodeToPrune = child.evaluate(t,m);
-      if(pruneHelper(t,nodeToPrune) == null)
-        prunedWholeTree = true;
+  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+    return new Matcher(newNodeNames, coindexer);
+  }
+
+  private class Matcher extends TsurgeonMatcher {
+    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+      super(PruneNode.this, newNodeNames, coindexer);
     }
-    return prunedWholeTree ? null : t;
+
+    @Override
+    public Tree evaluate(Tree tree, TregexMatcher tregex) {
+      boolean prunedWholeTree = false;
+      for(TsurgeonMatcher child : childMatcher) {
+        final Tree nodeToPrune = child.evaluate(tree, tregex);
+        if(pruneHelper(tree,nodeToPrune) == null)
+          prunedWholeTree = true;
+      }
+      return prunedWholeTree ? null : tree;
+    }
   }
 
   private static Tree pruneHelper(Tree root, Tree nodeToPrune) {

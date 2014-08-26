@@ -554,8 +554,9 @@ public class Tsurgeon {
    */
   public static Tree processPattern(TregexPattern matchPattern, TsurgeonPattern p, Tree t) {
     TregexMatcher m = matchPattern.matcher(t);
+    TsurgeonMatcher tsm = p.matcher();
     while (m.find()) {
-      t = p.evaluate(t,m);
+      t = tsm.evaluate(t, m);
       if (t==null) {
         break;
       }
@@ -574,9 +575,10 @@ public class Tsurgeon {
           System.err.println("Running pattern " + op.first());
         }
         TregexMatcher m = op.first().matcher(t);
+        TsurgeonMatcher tsm = op.second().matcher();
         while (m.find()) {
           matchedOnTree = true;
-          t = op.second().evaluate(t,m);
+          t = tsm.evaluate(t,m);
           if (t == null) {
             return null;
           }
