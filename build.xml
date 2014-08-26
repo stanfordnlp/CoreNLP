@@ -364,10 +364,7 @@
       </lib>
       <lib dir="${basedir}/lib">
         <include name="commons-lang3-3.1.jar"/>
-        <include name="xom-1.2.8.jar"/>
-        <include name="xalan.jar"/>
-        <include name="serializer.jar"/>
-        <include name="xercesImpl.jar"/>
+        <include name="xom-1.2.10.jar"/>
         <include name="xml-apis.jar"/>
         <include name="joda-time.jar"/>
         <include name="jollyday-0.4.7.jar"/>
