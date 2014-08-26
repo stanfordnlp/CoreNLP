@@ -15,7 +15,6 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
@@ -48,116 +47,6 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
   }
 
 
-  private static final Object LOCK = new Object();
-
-  static SemanticGraph convertIntermediateGraph(IntermediateSemanticGraph ig, List<CoreLabel> sentence) {
-    SemanticGraph graph = new SemanticGraph();
-
-    // first construct the actual nodes; keep them indexed by their index and copy count
-    // sentences such as "I went over the river and through the woods" have
-    // copys for "went" in the collapsed dependencies
-    TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
-    for(IntermediateNode in: ig.nodes){
-      CoreLabel token = sentence.get(in.index - 1); // index starts at 1!
-      IndexedWord word;
-      if (in.copyAnnotation > 0) {
-        // TODO: if we make a copy wrapper CoreLabel, use it here instead
-        word = new IndexedWord(new CoreLabel(token));
-        word.set(CoreAnnotations.CopyAnnotation.class, in.copyAnnotation);
-      } else {
-        word = new IndexedWord(token);
-      }
-
-      // for backwards compatibility - new annotations should have
-      // these fields set, but annotations older than August 2014 might not
-      if (word.docID() == null && in.docId != null) {
-        word.setDocID(in.docId);
-      }
-      if (word.sentIndex() < 0 && in.sentIndex >= 0) {
-        word.setSentIndex(in.sentIndex);
-      }
-      if (word.index() < 0 && in.index >= 0) {
-        word.setIndex(in.index);
-      }      
-
-      nodes.put(word.index(), word.copyCount(), word);
-      graph.addVertex(word);
-      if (in.isRoot) {
-        graph.addRoot(word);
-      }
-    }
-
-    // add all edges to the actual graph
-    for(IntermediateEdge ie: ig.edges){
-      IndexedWord source = nodes.get(ie.source, ie.sourceCopy);
-      if (source == null) {
-        throw new RuntimeIOException("Failed to find node " + ie.source + "-" + ie.sourceCopy);
-      }
-      IndexedWord target = nodes.get(ie.target, ie.targetCopy);
-      if (target == null) {
-        throw new RuntimeIOException("Failed to find node " + ie.target + "-" + ie.targetCopy);
-      }
-      assert(target != null);
-      synchronized (LOCK) {
-        // this is not thread-safe: there are static fields in GrammaticalRelation
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.dep);
-        graph.addEdge(source, target, rel, 1.0, ie.isExtra);
-      }
-    }
-
-    // compute root nodes if they weren't stored in the graph
-    if (!graph.isEmpty() && graph.getRoots().size() == 0){
-      graph.resetRoots();
-    }
-
-    return graph;
-  }
-
-  /**
-   * This stores the loaded SemanticGraph *before* we could convert the nodes to IndexedWords
-   * This conversion take places later, after we load all sentence tokens
-   */
-  private static class IntermediateSemanticGraph {
-    List<IntermediateNode> nodes;
-    List<IntermediateEdge> edges;
-    IntermediateSemanticGraph() {
-      nodes = new ArrayList<IntermediateNode>();
-      edges = new ArrayList<IntermediateEdge>();
-    }
-  }
-
-  private static class IntermediateNode {
-    String docId;
-    int sentIndex;
-    int index;
-    int copyAnnotation;
-    boolean isRoot;
-    IntermediateNode(String docId, int sentIndex, int index, int copy, boolean isRoot) {
-      this.docId = docId;
-      this.sentIndex = sentIndex;
-      this.index = index;
-      this.copyAnnotation = copy;
-      this.isRoot = isRoot;
-    }
-  }
-
-  private static class IntermediateEdge {
-    int source;
-    int sourceCopy;
-    int target;
-    int targetCopy;
-    String dep;
-    boolean isExtra;
-    IntermediateEdge(String dep, int source, int sourceCopy, int target, int targetCopy, boolean isExtra) {
-      this.dep = dep;
-      this.source = source;
-      this.sourceCopy = sourceCopy;
-      this.target = target;
-      this.targetCopy = targetCopy;
-      this.isExtra = isExtra;
-    }
-  }
-
   private static IntermediateSemanticGraph loadDependencyGraph(BufferedReader reader) throws IOException {
     IntermediateSemanticGraph graph = new IntermediateSemanticGraph();
 
@@ -179,7 +68,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         } else if(bbits.length == 2){
           copyAnnotation = Integer.valueOf(bbits[1]);
-        } else if (bbits.length == 3) {
+        } else if(bbits.length == 3){
           copyAnnotation = Integer.valueOf(bbits[1]);
           isRoot = bbits[2].equals("R");
         }
@@ -562,11 +451,11 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
       // convert the intermediate graph to an actual SemanticGraph
-      SemanticGraph collapsedDeps = convertIntermediateGraph(intermCollapsedDeps, tokens);
+      SemanticGraph collapsedDeps = intermCollapsedDeps.convertIntermediateGraph(tokens);
       sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, collapsedDeps);
-      SemanticGraph uncollapsedDeps = convertIntermediateGraph(intermUncollapsedDeps, tokens);
+      SemanticGraph uncollapsedDeps = intermUncollapsedDeps.convertIntermediateGraph(tokens);
       sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
-      SemanticGraph ccDeps = convertIntermediateGraph(intermCcDeps, tokens);
+      SemanticGraph ccDeps = intermCcDeps.convertIntermediateGraph(tokens);
       sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
 
       sentences.add(sentence);
