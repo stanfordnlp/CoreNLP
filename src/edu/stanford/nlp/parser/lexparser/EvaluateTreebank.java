@@ -252,6 +252,22 @@ public class EvaluateTreebank {
     return 0.0;
   }
 
+  public double getLACorpusDistance() {
+    if (factLA != null)
+      return factLA.getAvgCorpusDistance();
+    if (pcfgLA != null)
+      return pcfgLA.getAvgCorpusDistance();
+    return Double.MAX_VALUE;
+  }
+
+  public double getLASentenceDistance() {
+    if (factLA != null)
+      return factLA.getAvgSentenceDistance();
+    if (pcfgLA != null)
+      return pcfgLA.getAvgSentenceDistance();
+    return Double.MAX_VALUE;
+  }
+
 
   /**
    * Remove tree scores, so they don't print.

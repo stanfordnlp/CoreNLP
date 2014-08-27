@@ -162,6 +162,10 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     new Pair("sentence <<, (sn=sn <, (/^grup\\.w$/ $+ fp))",
              "delete sn"),
 
+    // Shed "conj" parents of periods in the middle of trees so that
+    // our splitter can identify sentence boundaries properly
+    new Pair("conj=conj <: fp=fp", "replace conj fp"),
+
     // Fix mis-tagging of inverted question mark
     new Pair("fit=fit <: ¿", "relabel fit fia"),
   };

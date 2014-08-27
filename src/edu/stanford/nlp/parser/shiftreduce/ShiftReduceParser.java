@@ -917,16 +917,20 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       outputStats();
 
 
-      double labelF1 = 0.0;
+      double evaluation = 0.0;
       if (devTreebank != null) {
         EvaluateTreebank evaluator = new EvaluateTreebank(op, null, this, tagger);
         evaluator.testOnTreebank(devTreebank);
-        labelF1 = evaluator.getLBScore();
-        System.err.println("Label F1 after " + iteration + " iterations: " + labelF1);
-        
-        if (labelF1 > bestScore) {
+
+        // Negate the edit distance so that we can plug this into a maximizer and have it work
+        // correctly!
+        evaluation = -evaluator.getLACorpusDistance();
+        System.err.println("Negative corpus-level LA after " + iteration + " iterations: " +
+                             evaluation);
+
+        if (evaluation > bestScore) {
           System.err.println("New best dev score (previous best " + bestScore + ")");
-          bestScore = labelF1;
+          bestScore = evaluation;
           bestIteration = iteration;
         } else {
           System.err.println("Failed to improve for " + (iteration - bestIteration) + " iteration(s) on previous best score of " + bestScore);
@@ -937,14 +941,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         }
         
         if (bestModels != null) {
-          bestModels.add(new ScoredObject<ShiftReduceParser>(this.deepCopy(), labelF1));
+          bestModels.add(new ScoredObject<ShiftReduceParser>(this.deepCopy(), evaluation));
           if (bestModels.size() > op.trainOptions().averagedModels) {
             bestModels.poll();
           }
         }
       }
       if (op.trainOptions().saveIntermediateModels && serializedPath != null && op.trainOptions.debugOutputFrequency > 0) {
-        String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(labelF1) + ".ser.gz";
+        String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + FILENAME.format(iteration) + "-" + NF.format(evaluation) + ".ser.gz";
         saveModel(tempName);
         // TODO: we could save a cutoff version of the model,
         // especially if we also get a dev set number for it, but that
