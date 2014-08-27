@@ -179,7 +179,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     }
   }
 
-  private static final Pattern pQuoted = Pattern.compile("\".+\"");
+  private static final Pattern pQuoted = Pattern.compile("\"(.+)\"");
 
   /**
    * Return the (single or multiple) words which make up the given
@@ -190,7 +190,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     if (quoteMatcher.matches()) {
       String[] ret = new String[3];
       ret[0] = "\"";
-      ret[1] = quoteMatcher.group(0);
+      ret[1] = quoteMatcher.group(1);
       ret[2] = "\"";
 
       return ret;
