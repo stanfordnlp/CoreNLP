@@ -23,7 +23,7 @@ public class SpanishTreeReaderFactory implements TreeReaderFactory, Serializable
 
   public TreeReader newTreeReader(Reader in) {
     return new PennTreeReader(in, new LabeledScoredTreeFactory(),
-                              new SpanishTreeNormalizer(false, false, false),
+                              new SpanishTreeNormalizer(false, false),
                               new PennTreebankTokenizer(in));
   }
 

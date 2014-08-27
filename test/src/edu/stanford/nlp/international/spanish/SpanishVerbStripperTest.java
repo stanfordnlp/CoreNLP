@@ -7,7 +7,7 @@ import junit.framework.TestCase;
  */
 public class SpanishVerbStripperTest extends TestCase {
 
-  public void testStrippable() {
+  public static void testStrippable() {
     assertTrue(SpanishVerbStripper.isStrippable("decirme"));
     assertTrue(SpanishVerbStripper.isStrippable("decirnos"));
     assertTrue(SpanishVerbStripper.isStrippable("jugarles"));
@@ -21,9 +21,14 @@ public class SpanishVerbStripperTest extends TestCase {
     assertTrue(SpanishVerbStripper.isStrippable("viviéndolo"));
     assertTrue(SpanishVerbStripper.isStrippable("leyéndolo"));
     assertTrue(SpanishVerbStripper.isStrippable("buscándome"));
+    assertTrue(SpanishVerbStripper.isStrippable("sentaos"));
+    assertTrue(SpanishVerbStripper.isStrippable("vestíos"));
+    assertTrue(SpanishVerbStripper.isStrippable("cómprelos"));
+    assertTrue(SpanishVerbStripper.isStrippable("házmelo"));
+    
   }
 
-  public void testStripVerb() {
+  public static void testStripVerb() {
     assertEquals("decir", SpanishVerbStripper.stripVerb("decirme"));
     assertEquals("decir", SpanishVerbStripper.stripVerb("decirnos"));
     assertEquals("jugar", SpanishVerbStripper.stripVerb("jugarles"));
@@ -37,6 +42,15 @@ public class SpanishVerbStripperTest extends TestCase {
     assertEquals("viviendo", SpanishVerbStripper.stripVerb("viviéndolo"));
     assertEquals("leyendo", SpanishVerbStripper.stripVerb("leyéndolo"));
     assertEquals("buscando", SpanishVerbStripper.stripVerb("buscándome"));
+    assertEquals("senta", SpanishVerbStripper.stripVerb("sentaos"));
+    assertEquals("vesti", SpanishVerbStripper.stripVerb("vestíos"));
+    assertEquals("compre", SpanishVerbStripper.stripVerb("cómprelos"));
+    assertEquals("haz", SpanishVerbStripper.stripVerb("házmelo"));
+  }
+
+  public static void main(String[] args) {
+    testStrippable();
+    testStripVerb();
   }
 
 }
