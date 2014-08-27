@@ -52,6 +52,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_NAMED_ENTITY = "ne";
   private static final String ATTR_POS = "pos";
   private static final String ATTR_ELLIPTIC = "elliptic";
+  private static final String ATTR_PUNCT = "punct";
 
   private static final String EMPTY_LEAF = "-NONE-";
 
@@ -137,26 +138,35 @@ public class SpanishXMLTreeReader implements TreeReader {
   }
 
   /**
-   * Extract the morphological analysis from a leaf. Note that the "ee" field
-   * contains the relativizer flag.
+   * Determine the part of speech of the given leaf node.
    *
-   * @param node
+   * Use some heuristics to make up for missing part-of-speech labels.
    */
-  // private String getMorph(Element node) {
-  //   String ee = node.getAttribute(ATTR_EE);
-  //   return ee == null ? "" : ee;
-  // }
+  private String getPOS(Element node) {
+    String pos = node.getAttribute(ATTR_POS);
 
-  /**
-   * Get the POS subcategory.
-   *
-   * @param node
-   * @return
-   */
-  // private String getSubcat(Element node) {
-  //   String subcat = node.getAttribute(ATTR_SUBCAT);
-  //   return subcat == null ? "" : subcat;
-  // }
+    // Make up for some missing part-of-speech tags
+    if (pos.equals("")) {
+      String namedAttribute = node.getAttribute(ATTR_NAMED_ENTITY);
+      if (namedAttribute.equals("date")) {
+        return "w";
+      } else if (namedAttribute.equals("number")) {
+        return "z0";
+      }
+
+      String tagName = node.getTagName();
+      if (tagName.equals("i")) {
+        return "i";
+      } else if (tagName.equals("z")) {
+        return "z0";
+      }
+
+      if (node.hasAttribute(ATTR_PUNCT))
+        return "f";
+    }
+
+    return pos;
+  }
 
   private String getWord(Element node) {
     String word = node.getAttribute(ATTR_WORD);
@@ -202,7 +212,7 @@ public class SpanishXMLTreeReader implements TreeReader {
 
     // TODO make sure there are no children as well?
 
-    String posStr = eRoot.getAttribute(ATTR_POS);
+    String posStr = getPOS(eRoot);
     posStr = treeNormalizer.normalizeNonterminal(posStr);
 
     String lemma = eRoot.getAttribute(ATTR_LEMMA);
