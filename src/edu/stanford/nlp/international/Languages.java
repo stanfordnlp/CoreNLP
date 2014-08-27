@@ -1,12 +1,6 @@
 package edu.stanford.nlp.international;
 
-import edu.stanford.nlp.parser.lexparser.ArabicTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.FrenchTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.HebrewTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
+import edu.stanford.nlp.parser.lexparser.*;
 
 /**
  * Constants and parameters for multilingual parsing.
@@ -18,7 +12,7 @@ public class Languages {
 
   private Languages() {}
 
-  public static enum Language {Arabic,Chinese,English,German,French,Hebrew}
+  public static enum Language {Arabic,Chinese,English,German,French,Hebrew,Spanish}
   
   private static String langList;
   static {
@@ -59,6 +53,10 @@ public class Languages {
 
     case Hebrew:
       tlpp = new HebrewTreebankParserParams();
+      break;
+
+    case Spanish:
+      tlpp = new SpanishTreebankParserParams();
       break;
 
     default:

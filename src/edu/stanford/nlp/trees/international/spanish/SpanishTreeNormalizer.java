@@ -135,6 +135,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public SpanishTreeNormalizer(boolean simplifiedTagset,
                                boolean aggressiveNormalization,
                                boolean retainNER) {
+    super(new SpanishTreebankLanguagePack());
+
     if (retainNER && !simplifiedTagset)
       throw new IllegalArgumentException("retainNER argument only valid when " +
                                          "simplified tagset is used");
