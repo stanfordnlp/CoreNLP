@@ -42,6 +42,12 @@ public class MultiWordTreeExpander {
   private static final String PREPOSITIONS =
     "(por|para|al?|del?|con(?:tra)?|sobre|en(?:tre)?|hacia|sin|según|hasta)";
 
+  private static TregexPattern parentheticalExpression = TregexPattern.compile(
+    "fpa=left > /^grup\\.nom$/ " + "$++ fpt=right");
+
+  private static TsurgeonPattern groupParentheticalExpression
+    = Tsurgeon.parseOperation("createSubtree grup.nom.inter4 left right");
+
   /**
    * Yes, some multiword tokens contain multiple clauses..
    */
@@ -313,6 +319,7 @@ public class MultiWordTreeExpander {
   private static List<Pair<TregexPattern, TsurgeonPattern>> firstStepExpansions =
     new ArrayList<Pair<TregexPattern, TsurgeonPattern>>() {{
       // Should be first-ish
+      add(new Pair(parentheticalExpression, groupParentheticalExpression));
       add(new Pair(multipleClauses, expandMultipleClauses));
 
       add(new Pair(leadingPrepositionalPhrase, expandPrepositionalPhrase1));
@@ -413,6 +420,7 @@ public class MultiWordTreeExpander {
 // triunfo . sitúa (periods in names at end)
 // Diez . Minutos (new rule for terminal prepositions?)
 // Abogados . y (parenthetical should be separated into its own clause)
+  // Team . /^2000$/ (same as above)
 // totalmente . evitables ("en opinion del" at end)
 // hábitat . tradicional ("en cuerpo y alma" phrase)
 // Eliécer . Hurtado ("salir al paso")
@@ -426,3 +434,4 @@ public class MultiWordTreeExpander {
 // harakiri . a ("en vez del": prepositional phrase  functioning as conjunction)
 // teatral . catalán (range phrase)
 // Wiranto . ha ("al frente de")
+// Claro . (que . cuando) (grup.nom.inter leaf caused by phrase "del todo")

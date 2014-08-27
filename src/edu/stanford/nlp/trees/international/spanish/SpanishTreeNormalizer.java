@@ -77,6 +77,10 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   @SuppressWarnings("unchecked")
   private static final Pair<String, String>[] cleanupStrs = new Pair[] {
     new Pair("sp < (sp=sp <: prep=prep)", "replace sp prep"),
+
+    // Left and right parentheses should be at same depth
+    new Pair("fpa > __=grandparent $++ (__=ancestor <<` fpt=fpt >` =grandparent)",
+      "move fpt $- ancestor"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
