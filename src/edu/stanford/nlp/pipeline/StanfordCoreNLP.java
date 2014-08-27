@@ -351,7 +351,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 				if(keepNewline) {
 					extraOptions = "tokenizeNLs,";
 				}
-				System.err.println(properties.getProperty("tokenize.language"));
 				return annotatorImplementation.tokenizer(properties, false, extraOptions);
 			}
 		
