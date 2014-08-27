@@ -523,19 +523,9 @@ public class MultiWordTreeExpander {
 // José . Vicente ("de vez en cuando")
 // PSC . (/^-$/ . PSOE) ("por lo que respecta")
 // científicos . (americanos . /,/) ("publica o perece")
-// Mediante . gruesas ("en su defecto")
-
-// TODO
-// recogida . (de . firmas) ("teniendo en cuenta")
-// según . Cruells ("haciéndose cargo")
-// historia . despiadada ("darse cuenta")
-// Imagínense . /./
-// jugadores . (de . Aíto) ("en rehacerse")
-// sólo . (los . espectadores) ("miles" has a ROOT tag???)
-// sentido . generoso (conmigo)
-// estrené . Lisboa (conmigo)
 // Nada . (que . ver) (infinitiu < grup.pron construction is .. wrong)
 // Fermina . Daza ("tiene nada que ver")
 // plantillas .. (temporada . pasada) ("Nada que ver" weird parse)
 // Por . qué .. pregunta (sn - grup.nom - sn unary rewrite.. shouldn't happen)
 // intentaba . alisar ("intentaba" never attaches infinitive in this way)
+// epígrafe . Arte (flat!)

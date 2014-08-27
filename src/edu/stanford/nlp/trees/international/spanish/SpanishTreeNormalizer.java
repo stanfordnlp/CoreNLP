@@ -158,6 +158,13 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
                "[delete queTag]" +
                "[delete vbContainer]"),
 
+    // One more bizarre "nada que ver"
+    new Pair("sn=sn <: (/^grup\\.nom/=gn <<: Nada)" +
+               "$+ (infinitiu=inf <<, que=que <<` (ver , =que) $+ sp=sp)",
+
+             "[delete inf] [insert (S (relatiu (pr000000 que)) (infinitiu (vmn0000 ver))) >-1 gn]" +
+               "[move sp >-1 sn]"),
+
     // Remove date lead-ins
     new Pair("sentence <<, (sn=sn <, (/^grup\\.w$/ $+ fp))",
              "delete sn"),
