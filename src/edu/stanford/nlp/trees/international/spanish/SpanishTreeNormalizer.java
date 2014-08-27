@@ -283,7 +283,14 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    */
   private static final String VERB_LEAF_WITH_PRONOUNS_TREGEX =
     // Match a leaf that looks like it has a clitic pronoun
-    "/(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
+
+    // Match suffixes of regular forms which may carry attached
+    // pronouns (imperative, gerund, infinitive)
+    "/(?:(?:[aeiáéí]r|[áé]ndo|[aeáé]n?|[aeiáéí](?:d(?!os)|(?=os)))" +
+      // Match irregular imperative stems
+      "|^(?:d[ií]|h[aá]z|v[eé]|p[oó]n|s[aá]l|sé|t[eé]n|v[eé]n|(?:id(?=os$))))" +
+      // Match attached pronouns
+      "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
       // It should actually be a verb (gerund, imperative or
       // infinitive)
       "> /^vm[gmn]0000$/";
@@ -330,15 +337,14 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
     TregexMatcher matcher = verbWithCliticPronouns.matcher(t);
     while (matcher.find()) {
-      Tree clause = matcher.getNode("clause");
-      Tree target = matcher.getNode("target");
-      Tree verb = matcher.getNode("vb");
+      Tree verbNode = matcher.getNode("vb");
+      String verb = verbNode.value();
 
-      // Calculate index at which to insert pronominal phrase
-      int idx = clause.objectIndexOf(target) + 1;
+      if (!SpanishVerbStripper.isStrippable(verb))
+        continue;
 
       Pair<String, List<String>> split =
-        SpanishVerbStripper.separatePronouns(verb.value());
+        SpanishVerbStripper.separatePronouns(verb);
       if (split == null)
         continue;
 
