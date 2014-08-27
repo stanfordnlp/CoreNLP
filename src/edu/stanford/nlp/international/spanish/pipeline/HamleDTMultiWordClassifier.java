@@ -49,7 +49,8 @@ public class HamleDTMultiWordClassifier {
 
   private static final List<Function<String, List<String>>> featureFunctions = new
     ArrayList<Function<String, List<String>>>() {{
-      add(new LeadingVerbFeatureFunction());
+      add(new LeadingPOSFeatureFunction("v")); // verbs
+      add(new LeadingPOSFeatureFunction("s")); // prepositions
       add(new CharacterNGramFeatureFunction(2, 4));
       add(new WordShapeFeatureFunction());
     }};
@@ -262,27 +263,31 @@ public class HamleDTMultiWordClassifier {
 
   }
 
-  private static class LeadingVerbFeatureFunction implements Function<String, List<String>> {
+  private static class LeadingPOSFeatureFunction implements Function<String, List<String>> {
 
-    private static final Set<String> verbs = new HashSet<String>();
-    static {
+    private final Set<String> allowedWords = new HashSet<String>();
+
+    private final List<String> positiveRet;
+    private final List<String> negativeRet;
+
+    public LeadingPOSFeatureFunction(String posPrefix) {
       for (Map.Entry<String, String> lex : dictionary.entrySet()) {
         // Add only verbs to set
-        if (lex.getValue().startsWith("v"))
-          verbs.add(lex.getKey());
+        if (lex.getValue().startsWith(posPrefix))
+          allowedWords.add(lex.getKey());
       }
-    }
 
-    private static final List<String> POSITIVE_RET = Arrays.asList("leadingVerb");
-    private static final List<String> NEGATIVE_RET = Arrays.asList("noLeadingVerb");
+      positiveRet = Arrays.asList("*leadingPOS[" + posPrefix + "]:");
+      negativeRet = Arrays.asList("*noLeadingPOS[" + posPrefix + "]:");
+    }
 
     @Override
     public List<String> apply(String mwe) {
       String[] words = mwe.split("_");
 
-      if (verbs.contains(words[0]))
-        return POSITIVE_RET;
-      return NEGATIVE_RET;
+      if (allowedWords.contains(words[0]))
+        return positiveRet;
+      return negativeRet;
     }
 
   }
