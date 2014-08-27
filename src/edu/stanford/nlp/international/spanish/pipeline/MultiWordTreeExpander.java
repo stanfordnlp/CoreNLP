@@ -40,7 +40,7 @@ public class MultiWordTreeExpander {
   private static final String CANDIDATE_GROUPS = "(^grup\\.(adv|c[cs]|[iwz]|nom|prep|pron|verb)|\\.inter)";
 
   private static final String PREPOSITIONS =
-    "(por|para|al?|del?|con(?:tra)?|sobre|en(?:tre)?|hacia|sin|según|hasta)";
+    "(por|para|pro|al?|del?|con(?:tra)?|sobre|en(?:tre)?|hacia|sin|según|hasta|bajo)";
 
   private static TregexPattern parentheticalExpression = TregexPattern.compile(
     "fpa=left > /^grup\\.nom$/ " + "$++ fpt=right");
@@ -72,7 +72,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^([adnswz]|p[ip])/=left !$-- sp000");
+                            " $+ /^([adnswz]|p[ipr])/=left !$-- sp000");
 
   private static TregexPattern leadingPrepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
@@ -85,7 +85,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^([adnswz]|p[ip])/=left !$-- sp000");
+                            " $+ /^([adnswz]|p[ipr])/=left !$-- sp000");
 
   /**
    * First step in expanding prepositional phrases: group NP to right of
@@ -252,7 +252,7 @@ public class MultiWordTreeExpander {
   // Final cleanup operations
 
   private static TregexPattern terminalPrepositions
-    = TregexPattern.compile("sp000=sp < /" + PREPOSITIONS + "/ >- (/^grup\\.nom/ > sn=sn)");
+    = TregexPattern.compile("sp000=sp < /" + PREPOSITIONS + "/ >- (/^grup\\.nom/ >+(/^grup\\.nom/) sn=sn >>- =sn)");
 
   private static TsurgeonPattern extractTerminalPrepositions = Tsurgeon.parseOperation(
     "[insert (prep=prep) $- sn] [move sp >0 prep]");
