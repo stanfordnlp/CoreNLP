@@ -30,6 +30,10 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    */
   public static final String MW_PHRASE_TAG = "MW_PHRASE?";
 
+  private static Map<String, String> spellingFixes = new HashMap<String, String>() {{
+      put("jucio", "juicio"); // 4800_2000406.tbf-5
+    }}
+
   private boolean simplifiedTagset;
   private boolean aggressiveNormalization;
 
@@ -62,6 +66,13 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     }
 
     return tree;
+  }
+
+  @Override
+  public Tree normalizeTerminal(String word) {
+    if (spellingFixes.containsKey(word))
+      return spellingFixes.get(word);
+    return word;
   }
 
   /**
