@@ -32,8 +32,56 @@ import edu.stanford.nlp.util.StringUtils;
  */
 public final class MultiWordPreprocessor {
 
-  private static int nMissingPOS = 0;
-  private static int nMissingPhrasal = 0;
+  private static int nMissingPOS;
+  private static int nMissingPhrasal;
+
+  private static int nFixedPOS;
+  private static int nFixedPhrasal;
+
+  /**
+   * If a multiword token has a part-of-speech tag matching a key of
+   * this map, the constituent heading the split expression should
+   * have a label with the value corresponding to said key.
+   *
+   * e.g., since `(rg, grup.adv)` is in this map, we will eventually
+   * convert
+   *
+   *     (rg cerca_de)
+   *
+   * to
+   *
+   *     (grup.adv (rg cerca) (sp000 de))
+   */
+  private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>() {{
+      put("ao0000", "grup.a");
+      put("aq0000", "grup.a");
+      put("rg", "grup.adv");
+      put("rn", "grup.adv"); // no sólo
+      put("vmg0000", "grup.verb");
+      put("vmic000", "grup.verb");
+      put("vmii000", "grup.verb");
+      put("vmif000", "grup.verb");
+      put("vmip000", "grup.verb");
+      put("vmis000", "grup.verb");
+      put("vmn0000", "grup.verb");
+      put("vmp0000", "grup.verb");
+      put("vmsi000", "grup.verb");
+      put("vmsp000", "grup.verb");
+      put("zm", "grup.nom");
+
+      // New groups (not from AnCora specification)
+      put("cc", "grup.cc");
+      put("cs", "grup.cs");
+      put("i", "grup.i");
+      put("pr000000", "grup.pron");
+      put("pt000000", "grup.pron");
+      put("px000000", "grup.pron");
+      put("sp000", "grup.prep");
+      put("w", "grup.w");
+      put("z", "grup.z");
+      put("z0", "grup.z");
+      put("zp", "grup.z");
+    }};
 
   private static class ManualUWModel {
 
@@ -210,8 +258,10 @@ public final class MultiWordPreprocessor {
         nMissingPOS++;
 
         String pos = inferPOS(t, parent, unigramTagger);
-        if (pos != null)
+        if (pos != null) {
           t.setValue(pos);
+          nFixedPOS++;
+        }
       }
 
       return;
@@ -221,12 +271,17 @@ public final class MultiWordPreprocessor {
       traverseAndFix(kid, t, pretermLabel, unigramTagger, retainNER);
 
     // Post-order visit
+    //
+    // TODO merge unnecessarily deep trees (maybe the job for a separate
+    // tree normalizer?)
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
 
       String phrasalCat = inferPhrasalCategory(t, pretermLabel, retainNER);
-      if (phrasalCat != null)
+      if (phrasalCat != null) {
         t.setValue(phrasalCat);
+        nFixedPhrasal++;
+      }
     }
   }
 
@@ -265,8 +320,10 @@ public final class MultiWordPreprocessor {
     // Retrieve the part-of-speech assigned to the original multi-word
     // token
     String originalPos = phraseValue.substring(phraseValue.lastIndexOf('_') + 1);
-    // TODO account for CLI flag
-    if (originalPos.length() > 0 && originalPos.charAt(0) == 'n') {
+
+    if (phrasalCategoryMap.containsKey(originalPos)) {
+      return phrasalCategoryMap.get(originalPos);
+    } else if (originalPos.length() > 0 && originalPos.charAt(0) == 'n') {
       // TODO may lead to some funky trees if a child somehow gets an
       // incorrect tag -- e.g. we may have a `grup.nom` head a `vmis000`
 
@@ -423,8 +480,12 @@ public final class MultiWordPreprocessor {
       resolveDummyTags(treeFile, pretermLabel, unigramTagger, retainNER);
 
       System.out.println("#Unknown Word Types: " + ManualUWModel.nUnknownWordTypes);
-      System.out.println("#Missing POS: " + nMissingPOS);
-      System.out.println("#Missing Phrasal: " + nMissingPhrasal);
+      System.out.println(String.format("#Missing POS: %d (fixed: %d, %.2f%%)",
+                                       nMissingPOS, nFixedPOS,
+                                       (double) nFixedPOS / nMissingPOS * 100));
+      System.out.println(String.format("#Missing Phrasal: %d (fixed: %d, %.2f%%)",
+                                       nMissingPhrasal, nFixedPhrasal,
+                                       (double) nFixedPhrasal / nMissingPhrasal * 100));
 
       System.out.println("Done!");
 
