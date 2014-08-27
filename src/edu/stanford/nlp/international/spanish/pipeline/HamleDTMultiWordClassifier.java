@@ -67,6 +67,7 @@ public class HamleDTMultiWordClassifier {
       add(new HasMultipleOfPOSFeatureFunction("A", "N")); // compound-y things
       add(new CharacterNGramFeatureFunction(4, 4));
       add(new WordShapeFeatureFunction());
+      add(new DeFollowedByNonWordFeatureFunction());
     }};
 
   private Classifier<String, String> classifier;
@@ -397,6 +398,34 @@ public class HamleDTMultiWordClassifier {
       }
 
       return count > 1 ? positiveRet : negativeRet;
+    }
+
+  }
+
+  /**
+   * Lots of names are "X de X" -- this "de" can look like a phrasal hint,
+   * but this feature should guard against that
+   */
+  private static class DeFollowedByNonWordFeatureFunction implements Function<String,
+    List<String>> {
+
+    private static final List<String> positiveRet = Arrays.asList("*deAndNonWord");
+    private static final List<String> negativeRet = new ArrayList<String>();
+
+    @Override
+    public List<String> apply(String mwe) {
+      String[] words = mwe.split("_");
+
+      for (int i = 0; i < words.length - 1; i++) {
+        String word = words[i].toLowerCase();
+        if (word.equals("de")) {
+          String next = words[i + 1].toLowerCase();
+          if (!dictionary.containsKey(next))
+            return positiveRet;
+        }
+      }
+
+      return negativeRet;
     }
 
   }
