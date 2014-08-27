@@ -44,6 +44,11 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     buildAnnotations();
   }
 
+  private static final String PODER_FORM =
+    "(?i)^(?:pued(?:o|[ea][sn]?)|" +
+      "pod(?:e[dr]|ido|[ea]mos|[éá]is|r(?:é(?:is)?|á[sn]?|emos)|r?ía(?:s|mos|is|n)?)|" +
+      "pud(?:[eo]|i(?:ste(?:is)?|mos|eron|er[ea](?:[sn]|is)?|ér[ea]mos|endo)))$";
+
   @SuppressWarnings("unchecked")
   private void buildAnnotations() {
     // +.25 F1
@@ -84,8 +89,14 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markParticipleAdjs", new Pair("@aq0000 < /[aeií]d[oa]s?$/",
                                                     new SimpleStringFunction("-part")));
 
+    // No effect on F1; unused in default config
     annotations.put("-markSentenceInitialClauses", new Pair("S !, __",
                                                             new SimpleStringFunction("-init")));
+
+    // +___ F1
+    annotations.put("-markPoder", new Pair(
+      String.format("/^(infinitiu|gerundi|grup\\.verb)$/ <<: %s", PODER_FORM),
+      new SimpleStringFunction("-poder")));
 
     compileAnnotations(headFinder);
   }
@@ -122,10 +133,10 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       // "-markPPHeads", negative F1!
 
       // clause annotations
-      "-markRelative", "-markSentenceInitialClauses",
+      "-markRelative", /* "-markSentenceInitialClauses", */
 
       // lexical / word- or tag-level annotations
-      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs",
+      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs", "-markPoder",
 
       // conjunction annotations
       "-markConjTypes",
