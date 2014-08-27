@@ -149,7 +149,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 		case "contigo":
 		case "consigo":
 		default:
-			First = word.substring(0, 3);
+			first = word.substring(0, 3);
 			second = word.substring(3, 5);
 		}
    
