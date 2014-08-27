@@ -99,9 +99,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   public ParserAnnotator(String annotatorName, Properties props) {
     String model = props.getProperty(annotatorName + ".model", LexicalizedParser.DEFAULT_PARSER_LOC);
     if (model == null) {
-      throw new IllegalArgumentException("No model specified for " +
-                                         "Parser annotator " +
-                                         annotatorName);
+      throw new IllegalArgumentException("No model specified for Parser annotator " + annotatorName);
     }
     this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 

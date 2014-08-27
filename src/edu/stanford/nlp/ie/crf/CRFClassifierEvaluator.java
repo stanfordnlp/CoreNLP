@@ -23,8 +23,9 @@ import java.util.List;
  * @author Angel Chang
  */
 public class CRFClassifierEvaluator<IN extends CoreMap> extends CmdEvaluator {
+
   private CRFClassifier<IN> classifier;
-  // NOTE: Defalt uses -r, specify without -r if IOB
+  // NOTE: Default uses -r, specify without -r if IOB
   private String cmdStr = "/u/nlp/bin/conlleval -r";
   private String[] cmd;
 
