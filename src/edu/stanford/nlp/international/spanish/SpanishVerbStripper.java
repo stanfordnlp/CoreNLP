@@ -83,20 +83,8 @@ public final class SpanishVerbStripper {
     }
   }
 
-  /**
-   * Matches the attached pronouns on a verb known to be strippable (see
-   * {@link #isStrippable(String)}).
-   */
-  private static final Pattern pAttachedPronouns =
-    Pattern.compile(PATTERN_ATTACHED_PRONOUNS);
-
   @SuppressWarnings("unchecked")
   private static final Pair<Pattern, String>[] accentFixes = new Pair[] {
-    //new Pair(Pattern.compile("ár$"), "ar"),
-    //new Pair(Pattern.compile("ér$"), "er"),
-    //new Pair(Pattern.compile("ír$"), "ir"),
-    //new Pair(Pattern.compile("ándo$"), "ando"),
-    //new Pair(Pattern.compile("(?<=[iy])éndo$"), "endo"),
     new Pair(Pattern.compile("á"), "a"),
     new Pair(Pattern.compile("é"), "e"),
     new Pair(Pattern.compile("í"), "i"),
@@ -163,7 +151,7 @@ public final class SpanishVerbStripper {
     return (pStrippable.matcher(word).find() || pIrregulars.matcher(word).find());
   }
 
-  public static String removeAccents(String word) {
+  private static String removeAccents(String word) {
     if (accentedInfinitives.contains(word))
       return word;
 
@@ -197,24 +185,43 @@ public final class SpanishVerbStripper {
    * <tt>(sentad, os)</tt>.
    */
   private boolean validateVerbPair(Pair<String, List<String>> pair) {
-      String stripped = pair.first().toLowerCase();
-      
-      String firstPron = pair.second().get(0).toLowerCase();
+    String stripped = pair.first().toLowerCase();
+    String firstPron = pair.second().get(0).toLowerCase();
 
-      if (dict.containsKey(stripped))
-				return true;
-			
-      if (firstPron.matches("os") && dict.containsKey(stripped + 'd')) {
-				pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
-				return true;
+    String pos = dict.get(stripped);
+
+    if (pos != null) {
+      if (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os")) {
+        // Invalid combination of verb root and pronoun.
+        // (If we combine a second-person plural imperative and the
+        // second person plural object pronoun, we expect to see an
+        // elided verb root, not the normal one that's in the
+        // dictionary.)
+        return false;
       }
-			
-      if (firstPron.matches("nos|se") && dict.containsKey(stripped +'s')) {
-				pair.setFirst(pair.first() + getCase(pair.first(), 's'));
-				return true;
-      }
-			
-      return false;
+
+      return true;
+    }
+
+    // Special case: de-elide elided verb root in the case of a second
+    // person plural imperative + second person object pronoun
+    //
+    // (e.g., given (senta, os), return (sentad, os))
+    if (firstPron.equalsIgnoreCase("os") && dict.containsKey(stripped + 'd')) {
+      pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
+      return true;
+    }
+
+    // Special case: de-elide elided verb root in the case of a first
+    // person plural imperative + object pronoun
+    //
+    // (vámo, nos) -> (vámos, nos)
+    if (firstPron.matches("nos|se") && dict.containsKey(stripped + 's')) {
+      pair.setFirst(pair.first() + getCase(pair.first(), 's'));
+      return true;
+    }
+
+    return false;
   }
 	
   /**

@@ -61,8 +61,8 @@ public class SpanishVerbStripperTest extends TestCase {
 
     // Don't treat plural past participles as 2nd-person commands!
     Pair<String, List<String>> l = verbStripper.separatePronouns("sentados");
-		System.err.println(l.toString());
-		//assertNull(l);
+		assertNull(l);
+
     pronouns.clear();
     pronouns.add("os");
     assertEquals(new Pair("sentad", pronouns),
