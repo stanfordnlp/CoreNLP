@@ -101,7 +101,7 @@ public class AnCoraProcessor {
     MulticoreWrapper<File, Pair<TwoDimensionalCounter<String, String>, List<Tree>>>
       wrapper = new MulticoreWrapper<File, Pair<TwoDimensionalCounter<String, String>,
       List<Tree>>>(Runtime.getRuntime().availableProcessors(),
-                     new XMLTreeProcessor(trf, encoding));
+                     new XMLTreeProcessor(trf, encoding), false);
 
     // Set up processing futures
     for (final File file : inputFiles) {
@@ -432,7 +432,8 @@ public class AnCoraProcessor {
 
     int availableProcessors = Runtime.getRuntime().availableProcessors();
     MulticoreWrapper<Collection<Tree>, Collection<Tree>> wrapper =
-      new MulticoreWrapper<Collection<Tree>, Collection<Tree>>(availableProcessors, processor);
+      new MulticoreWrapper<Collection<Tree>, Collection<Tree>>(availableProcessors, processor,
+                                                               false);
 
     // Chunk our work so that parallelization is actually worth it
     int numChunks = availableProcessors * 20;
