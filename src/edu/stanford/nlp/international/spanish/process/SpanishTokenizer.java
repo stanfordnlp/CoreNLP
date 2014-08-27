@@ -137,17 +137,17 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     String lowered = word.toLowerCase();
     if (lowered.equals("del") || lowered.equals("al")) {
-      first = lowered.substring(0, lowered.length() - 1);
-      char lastChar = lowered.charAt(lowered.length() - 1);
+      first = word.substring(0, lowered.length() - 1);
+      char lastChar = word.charAt(lowered.length() - 1);
       if (Character.isLowerCase(lastChar))
         second = "el";
       else second = "EL";
     } else if (lowered.equals("conmigo") || lowered.equals("consigo")) {
-			first = lowered.substring(0, 3);
-			second = lowered.charAt(3) + "í";
+			first = word.substring(0, 3);
+			second = word.charAt(3) + "í";
 		} else if (lowered.equals("contigo")) {
-      first = "con";
-      second = "ti";
+      first = word.substring(0, 3);
+      second = word.substring(3, 5);
     } else {
       throw new IllegalArgumentException("Invalid contraction provided to processContraction");
     }
