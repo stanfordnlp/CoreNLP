@@ -3,6 +3,7 @@ package edu.stanford.nlp.trees.international.spanish;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.AbstractTreebankLanguagePack;
 import edu.stanford.nlp.trees.CollinsHeadFinder;
@@ -66,7 +67,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public TokenizerFactory<? extends HasWord> getTokenizerFactory() {
-    return SpanishTokenizer.SpanishTokenizerFactory.newTokenizerFactory();
+    return SpanishTokenizer.factory(new CoreLabelTokenFactory(), null);
   }
 
   /**
