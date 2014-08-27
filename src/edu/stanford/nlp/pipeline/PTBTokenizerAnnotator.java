@@ -51,16 +51,26 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 		this(verbose, new Properties());
   }
 
-	public PTBTokenizerAnnotator(boolean verbose, String propString) {
-		this(verbose, PropertiesUtils.fromString(propString));
+	public PTBTokenizerAnnotator(boolean verbose, String options) {
+		super(verbose);
+
+		Properties props = new Properties();
+		if (options != null)
+			props.setProperty("tokenize.options", options);
+
+		factory = initFactory(Language.English, props);
 	}
 
 	public PTBTokenizerAnnotator(boolean verbose, Properties props) {
 		super(verbose);
-		Language type = getLangType(props);
-		String options = props.getProperty("tokenize.options", null);
 
-		switch(type) {
+		if (props == null)
+			props = new Properties();
+
+		Language type = getLangType(props);
+		factory = initFactory(type, props);
+
+		/*		switch(type) {
 		case Spanish:			
 			options = (options == null) ? DEFAULT_OPTIONS_ES : options;
 			factory = SpanishTokenizer.factory(new CoreLabelTokenFactory(), options);
@@ -77,7 +87,36 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 		default:
       options = (options == null) ? DEFAULT_OPTIONS_EN : options;
       factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
+			}*/
+	}
+
+	private TokenizerFactory<CoreLabel> initFactory(Language type, Properties props) {
+		String options = props.getProperty("tokenize.options", null);
+		TokenizerFactory<CoreLabel> factory;
+
+		switch(type) {
+
+    case Spanish:
+      options = (options == null) ? DEFAULT_OPTIONS_ES : options;
+      factory = SpanishTokenizer.factory(new CoreLabelTokenFactory(), options);
+      break;
+
+    case French:
+      options = (options == null) ? DEFAULT_OPTIONS_ES : options;
+      factory = FrenchTokenizer.factory(new CoreLabelTokenFactory(), options);
+      break;
+
+    case Whitespace:
+      boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
+      eolIsSignificant = eolIsSignificant || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+      factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<CoreLabel> (new CoreLabelTokenFactory(), eolIsSignificant);
+      break;
+
+    default:
+      options = (options == null) ? DEFAULT_OPTIONS_EN : options;
+      factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
     }
+		return factory;
 	}
 
 	/**

@@ -343,8 +343,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
-                          "false"))) {
+        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"))) {
           return annotatorImplementation.whitespaceTokenizer(properties);
         } else {
           String options = properties.getProperty("tokenize.options", null);
