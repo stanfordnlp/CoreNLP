@@ -28,9 +28,9 @@ CHINESE_TAGGER = /u/nlp/data/pos-tagger/distrib/chinese-nodistsim.tagger
 CHINESE_TLPP   = edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams
 
 
-GERMAN_TRAIN  = /afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test 1
-GERMAN_DEV    = /afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test 3
-GERMAN_TEST   = /afs/ir/data/linguistic-data/NEGRA/penn-format-train-dev-test 2
+GERMAN_TRAIN  = /u/nlp/data/GermanACL08/negra/negra_1.mrg
+GERMAN_DEV    = /u/nlp/data/GermanACL08/negra/negra_3.mrg
+GERMAN_TEST   = /u/nlp/data/GermanACL08/negra/negra_2.mrg
 GERMAN_TAGGER = /u/nlp/data/pos-tagger/distrib/german-fast.tagger
 GERMAN_TLPP   = edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams
 
