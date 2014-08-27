@@ -62,7 +62,6 @@ public final class MultiWordPreprocessor {
       put("aq0000", "grup.a");
       put("dn0000", "spec");
       put("dt0000", "spec");
-      put("i", "interjeccio");
       put("rg", "grup.adv");
       put("rn", "grup.adv"); // no sólo
       put("vmg0000", "grup.verb");
@@ -80,6 +79,7 @@ public final class MultiWordPreprocessor {
       // New groups (not from AnCora specification)
       put("cc", "grup.cc");
       put("cs", "grup.cs");
+      put("i", "grup.i");
       put("pr000000", "grup.pron");
       put("pt000000", "grup.pron");
       put("px000000", "grup.pron");
@@ -88,7 +88,6 @@ public final class MultiWordPreprocessor {
       put("z", "grup.z");
       put("z0", "grup.z");
       put("zp", "grup.z");
-      put("zu", "grup.z");
     }};
 
   private static class ManualUWModel {
@@ -187,24 +186,15 @@ public final class MultiWordPreprocessor {
         put("modos", "ncmp000");
         put("pedazos", "ncmp000");
 
-        put("A", "sps00");
-
         put("amén", "rg"); // amén de
 
         put("Teniendo", "vmg0000");
         put("formaba", "vmii000");
-        put("Formabas", "vmii000");
-        put("Forman", "vmii000");
         put("perece", "vmip000");
-        put("PONE", "vmii000");
         put("tardar", "vmn0000");
 
         put("seiscientas", "z0");
         put("trescientas", "z0");
-
-        put("cc", "zu");
-        put("km", "zu");
-        put("kms", "zu");
       }};
 
     private static int nUnknownWordTypes = posMap.size();
@@ -218,6 +208,7 @@ public final class MultiWordPreprocessor {
      * multi-word tokens)
      */
     private static final Set<String> actuallyNames = new HashSet<String>() {{
+      add("A");
       add("Avenida");
       add("Contra");
       add("Gracias"); // interjection
@@ -225,13 +216,11 @@ public final class MultiWordPreprocessor {
       add("Mercado");
       add("Jesús"); // interjection
       add("Salvo");
+      add("Sin");
       add("Van"); // verb
     }};
 
-    // Name-looking word that isn't "Al"
     private static final Pattern otherNamePattern = Pattern.compile("\\b(Al\\w+|A[^l]\\w*|[B-Z]\\w+)");
-    // Name-looking word that isn't "A"
-    private static final Pattern otherNamePattern2 = Pattern.compile("\\b(A\\w+|[B-Z]\\w+)");
 
     // Determiners which may also appear as pronouns
     private static final Pattern pPronounDeterminers = Pattern.compile("(tod|otr|un)[oa]s?");
@@ -242,6 +231,8 @@ public final class MultiWordPreprocessor {
 
       if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
         return "np00000";
+      else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
+        return "sp000";
       else if (word.equals("contra")
         && (containingPhrase.startsWith("en contra") || containingPhrase.startsWith("En contra")))
         return "nc0s000";
@@ -283,15 +274,6 @@ public final class MultiWordPreprocessor {
         return "nc0n000";
       else if (word.equals("cuenta")) // tomar en cuenta, darse cuenta de, ...
         return "nc0s000";
-      else if (word.equals("h") && containingPhrase.startsWith("km"))
-        return "zu";
-      else if (word.equals("A") && (containingPhrase.contains("-") || containingPhrase.contains(",")
-        || otherNamePattern2.matcher(containingPhrase).find() || containingPhrase.equals("terminal A")))
-        return "np00000";
-      else if (word.equals("forma") && containingPhrase.startsWith("forma parte"))
-        return "vmip000";
-      else if (word.equals("Sin") && containingPhrase.contains("Jaime"))
-        return "np00000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.

@@ -39,7 +39,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
-    put("embargp", "embargo"); // 18381_20000322.tbf-4
     put("jucio", "juicio"); // 4800_2000406.tbf-5
     put("méxico", "México"); // 111_C-3.tbf-17
     put("reirse", "reírse"); // 140_20011102.tbf-13
@@ -123,19 +122,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // Nominal groups where adjectival groups belong
     new Pair("/^s\\.a$/ <: (/^grup\\.nom$/=gn <: /^a/)",
       "relabel gn /grup.a/"),
-
-    // Adverbial phrases should always have adverb group children
-    // -- we see about 50 exceptions in the corpus..
-    new Pair("sadv !< /^grup\\.adv$/ <: /^(rg|neg)$/=adv",
-      "adjoinF (grup.adv foot@) adv"),
-
-    // 'z' tag should be 'z0'
-    new Pair("z=z <: (__ !< __)", "relabel z z0"),
-
-    // Conjunction groups aren't necessary if they head single
-    // prepositional phrases (we already see a `conj < sp` pattern;
-    // replicate that
-    new Pair("/^grup\\.c/=grup > conj <: sp=sp", "replace grup sp"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
