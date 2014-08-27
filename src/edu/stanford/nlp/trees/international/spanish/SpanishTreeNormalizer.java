@@ -14,11 +14,16 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * Normalize trees read from the AnCora Spanish corpus.
@@ -111,6 +116,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
         normalizeForMultiWord(t, tf);
       }
     }
+
+    // Now attack elisions: 'al' and 'del'
+    expandElisions(tree, tf);
 
     return tree;
   }
@@ -342,6 +350,120 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     }
 
     return words.toArray(new String[words.size()]);
+  }
+
+  /**
+   * Expand grandchild tokens which are elided forms of multi-word
+   * expressions ('al,' 'del').
+   *
+   * We perform this expansion separately from multi-word expansion
+   * because we follow special rules about where the expanded tokens
+   * should be placed in the case of elision.
+   *
+   * @param t Tree representing an entire sentence
+   * @param tf
+   */
+  private void expandElisions(Tree t, TreeFactory tf) {
+    Tsurgeon.processPatternsOnTree(elisionExpansions, t);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static final Pair<String, String>[] elisionExpansionStrs = new Pair[] {
+    // Elided forms with an ancestor which has an `sn` phrase as a right
+    // sibling
+    new Pair(// Search for right-hand `sn` ancestor sibling
+             "sp000 < /^(del|al)$/=elided >> (__=ancestor $+ sn=sn) " +
+             // Make sure this is the deepest ancestor
+             // sibling possible
+             ": (=ancestor !<< (__ << =elided $+ sn))",
+
+             // Insert the 'el' specifier as a constituent in adjacent
+             // noun phrase
+             "[relabel elided /l//] [insert (spec (da0000 el)) >0 sn]"),
+
+    // Prepositional forms with a `prep` grandparent which has a
+    // `grup.nom` phrase as a right sibling
+    new Pair("prep < (sp000 < /^(del|al)$/=elided) $+ /grup\\.nom/=target",
+
+             "[relabel elided /l//] " +
+             "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
+
+    // Elided forms with a `prep` ancestor which has an adjectival
+    // phrase as a right sibling ('al segundo', etc.)
+    new Pair("prep < (sp000 < /^(del|al)$/=elided) $+ /s\\.a/=target",
+
+             "[relabel elided /l//] " +
+             // Turn neighboring adjectival phrase into a noun phrase,
+             // adjoining original adj phrase beneath a `grup.nom`
+             "[adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) target]"),
+
+    // "del que golpea:" insert 'el' as specifier into adjacent relative
+    // phrase
+    new Pair("sp < (prep=prep < (sp000 < del=elided)) " +
+             ": (__ $- prep) << relatiu=relatiu",
+
+             // Build a noun phrase in the neighboring relative clause
+             // containing the 'el' specifier
+             "[relabel elided /l//] " +
+             "[adjoinF (sn (spec (da0000 el)) foot@) relatiu]"),
+
+    // "al" + infinitive phrase
+    new Pair("prep < (sp000 < /^(al|del)$/=elided) $+ " +
+             // Looking for an infinitive directly to the right of the
+             // "al" token, nested within one or more clause
+             // constituents
+             "(S=target <+(S) infinitiu=inf <<, =inf)",
+
+             "[relabel elided /l//] " +
+             "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
+
+    // "al no" + infinitive phrase
+    new Pair("prep < (sp000 < al=elided) $+ (S=target <, neg <2 infinitiu)",
+
+             "[relabel elided a] " +
+             "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
+
+    // "al que quisimos tanto"
+    new Pair("prep < (sp000 < al=elided) $+ relatiu=target",
+
+             "[relabel elided a] " +
+             "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
+
+    // "al de" etc.
+    new Pair("prep < (sp000 < al=elided) $+ (sp=target <, prep)",
+
+             "[relabel elided a] " +
+             "[adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) target]"),
+
+    // leading adjective in sibling: "al chileno Fernando"
+    new Pair("prep < (sp000 < /^(del|al)$/=elided) $+ " +
+             "(/grup\\.nom/=target <, /s\\.a/ <2 /sn|nc0[sp]000/)",
+
+             "[relabel elided /l//] " +
+             "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
+
+    // "al" + phrase begun by participle -> "a lo <participle>"
+    // e.g. "al conseguido" -> "a lo conseguido"
+    new Pair("prep < (sp000 < /^(al|del)$/=elided) $+ (S=target < participi)",
+
+             "[relabel elided /l//] " +
+             "[adjoinF (sn (spec (da0000 lo)) foot@) target]"),
+
+    // "del" used within specifier; e.g. "más del 30 por ciento"
+    new Pair("spec < (sp000 < del=elided) > sn $+ /grup\\.nom/=target",
+
+             "[relabel elided /l//] " +
+             "[insert (spec (da0000 el)) >0 target]"),
+  };
+
+  private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions;
+
+  static {
+    elisionExpansions =
+      new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(elisionExpansionStrs.length);
+    for (Pair<String, String> expansion : elisionExpansionStrs)
+      elisionExpansions.add(new Pair<TregexPattern, TsurgeonPattern>(TregexPattern.compile(expansion.first()),
+                                                                     Tsurgeon.parseOperation(expansion.second())));
   }
 
 }
