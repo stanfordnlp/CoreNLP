@@ -304,7 +304,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       List<String> pronouns = split.second();
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
-        String patternString = String.format("[insert (sn (grup.nom (pp000000 %s))) $- target]", pronoun);
+        String patternString = String.format("[insert (morfema.pronominal (pp000000 %s)) $- target]", pronoun);
         TsurgeonPattern pattern = Tsurgeon.parseOperation(patternString);
         t = pattern.evaluate(t, matcher);
       }
