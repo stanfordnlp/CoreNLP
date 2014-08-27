@@ -521,88 +521,88 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
     new Pair(// Search for `sn` which is right sibling of closest `prep`
              // ancestor to the elided node
-             "/^(prep|sadv|conj)$/ <+(/^grup\\.(adv|prep)$/) (sp000 < /^(del|al)$/=elided) $+ sn=sn",
+             "/^(prep|sadv|conj)$/ <+(/^grup\\.(adv|prep)$/) (sp000 < /(?i)^(del|al)$/=elided) $+ sn=sn",
 
              // Insert the 'el' specifier as a constituent in adjacent
              // noun phrase
-             "[relabel elided /l//] [insert (spec (da0000 el)) >0 sn]"),
+             "[relabel elided /(?i)l//] [insert (spec (da0000 el)) >0 sn]"),
 
     // Prepositional forms with a `prep` grandparent which has a
     // `grup.nom` phrase as a right sibling
-    new Pair("prep < (sp000 < /^(del|al)$/=elided) $+ /grup\\.nom/=target",
+    new Pair("prep < (sp000 < /(?i)^(del|al)$/=elided) $+ /grup\\.nom/=target",
 
-             "[relabel elided /l//] " +
+             "[relabel elided /(?i)l//] " +
              "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
 
     // Elided forms with a `prep` ancestor which has an adjectival
     // phrase as a right sibling ('al segundo', etc.)
-    new Pair("prep < (sp000 < /^(del|al)$/=elided) $+ /s\\.a/=target",
+    new Pair("prep < (sp000 < /(?i)^(del|al)$/=elided) $+ /s\\.a/=target",
 
-             "[relabel elided /l//] " +
+             "[relabel elided /(?i)l//] " +
              // Turn neighboring adjectival phrase into a noun phrase,
              // adjoining original adj phrase beneath a `grup.nom`
              "[adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) target]"),
 
     // "del que golpea:" insert 'el' as specifier into adjacent relative
     // phrase
-    new Pair("sp < (prep=prep < (sp000 < del=elided)) " +
+    new Pair("sp < (prep=prep < (sp000 < /(?i)^del$/=elided)) " +
              ": (__ $- prep) << relatiu=relatiu",
 
              // Build a noun phrase in the neighboring relative clause
              // containing the 'el' specifier
-             "[relabel elided /l//] " +
+             "[relabel elided /(?i)l//] " +
              "[adjoinF (sn (spec (da0000 el)) foot@) relatiu]"),
 
     // "al" + infinitive phrase
-    new Pair("prep < (sp000 < /^(al|del)$/=elided) $+ " +
+    new Pair("prep < (sp000 < /(?i)^(al|del)$/=elided) $+ " +
              // Looking for an infinitive directly to the right of the
              // "al" token, nested within one or more clause
              // constituents
              "(S=target <+(S) infinitiu=inf <<, =inf)",
 
-             "[relabel elided /l//] " +
+             "[relabel elided /(?i)l//] " +
              "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
 
     // "al no" + infinitive phrase
-    new Pair("prep < (sp000 < al=elided) $+ (S=target <, neg <2 infinitiu)",
+    new Pair("prep < (sp000 < /(?i)^al$/=elided) $+ (S=target <, neg <2 infinitiu)",
 
              "[relabel elided a] " +
              "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
 
     // "al que quisimos tanto"
-    new Pair("prep < (sp000 < al=elided) $+ relatiu=target",
+    new Pair("prep < (sp000 < /(?i)^al$/=elided) $+ relatiu=target",
 
              "[relabel elided a] " +
              "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
 
     // "al de" etc.
-    new Pair("prep < (sp000 < al=elided) $+ (sp=target <, prep)",
+    new Pair("prep < (sp000 < /(?i)^al$/=elided) $+ (sp=target <, prep)",
 
              "[relabel elided a] " +
              "[adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) target]"),
 
     // leading adjective in sibling: "al chileno Fernando"
-    new Pair("prep < (sp000 < /^(del|al)$/=elided) $+ " +
+    new Pair("prep < (sp000 < /(?i)^(del|al)$/=elided) $+ " +
              "(/grup\\.nom/=target <, /s\\.a/ <2 /sn|nc0[sp]000/)",
 
-             "[relabel elided /l//] " +
+             "[relabel elided /(?i)l//] " +
              "[adjoinF (sn (spec (da0000 el)) foot@) target]"),
 
     // "al" + phrase begun by participle -> "a lo <participle>"
     // e.g. "al conseguido" -> "a lo conseguido"
-    new Pair("prep < (sp000 < /^(al|del)$/=elided) $+ (S=target < participi)",
+    new Pair("prep < (sp000 < /(?i)^(al|del)$/=elided) $+ (S=target < participi)",
 
-             "[relabel elided /l//] " +
+             "[relabel elided /(?i)l//] " +
              "[adjoinF (sn (spec (da0000 lo)) foot@) target]"),
 
     // "del" used within specifier; e.g. "más del 30 por ciento"
-    new Pair("spec < (sp000=target < del=elided) > sn $+ /grup\\.nom/",
+    new Pair("spec < (sp000=target < /(?i)^del$/=elided) > sn $+ /grup\\.nom/",
 
-             "[relabel elided /l//] " +
+             "[relabel elided /(?i)l//] " +
              "[insert (da0000 el) $- target]"),
 
     // "del," "al" in date phrases: "1 de enero del 2001"
-    new Pair("sp000=kill < /^(del|al)$/ $+ w=target",
+    new Pair("sp000=kill < /(?i)^(del|al)$/ $+ w=target",
 
              "[delete kill] " +
              "[adjoinF (sp (prep (sp000 de)) (sn (spec (da0000 el)) foot@)) target]"),
