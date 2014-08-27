@@ -21,7 +21,7 @@ public class SpanishVerbStripper {
   //   - Gerunds
   //   - Affirmative imperatives
 
-  private static final String DICT_PATH = "edu/stanford/nlp/international/spanish/enclitic-inflections.data";
+  private static final String DICT_PATH = "/u/nlp/data/spanish/enclitic-inflections.data";
 
   private static HashMap<String, String> dict;
 
