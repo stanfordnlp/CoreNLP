@@ -11,12 +11,6 @@ import java.util.Map;
  */
 class TsurgeonPatternRoot extends TsurgeonPattern {
 
-  // TODO: both of these variables prevent Tsurgeon from being used in
-  // a threadsafe manner.  They should be factored into a Matcher
-  // object the same way regex, tregex, semgrex all work
-  CoindexationGenerator coindexer;
-  Map<String, Tree> newNodeNames;
-
   public TsurgeonPatternRoot(TsurgeonPattern child) {
     this(new TsurgeonPattern[] { child });
   }
@@ -26,32 +20,52 @@ class TsurgeonPatternRoot extends TsurgeonPattern {
     setRoot(this);
   }
 
+  boolean coindexes = false;
+
   /**
    * If one of the children is a CoindexNodes (or something else that
    * wants coindexing), it can call this at the time of setRoot()
    */
   void setCoindexes() {
-    coindexer = new CoindexationGenerator();
+    coindexes = true;
   }
 
-  /**
-   * returns null if one of the surgeries eliminates the tree entirely.  The
-   * operated-on tree is not to be trusted in this instance.
-   */
   @Override
-  public Tree evaluate(Tree t, TregexMatcher m) {
-    // TODO: not threadsafe
-    newNodeNames = Generics.newHashMap();
-    if (coindexer != null) {
-      coindexer.setLastIndex(t);
+  public TsurgeonMatcher matcher() {
+    CoindexationGenerator coindexer = null;
+    if (coindexes) {
+      coindexer = new CoindexationGenerator();
+    }
+    return matcher(Generics.<String,Tree>newHashMap(), coindexer);
+  }
+
+  @Override
+  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+    return new Matcher(newNodeNames, coindexer);
+  }
+
+
+  private class Matcher extends TsurgeonMatcher {
+    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+      super(TsurgeonPatternRoot.this, newNodeNames, coindexer);
     }
 
-    for (TsurgeonPattern child : children) {
-      t = child.evaluate(t, m);
-      if (t == null) {
-        return null;
+    /**
+     * returns null if one of the surgeries eliminates the tree entirely.  The
+     * operated-on tree is not to be trusted in this instance.
+     */
+    @Override
+    public Tree evaluate(Tree tree, TregexMatcher tregex) {
+      if (coindexer != null) {
+        coindexer.setLastIndex(tree);
       }
+      for (TsurgeonMatcher child : childMatcher) {
+        tree = child.evaluate(tree, tregex);
+        if (tree == null) {
+          return null;
+        }
+      }
+      return tree;
     }
-    return t;
   }
 }
