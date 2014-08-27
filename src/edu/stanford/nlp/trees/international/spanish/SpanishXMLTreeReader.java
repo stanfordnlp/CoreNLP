@@ -69,6 +69,7 @@ public class SpanishXMLTreeReader implements TreeReader {
 
   // Constituent annotations
   private static final String ATTR_COORDINATING = "coord";
+  private static final String ATTR_CLAUSE_TYPE = "clausetype";
 
   private NodeList sentences;
   private int sentIdx;
@@ -354,8 +355,11 @@ public class SpanishXMLTreeReader implements TreeReader {
     String label = eRoot.getNodeName().trim();
 
     if (detailedAnnotations) {
-      if (eRoot.getAttribute(ATTR_COORDINATING).equals("yes"))
+      if (eRoot.getAttribute(ATTR_COORDINATING).equals("yes")) {
         label += "-coord";
+      } else if (eRoot.hasAttribute(ATTR_CLAUSE_TYPE)) {
+        label += '-' + eRoot.getAttribute(ATTR_CLAUSE_TYPE);
+      }
     }
 
     return treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(label), children);
