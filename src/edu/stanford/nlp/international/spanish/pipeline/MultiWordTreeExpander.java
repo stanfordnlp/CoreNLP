@@ -502,41 +502,16 @@ public class MultiWordTreeExpander {
 
 }
 
-// Contrato . ayuda
+// GOOD EXAMPLES
 // incidentes . lamentables (nested articles near middle)
 // chiquilla . vistosa (giant multiword at end)
 // espejo . deformante (article fun at start)
 // menor . coste (watch "Comisión del Mercado" thing at end)
-// triunfo . sitúa (periods in names at end)
-// Diez . Minutos (new rule for terminal prepositions?)
-// Abogados . y (parenthetical should be separated into its own clause)
-  // Team . /^2000$/ (same as above)
 // totalmente . evitables ("en opinion del" at end)
-// hábitat . tradicional ("en cuerpo y alma" phrase)
-// Eliécer . Hurtado ("salir al paso")
-// /300/ . dólares ("en base a")
-// otro . vicepresidente ("está al caer")
-// o . coacción ("a favor del PRI")
-// ¿ . (no . estabais) (weird grup.nom leaf?? mistagging of "contra" here leads to string of three prepositions, which messes up our heuristics)
-// Nílton . Petrone ("en compañía del abogado y el fisioterapeuta..")
-// Ernesto . Zedillo ("a partir del 1 de diciembre próximo")
-// yo . (no . volvería) ("por nada del mundo")
-// harakiri . a ("en vez del": prepositional phrase  functioning as conjunction)
-// teatral . catalán (range phrase)
-// Wiranto . ha ("al frente de")
-// Claro . (que . cuando) (grup.nom.inter leaf caused by phrase "del todo"; "a lo que parece")
-// fundamentalmente . andaluza ("sobre todo", "todo" must not be marked as determiner here)
-// etarras . perseguidos ("a salvo")
-// José . Vicente ("de vez en cuando")
-// PSC . (/^-$/ . PSOE) ("por lo que respecta")
-// científicos . (americanos . /,/) ("publica o perece")
-// Por . qué .. pregunta (sn - grup.nom - sn unary rewrite.. shouldn't happen)
-// intentaba . alisar ("intentaba" never attaches infinitive in this way)
+
+// TODO (corpus)
 // epígrafe . Arte (flat!)
+
+// TODO (parser)
 // debería .. encima ("por encima de" parse, coordinated NP)
 // manía .. catalán ("castellana" parsed as being under a participi constituent)
-// /[ae]ndo$/=s !>> gerundi : =s !== /(?i)comando|Fernando|cuando|referendo|Comprendo|Nando/
-//     (quite a few gerunds in the dev set being mis-tagged)
-
-// NEEDS CORPUS FIX
-// recuperar .. tranvía ("escribiendo" missing gerundi parent constituent)
