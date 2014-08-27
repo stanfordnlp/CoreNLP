@@ -47,6 +47,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     put("reirse", "reírse"); // 140_20011102.tbf-13
     put("tambien", "también"); // 41_19991002.tbf-8
 
+    put("Intitute", "Institute"); // 22863_20001129.tbf-16
+
     // Hack: these aren't exactly spelling mistakes, but we need to
     // run a search-and-replace across the entire corpus with them, so
     // they should be treated just like spelling mistakes for our
