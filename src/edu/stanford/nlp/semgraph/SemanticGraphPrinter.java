@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.PTBTokenizer;
@@ -102,7 +101,8 @@ public class SemanticGraphPrinter {
     }
 
     if (save != null) {
-
+      System.err.println("Save not implemented!");
     }
   } // end main
+
 }

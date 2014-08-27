@@ -1,10 +1,8 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreLabel.GenericAnnotation;
 import edu.stanford.nlp.util.ErasureUtils;
 
@@ -77,13 +75,13 @@ public class PatternsAnnotations implements Serializable {
       return String.class;
     }
   }
-  
+
   public static class PatternLabel10 implements GenericAnnotation<String>{
     public Class<String> getType(){
       return String.class;
     }
   }
-  
+
   public static class OtherSemanticLabel implements GenericAnnotation<String>{
     public Class<String> getType(){
       return String.class;
