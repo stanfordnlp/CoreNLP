@@ -241,10 +241,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     if (retainNER)
       markSimpleNamedEntities(tree);
 
-    // Counter for part-of-speech statistics
-    TwoDimensionalCounter<String, String> unigramTagger =
-      new TwoDimensionalCounter<String, String>();
-
     for (Tree t : tree) {
       if (simplifiedTagset && t.isPreTerminal()) {
         // This is a part of speech tag. Remove extra morphological

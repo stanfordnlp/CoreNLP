@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
 import edu.stanford.nlp.international.spanish.SpanishUnknownWordSignatures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;

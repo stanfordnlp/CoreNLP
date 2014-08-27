@@ -16,6 +16,9 @@ import java.util.*;
  * A utility to build unigram part-of-speech tagging data from XML
  * corpus files from the AnCora corpus.
  *
+ * The constructed tagger is used to tag the constituent tokens of
+ * multi-word expressions, which have no tags in the AnCora corpus.
+ *
  * For invocation options, run the program with no arguments.
  *
  * @author Jon Gauthier

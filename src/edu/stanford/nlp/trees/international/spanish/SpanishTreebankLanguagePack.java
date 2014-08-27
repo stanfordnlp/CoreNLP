@@ -1,9 +1,7 @@
 package edu.stanford.nlp.trees.international.spanish;
 
-import java.util.regex.Pattern;
-
-import edu.stanford.nlp.international.spanish.SpanishMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
+import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.AbstractTreebankLanguagePack;
@@ -56,6 +54,19 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
   @Override
   public String getEncoding() {
     return STB_ENCODING;
+  }
+
+  /**
+   * Return a tokenizer which might be suitable for tokenizing text that will be used with this
+   * Treebank/Language pair, without tokenizing carriage returns (i.e., treating them as white
+   * space).  The implementation in AbstractTreebankLanguagePack returns a factory for {@link
+   * WhitespaceTokenizer}.
+   *
+   * @return A tokenizer
+   */
+  @Override
+  public TokenizerFactory<? extends HasWord> getTokenizerFactory() {
+    return SpanishTokenizer.SpanishTokenizerFactory.newTokenizerFactory();
   }
 
   /**
@@ -139,12 +150,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   /** {@inheritDoc} */
   public HeadFinder typedDependencyHeadFinder() {
-    return new CollinsHeadFinder(this);
-  }
-
-  @Override
-  public MorphoFeatureSpecification morphFeatureSpec() {
-    return new SpanishMorphoFeatureSpecification();
+    return new SpanishHeadFinder(this);
   }
 
 }

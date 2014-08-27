@@ -190,7 +190,12 @@ public class AnCoraProcessor {
   /**
    * Split the given tree based on a split point such that the
    * terminals leading up to the split point are in the left returned
-   * tree and those following the are in the left returned tree.
+   * tree and those following the split point are in the left returned
+   * tree.
+   *
+   * AnCora contains a nontrivial amount of trees with multiple
+   * sentences in them. This method is used to break apart these
+   * sentences into separate trees.
    *
    * @param t Tree from which to extract a subtree. This may be
    *          modified during processing.
@@ -198,8 +203,8 @@ public class AnCoraProcessor {
    *                   {@code t} is returned unchanged in the place of
    *                   the right tree.
    * @return A pair where the left tree contains every terminal leading
-   *         up to and including {@code extractPoint} and the right tree
-   *         contains every terminal following {@code extractPoint}.
+   *         up to and including {@code splitPoint} and the right tree
+   *         contains every terminal following {@code splitPoint}.
    *         Both trees may be normalized before return.
    */
   static Pair<Tree, Tree> split(Tree t, Tree splitPoint) {
@@ -319,6 +324,12 @@ public class AnCoraProcessor {
     }
   }
 
+  /**
+   * Matches a point in the AnCora corpus which is the delimiter
+   * between two sentences.
+   *
+   * @see {@link #split(Tree, Tree)}
+   */
   private static final TregexPattern pSplitPoint =
     TregexPattern.compile("fp $+ /^[^f]/ > S|sentence");
 

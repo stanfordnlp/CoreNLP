@@ -1,12 +1,14 @@
 package edu.stanford.nlp.stats;
 
+import edu.stanford.nlp.util.Pair;
+
 import java.text.NumberFormat;
 import java.util.*;
 
 /**
  * Interface representing a mapping between pairs of typed objects and double
  * values.
- *
+ * 
  * @author Angel Chang
  */
 public interface TwoDimensionalCounterInterface<K1, K2>  {
@@ -60,7 +62,7 @@ public interface TwoDimensionalCounterInterface<K1, K2>  {
   public boolean isEmpty();
 
   public void remove(K1 key);
-
+  
   public String toMatrixString(int cellSize);
 
   /**

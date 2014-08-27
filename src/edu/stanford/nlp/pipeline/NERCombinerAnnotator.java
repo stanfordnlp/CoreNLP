@@ -61,7 +61,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   }
 
   public NERCombinerAnnotator(boolean verbose, String... classifiers)
-    throws IOException, ClassNotFoundException
+    throws IOException, ClassNotFoundException 
   {
     this(new NERClassifierCombiner(classifiers), verbose);
   }

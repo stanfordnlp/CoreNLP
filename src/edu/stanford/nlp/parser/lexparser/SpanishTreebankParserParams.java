@@ -150,7 +150,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   /**
    * Mark `conj` constituents with their `cc` / `cs` child.
    */
-  private class MarkConjTypeFunction implements SerializableFunction<TregexMatcher, String> {
+  private static class MarkConjTypeFunction implements SerializableFunction<TregexMatcher, String> {
 
     private static final long serialVersionUID = 403406212736445856L;
 
@@ -164,7 +164,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   /**
    * Mark a tag with a prefix of its constituent word.
    */
-  private class MarkPrefixFunction implements SerializableFunction<TregexMatcher, String> {
+  private static class MarkPrefixFunction implements SerializableFunction<TregexMatcher, String> {
 
     private static final long serialVersionUID = -3275700521562916350L;
 
