@@ -39,8 +39,6 @@ public final class MultiWordPreprocessor {
     private static final String commonPluralNounStr =
       "abuelos";
 
-
-
     // "A. Alezais alfa Annick Appliances Ardenne Artois baptiste Bargue Bellanger Bregenz clefs Coeurs ...conomie consumer " +
       // "contrôleur Coopérative Coppée cuisson dédoublement demandeuse défraie Domestic dépistage Elektra Elettrodomestici " +
       // "Essonnes Fair Finparcom Gelisim gorge Happy Indesit Italia jockey Lawrence leone Levi machinisme Mc.Donnel MD Merloni " +
@@ -55,24 +53,32 @@ public final class MultiWordPreprocessor {
     private static int nUnknownWordTypes;
 
     static {
-      nouns.addAll(Arrays.asList(nStr.split("\\s+")));
+      commonNouns.addAll(Arrays.asList(commonNounStr.split("\\s+")));
+      commonPluralNouns.addAll(Arrays.asList(commonPluralNounStr.split("\\s+")));
       adjectives.addAll(Arrays.asList(aStr.split("\\s+")));
       preps.addAll(Arrays.asList(pStr.split("\\s+")));
-      nUnknownWordTypes = nouns.size() + adjectives.size() + preps.size();
+      nUnknownWordTypes = // nouns.size() +
+        adjectives.size() + preps.size();
     }
 
     private static final Pattern digit = Pattern.compile("\\d+");
-    private static final Pattern
+    private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
     public static String getTag(String word) {
       if(digit.matcher(word).find())
         return "z0";
-      else if(nouns.contains(word))
+      else if(commonNouns.contains(word))
         return "ncms000";
+      else if(commonPluralNouns.contains(word))
+        return "ncmp000";
       else if(adjectives.contains(word))
         return "aq0000";
       else if(preps.contains(word))
         return "sp000";
+
+      // Fallbacks
+      if (participle.matcher(word).find())
+        return "aq0000";
 
       System.err.println("No POS tag for " + word);
 
