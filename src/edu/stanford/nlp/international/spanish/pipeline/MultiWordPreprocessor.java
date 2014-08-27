@@ -198,6 +198,16 @@ public final class MultiWordPreprocessor {
     private static final Pattern digit = Pattern.compile("\\d+");
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
+    public static String getOverrideTag(String word, String containingPhrase) {
+      if (containingPhrase == null)
+        return null;
+
+      if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
+        return "np00000";
+
+      return null;
+    }
+
     /**
      * Match phrases for which unknown words should be assumed to be
      * common nouns
@@ -290,15 +300,9 @@ public final class MultiWordPreprocessor {
   }
 
   /**
-   * Attempt to infer the part of speech of the given preterminal node, which
-   * was created during the expansion of a multi-word token.
+   * Get a string representation of the immediate phrase which contains the given node.
    */
-  private static String inferPOS(Tree t, Tree parent,
-                                 TwoDimensionalCounter<String, String> unigramTagger) {
-    String word = t.firstChild().value();
-    if (unigramTagger.firstKeySet().contains(word))
-      return Counters.argmax(unigramTagger.getCounter(word));
-
+  private static String getContainingPhrase(Tree t, Tree parent) {
     if (parent == null)
       return null;
 
@@ -307,8 +311,26 @@ public final class MultiWordPreprocessor {
     for (Label l : phraseYield)
       containingPhrase.append(l).append(" ");
 
-    String containingPhraseStr =
-      containingPhrase.toString().substring(0, containingPhrase.length() - 1);
+    return containingPhrase.toString().substring(0, containingPhrase.length() - 1);
+  }
+
+  /**
+   * Attempt to infer the part of speech of the given preterminal node, which
+   * was created during the expansion of a multi-word token.
+   */
+  private static String inferPOS(Tree t, Tree parent,
+                                 TwoDimensionalCounter<String, String> unigramTagger) {
+    String word = t.firstChild().value();
+    String containingPhraseStr = getContainingPhrase(t, parent);
+
+    // Overrides: let the manual POS model handle a few special cases first
+    String overrideTag = ManualUWModel.getOverrideTag(word, containingPhraseStr);
+    if (overrideTag != null)
+      return overrideTag;
+
+    if (unigramTagger.firstKeySet().contains(word))
+      return Counters.argmax(unigramTagger.getCounter(word));
+
     return ManualUWModel.getTag(word, containingPhraseStr);
   }
 
