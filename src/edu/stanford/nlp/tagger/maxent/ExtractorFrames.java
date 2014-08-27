@@ -274,6 +274,7 @@ public class ExtractorFrames {
                  arg.equalsIgnoreCase("caselessnaacl2003unknowns") ||
                  arg.equalsIgnoreCase("naacl2003conjunctions") ||
                  arg.equalsIgnoreCase("frenchunknowns") ||
+                 arg.equalsIgnoreCase("spanishunknowns") ||
                  arg.startsWith("wordshapes(") ||
                  arg.startsWith("wordshapeconjunction(") ||
                  arg.equalsIgnoreCase("motleyUnknown") ||
@@ -769,4 +770,3 @@ class ExtractorWordShapeConjunction extends Extractor {
   @Override public boolean isDynamic() { return false; }
 
 }
-
