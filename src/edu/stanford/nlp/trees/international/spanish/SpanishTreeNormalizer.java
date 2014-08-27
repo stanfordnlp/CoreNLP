@@ -442,13 +442,12 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
   @SuppressWarnings("unchecked")
   private static final Pair<String, String>[] elisionExpansionStrs = new Pair[] {
-    // Elided forms with an ancestor which has an `sn` phrase as a right
-    // sibling
-    new Pair(// Search for right-hand `sn` ancestor sibling
-             "sp000 < /^(del|al)$/=elided >> (__=ancestor $+ sn=sn) " +
-             // Make sure this is the deepest ancestor
-             // sibling possible
-             ": (=ancestor !<< (__ << =elided $+ sn))",
+    // Elided forms with a `prep` ancestor which has an `sn` phrase as a
+    // right sibling
+
+    new Pair(// Search for `sn` which is right sibling of closest `prep`
+             // ancestor to the elided node
+             "/^(prep|sadv|conj)$/ <+(/^grup\\.(adv|prep)$/) (sp000 < /^(del|al)$/=elided) $+ sn=sn",
 
              // Insert the 'el' specifier as a constituent in adjacent
              // noun phrase
@@ -523,10 +522,16 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
              "[adjoinF (sn (spec (da0000 lo)) foot@) target]"),
 
     // "del" used within specifier; e.g. "más del 30 por ciento"
-    new Pair("spec < (sp000 < del=elided) > sn $+ /grup\\.nom/=target",
+    new Pair("spec < (sp000=target < del=elided) > sn $+ /grup\\.nom/",
 
              "[relabel elided /l//] " +
-             "[insert (spec (da0000 el)) >0 target]"),
+             "[insert (da0000 el) $- target]"),
+
+    // "del," "al" in date phrases: "1 de enero del 2001"
+    new Pair("sp000=kill < /^(del|al)$/ $+ w=target",
+
+             "[delete kill] " +
+             "[adjoinF (sp (prep (sp000 de)) (sn (spec (da0000 el)) foot@)) target]"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =
