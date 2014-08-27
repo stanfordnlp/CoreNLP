@@ -102,6 +102,7 @@ public class TreeToTSV {
           }
           sb.append(nl);
         }
+        sb.append(nl);
       }
       System.out.print(sb.toString());
 
