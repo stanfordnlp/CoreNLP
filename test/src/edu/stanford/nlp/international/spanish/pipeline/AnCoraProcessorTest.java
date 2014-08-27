@@ -170,8 +170,8 @@ public class AnCoraProcessorTest extends TestCase {
                                "                      (grup.prep (sp000 por) (rg encima) (sp000 de)))\n" +
                                "                    (sn\n" +
                                "                      (spec (da0000 los))\n" +
-                               "                      (grup.nom (pi000000 demás))))))))\n" +
-                               "          (fp .))))))");
+                               "                      (grup.nom (pi000000 demás)))))))))))\n" +
+                               "    (fp .)))");
 
     t1Second = Trees.readTree("  (ROOT\n" +
                                 "    (sentence\n" +

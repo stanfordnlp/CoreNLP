@@ -137,6 +137,12 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // prepositional phrases (we already see a `conj < sp` pattern;
     // replicate that
     new Pair("/^grup\\.c/=grup > conj <: sp=sp", "replace grup sp"),
+
+    // "Lift up" sentence-final periods which have been nested within
+    // constituents (convention in AnCora is to have sentence-final
+    // periods as final right children of the `sentence` constituent)
+    new Pair("__=N <<` (fp=fp <: (/^\\.$/ !. __)) > sentence=sentence",
+             "move fp $- N"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
@@ -194,6 +200,9 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
     // Now start some simple cleanup
     tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
+
+    // That might've produced some more A-over-As
+    tree = tree.spliceOut(aOverAFilter);
 
     // Find all named entities which are not multi-word tokens and nest
     // them within named entity NP groups
