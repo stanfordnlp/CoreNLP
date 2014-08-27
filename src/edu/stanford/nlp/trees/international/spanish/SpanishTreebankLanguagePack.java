@@ -1,5 +1,7 @@
 package edu.stanford.nlp.trees.international.spanish;
 
+import java.util.regex.Pattern;
+
 import edu.stanford.nlp.international.spanish.SpanishMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.HasWord;
@@ -43,9 +45,30 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] startSymbols = {"ROOT"};
 
+  /**
+   * Match tree node labels which correspond to part-of-speech tags.
+   */
+  private static final Pattern pPOSTag = Pattern.compile("^(?:a[qo]|r[gn]|d[dpteia0]|n[cp]|v[mas]|p[pdxitre0]|c[cs]|sp[sc0]|f|z[dmpu0]|[iw]$)");
+
   @Override
   public String getEncoding() {
     return STB_ENCODING;
+  }
+
+  @Override
+  public String basicCategory(String category) {
+    if (category == null)
+      return null;
+
+    if (pPOSTag.matcher(category).matches()) {
+      if (category.charAt(0) == 'v')
+        return category.substring(0, 2);
+      else
+        // Return "category" field only
+        return category.substring(0, 1);
+    }
+
+    return category;
   }
 
   /**
